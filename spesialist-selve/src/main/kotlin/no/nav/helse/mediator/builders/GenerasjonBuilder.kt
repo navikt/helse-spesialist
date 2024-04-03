@@ -1,14 +1,14 @@
 package no.nav.helse.mediator.builders
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
+import java.time.LocalDate
+import java.util.UUID
 
 class GenerasjonBuilder(
-    private val vedtaksperiodeId: UUID
+    private val vedtaksperiodeId: UUID,
 ) {
     private lateinit var generasjonId: UUID
     private lateinit var fom: LocalDate
@@ -36,7 +36,7 @@ class GenerasjonBuilder(
             tom = tom,
             tilstand = tilstand,
             tags = tags,
-            varsler = varsler.toSet()
+            varsler = varsler.toSet(),
         ).also {
             it.registrer(generasjonRepository, varselRepository)
         }
@@ -54,7 +54,10 @@ class GenerasjonBuilder(
         this.spleisBehandlingId = spleisBehandlingId
     }
 
-    internal fun periode(fom: LocalDate, tom: LocalDate) {
+    internal fun periode(
+        fom: LocalDate,
+        tom: LocalDate,
+    ) {
         this.fom = fom
         this.tom = tom
     }
@@ -64,7 +67,10 @@ class GenerasjonBuilder(
     }
 
     internal fun tags(tags: List<String>) {
-        this.tags.apply { clear(); addAll(tags) }
+        this.tags.apply {
+            clear()
+            addAll(tags)
+        }
     }
 
     internal fun tilstand(tilstand: Generasjon.Tilstand) {

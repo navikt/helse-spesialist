@@ -7,7 +7,11 @@ import java.time.LocalDateTime
 import javax.sql.DataSource
 
 class EgenAnsattDao(private val dataSource: DataSource) {
-    internal fun lagre(fødselsnummer: String, erEgenAnsatt: Boolean, opprettet: LocalDateTime) {
+    internal fun lagre(
+        fødselsnummer: String,
+        erEgenAnsatt: Boolean,
+        opprettet: LocalDateTime,
+    ) {
         @Language("PostgreSQL")
         val statement = """
             INSERT INTO egen_ansatt (person_ref, er_egen_ansatt, opprettet)
@@ -25,9 +29,9 @@ class EgenAnsattDao(private val dataSource: DataSource) {
                     mapOf(
                         "fodselsnummer" to fødselsnummer.toLong(),
                         "er_egen_ansatt" to erEgenAnsatt,
-                        "opprettet" to opprettet
-                    )
-                ).asExecute
+                        "opprettet" to opprettet,
+                    ),
+                ).asExecute,
             )
         }
     }
@@ -45,11 +49,11 @@ class EgenAnsattDao(private val dataSource: DataSource) {
                 queryOf(
                     query,
                     mapOf(
-                        "fodselsnummer" to fødselsnummer.toLong()
-                    )
+                        "fodselsnummer" to fødselsnummer.toLong(),
+                    ),
                 )
                     .map { it.boolean("er_egen_ansatt") }
-                    .asSingle
+                    .asSingle,
             )
         }
     }

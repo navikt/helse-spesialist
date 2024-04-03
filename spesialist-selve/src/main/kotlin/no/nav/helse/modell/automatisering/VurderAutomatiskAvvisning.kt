@@ -1,6 +1,5 @@
 package no.nav.helse.modell.automatisering
 
-import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.kommando.Command
@@ -12,6 +11,7 @@ import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vergemal.VergemålDao
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 internal class VurderAutomatiskAvvisning(
     private val fødselsnummer: String,
@@ -25,7 +25,6 @@ internal class VurderAutomatiskAvvisning(
     private val kanAvvises: Boolean,
     private val sykefraværstilfelle: Sykefraværstilfelle,
 ) : Command {
-
     override fun execute(context: CommandContext): Boolean {
         val tilhørerEnhetUtland = HentEnhetløsning.erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
         val avvisGrunnetEnhetUtland = tilhørerEnhetUtland && kanAvvises
@@ -34,12 +33,14 @@ internal class VurderAutomatiskAvvisning(
         val erSkjønnsfastsettelse = sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId)
 
         val avvisGrunnetSkjønnsfastsettelse =
-            if (!erSkjønnsfastsettelse) false
-            else {
+            if (!erSkjønnsfastsettelse) {
+                false
+            } else {
                 val sluppetForbiTidligere = personDao.findPersonerSomHarPassertFilter()
-                val slippesForbi = !erProd()
-                        || ((fødselsnummer.length == 11 && (16..31).contains(fødselsnummer.take(2).toInt())))
-                        || sluppetForbiTidligere.contains(fødselsnummer.toLong())
+                val slippesForbi =
+                    !erProd() ||
+                        ((fødselsnummer.length == 11 && (16..31).contains(fødselsnummer.take(2).toInt()))) ||
+                        sluppetForbiTidligere.contains(fødselsnummer.toLong())
                 !slippesForbi && kanAvvises
             }
 
@@ -58,7 +59,7 @@ internal class VurderAutomatiskAvvisning(
                 logg.info(
                     "Avviser ikke {} som har $avvisningsårsaker, fordi: {}",
                     kv("vedtaksperiodeId", vedtaksperiodeId),
-                    kv("kanAvvises", kanAvvises)
+                    kv("kanAvvises", kanAvvises),
                 )
             }
             return true
@@ -70,7 +71,7 @@ internal class VurderAutomatiskAvvisning(
             begrunnelser = avvisningsårsaker.toList(),
             utbetaling = utbetaling,
             hendelseId = hendelseId,
-            spleisBehandlingId = spleisBehandlingId
+            spleisBehandlingId = spleisBehandlingId,
         )
         logg.info("Automatisk avvisning av vedtaksperiode $vedtaksperiodeId pga:$avvisningsårsaker")
         return ferdigstill(context)
@@ -78,6 +79,7 @@ internal class VurderAutomatiskAvvisning(
 
     private companion object {
         private val logg = LoggerFactory.getLogger(VurderAutomatiskAvvisning::class.java)
+
         private fun erProd() = "prod-gcp" == System.getenv("NAIS_CLUSTER_NAME")
     }
 }

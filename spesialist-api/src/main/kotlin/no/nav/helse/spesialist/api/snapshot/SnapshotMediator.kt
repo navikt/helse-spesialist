@@ -19,14 +19,15 @@ class SnapshotMediator(private val snapshotDao: SnapshotApiDao, private val snap
 
     fun hentSnapshot(fødselsnummer: String): Pair<Personinfo, GraphQLPerson>? {
         oppdaterSnapshot(fødselsnummer)
-        val snapshot = try {
-            snapshotDao.hentSnapshotMedMetadata(fødselsnummer)
-        } catch (e: Exception) {
-            snapshotClient.hentSnapshot(fødselsnummer).data?.person?.let {
-                snapshotDao.lagre(fødselsnummer, it)
+        val snapshot =
+            try {
+                snapshotDao.hentSnapshotMedMetadata(fødselsnummer)
+            } catch (e: Exception) {
+                snapshotClient.hentSnapshot(fødselsnummer).data?.person?.let {
+                    snapshotDao.lagre(fødselsnummer, it)
+                }
+                snapshotDao.hentSnapshotMedMetadata(fødselsnummer)
             }
-            snapshotDao.hentSnapshotMedMetadata(fødselsnummer)
-        }
         return snapshot
     }
 }

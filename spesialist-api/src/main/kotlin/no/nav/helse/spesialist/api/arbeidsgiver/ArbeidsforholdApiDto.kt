@@ -7,5 +7,5 @@ data class ArbeidsforholdApiDto(
     val stillingstittel: String,
     val stillingsprosent: Int,
     val startdato: LocalDate,
-    val sluttdato: LocalDate?
+    val sluttdato: LocalDate?,
 )

@@ -1,6 +1,5 @@
 package no.nav.helse.modell.kommando
 
-import java.util.UUID
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.automatisering.Automatisering
@@ -43,6 +42,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 internal class OpprettSaksbehandleroppgave(
     private val fødselsnummer: String,
@@ -64,7 +64,6 @@ internal class OpprettSaksbehandleroppgave(
     private val vedtakDao: VedtakDao,
     private val påVentDao: PåVentDao,
 ) : Command {
-
     private companion object {
         private val logg = LoggerFactory.getLogger(OpprettSaksbehandleroppgave::class.java)
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
@@ -77,13 +76,17 @@ internal class OpprettSaksbehandleroppgave(
         val adressebeskyttelse = personDao.findAdressebeskyttelse(fødselsnummer)
         when (adressebeskyttelse) {
             Adressebeskyttelse.StrengtFortrolig,
-            Adressebeskyttelse.StrengtFortroligUtland -> egenskaper.add(STRENGT_FORTROLIG_ADRESSE)
+            Adressebeskyttelse.StrengtFortroligUtland,
+            -> egenskaper.add(STRENGT_FORTROLIG_ADRESSE)
             Adressebeskyttelse.Fortrolig -> egenskaper.add(FORTROLIG_ADRESSE)
             else -> {}
         }
 
-        if (utbetalingtype == Utbetalingtype.REVURDERING) egenskaper.add(REVURDERING)
-        else egenskaper.add(SØKNAD)
+        if (utbetalingtype == Utbetalingtype.REVURDERING) {
+            egenskaper.add(REVURDERING)
+        } else {
+            egenskaper.add(SØKNAD)
+        }
 
         if (automatisering.erStikkprøve(vedtaksperiodeId, hendelseId)) egenskaper.add(STIKKPRØVE)
         if (!egenskaper.contains(REVURDERING) && risikovurderingDao.kreverSupersaksbehandler(vedtaksperiodeId)) egenskaper.add(RISK_QA)

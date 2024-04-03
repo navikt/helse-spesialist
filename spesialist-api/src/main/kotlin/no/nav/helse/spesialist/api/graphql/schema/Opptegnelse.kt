@@ -4,7 +4,7 @@ data class Opptegnelse(
     val aktorId: String,
     val sekvensnummer: Int,
     val type: Opptegnelsetype,
-    val payload: String
+    val payload: String,
 )
 
 enum class Opptegnelsetype {

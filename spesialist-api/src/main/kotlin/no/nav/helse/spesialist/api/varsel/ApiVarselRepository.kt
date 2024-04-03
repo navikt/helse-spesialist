@@ -1,23 +1,29 @@
 package no.nav.helse.spesialist.api.varsel
 
-import java.util.UUID
-import javax.sql.DataSource
 import no.nav.helse.spesialist.api.graphql.schema.VarselDTO
 import no.nav.helse.spesialist.api.varsel.Varsel.Companion.toDto
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.AKTIV
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.GODKJENT
 import no.nav.helse.spesialist.api.vedtak.GenerasjonDao
 import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode
+import java.util.UUID
+import javax.sql.DataSource
 
 class ApiVarselRepository(dataSource: DataSource) {
-
     private val varselDao = ApiVarselDao(dataSource)
     private val generasjonDao = GenerasjonDao(dataSource)
 
-    internal fun finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId: UUID, utbetalingId: UUID): Set<VarselDTO> {
+    internal fun finnVarslerSomIkkeErInaktiveFor(
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+    ): Set<VarselDTO> {
         return varselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId).toDto()
     }
-    internal fun finnVarslerSomIkkeErInaktiveForSisteGenerasjon(vedtaksperiodeId: UUID, utbetalingId: UUID): Set<VarselDTO> {
+
+    internal fun finnVarslerSomIkkeErInaktiveForSisteGenerasjon(
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+    ): Set<VarselDTO> {
         return varselDao.finnVarslerSomIkkeErInaktiveForSisteGenerasjon(vedtaksperiodeId, utbetalingId).toDto()
     }
 
@@ -34,16 +40,26 @@ class ApiVarselRepository(dataSource: DataSource) {
         varselDao.godkjennVarslerFor(vedtaksperioder.map { it.vedtaksperiodeId() })
     }
 
-    fun vurderVarselFor(varselId: UUID, gjeldendeStatus: Varsel.Varselstatus, saksbehandlerIdent: String) {
+    fun vurderVarselFor(
+        varselId: UUID,
+        gjeldendeStatus: Varsel.Varselstatus,
+        saksbehandlerIdent: String,
+    ) {
         varselDao.vurderVarselFor(varselId, gjeldendeStatus, saksbehandlerIdent)
     }
 
-    internal fun erAktiv(varselkode: String, generasjonId: UUID): Boolean? {
+    internal fun erAktiv(
+        varselkode: String,
+        generasjonId: UUID,
+    ): Boolean? {
         val varselstatus = varselDao.finnStatusFor(varselkode, generasjonId) ?: return null
         return varselstatus == AKTIV
     }
 
-    internal fun erGodkjent(varselkode: String, generasjonId: UUID): Boolean? {
+    internal fun erGodkjent(
+        varselkode: String,
+        generasjonId: UUID,
+    ): Boolean? {
         val varselstatus = varselDao.finnStatusFor(varselkode, generasjonId) ?: return null
         return varselstatus == GODKJENT
     }
@@ -60,7 +76,7 @@ class ApiVarselRepository(dataSource: DataSource) {
     internal fun settStatusAktiv(
         generasjonId: UUID,
         varselkode: String,
-        ident: String
+        ident: String,
     ): VarselDTO? {
         return varselDao.settStatusAktiv(generasjonId, varselkode, ident)?.toDto()
     }
@@ -82,5 +98,4 @@ class ApiVarselRepository(dataSource: DataSource) {
             other.tidligereEnnOgSammenhengende(periode)
         }.toSet()
     }
-
 }

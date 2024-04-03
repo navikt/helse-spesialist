@@ -1,6 +1,5 @@
 package no.nav.helse.mediator.meldinger
 
-import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.person.OppdaterPersonsnapshot
@@ -11,10 +10,11 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 internal class OppdaterPersonsnapshotRiver(
     rapidsConnection: RapidsConnection,
-    private val mediator: MeldingMediator
+    private val mediator: MeldingMediator,
 ) : River.PacketListener {
     private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
@@ -27,17 +27,23 @@ internal class OppdaterPersonsnapshotRiver(
         }.register(this)
     }
 
-    override fun onError(problems: MessageProblems, context: MessageContext) {
+    override fun onError(
+        problems: MessageProblems,
+        context: MessageContext,
+    ) {
         sikkerlogg.error("Forstod ikke oppdater_personsnapshot:\n${problems.toExtendedReport()}")
     }
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) {
+    override fun onPacket(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         val id = UUID.fromString(packet["@id"].asText())
         val fødselsnummer = packet["fødselsnummer"].asText()
         sikkerlogg.info(
             "Mottok forespørsel om å oppdatere personsnapshot på {}, {}",
             StructuredArguments.keyValue("fødselsnummer", fødselsnummer),
-            StructuredArguments.keyValue("eventId", id)
+            StructuredArguments.keyValue("eventId", id),
         )
         mediator.mottaMelding(OppdaterPersonsnapshot(packet), context)
     }

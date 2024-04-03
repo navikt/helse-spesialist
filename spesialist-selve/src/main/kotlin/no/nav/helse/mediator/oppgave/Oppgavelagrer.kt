@@ -1,7 +1,5 @@
 package no.nav.helse.mediator.oppgave
 
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
@@ -12,12 +10,17 @@ import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveVisitor
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
+import java.time.LocalDateTime
+import java.util.UUID
 
 class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
     private lateinit var oppgaveForLagring: OppgaveFraDatabase
     private var totrinnsvurderingForLagring: TotrinnsvurderingFraDatabase? = null
 
-    internal fun lagre(oppgaveMediator: OppgaveMediator, contextId: UUID) {
+    internal fun lagre(
+        oppgaveMediator: OppgaveMediator,
+        contextId: UUID,
+    ) {
         val oppgave = oppgaveForLagring
         oppgaveMediator.opprett(
             id = oppgave.id,
@@ -28,8 +31,11 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
             hendelseId = oppgave.hendelseId,
             kanAvvises = oppgave.kanAvvises,
         )
-        if (oppgave.tildelt != null) tildelingDao.tildel(oppgave.id, oppgave.tildelt.oid)
-        else tildelingDao.avmeld(oppgave.id)
+        if (oppgave.tildelt != null) {
+            tildelingDao.tildel(oppgave.id, oppgave.tildelt.oid)
+        } else {
+            tildelingDao.avmeld(oppgave.id)
+        }
 
         val totrinnsvurdering = totrinnsvurderingForLagring
         if (totrinnsvurdering != null) oppgaveMediator.lagreTotrinnsvurdering(totrinnsvurdering)
@@ -44,8 +50,11 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
             ferdigstiltAvOid = oppgave.ferdigstiltAvOid,
             egenskaper = oppgave.egenskaper,
         )
-        if (oppgave.tildelt != null) tildelingDao.tildel(oppgave.id, oppgave.tildelt.oid)
-        else tildelingDao.avmeld(oppgave.id)
+        if (oppgave.tildelt != null) {
+            tildelingDao.tildel(oppgave.id, oppgave.tildelt.oid)
+        } else {
+            tildelingDao.avmeld(oppgave.id)
+        }
 
         val totrinnsvurdering = totrinnsvurderingForLagring
         if (totrinnsvurdering != null) oppgaveMediator.lagreTotrinnsvurdering(totrinnsvurdering)
@@ -62,20 +71,21 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
         egenskaper: List<Egenskap>,
         tildelt: Saksbehandler?,
         kanAvvises: Boolean,
-        totrinnsvurdering: Totrinnsvurdering?
+        totrinnsvurdering: Totrinnsvurdering?,
     ) {
-        oppgaveForLagring = OppgaveFraDatabase(
-            id = id,
-            egenskaper = egenskaper.map { it.tilDatabaseversjon() },
-            status = status(tilstand),
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-            hendelseId = hendelseId,
-            kanAvvises = kanAvvises,
-            ferdigstiltAvIdent = ferdigstiltAvIdent,
-            ferdigstiltAvOid = ferdigstiltAvOid,
-            tildelt = tildelt?.tilDatabaseversjon(),
-        )
+        oppgaveForLagring =
+            OppgaveFraDatabase(
+                id = id,
+                egenskaper = egenskaper.map { it.tilDatabaseversjon() },
+                status = status(tilstand),
+                vedtaksperiodeId = vedtaksperiodeId,
+                utbetalingId = utbetalingId,
+                hendelseId = hendelseId,
+                kanAvvises = kanAvvises,
+                ferdigstiltAvIdent = ferdigstiltAvIdent,
+                ferdigstiltAvOid = ferdigstiltAvOid,
+                tildelt = tildelt?.tilDatabaseversjon(),
+            )
     }
 
     override fun visitTotrinnsvurdering(
@@ -85,17 +95,18 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
         beslutter: Saksbehandler?,
         utbetalingId: UUID?,
         opprettet: LocalDateTime,
-        oppdatert: LocalDateTime?
+        oppdatert: LocalDateTime?,
     ) {
-        totrinnsvurderingForLagring = TotrinnsvurderingFraDatabase(
-            vedtaksperiodeId = vedtaksperiodeId,
-            erRetur = erRetur,
-            saksbehandler = saksbehandler?.oid(),
-            beslutter = beslutter?.oid(),
-            utbetalingId = utbetalingId,
-            opprettet = opprettet,
-            oppdatert = oppdatert
-        )
+        totrinnsvurderingForLagring =
+            TotrinnsvurderingFraDatabase(
+                vedtaksperiodeId = vedtaksperiodeId,
+                erRetur = erRetur,
+                saksbehandler = saksbehandler?.oid(),
+                beslutter = beslutter?.oid(),
+                utbetalingId = utbetalingId,
+                opprettet = opprettet,
+                oppdatert = oppdatert,
+            )
     }
 
     private fun status(tilstand: Oppgave.Tilstand): String {

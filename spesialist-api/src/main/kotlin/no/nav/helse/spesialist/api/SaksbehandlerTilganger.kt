@@ -8,7 +8,6 @@ class SaksbehandlerTilganger(
     private val beslutterSaksbehandlergruppe: UUID,
     private val skjermedePersonerSaksbehandlergruppe: UUID,
 ) {
-
     fun harTilgangTilKode7() = kode7Saksbehandlergruppe in gruppetilganger
 
     fun harTilgangTilBeslutterOppgaver() = beslutterSaksbehandlergruppe in gruppetilganger

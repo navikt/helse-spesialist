@@ -13,16 +13,17 @@ data class Lovhjemmel(
             ledd = ledd,
             bokstav = bokstav,
             lovverk = lovverk,
-            lovverksversjon = lovverksversjon
+            lovverksversjon = lovverksversjon,
         )
 
-    fun toDto() = LovhjemmelDto(
-        paragraf = paragraf,
-        ledd = ledd,
-        bokstav = bokstav,
-        lovverk = lovverk,
-        lovverksversjon = lovverksversjon
-    )
+    fun toDto() =
+        LovhjemmelDto(
+            paragraf = paragraf,
+            ledd = ledd,
+            bokstav = bokstav,
+            lovverk = lovverk,
+            lovverksversjon = lovverksversjon,
+        )
 }
 
 data class LovhjemmelEvent(

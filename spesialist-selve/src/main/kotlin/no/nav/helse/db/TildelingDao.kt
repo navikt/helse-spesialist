@@ -1,13 +1,16 @@
 package no.nav.helse.db
 
-import java.util.UUID
-import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
+import java.util.UUID
+import javax.sql.DataSource
 
 class TildelingDao(private val dataSource: DataSource) {
-    fun tildel(oppgaveId: Long, saksbehandlerOid: UUID) {
+    fun tildel(
+        oppgaveId: Long,
+        saksbehandlerOid: UUID,
+    ) {
         @Language("PostgreSQL")
         val query = """
             INSERT INTO tildeling(saksbehandler_ref, oppgave_id_ref) VALUES (:oid, :oppgave_id)
@@ -17,11 +20,12 @@ class TildelingDao(private val dataSource: DataSource) {
         sessionOf(dataSource).use {
             it.run(
                 queryOf(
-                    query, mapOf(
+                    query,
+                    mapOf(
                         "oid" to saksbehandlerOid,
                         "oppgave_id" to oppgaveId,
-                    )
-                ).asUpdate
+                    ),
+                ).asUpdate,
             )
         }
     }

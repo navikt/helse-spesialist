@@ -1,6 +1,5 @@
 package no.nav.helse.modell.person
 
-import java.util.UUID
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.modell.vedtaksperiode.Periode
@@ -14,11 +13,12 @@ import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtaksperiode.vedtak.SykepengevedtakBuilder
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 class Person private constructor(
     private val aktørId: String,
     private val fødselsnummer: String,
-    vedtaksperioder: List<Vedtaksperiode>
+    vedtaksperioder: List<Vedtaksperiode>,
 ) {
     private val vedtaksperioder = vedtaksperioder.toMutableList()
     private val observers = mutableSetOf<PersonObserver>()
@@ -32,11 +32,12 @@ class Person private constructor(
             ?: logg.warn("Vedtaksperiode med id={} finnes ikke", vedtaksperiodeId).let { return null }
     }
 
-    fun toDto() = PersonDto(
-        aktørId = aktørId,
-        fødselsnummer = fødselsnummer,
-        vedtaksperioder = vedtaksperioder.map { it.toDto() }
-    )
+    fun toDto() =
+        PersonDto(
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            vedtaksperioder = vedtaksperioder.map { it.toDto() },
+        )
 
     fun behandleTilbakedateringBehandlet(perioder: List<Periode>) {
         vedtaksperioder.forEach { it.behandleTilbakedateringGodkjent(perioder) }
@@ -56,7 +57,7 @@ class Person private constructor(
             ?.avsluttetUtenVedtak(this, avsluttetUtenVedtak)
     }
 
-    internal fun vedtaksperiodeForkastet(vedtaksperiodeForkastet: VedtaksperiodeForkastet ) {
+    internal fun vedtaksperiodeForkastet(vedtaksperiodeForkastet: VedtaksperiodeForkastet) {
         finnVedtaksperiode(vedtaksperiodeForkastet.vedtaksperiodeId())
             ?.vedtaksperiodeForkastet()
     }
@@ -93,13 +94,18 @@ class Person private constructor(
     companion object {
         private val logg = LoggerFactory.getLogger(this::class.java)
 
-        fun gjenopprett(aktørId: String, fødselsnummer: String, vedtaksperioder: List<VedtaksperiodeDto>): Person {
+        fun gjenopprett(
+            aktørId: String,
+            fødselsnummer: String,
+            vedtaksperioder: List<VedtaksperiodeDto>,
+        ): Person {
             return Person(
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
-                vedtaksperioder = vedtaksperioder.map {
-                    Vedtaksperiode.gjenopprett(it.organisasjonsnummer, it.vedtaksperiodeId, it.forkastet, it.generasjoner)
-                }
+                vedtaksperioder =
+                    vedtaksperioder.map {
+                        Vedtaksperiode.gjenopprett(it.organisasjonsnummer, it.vedtaksperiodeId, it.forkastet, it.generasjoner)
+                    },
             )
         }
     }

@@ -1,27 +1,32 @@
 package no.nav.helse.spesialist.api.abonnement
 
-import java.util.UUID
-import javax.sql.DataSource
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
+import java.util.UUID
+import javax.sql.DataSource
 
 class AbonnementDao(private val dataSource: DataSource) : HelseDao(dataSource) {
-
-    fun opprettAbonnement(saksbehandlerId: UUID, aktørId: Long) = sessionOf(dataSource).use { session ->
+    fun opprettAbonnement(
+        saksbehandlerId: UUID,
+        aktørId: Long,
+    ) = sessionOf(dataSource).use { session ->
         session.transaction { transactionalSession ->
-            val abonnementQuery = asSQL(
-                """
+            val abonnementQuery =
+                asSQL(
+                    """
                     delete from abonnement_for_opptegnelse where saksbehandler_id = :saksbehandlerId;
                     insert into abonnement_for_opptegnelse
                     select :saksbehandlerId, p.id
                     from person p
                     where p.aktor_id = :aktorId
-                """.trimIndent(), mapOf("saksbehandlerId" to saksbehandlerId, "aktorId" to aktørId)
-            )
+                    """.trimIndent(),
+                    mapOf("saksbehandlerId" to saksbehandlerId, "aktorId" to aktørId),
+                )
             transactionalSession.run(abonnementQuery.asUpdate)
 
-            val sekvensnummerQuery = asSQL(
-                """
+            val sekvensnummerQuery =
+                asSQL(
+                    """
                     -- hmm, kanskje vi egentlig bare burde sette max(sekvensnummer), ikke joine inn aktuell person?
                     with aktuelt_sekvensnummer as (
                         -- Forklaring: høyeste for person, dernest høyeste globalt, dernest 0
@@ -37,17 +42,22 @@ class AbonnementDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     where aktor_id = :aktorId
                     on conflict (saksbehandler_id) do update
                         set siste_sekvensnummer = (select sekvensnummeret from aktuelt_sekvensnummer)
-                """.trimIndent(), mapOf("saksbehandlerId" to saksbehandlerId, "aktorId" to aktørId)
-            )
+                    """.trimIndent(),
+                    mapOf("saksbehandlerId" to saksbehandlerId, "aktorId" to aktørId),
+                )
             transactionalSession.run(sekvensnummerQuery.asUpdate)
         }
     }
 
-    fun registrerSistekvensnummer(saksbehandlerIdent: UUID, sisteSekvensId: Int) = asSQL(
+    fun registrerSistekvensnummer(
+        saksbehandlerIdent: UUID,
+        sisteSekvensId: Int,
+    ) = asSQL(
         """
-            update saksbehandler_opptegnelse_sekvensnummer
-            set siste_sekvensnummer = :sisteSekvensId
-            where saksbehandler_id = :saksbehandlerId;
-        """.trimIndent(), mapOf("sisteSekvensId" to sisteSekvensId, "saksbehandlerId" to saksbehandlerIdent)
+        update saksbehandler_opptegnelse_sekvensnummer
+        set siste_sekvensnummer = :sisteSekvensId
+        where saksbehandler_id = :saksbehandlerId;
+        """.trimIndent(),
+        mapOf("sisteSekvensId" to sisteSekvensId, "saksbehandlerId" to saksbehandlerIdent),
     ).update()
 }

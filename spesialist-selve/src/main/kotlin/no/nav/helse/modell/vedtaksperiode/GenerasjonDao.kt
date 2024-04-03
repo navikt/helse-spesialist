@@ -1,9 +1,5 @@
 package no.nav.helse.modell.vedtaksperiode
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
-import javax.sql.DataSource
 import kotliquery.Query
 import kotliquery.Row
 import kotliquery.TransactionalSession
@@ -14,10 +10,16 @@ import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.VarselDto
 import no.nav.helse.modell.varsel.VarselStatusDto
 import org.intellij.lang.annotations.Language
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
+import javax.sql.DataSource
 
 class GenerasjonDao(private val dataSource: DataSource) {
-
-    internal fun byggSisteFor(vedtaksperiodeId: UUID, generasjonBuilder: GenerasjonBuilder) {
+    internal fun byggSisteFor(
+        vedtaksperiodeId: UUID,
+        generasjonBuilder: GenerasjonBuilder,
+    ) {
         @Language("PostgreSQL")
         val query = """
             SELECT DISTINCT ON (vedtaksperiode_id) id, vedtaksperiode_id, unik_id, utbetaling_id, spleis_behandling_id, skjæringstidspunkt, fom, tom, tilstand, tags
@@ -25,15 +27,17 @@ class GenerasjonDao(private val dataSource: DataSource) {
             WHERE vedtaksperiode_id = ? ORDER BY vedtaksperiode_id, id DESC;
             """
         sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, vedtaksperiodeId).map { row ->
-                generasjonBuilder.generasjonId(row.uuid("unik_id"))
-                row.uuidOrNull("utbetaling_id")?.let(generasjonBuilder::utbetalingId)
-                row.uuidOrNull("spleis_behandling_id")?.let(generasjonBuilder::spleisBehandlingId)
-                generasjonBuilder.skjæringstidspunkt(row.localDate("skjæringstidspunkt"))
-                generasjonBuilder.tilstand(mapToTilstand(row.string("tilstand")))
-                generasjonBuilder.tags(row.array<String>("tags").toList())
-                generasjonBuilder.periode(row.localDate("fom"), row.localDate("tom"))
-            }.asSingle)
+            session.run(
+                queryOf(query, vedtaksperiodeId).map { row ->
+                    generasjonBuilder.generasjonId(row.uuid("unik_id"))
+                    row.uuidOrNull("utbetaling_id")?.let(generasjonBuilder::utbetalingId)
+                    row.uuidOrNull("spleis_behandling_id")?.let(generasjonBuilder::spleisBehandlingId)
+                    generasjonBuilder.skjæringstidspunkt(row.localDate("skjæringstidspunkt"))
+                    generasjonBuilder.tilstand(mapToTilstand(row.string("tilstand")))
+                    generasjonBuilder.tags(row.array<String>("tags").toList())
+                    generasjonBuilder.periode(row.localDate("fom"), row.localDate("tom"))
+                }.asSingle,
+            )
         }
     }
 
@@ -47,7 +51,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
         return run(
             queryOf(
                 query,
-                mapOf("vedtaksperiode_id" to vedtaksperiodeId)
+                mapOf("vedtaksperiode_id" to vedtaksperiodeId),
             ).map { row ->
                 val generasjonRef = row.long("id")
                 GenerasjonDto(
@@ -58,22 +62,28 @@ class GenerasjonDao(private val dataSource: DataSource) {
                     skjæringstidspunkt = row.localDateOrNull("skjæringstidspunkt") ?: row.localDate("fom"),
                     fom = row.localDate("fom"),
                     tom = row.localDate("tom"),
-                    tilstand = when (val tilstand = row.string("tilstand")) {
-                        "Låst" -> TilstandDto.Låst
-                        "Ulåst" -> TilstandDto.Ulåst
-                        "AvsluttetUtenUtbetaling" -> TilstandDto.AvsluttetUtenUtbetaling
-                        "UtenUtbetalingMåVurderes" -> TilstandDto.UtenUtbetalingMåVurderes
-                        else -> throw IllegalArgumentException("$tilstand er ikke en gyldig generasjontilstand")
-                    },
+                    tilstand =
+                        when (val tilstand = row.string("tilstand")) {
+                            "Låst" -> TilstandDto.Låst
+                            "Ulåst" -> TilstandDto.Ulåst
+                            "AvsluttetUtenUtbetaling" -> TilstandDto.AvsluttetUtenUtbetaling
+                            "UtenUtbetalingMåVurderes" -> TilstandDto.UtenUtbetalingMåVurderes
+                            else -> throw IllegalArgumentException("$tilstand er ikke en gyldig generasjontilstand")
+                        },
                     tags = row.array<String>("tags").toList(),
-                    varsler = finnVarsler(generasjonRef)
+                    varsler = finnVarsler(generasjonRef),
                 )
-            }.asList
+            }.asList,
         )
     }
 
-    internal fun oppdaterMedBehandlingsInformasjon(generasjonId: UUID, spleisBehandlingId: UUID, tags: List<String>) {
+    internal fun oppdaterMedBehandlingsInformasjon(
+        generasjonId: UUID,
+        spleisBehandlingId: UUID,
+        tags: List<String>,
+    ) {
         val tagsAsString = tags.joinToString { """ "$it" """ }
+
         @Language("PostgreSQL")
         val query = """
                 UPDATE selve_vedtaksperiode_generasjon 
@@ -86,23 +96,26 @@ class GenerasjonDao(private val dataSource: DataSource) {
                     query,
                     mapOf(
                         "spleisBehandlingId" to spleisBehandlingId,
-                        "generasjon_id" to generasjonId
-                    )
-                ).asUpdate
+                        "generasjon_id" to generasjonId,
+                    ),
+                ).asUpdate,
             )
         }
     }
 
     internal fun finnTagsFor(spleisBehandlingId: UUID): List<String>? {
-        val tags = sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query =
-                "SELECT tags FROM selve_vedtaksperiode_generasjon WHERE spleis_behandling_id = ?;"
+        val tags =
+            sessionOf(dataSource).use { session ->
+                @Language("PostgreSQL")
+                val query =
+                    "SELECT tags FROM selve_vedtaksperiode_generasjon WHERE spleis_behandling_id = ?;"
 
-            session.run(queryOf(query, spleisBehandlingId).map {
-                it.array<String>("tags").toList()
-            }.asSingle)
-        }
+                session.run(
+                    queryOf(query, spleisBehandlingId).map {
+                        it.array<String>("tags").toList()
+                    }.asSingle,
+                )
+            }
         return tags
     }
 
@@ -128,13 +141,14 @@ class GenerasjonDao(private val dataSource: DataSource) {
 
     private fun TransactionalSession.lagre(generasjonDto: GenerasjonDto) {
         val tags = generasjonDto.tags.joinToString { """ $it """ }
+
         @Language("PostgreSQL")
         val query =
             """
-                INSERT INTO selve_vedtaksperiode_generasjon (unik_id, vedtaksperiode_id, utbetaling_id, spleis_behandling_id, opprettet_tidspunkt, opprettet_av_hendelse, tilstand_endret_tidspunkt, tilstand_endret_av_hendelse, fom, tom, skjæringstidspunkt, tilstand, tags) 
-                VALUES (:unik_id, :vedtaksperiode_id, :utbetaling_id, :spleis_behandling_id, now(), gen_random_uuid(), now(), gen_random_uuid(), :fom, :tom, :skjaeringstidspunkt, :tilstand, '{$tags}')
-                ON CONFLICT (unik_id) DO UPDATE SET utbetaling_id = excluded.utbetaling_id, spleis_behandling_id = excluded.spleis_behandling_id, fom = excluded.fom, tom = excluded.tom, skjæringstidspunkt = excluded.skjæringstidspunkt, tilstand = excluded.tilstand, tags = excluded.tags
-                """.trimIndent()
+            INSERT INTO selve_vedtaksperiode_generasjon (unik_id, vedtaksperiode_id, utbetaling_id, spleis_behandling_id, opprettet_tidspunkt, opprettet_av_hendelse, tilstand_endret_tidspunkt, tilstand_endret_av_hendelse, fom, tom, skjæringstidspunkt, tilstand, tags) 
+            VALUES (:unik_id, :vedtaksperiode_id, :utbetaling_id, :spleis_behandling_id, now(), gen_random_uuid(), now(), gen_random_uuid(), :fom, :tom, :skjaeringstidspunkt, :tilstand, '{$tags}')
+            ON CONFLICT (unik_id) DO UPDATE SET utbetaling_id = excluded.utbetaling_id, spleis_behandling_id = excluded.spleis_behandling_id, fom = excluded.fom, tom = excluded.tom, skjæringstidspunkt = excluded.skjæringstidspunkt, tilstand = excluded.tilstand, tags = excluded.tags
+            """.trimIndent()
         this.run(
             queryOf(
                 query,
@@ -147,18 +161,22 @@ class GenerasjonDao(private val dataSource: DataSource) {
                     "tom" to generasjonDto.tom,
                     "skjaeringstidspunkt" to generasjonDto.skjæringstidspunkt,
                     "tilstand" to generasjonDto.tilstand.name,
-                )
-            ).asUpdate
+                ),
+            ).asUpdate,
         )
     }
 
-    private fun TransactionalSession.lagre(varselDto: VarselDto, generasjonId: UUID) {
+    private fun TransactionalSession.lagre(
+        varselDto: VarselDto,
+        generasjonId: UUID,
+    ) {
         @Language("PostgreSQL")
-        val query = """
+        val query =
+            """
             INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, generasjon_ref, definisjon_ref, opprettet, status_endret_ident, status_endret_tidspunkt, status) 
             VALUES (:unik_id, :kode, :vedtaksperiode_id, (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = :generasjon_id), null, :opprettet, null, null, :status)
             ON CONFLICT (generasjon_ref, kode) DO UPDATE SET status = excluded.status, generasjon_ref = excluded.generasjon_ref
-        """.trimIndent()
+            """.trimIndent()
 
         this.run(
             queryOf(
@@ -169,22 +187,29 @@ class GenerasjonDao(private val dataSource: DataSource) {
                     "vedtaksperiode_id" to varselDto.vedtaksperiodeId,
                     "generasjon_id" to generasjonId,
                     "opprettet" to varselDto.opprettet,
-                    "status" to varselDto.status.name
-                )
-            ).asUpdate
+                    "status" to varselDto.status.name,
+                ),
+            ).asUpdate,
         )
     }
 
-    private fun TransactionalSession.slettVarsler(generasjonId: UUID, varselIder: List<UUID>) {
+    private fun TransactionalSession.slettVarsler(
+        generasjonId: UUID,
+        varselIder: List<UUID>,
+    ) {
         @Language("PostgreSQL")
-        val query = if (varselIder.isEmpty()) """
-            DELETE FROM selve_varsel WHERE generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon svg WHERE svg.unik_id = ? LIMIT 1)
-        """.trimIndent()
-        else """
-            DELETE FROM selve_varsel 
-            WHERE generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon svg WHERE svg.unik_id = ? LIMIT 1) 
-            AND selve_varsel.unik_id NOT IN (${varselIder.joinToString { "?" }})
-        """.trimIndent()
+        val query =
+            if (varselIder.isEmpty()) {
+                """
+                DELETE FROM selve_varsel WHERE generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon svg WHERE svg.unik_id = ? LIMIT 1)
+                """.trimIndent()
+            } else {
+                """
+                DELETE FROM selve_varsel 
+                WHERE generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon svg WHERE svg.unik_id = ? LIMIT 1) 
+                AND selve_varsel.unik_id NOT IN (${varselIder.joinToString { "?" }})
+                """.trimIndent()
+            }
 
         this.run(queryOf(query, generasjonId, *varselIder.toTypedArray()).asExecute)
     }
@@ -209,23 +234,25 @@ class GenerasjonDao(private val dataSource: DataSource) {
                     skjæringstidspunkt = row.localDate("skjæringstidspunkt"),
                     fom = row.localDate("fom"),
                     tom = row.localDate("tom"),
-                    tilstand = when (val tilstand = row.string("tilstand")) {
-                        "Låst" -> TilstandDto.Låst
-                        "Ulåst" -> TilstandDto.Ulåst
-                        "AvsluttetUtenUtbetaling" -> TilstandDto.AvsluttetUtenUtbetaling
-                        "UtenUtbetalingMåVurderes" -> TilstandDto.UtenUtbetalingMåVurderes
-                        else -> throw IllegalArgumentException("$tilstand er ikke en gyldig generasjontilstand")
-                    },
+                    tilstand =
+                        when (val tilstand = row.string("tilstand")) {
+                            "Låst" -> TilstandDto.Låst
+                            "Ulåst" -> TilstandDto.Ulåst
+                            "AvsluttetUtenUtbetaling" -> TilstandDto.AvsluttetUtenUtbetaling
+                            "UtenUtbetalingMåVurderes" -> TilstandDto.UtenUtbetalingMåVurderes
+                            else -> throw IllegalArgumentException("$tilstand er ikke en gyldig generasjontilstand")
+                        },
                     tags = row.array<String>("tags").toList(),
-                    varsler = finnVarsler(generasjonRef)
+                    varsler = finnVarsler(generasjonRef),
                 )
-            }.asSingle
+            }.asSingle,
         )
     }
 
     private fun TransactionalSession.finnVarsler(generasjonRef: Long): List<VarselDto> {
         @Language("PostgreSQL")
-        val query = """
+        val query =
+            """
             SELECT 
             unik_id, 
             kode, 
@@ -233,30 +260,30 @@ class GenerasjonDao(private val dataSource: DataSource) {
             opprettet, 
             status 
             FROM selve_varsel sv WHERE generasjon_ref = :generasjon_ref
-        """.trimIndent()
+            """.trimIndent()
         return this.run(
-                queryOf(
-                    query,
-                    mapOf("generasjon_ref" to generasjonRef),
-                ).map { row ->
-                    VarselDto(
-                        row.uuid("unik_id"),
-                        row.string("kode"),
-                        row.localDateTime("opprettet"),
-                        row.uuid("vedtaksperiode_id"),
-                        when (val status = row.string("status")) {
-                            "AKTIV" -> VarselStatusDto.AKTIV
-                            "INAKTIV" -> VarselStatusDto.INAKTIV
-                            "GODKJENT" -> VarselStatusDto.GODKJENT
-                            "VURDERT" -> VarselStatusDto.VURDERT
-                            "AVVIST" -> VarselStatusDto.AVVIST
-                            "AVVIKLET" -> VarselStatusDto.AVVIKLET
-                            else -> throw IllegalArgumentException("$status er ikke en gyldig varselstatus")
-                        }
-                    )
-                }.asList
-            )
-        }
+            queryOf(
+                query,
+                mapOf("generasjon_ref" to generasjonRef),
+            ).map { row ->
+                VarselDto(
+                    row.uuid("unik_id"),
+                    row.string("kode"),
+                    row.localDateTime("opprettet"),
+                    row.uuid("vedtaksperiode_id"),
+                    when (val status = row.string("status")) {
+                        "AKTIV" -> VarselStatusDto.AKTIV
+                        "INAKTIV" -> VarselStatusDto.INAKTIV
+                        "GODKJENT" -> VarselStatusDto.GODKJENT
+                        "VURDERT" -> VarselStatusDto.VURDERT
+                        "AVVIST" -> VarselStatusDto.AVVIST
+                        "AVVIKLET" -> VarselStatusDto.AVVIKLET
+                        else -> throw IllegalArgumentException("$status er ikke en gyldig varselstatus")
+                    },
+                )
+            }.asList,
+        )
+    }
 
     internal fun finnSkjæringstidspunktFor(vedtaksperiodeId: UUID): LocalDate? {
         return sessionOf(dataSource).use { session ->
@@ -282,7 +309,10 @@ class GenerasjonDao(private val dataSource: DataSource) {
         return queryOf(query, vedtaksperiodeId)
     }
 
-    internal fun utbetalingFor(generasjonId: UUID, utbetalingId: UUID): Generasjon? {
+    internal fun utbetalingFor(
+        generasjonId: UUID,
+        utbetalingId: UUID,
+    ): Generasjon? {
         @Language("PostgreSQL")
         val query = """
             UPDATE selve_vedtaksperiode_generasjon 
@@ -318,7 +348,10 @@ class GenerasjonDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun finnVedtaksperiodeIderFor(fødselsnummer: String, skjæringstidspunkt: LocalDate): Set<UUID> {
+    internal fun finnVedtaksperiodeIderFor(
+        fødselsnummer: String,
+        skjæringstidspunkt: LocalDate,
+    ): Set<UUID> {
         @Language("PostgreSQL")
         val query = """
             SELECT svg.vedtaksperiode_id FROM selve_vedtaksperiode_generasjon svg 
@@ -370,27 +403,29 @@ class GenerasjonDao(private val dataSource: DataSource) {
 
         return sessionOf(dataSource).use { session ->
             session.transaction { transactionalSession ->
-                val generasjon = requireNotNull(
-                    transactionalSession.run(
-                        queryOf(
-                            query,
-                            id,
-                            vedtaksperiodeId,
-                            hendelseId,
-                            skjæringstidspunkt,
-                            periode.fom(),
-                            periode.tom(),
-                            tilstand.navn()
-                        ).map(::toGenerasjon).asSingle
-                    )
-                ) { "Kunne ikke opprette ny generasjon" }
+                val generasjon =
+                    requireNotNull(
+                        transactionalSession.run(
+                            queryOf(
+                                query,
+                                id,
+                                vedtaksperiodeId,
+                                hendelseId,
+                                skjæringstidspunkt,
+                                periode.fom(),
+                                periode.tom(),
+                                tilstand.navn(),
+                            ).map(::toGenerasjon).asSingle,
+                        ),
+                    ) { "Kunne ikke opprette ny generasjon" }
                 transactionalSession.run(
                     queryOf(
-                        søknadMottattQuery, mapOf(
+                        søknadMottattQuery,
+                        mapOf(
                             "vedtaksperiodeId" to vedtaksperiodeId,
-                            "soknadMottatt" to LocalDateTime.now()
-                        )
-                    ).asUpdate
+                            "soknadMottatt" to LocalDateTime.now(),
+                        ),
+                    ).asUpdate,
                 )
                 generasjon
             }
@@ -423,19 +458,25 @@ class GenerasjonDao(private val dataSource: DataSource) {
         val query =
             "SELECT unik_id, vedtaksperiode_id, kode, opprettet, status FROM selve_varsel WHERE generasjon_ref = ?"
         return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, generasjonRef).map {
-                Varsel(
-                    it.uuid("unik_id"),
-                    it.string("kode"),
-                    it.localDateTime("opprettet"),
-                    it.uuid("vedtaksperiode_id"),
-                    enumValueOf(it.string("status"))
-                )
-            }.asList)
+            session.run(
+                queryOf(query, generasjonRef).map {
+                    Varsel(
+                        it.uuid("unik_id"),
+                        it.string("kode"),
+                        it.localDateTime("opprettet"),
+                        it.uuid("vedtaksperiode_id"),
+                        enumValueOf(it.string("status")),
+                    )
+                }.asList,
+            )
         }
     }
 
-    internal fun oppdaterTilstandFor(generasjonId: UUID, ny: Generasjon.Tilstand, endretAv: UUID) {
+    internal fun oppdaterTilstandFor(
+        generasjonId: UUID,
+        ny: Generasjon.Tilstand,
+        endretAv: UUID,
+    ) {
         @Language("PostgreSQL")
         val query = """
                 UPDATE selve_vedtaksperiode_generasjon 
@@ -450,9 +491,9 @@ class GenerasjonDao(private val dataSource: DataSource) {
                         "tilstand" to ny.navn(),
                         "endret_tidspunkt" to LocalDateTime.now(),
                         "endret_av_hendelse" to endretAv,
-                        "generasjon_id" to generasjonId
-                    )
-                ).asUpdate
+                        "generasjon_id" to generasjonId,
+                    ),
+                ).asUpdate,
             )
         }
     }
@@ -471,28 +512,30 @@ class GenerasjonDao(private val dataSource: DataSource) {
                 queryOf(
                     query,
                     mapOf(
-                        "vedtaksperiodeId" to vedtaksperiodeId
-                    )
+                        "vedtaksperiodeId" to vedtaksperiodeId,
+                    ),
                 ).map {
                     it.localDateTimeOrNull("tilstand_endret_tidspunkt")
-                }.asSingle
+                }.asSingle,
             )
         }
     }
 
     internal fun førsteKjenteDag(fødselsnummer: String): LocalDate {
-        @Language("PostgreSQL") val query = """
+        @Language("PostgreSQL")
+        val query =
+            """
             select min(svg.fom) as foersteFom
             from selve_vedtaksperiode_generasjon svg
             join vedtak v on svg.vedtaksperiode_id = v.vedtaksperiode_id
             join person p on p.id = v.person_ref
             where p.fodselsnummer = :fodselsnummer
-        """.trimIndent()
+            """.trimIndent()
         return sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
-                    query, mapOf("fodselsnummer" to fødselsnummer.toLong())
-                ).map { it.localDate("foersteFom") }.asSingle
+                    query, mapOf("fodselsnummer" to fødselsnummer.toLong()),
+                ).map { it.localDate("foersteFom") }.asSingle,
             ) ?: throw IllegalStateException("Forventet å kunne slå opp første kjente dag")
         }
     }

@@ -1,11 +1,11 @@
 package no.nav.helse.modell.totrinnsvurdering
 
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
 import no.nav.helse.modell.saksbehandler.Saksbehandler
+import java.time.LocalDateTime
+import java.util.UUID
 
 class Totrinnsvurdering(
     private val vedtaksperiodeId: UUID,
@@ -14,19 +14,30 @@ class Totrinnsvurdering(
     private var beslutter: Saksbehandler?,
     private var utbetalingId: UUID?,
     private val opprettet: LocalDateTime,
-    private var oppdatert: LocalDateTime?
+    private var oppdatert: LocalDateTime?,
 ) {
     private val erBeslutteroppgave: Boolean get() = !erRetur && saksbehandler != null
 
     internal fun accept(totrinnsvurderingVisitor: TotrinnsvurderingVisitor) {
-        totrinnsvurderingVisitor.visitTotrinnsvurdering(vedtaksperiodeId, erRetur, saksbehandler, beslutter, utbetalingId, opprettet, oppdatert)
+        totrinnsvurderingVisitor.visitTotrinnsvurdering(
+            vedtaksperiodeId,
+            erRetur,
+            saksbehandler,
+            beslutter,
+            utbetalingId,
+            opprettet,
+            oppdatert,
+        )
     }
 
     internal fun tidligereBeslutter() = beslutter
 
     internal fun opprinneligSaksbehandler() = saksbehandler
 
-    internal fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: Saksbehandler) {
+    internal fun sendTilBeslutter(
+        oppgaveId: Long,
+        behandlendeSaksbehandler: Saksbehandler,
+    ) {
         if (erBeslutteroppgave) throw OppgaveAlleredeSendtBeslutter(oppgaveId)
         if (behandlendeSaksbehandler == beslutter) throw OppgaveKreverVurderingAvToSaksbehandlere(oppgaveId)
 
@@ -35,7 +46,10 @@ class Totrinnsvurdering(
         if (erRetur) erRetur = false
     }
 
-    internal fun sendIRetur(oppgaveId: Long, beslutter: Saksbehandler) {
+    internal fun sendIRetur(
+        oppgaveId: Long,
+        beslutter: Saksbehandler,
+    ) {
         if (!erBeslutteroppgave) throw OppgaveAlleredeSendtIRetur(oppgaveId)
         if (beslutter == saksbehandler) throw OppgaveKreverVurderingAvToSaksbehandlere(oppgaveId)
 
@@ -51,14 +65,14 @@ class Totrinnsvurdering(
     override fun equals(other: Any?): Boolean {
         return this === other || (
             other is Totrinnsvurdering &&
-            vedtaksperiodeId == other.vedtaksperiodeId &&
-            erRetur == other.erRetur &&
-            saksbehandler == other.saksbehandler &&
-            beslutter == other.beslutter &&
-            utbetalingId == other.utbetalingId &&
-            opprettet.withNano(0) == other.opprettet.withNano(0) &&
-            oppdatert?.withNano(0) == other.oppdatert?.withNano(0)
-            )
+                vedtaksperiodeId == other.vedtaksperiodeId &&
+                erRetur == other.erRetur &&
+                saksbehandler == other.saksbehandler &&
+                beslutter == other.beslutter &&
+                utbetalingId == other.utbetalingId &&
+                opprettet.withNano(0) == other.opprettet.withNano(0) &&
+                oppdatert?.withNano(0) == other.oppdatert?.withNano(0)
+        )
     }
 
     override fun hashCode(): Int {

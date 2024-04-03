@@ -1,7 +1,6 @@
 package no.nav.helse.modell.gosysoppgaver
 
 import com.fasterxml.jackson.databind.JsonNode
-import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.meldinger.PersonmeldingOld
 import no.nav.helse.mediator.oppgave.OppgaveDao
@@ -16,25 +15,27 @@ import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.rapids_rivers.JsonMessage
+import java.util.UUID
 
 internal class GosysOppgaveEndret private constructor(
     override val id: UUID,
     private val fødselsnummer: String,
     private val json: String,
 ) : PersonmeldingOld {
-    internal constructor(packet: JsonMessage): this(
+    internal constructor(packet: JsonMessage) : this(
         id = UUID.fromString(packet["@id"].asText()),
         fødselsnummer = packet["fødselsnummer"].asText(),
-        json = packet.toJson()
+        json = packet.toJson(),
     )
 
-    internal constructor(jsonNode: JsonNode): this(
+    internal constructor(jsonNode: JsonNode) : this(
         id = UUID.fromString(jsonNode["@id"].asText()),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
-        json = jsonNode.toString()
+        json = jsonNode.toString(),
     )
 
     override fun fødselsnummer() = fødselsnummer
+
     override fun toJson(): String = json
 }
 
@@ -53,36 +54,36 @@ internal class GosysOppgaveEndretCommand(
     generasjonRepository: GenerasjonRepository,
     godkjenningMediator: GodkjenningMediator,
     spleisBehandlingId: UUID?,
-): MacroCommand() {
-    override val commands: List<Command> = listOf(
-        VurderÅpenGosysoppgave(
-            hendelseId = id,
-            aktørId = aktørId,
-            åpneGosysOppgaverDao = åpneGosysOppgaverDao,
-            generasjonRepository = generasjonRepository,
-            vedtaksperiodeId = oppgavedataForAutomatisering.vedtaksperiodeId,
-            sykefraværstilfelle = sykefraværstilfelle,
-            harTildeltOppgave = harTildeltOppgave,
-        ),
-        SjekkAtOppgaveFortsattErÅpenCommand(fødselsnummer = fødselsnummer, oppgaveDao = oppgaveDao),
-        SettTidligereAutomatiseringInaktivCommand(
-            vedtaksperiodeId = oppgavedataForAutomatisering.vedtaksperiodeId,
-            hendelseId = oppgavedataForAutomatisering.hendelseId,
-            automatisering = automatisering,
-        ),
-        AutomatiseringForEksisterendeOppgaveCommand(
-            fødselsnummer = fødselsnummer,
-            vedtaksperiodeId = oppgavedataForAutomatisering.vedtaksperiodeId,
-            hendelseId = oppgavedataForAutomatisering.hendelseId,
-            automatisering = automatisering,
-            godkjenningsbehovJson = oppgavedataForAutomatisering.godkjenningsbehovJson,
-            godkjenningMediator = godkjenningMediator,
-            oppgaveMediator = oppgaveMediator,
-            utbetaling = utbetaling,
-            periodetype = oppgavedataForAutomatisering.periodetype,
-            sykefraværstilfelle = sykefraværstilfelle,
-            spleisBehandlingId = spleisBehandlingId
+) : MacroCommand() {
+    override val commands: List<Command> =
+        listOf(
+            VurderÅpenGosysoppgave(
+                hendelseId = id,
+                aktørId = aktørId,
+                åpneGosysOppgaverDao = åpneGosysOppgaverDao,
+                generasjonRepository = generasjonRepository,
+                vedtaksperiodeId = oppgavedataForAutomatisering.vedtaksperiodeId,
+                sykefraværstilfelle = sykefraværstilfelle,
+                harTildeltOppgave = harTildeltOppgave,
+            ),
+            SjekkAtOppgaveFortsattErÅpenCommand(fødselsnummer = fødselsnummer, oppgaveDao = oppgaveDao),
+            SettTidligereAutomatiseringInaktivCommand(
+                vedtaksperiodeId = oppgavedataForAutomatisering.vedtaksperiodeId,
+                hendelseId = oppgavedataForAutomatisering.hendelseId,
+                automatisering = automatisering,
+            ),
+            AutomatiseringForEksisterendeOppgaveCommand(
+                fødselsnummer = fødselsnummer,
+                vedtaksperiodeId = oppgavedataForAutomatisering.vedtaksperiodeId,
+                hendelseId = oppgavedataForAutomatisering.hendelseId,
+                automatisering = automatisering,
+                godkjenningsbehovJson = oppgavedataForAutomatisering.godkjenningsbehovJson,
+                godkjenningMediator = godkjenningMediator,
+                oppgaveMediator = oppgaveMediator,
+                utbetaling = utbetaling,
+                periodetype = oppgavedataForAutomatisering.periodetype,
+                sykefraværstilfelle = sykefraværstilfelle,
+                spleisBehandlingId = spleisBehandlingId,
+            ),
         )
-    )
-
 }

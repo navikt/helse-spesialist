@@ -1,8 +1,8 @@
 package no.nav.helse.modell.sykefraværstilfelle
 
+import no.nav.helse.modell.vedtaksperiode.vedtak.SykepengevedtakBuilder
 import java.time.LocalDate
 import java.time.LocalDateTime
-import no.nav.helse.modell.vedtaksperiode.vedtak.SykepengevedtakBuilder
 
 internal class SkjønnsfastattSykepengegrunnlag(
     private val type: Skjønnsfastsettingstype,
@@ -11,7 +11,7 @@ internal class SkjønnsfastattSykepengegrunnlag(
     private val begrunnelseFraMal: String,
     private val begrunnelseFraFritekst: String,
     private val begrunnelseFraKonklusjon: String,
-    private val opprettet: LocalDateTime
+    private val opprettet: LocalDateTime,
 ) {
     internal fun byggVedtak(vedtakBuilder: SykepengevedtakBuilder) {
         vedtakBuilder.skjønnsfastsettingData(begrunnelseFraMal, begrunnelseFraFritekst, begrunnelseFraKonklusjon, type, årsak)

@@ -52,9 +52,8 @@ enum class SorteringsnøkkelForDatabase {
     TILDELT_TIL,
     OPPRETTET,
     SØKNAD_MOTTATT,
-    TIDSFRIST
+    TIDSFRIST,
 }
-
 
 enum class EgenskapForDatabase {
     RISK_QA,
@@ -82,5 +81,5 @@ enum class EgenskapForDatabase {
     OVERGANG_FRA_IT,
     SKJØNNSFASTSETTELSE,
     PÅ_VENT,
-    TILBAKEDATERT
+    TILBAKEDATERT,
 }

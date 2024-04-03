@@ -1,14 +1,13 @@
 package no.nav.helse.modell.kommando
 
-import java.util.UUID
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 internal class AvbrytOppgaveCommand(
     private val vedtaksperiodeId: UUID,
-    private val oppgaveMediator: OppgaveMediator
+    private val oppgaveMediator: OppgaveMediator,
 ) : Command {
-
     private companion object {
         private val log = LoggerFactory.getLogger(AvbrytOppgaveCommand::class.java)
     }
@@ -18,5 +17,4 @@ internal class AvbrytOppgaveCommand(
         oppgaveMediator.avbrytOppgaveFor(vedtaksperiodeId)
         return true
     }
-
 }

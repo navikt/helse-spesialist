@@ -28,7 +28,7 @@ data class Inntekt(
 
 data class Beregningsgrunnlag(
     val totalbeløp: Double,
-    val omregnedeÅrsinntekter: List<OmregnetÅrsinntekt>
+    val omregnedeÅrsinntekter: List<OmregnetÅrsinntekt>,
 )
 
 data class InnrapportertInntekt(

@@ -31,5 +31,3 @@ enum class SkjønnsfastsettingstypeForDatabase {
     RAPPORTERT_ÅRSINNTEKT,
     ANNET,
 }
-
-

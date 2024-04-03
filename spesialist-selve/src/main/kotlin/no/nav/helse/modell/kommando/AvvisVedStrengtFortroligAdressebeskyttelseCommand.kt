@@ -9,12 +9,12 @@ internal class AvvisVedStrengtFortroligAdressebeskyttelseCommand(
     private val fødselsnummer: String,
     private val personDao: PersonDao,
     private val oppgaveDao: OppgaveDao,
-    private val godkjenningMediator: GodkjenningMediator
+    private val godkjenningMediator: GodkjenningMediator,
 ) : Command {
-
     override fun execute(context: CommandContext): Boolean {
-        if (personDao.findAdressebeskyttelse(fødselsnummer) ?.equals(Adressebeskyttelse.StrengtFortrolig) == false )
+        if (personDao.findAdressebeskyttelse(fødselsnummer) ?.equals(Adressebeskyttelse.StrengtFortrolig) == false) {
             return true
+        }
         val oppgaveId = oppgaveDao.finnOppgaveId(fødselsnummer) ?: return true
 
         val årsaker = listOf("Adressebeskyttelse strengt fortrolig")
@@ -22,7 +22,7 @@ internal class AvvisVedStrengtFortroligAdressebeskyttelseCommand(
         godkjenningMediator.automatiskAvvisning(
             context::publiser,
             årsaker,
-            oppgaveId
+            oppgaveId,
         )
         oppgaveDao.invaliderOppgaveFor(fødselsnummer)
         return true

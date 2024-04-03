@@ -1,13 +1,13 @@
 package no.nav.helse.spesialist.api.varsel
 
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.spesialist.api.graphql.schema.VarselDTO
 import no.nav.helse.spesialist.api.graphql.schema.VarselDTO.VarselvurderingDTO
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.AKTIV
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.AVVIST
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.GODKJENT
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.VURDERT
+import java.time.LocalDateTime
+import java.util.UUID
 
 data class Varsel(
     private val varselId: UUID,
@@ -27,16 +27,17 @@ data class Varsel(
         }
     }
 
-    internal fun toDto() = VarselDTO(
-        generasjonId,
-        definisjonId,
-        opprettet.toString(),
-        kode,
-        tittel,
-        forklaring,
-        handling,
-        vurdering?.toDto(status),
-    )
+    internal fun toDto() =
+        VarselDTO(
+            generasjonId,
+            definisjonId,
+            opprettet.toString(),
+            kode,
+            tittel,
+            forklaring,
+            handling,
+            vurdering?.toDto(status),
+        )
 
     internal fun erAktiv(): Boolean {
         return status == AKTIV
@@ -48,7 +49,17 @@ data class Varsel(
         behandlingId: UUID,
         vedtaksperiodeId: UUID,
         ident: String,
-        vurderer: (fødselsnummer: String, behandlingId: UUID, vedtaksperiodeId: UUID, varselId: UUID, varselTittel: String, varselkode: String, forrigeStatus: Varselstatus, gjeldendeStatus: Varselstatus, saksbehandlerIdent: String) -> Unit,
+        vurderer: (
+            fødselsnummer: String,
+            behandlingId: UUID,
+            vedtaksperiodeId: UUID,
+            varselId: UUID,
+            varselTittel: String,
+            varselkode: String,
+            forrigeStatus: Varselstatus,
+            gjeldendeStatus: Varselstatus,
+            saksbehandlerIdent: String,
+        ) -> Unit,
     ) {
         if (status !in (listOf(AKTIV, VURDERT))) return
 
@@ -61,12 +72,12 @@ data class Varsel(
         private val ident: String,
         private val tidsstempel: LocalDateTime,
     ) {
-
-        internal fun toDto(status: Varselstatus) = VarselvurderingDTO(
-            ident,
-            tidsstempel.toString(),
-            no.nav.helse.spesialist.api.graphql.schema.Varselstatus.valueOf(status.name)
-        )
+        internal fun toDto(status: Varselstatus) =
+            VarselvurderingDTO(
+                ident,
+                tidsstempel.toString(),
+                no.nav.helse.spesialist.api.graphql.schema.Varselstatus.valueOf(status.name),
+            )
     }
 
     enum class Varselstatus {

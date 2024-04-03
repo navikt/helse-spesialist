@@ -1,10 +1,13 @@
 package no.nav.helse.spesialist.api
 
-import java.util.UUID
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
+import java.util.UUID
 
 interface Godkjenninghåndterer {
-    fun håndter(godkjenningDTO: GodkjenningDto, epost: String, oid: UUID, behandlingId: UUID)
-
+    fun håndter(
+        godkjenningDTO: GodkjenningDto,
+        epost: String,
+        oid: UUID,
+        behandlingId: UUID,
+    )
 }
-

@@ -1,14 +1,14 @@
 package no.nav.helse.modell.kommando
 
-import java.time.LocalDate
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.arbeidsgiver.Arbeidsgiverinformasjonløsning
 import no.nav.helse.modell.person.HentPersoninfoløsninger
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 
 internal class OppdaterArbeidsgiverCommand(
     orgnummere: List<String>,
-    private val arbeidsgiverDao: ArbeidsgiverDao
+    private val arbeidsgiverDao: ArbeidsgiverDao,
 ) : Command {
     private companion object {
         private val log = LoggerFactory.getLogger(OppdaterArbeidsgiverCommand::class.java)
@@ -27,20 +27,23 @@ internal class OppdaterArbeidsgiverCommand(
         return behandle(context)
     }
 
-    private fun ikkeOppdaterteNavn() = orgnummere.filterNot { orgnummer ->
-        val sistOppdatert = arbeidsgiverDao.findNavnSistOppdatert(orgnummer) ?: return@filterNot false
-        sistOppdatert.innenforSisteFjortenDager()
-    }
+    private fun ikkeOppdaterteNavn() =
+        orgnummere.filterNot { orgnummer ->
+            val sistOppdatert = arbeidsgiverDao.findNavnSistOppdatert(orgnummer) ?: return@filterNot false
+            sistOppdatert.innenforSisteFjortenDager()
+        }
 
-    private fun ikkeOppdaterteBransjer() = orgnummere.filterNot { orgnummer ->
-        val sistOppdatert = arbeidsgiverDao.findBransjerSistOppdatert(orgnummer) ?: return@filterNot false
-        sistOppdatert.innenforSisteFjortenDager()
-    }
+    private fun ikkeOppdaterteBransjer() =
+        orgnummere.filterNot { orgnummer ->
+            val sistOppdatert = arbeidsgiverDao.findBransjerSistOppdatert(orgnummer) ?: return@filterNot false
+            sistOppdatert.innenforSisteFjortenDager()
+        }
 
-    private fun ikkeOppdaterteNavnForPersonidenter() = personidenter.filterNot { personlignr ->
-        val sistOppdatert = arbeidsgiverDao.findNavnSistOppdatert(personlignr) ?: return@filterNot false
-        sistOppdatert.innenforSisteFjortenDager()
-    }
+    private fun ikkeOppdaterteNavnForPersonidenter() =
+        personidenter.filterNot { personlignr ->
+            val sistOppdatert = arbeidsgiverDao.findNavnSistOppdatert(personlignr) ?: return@filterNot false
+            sistOppdatert.innenforSisteFjortenDager()
+        }
 
     private fun behandle(context: CommandContext): Boolean {
         val løsning = context.get<Arbeidsgiverinformasjonløsning>()
@@ -53,7 +56,9 @@ internal class OppdaterArbeidsgiverCommand(
             løsning == null ||
             !løsning.harSvarForAlle(ikkeOppdaterteBransjer() + ikkeOppdaterteNavn()) ||
             ikkeOppdaterteNavnForPersonidenter().isNotEmpty()
-        ) return trengerMerInformasjon(context)
+        ) {
+            return trengerMerInformasjon(context)
+        }
 
         løsning.oppdater(arbeidsgiverDao)
 
@@ -67,7 +72,7 @@ internal class OppdaterArbeidsgiverCommand(
         if (ikkeOppdaterteArbeidsgivere.isNotEmpty()) {
             context.behov(
                 "Arbeidsgiverinformasjon",
-                mapOf("organisasjonsnummer" to ikkeOppdaterteArbeidsgivere)
+                mapOf("organisasjonsnummer" to ikkeOppdaterteArbeidsgivere),
             )
         }
         if (ikkeOppdatertePersonArbeidsgivere.isNotEmpty()) {

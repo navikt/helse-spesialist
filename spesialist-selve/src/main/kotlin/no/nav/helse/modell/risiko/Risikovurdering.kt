@@ -8,5 +8,6 @@ internal class Risikovurdering private constructor(private val kanGodkjennesAuto
     }
 
     override fun erAautomatiserbar() = kanGodkjennesAutomatisk
+
     override fun error() = "Vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning er ikke oppfylt"
 }

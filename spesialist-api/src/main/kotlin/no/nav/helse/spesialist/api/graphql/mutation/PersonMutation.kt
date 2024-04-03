@@ -9,12 +9,10 @@ import no.nav.helse.spesialist.api.Personhåndterer
 class PersonMutation(
     private val personhåndterer: Personhåndterer,
 ) : Mutation {
-
     @Suppress("unused")
-    suspend fun oppdaterPerson(
-        fodselsnummer: String
-    ): DataFetcherResult<Boolean> = withContext(Dispatchers.IO) {
-        personhåndterer.oppdaterSnapshot(fodselsnummer)
-        DataFetcherResult.newResult<Boolean>().data(true).build()
-    }
+    suspend fun oppdaterPerson(fodselsnummer: String): DataFetcherResult<Boolean> =
+        withContext(Dispatchers.IO) {
+            personhåndterer.oppdaterSnapshot(fodselsnummer)
+            DataFetcherResult.newResult<Boolean>().data(true).build()
+        }
 }

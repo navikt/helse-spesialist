@@ -9,15 +9,20 @@ import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 
 class OpptegnelseQuery(
-    private val saksbehandlerhåndterer: Saksbehandlerhåndterer
-): Query {
-
+    private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
+) : Query {
     @Suppress("unused")
-    fun opptegnelser(sekvensId: Int? = null, environment: DataFetchingEnvironment): DataFetcherResult<List<Opptegnelse>> {
+    fun opptegnelser(
+        sekvensId: Int? = null,
+        environment: DataFetchingEnvironment,
+    ): DataFetcherResult<List<Opptegnelse>> {
         val saksbehandler = environment.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(SAKSBEHANDLER.key).value
         val opptegnelser =
-            if (sekvensId != null) saksbehandlerhåndterer.hentAbonnerteOpptegnelser(saksbehandler, sekvensId)
-            else saksbehandlerhåndterer.hentAbonnerteOpptegnelser(saksbehandler)
+            if (sekvensId != null) {
+                saksbehandlerhåndterer.hentAbonnerteOpptegnelser(saksbehandler, sekvensId)
+            } else {
+                saksbehandlerhåndterer.hentAbonnerteOpptegnelser(saksbehandler)
+            }
 
         return DataFetcherResult.newResult<List<Opptegnelse>>().data(opptegnelser).build()
     }

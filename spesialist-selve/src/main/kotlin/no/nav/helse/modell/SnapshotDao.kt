@@ -1,26 +1,33 @@
 package no.nav.helse.modell
 
-import javax.sql.DataSource
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.objectMapper
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.intellij.lang.annotations.Language
+import javax.sql.DataSource
 
 class SnapshotDao(private val dataSource: DataSource) {
-    fun lagre(fødselsnummer: String, snapshot: GraphQLPerson) =
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            session.transaction { tx ->
-                val personRef = tx.finnPersonRef(fødselsnummer)
-                val versjon = snapshot.versjon
-                if (versjon > tx.finnGlobalVersjon())
-                    tx.oppdaterGlobalVersjon(versjon)
-                tx.lagre(personRef, objectMapper.writeValueAsString(snapshot), versjon)
+    fun lagre(
+        fødselsnummer: String,
+        snapshot: GraphQLPerson,
+    ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+        session.transaction { tx ->
+            val personRef = tx.finnPersonRef(fødselsnummer)
+            val versjon = snapshot.versjon
+            if (versjon > tx.finnGlobalVersjon()) {
+                tx.oppdaterGlobalVersjon(versjon)
             }
+            tx.lagre(personRef, objectMapper.writeValueAsString(snapshot), versjon)
         }
+    }
 
-    private fun TransactionalSession.lagre(personRef: Int, snapshot: String, versjon: Int): Int {
+    private fun TransactionalSession.lagre(
+        personRef: Int,
+        snapshot: String,
+        versjon: Int,
+    ): Int {
         @Language("PostgreSQL")
         val statement = """
             INSERT INTO snapshot(data, versjon, person_ref)
@@ -35,10 +42,10 @@ class SnapshotDao(private val dataSource: DataSource) {
                     mapOf(
                         "snapshot" to snapshot,
                         "versjon" to versjon,
-                        "person_ref" to personRef
-                    )
-                ).asUpdateAndReturnGeneratedKey
-            )
+                        "person_ref" to personRef,
+                    ),
+                ).asUpdateAndReturnGeneratedKey,
+            ),
         ).toInt()
     }
 

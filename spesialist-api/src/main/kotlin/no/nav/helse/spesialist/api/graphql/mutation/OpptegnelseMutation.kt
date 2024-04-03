@@ -8,9 +8,8 @@ import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 
 class OpptegnelseMutation(
-    private val saksbehandlerhåndterer: Saksbehandlerhåndterer
-): Mutation {
-
+    private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
+) : Mutation {
     @Suppress("unused")
     fun opprettAbonnement(
         personidentifikator: String,

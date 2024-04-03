@@ -18,7 +18,6 @@ internal class AvsluttetMedVedtakRiver(
     private val avviksvurderingDao: AvviksvurderingDao,
     private val generasjonDao: GenerasjonDao,
 ) : River.PacketListener {
-
     init {
         River(rapidsConnection).apply {
             validate {
@@ -29,14 +28,14 @@ internal class AvsluttetMedVedtakRiver(
                 it.requireKey(
                     "sykepengegrunnlag",
                     "grunnlagForSykepengegrunnlag",
-                    "grunnlagForSykepengegrunnlagPerArbeidsgiver"
+                    "grunnlagForSykepengegrunnlagPerArbeidsgiver",
                 )
                 it.requireKey("begrensning", "inntekt", "vedtakFattetTidspunkt", "tags")
                 it.requireKey("utbetalingId", "behandlingId")
 
                 it.requireAny(
                     "sykepengegrunnlagsfakta.fastsatt",
-                    listOf("EtterHovedregel", "IInfotrygd", "EtterSkjønn")
+                    listOf("EtterHovedregel", "IInfotrygd", "EtterSkjønn"),
                 )
                 it.requireKey("sykepengegrunnlagsfakta.omregnetÅrsinntekt")
                 it.require("sykepengegrunnlagsfakta.fastsatt") { fastsattNode ->
@@ -65,11 +64,17 @@ internal class AvsluttetMedVedtakRiver(
         }.register(this)
     }
 
-    override fun onError(problems: MessageProblems, context: MessageContext) {
+    override fun onError(
+        problems: MessageProblems,
+        context: MessageContext,
+    ) {
         sikkerlogg.error("Forstod ikke avsluttet_med_vedtak:\n${problems.toExtendedReport()}")
     }
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) {
+    override fun onPacket(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         sikkerlogg.info("Mottok melding avsluttet_med_vedtak:\n${packet.toJson()}")
         mediator.håndter(AvsluttetMedVedtakMessage(packet, avviksvurderingDao, generasjonDao), context)
     }

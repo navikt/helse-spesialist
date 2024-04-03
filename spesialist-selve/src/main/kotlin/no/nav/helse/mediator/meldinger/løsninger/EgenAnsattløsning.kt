@@ -10,7 +10,7 @@ import java.util.*
 internal class EgenAnsattløsning(
     private val opprettet: LocalDateTime,
     private val fødselsnummer: String,
-    private val erEgenAnsatt: Boolean
+    private val erEgenAnsatt: Boolean,
 ) {
     internal fun lagre(egenAnsattDao: EgenAnsattDao) {
         egenAnsattDao.lagre(fødselsnummer, erEgenAnsatt, opprettet)
@@ -18,7 +18,7 @@ internal class EgenAnsattløsning(
 
     internal class EgenAnsattRiver(
         rapidsConnection: RapidsConnection,
-        private val mediator: MeldingMediator
+        private val mediator: MeldingMediator,
     ) : River.PacketListener {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
@@ -38,7 +38,10 @@ internal class EgenAnsattløsning(
             }.register(this)
         }
 
-        override fun onPacket(packet: JsonMessage, context: MessageContext) {
+        override fun onPacket(
+            packet: JsonMessage,
+            context: MessageContext,
+        ) {
             sikkerLogg.info("Mottok melding EgenAnsatt:\n{}", packet.toJson())
             val opprettet = packet["@opprettet"].asLocalDateTime()
             val contextId = UUID.fromString(packet["contextId"].asText())
@@ -47,18 +50,19 @@ internal class EgenAnsattløsning(
 
             val erEgenAnsatt = packet["@løsning.EgenAnsatt"].asBoolean()
 
-            val egenAnsattløsning = EgenAnsattløsning(
-                opprettet = opprettet,
-                fødselsnummer = fødselsnummer,
-                erEgenAnsatt = erEgenAnsatt
-            )
+            val egenAnsattløsning =
+                EgenAnsattløsning(
+                    opprettet = opprettet,
+                    fødselsnummer = fødselsnummer,
+                    erEgenAnsatt = erEgenAnsatt,
+                )
 
             mediator.løsning(
                 hendelseId = hendelseId,
                 contextId = contextId,
                 behovId = UUID.fromString(packet["@id"].asText()),
                 løsning = egenAnsattløsning,
-                context = context
+                context = context,
             )
         }
     }

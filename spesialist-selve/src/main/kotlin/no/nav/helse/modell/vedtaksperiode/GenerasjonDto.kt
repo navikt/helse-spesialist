@@ -1,8 +1,8 @@
 package no.nav.helse.modell.vedtaksperiode
 
+import no.nav.helse.modell.varsel.VarselDto
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.modell.varsel.VarselDto
 
 data class GenerasjonDto(
     val id: UUID,
@@ -14,12 +14,12 @@ data class GenerasjonDto(
     val tom: LocalDate,
     val tilstand: TilstandDto,
     val tags: List<String>,
-    val varsler: List<VarselDto>
+    val varsler: List<VarselDto>,
 )
 
 enum class TilstandDto {
     Låst,
     Ulåst,
     AvsluttetUtenUtbetaling,
-    UtenUtbetalingMåVurderes
+    UtenUtbetalingMåVurderes,
 }

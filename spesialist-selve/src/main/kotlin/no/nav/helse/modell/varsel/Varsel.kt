@@ -1,8 +1,6 @@
 package no.nav.helse.modell.varsel
 
 import com.fasterxml.jackson.databind.JsonNode
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.AVVIST
 import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
@@ -10,22 +8,25 @@ import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.VURDERT
 import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
 import no.nav.helse.rapids_rivers.asLocalDateTime
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class Varsel(
     private val id: UUID,
     private val varselkode: String,
     private val opprettet: LocalDateTime,
     private val vedtaksperiodeId: UUID,
-    private var status: Status = AKTIV
+    private var status: Status = AKTIV,
 ) {
-
     internal enum class Status {
         AKTIV,
         INAKTIV,
         GODKJENT,
         VURDERT,
         AVVIST,
-        AVVIKLET;
+        AVVIKLET,
+        ;
+
         internal fun toDto(): VarselStatusDto {
             return when (this) {
                 AKTIV -> VarselStatusDto.AKTIV
@@ -67,7 +68,7 @@ internal class Varsel(
     }
 
     internal fun deaktiver(generasjonId: UUID) {
-        if(status != AKTIV) return
+        if (status != AKTIV) return
         this.status = INAKTIV
         observers.forEach { it.varselDeaktivert(id, varselkode, generasjonId, vedtaksperiodeId) }
     }
@@ -77,12 +78,14 @@ internal class Varsel(
     }
 
     override fun equals(other: Any?): Boolean =
-        this === other || (other is Varsel
-        && javaClass == other.javaClass
-        && id == other.id
-        && vedtaksperiodeId == other.vedtaksperiodeId
-        && opprettet.withNano(0) == other.opprettet.withNano(0)
-        && varselkode == other.varselkode)
+        this === other || (
+            other is Varsel &&
+                javaClass == other.javaClass &&
+                id == other.id &&
+                vedtaksperiodeId == other.vedtaksperiodeId &&
+                opprettet.withNano(0) == other.opprettet.withNano(0) &&
+                varselkode == other.varselkode
+        )
 
     override fun hashCode(): Int {
         var result = id.hashCode()
@@ -104,9 +107,11 @@ internal class Varsel(
         internal fun List<Varsel>.finnEksisterendeVarsel(varsel: Varsel): Varsel? {
             return find { it.varselkode == varsel.varselkode }
         }
+
         internal fun List<Varsel>.finnEksisterendeVarsel(varselkode: String): Varsel? {
             return find { it.varselkode == varselkode }
         }
+
         internal fun List<Varsel>.inneholderMedlemskapsvarsel(): Boolean {
             return any { it.status == AKTIV && it.varselkode == "RV_MV_1" }
         }
@@ -135,15 +140,15 @@ internal class Varsel(
             forEach { it.godkjennSpesialsakvarsel(generasjonId) }
         }
 
-        private val neiVarsler = listOf(
-            "RV_IT_3",
-
-            "RV_SI_3",
-            "RV_UT_23",
-            "RV_VV_8",
-            "SB_RV_2",
-            "SB_RV_3"
-        )
+        private val neiVarsler =
+            listOf(
+                "RV_IT_3",
+                "RV_SI_3",
+                "RV_UT_23",
+                "RV_VV_8",
+                "SB_RV_2",
+                "SB_RV_3",
+            )
 
         internal fun List<Varsel>.forhindrerAutomatisering() = any { it.status in listOf(VURDERT, AKTIV, AVVIST) }
 
@@ -156,13 +161,13 @@ internal class Varsel(
                         UUID.fromString(
                             jsonNode["kontekster"]
                                 .find { it["konteksttype"].asText() == "Vedtaksperiode" }!!["kontekstmap"]
-                                .get("vedtaksperiodeId").asText()
+                                .get("vedtaksperiodeId").asText(),
                         )
                     Varsel(
                         UUID.fromString(jsonNode["id"].asText()),
                         jsonNode["varselkode"].asText(),
                         jsonNode["tidsstempel"].asLocalDateTime(),
-                        vedtaksperiodeId
+                        vedtaksperiodeId,
                     )
                 }
         }

@@ -5,5 +5,5 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
 data class PersonDto(
     val aktørId: String,
     val fødselsnummer: String,
-    val vedtaksperioder: List<VedtaksperiodeDto>
+    val vedtaksperioder: List<VedtaksperiodeDto>,
 )

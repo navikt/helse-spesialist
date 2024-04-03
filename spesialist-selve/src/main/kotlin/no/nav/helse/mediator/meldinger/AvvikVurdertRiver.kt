@@ -1,6 +1,5 @@
 package no.nav.helse.mediator.meldinger
 
-import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.hendelser.AvvikVurdertMessage
@@ -10,6 +9,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 internal class AvvikVurdertRiver(
     rapidsConnection: RapidsConnection,
@@ -33,12 +33,12 @@ internal class AvvikVurdertRiver(
                     "avviksvurdering.beregningsgrunnlag.totalbeløp",
                     "avviksvurdering.sammenligningsgrunnlag",
                     "avviksvurdering.sammenligningsgrunnlag.totalbeløp",
-                    "avviksvurdering.avviksprosent"
+                    "avviksvurdering.avviksprosent",
                 )
                 it.requireArray("avviksvurdering.beregningsgrunnlag.omregnedeÅrsinntekter") {
                     requireKey(
                         "arbeidsgiverreferanse",
-                        "beløp"
+                        "beløp",
                     )
                 }
                 it.requireArray("avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter") {
@@ -46,7 +46,7 @@ internal class AvvikVurdertRiver(
                     requireArray("inntekter") {
                         requireKey(
                             "årMåned",
-                            "beløp"
+                            "beløp",
                         )
                     }
                 }
@@ -54,16 +54,19 @@ internal class AvvikVurdertRiver(
         }.register(this)
     }
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) {
+    override fun onPacket(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         val hendelseId = UUID.fromString(packet["@id"].asText())
         logg.info(
             "Mottok avvik_vurdert for {}",
-            kv("hendelseId", hendelseId)
+            kv("hendelseId", hendelseId),
         )
         sikkerlogg.info(
             "Mottok avvik_vurdert med {}, {}",
             kv("hendelseId", hendelseId),
-            kv("hendelse", packet.toJson())
+            kv("hendelse", packet.toJson()),
         )
         val message = AvvikVurdertMessage(packet)
         message.sendInnTil(mediator)

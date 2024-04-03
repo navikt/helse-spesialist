@@ -12,17 +12,17 @@ internal class Varseldefinisjon(
     private val avviklet: Boolean,
     private val opprettet: LocalDateTime,
 ) {
-
     internal fun toDto() = VarseldefinisjonDto(id, varselkode, tittel, forklaring, handling, avviklet, opprettet)
 
-    override fun equals(other: Any?) = this === other || (
-        other is Varseldefinisjon &&
-            id == other.id &&
-            varselkode == other.varselkode &&
-            tittel == other.tittel &&
-            forklaring == other.forklaring &&
-            handling == other.handling &&
-            avviklet == other.avviklet
+    override fun equals(other: Any?) =
+        this === other || (
+            other is Varseldefinisjon &&
+                id == other.id &&
+                varselkode == other.varselkode &&
+                tittel == other.tittel &&
+                forklaring == other.forklaring &&
+                handling == other.handling &&
+                avviklet == other.avviklet
         )
 
     override fun hashCode(): Int {

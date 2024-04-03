@@ -1,8 +1,8 @@
 package no.nav.helse.spesialist.api.vedtak
 
+import no.nav.helse.spesialist.api.varsel.Varsel
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.spesialist.api.varsel.Varsel
 
 data class Vedtaksperiode(
     private val vedtaksperiodeId: UUID,
@@ -29,7 +29,17 @@ data class Vedtaksperiode(
             fødselsnummer: String,
             behandlingId: UUID,
             ident: String,
-            godkjenner: (fødselsnummer: String, behandlingId: UUID, vedtaksperiodeId: UUID, varselId: UUID, varselTittel: String, varselkode: String, forrigeStatus: Varsel.Varselstatus, gjeldendeStatus: Varsel.Varselstatus, saksbehandlerIdent: String) -> Unit,
+            godkjenner: (
+                fødselsnummer: String,
+                behandlingId: UUID,
+                vedtaksperiodeId: UUID,
+                varselId: UUID,
+                varselTittel: String,
+                varselkode: String,
+                forrigeStatus: Varsel.Varselstatus,
+                gjeldendeStatus: Varsel.Varselstatus,
+                saksbehandlerIdent: String,
+            ) -> Unit,
         ) {
             forEach { vedtaksperiode ->
                 vedtaksperiode.varsler.forEach {
@@ -39,7 +49,7 @@ data class Vedtaksperiode(
                         behandlingId = behandlingId,
                         vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId,
                         ident = ident,
-                        vurderer = godkjenner
+                        vurderer = godkjenner,
                     )
                 }
             }
@@ -49,7 +59,17 @@ data class Vedtaksperiode(
             fødselsnummer: String,
             behandlingId: UUID,
             ident: String,
-            godkjenner: (fødselsnummer: String, behandlingId: UUID, vedtaksperiodeId: UUID, varselId: UUID, varselTittel: String, varselkode: String, forrigeStatus: Varsel.Varselstatus, gjeldendeStatus: Varsel.Varselstatus, saksbehandlerIdent: String) -> Unit,
+            godkjenner: (
+                fødselsnummer: String,
+                behandlingId: UUID,
+                vedtaksperiodeId: UUID,
+                varselId: UUID,
+                varselTittel: String,
+                varselkode: String,
+                forrigeStatus: Varsel.Varselstatus,
+                gjeldendeStatus: Varsel.Varselstatus,
+                saksbehandlerIdent: String,
+            ) -> Unit,
         ) {
             this.varsler.forEach {
                 it.vurder(
@@ -58,7 +78,7 @@ data class Vedtaksperiode(
                     behandlingId = behandlingId,
                     vedtaksperiodeId = this.vedtaksperiodeId,
                     ident = ident,
-                    vurderer = godkjenner
+                    vurderer = godkjenner,
                 )
             }
         }

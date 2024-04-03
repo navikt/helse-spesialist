@@ -16,5 +16,4 @@ data class AzureConfig(
         jwkProviderUri: String,
         tokenEndpoint: String,
     ) : this(clientId, issuer, JwkProviderBuilder(URI(jwkProviderUri).toURL()).build(), tokenEndpoint)
-
 }

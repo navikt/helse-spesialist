@@ -4,7 +4,6 @@ import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.utils.io.core.toByteArray
-import java.util.UUID
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.Toggle
 import no.nav.helse.spesialist.api.notat.NotatDao
@@ -27,6 +26,7 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLOppdrag
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLTidslinjeperiode
 import no.nav.helse.spleis.graphql.hentsnapshot.Sykepengedager
+import java.util.UUID
 import no.nav.helse.spleis.graphql.enums.Utbetalingtype as GraphQLUtbetalingtype
 
 enum class Inntektstype { ENARBEIDSGIVER, FLEREARBEIDSGIVERE }
@@ -35,7 +35,7 @@ enum class Periodetype {
     FORLENGELSE,
     FORSTEGANGSBEHANDLING,
     INFOTRYGDFORLENGELSE,
-    OVERGANG_FRA_IT
+    OVERGANG_FRA_IT,
 }
 
 enum class Periodetilstand {
@@ -54,7 +54,7 @@ enum class Periodetilstand {
     VenterPaEnAnnenPeriode,
     UtbetaltVenterPaEnAnnenPeriode,
     TilSkjonnsfastsettelse,
-    Ukjent
+    Ukjent,
 }
 
 enum class Utbetalingstatus {
@@ -68,7 +68,7 @@ enum class Utbetalingstatus {
     UBETALT,
     UTBETALINGFEILET,
     UTBETALT,
-    UKJENT
+    UKJENT,
 }
 
 enum class Utbetalingtype {
@@ -77,7 +77,7 @@ enum class Utbetalingtype {
     FERIEPENGER,
     REVURDERING,
     UTBETALING,
-    UKJENT
+    UKJENT,
 }
 
 enum class Varselstatus {
@@ -227,21 +227,36 @@ data class VarselDTO(
 
 interface Periode {
     fun erForkastet(): Boolean
+
     fun fom(): DateString
+
     fun tom(): DateString
+
     fun id(): UUID
+
     fun inntektstype(): Inntektstype
+
     fun opprettet(): DateTimeString
+
     fun periodetype(): Periodetype
+
     fun tidslinje(): List<Dag>
+
     fun vedtaksperiodeId(): UUID
+
     fun periodetilstand(): Periodetilstand
+
     fun skjaeringstidspunkt(): DateString
+
     fun varsler(): List<VarselDTO>
+
     fun hendelser(): List<Hendelse>
 
     @GraphQLIgnore
-    fun periodetilstand(tilstand: GraphQLPeriodetilstand, erSisteGenerasjon: Boolean) = when (tilstand) {
+    fun periodetilstand(
+        tilstand: GraphQLPeriodetilstand,
+        erSisteGenerasjon: Boolean,
+    ) = when (tilstand) {
         GraphQLPeriodetilstand.ANNULLERINGFEILET -> Periodetilstand.AnnulleringFeilet
         GraphQLPeriodetilstand.ANNULLERT -> Periodetilstand.Annullert
         GraphQLPeriodetilstand.INGENUTBETALING -> Periodetilstand.IngenUtbetaling
@@ -256,8 +271,11 @@ interface Periode {
         GraphQLPeriodetilstand.UTBETALINGFEILET -> Periodetilstand.UtbetalingFeilet
         GraphQLPeriodetilstand.VENTERPAANNENPERIODE -> Periodetilstand.VenterPaEnAnnenPeriode
         GraphQLPeriodetilstand.UTBETALTVENTERPAANNENPERIODE -> {
-            if (Toggle.BehandleEnOgEnPeriode.enabled && erSisteGenerasjon) Periodetilstand.VenterPaEnAnnenPeriode
-            else Periodetilstand.UtbetaltVenterPaEnAnnenPeriode
+            if (Toggle.BehandleEnOgEnPeriode.enabled && erSisteGenerasjon) {
+                Periodetilstand.VenterPaEnAnnenPeriode
+            } else {
+                Periodetilstand.UtbetaltVenterPaEnAnnenPeriode
+            }
         }
         GraphQLPeriodetilstand.TILSKJONNSFASTSETTELSE -> Periodetilstand.TilSkjonnsfastsettelse
         else -> Periodetilstand.Ukjent
@@ -273,49 +291,56 @@ interface Periode {
     fun tom(periode: GraphQLTidslinjeperiode): DateString = periode.tom
 
     @GraphQLIgnore
-    fun inntektstype(periode: GraphQLTidslinjeperiode): Inntektstype = when (periode.inntektstype) {
-        GraphQLInntektstype.ENARBEIDSGIVER -> Inntektstype.ENARBEIDSGIVER
-        GraphQLInntektstype.FLEREARBEIDSGIVERE -> Inntektstype.FLEREARBEIDSGIVERE
-        else -> throw Exception("Ukjent inntektstype ${periode.inntektstype}")
-    }
+    fun inntektstype(periode: GraphQLTidslinjeperiode): Inntektstype =
+        when (periode.inntektstype) {
+            GraphQLInntektstype.ENARBEIDSGIVER -> Inntektstype.ENARBEIDSGIVER
+            GraphQLInntektstype.FLEREARBEIDSGIVERE -> Inntektstype.FLEREARBEIDSGIVERE
+            else -> throw Exception("Ukjent inntektstype ${periode.inntektstype}")
+        }
 
     @GraphQLIgnore
     fun opprettet(periode: GraphQLTidslinjeperiode): DateTimeString = periode.opprettet
 
     @GraphQLIgnore
-    fun periodetype(periode: GraphQLTidslinjeperiode): Periodetype = when (periode.periodetype) {
-        GraphQLPeriodetype.FORLENGELSE -> Periodetype.FORLENGELSE
-        GraphQLPeriodetype.FORSTEGANGSBEHANDLING -> Periodetype.FORSTEGANGSBEHANDLING
-        GraphQLPeriodetype.INFOTRYGDFORLENGELSE -> Periodetype.INFOTRYGDFORLENGELSE
-        GraphQLPeriodetype.OVERGANGFRAIT -> Periodetype.OVERGANG_FRA_IT
-        else -> throw Exception("Ukjent periodetype ${periode.periodetype}")
-    }
+    fun periodetype(periode: GraphQLTidslinjeperiode): Periodetype =
+        when (periode.periodetype) {
+            GraphQLPeriodetype.FORLENGELSE -> Periodetype.FORLENGELSE
+            GraphQLPeriodetype.FORSTEGANGSBEHANDLING -> Periodetype.FORSTEGANGSBEHANDLING
+            GraphQLPeriodetype.INFOTRYGDFORLENGELSE -> Periodetype.INFOTRYGDFORLENGELSE
+            GraphQLPeriodetype.OVERGANGFRAIT -> Periodetype.OVERGANG_FRA_IT
+            else -> throw Exception("Ukjent periodetype ${periode.periodetype}")
+        }
 
     @GraphQLIgnore
-    fun notater(notatDao: NotatDao, vedtaksperiodeId: UUID): List<Notat> = notatDao.finnNotater(vedtaksperiodeId).map {
-        Notat(
-            id = it.id,
-            tekst = it.tekst,
-            opprettet = it.opprettet.toString(),
-            saksbehandlerOid = it.saksbehandlerOid,
-            saksbehandlerNavn = it.saksbehandlerNavn,
-            saksbehandlerEpost = it.saksbehandlerEpost,
-            saksbehandlerIdent = it.saksbehandlerIdent,
-            vedtaksperiodeId = it.vedtaksperiodeId,
-            feilregistrert = it.feilregistrert,
-            feilregistrert_tidspunkt = it.feilregistrert_tidspunkt.toString(),
-            type = it.type,
-            kommentarer = it.kommentarer.map { kommentar ->
-                Kommentar(
-                    id = kommentar.id,
-                    tekst = kommentar.tekst,
-                    opprettet = kommentar.opprettet.toString(),
-                    saksbehandlerident = kommentar.saksbehandlerident,
-                    feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt?.toString(),
-                )
-            }
-        )
-    }
+    fun notater(
+        notatDao: NotatDao,
+        vedtaksperiodeId: UUID,
+    ): List<Notat> =
+        notatDao.finnNotater(vedtaksperiodeId).map {
+            Notat(
+                id = it.id,
+                tekst = it.tekst,
+                opprettet = it.opprettet.toString(),
+                saksbehandlerOid = it.saksbehandlerOid,
+                saksbehandlerNavn = it.saksbehandlerNavn,
+                saksbehandlerEpost = it.saksbehandlerEpost,
+                saksbehandlerIdent = it.saksbehandlerIdent,
+                vedtaksperiodeId = it.vedtaksperiodeId,
+                feilregistrert = it.feilregistrert,
+                feilregistrert_tidspunkt = it.feilregistrert_tidspunkt.toString(),
+                type = it.type,
+                kommentarer =
+                    it.kommentarer.map { kommentar ->
+                        Kommentar(
+                            id = kommentar.id,
+                            tekst = kommentar.tekst,
+                            opprettet = kommentar.opprettet.toString(),
+                            saksbehandlerident = kommentar.saksbehandlerident,
+                            feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt?.toString(),
+                        )
+                    },
+            )
+        }
 
     @GraphQLIgnore
     fun tidslinje(periode: GraphQLTidslinjeperiode): List<Dag> = periode.tidslinje.map { it.tilDag() }
@@ -330,20 +355,36 @@ data class UberegnetPeriode(
     private val index: Int,
 ) : Periode {
     override fun erForkastet(): Boolean = erForkastet(periode)
+
     override fun fom(): DateString = fom(periode)
+
     override fun tom(): DateString = tom(periode)
+
     override fun id(): UUID = UUID.nameUUIDFromBytes(vedtaksperiodeId().toString().toByteArray() + index.toByte())
+
     override fun inntektstype(): Inntektstype = inntektstype(periode)
+
     override fun opprettet(): DateTimeString = opprettet(periode)
+
     override fun periodetype(): Periodetype = periodetype(periode)
+
     override fun tidslinje(): List<Dag> = tidslinje(periode)
+
     override fun vedtaksperiodeId(): UUID = periode.vedtaksperiodeId
+
     override fun periodetilstand(): Periodetilstand = periodetilstand(periode.periodetilstand, true)
+
     override fun skjaeringstidspunkt(): DateString = periode.skjaeringstidspunkt
+
     override fun hendelser(): List<Hendelse> = periode.hendelser.map { it.tilHendelse() }
-    override fun varsler(): List<VarselDTO> = if (skalViseAktiveVarsler)
-        varselRepository.finnVarslerForUberegnetPeriode(vedtaksperiodeId()).toList() else
-        varselRepository.finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId()).toList()
+
+    override fun varsler(): List<VarselDTO> =
+        if (skalViseAktiveVarsler) {
+            varselRepository.finnVarslerForUberegnetPeriode(vedtaksperiodeId()).toList()
+        } else {
+            varselRepository.finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId()).toList()
+        }
+
     fun notater(): List<Notat> = notater(notatDao, vedtaksperiodeId())
 }
 
@@ -357,20 +398,36 @@ data class UberegnetVilkarsprovdPeriode(
     private val index: Int,
 ) : Periode {
     override fun erForkastet(): Boolean = erForkastet(periode)
+
     override fun fom(): DateString = fom(periode)
+
     override fun tom(): DateString = tom(periode)
+
     override fun id(): UUID = UUID.nameUUIDFromBytes(vedtaksperiodeId().toString().toByteArray() + index.toByte())
+
     override fun inntektstype(): Inntektstype = inntektstype(periode)
+
     override fun opprettet(): DateTimeString = opprettet(periode)
+
     override fun periodetype(): Periodetype = periodetype(periode)
+
     override fun tidslinje(): List<Dag> = tidslinje(periode)
+
     override fun vedtaksperiodeId(): UUID = periode.vedtaksperiodeId
+
     override fun periodetilstand(): Periodetilstand = periodetilstand(periode.periodetilstand, true)
+
     override fun skjaeringstidspunkt(): DateString = periode.skjaeringstidspunkt
+
     override fun hendelser(): List<Hendelse> = periode.hendelser.map { it.tilHendelse() }
-    override fun varsler(): List<VarselDTO> = if (skalViseAktiveVarsler)
-        varselRepository.finnVarslerForUberegnetPeriode(vedtaksperiodeId()).toList() else
-        varselRepository.finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId()).toList()
+
+    override fun varsler(): List<VarselDTO> =
+        if (skalViseAktiveVarsler) {
+            varselRepository.finnVarslerForUberegnetPeriode(vedtaksperiodeId()).toList()
+        } else {
+            varselRepository.finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId()).toList()
+        }
+
     fun notater(): List<Notat> = notater(notatDao, vedtaksperiodeId())
 
     // Det blir litt for tungvint å håndtere i Speil at vilkarsgrunnlag kan være både null og ikke-null.
@@ -381,10 +438,11 @@ data class UberegnetVilkarsprovdPeriode(
 
 enum class Periodehandling {
     UTBETALE,
-    AVVISE
+    AVVISE,
 }
 
 data class Handling(val type: Periodehandling, val tillatt: Boolean, val begrunnelse: String? = null)
+
 @Suppress("unused")
 data class BeregnetPeriode(
     private val orgnummer: String,
@@ -402,23 +460,37 @@ data class BeregnetPeriode(
     private val index: Int,
 ) : Periode {
     private val periodetilstand = periodetilstand(periode.periodetilstand, erSisteGenerasjon)
+
     override fun erForkastet(): Boolean = erForkastet(periode)
+
     override fun fom(): DateString = fom(periode)
+
     override fun tom(): DateString = tom(periode)
+
     override fun id(): UUID = UUID.nameUUIDFromBytes(vedtaksperiodeId().toString().toByteArray() + index.toByte())
+
     override fun inntektstype(): Inntektstype = inntektstype(periode)
+
     override fun opprettet(): DateTimeString = opprettet(periode)
+
     override fun periodetype(): Periodetype = periodetype(periode)
+
     override fun tidslinje(): List<Dag> = tidslinje(periode)
+
     override fun vedtaksperiodeId(): UUID = periode.vedtaksperiodeId
+
     override fun periodetilstand(): Periodetilstand = periodetilstand
+
     fun handlinger() = byggHandlinger()
+
     fun egenskaper(): List<Oppgaveegenskap> = oppgavehåndterer.hentEgenskaper(periode.vedtaksperiodeId, periode.utbetaling.id)
 
     private fun byggHandlinger(): List<Handling> {
-        return if (periodetilstand != Periodetilstand.TilGodkjenning)
-            listOf(Handling(Periodehandling.UTBETALE, false, "perioden er ikke til godkjenning")
-        ) else {
+        return if (periodetilstand != Periodetilstand.TilGodkjenning) {
+            listOf(
+                Handling(Periodehandling.UTBETALE, false, "perioden er ikke til godkjenning"),
+            )
+        } else {
             val handlinger = listOf(Handling(Periodehandling.UTBETALE, true))
             val kanAvvises = oppgaveDto?.kanAvvises ?: false
             handlinger + Handling(Periodehandling.AVVISE, kanAvvises, "Spleis støtter ikke å avvise perioden")
@@ -435,7 +507,7 @@ data class BeregnetPeriode(
                 type = it.type,
                 saksbehandler_ident = it.saksbehandler_ident,
                 timestamp = it.timestamp.toString(),
-                notat_id = it.notat_id
+                notat_id = it.notat_id,
             )
         }
 
@@ -447,53 +519,58 @@ data class BeregnetPeriode(
 
     fun maksdato(): DateString = periode.maksdato
 
-    fun periodevilkar(): Periodevilkar = Periodevilkar(
-        alder = periode.periodevilkar.alder,
-        sykepengedager = periode.periodevilkar.sykepengedager
-    )
+    fun periodevilkar(): Periodevilkar =
+        Periodevilkar(
+            alder = periode.periodevilkar.alder,
+            sykepengedager = periode.periodevilkar.sykepengedager,
+        )
 
     override fun skjaeringstidspunkt(): DateString = periode.skjaeringstidspunkt
 
-    fun utbetaling(): Utbetaling = periode.utbetaling.let {
-        Utbetaling(
-            id = it.id,
-            arbeidsgiverFagsystemId = it.arbeidsgiverFagsystemId,
-            arbeidsgiverNettoBelop = it.arbeidsgiverNettoBelop,
-            personFagsystemId = it.personFagsystemId,
-            personNettoBelop = it.personNettoBelop,
-            status = when (it.statusEnum) {
-                GraphQLUtbetalingstatus.ANNULLERT -> Utbetalingstatus.ANNULLERT
-                GraphQLUtbetalingstatus.FORKASTET -> Utbetalingstatus.FORKASTET
-                GraphQLUtbetalingstatus.GODKJENT -> Utbetalingstatus.GODKJENT
-                GraphQLUtbetalingstatus.GODKJENTUTENUTBETALING -> Utbetalingstatus.GODKJENTUTENUTBETALING
-                GraphQLUtbetalingstatus.IKKEGODKJENT -> Utbetalingstatus.IKKEGODKJENT
-                GraphQLUtbetalingstatus.OVERFORT -> Utbetalingstatus.OVERFORT
-                GraphQLUtbetalingstatus.SENDT -> Utbetalingstatus.SENDT
-                GraphQLUtbetalingstatus.UBETALT -> Utbetalingstatus.UBETALT
-                GraphQLUtbetalingstatus.UTBETALINGFEILET -> Utbetalingstatus.UTBETALINGFEILET
-                GraphQLUtbetalingstatus.UTBETALT -> Utbetalingstatus.UTBETALT
-                GraphQLUtbetalingstatus.__UNKNOWN_VALUE -> Utbetalingstatus.UKJENT
-            },
-            type = when (it.typeEnum) {
-                GraphQLUtbetalingtype.ANNULLERING -> Utbetalingtype.ANNULLERING
-                GraphQLUtbetalingtype.ETTERUTBETALING -> Utbetalingtype.ETTERUTBETALING
-                GraphQLUtbetalingtype.FERIEPENGER -> Utbetalingtype.FERIEPENGER
-                GraphQLUtbetalingtype.REVURDERING -> Utbetalingtype.REVURDERING
-                GraphQLUtbetalingtype.UTBETALING -> Utbetalingtype.UTBETALING
-                GraphQLUtbetalingtype.__UNKNOWN_VALUE -> Utbetalingtype.UKJENT
-            },
-            vurdering = it.vurdering?.let { vurdering ->
-                Vurdering(
-                    automatisk = vurdering.automatisk,
-                    godkjent = vurdering.godkjent,
-                    ident = vurdering.ident,
-                    tidsstempel = vurdering.tidsstempel
-                )
-            },
-            arbeidsgiversimulering = it.arbeidsgiveroppdrag?.tilSimulering(),
-            personsimulering = it.personoppdrag?.tilSimulering()
-        )
-    }
+    fun utbetaling(): Utbetaling =
+        periode.utbetaling.let {
+            Utbetaling(
+                id = it.id,
+                arbeidsgiverFagsystemId = it.arbeidsgiverFagsystemId,
+                arbeidsgiverNettoBelop = it.arbeidsgiverNettoBelop,
+                personFagsystemId = it.personFagsystemId,
+                personNettoBelop = it.personNettoBelop,
+                status =
+                    when (it.statusEnum) {
+                        GraphQLUtbetalingstatus.ANNULLERT -> Utbetalingstatus.ANNULLERT
+                        GraphQLUtbetalingstatus.FORKASTET -> Utbetalingstatus.FORKASTET
+                        GraphQLUtbetalingstatus.GODKJENT -> Utbetalingstatus.GODKJENT
+                        GraphQLUtbetalingstatus.GODKJENTUTENUTBETALING -> Utbetalingstatus.GODKJENTUTENUTBETALING
+                        GraphQLUtbetalingstatus.IKKEGODKJENT -> Utbetalingstatus.IKKEGODKJENT
+                        GraphQLUtbetalingstatus.OVERFORT -> Utbetalingstatus.OVERFORT
+                        GraphQLUtbetalingstatus.SENDT -> Utbetalingstatus.SENDT
+                        GraphQLUtbetalingstatus.UBETALT -> Utbetalingstatus.UBETALT
+                        GraphQLUtbetalingstatus.UTBETALINGFEILET -> Utbetalingstatus.UTBETALINGFEILET
+                        GraphQLUtbetalingstatus.UTBETALT -> Utbetalingstatus.UTBETALT
+                        GraphQLUtbetalingstatus.__UNKNOWN_VALUE -> Utbetalingstatus.UKJENT
+                    },
+                type =
+                    when (it.typeEnum) {
+                        GraphQLUtbetalingtype.ANNULLERING -> Utbetalingtype.ANNULLERING
+                        GraphQLUtbetalingtype.ETTERUTBETALING -> Utbetalingtype.ETTERUTBETALING
+                        GraphQLUtbetalingtype.FERIEPENGER -> Utbetalingtype.FERIEPENGER
+                        GraphQLUtbetalingtype.REVURDERING -> Utbetalingtype.REVURDERING
+                        GraphQLUtbetalingtype.UTBETALING -> Utbetalingtype.UTBETALING
+                        GraphQLUtbetalingtype.__UNKNOWN_VALUE -> Utbetalingtype.UKJENT
+                    },
+                vurdering =
+                    it.vurdering?.let { vurdering ->
+                        Vurdering(
+                            automatisk = vurdering.automatisk,
+                            godkjent = vurdering.godkjent,
+                            ident = vurdering.ident,
+                            tidsstempel = vurdering.tidsstempel,
+                        )
+                    },
+                arbeidsgiversimulering = it.arbeidsgiveroppdrag?.tilSimulering(),
+                personsimulering = it.personoppdrag?.tilSimulering(),
+            )
+        }
 
     fun vilkarsgrunnlagId(): UUID? = periode.vilkarsgrunnlagId
 
@@ -501,23 +578,25 @@ data class BeregnetPeriode(
         risikovurderingApiDao.finnRisikovurdering(vedtaksperiodeId())?.let { vurdering ->
             Risikovurdering(
                 funn = vurdering.funn.tilFaresignaler(),
-                kontrollertOk = vurdering.kontrollertOk.tilFaresignaler()
+                kontrollertOk = vurdering.kontrollertOk.tilFaresignaler(),
             )
         }
 
     override fun varsler(): List<VarselDTO> =
-        if (erSisteGenerasjon) varselRepository.finnVarslerSomIkkeErInaktiveForSisteGenerasjon(
-            vedtaksperiodeId(),
-            periode.utbetaling.id
-        ).toList()
-        else varselRepository.finnVarslerSomIkkeErInaktiveFor(
-            vedtaksperiodeId(),
-            periode.utbetaling.id
-        ).toList()
+        if (erSisteGenerasjon) {
+            varselRepository.finnVarslerSomIkkeErInaktiveForSisteGenerasjon(
+                vedtaksperiodeId(),
+                periode.utbetaling.id,
+            ).toList()
+        } else {
+            varselRepository.finnVarslerSomIkkeErInaktiveFor(
+                vedtaksperiodeId(),
+                periode.utbetaling.id,
+            ).toList()
+        }
 
     @Deprecated("Oppgavereferanse bør hentes fra periodens oppgave")
-    fun oppgavereferanse(): String? =
-        oppgaveApiDao.finnOppgaveId(vedtaksperiodeId())?.toString()
+    fun oppgavereferanse(): String? = oppgaveApiDao.finnOppgaveId(vedtaksperiodeId())?.toString()
 
     private val oppgaveDto: OppgaveForPeriodevisningDto? by lazy {
         oppgaveApiDao.finnPeriodeoppgave(periode.vedtaksperiodeId)
@@ -531,64 +610,68 @@ data class BeregnetPeriode(
                 erRetur = it.erRetur,
                 saksbehandler = it.saksbehandler,
                 beslutter = it.beslutter,
-                erBeslutteroppgave = !it.erRetur && it.saksbehandler != null
+                erBeslutteroppgave = !it.erRetur && it.saksbehandler != null,
             )
         }
 
-    fun paVent(): PaVent? = påVentApiDao.hentAktivPåVent(vedtaksperiodeId())?.let {
-        PaVent(
-            frist = it.frist,
-            begrunnelse = it.begrunnelse,
-            oid = it.oid
-        )
-    }
+    fun paVent(): PaVent? =
+        påVentApiDao.hentAktivPåVent(vedtaksperiodeId())?.let {
+            PaVent(
+                frist = it.frist,
+                begrunnelse = it.begrunnelse,
+                oid = it.oid,
+            )
+        }
 }
-
 
 private fun GraphQLOppdrag.tilSimulering(): Simulering =
     Simulering(
         fagsystemId = fagsystemId,
         tidsstempel = tidsstempel,
-        utbetalingslinjer = utbetalingslinjer.map { linje ->
-            Simuleringslinje(
-                fom = linje.fom,
-                tom = linje.tom,
-                dagsats = linje.dagsats,
-                grad = linje.grad
-            )
-        },
+        utbetalingslinjer =
+            utbetalingslinjer.map { linje ->
+                Simuleringslinje(
+                    fom = linje.fom,
+                    tom = linje.tom,
+                    dagsats = linje.dagsats,
+                    grad = linje.grad,
+                )
+            },
         totalbelop = simulering?.totalbelop,
-        perioder = simulering?.perioder?.map { periode ->
-            Simuleringsperiode(
-                fom = periode.fom,
-                tom = periode.tom,
-                utbetalinger = periode.utbetalinger.map { utbetaling ->
-                    Simuleringsutbetaling(
-                        mottakerNavn = utbetaling.utbetalesTilNavn,
-                        mottakerId = utbetaling.utbetalesTilId,
-                        forfall = utbetaling.forfall,
-                        feilkonto = utbetaling.feilkonto,
-                        detaljer = utbetaling.detaljer.map { detaljer ->
-                            Simuleringsdetaljer(
-                                fom = detaljer.faktiskFom,
-                                tom = detaljer.faktiskTom,
-                                belop = detaljer.belop,
-                                antallSats = detaljer.antallSats,
-                                klassekode = detaljer.klassekode,
-                                klassekodebeskrivelse = detaljer.klassekodeBeskrivelse,
-                                konto = detaljer.konto,
-                                refunderesOrgNr = detaljer.refunderesOrgNr,
-                                sats = detaljer.sats,
-                                tilbakeforing = detaljer.tilbakeforing,
-                                typeSats = detaljer.typeSats,
-                                uforegrad = detaljer.uforegrad,
-                                utbetalingstype = detaljer.utbetalingstype
+        perioder =
+            simulering?.perioder?.map { periode ->
+                Simuleringsperiode(
+                    fom = periode.fom,
+                    tom = periode.tom,
+                    utbetalinger =
+                        periode.utbetalinger.map { utbetaling ->
+                            Simuleringsutbetaling(
+                                mottakerNavn = utbetaling.utbetalesTilNavn,
+                                mottakerId = utbetaling.utbetalesTilId,
+                                forfall = utbetaling.forfall,
+                                feilkonto = utbetaling.feilkonto,
+                                detaljer =
+                                    utbetaling.detaljer.map { detaljer ->
+                                        Simuleringsdetaljer(
+                                            fom = detaljer.faktiskFom,
+                                            tom = detaljer.faktiskTom,
+                                            belop = detaljer.belop,
+                                            antallSats = detaljer.antallSats,
+                                            klassekode = detaljer.klassekode,
+                                            klassekodebeskrivelse = detaljer.klassekodeBeskrivelse,
+                                            konto = detaljer.konto,
+                                            refunderesOrgNr = detaljer.refunderesOrgNr,
+                                            sats = detaljer.sats,
+                                            tilbakeforing = detaljer.tilbakeforing,
+                                            typeSats = detaljer.typeSats,
+                                            uforegrad = detaljer.uforegrad,
+                                            utbetalingstype = detaljer.utbetalingstype,
+                                        )
+                                    },
                             )
-                        }
-                    )
-                }
-            )
-        }
+                        },
+                )
+            },
     )
 
 private fun List<JsonNode>.tilFaresignaler(): List<Faresignal> =

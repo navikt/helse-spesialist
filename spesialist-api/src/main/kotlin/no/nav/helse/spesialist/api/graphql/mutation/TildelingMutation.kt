@@ -23,19 +23,21 @@ import org.slf4j.LoggerFactory
 class TildelingMutation(
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
 ) : Mutation {
-
     private companion object {
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
     }
 
     @Suppress("unused")
-    suspend fun opprettTildeling(oppgaveId: String, env: DataFetchingEnvironment): DataFetcherResult<Tildeling?> {
-        val saksbehandler= env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(ContextValues.SAKSBEHANDLER.key).value
+    suspend fun opprettTildeling(
+        oppgaveId: String,
+        env: DataFetchingEnvironment,
+    ): DataFetcherResult<Tildeling?> {
+        val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(ContextValues.SAKSBEHANDLER.key).value
         return withContext(Dispatchers.IO) {
             try {
                 saksbehandlerhåndterer.håndter(TildelOppgave(oppgaveId.toLong()), saksbehandler)
                 newResult<Tildeling?>().data(
-                    Tildeling(saksbehandler.navn, saksbehandler.epost, saksbehandler.oid)
+                    Tildeling(saksbehandler.navn, saksbehandler.epost, saksbehandler.oid),
                 ).build()
             } catch (e: OppgaveTildeltNoenAndre) {
                 newResult<Tildeling?>().error(alleredeTildeltError(e)).build()
@@ -46,8 +48,11 @@ class TildelingMutation(
     }
 
     @Suppress("unused")
-    suspend fun fjernTildeling(oppgaveId: String, env: DataFetchingEnvironment): DataFetcherResult<Boolean> {
-        val saksbehandler= env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(ContextValues.SAKSBEHANDLER.key).value
+    suspend fun fjernTildeling(
+        oppgaveId: String,
+        env: DataFetchingEnvironment,
+    ): DataFetcherResult<Boolean> {
+        val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(ContextValues.SAKSBEHANDLER.key).value
         return withContext(Dispatchers.IO) {
             try {
                 saksbehandlerhåndterer.håndter(AvmeldOppgave(oppgaveId.toLong()), saksbehandler)

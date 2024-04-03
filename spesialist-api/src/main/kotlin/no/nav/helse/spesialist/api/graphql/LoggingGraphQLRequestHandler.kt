@@ -9,7 +9,6 @@ import graphql.GraphQLContext
 import org.slf4j.LoggerFactory
 
 class LoggingGraphQLRequestHandler(graphQL: GraphQL) : GraphQLRequestHandler(graphQL) {
-
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
     override suspend fun executeRequest(
@@ -20,8 +19,9 @@ class LoggingGraphQLRequestHandler(graphQL: GraphQL) : GraphQLRequestHandler(gra
             graphQLRequest.operationName.also { operationName ->
                 if (operationName != null) {
                     sikkerLogg.trace("GraphQL-kall mottatt, operationName: $operationName")
-                } else if (!graphQLRequest.query.contains("query IntrospectionQuery"))
+                } else if (!graphQLRequest.query.contains("query IntrospectionQuery")) {
                     sikkerLogg.warn("GraphQL-kall uten navngitt query, bør fikses i kallende kode. Requesten:\n${graphQLRequest.query}")
+                }
             }
         }
         return super.executeRequest(graphQLRequest, graphQLContext)

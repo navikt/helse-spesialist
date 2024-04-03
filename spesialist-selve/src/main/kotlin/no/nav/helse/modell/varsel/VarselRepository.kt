@@ -1,8 +1,5 @@
 package no.nav.helse.modell.varsel
 
-import java.time.LocalDateTime
-import java.util.UUID
-import javax.sql.DataSource
 import no.nav.helse.mediator.builders.GenerasjonBuilder
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
@@ -10,13 +7,18 @@ import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
 import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
 import no.nav.helse.tellInaktivtVarsel
 import no.nav.helse.tellVarsel
+import java.time.LocalDateTime
+import java.util.UUID
+import javax.sql.DataSource
 
-internal class ActualVarselRepository(dataSource: DataSource): IVedtaksperiodeObserver {
-
+internal class ActualVarselRepository(dataSource: DataSource) : IVedtaksperiodeObserver {
     private val varselDao = VarselDao(dataSource)
     private val definisjonDao = DefinisjonDao(dataSource)
 
-    internal fun byggGenerasjon(generasjonId: UUID, generasjonBuilder: GenerasjonBuilder) {
+    internal fun byggGenerasjon(
+        generasjonId: UUID,
+        generasjonBuilder: GenerasjonBuilder,
+    ) {
         generasjonBuilder.varsler(varselDao.varslerFor(generasjonId))
     }
 
@@ -26,24 +28,47 @@ internal class ActualVarselRepository(dataSource: DataSource): IVedtaksperiodeOb
         generasjonId: UUID,
         varselkode: String,
         opprettet: LocalDateTime,
-        ) {
+    ) {
         varselDao.lagreVarsel(varselId, varselkode, opprettet, vedtaksperiodeId, generasjonId)
         if (varselkode.matches(varselkodeformat.toRegex())) tellVarsel(varselkode)
     }
 
-    override fun varselReaktivert(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID) {
+    override fun varselReaktivert(
+        varselId: UUID,
+        varselkode: String,
+        generasjonId: UUID,
+        vedtaksperiodeId: UUID,
+    ) {
         varselDao.oppdaterStatus(vedtaksperiodeId, generasjonId, varselkode, AKTIV, null, null)
         if (varselkode.matches(varselkodeformat.toRegex())) tellVarsel(varselkode)
     }
 
-    override fun varselDeaktivert(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID) {
+    override fun varselDeaktivert(
+        varselId: UUID,
+        varselkode: String,
+        generasjonId: UUID,
+        vedtaksperiodeId: UUID,
+    ) {
         varselDao.oppdaterStatus(vedtaksperiodeId, generasjonId, varselkode, INAKTIV, null, null)
         if (varselkode.matches(varselkodeformat.toRegex())) tellInaktivtVarsel(varselkode)
     }
 
-    override fun varselGodkjent(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID, statusEndretAv: String) {
+    override fun varselGodkjent(
+        varselId: UUID,
+        varselkode: String,
+        generasjonId: UUID,
+        vedtaksperiodeId: UUID,
+        statusEndretAv: String,
+    ) {
         val definisjon = definisjonDao.sisteDefinisjonFor(varselkode)
-        varselDao.oppdaterStatus(vedtaksperiodeId, generasjonId, varselkode, status = GODKJENT, ident = statusEndretAv, definisjon.toDto().id)
+        varselDao.oppdaterStatus(
+            vedtaksperiodeId,
+            generasjonId,
+            varselkode,
+            status = GODKJENT,
+            ident = statusEndretAv,
+            definisjon.toDto().id,
+        )
     }
 
     internal fun lagreDefinisjon(definisjonDto: VarseldefinisjonDto) {
@@ -54,7 +79,7 @@ internal class ActualVarselRepository(dataSource: DataSource): IVedtaksperiodeOb
             forklaring = definisjonDto.forklaring,
             handling = definisjonDto.handling,
             avviklet = definisjonDto.avviklet,
-            opprettet = definisjonDto.opprettet
+            opprettet = definisjonDto.opprettet,
         )
     }
 

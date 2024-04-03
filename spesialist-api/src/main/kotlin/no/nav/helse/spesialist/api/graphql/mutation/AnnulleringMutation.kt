@@ -14,25 +14,25 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandlingF
 class AnnulleringMutation(
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
 ) : Mutation {
-
     @Suppress("unused")
     suspend fun annuller(
         annullering: AnnulleringData,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean> = withContext(Dispatchers.IO) {
-        val saksbehandler: Lazy<SaksbehandlerFraApi> = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
-        val annulleringHandling = AnnulleringHandlingFraApi(
-            aktørId = annullering.aktorId,
-            fødselsnummer = annullering.fodselsnummer,
-            organisasjonsnummer = annullering.organisasjonsnummer ?: "",
-            fagsystemId = annullering.fagsystemId,
-            utbetalingId = annullering.utbetalingId,
-            begrunnelser = annullering.begrunnelser,
-            kommentar = annullering.kommentar
-        )
+    ): DataFetcherResult<Boolean> =
+        withContext(Dispatchers.IO) {
+            val saksbehandler: Lazy<SaksbehandlerFraApi> = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
+            val annulleringHandling =
+                AnnulleringHandlingFraApi(
+                    aktørId = annullering.aktorId,
+                    fødselsnummer = annullering.fodselsnummer,
+                    organisasjonsnummer = annullering.organisasjonsnummer ?: "",
+                    fagsystemId = annullering.fagsystemId,
+                    utbetalingId = annullering.utbetalingId,
+                    begrunnelser = annullering.begrunnelser,
+                    kommentar = annullering.kommentar,
+                )
 
-        saksbehandlerhåndterer.håndter(annulleringHandling, saksbehandler.value)
-        DataFetcherResult.newResult<Boolean>().data(true).build()
-    }
-
+            saksbehandlerhåndterer.håndter(annulleringHandling, saksbehandler.value)
+            DataFetcherResult.newResult<Boolean>().data(true).build()
+        }
 }

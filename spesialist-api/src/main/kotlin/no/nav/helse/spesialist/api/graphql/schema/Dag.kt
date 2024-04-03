@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
-import java.util.UUID
 import no.nav.helse.spleis.graphql.enums.GraphQLBegrunnelse
 import no.nav.helse.spleis.graphql.enums.GraphQLSykdomsdagkildetype
 import no.nav.helse.spleis.graphql.enums.GraphQLSykdomsdagtype
@@ -8,13 +7,14 @@ import no.nav.helse.spleis.graphql.enums.GraphQLUtbetalingsdagType
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLDag
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSykdomsdagkilde
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetalingsinfo
+import java.util.UUID
 
 enum class Kildetype {
     INNTEKTSMELDING,
     SAKSBEHANDLER,
     SOKNAD,
     SYKMELDING,
-    UKJENT
+    UKJENT,
 }
 
 enum class Sykdomsdagtype {
@@ -63,12 +63,12 @@ enum class Begrunnelse {
     SYKEPENGEDAGER_OPPBRUKT,
     SYKEPENGEDAGER_OPPBRUKT_OVER_67,
     ANDREYTELSER,
-    UKJENT
+    UKJENT,
 }
 
 data class Kilde(
     val id: UUID,
-    val type: Kildetype
+    val type: Kildetype,
 )
 
 data class Utbetalingsinfo(
@@ -77,7 +77,7 @@ data class Utbetalingsinfo(
     val personbelop: Int?,
     val refusjonsbelop: Int?,
     val totalGrad: Double?,
-    val utbetaling: Int?
+    val utbetaling: Int?,
 )
 
 data class Dag(
@@ -87,7 +87,7 @@ data class Dag(
     val sykdomsdagtype: Sykdomsdagtype,
     val utbetalingsdagtype: Utbetalingsdagtype,
     val utbetalingsinfo: Utbetalingsinfo?,
-    val begrunnelser: List<Begrunnelse>?
+    val begrunnelser: List<Begrunnelse>?,
 )
 
 internal fun GraphQLDag.tilDag(): Dag =
@@ -104,7 +104,7 @@ internal fun GraphQLDag.tilDag(): Dag =
 private fun GraphQLSykdomsdagkilde.tilKilde(): Kilde =
     Kilde(
         id = id,
-        type = type.tilKildetype()
+        type = type.tilKildetype(),
     )
 
 private fun GraphQLSykdomsdagkildetype.tilKildetype(): Kildetype =
@@ -160,7 +160,7 @@ private fun GraphQLUtbetalingsinfo.tilUtbetalingsinfo(): Utbetalingsinfo =
         personbelop = personbelop,
         refusjonsbelop = refusjonsbelop,
         totalGrad = totalGrad,
-        utbetaling = utbetaling
+        utbetaling = utbetaling,
     )
 
 private fun GraphQLBegrunnelse.tilBegrunnelse(): Begrunnelse =

@@ -1,7 +1,5 @@
 package no.nav.helse.modell.sykefraværstilfelle
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.modell.person.PersonObserver
 import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastattSykepengegrunnlag.Companion.sortert
 import no.nav.helse.modell.varsel.Varsel
@@ -17,6 +15,8 @@ import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverTotrinnsvur
 import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetMedVedtak
 import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengevedtak
 import no.nav.helse.modell.vedtaksperiode.vedtak.SykepengevedtakBuilder
+import java.time.LocalDate
+import java.util.UUID
 
 internal class Sykefraværstilfelle(
     private val fødselsnummer: String,
@@ -34,18 +34,23 @@ internal class Sykefraværstilfelle(
     private fun fattVedtak(vedtak: Sykepengevedtak) = observers.forEach { it.vedtakFattet(vedtak) }
 
     internal fun haster(vedtaksperiodeId: UUID): Boolean {
-        val generasjon = gjeldendeGenerasjoner.finnGenerasjon(vedtaksperiodeId)
-            ?: throw IllegalArgumentException("Finner ikke generasjon med vedtaksperiodeId=$vedtaksperiodeId i sykefraværstilfelle med skjæringstidspunkt=$skjæringstidspunkt")
+        val generasjon =
+            gjeldendeGenerasjoner.finnGenerasjon(vedtaksperiodeId)
+                ?: throw IllegalArgumentException("Finner ikke generasjon med vedtaksperiodeId=$vedtaksperiodeId i sykefraværstilfelle med skjæringstidspunkt=$skjæringstidspunkt")
         return generasjon.hasterÅBehandle()
     }
 
     internal fun forhindrerAutomatisering(vedtaksperiodeId: UUID): Boolean {
-        val generasjonForPeriode = gjeldendeGenerasjoner.finnGenerasjon(vedtaksperiodeId)
-            ?: throw IllegalStateException("Sykefraværstilfellet må inneholde generasjon for vedtaksperiodeId=$vedtaksperiodeId")
+        val generasjonForPeriode =
+            gjeldendeGenerasjoner.finnGenerasjon(vedtaksperiodeId)
+                ?: throw IllegalStateException("Sykefraværstilfellet må inneholde generasjon for vedtaksperiodeId=$vedtaksperiodeId")
         return gjeldendeGenerasjoner.forhindrerAutomatisering(generasjonForPeriode)
     }
 
-    internal fun håndter(varsel: Varsel, hendelseId: UUID) {
+    internal fun håndter(
+        varsel: Varsel,
+        hendelseId: UUID,
+    ) {
         gjeldendeGenerasjoner.håndterNyttVarsel(listOf(varsel), hendelseId)
     }
 
@@ -55,12 +60,16 @@ internal class Sykefraværstilfelle(
     }
 
     internal fun automatiskGodkjennSpesialsakvarsler(vedtaksperiodeId: UUID) {
-        val generasjon = gjeldendeGenerasjoner.finnGenerasjon(vedtaksperiodeId)
-            ?: throw IllegalStateException("Forventer å finne generasjon for perioden")
+        val generasjon =
+            gjeldendeGenerasjoner.finnGenerasjon(vedtaksperiodeId)
+                ?: throw IllegalStateException("Forventer å finne generasjon for perioden")
         generasjon.automatiskGodkjennSpesialsakvarsler()
     }
 
-    internal fun håndter(avsluttetMedVedtak: AvsluttetMedVedtak, tags: List<String>) {
+    internal fun håndter(
+        avsluttetMedVedtak: AvsluttetMedVedtak,
+        tags: List<String>,
+    ) {
         val vedtakBuilder = SykepengevedtakBuilder()
         val skjønnsfastsattSykepengegrunnlag = skjønnsfastatteSykepengegrunnlag.lastOrNull()
         skjønnsfastsattSykepengegrunnlag?.also {
@@ -77,7 +86,11 @@ internal class Sykefraværstilfelle(
         gjeldendeGenerasjoner.deaktiver(varsel)
     }
 
-    internal fun håndterGodkjent(saksbehandlerIdent: String, vedtaksperiodeId: UUID, hendelseId: UUID) {
+    internal fun håndterGodkjent(
+        saksbehandlerIdent: String,
+        vedtaksperiodeId: UUID,
+        hendelseId: UUID,
+    ) {
         gjeldendeGenerasjoner.håndterGodkjent(saksbehandlerIdent, vedtaksperiodeId, hendelseId)
     }
 

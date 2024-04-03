@@ -8,9 +8,8 @@ import org.slf4j.LoggerFactory
 
 internal class SlettPersonRiver(
     rapidsConnection: RapidsConnection,
-    private val personRepository: PersonRepository
-): River.PacketListener {
-
+    private val personRepository: PersonRepository,
+) : River.PacketListener {
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
@@ -24,7 +23,10 @@ internal class SlettPersonRiver(
         }.register(this)
     }
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) {
+    override fun onPacket(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         val fødselsnummer = packet["fødselsnummer"].asText()
         sikkerlogg.info("Sletter person med fødselsnummer: $fødselsnummer")
         personRepository.slett(fødselsnummer)

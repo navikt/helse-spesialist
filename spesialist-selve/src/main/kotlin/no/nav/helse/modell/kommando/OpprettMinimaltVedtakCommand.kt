@@ -1,12 +1,12 @@
 package no.nav.helse.modell.kommando
 
-import java.time.LocalDate
-import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.person.PersonDao
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.util.UUID
 
 internal class OpprettMinimaltVedtakCommand(
     private val fødselsnummer: String,
@@ -37,7 +37,10 @@ internal class OpprettMinimaltVedtakCommand(
         return opprett(personRef, arbeidsgiverRef)
     }
 
-    private fun opprett(personRef: Long, arbeidsgiverRef: Long): Boolean {
+    private fun opprett(
+        personRef: Long,
+        arbeidsgiverRef: Long,
+    ): Boolean {
         sikkerlogg.info(
             "Oppretter minimal vedtaksperiode for {}, {}, {}",
             keyValue("vedtaksperiodeId", vedtaksperiodeId),
@@ -49,7 +52,7 @@ internal class OpprettMinimaltVedtakCommand(
             fom = periodeFom,
             tom = periodeTom,
             personRef = personRef,
-            arbeidsgiverRef = arbeidsgiverRef
+            arbeidsgiverRef = arbeidsgiverRef,
         )
 
         return true

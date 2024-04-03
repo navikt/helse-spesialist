@@ -10,24 +10,24 @@ data class Arbeidsgiverinntekt(
     val omregnetArsinntekt: OmregnetArsinntekt?,
     val sammenligningsgrunnlag: Sammenligningsgrunnlag?,
     val skjonnsmessigFastsatt: OmregnetArsinntekt?,
-    val deaktivert: Boolean? = null
+    val deaktivert: Boolean? = null,
 )
 
 data class Sammenligningsgrunnlag(
     val belop: Double,
-    val inntektFraAOrdningen: List<InntektFraAOrdningen>
+    val inntektFraAOrdningen: List<InntektFraAOrdningen>,
 )
 
 data class OmregnetArsinntekt(
     val belop: Double,
     val inntektFraAOrdningen: List<InntektFraAOrdningen>?,
     val kilde: Inntektskilde,
-    val manedsbelop: Double
+    val manedsbelop: Double,
 )
 
 data class InntektFraAOrdningen(
     val maned: YearMonthString,
-    val sum: Double
+    val sum: Double,
 )
 
 enum class Inntektskilde {
@@ -36,7 +36,7 @@ enum class Inntektskilde {
     INNTEKTSMELDING,
     SAKSBEHANDLER,
     IKKE_RAPPORTERT,
-    SKJONNSMESSIG_FASTSATT
+    SKJONNSMESSIG_FASTSATT,
 }
 
 internal fun GraphQLOmregnetArsinntekt.tilOmregnetÅrsinntekt(): OmregnetArsinntekt =
@@ -44,7 +44,7 @@ internal fun GraphQLOmregnetArsinntekt.tilOmregnetÅrsinntekt(): OmregnetArsinnt
         belop = belop,
         inntektFraAOrdningen = inntekterFraAOrdningen?.map { it.tilInntektFraAOrdningen() },
         kilde = kilde.tilInntektskilde(),
-        manedsbelop = manedsbelop
+        manedsbelop = manedsbelop,
     )
 
 internal fun GraphQLSkjonnsmessigFastsatt.tilOmregnetÅrsinntekt(): OmregnetArsinntekt =
@@ -52,13 +52,13 @@ internal fun GraphQLSkjonnsmessigFastsatt.tilOmregnetÅrsinntekt(): OmregnetArsi
         belop = belop,
         inntektFraAOrdningen = null,
         kilde = Inntektskilde.SKJONNSMESSIG_FASTSATT,
-        manedsbelop = manedsbelop
+        manedsbelop = manedsbelop,
     )
 
 private fun GraphQLInntekterFraAOrdningen.tilInntektFraAOrdningen(): InntektFraAOrdningen =
     InntektFraAOrdningen(
         maned = maned,
-        sum = sum
+        sum = sum,
     )
 
 private fun GraphQLInntektskilde.tilInntektskilde(): Inntektskilde =

@@ -6,8 +6,8 @@ import java.util.*
 internal class OpprettKoblingTilUtbetalingCommand(
     private val vedtaksperiodeId: UUID,
     private val utbetalingId: UUID,
-    private val utbetalingDao: UtbetalingDao
-): Command {
+    private val utbetalingDao: UtbetalingDao,
+) : Command {
     override fun execute(context: CommandContext): Boolean {
         utbetalingDao.opprettKobling(vedtaksperiodeId, utbetalingId)
         return true

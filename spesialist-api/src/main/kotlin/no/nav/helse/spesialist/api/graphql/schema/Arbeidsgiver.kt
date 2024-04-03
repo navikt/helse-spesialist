@@ -1,8 +1,6 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
 import io.ktor.utils.io.core.toByteArray
-import java.time.format.DateTimeFormatter
-import java.util.UUID
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.notat.NotatDao
@@ -24,6 +22,8 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGenerasjon
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUberegnetPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUberegnetVilkarsprovdPeriode
+import java.time.format.DateTimeFormatter
+import java.util.UUID
 
 data class Arbeidsforhold(
     val stillingstittel: String,
@@ -151,63 +151,68 @@ data class Arbeidsgiver(
     private val påVentApiDao: PåVentApiDao,
     private val tilganger: SaksbehandlerTilganger,
 ) {
-    fun generasjoner(): List<Generasjon> = generasjoner.mapIndexed { index, generasjon ->
-        val oppgaveId = oppgaveApiDao.finnOppgaveId(fødselsnummer)
-        val perioderSomSkalViseAktiveVarsler = varselRepository.perioderSomSkalViseVarsler(oppgaveId)
-        Generasjon(
-            id = generasjon.id,
-            perioder = generasjon.perioder.map {
-                when (it) {
-                    is GraphQLUberegnetPeriode -> UberegnetPeriode(
-                        varselRepository = varselRepository,
-                        periode = it,
-                        skalViseAktiveVarsler = index == 0 && perioderSomSkalViseAktiveVarsler.contains(it.vedtaksperiodeId),
-                        notatDao = notatDao,
-                        index = index,
-                    )
+    fun generasjoner(): List<Generasjon> =
+        generasjoner.mapIndexed { index, generasjon ->
+            val oppgaveId = oppgaveApiDao.finnOppgaveId(fødselsnummer)
+            val perioderSomSkalViseAktiveVarsler = varselRepository.perioderSomSkalViseVarsler(oppgaveId)
+            Generasjon(
+                id = generasjon.id,
+                perioder =
+                    generasjon.perioder.map {
+                        when (it) {
+                            is GraphQLUberegnetPeriode ->
+                                UberegnetPeriode(
+                                    varselRepository = varselRepository,
+                                    periode = it,
+                                    skalViseAktiveVarsler = index == 0 && perioderSomSkalViseAktiveVarsler.contains(it.vedtaksperiodeId),
+                                    notatDao = notatDao,
+                                    index = index,
+                                )
 
-                    is GraphQLBeregnetPeriode -> BeregnetPeriode(
-                        orgnummer = organisasjonsnummer,
-                        periode = it,
-                        risikovurderingApiDao = risikovurderingApiDao,
-                        varselRepository = varselRepository,
-                        oppgaveApiDao = oppgaveApiDao,
-                        periodehistorikkDao = periodehistorikkDao,
-                        notatDao = notatDao,
-                        totrinnsvurderingApiDao = totrinnsvurderingApiDao,
-                        påVentApiDao = påVentApiDao,
-                        tilganger = tilganger,
-                        erSisteGenerasjon = index == 0,
-                        index = index,
-                        oppgavehåndterer = oppgavehåndterer,
-                    )
+                            is GraphQLBeregnetPeriode ->
+                                BeregnetPeriode(
+                                    orgnummer = organisasjonsnummer,
+                                    periode = it,
+                                    risikovurderingApiDao = risikovurderingApiDao,
+                                    varselRepository = varselRepository,
+                                    oppgaveApiDao = oppgaveApiDao,
+                                    periodehistorikkDao = periodehistorikkDao,
+                                    notatDao = notatDao,
+                                    totrinnsvurderingApiDao = totrinnsvurderingApiDao,
+                                    påVentApiDao = påVentApiDao,
+                                    tilganger = tilganger,
+                                    erSisteGenerasjon = index == 0,
+                                    index = index,
+                                    oppgavehåndterer = oppgavehåndterer,
+                                )
 
-                    is GraphQLUberegnetVilkarsprovdPeriode -> UberegnetVilkarsprovdPeriode(
-                        vilkarsgrunnlagId = it.vilkarsgrunnlagId,
-                        varselRepository = varselRepository,
-                        periode = it,
-                        // Antakelse om at hvis det ikke finnes oppgave er det en periode som skal skjønnsfastsettes. Da vil vi vise varsler.
-                        // Dette kans fjernes når skjønnsfastsettingperioder også har oppgave.
-                        skalViseAktiveVarsler = if (oppgaveId == null) true else index == 0 && perioderSomSkalViseAktiveVarsler.contains(it.vedtaksperiodeId),
-                        notatDao = notatDao,
-                        index = index,
-                    )
+                            is GraphQLUberegnetVilkarsprovdPeriode ->
+                                UberegnetVilkarsprovdPeriode(
+                                    vilkarsgrunnlagId = it.vilkarsgrunnlagId,
+                                    varselRepository = varselRepository,
+                                    periode = it,
+                                    // Antakelse om at hvis det ikke finnes oppgave er det en periode som skal skjønnsfastsettes. Da vil vi vise varsler.
+                                    // Dette kans fjernes når skjønnsfastsettingperioder også har oppgave.
+                                    skalViseAktiveVarsler = if (oppgaveId == null) true else index == 0 && perioderSomSkalViseAktiveVarsler.contains(it.vedtaksperiodeId),
+                                    notatDao = notatDao,
+                                    index = index,
+                                )
 
-                    else -> throw Exception("Ukjent tidslinjeperiode")
-                }
-            }
-        )
-    }
+                            else -> throw Exception("Ukjent tidslinjeperiode")
+                        }
+                    },
+            )
+        }
 
     fun overstyringer(): List<Overstyring> =
         overstyringApiDao.finnOverstyringerAvTidslinjer(fødselsnummer, organisasjonsnummer)
             .map { it.tilDagoverstyring() } +
-        overstyringApiDao.finnOverstyringerAvInntekt(fødselsnummer, organisasjonsnummer)
-            .map { it.tilInntektoverstyring() } +
-        overstyringApiDao.finnOverstyringerAvArbeidsforhold(fødselsnummer, organisasjonsnummer)
-            .map { it.tilArbeidsforholdoverstyring() } +
-        overstyringApiDao.finnSkjønnsfastsettingSykepengegrunnlag(fødselsnummer, organisasjonsnummer)
-            .map { it.tilSykepengegrunnlagSkjønnsfastsetting() }
+            overstyringApiDao.finnOverstyringerAvInntekt(fødselsnummer, organisasjonsnummer)
+                .map { it.tilInntektoverstyring() } +
+            overstyringApiDao.finnOverstyringerAvArbeidsforhold(fødselsnummer, organisasjonsnummer)
+                .map { it.tilArbeidsforholdoverstyring() } +
+            overstyringApiDao.finnSkjønnsfastsettingSykepengegrunnlag(fødselsnummer, organisasjonsnummer)
+                .map { it.tilSykepengegrunnlagSkjønnsfastsetting() }
 
     fun arbeidsforhold(): List<Arbeidsforhold> =
         arbeidsgiverApiDao.finnArbeidsforhold(fødselsnummer, organisasjonsnummer).map {
@@ -215,96 +220,112 @@ data class Arbeidsgiver(
                 stillingstittel = it.stillingstittel,
                 stillingsprosent = it.stillingsprosent,
                 startdato = it.startdato.format(DateTimeFormatter.ISO_DATE),
-                sluttdato = it.sluttdato?.format(DateTimeFormatter.ISO_DATE)
+                sluttdato = it.sluttdato?.format(DateTimeFormatter.ISO_DATE),
             )
         }
 
-    fun inntekterFraAordningen(): List<ArbeidsgiverInntekterFraAOrdningen> = arbeidsgiverApiDao.finnArbeidsgiverInntekterFraAordningen(fødselsnummer, organisasjonsnummer)
+    fun inntekterFraAordningen(): List<ArbeidsgiverInntekterFraAOrdningen> =
+        arbeidsgiverApiDao.finnArbeidsgiverInntekterFraAordningen(
+            fødselsnummer,
+            organisasjonsnummer,
+        )
 }
 
-private fun OverstyringTidslinjeDto.tilDagoverstyring() = Dagoverstyring(
-    hendelseId = hendelseId,
-    begrunnelse = begrunnelse,
-    timestamp = timestamp.format(DateTimeFormatter.ISO_DATE_TIME),
-    saksbehandler = Saksbehandler(
-        navn = saksbehandlerNavn,
-        ident = saksbehandlerIdent
-    ),
-    dager = overstyrteDager.map { dag ->
-        Dagoverstyring.OverstyrtDag(
-            dato = dag.dato.format(DateTimeFormatter.ISO_DATE),
-            type = dag.type,
-            fraType = dag.fraType,
-            grad = dag.grad,
-            fraGrad = dag.fraGrad
-        )
-    },
-    ferdigstilt = ferdigstilt,
-)
+private fun OverstyringTidslinjeDto.tilDagoverstyring() =
+    Dagoverstyring(
+        hendelseId = hendelseId,
+        begrunnelse = begrunnelse,
+        timestamp = timestamp.format(DateTimeFormatter.ISO_DATE_TIME),
+        saksbehandler =
+            Saksbehandler(
+                navn = saksbehandlerNavn,
+                ident = saksbehandlerIdent,
+            ),
+        dager =
+            overstyrteDager.map { dag ->
+                Dagoverstyring.OverstyrtDag(
+                    dato = dag.dato.format(DateTimeFormatter.ISO_DATE),
+                    type = dag.type,
+                    fraType = dag.fraType,
+                    grad = dag.grad,
+                    fraGrad = dag.fraGrad,
+                )
+            },
+        ferdigstilt = ferdigstilt,
+    )
 
-private fun OverstyringInntektDto.tilInntektoverstyring() = Inntektoverstyring(
-    hendelseId = hendelseId,
-    timestamp = timestamp.format(DateTimeFormatter.ISO_DATE_TIME),
-    saksbehandler = Saksbehandler(
-        navn = saksbehandlerNavn,
-        ident = saksbehandlerIdent
-    ),
-    inntekt = Inntektoverstyring.OverstyrtInntekt(
+private fun OverstyringInntektDto.tilInntektoverstyring() =
+    Inntektoverstyring(
+        hendelseId = hendelseId,
+        timestamp = timestamp.format(DateTimeFormatter.ISO_DATE_TIME),
+        saksbehandler =
+            Saksbehandler(
+                navn = saksbehandlerNavn,
+                ident = saksbehandlerIdent,
+            ),
+        inntekt =
+            Inntektoverstyring.OverstyrtInntekt(
+                forklaring = forklaring,
+                begrunnelse = begrunnelse,
+                manedligInntekt = månedligInntekt,
+                fraManedligInntekt = fraMånedligInntekt,
+                skjaeringstidspunkt = skjæringstidspunkt.format(DateTimeFormatter.ISO_DATE),
+                refusjonsopplysninger =
+                    refusjonsopplysninger?.map {
+                        Inntektoverstyring.Refusjonsopplysning(
+                            fom = it.fom.toString(),
+                            tom = it.tom?.toString(),
+                            belop = it.beløp,
+                        )
+                    } ?: emptyList(),
+                fraRefusjonsopplysninger =
+                    fraRefusjonsopplysninger?.map {
+                        Inntektoverstyring.Refusjonsopplysning(
+                            fom = it.fom.toString(),
+                            tom = it.tom?.toString(),
+                            belop = it.beløp,
+                        )
+                    } ?: emptyList(),
+            ),
+        ferdigstilt = ferdigstilt,
+    )
+
+private fun OverstyringArbeidsforholdDto.tilArbeidsforholdoverstyring() =
+    Arbeidsforholdoverstyring(
+        hendelseId = hendelseId,
+        begrunnelse = begrunnelse,
+        timestamp = timestamp.format(DateTimeFormatter.ISO_DATE_TIME),
+        saksbehandler =
+            Saksbehandler(
+                navn = saksbehandlerNavn,
+                ident = saksbehandlerIdent,
+            ),
+        deaktivert = deaktivert,
+        skjaeringstidspunkt = skjæringstidspunkt.format(DateTimeFormatter.ISO_DATE),
         forklaring = forklaring,
-        begrunnelse = begrunnelse,
-        manedligInntekt = månedligInntekt,
-        fraManedligInntekt = fraMånedligInntekt,
-        skjaeringstidspunkt = skjæringstidspunkt.format(DateTimeFormatter.ISO_DATE),
-        refusjonsopplysninger = refusjonsopplysninger?.map {
-            Inntektoverstyring.Refusjonsopplysning(
-                fom = it.fom.toString(),
-                tom = it.tom?.toString(),
-                belop = it.beløp
-            )
-        } ?: emptyList(),
-        fraRefusjonsopplysninger = fraRefusjonsopplysninger?.map {
-            Inntektoverstyring.Refusjonsopplysning(
-                fom = it.fom.toString(),
-                tom = it.tom?.toString(),
-                belop = it.beløp
-            )
-        } ?: emptyList(),
-    ),
-    ferdigstilt = ferdigstilt,
-)
+        ferdigstilt = ferdigstilt,
+    )
 
-private fun OverstyringArbeidsforholdDto.tilArbeidsforholdoverstyring() = Arbeidsforholdoverstyring(
-    hendelseId = hendelseId,
-    begrunnelse = begrunnelse,
-    timestamp = timestamp.format(DateTimeFormatter.ISO_DATE_TIME),
-    saksbehandler = Saksbehandler(
-        navn = saksbehandlerNavn,
-        ident = saksbehandlerIdent
-    ),
-    deaktivert = deaktivert,
-    skjaeringstidspunkt = skjæringstidspunkt.format(DateTimeFormatter.ISO_DATE),
-    forklaring = forklaring,
-    ferdigstilt = ferdigstilt,
-)
-
-private fun SkjønnsfastsettingSykepengegrunnlagDto.tilSykepengegrunnlagSkjønnsfastsetting() = Sykepengegrunnlagskjonnsfastsetting(
-    hendelseId = hendelseId,
-    timestamp = timestamp.format(DateTimeFormatter.ISO_DATE_TIME),
-    saksbehandler = Saksbehandler(
-        navn = saksbehandlerNavn,
-        ident = saksbehandlerIdent
-    ),
-    skjonnsfastsatt = Sykepengegrunnlagskjonnsfastsetting.SkjonnsfastsattSykepengegrunnlag(
-        arsak = årsak,
-        type = type,
-        begrunnelse = begrunnelse,
-        begrunnelseMal = begrunnelseMal,
-        begrunnelseFritekst = begrunnelseFritekst,
-        begrunnelseKonklusjon = begrunnelseKonklusjon,
-        arlig = årlig,
-        fraArlig = fraÅrlig,
-        skjaeringstidspunkt = skjæringstidspunkt.format(DateTimeFormatter.ISO_DATE),
-    ),
-    ferdigstilt = ferdigstilt,
-)
-
+private fun SkjønnsfastsettingSykepengegrunnlagDto.tilSykepengegrunnlagSkjønnsfastsetting() =
+    Sykepengegrunnlagskjonnsfastsetting(
+        hendelseId = hendelseId,
+        timestamp = timestamp.format(DateTimeFormatter.ISO_DATE_TIME),
+        saksbehandler =
+            Saksbehandler(
+                navn = saksbehandlerNavn,
+                ident = saksbehandlerIdent,
+            ),
+        skjonnsfastsatt =
+            Sykepengegrunnlagskjonnsfastsetting.SkjonnsfastsattSykepengegrunnlag(
+                arsak = årsak,
+                type = type,
+                begrunnelse = begrunnelse,
+                begrunnelseMal = begrunnelseMal,
+                begrunnelseFritekst = begrunnelseFritekst,
+                begrunnelseKonklusjon = begrunnelseKonklusjon,
+                arlig = årlig,
+                fraArlig = fraÅrlig,
+                skjaeringstidspunkt = skjæringstidspunkt.format(DateTimeFormatter.ISO_DATE),
+            ),
+        ferdigstilt = ferdigstilt,
+    )

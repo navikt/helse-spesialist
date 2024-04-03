@@ -1,8 +1,6 @@
 package no.nav.helse.mediator
 
 import SøknadSendtArbeidsledigRiver
-import java.util.UUID
-import javax.sql.DataSource
 import no.nav.helse.MetrikkRiver
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.meldinger.AvsluttetMedVedtakRiver
@@ -75,6 +73,8 @@ import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
 import no.nav.helse.spesialist.api.Personhåndterer
 import org.slf4j.LoggerFactory
+import java.util.UUID
+import javax.sql.DataSource
 
 internal class MeldingMediator(
     private val dataSource: DataSource,
@@ -166,8 +166,8 @@ internal class MeldingMediator(
             mapOf(
                 "contextId" to "$contextId",
                 "meldingId" to "$behovId",
-                "opprinneligMeldingId" to "$hendelseId"
-            )
+                "opprinneligMeldingId" to "$hendelseId",
+            ),
         ) {
             løsninger(context, hendelseId, contextId)?.also { it.add(hendelseId, contextId, løsning) }
                 ?: logg.info("mottok løsning som ikke kunne brukes fordi kommandoen ikke lengre er suspendert, eller fordi hendelsen er ukjent")
@@ -185,8 +185,8 @@ internal class MeldingMediator(
             mapOf(
                 "contextId" to "$contextId",
                 "opprinneligMeldingId" to "$hendelseId",
-                "meldingId" to "$meldingId"
-            )
+                "meldingId" to "$meldingId",
+            ),
         ) {
             påminnelse(context, hendelseId, contextId)?.also {
                 it.add(hendelseId, contextId, påminnelse)
@@ -204,7 +204,10 @@ internal class MeldingMediator(
         }
     }
 
-    internal fun håndter(avsluttetMedVedtakMessage: AvsluttetMedVedtakMessage, messageContext: MessageContext) {
+    internal fun håndter(
+        avsluttetMedVedtakMessage: AvsluttetMedVedtakMessage,
+        messageContext: MessageContext,
+    ) {
         val fødselsnummer = avsluttetMedVedtakMessage.fødselsnummer()
         val skjæringstidspunkt = avsluttetMedVedtakMessage.skjæringstidspunkt()
         val sykefraværstilfelle = kommandofabrikk.sykefraværstilfelle(fødselsnummer, skjæringstidspunkt)
@@ -224,8 +227,9 @@ internal class MeldingMediator(
         avviksvurderingId: UUID?,
         vilkårsgrunnlagId: UUID,
     ) {
-        if (avviksvurderingId != null)
+        if (avviksvurderingId != null) {
             avviksvurderingDao.opprettKobling(avviksvurderingId, vilkårsgrunnlagId)
+        }
 
         personRepository.brukPersonHvisFinnes(godkjenningsbehov.fødselsnummer()) {
             mottaSpleisVedtaksperioder(godkjenningsbehov.spleisVedtaksperioder)
@@ -243,13 +247,19 @@ internal class MeldingMediator(
             return
         }
         if (oppgaveDao.harGyldigOppgave(utbetalingId) || vedtakDao.erAutomatiskGodkjent(utbetalingId)) {
-            sikkerlogg.info("vedtaksperiodeId=$vedtaksperiodeId med utbetalingId=$utbetalingId har gyldig oppgave eller er automatisk godkjent. Ignorerer godkjenningsbehov med id=$id")
+            sikkerlogg.info(
+                "vedtaksperiodeId=$vedtaksperiodeId med utbetalingId=$utbetalingId har gyldig oppgave eller er automatisk godkjent. Ignorerer godkjenningsbehov med id=$id",
+            )
             return
         }
         håndter(godkjenningsbehov, context)
     }
 
-    fun gosysOppgaveEndret(fødselsnummer: String, oppgaveEndret: GosysOppgaveEndret, context: MessageContext) {
+    fun gosysOppgaveEndret(
+        fødselsnummer: String,
+        oppgaveEndret: GosysOppgaveEndret,
+        context: MessageContext,
+    ) {
         oppgaveDao.finnOppgaveId(fødselsnummer)?.also { oppgaveId ->
             sikkerlogg.info("Fant en oppgave for {}: {}", fødselsnummer, oppgaveId)
             val commandData = oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)
@@ -262,15 +272,20 @@ internal class MeldingMediator(
         } ?: sikkerlogg.info("Ingen åpne oppgaver i Speil for {}", fødselsnummer)
     }
 
-    fun tilbakedateringBehandlet(fødselsnummer: String, tilbakedateringBehandlet: TilbakedateringBehandlet, context: MessageContext) {
+    fun tilbakedateringBehandlet(
+        fødselsnummer: String,
+        tilbakedateringBehandlet: TilbakedateringBehandlet,
+        context: MessageContext,
+    ) {
         personRepository.brukPersonHvisFinnes(fødselsnummer) {
             behandleTilbakedateringBehandlet(tilbakedateringBehandlet.perioder)
         }
         oppgaveDao.finnOppgaveId(fødselsnummer)?.also { oppgaveId ->
             sikkerlogg.info("Fant en oppgave for {}: {}", fødselsnummer, oppgaveId)
 
-            val oppgaveDataForAutomatisering = oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)
-                ?: return@also sikkerlogg.info("Fant ikke commandData for {} og {}", fødselsnummer, oppgaveId)
+            val oppgaveDataForAutomatisering =
+                oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)
+                    ?: return@also sikkerlogg.info("Fant ikke commandData for {} og {}", fødselsnummer, oppgaveId)
 
             if (!oppgaveDataForAutomatisering.periodeOverlapperMed(tilbakedateringBehandlet.perioder)) {
                 sikkerlogg.info("Ingen av periodene i sykmeldingen er innenfor vedtaksperiodens fom og tom, for tilbakedateringen {} og {}", fødselsnummer, oppgaveId)
@@ -290,29 +305,41 @@ internal class MeldingMediator(
         løsninger = null
     }
 
-    private fun løsninger(messageContext: MessageContext, meldingId: UUID, contextId: UUID): Løsninger? {
+    private fun løsninger(
+        messageContext: MessageContext,
+        meldingId: UUID,
+        contextId: UUID,
+    ): Løsninger? {
         return løsninger ?: run {
-            val commandContext = commandContextDao.finnSuspendert(contextId) ?: run {
-                logg.info("Ignorerer melding fordi kommandokonteksten ikke er suspendert")
-                return null
-            }
-            val melding = meldingDao.finn(meldingId) ?: run {
-                logg.info("Ignorerer melding fordi opprinnelig melding ikke finnes i databasen")
-                return null
-            }
+            val commandContext =
+                commandContextDao.finnSuspendert(contextId) ?: run {
+                    logg.info("Ignorerer melding fordi kommandokonteksten ikke er suspendert")
+                    return null
+                }
+            val melding =
+                meldingDao.finn(meldingId) ?: run {
+                    logg.info("Ignorerer melding fordi opprinnelig melding ikke finnes i databasen")
+                    return null
+                }
             Løsninger(messageContext, melding, contextId, commandContext).also { løsninger = it }
         }
     }
 
-    private fun påminnelse(messageContext: MessageContext, meldingId: UUID, contextId: UUID): Påminnelse? {
-        val commandContext = commandContextDao.finnSuspendertEllerFeil(contextId) ?: run {
-            logg.info("Ignorerer melding fordi kommandokonteksten ikke er suspendert eller feil")
-            return null
-        }
-        val hendelse = meldingDao.finn(meldingId) ?: run {
-            logg.info("Ignorerer melding fordi opprinnelig melding ikke finnes i databasen")
-            return null
-        }
+    private fun påminnelse(
+        messageContext: MessageContext,
+        meldingId: UUID,
+        contextId: UUID,
+    ): Påminnelse? {
+        val commandContext =
+            commandContextDao.finnSuspendertEllerFeil(contextId) ?: run {
+                logg.info("Ignorerer melding fordi kommandokonteksten ikke er suspendert eller feil")
+                return null
+            }
+        val hendelse =
+            meldingDao.finn(meldingId) ?: run {
+                logg.info("Ignorerer melding fordi opprinnelig melding ikke finnes i databasen")
+                return null
+            }
 
         return Påminnelse(messageContext, hendelse, contextId, commandContext)
     }
@@ -322,25 +349,34 @@ internal class MeldingMediator(
         løsninger?.fortsett(this, message)
     }
 
-    private fun errorHandler(err: Exception, message: String) {
+    private fun errorHandler(
+        err: Exception,
+        message: String,
+    ) {
         logg.error("alvorlig feil: ${err.message} (se sikkerlogg for melding)", err)
         sikkerlogg.error("alvorlig feil: ${err.message}\n\t$message", err, err.printStackTrace())
     }
 
-    private fun nyContext(hendelse: PersonmeldingOld, contextId: UUID) = CommandContext(contextId).apply {
+    private fun nyContext(
+        hendelse: PersonmeldingOld,
+        contextId: UUID,
+    ) = CommandContext(contextId).apply {
         meldingDao.lagre(hendelse)
         opprett(commandContextDao, hendelse.id)
     }
 
-    internal fun mottaMelding(melding: Personmelding, messageContext: MessageContext) {
+    internal fun mottaMelding(
+        melding: Personmelding,
+        messageContext: MessageContext,
+    ) {
         val meldingnavn = requireNotNull(melding::class.simpleName)
         withMDC(
             mutableMapOf(
                 "meldingId" to melding.id.toString(),
-                "meldingnavn" to meldingnavn
+                "meldingnavn" to meldingnavn,
             ).apply {
                 if (melding is Vedtaksperiodemelding) put("vedtaksperiodeId", melding.vedtaksperiodeId().toString())
-            }
+            },
         ) {
             logg.info("Melding $meldingnavn mottatt")
             sikkerlogg.info("Melding $meldingnavn mottatt:\n${melding.toJson()}")
@@ -352,13 +388,17 @@ internal class MeldingMediator(
         }
     }
 
-    private fun gjenopptaMelding(melding: Personmelding, commandContext: CommandContext, messageContext: MessageContext){
+    private fun gjenopptaMelding(
+        melding: Personmelding,
+        commandContext: CommandContext,
+        messageContext: MessageContext,
+    ) {
         val meldingnavn = requireNotNull(melding::class.simpleName)
         withMDC(
             mapOf(
                 "meldingId" to melding.id.toString(),
-                "meldingnavn" to meldingnavn
-            )
+                "meldingnavn" to meldingnavn,
+            ),
         ) {
             logg.info("Melding $meldingnavn gjenopptatt")
             sikkerlogg.info("Melding $meldingnavn gjenopptatt:\n${melding.toJson()}")
@@ -371,7 +411,10 @@ internal class MeldingMediator(
         }
     }
 
-    private fun behandleMelding(melding: Personmelding, messageContext: MessageContext){
+    private fun behandleMelding(
+        melding: Personmelding,
+        messageContext: MessageContext,
+    ) {
         val meldingnavn = requireNotNull(melding::class.simpleName)
         val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
         val commandContextTilstandMediator = CommandContextTilstandMediator()
@@ -397,7 +440,11 @@ internal class MeldingMediator(
         }
     }
 
-    internal fun håndter(fødselsnummer: String, melding: PersonmeldingOld, messageContext: MessageContext) {
+    internal fun håndter(
+        fødselsnummer: String,
+        melding: PersonmeldingOld,
+        messageContext: MessageContext,
+    ) {
         withMDC(mapOf("meldingId" to melding.id.toString())) {
             if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) {
                 logg.info("Ignorerer melding ${melding::class.simpleName} fordi personen ikke finnes i databasen")
@@ -407,13 +454,16 @@ internal class MeldingMediator(
         }
     }
 
-    internal fun håndter(melding: PersonmeldingOld, messageContext: MessageContext) {
+    internal fun håndter(
+        melding: PersonmeldingOld,
+        messageContext: MessageContext,
+    ) {
         val contextId = UUID.randomUUID()
         withMDC(
             mapOf(
                 "meldingId" to melding.id.toString(),
-                "contextId" to contextId.toString()
-            )
+                "contextId" to contextId.toString(),
+            ),
         ) {
             logg.info("Behandler melding ${melding::class.simpleName}")
             logg.info("Oppretter ny kommandokontekst som følge av ${melding::class.simpleName}")
@@ -421,7 +471,11 @@ internal class MeldingMediator(
         }
     }
 
-    private fun håndter(melding: PersonmeldingOld, commandContext: CommandContext, messageContext: MessageContext) {
+    private fun håndter(
+        melding: PersonmeldingOld,
+        commandContext: CommandContext,
+        messageContext: MessageContext,
+    ) {
         val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
         val commandContextTilstandMediator = CommandContextTilstandMediator()
         commandContext.nyObserver(utgåendeMeldingerMediator)
@@ -429,8 +483,18 @@ internal class MeldingMediator(
         val hendelsenavn = melding::class.simpleName ?: "ukjent hendelse"
         try {
             when (melding) {
-                is GosysOppgaveEndret -> iverksett(kommandofabrikk.gosysOppgaveEndret(melding.fødselsnummer(), melding), melding.id, commandContext)
-                is TilbakedateringBehandlet -> iverksett(kommandofabrikk.tilbakedateringGodkjent(melding.fødselsnummer()), melding.id, commandContext)
+                is GosysOppgaveEndret ->
+                    iverksett(
+                        kommandofabrikk.gosysOppgaveEndret(melding.fødselsnummer(), melding),
+                        melding.id,
+                        commandContext,
+                    )
+                is TilbakedateringBehandlet ->
+                    iverksett(
+                        kommandofabrikk.tilbakedateringGodkjent(melding.fødselsnummer()),
+                        melding.id,
+                        commandContext,
+                    )
                 is SøknadSendt -> iverksett(kommandofabrikk.søknadSendt(melding), melding.id, commandContext)
                 is Godkjenningsbehov -> iverksett(kommandofabrikk.godkjenningsbehov(melding), melding.id, commandContext)
                 is Saksbehandlerløsning -> iverksett(kommandofabrikk.utbetalingsgodkjenning(melding), melding.id, commandContext)
@@ -446,21 +510,31 @@ internal class MeldingMediator(
         }
     }
 
-    private fun iverksett(command: Command, hendelseId: UUID, commandContext: CommandContext) {
+    private fun iverksett(
+        command: Command,
+        hendelseId: UUID,
+        commandContext: CommandContext,
+    ) {
         val contextId = commandContext.id()
         try {
             if (commandContext.utfør(commandContextDao, hendelseId, command)) {
                 val kjøretid = commandContextDao.tidsbrukForContext(contextId)
                 metrikker(command.name, kjøretid, contextId)
                 logg.info("Kommando(er) for ${command.name} er utført ferdig. Det tok ca {}ms å kjøre hele kommandokjeden", kjøretid)
-            } else logg.info("${command.name} er suspendert")
+            } else {
+                logg.info("${command.name} er suspendert")
+            }
         } catch (err: Exception) {
             command.undo(commandContext)
             throw err
         }
     }
 
-    private fun metrikker(hendelsenavn: String, kjøretidMs: Int, contextId: UUID) {
+    private fun metrikker(
+        hendelsenavn: String,
+        kjøretidMs: Int,
+        contextId: UUID,
+    ) {
         if (hendelsenavn == Godkjenningsbehov::class.simpleName) {
             val utfall: GodkjenningsbehovUtfall = metrikkDao.finnUtfallForGodkjenningsbehov(contextId)
             registrerTidsbrukForGodkjenningsbehov(utfall, kjøretidMs)
@@ -474,17 +548,29 @@ internal class MeldingMediator(
         private val contextId: UUID,
         private val commandContext: CommandContext,
     ) {
-        fun add(hendelseId: UUID, contextId: UUID, løsning: Any) {
+        fun add(
+            hendelseId: UUID,
+            contextId: UUID,
+            løsning: Any,
+        ) {
             check(hendelseId == melding.id)
             check(contextId == this.contextId)
             commandContext.add(løsning)
         }
 
-        fun fortsett(mediator: MeldingMediator, message: String) {
+        fun fortsett(
+            mediator: MeldingMediator,
+            message: String,
+        ) {
             logg.info("fortsetter utførelse av kommandokontekst som følge av løsninger på behov for ${melding::class.simpleName}")
-            sikkerlogg.info("fortsetter utførelse av kommandokontekst som følge av løsninger på behov for ${melding::class.simpleName}\nInnkommende melding:\n\t$message")
-            if (melding is Personmelding) mediator.gjenopptaMelding(melding, commandContext, messageContext)
-            else mediator.håndter(melding, commandContext, messageContext)
+            sikkerlogg.info(
+                "fortsetter utførelse av kommandokontekst som følge av løsninger på behov for ${melding::class.simpleName}\nInnkommende melding:\n\t$message",
+            )
+            if (melding is Personmelding) {
+                mediator.gjenopptaMelding(melding, commandContext, messageContext)
+            } else {
+                mediator.håndter(melding, commandContext, messageContext)
+            }
         }
     }
 
@@ -494,7 +580,11 @@ internal class MeldingMediator(
         private val contextId: UUID,
         private val commandContext: CommandContext,
     ) {
-        fun add(hendelseId: UUID, contextId: UUID, påminnelse: Any) {
+        fun add(
+            hendelseId: UUID,
+            contextId: UUID,
+            påminnelse: Any,
+        ) {
             check(hendelseId == melding.id)
             check(contextId == this.contextId)
             commandContext.add(påminnelse)
@@ -502,17 +592,24 @@ internal class MeldingMediator(
 
         fun fortsett(mediator: MeldingMediator) {
             logg.info("fortsetter utførelse av kommandokontekst som følge av påminnelse")
-            if (melding is Personmelding) mediator.gjenopptaMelding(melding, commandContext, messageContext)
-            else mediator.håndter(melding, commandContext, messageContext)
+            if (melding is Personmelding) {
+                mediator.gjenopptaMelding(melding, commandContext, messageContext)
+            } else {
+                mediator.håndter(melding, commandContext, messageContext)
+            }
         }
     }
 
     override fun oppdaterSnapshot(fnr: String) {
-        val json = objectMapper.readTree(JsonMessage.newMessage(
-            "oppdater_personsnapshot", mapOf(
-                "fødselsnummer" to fnr
+        val json =
+            objectMapper.readTree(
+                JsonMessage.newMessage(
+                    "oppdater_personsnapshot",
+                    mapOf(
+                        "fødselsnummer" to fnr,
+                    ),
+                ).toJson(),
             )
-        ).toJson())
 
         mottaMelding(OppdaterPersonsnapshot(json), rapidsConnection)
     }

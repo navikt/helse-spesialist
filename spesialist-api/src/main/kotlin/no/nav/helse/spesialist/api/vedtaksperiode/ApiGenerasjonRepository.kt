@@ -1,12 +1,11 @@
 package no.nav.helse.spesialist.api.vedtaksperiode
 
-import javax.sql.DataSource
 import no.nav.helse.spesialist.api.varsel.ApiVarselDao
 import no.nav.helse.spesialist.api.vedtak.GenerasjonDao
 import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode
+import javax.sql.DataSource
 
 class ApiGenerasjonRepository(dataSource: DataSource) {
-
     private val varselDao = ApiVarselDao(dataSource)
     private val generasjonDao = GenerasjonDao(dataSource)
 

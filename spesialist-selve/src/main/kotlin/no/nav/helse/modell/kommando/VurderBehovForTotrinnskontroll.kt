@@ -1,12 +1,12 @@
 package no.nav.helse.modell.kommando
 
-import java.util.UUID
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 internal class VurderBehovForTotrinnskontroll(
     private val fødselsnummer: String,
@@ -14,9 +14,8 @@ internal class VurderBehovForTotrinnskontroll(
     private val oppgaveMediator: OppgaveMediator,
     private val overstyringDao: OverstyringDao,
     private val totrinnsvurderingMediator: TotrinnsvurderingMediator,
-    private val sykefraværstilfelle: Sykefraværstilfelle
+    private val sykefraværstilfelle: Sykefraværstilfelle,
 ) : Command {
-
     private companion object {
         private val logg = LoggerFactory.getLogger(VurderBehovForTotrinnskontroll::class.java)
     }
@@ -37,7 +36,7 @@ internal class VurderBehovForTotrinnskontroll(
             if (behandlendeSaksbehandlerOid != null) {
                 oppgaveMediator.reserverOppgave(
                     saksbehandleroid = behandlendeSaksbehandlerOid,
-                    fødselsnummer = fødselsnummer
+                    fødselsnummer = fødselsnummer,
                 )
             }
         }

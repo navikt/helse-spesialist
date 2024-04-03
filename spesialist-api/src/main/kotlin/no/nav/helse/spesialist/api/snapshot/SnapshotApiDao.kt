@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.api.snapshot
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import javax.sql.DataSource
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -11,9 +10,9 @@ import no.nav.helse.spesialist.api.graphql.schema.Personinfo
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.intellij.lang.annotations.Language
+import javax.sql.DataSource
 
 class SnapshotApiDao(private val dataSource: DataSource) {
-
     fun hentSnapshotMedMetadata(fødselsnummer: String): Pair<Personinfo, GraphQLPerson>? =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
@@ -26,47 +25,54 @@ class SnapshotApiDao(private val dataSource: DataSource) {
             session.run(
                 queryOf(
                     statement,
-                    mapOf("fnr" to fødselsnummer.toLong())
+                    mapOf("fnr" to fødselsnummer.toLong()),
                 ).map { row ->
-                    val personinfo = Personinfo(
-                        fornavn = row.string("fornavn"),
-                        mellomnavn = row.stringOrNull("mellomnavn"),
-                        etternavn = row.string("etternavn"),
-                        fodselsdato = row.stringOrNull("fodselsdato"),
-                        kjonn = row.stringOrNull("kjonn")?.let(Kjonn::valueOf) ?: Kjonn.Ukjent,
-                        adressebeskyttelse = row.string("adressebeskyttelse").let(Adressebeskyttelse::valueOf),
-                        reservasjon = null
-                    )
+                    val personinfo =
+                        Personinfo(
+                            fornavn = row.string("fornavn"),
+                            mellomnavn = row.stringOrNull("mellomnavn"),
+                            etternavn = row.string("etternavn"),
+                            fodselsdato = row.stringOrNull("fodselsdato"),
+                            kjonn = row.stringOrNull("kjonn")?.let(Kjonn::valueOf) ?: Kjonn.Ukjent,
+                            adressebeskyttelse = row.string("adressebeskyttelse").let(Adressebeskyttelse::valueOf),
+                            reservasjon = null,
+                        )
                     val snapshot = objectMapper.readValue<GraphQLPerson>(row.string("data"))
                     personinfo to snapshot
-                }.asSingle
+                }.asSingle,
             )
         }
 
-    fun lagre(fødselsnummer: String, snapshot: GraphQLPerson) =
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            session.transaction { tx ->
-                val personRef = tx.finnPersonRef(fødselsnummer)
-                val versjon = snapshot.versjon
-                if (versjon > tx.finnGlobalVersjon()) {
-                    tx.oppdaterGlobalVersjon(versjon)
-                }
-                tx.lagre(personRef, objectMapper.writeValueAsString(snapshot), versjon)
-            }
-        }
-
-    fun utdatert(fødselsnummer: String) = sessionOf(dataSource).use { session ->
+    fun lagre(
+        fødselsnummer: String,
+        snapshot: GraphQLPerson,
+    ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         session.transaction { tx ->
-            val versjonForSnapshot = tx.finnSnapshotVersjon(fødselsnummer)
-            val sisteGjeldendeVersjon = tx.finnGlobalVersjon()
-
-            versjonForSnapshot?.let { it < sisteGjeldendeVersjon } ?: true
+            val personRef = tx.finnPersonRef(fødselsnummer)
+            val versjon = snapshot.versjon
+            if (versjon > tx.finnGlobalVersjon()) {
+                tx.oppdaterGlobalVersjon(versjon)
+            }
+            tx.lagre(personRef, objectMapper.writeValueAsString(snapshot), versjon)
         }
     }
 
+    fun utdatert(fødselsnummer: String) =
+        sessionOf(dataSource).use { session ->
+            session.transaction { tx ->
+                val versjonForSnapshot = tx.finnSnapshotVersjon(fødselsnummer)
+                val sisteGjeldendeVersjon = tx.finnGlobalVersjon()
+
+                versjonForSnapshot?.let { it < sisteGjeldendeVersjon } ?: true
+            }
+        }
 }
 
-private fun TransactionalSession.lagre(personRef: Int, snapshot: String, versjon: Int): Int {
+private fun TransactionalSession.lagre(
+    personRef: Int,
+    snapshot: String,
+    versjon: Int,
+): Int {
     @Language("PostgreSQL")
     val statement = """
             INSERT INTO snapshot(data, versjon, person_ref)
@@ -81,10 +87,10 @@ private fun TransactionalSession.lagre(personRef: Int, snapshot: String, versjon
                 mapOf(
                     "snapshot" to snapshot,
                     "versjon" to versjon,
-                    "person_ref" to personRef
-                )
-            ).asUpdateAndReturnGeneratedKey
-        )
+                    "person_ref" to personRef,
+                ),
+            ).asUpdateAndReturnGeneratedKey,
+        ),
     ).toInt()
 }
 

@@ -1,9 +1,9 @@
 package no.nav.helse.spesialist.api.egenAnsatt
 
-import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
+import javax.sql.DataSource
 
 class EgenAnsattApiDao(private val dataSource: DataSource) {
     fun erEgenAnsatt(fødselsnummer: String): Boolean? {
@@ -19,11 +19,11 @@ class EgenAnsattApiDao(private val dataSource: DataSource) {
                 queryOf(
                     query,
                     mapOf(
-                        "fodselsnummer" to fødselsnummer.toLong()
-                    )
+                        "fodselsnummer" to fødselsnummer.toLong(),
+                    ),
                 )
                     .map { it.boolean("er_egen_ansatt") }
-                    .asSingle
+                    .asSingle,
             )
         }
     }

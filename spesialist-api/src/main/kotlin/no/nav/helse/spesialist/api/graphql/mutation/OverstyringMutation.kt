@@ -5,8 +5,6 @@ import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
-import java.time.LocalDate
-import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
@@ -21,10 +19,10 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRef
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-
+import java.time.LocalDate
+import java.util.UUID
 
 class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhåndterer) : Mutation {
-
     private companion object {
         private val logg: Logger = LoggerFactory.getLogger(OverstyringMutation::class.java)
     }
@@ -33,131 +31,149 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
     suspend fun overstyrDager(
         overstyring: TidslinjeOverstyring,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean> = withContext(Dispatchers.IO) {
-        val saksbehandler: Lazy<SaksbehandlerFraApi> = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
-        try {
-            val handling = OverstyrTidslinjeHandlingFraApi(
-                vedtaksperiodeId = UUID.fromString(overstyring.vedtaksperiodeId),
-                organisasjonsnummer = overstyring.organisasjonsnummer,
-                fødselsnummer = overstyring.fodselsnummer,
-                aktørId = overstyring.aktorId,
-                begrunnelse = overstyring.begrunnelse,
-                dager = overstyring.dager.map { it ->
-                    OverstyrTidslinjeHandlingFraApi.OverstyrDagFraApi(
-                        dato = LocalDate.parse(it.dato),
-                        type = it.type,
-                        fraType = it.fraType,
-                        grad = it.grad,
-                        fraGrad = it.fraGrad,
-                        lovhjemmel = it.lovhjemmel?.let { lovhjemmel ->
-                            LovhjemmelFraApi(
-                                lovhjemmel.paragraf,
-                                lovhjemmel.ledd,
-                                lovhjemmel.bokstav,
-                                lovhjemmel.lovverk,
-                                lovhjemmel.lovverksversjon,
-                            )
-                        },
+    ): DataFetcherResult<Boolean> =
+        withContext(Dispatchers.IO) {
+            val saksbehandler: Lazy<SaksbehandlerFraApi> = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
+            try {
+                val handling =
+                    OverstyrTidslinjeHandlingFraApi(
+                        vedtaksperiodeId = UUID.fromString(overstyring.vedtaksperiodeId),
+                        organisasjonsnummer = overstyring.organisasjonsnummer,
+                        fødselsnummer = overstyring.fodselsnummer,
+                        aktørId = overstyring.aktorId,
+                        begrunnelse = overstyring.begrunnelse,
+                        dager =
+                            overstyring.dager.map { it ->
+                                OverstyrTidslinjeHandlingFraApi.OverstyrDagFraApi(
+                                    dato = LocalDate.parse(it.dato),
+                                    type = it.type,
+                                    fraType = it.fraType,
+                                    grad = it.grad,
+                                    fraGrad = it.fraGrad,
+                                    lovhjemmel =
+                                        it.lovhjemmel?.let { lovhjemmel ->
+                                            LovhjemmelFraApi(
+                                                lovhjemmel.paragraf,
+                                                lovhjemmel.ledd,
+                                                lovhjemmel.bokstav,
+                                                lovhjemmel.lovverk,
+                                                lovhjemmel.lovverksversjon,
+                                            )
+                                        },
+                                )
+                            },
                     )
-                })
-            withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(handling, saksbehandler.value) }
-        } catch (e: Exception) {
-            val kunneIkkeOverstyreError = kunneIkkeOverstyreError("dager")
-            logg.error(kunneIkkeOverstyreError.message, e)
-            return@withContext DataFetcherResult.newResult<Boolean>().error(kunneIkkeOverstyreError).build()
+                withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(handling, saksbehandler.value) }
+            } catch (e: Exception) {
+                val kunneIkkeOverstyreError = kunneIkkeOverstyreError("dager")
+                logg.error(kunneIkkeOverstyreError.message, e)
+                return@withContext DataFetcherResult.newResult<Boolean>().error(kunneIkkeOverstyreError).build()
+            }
+            DataFetcherResult.newResult<Boolean>().data(true).build()
         }
-        DataFetcherResult.newResult<Boolean>().data(true).build()
-    }
 
     @Suppress("unused")
     suspend fun overstyrInntektOgRefusjon(
         overstyring: InntektOgRefusjonOverstyring,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean> = withContext(Dispatchers.IO) {
-        val saksbehandler: Lazy<SaksbehandlerFraApi> = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
-        try {
-            val handling = OverstyrInntektOgRefusjonHandlingFraApi(
-                aktørId = overstyring.aktorId,
-                fødselsnummer = overstyring.fodselsnummer,
-                skjæringstidspunkt = LocalDate.parse(overstyring.skjaringstidspunkt),
-                arbeidsgivere = overstyring.arbeidsgivere.map { arbeidsgiver ->
-                    OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi(
-                        organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-                        månedligInntekt = arbeidsgiver.manedligInntekt,
-                        fraMånedligInntekt = arbeidsgiver.fraManedligInntekt,
-                        refusjonsopplysninger = arbeidsgiver.refusjonsopplysninger?.map { refusjonselement ->
-                            OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi.RefusjonselementFraApi(
-                                fom = LocalDate.parse(refusjonselement.fom),
-                                tom = refusjonselement.tom?.let { LocalDate.parse(it) },
-                                beløp = refusjonselement.belop
-                            )
-                        },
-                        fraRefusjonsopplysninger = arbeidsgiver.fraRefusjonsopplysninger?.map { refusjonselement ->
-                            OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi.RefusjonselementFraApi(
-                                fom = LocalDate.parse(refusjonselement.fom),
-                                tom = refusjonselement.tom?.let { LocalDate.parse(it) },
-                                beløp = refusjonselement.belop
-                            )
-                        },
-                        begrunnelse = arbeidsgiver.begrunnelse,
-                        forklaring = arbeidsgiver.forklaring,
-                        lovhjemmel = arbeidsgiver.lovhjemmel?.let { lovhjemmel ->
-                            LovhjemmelFraApi(
-                                paragraf = lovhjemmel.paragraf,
-                                ledd = lovhjemmel.ledd,
-                                bokstav = lovhjemmel.bokstav,
-                                lovverk = lovhjemmel.lovverk,
-                                lovverksversjon = lovhjemmel.lovverksversjon,
-                            )
-                        })
-                })
-            withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(handling, saksbehandler.value) }
-        } catch (e: Exception) {
-            val kunneIkkeOverstyreError = kunneIkkeOverstyreError("inntekt og refusjon")
-            logg.error(kunneIkkeOverstyreError.message, e)
-            return@withContext DataFetcherResult.newResult<Boolean>()
-                .error(kunneIkkeOverstyreError).build()
+    ): DataFetcherResult<Boolean> =
+        withContext(Dispatchers.IO) {
+            val saksbehandler: Lazy<SaksbehandlerFraApi> = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
+            try {
+                val handling =
+                    OverstyrInntektOgRefusjonHandlingFraApi(
+                        aktørId = overstyring.aktorId,
+                        fødselsnummer = overstyring.fodselsnummer,
+                        skjæringstidspunkt = LocalDate.parse(overstyring.skjaringstidspunkt),
+                        arbeidsgivere =
+                            overstyring.arbeidsgivere.map { arbeidsgiver ->
+                                OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi(
+                                    organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+                                    månedligInntekt = arbeidsgiver.manedligInntekt,
+                                    fraMånedligInntekt = arbeidsgiver.fraManedligInntekt,
+                                    refusjonsopplysninger =
+                                        arbeidsgiver.refusjonsopplysninger?.map { refusjonselement ->
+                                            OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi.RefusjonselementFraApi(
+                                                fom = LocalDate.parse(refusjonselement.fom),
+                                                tom = refusjonselement.tom?.let { LocalDate.parse(it) },
+                                                beløp = refusjonselement.belop,
+                                            )
+                                        },
+                                    fraRefusjonsopplysninger =
+                                        arbeidsgiver.fraRefusjonsopplysninger?.map { refusjonselement ->
+                                            OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi.RefusjonselementFraApi(
+                                                fom = LocalDate.parse(refusjonselement.fom),
+                                                tom = refusjonselement.tom?.let { LocalDate.parse(it) },
+                                                beløp = refusjonselement.belop,
+                                            )
+                                        },
+                                    begrunnelse = arbeidsgiver.begrunnelse,
+                                    forklaring = arbeidsgiver.forklaring,
+                                    lovhjemmel =
+                                        arbeidsgiver.lovhjemmel?.let { lovhjemmel ->
+                                            LovhjemmelFraApi(
+                                                paragraf = lovhjemmel.paragraf,
+                                                ledd = lovhjemmel.ledd,
+                                                bokstav = lovhjemmel.bokstav,
+                                                lovverk = lovhjemmel.lovverk,
+                                                lovverksversjon = lovhjemmel.lovverksversjon,
+                                            )
+                                        },
+                                )
+                            },
+                    )
+                withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(handling, saksbehandler.value) }
+            } catch (e: Exception) {
+                val kunneIkkeOverstyreError = kunneIkkeOverstyreError("inntekt og refusjon")
+                logg.error(kunneIkkeOverstyreError.message, e)
+                return@withContext DataFetcherResult.newResult<Boolean>()
+                    .error(kunneIkkeOverstyreError).build()
+            }
+            DataFetcherResult.newResult<Boolean>().data(true).build()
         }
-        DataFetcherResult.newResult<Boolean>().data(true).build()
-    }
 
     @Suppress("unused")
     suspend fun overstyrArbeidsforhold(
         overstyring: ArbeidsforholdOverstyringHandling,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean> = withContext(Dispatchers.IO) {
-        val saksbehandler: Lazy<SaksbehandlerFraApi> = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
-        try {
-            val handling = OverstyrArbeidsforholdHandlingFraApi(
-                overstyring.fodselsnummer,
-                aktørId = overstyring.aktorId,
-                skjæringstidspunkt = LocalDate.parse(overstyring.skjaringstidspunkt),
-                overstyrteArbeidsforhold = overstyring.overstyrteArbeidsforhold.map { arbeidsforhold ->
-                    OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi(
-                        orgnummer = arbeidsforhold.orgnummer,
-                        deaktivert = arbeidsforhold.deaktivert,
-                        begrunnelse = arbeidsforhold.begrunnelse,
-                        forklaring = arbeidsforhold.forklaring,
-                        lovhjemmel = arbeidsforhold.lovhjemmel?.let { lovhjemmel ->
-                            LovhjemmelFraApi(
-                                paragraf = lovhjemmel.paragraf,
-                                ledd = lovhjemmel.ledd,
-                                bokstav = lovhjemmel.bokstav,
-                                lovverk = lovhjemmel.lovverk,
-                                lovverksversjon = lovhjemmel.lovverksversjon,
-                            )
-                        }
+    ): DataFetcherResult<Boolean> =
+        withContext(Dispatchers.IO) {
+            val saksbehandler: Lazy<SaksbehandlerFraApi> = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
+            try {
+                val handling =
+                    OverstyrArbeidsforholdHandlingFraApi(
+                        overstyring.fodselsnummer,
+                        aktørId = overstyring.aktorId,
+                        skjæringstidspunkt = LocalDate.parse(overstyring.skjaringstidspunkt),
+                        overstyrteArbeidsforhold =
+                            overstyring.overstyrteArbeidsforhold.map { arbeidsforhold ->
+                                OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi(
+                                    orgnummer = arbeidsforhold.orgnummer,
+                                    deaktivert = arbeidsforhold.deaktivert,
+                                    begrunnelse = arbeidsforhold.begrunnelse,
+                                    forklaring = arbeidsforhold.forklaring,
+                                    lovhjemmel =
+                                        arbeidsforhold.lovhjemmel?.let { lovhjemmel ->
+                                            LovhjemmelFraApi(
+                                                paragraf = lovhjemmel.paragraf,
+                                                ledd = lovhjemmel.ledd,
+                                                bokstav = lovhjemmel.bokstav,
+                                                lovverk = lovhjemmel.lovverk,
+                                                lovverksversjon = lovhjemmel.lovverksversjon,
+                                            )
+                                        },
+                                )
+                            },
                     )
-                })
-            withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(handling, saksbehandler.value) }
-        } catch (e: Exception) {
-            val kunneIkkeOverstyreError = kunneIkkeOverstyreError("arbeidsforhold")
-            logg.error(kunneIkkeOverstyreError.message, e)
-            return@withContext DataFetcherResult.newResult<Boolean>().error(kunneIkkeOverstyreError)
-                .build()
+                withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(handling, saksbehandler.value) }
+            } catch (e: Exception) {
+                val kunneIkkeOverstyreError = kunneIkkeOverstyreError("arbeidsforhold")
+                logg.error(kunneIkkeOverstyreError.message, e)
+                return@withContext DataFetcherResult.newResult<Boolean>().error(kunneIkkeOverstyreError)
+                    .build()
+            }
+            DataFetcherResult.newResult<Boolean>().data(true).build()
         }
-        DataFetcherResult.newResult<Boolean>().data(true).build()
-    }
 
     private fun kunneIkkeOverstyreError(overstyring: String): GraphQLError =
         GraphqlErrorException.newErrorException().message("Kunne ikke overstyre $overstyring")

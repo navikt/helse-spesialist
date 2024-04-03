@@ -1,13 +1,13 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
-import java.util.UUID
 import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.Companion.varsler
 import no.nav.helse.rapids_rivers.JsonMessage
+import java.util.UUID
 
 internal class NyeVarsler private constructor(
     override val id: UUID,
@@ -15,23 +15,27 @@ internal class NyeVarsler private constructor(
     internal val varsler: List<Varsel>,
     private val json: String,
 ) : Personmelding {
-    internal constructor(packet: JsonMessage): this(
+    internal constructor(packet: JsonMessage) : this(
         id = UUID.fromString(packet["@id"].asText()),
         fødselsnummer = packet["fødselsnummer"].asText(),
         varsler = packet["aktiviteter"].varsler(),
-        json = packet.toJson()
+        json = packet.toJson(),
     )
-    internal constructor(jsonNode: JsonNode): this(
+    internal constructor(jsonNode: JsonNode) : this(
         id = UUID.fromString(jsonNode["@id"].asText()),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
         varsler = jsonNode["aktiviteter"].varsler(),
-        json = jsonNode.toString()
+        json = jsonNode.toString(),
     )
 
     override fun fødselsnummer(): String = fødselsnummer
+
     override fun toJson(): String = json
 
-    override fun behandle(person: Person, kommandofabrikk: Kommandofabrikk) {
+    override fun behandle(
+        person: Person,
+        kommandofabrikk: Kommandofabrikk,
+    ) {
         person.nyeVarsler(this)
     }
 }

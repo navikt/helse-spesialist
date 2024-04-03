@@ -15,7 +15,7 @@ fun Application.azureAdAppAuthentication(config: AzureAdAppConfig) {
 }
 
 class AzureAdAppConfig(
-    private val azureConfig: AzureConfig
+    private val azureConfig: AzureConfig,
 ) {
     fun configureAuthentication(configuration: JWTAuthenticationProvider.Config) {
         configuration.verifier(azureConfig.jwkProvider, azureConfig.issuer) {

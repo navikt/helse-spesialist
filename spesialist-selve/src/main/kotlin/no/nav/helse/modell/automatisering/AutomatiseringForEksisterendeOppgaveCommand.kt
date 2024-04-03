@@ -1,6 +1,5 @@
 package no.nav.helse.modell.automatisering
 
-import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
@@ -10,6 +9,7 @@ import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 internal class AutomatiseringForEksisterendeOppgaveCommand(
     private val fødselsnummer: String,
@@ -22,9 +22,8 @@ internal class AutomatiseringForEksisterendeOppgaveCommand(
     private val utbetaling: Utbetaling,
     private val periodetype: Periodetype,
     private val sykefraværstilfelle: Sykefraværstilfelle,
-    private val spleisBehandlingId: UUID?
+    private val spleisBehandlingId: UUID?,
 ) : Command {
-
     private companion object {
         private val logg = LoggerFactory.getLogger(AutomatiseringForEksisterendeOppgaveCommand::class.java)
     }
@@ -38,7 +37,7 @@ internal class AutomatiseringForEksisterendeOppgaveCommand(
                 vedtaksperiodeId = vedtaksperiodeId,
                 fødselsnummer = fødselsnummer,
                 hendelseId = hendelseId,
-                spleisBehandlingId = spleisBehandlingId
+                spleisBehandlingId = spleisBehandlingId,
             )
             logg.info("Oppgave avbrytes for vedtaksperiode $vedtaksperiodeId på grunn av automatisering")
             oppgaveMediator.avbrytOppgaveFor(vedtaksperiodeId)

@@ -1,7 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
-import java.util.UUID
 import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.oppgave.OppgaveMediator
@@ -14,6 +13,7 @@ import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import java.util.UUID
 
 internal class VedtaksperiodeReberegnet private constructor(
     override val id: UUID,
@@ -21,13 +21,13 @@ internal class VedtaksperiodeReberegnet private constructor(
     private val vedtaksperiodeId: UUID,
     private val json: String,
 ) : Vedtaksperiodemelding {
-    internal constructor(packet: JsonMessage): this(
+    internal constructor(packet: JsonMessage) : this(
         id = UUID.fromString(packet["@id"].asText()),
         fødselsnummer = packet["fødselsnummer"].asText(),
         vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
         json = packet.toJson(),
     )
-    internal constructor(jsonNode: JsonNode): this(
+    internal constructor(jsonNode: JsonNode) : this(
         id = UUID.fromString(jsonNode["@id"].asText()),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
         vedtaksperiodeId = UUID.fromString(jsonNode["vedtaksperiodeId"].asText()),
@@ -35,9 +35,15 @@ internal class VedtaksperiodeReberegnet private constructor(
     )
 
     override fun fødselsnummer() = fødselsnummer
+
     override fun toJson(): String = json
+
     override fun vedtaksperiodeId(): UUID = vedtaksperiodeId
-    override fun behandle(person: Person, kommandofabrikk: Kommandofabrikk) {
+
+    override fun behandle(
+        person: Person,
+        kommandofabrikk: Kommandofabrikk,
+    ) {
         kommandofabrikk.iverksettVedtaksperiodeReberegnet(this)
     }
 }
@@ -47,18 +53,19 @@ internal class VedtaksperiodeReberegnetCommand(
     utbetalingDao: UtbetalingDao,
     periodehistorikkDao: PeriodehistorikkDao,
     commandContextDao: CommandContextDao,
-    oppgaveMediator: OppgaveMediator
-): MacroCommand() {
-    override val commands: List<Command> = listOf(
-        VedtaksperiodeReberegnetPeriodehistorikk(
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingDao = utbetalingDao,
-            periodehistorikkDao = periodehistorikkDao
-        ),
-        AvbrytCommand(
-            vedtaksperiodeId = vedtaksperiodeId,
-            commandContextDao = commandContextDao,
-            oppgaveMediator = oppgaveMediator
+    oppgaveMediator: OppgaveMediator,
+) : MacroCommand() {
+    override val commands: List<Command> =
+        listOf(
+            VedtaksperiodeReberegnetPeriodehistorikk(
+                vedtaksperiodeId = vedtaksperiodeId,
+                utbetalingDao = utbetalingDao,
+                periodehistorikkDao = periodehistorikkDao,
+            ),
+            AvbrytCommand(
+                vedtaksperiodeId = vedtaksperiodeId,
+                commandContextDao = commandContextDao,
+                oppgaveMediator = oppgaveMediator,
+            ),
         )
-    )
 }

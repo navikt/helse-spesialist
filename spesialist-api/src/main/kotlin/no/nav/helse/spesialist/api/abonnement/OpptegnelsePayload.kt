@@ -1,38 +1,43 @@
 package no.nav.helse.spesialist.api.abonnement
 
+import org.intellij.lang.annotations.Language
 import java.time.LocalDateTime
 import java.util.*
-import org.intellij.lang.annotations.Language
 
 sealed class OpptegnelsePayload {
     abstract fun toJson(): String
 }
 
 data class UtbetalingPayload(private val utbetalingId: UUID) : OpptegnelsePayload() {
-    override fun toJson() = """
+    override fun toJson() =
+        """
         { "utbetalingId": "$utbetalingId" }
-    """.trimIndent()
+        """.trimIndent()
 }
 
 data class GodkjenningsbehovPayload(private val hendelseId: UUID) : OpptegnelsePayload() {
-    override fun toJson() = """
+    override fun toJson() =
+        """
         { "hendelseId": "$hendelseId" }
-    """.trimIndent()
+        """.trimIndent()
 }
 
 enum class AutomatiskBehandlingUtfall {
-    UTBETALT, AVVIST
+    UTBETALT,
+    AVVIST,
 }
 
 data class AutomatiskBehandlingPayload(private val hendelseId: UUID, private val utfall: AutomatiskBehandlingUtfall) : OpptegnelsePayload() {
-    override fun toJson() = """
+    override fun toJson() =
+        """
         { "hendelseId": "$hendelseId", "utfall": "$utfall" }
-    """.trimIndent()
+        """.trimIndent()
 }
 
 data object PersonOppdatertPayload : OpptegnelsePayload() {
     @Language("json")
-    override fun toJson() = """
+    override fun toJson() =
+        """
         { "oppdatert": "${LocalDateTime.now()}" }
-    """.trimIndent()
+        """.trimIndent()
 }

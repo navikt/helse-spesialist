@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.api.graphql.query
 import com.expediagroup.graphql.server.operations.Query
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
-import java.time.Duration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
@@ -16,9 +15,9 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.Duration
 
 class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
-
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
     @Suppress("unused")
@@ -28,13 +27,14 @@ class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
         env: DataFetchingEnvironment,
     ): DataFetcherResult<BehandledeOppgaver> {
         val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(SAKSBEHANDLER.key).value
-        val behandledeOppgaver = withContext(Dispatchers.IO) {
-            oppgavehåndterer.behandledeOppgaver(
-                saksbehandlerFraApi = saksbehandler,
-                offset = offset,
-                limit = limit,
-            )
-        }
+        val behandledeOppgaver =
+            withContext(Dispatchers.IO) {
+                oppgavehåndterer.behandledeOppgaver(
+                    saksbehandlerFraApi = saksbehandler,
+                    offset = offset,
+                    limit = limit,
+                )
+            }
 
         return DataFetcherResult.newResult<BehandledeOppgaver>().data(behandledeOppgaver).build()
     }
@@ -50,15 +50,16 @@ class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
         sikkerLogg.info("Henter OppgaverTilBehandling")
         val startTrace = startSporing(env)
         val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(SAKSBEHANDLER.key).value
-        val oppgaver = withContext(Dispatchers.IO) {
-            oppgavehåndterer.oppgaver(
-                saksbehandlerFraApi = saksbehandler,
-                offset = offset,
-                limit = limit,
-                sortering = sortering,
-                filtrering = filtrering,
-            )
-        }
+        val oppgaver =
+            withContext(Dispatchers.IO) {
+                oppgavehåndterer.oppgaver(
+                    saksbehandlerFraApi = saksbehandler,
+                    offset = offset,
+                    limit = limit,
+                    sortering = sortering,
+                    filtrering = filtrering,
+                )
+            }
         avsluttSporing(startTrace)
 
         return DataFetcherResult.newResult<OppgaverTilBehandling>().data(oppgaver).build()
@@ -69,11 +70,12 @@ class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
         sikkerLogg.info("Henter AntallOppgaver")
         val startTrace = startSporing(env)
         val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(SAKSBEHANDLER.key).value
-        val antallOppgaver = withContext(Dispatchers.IO) {
-            oppgavehåndterer.antallOppgaver(
-                saksbehandlerFraApi = saksbehandler,
-            )
-        }
+        val antallOppgaver =
+            withContext(Dispatchers.IO) {
+                oppgavehåndterer.antallOppgaver(
+                    saksbehandlerFraApi = saksbehandler,
+                )
+            }
         avsluttSporing(startTrace)
 
         return DataFetcherResult.newResult<AntallOppgaver>().data(antallOppgaver).build()

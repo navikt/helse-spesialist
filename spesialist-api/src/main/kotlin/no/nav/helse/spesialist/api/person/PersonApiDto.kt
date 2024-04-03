@@ -7,5 +7,5 @@ enum class Adressebeskyttelse {
     Fortrolig,
     StrengtFortrolig,
     StrengtFortroligUtland,
-    Ukjent
+    Ukjent,
 }

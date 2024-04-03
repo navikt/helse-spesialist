@@ -17,7 +17,7 @@ internal class Vergemålløsning(
 
     internal class VergemålRiver(
         rapidsConnection: RapidsConnection,
-        private val meldingMediator: MeldingMediator
+        private val meldingMediator: MeldingMediator,
     ) : River.PacketListener {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
@@ -37,7 +37,10 @@ internal class Vergemålløsning(
             }.register(this)
         }
 
-        override fun onPacket(packet: JsonMessage, context: MessageContext) {
+        override fun onPacket(
+            packet: JsonMessage,
+            context: MessageContext,
+        ) {
             sikkerLogg.info("Mottok melding Vergemål:\n{}", packet.toJson())
             val contextId = UUID.fromString(packet["contextId"].asText())
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())
@@ -48,23 +51,25 @@ internal class Vergemålløsning(
             val harFremtidsfullmakter = !vergemålNode["fremtidsfullmakter"].isEmpty
             val harFullmakter = !vergemålNode["fullmakter"].isEmpty
 
-            val vergemål = Vergemål(
-                harVergemål = harVergemål,
-                harFremtidsfullmakter = harFremtidsfullmakter,
-                harFullmakter = harFullmakter
-            )
+            val vergemål =
+                Vergemål(
+                    harVergemål = harVergemål,
+                    harFremtidsfullmakter = harFremtidsfullmakter,
+                    harFullmakter = harFullmakter,
+                )
 
-            val vergemålLøsning = Vergemålløsning(
-                fødselsnummer = fødselsnummer,
-                vergemål = vergemål
-            )
+            val vergemålLøsning =
+                Vergemålløsning(
+                    fødselsnummer = fødselsnummer,
+                    vergemål = vergemål,
+                )
 
             meldingMediator.løsning(
                 hendelseId = hendelseId,
                 contextId = contextId,
                 behovId = UUID.fromString(packet["@id"].asText()),
                 løsning = vergemålLøsning,
-                context = context
+                context = context,
             )
         }
     }

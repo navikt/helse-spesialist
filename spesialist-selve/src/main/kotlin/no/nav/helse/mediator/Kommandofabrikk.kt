@@ -1,8 +1,5 @@
 package no.nav.helse.mediator
 
-import java.time.LocalDate
-import java.util.UUID
-import javax.sql.DataSource
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
@@ -73,6 +70,9 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.util.UUID
+import javax.sql.DataSource
 
 internal class Kommandofabrikk(
     dataSource: DataSource,
@@ -98,12 +98,13 @@ internal class Kommandofabrikk(
     private val notatMediator: NotatMediator = NotatMediator(notatDao),
     private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
     private val påVentDao: PåVentDao = PåVentDao(dataSource),
-    private val totrinnsvurderingMediator: TotrinnsvurderingMediator = TotrinnsvurderingMediator(
-        totrinnsvurderingDao,
-        oppgaveDao,
-        periodehistorikkDao,
-        notatMediator,
-    ),
+    private val totrinnsvurderingMediator: TotrinnsvurderingMediator =
+        TotrinnsvurderingMediator(
+            totrinnsvurderingDao,
+            oppgaveDao,
+            periodehistorikkDao,
+            notatMediator,
+        ),
     private val godkjenningMediator: GodkjenningMediator,
     private val automatisering: Automatisering,
     private val arbeidsforholdDao: ArbeidsforholdDao = ArbeidsforholdDao(dataSource),
@@ -116,8 +117,8 @@ internal class Kommandofabrikk(
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
         private val logg = LoggerFactory.getLogger(this::class.java)
-
     }
+
     private val sykefraværstilfelleDao = SykefraværstilfelleDao(dataSource)
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
     private val metrikkDao = MetrikkDao(dataSource)
@@ -141,13 +142,23 @@ internal class Kommandofabrikk(
         this.commandContext = null
     }
 
-    internal fun sykefraværstilfelle(fødselsnummer: String, skjæringstidspunkt: LocalDate): Sykefraværstilfelle {
+    internal fun sykefraværstilfelle(
+        fødselsnummer: String,
+        skjæringstidspunkt: LocalDate,
+    ): Sykefraværstilfelle {
         val gjeldendeGenerasjoner = generasjonerFor(fødselsnummer, skjæringstidspunkt)
-        val skjønnsfastsatteSykepengegrunnlag = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(fødselsnummer, skjæringstidspunkt)
+        val skjønnsfastsatteSykepengegrunnlag =
+            sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(
+                fødselsnummer,
+                skjæringstidspunkt,
+            )
         return Sykefraværstilfelle(fødselsnummer, skjæringstidspunkt, gjeldendeGenerasjoner, skjønnsfastsatteSykepengegrunnlag)
     }
 
-    private fun generasjonerFor(fødselsnummer: String, skjæringstidspunkt: LocalDate): List<Generasjon> {
+    private fun generasjonerFor(
+        fødselsnummer: String,
+        skjæringstidspunkt: LocalDate,
+    ): List<Generasjon> {
         return gjeldendeGenerasjoner {
             generasjonRepository.finnVedtaksperiodeIderFor(fødselsnummer, skjæringstidspunkt)
         }
@@ -173,14 +184,18 @@ internal class Kommandofabrikk(
             erEgenAnsatt = melding.erEgenAnsatt,
             opprettet = melding.opprettet,
             egenAnsattDao = egenAnsattDao,
-            oppgaveMediator = oppgaveMediator
+            oppgaveMediator = oppgaveMediator,
         )
     }
 
-    fun gosysOppgaveEndret(fødselsnummer: String, hendelse: GosysOppgaveEndret): GosysOppgaveEndretCommand {
-        val oppgaveDataForAutomatisering = oppgaveDao.finnOppgaveIdUansettStatus(fødselsnummer).let { oppgaveId ->
-            oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)!!
-        }
+    fun gosysOppgaveEndret(
+        fødselsnummer: String,
+        hendelse: GosysOppgaveEndret,
+    ): GosysOppgaveEndretCommand {
+        val oppgaveDataForAutomatisering =
+            oppgaveDao.finnOppgaveIdUansettStatus(fødselsnummer).let { oppgaveId ->
+                oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)!!
+            }
 
         val skjæringstidspunkt = generasjonRepository.skjæringstidspunktFor(oppgaveDataForAutomatisering.vedtaksperiodeId)
 
@@ -204,20 +219,23 @@ internal class Kommandofabrikk(
             oppgaveMediator = oppgaveMediator,
             generasjonRepository = generasjonRepository,
             godkjenningMediator = godkjenningMediator,
-            spleisBehandlingId = spleisBehandlingId
+            spleisBehandlingId = spleisBehandlingId,
         )
     }
 
     fun tilbakedateringGodkjent(fødselsnummer: String): TilbakedateringGodkjentCommand {
-        val oppgaveDataForAutomatisering = oppgaveDao.finnOppgaveIdUansettStatus(fødselsnummer).let { oppgaveId ->
-            oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)!!
-        }
+        val oppgaveDataForAutomatisering =
+            oppgaveDao.finnOppgaveIdUansettStatus(fødselsnummer).let { oppgaveId ->
+                oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)!!
+            }
         val sykefraværstilfelle = sykefraværstilfelle(fødselsnummer, oppgaveDataForAutomatisering.skjæringstidspunkt)
         val utbetaling = utbetalingDao.hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
         val spleisBehandlingId =
             generasjonDao.finnGjeldendeGenerasjon(oppgaveDataForAutomatisering.vedtaksperiodeId)?.spleisBehandlingId
 
-        sikkerlogg.info("Henter oppgaveDataForAutomatisering ifm. godkjent tilbakedatering for fnr $fødselsnummer og vedtaksperiodeId ${oppgaveDataForAutomatisering.vedtaksperiodeId}")
+        sikkerlogg.info(
+            "Henter oppgaveDataForAutomatisering ifm. godkjent tilbakedatering for fnr $fødselsnummer og vedtaksperiodeId ${oppgaveDataForAutomatisering.vedtaksperiodeId}",
+        )
 
         return TilbakedateringGodkjentCommand(
             fødselsnummer = fødselsnummer,
@@ -227,7 +245,7 @@ internal class Kommandofabrikk(
             oppgaveDataForAutomatisering = oppgaveDataForAutomatisering,
             oppgaveMediator = oppgaveMediator,
             godkjenningMediator = godkjenningMediator,
-            spleisBehandlingId = spleisBehandlingId
+            spleisBehandlingId = spleisBehandlingId,
         )
     }
 
@@ -237,7 +255,7 @@ internal class Kommandofabrikk(
             utbetalingDao = utbetalingDao,
             periodehistorikkDao = periodehistorikkDao,
             commandContextDao = commandContextDao,
-            oppgaveMediator = oppgaveMediator
+            oppgaveMediator = oppgaveMediator,
         )
     }
 
@@ -245,7 +263,7 @@ internal class Kommandofabrikk(
         return VedtaksperiodeNyUtbetalingCommand(
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
             utbetalingId = hendelse.utbetalingId,
-            utbetalingDao = utbetalingDao
+            utbetalingDao = utbetalingDao,
         )
     }
 
@@ -255,7 +273,7 @@ internal class Kommandofabrikk(
             aktørId = hendelse.aktørId,
             organisasjonsnummer = hendelse.organisasjonsnummer,
             personDao = personDao,
-            arbeidsgiverDao = arbeidsgiverDao
+            arbeidsgiverDao = arbeidsgiverDao,
         )
     }
 
@@ -270,7 +288,7 @@ internal class Kommandofabrikk(
             personDao = personDao,
             snapshotDao = snapshotDao,
             opptegnelseDao = opptegnelseDao,
-            snapshotClient = snapshotClient
+            snapshotClient = snapshotClient,
         )
     }
 
@@ -292,7 +310,7 @@ internal class Kommandofabrikk(
             personDao = personDao,
             snapshotDao = snapshotDao,
             snapshotClient = snapshotClient,
-            saksbehandlerDao = saksbehandlerDao
+            saksbehandlerDao = saksbehandlerDao,
         )
     }
 
@@ -315,7 +333,7 @@ internal class Kommandofabrikk(
             tildelingDao = tildelingDao,
             oppgaveMediator = oppgaveMediator,
             totrinnsvurderingMediator = totrinnsvurderingMediator,
-            json = hendelse.toJson()
+            json = hendelse.toJson(),
         )
     }
 
@@ -328,7 +346,7 @@ internal class Kommandofabrikk(
             commandContextDao = commandContextDao,
             snapshotDao = snapshotDao,
             snapshotClient = snapshotClient,
-            oppgaveMediator = oppgaveMediator
+            oppgaveMediator = oppgaveMediator,
         )
     }
 
@@ -360,7 +378,7 @@ internal class Kommandofabrikk(
             saksbehandler = hendelse.saksbehandler,
             beslutter = hendelse.beslutter,
             meldingDao = meldingDao,
-            godkjenningMediator = godkjenningMediator
+            godkjenningMediator = godkjenningMediator,
         )
     }
 
@@ -405,7 +423,7 @@ internal class Kommandofabrikk(
             generasjonRepository = generasjonRepository,
             godkjenningMediator = godkjenningMediator,
             totrinnsvurderingMediator = totrinnsvurderingMediator,
-            json = hendelse.toJson()
+            json = hendelse.toJson(),
         )
     }
 
@@ -453,23 +471,29 @@ internal class Kommandofabrikk(
         iverksett(adressebeskyttelseEndret(melding), melding.id)
     }
 
-    private fun nyContext(meldingId: UUID) = CommandContext(UUID.randomUUID()).apply {
-        opprett(commandContextDao, meldingId)
-    }
+    private fun nyContext(meldingId: UUID) =
+        CommandContext(UUID.randomUUID()).apply {
+            opprett(commandContextDao, meldingId)
+        }
 
-    private fun iverksett(command: Command, meldingId: UUID) {
+    private fun iverksett(
+        command: Command,
+        meldingId: UUID,
+    ) {
         val commandContext = this.commandContext ?: nyContext(meldingId)
         observers.forEach { commandContext.nyObserver(it) }
         val contextId = commandContext.id()
         withMDC(
-            mapOf("contextId" to contextId.toString())
+            mapOf("contextId" to contextId.toString()),
         ) {
             try {
                 if (commandContext.utfør(commandContextDao, meldingId, command)) {
                     val kjøretid = commandContextDao.tidsbrukForContext(contextId)
                     metrikker(command.name, kjøretid, contextId)
                     logg.info("Kommando(er) for ${command.name} er utført ferdig. Det tok ca {}ms å kjøre hele kommandokjeden", kjøretid)
-                } else logg.info("${command.name} er suspendert")
+                } else {
+                    logg.info("${command.name} er suspendert")
+                }
             } catch (err: Exception) {
                 command.undo(commandContext)
                 throw err
@@ -479,13 +503,15 @@ internal class Kommandofabrikk(
         }
     }
 
-    private fun metrikker(hendelsenavn: String, kjøretidMs: Int, contextId: UUID) {
+    private fun metrikker(
+        hendelsenavn: String,
+        kjøretidMs: Int,
+        contextId: UUID,
+    ) {
         if (hendelsenavn == Godkjenningsbehov::class.simpleName) {
             val utfall: GodkjenningsbehovUtfall = metrikkDao.finnUtfallForGodkjenningsbehov(contextId)
             registrerTidsbrukForGodkjenningsbehov(utfall, kjøretidMs)
         }
         registrerTidsbrukForHendelse(hendelsenavn, kjøretidMs)
     }
-
-
 }

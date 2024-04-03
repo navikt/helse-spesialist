@@ -1,8 +1,8 @@
 package no.nav.helse.modell.saksbehandler.handlinger.dto
 
+import no.nav.helse.modell.vilkårsprøving.LovhjemmelDto
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.modell.vilkårsprøving.LovhjemmelDto
 
 data class OverstyrtTidslinjeDto(
     val id: UUID,
@@ -10,7 +10,7 @@ data class OverstyrtTidslinjeDto(
     val fødselsnummer: String,
     val organisasjonsnummer: String,
     val dager: List<OverstyrtTidslinjedagDto>,
-    val begrunnelse: String
+    val begrunnelse: String,
 )
 
 data class OverstyrtTidslinjedagDto(
@@ -19,5 +19,5 @@ data class OverstyrtTidslinjedagDto(
     val fraType: String,
     val grad: Int?,
     val fraGrad: Int?,
-    val lovhjemmel: LovhjemmelDto?
+    val lovhjemmel: LovhjemmelDto?,
 )

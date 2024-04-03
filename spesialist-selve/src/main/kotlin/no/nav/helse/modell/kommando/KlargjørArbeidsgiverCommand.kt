@@ -4,11 +4,12 @@ import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 
 internal class KlargjørArbeidsgiverCommand(
     orgnummere: List<String>,
-    arbeidsgiverDao: ArbeidsgiverDao
+    arbeidsgiverDao: ArbeidsgiverDao,
 ) : MacroCommand() {
     private val arbeidsgivere = orgnummere.distinct()
-    override val commands: List<Command> = listOf(
-        OpprettArbeidsgiverCommand(arbeidsgivere, arbeidsgiverDao),
-        OppdaterArbeidsgiverCommand(arbeidsgivere, arbeidsgiverDao)
-    )
+    override val commands: List<Command> =
+        listOf(
+            OpprettArbeidsgiverCommand(arbeidsgivere, arbeidsgiverDao),
+            OppdaterArbeidsgiverCommand(arbeidsgivere, arbeidsgiverDao),
+        )
 }

@@ -1,6 +1,5 @@
 package no.nav.helse.modell.automatisering
 
-import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.kommando.Command
@@ -10,6 +9,7 @@ import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 internal class VurderAutomatiskInnvilgelse(
     private val fødselsnummer: String,
@@ -21,9 +21,8 @@ internal class VurderAutomatiskInnvilgelse(
     private val godkjenningMediator: GodkjenningMediator,
     private val utbetaling: Utbetaling,
     private val periodetype: Periodetype,
-    private val sykefraværstilfelle: Sykefraværstilfelle
+    private val sykefraværstilfelle: Sykefraværstilfelle,
 ) : Command {
-
     private companion object {
         private val logg = LoggerFactory.getLogger(VurderAutomatiskInnvilgelse::class.java)
     }
@@ -37,7 +36,7 @@ internal class VurderAutomatiskInnvilgelse(
                 vedtaksperiodeId = vedtaksperiodeId,
                 fødselsnummer = fødselsnummer,
                 hendelseId = hendelseId,
-                spleisBehandlingId = spleisBehandlingId
+                spleisBehandlingId = spleisBehandlingId,
             )
             logg.info("Automatisk godkjenning for vedtaksperiode $vedtaksperiodeId")
             ferdigstill(context)

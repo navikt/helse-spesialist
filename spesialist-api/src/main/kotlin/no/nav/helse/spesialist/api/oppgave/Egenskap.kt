@@ -26,5 +26,5 @@ enum class Egenskap {
     OVERGANG_FRA_IT,
     SKJØNNSFASTSETTELSE,
     PÅ_VENT,
-    TILBAKEDATERT
+    TILBAKEDATERT,
 }

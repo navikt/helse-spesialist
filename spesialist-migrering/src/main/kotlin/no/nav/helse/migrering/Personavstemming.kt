@@ -1,7 +1,6 @@
 package no.nav.helse.migrering
 
 import com.fasterxml.jackson.databind.JsonNode
-import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.migrering.db.SpesialistDao
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -11,14 +10,13 @@ import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.River.PacketListener
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 internal class Personavstemming {
-
     internal class River(
         rapidsConnection: RapidsConnection,
         private val spesialistDao: SpesialistDao,
     ) : PacketListener {
-
         private companion object {
             private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
         }
@@ -43,23 +41,34 @@ internal class Personavstemming {
             }.register(this)
         }
 
-        override fun onPacket(packet: JsonMessage, context: MessageContext) {
+        override fun onPacket(
+            packet: JsonMessage,
+            context: MessageContext,
+        ) {
             val fødselsnummer = packet["fødselsnummer"].asText()
             val aktørId = packet["aktørId"].asText()
             sikkerlogg.info("Mottatt person_avstemt for {}, {}", keyValue("fødselsnummer", fødselsnummer), keyValue("aktørId", aktørId))
-            val forkastedeVedtaksperioderIder = packet["arbeidsgivere"].flatMap { arbeidsgiverNode ->
-                arbeidsgiverNode.path("forkastedeVedtaksperioder").map { periodeNode ->
-                    UUID.fromString(periodeNode.path("id").asText())
+            val forkastedeVedtaksperioderIder =
+                packet["arbeidsgivere"].flatMap { arbeidsgiverNode ->
+                    arbeidsgiverNode.path("forkastedeVedtaksperioder").map { periodeNode ->
+                        UUID.fromString(periodeNode.path("id").asText())
+                    }
                 }
-            }
             if (forkastedeVedtaksperioderIder.isEmpty()) {
-                sikkerlogg.info("Ingen forkastede perioder for {}, {}", keyValue("fødselsnummer", fødselsnummer), keyValue("aktørId", aktørId))
+                sikkerlogg.info(
+                    "Ingen forkastede perioder for {}, {}",
+                    keyValue("fødselsnummer", fødselsnummer),
+                    keyValue("aktørId", aktørId),
+                )
             } else {
-                sikkerlogg.info("${forkastedeVedtaksperioderIder.size} forkastede perioder for {}, {}", keyValue("fødselsnummer", fødselsnummer), keyValue("aktørId", aktørId))
+                sikkerlogg.info(
+                    "${forkastedeVedtaksperioderIder.size} forkastede perioder for {}, {}",
+                    keyValue("fødselsnummer", fødselsnummer),
+                    keyValue("aktørId", aktørId),
+                )
                 forkastedeVedtaksperioderIder.forEach(spesialistDao::forkast)
             }
             sikkerlogg.info("Person {}, {} avstemt", keyValue("fødselsnummer", fødselsnummer), keyValue("aktørId", aktørId))
         }
     }
-
 }

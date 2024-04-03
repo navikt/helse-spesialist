@@ -27,11 +27,6 @@ import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.routing
 import io.ktor.server.websocket.WebSockets
-import java.lang.management.GarbageCollectorMXBean
-import java.lang.management.ManagementFactory
-import java.net.ProxySelector
-import java.net.URI
-import java.util.UUID
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.ReservasjonDao
@@ -95,6 +90,11 @@ import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
+import java.lang.management.GarbageCollectorMXBean
+import java.lang.management.ManagementFactory
+import java.net.ProxySelector
+import java.net.URI
+import java.util.UUID
 import kotlin.random.Random.Default.nextInt
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
 import no.nav.helse.spesialist.api.tildeling.TildelingDao as TildelingApiDao
@@ -106,83 +106,92 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val dataSourceBuilder = DataSourceBuilder(env)
     private val dataSource = dataSourceBuilder.getDataSource()
 
-    private val azureAdClient = HttpClient(Apache) {
-        install(HttpRequestRetry) {
-            retryOnExceptionIf(3) { request, throwable ->
-                logg.warn("Caught exception ${throwable.message}, for url ${request.url}")
-                true
-            }
-            retryIf(maxRetries) { request, response ->
-                if (response.status.value.let { it in 500..599 }) {
-                    logg.warn(
-                        "Retrying for statuscode ${response.status.value}, for url ${request.url}"
-                    )
+    private val azureAdClient =
+        HttpClient(Apache) {
+            install(HttpRequestRetry) {
+                retryOnExceptionIf(3) { request, throwable ->
+                    logg.warn("Caught exception ${throwable.message}, for url ${request.url}")
                     true
-                } else {
-                    false
+                }
+                retryIf(maxRetries) { request, response ->
+                    if (response.status.value.let { it in 500..599 }) {
+                        logg.warn(
+                            "Retrying for statuscode ${response.status.value}, for url ${request.url}",
+                        )
+                        true
+                    } else {
+                        false
+                    }
                 }
             }
-        }
-        engine {
-            customizeClient {
-                setRoutePlanner(SystemDefaultRoutePlanner(ProxySelector.getDefault()))
+            engine {
+                customizeClient {
+                    setRoutePlanner(SystemDefaultRoutePlanner(ProxySelector.getDefault()))
+                }
+            }
+            install(ContentNegotiation) {
+                register(
+                    ContentType.Application.Json,
+                    JacksonConverter(
+                        jacksonObjectMapper()
+                            .registerModule(JavaTimeModule()),
+                    ),
+                )
             }
         }
-        install(ContentNegotiation) {
-            register(
-                ContentType.Application.Json, JacksonConverter(
-                    jacksonObjectMapper()
-                        .registerModule(JavaTimeModule())
-                )
-            )
+    private val httpClient =
+        HttpClient(Apache) {
+            install(ContentNegotiation) {
+                register(ContentType.Application.Json, JacksonConverter())
+            }
+            engine {
+                socketTimeout = 120_000
+                connectTimeout = 1_000
+                connectionRequestTimeout = 40_000
+            }
         }
-    }
-    private val httpClient = HttpClient(Apache) {
-        install(ContentNegotiation) {
-            register(ContentType.Application.Json, JacksonConverter())
+    private val reservasjonHttpClient =
+        HttpClient(Apache) {
+            install(ContentNegotiation) {
+                register(ContentType.Application.Json, JacksonConverter())
+            }
+            engine {
+                socketTimeout = 1_000
+                connectTimeout = 1_000
+                connectionRequestTimeout = 2_000
+            }
         }
-        engine {
-            socketTimeout = 120_000
-            connectTimeout = 1_000
-            connectionRequestTimeout = 40_000
-        }
-    }
-    private val reservasjonHttpClient = HttpClient(Apache) {
-        install(ContentNegotiation) {
-            register(ContentType.Application.Json, JacksonConverter())
-        }
-        engine {
-            socketTimeout = 1_000
-            connectTimeout = 1_000
-            connectionRequestTimeout = 2_000
-        }
-    }
-    private val azureConfig = AzureConfig(
-        clientId = env.getValue("AZURE_APP_CLIENT_ID"),
-        issuer = env.getValue("AZURE_OPENID_CONFIG_ISSUER"),
-        jwkProviderUri = env.getValue("AZURE_OPENID_CONFIG_JWKS_URI"),
-        tokenEndpoint = env.getValue("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
-    )
-    private val azureAdAppConfig = AzureAdAppConfig(
-        azureConfig = azureConfig,
-    )
-    private val accessTokenClient = AccessTokenClient(
-        httpClient = azureAdClient,
-        azureConfig = azureConfig,
-        privateJwk = env.getValue("AZURE_APP_JWK")
-    )
-    private val snapshotClient = SnapshotClient(
-        httpClient = httpClient,
-        accessTokenClient = accessTokenClient,
-        spleisUrl = URI.create(env.getValue("SPLEIS_API_URL")),
-        spleisClientId = env.getValue("SPLEIS_CLIENT_ID")
-    )
-    private val reservasjonClient = ReservasjonClient(
-        httpClient = reservasjonHttpClient,
-        accessTokenClient = accessTokenClient,
-        apiUrl = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_API_URL"),
-        scope = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE"),
-    )
+    private val azureConfig =
+        AzureConfig(
+            clientId = env.getValue("AZURE_APP_CLIENT_ID"),
+            issuer = env.getValue("AZURE_OPENID_CONFIG_ISSUER"),
+            jwkProviderUri = env.getValue("AZURE_OPENID_CONFIG_JWKS_URI"),
+            tokenEndpoint = env.getValue("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
+        )
+    private val azureAdAppConfig =
+        AzureAdAppConfig(
+            azureConfig = azureConfig,
+        )
+    private val accessTokenClient =
+        AccessTokenClient(
+            httpClient = azureAdClient,
+            azureConfig = azureConfig,
+            privateJwk = env.getValue("AZURE_APP_JWK"),
+        )
+    private val snapshotClient =
+        SnapshotClient(
+            httpClient = httpClient,
+            accessTokenClient = accessTokenClient,
+            spleisUrl = URI.create(env.getValue("SPLEIS_API_URL")),
+            spleisClientId = env.getValue("SPLEIS_CLIENT_ID"),
+        )
+    private val reservasjonClient =
+        ReservasjonClient(
+            httpClient = reservasjonHttpClient,
+            accessTokenClient = accessTokenClient,
+            apiUrl = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_API_URL"),
+            scope = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE"),
+        )
 
     private val msGraphClient = MsGraphClient(httpClient = httpClient, tokenClient = accessTokenClient)
 
@@ -221,11 +230,12 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val dokumentDao = DokumentDao(dataSource)
     private val generasjonDao = GenerasjonDao(dataSource)
     private val påVentApiDao = PåVentApiDao(dataSource)
-    private val avviksvurderinghenter = object : Avviksvurderinghenter {
-        override fun hentAvviksvurdering(vilkårsgrunnlagId: UUID): Avviksvurdering? {
-            return AvviksvurderingDao(dataSource).finnAvviksvurdering(vilkårsgrunnlagId)
+    private val avviksvurderinghenter =
+        object : Avviksvurderinghenter {
+            override fun hentAvviksvurdering(vilkårsgrunnlagId: UUID): Avviksvurdering? {
+                return AvviksvurderingDao(dataSource).finnAvviksvurdering(vilkårsgrunnlagId)
+            }
         }
-    }
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
 
     private val behandlingsstatistikkMediator = BehandlingsstatistikkMediator(behandlingsstatistikkDao)
@@ -234,50 +244,53 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
 
     private lateinit var dokumentMediator: DokumentMediator
 
-    private val godkjenningMediator = GodkjenningMediator(
-        vedtakDao,
-        opptegnelseDao,
-        oppgaveDao,
-        UtbetalingDao(dataSource),
-        meldingDao,
-        generasjonDao
-    )
+    private val godkjenningMediator =
+        GodkjenningMediator(
+            vedtakDao,
+            opptegnelseDao,
+            oppgaveDao,
+            UtbetalingDao(dataSource),
+            meldingDao,
+            generasjonDao,
+        )
 
     private val totrinnsvurderingMediator =
         TotrinnsvurderingMediator(TotrinnsvurderingDao(dataSource), oppgaveDao, periodehistorikkDao, notatMediator)
 
-    private val snapshotMediator = SnapshotMediator(
-        snapshotDao = snapshotApiDao,
-        snapshotClient = snapshotClient,
+    private val snapshotMediator =
+        SnapshotMediator(
+            snapshotDao = snapshotApiDao,
+            snapshotClient = snapshotClient,
+        )
+
+    private val plukkTilManuell: PlukkTilManuell<String> = (
+        {
+            it?.let {
+                val divisor = it.toInt()
+                require(divisor > 0) { "Her er et vennlig tips: ikke prøv å dele på 0" }
+                nextInt(divisor) == 0
+            } ?: false
+        }
     )
 
-    private val plukkTilManuell: PlukkTilManuell<String> = ({
-        it?.let {
-            val divisor = it.toInt()
-            require(divisor > 0) { "Her er et vennlig tips: ikke prøv å dele på 0" }
-            nextInt(divisor) == 0
-        } ?: false
-    })
+    private val stikkprøver =
+        object : Stikkprøver {
+            override fun utsFlereArbeidsgivereFørstegangsbehandling() = plukkTilManuell(env["STIKKPROEVER_UTS_FLERE_AG_FGB_DIVISOR"])
 
-    private val stikkprøver = object : Stikkprøver {
-        override fun utsFlereArbeidsgivereFørstegangsbehandling() =
-            plukkTilManuell(env["STIKKPROEVER_UTS_FLERE_AG_FGB_DIVISOR"])
+            override fun utsFlereArbeidsgivereForlengelse() = plukkTilManuell(env["STIKKPROEVER_UTS_FLERE_AG_FORLENGELSE_DIVISOR"])
 
-        override fun utsFlereArbeidsgivereForlengelse() =
-            plukkTilManuell(env["STIKKPROEVER_UTS_FLERE_AG_FORLENGELSE_DIVISOR"])
+            override fun utsEnArbeidsgiverFørstegangsbehandling() = plukkTilManuell(env["STIKKPROEVER_UTS_EN_AG_FGB_DIVISOR"])
 
-        override fun utsEnArbeidsgiverFørstegangsbehandling() =
-            plukkTilManuell(env["STIKKPROEVER_UTS_EN_AG_FGB_DIVISOR"])
+            override fun utsEnArbeidsgiverForlengelse() = plukkTilManuell(env["STIKKPROEVER_UTS_EN_AG_FORLENGELSE_DIVISOR"])
 
-        override fun utsEnArbeidsgiverForlengelse() = plukkTilManuell(env["STIKKPROEVER_UTS_EN_AG_FORLENGELSE_DIVISOR"])
-        override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() =
-            plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_FLERE_AG_FGB_DIVISOR"])
+            override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() =
+                plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_FLERE_AG_FGB_DIVISOR"])
 
-        override fun fullRefusjonFlereArbeidsgivereForlengelse() =
-            plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_FLERE_AG_FORLENGELSE_DIVISOR"])
+            override fun fullRefusjonFlereArbeidsgivereForlengelse() =
+                plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_FLERE_AG_FORLENGELSE_DIVISOR"])
 
-        override fun fullRefusjonEnArbeidsgiver() = plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_EN_AG_DIVISOR"])
-    }
+            override fun fullRefusjonEnArbeidsgiver() = plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_EN_AG_DIVISOR"])
+        }
 
     private val tilgangsgrupper = Tilgangsgrupper(System.getenv())
     private val tilgangskontrollørForReservasjon = TilgangskontrollørForReservasjon(msGraphClient, tilgangsgrupper)
@@ -347,62 +360,68 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val godkjenningService: GodkjenningService
 
     private val automatiseringDao = AutomatiseringDao(dataSource)
-    val automatisering = Automatisering(
-        risikovurderingDao = risikovurderingDao,
-        automatiseringDao = automatiseringDao,
-        åpneGosysOppgaverDao = åpneGosysOppgaverDao,
-        vergemålDao = vergemålDao,
-        personDao = personDao,
-        vedtakDao = vedtakDao,
-        overstyringDao = overstyringDao,
-        stikkprøver = stikkprøver,
-        meldingDao = meldingDao,
-        generasjonDao = generasjonDao,
-    )
+    val automatisering =
+        Automatisering(
+            risikovurderingDao = risikovurderingDao,
+            automatiseringDao = automatiseringDao,
+            åpneGosysOppgaverDao = åpneGosysOppgaverDao,
+            vergemålDao = vergemålDao,
+            personDao = personDao,
+            vedtakDao = vedtakDao,
+            overstyringDao = overstyringDao,
+            stikkprøver = stikkprøver,
+            meldingDao = meldingDao,
+            generasjonDao = generasjonDao,
+        )
 
-    private val kommandofabrikk = Kommandofabrikk(
-        dataSource = dataSource,
-        snapshotClient = snapshotClient,
-        oppgaveMediator = { oppgaveMediator },
-        godkjenningMediator = godkjenningMediator,
-        automatisering = automatisering
-    )
+    private val kommandofabrikk =
+        Kommandofabrikk(
+            dataSource = dataSource,
+            snapshotClient = snapshotClient,
+            oppgaveMediator = { oppgaveMediator },
+            godkjenningMediator = godkjenningMediator,
+            automatisering = automatisering,
+        )
 
     init {
         rapidsConnection.register(this)
-        oppgaveMediator = OppgaveMediator(
-            meldingDao = meldingDao,
-            oppgaveDao = oppgaveDao,
-            tildelingDao = tildelingDao,
-            reservasjonDao = reservasjonDao,
-            opptegnelseDao = opptegnelseDao,
-            totrinnsvurderingRepository = totrinnsvurderingDao,
-            saksbehandlerRepository = saksbehandlerDao,
-            rapidsConnection = rapidsConnection,
-            tilgangskontroll = tilgangskontrollørForReservasjon,
-            tilgangsgrupper = tilgangsgrupper
-        )
-        meldingMediator = MeldingMediator(
-            dataSource = dataSource,
-            rapidsConnection = rapidsConnection,
-            kommandofabrikk = kommandofabrikk,
-            avviksvurderingDao = avviksvurderingDao,
-            generasjonDao = generasjonDao
-        )
+        oppgaveMediator =
+            OppgaveMediator(
+                meldingDao = meldingDao,
+                oppgaveDao = oppgaveDao,
+                tildelingDao = tildelingDao,
+                reservasjonDao = reservasjonDao,
+                opptegnelseDao = opptegnelseDao,
+                totrinnsvurderingRepository = totrinnsvurderingDao,
+                saksbehandlerRepository = saksbehandlerDao,
+                rapidsConnection = rapidsConnection,
+                tilgangskontroll = tilgangskontrollørForReservasjon,
+                tilgangsgrupper = tilgangsgrupper,
+            )
+        meldingMediator =
+            MeldingMediator(
+                dataSource = dataSource,
+                rapidsConnection = rapidsConnection,
+                kommandofabrikk = kommandofabrikk,
+                avviksvurderingDao = avviksvurderingDao,
+                generasjonDao = generasjonDao,
+            )
         saksbehandlerMediator = SaksbehandlerMediator(dataSource, versjonAvKode(env), rapidsConnection, oppgaveMediator, tilgangsgrupper)
         dokumentMediator = DokumentMediator(dokumentDao, rapidsConnection)
-        godkjenningService = GodkjenningService(
-            dataSource = dataSource,
-            rapidsConnection = rapidsConnection,
-            oppgaveMediator = oppgaveMediator,
-            saksbehandlerRepository = saksbehandlerDao
-        )
+        godkjenningService =
+            GodkjenningService(
+                dataSource = dataSource,
+                rapidsConnection = rapidsConnection,
+                oppgaveMediator = oppgaveMediator,
+                saksbehandlerRepository = saksbehandlerDao,
+            )
     }
 
-    fun start() = rapidsConnection.start().also {
-        val beans: List<GarbageCollectorMXBean> = ManagementFactory.getGarbageCollectorMXBeans()
-        logg.info("Registrerte garbage collectors etter oppstart: ${beans.joinToString { it.name }}")
-    }
+    fun start() =
+        rapidsConnection.start().also {
+            val beans: List<GarbageCollectorMXBean> = ManagementFactory.getGarbageCollectorMXBeans()
+            logg.info("Registrerte garbage collectors etter oppstart: ${beans.joinToString { it.name }}")
+        }
 
     override fun onStartup(rapidsConnection: RapidsConnection) {
         dataSourceBuilder.migrate()
@@ -418,7 +437,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
 }
 
 fun Application.installErrorHandling() {
-
     install(StatusPages) {
         exception<Modellfeil> { call: ApplicationCall, modellfeil: Modellfeil ->
             modellfeil.logger()
@@ -431,10 +449,9 @@ fun Application.installErrorHandling() {
             sikkerlogg.error("Unhandled: $verb - $uri", cause)
             call.respondText(
                 text = "Det skjedde en uventet feil",
-                status = HttpStatusCode.InternalServerError
+                status = HttpStatusCode.InternalServerError,
             )
             call.respond(HttpStatusCode.InternalServerError, "Det skjedde en uventet feil")
-
         }
     }
 }

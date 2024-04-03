@@ -1,7 +1,5 @@
 package no.nav.helse.mediator
 
-import java.util.UUID
-import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.ReservasjonDao
@@ -68,6 +66,8 @@ import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.godkjennVarsl
 import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.harAktiveVarsler
 import no.nav.helse.spesialist.api.vedtaksperiode.ApiGenerasjonRepository
 import org.slf4j.LoggerFactory
+import java.util.UUID
+import javax.sql.DataSource
 
 internal class SaksbehandlerMediator(
     dataSource: DataSource,
@@ -86,7 +86,10 @@ internal class SaksbehandlerMediator(
     private val overstyringDao = OverstyringDao(dataSource)
     private val påVentDao = PåVentDao(dataSource)
 
-    override fun <T : HandlingFraApi> håndter(handlingFraApi: T, saksbehandlerFraApi: SaksbehandlerFraApi) {
+    override fun <T : HandlingFraApi> håndter(
+        handlingFraApi: T,
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+    ) {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         val modellhandling = handlingFraApi.tilModellversjon()
         SaksbehandlerLagrer(saksbehandlerDao).lagre(saksbehandler)
@@ -98,8 +101,8 @@ internal class SaksbehandlerMediator(
         withMDC(
             mapOf(
                 "saksbehandlerOid" to saksbehandler.oid().toString(),
-                "handlingId" to handlingId.toString()
-            )
+                "handlingId" to handlingId.toString(),
+            ),
         ) {
             sikkerlogg.info("Utfører handling ${modellhandling.loggnavn()} på vegne av saksbehandler $saksbehandler")
             when (modellhandling) {
@@ -112,7 +115,10 @@ internal class SaksbehandlerMediator(
         }
     }
 
-    private fun håndter(handling: Oppgavehandling, saksbehandler: Saksbehandler) {
+    private fun håndter(
+        handling: Oppgavehandling,
+        saksbehandler: Saksbehandler,
+    ) {
         try {
             oppgaveMediator.håndter(handling, saksbehandler)
         } catch (e: Modellfeil) {
@@ -120,23 +126,31 @@ internal class SaksbehandlerMediator(
         }
     }
 
-    private fun håndter(handling: PåVent, saksbehandler: Saksbehandler) {
+    private fun håndter(
+        handling: PåVent,
+        saksbehandler: Saksbehandler,
+    ) {
         try {
             oppgaveMediator.håndter(handling, saksbehandler)
             PåVentMediator(påVentDao).apply {
                 this.lagre(
                     påVent = handling,
-                    saksbehandlerOid = saksbehandler.oid()
+                    saksbehandlerOid = saksbehandler.oid(),
                 )
             }
-            sikkerlogg.info("Utfører handling ${handling.loggnavn()} på oppgave ${handling.oppgaveId()} på vegne av saksbehandler $saksbehandler")
+            sikkerlogg.info(
+                "Utfører handling ${handling.loggnavn()} på oppgave ${handling.oppgaveId()} på vegne av saksbehandler $saksbehandler",
+            )
             handling.utførAv(saksbehandler)
         } catch (e: Modellfeil) {
             throw e.tilApiversjon()
         }
     }
 
-    private fun håndter(handling: Overstyring, saksbehandler: Saksbehandler) {
+    private fun håndter(
+        handling: Overstyring,
+        saksbehandler: Saksbehandler,
+    ) {
         val fødselsnummer = handling.gjelderFødselsnummer()
         oppgaveMediator.håndter(handling)
         reservasjonDao.reserverPerson(saksbehandler.oid(), fødselsnummer)
@@ -147,7 +161,10 @@ internal class SaksbehandlerMediator(
         handling.utførAv(saksbehandler)
     }
 
-    override fun opprettAbonnement(saksbehandlerFraApi: SaksbehandlerFraApi, personidentifikator: String) {
+    override fun opprettAbonnement(
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+        personidentifikator: String,
+    ) {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         SaksbehandlerLagrer(saksbehandlerDao).lagre(saksbehandler)
         abonnementDao.opprettAbonnement(saksbehandler.oid(), personidentifikator.toLong())
@@ -169,14 +186,19 @@ internal class SaksbehandlerMediator(
         return opptegnelseDao.finnOpptegnelser(saksbehandler.oid())
     }
 
-    override fun håndter(godkjenning: GodkjenningDto, behandlingId: UUID, saksbehandlerFraApi: SaksbehandlerFraApi) {
+    override fun håndter(
+        godkjenning: GodkjenningDto,
+        behandlingId: UUID,
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+    ) {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         val fødselsnummer = oppgaveApiDao.finnFødselsnummer(godkjenning.oppgavereferanse)
 
         if (godkjenning.godkjent) {
             val perioderTilBehandling = generasjonRepository.perioderTilBehandling(godkjenning.oppgavereferanse)
-            if (perioderTilBehandling.harAktiveVarsler())
+            if (perioderTilBehandling.harAktiveVarsler()) {
                 throw ManglerVurderingAvVarsler(godkjenning.oppgavereferanse)
+            }
             perioderTilBehandling.godkjennVarsler(fødselsnummer, behandlingId, saksbehandler.ident(), this::vurderVarsel)
         } else {
             val periodeTilGodkjenning = generasjonRepository.periodeTilGodkjenning(godkjenning.oppgavereferanse)
@@ -189,8 +211,9 @@ internal class SaksbehandlerMediator(
 
     override fun håndterTotrinnsvurdering(oppgavereferanse: Long) {
         val perioderTilBehandling = generasjonRepository.perioderTilBehandling(oppgavereferanse)
-        if (perioderTilBehandling.harAktiveVarsler())
+        if (perioderTilBehandling.harAktiveVarsler()) {
             throw ManglerVurderingAvVarsler(oppgavereferanse)
+        }
     }
 
     private fun vurderVarsel(
@@ -205,29 +228,32 @@ internal class SaksbehandlerMediator(
         saksbehandlerIdent: String,
     ) {
         varselRepository.vurderVarselFor(varselId, gjeldendeStatus, saksbehandlerIdent)
-        val message = JsonMessage.newMessage(
-            "varsel_endret", mapOf(
-                "fødselsnummer" to fødselsnummer,
-                "vedtaksperiode_id" to vedtaksperiodeId,
-                "behandling_id" to behandlingId,
-                "varsel_id" to varselId,
-                "varseltittel" to varseltittel,
-                "varselkode" to varselkode,
-                "forrige_status" to forrigeStatus.name,
-                "gjeldende_status" to gjeldendeStatus.name
+        val message =
+            JsonMessage.newMessage(
+                "varsel_endret",
+                mapOf(
+                    "fødselsnummer" to fødselsnummer,
+                    "vedtaksperiode_id" to vedtaksperiodeId,
+                    "behandling_id" to behandlingId,
+                    "varsel_id" to varselId,
+                    "varseltittel" to varseltittel,
+                    "varselkode" to varselkode,
+                    "forrige_status" to forrigeStatus.name,
+                    "gjeldende_status" to gjeldendeStatus.name,
+                ),
             )
-        )
         sikkerlogg.info(
             "Publiserer varsel_endret for varsel med {}, {}, {}",
             kv("varselId", varselId),
             kv("varselkode", varselkode),
-            kv("status", gjeldendeStatus)
+            kv("status", gjeldendeStatus),
         )
         rapidsConnection.publish(fødselsnummer, message.toJson())
     }
 
     internal companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+
         internal fun Modellfeil.tilApiversjon(): no.nav.helse.spesialist.api.feilhåndtering.Modellfeil {
             return when (this) {
                 is no.nav.helse.modell.OppgaveIkkeTildelt -> OppgaveIkkeTildelt(oppgaveId)
@@ -237,7 +263,10 @@ internal class SaksbehandlerMediator(
                 }
                 is OppgaveAlleredeSendtBeslutter -> no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter(oppgaveId)
                 is OppgaveAlleredeSendtIRetur -> no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur(oppgaveId)
-                is OppgaveKreverVurderingAvToSaksbehandlere -> no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverVurderingAvToSaksbehandlere(oppgaveId)
+                is OppgaveKreverVurderingAvToSaksbehandlere ->
+                    no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverVurderingAvToSaksbehandlere(
+                        oppgaveId,
+                    )
                 is ManglerTilgang -> IkkeTilgang(oid, oppgaveId)
             }
         }
@@ -265,17 +294,19 @@ internal class SaksbehandlerMediator(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             skjæringstidspunkt = skjæringstidspunkt,
-            overstyrteArbeidsforhold = overstyrteArbeidsforhold.map { overstyrtArbeidsforhold ->
-                Arbeidsforhold(
-                    organisasjonsnummer = overstyrtArbeidsforhold.orgnummer,
-                    deaktivert = overstyrtArbeidsforhold.deaktivert,
-                    begrunnelse = overstyrtArbeidsforhold.begrunnelse,
-                    forklaring = overstyrtArbeidsforhold.forklaring,
-                    lovhjemmel = overstyrtArbeidsforhold.lovhjemmel?.let {
-                        Lovhjemmel(it.paragraf, it.ledd, it.bokstav, it.lovverk, it.lovverksversjon)
-                    }
-                )
-            }
+            overstyrteArbeidsforhold =
+                overstyrteArbeidsforhold.map { overstyrtArbeidsforhold ->
+                    Arbeidsforhold(
+                        organisasjonsnummer = overstyrtArbeidsforhold.orgnummer,
+                        deaktivert = overstyrtArbeidsforhold.deaktivert,
+                        begrunnelse = overstyrtArbeidsforhold.begrunnelse,
+                        forklaring = overstyrtArbeidsforhold.forklaring,
+                        lovhjemmel =
+                            overstyrtArbeidsforhold.lovhjemmel?.let {
+                                Lovhjemmel(it.paragraf, it.ledd, it.bokstav, it.lovverk, it.lovverksversjon)
+                            },
+                    )
+                },
         )
     }
 
@@ -284,24 +315,26 @@ internal class SaksbehandlerMediator(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
-            arbeidsgivere = arbeidsgivere.map { overstyrArbeidsgiver ->
-                OverstyrtArbeidsgiver(
-                    overstyrArbeidsgiver.organisasjonsnummer,
-                    overstyrArbeidsgiver.månedligInntekt,
-                    overstyrArbeidsgiver.fraMånedligInntekt,
-                    overstyrArbeidsgiver.refusjonsopplysninger?.map {
-                        Refusjonselement(it.fom, it.tom, it.beløp)
-                    },
-                    overstyrArbeidsgiver.fraRefusjonsopplysninger?.map {
-                        Refusjonselement(it.fom, it.tom, it.beløp)
-                    },
-                    begrunnelse = overstyrArbeidsgiver.begrunnelse,
-                    forklaring = overstyrArbeidsgiver.forklaring,
-                    lovhjemmel = overstyrArbeidsgiver.lovhjemmel?.let {
-                        Lovhjemmel(it.paragraf, it.ledd, it.bokstav, it.lovverk, it.lovverksversjon)
-                    }
-                )
-            },
+            arbeidsgivere =
+                arbeidsgivere.map { overstyrArbeidsgiver ->
+                    OverstyrtArbeidsgiver(
+                        overstyrArbeidsgiver.organisasjonsnummer,
+                        overstyrArbeidsgiver.månedligInntekt,
+                        overstyrArbeidsgiver.fraMånedligInntekt,
+                        overstyrArbeidsgiver.refusjonsopplysninger?.map {
+                            Refusjonselement(it.fom, it.tom, it.beløp)
+                        },
+                        overstyrArbeidsgiver.fraRefusjonsopplysninger?.map {
+                            Refusjonselement(it.fom, it.tom, it.beløp)
+                        },
+                        begrunnelse = overstyrArbeidsgiver.begrunnelse,
+                        forklaring = overstyrArbeidsgiver.forklaring,
+                        lovhjemmel =
+                            overstyrArbeidsgiver.lovhjemmel?.let {
+                                Lovhjemmel(it.paragraf, it.ledd, it.bokstav, it.lovverk, it.lovverksversjon)
+                            },
+                    )
+                },
         )
     }
 
@@ -311,24 +344,27 @@ internal class SaksbehandlerMediator(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
-            dager = dager.map {
-                OverstyrtTidslinjedag(
-                    dato = it.dato,
-                    type = it.type,
-                    fraType = it.fraType,
-                    grad = it.grad,
-                    fraGrad = it.fraGrad,
-                    lovhjemmel = it.lovhjemmel?.let { lovhjemmel ->
-                        Lovhjemmel(
-                            paragraf = lovhjemmel.paragraf,
-                            ledd = lovhjemmel.ledd,
-                            bokstav = lovhjemmel.bokstav,
-                            lovverk = lovhjemmel.lovverk,
-                            lovverksversjon = lovhjemmel.lovverksversjon,
-                        )
-                    })
-            },
-            begrunnelse = begrunnelse
+            dager =
+                dager.map {
+                    OverstyrtTidslinjedag(
+                        dato = it.dato,
+                        type = it.type,
+                        fraType = it.fraType,
+                        grad = it.grad,
+                        fraGrad = it.fraGrad,
+                        lovhjemmel =
+                            it.lovhjemmel?.let { lovhjemmel ->
+                                Lovhjemmel(
+                                    paragraf = lovhjemmel.paragraf,
+                                    ledd = lovhjemmel.ledd,
+                                    bokstav = lovhjemmel.bokstav,
+                                    lovverk = lovhjemmel.lovverk,
+                                    lovverksversjon = lovhjemmel.lovverksversjon,
+                                )
+                            },
+                    )
+                },
+            begrunnelse = begrunnelse,
         )
     }
 
@@ -337,32 +373,35 @@ internal class SaksbehandlerMediator(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
-            arbeidsgivere = arbeidsgivere.map {
-                SkjønnsfastsattArbeidsgiver(
-                    it.organisasjonsnummer,
-                    it.årlig,
-                    it.fraÅrlig,
-                    it.årsak,
-                    type = when (it.type) {
-                        SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT
-                        SkjønnsfastsettingstypeDto.RAPPORTERT_ÅRSINNTEKT -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT
-                        SkjønnsfastsettingstypeDto.ANNET -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.ANNET
-                    },
-                    begrunnelseMal = it.begrunnelseMal,
-                    begrunnelseFritekst = it.begrunnelseFritekst,
-                    begrunnelseKonklusjon = it.begrunnelseKonklusjon,
-                    lovhjemmel = it.lovhjemmel?.let { lovhjemmel ->
-                        Lovhjemmel(
-                            paragraf = lovhjemmel.paragraf,
-                            ledd = lovhjemmel.ledd,
-                            bokstav = lovhjemmel.bokstav,
-                            lovverk = lovhjemmel.lovverk,
-                            lovverksversjon = lovhjemmel.lovverksversjon
-                        )
-                    },
-                    initierendeVedtaksperiodeId = it.initierendeVedtaksperiodeId
-                )
-            }
+            arbeidsgivere =
+                arbeidsgivere.map {
+                    SkjønnsfastsattArbeidsgiver(
+                        it.organisasjonsnummer,
+                        it.årlig,
+                        it.fraÅrlig,
+                        it.årsak,
+                        type =
+                            when (it.type) {
+                                SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT
+                                SkjønnsfastsettingstypeDto.RAPPORTERT_ÅRSINNTEKT -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT
+                                SkjønnsfastsettingstypeDto.ANNET -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.ANNET
+                            },
+                        begrunnelseMal = it.begrunnelseMal,
+                        begrunnelseFritekst = it.begrunnelseFritekst,
+                        begrunnelseKonklusjon = it.begrunnelseKonklusjon,
+                        lovhjemmel =
+                            it.lovhjemmel?.let { lovhjemmel ->
+                                Lovhjemmel(
+                                    paragraf = lovhjemmel.paragraf,
+                                    ledd = lovhjemmel.ledd,
+                                    bokstav = lovhjemmel.bokstav,
+                                    lovverk = lovhjemmel.lovverk,
+                                    lovverksversjon = lovhjemmel.lovverksversjon,
+                                )
+                            },
+                        initierendeVedtaksperiodeId = it.initierendeVedtaksperiodeId,
+                    )
+                },
         )
     }
 
@@ -374,7 +413,7 @@ internal class SaksbehandlerMediator(
             fagsystemId = this.fagsystemId,
             utbetalingId = this.utbetalingId,
             begrunnelser = this.begrunnelser,
-            kommentar = this.kommentar
+            kommentar = this.kommentar,
         )
     }
 

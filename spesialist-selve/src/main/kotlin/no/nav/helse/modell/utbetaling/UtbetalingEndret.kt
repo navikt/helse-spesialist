@@ -1,8 +1,6 @@
 package no.nav.helse.modell.utbetaling
 
 import com.fasterxml.jackson.databind.JsonNode
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.meldinger.Personmelding
@@ -20,6 +18,8 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class UtbetalingEndret private constructor(
     override val id: UUID,
@@ -33,9 +33,9 @@ internal class UtbetalingEndret private constructor(
     val personbeløp: Int,
     val arbeidsgiverOppdrag: LagreOppdragCommand.Oppdrag,
     val personOppdrag: LagreOppdragCommand.Oppdrag,
-    private val json: String
+    private val json: String,
 ) : Personmelding {
-    internal constructor(packet: JsonMessage): this(
+    internal constructor(packet: JsonMessage) : this(
         id = UUID.fromString(packet["@id"].asText()),
         fødselsnummer = packet["fødselsnummer"].asText(),
         organisasjonsnummer = packet["organisasjonsnummer"].asText(),
@@ -47,9 +47,9 @@ internal class UtbetalingEndret private constructor(
         personbeløp = packet["personOppdrag"]["nettoBeløp"].asInt(),
         arbeidsgiverOppdrag = tilOppdrag(packet["arbeidsgiverOppdrag"], packet["organisasjonsnummer"].asText()),
         personOppdrag = tilOppdrag(packet["personOppdrag"], packet["fødselsnummer"].asText()),
-        json = packet.toJson()
+        json = packet.toJson(),
     )
-    internal constructor(jsonNode: JsonNode): this(
+    internal constructor(jsonNode: JsonNode) : this(
         id = UUID.fromString(jsonNode["@id"].asText()),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
         organisasjonsnummer = jsonNode["organisasjonsnummer"].asText(),
@@ -61,29 +61,38 @@ internal class UtbetalingEndret private constructor(
         personbeløp = jsonNode["personOppdrag"]["nettoBeløp"].asInt(),
         arbeidsgiverOppdrag = tilOppdrag(jsonNode["arbeidsgiverOppdrag"], jsonNode["organisasjonsnummer"].asText()),
         personOppdrag = tilOppdrag(jsonNode["personOppdrag"], jsonNode["fødselsnummer"].asText()),
-        json = jsonNode.toString()
+        json = jsonNode.toString(),
     )
 
-    override fun behandle(person: Person, kommandofabrikk: Kommandofabrikk) {
+    override fun behandle(
+        person: Person,
+        kommandofabrikk: Kommandofabrikk,
+    ) {
         if (gjeldendeStatus == FORKASTET) person.utbetalingForkastet(this)
         kommandofabrikk.iverksettUtbetalingEndret(this)
     }
 
     override fun fødselsnummer(): String = fødselsnummer
+
     override fun toJson(): String = json
+
     fun erRelevantFor(gjeldendeUtbetalingId: UUID) = utbetalingId == gjeldendeUtbetalingId
 
     private companion object {
-        private fun tilOppdrag(jsonNode: JsonNode, mottaker: String) = LagreOppdragCommand.Oppdrag(
+        private fun tilOppdrag(
+            jsonNode: JsonNode,
+            mottaker: String,
+        ) = LagreOppdragCommand.Oppdrag(
             fagsystemId = jsonNode.path("fagsystemId").asText(),
             mottaker = jsonNode.path("mottaker").takeIf(JsonNode::isTextual)?.asText() ?: mottaker,
-            linjer = jsonNode.path("linjer").map { linje ->
-                LagreOppdragCommand.Oppdrag.Utbetalingslinje(
-                    fom = linje.path("fom").asLocalDate(),
-                    tom = linje.path("tom").asLocalDate(),
-                    totalbeløp = linje.path("totalbeløp").takeIf(JsonNode::isInt)?.asInt()
-                )
-            }
+            linjer =
+                jsonNode.path("linjer").map { linje ->
+                    LagreOppdragCommand.Oppdrag.Utbetalingslinje(
+                        fom = linje.path("fom").asLocalDate(),
+                        tom = linje.path("tom").asLocalDate(),
+                        totalbeløp = linje.path("totalbeløp").takeIf(JsonNode::isInt)?.asInt(),
+                    )
+                },
         )
     }
 }
@@ -106,31 +115,32 @@ internal class UtbetalingEndretCommand(
     tildelingDao: TildelingDao,
     oppgaveMediator: OppgaveMediator,
     totrinnsvurderingMediator: TotrinnsvurderingMediator,
-    json: String
-): MacroCommand() {
-    override val commands: List<Command> = mutableListOf(
-        LagreOppdragCommand(
-            fødselsnummer = fødselsnummer,
-            orgnummer = organisasjonsnummer,
-            utbetalingId = utbetalingId,
-            type = Utbetalingtype.valueOf(utbetalingstype),
-            status = gjeldendeStatus,
-            opprettet = opprettet,
-            arbeidsgiverOppdrag = arbeidsgiverOppdrag,
-            personOppdrag = personOppdrag,
-            arbeidsgiverbeløp = arbeidsgiverbeløp,
-            personbeløp = personbeløp,
-            json = json,
-            utbetalingDao = utbetalingDao,
-            opptegnelseDao = opptegnelseDao
-        ),
-        ReserverPersonHvisTildeltCommand(
-            fødselsnummer = fødselsnummer,
-            reservasjonDao = reservasjonDao,
-            tildelingDao = tildelingDao,
-            oppgaveDao = oppgaveDao,
-            totrinnsvurderingMediator = totrinnsvurderingMediator
-        ),
-        OppdaterOppgavestatusCommand(utbetalingId, gjeldendeStatus, oppgaveMediator),
-    )
+    json: String,
+) : MacroCommand() {
+    override val commands: List<Command> =
+        mutableListOf(
+            LagreOppdragCommand(
+                fødselsnummer = fødselsnummer,
+                orgnummer = organisasjonsnummer,
+                utbetalingId = utbetalingId,
+                type = Utbetalingtype.valueOf(utbetalingstype),
+                status = gjeldendeStatus,
+                opprettet = opprettet,
+                arbeidsgiverOppdrag = arbeidsgiverOppdrag,
+                personOppdrag = personOppdrag,
+                arbeidsgiverbeløp = arbeidsgiverbeløp,
+                personbeløp = personbeløp,
+                json = json,
+                utbetalingDao = utbetalingDao,
+                opptegnelseDao = opptegnelseDao,
+            ),
+            ReserverPersonHvisTildeltCommand(
+                fødselsnummer = fødselsnummer,
+                reservasjonDao = reservasjonDao,
+                tildelingDao = tildelingDao,
+                oppgaveDao = oppgaveDao,
+                totrinnsvurderingMediator = totrinnsvurderingMediator,
+            ),
+            OppdaterOppgavestatusCommand(utbetalingId, gjeldendeStatus, oppgaveMediator),
+        )
 }

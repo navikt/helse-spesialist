@@ -9,7 +9,6 @@ internal class KontrollerEgenAnsattstatus(
     private val fødselsnummer: String,
     private val egenAnsattDao: EgenAnsattDao,
 ) : Command {
-
     private companion object {
         private val logg = LoggerFactory.getLogger(KontrollerEgenAnsattstatus::class.java)
     }

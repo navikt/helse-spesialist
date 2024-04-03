@@ -1,13 +1,13 @@
 package no.nav.helse.mediator.meldinger.hendelser
 
 import com.fasterxml.jackson.databind.JsonNode
-import java.util.UUID
 import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.rapids_rivers.JsonMessage
+import java.util.UUID
 
 internal class AvsluttetUtenVedtakMessage private constructor(
     override val id: UUID,
@@ -15,38 +15,43 @@ internal class AvsluttetUtenVedtakMessage private constructor(
     private val vedtaksperiodeId: UUID,
     private val spleisBehandlingId: UUID,
     private val hendelser: List<UUID>,
-    private val json: String
-): Vedtaksperiodemelding {
-
-    internal constructor(jsonNode: JsonNode): this(
+    private val json: String,
+) : Vedtaksperiodemelding {
+    internal constructor(jsonNode: JsonNode) : this(
         id = jsonNode["@id"].asUUID(),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
         vedtaksperiodeId = UUID.fromString(jsonNode["vedtaksperiodeId"].asText()),
         spleisBehandlingId = UUID.fromString(jsonNode["behandlingId"].asText()),
         hendelser = jsonNode["hendelser"].map { it.asUUID() },
-        json = jsonNode.toString()
+        json = jsonNode.toString(),
     )
 
-    internal constructor(packet: JsonMessage): this(
+    internal constructor(packet: JsonMessage) : this(
         id = packet["@id"].asUUID(),
         fødselsnummer = packet["fødselsnummer"].asText(),
         vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
         spleisBehandlingId = UUID.fromString(packet["behandlingId"].asText()),
         hendelser = packet["hendelser"].map { it.asUUID() },
-        json = packet.toJson()
+        json = packet.toJson(),
     )
 
-    private val avsluttetUtenVedtak get() = AvsluttetUtenVedtak(
-        vedtaksperiodeId = vedtaksperiodeId,
-        spleisBehandlingId = spleisBehandlingId,
-        hendelser = hendelser,
-    )
+    private val avsluttetUtenVedtak get() =
+        AvsluttetUtenVedtak(
+            vedtaksperiodeId = vedtaksperiodeId,
+            spleisBehandlingId = spleisBehandlingId,
+            hendelser = hendelser,
+        )
+
     override fun fødselsnummer(): String = fødselsnummer
+
     override fun vedtaksperiodeId(): UUID = vedtaksperiodeId
 
     override fun toJson(): String = json
 
-    override fun behandle(person: Person, kommandofabrikk: Kommandofabrikk) {
+    override fun behandle(
+        person: Person,
+        kommandofabrikk: Kommandofabrikk,
+    ) {
         person.avsluttetUtenVedtak(avsluttetUtenVedtak)
     }
 }

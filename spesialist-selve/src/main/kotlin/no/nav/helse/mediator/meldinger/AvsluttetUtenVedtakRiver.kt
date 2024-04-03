@@ -14,7 +14,6 @@ internal class AvsluttetUtenVedtakRiver(
     rapidsConnection: RapidsConnection,
     private val mediator: MeldingMediator,
 ) : River.PacketListener {
-
     init {
         River(rapidsConnection).apply {
             validate {
@@ -26,11 +25,17 @@ internal class AvsluttetUtenVedtakRiver(
         }.register(this)
     }
 
-    override fun onError(problems: MessageProblems, context: MessageContext) {
+    override fun onError(
+        problems: MessageProblems,
+        context: MessageContext,
+    ) {
         sikkerlogg.error("Forstod ikke avsluttet_uten_vedtak:\n${problems.toExtendedReport()}")
     }
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) {
+    override fun onPacket(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         sikkerlogg.info("Mottok melding avsluttet_uten_vedtak:\n${packet.toJson()}")
         mediator.mottaMelding(AvsluttetUtenVedtakMessage(packet), context)
     }

@@ -1,9 +1,9 @@
 package no.nav.helse.modell.saksbehandler.handlinger.dto
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.vilkårsprøving.LovhjemmelDto
+import java.time.LocalDate
+import java.util.UUID
 
 data class SkjønnsfastsattSykepengegrunnlagDto(
     val id: UUID,

@@ -42,14 +42,21 @@ internal abstract class MacroCommand : Command {
         return name + commands.joinToString { it.hash() }
     }
 
-    private fun run(context: CommandContext, commands: List<Command>): Boolean {
+    private fun run(
+        context: CommandContext,
+        commands: List<Command>,
+    ): Boolean {
         return CommandContext.run(context, commands) {
             historikk.add(0, it)
             runCommand(context, it, Command::execute)
         }
     }
 
-    private fun runCommand(context: CommandContext, command: Command, commandAction: Command.(CommandContext) -> Boolean): Boolean {
+    private fun runCommand(
+        context: CommandContext,
+        command: Command,
+        commandAction: Command.(CommandContext) -> Boolean,
+    ): Boolean {
         if (!commandAction(command, context)) {
             context.suspendert(currentIndex)
             logg.info("Kommando ${command::class.simpleName} suspenderte, nåværende sti: ${context.sti()}")

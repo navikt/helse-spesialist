@@ -11,7 +11,6 @@ internal class OppdaterSnapshotCommand(
     private val fødselsnummer: String,
     private val personDao: PersonDao,
 ) : Command {
-
     private companion object {
         private val logg = LoggerFactory.getLogger(OppdaterSnapshotCommand::class.java)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -24,7 +23,9 @@ internal class OppdaterSnapshotCommand(
             personDao.findPersoninfoRef(fødselsnummer) != null
         ) {
             oppdaterSnapshot()
-        } else ignorer()
+        } else {
+            ignorer()
+        }
     }
 
     private fun oppdaterSnapshot(): Boolean {

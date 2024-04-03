@@ -4,33 +4,34 @@ import com.expediagroup.graphql.server.operations.Mutation
 import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
-import java.util.UUID
 import no.nav.helse.spesialist.api.graphql.query.tilKommentar
 import no.nav.helse.spesialist.api.graphql.query.tilNotat
 import no.nav.helse.spesialist.api.graphql.schema.Kommentar
 import no.nav.helse.spesialist.api.graphql.schema.Notat
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.notat.NotatDao
+import java.util.UUID
 
 class NotatMutation(private val notatDao: NotatDao) : Mutation {
-
     @Suppress("unused")
     fun feilregistrerNotat(id: Int): DataFetcherResult<Notat?> {
-        val notatDto = try {
-            notatDao.feilregistrerNotat(id)
-        } catch (e: RuntimeException) {
-            return DataFetcherResult.newResult<Notat?>().error(kunneIkkeFeilregistrereNotatError(id)).build()
-        }
+        val notatDto =
+            try {
+                notatDao.feilregistrerNotat(id)
+            } catch (e: RuntimeException) {
+                return DataFetcherResult.newResult<Notat?>().error(kunneIkkeFeilregistrereNotatError(id)).build()
+            }
         return DataFetcherResult.newResult<Notat?>().data(notatDto?.let(::tilNotat)).build()
     }
 
     @Suppress("unused")
     fun feilregistrerKommentar(id: Int): DataFetcherResult<Kommentar?> {
-        val kommentarDto = try {
-            notatDao.feilregistrerKommentar(id)
-        } catch (e: Exception) {
-            return DataFetcherResult.newResult<Kommentar?>().error(kunneIkkeFeilregistrereKommentarError(id)).build()
-        }
+        val kommentarDto =
+            try {
+                notatDao.feilregistrerKommentar(id)
+            } catch (e: Exception) {
+                return DataFetcherResult.newResult<Kommentar?>().error(kunneIkkeFeilregistrereKommentarError(id)).build()
+            }
         return DataFetcherResult.newResult<Kommentar?>().data(kommentarDto?.let(::tilKommentar)).build()
     }
 
@@ -45,22 +46,28 @@ class NotatMutation(private val notatDao: NotatDao) : Mutation {
         saksbehandlerOid: String,
     ): DataFetcherResult<Notat?> {
         val vedtaksperiodeIdUUID = UUID.fromString(vedtaksperiodeId)
-        val notatDto = try {
-            notatDao.opprettNotat(vedtaksperiodeIdUUID, tekst, UUID.fromString(saksbehandlerOid), type)
-        } catch (e: RuntimeException) {
-            return DataFetcherResult.newResult<Notat?>().error(kunneIkkeOppretteNotatError(vedtaksperiodeIdUUID))
-                .build()
-        }
+        val notatDto =
+            try {
+                notatDao.opprettNotat(vedtaksperiodeIdUUID, tekst, UUID.fromString(saksbehandlerOid), type)
+            } catch (e: RuntimeException) {
+                return DataFetcherResult.newResult<Notat?>().error(kunneIkkeOppretteNotatError(vedtaksperiodeIdUUID))
+                    .build()
+            }
         return DataFetcherResult.newResult<Notat?>().data(notatDto?.let(::tilNotat)).build()
     }
 
     @Suppress("unused")
-    fun leggTilKommentar(notatId: Int, tekst: String, saksbehandlerident: String): DataFetcherResult<Kommentar?> {
-        val kommentarDto = try {
-            notatDao.leggTilKommentar(notatId, tekst, saksbehandlerident)
-        } catch (e: Exception) {
-            return DataFetcherResult.newResult<Kommentar?>().error(kunneIkkeFinneNotatError(notatId)).build()
-        }
+    fun leggTilKommentar(
+        notatId: Int,
+        tekst: String,
+        saksbehandlerident: String,
+    ): DataFetcherResult<Kommentar?> {
+        val kommentarDto =
+            try {
+                notatDao.leggTilKommentar(notatId, tekst, saksbehandlerident)
+            } catch (e: Exception) {
+                return DataFetcherResult.newResult<Kommentar?>().error(kunneIkkeFinneNotatError(notatId)).build()
+            }
 
         return DataFetcherResult.newResult<Kommentar?>().data(kommentarDto?.let(::tilKommentar)).build()
     }

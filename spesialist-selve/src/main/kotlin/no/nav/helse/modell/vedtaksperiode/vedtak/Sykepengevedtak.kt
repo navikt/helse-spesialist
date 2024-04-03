@@ -1,10 +1,10 @@
 package no.nav.helse.modell.vedtaksperiode.vedtak
 
+import no.nav.helse.modell.sykefraværstilfelle.Skjønnsfastsettingstype
+import no.nav.helse.modell.sykefraværstilfelle.Skjønnsfastsettingsårsak
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.modell.sykefraværstilfelle.Skjønnsfastsettingstype
-import no.nav.helse.modell.sykefraværstilfelle.Skjønnsfastsettingsårsak
 
 internal sealed class Sykepengevedtak(
     val fødselsnummer: String,
@@ -22,27 +22,28 @@ internal sealed class Sykepengevedtak(
     val begrensning: String,
     val inntekt: Double,
     val vedtakFattetTidspunkt: LocalDateTime,
-    val tags: List<String>
+    val tags: List<String>,
 ) {
-    override fun equals(other: Any?) = this === other || (
-            other is Sykepengevedtak
-                    && fødselsnummer == other.fødselsnummer
-                    && aktørId == other.aktørId
-                    && vedtaksperiodeId == other.vedtaksperiodeId
-                    && spleisBehandlingId == other.spleisBehandlingId
-                    && organisasjonsnummer == other.organisasjonsnummer
-                    && fom == other.fom
-                    && tom == other.tom
-                    && skjæringstidspunkt == other.skjæringstidspunkt
-                    && hendelser == other.hendelser
-                    && sykepengegrunnlag == other.sykepengegrunnlag
-                    && grunnlagForSykepengegrunnlag == other.grunnlagForSykepengegrunnlag
-                    && grunnlagForSykepengegrunnlagPerArbeidsgiver == other.grunnlagForSykepengegrunnlagPerArbeidsgiver
-                    && begrensning == other.begrensning
-                    && inntekt == other.inntekt
-                    && vedtakFattetTidspunkt.withNano(0) == other.vedtakFattetTidspunkt.withNano(0)
-                    && tags == other.tags
-            )
+    override fun equals(other: Any?) =
+        this === other || (
+            other is Sykepengevedtak &&
+                fødselsnummer == other.fødselsnummer &&
+                aktørId == other.aktørId &&
+                vedtaksperiodeId == other.vedtaksperiodeId &&
+                spleisBehandlingId == other.spleisBehandlingId &&
+                organisasjonsnummer == other.organisasjonsnummer &&
+                fom == other.fom &&
+                tom == other.tom &&
+                skjæringstidspunkt == other.skjæringstidspunkt &&
+                hendelser == other.hendelser &&
+                sykepengegrunnlag == other.sykepengegrunnlag &&
+                grunnlagForSykepengegrunnlag == other.grunnlagForSykepengegrunnlag &&
+                grunnlagForSykepengegrunnlagPerArbeidsgiver == other.grunnlagForSykepengegrunnlagPerArbeidsgiver &&
+                begrensning == other.begrensning &&
+                inntekt == other.inntekt &&
+                vedtakFattetTidspunkt.withNano(0) == other.vedtakFattetTidspunkt.withNano(0) &&
+                tags == other.tags
+        )
 
     override fun hashCode(): Int {
         var result = fødselsnummer.hashCode()
@@ -81,25 +82,25 @@ internal sealed class Sykepengevedtak(
         begrensning: String,
         inntekt: Double,
         vedtakFattetTidspunkt: LocalDateTime,
-        tags: List<String>
+        tags: List<String>,
     ) : Sykepengevedtak(
-        fødselsnummer,
-        aktørId,
-        vedtaksperiodeId,
-        spleisBehandlingId,
-        organisasjonsnummer,
-        fom,
-        tom,
-        skjæringstidspunkt,
-        hendelser,
-        sykepengegrunnlag,
-        grunnlagForSykepengegrunnlag,
-        grunnlagForSykepengegrunnlagPerArbeidsgiver,
-        begrensning,
-        inntekt,
-        vedtakFattetTidspunkt,
-        tags
-    ) {
+            fødselsnummer,
+            aktørId,
+            vedtaksperiodeId,
+            spleisBehandlingId,
+            organisasjonsnummer,
+            fom,
+            tom,
+            skjæringstidspunkt,
+            hendelser,
+            sykepengegrunnlag,
+            grunnlagForSykepengegrunnlag,
+            grunnlagForSykepengegrunnlagPerArbeidsgiver,
+            begrensning,
+            inntekt,
+            vedtakFattetTidspunkt,
+            tags,
+        ) {
         override fun equals(other: Any?) = this === other || (super.equals(other) && other is AuuVedtak)
     }
 
@@ -122,31 +123,32 @@ internal sealed class Sykepengevedtak(
         val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
         val skjønnsfastsettingopplysninger: SkjønnsfastsettingopplysningerDto?,
         vedtakFattetTidspunkt: LocalDateTime,
-        tags: List<String>
-    ): Sykepengevedtak(
-        fødselsnummer,
-        aktørId,
-        vedtaksperiodeId,
-        spleisBehandlingId,
-        organisasjonsnummer,
-        fom,
-        tom,
-        skjæringstidspunkt,
-        hendelser,
-        sykepengegrunnlag,
-        grunnlagForSykepengegrunnlag,
-        grunnlagForSykepengegrunnlagPerArbeidsgiver,
-        begrensning,
-        inntekt,
-        vedtakFattetTidspunkt,
-        tags
-    ) {
-        override fun equals(other: Any?) = this === other || (
-            super.equals(other)
-                && other is Vedtak
-                && this.utbetalingId == other.utbetalingId
-                && this.sykepengegrunnlagsfakta == other.sykepengegrunnlagsfakta
-                && this.skjønnsfastsettingopplysninger == other.skjønnsfastsettingopplysninger
+        tags: List<String>,
+    ) : Sykepengevedtak(
+            fødselsnummer,
+            aktørId,
+            vedtaksperiodeId,
+            spleisBehandlingId,
+            organisasjonsnummer,
+            fom,
+            tom,
+            skjæringstidspunkt,
+            hendelser,
+            sykepengegrunnlag,
+            grunnlagForSykepengegrunnlag,
+            grunnlagForSykepengegrunnlagPerArbeidsgiver,
+            begrensning,
+            inntekt,
+            vedtakFattetTidspunkt,
+            tags,
+        ) {
+        override fun equals(other: Any?) =
+            this === other || (
+                super.equals(other) &&
+                    other is Vedtak &&
+                    this.utbetalingId == other.utbetalingId &&
+                    this.sykepengegrunnlagsfakta == other.sykepengegrunnlagsfakta &&
+                    this.skjønnsfastsettingopplysninger == other.skjønnsfastsettingopplysninger
             )
 
         override fun hashCode(): Int {

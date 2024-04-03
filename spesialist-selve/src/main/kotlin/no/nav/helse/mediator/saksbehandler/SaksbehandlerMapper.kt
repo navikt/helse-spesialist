@@ -1,15 +1,14 @@
 package no.nav.helse.mediator.saksbehandler
 
-import java.util.UUID
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.mediator.TilgangskontrollørForApi
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.SaksbehandlerVisitor
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
+import java.util.UUID
 
 internal object SaksbehandlerMapper {
-
     internal fun Saksbehandler.tilApiversjon(): SaksbehandlerFraApi {
         return tilApiMapper.let {
             this.accept(it)
@@ -30,21 +29,35 @@ internal object SaksbehandlerMapper {
             oid = oid,
             navn = navn,
             ident = ident,
-            tilgangskontroll = TilgangskontrollørForApi(grupper, tilgangsgrupper)
+            tilgangskontroll = TilgangskontrollørForApi(grupper, tilgangsgrupper),
         )
     }
 
-    private val tilApiMapper get() = object: SaksbehandlerVisitor {
-        lateinit var saksbehandlerFraApi: SaksbehandlerFraApi
-        override fun visitSaksbehandler(epostadresse: String, oid: UUID, navn: String, ident: String) {
-            saksbehandlerFraApi = SaksbehandlerFraApi(oid, navn, epostadresse, ident, emptyList())
-        }
-    }
+    private val tilApiMapper get() =
+        object : SaksbehandlerVisitor {
+            lateinit var saksbehandlerFraApi: SaksbehandlerFraApi
 
-    private val tilDatabaseMapper get() = object: SaksbehandlerVisitor {
-        lateinit var saksbehandlerForDatabase: SaksbehandlerFraDatabase
-        override fun visitSaksbehandler(epostadresse: String, oid: UUID, navn: String, ident: String) {
-            saksbehandlerForDatabase = SaksbehandlerFraDatabase(epostadresse, oid, navn, ident)
+            override fun visitSaksbehandler(
+                epostadresse: String,
+                oid: UUID,
+                navn: String,
+                ident: String,
+            ) {
+                saksbehandlerFraApi = SaksbehandlerFraApi(oid, navn, epostadresse, ident, emptyList())
+            }
         }
-    }
- }
+
+    private val tilDatabaseMapper get() =
+        object : SaksbehandlerVisitor {
+            lateinit var saksbehandlerForDatabase: SaksbehandlerFraDatabase
+
+            override fun visitSaksbehandler(
+                epostadresse: String,
+                oid: UUID,
+                navn: String,
+                ident: String,
+            ) {
+                saksbehandlerForDatabase = SaksbehandlerFraDatabase(epostadresse, oid, navn, ident)
+            }
+        }
+}

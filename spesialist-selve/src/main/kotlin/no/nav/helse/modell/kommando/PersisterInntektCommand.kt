@@ -1,12 +1,12 @@
 package no.nav.helse.modell.kommando
 
-import java.time.LocalDate
-import java.time.YearMonth
 import no.nav.helse.mediator.meldinger.løsninger.Inntektløsning
 import no.nav.helse.modell.person.PersonDao
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.time.YearMonth
 
-internal class PersisterInntektCommand (
+internal class PersisterInntektCommand(
     private val fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
     private val personDao: PersonDao,
@@ -39,7 +39,7 @@ internal class PersisterInntektCommand (
             mapOf(
                 "beregningStart" to skjæringstidspunkt.minusMonths(12).toYearMonth().toString(),
                 "beregningSlutt" to skjæringstidspunkt.minusMonths(1).toYearMonth().toString(),
-            )
+            ),
         )
 
         return false

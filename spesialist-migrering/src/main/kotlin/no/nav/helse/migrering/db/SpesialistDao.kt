@@ -1,13 +1,12 @@
 package no.nav.helse.migrering.db
 
-import java.util.UUID
-import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
+import java.util.UUID
+import javax.sql.DataSource
 
 internal class SpesialistDao(private val dataSource: DataSource) {
-
     internal fun forkast(vedtaksperiodeId: UUID) {
         @Language("PostgreSQL")
         val query = "UPDATE vedtak SET forkastet = ?, forkastet_av_hendelse = ? WHERE vedtaksperiode_id = ? "

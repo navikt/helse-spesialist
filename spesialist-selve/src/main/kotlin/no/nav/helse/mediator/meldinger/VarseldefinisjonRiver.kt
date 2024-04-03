@@ -13,9 +13,8 @@ import org.slf4j.LoggerFactory
 
 internal class VarseldefinisjonRiver(
     rapidsConnection: RapidsConnection,
-    private val mediator: MeldingMediator
-): River.PacketListener {
-
+    private val mediator: MeldingMediator,
+) : River.PacketListener {
     private companion object {
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
     }
@@ -32,18 +31,24 @@ internal class VarseldefinisjonRiver(
                     "gjeldende_definisjon.kode",
                     "gjeldende_definisjon.tittel",
                     "gjeldende_definisjon.avviklet",
-                    "gjeldende_definisjon.opprettet"
+                    "gjeldende_definisjon.opprettet",
                 )
                 it.interestedIn("gjeldende_definisjon.forklaring", "gjeldende_definisjon.handling")
             }
         }.register(this)
     }
 
-    override fun onError(problems: MessageProblems, context: MessageContext) {
+    override fun onError(
+        problems: MessageProblems,
+        context: MessageContext,
+    ) {
         sikkerlogg.error("Forstod ikke varselkode_ny_definisjon:\n${problems.toExtendedReport()}")
     }
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) {
+    override fun onPacket(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         sikkerlogg.info("Mottok melding om ny definisjon for {}", kv("varselkode", packet["varselkode"].asText()))
 
         val message = VarseldefinisjonMessage(packet)

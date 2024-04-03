@@ -1,11 +1,11 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
-import java.util.UUID
 import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.person.Person
 import no.nav.helse.rapids_rivers.JsonMessage
+import java.util.UUID
 
 internal class VedtaksperiodeEndret(
     override val id: UUID,
@@ -13,22 +13,27 @@ internal class VedtaksperiodeEndret(
     private val fødselsnummer: String,
     private val json: String,
 ) : Vedtaksperiodemelding {
-    internal constructor(packet: JsonMessage): this(
+    internal constructor(packet: JsonMessage) : this(
         id = UUID.fromString(packet["@id"].asText()),
         vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
         fødselsnummer = packet["fødselsnummer"].asText(),
-        json = packet.toJson()
+        json = packet.toJson(),
     )
-    internal constructor(jsonNode: JsonNode): this(
+    internal constructor(jsonNode: JsonNode) : this(
         id = UUID.fromString(jsonNode["@id"].asText()),
         vedtaksperiodeId = UUID.fromString(jsonNode["vedtaksperiodeId"].asText()),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
-        json = jsonNode.toString()
+        json = jsonNode.toString(),
     )
 
     override fun fødselsnummer() = fødselsnummer
+
     override fun vedtaksperiodeId() = vedtaksperiodeId
-    override fun behandle(person: Person, kommandofabrikk: Kommandofabrikk) {
+
+    override fun behandle(
+        person: Person,
+        kommandofabrikk: Kommandofabrikk,
+    ) {
         kommandofabrikk.iverksettOppdaterSnapshot(this)
     }
 

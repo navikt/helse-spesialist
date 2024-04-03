@@ -74,121 +74,125 @@ internal class SchemaBuilder(
     private val dokumenthåndterer: Dokumenthåndterer,
 ) {
     fun build(): GraphQLSchema {
-        val schemaConfig = SchemaGeneratorConfig(
-            supportedPackages = listOf(
-                "no.nav.helse.spesialist.api.graphql",
-                "no.nav.helse.spleis.graphql",
-            ),
-            hooks = schemaGeneratorHooks
-        )
+        val schemaConfig =
+            SchemaGeneratorConfig(
+                supportedPackages =
+                    listOf(
+                        "no.nav.helse.spesialist.api.graphql",
+                        "no.nav.helse.spleis.graphql",
+                    ),
+                hooks = schemaGeneratorHooks,
+            )
         return toSchema(
             config = schemaConfig,
-            queries = listOf(
-                TopLevelObject(
-                    PersonQuery(
-                        personApiDao = personApiDao,
-                        egenAnsattApiDao = egenAnsattApiDao,
-                        tildelingDao = tildelingDao,
-                        arbeidsgiverApiDao = arbeidsgiverApiDao,
-                        overstyringApiDao = overstyringApiDao,
-                        risikovurderingApiDao = risikovurderingApiDao,
-                        varselRepository = varselRepository,
-                        oppgaveApiDao = oppgaveApiDao,
-                        periodehistorikkDao = periodehistorikkDao,
-                        notatDao = notatDao,
-                        totrinnsvurderingApiDao = totrinnsvurderingApiDao,
-                        påVentApiDao = påVentApiDao,
-                        snapshotMediator = snapshotMediator,
-                        reservasjonClient = reservasjonClient,
-                        oppgavehåndterer = oppgavehåndterer,
-                        avviksvurderinghenter = avviksvurderinghenter
-                    )
+            queries =
+                listOf(
+                    TopLevelObject(
+                        PersonQuery(
+                            personApiDao = personApiDao,
+                            egenAnsattApiDao = egenAnsattApiDao,
+                            tildelingDao = tildelingDao,
+                            arbeidsgiverApiDao = arbeidsgiverApiDao,
+                            overstyringApiDao = overstyringApiDao,
+                            risikovurderingApiDao = risikovurderingApiDao,
+                            varselRepository = varselRepository,
+                            oppgaveApiDao = oppgaveApiDao,
+                            periodehistorikkDao = periodehistorikkDao,
+                            notatDao = notatDao,
+                            totrinnsvurderingApiDao = totrinnsvurderingApiDao,
+                            påVentApiDao = påVentApiDao,
+                            snapshotMediator = snapshotMediator,
+                            reservasjonClient = reservasjonClient,
+                            oppgavehåndterer = oppgavehåndterer,
+                            avviksvurderinghenter = avviksvurderinghenter,
+                        ),
+                    ),
+                    TopLevelObject(
+                        OppdragQuery(
+                            personApiDao = personApiDao,
+                            egenAnsattApiDao = egenAnsattApiDao,
+                            utbetalingApiDao = utbetalingApiDao,
+                        ),
+                    ),
+                    TopLevelObject(
+                        OppgaverQuery(
+                            oppgavehåndterer = oppgavehåndterer,
+                        ),
+                    ),
+                    TopLevelObject(
+                        BehandlingsstatistikkQuery(
+                            behandlingsstatistikkMediator = behandlingsstatistikkMediator,
+                        ),
+                    ),
+                    TopLevelObject(
+                        NotatQuery(notatDao = notatDao),
+                    ),
+                    TopLevelObject(
+                        OpptegnelseQuery(
+                            saksbehandlerhåndterer = saksbehandlerhåndterer,
+                        ),
+                    ),
+                    TopLevelObject(
+                        DokumentQuery(
+                            personApiDao = personApiDao,
+                            egenAnsattApiDao = egenAnsattApiDao,
+                            dokumenthåndterer = dokumenthåndterer,
+                        ),
+                    ),
                 ),
-                TopLevelObject(
-                    OppdragQuery(
-                        personApiDao = personApiDao,
-                        egenAnsattApiDao = egenAnsattApiDao,
-                        utbetalingApiDao = utbetalingApiDao,
-                    )
+            mutations =
+                listOf(
+                    TopLevelObject(
+                        NotatMutation(notatDao = notatDao),
+                    ),
+                    TopLevelObject(
+                        VarselMutation(varselRepository = varselRepository),
+                    ),
+                    TopLevelObject(
+                        TildelingMutation(saksbehandlerhåndterer = saksbehandlerhåndterer),
+                    ),
+                    TopLevelObject(
+                        OpptegnelseMutation(saksbehandlerhåndterer = saksbehandlerhåndterer),
+                    ),
+                    TopLevelObject(
+                        OverstyringMutation(saksbehandlerhåndterer = saksbehandlerhåndterer),
+                    ),
+                    TopLevelObject(
+                        SkjonnsfastsettelseMutation(saksbehandlerhåndterer = saksbehandlerhåndterer),
+                    ),
+                    TopLevelObject(
+                        TotrinnsvurderingMutation(
+                            saksbehandlerhåndterer = saksbehandlerhåndterer,
+                            oppgavehåndterer = oppgavehåndterer,
+                            totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
+                        ),
+                    ),
+                    TopLevelObject(
+                        VedtakMutation(
+                            oppgavehåndterer = oppgavehåndterer,
+                            totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
+                            saksbehandlerhåndterer = saksbehandlerhåndterer,
+                            godkjenninghåndterer = godkjenninghåndterer,
+                        ),
+                    ),
+                    TopLevelObject(
+                        PersonMutation(
+                            personhåndterer = personhåndterer,
+                        ),
+                    ),
+                    TopLevelObject(
+                        AnnulleringMutation(
+                            saksbehandlerhåndterer = saksbehandlerhåndterer,
+                        ),
+                    ),
+                    TopLevelObject(
+                        PaVentMutation(
+                            saksbehandlerhåndterer = saksbehandlerhåndterer,
+                            notatMediator = notatMediator,
+                            periodehistorikkDao = periodehistorikkDao,
+                        ),
+                    ),
                 ),
-                TopLevelObject(
-                    OppgaverQuery(
-                        oppgavehåndterer = oppgavehåndterer
-                    )
-                ),
-                TopLevelObject(
-                    BehandlingsstatistikkQuery(
-                        behandlingsstatistikkMediator = behandlingsstatistikkMediator,
-                    )
-                ),
-                TopLevelObject(
-                    NotatQuery(notatDao = notatDao)
-                ),
-                TopLevelObject(
-                    OpptegnelseQuery(
-                        saksbehandlerhåndterer = saksbehandlerhåndterer
-                    )
-                ),
-                TopLevelObject(
-                    DokumentQuery(
-                        personApiDao = personApiDao,
-                        egenAnsattApiDao = egenAnsattApiDao,
-                        dokumenthåndterer = dokumenthåndterer
-                    )
-                ),
-            ),
-            mutations = listOf(
-                TopLevelObject(
-                    NotatMutation(notatDao = notatDao)
-                ),
-                TopLevelObject(
-                    VarselMutation(varselRepository = varselRepository)
-                ),
-                TopLevelObject(
-                    TildelingMutation(saksbehandlerhåndterer = saksbehandlerhåndterer)
-                ),
-                TopLevelObject(
-                    OpptegnelseMutation(saksbehandlerhåndterer = saksbehandlerhåndterer)
-                ),
-                TopLevelObject(
-                    OverstyringMutation(saksbehandlerhåndterer = saksbehandlerhåndterer)
-                ),
-                TopLevelObject(
-                    SkjonnsfastsettelseMutation(saksbehandlerhåndterer = saksbehandlerhåndterer)
-                ),
-                TopLevelObject(
-                    TotrinnsvurderingMutation(
-                        saksbehandlerhåndterer = saksbehandlerhåndterer,
-                        oppgavehåndterer = oppgavehåndterer,
-                        totrinnsvurderinghåndterer = totrinnsvurderinghåndterer
-                    )
-                ),
-                TopLevelObject(
-                    VedtakMutation(
-                        oppgavehåndterer = oppgavehåndterer,
-                        totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
-                        saksbehandlerhåndterer = saksbehandlerhåndterer,
-                        godkjenninghåndterer = godkjenninghåndterer
-                    )
-                ),
-                TopLevelObject(
-                    PersonMutation(
-                        personhåndterer = personhåndterer
-                    )
-                ),
-                TopLevelObject(
-                    AnnulleringMutation(
-                        saksbehandlerhåndterer = saksbehandlerhåndterer
-                    )
-                ),
-                TopLevelObject(
-                    PaVentMutation(
-                        saksbehandlerhåndterer = saksbehandlerhåndterer,
-                        notatMediator = notatMediator,
-                        periodehistorikkDao = periodehistorikkDao
-                    )
-                ),
-            )
         )
     }
 }

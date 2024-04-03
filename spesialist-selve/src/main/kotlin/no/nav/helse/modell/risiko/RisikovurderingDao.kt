@@ -15,7 +15,7 @@ internal class RisikovurderingDao(val dataSource: DataSource) {
         kanGodkjennesAutomatisk: Boolean,
         kreverSupersaksbehandler: Boolean,
         data: JsonNode,
-        opprettet: LocalDateTime
+        opprettet: LocalDateTime,
     ) {
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
@@ -31,24 +31,26 @@ internal class RisikovurderingDao(val dataSource: DataSource) {
                     kreverSupersaksbehandler,
                     objectMapper.writeValueAsString(data),
                     opprettet,
-                ).asUpdate
+                ).asUpdate,
             )
         }
     }
 
-    internal fun hentRisikovurdering(vedtaksperiodeId: UUID) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val statement = "SELECT kan_godkjennes_automatisk FROM risikovurdering_2021 WHERE vedtaksperiode_id = ? ORDER BY id DESC LIMIT 1"
-        session.run(
-            queryOf(statement, vedtaksperiodeId).map { it.boolean("kan_godkjennes_automatisk") }.asSingle
-        )?.let(Risikovurdering::restore)
-    }
+    internal fun hentRisikovurdering(vedtaksperiodeId: UUID) =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val statement = "SELECT kan_godkjennes_automatisk FROM risikovurdering_2021 WHERE vedtaksperiode_id = ? ORDER BY id DESC LIMIT 1"
+            session.run(
+                queryOf(statement, vedtaksperiodeId).map { it.boolean("kan_godkjennes_automatisk") }.asSingle,
+            )?.let(Risikovurdering::restore)
+        }
 
-    internal fun kreverSupersaksbehandler(vedtaksperiodeId: UUID) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val statement = "SELECT krever_supersaksbehandler FROM risikovurdering_2021 WHERE vedtaksperiode_id = ? ORDER BY id DESC LIMIT 1"
-        session.run(
-            queryOf(statement, vedtaksperiodeId).map { it.boolean("krever_supersaksbehandler") }.asSingle
-        ) ?: false
-    }
+    internal fun kreverSupersaksbehandler(vedtaksperiodeId: UUID) =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val statement = "SELECT krever_supersaksbehandler FROM risikovurdering_2021 WHERE vedtaksperiode_id = ? ORDER BY id DESC LIMIT 1"
+            session.run(
+                queryOf(statement, vedtaksperiodeId).map { it.boolean("krever_supersaksbehandler") }.asSingle,
+            ) ?: false
+        }
 }

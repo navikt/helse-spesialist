@@ -8,17 +8,17 @@ class VarselDto(
     val varselkode: String,
     val opprettet: LocalDateTime,
     val vedtaksperiodeId: UUID,
-    val status: VarselStatusDto
+    val status: VarselStatusDto,
 ) {
     override fun equals(other: Any?): Boolean =
         this === other || (
-            other is VarselDto
-                && id == other.id
-                && varselkode == other.varselkode
-                && opprettet.withNano(0) == other.opprettet.withNano(0)
-                && vedtaksperiodeId == other.vedtaksperiodeId
-                && status == other.status
-            )
+            other is VarselDto &&
+                id == other.id &&
+                varselkode == other.varselkode &&
+                opprettet.withNano(0) == other.opprettet.withNano(0) &&
+                vedtaksperiodeId == other.vedtaksperiodeId &&
+                status == other.status
+        )
 
     override fun hashCode(): Int {
         var result = id.hashCode()

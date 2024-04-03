@@ -1,16 +1,39 @@
 package no.nav.helse.modell.saksbehandler
 
+import no.nav.helse.modell.vilkårsprøving.SubsumsjonEvent
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.modell.vilkårsprøving.SubsumsjonEvent
 
 interface SaksbehandlerObserver {
-    fun tidslinjeOverstyrt(fødselsnummer: String, event: OverstyrtTidslinjeEvent) {}
-    fun inntektOgRefusjonOverstyrt(fødselsnummer: String, event: OverstyrtInntektOgRefusjonEvent) {}
-    fun arbeidsforholdOverstyrt(fødselsnummer: String, event: OverstyrtArbeidsforholdEvent) {}
-    fun sykepengegrunnlagSkjønnsfastsatt(fødselsnummer: String, event: SkjønnsfastsattSykepengegrunnlagEvent) {}
-    fun utbetalingAnnullert(fødselsnummer: String, event: AnnullertUtbetalingEvent) {}
-    fun nySubsumsjon(fødselsnummer: String, subsumsjonEvent: SubsumsjonEvent) {}
+    fun tidslinjeOverstyrt(
+        fødselsnummer: String,
+        event: OverstyrtTidslinjeEvent,
+    ) {}
+
+    fun inntektOgRefusjonOverstyrt(
+        fødselsnummer: String,
+        event: OverstyrtInntektOgRefusjonEvent,
+    ) {}
+
+    fun arbeidsforholdOverstyrt(
+        fødselsnummer: String,
+        event: OverstyrtArbeidsforholdEvent,
+    ) {}
+
+    fun sykepengegrunnlagSkjønnsfastsatt(
+        fødselsnummer: String,
+        event: SkjønnsfastsattSykepengegrunnlagEvent,
+    ) {}
+
+    fun utbetalingAnnullert(
+        fødselsnummer: String,
+        event: AnnullertUtbetalingEvent,
+    ) {}
+
+    fun nySubsumsjon(
+        fødselsnummer: String,
+        subsumsjonEvent: SubsumsjonEvent,
+    ) {}
 }
 
 data class OverstyrtInntektOgRefusjonEvent(
@@ -22,9 +45,8 @@ data class OverstyrtInntektOgRefusjonEvent(
     val saksbehandlerOid: UUID,
     val saksbehandlerNavn: String,
     val saksbehandlerIdent: String,
-    val saksbehandlerEpost: String
+    val saksbehandlerEpost: String,
 ) {
-
     data class OverstyrtArbeidsgiverEvent(
         val organisasjonsnummer: String,
         val månedligInntekt: Double,
@@ -37,7 +59,7 @@ data class OverstyrtInntektOgRefusjonEvent(
         data class OverstyrtRefusjonselementEvent(
             val fom: LocalDate,
             val tom: LocalDate? = null,
-            val beløp: Double
+            val beløp: Double,
         )
     }
 }
@@ -69,7 +91,6 @@ data class OverstyrtArbeidsforholdEvent(
     val skjæringstidspunkt: LocalDate,
     val overstyrteArbeidsforhold: List<Arbeidsforhold>,
 ) {
-
     data class Arbeidsforhold(
         val orgnummer: String,
         val deaktivert: Boolean,
@@ -87,9 +108,8 @@ data class SkjønnsfastsattSykepengegrunnlagEvent(
     val saksbehandlerIdent: String,
     val saksbehandlerEpost: String,
     val skjæringstidspunkt: LocalDate,
-    val arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>
+    val arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
 ) {
-
     data class SkjønnsfastsattArbeidsgiver(
         val organisasjonsnummer: String,
         val årlig: Double,
@@ -114,5 +134,5 @@ data class AnnullertUtbetalingEvent(
     val fagsystemId: String?,
     val utbetalingId: String?,
     val begrunnelser: List<String>,
-    val kommentar: String?
+    val kommentar: String?,
 )

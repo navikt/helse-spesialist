@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
 
 internal class VedtaksperiodeReberegnetRiver(
     rapidsConnection: RapidsConnection,
-    private val mediator: MeldingMediator
+    private val mediator: MeldingMediator,
 ) : River.PacketListener {
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -21,13 +21,18 @@ internal class VedtaksperiodeReberegnetRiver(
                 it.demand("forrigeTilstand") { node -> check(node.asText().startsWith("AVVENTER_GODKJENNING")) }
                 it.rejectValues("gjeldendeTilstand", listOf("AVSLUTTET", "TIL_UTBETALING", "TIL_INFOTRYGD"))
                 it.requireKey(
-                    "@id", "fødselsnummer", "vedtaksperiodeId"
+                    "@id",
+                    "fødselsnummer",
+                    "vedtaksperiodeId",
                 )
             }
         }.register(this)
     }
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) {
+    override fun onPacket(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         log.info("Håndterer reberegning av vedtaksperiode: ${packet["vedtaksperiodeId"].asText()}")
         mediator.mottaMelding(VedtaksperiodeReberegnet(packet), context)
     }

@@ -52,7 +52,6 @@ class PersonQuery(
     private val oppgavehåndterer: Oppgavehåndterer,
     private val avviksvurderinghenter: Avviksvurderinghenter,
 ) : AbstractPersonQuery(personApiDao, egenAnsattApiDao) {
-
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
     private val auditLog = LoggerFactory.getLogger("auditLogger")
 
@@ -62,9 +61,10 @@ class PersonQuery(
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Person?> {
         if (fnr == null) {
-            if (aktorId == null)
+            if (aktorId == null) {
                 return DataFetcherResult.newResult<Person?>()
                     .error(getBadRequestError("Requesten mangler både fødselsnummer og aktørId")).build()
+            }
             if (aktorId.length != 13) {
                 return DataFetcherResult.newResult<Person?>()
                     .error(getBadRequestError("Feil lengde på parameter aktorId: ${aktorId.length}")).build()
@@ -72,14 +72,17 @@ class PersonQuery(
         }
 
         val fødselsnummer =
-            if (fnr != null && personApiDao.finnesPersonMedFødselsnummer(fnr)) fnr
-            else aktorId?.let {
-                try {
-                    personApiDao.finnFødselsnummer(it.toLong())
-                } catch (e: Exception) {
-                    val fødselsnumre = personApiDao.finnFødselsnumre(aktorId.toLong()).toSet()
-                    auditLog(env.graphQlContext, aktorId, null, getFlereFødselsnumreError(fødselsnumre).message)
-                    return DataFetcherResult.newResult<Person?>().error(getFlereFødselsnumreError(fødselsnumre)).build()
+            if (fnr != null && personApiDao.finnesPersonMedFødselsnummer(fnr)) {
+                fnr
+            } else {
+                aktorId?.let {
+                    try {
+                        personApiDao.finnFødselsnummer(it.toLong())
+                    } catch (e: Exception) {
+                        val fødselsnumre = personApiDao.finnFødselsnumre(aktorId.toLong()).toSet()
+                        auditLog(env.graphQlContext, aktorId, null, getFlereFødselsnumreError(fødselsnumre).message)
+                        return DataFetcherResult.newResult<Person?>().error(getFlereFødselsnumreError(fødselsnumre)).build()
+                    }
                 }
             }
         if (fødselsnummer == null || (!erDev() && !personApiDao.spesialistHarPersonKlarForVisningISpeil(fødselsnummer))) {
@@ -95,34 +98,36 @@ class PersonQuery(
             return DataFetcherResult.newResult<Person?>().error(getForbiddenError(fødselsnummer)).build()
         }
 
-        val snapshot = try {
-            snapshotMediator.hentSnapshot(fødselsnummer)
-        } catch (e: Exception) {
-            sikkerLogg.error("feilet under henting av snapshot for {}", keyValue("fnr", fødselsnummer), e)
-            auditLog(env.graphQlContext, fødselsnummer, null, getSnapshotValidationError().message)
-            return DataFetcherResult.newResult<Person?>().error(getSnapshotValidationError()).build()
-        }
+        val snapshot =
+            try {
+                snapshotMediator.hentSnapshot(fødselsnummer)
+            } catch (e: Exception) {
+                sikkerLogg.error("feilet under henting av snapshot for {}", keyValue("fnr", fødselsnummer), e)
+                auditLog(env.graphQlContext, fødselsnummer, null, getSnapshotValidationError().message)
+                return DataFetcherResult.newResult<Person?>().error(getSnapshotValidationError()).build()
+            }
 
-        val person = snapshot?.let { (personinfo, personSnapshot) ->
-            Person(
-                snapshot = personSnapshot,
-                personinfo = personinfo.copy(reservasjon = reservasjon.await()),
-                personApiDao = personApiDao,
-                tildelingDao = tildelingDao,
-                arbeidsgiverApiDao = arbeidsgiverApiDao,
-                overstyringApiDao = overstyringApiDao,
-                risikovurderingApiDao = risikovurderingApiDao,
-                varselRepository = varselRepository,
-                oppgaveApiDao = oppgaveApiDao,
-                periodehistorikkDao = periodehistorikkDao,
-                notatDao = notatDao,
-                totrinnsvurderingApiDao = totrinnsvurderingApiDao,
-                påVentApiDao = påVentApiDao,
-                avviksvurderinghenter = avviksvurderinghenter,
-                tilganger = env.graphQlContext.get("tilganger"),
-                oppgavehåndterer = oppgavehåndterer,
-            )
-        }
+        val person =
+            snapshot?.let { (personinfo, personSnapshot) ->
+                Person(
+                    snapshot = personSnapshot,
+                    personinfo = personinfo.copy(reservasjon = reservasjon.await()),
+                    personApiDao = personApiDao,
+                    tildelingDao = tildelingDao,
+                    arbeidsgiverApiDao = arbeidsgiverApiDao,
+                    overstyringApiDao = overstyringApiDao,
+                    risikovurderingApiDao = risikovurderingApiDao,
+                    varselRepository = varselRepository,
+                    oppgaveApiDao = oppgaveApiDao,
+                    periodehistorikkDao = periodehistorikkDao,
+                    notatDao = notatDao,
+                    totrinnsvurderingApiDao = totrinnsvurderingApiDao,
+                    påVentApiDao = påVentApiDao,
+                    avviksvurderinghenter = avviksvurderinghenter,
+                    tilganger = env.graphQlContext.get("tilganger"),
+                    oppgavehåndterer = oppgavehåndterer,
+                )
+            }
 
         return if (person == null) {
             auditLog(env.graphQlContext, fødselsnummer, true, getNotFoundError(fødselsnummer).message)
@@ -134,9 +139,12 @@ class PersonQuery(
     }
 
     private fun finnReservasjonsstatus(fødselsnummer: String) =
-        if (erDev()) CompletableDeferred<Reservasjon?>().also { it.complete(null) }
-        else CoroutineScope(Dispatchers.IO).async {
-            reservasjonClient.hentReservasjonsstatus(fødselsnummer)
+        if (erDev()) {
+            CompletableDeferred<Reservasjon?>().also { it.complete(null) }
+        } else {
+            CoroutineScope(Dispatchers.IO).async {
+                reservasjonClient.hentReservasjonsstatus(fødselsnummer)
+            }
         }
 
     private fun getFlereFødselsnumreError(fødselsnumre: Set<String>): GraphQLError =
@@ -147,30 +155,45 @@ class PersonQuery(
                     "code" to 500,
                     "feilkode" to "HarFlereFodselsnumre",
                     "fodselsnumre" to fødselsnumre,
-                )
+                ),
             ).build()
 
-    private fun getSnapshotValidationError(): GraphQLError = GraphqlErrorException.newErrorException()
-        .message("Lagret snapshot stemmer ikke overens med forventet format. Dette kommer som regel av at noen har gjort endringer på formatet men glemt å bumpe versjonsnummeret.")
-        .extensions(mapOf("code" to 501, "field" to "person"))
-        .build()
+    private fun getSnapshotValidationError(): GraphQLError =
+        GraphqlErrorException.newErrorException()
+            .message(
+                "Lagret snapshot stemmer ikke overens med forventet format. Dette kommer som regel av at noen har gjort endringer på formatet men glemt å bumpe versjonsnummeret.",
+            )
+            .extensions(mapOf("code" to 501, "field" to "person"))
+            .build()
 
-    private fun getBadRequestError(melding: String): GraphQLError = GraphqlErrorException.newErrorException()
-        .message(melding)
-        .extensions(mapOf("code" to 400))
-        .build()
+    private fun getBadRequestError(melding: String): GraphQLError =
+        GraphqlErrorException.newErrorException()
+            .message(melding)
+            .extensions(mapOf("code" to 400))
+            .build()
 
-    private fun auditLog(graphQLContext: GraphQLContext, personId: String, harTilgang: Boolean?, fantIkkePersonErrorMsg: String?) {
+    private fun auditLog(
+        graphQLContext: GraphQLContext,
+        personId: String,
+        harTilgang: Boolean?,
+        fantIkkePersonErrorMsg: String?,
+    ) {
         val saksbehandlerIdent = graphQLContext.get<String>(ContextValues.SAKSBEHANDLER_IDENT.key)
         auditLogTeller.inc()
 
         if (harTilgang == false) {
-            auditLog.warn("end=${System.currentTimeMillis()} suid=$saksbehandlerIdent duid=$personId operation=PersonQuery flexString1=Deny")
+            auditLog.warn(
+                "end=${System.currentTimeMillis()} suid=$saksbehandlerIdent duid=$personId operation=PersonQuery flexString1=Deny",
+            )
         } else if (fantIkkePersonErrorMsg != null) {
-            auditLog.warn("end=${System.currentTimeMillis()} suid=$saksbehandlerIdent duid=$personId operation=PersonQuery msg=$fantIkkePersonErrorMsg")
+            auditLog.warn(
+                "end=${System.currentTimeMillis()} suid=$saksbehandlerIdent duid=$personId operation=PersonQuery msg=$fantIkkePersonErrorMsg",
+            )
         } else {
             auditLog.info("end=${System.currentTimeMillis()} suid=$saksbehandlerIdent duid=$personId operation=PersonQuery")
         }
-        sikkerLogg.debug("audit-logget, operationName: PersonQuery, harTilgang: $harTilgang, fantIkkePersonErrorMsg: $fantIkkePersonErrorMsg")
+        sikkerLogg.debug(
+            "audit-logget, operationName: PersonQuery, harTilgang: $harTilgang, fantIkkePersonErrorMsg: $fantIkkePersonErrorMsg",
+        )
     }
 }

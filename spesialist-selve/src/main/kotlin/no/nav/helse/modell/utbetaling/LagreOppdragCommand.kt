@@ -1,8 +1,5 @@
 package no.nav.helse.modell.utbetaling
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.ANNULLERT
@@ -14,6 +11,9 @@ import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.abonnement.UtbetalingPayload
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class LagreOppdragCommand(
     private val fødselsnummer: String,
@@ -28,9 +28,8 @@ internal class LagreOppdragCommand(
     private val personbeløp: Int,
     private val json: String,
     private val utbetalingDao: UtbetalingDao,
-    private val opptegnelseDao: OpptegnelseDao
+    private val opptegnelseDao: OpptegnelseDao,
 ) : Command {
-
     private companion object {
         private val log = LoggerFactory.getLogger(LagreOppdragCommand::class.java)
     }
@@ -38,23 +37,29 @@ internal class LagreOppdragCommand(
     internal class Oppdrag(
         private val fagsystemId: String,
         private val mottaker: String,
-        private val linjer: List<Utbetalingslinje>
+        private val linjer: List<Utbetalingslinje>,
     ) {
         internal fun lagre(utbetalingDao: UtbetalingDao) =
             utbetalingDao.nyttOppdrag(fagsystemId, mottaker)?.also {
                 lagreLinjer(utbetalingDao, it)
             }
 
-        private fun lagreLinjer(utbetalingDao: UtbetalingDao, oppdragId: Long) {
+        private fun lagreLinjer(
+            utbetalingDao: UtbetalingDao,
+            oppdragId: Long,
+        ) {
             linjer.forEach { it.lagre(utbetalingDao, oppdragId) }
         }
 
         internal class Utbetalingslinje(
             private val fom: LocalDate,
             private val tom: LocalDate,
-            private val totalbeløp: Int?
+            private val totalbeløp: Int?,
         ) {
-            internal fun lagre(utbetalingDao: UtbetalingDao, oppdragId: Long) {
+            internal fun lagre(
+                utbetalingDao: UtbetalingDao,
+                oppdragId: Long,
+            ) {
                 utbetalingDao.nyLinje(oppdragId, fom, tom, totalbeløp)
             }
         }
@@ -68,42 +73,44 @@ internal class LagreOppdragCommand(
     }
 
     private fun lagre() {
-        val utbetalingIdRef = utbetalingDao.finnUtbetalingIdRef(utbetalingId)
-            ?: run {
-                val arbeidsgiverFagsystemIdRef =
-                    requireNotNull(arbeidsgiverOppdrag.lagre(utbetalingDao)) { "Forventet arbeidsgiver fagsystemId ref" }
-                val personFagsystemIdRef =
-                    requireNotNull(personOppdrag.lagre(utbetalingDao)) { "Forventet person fagsystemId ref" }
+        val utbetalingIdRef =
+            utbetalingDao.finnUtbetalingIdRef(utbetalingId)
+                ?: run {
+                    val arbeidsgiverFagsystemIdRef =
+                        requireNotNull(arbeidsgiverOppdrag.lagre(utbetalingDao)) { "Forventet arbeidsgiver fagsystemId ref" }
+                    val personFagsystemIdRef =
+                        requireNotNull(personOppdrag.lagre(utbetalingDao)) { "Forventet person fagsystemId ref" }
 
-                utbetalingDao.opprettUtbetalingId(
-                    utbetalingId,
-                    fødselsnummer,
-                    orgnummer,
-                    type,
-                    opprettet,
-                    arbeidsgiverFagsystemIdRef,
-                    personFagsystemIdRef,
-                    arbeidsgiverbeløp,
-                    personbeløp
-                )
-            }
+                    utbetalingDao.opprettUtbetalingId(
+                        utbetalingId,
+                        fødselsnummer,
+                        orgnummer,
+                        type,
+                        opprettet,
+                        arbeidsgiverFagsystemIdRef,
+                        personFagsystemIdRef,
+                        arbeidsgiverbeløp,
+                        personbeløp,
+                    )
+                }
 
         utbetalingDao.nyUtbetalingStatus(utbetalingIdRef, status, opprettet, json)
     }
 
     private fun lagOpptegnelse() {
-        val opptegnelseType: OpptegnelseType = when {
-            type == Utbetalingtype.ANNULLERING && status == UTBETALING_FEILET -> {
-                OpptegnelseType.UTBETALING_ANNULLERING_FEILET
+        val opptegnelseType: OpptegnelseType =
+            when {
+                type == Utbetalingtype.ANNULLERING && status == UTBETALING_FEILET -> {
+                    OpptegnelseType.UTBETALING_ANNULLERING_FEILET
+                }
+                type == Utbetalingtype.ANNULLERING && status == ANNULLERT -> {
+                    OpptegnelseType.UTBETALING_ANNULLERING_OK
+                }
+                type == Utbetalingtype.REVURDERING && status in listOf(UTBETALT, GODKJENT_UTEN_UTBETALING, OVERFØRT) -> {
+                    OpptegnelseType.REVURDERING_FERDIGBEHANDLET
+                }
+                else -> return
             }
-            type == Utbetalingtype.ANNULLERING && status == ANNULLERT -> {
-                OpptegnelseType.UTBETALING_ANNULLERING_OK
-            }
-            type == Utbetalingtype.REVURDERING && status in listOf(UTBETALT, GODKJENT_UTEN_UTBETALING, OVERFØRT) -> {
-                OpptegnelseType.REVURDERING_FERDIGBEHANDLET
-            }
-            else -> return
-        }
 
         opptegnelseDao.opprettOpptegnelse(fødselsnummer, UtbetalingPayload(utbetalingId), opptegnelseType)
     }

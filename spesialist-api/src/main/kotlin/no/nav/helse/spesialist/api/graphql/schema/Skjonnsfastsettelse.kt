@@ -19,7 +19,6 @@ data class SkjonnsfastsettelseArbeidsgiver(
     val lovhjemmel: Lovhjemmel?,
     val initierendeVedtaksperiodeId: String?,
 ) {
-
     enum class SkjonnsfastsettelseType {
         OMREGNET_ARSINNTEKT,
         RAPPORTERT_ARSINNTEKT,

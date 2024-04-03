@@ -3,10 +3,11 @@ package no.nav.helse.modell.vedtaksperiode.vedtak
 internal sealed class Sykepengegrunnlagsfakta(
     val omregnetÅrsinntekt: Double,
 ) {
-    override fun equals(other: Any?): Boolean = this === other || (
-        other is Sykepengegrunnlagsfakta
-            && this.omregnetÅrsinntekt == other.omregnetÅrsinntekt
-    )
+    override fun equals(other: Any?): Boolean =
+        this === other || (
+            other is Sykepengegrunnlagsfakta &&
+                this.omregnetÅrsinntekt == other.omregnetÅrsinntekt
+        )
 
     override fun hashCode() = omregnetÅrsinntekt.hashCode()
 
@@ -20,15 +21,16 @@ internal sealed class Sykepengegrunnlagsfakta(
         val tags: List<String>,
         val arbeidsgivere: List<Arbeidsgiver>,
     ) : Sykepengegrunnlagsfakta(omregnetÅrsinntekt) {
-        override fun equals(other: Any?): Boolean = this === other || (
-            super.equals(other)
-                && other is Spleis
-                && innrapportertÅrsinntekt == other.innrapportertÅrsinntekt
-                && avviksprosent == other.avviksprosent
-                && seksG == other.seksG
-                && tags == other.tags
-                && arbeidsgivere == other.arbeidsgivere
-        )
+        override fun equals(other: Any?): Boolean =
+            this === other || (
+                super.equals(other) &&
+                    other is Spleis &&
+                    innrapportertÅrsinntekt == other.innrapportertÅrsinntekt &&
+                    avviksprosent == other.avviksprosent &&
+                    seksG == other.seksG &&
+                    tags == other.tags &&
+                    arbeidsgivere == other.arbeidsgivere
+            )
 
         override fun hashCode(): Int {
             var result = super.hashCode()
@@ -49,18 +51,19 @@ internal sealed class Sykepengegrunnlagsfakta(
             tags: List<String>,
             arbeidsgivere: List<Arbeidsgiver.EtterSkjønn>,
         ) : Spleis(
-            omregnetÅrsinntekt,
-            innrapportertÅrsinntekt,
-            avviksprosent,
-            seksG,
-            tags,
-            arbeidsgivere
-        ) {
-            override fun equals(other: Any?) = this === other || (
-                super.equals(other)
-                    && other is EtterSkjønn
-                    && skjønnsfastsatt == other.skjønnsfastsatt
-            )
+                omregnetÅrsinntekt,
+                innrapportertÅrsinntekt,
+                avviksprosent,
+                seksG,
+                tags,
+                arbeidsgivere,
+            ) {
+            override fun equals(other: Any?) =
+                this === other || (
+                    super.equals(other) &&
+                        other is EtterSkjønn &&
+                        skjønnsfastsatt == other.skjønnsfastsatt
+                )
 
             override fun hashCode(): Int {
                 var result = super.hashCode()
@@ -78,15 +81,14 @@ internal sealed class Sykepengegrunnlagsfakta(
             tags: List<String>,
             arbeidsgivere: List<Arbeidsgiver.EtterHovedregel>,
         ) : Spleis(
-            omregnetÅrsinntekt,
-            innrapportertÅrsinntekt,
-            avviksprosent,
-            seksG,
-            tags,
-            arbeidsgivere
-        ) {
-            override fun equals(other: Any?): Boolean =
-                this === other || (super.equals(other) && other is EtterHovedregel)
+                omregnetÅrsinntekt,
+                innrapportertÅrsinntekt,
+                avviksprosent,
+                seksG,
+                tags,
+                arbeidsgivere,
+            ) {
+            override fun equals(other: Any?): Boolean = this === other || (super.equals(other) && other is EtterHovedregel)
         }
 
         internal sealed class Arbeidsgiver(
@@ -94,12 +96,13 @@ internal sealed class Sykepengegrunnlagsfakta(
             val omregnetÅrsinntekt: Double,
             val innrapportertÅrsinntekt: Double,
         ) {
-            override fun equals(other: Any?): Boolean = this === other || (
-                    other is Arbeidsgiver
-                            && organisasjonsnummer == other.organisasjonsnummer
-                            && omregnetÅrsinntekt == other.omregnetÅrsinntekt
-                            && innrapportertÅrsinntekt == other.innrapportertÅrsinntekt
-                    )
+            override fun equals(other: Any?): Boolean =
+                this === other || (
+                    other is Arbeidsgiver &&
+                        organisasjonsnummer == other.organisasjonsnummer &&
+                        omregnetÅrsinntekt == other.omregnetÅrsinntekt &&
+                        innrapportertÅrsinntekt == other.innrapportertÅrsinntekt
+                )
 
             override fun hashCode(): Int {
                 var result = organisasjonsnummer.hashCode()
@@ -114,11 +117,12 @@ internal sealed class Sykepengegrunnlagsfakta(
                 innrapportertÅrsinntekt: Double,
                 val skjønnsfastsatt: Double,
             ) : Arbeidsgiver(organisasjonsnummer, omregnetÅrsinntekt, innrapportertÅrsinntekt) {
-                override fun equals(other: Any?) = this === other || (
-                        super.equals(other)
-                                && other is EtterSkjønn
-                                && skjønnsfastsatt == other.skjønnsfastsatt
-                        )
+                override fun equals(other: Any?) =
+                    this === other || (
+                        super.equals(other) &&
+                            other is EtterSkjønn &&
+                            skjønnsfastsatt == other.skjønnsfastsatt
+                    )
 
                 override fun hashCode(): Int {
                     var result = super.hashCode()
@@ -133,8 +137,7 @@ internal sealed class Sykepengegrunnlagsfakta(
                 omregnetÅrsinntekt: Double,
                 innrapportertÅrsinntekt: Double,
             ) : Arbeidsgiver(organisasjonsnummer, omregnetÅrsinntekt, innrapportertÅrsinntekt) {
-                override fun equals(other: Any?) =
-                    this === other || (super.equals(other) && other is EtterHovedregel)
+                override fun equals(other: Any?) = this === other || (super.equals(other) && other is EtterHovedregel)
             }
         }
     }
@@ -143,5 +146,5 @@ internal sealed class Sykepengegrunnlagsfakta(
 internal enum class Faktatype {
     ETTER_SKJØNN,
     ETTER_HOVEDREGEL,
-    I_INFOTRYGD
+    I_INFOTRYGD,
 }

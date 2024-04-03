@@ -9,19 +9,22 @@ class Periode(
     init {
         require(fom <= tom) { "Fom kan ikke være etter tom" }
     }
+
     internal fun fom() = fom
+
     internal fun tom() = tom
+
     override fun equals(other: Any?): Boolean =
-        this === other || (other is Periode
-                && javaClass == other.javaClass
-                && fom == other.fom
-                && tom == other.tom
-                )
+        this === other || (
+            other is Periode &&
+                javaClass == other.javaClass &&
+                fom == other.fom &&
+                tom == other.tom
+        )
 
     internal fun overlapperMed(other: Periode) = this.overlapper(other) || other.overlapper(this)
 
-    private fun overlapper(other: Periode) =
-        other.fom in fom .. tom || other.tom in fom .. tom
+    private fun overlapper(other: Periode) = other.fom in fom..tom || other.tom in fom..tom
 
     override fun hashCode(): Int {
         var result = fom.hashCode()

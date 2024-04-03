@@ -27,9 +27,10 @@ class Kommandologg private constructor(private val forelder: Kommandologg? = nul
         forelder?.nyttInnslag(innslag)
     }
 
-    fun barn() = Kommandologg(forelder = this).also {
-        it.kontekster.addAll(this.kontekster)
-    }
+    fun barn() =
+        Kommandologg(forelder = this).also {
+            it.kontekster.addAll(this.kontekster)
+        }
 
     companion object {
         fun nyLogg() = Kommandologg()
@@ -40,7 +41,7 @@ private data class KommandologgKontekst(val navn: String)
 
 private class Logginnslag(
     private val melding: String,
-    private val kontekster: Set<KommandologgKontekst>
+    private val kontekster: Set<KommandologgKontekst>,
 ) {
     val id: UUID = UUID.randomUUID()
     val opprettet: LocalDateTime = LocalDateTime.now()

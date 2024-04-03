@@ -1,12 +1,12 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
-import java.util.UUID
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInfotrygdVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSpleisVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSykepengegrunnlagsgrense
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLVilkarsgrunnlag
+import java.util.UUID
 
 enum class Vilkarsgrunnlagtype { INFOTRYGD, SPLEIS, UKJENT }
 
@@ -56,30 +56,37 @@ internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Av
             val avviksvurdering: Avviksvurdering =
                 checkNotNull(avviksvurderinghenter.hentAvviksvurdering(id)) { "Fant ikke avviksvurdering for vilkårsgrunnlagId $id" }
             val orgnrs =
-                (avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter.map { it.arbeidsgiverreferanse } + inntekter.map { it.arbeidsgiver }).toSet()
-            val inntekter = orgnrs.map { arbeidsgiverreferanse ->
-                val inntektFraSpleis =
-                    inntekter.singleOrNull { inntektFraSpleis -> inntektFraSpleis.arbeidsgiver == arbeidsgiverreferanse }
-                val sammenligningsgrunnlagInntekt =
-                    avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter.singleOrNull { it.arbeidsgiverreferanse == arbeidsgiverreferanse }
-                Arbeidsgiverinntekt(
-                    arbeidsgiver = arbeidsgiverreferanse,
-                    omregnetArsinntekt = inntektFraSpleis?.omregnetArsinntekt?.tilOmregnetÅrsinntekt(),
-                    sammenligningsgrunnlag = sammenligningsgrunnlagInntekt?.let {
-                        Sammenligningsgrunnlag(
-                            belop = sammenligningsgrunnlagInntekt.inntekter.sumOf { it.beløp },
-                            inntektFraAOrdningen = sammenligningsgrunnlagInntekt.inntekter.map { inntekt ->
-                                InntektFraAOrdningen(
-                                    maned = inntekt.årMåned.toString(),
-                                    sum = inntekt.beløp
+                (
+                    avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter.map {
+                        it.arbeidsgiverreferanse
+                    } + inntekter.map { it.arbeidsgiver }
+                ).toSet()
+            val inntekter =
+                orgnrs.map { arbeidsgiverreferanse ->
+                    val inntektFraSpleis =
+                        inntekter.singleOrNull { inntektFraSpleis -> inntektFraSpleis.arbeidsgiver == arbeidsgiverreferanse }
+                    val sammenligningsgrunnlagInntekt =
+                        avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter.singleOrNull { it.arbeidsgiverreferanse == arbeidsgiverreferanse }
+                    Arbeidsgiverinntekt(
+                        arbeidsgiver = arbeidsgiverreferanse,
+                        omregnetArsinntekt = inntektFraSpleis?.omregnetArsinntekt?.tilOmregnetÅrsinntekt(),
+                        sammenligningsgrunnlag =
+                            sammenligningsgrunnlagInntekt?.let {
+                                Sammenligningsgrunnlag(
+                                    belop = sammenligningsgrunnlagInntekt.inntekter.sumOf { it.beløp },
+                                    inntektFraAOrdningen =
+                                        sammenligningsgrunnlagInntekt.inntekter.map { inntekt ->
+                                            InntektFraAOrdningen(
+                                                maned = inntekt.årMåned.toString(),
+                                                sum = inntekt.beløp,
+                                            )
+                                        },
                                 )
-                            }
-                        )
-                    },
-                    skjonnsmessigFastsatt = inntektFraSpleis?.skjonnsmessigFastsatt?.tilOmregnetÅrsinntekt(),
-                    deaktivert = inntektFraSpleis?.deaktivert,
-                )
-            }
+                            },
+                        skjonnsmessigFastsatt = inntektFraSpleis?.skjonnsmessigFastsatt?.tilOmregnetÅrsinntekt(),
+                        deaktivert = inntektFraSpleis?.deaktivert,
+                    )
+                }
 
             VilkarsgrunnlagSpleis(
                 inntekter = inntekter,
@@ -98,34 +105,35 @@ internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Av
                 oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap,
                 oppfyllerKravOmMinstelonn = oppfyllerKravOmMinstelonn,
                 oppfyllerKravOmOpptjening = oppfyllerKravOmOpptjening,
-                opptjeningFra = opptjeningFra
+                opptjeningFra = opptjeningFra,
             )
         }
 
-        is GraphQLInfotrygdVilkarsgrunnlag -> VilkarsgrunnlagInfotrygd(
-            id = id,
-            vilkarsgrunnlagtype = Vilkarsgrunnlagtype.INFOTRYGD,
-            inntekter = inntekter.map {
-                Arbeidsgiverinntekt(
-                    arbeidsgiver = it.arbeidsgiver,
-                    omregnetArsinntekt = it.omregnetArsinntekt.tilOmregnetÅrsinntekt(),
-                    sammenligningsgrunnlag = null,
-                    skjonnsmessigFastsatt = null,
-                    deaktivert = it.deaktivert
-                )
-            },
-            arbeidsgiverrefusjoner = arbeidsgiverrefusjoner.map { it.tilArbeidsgiverrefusjon() },
-            omregnetArsinntekt = omregnetArsinntekt,
-            skjaeringstidspunkt = skjaeringstidspunkt,
-            sykepengegrunnlag = sykepengegrunnlag
-        )
+        is GraphQLInfotrygdVilkarsgrunnlag ->
+            VilkarsgrunnlagInfotrygd(
+                id = id,
+                vilkarsgrunnlagtype = Vilkarsgrunnlagtype.INFOTRYGD,
+                inntekter =
+                    inntekter.map {
+                        Arbeidsgiverinntekt(
+                            arbeidsgiver = it.arbeidsgiver,
+                            omregnetArsinntekt = it.omregnetArsinntekt.tilOmregnetÅrsinntekt(),
+                            sammenligningsgrunnlag = null,
+                            skjonnsmessigFastsatt = null,
+                            deaktivert = it.deaktivert,
+                        )
+                    },
+                arbeidsgiverrefusjoner = arbeidsgiverrefusjoner.map { it.tilArbeidsgiverrefusjon() },
+                omregnetArsinntekt = omregnetArsinntekt,
+                skjaeringstidspunkt = skjaeringstidspunkt,
+                sykepengegrunnlag = sykepengegrunnlag,
+            )
 
         else -> throw Exception("Ukjent vilkårsgrunnlag ${this.javaClass.name}")
     }
 }
 
-internal fun GraphQLSykepengegrunnlagsgrense.tilSykepengegrunnlaggrense() =
-    Sykepengegrunnlagsgrense(grunnbelop, grense, virkningstidspunkt)
+internal fun GraphQLSykepengegrunnlagsgrense.tilSykepengegrunnlaggrense() = Sykepengegrunnlagsgrense(grunnbelop, grense, virkningstidspunkt)
 
 data class Sykepengegrunnlagsgrense(
     val grunnbelop: Int,

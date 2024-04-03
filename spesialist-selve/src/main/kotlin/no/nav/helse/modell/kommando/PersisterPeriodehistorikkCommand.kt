@@ -1,10 +1,10 @@
 package no.nav.helse.modell.kommando
 
-import java.util.UUID
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 internal class PersisterPeriodehistorikkCommand(
     private val vedtaksperiodeId: UUID,
@@ -12,7 +12,6 @@ internal class PersisterPeriodehistorikkCommand(
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val utbetalingDao: UtbetalingDao,
 ) : Command {
-
     private companion object {
         private val logg = LoggerFactory.getLogger(PersisterPeriodehistorikkCommand::class.java)
     }
@@ -27,12 +26,12 @@ internal class PersisterPeriodehistorikkCommand(
 
         if (forrigeStatus == Utbetalingsstatus.FORKASTET) {
             val forrigeUtbetalingId = forrigeUtbetaling.utbetalingId
-            logg.info("Migrerer periodehistorikk fra utbetalingId $forrigeUtbetalingId til utbetalingId $utbetalingId for vedtaksperiodeId $vedtaksperiodeId")
+            logg.info(
+                "Migrerer periodehistorikk fra utbetalingId $forrigeUtbetalingId til utbetalingId $utbetalingId for vedtaksperiodeId $vedtaksperiodeId",
+            )
             periodehistorikkDao.migrer(forrigeUtbetalingId, utbetalingId)
         }
 
         return true
     }
-
-
 }

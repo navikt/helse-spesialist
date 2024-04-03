@@ -33,7 +33,7 @@ data class StatistikkPerKombinasjon(
     val perInntekttype: Map<Inntektskilde, Int>,
     val perPeriodetype: Map<Periodetype, Int>,
     val perMottakertype: Map<Mottakertype, Int>,
-    val perUtbetalingtype: Map<Utbetalingtype, Int>
+    val perUtbetalingtype: Map<Utbetalingtype, Int>,
 )
 
 data class AntallPerKombinasjonRad(

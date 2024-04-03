@@ -6,17 +6,17 @@ enum class Periodetype {
     FØRSTEGANGSBEHANDLING,
     FORLENGELSE,
     INFOTRYGDFORLENGELSE,
-    OVERGANG_FRA_IT
+    OVERGANG_FRA_IT,
 }
 
 enum class Inntektskilde {
     EN_ARBEIDSGIVER,
-    FLERE_ARBEIDSGIVERE
+    FLERE_ARBEIDSGIVERE,
 }
 
 data class VedtaksperiodeDto(
     val organisasjonsnummer: String,
     val vedtaksperiodeId: UUID,
     val forkastet: Boolean,
-    val generasjoner: List<GenerasjonDto>
+    val generasjoner: List<GenerasjonDto>,
 )

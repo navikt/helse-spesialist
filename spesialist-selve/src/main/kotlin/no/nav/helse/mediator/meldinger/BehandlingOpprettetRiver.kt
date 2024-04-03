@@ -10,8 +10,7 @@ import no.nav.helse.rapids_rivers.River
 internal class BehandlingOpprettetRiver(
     rapidsConnection: RapidsConnection,
     private val mediator: MeldingMediator,
-): River.PacketListener {
-
+) : River.PacketListener {
     init {
         River(rapidsConnection).apply {
             validate {
@@ -29,7 +28,10 @@ internal class BehandlingOpprettetRiver(
         }.register(this)
     }
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) {
+    override fun onPacket(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         mediator.mottaMelding(BehandlingOpprettet(packet), context)
     }
 }

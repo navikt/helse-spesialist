@@ -8,15 +8,16 @@ data class SaksbehandlerFraApi(
     val navn: String,
     val epost: String,
     val ident: String,
-    val grupper: List<UUID>
+    val grupper: List<UUID>,
 ) {
     companion object {
-        fun fraOnBehalfOfToken(jwtPrincipal: JWTPrincipal) = SaksbehandlerFraApi(
-            epost = jwtPrincipal.payload.getClaim("preferred_username").asString(),
-            oid = jwtPrincipal.payload.getClaim("oid").asString().let { UUID.fromString(it) },
-            navn = jwtPrincipal.payload.getClaim("name").asString(),
-            ident = jwtPrincipal.payload.getClaim("NAVident").asString(),
-            grupper = jwtPrincipal.payload.getClaim("groups")?.asList(String::class.java)?.map(UUID::fromString) ?: emptyList()
-        )
+        fun fraOnBehalfOfToken(jwtPrincipal: JWTPrincipal) =
+            SaksbehandlerFraApi(
+                epost = jwtPrincipal.payload.getClaim("preferred_username").asString(),
+                oid = jwtPrincipal.payload.getClaim("oid").asString().let { UUID.fromString(it) },
+                navn = jwtPrincipal.payload.getClaim("name").asString(),
+                ident = jwtPrincipal.payload.getClaim("NAVident").asString(),
+                grupper = jwtPrincipal.payload.getClaim("groups")?.asList(String::class.java)?.map(UUID::fromString) ?: emptyList(),
+            )
     }
 }

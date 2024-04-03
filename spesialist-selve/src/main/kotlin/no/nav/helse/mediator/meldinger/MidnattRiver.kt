@@ -1,6 +1,5 @@
 package no.nav.helse.mediator.meldinger
 
-import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -9,12 +8,12 @@ import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 internal class MidnattRiver(
     rapidsConnection: RapidsConnection,
-    private val mediator: MeldingMediator
+    private val mediator: MeldingMediator,
 ) : River.PacketListener {
-
     private companion object {
         private val logg = LoggerFactory.getLogger(this::class.java)
     }
@@ -28,11 +27,17 @@ internal class MidnattRiver(
         }.register(this)
     }
 
-    override fun onError(problems: MessageProblems, context: MessageContext) {
+    override fun onError(
+        problems: MessageProblems,
+        context: MessageContext,
+    ) {
         logg.error("Forstod ikke midnatt:\n${problems.toExtendedReport()}")
     }
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) {
+    override fun onPacket(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         val hendelseId = UUID.fromString(packet["@id"].asText())
         logg.info("Mottok melding midnatt , {}", kv("hendelseId", hendelseId))
 

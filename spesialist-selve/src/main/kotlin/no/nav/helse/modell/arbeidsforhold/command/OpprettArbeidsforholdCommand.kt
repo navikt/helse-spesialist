@@ -9,9 +9,8 @@ import org.slf4j.LoggerFactory
 internal class OpprettArbeidsforholdCommand(
     private val fødselsnummer: String,
     private val arbeidsforholdDao: ArbeidsforholdDao,
-    private val organisasjonsnummer: String
+    private val organisasjonsnummer: String,
 ) : Command {
-
     private companion object {
         private val logg = LoggerFactory.getLogger(OpprettArbeidsforholdCommand::class.java)
     }
@@ -23,8 +22,7 @@ internal class OpprettArbeidsforholdCommand(
 
     override fun resume(context: CommandContext) = behandle(context)
 
-    private fun arbeidsforholdOpprettet() =
-        arbeidsforholdDao.findArbeidsforhold(fødselsnummer, organisasjonsnummer).isNotEmpty()
+    private fun arbeidsforholdOpprettet() = arbeidsforholdDao.findArbeidsforhold(fødselsnummer, organisasjonsnummer).isNotEmpty()
 
     private fun ignorer(): Boolean {
         logg.info("Arbeidsforhold finnes fra før")
@@ -34,7 +32,7 @@ internal class OpprettArbeidsforholdCommand(
     private fun behandle(context: CommandContext): Boolean {
         context.get<Arbeidsforholdløsning>()?.opprett(arbeidsforholdDao, fødselsnummer, organisasjonsnummer)
             ?: return trengerMerInformasjon(
-                context
+                context,
             )
         return true
     }
@@ -42,10 +40,11 @@ internal class OpprettArbeidsforholdCommand(
     private fun trengerMerInformasjon(context: CommandContext): Boolean {
         logg.info("Trenger mer informasjon for å opprette arbeidsforhold")
         context.behov(
-            "Arbeidsforhold", mapOf(
+            "Arbeidsforhold",
+            mapOf(
                 "fødselsnummer" to fødselsnummer,
                 "organisasjonsnummer" to organisasjonsnummer,
-            )
+            ),
         )
         return false
     }

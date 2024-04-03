@@ -5,7 +5,6 @@ import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
-import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.rapids_rivers.isMissingOrNull
@@ -30,17 +29,21 @@ import no.nav.helse.spesialist.api.graphql.schema.Visningskriterium
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 class DokumentQuery(
     personApiDao: PersonApiDao,
     egenAnsattApiDao: EgenAnsattApiDao,
     private val dokumenthåndterer: Dokumenthåndterer,
 ) : AbstractPersonQuery(personApiDao, egenAnsattApiDao) {
-
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
     @Suppress("unused")
-    suspend fun hentSoknad(fnr: String, dokumentId: String, env: DataFetchingEnvironment): DataFetcherResult<Soknad> {
+    suspend fun hentSoknad(
+        fnr: String,
+        dokumentId: String,
+        env: DataFetchingEnvironment,
+    ): DataFetcherResult<Soknad> {
         if (isForbidden(fnr, env)) {
             return DataFetcherResult.newResult<Soknad?>().error(getForbiddenError(fnr)).build()
         }
@@ -49,14 +52,18 @@ class DokumentQuery(
             return DataFetcherResult.newResult<Soknad>().error(getEmptyRequestError()).build()
         }
 
-        val dokument = withContext(Dispatchers.IO) {
-            dokumenthåndterer.håndter(fnr, UUID.fromString(dokumentId), DokumentType.SØKNAD.name)
-        }.let {
-            val error = it.path("error")?.takeUnless { error -> error.isMissingOrNull() }?.asInt()
-            if (it.size() == 0) return DataFetcherResult.newResult<Soknad>().error(getExpectationFailedError()).build()
-            else if (error == 408) return DataFetcherResult.newResult<Soknad>().error(getEmptyResultTimeoutError()).build()
-            return@let it.tilSøknad()
-        }
+        val dokument =
+            withContext(Dispatchers.IO) {
+                dokumenthåndterer.håndter(fnr, UUID.fromString(dokumentId), DokumentType.SØKNAD.name)
+            }.let {
+                val error = it.path("error")?.takeUnless { error -> error.isMissingOrNull() }?.asInt()
+                if (it.size() == 0) {
+                    return DataFetcherResult.newResult<Soknad>().error(getExpectationFailedError()).build()
+                } else if (error == 408) {
+                    return DataFetcherResult.newResult<Soknad>().error(getEmptyResultTimeoutError()).build()
+                }
+                return@let it.tilSøknad()
+            }
 
         return DataFetcherResult.newResult<Soknad>().data(dokument).build()
     }
@@ -75,17 +82,22 @@ class DokumentQuery(
             return DataFetcherResult.newResult<DokumentInntektsmelding>().error(getEmptyRequestError()).build()
         }
 
-        val dokument = withContext(Dispatchers.IO) {
-            dokumenthåndterer.håndter(fnr, UUID.fromString(dokumentId), DokumentType.INNTEKTSMELDING.name)
-        }.let {
-            val error = it.path("error")?.takeUnless { error -> error.isMissingOrNull() }?.asInt()
-            if (it.size() == 0) return DataFetcherResult.newResult<DokumentInntektsmelding>()
-                .error(getExpectationFailedError()).build()
-            else if (error == 404) return DataFetcherResult.newResult<DokumentInntektsmelding>()
-                .error(getNotFoundErrorEkstern()).build()
-            else if (error == 408) return DataFetcherResult.newResult<DokumentInntektsmelding>().error(getEmptyResultTimeoutError()).build()
-            return@let it.tilInntektsmelding()
-        }
+        val dokument =
+            withContext(Dispatchers.IO) {
+                dokumenthåndterer.håndter(fnr, UUID.fromString(dokumentId), DokumentType.INNTEKTSMELDING.name)
+            }.let {
+                val error = it.path("error")?.takeUnless { error -> error.isMissingOrNull() }?.asInt()
+                if (it.size() == 0) {
+                    return DataFetcherResult.newResult<DokumentInntektsmelding>()
+                        .error(getExpectationFailedError()).build()
+                } else if (error == 404) {
+                    return DataFetcherResult.newResult<DokumentInntektsmelding>()
+                        .error(getNotFoundErrorEkstern()).build()
+                } else if (error == 408) {
+                    return DataFetcherResult.newResult<DokumentInntektsmelding>().error(getEmptyResultTimeoutError()).build()
+                }
+                return@let it.tilInntektsmelding()
+            }
 
         return DataFetcherResult.newResult<DokumentInntektsmelding>().data(dokument).build()
     }
@@ -108,72 +120,94 @@ class DokumentQuery(
 
     private fun JsonNode.tilInntektsmelding(): DokumentInntektsmelding {
         return DokumentInntektsmelding(
-            begrunnelseForReduksjonEllerIkkeUtbetalt = this.path("begrunnelseForReduksjonEllerIkkeUtbetalt")
-                .takeUnless { it.isMissingOrNull() }?.asText(),
+            begrunnelseForReduksjonEllerIkkeUtbetalt =
+                this.path("begrunnelseForReduksjonEllerIkkeUtbetalt")
+                    .takeUnless { it.isMissingOrNull() }?.asText(),
             bruttoUtbetalt = this.path("bruttoUtbetalt").takeUnless { it.isMissingOrNull() }?.asDouble(),
             beregnetInntekt = this.path("beregnetInntekt").takeUnless { it.isMissingOrNull() }?.asDouble(),
             inntektsdato = this.path("inntektsdato").takeUnless { it.isMissingOrNull() }?.asText(),
-            refusjon = this.path("refusjon").takeUnless { it.isMissingOrNull() }?.let { refusjon ->
-                Refusjon(beloepPrMnd = refusjon["beloepPrMnd"].takeUnless { it.isMissingOrNull() }?.asDouble(),
-                    opphoersdato = refusjon["opphoersdato"].takeUnless { it.isMissingOrNull() }?.asText()
-                )
-            },
-            endringIRefusjoner = this.path("endringIRefusjoner").takeUnless { it.isMissingOrNull() }
-                ?.map { endringIRefusjon ->
-                    EndringIRefusjon(endringsdato = endringIRefusjon["endringsdato"].takeUnless { it.isMissingOrNull() }
-                        ?.asText(),
-                        beloep = endringIRefusjon["beloep"].takeUnless { it.isMissingOrNull() }?.asDouble())
-                },
-            opphoerAvNaturalytelser = this.path("opphoerAvNaturalytelser").takeUnless { it.isMissingOrNull() }
-                ?.map { opphørAvNaturalytelse ->
-                    OpphoerAvNaturalytelse(opphørAvNaturalytelse["naturalytelse"].takeUnless { it.isMissingOrNull() }
-                        ?.asText()?.tilNaturalytelse(),
-                        fom = opphørAvNaturalytelse["fom"].takeUnless { it.isMissingOrNull() }?.asText(),
-                        beloepPrMnd = opphørAvNaturalytelse["beloepPrMnd"].takeUnless { it.isMissingOrNull() }
-                            ?.asDouble())
-                },
-            gjenopptakelseNaturalytelser = this.path("gjenopptakelseNaturalytelser").takeUnless { it.isMissingOrNull() }
-                ?.map { gjenopptakelseNaturalytelse ->
-                    GjenopptakelseNaturalytelse(gjenopptakelseNaturalytelse["naturalytelse"].takeUnless { it.isMissingOrNull() }
-                        ?.asText()?.tilNaturalytelse(),
-                        fom = gjenopptakelseNaturalytelse["fom"].takeUnless { it.isMissingOrNull() }?.asText(),
-                        beloepPrMnd = gjenopptakelseNaturalytelse["beloepPrMnd"].takeUnless { it.isMissingOrNull() }
-                            ?.asDouble())
-                },
-            arbeidsgiverperioder = this.path("arbeidsgiverperioder").takeUnless { it.isMissingOrNull() }
-                ?.map { arbeidsgiverperiode ->
-                    IMPeriode(fom = arbeidsgiverperiode["fom"].takeUnless { it.isMissingOrNull() }?.asText(),
-                        tom = arbeidsgiverperiode["tom"].takeUnless { it.isMissingOrNull() }?.asText()
+            refusjon =
+                this.path("refusjon").takeUnless { it.isMissingOrNull() }?.let { refusjon ->
+                    Refusjon(
+                        beloepPrMnd = refusjon["beloepPrMnd"].takeUnless { it.isMissingOrNull() }?.asDouble(),
+                        opphoersdato = refusjon["opphoersdato"].takeUnless { it.isMissingOrNull() }?.asText(),
                     )
                 },
-            ferieperioder = this.path("ferieperioder").takeUnless { it.isMissingOrNull() }?.map { ferieperiode ->
-                IMPeriode(fom = ferieperiode["fom"].takeUnless { it.isMissingOrNull() }?.asText(),
-                    tom = ferieperiode["tom"].takeUnless { it.isMissingOrNull() }?.asText()
-                )
-            },
+            endringIRefusjoner =
+                this.path("endringIRefusjoner").takeUnless { it.isMissingOrNull() }
+                    ?.map { endringIRefusjon ->
+                        EndringIRefusjon(
+                            endringsdato =
+                                endringIRefusjon["endringsdato"].takeUnless { it.isMissingOrNull() }
+                                    ?.asText(),
+                            beloep = endringIRefusjon["beloep"].takeUnless { it.isMissingOrNull() }?.asDouble(),
+                        )
+                    },
+            opphoerAvNaturalytelser =
+                this.path("opphoerAvNaturalytelser").takeUnless { it.isMissingOrNull() }
+                    ?.map { opphørAvNaturalytelse ->
+                        OpphoerAvNaturalytelse(
+                            opphørAvNaturalytelse["naturalytelse"].takeUnless { it.isMissingOrNull() }
+                                ?.asText()?.tilNaturalytelse(),
+                            fom = opphørAvNaturalytelse["fom"].takeUnless { it.isMissingOrNull() }?.asText(),
+                            beloepPrMnd =
+                                opphørAvNaturalytelse["beloepPrMnd"].takeUnless { it.isMissingOrNull() }
+                                    ?.asDouble(),
+                        )
+                    },
+            gjenopptakelseNaturalytelser =
+                this.path("gjenopptakelseNaturalytelser").takeUnless { it.isMissingOrNull() }
+                    ?.map { gjenopptakelseNaturalytelse ->
+                        GjenopptakelseNaturalytelse(
+                            gjenopptakelseNaturalytelse["naturalytelse"].takeUnless { it.isMissingOrNull() }
+                                ?.asText()?.tilNaturalytelse(),
+                            fom = gjenopptakelseNaturalytelse["fom"].takeUnless { it.isMissingOrNull() }?.asText(),
+                            beloepPrMnd =
+                                gjenopptakelseNaturalytelse["beloepPrMnd"].takeUnless { it.isMissingOrNull() }
+                                    ?.asDouble(),
+                        )
+                    },
+            arbeidsgiverperioder =
+                this.path("arbeidsgiverperioder").takeUnless { it.isMissingOrNull() }
+                    ?.map { arbeidsgiverperiode ->
+                        IMPeriode(
+                            fom = arbeidsgiverperiode["fom"].takeUnless { it.isMissingOrNull() }?.asText(),
+                            tom = arbeidsgiverperiode["tom"].takeUnless { it.isMissingOrNull() }?.asText(),
+                        )
+                    },
+            ferieperioder =
+                this.path("ferieperioder").takeUnless { it.isMissingOrNull() }?.map { ferieperiode ->
+                    IMPeriode(
+                        fom = ferieperiode["fom"].takeUnless { it.isMissingOrNull() }?.asText(),
+                        tom = ferieperiode["tom"].takeUnless { it.isMissingOrNull() }?.asText(),
+                    )
+                },
             foersteFravaersdag = this.path("foersteFravaersdag").takeUnless { it.isMissingOrNull() }?.asText(),
             naerRelasjon = this.path("naerRelasjon").takeUnless { it.isMissingOrNull() }?.asBoolean(),
             innsenderFulltNavn = this.path("innsenderFulltNavn").takeUnless { it.isMissingOrNull() }?.asText(),
             innsenderTelefon = this.path("innsenderTelefon").takeUnless { it.isMissingOrNull() }?.asText(),
-            inntektEndringAarsak = this.path("inntektEndringAarsak").takeUnless { it.isMissingOrNull() }?.let { endringAarsak ->
-                InntektEndringAarsak(
-                    aarsak = endringAarsak["aarsak"].asText(),
-                    perioder = endringAarsak["perioder"].takeUnless { it.isMissingOrNull() }?.map { periode ->
-                        IMPeriode(
-                            fom = periode["fom"].takeUnless { it.isMissingOrNull() }?.asText(),
-                            tom = periode["tom"].takeUnless { it.isMissingOrNull() }?.asText(),
-                        )
-                    },
-                    gjelderFra = endringAarsak["gjelderFra"].takeUnless { it.isMissingOrNull() }?.asText(),
-                    bleKjent = endringAarsak["bleKjent"].takeUnless { it.isMissingOrNull() }?.asText(),
-                )
-            },
-            avsenderSystem = this.path("avsenderSystem").takeUnless { it.isMissingOrNull() }?.let { avsenderSystem ->
-                AvsenderSystem(
-                    navn = avsenderSystem["navn"].takeUnless { it.isMissingOrNull() }?.asText(),
-                    versjon = avsenderSystem["versjon"].takeUnless { it.isMissingOrNull() }?.asText()
-                )
-            }
+            inntektEndringAarsak =
+                this.path("inntektEndringAarsak").takeUnless { it.isMissingOrNull() }?.let { endringAarsak ->
+                    InntektEndringAarsak(
+                        aarsak = endringAarsak["aarsak"].asText(),
+                        perioder =
+                            endringAarsak["perioder"].takeUnless { it.isMissingOrNull() }?.map { periode ->
+                                IMPeriode(
+                                    fom = periode["fom"].takeUnless { it.isMissingOrNull() }?.asText(),
+                                    tom = periode["tom"].takeUnless { it.isMissingOrNull() }?.asText(),
+                                )
+                            },
+                        gjelderFra = endringAarsak["gjelderFra"].takeUnless { it.isMissingOrNull() }?.asText(),
+                        bleKjent = endringAarsak["bleKjent"].takeUnless { it.isMissingOrNull() }?.asText(),
+                    )
+                },
+            avsenderSystem =
+                this.path("avsenderSystem").takeUnless { it.isMissingOrNull() }?.let { avsenderSystem ->
+                    AvsenderSystem(
+                        navn = avsenderSystem["navn"].takeUnless { it.isMissingOrNull() }?.asText(),
+                        versjon = avsenderSystem["versjon"].takeUnless { it.isMissingOrNull() }?.asText(),
+                    )
+                },
         )
     }
 
@@ -200,7 +234,8 @@ class DokumentQuery(
             "YRKEBILTJENESTLIGBEHOVKILOMETER" -> Naturalytelse.YRKEBILTJENESTLIGBEHOVKILOMETER
             else -> {
                 sikkerLogg.error(
-                    "Inntektsmelding har ny Naturalytelse som må støttes: {}, returnerer UKJENT enn så lenge", this
+                    "Inntektsmelding har ny Naturalytelse som må støttes: {}, returnerer UKJENT enn så lenge",
+                    this,
                 )
                 return Naturalytelse.UKJENT
             }
@@ -215,15 +250,16 @@ class DokumentQuery(
             this.path("egenmeldingsdagerFraSykmelding").takeUnless { it.isMissingOrNull() }?.map { it.asText() }
         val soknadsperioder =
             this.path("soknadsperioder").takeUnless { it.isMissingOrNull() }?.map { it.tilSøknadsperioder() }
-        val sporsmal = this.path("sporsmal").takeUnless { it.isMissingOrNull() }?.map { it.tilSpørsmål() }
-            ?.filter { it.skalVises() }
+        val sporsmal =
+            this.path("sporsmal").takeUnless { it.isMissingOrNull() }?.map { it.tilSpørsmål() }
+                ?.filter { it.skalVises() }
         return Soknad(
             type = type,
             arbeidGjenopptatt = arbeidGjenopptatt,
             sykmeldingSkrevet = sykmeldingSkrevet,
             egenmeldingsdagerFraSykmelding = egenmeldingsdagerFraSykmelding,
             soknadsperioder = soknadsperioder,
-            sporsmal = sporsmal
+            sporsmal = sporsmal,
         )
     }
 
@@ -239,7 +275,8 @@ class DokumentQuery(
             "GRADERT_REISETILSKUDD" -> Soknadstype.Gradert_reisetilskudd
             else -> {
                 sikkerLogg.error(
-                    "Søknad har ny Soknadstype som må støttes: {}, returnerer UKJENT enn så lenge", this
+                    "Søknad har ny Soknadstype som må støttes: {}, returnerer UKJENT enn så lenge",
+                    this,
                 )
                 return Soknadstype.UKJENT
             }
@@ -252,7 +289,7 @@ class DokumentQuery(
             tom = this.path("tom").asText(),
             grad = this.path("grad").takeUnless { it.isMissingOrNull() }?.asInt(),
             sykmeldingsgrad = this.path("sykmeldingsgrad").takeUnless { it.isMissingOrNull() }?.asInt(),
-            faktiskGrad = this.path("faktiskGrad").takeUnless { it.isMissingOrNull() }?.asInt()
+            faktiskGrad = this.path("faktiskGrad").takeUnless { it.isMissingOrNull() }?.asInt(),
         )
     }
 
@@ -261,27 +298,30 @@ class DokumentQuery(
         val kriterieForVisningAvUndersporsmal =
             this.path("kriterieForVisningAvUndersporsmal").takeUnless { it.isMissingOrNull() }?.asText()
                 ?.tilVisningskriterium()
-        val undersporsmal = this.path("undersporsmal").takeUnless { it.isMissingOrNull() }?.map { it.tilSpørsmål() }
-            ?.filter { it.skalVises(rotnivå = false) }
+        val undersporsmal =
+            this.path("undersporsmal").takeUnless { it.isMissingOrNull() }?.map { it.tilSpørsmål() }
+                ?.filter { it.skalVises(rotnivå = false) }
 
-        return Sporsmal(tag = this.path("tag").takeUnless { it.isMissingOrNull() }?.asText(),
+        return Sporsmal(
+            tag = this.path("tag").takeUnless { it.isMissingOrNull() }?.asText(),
             sporsmalstekst = this.path("sporsmalstekst").takeUnless { it.isMissingOrNull() }?.asText(),
             undertekst = this.path("undertekst").takeUnless { it.isMissingOrNull() }?.asText(),
             svartype = this.path("svartype").takeUnless { it.isMissingOrNull() }?.asText()?.tilSvartype(),
             svar = svar,
             undersporsmal = undersporsmal,
-            kriterieForVisningAvUndersporsmal = kriterieForVisningAvUndersporsmal
+            kriterieForVisningAvUndersporsmal = kriterieForVisningAvUndersporsmal,
         )
     }
 
     private fun Sporsmal.skalVises(rotnivå: Boolean = true): Boolean {
-        val harTagSomSkalVises = when (this.tag) {
-            "BEKREFT_OPPLYSNINGER" -> false
-            "ANSVARSERKLARING" -> false
-            "VAER_KLAR_OVER_AT" -> false
-            "TIL_SLUTT" -> false
-            else -> true
-        }
+        val harTagSomSkalVises =
+            when (this.tag) {
+                "BEKREFT_OPPLYSNINGER" -> false
+                "ANSVARSERKLARING" -> false
+                "VAER_KLAR_OVER_AT" -> false
+                "TIL_SLUTT" -> false
+                else -> true
+            }
 
         val harUnderspørsmål = !this.undersporsmal.isNullOrEmpty()
         val førsteSvar = this.svar?.firstOrNull()?.verdi
@@ -294,7 +334,7 @@ class DokumentQuery(
 
     private fun JsonNode.tilSvar(): Svar {
         return Svar(
-            verdi = this.path("verdi").takeUnless { it.isMissingOrNull() }?.asText()
+            verdi = this.path("verdi").takeUnless { it.isMissingOrNull() }?.asText(),
         )
     }
 
@@ -339,7 +379,8 @@ class DokumentQuery(
             "CHECKED" -> Visningskriterium.CHECKED
             else -> {
                 sikkerLogg.error(
-                    "Søknad har nytt Visningskriterium som må støttes: {}, returnerer UKJENT enn så lenge", this
+                    "Søknad har nytt Visningskriterium som må støttes: {}, returnerer UKJENT enn så lenge",
+                    this,
                 )
                 return Visningskriterium.UKJENT
             }
@@ -348,5 +389,6 @@ class DokumentQuery(
 }
 
 enum class DokumentType {
-    SØKNAD, INNTEKTSMELDING
+    SØKNAD,
+    INNTEKTSMELDING,
 }

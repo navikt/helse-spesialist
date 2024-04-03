@@ -7,11 +7,11 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.prometheus.client.Histogram
-import java.util.UUID
 import no.nav.helse.spesialist.api.client.AccessTokenClient
 import no.nav.helse.spesialist.api.graphql.schema.Reservasjon
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 class ReservasjonClient(
     private val httpClient: HttpClient,
@@ -23,10 +23,11 @@ class ReservasjonClient(
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
     companion object {
-        private val responstidReservasjonsstatus: Histogram = Histogram.build()
-            .name("responstid_hent_reservasjonsstatus")
-            .help("Responstid for kall til digdir-krr-proxy")
-            .register()
+        private val responstidReservasjonsstatus: Histogram =
+            Histogram.build()
+                .name("responstid_hent_reservasjonsstatus")
+                .help("Responstid for kall til digdir-krr-proxy")
+                .register()
     }
 
     internal suspend fun hentReservasjonsstatus(fnr: String): Reservasjon? {
@@ -50,5 +51,4 @@ class ReservasjonClient(
 
         return null
     }
-
 }

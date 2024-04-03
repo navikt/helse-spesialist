@@ -1,8 +1,8 @@
 package no.nav.helse.modell.saksbehandler.handlinger.dto
 
+import no.nav.helse.modell.vilkårsprøving.LovhjemmelDto
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.modell.vilkårsprøving.LovhjemmelDto
 
 data class OverstyrtInntektOgRefusjonDto(
     val id: UUID,
@@ -26,5 +26,5 @@ data class OverstyrtArbeidsgiverDto(
 data class RefusjonselementDto(
     val fom: LocalDate,
     val tom: LocalDate? = null,
-    val beløp: Double
+    val beløp: Double,
 )

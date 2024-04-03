@@ -23,9 +23,10 @@ tasks {
 
         manifest {
             attributes["Main-Class"] = "no.nav.helse.AppKt"
-            attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(separator = " ") {
-                it.name
-            }
+            attributes["Class-Path"] =
+                configurations.runtimeClasspath.get().joinToString(separator = " ") {
+                    it.name
+                }
         }
     }
 

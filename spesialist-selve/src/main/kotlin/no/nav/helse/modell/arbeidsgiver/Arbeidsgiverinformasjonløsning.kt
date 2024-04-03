@@ -19,6 +19,6 @@ internal class Arbeidsgiverinformasjonløsning(private val arbeidsgivere: List<A
     internal data class ArbeidsgiverDto(
         val orgnummer: String,
         val navn: String,
-        val bransjer: List<String>
+        val bransjer: List<String>,
     )
 }

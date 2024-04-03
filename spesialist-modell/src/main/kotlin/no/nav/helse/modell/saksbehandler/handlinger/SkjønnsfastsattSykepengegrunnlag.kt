@@ -1,7 +1,5 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.SkjønnsfastsattSykepengegrunnlagEvent
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver.Companion.byggSubsumsjon
@@ -11,6 +9,8 @@ import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.SporingSkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_BEREGNET
+import java.time.LocalDate
+import java.util.UUID
 
 class SkjønnsfastsattSykepengegrunnlag(
     private val id: UUID = UUID.randomUUID(),
@@ -18,14 +18,21 @@ class SkjønnsfastsattSykepengegrunnlag(
     private val fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
     private val arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
-): Overstyring {
+) : Overstyring {
     override fun gjelderFødselsnummer(): String = fødselsnummer
+
     override fun utførAv(saksbehandler: Saksbehandler) {
         saksbehandler.håndter(this)
     }
+
     override fun loggnavn(): String = "skjønnsfastsett_sykepengegrunnlag"
 
-    fun byggEvent(oid: UUID, navn: String, epost: String, ident: String): SkjønnsfastsattSykepengegrunnlagEvent {
+    fun byggEvent(
+        oid: UUID,
+        navn: String,
+        epost: String,
+        ident: String,
+    ): SkjønnsfastsattSykepengegrunnlagEvent {
         return SkjønnsfastsattSykepengegrunnlagEvent(
             id = id,
             fødselsnummer = fødselsnummer,
@@ -35,17 +42,18 @@ class SkjønnsfastsattSykepengegrunnlag(
             saksbehandlerIdent = ident,
             saksbehandlerEpost = epost,
             skjæringstidspunkt = skjæringstidspunkt,
-            arbeidsgivere = arbeidsgivere.map(SkjønnsfastsattArbeidsgiver::byggEvent)
+            arbeidsgivere = arbeidsgivere.map(SkjønnsfastsattArbeidsgiver::byggEvent),
         )
     }
 
-    fun toDto() = SkjønnsfastsattSykepengegrunnlagDto(
-        id = id,
-        aktørId = aktørId,
-        fødselsnummer = fødselsnummer,
-        skjæringstidspunkt = skjæringstidspunkt,
-        arbeidsgivere = arbeidsgivere.map(SkjønnsfastsattArbeidsgiver::toDto)
-    )
+    fun toDto() =
+        SkjønnsfastsattSykepengegrunnlagDto(
+            id = id,
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            skjæringstidspunkt = skjæringstidspunkt,
+            arbeidsgivere = arbeidsgivere.map(SkjønnsfastsattArbeidsgiver::toDto),
+        )
 
     internal fun byggSubsumsjon(saksbehandlerEpost: String): Subsumsjon {
         return arbeidsgivere.byggSubsumsjon(saksbehandlerEpost, fødselsnummer)
@@ -64,7 +72,6 @@ class SkjønnsfastsattArbeidsgiver(
     private val lovhjemmel: Lovhjemmel?,
     private val initierendeVedtaksperiodeId: String?,
 ) {
-
     internal companion object {
         internal fun List<SkjønnsfastsattArbeidsgiver>.byggSubsumsjon(
             saksbehandlerEpost: String,
@@ -72,48 +79,55 @@ class SkjønnsfastsattArbeidsgiver(
         ) = Subsumsjon(
             lovhjemmel = this.first().lovhjemmel!!,
             fødselsnummer = fødselsnummer,
-            input = mapOf(
-                "sattÅrligInntektPerArbeidsgiver" to this.map { ag -> mapOf(ag.organisasjonsnummer to ag.årlig) },
-            ),
-            output = mapOf(
-                "grunnlagForSykepengegrunnlag" to this.sumOf { ag -> ag.årlig }
-            ),
+            input =
+                mapOf(
+                    "sattÅrligInntektPerArbeidsgiver" to this.map { ag -> mapOf(ag.organisasjonsnummer to ag.årlig) },
+                ),
+            output =
+                mapOf(
+                    "grunnlagForSykepengegrunnlag" to this.sumOf { ag -> ag.årlig },
+                ),
             utfall = VILKAR_BEREGNET,
-            sporing = SporingSkjønnsfastsattSykepengegrunnlag(
-                vedtaksperioder = this.mapNotNull { ag -> ag.initierendeVedtaksperiodeId?.let { UUID.fromString(it) } },
-                organisasjonsnummer = this.map { ag -> ag.organisasjonsnummer },
-                saksbehandler = listOf(saksbehandlerEpost)
-            ),
+            sporing =
+                SporingSkjønnsfastsattSykepengegrunnlag(
+                    vedtaksperioder = this.mapNotNull { ag -> ag.initierendeVedtaksperiodeId?.let { UUID.fromString(it) } },
+                    organisasjonsnummer = this.map { ag -> ag.organisasjonsnummer },
+                    saksbehandler = listOf(saksbehandlerEpost),
+                ),
         )
     }
-    fun byggEvent() = SkjønnsfastsattSykepengegrunnlagEvent.SkjønnsfastsattArbeidsgiver(
-        organisasjonsnummer = organisasjonsnummer,
-        årlig = årlig,
-        fraÅrlig = fraÅrlig,
-        årsak = årsak,
-        type = when (type) {
-            Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT -> "OMREGNET_ÅRSINNTEKT"
-            Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT -> "RAPPORTERT_ÅRSINNTEKT"
-            Skjønnsfastsettingstype.ANNET -> "ANNET"
-        },
-        begrunnelseMal = begrunnelseMal,
-        begrunnelseFritekst = begrunnelseFritekst,
-        begrunnelseKonklusjon = begrunnelseKonklusjon,
-        initierendeVedtaksperiodeId = initierendeVedtaksperiodeId
-    )
 
-    fun toDto() = SkjønnsfastsattArbeidsgiverDto(
-        organisasjonsnummer = organisasjonsnummer,
-        årlig = årlig,
-        fraÅrlig = fraÅrlig,
-        årsak = årsak,
-        type = type,
-        begrunnelseMal = begrunnelseMal,
-        begrunnelseFritekst = begrunnelseFritekst,
-        begrunnelseKonklusjon = begrunnelseKonklusjon,
-        lovhjemmel = lovhjemmel?.toDto(),
-        initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,
-    )
+    fun byggEvent() =
+        SkjønnsfastsattSykepengegrunnlagEvent.SkjønnsfastsattArbeidsgiver(
+            organisasjonsnummer = organisasjonsnummer,
+            årlig = årlig,
+            fraÅrlig = fraÅrlig,
+            årsak = årsak,
+            type =
+                when (type) {
+                    Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT -> "OMREGNET_ÅRSINNTEKT"
+                    Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT -> "RAPPORTERT_ÅRSINNTEKT"
+                    Skjønnsfastsettingstype.ANNET -> "ANNET"
+                },
+            begrunnelseMal = begrunnelseMal,
+            begrunnelseFritekst = begrunnelseFritekst,
+            begrunnelseKonklusjon = begrunnelseKonklusjon,
+            initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,
+        )
+
+    fun toDto() =
+        SkjønnsfastsattArbeidsgiverDto(
+            organisasjonsnummer = organisasjonsnummer,
+            årlig = årlig,
+            fraÅrlig = fraÅrlig,
+            årsak = årsak,
+            type = type,
+            begrunnelseMal = begrunnelseMal,
+            begrunnelseFritekst = begrunnelseFritekst,
+            begrunnelseKonklusjon = begrunnelseKonklusjon,
+            lovhjemmel = lovhjemmel?.toDto(),
+            initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,
+        )
 
     enum class Skjønnsfastsettingstype {
         OMREGNET_ÅRSINNTEKT,

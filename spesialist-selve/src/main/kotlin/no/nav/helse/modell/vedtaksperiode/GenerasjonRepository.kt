@@ -1,24 +1,28 @@
 package no.nav.helse.modell.vedtaksperiode
 
-import java.time.LocalDate
-import java.util.UUID
-import javax.sql.DataSource
 import kotliquery.TransactionalSession
 import kotliquery.sessionOf
 import no.nav.helse.mediator.builders.GenerasjonBuilder
 import no.nav.helse.modell.VedtakDao
+import java.time.LocalDate
+import java.util.UUID
+import javax.sql.DataSource
 
-internal class GenerasjonRepository(private val dataSource: DataSource): IVedtaksperiodeObserver {
-
+internal class GenerasjonRepository(private val dataSource: DataSource) : IVedtaksperiodeObserver {
     private val dao = GenerasjonDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
 
-    internal fun brukVedtaksperiode(fødselsnummer: String, vedtaksperiodeId: UUID, block: (vedtaksperiode: Vedtaksperiode) -> Unit) {
+    internal fun brukVedtaksperiode(
+        fødselsnummer: String,
+        vedtaksperiodeId: UUID,
+        block: (vedtaksperiode: Vedtaksperiode) -> Unit,
+    ) {
         sessionOf(dataSource).use { session ->
             session.transaction { tx ->
-                val vedtaksperiode = tx.finnVedtaksperiode(vedtaksperiodeId).let {
-                    Vedtaksperiode.gjenopprett(it.organisasjonsnummer, it.vedtaksperiodeId, it.forkastet, it.generasjoner)
-                }
+                val vedtaksperiode =
+                    tx.finnVedtaksperiode(vedtaksperiodeId).let {
+                        Vedtaksperiode.gjenopprett(it.organisasjonsnummer, it.vedtaksperiodeId, it.forkastet, it.generasjoner)
+                    }
                 block(vedtaksperiode)
                 tx.lagreVedtaksperiode(fødselsnummer, vedtaksperiode.toDto())
             }
@@ -31,7 +35,10 @@ internal class GenerasjonRepository(private val dataSource: DataSource): IVedtak
         }
     }
 
-    internal fun TransactionalSession.lagreVedtaksperioder(fødselsnummer: String, vedtaksperioder: List<VedtaksperiodeDto>) {
+    internal fun TransactionalSession.lagreVedtaksperioder(
+        fødselsnummer: String,
+        vedtaksperioder: List<VedtaksperiodeDto>,
+    ) {
         vedtaksperioder.forEach { lagreVedtaksperiode(fødselsnummer, it) }
     }
 
@@ -49,7 +56,10 @@ internal class GenerasjonRepository(private val dataSource: DataSource): IVedtak
         }
     }
 
-    private fun TransactionalSession.lagreVedtaksperiode(fødselsnummer: String, vedtaksperiode: VedtaksperiodeDto) {
+    private fun TransactionalSession.lagreVedtaksperiode(
+        fødselsnummer: String,
+        vedtaksperiode: VedtaksperiodeDto,
+    ) {
         with(vedtakDao) {
             lagreVedtaksperiode(fødselsnummer, vedtaksperiode)
         }
@@ -63,11 +73,17 @@ internal class GenerasjonRepository(private val dataSource: DataSource): IVedtak
         }
     }
 
-    internal fun byggGenerasjon(vedtaksperiodeId: UUID, generasjonBuilder: GenerasjonBuilder) {
+    internal fun byggGenerasjon(
+        vedtaksperiodeId: UUID,
+        generasjonBuilder: GenerasjonBuilder,
+    ) {
         dao.byggSisteFor(vedtaksperiodeId, generasjonBuilder)
     }
 
-    internal fun finnVedtaksperiodeIderFor(fødselsnummer: String, skjæringstidspunkt: LocalDate): Set<UUID> {
+    internal fun finnVedtaksperiodeIderFor(
+        fødselsnummer: String,
+        skjæringstidspunkt: LocalDate,
+    ): Set<UUID> {
         return dao.finnVedtaksperiodeIderFor(fødselsnummer, skjæringstidspunkt)
     }
 
@@ -81,11 +97,10 @@ internal class GenerasjonRepository(private val dataSource: DataSource): IVedtak
         vedtaksperiodeId: UUID,
         gammel: Generasjon.Tilstand,
         ny: Generasjon.Tilstand,
-        hendelseId: UUID
+        hendelseId: UUID,
     ) {
         dao.oppdaterTilstandFor(generasjonId, ny, hendelseId)
     }
 
     internal fun førsteKjenteDag(fødselsnummer: String) = dao.førsteKjenteDag(fødselsnummer)
-
 }

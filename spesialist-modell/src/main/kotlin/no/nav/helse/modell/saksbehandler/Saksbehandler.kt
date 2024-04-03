@@ -1,12 +1,12 @@
 package no.nav.helse.modell.saksbehandler
 
-import java.util.UUID
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.saksbehandler.handlinger.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtInntektOgRefusjon
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
+import java.util.UUID
 
 class Saksbehandler(
     private val epostadresse: String,
@@ -22,15 +22,16 @@ class Saksbehandler(
     }
 
     fun ident(): String = ident
+
     fun oid(): UUID = oid
+
     fun epostadresse(): String = epostadresse
 
     fun accept(visitor: SaksbehandlerVisitor) {
         visitor.visitSaksbehandler(epostadresse, oid, navn, ident)
     }
 
-    fun harTilgangTil(egenskaper: List<Egenskap>): Boolean =
-        tilgangskontroll.harTilgangTil(oid, egenskaper)
+    fun harTilgangTil(egenskaper: List<Egenskap>): Boolean = tilgangskontroll.harTilgangTil(oid, egenskaper)
 
     internal fun håndter(hendelse: OverstyrtTidslinje) {
         val event = hendelse.byggEvent()
@@ -65,13 +66,14 @@ class Saksbehandler(
 
     override fun toString(): String = "epostadresse=$epostadresse, oid=$oid"
 
-    override fun equals(other: Any?) = this === other || (
-        other is Saksbehandler &&
-        epostadresse == other.epostadresse &&
-        navn == other.navn &&
-        oid == other.oid &&
-        ident == other.ident
-    )
+    override fun equals(other: Any?) =
+        this === other || (
+            other is Saksbehandler &&
+                epostadresse == other.epostadresse &&
+                navn == other.navn &&
+                oid == other.oid &&
+                ident == other.ident
+        )
 
     override fun hashCode(): Int {
         var result = epostadresse.hashCode()

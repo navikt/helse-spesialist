@@ -1,6 +1,5 @@
 package no.nav.helse.mediator.meldinger
 
-import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -14,6 +13,7 @@ import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 internal class GodkjenningsbehovRiver(
     rapidsConnection: RapidsConnection,
@@ -29,7 +29,12 @@ internal class GodkjenningsbehovRiver(
                 it.demandValue("behandletAvSpinnvill", true)
                 it.rejectKey("@løsning")
                 it.requireKey(
-                    "@id", "fødselsnummer", "aktørId", "organisasjonsnummer", "vedtaksperiodeId", "utbetalingId"
+                    "@id",
+                    "fødselsnummer",
+                    "aktørId",
+                    "organisasjonsnummer",
+                    "vedtaksperiodeId",
+                    "utbetalingId",
                 )
                 it.requireKey(
                     "Godkjenning.periodeFom",
@@ -52,15 +57,21 @@ internal class GodkjenningsbehovRiver(
         }.register(this)
     }
 
-    override fun onError(problems: MessageProblems, context: MessageContext) {
+    override fun onError(
+        problems: MessageProblems,
+        context: MessageContext,
+    ) {
         sikkerLogg.error("Forstod ikke Godkjenning-behov:\n${problems.toExtendedReport()}")
     }
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) {
+    override fun onPacket(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         val hendelseId = UUID.fromString(packet["@id"].asText())
         logg.info(
             "Mottok godkjenningsbehov med {}",
-            StructuredArguments.keyValue("hendelseId", hendelseId)
+            StructuredArguments.keyValue("hendelseId", hendelseId),
         )
         sikkerLogg.info(
             "Mottok godkjenningsbehov med {}, {}",
@@ -69,10 +80,11 @@ internal class GodkjenningsbehovRiver(
         )
         mediator.godkjenningsbehov(
             Godkjenningsbehov(packet),
-            avviksvurderingId = packet["avviksvurderingId"].takeUnless { it.isMissingOrNull() }
-                ?.let { UUID.fromString(it.asText()) },
+            avviksvurderingId =
+                packet["avviksvurderingId"].takeUnless { it.isMissingOrNull() }
+                    ?.let { UUID.fromString(it.asText()) },
             vilkårsgrunnlagId = UUID.fromString(packet["Godkjenning.vilkårsgrunnlagId"].asText()),
-            context = context
+            context = context,
         )
     }
 }

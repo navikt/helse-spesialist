@@ -1,15 +1,14 @@
 package no.nav.helse.db
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import java.time.LocalDate
-import javax.sql.DataSource
 import no.nav.helse.HelseDao
 import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastattSykepengegrunnlag
 import no.nav.helse.modell.sykefraværstilfelle.Skjønnsfastsettingsårsak
 import no.nav.helse.objectMapper
+import java.time.LocalDate
+import javax.sql.DataSource
 
 internal class SykefraværstilfelleDao(dataSource: DataSource) : HelseDao(dataSource) {
-
     internal fun finnSkjønnsfastsatteSykepengegrunnlag(
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate,
@@ -25,7 +24,7 @@ internal class SykefraværstilfelleDao(dataSource: DataSource) : HelseDao(dataSo
                 WHERE ss.skjaeringstidspunkt::date = :skjaeringstidspunkt
                 AND fodselsnummer = :fodselsnummer
         """,
-            mapOf("skjaeringstidspunkt" to skjæringstidspunkt, "fodselsnummer" to fødselsnummer.toLong())
+            mapOf("skjaeringstidspunkt" to skjæringstidspunkt, "fodselsnummer" to fødselsnummer.toLong()),
         ).list {
             SkjønnsfastattSykepengegrunnlag(
                 type = enumValueOf(it.string("type")),
@@ -34,14 +33,14 @@ internal class SykefraværstilfelleDao(dataSource: DataSource) : HelseDao(dataSo
                 begrunnelseFraMal = it.string("mal"),
                 begrunnelseFraFritekst = it.string("fritekst"),
                 begrunnelseFraKonklusjon = it.string("konklusjon"),
-                opprettet = it.localDateTime("tidspunkt")
+                opprettet = it.localDateTime("tidspunkt"),
             )
         }
     }
 }
 
-private fun String.tilÅrsak():Skjønnsfastsettingsårsak {
-    return when(this) {
+private fun String.tilÅrsak(): Skjønnsfastsettingsårsak {
+    return when (this) {
         "2" -> Skjønnsfastsettingsårsak.ANDRE_AVSNITT
         "3" -> Skjønnsfastsettingsårsak.TREDJE_AVSNITT
         else -> Skjønnsfastsettingsårsak.ANDRE_AVSNITT

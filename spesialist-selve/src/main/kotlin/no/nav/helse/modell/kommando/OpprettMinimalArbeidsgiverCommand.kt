@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory
 
 internal class OpprettMinimalArbeidsgiverCommand(
     private val organisasjonsnummer: String,
-    private val arbeidsgiverDao: ArbeidsgiverDao
+    private val arbeidsgiverDao: ArbeidsgiverDao,
 ) : Command {
     private companion object {
         private val log = LoggerFactory.getLogger(OpprettMinimalArbeidsgiverCommand::class.java)
@@ -22,6 +22,5 @@ internal class OpprettMinimalArbeidsgiverCommand(
         return true
     }
 
-    private fun arbeidsgiverFinnes() =
-        arbeidsgiverDao.findArbeidsgiverByOrgnummer(organisasjonsnummer) != null
+    private fun arbeidsgiverFinnes() = arbeidsgiverDao.findArbeidsgiverByOrgnummer(organisasjonsnummer) != null
 }

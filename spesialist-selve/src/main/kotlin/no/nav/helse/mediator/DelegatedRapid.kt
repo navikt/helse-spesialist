@@ -8,9 +8,8 @@ internal class DelegatedRapid(
     private val beforeRiverAction: () -> Unit,
     private val skalBehandleMelding: (String) -> Boolean,
     private val afterRiverAction: (String) -> Unit,
-    private val errorAction: (Exception, String) -> Unit
+    private val errorAction: (Exception, String) -> Unit,
 ) : RapidsConnection(), RapidsConnection.MessageListener {
-
     init {
         rapidsConnection.register(this)
     }
@@ -19,7 +18,10 @@ internal class DelegatedRapid(
         return "Spesialist"
     }
 
-    override fun onMessage(message: String, context: MessageContext) {
+    override fun onMessage(
+        message: String,
+        context: MessageContext,
+    ) {
         try {
             beforeRiverAction()
             if (skalBehandleMelding(message)) notifyMessage(message, context)
@@ -34,10 +36,14 @@ internal class DelegatedRapid(
         rapidsConnection.publish(message)
     }
 
-    override fun publish(key: String, message: String) {
+    override fun publish(
+        key: String,
+        message: String,
+    ) {
         rapidsConnection.publish(key, message)
     }
 
     override fun start() = throw IllegalStateException()
+
     override fun stop() = throw IllegalStateException()
 }

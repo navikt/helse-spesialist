@@ -8,5 +8,5 @@ data class ArbeidsforholdDto(
     val startdato: LocalDate,
     val sluttdato: LocalDate?,
     val stillingsprosent: Int,
-    val stillingstittel: String
+    val stillingstittel: String,
 )

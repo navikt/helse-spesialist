@@ -1,13 +1,12 @@
 package no.nav.helse.spesialist.api.utbetaling
 
-import javax.sql.DataSource
 import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
+import javax.sql.DataSource
 
 class UtbetalingApiDao(private val dataSource: DataSource) {
-
     fun findUtbetalinger(fødselsnummer: String): List<UtbetalingApiDto> {
         @Language("PostgreSQL")
         val query = """
@@ -35,48 +34,57 @@ ORDER BY ui.id, u.opprettet DESC
                             status = Utbetalingsstatus.valueOf(row.string("status")),
                             personoppdrag = personoppdrag,
                             arbeidsgiveroppdrag = arbeidsgiveroppdrag,
-                            annullertAvSaksbehandler = row.localDateTimeOrNull("annullert_tidspunkt")?.let {
-                                AnnullertAvSaksbehandlerApiDto(
-                                    annullertTidspunkt = it,
-                                    saksbehandlerNavn = row.string("navn")
-                                )
-                            },
-                            totalbeløp = personoppdrag.totalbeløp() + arbeidsgiveroppdrag.totalbeløp()
+                            annullertAvSaksbehandler =
+                                row.localDateTimeOrNull("annullert_tidspunkt")?.let {
+                                    AnnullertAvSaksbehandlerApiDto(
+                                        annullertTidspunkt = it,
+                                        saksbehandlerNavn = row.string("navn"),
+                                    )
+                                },
+                            totalbeløp = personoppdrag.totalbeløp() + arbeidsgiveroppdrag.totalbeløp(),
                         )
                     }
-                    .asList)
+                    .asList,
+            )
         }
     }
 
-    private fun findOppdrag(session: Session, fagsystemIdRef: Long): OppdragApiDto? =
+    private fun findOppdrag(
+        session: Session,
+        fagsystemIdRef: Long,
+    ): OppdragApiDto? =
         session.run(
             queryOf(
                 "SELECT id,mottaker,fagsystem_id FROM oppdrag WHERE id = :fagsystemIdRef",
-                mapOf("fagsystemIdRef" to fagsystemIdRef)
+                mapOf("fagsystemIdRef" to fagsystemIdRef),
             ).map { row ->
                 OppdragApiDto(
                     mottaker = row.string("mottaker"),
                     fagsystemId = row.string("fagsystem_id"),
-                    utbetalingslinjer = findUtbetalingslinjer(session, row.long("id"))
+                    utbetalingslinjer = findUtbetalingslinjer(session, row.long("id")),
                 )
-            }.asSingle
+            }.asSingle,
         )
 
-        private fun findUtbetalingslinjer(session: Session, oppdragId: Long): List<UtbetalingslinjeApiDto> {
+    private fun findUtbetalingslinjer(
+        session: Session,
+        oppdragId: Long,
+    ): List<UtbetalingslinjeApiDto> {
         @Language("PostgreSQL")
         val query = "SELECT fom, tom, totalbeløp FROM utbetalingslinje WHERE oppdrag_id=:oppdrag_id;"
 
-        return session.run(queryOf(query, mapOf("oppdrag_id" to oppdragId))
-            .map { row ->
-                UtbetalingslinjeApiDto(
-                    fom = row.localDate("fom"),
-                    tom = row.localDate("tom"),
-                    totalbeløp = row.intOrNull("totalbeløp")
-                )
-            }
-            .asList)
+        return session.run(
+            queryOf(query, mapOf("oppdrag_id" to oppdragId))
+                .map { row ->
+                    UtbetalingslinjeApiDto(
+                        fom = row.localDate("fom"),
+                        tom = row.localDate("tom"),
+                        totalbeløp = row.intOrNull("totalbeløp"),
+                    )
+                }
+                .asList,
+        )
     }
-
 }
 
 private fun OppdragApiDto?.totalbeløp(): Int {

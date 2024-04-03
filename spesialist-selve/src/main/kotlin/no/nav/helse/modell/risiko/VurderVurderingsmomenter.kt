@@ -1,6 +1,5 @@
 package no.nav.helse.modell.risiko
 
-import java.util.UUID
 import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
@@ -8,6 +7,7 @@ import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_1
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 internal class VurderVurderingsmomenter(
     private val hendelseId: UUID,
@@ -18,7 +18,6 @@ internal class VurderVurderingsmomenter(
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val utbetaling: Utbetaling,
 ) : Command {
-
     override fun execute(context: CommandContext) = behandle(context)
 
     override fun resume(context: CommandContext) = behandle(context)
@@ -30,12 +29,13 @@ internal class VurderVurderingsmomenter(
         if (løsning == null || !løsning.gjelderVedtaksperiode(vedtaksperiodeId)) {
             logg.info("Trenger risikovurdering av vedtaksperiode $vedtaksperiodeId")
             context.behov(
-                "Risikovurdering", mapOf(
+                "Risikovurdering",
+                mapOf(
                     "vedtaksperiodeId" to vedtaksperiodeId,
                     "organisasjonsnummer" to organisasjonsnummer,
                     "førstegangsbehandling" to førstegangsbehandling,
                     "kunRefusjon" to !utbetaling.harEndringIUtbetalingTilSykmeldt(),
-                )
+                ),
             )
             return false
         }

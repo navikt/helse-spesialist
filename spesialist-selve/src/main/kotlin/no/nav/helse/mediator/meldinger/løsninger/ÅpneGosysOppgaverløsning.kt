@@ -1,7 +1,5 @@
 package no.nav.helse.mediator.meldinger.løsninger
 
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
@@ -15,6 +13,8 @@ import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class ÅpneGosysOppgaverløsning(
     private val opprettet: LocalDateTime,
@@ -28,8 +28,8 @@ internal class ÅpneGosysOppgaverløsning(
                 fødselsnummer = fødselsnummer,
                 antall = antall,
                 oppslagFeilet = oppslagFeilet,
-                opprettet = opprettet
-            )
+                opprettet = opprettet,
+            ),
         )
     }
 
@@ -37,7 +37,7 @@ internal class ÅpneGosysOppgaverløsning(
         vedtaksperiodeId: UUID,
         sykefraværstilfelle: Sykefraværstilfelle,
         hendelseId: UUID,
-        harTildeltOppgave: Boolean
+        harTildeltOppgave: Boolean,
     ) {
         varslerForOppslagFeilet(vedtaksperiodeId, sykefraværstilfelle, hendelseId)
         varslerForÅpneGosysOppgaver(vedtaksperiodeId, sykefraværstilfelle, hendelseId, harTildeltOppgave)
@@ -46,7 +46,7 @@ internal class ÅpneGosysOppgaverløsning(
     private fun varslerForOppslagFeilet(
         vedtaksperiodeId: UUID,
         sykefraværstilfelle: Sykefraværstilfelle,
-        hendelseId: UUID
+        hendelseId: UUID,
     ) {
         if (oppslagFeilet) {
             sykefraværstilfelle.håndter(SB_EX_3.nyttVarsel(vedtaksperiodeId), hendelseId)
@@ -59,7 +59,7 @@ internal class ÅpneGosysOppgaverløsning(
         vedtaksperiodeId: UUID,
         sykefraværstilfelle: Sykefraværstilfelle,
         hendelseId: UUID,
-        harTildeltOppgave: Boolean
+        harTildeltOppgave: Boolean,
     ) {
         if (antall == null) return
 
@@ -93,7 +93,10 @@ internal class ÅpneGosysOppgaverløsning(
             }.register(this)
         }
 
-        override fun onPacket(packet: JsonMessage, context: MessageContext) {
+        override fun onPacket(
+            packet: JsonMessage,
+            context: MessageContext,
+        ) {
             sikkerLogg.info("Mottok melding ÅpneOppgaverMessage:\n{}", packet.toJson())
             val opprettet = packet["@opprettet"].asLocalDateTime()
             val contextId = UUID.fromString(packet["contextId"].asText())
@@ -103,19 +106,20 @@ internal class ÅpneGosysOppgaverløsning(
             val antall = packet["@løsning.ÅpneOppgaver.antall"].takeUnless { it.isMissingOrNull() }?.asInt()
             val oppslagFeilet = packet["@løsning.ÅpneOppgaver.oppslagFeilet"].asBoolean()
 
-            val åpneGosysOppgaver = ÅpneGosysOppgaverløsning(
-                opprettet = opprettet,
-                fødselsnummer = fødselsnummer,
-                antall = antall,
-                oppslagFeilet = oppslagFeilet
-            )
+            val åpneGosysOppgaver =
+                ÅpneGosysOppgaverløsning(
+                    opprettet = opprettet,
+                    fødselsnummer = fødselsnummer,
+                    antall = antall,
+                    oppslagFeilet = oppslagFeilet,
+                )
 
             meldingMediator.løsning(
                 hendelseId = hendelseId,
                 contextId = contextId,
                 behovId = UUID.fromString(packet["@id"].asText()),
                 løsning = åpneGosysOppgaver,
-                context = context
+                context = context,
             )
         }
     }

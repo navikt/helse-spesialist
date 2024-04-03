@@ -6,10 +6,12 @@ import java.util.UUID
 internal class AvsluttetUtenVedtak(
     private val vedtaksperiodeId: UUID,
     private val hendelser: List<UUID>,
-    private val spleisBehandlingId: UUID
+    private val spleisBehandlingId: UUID,
 ) {
     fun vedtaksperiodeId() = vedtaksperiodeId
+
     fun spleisBehandlingId() = spleisBehandlingId
+
     fun byggMelding(vedtakBuilder: SykepengevedtakBuilder) {
         vedtakBuilder.hendelser(hendelser)
         vedtakBuilder.vedtakFattetTidspunkt(LocalDateTime.now())

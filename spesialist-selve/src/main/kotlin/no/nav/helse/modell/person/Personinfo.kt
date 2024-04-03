@@ -1,9 +1,9 @@
 package no.nav.helse.modell.person
 
-import java.time.LocalDate
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn
+import java.time.LocalDate
 
 internal class HentPersoninfoløsninger(private val løsninger: List<HentPersoninfoløsning>) {
     internal fun opprett(dao: ArbeidsgiverDao) {
@@ -18,7 +18,7 @@ internal class HentPersoninfoløsning(
     private val etternavn: String,
     private val fødselsdato: LocalDate,
     private val kjønn: Kjønn,
-    private val adressebeskyttelse: Adressebeskyttelse
+    private val adressebeskyttelse: Adressebeskyttelse,
 ) {
     internal fun lagre(personDao: PersonDao): Long =
         personDao.insertPersoninfo(fornavn, mellomnavn, etternavn, fødselsdato, kjønn, adressebeskyttelse)
@@ -28,16 +28,18 @@ internal class HentPersoninfoløsning(
         dao.upsertBransjer(ident, listOf(BRANSJE_PRIVATPERSON))
     }
 
-    internal fun oppdater(personDao: PersonDao, fødselsnummer: String) =
-        personDao.upsertPersoninfo(
-            fødselsnummer = fødselsnummer,
-            fornavn = fornavn,
-            mellomnavn = mellomnavn,
-            etternavn = etternavn,
-            fødselsdato = fødselsdato,
-            kjønn = kjønn,
-            adressebeskyttelse = adressebeskyttelse
-        )
+    internal fun oppdater(
+        personDao: PersonDao,
+        fødselsnummer: String,
+    ) = personDao.upsertPersoninfo(
+        fødselsnummer = fødselsnummer,
+        fornavn = fornavn,
+        mellomnavn = mellomnavn,
+        etternavn = etternavn,
+        fødselsdato = fødselsdato,
+        kjønn = kjønn,
+        adressebeskyttelse = adressebeskyttelse,
+    )
 
     private companion object {
         private const val BRANSJE_PRIVATPERSON = "Privatperson"

@@ -1,16 +1,16 @@
 package no.nav.helse.modell.oppgave
 
-import java.util.EnumSet
 import no.nav.helse.modell.oppgave.Egenskap.Kategori.Inntektskilde
 import no.nav.helse.modell.oppgave.Egenskap.Kategori.Mottaker
 import no.nav.helse.modell.oppgave.Egenskap.Kategori.Oppgavetype
 import no.nav.helse.modell.oppgave.Egenskap.Kategori.Periodetype
 import no.nav.helse.modell.oppgave.Egenskap.Kategori.Status
 import no.nav.helse.modell.oppgave.Egenskap.Kategori.Ukategorisert
+import java.util.EnumSet
 
 enum class Egenskap(
     val kategori: Kategori = Ukategorisert,
-    private val tilgangsstyrt: Boolean = false
+    private val tilgangsstyrt: Boolean = false,
 ) {
     RISK_QA,
     FORTROLIG_ADRESSE(tilgangsstyrt = true),
@@ -37,7 +37,8 @@ enum class Egenskap(
     SKJØNNSFASTSETTELSE,
     PÅ_VENT(kategori = Status),
     TILBAKEDATERT,
-    VERGEMÅL;
+    VERGEMÅL,
+    ;
 
     enum class Kategori {
         Mottaker,
@@ -45,12 +46,13 @@ enum class Egenskap(
         Oppgavetype,
         Ukategorisert,
         Periodetype,
-        Status
+        Status,
     }
 
     companion object {
         val alleTilgangsstyrteEgenskaper = EnumSet.allOf(Egenskap::class.java).filter(Egenskap::tilgangsstyrt)
         val alleUkategoriserteEgenskaper = EnumSet.allOf(Egenskap::class.java).filter { it.kategori == Ukategorisert }
+
         fun Collection<Egenskap>.tilgangsstyrteEgenskaper() = filter { it in alleTilgangsstyrteEgenskaper }
     }
 }

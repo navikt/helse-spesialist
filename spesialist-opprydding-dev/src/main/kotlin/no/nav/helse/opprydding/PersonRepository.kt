@@ -1,11 +1,11 @@
 package no.nav.helse.opprydding
 
-import javax.sql.DataSource
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
 import org.slf4j.LoggerFactory
+import javax.sql.DataSource
 
 internal class PersonRepository(private val dataSource: DataSource) {
     private companion object {
@@ -15,10 +15,11 @@ internal class PersonRepository(private val dataSource: DataSource) {
     internal fun slett(fødselsnummer: String) {
         sessionOf(dataSource).use { session ->
             session.transaction {
-                val personId = it.finnPerson(fødselsnummer) ?: run {
-                    sikkerlogg.info("Fant ikke person med fødselsnummer $fødselsnummer, avbryter sletting")
-                    return@transaction
-                }
+                val personId =
+                    it.finnPerson(fødselsnummer) ?: run {
+                        sikkerlogg.info("Fant ikke person med fødselsnummer $fødselsnummer, avbryter sletting")
+                        return@transaction
+                    }
                 it.slettOverstyring(personId)
                 it.slettReserverPerson(personId)
                 it.slettOpptegnelse(personId)
@@ -84,9 +85,11 @@ internal class PersonRepository(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val query =
             "SELECT sammenligningsgrunnlag_ref FROM avviksvurdering WHERE fødselsnummer::bigint = (SELECT fodselsnummer FROM person WHERE id = ?)"
-        return run(queryOf(query, personRef).map {
-            it.int("sammenligningsgrunnlag_ref")
-        }.asList)
+        return run(
+            queryOf(query, personRef).map {
+                it.int("sammenligningsgrunnlag_ref")
+            }.asList,
+        )
     }
 
     private fun TransactionalSession.finnPersoninfoRef(personRef: Int): List<Int> {
@@ -192,7 +195,16 @@ internal class PersonRepository(private val dataSource: DataSource) {
     private fun TransactionalSession.slettSkjønnsfastsettingSykepengegrunnlag(personRef: Int) {
         @Language("PostgreSQL")
         val query = "DELETE FROM skjonnsfastsetting_sykepengegrunnlag WHERE overstyring_ref IN (SELECT id FROM overstyring WHERE person_ref = ?) RETURNING begrunnelse_fritekst_ref, begrunnelse_mal_ref, begrunnelse_konklusjon_ref"
-        val begrunnelseRef = run(queryOf(query, personRef).map { listOf(it.longOrNull("begrunnelse_fritekst_ref"), it.longOrNull("begrunnelse_mal_ref"), it.longOrNull("begrunnelse_konklusjon_ref"))}.asSingle)
+        val begrunnelseRef =
+            run(
+                queryOf(query, personRef).map {
+                    listOf(
+                        it.longOrNull("begrunnelse_fritekst_ref"),
+                        it.longOrNull("begrunnelse_mal_ref"),
+                        it.longOrNull("begrunnelse_konklusjon_ref"),
+                    )
+                }.asSingle,
+            )
         begrunnelseRef?.forEach {
             it?.let { slettBegrunnelse(it) }
         }
@@ -422,11 +434,16 @@ internal class PersonRepository(private val dataSource: DataSource) {
     private fun TransactionalSession.finnFagsystemIdRef(personRef: Int): List<Int> {
         @Language("PostgreSQL")
         val query = "SELECT arbeidsgiver_fagsystem_id_ref, person_fagsystem_id_ref FROM utbetaling_id WHERE person_ref = ?"
-        return run(queryOf(query, personRef).map { listOf(it.int("arbeidsgiver_fagsystem_id_ref"), it.int("person_fagsystem_id_ref")) }.asList).flatten()
+        return run(
+            queryOf(query, personRef).map {
+                listOf(it.int("arbeidsgiver_fagsystem_id_ref"), it.int("person_fagsystem_id_ref"))
+            }.asList,
+        ).flatten()
     }
 
     private fun TransactionalSession.slettUtbetalingId(personRef: Int) {
         val oppdragRef = finnFagsystemIdRef(personRef)
+
         @Language("PostgreSQL")
         val query = "DELETE FROM utbetaling_id WHERE person_ref = ?"
         run(queryOf(query, personRef).asExecute)
@@ -440,7 +457,7 @@ internal class PersonRepository(private val dataSource: DataSource) {
 
         @Language("PostgreSQL")
         val query = "DELETE FROM oppdrag WHERE id IN (${oppdragRef.joinToString { "?" }})"
-        run(queryOf(query,  *oppdragRef.toTypedArray()).asExecute)
+        run(queryOf(query, *oppdragRef.toTypedArray()).asExecute)
     }
 
     private fun TransactionalSession.slettUtbetalingslinje(oppdragRef: List<Int>) {

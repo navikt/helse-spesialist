@@ -15,8 +15,6 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
-import java.time.Duration
-import java.util.UUID
 import no.nav.helse.mediator.IBehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Dokumenthåndterer
@@ -46,6 +44,8 @@ import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.Duration
+import java.util.UUID
 
 fun Application.graphQLApi(
     personApiDao: PersonApiDao,
@@ -76,44 +76,48 @@ fun Application.graphQLApi(
     personhåndterer: Personhåndterer,
     dokumenthåndterer: Dokumenthåndterer,
 ) {
-    val schema = SchemaBuilder(
-        personApiDao = personApiDao,
-        egenAnsattApiDao = egenAnsattApiDao,
-        tildelingDao = tildelingDao,
-        arbeidsgiverApiDao = arbeidsgiverApiDao,
-        overstyringApiDao = overstyringApiDao,
-        risikovurderingApiDao = risikovurderingApiDao,
-        varselRepository = varselRepository,
-        utbetalingApiDao = utbetalingApiDao,
-        oppgaveApiDao = oppgaveApiDao,
-        periodehistorikkDao = periodehistorikkDao,
-        snapshotMediator = snapshotMediator,
-        notatDao = notatDao,
-        totrinnsvurderingApiDao = totrinnsvurderingApiDao,
-        påVentApiDao = påVentApiDao,
-        reservasjonClient = reservasjonClient,
-        avviksvurderinghenter = avviksvurderinghenter,
-        behandlingsstatistikkMediator = behandlingsstatistikkMediator,
-        notatMediator = notatMediator,
-        saksbehandlerhåndterer = saksbehandlerhåndterer,
-        oppgavehåndterer = oppgavehåndterer,
-        totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
-        godkjenninghåndterer = godkjenninghåndterer,
-        personhåndterer = personhåndterer,
-        dokumenthåndterer = dokumenthåndterer,
-    ).build()
+    val schema =
+        SchemaBuilder(
+            personApiDao = personApiDao,
+            egenAnsattApiDao = egenAnsattApiDao,
+            tildelingDao = tildelingDao,
+            arbeidsgiverApiDao = arbeidsgiverApiDao,
+            overstyringApiDao = overstyringApiDao,
+            risikovurderingApiDao = risikovurderingApiDao,
+            varselRepository = varselRepository,
+            utbetalingApiDao = utbetalingApiDao,
+            oppgaveApiDao = oppgaveApiDao,
+            periodehistorikkDao = periodehistorikkDao,
+            snapshotMediator = snapshotMediator,
+            notatDao = notatDao,
+            totrinnsvurderingApiDao = totrinnsvurderingApiDao,
+            påVentApiDao = påVentApiDao,
+            reservasjonClient = reservasjonClient,
+            avviksvurderinghenter = avviksvurderinghenter,
+            behandlingsstatistikkMediator = behandlingsstatistikkMediator,
+            notatMediator = notatMediator,
+            saksbehandlerhåndterer = saksbehandlerhåndterer,
+            oppgavehåndterer = oppgavehåndterer,
+            totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
+            godkjenninghåndterer = godkjenninghåndterer,
+            personhåndterer = personhåndterer,
+            dokumenthåndterer = dokumenthåndterer,
+        ).build()
 
-    val server = GraphQLServer(
-        requestParser = RequestParser(),
-        contextFactory = ContextFactory(
-            kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
-            skjermedePersonerSaksbehandlergruppe = skjermedePersonerGruppeId,
-            beslutterSaksbehandlergruppe = beslutterGruppeId,
-        ),
-        requestHandler = LoggingGraphQLRequestHandler(
-            GraphQL.newGraphQL(schema).build()
+    val server =
+        GraphQLServer(
+            requestParser = RequestParser(),
+            contextFactory =
+                ContextFactory(
+                    kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
+                    skjermedePersonerSaksbehandlergruppe = skjermedePersonerGruppeId,
+                    beslutterSaksbehandlergruppe = beslutterGruppeId,
+                ),
+            requestHandler =
+                LoggingGraphQLRequestHandler(
+                    GraphQL.newGraphQL(schema).build(),
+                ),
         )
-    )
 
     routing {
         route("graphql") {
@@ -144,8 +148,9 @@ internal fun Route.queryHandler(server: GraphQLServer<ApplicationRequest>) {
             val json = objectMapper.writeValueAsString(result)
             sikkerLogg.trace("Respons mappet etter ${tidBrukt(start).toMillis()} ms")
             call.respond(json)
-        } else
+        } else {
             sikkerLogg.trace("$tidslogging, men noe gikk galt")
+        }
     }
 }
 
@@ -159,7 +164,9 @@ internal fun Route.playground() {
     }
 }
 
-private fun buildPlaygroundHtml(graphQLEndpoint: String, subscriptionsEndpoint: String) =
-    Application::class.java.classLoader.getResource("graphql-playground.html")?.readText()
-        ?.replace("\${graphQLEndpoint}", graphQLEndpoint)?.replace("\${subscriptionsEndpoint}", subscriptionsEndpoint)
-        ?: throw IllegalStateException("graphql-playground.html cannot be found in the classpath")
+private fun buildPlaygroundHtml(
+    graphQLEndpoint: String,
+    subscriptionsEndpoint: String,
+) = Application::class.java.classLoader.getResource("graphql-playground.html")?.readText()
+    ?.replace("\${graphQLEndpoint}", graphQLEndpoint)?.replace("\${subscriptionsEndpoint}", subscriptionsEndpoint)
+    ?: throw IllegalStateException("graphql-playground.html cannot be found in the classpath")

@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.api.graphql.schema
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.readValue
-import java.util.UUID
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
@@ -20,6 +19,7 @@ import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGhostPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
+import java.util.UUID
 
 data class Infotrygdutbetaling(
     val fom: String,
@@ -27,12 +27,12 @@ data class Infotrygdutbetaling(
     val grad: String,
     val dagsats: Double,
     val typetekst: String,
-    val organisasjonsnummer: String
+    val organisasjonsnummer: String,
 )
 
 data class Saksbehandler(
     val navn: String,
-    val ident: String?
+    val ident: String?,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -43,7 +43,7 @@ data class Reservasjon(
 
 data class Enhet(
     val id: String,
-    val navn: String
+    val navn: String,
 )
 
 data class Tildeling(
@@ -55,7 +55,7 @@ data class Tildeling(
 data class PaVent(
     val frist: DateTimeString?,
     val begrunnelse: String?,
-    val oid: UUID
+    val oid: UUID,
 )
 
 data class Person(
@@ -88,42 +88,43 @@ data class Person(
 
     fun enhet(): Enhet = personApiDao.finnEnhet(snapshot.fodselsnummer).let { Enhet(it.id, it.navn) }
 
-    fun tildeling(): Tildeling? = tildelingDao.tildelingForPerson(snapshot.fodselsnummer)?.let {
-        Tildeling(
-            navn = it.navn,
-            epost = it.epost,
-            oid = it.oid,
-        )
-    }
+    fun tildeling(): Tildeling? =
+        tildelingDao.tildelingForPerson(snapshot.fodselsnummer)?.let {
+            Tildeling(
+                navn = it.navn,
+                epost = it.epost,
+                oid = it.oid,
+            )
+        }
 
-    fun arbeidsgivere(): List<Arbeidsgiver> = snapshot.arbeidsgivere.map {
-        Arbeidsgiver(
-            organisasjonsnummer = it.organisasjonsnummer,
-            navn = arbeidsgiverApiDao.finnNavn(it.organisasjonsnummer) ?: "Ikke tilgjengelig",
-            bransjer = arbeidsgiverApiDao.finnBransjer(it.organisasjonsnummer),
-            ghostPerioder = it.ghostPerioder.tilGhostPerioder(it.organisasjonsnummer),
-            fødselsnummer = snapshot.fodselsnummer,
-            overstyringApiDao = overstyringApiDao,
-            generasjoner = it.generasjoner,
-            arbeidsgiverApiDao = arbeidsgiverApiDao,
-            risikovurderingApiDao = risikovurderingApiDao,
-            varselRepository = varselRepository,
-            oppgaveApiDao = oppgaveApiDao,
-            periodehistorikkDao = periodehistorikkDao,
-            notatDao = notatDao,
-            totrinnsvurderingApiDao = totrinnsvurderingApiDao,
-            påVentApiDao = påVentApiDao,
-            tilganger = tilganger,
-            oppgavehåndterer = oppgavehåndterer,
-        )
-    }
+    fun arbeidsgivere(): List<Arbeidsgiver> =
+        snapshot.arbeidsgivere.map {
+            Arbeidsgiver(
+                organisasjonsnummer = it.organisasjonsnummer,
+                navn = arbeidsgiverApiDao.finnNavn(it.organisasjonsnummer) ?: "Ikke tilgjengelig",
+                bransjer = arbeidsgiverApiDao.finnBransjer(it.organisasjonsnummer),
+                ghostPerioder = it.ghostPerioder.tilGhostPerioder(it.organisasjonsnummer),
+                fødselsnummer = snapshot.fodselsnummer,
+                overstyringApiDao = overstyringApiDao,
+                generasjoner = it.generasjoner,
+                arbeidsgiverApiDao = arbeidsgiverApiDao,
+                risikovurderingApiDao = risikovurderingApiDao,
+                varselRepository = varselRepository,
+                oppgaveApiDao = oppgaveApiDao,
+                periodehistorikkDao = periodehistorikkDao,
+                notatDao = notatDao,
+                totrinnsvurderingApiDao = totrinnsvurderingApiDao,
+                påVentApiDao = påVentApiDao,
+                tilganger = tilganger,
+                oppgavehåndterer = oppgavehåndterer,
+            )
+        }
 
     fun infotrygdutbetalinger(): List<Infotrygdutbetaling>? =
         personApiDao.finnInfotrygdutbetalinger(snapshot.fodselsnummer)
             ?.let { objectMapper.readValue(it) }
 
-    fun vilkarsgrunnlag(): List<Vilkarsgrunnlag> =
-        snapshot.vilkarsgrunnlag.map { it.tilVilkarsgrunnlag(avviksvurderinghenter) }
+    fun vilkarsgrunnlag(): List<Vilkarsgrunnlag> = snapshot.vilkarsgrunnlag.map { it.tilVilkarsgrunnlag(avviksvurderinghenter) }
 
     private fun List<GraphQLGhostPeriode>.tilGhostPerioder(organisasjonsnummer: String): List<GhostPeriode> =
         map {
@@ -133,7 +134,7 @@ data class Person(
                 skjaeringstidspunkt = it.skjaeringstidspunkt,
                 vilkarsgrunnlagId = it.vilkarsgrunnlagId,
                 deaktivert = it.deaktivert,
-                organisasjonsnummer = organisasjonsnummer
+                organisasjonsnummer = organisasjonsnummer,
             )
         }
 }

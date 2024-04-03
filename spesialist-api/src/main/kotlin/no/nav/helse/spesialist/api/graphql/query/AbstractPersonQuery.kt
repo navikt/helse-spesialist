@@ -13,8 +13,10 @@ abstract class AbstractPersonQuery(
     protected val personApiDao: PersonApiDao,
     private val egenAnsattApiDao: EgenAnsattApiDao,
 ) : Query {
-
-    protected fun isForbidden(fnr: String, env: DataFetchingEnvironment): Boolean {
+    protected fun isForbidden(
+        fnr: String,
+        env: DataFetchingEnvironment,
+    ): Boolean {
         val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>("tilganger")
         val kanSeSkjermede = tilganger.harTilgangTilSkjermedePersoner()
         val erSkjermet = egenAnsattApiDao.erEgenAnsatt(fnr) ?: return true
@@ -26,14 +28,15 @@ abstract class AbstractPersonQuery(
         return (!kanSeKode7 && erFortrolig) || (!erFortrolig && !erUgradert)
     }
 
-    protected fun getForbiddenError(fnr: String): GraphQLError = GraphqlErrorException.newErrorException()
-        .message("Har ikke tilgang til person med fødselsnummer $fnr")
-        .extensions(mapOf("code" to 403, "field" to "person"))
-        .build()
+    protected fun getForbiddenError(fnr: String): GraphQLError =
+        GraphqlErrorException.newErrorException()
+            .message("Har ikke tilgang til person med fødselsnummer $fnr")
+            .extensions(mapOf("code" to 403, "field" to "person"))
+            .build()
 
-    protected fun getNotFoundError(fnr: String? = null): GraphQLError = GraphqlErrorException.newErrorException()
-        .message("Finner ikke data for person med fødselsnummer $fnr")
-        .extensions(mapOf("code" to 404, "field" to "person"))
-        .build()
-
+    protected fun getNotFoundError(fnr: String? = null): GraphQLError =
+        GraphqlErrorException.newErrorException()
+            .message("Finner ikke data for person med fødselsnummer $fnr")
+            .extensions(mapOf("code" to 404, "field" to "person"))
+            .build()
 }

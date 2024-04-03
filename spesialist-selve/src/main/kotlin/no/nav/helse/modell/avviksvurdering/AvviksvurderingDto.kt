@@ -33,11 +33,10 @@ data class InntektDto(
 
 data class BeregningsgrunnlagDto(
     val totalbeløp: Double,
-    val omregnedeÅrsinntekter: List<OmregnetÅrsinntektDto>
+    val omregnedeÅrsinntekter: List<OmregnetÅrsinntektDto>,
 )
 
 data class OmregnetÅrsinntektDto(
     val arbeidsgiverreferanse: String,
     val beløp: Double,
 )
-

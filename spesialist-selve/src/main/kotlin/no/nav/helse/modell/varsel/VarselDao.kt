@@ -1,16 +1,15 @@
 package no.nav.helse.modell.varsel
 
-import java.time.LocalDateTime
-import java.util.UUID
-import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
 import no.nav.helse.modell.varsel.Varsel.Status
 import org.intellij.lang.annotations.Language
+import java.time.LocalDateTime
+import java.util.UUID
+import javax.sql.DataSource
 
 internal class VarselDao(private val dataSource: DataSource) : HelseDao(dataSource) {
-
     internal fun lagreVarsel(
         varselId: UUID,
         varselkode: String,
@@ -27,7 +26,10 @@ internal class VarselDao(private val dataSource: DataSource) : HelseDao(dataSour
         }
     }
 
-    internal fun avvikleVarsel(varselkode: String, definisjonId: UUID) {
+    internal fun avvikleVarsel(
+        varselkode: String,
+        definisjonId: UUID,
+    ) {
         @Language("PostgreSQL")
         val query =
             """
@@ -50,13 +52,20 @@ internal class VarselDao(private val dataSource: DataSource) : HelseDao(dataSour
                         "ident" to "avviklet_fra_speaker",
                         "definisjonId" to definisjonId,
                         "varselkode" to varselkode,
-                    )
-                ).asUpdate
+                    ),
+                ).asUpdate,
             )
         }
     }
 
-    internal fun oppdaterStatus(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, status: Status, ident: String?, definisjonId: UUID?) {
+    internal fun oppdaterStatus(
+        vedtaksperiodeId: UUID,
+        generasjonId: UUID,
+        varselkode: String,
+        status: Status,
+        ident: String?,
+        definisjonId: UUID?,
+    ) {
         @Language("PostgreSQL")
         val query =
             """
@@ -86,16 +95,22 @@ internal class VarselDao(private val dataSource: DataSource) : HelseDao(dataSour
                         "definisjonId" to definisjonId,
                         "vedtaksperiodeId" to vedtaksperiodeId,
                         "generasjonId" to generasjonId,
-                        "varselkode" to varselkode
-                    )
-                ).asUpdate
+                        "varselkode" to varselkode,
+                    ),
+                ).asUpdate,
             ).also {
-                check(it > 0) { "Varsel $varselkode for generasjonId $generasjonId, vedtaksperiodeId $vedtaksperiodeId har allerede status $status"}
+                check(
+                    it > 0,
+                ) { "Varsel $varselkode for generasjonId $generasjonId, vedtaksperiodeId $vedtaksperiodeId har allerede status $status" }
             }
         }
     }
 
-    internal fun oppdaterGenerasjon(id: UUID, gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {
+    internal fun oppdaterGenerasjon(
+        id: UUID,
+        gammelGenerasjonId: UUID,
+        nyGenerasjonId: UUID,
+    ) {
         @Language("PostgreSQL")
         val query = """
            UPDATE selve_varsel 
@@ -112,20 +127,25 @@ internal class VarselDao(private val dataSource: DataSource) : HelseDao(dataSour
                         "ny_generasjon_id" to nyGenerasjonId,
                         "gammel_generasjon_id" to gammelGenerasjonId,
                         "id" to id,
-                    )
-                ).asUpdate
+                    ),
+                ).asUpdate,
             )
         }
     }
 
-    internal fun finnVarselstatus(vedtaksperiodeId: UUID, varselkode: String): Status? {
+    internal fun finnVarselstatus(
+        vedtaksperiodeId: UUID,
+        varselkode: String,
+    ): Status? {
         @Language("PostgreSQL")
         val query = "SELECT status FROM selve_varsel WHERE vedtaksperiode_id = ? and kode = ?;"
 
         return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, vedtaksperiodeId, varselkode).map {
-                enumValueOf<Status>(it.string(1))
-            }.asSingle)
+            session.run(
+                queryOf(query, vedtaksperiodeId, varselkode).map {
+                    enumValueOf<Status>(it.string(1))
+                }.asSingle,
+            )
         }
     }
 
@@ -134,27 +154,34 @@ internal class VarselDao(private val dataSource: DataSource) : HelseDao(dataSour
         val query =
             "SELECT unik_id, vedtaksperiode_id, kode, opprettet, status FROM selve_varsel WHERE generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?)"
         return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, generasjonId).map {
-                Varsel(
-                    it.uuid("unik_id"),
-                    it.string("kode"),
-                    it.localDateTime("opprettet"),
-                    it.uuid("vedtaksperiode_id"),
-                    enumValueOf(it.string("status"))
-                )
-            }.asList)
+            session.run(
+                queryOf(query, generasjonId).map {
+                    Varsel(
+                        it.uuid("unik_id"),
+                        it.string("kode"),
+                        it.localDateTime("opprettet"),
+                        it.uuid("vedtaksperiode_id"),
+                        enumValueOf(it.string("status")),
+                    )
+                }.asList,
+            )
         }
     }
 
-    internal fun slettFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String) = asSQL(
+    internal fun slettFor(
+        vedtaksperiodeId: UUID,
+        generasjonId: UUID,
+        varselkode: String,
+    ) = asSQL(
         """
-            delete from selve_varsel where vedtaksperiode_id = :vedtaksperiodeId
-                and kode = :varselkode
-                and generasjon_ref = (select id from selve_vedtaksperiode_generasjon where unik_id = :generasjonId) 
-        """.trimIndent(), mapOf(
+        delete from selve_varsel where vedtaksperiode_id = :vedtaksperiodeId
+            and kode = :varselkode
+            and generasjon_ref = (select id from selve_vedtaksperiode_generasjon where unik_id = :generasjonId) 
+        """.trimIndent(),
+        mapOf(
             "vedtaksperiodeId" to vedtaksperiodeId,
             "generasjonId" to generasjonId,
             "varselkode" to varselkode,
-        )
+        ),
     ).update()
 }

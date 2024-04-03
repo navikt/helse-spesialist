@@ -1,9 +1,9 @@
 package no.nav.helse.mediator.meldinger.utgående
 
-import java.util.UUID
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.rapids_rivers.JsonMessage
+import java.util.UUID
 
 internal class VedtaksperiodeGodkjent private constructor(
     private val vedtaksperiodeId: UUID,
@@ -12,7 +12,7 @@ internal class VedtaksperiodeGodkjent private constructor(
     private val periodetype: Periodetype,
     private val saksbehandler: Saksbehandlerløsning.Saksbehandler,
     private val beslutter: Saksbehandlerløsning.Saksbehandler?,
-    private val automatiskBehandlet: Boolean
+    private val automatiskBehandlet: Boolean,
 ) {
     internal fun toJson() =
         JsonMessage.newMessage(
@@ -24,10 +24,11 @@ internal class VedtaksperiodeGodkjent private constructor(
                 "saksbehandlerIdent" to saksbehandler.ident,
                 "saksbehandlerEpost" to saksbehandler.epostadresse,
                 "automatiskBehandling" to automatiskBehandlet,
-                "saksbehandler" to mapOf(
-                    "ident" to saksbehandler.ident,
-                    "epostadresse" to saksbehandler.epostadresse
-                )
+                "saksbehandler" to
+                    mapOf(
+                        "ident" to saksbehandler.ident,
+                        "epostadresse" to saksbehandler.epostadresse,
+                    ),
             ).apply {
                 compute("beslutter") { _, _ ->
                     beslutter?.let {
@@ -35,7 +36,7 @@ internal class VedtaksperiodeGodkjent private constructor(
                     }
                 }
                 compute("behandlingId") { _, _ -> spleisBehandlingId }
-            }
+            },
         ).toJson()
 
     internal companion object {
@@ -54,7 +55,7 @@ internal class VedtaksperiodeGodkjent private constructor(
                 periodetype = periodetype,
                 saksbehandler = saksbehandler,
                 beslutter = beslutter,
-                automatiskBehandlet = false
+                automatiskBehandlet = false,
             )
         }
 
@@ -63,7 +64,7 @@ internal class VedtaksperiodeGodkjent private constructor(
             spleisBehandlingId: UUID?,
             fødselsnummer: String,
             periodetype: Periodetype,
-            saksbehandler: Saksbehandlerløsning.Saksbehandler
+            saksbehandler: Saksbehandlerløsning.Saksbehandler,
         ): VedtaksperiodeGodkjent {
             return VedtaksperiodeGodkjent(
                 vedtaksperiodeId = vedtaksperiodeId,
@@ -72,7 +73,7 @@ internal class VedtaksperiodeGodkjent private constructor(
                 periodetype = periodetype,
                 saksbehandler = saksbehandler,
                 beslutter = null,
-                automatiskBehandlet = true
+                automatiskBehandlet = true,
             )
         }
     }

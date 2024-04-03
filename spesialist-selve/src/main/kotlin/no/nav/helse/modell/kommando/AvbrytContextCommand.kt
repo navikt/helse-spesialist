@@ -6,9 +6,8 @@ import java.util.*
 
 internal class AvbrytContextCommand(
     private val vedtaksperiodeId: UUID,
-    private val commandContextDao: CommandContextDao
+    private val commandContextDao: CommandContextDao,
 ) : Command {
-
     private companion object {
         private val log = LoggerFactory.getLogger(AvbrytContextCommand::class.java)
     }
@@ -18,5 +17,4 @@ internal class AvbrytContextCommand(
         context.avbryt(commandContextDao, vedtaksperiodeId)
         return true
     }
-
 }

@@ -17,14 +17,14 @@ class TotrinnsvurderingOld(
     override fun equals(other: Any?): Boolean {
         return this === other || (
             other is TotrinnsvurderingOld &&
-            vedtaksperiodeId == other.vedtaksperiodeId &&
-            erRetur == other.erRetur &&
-            saksbehandler == other.saksbehandler &&
-            beslutter == other.beslutter &&
-            utbetalingIdRef == other.utbetalingIdRef &&
-            opprettet.withNano(0) == other.opprettet.withNano(0) &&
-            oppdatert?.withNano(0) == other.oppdatert?.withNano(0)
-            )
+                vedtaksperiodeId == other.vedtaksperiodeId &&
+                erRetur == other.erRetur &&
+                saksbehandler == other.saksbehandler &&
+                beslutter == other.beslutter &&
+                utbetalingIdRef == other.utbetalingIdRef &&
+                opprettet.withNano(0) == other.opprettet.withNano(0) &&
+                oppdatert?.withNano(0) == other.oppdatert?.withNano(0)
+        )
     }
 
     override fun hashCode(): Int {

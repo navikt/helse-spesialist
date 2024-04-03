@@ -16,8 +16,9 @@ class Oppgavehenter(
     private val tilgangskontroll: Tilgangskontroll,
 ) {
     fun oppgave(id: Long): Oppgave {
-        val oppgave = oppgaveRepository.finnOppgave(id)
-            ?: throw IllegalStateException("Forventer å finne oppgave med oppgaveId=$id")
+        val oppgave =
+            oppgaveRepository.finnOppgave(id)
+                ?: throw IllegalStateException("Forventer å finne oppgave med oppgaveId=$id")
         val totrinnsvurdering = totrinnsvurderingRepository.hentAktivTotrinnsvurdering(id)
 
         return Oppgave(
@@ -29,21 +30,23 @@ class Oppgavehenter(
             kanAvvises = oppgave.kanAvvises,
             ferdigstiltAvIdent = oppgave.ferdigstiltAvIdent,
             ferdigstiltAvOid = oppgave.ferdigstiltAvOid,
-            tildelt = oppgave.tildelt?.let {
-                Saksbehandler(it.epostadresse, it.oid, it.navn, it.ident, tilgangskontroll)
-            },
-            totrinnsvurdering = totrinnsvurdering?.let {
-                Totrinnsvurdering(
-                    vedtaksperiodeId = it.vedtaksperiodeId,
-                    erRetur = it.erRetur,
-                    saksbehandler = it.saksbehandler?.let(saksbehandlerRepository::finnSaksbehandler)?.toSaksbehandler(),
-                    beslutter = it.beslutter?.let(saksbehandlerRepository::finnSaksbehandler)?.toSaksbehandler(),
-                    utbetalingId = it.utbetalingId,
-                    opprettet = it.opprettet,
-                    oppdatert = it.oppdatert
-                )
-            },
-            egenskaper = oppgave.egenskaper.map { it.tilModellversjon() }
+            tildelt =
+                oppgave.tildelt?.let {
+                    Saksbehandler(it.epostadresse, it.oid, it.navn, it.ident, tilgangskontroll)
+                },
+            totrinnsvurdering =
+                totrinnsvurdering?.let {
+                    Totrinnsvurdering(
+                        vedtaksperiodeId = it.vedtaksperiodeId,
+                        erRetur = it.erRetur,
+                        saksbehandler = it.saksbehandler?.let(saksbehandlerRepository::finnSaksbehandler)?.toSaksbehandler(),
+                        beslutter = it.beslutter?.let(saksbehandlerRepository::finnSaksbehandler)?.toSaksbehandler(),
+                        utbetalingId = it.utbetalingId,
+                        opprettet = it.opprettet,
+                        oppdatert = it.oppdatert,
+                    )
+                },
+            egenskaper = oppgave.egenskaper.map { it.tilModellversjon() },
         )
     }
 

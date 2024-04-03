@@ -13,8 +13,10 @@ data class Vergemål(
 )
 
 class VergemålDao(val dataSource: DataSource) {
-
-    fun lagre(fødselsnummer: String, vergemål: Vergemål) {
+    fun lagre(
+        fødselsnummer: String,
+        vergemål: Vergemål,
+    ) {
         @Language("PostgreSQL")
         val statement = """
             INSERT INTO vergemal (person_ref, har_vergemal, har_fremtidsfullmakter, har_fullmakter, opprettet)
@@ -41,9 +43,9 @@ class VergemålDao(val dataSource: DataSource) {
                         "har_vergemal" to vergemål.harVergemål,
                         "har_fremtidsfullmakter" to vergemål.harFullmakter,
                         "har_fullmakter" to vergemål.harFullmakter,
-                        "opprettet" to LocalDateTime.now()
-                    )
-                ).asExecute
+                        "opprettet" to LocalDateTime.now(),
+                    ),
+                ).asExecute,
             )
         }
     }
@@ -61,16 +63,17 @@ class VergemålDao(val dataSource: DataSource) {
                 queryOf(
                     query,
                     mapOf(
-                        "fodselsnummer" to fødselsnummer.toLong()
-                    )
+                        "fodselsnummer" to fødselsnummer.toLong(),
+                    ),
                 )
-                    .map { Vergemål(
-                        it.boolean("har_vergemal"),
-                        it.boolean("har_fremtidsfullmakter"),
-                        it.boolean("har_fullmakter"),
-                    ).harVergemål }
-                    .asSingle
-
+                    .map {
+                        Vergemål(
+                            it.boolean("har_vergemal"),
+                            it.boolean("har_fremtidsfullmakter"),
+                            it.boolean("har_fullmakter"),
+                        ).harVergemål
+                    }
+                    .asSingle,
             )
         }
     }

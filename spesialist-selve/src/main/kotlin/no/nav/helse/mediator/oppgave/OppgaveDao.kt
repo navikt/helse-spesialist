@@ -1,8 +1,5 @@
 package no.nav.helse.mediator.oppgave
 
-import java.time.LocalDate
-import java.util.UUID
-import javax.sql.DataSource
 import no.nav.helse.HelseDao
 import no.nav.helse.db.AntallOppgaverFraDatabase
 import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
@@ -18,19 +15,22 @@ import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
+import java.time.LocalDate
+import java.util.UUID
+import javax.sql.DataSource
 
 interface OppgaveRepository {
     fun finnOppgave(id: Long): OppgaveFraDatabase?
+
     fun finnHendelseId(id: Long): UUID
 }
 
 class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveRepository {
-
     fun reserverNesteId(): Long {
         return asSQL(
             """
                SELECT nextval(pg_get_serial_sequence('oppgave', 'id')) as neste_id; 
-            """
+            """,
         ).single { it.long("neste_id") }
             ?: throw IllegalStateException("Klarer ikke hente neste id i sekvens fra oppgave-tabellen")
     }
@@ -45,7 +45,8 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             LEFT JOIN saksbehandler s on s.oid = t.saksbehandler_ref
             WHERE o.id = :oppgaveId
             ORDER BY o.id DESC LIMIT 1
-        """, mapOf("oppgaveId" to id)
+        """,
+            mapOf("oppgaveId" to id),
         ).single { row ->
             val egenskaper: List<EgenskapForDatabase> = row.array<String>("egenskaper").toList().map { enumValueOf(it) }
             OppgaveFraDatabase(
@@ -58,14 +59,15 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 kanAvvises = row.boolean("kan_avvises"),
                 ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
                 ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString),
-                tildelt = row.uuidOrNull("oid")?.let {
-                    SaksbehandlerFraDatabase(
-                        epostadresse = row.string("epost"),
-                        oid = it,
-                        navn = row.string("navn"),
-                        ident = row.string("ident")
-                    )
-                },
+                tildelt =
+                    row.uuidOrNull("oid")?.let {
+                        SaksbehandlerFraDatabase(
+                            epostadresse = row.string("epost"),
+                            oid = it,
+                            navn = row.string("navn"),
+                            ident = row.string("ident"),
+                        )
+                    },
             )
         }
     }
@@ -144,7 +146,8 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 ORDER BY $orderBy NULLS LAST
                 OFFSET :offset
                 LIMIT :limit
-            """, mapOf(
+            """,
+            mapOf(
                 "oid" to saksbehandlerOid,
                 "offset" to offset,
                 "limit" to limit,
@@ -157,49 +160,56 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 "ingen_mottakertype_egenskaper" to (mottakerEgenskaper == null),
                 "ingen_antallarbeidsforholdtype_egenskaper" to (antallArbeidsforholdEgenskaper == null),
                 "ingen_statustype_egenskaper" to (statusEgenskaper == null),
-            )
+            ),
         ).list { row ->
             val egenskaper = row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }.toSet()
             OppgaveFraDatabaseForVisning(
                 id = row.long("oppgave_id"),
                 aktørId = row.string("aktor_id"),
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                navn = PersonnavnFraDatabase(
-                    row.string("fornavn"),
-                    row.stringOrNull("mellomnavn"),
-                    row.string("etternavn"),
-                ),
+                navn =
+                    PersonnavnFraDatabase(
+                        row.string("fornavn"),
+                        row.stringOrNull("mellomnavn"),
+                        row.string("etternavn"),
+                    ),
                 egenskaper = egenskaper,
-                tildelt = row.uuidOrNull("oid")?.let {
-                    SaksbehandlerFraDatabase(
-                        epostadresse = row.string("epost"),
-                        it,
-                        row.string("navn"),
-                        row.string("ident")
-                    )
-                },
+                tildelt =
+                    row.uuidOrNull("oid")?.let {
+                        SaksbehandlerFraDatabase(
+                            epostadresse = row.string("epost"),
+                            it,
+                            row.string("navn"),
+                            row.string("ident"),
+                        )
+                    },
                 påVent = egenskaper.contains(EgenskapForDatabase.PÅ_VENT),
                 opprettet = row.localDateTime("opprettet"),
                 opprinneligSøknadsdato = row.localDateTime("opprinnelig_soknadsdato"),
                 tidsfrist = row.localDateOrNull("frist"),
-                filtrertAntall = row.int("filtered_count")
+                filtrertAntall = row.int("filtered_count"),
             )
         }
     }
 
-    internal fun finnEgenskaper(vedtaksperiodeId: UUID, utbetalingId: UUID): Set<EgenskapForDatabase>? = asSQL(
-        """
+    internal fun finnEgenskaper(
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+    ): Set<EgenskapForDatabase>? =
+        asSQL(
+            """
             SELECT o.egenskaper FROM oppgave o 
             INNER JOIN vedtak v ON o.vedtak_ref = v.id
             WHERE v.vedtaksperiode_id = :vedtaksperiodeId
             AND o.utbetaling_id = :utbetalingId
             ORDER BY o.opprettet DESC
             LIMIT 1
-        """.trimIndent(), mapOf(
-            "vedtaksperiodeId" to vedtaksperiodeId,
-            "utbetalingId" to utbetalingId
-        )
-    ).single { row -> row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }.toSet() }
+            """.trimIndent(),
+            mapOf(
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "utbetalingId" to utbetalingId,
+            ),
+        ).single { row -> row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }.toSet() }
 
     internal fun finnAntallOppgaver(saksbehandlerOid: UUID): AntallOppgaverFraDatabase {
         return asSQL(
@@ -211,11 +221,12 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
             WHERE o.status = 'AvventerSaksbehandler'
             AND t.saksbehandler_ref = :oid
-        """, mapOf("oid" to saksbehandlerOid)
+        """,
+            mapOf("oid" to saksbehandlerOid),
         ).single { row ->
             AntallOppgaverFraDatabase(
                 antallMineSaker = row.int("antall_mine_saker"),
-                antallMineSakerPåVent = row.int("antall_mine_saker_på_vent")
+                antallMineSakerPåVent = row.int("antall_mine_saker_på_vent"),
             )
         } ?: AntallOppgaverFraDatabase(antallMineSaker = 0, antallMineSakerPåVent = 0)
     }
@@ -224,8 +235,9 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         behandletAvOid: UUID,
         offset: Int = 0,
         limit: Int = Int.MAX_VALUE,
-    ): List<BehandletOppgaveFraDatabaseForVisning> = asSQL(
-        """
+    ): List<BehandletOppgaveFraDatabaseForVisning> =
+        asSQL(
+            """
         SELECT 
             o.id as oppgave_id,
             p.aktor_id,
@@ -250,34 +262,37 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         OFFSET :offset
         LIMIT :limit;
     """,
-        mapOf("oid" to behandletAvOid, "fom" to LocalDate.now(), "offset" to offset, "limit" to limit)
-    ).list { row ->
-        BehandletOppgaveFraDatabaseForVisning(
-            id = row.long("oppgave_id"),
-            aktørId = row.string("aktor_id"),
-            egenskaper = row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }.toSet(),
-            ferdigstiltTidspunkt = row.localDateTime("ferdigstilt_tidspunkt"),
-            ferdigstiltAv = row.stringOrNull("ferdigstilt_av"),
-            navn = PersonnavnFraDatabase(
-                row.string("fornavn"),
-                row.stringOrNull("mellomnavn"),
-                row.string("etternavn"),
-            ),
-            filtrertAntall = row.int("filtered_count"),
-        )
-    }
+            mapOf("oid" to behandletAvOid, "fom" to LocalDate.now(), "offset" to offset, "limit" to limit),
+        ).list { row ->
+            BehandletOppgaveFraDatabaseForVisning(
+                id = row.long("oppgave_id"),
+                aktørId = row.string("aktor_id"),
+                egenskaper = row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }.toSet(),
+                ferdigstiltTidspunkt = row.localDateTime("ferdigstilt_tidspunkt"),
+                ferdigstiltAv = row.stringOrNull("ferdigstilt_av"),
+                navn =
+                    PersonnavnFraDatabase(
+                        row.string("fornavn"),
+                        row.stringOrNull("mellomnavn"),
+                        row.string("etternavn"),
+                    ),
+                filtrertAntall = row.int("filtered_count"),
+            )
+        }
 
-    private fun OppgavesorteringForDatabase.nøkkelTilKolonne() = when (this.nøkkel) {
-        SorteringsnøkkelForDatabase.TILDELT_TIL -> "navn"
-        SorteringsnøkkelForDatabase.OPPRETTET -> "opprettet"
-        SorteringsnøkkelForDatabase.TIDSFRIST -> "frist"
-        SorteringsnøkkelForDatabase.SØKNAD_MOTTATT -> "opprinnelig_soknadsdato"
-    } + if (this.stigende) " ASC" else " DESC"
+    private fun OppgavesorteringForDatabase.nøkkelTilKolonne() =
+        when (this.nøkkel) {
+            SorteringsnøkkelForDatabase.TILDELT_TIL -> "navn"
+            SorteringsnøkkelForDatabase.OPPRETTET -> "opprettet"
+            SorteringsnøkkelForDatabase.TIDSFRIST -> "frist"
+            SorteringsnøkkelForDatabase.SØKNAD_MOTTATT -> "opprinnelig_soknadsdato"
+        } + if (this.stigende) " ASC" else " DESC"
 
-    fun finnUtbetalingId(oppgaveId: Long) = asSQL(
-        " SELECT utbetaling_id FROM oppgave WHERE id = :oppgaveId; ",
-        mapOf("oppgaveId" to oppgaveId)
-    ).single { it.uuid("utbetaling_id") }
+    fun finnUtbetalingId(oppgaveId: Long) =
+        asSQL(
+            " SELECT utbetaling_id FROM oppgave WHERE id = :oppgaveId; ",
+            mapOf("oppgaveId" to oppgaveId),
+        ).single { it.uuid("utbetaling_id") }
 
     fun finnIdForAktivOppgave(vedtaksperiodeId: UUID) =
         asSQL(
@@ -288,7 +303,8 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                     AND status not in ('Ferdigstilt'::oppgavestatus, 'Invalidert'::oppgavestatus)
             ORDER BY opprettet DESC
             LIMIT 1
-        """, mapOf("vedtaksperiodeId" to vedtaksperiodeId)
+        """,
+            mapOf("vedtaksperiodeId" to vedtaksperiodeId),
         ).single { it.long("id") }
 
     fun finnOppgaveIdUansettStatus(fødselsnummer: String) =
@@ -300,7 +316,8 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             WHERE p.fodselsnummer = :fodselsnummer
             ORDER BY o.id DESC
             LIMIT 1;
-        """, mapOf("fodselsnummer" to fødselsnummer.toLong())
+        """,
+            mapOf("fodselsnummer" to fødselsnummer.toLong()),
         ).single { it.long("oppgaveId") }!!
 
     fun finnGodkjenningsbehov(fødselsnummer: String) =
@@ -313,7 +330,8 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             WHERE p.fodselsnummer = :fodselsnummer
             AND status = 'AvventerSaksbehandler'::oppgavestatus
             GROUP BY c.hendelse_id;
-        """, mapOf("fodselsnummer" to fødselsnummer.toLong())
+        """,
+            mapOf("fodselsnummer" to fødselsnummer.toLong()),
         ).single { it.uuid("hendelse_id") }!!
 
     fun finnVedtaksperiodeId(fødselsnummer: String) =
@@ -324,7 +342,8 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                      JOIN person p ON v.person_ref = p.id
             WHERE p.fodselsnummer = :fodselsnummer
             AND status = 'AvventerSaksbehandler'::oppgavestatus;
-        """, mapOf("fodselsnummer" to fødselsnummer.toLong())
+        """,
+            mapOf("fodselsnummer" to fødselsnummer.toLong()),
         ).single { it.uuid("vedtaksperiode_id") }!!
 
     fun finnOppgaveId(fødselsnummer: String) =
@@ -335,7 +354,8 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                      JOIN person p ON v.person_ref = p.id
             WHERE o.status = 'AvventerSaksbehandler'::oppgavestatus
               AND p.fodselsnummer = :fodselsnummer;
-        """, mapOf("fodselsnummer" to fødselsnummer.toLong())
+        """,
+            mapOf("fodselsnummer" to fødselsnummer.toLong()),
         ).single { it.long("oppgaveId") }
 
     fun finnOppgaveId(utbetalingId: UUID) =
@@ -343,19 +363,26 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             """ SELECT o.id as oppgaveId
             FROM oppgave o WHERE o.utbetaling_id = :utbetaling_id
             AND o.status NOT IN ('Invalidert'::oppgavestatus, 'Ferdigstilt'::oppgavestatus)
-        """, mapOf("utbetaling_id" to utbetalingId)
+        """,
+            mapOf("utbetaling_id" to utbetalingId),
         ).single { it.long("oppgaveId") }
 
-    fun finnVedtaksperiodeId(oppgaveId: Long) = requireNotNull(
-        asSQL(
-            """ SELECT v.vedtaksperiode_id
+    fun finnVedtaksperiodeId(oppgaveId: Long) =
+        requireNotNull(
+            asSQL(
+                """ SELECT v.vedtaksperiode_id
             FROM vedtak v
             INNER JOIN oppgave o on v.id = o.vedtak_ref
             WHERE o.id = :oppgaveId
-        """, mapOf("oppgaveId" to oppgaveId)
-        ).single { row -> row.uuid("vedtaksperiode_id") })
+        """,
+                mapOf("oppgaveId" to oppgaveId),
+            ).single { row -> row.uuid("vedtaksperiode_id") },
+        )
 
-    private fun finnArbeidsgiverbeløpOgPersonbeløp(vedtaksperiodeId: UUID, utbetalingId: UUID) = requireNotNull(
+    private fun finnArbeidsgiverbeløpOgPersonbeløp(
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+    ) = requireNotNull(
         asSQL(
             """ SELECT SUM(ABS(arbeidsgiverbeløp)) as sumArbeidsgiverbeløp, SUM(ABS(personbeløp)) as sumPersonbeløp
             FROM utbetaling_id 
@@ -369,15 +396,20 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                             WHERE vedtaksperiode_id=:vedtaksperiodeId AND tilstand='Ulåst'
                         ) AND tilstand='Ulåst'
                     )
-        """, mapOf(
+        """,
+            mapOf(
                 "utbetalingId" to utbetalingId,
-                "vedtaksperiodeId" to vedtaksperiodeId
-            )
+                "vedtaksperiodeId" to vedtaksperiodeId,
+            ),
         ).single { row ->
             Pair(row.intOrNull("sumArbeidsgiverbeløp") ?: 0, row.intOrNull("sumPersonbeløp") ?: 0)
-        })
+        },
+    )
 
-    private fun finnMottaker(harArbeidsgiverbeløp: Boolean, harPersonbeløp: Boolean): Mottaker? {
+    private fun finnMottaker(
+        harArbeidsgiverbeløp: Boolean,
+        harPersonbeløp: Boolean,
+    ): Mottaker? {
         return when {
             harArbeidsgiverbeløp && harPersonbeløp -> Mottaker.BEGGE
             harPersonbeløp -> Mottaker.SYKMELDT
@@ -393,8 +425,8 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
         kanAvvises: Boolean,
-    ) =
-        requireNotNull(run {
+    ) = requireNotNull(
+        run {
             val vedtakRef = vedtakRef(vedtaksperiodeId)
             val personRef = personRef(vedtaksperiodeId)
 
@@ -430,7 +462,8 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                                     AND v.person_ref=:personRef
                         )
                     ;
-                """, mapOf(
+                """,
+                mapOf(
                     "id" to id,
                     "oppgavestatus" to "AvventerSaksbehandler",
                     "ferdigstiltAv" to null,
@@ -441,19 +474,26 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                     "mottaker" to mottaker?.name,
                     "kanAvvises" to kanAvvises,
                     "personRef" to personRef,
-                )
+                ),
             ).updateAndReturnGeneratedKey()
-        }) { "Kunne ikke opprette oppgave for vedtak: $vedtaksperiodeId" }
+        },
+    ) { "Kunne ikke opprette oppgave for vedtak: $vedtaksperiodeId" }
 
-    private fun personRef(vedtaksperiodeId: UUID) = requireNotNull(asSQL(
-        "SELECT person_ref FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId;",
-        mapOf("vedtaksperiodeId" to vedtaksperiodeId)
-    ).single { it.long("person_ref") }) { "Kunne ikke finne person for vedtaksperiodeId $vedtaksperiodeId" }
+    private fun personRef(vedtaksperiodeId: UUID) =
+        requireNotNull(
+            asSQL(
+                "SELECT person_ref FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId;",
+                mapOf("vedtaksperiodeId" to vedtaksperiodeId),
+            ).single { it.long("person_ref") },
+        ) { "Kunne ikke finne person for vedtaksperiodeId $vedtaksperiodeId" }
 
-    private fun vedtakRef(vedtaksperiodeId: UUID) = requireNotNull(asSQL(
-        "SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId;",
-        mapOf("vedtaksperiodeId" to vedtaksperiodeId)
-    ).single { it.long("id") }) { "Kunne ikke finne vedtak for vedtaksperiodeId $vedtaksperiodeId" }
+    private fun vedtakRef(vedtaksperiodeId: UUID) =
+        requireNotNull(
+            asSQL(
+                "SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId;",
+                mapOf("vedtaksperiodeId" to vedtaksperiodeId),
+            ).single { it.long("id") },
+        ) { "Kunne ikke finne vedtak for vedtaksperiodeId $vedtaksperiodeId" }
 
     fun updateOppgave(
         oppgaveId: Long,
@@ -468,32 +508,38 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 UPDATE oppgave
                 SET ferdigstilt_av = :ferdigstiltAv, ferdigstilt_av_oid = :oid, status = :oppgavestatus::oppgavestatus, egenskaper = '{$egenskaperForDatabase}'
                 WHERE id=:oppgaveId; 
-            """, mapOf(
+            """,
+            mapOf(
                 "ferdigstiltAv" to ferdigstiltAv,
                 "oid" to oid,
                 "oppgavestatus" to oppgavestatus,
-                "oppgaveId" to oppgaveId
-            )
+                "oppgaveId" to oppgaveId,
+            ),
         ).update()
     }
 
-    override fun finnHendelseId(id: Long) = requireNotNull(
-        asSQL(
-            """
+    override fun finnHendelseId(id: Long) =
+        requireNotNull(
+            asSQL(
+                """
                 SELECT DISTINCT hendelse_id 
                 FROM command_context 
                 WHERE context_id = (SELECT command_context_id FROM oppgave WHERE id = :oppgaveId);
             """,
-            mapOf("oppgaveId" to id)
+                mapOf("oppgaveId" to id),
+            )
+                .single { row -> row.uuid("hendelse_id") },
         )
-            .single { row -> row.uuid("hendelse_id") })
 
-    fun harGyldigOppgave(utbetalingId: UUID) = requireNotNull(
-        asSQL(
-            """ SELECT COUNT(1) AS oppgave_count FROM oppgave
+    fun harGyldigOppgave(utbetalingId: UUID) =
+        requireNotNull(
+            asSQL(
+                """ SELECT COUNT(1) AS oppgave_count FROM oppgave
             WHERE utbetaling_id = :utbetalingId AND status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus, 'Ferdigstilt'::oppgavestatus)
-        """, mapOf("utbetalingId" to utbetalingId)
-        ).single { it.int("oppgave_count") }) > 0
+        """,
+                mapOf("utbetalingId" to utbetalingId),
+            ).single { it.int("oppgave_count") },
+        ) > 0
 
     fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) =
         requireNotNull(
@@ -501,24 +547,34 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 """ SELECT COUNT(1) AS oppgave_count FROM oppgave o
                 INNER JOIN vedtak v on o.vedtak_ref = v.id
                 WHERE v.vedtaksperiode_id = :vedtaksperiodeId AND o.status = 'Ferdigstilt'::oppgavestatus
-            """, mapOf("vedtaksperiodeId" to vedtaksperiodeId)
-            ).single { it.int("oppgave_count") }) > 0
+            """,
+                mapOf("vedtaksperiodeId" to vedtaksperiodeId),
+            ).single { it.int("oppgave_count") },
+        ) > 0
 
-    fun venterPåSaksbehandler(oppgaveId: Long) = requireNotNull(asSQL(
-        """ 
+    fun venterPåSaksbehandler(oppgaveId: Long) =
+        requireNotNull(
+            asSQL(
+                """ 
             SELECT EXISTS (
                 SELECT 1 FROM oppgave WHERE id=:oppgaveId AND status IN('AvventerSaksbehandler'::oppgavestatus)
             )
-        """, mapOf("oppgaveId" to oppgaveId)
-    ).single { it.boolean(1) })
+        """,
+                mapOf("oppgaveId" to oppgaveId),
+            ).single { it.boolean(1) },
+        )
 
-    fun finnFødselsnummer(oppgaveId: Long) = requireNotNull(asSQL(
-        """ SELECT fodselsnummer from person
+    fun finnFødselsnummer(oppgaveId: Long) =
+        requireNotNull(
+            asSQL(
+                """ SELECT fodselsnummer from person
             INNER JOIN vedtak v on person.id = v.person_ref
             INNER JOIN oppgave o on v.id = o.vedtak_ref
             WHERE o.id = :oppgaveId
-        """, mapOf("oppgaveId" to oppgaveId)
-    ).single { it.long("fodselsnummer").toFødselsnummer() })
+        """,
+                mapOf("oppgaveId" to oppgaveId),
+            ).single { it.long("fodselsnummer").toFødselsnummer() },
+        )
 
     fun oppgaveDataForAutomatisering(oppgaveId: Long): OppgaveDataForAutomatisering? =
         asSQL(
@@ -528,7 +584,8 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             INNER JOIN hendelse h ON h.id = (SELECT hendelse_id FROM command_context WHERE context_id = o.command_context_id LIMIT 1)
             INNER JOIN saksbehandleroppgavetype s ON s.vedtak_ref = v.id
             WHERE o.id = :oppgaveId 
-        """, mapOf("oppgaveId" to oppgaveId)
+        """,
+            mapOf("oppgaveId" to oppgaveId),
         ).single {
             val json = objectMapper.readTree(it.string("godkjenningbehovJson"))
             val skjæringstidspunkt = json.path("Godkjenning").path("skjæringstidspunkt").asLocalDate()
@@ -540,7 +597,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 utbetalingId = it.uuid("utbetaling_id"),
                 hendelseId = it.uuid("hendelseId"),
                 godkjenningsbehovJson = it.string("godkjenningbehovJson"),
-                periodetype = enumValueOf(it.string("periodetype"))
+                periodetype = enumValueOf(it.string("periodetype")),
             )
         }
 
@@ -554,9 +611,9 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         WHERE p.fodselsnummer = :fodselsnummer
         and o.id = o2.id
         AND o.status = 'AvventerSaksbehandler'::oppgavestatus; 
-    """, mapOf("fodselsnummer" to fødselsnummer.toLong())
-    ).update()
-
+    """,
+            mapOf("fodselsnummer" to fødselsnummer.toLong()),
+        ).update()
 
     private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
 }

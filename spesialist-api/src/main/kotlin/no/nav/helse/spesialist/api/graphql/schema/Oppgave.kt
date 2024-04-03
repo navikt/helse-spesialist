@@ -11,12 +11,12 @@ enum class Oppgavetype {
     UTBETALING_TIL_SYKMELDT,
     DELVIS_REFUSJON,
     UTBETALING_TIL_ARBEIDSGIVER,
-    INGEN_UTBETALING
+    INGEN_UTBETALING,
 }
 
 enum class AntallArbeidsforhold {
     ET_ARBEIDSFORHOLD,
-    FLERE_ARBEIDSFORHOLD
+    FLERE_ARBEIDSFORHOLD,
 }
 
 enum class Egenskap {
@@ -45,7 +45,7 @@ enum class Egenskap {
     VERGEMAL,
     SKJONNSFASTSETTELSE,
     PA_VENT,
-    TILBAKEDATERT
+    TILBAKEDATERT,
 }
 
 enum class Kategori {
@@ -54,7 +54,7 @@ enum class Kategori {
     Oppgavetype,
     Ukategorisert,
     Periodetype,
-    Status
+    Status,
 }
 
 data class Filtrering(
@@ -72,17 +72,17 @@ enum class Sorteringsnokkel {
     TILDELT_TIL,
     OPPRETTET,
     SOKNAD_MOTTATT,
-    TIDSFRIST
+    TIDSFRIST,
 }
 
 data class BehandledeOppgaver(
     val totaltAntallOppgaver: Int,
-    val oppgaver: List<BehandletOppgave>
+    val oppgaver: List<BehandletOppgave>,
 )
 
 data class OppgaverTilBehandling(
     val totaltAntallOppgaver: Int,
-    val oppgaver: List<OppgaveTilBehandling>
+    val oppgaver: List<OppgaveTilBehandling>,
 )
 
 data class AntallOppgaver(
@@ -119,14 +119,14 @@ data class Totrinnsvurdering(
     val erRetur: Boolean,
     val saksbehandler: UUID?,
     val beslutter: UUID?,
-    val erBeslutteroppgave: Boolean
+    val erBeslutteroppgave: Boolean,
 )
 
 enum class Mottaker {
     SYKMELDT,
     ARBEIDSGIVER,
     BEGGE,
-    INGEN
+    INGEN,
 }
 
 data class Personnavn(

@@ -1,7 +1,5 @@
 package no.nav.helse.modell.kommando
 
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
@@ -9,6 +7,8 @@ import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class UtbetalingsgodkjenningCommand(
     private val id: UUID,
@@ -30,9 +30,8 @@ internal class UtbetalingsgodkjenningCommand(
     private val saksbehandler: Saksbehandlerløsning.Saksbehandler,
     private val beslutter: Saksbehandlerløsning.Saksbehandler?,
     private val meldingDao: MeldingDao,
-    private val godkjenningMediator: GodkjenningMediator
+    private val godkjenningMediator: GodkjenningMediator,
 ) : Command {
-
     private companion object {
         private val log = LoggerFactory.getLogger(UtbetalingsgodkjenningCommand::class.java)
     }
@@ -55,7 +54,7 @@ internal class UtbetalingsgodkjenningCommand(
                 godkjenttidspunkt = godkjenttidspunkt,
                 saksbehandleroverstyringer = saksbehandleroverstyringer,
                 sykefraværstilfelle = sykefraværstilfelle,
-                spleisBehandlingId = spleisBehandlingId
+                spleisBehandlingId = spleisBehandlingId,
             )
         } else {
             godkjenningMediator.saksbehandlerAvvisning(
@@ -72,11 +71,10 @@ internal class UtbetalingsgodkjenningCommand(
                 begrunnelser = begrunnelser,
                 kommentar = kommentar,
                 saksbehandleroverstyringer = saksbehandleroverstyringer,
-                spleisBehandlingId = spleisBehandlingId
+                spleisBehandlingId = spleisBehandlingId,
             )
         }
         log.info("sender svar på godkjenningsbehov")
         return true
     }
 }
-

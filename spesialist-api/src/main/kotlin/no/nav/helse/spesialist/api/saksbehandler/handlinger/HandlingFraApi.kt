@@ -6,8 +6,9 @@ import java.util.UUID
 
 sealed interface HandlingFraApi
 
-data class TildelOppgave(val oppgaveId: Long): HandlingFraApi
-data class AvmeldOppgave(val oppgaveId: Long): HandlingFraApi
+data class TildelOppgave(val oppgaveId: Long) : HandlingFraApi
+
+data class AvmeldOppgave(val oppgaveId: Long) : HandlingFraApi
 
 @JsonIgnoreProperties
 class OverstyrTidslinjeHandlingFraApi(
@@ -16,9 +17,8 @@ class OverstyrTidslinjeHandlingFraApi(
     val fødselsnummer: String,
     val aktørId: String,
     val begrunnelse: String,
-    val dager: List<OverstyrDagFraApi>
-): HandlingFraApi {
-
+    val dager: List<OverstyrDagFraApi>,
+) : HandlingFraApi {
     @JsonIgnoreProperties
     class OverstyrDagFraApi(
         val dato: LocalDate,
@@ -36,7 +36,6 @@ data class OverstyrInntektOgRefusjonHandlingFraApi(
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<OverstyrArbeidsgiverFraApi>,
 ) : HandlingFraApi {
-
     data class OverstyrArbeidsgiverFraApi(
         val organisasjonsnummer: String,
         val månedligInntekt: Double,
@@ -47,7 +46,6 @@ data class OverstyrInntektOgRefusjonHandlingFraApi(
         val forklaring: String,
         val lovhjemmel: LovhjemmelFraApi?,
     ) {
-
         data class RefusjonselementFraApi(
             val fom: LocalDate,
             val tom: LocalDate? = null,
@@ -63,7 +61,6 @@ data class OverstyrArbeidsforholdHandlingFraApi(
     val skjæringstidspunkt: LocalDate,
     val overstyrteArbeidsforhold: List<ArbeidsforholdFraApi>,
 ) : HandlingFraApi {
-
     @JsonIgnoreProperties
     data class ArbeidsforholdFraApi(
         val orgnummer: String,
@@ -80,7 +77,6 @@ data class SkjønnsfastsettSykepengegrunnlagHandlingFraApi(
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<SkjønnsfastsattArbeidsgiverFraApi>,
 ) : HandlingFraApi {
-
     data class SkjønnsfastsattArbeidsgiverFraApi(
         val organisasjonsnummer: String,
         val årlig: Double,
@@ -93,7 +89,6 @@ data class SkjønnsfastsettSykepengegrunnlagHandlingFraApi(
         val lovhjemmel: LovhjemmelFraApi?,
         val initierendeVedtaksperiodeId: String?,
     ) {
-
         enum class SkjønnsfastsettingstypeDto {
             OMREGNET_ÅRSINNTEKT,
             RAPPORTERT_ÅRSINNTEKT,
@@ -118,17 +113,17 @@ data class AnnulleringHandlingFraApi(
     val fagsystemId: String?,
     val utbetalingId: String?,
     val begrunnelser: List<String> = emptyList(),
-    val kommentar: String?
-): HandlingFraApi
+    val kommentar: String?,
+) : HandlingFraApi
 
 data class LeggPåVent(
     val oppgaveId: Long,
     val saksbehandlerOid: UUID,
     val frist: LocalDate,
     val skalTildeles: Boolean,
-    val begrunnelse: String?
-): HandlingFraApi
+    val begrunnelse: String?,
+) : HandlingFraApi
 
 data class FjernPåVent(
-    val oppgaveId: Long
-): HandlingFraApi
+    val oppgaveId: Long,
+) : HandlingFraApi

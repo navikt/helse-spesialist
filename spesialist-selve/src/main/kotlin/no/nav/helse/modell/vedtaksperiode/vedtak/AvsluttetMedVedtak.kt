@@ -22,7 +22,7 @@ internal class AvsluttetMedVedtak(
     private val fom: LocalDate,
     private val tom: LocalDate,
     private val vedtakFattetTidspunkt: LocalDateTime,
-    private val tags: List<String>
+    private val tags: List<String>,
 ) {
     fun byggVedtak(vedtakBuilder: SykepengevedtakBuilder) {
         vedtakBuilder.fødselsnummer(fødselsnummer)

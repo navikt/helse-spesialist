@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
 
 internal class OpprettArbeidsgiverCommand(
     private val orgnummere: List<String>,
-    private val arbeidsgiverDao: ArbeidsgiverDao
+    private val arbeidsgiverDao: ArbeidsgiverDao,
 ) : Command {
     private companion object {
         private val logg = LoggerFactory.getLogger(OpprettArbeidsgiverCommand::class.java)
@@ -32,24 +32,28 @@ internal class OpprettArbeidsgiverCommand(
     private fun behandle(context: CommandContext): Boolean {
         val arbeidsgivereSomIkkeFinnes = arbeidsgivereSomIkkeFinnes()
         if (arbeidsgivereSomIkkeFinnes.isEmpty()) return ignorer()
-        val arbeidsgiver = context.get<Arbeidsgiverinformasjonløsning>()?.also { arbeidsgiver ->
-            logg.info("oppretter arbeidsgiver fra orgnumre")
-            arbeidsgiver.opprett(arbeidsgiverDao)
-        }
-        val personinfo = context.get<HentPersoninfoløsninger>()?.also { personinfo ->
-            logg.info("oppretter arbeidsgiver fra personer")
-            personinfo.opprett(arbeidsgiverDao)
-        }
+        val arbeidsgiver =
+            context.get<Arbeidsgiverinformasjonløsning>()?.also { arbeidsgiver ->
+                logg.info("oppretter arbeidsgiver fra orgnumre")
+                arbeidsgiver.opprett(arbeidsgiverDao)
+            }
+        val personinfo =
+            context.get<HentPersoninfoløsninger>()?.also { personinfo ->
+                logg.info("oppretter arbeidsgiver fra personer")
+                personinfo.opprett(arbeidsgiverDao)
+            }
 
         if (arbeidsgiver == null && personinfo == null) return trengerMerInformasjon(context, arbeidsgivereSomIkkeFinnes)
 
         return true
     }
 
-    private fun arbeidsgivereSomIkkeFinnes() =
-        orgnummere.filter { arbeidsgiverDao.findArbeidsgiverByOrgnummer(it) == null }
+    private fun arbeidsgivereSomIkkeFinnes() = orgnummere.filter { arbeidsgiverDao.findArbeidsgiverByOrgnummer(it) == null }
 
-    private fun trengerMerInformasjon(context: CommandContext, arbeidsgivereSomIkkeFinnes: List<String>): Boolean {
+    private fun trengerMerInformasjon(
+        context: CommandContext,
+        arbeidsgivereSomIkkeFinnes: List<String>,
+    ): Boolean {
         sikkerlogg.info("Ber om info for arbeidsgiver(e) $arbeidsgivereSomIkkeFinnes")
         val (orgnumre, personer) = arbeidsgivereSomIkkeFinnes.partition { it.length == 9 }
         if (orgnumre.isNotEmpty()) context.behov("Arbeidsgiverinformasjon", mapOf("organisasjonsnummer" to orgnumre))

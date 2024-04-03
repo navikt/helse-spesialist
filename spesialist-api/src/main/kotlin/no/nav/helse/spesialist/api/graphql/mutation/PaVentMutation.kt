@@ -7,8 +7,6 @@ import graphql.execution.DataFetcherResult
 import graphql.execution.DataFetcherResult.newResult
 import graphql.schema.DataFetchingEnvironment
 import io.ktor.http.HttpStatusCode
-import java.time.LocalDate
-import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
@@ -27,13 +25,14 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernPåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LeggPåVent
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.util.UUID
 
 class PaVentMutation(
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
     private val notatMediator: NotatMediator,
-    private val periodehistorikkDao: PeriodehistorikkDao
+    private val periodehistorikkDao: PeriodehistorikkDao,
 ) : Mutation {
-
     private companion object {
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
     }
@@ -54,13 +53,16 @@ class PaVentMutation(
 
             try {
                 notatMediator.lagreForOppgaveId(oppgaveId.toLong(), notatTekst, saksbehandlerOid, notatType)
-                saksbehandlerhåndterer.håndter(LeggPåVent(oppgaveId.toLong(), saksbehandler.oid, LocalDate.parse(frist), tildeling, begrunnelse), saksbehandler)
+                saksbehandlerhåndterer.håndter(
+                    LeggPåVent(oppgaveId.toLong(), saksbehandler.oid, LocalDate.parse(frist), tildeling, begrunnelse),
+                    saksbehandler,
+                )
                 newResult<PaVent?>().data(
                     PaVent(
                         frist = frist,
                         begrunnelse = begrunnelse,
-                        oid = saksbehandler.oid
-                    )
+                        oid = saksbehandler.oid,
+                    ),
                 ).build()
             } catch (e: OppgaveIkkeTildelt) {
                 newResult<PaVent?>().error(ikkeTildeltError(e)).build()
@@ -73,7 +75,10 @@ class PaVentMutation(
     }
 
     @Suppress("unused")
-    suspend fun fjernPaVent(oppgaveId: String, env: DataFetchingEnvironment): DataFetcherResult<Boolean?> {
+    suspend fun fjernPaVent(
+        oppgaveId: String,
+        env: DataFetchingEnvironment,
+    ): DataFetcherResult<Boolean?> {
         val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(ContextValues.SAKSBEHANDLER.key).value
         return withContext(Dispatchers.IO) {
             try {

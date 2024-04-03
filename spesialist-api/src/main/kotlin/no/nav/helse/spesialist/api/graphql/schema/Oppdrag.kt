@@ -1,10 +1,10 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
-import java.time.format.DateTimeFormatter
-import java.util.UUID
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDto
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingslinjeApiDto
 import no.nav.helse.spesialist.api.utbetaling.Utbetalingsstatus
+import java.time.format.DateTimeFormatter
+import java.util.UUID
 
 enum class Oppdragsstatus {
     GODKJENT,
@@ -17,13 +17,13 @@ enum class Oppdragsstatus {
     FORKASTET,
     IKKE_GODKJENT,
     GODKJENT_UTEN_UTBETALING,
-    NY
+    NY,
 }
 
 data class Utbetalingslinje(
     val fom: DateString,
     val tom: DateString,
-    val totalbelop: Int
+    val totalbelop: Int,
 )
 
 interface Spennoppdrag {
@@ -34,18 +34,18 @@ interface Spennoppdrag {
 data class Personoppdrag(
     override val fagsystemId: String,
     override val linjer: List<Utbetalingslinje>,
-    val fodselsnummer: String
+    val fodselsnummer: String,
 ) : Spennoppdrag
 
 data class Arbeidsgiveroppdrag(
     override val fagsystemId: String,
     override val linjer: List<Utbetalingslinje>,
-    val organisasjonsnummer: String
+    val organisasjonsnummer: String,
 ) : Spennoppdrag
 
 data class Annullering(
     val tidspunkt: DateTimeString,
-    val saksbehandler: String
+    val saksbehandler: String,
 )
 
 data class Oppdrag(private val utbetaling: UtbetalingApiDto) {
@@ -53,28 +53,31 @@ data class Oppdrag(private val utbetaling: UtbetalingApiDto) {
 
     fun status() = utbetaling.status.tilOppdragsstatus()
 
-    fun arbeidsgiveroppdrag() = utbetaling.arbeidsgiveroppdrag?.let {
-        Arbeidsgiveroppdrag(
-            fagsystemId = it.fagsystemId,
-            linjer = it.utbetalingslinjer.tilUtbetalingslinjer(),
-            organisasjonsnummer = it.mottaker,
-        )
-    }
+    fun arbeidsgiveroppdrag() =
+        utbetaling.arbeidsgiveroppdrag?.let {
+            Arbeidsgiveroppdrag(
+                fagsystemId = it.fagsystemId,
+                linjer = it.utbetalingslinjer.tilUtbetalingslinjer(),
+                organisasjonsnummer = it.mottaker,
+            )
+        }
 
-    fun personoppdrag() = utbetaling.personoppdrag?.let {
-        Personoppdrag(
-            fagsystemId = it.fagsystemId,
-            linjer = it.utbetalingslinjer.tilUtbetalingslinjer(),
-            fodselsnummer = it.mottaker,
-        )
-    }
+    fun personoppdrag() =
+        utbetaling.personoppdrag?.let {
+            Personoppdrag(
+                fagsystemId = it.fagsystemId,
+                linjer = it.utbetalingslinjer.tilUtbetalingslinjer(),
+                fodselsnummer = it.mottaker,
+            )
+        }
 
-    fun annullering() = utbetaling.annullertAvSaksbehandler?.let {
-        Annullering(
-            tidspunkt = it.annullertTidspunkt.format(DateTimeFormatter.ISO_DATE_TIME),
-            saksbehandler = it.saksbehandlerNavn
-        )
-    }
+    fun annullering() =
+        utbetaling.annullertAvSaksbehandler?.let {
+            Annullering(
+                tidspunkt = it.annullertTidspunkt.format(DateTimeFormatter.ISO_DATE_TIME),
+                saksbehandler = it.saksbehandlerNavn,
+            )
+        }
 
     fun totalbelop() = utbetaling.totalbeløp
 
@@ -85,7 +88,7 @@ data class Oppdrag(private val utbetaling: UtbetalingApiDto) {
             Utbetalingslinje(
                 fom = it.fom.format(DateTimeFormatter.ISO_DATE),
                 tom = it.tom.format(DateTimeFormatter.ISO_DATE),
-                totalbelop = it.totalbeløp ?: 0
+                totalbelop = it.totalbeløp ?: 0,
             )
         }
 

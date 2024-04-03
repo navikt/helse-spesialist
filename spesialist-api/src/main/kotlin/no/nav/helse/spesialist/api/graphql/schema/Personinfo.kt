@@ -11,7 +11,7 @@ enum class Adressebeskyttelse {
     Fortrolig,
     StrengtFortrolig,
     StrengtFortroligUtland,
-    Ukjent
+    Ukjent,
 }
 
 data class Personinfo(
@@ -23,4 +23,3 @@ data class Personinfo(
     val adressebeskyttelse: Adressebeskyttelse,
     val reservasjon: Reservasjon? = null,
 )
-

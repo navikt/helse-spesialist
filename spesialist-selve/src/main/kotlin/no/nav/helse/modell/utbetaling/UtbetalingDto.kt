@@ -13,7 +13,8 @@ enum class Utbetalingsstatus {
     FORKASTET,
     IKKE_GODKJENT,
     GODKJENT_UTEN_UTBETALING,
-    NY;
+    NY,
+    ;
 
     internal companion object {
         internal val gyldigeStatuser = EnumSet.allOf(Utbetalingsstatus::class.java)
@@ -21,8 +22,14 @@ enum class Utbetalingsstatus {
         internal fun EnumSet<Utbetalingsstatus>.values() = this.map(Utbetalingsstatus::toString)
     }
 }
+
 enum class Utbetalingtype {
-    UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING, FERIEPENGER;
+    UTBETALING,
+    ETTERUTBETALING,
+    ANNULLERING,
+    REVURDERING,
+    FERIEPENGER,
+    ;
 
     internal companion object {
         internal val gyldigeTyper = EnumSet.allOf(Utbetalingtype::class.java)
@@ -30,4 +37,3 @@ enum class Utbetalingtype {
         internal fun EnumSet<Utbetalingtype>.values() = this.map(Utbetalingtype::toString)
     }
 }
-

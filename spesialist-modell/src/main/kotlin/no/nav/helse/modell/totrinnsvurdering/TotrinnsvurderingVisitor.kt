@@ -1,8 +1,8 @@
 package no.nav.helse.modell.totrinnsvurdering
 
+import no.nav.helse.modell.saksbehandler.Saksbehandler
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.modell.saksbehandler.Saksbehandler
 
 interface TotrinnsvurderingVisitor {
     fun visitTotrinnsvurdering(
@@ -12,6 +12,6 @@ interface TotrinnsvurderingVisitor {
         beslutter: Saksbehandler?,
         utbetalingId: UUID?,
         opprettet: LocalDateTime,
-        oppdatert: LocalDateTime?
+        oppdatert: LocalDateTime?,
     ) {}
 }

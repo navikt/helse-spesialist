@@ -25,11 +25,17 @@ internal class EndretSkjermetinfoRiver(
         }.register(this)
     }
 
-    override fun onError(problems: MessageProblems, context: MessageContext) {
-        sikkerLogg.error("Forstod ikke ${eventName}:\n${problems.toExtendedReport()}")
+    override fun onError(
+        problems: MessageProblems,
+        context: MessageContext,
+    ) {
+        sikkerLogg.error("Forstod ikke $eventName:\n${problems.toExtendedReport()}")
     }
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) {
+    override fun onPacket(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         val fødselsnummer = packet["fødselsnummer"].asText()
         try {
             fødselsnummer.toLong()

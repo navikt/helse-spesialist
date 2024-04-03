@@ -1,8 +1,6 @@
 package no.nav.helse.modell.gosysoppgaver
 
 import java.time.LocalDate
-import java.time.LocalDate.now
-import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.modell.kommando.Command
@@ -10,6 +8,8 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import org.slf4j.LoggerFactory
+import java.time.LocalDate.now
+import java.util.UUID
 
 internal class VurderÅpenGosysoppgave(
     private val hendelseId: UUID,
@@ -20,7 +20,6 @@ internal class VurderÅpenGosysoppgave(
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val harTildeltOppgave: Boolean,
 ) : Command {
-
     private companion object {
         private val logg = LoggerFactory.getLogger(VurderÅpenGosysoppgave::class.java)
     }
@@ -35,7 +34,7 @@ internal class VurderÅpenGosysoppgave(
             logg.info("Trenger oppgaveinformasjon fra Gosys")
             context.behov(
                 "ÅpneOppgaver",
-                mapOf("aktørId" to aktørId, "ikkeEldreEnn" to ikkeEldreEnn(vedtaksperiodeId))
+                mapOf("aktørId" to aktørId, "ikkeEldreEnn" to ikkeEldreEnn(vedtaksperiodeId)),
             )
             return false
         }

@@ -11,8 +11,9 @@ data class OverstyrtTidslinjeForDatabase(
     val organisasjonsnummer: String,
     val dager: List<OverstyrtTidslinjedagForDatabase>,
     val begrunnelse: String,
-    val opprettet: LocalDateTime
+    val opprettet: LocalDateTime,
 )
+
 data class OverstyrtTidslinjedagForDatabase(
     val dato: LocalDate,
     val type: String,

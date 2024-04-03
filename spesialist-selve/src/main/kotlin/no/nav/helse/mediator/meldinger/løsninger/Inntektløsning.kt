@@ -1,9 +1,6 @@
 package no.nav.helse.mediator.meldinger.løsninger
 
 import com.fasterxml.jackson.databind.JsonNode
-import java.time.LocalDate
-import java.time.YearMonth
-import java.util.UUID
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -13,13 +10,18 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asYearMonth
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.time.YearMonth
+import java.util.UUID
 
 internal class Inntektløsning(
     private val inntekter: List<Inntekter>,
 ) {
-
-    internal fun lagre(personDao: PersonDao, fødselsnummer: String, skjæringstidspunkt: LocalDate): Long? =
-        personDao.insertInntekter(fødselsnummer, skjæringstidspunkt, inntekter)
+    internal fun lagre(
+        personDao: PersonDao,
+        fødselsnummer: String,
+        skjæringstidspunkt: LocalDate,
+    ): Long? = personDao.insertInntekter(fødselsnummer, skjæringstidspunkt, inntekter)
 
     internal class InntektRiver(
         rapidsConnection: RapidsConnection,
@@ -50,27 +52,34 @@ internal class Inntektløsning(
                 }.register(this)
         }
 
-        override fun onError(problems: MessageProblems, context: MessageContext) {
+        override fun onError(
+            problems: MessageProblems,
+            context: MessageContext,
+        ) {
             sikkerLog.error("forstod ikke Inntekter:\n${problems.toExtendedReport()}")
         }
 
-        override fun onPacket(packet: JsonMessage, context: MessageContext) {
+        override fun onPacket(
+            packet: JsonMessage,
+            context: MessageContext,
+        ) {
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())
             val contextId = UUID.fromString(packet["contextId"].asText())
 
-            val inntektsløsning = Inntektløsning(
-                packet["@løsning.$behov"].map { løsning ->
-                    Inntekter(
-                        løsning["årMåned"].asYearMonth(),
-                        løsning["inntektsliste"].map {
-                            Inntekter.Inntekt(
-                                it["beløp"].asDouble(),
-                                it["orgnummer"].asText(),
-                            )
-                        }
-                    )
-                }
-            )
+            val inntektsløsning =
+                Inntektløsning(
+                    packet["@løsning.$behov"].map { løsning ->
+                        Inntekter(
+                            løsning["årMåned"].asYearMonth(),
+                            løsning["inntektsliste"].map {
+                                Inntekter.Inntekt(
+                                    it["beløp"].asDouble(),
+                                    it["orgnummer"].asText(),
+                                )
+                            },
+                        )
+                    },
+                )
 
             mediator.løsning(hendelseId, contextId, UUID.fromString(packet["@id"].asText()), inntektsløsning, context)
         }

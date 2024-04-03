@@ -6,8 +6,8 @@ import java.util.*
 internal class OpprettKoblingTilHendelseCommand(
     private val hendelseId: UUID,
     private val vedtaksperiodeId: UUID,
-    private val vedtakDao: VedtakDao
-): Command {
+    private val vedtakDao: VedtakDao,
+) : Command {
     override fun execute(context: CommandContext): Boolean {
         vedtakDao.opprettKobling(vedtaksperiodeId, hendelseId)
         return true

@@ -1,11 +1,11 @@
 package no.nav.helse.modell.arbeidsforhold
 
-import java.time.LocalDate
-import javax.sql.DataSource
 import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
+import java.time.LocalDate
+import javax.sql.DataSource
 
 class ArbeidsforholdDao(private val dataSource: DataSource) {
     internal fun insertArbeidsforhold(
@@ -14,10 +14,11 @@ class ArbeidsforholdDao(private val dataSource: DataSource) {
         startdato: LocalDate,
         sluttdato: LocalDate?,
         stillingstittel: String,
-        stillingsprosent: Int
-    ): Long = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-        session.insertArbeidsforhold(fødselsnummer, organisasjonsnummer, startdato, sluttdato, stillingstittel, stillingsprosent)
-    }
+        stillingsprosent: Int,
+    ): Long =
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            session.insertArbeidsforhold(fødselsnummer, organisasjonsnummer, startdato, sluttdato, stillingstittel, stillingsprosent)
+        }
 
     private fun Session.insertArbeidsforhold(
         fødselsnummer: String,
@@ -25,7 +26,7 @@ class ArbeidsforholdDao(private val dataSource: DataSource) {
         startdato: LocalDate,
         sluttdato: LocalDate?,
         stillingstittel: String,
-        stillingsprosent: Int
+        stillingsprosent: Int,
     ): Long {
         @Language("PostgreSQL")
         val query = """
@@ -46,14 +47,17 @@ class ArbeidsforholdDao(private val dataSource: DataSource) {
                         "startdato" to startdato,
                         "sluttdato" to sluttdato,
                         "stillingstittel" to stillingstittel,
-                        "stillingsprosent" to stillingsprosent
-                    )
-                ).asUpdateAndReturnGeneratedKey
-            )
+                        "stillingsprosent" to stillingsprosent,
+                    ),
+                ).asUpdateAndReturnGeneratedKey,
+            ),
         )
     }
 
-    fun findArbeidsforhold(fødselsnummer: String, organisasjonsnummer: String): List<ArbeidsforholdDto> =
+    fun findArbeidsforhold(
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+    ): List<ArbeidsforholdDto> =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query = """
@@ -66,8 +70,8 @@ class ArbeidsforholdDao(private val dataSource: DataSource) {
                     query,
                     mapOf(
                         "fodselsnummer" to fødselsnummer.toLong(),
-                        "organisasjonsnummer" to organisasjonsnummer.toLong()
-                    )
+                        "organisasjonsnummer" to organisasjonsnummer.toLong(),
+                    ),
                 ).map { row ->
                     ArbeidsforholdDto(
                         personId = row.long("person_ref"),
@@ -75,16 +79,16 @@ class ArbeidsforholdDao(private val dataSource: DataSource) {
                         startdato = row.localDate("startdato"),
                         sluttdato = row.localDateOrNull("sluttdato"),
                         stillingsprosent = row.int("stillingsprosent"),
-                        stillingstittel = row.string("stillingstittel")
+                        stillingstittel = row.string("stillingstittel"),
                     )
-                }.asList
+                }.asList,
             )
         }
 
     internal fun oppdaterArbeidsforhold(
         fødselsnummer: String,
         organisasjonsnummer: String,
-        arbeidsforhold: List<Arbeidsforholdløsning.Løsning>
+        arbeidsforhold: List<Arbeidsforholdløsning.Løsning>,
     ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         session.transaction { transaction ->
             @Language("PostgreSQL")
@@ -95,21 +99,29 @@ class ArbeidsforholdDao(private val dataSource: DataSource) {
             """
             transaction.run(
                 queryOf(
-                    deleteQuery, mapOf(
+                    deleteQuery,
+                    mapOf(
                         "fodselsnummer" to fødselsnummer.toLong(),
-                        "organisasjonsnummer" to organisasjonsnummer.toLong()
-                    )
-                ).asUpdate
+                        "organisasjonsnummer" to organisasjonsnummer.toLong(),
+                    ),
+                ).asUpdate,
             )
             arbeidsforhold.forEach {
-                transaction.insertArbeidsforhold(fødselsnummer, organisasjonsnummer, it.startdato, it.sluttdato, it.stillingstittel, it.stillingsprosent)
+                transaction.insertArbeidsforhold(
+                    fødselsnummer,
+                    organisasjonsnummer,
+                    it.startdato,
+                    it.sluttdato,
+                    it.stillingstittel,
+                    it.stillingsprosent,
+                )
             }
         }
     }
 
     internal fun findArbeidsforholdSistOppdatert(
         fødselsnummer: String,
-        organisasjonsnummer: String
+        organisasjonsnummer: String,
     ) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = """
@@ -120,13 +132,14 @@ class ArbeidsforholdDao(private val dataSource: DataSource) {
         """
         session.run(
             queryOf(
-                query, mapOf(
+                query,
+                mapOf(
                     "fodselsnummer" to fødselsnummer.toLong(),
-                    "organisasjonsnummer" to organisasjonsnummer.toLong()
-                )
+                    "organisasjonsnummer" to organisasjonsnummer.toLong(),
+                ),
             )
                 .map { row -> row.sqlDate("oppdatert").toLocalDate() }
-                .asSingle
+                .asSingle,
         )
     }
 }

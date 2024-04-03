@@ -74,7 +74,6 @@ enum class Skjonnsfastsettingstype {
     ANNET,
 }
 
-
 data class SkjønnsfastsettingSykepengegrunnlagDto(
     val hendelseId: UUID,
     val fødselsnummer: String,

@@ -1,8 +1,5 @@
 package no.nav.helse.modell
 
-import java.time.LocalDate
-import java.util.UUID
-import javax.sql.DataSource
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -50,6 +47,9 @@ import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDate
 import org.intellij.lang.annotations.Language
+import java.time.LocalDate
+import java.util.UUID
+import javax.sql.DataSource
 
 internal class MeldingDao(private val dataSource: DataSource) {
     internal fun lagre(melding: PersonmeldingOld) {
@@ -57,8 +57,9 @@ internal class MeldingDao(private val dataSource: DataSource) {
             session.transaction { transactionalSession ->
                 transactionalSession.run {
                     lagre(melding)
-                    if (melding is VedtaksperiodemeldingOld)
+                    if (melding is VedtaksperiodemeldingOld) {
                         opprettKobling(melding.vedtaksperiodeId(), melding.id)
+                    }
                 }
             }
         }
@@ -68,9 +69,13 @@ internal class MeldingDao(private val dataSource: DataSource) {
         return sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val statement = """SELECT fodselsnummer FROM hendelse WHERE id = ?"""
-            requireNotNull(session.run(queryOf(statement, meldingId).map {
-                it.long("fodselsnummer").toFødselsnummer()
-            }.asSingle))
+            requireNotNull(
+                session.run(
+                    queryOf(statement, meldingId).map {
+                        it.long("fodselsnummer").toFødselsnummer()
+                    }.asSingle,
+                ),
+            )
         }
     }
 
@@ -82,9 +87,13 @@ internal class MeldingDao(private val dataSource: DataSource) {
                 FROM automatisering_korrigert_soknad aks
                 WHERE vedtaksperiode_id = :vedtaksperiodeId
                 """
-            requireNotNull(session.run(queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).map {
-                it.int("antall")
-            }.asSingle))
+            requireNotNull(
+                session.run(
+                    queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).map {
+                        it.int("antall")
+                    }.asSingle,
+                ),
+            )
         }
     }
 
@@ -96,13 +105,20 @@ internal class MeldingDao(private val dataSource: DataSource) {
                 FROM automatisering_korrigert_soknad aks
                 WHERE hendelse_ref = :hendelseId
                 """
-            requireNotNull(session.run(queryOf(statement, mapOf("hendelseId" to meldingId)).map {
-                it.int("antall") > 0
-            }.asSingle))
+            requireNotNull(
+                session.run(
+                    queryOf(statement, mapOf("hendelseId" to meldingId)).map {
+                        it.int("antall") > 0
+                    }.asSingle,
+                ),
+            )
         }
     }
 
-    internal fun opprettAutomatiseringKorrigertSøknad(vedtaksperiodeId: UUID, meldingId: UUID) {
+    internal fun opprettAutomatiseringKorrigertSøknad(
+        vedtaksperiodeId: UUID,
+        meldingId: UUID,
+    ) {
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val statement = """
@@ -113,7 +129,10 @@ internal class MeldingDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer: String, vedtaksperiodeId: UUID): OverstyringIgangsattKorrigertSøknad? {
+    internal fun sisteOverstyringIgangsattOmKorrigertSøknad(
+        fødselsnummer: String,
+        vedtaksperiodeId: UUID,
+    ): OverstyringIgangsattKorrigertSøknad? {
         return sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val statement = """
@@ -125,24 +144,31 @@ internal class MeldingDao(private val dataSource: DataSource) {
                 ORDER BY h.data ->> '@opprettet' DESC
                 LIMIT 1
                 """
-            session.run(queryOf(statement, mapOf("fodselsnummer" to fødselsnummer.toLong(), "vedtaksperiodeId" to vedtaksperiodeId.toString())).map { row ->
-                row.stringOrNull("data")?.let {
-                    val data = objectMapper.readTree(it)
-                    if (data["årsak"].asText() != "KORRIGERT_SØKNAD") return@let null
+            session.run(
+                queryOf(
+                    statement,
+                    mapOf("fodselsnummer" to fødselsnummer.toLong(), "vedtaksperiodeId" to vedtaksperiodeId.toString()),
+                ).map {
+                        row ->
+                    row.stringOrNull("data")?.let {
+                        val data = objectMapper.readTree(it)
+                        if (data["årsak"].asText() != "KORRIGERT_SØKNAD") return@let null
 
-                    OverstyringIgangsattKorrigertSøknad(
-                        periodeForEndringFom = data["periodeForEndringFom"].asLocalDate(),
-                        meldingId = data["@id"].asText(),
-                        berørtePerioder = data["berørtePerioder"].map { berørtPeriode ->
-                            BerørtPeriode(
-                                vedtaksperiodeId = UUID.fromString(berørtPeriode["vedtaksperiodeId"].asText()),
-                                periodeFom = berørtPeriode["periodeFom"].asLocalDate(),
-                                orgnummer = berørtPeriode["orgnummer"].asText()
-                            )
-                        }
-                    )
-                }
-            }.asSingle)
+                        OverstyringIgangsattKorrigertSøknad(
+                            periodeForEndringFom = data["periodeForEndringFom"].asLocalDate(),
+                            meldingId = data["@id"].asText(),
+                            berørtePerioder =
+                                data["berørtePerioder"].map { berørtPeriode ->
+                                    BerørtPeriode(
+                                        vedtaksperiodeId = UUID.fromString(berørtPeriode["vedtaksperiodeId"].asText()),
+                                        periodeFom = berørtPeriode["periodeFom"].asLocalDate(),
+                                        orgnummer = berørtPeriode["orgnummer"].asText(),
+                                    )
+                                },
+                        )
+                    }
+                }.asSingle,
+            )
         }
     }
 
@@ -162,12 +188,17 @@ internal class MeldingDao(private val dataSource: DataSource) {
         return finnJson(meldingId, GODKJENNING)
     }
 
-    private fun finnJson(meldingId: UUID, meldingtype: Meldingtype): String {
-        return requireNotNull(sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val statement = """SELECT data FROM hendelse WHERE id = ? AND type = ?"""
-            session.run(queryOf(statement, meldingId, meldingtype.name).map { it.string("data") }.asSingle)
-        })
+    private fun finnJson(
+        meldingId: UUID,
+        meldingtype: Meldingtype,
+    ): String {
+        return requireNotNull(
+            sessionOf(dataSource).use { session ->
+                @Language("PostgreSQL")
+                val statement = """SELECT data FROM hendelse WHERE id = ? AND type = ?"""
+                session.run(queryOf(statement, meldingId, meldingtype.name).map { it.string("data") }.asSingle)
+            },
+        )
     }
 
     private fun TransactionalSession.lagre(melding: PersonmeldingOld) {
@@ -183,28 +214,34 @@ internal class MeldingDao(private val dataSource: DataSource) {
                 melding.id,
                 melding.fødselsnummer().toLong(),
                 melding.toJson(),
-                tilMeldingtype(melding).name
-            ).asUpdate
+                tilMeldingtype(melding).name,
+            ).asUpdate,
         )
     }
 
-    private fun TransactionalSession.opprettKobling(vedtaksperiodeId: UUID, meldingId: UUID) {
+    private fun TransactionalSession.opprettKobling(
+        vedtaksperiodeId: UUID,
+        meldingId: UUID,
+    ) {
         @Language("PostgreSQL")
         val koblingStatement = "INSERT INTO vedtaksperiode_hendelse(vedtaksperiode_id, hendelse_ref) VALUES(?,?)"
         run(
             queryOf(
                 koblingStatement,
                 vedtaksperiodeId,
-                meldingId
-            ).asUpdate
+                meldingId,
+            ).asUpdate,
         )
     }
 
-    internal fun finn(id: UUID) = sessionOf(dataSource).use { session ->
-        session.run(queryOf("SELECT type,data FROM hendelse WHERE id = ?", id).map { row ->
-            fraMeldingtype(enumValueOf(row.string("type")), row.string("data"))
-        }.asSingle)
-    }
+    internal fun finn(id: UUID) =
+        sessionOf(dataSource).use { session ->
+            session.run(
+                queryOf("SELECT type,data FROM hendelse WHERE id = ?", id).map { row ->
+                    fraMeldingtype(enumValueOf(row.string("type")), row.string("data"))
+                }.asSingle,
+            )
+        }
 
     private fun fraMeldingtype(
         meldingtype: Meldingtype,
@@ -234,35 +271,49 @@ internal class MeldingDao(private val dataSource: DataSource) {
         }
     }
 
-    private fun tilMeldingtype(melding: PersonmeldingOld) = when (melding) {
-        is AdressebeskyttelseEndret -> ADRESSEBESKYTTELSE_ENDRET
-        is VedtaksperiodeEndret -> VEDTAKSPERIODE_ENDRET
-        is VedtaksperiodeForkastet -> VEDTAKSPERIODE_FORKASTET
-        is Godkjenningsbehov -> GODKJENNING
-        is OverstyringIgangsatt -> OVERSTYRING_IGANGSATT
-        is Saksbehandlerløsning -> SAKSBEHANDLERLØSNING
-        is UtbetalingAnnullert -> UTBETALING_ANNULLERT
-        is OppdaterPersonsnapshot -> OPPDATER_PERSONSNAPSHOT
-        is UtbetalingEndret -> UTBETALING_ENDRET
-        is VedtaksperiodeReberegnet -> VEDTAKSPERIODE_REBEREGNET
-        is GosysOppgaveEndret -> GOSYS_OPPGAVE_ENDRET
-        is EndretEgenAnsattStatus -> ENDRET_EGEN_ANSATT_STATUS
-        is VedtakFattet -> VEDTAK_FATTET
-        is NyeVarsler -> NYE_VARSLER
-        is SøknadSendt -> SØKNAD_SENDT
-        is VedtaksperiodeNyUtbetaling -> VEDTAKSPERIODE_NY_UTBETALING
-        is TilbakedateringBehandlet -> GODKJENT_TILBAKEDATERT_SYKMELDING
-        is BehandlingOpprettet -> BEHANDLING_OPPRETTET
-        is AvsluttetUtenVedtakMessage -> AVSLUTTET_UTEN_VEDTAK
-        else -> throw IllegalArgumentException("ukjent meldingtype: ${melding::class.simpleName}")
-    }
+    private fun tilMeldingtype(melding: PersonmeldingOld) =
+        when (melding) {
+            is AdressebeskyttelseEndret -> ADRESSEBESKYTTELSE_ENDRET
+            is VedtaksperiodeEndret -> VEDTAKSPERIODE_ENDRET
+            is VedtaksperiodeForkastet -> VEDTAKSPERIODE_FORKASTET
+            is Godkjenningsbehov -> GODKJENNING
+            is OverstyringIgangsatt -> OVERSTYRING_IGANGSATT
+            is Saksbehandlerløsning -> SAKSBEHANDLERLØSNING
+            is UtbetalingAnnullert -> UTBETALING_ANNULLERT
+            is OppdaterPersonsnapshot -> OPPDATER_PERSONSNAPSHOT
+            is UtbetalingEndret -> UTBETALING_ENDRET
+            is VedtaksperiodeReberegnet -> VEDTAKSPERIODE_REBEREGNET
+            is GosysOppgaveEndret -> GOSYS_OPPGAVE_ENDRET
+            is EndretEgenAnsattStatus -> ENDRET_EGEN_ANSATT_STATUS
+            is VedtakFattet -> VEDTAK_FATTET
+            is NyeVarsler -> NYE_VARSLER
+            is SøknadSendt -> SØKNAD_SENDT
+            is VedtaksperiodeNyUtbetaling -> VEDTAKSPERIODE_NY_UTBETALING
+            is TilbakedateringBehandlet -> GODKJENT_TILBAKEDATERT_SYKMELDING
+            is BehandlingOpprettet -> BEHANDLING_OPPRETTET
+            is AvsluttetUtenVedtakMessage -> AVSLUTTET_UTEN_VEDTAK
+            else -> throw IllegalArgumentException("ukjent meldingtype: ${melding::class.simpleName}")
+        }
 
     private enum class Meldingtype {
-        ADRESSEBESKYTTELSE_ENDRET, VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING,
-        SAKSBEHANDLERLØSNING, UTBETALING_ANNULLERT, OPPDATER_PERSONSNAPSHOT, UTBETALING_ENDRET,
-        VEDTAKSPERIODE_REBEREGNET, BEHANDLING_OPPRETTET,
-        OVERSTYRING_IGANGSATT, GOSYS_OPPGAVE_ENDRET, ENDRET_EGEN_ANSATT_STATUS, VEDTAK_FATTET,
-        NYE_VARSLER, SØKNAD_SENDT, VEDTAKSPERIODE_NY_UTBETALING,
-        GODKJENT_TILBAKEDATERT_SYKMELDING, AVSLUTTET_UTEN_VEDTAK
+        ADRESSEBESKYTTELSE_ENDRET,
+        VEDTAKSPERIODE_ENDRET,
+        VEDTAKSPERIODE_FORKASTET,
+        GODKJENNING,
+        SAKSBEHANDLERLØSNING,
+        UTBETALING_ANNULLERT,
+        OPPDATER_PERSONSNAPSHOT,
+        UTBETALING_ENDRET,
+        VEDTAKSPERIODE_REBEREGNET,
+        BEHANDLING_OPPRETTET,
+        OVERSTYRING_IGANGSATT,
+        GOSYS_OPPGAVE_ENDRET,
+        ENDRET_EGEN_ANSATT_STATUS,
+        VEDTAK_FATTET,
+        NYE_VARSLER,
+        SØKNAD_SENDT,
+        VEDTAKSPERIODE_NY_UTBETALING,
+        GODKJENT_TILBAKEDATERT_SYKMELDING,
+        AVSLUTTET_UTEN_VEDTAK,
     }
 }

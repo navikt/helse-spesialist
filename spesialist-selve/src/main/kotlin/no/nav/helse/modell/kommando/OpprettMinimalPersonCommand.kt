@@ -6,9 +6,8 @@ import org.slf4j.LoggerFactory
 internal class OpprettMinimalPersonCommand(
     private val fødselsnummer: String,
     private val aktørId: String,
-    private val personDao: PersonDao
+    private val personDao: PersonDao,
 ) : Command {
-
     private companion object {
         private val logg = LoggerFactory.getLogger(OpprettMinimalPersonCommand::class.java)
         private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
@@ -32,7 +31,7 @@ internal class OpprettMinimalPersonCommand(
         sikkerLog.info("Oppretter minimal person for fødselsnummer: $fødselsnummer og aktørId: $aktørId")
         personDao.insertPerson(
             fødselsnummer = fødselsnummer,
-            aktørId = aktørId
+            aktørId = aktørId,
         )
         return true
     }

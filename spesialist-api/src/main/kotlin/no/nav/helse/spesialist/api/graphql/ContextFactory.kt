@@ -7,7 +7,6 @@ import graphql.GraphQLContext
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.request.ApplicationRequest
-import java.util.UUID
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDER_EPOST
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
@@ -18,6 +17,7 @@ import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
@@ -35,19 +35,21 @@ class ContextFactory(
     private val skjermedePersonerSaksbehandlergruppe: UUID,
     private val beslutterSaksbehandlergruppe: UUID,
 ) : GraphQLContextFactory<ApplicationRequest> {
-    override suspend fun generateContext(request: ApplicationRequest): GraphQLContext = mapOf(
-        TILGANGER.key to SaksbehandlerTilganger(
-            gruppetilganger = request.getGrupper(),
-            kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
-            beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
-            skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
-        ),
-        SAKSBEHANDLER_NAVN.key to request.getSaksbehandlerName(),
-        SAKSBEHANDER_EPOST.key to request.getSaksbehanderEpost(),
-        SAKSBEHANDLER_OID.key to request.getSaksbehandlerOid(),
-        SAKSBEHANDLER_IDENT.key to request.getSaksbehandlerIdent(),
-        SAKSBEHANDLER.key to request.saksbehandler()
-    ).toGraphQLContext()
+    override suspend fun generateContext(request: ApplicationRequest): GraphQLContext =
+        mapOf(
+            TILGANGER.key to
+                SaksbehandlerTilganger(
+                    gruppetilganger = request.getGrupper(),
+                    kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
+                    beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
+                    skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
+                ),
+            SAKSBEHANDLER_NAVN.key to request.getSaksbehandlerName(),
+            SAKSBEHANDER_EPOST.key to request.getSaksbehanderEpost(),
+            SAKSBEHANDLER_OID.key to request.getSaksbehandlerOid(),
+            SAKSBEHANDLER_IDENT.key to request.getSaksbehandlerIdent(),
+            SAKSBEHANDLER.key to request.saksbehandler(),
+        ).toGraphQLContext()
 }
 
 private fun ApplicationRequest.getGrupper(): List<UUID> {

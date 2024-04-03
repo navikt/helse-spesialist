@@ -6,5 +6,5 @@ data class SaksbehandlerFraDatabase(
     val epostadresse: String,
     val oid: UUID,
     val navn: String,
-    val ident: String
+    val ident: String,
 )

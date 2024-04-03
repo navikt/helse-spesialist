@@ -1,14 +1,18 @@
 package no.nav.helse.modell.person
 
-import javax.sql.DataSource
 import kotliquery.TransactionalSession
 import kotliquery.sessionOf
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
+import javax.sql.DataSource
 
 internal class PersonRepository(private val dataSource: DataSource) {
     private val personDao = PersonDao(dataSource)
     private val generasjonRepository = GenerasjonRepository(dataSource)
-    fun brukPersonHvisFinnes(fødselsnummer: String, personScope: Person.() -> Unit) {
+
+    fun brukPersonHvisFinnes(
+        fødselsnummer: String,
+        personScope: Person.() -> Unit,
+    ) {
         sessionOf(dataSource).use {
             it.transaction { tx ->
                 val person = tx.finnPerson(fødselsnummer) ?: return

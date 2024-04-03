@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.utbetaling
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+
 enum class Utbetalingsstatus {
     GODKJENT,
     SENDT,
@@ -24,22 +25,23 @@ data class UtbetalingApiDto(
     val arbeidsgiveroppdrag: OppdragApiDto?,
     val personoppdrag: OppdragApiDto?,
     val annullertAvSaksbehandler: AnnullertAvSaksbehandlerApiDto?,
-    val totalbeløp: Int?
+    val totalbeløp: Int?,
 )
 
 data class AnnullertAvSaksbehandlerApiDto(
     val annullertTidspunkt: LocalDateTime,
-    val saksbehandlerNavn: String
+    val saksbehandlerNavn: String,
 )
 
 data class OppdragApiDto(
     val fagsystemId: String,
     val utbetalingslinjer: List<UtbetalingslinjeApiDto>,
-    val mottaker: String // Fødselsnummer eller organisasjonsnummer
+    // Fødselsnummer eller organisasjonsnummer
+    val mottaker: String,
 )
 
 data class UtbetalingslinjeApiDto(
     val fom: LocalDate,
     val tom: LocalDate,
-    val totalbeløp: Int?
+    val totalbeløp: Int?,
 )

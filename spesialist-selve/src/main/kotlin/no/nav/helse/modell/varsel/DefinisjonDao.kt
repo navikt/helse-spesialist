@@ -1,41 +1,44 @@
 package no.nav.helse.modell.varsel
 
-import java.time.LocalDateTime
-import java.util.UUID
-import javax.sql.DataSource
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
+import java.time.LocalDateTime
+import java.util.UUID
+import javax.sql.DataSource
 
 class DefinisjonDao(private val dataSource: DataSource) {
-
     internal fun definisjonFor(definisjonId: UUID): Varseldefinisjon {
         @Language("PostgreSQL")
         val query = "SELECT * FROM api_varseldefinisjon WHERE unik_id = ?;"
 
-        return requireNotNull(sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(
-                    query,
-                    definisjonId
-                ).map(this::mapToDefinisjon).asSingle
-            )
-        })
+        return requireNotNull(
+            sessionOf(dataSource).use { session ->
+                session.run(
+                    queryOf(
+                        query,
+                        definisjonId,
+                    ).map(this::mapToDefinisjon).asSingle,
+                )
+            },
+        )
     }
 
     internal fun sisteDefinisjonFor(varselkode: String): Varseldefinisjon {
         @Language("PostgreSQL")
         val query = "SELECT * FROM api_varseldefinisjon WHERE kode = ? ORDER BY opprettet DESC;"
 
-        return requireNotNull(sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(
-                    query,
-                    varselkode
-                ).map(this::mapToDefinisjon).asSingle
-            )
-        })
+        return requireNotNull(
+            sessionOf(dataSource).use { session ->
+                session.run(
+                    queryOf(
+                        query,
+                        varselkode,
+                    ).map(this::mapToDefinisjon).asSingle,
+                )
+            },
+        )
     }
 
     internal fun lagreDefinisjon(
@@ -64,7 +67,7 @@ class DefinisjonDao(private val dataSource: DataSource) {
             forklaring = row.stringOrNull("forklaring"),
             handling = row.stringOrNull("handling"),
             avviklet = row.boolean("avviklet"),
-            opprettet = row.localDateTime("opprettet")
+            opprettet = row.localDateTime("opprettet"),
         )
     }
 }

@@ -2,7 +2,7 @@ package no.nav.helse.modell.saksbehandler.handlinger
 
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 
-class AvmeldOppgave(oppgaveId: Long): Oppgavehandling(oppgaveId) {
+class AvmeldOppgave(oppgaveId: Long) : Oppgavehandling(oppgaveId) {
     override fun utførAv(saksbehandler: Saksbehandler) {
         oppgave.forsøkAvmelding(saksbehandler)
     }

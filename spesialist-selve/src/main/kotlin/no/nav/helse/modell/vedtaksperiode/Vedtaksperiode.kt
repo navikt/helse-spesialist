@@ -1,18 +1,18 @@
 package no.nav.helse.modell.vedtaksperiode
 
-import java.util.UUID
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.VarselStatusDto
 import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtaksperiode.vedtak.SykepengevedtakBuilder
+import java.util.UUID
 
 internal class Vedtaksperiode private constructor(
     private val vedtaksperiodeId: UUID,
     private val organisasjonsnummer: String,
     private var forkastet: Boolean,
-    generasjoner: List<Generasjon>
+    generasjoner: List<Generasjon>,
 ) {
     private val generasjoner = generasjoner.toMutableList()
     private val gjeldendeGenerasjon get() = generasjoner.last()
@@ -27,7 +27,8 @@ internal class Vedtaksperiode private constructor(
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             forkastet = forkastet,
-            generasjoner = generasjoner.map { it.toDto() })
+            generasjoner = generasjoner.map { it.toDto() },
+        )
     }
 
     internal fun behandleTilbakedateringGodkjent(perioder: List<Periode>) {
@@ -66,7 +67,10 @@ internal class Vedtaksperiode private constructor(
         gjeldendeGenerasjon.håndterVedtakFattet(meldingId)
     }
 
-    internal fun avsluttetUtenVedtak(person: Person, avsluttetUtenVedtak: AvsluttetUtenVedtak) {
+    internal fun avsluttetUtenVedtak(
+        person: Person,
+        avsluttetUtenVedtak: AvsluttetUtenVedtak,
+    ) {
         if (forkastet) return
         val sykepengevedtakBuilder = SykepengevedtakBuilder()
         gjeldendeGenerasjon.avsluttetUtenVedtak(avsluttetUtenVedtak, sykepengevedtakBuilder)
@@ -88,12 +92,18 @@ internal class Vedtaksperiode private constructor(
         varsler.forEach { gjeldendeGenerasjon.håndterNyttVarsel(it, UUID.randomUUID()) }
     }
 
-    internal fun mottaBehandlingsinformasjon(tags: List<String>, spleisBehandlingId: UUID) {
+    internal fun mottaBehandlingsinformasjon(
+        tags: List<String>,
+        spleisBehandlingId: UUID,
+    ) {
         if (forkastet) return
         gjeldendeGenerasjon.oppdaterBehandlingsinformasjon(tags, spleisBehandlingId)
     }
 
-    internal fun nyUtbetaling(meldingId: UUID, utbetalingId: UUID) {
+    internal fun nyUtbetaling(
+        meldingId: UUID,
+        utbetalingId: UUID,
+    ) {
         if (forkastet) return
         gjeldendeGenerasjon.håndterNyUtbetaling(meldingId, utbetalingId)
     }
@@ -103,17 +113,18 @@ internal class Vedtaksperiode private constructor(
             return Vedtaksperiode(
                 vedtaksperiodeId = spleisBehandling.vedtaksperiodeId,
                 organisasjonsnummer = spleisBehandling.organisasjonsnummer,
-                generasjoner = listOf(
-                    Generasjon(
-                        id = UUID.randomUUID(),
-                        vedtaksperiodeId = spleisBehandling.vedtaksperiodeId,
-                        spleisBehandlingId = spleisBehandling.spleisBehandlingId,
-                        fom = spleisBehandling.fom,
-                        tom = spleisBehandling.tom,
-                        skjæringstidspunkt = spleisBehandling.fom // Spleis sender oss ikke skjæringstidspunkt på dette tidspunktet
-                    )
-                ),
-                forkastet = false
+                generasjoner =
+                    listOf(
+                        Generasjon(
+                            id = UUID.randomUUID(),
+                            vedtaksperiodeId = spleisBehandling.vedtaksperiodeId,
+                            spleisBehandlingId = spleisBehandling.spleisBehandlingId,
+                            fom = spleisBehandling.fom,
+                            tom = spleisBehandling.tom,
+                            skjæringstidspunkt = spleisBehandling.fom, // Spleis sender oss ikke skjæringstidspunkt på dette tidspunktet
+                        ),
+                    ),
+                forkastet = false,
             )
         }
 
@@ -128,7 +139,7 @@ internal class Vedtaksperiode private constructor(
                 organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
                 forkastet = forkastet,
-                generasjoner = generasjoner.map { it.tilGenerasjon() }
+                generasjoner = generasjoner.map { it.tilGenerasjon() },
             )
         }
 
@@ -141,29 +152,32 @@ internal class Vedtaksperiode private constructor(
                 skjæringstidspunkt = skjæringstidspunkt,
                 fom = fom,
                 tom = tom,
-                tilstand = when (tilstand) {
-                    TilstandDto.Låst -> Generasjon.Låst
-                    TilstandDto.Ulåst -> Generasjon.Ulåst
-                    TilstandDto.AvsluttetUtenUtbetaling -> Generasjon.AvsluttetUtenUtbetaling
-                    TilstandDto.UtenUtbetalingMåVurderes -> Generasjon.UtenUtbetalingMåVurderes
-                },
+                tilstand =
+                    when (tilstand) {
+                        TilstandDto.Låst -> Generasjon.Låst
+                        TilstandDto.Ulåst -> Generasjon.Ulåst
+                        TilstandDto.AvsluttetUtenUtbetaling -> Generasjon.AvsluttetUtenUtbetaling
+                        TilstandDto.UtenUtbetalingMåVurderes -> Generasjon.UtenUtbetalingMåVurderes
+                    },
                 tags = tags.toList(),
-                varsler = varsler.map { varselDto ->
-                    Varsel(
-                        id = varselDto.id,
-                        varselkode = varselDto.varselkode,
-                        opprettet = varselDto.opprettet,
-                        vedtaksperiodeId = varselDto.vedtaksperiodeId,
-                        status = when (varselDto.status) {
-                            VarselStatusDto.AKTIV -> Varsel.Status.AKTIV
-                            VarselStatusDto.INAKTIV -> Varsel.Status.INAKTIV
-                            VarselStatusDto.GODKJENT -> Varsel.Status.GODKJENT
-                            VarselStatusDto.VURDERT -> Varsel.Status.VURDERT
-                            VarselStatusDto.AVVIST -> Varsel.Status.AVVIST
-                            VarselStatusDto.AVVIKLET -> Varsel.Status.AVVIKLET
-                        }
-                    )
-                }.toSet()
+                varsler =
+                    varsler.map { varselDto ->
+                        Varsel(
+                            id = varselDto.id,
+                            varselkode = varselDto.varselkode,
+                            opprettet = varselDto.opprettet,
+                            vedtaksperiodeId = varselDto.vedtaksperiodeId,
+                            status =
+                                when (varselDto.status) {
+                                    VarselStatusDto.AKTIV -> Varsel.Status.AKTIV
+                                    VarselStatusDto.INAKTIV -> Varsel.Status.INAKTIV
+                                    VarselStatusDto.GODKJENT -> Varsel.Status.GODKJENT
+                                    VarselStatusDto.VURDERT -> Varsel.Status.VURDERT
+                                    VarselStatusDto.AVVIST -> Varsel.Status.AVVIST
+                                    VarselStatusDto.AVVIKLET -> Varsel.Status.AVVIKLET
+                                },
+                        )
+                    }.toSet(),
             )
         }
     }

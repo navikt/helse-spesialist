@@ -1,13 +1,13 @@
 package no.nav.helse.mediator.meldinger.hendelser
 
 import com.fasterxml.jackson.databind.JsonNode
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class VarseldefinisjonMessage(packet: JsonMessage) {
     private val id: UUID = UUID.fromString(packet["gjeldende_definisjon.id"].asText())

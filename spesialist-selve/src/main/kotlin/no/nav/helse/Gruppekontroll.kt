@@ -9,31 +9,37 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.path
-import java.util.UUID
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.spesialist.api.client.AccessTokenClient
+import java.util.UUID
 
 internal interface Gruppekontroll {
-    suspend fun erIGrupper(oid: UUID, gruppeIder: List<UUID>): Boolean
+    suspend fun erIGrupper(
+        oid: UUID,
+        gruppeIder: List<UUID>,
+    ): Boolean
 }
 
 class MsGraphClient(
     private val httpClient: HttpClient,
     private val tokenClient: AccessTokenClient,
     private val graphUrl: String = "https://graph.microsoft.com/v1.0",
-): Gruppekontroll {
-
-    override suspend fun erIGrupper(oid: UUID, gruppeIder: List<UUID>): Boolean {
+) : Gruppekontroll {
+    override suspend fun erIGrupper(
+        oid: UUID,
+        gruppeIder: List<UUID>,
+    ): Boolean {
         val token = tokenClient.hentAccessToken("https://graph.microsoft.com/.default")
-        val response = httpClient.post(graphUrl) {
-            url {
-                path("v1.0/users/$oid/checkMemberGroups")
+        val response =
+            httpClient.post(graphUrl) {
+                url {
+                    path("v1.0/users/$oid/checkMemberGroups")
+                }
+                bearerAuth(token)
+                accept(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
+                setBody(mapOf("groupIds" to gruppeIder.map { it.toString() }))
             }
-            bearerAuth(token)
-            accept(ContentType.Application.Json)
-            contentType(ContentType.Application.Json)
-            setBody(mapOf("groupIds" to gruppeIder.map { it.toString() }))
-        }
 
         val responseNode = objectMapper.readTree(response.bodyAsText())
         val grupper = responseNode["value"].map { it.asUUID() }

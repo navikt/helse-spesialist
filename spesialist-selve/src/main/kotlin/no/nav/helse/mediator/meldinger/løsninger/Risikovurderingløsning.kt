@@ -1,8 +1,6 @@
 package no.nav.helse.mediator.meldinger.løsninger
 
 import com.fasterxml.jackson.databind.JsonNode
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.varsel.Varselkode
@@ -14,6 +12,8 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class Risikovurderingløsning(
     private val vedtaksperiodeId: UUID,
@@ -32,7 +32,7 @@ internal class Risikovurderingløsning(
             opprettet = opprettet,
             kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
             kreverSupersaksbehandler = løsning["funn"].any { it["kreverSupersaksbehandler"].asBoolean() },
-            data = løsning
+            data = løsning,
         )
     }
 
@@ -43,16 +43,17 @@ internal class Risikovurderingløsning(
 
     internal fun arbeidsuførhetsmelding(): String =
         "Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes." +
-                løsning["funn"]
-                    .filter { funn -> funn["kategori"].toList().map(JsonNode::asText).contains("8-4") }
-                    .map { it["beskrivelse"].asText() }
-                    .takeIf { it.isNotEmpty() }
-                    ?.let { "\n" + it.joinToString(" ") }
+            løsning["funn"]
+                .filter { funn -> funn["kategori"].toList().map(JsonNode::asText).contains("8-4") }
+                .map { it["beskrivelse"].asText() }
+                .takeIf { it.isNotEmpty() }
+                ?.let { "\n" + it.joinToString(" ") }
 
     internal fun varselkode(): Varselkode {
-        val riskbeskrivelser = løsning["funn"]
-            .filter { funn -> funn["kategori"].toList().map(JsonNode::asText).contains("8-4") }
-            .map { it["beskrivelse"].asText() }
+        val riskbeskrivelser =
+            løsning["funn"]
+                .filter { funn -> funn["kategori"].toList().map(JsonNode::asText).contains("8-4") }
+                .map { it["beskrivelse"].asText() }
         val feilmelding =
             "Klarte ikke gjøre automatisk 8-4-vurdering p.g.a. teknisk feil. Kan godkjennes hvis alt ser greit ut."
         if (riskbeskrivelser.contains(feilmelding)) return SB_RV_3
@@ -89,7 +90,10 @@ internal class Risikovurderingløsning(
             }.register(this)
         }
 
-        override fun onPacket(packet: JsonMessage, context: MessageContext) {
+        override fun onPacket(
+            packet: JsonMessage,
+            context: MessageContext,
+        ) {
             sikkerLogg.info("Mottok melding RisikovurderingMessage:\n{}", packet.toJson())
             val opprettet = packet["@opprettet"].asLocalDateTime()
             val vedtaksperiodeId = UUID.fromString(packet["Risikovurdering.vedtaksperiodeId"].asText())
@@ -99,19 +103,20 @@ internal class Risikovurderingløsning(
             val løsning = packet["@løsning.Risikovurdering"]
             val kanGodkjennesAutomatisk = løsning["kanGodkjennesAutomatisk"].asBoolean()
 
-            val risikovurdering = Risikovurderingløsning(
-                vedtaksperiodeId = vedtaksperiodeId,
-                opprettet = opprettet,
-                kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
-                løsning = løsning,
-            )
+            val risikovurdering =
+                Risikovurderingløsning(
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    opprettet = opprettet,
+                    kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
+                    løsning = løsning,
+                )
 
             meldingMediator.løsning(
                 hendelseId = hendelseId,
                 contextId = contextId,
                 behovId = UUID.fromString(packet["@id"].asText()),
                 løsning = risikovurdering,
-                context = context
+                context = context,
             )
         }
     }

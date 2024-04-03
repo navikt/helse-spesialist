@@ -1,17 +1,17 @@
 package no.nav.helse.modell.arbeidsforhold.command
 
-import java.time.LocalDate
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 
 internal class OppdaterArbeidsforholdCommand(
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
     private val arbeidsforholdDao: ArbeidsforholdDao,
-    private val førstegangsbehandling: Boolean
+    private val førstegangsbehandling: Boolean,
 ) : Command {
     private companion object {
         private val logg = LoggerFactory.getLogger(OppdaterArbeidsforholdCommand::class.java)
@@ -37,10 +37,9 @@ internal class OppdaterArbeidsforholdCommand(
     }
 
     private fun skalOppdateres(sistOppdatert: LocalDate) =
-         erIkkeOppdatertSiste14Dager(sistOppdatert) || erFørstegangIkkeOppdatertSisteDag(sistOppdatert)
+        erIkkeOppdatertSiste14Dager(sistOppdatert) || erFørstegangIkkeOppdatertSisteDag(sistOppdatert)
 
-    private fun erIkkeOppdatertSiste14Dager(sistOppdatert: LocalDate) =
-         sistOppdatert < LocalDate.now().minusDays(14)
+    private fun erIkkeOppdatertSiste14Dager(sistOppdatert: LocalDate) = sistOppdatert < LocalDate.now().minusDays(14)
 
     private fun erFørstegangIkkeOppdatertSisteDag(sistOppdatert: LocalDate) =
         førstegangsbehandling && sistOppdatert <= LocalDate.now().minusDays(1)
@@ -54,10 +53,11 @@ internal class OppdaterArbeidsforholdCommand(
     private fun trengerMerInformasjon(context: CommandContext): Boolean {
         logg.info("Trenger mer informasjon for å oppdatere arbeidsforhold")
         context.behov(
-            "Arbeidsforhold", mapOf(
+            "Arbeidsforhold",
+            mapOf(
                 "fødselsnummer" to fødselsnummer,
                 "organisasjonsnummer" to organisasjonsnummer,
-            )
+            ),
         )
         return false
     }

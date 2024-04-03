@@ -9,21 +9,21 @@ import io.ktor.server.request.receive
 import io.prometheus.client.Counter
 import io.prometheus.client.Summary
 
-val GraphQLMetrikker = createRouteScopedPlugin("GraphQLMetrikker") {
-    onCallRespond { call ->
-        // call.receive<JsonNode> gjør at ktor ikke klarer å serve GraphQLPlayground-htmlen...
-        if (call.request.httpMethod == HttpMethod.Get) return@onCallRespond
-        (call.receive<JsonNode>()["operationName"]?.textValue() ?: "ukjent").let { operationName ->
-            val elapsed = call.processingTimeMillis()
-            graphQLResponstider.labels(operationName).observe(elapsed.toDouble())
+val GraphQLMetrikker =
+    createRouteScopedPlugin("GraphQLMetrikker") {
+        onCallRespond { call ->
+            // call.receive<JsonNode> gjør at ktor ikke klarer å serve GraphQLPlayground-htmlen...
+            if (call.request.httpMethod == HttpMethod.Get) return@onCallRespond
+            (call.receive<JsonNode>()["operationName"]?.textValue() ?: "ukjent").let { operationName ->
+                val elapsed = call.processingTimeMillis()
+                graphQLResponstider.labels(operationName).observe(elapsed.toDouble())
+            }
         }
     }
-}
 
 private val graphQLResponstider =
     Summary.build("graphql_responstider", "Måler responstider for GraphQL-kall")
         .labelNames("operationName")
         .register()
-
 
 internal val auditLogTeller = Counter.build("auditlog_total", "Teller antall auditlogginnslag").register()

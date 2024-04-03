@@ -16,18 +16,20 @@ import org.slf4j.Logger
 private val ignoredPaths = listOf("/metrics", "/isalive", "/isready")
 
 internal fun Application.requestResponseTracing(logger: Logger) {
-    val httpRequestCounter = Counter.build(
-        "http_requests_total",
-        "Counts the http requests"
-    )
-        .labelNames("method", "code")
-        .register()
+    val httpRequestCounter =
+        Counter.build(
+            "http_requests_total",
+            "Counts the http requests",
+        )
+            .labelNames("method", "code")
+            .register()
 
-    val httpRequestDuration = Histogram.build(
-        "http_request_duration_seconds",
-        "Distribution of http request duration"
-    )
-        .register()
+    val httpRequestDuration =
+        Histogram.build(
+            "http_request_duration_seconds",
+            "Distribution of http request duration",
+        )
+            .register()
 
     intercept(ApplicationCallPipeline.Monitoring) {
         try {
@@ -43,13 +45,16 @@ internal fun Application.requestResponseTracing(logger: Logger) {
     }
 
     sendPipeline.intercept(ApplicationSendPipeline.After) { message ->
-        val status = call.response.status() ?: (when (message) {
-            is OutgoingContent -> message.status
-            is HttpStatusCode -> message
-            else -> null
-        } ?: HttpStatusCode.OK).also { status ->
-            call.response.status(status)
-        }
+        val status =
+            call.response.status() ?: (
+                when (message) {
+                    is OutgoingContent -> message.status
+                    is HttpStatusCode -> message
+                    else -> null
+                } ?: HttpStatusCode.OK
+            ).also { status ->
+                call.response.status(status)
+            }
 
         if (call.request.uri in ignoredPaths) return@intercept
         logger.info("responding with status=${status.value} callId=${call.callId} ")

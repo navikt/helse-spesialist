@@ -1,6 +1,5 @@
 package no.nav.helse.mediator.meldinger
 
-import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
@@ -10,6 +9,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 // I skrivende stund er det kun meldinger der tilbakedateringen er godkjent som
 // kommer til Spesialist, dvs. sendes på rapiden. Andre meldinger filtreres ut i sparkel-appen
@@ -35,20 +35,23 @@ internal class TilbakedateringBehandletRiver(
         }.register(this)
     }
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) {
+    override fun onPacket(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         val hendelseId = UUID.fromString(packet["@id"].asText())
         val sykmeldingId = packet["sykmeldingId"].asText()
         val fødselsnummer = packet["fødselsnummer"].asText()
 
         logg.info(
             "Mottok tilbakedatering_behandlet med {}",
-            StructuredArguments.keyValue("eventId", hendelseId)
+            StructuredArguments.keyValue("eventId", hendelseId),
         )
         sikkerlogg.info(
             "Mottok tilbakedatering_behandlet med {}, {}, {}",
             StructuredArguments.keyValue("hendelseId", hendelseId),
             StructuredArguments.keyValue("sykmeldingId", sykmeldingId),
-            StructuredArguments.keyValue("hendelse", packet.toJson())
+            StructuredArguments.keyValue("hendelse", packet.toJson()),
         )
 
         mediator.tilbakedateringBehandlet(fødselsnummer, TilbakedateringBehandlet(packet), context)

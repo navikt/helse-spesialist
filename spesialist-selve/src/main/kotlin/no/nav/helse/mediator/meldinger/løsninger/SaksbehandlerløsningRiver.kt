@@ -1,7 +1,6 @@
 package no.nav.helse.mediator.meldinger.løsninger
 
 import com.fasterxml.jackson.databind.JsonNode
-import java.util.UUID
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -11,6 +10,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 internal class SaksbehandlerløsningRiver(
     rapidsConnection: RapidsConnection,
@@ -33,11 +33,17 @@ internal class SaksbehandlerløsningRiver(
             }.register(this)
     }
 
-    override fun onError(problems: MessageProblems, context: MessageContext) {
+    override fun onError(
+        problems: MessageProblems,
+        context: MessageContext,
+    ) {
         sikkerLog.error("forstod ikke saksbehandlerløsning:\n${problems.toExtendedReport()}")
     }
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) {
+    override fun onPacket(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         if (UUID.fromString(packet["@id"].asText()) == UUID.fromString("7af5fede-749d-4718-ac91-444996600236")) return
         val fødselsnummer = packet["fødselsnummer"].asText()
         mediator.håndter(fødselsnummer, Saksbehandlerløsning(packet), context)

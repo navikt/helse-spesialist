@@ -1,16 +1,14 @@
 package no.nav.helse.modell.utbetaling
 
+import kotliquery.queryOf
+import kotliquery.sessionOf
+import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import org.intellij.lang.annotations.Language
 
 class UtbetalingDao(private val dataSource: DataSource) {
-
-
     fun erUtbetaltFør(aktørId: String): Boolean {
         @Language("PostgreSQL")
         val statement = """
@@ -28,9 +26,11 @@ class UtbetalingDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val statement = "SELECT id FROM utbetaling_id WHERE utbetaling_id = ? LIMIT 1;"
         return sessionOf(dataSource).use {
-            it.run(queryOf(statement, utbetalingId).map { row ->
-                row.long("id")
-            }.asSingle)
+            it.run(
+                queryOf(statement, utbetalingId).map { row ->
+                    row.long("id")
+                }.asSingle,
+            )
         }
     }
 
@@ -38,7 +38,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
         utbetalingIdRef: Long,
         status: Utbetalingsstatus,
         opprettet: LocalDateTime,
-        json: String
+        json: String,
     ) {
         @Language("PostgreSQL")
         val statement = """
@@ -48,29 +48,31 @@ class UtbetalingDao(private val dataSource: DataSource) {
         sessionOf(dataSource).use {
             it.run(
                 queryOf(
-                    statement, mapOf(
+                    statement,
+                    mapOf(
                         "utbetalingIdRef" to utbetalingIdRef,
                         "status" to status.toString(),
                         "opprettet" to opprettet,
-                        "json" to json
-                    )
-                ).asExecute
+                        "json" to json,
+                    ),
+                ).asExecute,
             )
         }
     }
 
     internal fun erUtbetalingForkastet(utbetalingId: UUID): Boolean {
         @Language("PostgreSQL")
-        val query = """
+        val query =
+            """
             SELECT 1
             FROM utbetaling u
             JOIN utbetaling_id ui ON u.utbetaling_id_ref = ui.id
             WHERE ui.utbetaling_id = :utbetaling_id
             AND status = 'FORKASTET'
-        """.trimIndent()
+            """.trimIndent()
         return sessionOf(dataSource).use { session ->
             session.run(
-                queryOf(query, mapOf("utbetaling_id" to utbetalingId)).map { true }.asSingle
+                queryOf(query, mapOf("utbetaling_id" to utbetalingId)).map { true }.asSingle,
             )
         } ?: false
     }
@@ -84,7 +86,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
         arbeidsgiverFagsystemIdRef: Long,
         personFagsystemIdRef: Long,
         arbeidsgiverbeløp: Int,
-        personbeløp: Int
+        personbeløp: Int,
     ): Long {
         @Language("PostgreSQL")
         val statement = """
@@ -107,7 +109,8 @@ class UtbetalingDao(private val dataSource: DataSource) {
             requireNotNull(
                 it.run(
                     queryOf(
-                        statement, mapOf(
+                        statement,
+                        mapOf(
                             "utbetalingId" to utbetalingId,
                             "fodselsnummer" to fødselsnummer.toLong(),
                             "orgnummer" to orgnummer.toLong(),
@@ -117,16 +120,16 @@ class UtbetalingDao(private val dataSource: DataSource) {
                             "personFagsystemIdRef" to personFagsystemIdRef,
                             "arbeidsgiverbelop" to arbeidsgiverbeløp,
                             "personbelop" to personbeløp,
-                        )
-                    ).asUpdateAndReturnGeneratedKey
-                )
+                        ),
+                    ).asUpdateAndReturnGeneratedKey,
+                ),
             ) { "Kunne ikke opprette utbetaling" }
         }
     }
 
     internal fun nyttOppdrag(
         fagsystemId: String,
-        mottaker: String
+        mottaker: String,
     ): Long? {
         @Language("PostgreSQL")
         val statement = """
@@ -137,11 +140,12 @@ class UtbetalingDao(private val dataSource: DataSource) {
         return sessionOf(dataSource, returnGeneratedKey = true).use {
             it.run(
                 queryOf(
-                    statement, mapOf(
+                    statement,
+                    mapOf(
                         "fagsystemId" to fagsystemId,
-                        "mottaker" to mottaker
-                    )
-                ).asUpdateAndReturnGeneratedKey
+                        "mottaker" to mottaker,
+                    ),
+                ).asUpdateAndReturnGeneratedKey,
             )
         }
     }
@@ -150,7 +154,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
         oppdragId: Long,
         fom: LocalDate,
         tom: LocalDate,
-        totalbeløp: Int?
+        totalbeløp: Int?,
     ) {
         @Language("PostgreSQL")
         val statement = """
@@ -160,18 +164,22 @@ class UtbetalingDao(private val dataSource: DataSource) {
         return sessionOf(dataSource).use {
             it.run(
                 queryOf(
-                    statement, mapOf(
+                    statement,
+                    mapOf(
                         "oppdragIdRef" to oppdragId,
                         "fom" to fom,
                         "tom" to tom,
-                        "totalbelop" to totalbeløp
-                    )
-                ).asExecute
+                        "totalbelop" to totalbeløp,
+                    ),
+                ).asExecute,
             )
         }
     }
 
-    internal fun nyAnnullering(annullertTidspunkt: LocalDateTime, saksbehandlerRef: UUID): Long {
+    internal fun nyAnnullering(
+        annullertTidspunkt: LocalDateTime,
+        saksbehandlerRef: UUID,
+    ): Long {
         @Language("PostgreSQL")
         val statement = """
             INSERT INTO annullert_av_saksbehandler(annullert_tidspunkt, saksbehandler_ref)
@@ -181,17 +189,21 @@ class UtbetalingDao(private val dataSource: DataSource) {
             requireNotNull(
                 it.run(
                     queryOf(
-                        statement, mapOf(
+                        statement,
+                        mapOf(
                             "annullertTidspunkt" to annullertTidspunkt,
-                            "saksbehandlerRef" to saksbehandlerRef
-                        )
-                    ).asUpdateAndReturnGeneratedKey
-                )
+                            "saksbehandlerRef" to saksbehandlerRef,
+                        ),
+                    ).asUpdateAndReturnGeneratedKey,
+                ),
             ) { "Kunne ikke opprette annullering" }
         }
     }
 
-    fun leggTilAnnullertAvSaksbehandler(utbetalingId: UUID, annullertAvSaksbehandlerRef: Long) {
+    fun leggTilAnnullertAvSaksbehandler(
+        utbetalingId: UUID,
+        annullertAvSaksbehandlerRef: Long,
+    ) {
         val utbetalingIdRef = finnUtbetalingIdRef(utbetalingId)
 
         @Language("PostgreSQL")
@@ -204,16 +216,20 @@ class UtbetalingDao(private val dataSource: DataSource) {
         sessionOf(dataSource).use {
             it.run(
                 queryOf(
-                    query, mapOf(
+                    query,
+                    mapOf(
                         "annullertAvSaksbehandlerRef" to annullertAvSaksbehandlerRef,
-                        "utbetalingIdRef" to utbetalingIdRef
-                    )
-                ).asExecute
+                        "utbetalingIdRef" to utbetalingIdRef,
+                    ),
+                ).asExecute,
             )
         }
     }
 
-    internal fun opprettKobling(vedtaksperiodeId: UUID, utbetalingId: UUID) = sessionOf(dataSource).use { session ->
+    internal fun opprettKobling(
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+    ) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val statement = """
             INSERT INTO vedtaksperiode_utbetaling_id(vedtaksperiode_id, utbetaling_id) VALUES (?, ?)
@@ -222,12 +238,14 @@ class UtbetalingDao(private val dataSource: DataSource) {
         session.run(queryOf(statement, vedtaksperiodeId, utbetalingId).asUpdate)
     }
 
-    internal fun fjernKobling(vedtaksperiodeId: UUID, utbetalingId: UUID) =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val statement = "DELETE FROM vedtaksperiode_utbetaling_id WHERE utbetaling_id = ? AND vedtaksperiode_id = ?"
-            session.run(queryOf(statement, utbetalingId, vedtaksperiodeId).asUpdate)
-        }
+    internal fun fjernKobling(
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+    ) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val statement = "DELETE FROM vedtaksperiode_utbetaling_id WHERE utbetaling_id = ? AND vedtaksperiode_id = ?"
+        session.run(queryOf(statement, utbetalingId, vedtaksperiodeId).asUpdate)
+    }
 
     data class TidligereUtbetalingerForVedtaksperiodeDto(
         val utbetalingId: UUID,
@@ -242,14 +260,16 @@ class UtbetalingDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val query = "SELECT arbeidsgiverbeløp, personbeløp, type FROM utbetaling_id u WHERE u.utbetaling_id = :utbetaling_id"
         return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, mapOf("utbetaling_id" to utbetalingId)).map {
-                Utbetaling(
-                    utbetalingId,
-                    it.int("arbeidsgiverbeløp"),
-                    it.int("personbeløp"),
-                    enumValueOf(it.string("type")),
-                )
-            }.asSingle)
+            session.run(
+                queryOf(query, mapOf("utbetaling_id" to utbetalingId)).map {
+                    Utbetaling(
+                        utbetalingId,
+                        it.int("arbeidsgiverbeløp"),
+                        it.int("personbeløp"),
+                        enumValueOf(it.string("type")),
+                    )
+                }.asSingle,
+            )
         }
     }
 
@@ -257,14 +277,16 @@ class UtbetalingDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val query = "SELECT utbetaling_id, arbeidsgiverbeløp, personbeløp, type FROM utbetaling_id u WHERE u.utbetaling_id = (SELECT utbetaling_id FROM oppgave o WHERE o.id = :oppgave_id)"
         return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, mapOf("oppgave_id" to oppgaveId)).map {
-                Utbetaling(
-                    it.uuid("utbetaling_id"),
-                    it.int("arbeidsgiverbeløp"),
-                    it.int("personbeløp"),
-                    enumValueOf(it.string("type")),
-                )
-            }.asSingle)
+            session.run(
+                queryOf(query, mapOf("oppgave_id" to oppgaveId)).map {
+                    Utbetaling(
+                        it.uuid("utbetaling_id"),
+                        it.int("arbeidsgiverbeløp"),
+                        it.int("personbeløp"),
+                        enumValueOf(it.string("type")),
+                    )
+                }.asSingle,
+            )
         }
     }
 
@@ -282,11 +304,13 @@ class UtbetalingDao(private val dataSource: DataSource) {
         return sessionOf(dataSource).use {
             it.run(
                 queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId))
-                    .map { row -> TidligereUtbetalingerForVedtaksperiodeDto(
-                        id = row.int("id"),
-                        utbetalingId = row.uuid("utbetaling_id"),
-                        utbetalingsstatus = Utbetalingsstatus.valueOf(row.string("status"))
-                    )}.asList
+                    .map { row ->
+                        TidligereUtbetalingerForVedtaksperiodeDto(
+                            id = row.int("id"),
+                            utbetalingId = row.uuid("utbetaling_id"),
+                            utbetalingsstatus = Utbetalingsstatus.valueOf(row.string("status")),
+                        )
+                    }.asList,
             )
         }
     }

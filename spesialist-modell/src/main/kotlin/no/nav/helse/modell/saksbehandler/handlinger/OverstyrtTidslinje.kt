@@ -1,7 +1,5 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.modell.saksbehandler.OverstyrtTidslinjeEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinjedag.Companion.byggSubsumsjoner
@@ -11,6 +9,8 @@ import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.SporingOverstyrtTidslinje
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_BEREGNET
+import java.time.LocalDate
+import java.util.UUID
 
 class OverstyrtTidslinje(
     private val id: UUID = UUID.randomUUID(),
@@ -22,28 +22,31 @@ class OverstyrtTidslinje(
     private val begrunnelse: String,
 ) : Overstyring {
     override fun gjelderFødselsnummer(): String = fødselsnummer
+
     override fun utførAv(saksbehandler: Saksbehandler) {
         saksbehandler.håndter(this)
     }
 
     override fun loggnavn(): String = "overstyr_tidslinje"
 
-    fun byggEvent() = OverstyrtTidslinjeEvent(
-        id = id,
-        fødselsnummer = fødselsnummer,
-        aktørId = aktørId,
-        organisasjonsnummer = organisasjonsnummer,
-        dager = dager.map(OverstyrtTidslinjedag::byggEvent),
-    )
+    fun byggEvent() =
+        OverstyrtTidslinjeEvent(
+            id = id,
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            organisasjonsnummer = organisasjonsnummer,
+            dager = dager.map(OverstyrtTidslinjedag::byggEvent),
+        )
 
-    fun toDto() = OverstyrtTidslinjeDto(
-        id = id,
-        aktørId = aktørId,
-        fødselsnummer = fødselsnummer,
-        organisasjonsnummer = organisasjonsnummer,
-        dager = dager.map(OverstyrtTidslinjedag::toDto),
-        begrunnelse = begrunnelse
-    )
+    fun toDto() =
+        OverstyrtTidslinjeDto(
+            id = id,
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            dager = dager.map(OverstyrtTidslinjedag::toDto),
+            begrunnelse = begrunnelse,
+        )
 
     internal fun byggSubsumsjoner(saksbehandlerEpost: String): List<Subsumsjon> {
         return dager.byggSubsumsjoner(
@@ -65,7 +68,6 @@ class OverstyrtTidslinjedag(
     private val fraGrad: Int?,
     private val lovhjemmel: Lovhjemmel?,
 ) {
-
     internal companion object {
         internal fun List<OverstyrtTidslinjedag>.byggSubsumsjoner(
             overstyringId: UUID,
@@ -74,52 +76,59 @@ class OverstyrtTidslinjedag(
             organisasjonsnummer: String,
             begrunnelse: String,
             saksbehandlerEpost: String,
-        ): List<Subsumsjon> = this
-            .mapNotNull { if (it.lovhjemmel != null) it.lovhjemmel to it else null }
-            .groupBy({ it.first }, { it.second })
-            .map { (lovhjemmel, dager) ->
-                Subsumsjon(
-                    lovhjemmel = lovhjemmel,
-                    fødselsnummer = fødselsnummer,
-                    utfall = VILKAR_BEREGNET,
-                    input = mapOf(
-                        "begrunnelseFraSaksbehandler" to begrunnelse,
-                    ),
-                    output = mapOf(
-                        "dager" to dager.map {
+        ): List<Subsumsjon> =
+            this
+                .mapNotNull { if (it.lovhjemmel != null) it.lovhjemmel to it else null }
+                .groupBy({ it.first }, { it.second })
+                .map { (lovhjemmel, dager) ->
+                    Subsumsjon(
+                        lovhjemmel = lovhjemmel,
+                        fødselsnummer = fødselsnummer,
+                        utfall = VILKAR_BEREGNET,
+                        input =
                             mapOf(
-                                "dato" to it.dato,
-                                "type" to it.type,
-                                "fraType" to it.fraType,
-                                "grad" to it.grad,
-                                "fraGrad" to it.fraGrad,
-                            )
-                        }
-                    ),
-                    sporing = SporingOverstyrtTidslinje(
-                        vedtaksperioder = listOf(vedtaksperiodeId),
-                        organisasjonsnummer = listOf(organisasjonsnummer),
-                        saksbehandler = listOf(saksbehandlerEpost),
-                        overstyrtTidslinjeId = overstyringId,
+                                "begrunnelseFraSaksbehandler" to begrunnelse,
+                            ),
+                        output =
+                            mapOf(
+                                "dager" to
+                                    dager.map {
+                                        mapOf(
+                                            "dato" to it.dato,
+                                            "type" to it.type,
+                                            "fraType" to it.fraType,
+                                            "grad" to it.grad,
+                                            "fraGrad" to it.fraGrad,
+                                        )
+                                    },
+                            ),
+                        sporing =
+                            SporingOverstyrtTidslinje(
+                                vedtaksperioder = listOf(vedtaksperiodeId),
+                                organisasjonsnummer = listOf(organisasjonsnummer),
+                                saksbehandler = listOf(saksbehandlerEpost),
+                                overstyrtTidslinjeId = overstyringId,
+                            ),
                     )
-                )
-            }
+                }
     }
 
-    fun byggEvent() = OverstyrtTidslinjeEvent.OverstyrtTidslinjeEventDag(
-        dato = dato,
-        type = type,
-        fraType = fraType,
-        grad = grad,
-        fraGrad = fraGrad,
-    )
+    fun byggEvent() =
+        OverstyrtTidslinjeEvent.OverstyrtTidslinjeEventDag(
+            dato = dato,
+            type = type,
+            fraType = fraType,
+            grad = grad,
+            fraGrad = fraGrad,
+        )
 
-    fun toDto() = OverstyrtTidslinjedagDto(
-        dato = dato,
-        type = type,
-        fraType = fraType,
-        grad = grad,
-        fraGrad = fraGrad,
-        lovhjemmel = lovhjemmel?.toDto()
-    )
+    fun toDto() =
+        OverstyrtTidslinjedagDto(
+            dato = dato,
+            type = type,
+            fraType = fraType,
+            grad = grad,
+            fraGrad = fraGrad,
+            lovhjemmel = lovhjemmel?.toDto(),
+        )
 }

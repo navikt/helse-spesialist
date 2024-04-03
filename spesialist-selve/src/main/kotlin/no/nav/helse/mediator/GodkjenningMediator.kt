@@ -1,7 +1,5 @@
 package no.nav.helse.mediator
 
-import java.time.LocalDateTime
-import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.automatiseringsteller
 import no.nav.helse.automatiskAvvistÅrsakerTeller
@@ -20,6 +18,8 @@ import no.nav.helse.spesialist.api.abonnement.AutomatiskBehandlingUtfall
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class GodkjenningMediator(
     private val vedtakDao: VedtakDao,
@@ -50,19 +50,21 @@ internal class GodkjenningMediator(
             saksbehandlerIdent = saksbehandlerIdent,
             saksbehandlerEpost = saksbehandlerEpost,
             godkjenttidspunkt = godkjenttidspunkt,
-            saksbehandleroverstyringer = saksbehandleroverstyringer
+            saksbehandleroverstyringer = saksbehandleroverstyringer,
         )
         sykefraværstilfelle.håndterGodkjent(saksbehandlerIdent, vedtaksperiodeId, hendelseId)
 
         context.publiser(behov.toJson())
-        context.publiser(behov.lagVedtaksperiodeGodkjentManuelt(
-            vedtaksperiodeId = vedtaksperiodeId,
-            spleisBehandlingId = spleisBehandlingId,
-            fødselsnummer = fødselsnummer,
-            saksbehandler = saksbehandler,
-            beslutter = beslutter,
-            vedtakDao = vedtakDao
-        ).toJson())
+        context.publiser(
+            behov.lagVedtaksperiodeGodkjentManuelt(
+                vedtaksperiodeId = vedtaksperiodeId,
+                spleisBehandlingId = spleisBehandlingId,
+                fødselsnummer = fødselsnummer,
+                saksbehandler = saksbehandler,
+                beslutter = beslutter,
+                vedtakDao = vedtakDao,
+            ).toJson(),
+        )
     }
 
     internal fun saksbehandlerAvvisning(
@@ -89,16 +91,18 @@ internal class GodkjenningMediator(
             årsak = årsak,
             begrunnelser = begrunnelser,
             kommentar = kommentar,
-            saksbehandleroverstyringer = saksbehandleroverstyringer
+            saksbehandleroverstyringer = saksbehandleroverstyringer,
         )
         context.publiser(behov.toJson())
-        context.publiser(behov.lagVedtaksperiodeAvvistManuelt(
-            vedtaksperiodeId = vedtaksperiodeId,
-            spleisBehandlingId = spleisBehandlingId,
-            fødselsnummer = fødselsnummer,
-            saksbehandler = saksbehandler,
-            vedtakDao = vedtakDao
-        ).toJson())
+        context.publiser(
+            behov.lagVedtaksperiodeAvvistManuelt(
+                vedtaksperiodeId = vedtaksperiodeId,
+                spleisBehandlingId = spleisBehandlingId,
+                fødselsnummer = fødselsnummer,
+                saksbehandler = saksbehandler,
+                vedtakDao = vedtakDao,
+            ).toJson(),
+        )
     }
 
     internal fun automatiskUtbetaling(
@@ -111,25 +115,31 @@ internal class GodkjenningMediator(
     ) {
         behov.godkjennAutomatisk()
         context.publiser(behov.toJson())
-        context.publiser(behov.lagVedtaksperiodeGodkjentAutomatisk(
-            vedtaksperiodeId = vedtaksperiodeId,
-            spleisBehandlingId = spleisBehandlingId,
-            fødselsnummer = fødselsnummer,
-            vedtakDao = vedtakDao
-        ).toJson())
+        context.publiser(
+            behov.lagVedtaksperiodeGodkjentAutomatisk(
+                vedtaksperiodeId = vedtaksperiodeId,
+                spleisBehandlingId = spleisBehandlingId,
+                fødselsnummer = fødselsnummer,
+                vedtakDao = vedtakDao,
+            ).toJson(),
+        )
         opptegnelseDao.opprettOpptegnelse(
             fødselsnummer = fødselsnummer,
             payload = AutomatiskBehandlingPayload(hendelseId, AutomatiskBehandlingUtfall.UTBETALT),
-            type = OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV
+            type = OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV,
         )
         automatiseringsteller.inc()
         sikkerLogg.info(
             "Automatisk godkjenning av vedtaksperiode $vedtaksperiodeId for {}",
-            keyValue("fødselsnummer", fødselsnummer)
+            keyValue("fødselsnummer", fødselsnummer),
         )
     }
 
-    internal fun automatiskAvvisning(publiserer: Publiserer, begrunnelser: List<String>, oppgaveId: Long) {
+    internal fun automatiskAvvisning(
+        publiserer: Publiserer,
+        begrunnelser: List<String>,
+        oppgaveId: Long,
+    ) {
         val utbetaling = utbetalingDao.utbetalingFor(oppgaveId) ?: return
         val fødselsnummer = oppgaveDao.finnFødselsnummer(oppgaveId)
         val hendelseId = oppgaveDao.finnGodkjenningsbehov(fødselsnummer)
@@ -141,7 +151,7 @@ internal class GodkjenningMediator(
             begrunnelser = begrunnelser,
             utbetaling = utbetaling,
             hendelseId = hendelseId,
-            spleisBehandlingId = spleisBehandlingId
+            spleisBehandlingId = spleisBehandlingId,
         )
     }
 
@@ -163,7 +173,7 @@ internal class GodkjenningMediator(
             fødselsnummer = fødselsnummer,
             begrunnelser = begrunnelser,
             hendelseId = hendelseId,
-            spleisBehandlingId = spleisBehandlingId
+            spleisBehandlingId = spleisBehandlingId,
         )
     }
 
@@ -178,16 +188,18 @@ internal class GodkjenningMediator(
     ) {
         behov.avvisAutomatisk(begrunnelser)
         publiserer.publiser(behov.toJson())
-        publiserer.publiser(behov.lagVedtaksperiodeAvvistAutomatisk(
-            vedtaksperiodeId = vedtaksperiodeId,
-            spleisBehandlingId = spleisBehandlingId,
-            fødselsnummer = fødselsnummer,
-            vedtakDao = vedtakDao
-        ).toJson())
+        publiserer.publiser(
+            behov.lagVedtaksperiodeAvvistAutomatisk(
+                vedtaksperiodeId = vedtaksperiodeId,
+                spleisBehandlingId = spleisBehandlingId,
+                fødselsnummer = fødselsnummer,
+                vedtakDao = vedtakDao,
+            ).toJson(),
+        )
         opptegnelseDao.opprettOpptegnelse(
             fødselsnummer = fødselsnummer,
             payload = AutomatiskBehandlingPayload(hendelseId, AutomatiskBehandlingUtfall.AVVIST),
-            type = OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV
+            type = OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV,
         )
 
         begrunnelser.forEach { automatiskAvvistÅrsakerTeller.labels(it).inc() }

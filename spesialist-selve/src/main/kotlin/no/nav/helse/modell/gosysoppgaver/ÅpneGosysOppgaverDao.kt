@@ -21,9 +21,9 @@ internal class ÅpneGosysOppgaverDao(val dataSource: DataSource) {
                         "fodselsnummer" to åpneGosysOppgaver.fødselsnummer.toLong(),
                         "antall" to åpneGosysOppgaver.antall,
                         "oppslag_feilet" to åpneGosysOppgaver.oppslagFeilet,
-                        "opprettet" to åpneGosysOppgaver.opprettet
-                    )
-                ).asExecute
+                        "opprettet" to åpneGosysOppgaver.opprettet,
+                    ),
+                ).asExecute,
             )
         }
     }
@@ -41,7 +41,7 @@ internal class ÅpneGosysOppgaverDao(val dataSource: DataSource) {
             session.run(
                 queryOf(query, fødselsnummer.toLong())
                     .map { it.intOrNull("antall") }
-                    .asSingle
+                    .asSingle,
             )
         }
     }

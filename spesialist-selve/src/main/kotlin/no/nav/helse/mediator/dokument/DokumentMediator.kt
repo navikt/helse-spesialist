@@ -1,7 +1,6 @@
 package no.nav.helse.mediator.dokument
 
 import com.fasterxml.jackson.databind.JsonNode
-import java.util.UUID
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments
@@ -12,6 +11,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spesialist.api.Dokumenthåndterer
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 class DokumentMediator(
     private val dokumentDao: DokumentDao,
@@ -22,17 +22,22 @@ class DokumentMediator(
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    override fun håndter(fødselsnummer: String, dokumentId: UUID, dokumentType: String): JsonNode {
+    override fun håndter(
+        fødselsnummer: String,
+        dokumentId: UUID,
+        dokumentType: String,
+    ): JsonNode {
         return dokumentDao.hent(fødselsnummer, dokumentId).let { dokument ->
             val erTom = dokument?.size() == 0
             val error = dokument?.path("error")?.takeUnless { it.isMissingOrNull() }?.asInt()
             if (dokument == null || erTom || (error != null && error != 404)) {
                 sendHentDokument(fødselsnummer, dokumentId, dokumentType)
 
-                val response = runBlocking {
-                    delay(100)
-                    hentDokument(fødselsnummer, dokumentId, retries)
-                }
+                val response =
+                    runBlocking {
+                        delay(100)
+                        hentDokument(fødselsnummer, dokumentId, retries)
+                    }
                 return@let response
             }
 
@@ -40,31 +45,40 @@ class DokumentMediator(
         }
     }
 
-    private suspend fun hentDokument(fødselsnummer: String, dokumentId: UUID, retries: Int): JsonNode {
+    private suspend fun hentDokument(
+        fødselsnummer: String,
+        dokumentId: UUID,
+        retries: Int,
+    ): JsonNode {
         if (retries == 0) return objectMapper.createObjectNode().put("error", 408)
 
-        val response = runBlocking {
-            val dokument = dokumentDao.hent(fødselsnummer, dokumentId)
-            if (dokument == null) {
-                delay(100)
-                hentDokument(fødselsnummer, dokumentId, retries - 1)
-            } else {
-                return@runBlocking dokument
+        val response =
+            runBlocking {
+                val dokument = dokumentDao.hent(fødselsnummer, dokumentId)
+                if (dokument == null) {
+                    delay(100)
+                    hentDokument(fødselsnummer, dokumentId, retries - 1)
+                } else {
+                    return@runBlocking dokument
+                }
             }
-        }
         return response
     }
 
     private fun sendHentDokument(
-        fødselsnummer: String, dokumentId: UUID, dokumentType: String
+        fødselsnummer: String,
+        dokumentId: UUID,
+        dokumentType: String,
     ) {
-        val message = JsonMessage.newMessage(
-            "hent-dokument", mapOf(
-                "fødselsnummer" to fødselsnummer,
-                "dokumentId" to dokumentId,
-                "dokumentType" to dokumentType
+        val message =
+            JsonMessage.newMessage(
+                "hent-dokument",
+                mapOf(
+                    "fødselsnummer" to fødselsnummer,
+                    "dokumentId" to dokumentId,
+                    "dokumentType" to dokumentType,
+                ),
             )
-        )
         sikkerlogg.info(
             "Publiserer hent-dokument med {}, {}",
             StructuredArguments.kv("dokumentId", dokumentId),

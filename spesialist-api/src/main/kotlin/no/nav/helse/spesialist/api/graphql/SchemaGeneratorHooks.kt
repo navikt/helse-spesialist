@@ -15,32 +15,39 @@ import kotlin.reflect.KType
 /**
  * Støttekode for å kunne bruke UUID som type, i stedet for å måtte ha den som String.
  */
-internal val schemaGeneratorHooks = object : SchemaGeneratorHooks {
-    override fun willGenerateGraphQLType(type: KType): GraphQLType? = when (type.classifier as? KClass<*>) {
-        UUID::class -> graphQLUUID
-        else -> null
+internal val schemaGeneratorHooks =
+    object : SchemaGeneratorHooks {
+        override fun willGenerateGraphQLType(type: KType): GraphQLType? =
+            when (type.classifier as? KClass<*>) {
+                UUID::class -> graphQLUUID
+                else -> null
+            }
     }
-}
 
-private val graphQLUUID: GraphQLScalarType = GraphQLScalarType.newScalar()
-    .name(UUID::class.simpleName)
-    .description(UUID::class.toString())
-    .coercing(UuidCoercing)
-    .build()
+private val graphQLUUID: GraphQLScalarType =
+    GraphQLScalarType.newScalar()
+        .name(UUID::class.simpleName)
+        .description(UUID::class.toString())
+        .coercing(UuidCoercing)
+        .build()
 
 private object UuidCoercing : Coercing<UUID, String> {
+    override fun serialize(
+        dataFetcherResult: Any,
+        graphQLContext: GraphQLContext,
+        locale: Locale,
+    ) = dataFetcherResult.toString()
 
-    override fun serialize(dataFetcherResult: Any, graphQLContext: GraphQLContext, locale: Locale) =
-        dataFetcherResult.toString()
-
-    override fun parseValue(input: Any, graphQLContext: GraphQLContext, locale: Locale): UUID =
-        UUID.fromString(serialize(input, graphQLContext, locale))
+    override fun parseValue(
+        input: Any,
+        graphQLContext: GraphQLContext,
+        locale: Locale,
+    ): UUID = UUID.fromString(serialize(input, graphQLContext, locale))
 
     override fun parseLiteral(
         input: Value<*>,
         variables: CoercedVariables,
         graphQLContext: GraphQLContext,
         locale: Locale,
-    ): UUID =
-        UUID.fromString(serialize(input, graphQLContext, locale))
+    ): UUID = UUID.fromString(serialize(input, graphQLContext, locale))
 }

@@ -9,7 +9,7 @@ internal class PersisterVedtaksperiodetypeCommand(
     private val vedtaksperiodeId: UUID,
     private val vedtaksperiodetype: Periodetype,
     private val inntektskilde: Inntektskilde,
-    private val vedtakDao: VedtakDao
+    private val vedtakDao: VedtakDao,
 ) :
     Command {
     override fun execute(context: CommandContext): Boolean {
