@@ -396,6 +396,14 @@ internal class Generasjon private constructor(
         ) {
             generasjon.nyTilstand(this, UtenUtbetalingMåVurderes, hendelseId)
         }
+
+        override fun avsluttetUtenVedtak(
+            generasjon: Generasjon,
+            sykepengevedtakBuilder: SykepengevedtakBuilder,
+        ) {
+            sikkerlogg.warn("Spesialist mottar avsluttet_uten_vedtak når den allerede er i tilstand AvsluttetUtenUtbetaling")
+            generasjon.supplerAvsluttetUtenVedtak(sykepengevedtakBuilder)
+        }
     }
 
     internal data object UtenUtbetalingMåVurderes : Tilstand {
@@ -421,6 +429,7 @@ internal class Generasjon private constructor(
             generasjon: Generasjon,
             sykepengevedtakBuilder: SykepengevedtakBuilder,
         ) {
+            sikkerlogg.warn("Spesialist mottar avsluttet_uten_vedtak når den allerede er i tilstand UtenUtbetalingMåVurderes")
             generasjon.supplerAvsluttetUtenVedtak(sykepengevedtakBuilder)
         }
     }

@@ -325,7 +325,7 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
     }
 
     @Test
-    fun `kan motta avsluttet uten utbetaling i IngenUtbetalingMåVurderes`() {
+    fun `kan motta avsluttet_uten_vedtak i IngenUtbetalingMåVurderes`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjonMedVarsel(vedtaksperiodeId = vedtaksperiodeId)
         generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
