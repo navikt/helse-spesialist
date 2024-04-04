@@ -63,6 +63,7 @@ import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
+import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovCommand
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.objectMapper
@@ -547,7 +548,7 @@ internal class MeldingMediator(
         kjøretidMs: Int,
         contextId: UUID,
     ) {
-        if (hendelsenavn == Godkjenningsbehov::class.simpleName) {
+        if (hendelsenavn == GodkjenningsbehovCommand::class.simpleName) {
             val utfall: GodkjenningsbehovUtfall = metrikkDao.finnUtfallForGodkjenningsbehov(contextId)
             registrerTidsbrukForGodkjenningsbehov(utfall, kjøretidMs)
         }

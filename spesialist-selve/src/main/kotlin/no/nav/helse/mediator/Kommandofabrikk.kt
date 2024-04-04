@@ -508,7 +508,7 @@ internal class Kommandofabrikk(
         kjøretidMs: Int,
         contextId: UUID,
     ) {
-        if (hendelsenavn == Godkjenningsbehov::class.simpleName) {
+        if (hendelsenavn == GodkjenningsbehovCommand::class.simpleName) {
             val utfall: GodkjenningsbehovUtfall = metrikkDao.finnUtfallForGodkjenningsbehov(contextId)
             registrerTidsbrukForGodkjenningsbehov(utfall, kjøretidMs)
         }
