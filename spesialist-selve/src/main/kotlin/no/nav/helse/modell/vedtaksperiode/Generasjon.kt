@@ -416,6 +416,13 @@ internal class Generasjon private constructor(
         ) {
             vedtaksperiode.nyGenerasjon(generasjon.nyBehandling(spleisBehandling.spleisBehandlingId))
         }
+
+        override fun avsluttetUtenVedtak(
+            generasjon: Generasjon,
+            sykepengevedtakBuilder: SykepengevedtakBuilder,
+        ) {
+            generasjon.supplerAvsluttetUtenVedtak(sykepengevedtakBuilder)
+        }
     }
 
     override fun toString(): String = "generasjonId=$id, vedtaksperiodeId=$vedtaksperiodeId"

@@ -19,6 +19,8 @@ import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjon
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverSkjønnsfastsettelse
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverTotrinnsvurdering
 import no.nav.helse.modell.vedtaksperiode.Periode.Companion.til
+import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
+import no.nav.helse.modell.vedtaksperiode.vedtak.SykepengevedtakBuilder
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -28,6 +30,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -319,6 +322,18 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
         assertEquals(30.januar, dto.tom)
         assertEquals(2.januar, dto.skjæringstidspunkt)
         assertEquals(behandlingId, dto.spleisBehandlingId)
+    }
+
+    @Test
+    fun `kan motta avsluttet uten utbetaling i IngenUtbetalingMåVurderes`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjon = generasjonMedVarsel(vedtaksperiodeId = vedtaksperiodeId)
+        generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
+        assertEquals(TilstandDto.UtenUtbetalingMåVurderes, generasjon.toDto().tilstand)
+        assertDoesNotThrow {
+            generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
+        }
+        assertEquals(TilstandDto.UtenUtbetalingMåVurderes, generasjon.toDto().tilstand)
     }
 
     @Test
