@@ -11,7 +11,7 @@ val mockkVersion = "1.13.9"
 val postgresqlVersion = "42.7.2"
 
 plugins {
-    kotlin("jvm") version "1.9.22"
+    kotlin("jvm") version "1.9.23"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
 }
 
