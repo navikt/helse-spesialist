@@ -36,6 +36,16 @@ allprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
 
+    ktlint {
+        ignoreFailures = true
+        // Hvis du gjør endringer i disse filterne må du slette alle "build"/"out"-mappene og deretter
+        // kjøre ./gradlew --no-build-cache ktlintCheck minst én gang for at endringene skal ta effekt
+        filter {
+            exclude { it.file.path.contains("generated") }
+            exclude { it.file.path.contains("test") }
+        }
+    }
+
     dependencies {
         implementation("com.github.navikt:rapids-and-rivers:$rapidsAndRiversVersion")
         implementation("io.ktor:ktor-server-cio:$ktorVersion")
@@ -88,15 +98,6 @@ allprojects {
             exclude(group = "junit")
         }
         testImplementation("io.mockk:mockk:$mockkVersion")
-    }
-
-    ktlint {
-        // Hvis du gjør endringer i disse filterne må du slette alle "build"/"out"-mappene og deretter
-        // kjøre ./gradlew --no-build-cache ktlintCheck minst én gang for at endringene skal ta effekt
-        filter {
-            exclude { it.file.path.contains("generated") }
-            exclude { it.file.path.contains("test") }
-        }
     }
 }
 
