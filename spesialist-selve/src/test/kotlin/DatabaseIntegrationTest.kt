@@ -312,7 +312,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             UUID.randomUUID(),
             1.januar,
             Periode(1.januar, 31.januar),
-            Generasjon.Ulåst
+            Generasjon.Åpen
         )
     }
 

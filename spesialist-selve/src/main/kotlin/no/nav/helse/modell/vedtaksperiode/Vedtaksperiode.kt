@@ -156,7 +156,7 @@ internal class Vedtaksperiode private constructor(
                 tilstand =
                     when (tilstand) {
                         TilstandDto.Låst -> Generasjon.Låst
-                        TilstandDto.Ulåst -> Generasjon.Ulåst
+                        TilstandDto.Åpen -> Generasjon.Åpen
                         TilstandDto.AvsluttetUtenUtbetaling -> Generasjon.AvsluttetUtenUtbetaling
                         TilstandDto.UtenUtbetalingMåVurderes -> Generasjon.UtenUtbetalingMåVurderes
                     },

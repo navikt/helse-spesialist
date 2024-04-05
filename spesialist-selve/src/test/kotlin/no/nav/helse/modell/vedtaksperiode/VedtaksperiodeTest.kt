@@ -62,7 +62,7 @@ class VedtaksperiodeTest {
         vedtaksperiode.nySpleisBehandling(nySpleisBehandling(vedtaksperiodeId))
         val generasjoner = vedtaksperiode.toDto().generasjoner
         val nyGjeldendeGenerasjon = generasjoner.last()
-        assertEquals(TilstandDto.Ulåst, nyGjeldendeGenerasjon.tilstand)
+        assertEquals(TilstandDto.Åpen, nyGjeldendeGenerasjon.tilstand)
         assertEquals(2, generasjoner.size)
     }
     @Test
@@ -73,7 +73,7 @@ class VedtaksperiodeTest {
         vedtaksperiode.nySpleisBehandling(nySpleisBehandling(vedtaksperiodeId))
         val generasjoner = vedtaksperiode.toDto().generasjoner
         val nyGjeldendeGenerasjon = generasjoner.last()
-        assertEquals(TilstandDto.Ulåst, nyGjeldendeGenerasjon.tilstand)
+        assertEquals(TilstandDto.Åpen, nyGjeldendeGenerasjon.tilstand)
         assertEquals(2, generasjoner.size)
     }
 

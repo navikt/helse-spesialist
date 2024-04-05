@@ -49,7 +49,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
                             vedtaksperiodeId = VEDTAKSPERIODE,
                             forkastet = false,
                             generasjoner = listOf(
-                                GenerasjonDto(UUID.randomUUID(), VEDTAKSPERIODE, null, UUID.randomUUID(), 1.januar, 1.januar, 31.januar, TilstandDto.Ulåst, emptyList(), emptyList())
+                                GenerasjonDto(UUID.randomUUID(), VEDTAKSPERIODE, null, UUID.randomUUID(), 1.januar, 1.januar, 31.januar, TilstandDto.Åpen, emptyList(), emptyList())
                             )
                         )
                     )
@@ -84,7 +84,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
                             vedtaksperiodeId = VEDTAKSPERIODE,
                             forkastet = true,
                             generasjoner = listOf(
-                                GenerasjonDto(UUID.randomUUID(), VEDTAKSPERIODE, null, UUID.randomUUID(), 1.januar, 1.januar, 31.januar, TilstandDto.Ulåst, emptyList(), emptyList())
+                                GenerasjonDto(UUID.randomUUID(), VEDTAKSPERIODE, null, UUID.randomUUID(), 1.januar, 1.januar, 31.januar, TilstandDto.Åpen, emptyList(), emptyList())
                             )
                         )
                     )

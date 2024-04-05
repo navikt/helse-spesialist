@@ -28,7 +28,7 @@ class GenerasjonBuilderTest : AbstractDatabaseTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val varselId = UUID.randomUUID()
         val opprettet = LocalDateTime.now()
-        generasjonDao.opprettFor(generasjonId, vedtaksperiodeId, UUID.randomUUID(), 1.januar, 1.januar til 31.januar, Generasjon.Ulåst)
+        generasjonDao.opprettFor(generasjonId, vedtaksperiodeId, UUID.randomUUID(), 1.januar, 1.januar til 31.januar, Generasjon.Åpen)
         varselRepository.varselOpprettet(varselId, vedtaksperiodeId, generasjonId, "SB_EX_1", opprettet)
         val builder = GenerasjonBuilder(vedtaksperiodeId)
         val vedtaksperiode = builder.build(generasjonRepository, varselRepository)
@@ -44,7 +44,7 @@ class GenerasjonBuilderTest : AbstractDatabaseTest() {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val varselId = UUID.randomUUID()
-        generasjonDao.opprettFor(generasjonId, vedtaksperiodeId, UUID.randomUUID(), 1.januar, 1.januar til 31.januar, Generasjon.Ulåst)
+        generasjonDao.opprettFor(generasjonId, vedtaksperiodeId, UUID.randomUUID(), 1.januar, 1.januar til 31.januar, Generasjon.Åpen)
         val builder = GenerasjonBuilder(vedtaksperiodeId)
         val generasjon = builder.build(generasjonRepository, varselRepository)
         listOf(generasjon).håndterNyttVarsel(
