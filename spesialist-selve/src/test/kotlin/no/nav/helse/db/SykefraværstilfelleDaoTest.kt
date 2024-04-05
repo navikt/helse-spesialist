@@ -59,7 +59,7 @@ internal class SykefraværstilfelleDaoTest : DatabaseIntegrationTest() {
         opprettSaksbehandler()
         val hendelseId = UUID.randomUUID()
         testhendelse(hendelseId)
-        val tidspunkt = LocalDateTime.now()
+        val tidspunkt = LocalDateTime.now().withNano(0)
         overstyringDao.persisterSkjønnsfastsettingSykepengegrunnlag(
             skjønnsfastsattSykepengegrunnlag =
                 skjønnsfastsattSykepengegrunnlag(
@@ -147,7 +147,7 @@ internal class SykefraværstilfelleDaoTest : DatabaseIntegrationTest() {
         val hendelseId2 = UUID.randomUUID()
         testhendelse(hendelseId1)
         testhendelse(hendelseId2)
-        val tidspunkt = LocalDateTime.now()
+        val tidspunkt = LocalDateTime.now().withNano(0)
         overstyringDao.persisterSkjønnsfastsettingSykepengegrunnlag(
             skjønnsfastsattSykepengegrunnlag(
                 opprettet = tidspunkt,
