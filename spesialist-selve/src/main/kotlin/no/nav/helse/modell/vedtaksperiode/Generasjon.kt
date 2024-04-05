@@ -417,20 +417,21 @@ internal class Generasjon private constructor(
             generasjon.nyTilstand(this, AvsluttetUtenUtbetaling, hendelseId)
         }
 
-        override fun nySpleisBehandling(
-            generasjon: Generasjon,
-            vedtaksperiode: Vedtaksperiode,
-            spleisBehandling: SpleisBehandling,
-        ) {
-            vedtaksperiode.nyGenerasjon(generasjon.nyBehandling(spleisBehandling.spleisBehandlingId))
-        }
-
         override fun avsluttetUtenVedtak(
             generasjon: Generasjon,
             sykepengevedtakBuilder: SykepengevedtakBuilder,
         ) {
             sikkerlogg.warn("Spesialist mottar avsluttet_uten_vedtak når den allerede er i tilstand UtenUtbetalingMåVurderes")
             generasjon.supplerAvsluttetUtenVedtak(sykepengevedtakBuilder)
+        }
+
+        override fun nySpleisBehandling(
+            generasjon: Generasjon,
+            vedtaksperiode: Vedtaksperiode,
+            spleisBehandling: SpleisBehandling,
+        ) {
+            vedtaksperiode.nyGenerasjon(generasjon.nyBehandling(spleisBehandling.spleisBehandlingId))
+            generasjon.nyTilstand(this, AvsluttetUtenUtbetaling, UUID.randomUUID())
         }
     }
 

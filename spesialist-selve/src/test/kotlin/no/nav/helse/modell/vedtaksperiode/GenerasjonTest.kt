@@ -1,5 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
+import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
@@ -334,6 +335,18 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
             generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
         }
         assertEquals(TilstandDto.UtenUtbetalingMåVurderes, generasjon.toDto().tilstand)
+    }
+
+    @Test
+    fun `bytter tilstand ved mottak av ny behandling i IngenUtbetalingMåVurderes`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjon = generasjonMedVarsel(vedtaksperiodeId = vedtaksperiodeId)
+        generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
+        generasjon.nySpleisBehandling(
+            mockk(relaxed = true),
+            SpleisBehandling("9878654321", vedtaksperiodeId, UUID.randomUUID(), 1.januar, 31.januar),
+        )
+        assertEquals(TilstandDto.AvsluttetUtenUtbetaling, generasjon.toDto().tilstand)
     }
 
     @Test
