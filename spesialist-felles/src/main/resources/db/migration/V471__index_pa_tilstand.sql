@@ -1,0 +1,1 @@
+CREATE index ON selve_vedtaksperiode_generasjon(tilstand);
