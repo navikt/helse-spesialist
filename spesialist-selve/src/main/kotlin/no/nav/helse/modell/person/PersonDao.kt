@@ -39,6 +39,7 @@ internal class PersonDao(private val dataSource: DataSource) {
                         aktørId = row.long("aktor_id").toString(),
                         fødselsnummer = row.long("fodselsnummer").toFødselsnummer(),
                         vedtaksperioder = emptyList(),
+                        skjønnsfastsatteSykepengegrunnlag = emptyList(),
                     )
                 }
                 .asSingle,

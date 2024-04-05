@@ -3,7 +3,7 @@ package no.nav.helse.modell.vedtaksperiode.vedtak
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.januar
-import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastattSykepengegrunnlag
+import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.sykefraværstilfelle.Skjønnsfastsettingstype
 import no.nav.helse.modell.sykefraværstilfelle.Skjønnsfastsettingsårsak
 import no.nav.helse.modell.vedtaksperiode.vedtak.Faktatype.ETTER_HOVEDREGEL
@@ -116,7 +116,7 @@ class SykepengevedtakBuilderTest {
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_SKJØNN))
-            .skjønnsfastsattSykepengegrunnlag(SkjønnsfastattSykepengegrunnlag(Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT, Skjønnsfastsettingsårsak.ANDRE_AVSNITT, skjæringstidspunkt, "Mal", "Fritekst", "Konklusjon", LocalDateTime.now()))
+            .skjønnsfastsattSykepengegrunnlag(SkjønnsfastsattSykepengegrunnlag(Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT, Skjønnsfastsettingsårsak.ANDRE_AVSNITT, skjæringstidspunkt, "Mal", "Fritekst", "Konklusjon", LocalDateTime.now()))
             .tags(listOf("IngenNyArbeidsgiverperiode"))
 
         val utkast = builder.build()

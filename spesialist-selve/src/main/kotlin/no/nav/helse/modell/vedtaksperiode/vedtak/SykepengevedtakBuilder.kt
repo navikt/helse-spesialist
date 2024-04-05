@@ -1,6 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode.vedtak
 
-import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastattSykepengegrunnlag
+import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.sykefraværstilfelle.Skjønnsfastsettingstype
 import no.nav.helse.modell.sykefraværstilfelle.Skjønnsfastsettingsårsak
 import java.time.LocalDate
@@ -26,7 +26,7 @@ internal class SykepengevedtakBuilder {
     private lateinit var vedtakFattetTidspunkt: LocalDateTime
     private var utbetalingId: UUID? = null
     private var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta? = null
-    private var skjønnsfastsattSykepengegrunnlag: SkjønnsfastattSykepengegrunnlag? = null
+    private var skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlag? = null
     private var skjønnsfastsettingopplysninger: SkjønnsfastsettingopplysningerDto? = null
     private val tags: MutableList<String> = mutableListOf()
 
@@ -71,7 +71,7 @@ internal class SykepengevedtakBuilder {
             this.sykepengegrunnlagsfakta = sykepengegrunnlagsfakta
         }
 
-    internal fun skjønnsfastsattSykepengegrunnlag(skjønnsfastsattSykepengegrunnlag: SkjønnsfastattSykepengegrunnlag) =
+    internal fun skjønnsfastsattSykepengegrunnlag(skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlag) =
         apply {
             this.skjønnsfastsattSykepengegrunnlag = skjønnsfastsattSykepengegrunnlag
             skjønnsfastsattSykepengegrunnlag.byggVedtak(this)

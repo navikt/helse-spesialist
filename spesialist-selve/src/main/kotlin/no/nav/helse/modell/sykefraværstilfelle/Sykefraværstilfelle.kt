@@ -1,7 +1,7 @@
 package no.nav.helse.modell.sykefraværstilfelle
 
 import no.nav.helse.modell.person.PersonObserver
-import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastattSykepengegrunnlag.Companion.sortert
+import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastsattSykepengegrunnlag.Companion.sortert
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.deaktiver
@@ -22,7 +22,7 @@ internal class Sykefraværstilfelle(
     private val fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
     private val gjeldendeGenerasjoner: List<Generasjon>,
-    skjønnsfastatteSykepengegrunnlag: List<SkjønnsfastattSykepengegrunnlag>,
+    skjønnsfastatteSykepengegrunnlag: List<SkjønnsfastsattSykepengegrunnlag>,
 ) {
     init {
         check(gjeldendeGenerasjoner.isNotEmpty()) { "Kan ikke opprette et sykefraværstilfelle uten generasjoner" }
