@@ -120,7 +120,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
         val query =
             """
             INSERT INTO selve_vedtaksperiode_generasjon (unik_id, vedtaksperiode_id, utbetaling_id, spleis_behandling_id, opprettet_tidspunkt, opprettet_av_hendelse, tilstand_endret_tidspunkt, tilstand_endret_av_hendelse, fom, tom, skjæringstidspunkt, tilstand, tags) 
-            VALUES (:unik_id, :vedtaksperiode_id, :utbetaling_id, :spleis_behandling_id, now(), gen_random_uuid(), now(), gen_random_uuid(), :fom, :tom, :skjaeringstidspunkt, :tilstand, '{$tags}')
+            VALUES (:unik_id, :vedtaksperiode_id, :utbetaling_id, :spleis_behandling_id, now(), gen_random_uuid(), now(), gen_random_uuid(), :fom, :tom, :skjaeringstidspunkt, :tilstand::generasjon_tilstand, '{$tags}')
             ON CONFLICT (unik_id) DO UPDATE SET utbetaling_id = excluded.utbetaling_id, spleis_behandling_id = excluded.spleis_behandling_id, fom = excluded.fom, tom = excluded.tom, skjæringstidspunkt = excluded.skjæringstidspunkt, tilstand = excluded.tilstand, tags = excluded.tags
             """.trimIndent()
         this.run(
@@ -362,7 +362,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val query = """
             INSERT INTO selve_vedtaksperiode_generasjon (unik_id, vedtaksperiode_id, opprettet_av_hendelse, skjæringstidspunkt, fom, tom, tilstand) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?::generasjon_tilstand)
             RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, spleis_behandling_id, skjæringstidspunkt, fom, tom, tilstand, tags
         """
 
@@ -454,7 +454,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val query = """
                 UPDATE selve_vedtaksperiode_generasjon 
-                SET tilstand = :tilstand, tilstand_endret_tidspunkt = :endret_tidspunkt, tilstand_endret_av_hendelse = :endret_av_hendelse 
+                SET tilstand = :tilstand::generasjon_tilstand, tilstand_endret_tidspunkt = :endret_tidspunkt, tilstand_endret_av_hendelse = :endret_av_hendelse 
                 WHERE unik_id = :generasjon_id
             """
         sessionOf(dataSource).use { session ->
@@ -508,7 +508,8 @@ class GenerasjonDao(private val dataSource: DataSource) {
         return sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
-                    query, mapOf("fodselsnummer" to fødselsnummer.toLong()),
+                    query,
+                    mapOf("fodselsnummer" to fødselsnummer.toLong()),
                 ).map { it.localDate("foersteFom") }.asSingle,
             ) ?: throw IllegalStateException("Forventet å kunne slå opp første kjente dag")
         }
