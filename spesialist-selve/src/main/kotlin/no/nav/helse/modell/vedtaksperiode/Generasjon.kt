@@ -241,6 +241,7 @@ internal class Generasjon private constructor(
                 Låst -> TilstandDto.Låst
                 Åpen -> TilstandDto.Åpen
                 UtenUtbetalingMåVurderes -> TilstandDto.UtenUtbetalingMåVurderes
+                KlarTilBehandling -> TilstandDto.KlarTilBehandling
             }
         }
 
@@ -313,6 +314,26 @@ internal class Generasjon private constructor(
         ) {}
     }
 
+    internal data object KlarTilBehandling : Tilstand {
+        override fun navn(): String = "KlarTilBehandling"
+
+        override fun vedtakFattet(
+            generasjon: Generasjon,
+            hendelseId: UUID,
+        ) {
+            checkNotNull(generasjon.utbetalingId) { "Mottatt vedtak_fattet i tilstand=${navn()}, men mangler utbetalingId" }
+            generasjon.nyTilstand(this, Låst, hendelseId)
+        }
+
+        override fun invaliderUtbetaling(
+            generasjon: Generasjon,
+            utbetalingId: UUID,
+        ) {
+            generasjon.utbetalingId = null
+            generasjon.nyTilstand(this, Åpen, UUID.randomUUID())
+        }
+    }
+
     internal data object Åpen : Tilstand {
         override fun navn(): String = "Åpen"
 
@@ -322,6 +343,7 @@ internal class Generasjon private constructor(
             utbetalingId: UUID,
         ) {
             generasjon.nyUtbetaling(utbetalingId)
+            generasjon.nyTilstand(this, KlarTilBehandling, hendelseId)
         }
 
         override fun nySpleisBehandling(
@@ -332,37 +354,20 @@ internal class Generasjon private constructor(
             sikkerlogg.warn("Forventer ikke ny Spleis-behandling, gjeldende generasjon i Spesialist er ikke lukket")
         }
 
-        override fun invaliderUtbetaling(
-            generasjon: Generasjon,
-            utbetalingId: UUID,
-        ) {
-            generasjon.utbetalingId = null
-        }
-
         override fun avsluttetUtenVedtak(
             generasjon: Generasjon,
             sykepengevedtakBuilder: SykepengevedtakBuilder,
         ) {
+            check(
+                generasjon.utbetalingId == null,
+            ) { "Mottatt avsluttet_uten_vedtak på generasjon som har utbetaling. Det gir ingen mening." }
             val nesteTilstand =
                 when {
                     generasjon.varsler.isNotEmpty() -> UtenUtbetalingMåVurderes
-                    generasjon.utbetalingId == null -> AvsluttetUtenUtbetaling
-                    else -> throw IllegalStateException(
-                        "Mottatt avsluttet_uten_vedtak på generasjon som har utbetaling. Det gir ingen mening.",
-                    )
+                    else -> AvsluttetUtenUtbetaling
                 }
             generasjon.nyTilstand(this, nesteTilstand, UUID.randomUUID())
             generasjon.supplerAvsluttetUtenVedtak(sykepengevedtakBuilder)
-        }
-
-        override fun vedtakFattet(
-            generasjon: Generasjon,
-            hendelseId: UUID,
-        ) {
-            if (generasjon.utbetalingId == null) {
-                return generasjon.nyTilstand(this, AvsluttetUtenUtbetaling, hendelseId)
-            }
-            generasjon.nyTilstand(this, Låst, hendelseId)
         }
     }
 

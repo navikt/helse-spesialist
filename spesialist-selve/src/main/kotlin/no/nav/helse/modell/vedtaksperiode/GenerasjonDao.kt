@@ -68,6 +68,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
                             "Åpen" -> TilstandDto.Åpen
                             "AvsluttetUtenUtbetaling" -> TilstandDto.AvsluttetUtenUtbetaling
                             "UtenUtbetalingMåVurderes" -> TilstandDto.UtenUtbetalingMåVurderes
+                            "KlarTilBehandling" -> TilstandDto.KlarTilBehandling
                             else -> throw IllegalArgumentException("$tilstand er ikke en gyldig generasjontilstand")
                         },
                     tags = row.array<String>("tags").toList(),
@@ -214,6 +215,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
                             "Åpen" -> TilstandDto.Åpen
                             "AvsluttetUtenUtbetaling" -> TilstandDto.AvsluttetUtenUtbetaling
                             "UtenUtbetalingMåVurderes" -> TilstandDto.UtenUtbetalingMåVurderes
+                            "KlarTilBehandling" -> TilstandDto.KlarTilBehandling
                             else -> throw IllegalArgumentException("$tilstand er ikke en gyldig generasjontilstand")
                         },
                     tags = row.array<String>("tags").toList(),

@@ -22,4 +22,5 @@ enum class TilstandDto {
     Åpen,
     AvsluttetUtenUtbetaling,
     UtenUtbetalingMåVurderes,
+    KlarTilBehandling,
 }

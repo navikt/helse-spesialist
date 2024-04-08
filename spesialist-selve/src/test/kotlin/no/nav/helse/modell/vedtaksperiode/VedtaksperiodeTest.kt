@@ -1,17 +1,18 @@
 package no.nav.helse.modell.vedtaksperiode
 
-import java.time.LocalDateTime
-import java.util.UUID
+import io.mockk.mockk
 import no.nav.helse.januar
 import no.nav.helse.modell.varsel.Varsel
+import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDateTime
+import java.util.UUID
 
 class VedtaksperiodeTest {
-
     @Disabled
     @Test
     fun `ugyldig tilstand om Spesialist mottar ny behandling når gjeldende generasjon ikke er lukket`() {
@@ -65,26 +66,20 @@ class VedtaksperiodeTest {
         assertEquals(TilstandDto.Åpen, nyGjeldendeGenerasjon.tilstand)
         assertEquals(2, generasjoner.size)
     }
+
     @Test
     fun `oppretter ny generasjon om spesialist mottar ny behandling når gjeldende generasjon er AUU`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
-        vedtaksperiode.vedtakFattet(UUID.randomUUID())
+        vedtaksperiode.avsluttetUtenVedtak(
+            person = mockk(relaxed = true),
+            avsluttetUtenVedtak = AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()),
+        )
         vedtaksperiode.nySpleisBehandling(nySpleisBehandling(vedtaksperiodeId))
         val generasjoner = vedtaksperiode.toDto().generasjoner
         val nyGjeldendeGenerasjon = generasjoner.last()
         assertEquals(TilstandDto.Åpen, nyGjeldendeGenerasjon.tilstand)
         assertEquals(2, generasjoner.size)
-    }
-
-    @Test
-    fun `vedtak fattet uten utbetaling medfører at generasjonen lukkes som AUU-generasjon`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
-        vedtaksperiode.vedtakFattet(UUID.randomUUID())
-        val dto = vedtaksperiode.toDto()
-        val generasjon = dto.generasjoner.single()
-        assertEquals(TilstandDto.AvsluttetUtenUtbetaling, generasjon.tilstand)
     }
 
     @Test
@@ -102,9 +97,13 @@ class VedtaksperiodeTest {
         }
     }
 
-    private fun nySpleisBehandling(vedtaksperiodeId: UUID) = SpleisBehandling("987654321", vedtaksperiodeId, UUID.randomUUID(), 1.januar, 31.januar)
+    private fun nySpleisBehandling(vedtaksperiodeId: UUID) =
+        SpleisBehandling("987654321", vedtaksperiodeId, UUID.randomUUID(), 1.januar, 31.januar)
 
-    private fun nyttVarsel(vedtaksperiodeId: UUID, varselkode: String = "SB_EX_1") = Varsel(UUID.randomUUID(), varselkode, LocalDateTime.now(), vedtaksperiodeId)
+    private fun nyttVarsel(
+        vedtaksperiodeId: UUID,
+        varselkode: String = "SB_EX_1",
+    ) = Varsel(UUID.randomUUID(), varselkode, LocalDateTime.now(), vedtaksperiodeId)
 
     private fun nyVedtaksperiode(vedtaksperiodeId: UUID) = Vedtaksperiode.nyVedtaksperiode(nySpleisBehandling(vedtaksperiodeId))
 }

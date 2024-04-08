@@ -184,6 +184,7 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
         val gammelUtbetalingId = UUID.randomUUID()
         val nyUtbetalingId = UUID.randomUUID()
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), gammelUtbetalingId)
+        generasjon.håndterForkastetUtbetaling(gammelUtbetalingId)
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), nyUtbetalingId)
 
         assertEquals(nyUtbetalingId, generasjon.toDto().utbetalingId)
@@ -455,7 +456,7 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon1 = generasjon(generasjonId, vedtaksperiodeId, skjæringstidspunkt = 1.januar)
-        generasjon1.håndterVedtakFattet(UUID.randomUUID())
+        generasjon1.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
         val generasjon2 = generasjon(generasjonId, vedtaksperiodeId, skjæringstidspunkt = 1.januar)
         assertNotEquals(generasjon1, generasjon2)
         assertNotEquals(generasjon1.hashCode(), generasjon2.hashCode())
@@ -490,7 +491,7 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
                 skjæringstidspunkt,
                 fom,
                 tom,
-                TilstandDto.Åpen,
+                TilstandDto.KlarTilBehandling,
                 tags,
                 listOf(varsel.toDto()),
             ),

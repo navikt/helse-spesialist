@@ -159,6 +159,7 @@ internal class Vedtaksperiode private constructor(
                         TilstandDto.Åpen -> Generasjon.Åpen
                         TilstandDto.AvsluttetUtenUtbetaling -> Generasjon.AvsluttetUtenUtbetaling
                         TilstandDto.UtenUtbetalingMåVurderes -> Generasjon.UtenUtbetalingMåVurderes
+                        TilstandDto.KlarTilBehandling -> Generasjon.KlarTilBehandling
                     },
                 tags = tags.toList(),
                 varsler =
