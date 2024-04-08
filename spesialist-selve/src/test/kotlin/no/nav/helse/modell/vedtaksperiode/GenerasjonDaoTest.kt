@@ -319,46 +319,6 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `oppdaterer generasjon med behandlingsinformasjon`() {
-        val vedtaksperiodeEndretId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
-        generasjonDao.opprettFor(
-            generasjonId,
-            VEDTAKSPERIODE,
-            vedtaksperiodeEndretId,
-            1.januar,
-            Periode(1.januar, 31.januar),
-            Generasjon.Åpen,
-        )
-
-        val spleisBehandlingId = UUID.randomUUID()
-        val tags = listOf("ARBEIDSGIVERUTBETALING", "PERSONUTBETALING")
-
-        generasjonDao.oppdaterMedBehandlingsInformasjon(generasjonId, spleisBehandlingId, tags)
-
-        assertTags(generasjonId, tags)
-        assertSpleisBehandlingId(generasjonId, spleisBehandlingId)
-    }
-
-    @Test
-    fun `ingen tags`() {
-        val vedtaksperiodeEndretId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
-        generasjonDao.opprettFor(
-            generasjonId,
-            VEDTAKSPERIODE,
-            vedtaksperiodeEndretId,
-            1.januar,
-            Periode(1.januar, 31.januar),
-            Generasjon.Åpen,
-        )
-        val spleisBehandlingId = UUID.randomUUID()
-        val tags = emptyList<String>()
-        generasjonDao.oppdaterMedBehandlingsInformasjon(generasjonId, spleisBehandlingId, tags)
-        assertEquals(emptyList<String>(), generasjonDao.finnTagsFor(spleisBehandlingId))
-    }
-
-    @Test
     fun `mangler tags`() {
         val tulleId = UUID.randomUUID()
         val tags = generasjonDao.finnTagsFor(tulleId)

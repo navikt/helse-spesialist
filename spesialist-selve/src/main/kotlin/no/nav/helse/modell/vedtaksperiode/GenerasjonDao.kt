@@ -77,32 +77,6 @@ class GenerasjonDao(private val dataSource: DataSource) {
         )
     }
 
-    internal fun oppdaterMedBehandlingsInformasjon(
-        generasjonId: UUID,
-        spleisBehandlingId: UUID,
-        tags: List<String>,
-    ) {
-        val tagsAsString = tags.joinToString { """ "$it" """ }
-
-        @Language("PostgreSQL")
-        val query = """
-                UPDATE selve_vedtaksperiode_generasjon 
-                SET spleis_behandling_id = :spleisBehandlingId, tags = '{$tagsAsString}' 
-                WHERE unik_id = :generasjon_id
-            """
-        sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(
-                    query,
-                    mapOf(
-                        "spleisBehandlingId" to spleisBehandlingId,
-                        "generasjon_id" to generasjonId,
-                    ),
-                ).asUpdate,
-            )
-        }
-    }
-
     internal fun finnTagsFor(spleisBehandlingId: UUID): List<String>? {
         val tags =
             sessionOf(dataSource).use { session ->
