@@ -33,11 +33,6 @@ interface Periode {
     vedtaksperiodeId: UUID!
 }
 
-interface Spennoppdrag {
-    fagsystemId: String!
-    linjer: [Utbetalingslinje!]!
-}
-
 interface Vilkarsgrunnlag {
     arbeidsgiverrefusjoner: [Arbeidsgiverrefusjon!]!
     id: UUID!
@@ -51,11 +46,6 @@ interface Vilkarsgrunnlag {
 type Alder {
     alderSisteSykedag: Int!
     oppfylt: Boolean!
-}
-
-type Annullering {
-    saksbehandler: String!
-    tidspunkt: String!
 }
 
 type Antall {
@@ -109,12 +99,6 @@ type Arbeidsgiverinntekt {
     omregnetArsinntekt: OmregnetArsinntekt
     sammenligningsgrunnlag: Sammenligningsgrunnlag
     skjonnsmessigFastsatt: OmregnetArsinntekt
-}
-
-type Arbeidsgiveroppdrag implements Spennoppdrag {
-    fagsystemId: String!
-    linjer: [Utbetalingslinje!]!
-    organisasjonsnummer: String!
 }
 
 type Arbeidsgiverrefusjon {
@@ -379,16 +363,6 @@ type OmregnetArsinntekt {
     manedsbelop: Float!
 }
 
-type Oppdrag {
-    annullering: Annullering
-    arbeidsgiveroppdrag: Arbeidsgiveroppdrag
-    personoppdrag: Personoppdrag
-    status: Oppdragsstatus!
-    totalbelop: Int
-    type: String!
-    utbetalingId: UUID!
-}
-
 type OppgaveForPeriodevisning {
     id: String!
 }
@@ -497,12 +471,6 @@ type Personnavn {
     mellomnavn: String
 }
 
-type Personoppdrag implements Spennoppdrag {
-    fagsystemId: String!
-    fodselsnummer: String!
-    linjer: [Utbetalingslinje!]!
-}
-
 type Query {
     antallOppgaver: AntallOppgaver!
     behandledeOppgaverFeed(limit: Int!, offset: Int!): BehandledeOppgaver!
@@ -510,7 +478,6 @@ type Query {
     hentInntektsmelding(dokumentId: String!, fnr: String!): DokumentInntektsmelding
     hentSoknad(dokumentId: String!, fnr: String!): Soknad!
     notater(forPerioder: [String!]!): [Notater!]!
-    oppdrag(fnr: String!): [Oppdrag!]!
     oppgaveFeed(filtrering: FiltreringInput!, limit: Int!, offset: Int!, sortering: [OppgavesorteringInput!]!): OppgaverTilBehandling!
     opptegnelser(sekvensId: Int): [Opptegnelse!]!
     person(aktorId: String, fnr: String): Person
@@ -792,12 +759,6 @@ type Utbetalingsinfo {
     utbetaling: Int
 }
 
-type Utbetalingslinje {
-    fom: String!
-    tom: String!
-    totalbelop: Int!
-}
-
 type VarselDTO {
     definisjonId: UUID!
     forklaring: String
@@ -1010,20 +971,6 @@ enum NotatType {
     Generelt
     PaaVent
     Retur
-}
-
-enum Oppdragsstatus {
-    ANNULLERT
-    FORKASTET
-    GODKJENT
-    GODKJENT_UTEN_UTBETALING
-    IKKE_GODKJENT
-    IKKE_UTBETALT
-    NY
-    OVERFORT
-    SENDT
-    UTBETALING_FEILET
-    UTBETALT
 }
 
 enum Oppgavetype {

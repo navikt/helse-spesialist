@@ -27,7 +27,6 @@ import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQuery
 import no.nav.helse.spesialist.api.graphql.query.DokumentQuery
 import no.nav.helse.spesialist.api.graphql.query.NotatQuery
-import no.nav.helse.spesialist.api.graphql.query.OppdragQuery
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQuery
 import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQuery
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
@@ -44,7 +43,6 @@ import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
-import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 
 internal class SchemaBuilder(
@@ -55,7 +53,6 @@ internal class SchemaBuilder(
     val overstyringApiDao: OverstyringApiDao,
     val risikovurderingApiDao: RisikovurderingApiDao,
     val varselRepository: ApiVarselRepository,
-    val utbetalingApiDao: UtbetalingApiDao,
     val oppgaveApiDao: OppgaveApiDao,
     val periodehistorikkDao: PeriodehistorikkDao,
     val påVentApiDao: PåVentApiDao,
@@ -105,13 +102,6 @@ internal class SchemaBuilder(
                             reservasjonClient = reservasjonClient,
                             oppgavehåndterer = oppgavehåndterer,
                             avviksvurderinghenter = avviksvurderinghenter,
-                        ),
-                    ),
-                    TopLevelObject(
-                        OppdragQuery(
-                            personApiDao = personApiDao,
-                            egenAnsattApiDao = egenAnsattApiDao,
-                            utbetalingApiDao = utbetalingApiDao,
                         ),
                     ),
                     TopLevelObject(

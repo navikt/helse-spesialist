@@ -85,7 +85,6 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
-import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.LoggerFactory
@@ -215,7 +214,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     private val egenAnsattApiDao = EgenAnsattApiDao(dataSource)
-    private val utbetalingApiDao = UtbetalingApiDao(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
     private val notatDao = NotatDao(dataSource)
@@ -328,7 +326,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 overstyringApiDao = overstyringApiDao,
                 risikovurderingApiDao = risikovurderingApiDao,
                 varselRepository = apiVarselRepository,
-                utbetalingApiDao = utbetalingApiDao,
                 oppgaveApiDao = oppgaveApiDao,
                 periodehistorikkDao = periodehistorikkDao,
                 notatDao = notatDao,

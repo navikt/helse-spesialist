@@ -40,7 +40,6 @@ import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
-import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -55,7 +54,6 @@ fun Application.graphQLApi(
     overstyringApiDao: OverstyringApiDao,
     risikovurderingApiDao: RisikovurderingApiDao,
     varselRepository: ApiVarselRepository,
-    utbetalingApiDao: UtbetalingApiDao,
     oppgaveApiDao: OppgaveApiDao,
     periodehistorikkDao: PeriodehistorikkDao,
     notatDao: NotatDao,
@@ -85,7 +83,6 @@ fun Application.graphQLApi(
             overstyringApiDao = overstyringApiDao,
             risikovurderingApiDao = risikovurderingApiDao,
             varselRepository = varselRepository,
-            utbetalingApiDao = utbetalingApiDao,
             oppgaveApiDao = oppgaveApiDao,
             periodehistorikkDao = periodehistorikkDao,
             snapshotMediator = snapshotMediator,

@@ -73,7 +73,6 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
-import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
@@ -126,7 +125,6 @@ fun main() = runBlocking {
         val overstyringApiDao = OverstyringApiDao(dataSource)
         val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
         val apiVarselRepository = mockk<ApiVarselRepository>(relaxed = true)
-        val utbetalingApiDao = mockk<UtbetalingApiDao>(relaxed = true)
         val oppgaveApiDao = mockk<OppgaveApiDao>(relaxed = true)
         val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
         val notatDao = mockk<NotatDao>(relaxed = true)
@@ -172,7 +170,6 @@ fun main() = runBlocking {
         coEvery { reservasjonClient.hentReservasjonsstatus(any()) } answers withDelay(800) {
             Reservasjon(kanVarsles = true, reservert = false)
         }
-        every { utbetalingApiDao.findUtbetalinger(any()) } returns emptyList()
         every { behandlingsstatistikkMediator.getBehandlingsstatistikk() } returns BehandlingsstatistikkResponse(
             enArbeidsgiver = Statistikk(485, 104, 789),
             flereArbeidsgivere = Statistikk(254, 58, 301),
@@ -222,7 +219,6 @@ fun main() = runBlocking {
             overstyringApiDao = overstyringApiDao,
             risikovurderingApiDao = risikovurderingApiDao,
             varselRepository = apiVarselRepository,
-            utbetalingApiDao = utbetalingApiDao,
             oppgaveApiDao = oppgaveApiDao,
             periodehistorikkDao = periodehistorikkDao,
             notatDao = notatDao,

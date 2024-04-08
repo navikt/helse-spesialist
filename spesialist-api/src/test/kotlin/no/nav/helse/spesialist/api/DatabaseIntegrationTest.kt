@@ -33,7 +33,6 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
-import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
@@ -100,7 +99,6 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val periodehistorikkDao = PeriodehistorikkDao(dataSource)
     private val snapshotApiDao = SnapshotApiDao(dataSource)
 
-    protected val utbetalingApiDao = mockk<UtbetalingApiDao>(relaxed = true)
     protected val egenAnsattApiDao = mockk<EgenAnsattApiDao>(relaxed = true)
     protected val snapshotClient = mockk<SnapshotClient>(relaxed = true)
 
