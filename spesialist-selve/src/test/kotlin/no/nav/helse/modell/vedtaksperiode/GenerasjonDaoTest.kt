@@ -62,7 +62,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             Periode(1.januar, 31.januar),
             Generasjon.VidereBehandlingAvklares,
         )
-        generasjonDao.oppdaterTilstandFor(generasjonId1, Generasjon.Låst, UUID.randomUUID())
+        generasjonDao.oppdaterTilstandFor(generasjonId1, Generasjon.VedtakFattet, UUID.randomUUID())
         generasjonDao.opprettFor(
             generasjonId2,
             vedtaksperiodeId,
@@ -157,7 +157,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
                 fom = 2.januar,
                 tom = 30.januar,
                 skjæringstidspunkt = 2.januar,
-                tilstand = TilstandDto.Låst,
+                tilstand = TilstandDto.VedtakFattet,
             ),
         )
         val lagretGenerasjon = generasjonDao.finnGjeldendeGenerasjon(vedtaksperiodeId)
@@ -167,7 +167,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         assertEquals(2.januar, lagretGenerasjon?.fom)
         assertEquals(30.januar, lagretGenerasjon?.tom)
         assertEquals(2.januar, lagretGenerasjon?.skjæringstidspunkt)
-        assertEquals(TilstandDto.Låst, lagretGenerasjon?.tilstand)
+        assertEquals(TilstandDto.VedtakFattet, lagretGenerasjon?.tilstand)
         assertEquals(nyUtbetalingId, lagretGenerasjon?.utbetalingId)
     }
 
@@ -321,9 +321,9 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             Periode(1.januar, 31.januar),
             Generasjon.VidereBehandlingAvklares,
         )
-        generasjonDao.oppdaterTilstandFor(generasjonId, Generasjon.Låst, UUID.randomUUID())
+        generasjonDao.oppdaterTilstandFor(generasjonId, Generasjon.VedtakFattet, UUID.randomUUID())
 
-        assertTilstand(VEDTAKSPERIODE, Generasjon.Låst)
+        assertTilstand(VEDTAKSPERIODE, Generasjon.VedtakFattet)
     }
 
     @Test
@@ -375,7 +375,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             UUID.randomUUID(),
             1.januar,
             Periode(1.januar, 31.januar),
-            Generasjon.Låst,
+            Generasjon.VedtakFattet,
         )
         val generasjonId = UUID.randomUUID()
         generasjonDao.opprettFor(
@@ -551,7 +551,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             UUID.randomUUID(),
             1.januar,
             Periode(1.januar, 31.januar),
-            Generasjon.Låst,
+            Generasjon.VedtakFattet,
         )
         val opprinneligSøknadsdato = finnSøknadMottatt(VEDTAKSPERIODE)
         generasjonDao.opprettFor(
@@ -567,7 +567,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `Finner første generasjons låst tidspunkt`() {
+    fun `Finner første generasjons VedtakFattet tidspunkt`() {
         val vedtaksperiodeEndretId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
         generasjonDao.opprettFor(
@@ -578,9 +578,9 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             Periode(1.januar, 31.januar),
             Generasjon.VidereBehandlingAvklares,
         )
-        generasjonDao.oppdaterTilstandFor(generasjonId, Generasjon.Låst, UUID.randomUUID())
+        generasjonDao.oppdaterTilstandFor(generasjonId, Generasjon.VedtakFattet, UUID.randomUUID())
 
-        assertNotNull(generasjonDao.førsteGenerasjonLåstTidspunkt(VEDTAKSPERIODE))
+        assertNotNull(generasjonDao.førsteGenerasjonVedtakFattetTidspunkt(VEDTAKSPERIODE))
     }
 
     private fun Pair<LocalDate, LocalDate>.tilPeriode() = Periode(first, second)
@@ -598,7 +598,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             UUID.randomUUID(),
             førstePeriode.first,
             førstePeriode.tilPeriode(),
-            Generasjon.Låst,
+            Generasjon.VedtakFattet,
         )
 
         val vedtaksperiodeId2 = UUID.randomUUID()
@@ -610,7 +610,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             UUID.randomUUID(),
             senerePeriode.first,
             senerePeriode.tilPeriode(),
-            Generasjon.Låst,
+            Generasjon.VedtakFattet,
         )
 
         assertEquals(1.januar, generasjonDao.førsteKjenteDag(FNR))

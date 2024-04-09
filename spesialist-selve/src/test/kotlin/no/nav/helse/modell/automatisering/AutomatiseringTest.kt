@@ -6,9 +6,6 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import lagFødselsnummer
 import lagOrganisasjonsnummer
 import no.nav.helse.januar
@@ -33,9 +30,11 @@ import no.nav.helse.modell.vergemal.VergemålDao
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.ResourceLock
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class AutomatiseringTest {
-
     private val fødselsnummer = lagFødselsnummer()
     private val orgnummer = lagOrganisasjonsnummer()
     private val vedtaksperiodeId = UUID.randomUUID()
@@ -45,9 +44,10 @@ internal class AutomatiseringTest {
     private val periodeFom = LocalDate.now()
 
     private val vedtakDaoMock = mockk<VedtakDao>()
-    private val risikovurderingDaoMock = mockk<RisikovurderingDao> {
-        every { hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(true)
-    }
+    private val risikovurderingDaoMock =
+        mockk<RisikovurderingDao> {
+            every { hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(true)
+        }
     private val åpneGosysOppgaverDaoMock = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val personDaoMock = mockk<PersonDao>(relaxed = true)
@@ -59,15 +59,22 @@ internal class AutomatiseringTest {
     private var stikkprøveFullRefusjonEnArbeidsgiver = false
     private var stikkprøveUtsEnArbeidsgiverFørstegangsbehandling = false
     private var stikkprøveUtsEnArbeidsgiverForlengelse = false
-    private val stikkprøver = object : Stikkprøver {
-        override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
-        override fun utsFlereArbeidsgivereForlengelse() = false
-        override fun utsEnArbeidsgiverFørstegangsbehandling() = stikkprøveUtsEnArbeidsgiverFørstegangsbehandling
-        override fun utsEnArbeidsgiverForlengelse() = stikkprøveUtsEnArbeidsgiverForlengelse
-        override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() = false
-        override fun fullRefusjonFlereArbeidsgivereForlengelse() = false
-        override fun fullRefusjonEnArbeidsgiver() = stikkprøveFullRefusjonEnArbeidsgiver
-    }
+    private val stikkprøver =
+        object : Stikkprøver {
+            override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
+
+            override fun utsFlereArbeidsgivereForlengelse() = false
+
+            override fun utsEnArbeidsgiverFørstegangsbehandling() = stikkprøveUtsEnArbeidsgiverFørstegangsbehandling
+
+            override fun utsEnArbeidsgiverForlengelse() = stikkprøveUtsEnArbeidsgiverForlengelse
+
+            override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() = false
+
+            override fun fullRefusjonFlereArbeidsgivereForlengelse() = false
+
+            override fun fullRefusjonEnArbeidsgiver() = stikkprøveFullRefusjonEnArbeidsgiver
+        }
 
     private val automatisering =
         Automatisering(
@@ -91,19 +98,27 @@ internal class AutomatiseringTest {
         every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
         every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 0
         every { overstyringDaoMock.harVedtaksperiodePågåendeOverstyring(any()) } returns false
-        every { meldingDaoMock.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, vedtaksperiodeId) } returns MeldingDao.OverstyringIgangsattKorrigertSøknad(
-            meldingId = hendelseId.toString(),
-            periodeForEndringFom = periodeFom,
-            berørtePerioder = listOf(MeldingDao.BerørtPeriode(
-                vedtaksperiodeId = vedtaksperiodeId,
-                orgnummer = orgnummer,
-                periodeFom = periodeFom
+        every { meldingDaoMock.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, vedtaksperiodeId) } returns
+            MeldingDao.OverstyringIgangsattKorrigertSøknad(
+                meldingId = hendelseId.toString(),
+                periodeForEndringFom = periodeFom,
+                berørtePerioder =
+                    listOf(
+                        MeldingDao.BerørtPeriode(
+                            vedtaksperiodeId = vedtaksperiodeId,
+                            orgnummer = orgnummer,
+                            periodeFom = periodeFom,
+                        ),
+                    ),
             )
-        ))
         every { vedtakDaoMock.finnOrgnummer(vedtaksperiodeId) } returns orgnummer
         every { meldingDaoMock.finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId) } returns 1
         every { meldingDaoMock.erAutomatisertKorrigertSøknadHåndtert(hendelseId) } returns false
-        every { generasjonDaoMock.førsteGenerasjonLåstTidspunkt(vedtaksperiodeId) } returns LocalDateTime.now().minusMonths(6).plusDays(1)
+        every {
+            generasjonDaoMock.førsteGenerasjonVedtakFattetTidspunkt(
+                vedtaksperiodeId,
+            )
+        } returns LocalDateTime.now().minusMonths(6).plusDays(1)
         stikkprøveFullRefusjonEnArbeidsgiver = false
         stikkprøveUtsEnArbeidsgiverForlengelse = false
     }
@@ -121,10 +136,13 @@ internal class AutomatiseringTest {
         val gjeldendeGenerasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
         gjeldendeGenerasjon.håndterNyttVarsel(
             Varsel(UUID.randomUUID(), "RV_IM_1", LocalDateTime.now(), vedtaksperiodeId),
-            hendelseId
+            hendelseId,
         )
         support.run {
-            forsøkAutomatisering(generasjoner = listOf(gjeldendeGenerasjon), utbetaling = enUtbetaling(arbeidsgiverbeløp = 0, personbeløp = 0))
+            forsøkAutomatisering(
+                generasjoner = listOf(gjeldendeGenerasjon),
+                utbetaling = enUtbetaling(arbeidsgiverbeløp = 0, personbeløp = 0),
+            )
             assertBleAutomatiskGodkjent()
         }
         Toggle.AutomatiserSpesialsak.disable()
@@ -143,10 +161,13 @@ internal class AutomatiseringTest {
         val gjeldendeGenerasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
         gjeldendeGenerasjon.håndterNyttVarsel(
             Varsel(UUID.randomUUID(), "RV_IM_1", LocalDateTime.now(), vedtaksperiodeId),
-            hendelseId
+            hendelseId,
         )
         support.run {
-            forsøkAutomatisering(generasjoner = listOf(gjeldendeGenerasjon), utbetaling = enUtbetaling(arbeidsgiverbeløp = 0, personbeløp = 0))
+            forsøkAutomatisering(
+                generasjoner = listOf(gjeldendeGenerasjon),
+                utbetaling = enUtbetaling(arbeidsgiverbeløp = 0, personbeløp = 0),
+            )
             assertGikkTilManuell()
         }
         Toggle.AutomatiserSpesialsak.enable()
@@ -162,7 +183,7 @@ internal class AutomatiseringTest {
         val gjeldendeGenerasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
         gjeldendeGenerasjon.håndterNyttVarsel(
             Varsel(UUID.randomUUID(), "RV_IM_1", LocalDateTime.now(), vedtaksperiodeId),
-            hendelseId
+            hendelseId,
         )
         support.run {
             forsøkAutomatisering(generasjoner = listOf(gjeldendeGenerasjon))
@@ -178,7 +199,7 @@ internal class AutomatiseringTest {
 
     @Test
     fun `vedtaksperiode som mottok første søknad for mer enn 6 måneder er ikke automatiserbar`() {
-        every { generasjonDaoMock.førsteGenerasjonLåstTidspunkt(vedtaksperiodeId) } returns LocalDateTime.now().minusMonths(6)
+        every { generasjonDaoMock.førsteGenerasjonVedtakFattetTidspunkt(vedtaksperiodeId) } returns LocalDateTime.now().minusMonths(6)
         gårTilManuellMedError(problems = listOf("Mer enn 6 måneder siden vedtak på første mottatt søknad"))
     }
 
@@ -246,8 +267,8 @@ internal class AutomatiseringTest {
             enUtbetaling(
                 arbeidsgiverbeløp = 0,
                 personbeløp = 0,
-                type = Utbetalingtype.REVURDERING
-            )
+                type = Utbetalingtype.REVURDERING,
+            ),
         )
     }
 
@@ -279,7 +300,7 @@ internal class AutomatiseringTest {
         support.run {
             forsøkAutomatisering(
                 periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-                utbetaling = enUtbetaling(personbeløp = 500)
+                utbetaling = enUtbetaling(personbeløp = 500),
             )
             assertGikkTilManuell()
         }
@@ -299,11 +320,12 @@ internal class AutomatiseringTest {
     @Test
     fun `nullrevurdering grunnet saksbehandleroverstyring skal ikke automatisk godkjennes`() {
         support.forsøkAutomatisering(
-            utbetaling = enUtbetaling(
-                arbeidsgiverbeløp = 0,
-                personbeløp = 0,
-                type = Utbetalingtype.REVURDERING
-            )
+            utbetaling =
+                enUtbetaling(
+                    arbeidsgiverbeløp = 0,
+                    personbeløp = 0,
+                    type = Utbetalingtype.REVURDERING,
+                ),
         )
         support.assertBleAutomatiskGodkjent()
 
@@ -314,38 +336,42 @@ internal class AutomatiseringTest {
         support.assertGikkTilManuell()
     }
 
-    private val support = object {
-        val onAutomatiserbar = mockk<() -> Unit>(relaxed = true)
-        fun forsøkAutomatisering(
-            periodetype: Periodetype = Periodetype.FORLENGELSE,
-            generasjoner: List<Generasjon> = listOf(Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)),
-            utbetaling: Utbetaling = enUtbetaling(),
-        ) = automatisering.utfør(
-            fødselsnummer,
-            vedtaksperiodeId,
-            hendelseId,
-            utbetaling,
-            periodetype,
-            sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, generasjoner, emptyList()),
-            onAutomatiserbar,
-        )
+    private val support =
+        object {
+            val onAutomatiserbar = mockk<() -> Unit>(relaxed = true)
 
-        fun assertBleAutomatiskGodkjent() {
-            verify(exactly = 1) { onAutomatiserbar() }
-            verify(exactly = 1) { automatiseringDaoMock.automatisert(vedtaksperiodeId, hendelseId, utbetalingId) }
-            verify(exactly = 0) { automatiseringDaoMock.manuellSaksbehandling(any(), any(), any(), any()) }
-        }
+            fun forsøkAutomatisering(
+                periodetype: Periodetype = Periodetype.FORLENGELSE,
+                generasjoner: List<Generasjon> = listOf(Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)),
+                utbetaling: Utbetaling = enUtbetaling(),
+            ) = automatisering.utfør(
+                fødselsnummer,
+                vedtaksperiodeId,
+                hendelseId,
+                utbetaling,
+                periodetype,
+                sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, generasjoner, emptyList()),
+                onAutomatiserbar,
+            )
 
-        fun assertGikkTilManuell(problems: List<String>? = null) {
-            verify(exactly = 0) { onAutomatiserbar() }
-            verify(exactly = 0) { automatiseringDaoMock.automatisert(any(), any(), any()) }
-            verify(exactly = 1) {
-                if (stikkprøveUtsEnArbeidsgiverForlengelse || stikkprøveFullRefusjonEnArbeidsgiver || stikkprøveUtsEnArbeidsgiverFørstegangsbehandling)
-                    automatiseringDaoMock.stikkprøve(any(), any(), any())
-                else automatiseringDaoMock.manuellSaksbehandling(problems ?: any(), vedtaksperiodeId, hendelseId, utbetalingId)
+            fun assertBleAutomatiskGodkjent() {
+                verify(exactly = 1) { onAutomatiserbar() }
+                verify(exactly = 1) { automatiseringDaoMock.automatisert(vedtaksperiodeId, hendelseId, utbetalingId) }
+                verify(exactly = 0) { automatiseringDaoMock.manuellSaksbehandling(any(), any(), any(), any()) }
+            }
+
+            fun assertGikkTilManuell(problems: List<String>? = null) {
+                verify(exactly = 0) { onAutomatiserbar() }
+                verify(exactly = 0) { automatiseringDaoMock.automatisert(any(), any(), any()) }
+                verify(exactly = 1) {
+                    if (stikkprøveUtsEnArbeidsgiverForlengelse || stikkprøveFullRefusjonEnArbeidsgiver || stikkprøveUtsEnArbeidsgiverFørstegangsbehandling) {
+                        automatiseringDaoMock.stikkprøve(any(), any(), any())
+                    } else {
+                        automatiseringDaoMock.manuellSaksbehandling(problems ?: any(), vedtaksperiodeId, hendelseId, utbetalingId)
+                    }
+                }
             }
         }
-    }
 
     private fun enUtbetaling(
         arbeidsgiverbeløp: Int = 500,
@@ -353,19 +379,23 @@ internal class AutomatiseringTest {
         type: Utbetalingtype = Utbetalingtype.UTBETALING,
     ) = Utbetaling(utbetalingId, arbeidsgiverbeløp, personbeløp, type)
 
-    private fun gårTilManuell(utbetaling: Utbetaling = enUtbetaling()) = support.run {
-        forsøkAutomatisering(utbetaling = utbetaling)
-        assertGikkTilManuell()
-    }
+    private fun gårTilManuell(utbetaling: Utbetaling = enUtbetaling()) =
+        support.run {
+            forsøkAutomatisering(utbetaling = utbetaling)
+            assertGikkTilManuell()
+        }
 
-    private fun gårTilManuellMedError(utbetaling: Utbetaling = enUtbetaling(), problems: List<String>) = support.run {
+    private fun gårTilManuellMedError(
+        utbetaling: Utbetaling = enUtbetaling(),
+        problems: List<String>,
+    ) = support.run {
         forsøkAutomatisering(utbetaling = utbetaling)
         assertGikkTilManuell(problems)
     }
 
-    private fun gårAutomatisk(utbetaling: Utbetaling = enUtbetaling()) = support.run {
-        forsøkAutomatisering(utbetaling = utbetaling)
-        assertBleAutomatiskGodkjent()
-    }
+    private fun gårAutomatisk(utbetaling: Utbetaling = enUtbetaling()) =
+        support.run {
+            forsøkAutomatisering(utbetaling = utbetaling)
+            assertBleAutomatiskGodkjent()
+        }
 }
-

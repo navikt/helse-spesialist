@@ -55,7 +55,7 @@ class VedtaksperiodeTest {
     }
 
     @Test
-    fun `oppretter ny generasjon om spesialist mottar ny behandling når gjeldende generasjon er låst`() {
+    fun `oppretter ny generasjon om spesialist mottar ny behandling når gjeldende generasjon er avsluttet`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
         vedtaksperiode.nyUtbetaling(UUID.randomUUID(), UUID.randomUUID())

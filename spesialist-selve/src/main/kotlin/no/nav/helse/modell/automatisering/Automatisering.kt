@@ -114,7 +114,7 @@ internal class Automatisering(
         fødselsnummer: String,
         vedtaksperiodeId: UUID,
     ): OverstyringIgangsattKorrigertSøknad? =
-        generasjonDao.førsteGenerasjonLåstTidspunkt(vedtaksperiodeId)?.let {
+        generasjonDao.førsteGenerasjonVedtakFattetTidspunkt(vedtaksperiodeId)?.let {
             meldingDao.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, vedtaksperiodeId)
         }
 
@@ -138,7 +138,7 @@ internal class Automatisering(
 
         vedtaksperiodeIdKorrigertSøknad?.let {
             val merEnn6MånederSidenVedtakPåFørsteMottattSøknad =
-                generasjonDao.førsteGenerasjonLåstTidspunkt(it)
+                generasjonDao.førsteGenerasjonVedtakFattetTidspunkt(it)
                     ?.isBefore(LocalDateTime.now().minusMonths(6))
                     ?: true
             val antallKorrigeringer = meldingDao.finnAntallAutomatisertKorrigertSøknad(it)
@@ -280,7 +280,11 @@ internal class Automatisering(
         override fun erAautomatiserbar() =
             !utbetaling.erRevurdering() ||
                 (utbetaling.refusjonstype() != Refusjonstype.NEGATIVT_BELØP).also {
-                    if (it) sikkerLogg.info("Revurdering av $vedtaksperiodeId (person $fødselsnummer) har ikke et negativt beløp, og er godkjent for automatisering")
+                    if (it) {
+                        sikkerLogg.info(
+                            "Revurdering av $vedtaksperiodeId (person $fødselsnummer) har ikke et negativt beløp, og er godkjent for automatisering",
+                        )
+                    }
                 }
 
         override fun error() = "Utbetalingen er revurdering med negativt beløp"

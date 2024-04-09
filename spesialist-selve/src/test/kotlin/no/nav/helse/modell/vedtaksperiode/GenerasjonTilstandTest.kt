@@ -65,17 +65,17 @@ internal class GenerasjonTilstandTest {
     }
 
     @Test
-    fun `Går fra MedVedtaksforslag til Låst når vi mottar vedtak_fattet`() {
+    fun `Går fra KlarTilBehandling til VedtakFattet når vi mottar vedtak_fattet`() {
         val generasjonId = UUID.randomUUID()
         val generasjon = generasjon(generasjonId, UUID.randomUUID())
         generasjon.registrer(observer)
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), UUID.randomUUID())
         generasjon.håndterVedtakFattet(UUID.randomUUID())
-        observer.assertTilstandsendring(generasjonId, Generasjon.KlarTilBehandling, Generasjon.Låst, 1)
+        observer.assertTilstandsendring(generasjonId, Generasjon.KlarTilBehandling, Generasjon.VedtakFattet, 1)
     }
 
     @Test
-    fun `Låst - håndterer ikke vedtak fattet`() {
+    fun `Håndterer ikke vedtak fattet i VedtakFattet tilstand`() {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjon(generasjonId, vedtaksperiodeId)
@@ -86,10 +86,10 @@ internal class GenerasjonTilstandTest {
 
         generasjon.håndterVedtakFattet(UUID.randomUUID())
         observer.assertTilstandsendring(generasjonId, Generasjon.VidereBehandlingAvklares, Generasjon.KlarTilBehandling, 0)
-        observer.assertTilstandsendring(generasjonId, Generasjon.KlarTilBehandling, Generasjon.Låst, 1)
+        observer.assertTilstandsendring(generasjonId, Generasjon.KlarTilBehandling, Generasjon.VedtakFattet, 1)
 
         generasjon.håndterVedtakFattet(UUID.randomUUID())
-        observer.assertGjeldendeTilstand(generasjonId, Generasjon.Låst)
+        observer.assertGjeldendeTilstand(generasjonId, Generasjon.VedtakFattet)
     }
 
     @Test

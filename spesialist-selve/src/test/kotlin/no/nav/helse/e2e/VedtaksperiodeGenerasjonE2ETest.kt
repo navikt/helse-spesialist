@@ -148,7 +148,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
         val antall =
             sessionOf(dataSource).use { session ->
                 @Language("PostgreSQL")
-                val query = "SELECT COUNT(1) FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? AND tilstand = '${Generasjon.Låst.navn()}'"
+                val query = "SELECT COUNT(1) FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? AND tilstand = '${Generasjon.VedtakFattet.navn()}'"
                 session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
             }
         assertEquals(

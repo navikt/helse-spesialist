@@ -18,7 +18,7 @@ data class GenerasjonDto(
 )
 
 enum class TilstandDto {
-    Låst,
+    VedtakFattet,
     VidereBehandlingAvklares,
     AvsluttetUtenUtbetaling,
     UtenUtbetalingMåVurderes,

@@ -458,12 +458,12 @@ class GenerasjonDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun førsteGenerasjonLåstTidspunkt(vedtaksperiodeId: UUID): LocalDateTime? {
+    internal fun førsteGenerasjonVedtakFattetTidspunkt(vedtaksperiodeId: UUID): LocalDateTime? {
         @Language("PostgreSQL")
         val query = """
                 SELECT tilstand_endret_tidspunkt 
                 FROM selve_vedtaksperiode_generasjon 
-                WHERE vedtaksperiode_id = :vedtaksperiodeId AND tilstand = 'Låst'
+                WHERE vedtaksperiode_id = :vedtaksperiodeId AND tilstand = 'VedtakFattet'
                 ORDER BY tilstand_endret_tidspunkt
                 LIMIT 1
             """

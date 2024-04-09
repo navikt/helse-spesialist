@@ -248,7 +248,7 @@ internal class Generasjon private constructor(
         fun toDto(): TilstandDto {
             return when (this) {
                 AvsluttetUtenUtbetaling -> TilstandDto.AvsluttetUtenUtbetaling
-                Låst -> TilstandDto.Låst
+                VedtakFattet -> TilstandDto.VedtakFattet
                 VidereBehandlingAvklares -> TilstandDto.VidereBehandlingAvklares
                 UtenUtbetalingMåVurderes -> TilstandDto.UtenUtbetalingMåVurderes
                 KlarTilBehandling -> TilstandDto.KlarTilBehandling
@@ -332,7 +332,7 @@ internal class Generasjon private constructor(
             hendelseId: UUID,
         ) {
             checkNotNull(generasjon.utbetalingId) { "Mottatt vedtak_fattet i tilstand=${navn()}, men mangler utbetalingId" }
-            generasjon.nyTilstand(this, Låst, hendelseId)
+            generasjon.nyTilstand(this, VedtakFattet, hendelseId)
         }
 
         override fun invaliderUtbetaling(
@@ -381,8 +381,8 @@ internal class Generasjon private constructor(
         }
     }
 
-    internal data object Låst : Tilstand {
-        override fun navn(): String = "Låst"
+    internal data object VedtakFattet : Tilstand {
+        override fun navn(): String = "VedtakFattet"
 
         override fun nySpleisBehandling(
             generasjon: Generasjon,

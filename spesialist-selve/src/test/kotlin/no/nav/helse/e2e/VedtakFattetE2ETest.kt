@@ -1,7 +1,6 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
-import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.modell.vedtaksperiode.Generasjon
@@ -10,9 +9,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import java.util.UUID
 
-internal class VedtakFattetE2ETest: AbstractE2ETest() {
-
+internal class VedtakFattetE2ETest : AbstractE2ETest() {
     @Test
     fun `vedtak fattet medfører låsing av vedtaksperiode-generasjon`() {
         vedtaksløsningenMottarNySøknad()
@@ -45,21 +44,26 @@ internal class VedtakFattetE2ETest: AbstractE2ETest() {
         }
     }
 
-    private fun assertSpesialsak(vedtaksperiodeId: UUID, forventetSpesialsak: Boolean) {
+    private fun assertSpesialsak(
+        vedtaksperiodeId: UUID,
+        forventetSpesialsak: Boolean,
+    ) {
         @Language("PostgreSQL")
         val query = """SELECT true FROM spesialsak WHERE vedtaksperiode_id = ? and ferdigbehandlet = false"""
-        val erSpesialsak = sessionOf(Companion.dataSource).use {
-            it.run(queryOf(query, vedtaksperiodeId).map { it.boolean(1) }.asSingle) ?: false
-        }
+        val erSpesialsak =
+            sessionOf(Companion.dataSource).use {
+                it.run(queryOf(query, vedtaksperiodeId).map { it.boolean(1) }.asSingle) ?: false
+            }
         assertEquals(forventetSpesialsak, erSpesialsak)
     }
 
     private fun assertFerdigBehandledeGenerasjoner(vedtaksperiodeId: UUID) {
         @Language("PostgreSQL")
-        val query = "SELECT 1 FROM selve_vedtaksperiode_generasjon svg WHERE vedtaksperiode_id = :vedtaksperiode_id AND tilstand = '${Generasjon.Låst.navn()}'"
-        val antallFerdigBehandledeGenerasjoner = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, mapOf("vedtaksperiode_id" to vedtaksperiodeId)).map { it.int(1) }.asSingle) ?: 0
-        }
+        val query = "SELECT 1 FROM selve_vedtaksperiode_generasjon svg WHERE vedtaksperiode_id = :vedtaksperiode_id AND tilstand = '${Generasjon.VedtakFattet.navn()}'"
+        val antallFerdigBehandledeGenerasjoner =
+            sessionOf(dataSource).use { session ->
+                session.run(queryOf(query, mapOf("vedtaksperiode_id" to vedtaksperiodeId)).map { it.int(1) }.asSingle) ?: 0
+            }
         assertTrue(antallFerdigBehandledeGenerasjoner > 0)
     }
 }

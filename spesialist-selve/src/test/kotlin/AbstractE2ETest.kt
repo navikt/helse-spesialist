@@ -6,9 +6,6 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
@@ -71,16 +68,38 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.fail
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import kotlin.random.Random.Default.nextInt
 import kotlin.random.Random.Default.nextLong
 
 fun lagFødselsnummer() = nextLong(from = 100000_00000, until = 699999_99999).toString()
+
 fun lagAktørId() = nextLong(from = 1_000_000_000_000, until = 1_000_099_999_999).toString()
+
 fun lagOrganisasjonsnummer() = nextLong(from = 800_000_000, until = 999_999_999).toString()
 
-private val fornavnListe = listOf("Måteholden", "Dypsindig", "Ultrafiolett", "Urettferdig", "Berikende", "Upresis", "Stridlynt", "Rund", "Internasjonal")
-private val mellomnavnListe = listOf("Lysende", "Spennende", "Tidløs", "Hjertelig", "Storslått", "Sjarmerende", "Uforutsigbar", "Behagelig", "Robust", "Sofistikert") + List(10) { null }
-private val etternavnListe = listOf("Diode", "Flom", "Damesykkel", "Undulat", "Bakgrunn", "Genser", "Fornøyelse", "Campingvogn", "Bakkeklaring")
+private val fornavnListe =
+    listOf("Måteholden", "Dypsindig", "Ultrafiolett", "Urettferdig", "Berikende", "Upresis", "Stridlynt", "Rund", "Internasjonal")
+private val mellomnavnListe =
+    listOf(
+        "Lysende",
+        "Spennende",
+        "Tidløs",
+        "Hjertelig",
+        "Storslått",
+        "Sjarmerende",
+        "Uforutsigbar",
+        "Behagelig",
+        "Robust",
+        "Sofistikert",
+    ) +
+        List(10) {
+            null
+        }
+private val etternavnListe =
+    listOf("Diode", "Flom", "Damesykkel", "Undulat", "Bakgrunn", "Genser", "Fornøyelse", "Campingvogn", "Bakkeklaring")
 
 private val organisasjonsnavnDel1 = listOf("NEPE", "KLOVNE", "BOBLEBAD-", "DUSTE", "SKIHOPP", "SMÅBARN", "SPANIA")
 private val organisasjonsnavnDel2 = listOf("AVDELINGEN", "SENTERET", "FORUM", "KLUBBEN", "SNEKKERIET")
@@ -91,12 +110,13 @@ fun lagSaksbehandlerident() = ('A'..'Z').random() + "${nextInt(from = 100_000, u
 
 fun fødselsdato(): LocalDate {
     val end = LocalDate.now().minusYears(18)
-    val start =  end.minusYears(100)
+    val start = end.minusYears(100)
     val randomDayInEpoch = nextLong(start.toEpochDay(), end.toEpochDay())
     return LocalDate.ofEpochDay(randomDayInEpoch)
 }
 
 fun lagFornavn() = fornavnListe.random()
+
 fun lagEtternavn() = etternavnListe.random()
 
 internal class TestPerson {
@@ -117,30 +137,36 @@ internal class TestPerson {
     val vedtaksperiodeId2 = vedtaksperiode2.vedtaksperiodeId
     val utbetalingId1 = vedtaksperiode1.utbetalingId
     val utbetalingId2 = vedtaksperiode2.utbetalingId
+
     override fun toString(): String {
         return "Testdatasett(fødselsnummer='$fødselsnummer', aktørId='$aktørId', orgnummer='$orgnummer', orgnummer2='$orgnummer2', vedtaksperiodeId1=$vedtaksperiodeId1, vedtaksperiodeId2=$vedtaksperiodeId2, utbetalingId1=$utbetalingId1, utbetalingId2=$utbetalingId2)"
     }
 
-    val Int.arbeidsgiver get() = arbeidsgivere[this-1] ?: throw IllegalArgumentException("Arbeidsgiver med index $this finnes ikke")
+    val Int.arbeidsgiver get() = arbeidsgivere[this - 1] ?: throw IllegalArgumentException("Arbeidsgiver med index $this finnes ikke")
 
-    internal fun nyArbeidsgiver() = TestArbeidsgiver(fødselsnummer, aktørId).also {
-        arbeidsgivere[arbeidsgivere.size] = it
-    }
+    internal fun nyArbeidsgiver() =
+        TestArbeidsgiver(fødselsnummer, aktørId).also {
+            arbeidsgivere[arbeidsgivere.size] = it
+        }
 }
 
 internal class TestArbeidsgiver(
     val fødselsnummer: String,
-    val aktørId: String
+    val aktørId: String,
 ) {
     private val vedtaksperioder = mutableMapOf<Int, TestVedtaksperiode>()
     val organisasjonsnummer = lagOrganisasjonsnummer()
     val organisasjonsnavn = lagOrganisasjonsnavn()
 
-    internal fun nyVedtaksperiode() = TestVedtaksperiode(fødselsnummer, aktørId, organisasjonsnummer).also {
-        vedtaksperioder[vedtaksperioder.size] = it
-    }
+    internal fun nyVedtaksperiode() =
+        TestVedtaksperiode(fødselsnummer, aktørId, organisasjonsnummer).also {
+            vedtaksperioder[vedtaksperioder.size] = it
+        }
 
-    val Int.vedtaksperiode get() = vedtaksperioder[this] ?: throw IllegalArgumentException("Vedtaksperiode med index $this for arbeidsgiver $organisasjonsnummer finnes ikke")
+    val Int.vedtaksperiode get() =
+        vedtaksperioder[this] ?: throw IllegalArgumentException(
+            "Vedtaksperiode med index $this for arbeidsgiver $organisasjonsnummer finnes ikke",
+        )
 }
 
 internal class TestVedtaksperiode(
@@ -156,25 +182,28 @@ internal class TestVedtaksperiode(
 internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val testperson = TestPerson().also { println("Bruker testdata: $it") }
     val FØDSELSNUMMER = testperson.fødselsnummer
-    val ORGNR = with(testperson) {
-        1.arbeidsgiver.organisasjonsnummer
-    }
-    val ORGNR2 = with(testperson) {
-        2.arbeidsgiver.organisasjonsnummer
-    }
+    val ORGNR =
+        with(testperson) {
+            1.arbeidsgiver.organisasjonsnummer
+        }
+    val ORGNR2 =
+        with(testperson) {
+            2.arbeidsgiver.organisasjonsnummer
+        }
     val AKTØR = testperson.aktørId
     val VEDTAKSPERIODE_ID = testperson.vedtaksperiodeId1
     val VEDTAKSPERIODE_ID_2 = testperson.vedtaksperiodeId2
     val UTBETALING_ID = testperson.utbetalingId1
     private val behandlinger = mutableMapOf<UUID, MutableList<UUID>>()
-    protected val godkjenningsbehovTestdata get() = GodkjenningsbehovTestdata(
-        fødselsnummer = FØDSELSNUMMER,
-        aktørId = AKTØR,
-        organisasjonsnummer = ORGNR,
-        vedtaksperiodeId = VEDTAKSPERIODE_ID,
-        utbetalingId = UTBETALING_ID,
-        spleisBehandlingId = behandlinger.getValue(VEDTAKSPERIODE_ID).last()
-    )
+    protected val godkjenningsbehovTestdata get() =
+        GodkjenningsbehovTestdata(
+            fødselsnummer = FØDSELSNUMMER,
+            aktørId = AKTØR,
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID,
+            spleisBehandlingId = behandlinger.getValue(VEDTAKSPERIODE_ID).last(),
+        )
     private val avviksvurderingTestdata = AvviksvurderingTestdata()
     private lateinit var utbetalingId: UUID
     internal val snapshotClient = mockk<SnapshotClient>()
@@ -188,13 +217,14 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val SAKSBEHANDLER_EPOST = "augunn.saksbehandler@nav.no"
     protected val SAKSBEHANDLER_IDENT = "S199999"
     protected val SAKSBEHANDLER_NAVN = "Augunn Saksbehandler"
-    private val saksbehandler = SaksbehandlerFraApi(
-        oid = SAKSBEHANDLER_OID,
-        navn = SAKSBEHANDLER_NAVN,
-        epost = SAKSBEHANDLER_EPOST,
-        ident = SAKSBEHANDLER_IDENT,
-        grupper = emptyList()
-    )
+    private val saksbehandler =
+        SaksbehandlerFraApi(
+            oid = SAKSBEHANDLER_OID,
+            navn = SAKSBEHANDLER_NAVN,
+            epost = SAKSBEHANDLER_EPOST,
+            ident = SAKSBEHANDLER_IDENT,
+            grupper = emptyList(),
+        )
 
     @BeforeEach
     internal fun resetTestSetup() {
@@ -221,10 +251,13 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         require(this > 0) { "Forventet oppgaveId for vedtaksperiodeId=$vedtaksperiodeId må være større enn 0" }
         @Language("PostgreSQL")
         val query = "SELECT id FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?)"
-        val oppgaveIder = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, vedtaksperiodeId).map { it.long("id") }.asList)
+        val oppgaveIder =
+            sessionOf(dataSource).use { session ->
+                session.run(queryOf(query, vedtaksperiodeId).map { it.long("id") }.asList)
+            }
+        assertTrue(oppgaveIder.size >= this) {
+            "Forventer at det finnes minimum $this antall oppgaver for vedtaksperiodeId=$vedtaksperiodeId. Fant ${oppgaveIder.size} oppgaver."
         }
-        assertTrue(oppgaveIder.size >= this) { "Forventer at det finnes minimum $this antall oppgaver for vedtaksperiodeId=$vedtaksperiodeId. Fant ${oppgaveIder.size} oppgaver." }
         return oppgaveIder[this - 1]
     }
 
@@ -241,11 +274,12 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     ) {
         spesialistBehandlerGodkjenningsbehovFremTilRisikovurdering(
             avviksvurderingTestdata = avviksvurderingTestdata,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(
-                periodeFom = fom,
-                periodeTom = tom,
-                skjæringstidspunkt = skjæringstidspunkt
-            )
+            godkjenningsbehovTestdata =
+                godkjenningsbehovTestdata.copy(
+                    periodeFom = fom,
+                    periodeTom = tom,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                ),
         )
         håndterRisikovurderingløsning(vedtaksperiodeId = vedtaksperiodeId)
         håndterUtbetalingUtbetalt()
@@ -258,7 +292,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fullmakter: List<Fullmakt> = emptyList(),
         risikofunn: List<Risikofunn> = emptyList(),
         harOppdatertMetadata: Boolean = false,
-        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata
+        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             regelverksvarsler = regelverksvarsler,
@@ -315,7 +349,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
             avviksvurderingTestdata = avviksvurderingTestdata,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata,
         )
         håndterVergemålløsning(fullmakter = fullmakter)
     }
@@ -330,29 +364,34 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
         godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot(
-            versjon = snapshotversjon,
-            fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
-            aktørId = godkjenningsbehovTestdata.aktørId,
-            organisasjonsnummer = godkjenningsbehovTestdata.organisasjonsnummer,
-            vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
-            utbetalingId = godkjenningsbehovTestdata.utbetalingId,
-            arbeidsgiverbeløp = arbeidsgiverbeløp,
-            personbeløp = personbeløp,
-        )
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns
+            snapshot(
+                versjon = snapshotversjon,
+                fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
+                aktørId = godkjenningsbehovTestdata.aktørId,
+                organisasjonsnummer = godkjenningsbehovTestdata.organisasjonsnummer,
+                vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
+                utbetalingId = godkjenningsbehovTestdata.utbetalingId,
+                arbeidsgiverbeløp = arbeidsgiverbeløp,
+                personbeløp = personbeløp,
+            )
         if (regelverksvarsler.isNotEmpty()) håndterAktivitetsloggNyAktivitet(varselkoder = regelverksvarsler)
         håndterGodkjenningsbehov(
             harOppdatertMetainfo = harOppdatertMetadata,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
             avviksvurderingTestdata = avviksvurderingTestdata,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata,
         )
         if (!harOppdatertMetadata) {
             håndterPersoninfoløsning()
             håndterEnhetløsning(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId, enhet = enhet)
             håndterInfotrygdutbetalingerløsning(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
-            if (godkjenningsbehovTestdata.orgnummereMedRelevanteArbeidsforhold.isNotEmpty()) håndterArbeidsgiverinformasjonløsning(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
+            if (godkjenningsbehovTestdata.orgnummereMedRelevanteArbeidsforhold.isNotEmpty()) {
+                håndterArbeidsgiverinformasjonløsning(
+                    vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
+                )
+            }
             håndterArbeidsgiverinformasjonløsning(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
             håndterArbeidsforholdløsning(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
         }
@@ -392,13 +431,15 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
             avviksvurderingTestdata = avviksvurderingTestdata,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata,
         )
-        if (!harRisikovurdering) håndterRisikovurderingløsning(
-            kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
-            risikofunn = risikofunn,
-            vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId
-        )
+        if (!harRisikovurdering) {
+            håndterRisikovurderingløsning(
+                kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
+                risikofunn = risikofunn,
+                vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
+            )
+        }
         if (!erFerdigstilt(sisteGodkjenningsbehovId)) håndterInntektløsning()
     }
 
@@ -445,18 +486,19 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
-        spleisBehandlingId: UUID = UUID.randomUUID()
+        spleisBehandlingId: UUID = UUID.randomUUID(),
     ) {
         behandlinger.getOrPut(vedtaksperiodeId) { mutableListOf() }.addLast(spleisBehandlingId)
-        sisteMeldingId = meldingssender.sendBehandlingOpprettet(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            fom = fom,
-            tom = tom,
-            spleisBehandlingId = spleisBehandlingId
-        )
+        sisteMeldingId =
+            meldingssender.sendBehandlingOpprettet(
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                fom = fom,
+                tom = tom,
+                spleisBehandlingId = spleisBehandlingId,
+            )
         assertIngenEtterspurteBehov()
         assertVedtaksperiodeEksisterer(vedtaksperiodeId)
     }
@@ -471,17 +513,20 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         gjeldendeTilstand: String? = null,
     ) {
         val erRevurdering = erRevurdering(vedtaksperiodeId)
-        sisteMeldingId = meldingssender.sendVedtaksperiodeEndret(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            forrigeTilstand = forrigeTilstand
-                ?: if (erRevurdering) "AVVENTER_SIMULERING_REVURDERING" else "AVVENTER_SIMULERING",
-            gjeldendeTilstand = gjeldendeTilstand
-                ?: if (erRevurdering) "AVVENTER_GODKJENNING_REVURDERING" else "AVVENTER_GODKJENNING",
-            forårsaketAvId = forårsaketAvId
-        )
+        sisteMeldingId =
+            meldingssender.sendVedtaksperiodeEndret(
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                forrigeTilstand =
+                    forrigeTilstand
+                        ?: if (erRevurdering) "AVVENTER_SIMULERING_REVURDERING" else "AVVENTER_SIMULERING",
+                gjeldendeTilstand =
+                    gjeldendeTilstand
+                        ?: if (erRevurdering) "AVVENTER_GODKJENNING_REVURDERING" else "AVVENTER_GODKJENNING",
+                forårsaketAvId = forårsaketAvId,
+            )
     }
 
     protected fun håndterVedtaksperiodeReberegnet(
@@ -492,15 +537,16 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         forårsaketAvId: UUID = UUID.randomUUID(),
     ) {
         val erRevurdering = erRevurdering(vedtaksperiodeId)
-        sisteMeldingId = meldingssender.sendVedtaksperiodeEndret(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            forrigeTilstand = if (erRevurdering) "AVVENTER_GODKJENNING_REVURDERING" else "AVVENTER_GODKJENNING",
-            gjeldendeTilstand = if (erRevurdering) "AVVENTER_HISTORIKK_REVURDERING" else "AVVENTER_HISTORIKK",
-            forårsaketAvId = forårsaketAvId
-        )
+        sisteMeldingId =
+            meldingssender.sendVedtaksperiodeEndret(
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                forrigeTilstand = if (erRevurdering) "AVVENTER_GODKJENNING_REVURDERING" else "AVVENTER_GODKJENNING",
+                gjeldendeTilstand = if (erRevurdering) "AVVENTER_HISTORIKK_REVURDERING" else "AVVENTER_HISTORIKK",
+                forårsaketAvId = forårsaketAvId,
+            )
         assertIngenEtterspurteBehov()
     }
 
@@ -510,12 +556,13 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
     ) {
-        sisteMeldingId = meldingssender.sendVedtaksperiodeForkastet(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-        )
+        sisteMeldingId =
+            meldingssender.sendVedtaksperiodeForkastet(
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+            )
         assertIngenEtterspurteBehov()
     }
 
@@ -527,13 +574,14 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         utbetalingId: UUID = testperson.utbetalingId1,
     ) {
         if (!this::utbetalingId.isInitialized || utbetalingId != this.utbetalingId) nyUtbetalingId(utbetalingId)
-        sisteMeldingId = meldingssender.sendVedtaksperiodeNyUtbetaling(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = this.utbetalingId
-        )
+        sisteMeldingId =
+            meldingssender.sendVedtaksperiodeNyUtbetaling(
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                utbetalingId = this.utbetalingId,
+            )
         assertIngenEtterspurteBehov()
     }
 
@@ -547,13 +595,14 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         varselkoder.forEach {
             lagVarseldefinisjon(it)
         }
-        sisteMeldingId = meldingssender.sendAktivitetsloggNyAktivitet(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            varselkoder = varselkoder
-        )
+        sisteMeldingId =
+            meldingssender.sendAktivitetsloggNyAktivitet(
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                varselkoder = varselkoder,
+            )
         assertIngenEtterspurteBehov()
     }
 
@@ -572,11 +621,17 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertEtterspurteBehov("ÅpneOppgaver")
     }
 
-    protected fun håndterTilbakedateringBehandlet(fødselsnummer: String = FØDSELSNUMMER, perioder: List<Periode>) {
+    protected fun håndterTilbakedateringBehandlet(
+        fødselsnummer: String = FØDSELSNUMMER,
+        perioder: List<Periode>,
+    ) {
         sisteMeldingId = meldingssender.sendTilbakedateringBehandlet(fødselsnummer, perioder)
     }
 
-    protected fun håndterKommandokjedePåminnelse(commandContextId: UUID, meldingId: UUID) {
+    protected fun håndterKommandokjedePåminnelse(
+        commandContextId: UUID,
+        meldingId: UUID,
+    ) {
         sisteMeldingId = meldingssender.sendKommandokjedePåminnelse(commandContextId, meldingId)
     }
 
@@ -597,7 +652,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             utbetalingtype,
             arbeidsgiverbeløp,
             personbeløp,
-            utbetalingId = this.utbetalingId
+            utbetalingId = this.utbetalingId,
         )
         assertIngenEtterspurteBehov()
     }
@@ -637,18 +692,19 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         utbetalingId: UUID = this.utbetalingId,
     ) {
         nyUtbetalingId(utbetalingId)
-        sisteMeldingId = meldingssender.sendUtbetalingEndret(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            utbetalingId = this.utbetalingId,
-            type = utbetalingtype,
-            arbeidsgiverbeløp = arbeidsgiverbeløp,
-            personbeløp = personbeløp,
-            forrigeStatus = forrigeStatus,
-            gjeldendeStatus = gjeldendeStatus,
-            opprettet = opprettet
-        )
+        sisteMeldingId =
+            meldingssender.sendUtbetalingEndret(
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                utbetalingId = this.utbetalingId,
+                type = utbetalingtype,
+                arbeidsgiverbeløp = arbeidsgiverbeløp,
+                personbeløp = personbeløp,
+                forrigeStatus = forrigeStatus,
+                gjeldendeStatus = gjeldendeStatus,
+                opprettet = opprettet,
+            )
     }
 
     protected fun håndterUtbetalingFeilet(
@@ -669,7 +725,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             arbeidsgiverbeløp,
             personbeløp,
             gjeldendeStatus = UTBETALING_FEILET,
-            utbetalingId = this.utbetalingId
+            utbetalingId = this.utbetalingId,
         )
         assertIngenEtterspurteBehov()
         assertIngenUtgåendeMeldinger()
@@ -687,7 +743,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             organisasjonsnummer,
             forrigeStatus = forrigeStatus,
             gjeldendeStatus = FORKASTET,
-            utbetalingId = this.utbetalingId
+            utbetalingId = this.utbetalingId,
         )
         assertIngenEtterspurteBehov()
     }
@@ -703,7 +759,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             organisasjonsnummer,
             forrigeStatus = SENDT,
             gjeldendeStatus = UTBETALT,
-            utbetalingId = this.utbetalingId
+            utbetalingId = this.utbetalingId,
         )
         assertIngenEtterspurteBehov()
     }
@@ -713,7 +769,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         saksbehandler_epost: String,
     ) {
         @Suppress("SqlResolve")
-        fun fagsystemidFor(utbetalingId: UUID, tilArbeidsgiver: Boolean): String {
+        fun fagsystemidFor(
+            utbetalingId: UUID,
+            tilArbeidsgiver: Boolean,
+        ): String {
             val fagsystemidtype = if (tilArbeidsgiver) "arbeidsgiver" else "person"
             return sessionOf(dataSource).use { session ->
                 @Language("PostgreSQL")
@@ -725,13 +784,14 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             }
         }
 
-        sisteMeldingId = meldingssender.sendUtbetalingAnnullert(
-            fødselsnummer = fødselsnummer,
-            utbetalingId = utbetalingId,
-            epost = saksbehandler_epost,
-            arbeidsgiverFagsystemId = fagsystemidFor(utbetalingId, tilArbeidsgiver = true),
-            personFagsystemId = fagsystemidFor(utbetalingId, tilArbeidsgiver = false),
-        )
+        sisteMeldingId =
+            meldingssender.sendUtbetalingAnnullert(
+                fødselsnummer = fødselsnummer,
+                utbetalingId = utbetalingId,
+                epost = saksbehandler_epost,
+                arbeidsgiverFagsystemId = fagsystemidFor(utbetalingId, tilArbeidsgiver = true),
+                personFagsystemId = fagsystemidFor(utbetalingId, tilArbeidsgiver = false),
+            )
         assertIngenEtterspurteBehov()
     }
 
@@ -742,15 +802,23 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
         val erRevurdering = erRevurdering(godkjenningsbehovTestdata.vedtaksperiodeId)
-        håndterVedtaksperiodeNyUtbetaling(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId, utbetalingId = godkjenningsbehovTestdata.utbetalingId)
+        håndterVedtaksperiodeNyUtbetaling(
+            vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
+            utbetalingId = godkjenningsbehovTestdata.utbetalingId,
+        )
         håndterUtbetalingOpprettet(
             utbetalingtype = if (erRevurdering) "REVURDERING" else "UTBETALING",
             utbetalingId = godkjenningsbehovTestdata.utbetalingId,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
-            personbeløp = personbeløp
+            personbeløp = personbeløp,
         )
         håndterVedtaksperiodeEndret(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
-        spinnvillAvviksvurderer(avviksvurderingTestdata, godkjenningsbehovTestdata.fødselsnummer, godkjenningsbehovTestdata.aktørId, godkjenningsbehovTestdata.organisasjonsnummer)
+        spinnvillAvviksvurderer(
+            avviksvurderingTestdata,
+            godkjenningsbehovTestdata.fødselsnummer,
+            godkjenningsbehovTestdata.aktørId,
+            godkjenningsbehovTestdata.organisasjonsnummer,
+        )
         sisteMeldingId = sendGodkjenningsbehov(godkjenningsbehovTestdata)
         sisteGodkjenningsbehovId = sisteMeldingId
     }
@@ -762,21 +830,24 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
         godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
-        val alleArbeidsforhold = sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = "SELECT a.orgnummer FROM arbeidsgiver a"
-            session.run(queryOf(query).map { it.string("orgnummer") }.asList)
-        }
+        val alleArbeidsforhold =
+            sessionOf(dataSource).use { session ->
+                @Language("PostgreSQL")
+                val query = "SELECT a.orgnummer FROM arbeidsgiver a"
+                session.run(queryOf(query).map { it.string("orgnummer") }.asList)
+            }
         håndterGodkjenningsbehovUtenValidering(
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
             avviksvurderingTestdata = avviksvurderingTestdata,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(avviksvurderingId = avviksvurderingTestdata.avviksvurderingId)
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(avviksvurderingId = avviksvurderingTestdata.avviksvurderingId),
         )
 
         when {
             !harOppdatertMetainfo -> assertEtterspurteBehov("HentPersoninfoV2")
-            !godkjenningsbehovTestdata.orgnummereMedRelevanteArbeidsforhold.all { it in alleArbeidsforhold } -> assertEtterspurteBehov("Arbeidsgiverinformasjon")
+            !godkjenningsbehovTestdata.orgnummereMedRelevanteArbeidsforhold.all {
+                it in alleArbeidsforhold
+            } -> assertEtterspurteBehov("Arbeidsgiverinformasjon")
             else -> assertEtterspurteBehov("Vergemål")
         }
     }
@@ -790,11 +861,12 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
     ) {
         assertEtterspurteBehov("HentPersoninfoV2")
-        sisteMeldingId = meldingssender.sendPersoninfoløsning(
-            aktørId,
-            fødselsnummer,
-            adressebeskyttelse
-        )
+        sisteMeldingId =
+            meldingssender.sendPersoninfoløsning(
+                aktørId,
+                fødselsnummer,
+                adressebeskyttelse,
+            )
     }
 
     protected fun håndterPersoninfoløsningUtenValidering(
@@ -802,11 +874,12 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
     ) {
-        sisteMeldingId = meldingssender.sendPersoninfoløsning(
-            aktørId,
-            fødselsnummer,
-            adressebeskyttelse,
-        )
+        sisteMeldingId =
+            meldingssender.sendPersoninfoløsning(
+                aktørId,
+                fødselsnummer,
+                adressebeskyttelse,
+            )
     }
 
     protected fun håndterEnhetløsning(
@@ -828,12 +901,13 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
     ) {
         assertEtterspurteBehov("HentInfotrygdutbetalinger")
-        sisteMeldingId = meldingssender.sendInfotrygdutbetalingerløsning(
-            aktørId,
-            fødselsnummer,
-            organisasjonsnummer,
-            vedtaksperiodeId
-        )
+        sisteMeldingId =
+            meldingssender.sendInfotrygdutbetalingerløsning(
+                aktørId,
+                fødselsnummer,
+                organisasjonsnummer,
+                vedtaksperiodeId,
+            )
     }
 
     protected fun håndterArbeidsgiverinformasjonløsning(
@@ -846,22 +920,24 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         val erKompositt = testRapid.inspektør.sisteBehov("Arbeidsgiverinformasjon", "HentPersoninfoV2") != null
         if (erKompositt) {
             assertEtterspurteBehov("Arbeidsgiverinformasjon", "HentPersoninfoV2")
-            sisteMeldingId = meldingssender.sendArbeidsgiverinformasjonKompositt(
-                aktørId,
-                fødselsnummer,
-                organisasjonsnummer,
-                vedtaksperiodeId
-            )
+            sisteMeldingId =
+                meldingssender.sendArbeidsgiverinformasjonKompositt(
+                    aktørId,
+                    fødselsnummer,
+                    organisasjonsnummer,
+                    vedtaksperiodeId,
+                )
             return
         }
         assertEtterspurteBehov("Arbeidsgiverinformasjon")
-        sisteMeldingId = meldingssender.sendArbeidsgiverinformasjonløsning(
-            aktørId,
-            fødselsnummer,
-            organisasjonsnummer,
-            vedtaksperiodeId,
-            arbeidsgiverinformasjonJson
-        )
+        sisteMeldingId =
+            meldingssender.sendArbeidsgiverinformasjonløsning(
+                aktørId,
+                fødselsnummer,
+                organisasjonsnummer,
+                vedtaksperiodeId,
+                arbeidsgiverinformasjonJson,
+            )
     }
 
     protected fun håndterArbeidsforholdløsning(
@@ -923,14 +999,15 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         risikofunn: List<Risikofunn> = emptyList(),
     ) {
         assertEtterspurteBehov("Risikovurdering")
-        sisteMeldingId = meldingssender.sendRisikovurderingløsning(
-            aktørId,
-            fødselsnummer,
-            organisasjonsnummer,
-            vedtaksperiodeId,
-            kanGodkjennesAutomatisk,
-            risikofunn
-        )
+        sisteMeldingId =
+            meldingssender.sendRisikovurderingløsning(
+                aktørId,
+                fødselsnummer,
+                organisasjonsnummer,
+                vedtaksperiodeId,
+                kanGodkjennesAutomatisk,
+                risikofunn,
+            )
     }
 
     protected fun håndterSaksbehandlerløsning(
@@ -940,19 +1017,21 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         kommentar: String? = null,
         begrunnelser: List<String> = emptyList(),
     ) {
-        fun oppgaveIdFor(vedtaksperiodeId: UUID): Long = sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query =
-                "SELECT id FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?) ORDER BY id DESC LIMIT 1;"
-            requireNotNull(session.run(queryOf(query, vedtaksperiodeId).map { it.long(1) }.asSingle))
-        }
+        fun oppgaveIdFor(vedtaksperiodeId: UUID): Long =
+            sessionOf(dataSource).use { session ->
+                @Language("PostgreSQL")
+                val query =
+                    "SELECT id FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?) ORDER BY id DESC LIMIT 1;"
+                requireNotNull(session.run(queryOf(query, vedtaksperiodeId).map { it.long(1) }.asSingle))
+            }
 
-        fun godkjenningsbehovIdFor(vedtaksperiodeId: UUID): UUID = sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query =
-                "SELECT id FROM hendelse h INNER JOIN vedtaksperiode_hendelse vh on h.id = vh.hendelse_ref WHERE vh.vedtaksperiode_id = ? AND h.type = 'GODKJENNING';"
-            requireNotNull(session.run(queryOf(query, vedtaksperiodeId).map { it.uuid("id") }.asSingle))
-        }
+        fun godkjenningsbehovIdFor(vedtaksperiodeId: UUID): UUID =
+            sessionOf(dataSource).use { session ->
+                @Language("PostgreSQL")
+                val query =
+                    "SELECT id FROM hendelse h INNER JOIN vedtaksperiode_hendelse vh on h.id = vh.hendelse_ref WHERE vh.vedtaksperiode_id = ? AND h.type = 'GODKJENNING';"
+                requireNotNull(session.run(queryOf(query, vedtaksperiodeId).map { it.uuid("id") }.asSingle))
+            }
 
         fun settOppgaveIAvventerSystem(oppgaveId: Long) {
             @Language("PostgreSQL")
@@ -965,16 +1044,20 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         val oppgaveId = oppgaveIdFor(vedtaksperiodeId)
         val godkjenningsbehovId = godkjenningsbehovIdFor(vedtaksperiodeId)
         settOppgaveIAvventerSystem(oppgaveId)
-        sisteMeldingId = meldingssender.sendSaksbehandlerløsning(
-            fødselsnummer,
-            oppgaveId = oppgaveId,
-            godkjenningsbehovId = godkjenningsbehovId,
-            godkjent = godkjent,
-            begrunnelser = begrunnelser,
-            kommentar = kommentar
-        )
-        if (godkjent) assertUtgåendeMelding("vedtaksperiode_godkjent")
-        else assertUtgåendeMelding("vedtaksperiode_avvist")
+        sisteMeldingId =
+            meldingssender.sendSaksbehandlerløsning(
+                fødselsnummer,
+                oppgaveId = oppgaveId,
+                godkjenningsbehovId = godkjenningsbehovId,
+                godkjent = godkjent,
+                begrunnelser = begrunnelser,
+                kommentar = kommentar,
+            )
+        if (godkjent) {
+            assertUtgåendeMelding("vedtaksperiode_godkjent")
+        } else {
+            assertUtgåendeMelding("vedtaksperiode_avvist")
+        }
         assertUtgåendeBehovløsning("Godkjenning")
     }
 
@@ -992,20 +1075,21 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         tags: List<String> = emptyList(),
     ) {
         val utbetalingId = if (this::utbetalingId.isInitialized) this.utbetalingId else null
-        sisteMeldingId = meldingssender.sendAvsluttetMedVedtak(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            spleisBehandlingId = spleisBehandlingId,
-            utbetalingId = utbetalingId,
-            fom = fom,
-            tom = tom,
-            skjæringstidspunkt = skjæringstidspunkt,
-            fastsattType = fastsattType,
-            settInnAvviksvurderingFraSpleis = settInnAvviksvurderingFraSpleis,
-            tags = tags
-        )
+        sisteMeldingId =
+            meldingssender.sendAvsluttetMedVedtak(
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                spleisBehandlingId = spleisBehandlingId,
+                utbetalingId = utbetalingId,
+                fom = fom,
+                tom = tom,
+                skjæringstidspunkt = skjæringstidspunkt,
+                fastsattType = fastsattType,
+                settInnAvviksvurderingFraSpleis = settInnAvviksvurderingFraSpleis,
+                tags = tags,
+            )
     }
 
     protected fun håndterAvsluttetUtenVedtak(
@@ -1018,16 +1102,17 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         tom: LocalDate = 11.januar,
         skjæringstidspunkt: LocalDate = fom,
     ) {
-        sisteMeldingId = meldingssender.sendAvsluttetUtenVedtak(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            spleisBehandlingId = spleisBehandlingId,
-            fom = fom,
-            tom = tom,
-            skjæringstidspunkt = skjæringstidspunkt,
-        )
+        sisteMeldingId =
+            meldingssender.sendAvsluttetUtenVedtak(
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                spleisBehandlingId = spleisBehandlingId,
+                fom = fom,
+                tom = tom,
+                skjæringstidspunkt = skjæringstidspunkt,
+            )
     }
 
     protected fun håndterVedtakFattet(
@@ -1065,28 +1150,37 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
         skjæringstidspunkt: LocalDate = 1.januar,
-        arbeidsgivere: List<SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi> = listOf(
-            SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi(
-                organisasjonsnummer = organisasjonsnummer,
-                årlig = 1.0,
-                fraÅrlig = 1.0,
-                årsak = "årsak",
-                type = SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi.SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT,
-                begrunnelseMal = "begrunnelseMal",
-                begrunnelseKonklusjon = "begrunnelseKonklusjon",
-                begrunnelseFritekst = "begrunnelseFritekst",
-                lovhjemmel = LovhjemmelFraApi(paragraf = "paragraf", ledd = "ledd", bokstav = "bokstav", lovverk = "folketrygdloven", lovverksversjon = ""),
-                initierendeVedtaksperiodeId = vedtaksperiodeId.toString(),
-            )
-        ),
+        arbeidsgivere: List<SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi> =
+            listOf(
+                SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi(
+                    organisasjonsnummer = organisasjonsnummer,
+                    årlig = 1.0,
+                    fraÅrlig = 1.0,
+                    årsak = "årsak",
+                    type = SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi.SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT,
+                    begrunnelseMal = "begrunnelseMal",
+                    begrunnelseKonklusjon = "begrunnelseKonklusjon",
+                    begrunnelseFritekst = "begrunnelseFritekst",
+                    lovhjemmel =
+                        LovhjemmelFraApi(
+                            paragraf = "paragraf",
+                            ledd = "ledd",
+                            bokstav = "bokstav",
+                            lovverk = "folketrygdloven",
+                            lovverksversjon = "",
+                        ),
+                    initierendeVedtaksperiodeId = vedtaksperiodeId.toString(),
+                ),
+            ),
     ) {
         håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "skjønnsmessig_fastsettelse") {
-            val handling = SkjønnsfastsettSykepengegrunnlagHandlingFraApi(
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                skjæringstidspunkt = skjæringstidspunkt,
-                arbeidsgivere = arbeidsgivere,
-            )
+            val handling =
+                SkjønnsfastsettSykepengegrunnlagHandlingFraApi(
+                    aktørId = aktørId,
+                    fødselsnummer = fødselsnummer,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    arbeidsgivere = arbeidsgivere,
+                )
             testMediator.håndter(handling, saksbehandler)
             // Her må det gjøres kall til api for å sende inn skjønnsfastsettelse
         }
@@ -1097,19 +1191,21 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
-        dager: List<OverstyrDagFraApi> = listOf(
-            OverstyrDagFraApi(1.januar(1970), Dagtype.Feriedag.toString(), Dagtype.Sykedag.toString(), null, 100, null)
-        ),
+        dager: List<OverstyrDagFraApi> =
+            listOf(
+                OverstyrDagFraApi(1.januar(1970), Dagtype.Feriedag.toString(), Dagtype.Sykedag.toString(), null, 100, null),
+            ),
     ) {
         håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "overstyr_tidslinje") {
-            val handling = OverstyrTidslinjeHandlingFraApi(
-                vedtaksperiodeId,
-                organisasjonsnummer,
-                fødselsnummer,
-                aktørId,
-                "En begrunnelse",
-                dager
-            )
+            val handling =
+                OverstyrTidslinjeHandlingFraApi(
+                    vedtaksperiodeId,
+                    organisasjonsnummer,
+                    fødselsnummer,
+                    aktørId,
+                    "En begrunnelse",
+                    dager,
+                )
             testMediator.håndter(handling, saksbehandler)
             // Her må det gjøres kall til api for å sende inn overstyring av tidslinje
         }
@@ -1119,20 +1215,20 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         skjæringstidspunkt: LocalDate = 1.januar(1970),
-        arbeidsgivere: List<OverstyrArbeidsgiverFraApi> = listOf(
-            OverstyrArbeidsgiverFraApi(
-                organisasjonsnummer = ORGNR,
-                månedligInntekt = 25000.0,
-                fraMånedligInntekt = 25001.0,
-                forklaring = "testbortforklaring",
-                lovhjemmel = LovhjemmelFraApi("8-28", "LEDD_1", "BOKSTAV_A", "folketrygdloven", "1970-01-01"),
-                refusjonsopplysninger = null,
-                fraRefusjonsopplysninger = null,
-                begrunnelse = "en begrunnelse"
-            )
-        ),
-
-        ) {
+        arbeidsgivere: List<OverstyrArbeidsgiverFraApi> =
+            listOf(
+                OverstyrArbeidsgiverFraApi(
+                    organisasjonsnummer = ORGNR,
+                    månedligInntekt = 25000.0,
+                    fraMånedligInntekt = 25001.0,
+                    forklaring = "testbortforklaring",
+                    lovhjemmel = LovhjemmelFraApi("8-28", "LEDD_1", "BOKSTAV_A", "folketrygdloven", "1970-01-01"),
+                    refusjonsopplysninger = null,
+                    fraRefusjonsopplysninger = null,
+                    begrunnelse = "en begrunnelse",
+                ),
+            ),
+    ) {
         håndterOverstyring(aktørId, fødselsnummer, ORGNR, "overstyr_inntekt_og_refusjon") {
             val handling =
                 OverstyrInntektOgRefusjonHandlingFraApi(aktørId, fødselsnummer, skjæringstidspunkt, arbeidsgivere)
@@ -1145,23 +1241,25 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         skjæringstidspunkt: LocalDate = 1.januar,
-        overstyrteArbeidsforhold: List<ArbeidsforholdFraApi> = listOf(
-            ArbeidsforholdFraApi(
-                orgnummer = organisasjonsnummer,
-                deaktivert = true,
-                begrunnelse = "begrunnelse",
-                forklaring = "forklaring",
-                lovhjemmel = LovhjemmelFraApi("8-15", null, null, "folketrygdloven", "1998-12-18"),
-            )
-        ),
+        overstyrteArbeidsforhold: List<ArbeidsforholdFraApi> =
+            listOf(
+                ArbeidsforholdFraApi(
+                    orgnummer = organisasjonsnummer,
+                    deaktivert = true,
+                    begrunnelse = "begrunnelse",
+                    forklaring = "forklaring",
+                    lovhjemmel = LovhjemmelFraApi("8-15", null, null, "folketrygdloven", "1998-12-18"),
+                ),
+            ),
     ) {
         håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "overstyr_arbeidsforhold") {
-            val handling = OverstyrArbeidsforholdHandlingFraApi(
-                fødselsnummer,
-                aktørId,
-                skjæringstidspunkt,
-                overstyrteArbeidsforhold
-            )
+            val handling =
+                OverstyrArbeidsforholdHandlingFraApi(
+                    fødselsnummer,
+                    aktørId,
+                    skjæringstidspunkt,
+                    overstyrteArbeidsforhold,
+                )
             testMediator.håndter(handling, saksbehandler)
         }
     }
@@ -1181,55 +1279,72 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         håndterVedtaksperiodeReberegnet(aktørId, fødselsnummer, organisasjonsnummer)
     }
 
-    private fun håndterOverstyringIgangsatt(fødselsnummer: String, kildeId: UUID) {
-        sisteMeldingId = meldingssender.sendOverstyringIgangsatt(
-            fødselsnummer = fødselsnummer,
-            orgnummer = ORGNR,
-            berørtePerioder = listOf(
-                mapOf(
-                    "vedtaksperiodeId" to "${testperson.vedtaksperiodeId1}"
-                )
-            ),
-            kilde = kildeId
-        )
+    private fun håndterOverstyringIgangsatt(
+        fødselsnummer: String,
+        kildeId: UUID,
+    ) {
+        sisteMeldingId =
+            meldingssender.sendOverstyringIgangsatt(
+                fødselsnummer = fødselsnummer,
+                orgnummer = ORGNR,
+                berørtePerioder =
+                    listOf(
+                        mapOf(
+                            "vedtaksperiodeId" to "${testperson.vedtaksperiodeId1}",
+                        ),
+                    ),
+                kilde = kildeId,
+            )
     }
 
     private fun erRevurdering(vedtaksperiodeId: UUID): Boolean {
         return sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query =
-                "SELECT true FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? AND tilstand = '${Generasjon.Låst.navn()}' ORDER BY id DESC"
+                "SELECT true FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? AND tilstand = '${Generasjon.VedtakFattet.navn()}' ORDER BY id DESC"
             session.run(queryOf(query, vedtaksperiodeId).map { it.boolean(1) }.asSingle) ?: false
         }
     }
 
-    protected fun assertUtbetalinger(utbetalingId: UUID, forventetAntall: Int) {
+    protected fun assertUtbetalinger(
+        utbetalingId: UUID,
+        forventetAntall: Int,
+    ) {
         @Language("PostgreSQL")
         val query =
             "SELECT COUNT(1) FROM utbetaling_id ui INNER JOIN utbetaling u on ui.id = u.utbetaling_id_ref WHERE ui.utbetaling_id = ?"
-        val antall = sessionOf(dataSource).use {
-            it.run(queryOf(query, utbetalingId).map { it.int(1) }.asSingle)
-        }
+        val antall =
+            sessionOf(dataSource).use {
+                it.run(queryOf(query, utbetalingId).map { it.int(1) }.asSingle)
+            }
         assertEquals(forventetAntall, antall)
     }
 
-    protected fun assertFeilendeMeldinger(forventetAntall: Int, hendelseId: UUID) {
+    protected fun assertFeilendeMeldinger(
+        forventetAntall: Int,
+        hendelseId: UUID,
+    ) {
         @Language("PostgreSQL")
         val query = "SELECT COUNT(1) FROM feilende_meldinger WHERE id = :id"
-        val antall = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, mapOf("id" to hendelseId)).map { it.int(1) }.asSingle)
-        }
+        val antall =
+            sessionOf(dataSource).use { session ->
+                session.run(queryOf(query, mapOf("id" to hendelseId)).map { it.int(1) }.asSingle)
+            }
         assertEquals(forventetAntall, antall)
     }
 
-    protected fun assertKommandokjedetilstander(hendelseId: UUID, vararg forventedeTilstander: Kommandokjedetilstand) {
+    protected fun assertKommandokjedetilstander(
+        hendelseId: UUID,
+        vararg forventedeTilstander: Kommandokjedetilstand,
+    ) {
         @Language("PostgreSQL")
         val query = "SELECT tilstand FROM command_context WHERE hendelse_id = ? ORDER BY id"
-        val tilstander = sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(query, hendelseId).map { it.string("tilstand") }.asList
-            )
-        }
+        val tilstander =
+            sessionOf(dataSource).use { session ->
+                session.run(
+                    queryOf(query, hendelseId).map { it.string("tilstand") }.asList,
+                )
+            }
         assertEquals(forventedeTilstander.map { it.name }.toList(), tilstander)
     }
 
@@ -1250,8 +1365,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         }
     }
 
-    protected fun assertGodkjenningsbehovIkkeBesvart() =
-        testRapid.inspektør.løsning("Godkjenningsbehov") == null
+    protected fun assertGodkjenningsbehovIkkeBesvart() = testRapid.inspektør.løsning("Godkjenningsbehov") == null
 
     protected fun assertVedtaksperiodeAvvist(
         periodetype: String,
@@ -1263,8 +1377,11 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             assertEquals(begrunnelser, it.path("begrunnelser")?.map(JsonNode::asText))
             // TODO: BUG: Vi sender faktisk kommentar som "null", ikke null...
             val faktiskKommentar = it.takeIf { it.hasNonNull("kommentar") }?.get("kommentar")?.asText()
-            if (kommentar == null) assertEquals("null", faktiskKommentar)
-            else assertEquals(kommentar, faktiskKommentar)
+            if (kommentar == null) {
+                assertEquals("null", faktiskKommentar)
+            } else {
+                assertEquals(kommentar, faktiskKommentar)
+            }
         }
     }
 
@@ -1275,23 +1392,30 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         @Language("PostgreSQL")
         val query =
             "SELECT status FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?) ORDER by id DESC"
-        val sisteOppgavestatus = sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(
-                    query,
-                    vedtaksperiodeId
-                ).map { enumValueOf<Oppgavestatus>(it.string("status")) }.asSingle
-            )
-        }
+        val sisteOppgavestatus =
+            sessionOf(dataSource).use { session ->
+                session.run(
+                    queryOf(
+                        query,
+                        vedtaksperiodeId,
+                    ).map { enumValueOf<Oppgavestatus>(it.string("status")) }.asSingle,
+                )
+            }
         assertEquals(oppgavestatus, sisteOppgavestatus)
     }
 
-    protected fun assertHarOppgaveegenskap(oppgaveId: Int, vararg forventedeEgenskaper: Egenskap) {
+    protected fun assertHarOppgaveegenskap(
+        oppgaveId: Int,
+        vararg forventedeEgenskaper: Egenskap,
+    ) {
         val egenskaper = hentOppgaveegenskaper(oppgaveId)
         assertTrue(egenskaper.containsAll(forventedeEgenskaper.toList()))
     }
 
-    protected fun assertHarIkkeOppgaveegenskap(oppgaveId: Int, vararg forventedeEgenskaper: Egenskap) {
+    protected fun assertHarIkkeOppgaveegenskap(
+        oppgaveId: Int,
+        vararg forventedeEgenskaper: Egenskap,
+    ) {
         val egenskaper = hentOppgaveegenskaper(oppgaveId)
         assertTrue(egenskaper.none { it in forventedeEgenskaper })
     }
@@ -1299,75 +1423,98 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private fun hentOppgaveegenskaper(oppgaveId: Int): Set<Egenskap> {
         @Language("PostgreSQL")
         val query = "select egenskaper from oppgave o where id = :oppgaveId"
-        val egenskaper = requireNotNull(sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, mapOf("oppgaveId" to oppgaveId)).map { row ->
-                row.array<String>("egenskaper").map<String, Egenskap>(::enumValueOf).toSet()
-            }.asSingle)
-        }) { "Forventer å finne en oppgave for id=$oppgaveId" }
+        val egenskaper =
+            requireNotNull(
+                sessionOf(dataSource).use { session ->
+                    session.run(
+                        queryOf(query, mapOf("oppgaveId" to oppgaveId)).map { row ->
+                            row.array<String>("egenskaper").map<String, Egenskap>(::enumValueOf).toSet()
+                        }.asSingle,
+                    )
+                },
+            ) { "Forventer å finne en oppgave for id=$oppgaveId" }
 
         return egenskaper
     }
 
-    protected fun assertSaksbehandleroppgaveBleIkkeOpprettet(
-        vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
-    ) {
+    protected fun assertSaksbehandleroppgaveBleIkkeOpprettet(vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1) {
         @Language("PostgreSQL")
         val query = "SELECT 1 FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?)"
-        val antallOppgaver = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asList)
-        }
+        val antallOppgaver =
+            sessionOf(dataSource).use { session ->
+                session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asList)
+            }
         assertEquals(0, antallOppgaver.size)
     }
 
-    protected fun assertSnapshot(forventet: GraphQLClientResponse<HentSnapshot.Result>, vedtaksperiodeId: UUID) {
+    protected fun assertSnapshot(
+        forventet: GraphQLClientResponse<HentSnapshot.Result>,
+        vedtaksperiodeId: UUID,
+    ) {
         val forventetPersonsnapshot = forventet.data?.person
-        val personsnaphot = sessionOf(dataSource).use {
-            @Language("PostgreSQL")
-            val query =
-                "SELECT data FROM snapshot WHERE id = (SELECT snapshot_ref FROM vedtak WHERE vedtaksperiode_id=?)"
-            it.run(
-                queryOf(query, vedtaksperiodeId).map { row ->
-                    objectMapper.readValue<GraphQLPerson>(row.string("data"))
-                }.asSingle
-            )
-        }
+        val personsnaphot =
+            sessionOf(dataSource).use {
+                @Language("PostgreSQL")
+                val query =
+                    "SELECT data FROM snapshot WHERE id = (SELECT snapshot_ref FROM vedtak WHERE vedtaksperiode_id=?)"
+                it.run(
+                    queryOf(query, vedtaksperiodeId).map { row ->
+                        objectMapper.readValue<GraphQLPerson>(row.string("data"))
+                    }.asSingle,
+                )
+            }
         assertEquals(forventetPersonsnapshot, personsnaphot)
     }
 
-    protected fun assertSnapshotversjon(vedtaksperiodeId: UUID, forventetVersjon: Int) {
-        val versjon = sessionOf(dataSource).use {
-            @Language("PostgreSQL")
-            val query =
-                "SELECT versjon FROM snapshot WHERE id = (SELECT snapshot_ref FROM vedtak WHERE vedtaksperiode_id=?)"
-            it.run(
-                queryOf(query, vedtaksperiodeId).map { row ->
-                    row.int("versjon")
-                }.asSingle
-            )
-        }
+    protected fun assertSnapshotversjon(
+        vedtaksperiodeId: UUID,
+        forventetVersjon: Int,
+    ) {
+        val versjon =
+            sessionOf(dataSource).use {
+                @Language("PostgreSQL")
+                val query =
+                    "SELECT versjon FROM snapshot WHERE id = (SELECT snapshot_ref FROM vedtak WHERE vedtaksperiode_id=?)"
+                it.run(
+                    queryOf(query, vedtaksperiodeId).map { row ->
+                        row.int("versjon")
+                    }.asSingle,
+                )
+            }
         assertEquals(forventetVersjon, versjon)
     }
 
-    protected fun assertVarsler(vedtaksperiodeId: UUID, forventetAntall: Int) {
-        val antall = sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = "SELECT COUNT(1) FROM selve_varsel WHERE vedtaksperiode_id = ?"
-            session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
-        }
+    protected fun assertVarsler(
+        vedtaksperiodeId: UUID,
+        forventetAntall: Int,
+    ) {
+        val antall =
+            sessionOf(dataSource).use { session ->
+                @Language("PostgreSQL")
+                val query = "SELECT COUNT(1) FROM selve_varsel WHERE vedtaksperiode_id = ?"
+                session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
+            }
         assertEquals(forventetAntall, antall)
     }
 
-    protected fun assertGodkjentVarsel(vedtaksperiodeId: UUID, varselkode: String) {
-        val antall = sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query =
-                "SELECT COUNT(1) FROM selve_varsel WHERE vedtaksperiode_id = ? AND kode = ? AND status = 'GODKJENT'"
-            session.run(queryOf(query, vedtaksperiodeId, varselkode).map { it.int(1) }.asSingle)
-        }
+    protected fun assertGodkjentVarsel(
+        vedtaksperiodeId: UUID,
+        varselkode: String,
+    ) {
+        val antall =
+            sessionOf(dataSource).use { session ->
+                @Language("PostgreSQL")
+                val query =
+                    "SELECT COUNT(1) FROM selve_varsel WHERE vedtaksperiode_id = ? AND kode = ? AND status = 'GODKJENT'"
+                session.run(queryOf(query, vedtaksperiodeId, varselkode).map { it.int(1) }.asSingle)
+            }
         assertEquals(1, antall)
     }
 
-    protected fun assertSkjermet(fødselsnummer: String = FØDSELSNUMMER, skjermet: Boolean?) {
+    protected fun assertSkjermet(
+        fødselsnummer: String = FØDSELSNUMMER,
+        skjermet: Boolean?,
+    ) {
         assertEquals(skjermet, EgenAnsattDao(dataSource).erEgenAnsatt(fødselsnummer))
     }
 
@@ -1387,6 +1534,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected fun assertVedtaksperiodeEksisterer(vedtaksperiodeId: UUID) {
         assertEquals(1, vedtak(vedtaksperiodeId))
     }
+
     protected fun assertVedtaksperiodeForkastet(vedtaksperiodeId: UUID) {
         assertEquals(1, forkastedeVedtak(vedtaksperiodeId))
     }
@@ -1395,10 +1543,13 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertEquals(0, vedtak(vedtaksperiodeId))
     }
 
-    protected fun assertPersonEksisterer(fødselsnummer: String, aktørId: String) {
+    protected fun assertPersonEksisterer(
+        fødselsnummer: String,
+        aktørId: String,
+    ) {
         assertEquals(
             1,
-            person(fødselsnummer, aktørId)
+            person(fødselsnummer, aktørId),
         ) { "Person med fødselsnummer=$fødselsnummer og aktørId=$aktørId finnes ikke i databasen" }
     }
 
@@ -1410,14 +1561,17 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 ?: fail("Fant ikke personinfo for $fødselsnummer")
         }
 
-    protected fun assertPersonEksistererIkke(fødselsnummer: String, aktørId: String) {
+    protected fun assertPersonEksistererIkke(
+        fødselsnummer: String,
+        aktørId: String,
+    ) {
         assertEquals(0, person(fødselsnummer, aktørId))
     }
 
     protected fun assertArbeidsgiverEksisterer(organisasjonsnummer: String) {
         assertEquals(
             1,
-            arbeidsgiver(organisasjonsnummer)
+            arbeidsgiver(organisasjonsnummer),
         ) { "Arbeidsgiver med organisasjonsnummer=$organisasjonsnummer finnes ikke i databasen" }
     }
 
@@ -1447,7 +1601,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertNotNull(løsning)
     }
 
-    protected fun assertInnholdIBehov(behov: String, block: (JsonNode) -> Unit) {
+    protected fun assertInnholdIBehov(
+        behov: String,
+        block: (JsonNode) -> Unit,
+    ) {
         val etterspurtBehov = testRapid.inspektør.behov(behov).last()
         block(etterspurtBehov)
     }
@@ -1471,12 +1628,18 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertEquals(sisteEtterspurteBehov, behov)
     }
 
-    protected fun assertUtbetaling(arbeidsgiverbeløp: Int, personbeløp: Int) {
+    protected fun assertUtbetaling(
+        arbeidsgiverbeløp: Int,
+        personbeløp: Int,
+    ) {
         assertEquals(arbeidsgiverbeløp, finnbeløp("arbeidsgiver"))
         assertEquals(personbeløp, finnbeløp("person"))
     }
 
-    protected fun assertOverstyringer(vedtaksperiodeId: UUID, vararg forventedeOverstyringstyper: OverstyringType) {
+    protected fun assertOverstyringer(
+        vedtaksperiodeId: UUID,
+        vararg forventedeOverstyringstyper: OverstyringType,
+    ) {
         val utførteOverstyringstyper = testMediator.overstyringstyperForVedtaksperiode(vedtaksperiodeId)
         assertEquals(forventedeOverstyringstyper.toSet(), utførteOverstyringstyper.toSet()) {
             val ikkeEtterspurt = utførteOverstyringstyper.toSet() - forventedeOverstyringstyper.toSet()
@@ -1486,16 +1649,18 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected fun assertTotrinnsvurdering(oppgaveId: Long) {
         @Language("PostgreSQL")
-        val query = """
-           SELECT 1 FROM totrinnsvurdering
-           INNER JOIN vedtak v on totrinnsvurdering.vedtaksperiode_id = v.vedtaksperiode_id
-           INNER JOIN oppgave o on v.id = o.vedtak_ref
-           WHERE o.id = ?
-           AND utbetaling_id_ref IS NULL
-        """.trimIndent()
-        val erToTrinnsvurdering = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, oppgaveId).map { it.boolean(1) }.asSingle)
-        } ?: throw IllegalStateException("Finner ikke oppgave med id $oppgaveId")
+        val query =
+            """
+            SELECT 1 FROM totrinnsvurdering
+            INNER JOIN vedtak v on totrinnsvurdering.vedtaksperiode_id = v.vedtaksperiode_id
+            INNER JOIN oppgave o on v.id = o.vedtak_ref
+            WHERE o.id = ?
+            AND utbetaling_id_ref IS NULL
+            """.trimIndent()
+        val erToTrinnsvurdering =
+            sessionOf(dataSource).use { session ->
+                session.run(queryOf(query, oppgaveId).map { it.boolean(1) }.asSingle)
+            } ?: throw IllegalStateException("Finner ikke oppgave med id $oppgaveId")
         assertTrue(erToTrinnsvurdering) {
             "Forventer at oppgaveId=$oppgaveId krever totrinnsvurdering"
         }
@@ -1514,7 +1679,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         val query = "SELECT context_id FROM command_context WHERE hendelse_id = ? ORDER by id DESC LIMIT 1"
         return sessionOf(dataSource).use { session ->
             requireNotNull(
-                session.run(queryOf(query, godkjenningsbehovId).map { it.uuid("context_id") }.asSingle)
+                session.run(queryOf(query, godkjenningsbehovId).map { it.uuid("context_id") }.asSingle),
             )
         }
     }
@@ -1528,12 +1693,15 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         }
     }
 
-    protected fun person(fødselsnummer: String, aktørId: String): Int {
+    protected fun person(
+        fødselsnummer: String,
+        aktørId: String,
+    ): Int {
         return sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query = "SELECT COUNT(*) FROM person WHERE fodselsnummer = ? AND aktor_id = ?"
             requireNotNull(
-                session.run(queryOf(query, fødselsnummer.toLong(), aktørId.toLong()).map { row -> row.int(1) }.asSingle)
+                session.run(queryOf(query, fødselsnummer.toLong(), aktørId.toLong()).map { row -> row.int(1) }.asSingle),
             )
         }
     }
@@ -1543,7 +1711,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             @Language("PostgreSQL")
             val query = "SELECT COUNT(*) FROM arbeidsgiver WHERE orgnummer = ?"
             requireNotNull(
-                session.run(queryOf(query, organisasjonsnummer.toLong()).map { row -> row.int(1) }.asSingle)
+                session.run(queryOf(query, organisasjonsnummer.toLong()).map { row -> row.int(1) }.asSingle),
             )
         }
     }
@@ -1553,39 +1721,42 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             @Language("PostgreSQL")
             val query = "SELECT COUNT(*) FROM vedtak WHERE vedtaksperiode_id = ?"
             requireNotNull(
-                session.run(queryOf(query, vedtaksperiodeId).map { row -> row.int(1) }.asSingle)
+                session.run(queryOf(query, vedtaksperiodeId).map { row -> row.int(1) }.asSingle),
             )
         }
     }
+
     protected fun forkastedeVedtak(vedtaksperiodeId: UUID): Int {
         return sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query = "SELECT COUNT(*) FROM vedtak WHERE vedtaksperiode_id = ? AND forkastet = TRUE"
             requireNotNull(
-                session.run(queryOf(query, vedtaksperiodeId).map { row -> row.int(1) }.asSingle)
+                session.run(queryOf(query, vedtaksperiodeId).map { row -> row.int(1) }.asSingle),
             )
         }
     }
 
-    private fun List<OverstyrArbeidsgiverFraApi>.byggOverstyrArbeidsgiverEvent() = this.map {
-        OverstyrtArbeidsgiverEvent(
-            organisasjonsnummer = it.organisasjonsnummer,
-            månedligInntekt = it.månedligInntekt,
-            fraMånedligInntekt = it.fraMånedligInntekt,
-            refusjonsopplysninger = it.refusjonsopplysninger?.byggRefusjonselementEvent(),
-            fraRefusjonsopplysninger = it.fraRefusjonsopplysninger?.byggRefusjonselementEvent(),
-            begrunnelse = it.begrunnelse,
-            forklaring = it.forklaring,
-        )
-    }
+    private fun List<OverstyrArbeidsgiverFraApi>.byggOverstyrArbeidsgiverEvent() =
+        this.map {
+            OverstyrtArbeidsgiverEvent(
+                organisasjonsnummer = it.organisasjonsnummer,
+                månedligInntekt = it.månedligInntekt,
+                fraMånedligInntekt = it.fraMånedligInntekt,
+                refusjonsopplysninger = it.refusjonsopplysninger?.byggRefusjonselementEvent(),
+                fraRefusjonsopplysninger = it.fraRefusjonsopplysninger?.byggRefusjonselementEvent(),
+                begrunnelse = it.begrunnelse,
+                forklaring = it.forklaring,
+            )
+        }
 
-    private fun List<RefusjonselementFraApi>.byggRefusjonselementEvent() = this.map {
-        OverstyrtRefusjonselementEvent(
-            fom = it.fom,
-            tom = it.tom,
-            beløp = it.beløp,
-        )
-    }
+    private fun List<RefusjonselementFraApi>.byggRefusjonselementEvent() =
+        this.map {
+            OverstyrtRefusjonselementEvent(
+                fom = it.fom,
+                tom = it.tom,
+                beløp = it.beløp,
+            )
+        }
 
     private fun lagVarseldefinisjoner() {
         Varselkode.entries.forEach { varselkode ->
@@ -1603,12 +1774,12 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     query,
                     UUID.nameUUIDFromBytes(varselkode.toByteArray()),
                     varselkode,
-                    "En tittel for varselkode=${varselkode}",
-                    "En forklaring for varselkode=${varselkode}",
-                    "En handling for varselkode=${varselkode}",
+                    "En tittel for varselkode=$varselkode",
+                    "En forklaring for varselkode=$varselkode",
+                    "En handling for varselkode=$varselkode",
                     false,
-                    LocalDateTime.now()
-                ).asUpdate
+                    LocalDateTime.now(),
+                ).asUpdate,
             )
         }
     }
@@ -1617,7 +1788,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         NY,
         SUSPENDERT,
         FERDIG,
-        AVBRUTT
+        AVBRUTT,
     }
 }
-

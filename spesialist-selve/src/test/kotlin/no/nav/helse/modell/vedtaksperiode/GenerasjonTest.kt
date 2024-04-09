@@ -501,7 +501,7 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
 
     @Test
     fun `generasjonTilstand toDto`() {
-        assertEquals(TilstandDto.Låst, Generasjon.Låst.toDto())
+        assertEquals(TilstandDto.VedtakFattet, Generasjon.VedtakFattet.toDto())
         assertEquals(TilstandDto.VidereBehandlingAvklares, Generasjon.VidereBehandlingAvklares.toDto())
         assertEquals(TilstandDto.AvsluttetUtenUtbetaling, Generasjon.AvsluttetUtenUtbetaling.toDto())
         assertEquals(TilstandDto.UtenUtbetalingMåVurderes, Generasjon.UtenUtbetalingMåVurderes.toDto())
