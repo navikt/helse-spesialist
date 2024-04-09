@@ -14,6 +14,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -327,10 +328,20 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `mangler tags`() {
+    fun `slår opp tags på ikke-eksisterende behandling`() {
         val tulleId = UUID.randomUUID()
         val tags = generasjonDao.finnTagsFor(tulleId)
-        assertEquals(null, tags)
+        assertNull(tags)
+    }
+
+    @Test
+    fun `behandling uten tags gir tom liste`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val spleisBehandlingId = UUID.randomUUID()
+        val generasjon1 = nyGenerasjonDto(vedtaksperiodeId = vedtaksperiodeId, spleisBehandlingId = spleisBehandlingId)
+        generasjonDao.lagre(generasjon1)
+        val tags = generasjonDao.finnTagsFor(spleisBehandlingId)
+        assertTrue(tags != null && tags.isEmpty())
     }
 
     @Test
