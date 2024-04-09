@@ -35,13 +35,13 @@ internal class GenerasjonTilstandTest {
     }
 
     @Test
-    fun `Går fra VidereBehandlingAvklares til AvsluttetUtenUtbetaling ved avsluttet uten vedtak`() {
+    fun `Går fra VidereBehandlingAvklares til AvsluttetUtenVedtak ved avsluttet uten vedtak`() {
         val generasjonId = UUID.randomUUID()
         val generasjon = generasjon(generasjonId, UUID.randomUUID())
         generasjon.registrer(observer)
         generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(UUID.randomUUID(), emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
 
-        observer.assertTilstandsendring(generasjonId, Generasjon.VidereBehandlingAvklares, Generasjon.AvsluttetUtenUtbetaling, 0)
+        observer.assertTilstandsendring(generasjonId, Generasjon.VidereBehandlingAvklares, Generasjon.AvsluttetUtenVedtak, 0)
     }
 
     @Test
@@ -52,7 +52,7 @@ internal class GenerasjonTilstandTest {
         generasjon.registrer(observer)
         generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(UUID.randomUUID(), emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
 
-        observer.assertTilstandsendring(generasjonId, Generasjon.VidereBehandlingAvklares, Generasjon.AvsluttetUtenUtbetaling, 0)
+        observer.assertTilstandsendring(generasjonId, Generasjon.VidereBehandlingAvklares, Generasjon.AvsluttetUtenVedtak, 0)
     }
 
     @Test
@@ -100,10 +100,10 @@ internal class GenerasjonTilstandTest {
         generasjon.registrer(observer)
 
         generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
-        observer.assertTilstandsendring(generasjonId, Generasjon.VidereBehandlingAvklares, Generasjon.AvsluttetUtenUtbetaling, 0)
+        observer.assertTilstandsendring(generasjonId, Generasjon.VidereBehandlingAvklares, Generasjon.AvsluttetUtenVedtak, 0)
 
         generasjon.håndterVedtakFattet(UUID.randomUUID())
-        observer.assertGjeldendeTilstand(generasjonId, Generasjon.AvsluttetUtenUtbetaling)
+        observer.assertGjeldendeTilstand(generasjonId, Generasjon.AvsluttetUtenVedtak)
     }
 
     @Test
@@ -114,10 +114,10 @@ internal class GenerasjonTilstandTest {
         generasjon.registrer(observer)
 
         generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
-        observer.assertTilstandsendring(generasjonId, Generasjon.VidereBehandlingAvklares, Generasjon.AvsluttetUtenUtbetaling, 0)
+        observer.assertTilstandsendring(generasjonId, Generasjon.VidereBehandlingAvklares, Generasjon.AvsluttetUtenVedtak, 0)
 
         generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
-        observer.assertTilstandsendring(generasjonId, Generasjon.AvsluttetUtenUtbetaling, Generasjon.UtenUtbetalingMåVurderes, 1)
+        observer.assertTilstandsendring(generasjonId, Generasjon.AvsluttetUtenVedtak, Generasjon.UtenUtbetalingMåVurderes, 1)
         assertEquals(1, observer.opprettedeVarsler.size)
     }
 
@@ -129,14 +129,14 @@ internal class GenerasjonTilstandTest {
         generasjon.registrer(observer)
 
         generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
-        observer.assertTilstandsendring(generasjonId, Generasjon.VidereBehandlingAvklares, Generasjon.AvsluttetUtenUtbetaling, 0)
+        observer.assertTilstandsendring(generasjonId, Generasjon.VidereBehandlingAvklares, Generasjon.AvsluttetUtenVedtak, 0)
 
         generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
-        observer.assertTilstandsendring(generasjonId, Generasjon.AvsluttetUtenUtbetaling, Generasjon.UtenUtbetalingMåVurderes, 1)
+        observer.assertTilstandsendring(generasjonId, Generasjon.AvsluttetUtenVedtak, Generasjon.UtenUtbetalingMåVurderes, 1)
         assertEquals(1, observer.opprettedeVarsler.size)
 
         generasjon.håndterGodkjentAvSaksbehandler("123456", UUID.randomUUID())
-        observer.assertTilstandsendring(generasjonId, Generasjon.UtenUtbetalingMåVurderes, Generasjon.AvsluttetUtenUtbetaling, 2)
+        observer.assertTilstandsendring(generasjonId, Generasjon.UtenUtbetalingMåVurderes, Generasjon.AvsluttetUtenVedtak, 2)
     }
 
     @Test
@@ -147,10 +147,10 @@ internal class GenerasjonTilstandTest {
         generasjon.registrer(observer)
 
         generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
-        observer.assertTilstandsendring(generasjonId, Generasjon.VidereBehandlingAvklares, Generasjon.AvsluttetUtenUtbetaling, 0)
+        observer.assertTilstandsendring(generasjonId, Generasjon.VidereBehandlingAvklares, Generasjon.AvsluttetUtenVedtak, 0)
 
         generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
-        observer.assertTilstandsendring(generasjonId, Generasjon.AvsluttetUtenUtbetaling, Generasjon.UtenUtbetalingMåVurderes, 1)
+        observer.assertTilstandsendring(generasjonId, Generasjon.AvsluttetUtenVedtak, Generasjon.UtenUtbetalingMåVurderes, 1)
 
         generasjon.håndterVedtakFattet(UUID.randomUUID())
         observer.assertGjeldendeTilstand(generasjonId, Generasjon.UtenUtbetalingMåVurderes)

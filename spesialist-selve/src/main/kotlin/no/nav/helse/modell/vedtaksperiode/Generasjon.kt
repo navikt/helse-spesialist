@@ -12,7 +12,6 @@ import no.nav.helse.modell.varsel.Varsel.Companion.inneholderSvartelistedeVarsle
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderVarselOmAvvik
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderVarselOmNegativtBeløp
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderVarselOmTilbakedatering
-import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtaksperiode.vedtak.SykepengevedtakBuilder
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -83,7 +82,7 @@ internal class Generasjon private constructor(
 
     internal fun tilhører(dato: LocalDate): Boolean = periode.tom() <= dato
 
-    internal fun håndter(avsluttetUtenVedtak: AvsluttetUtenVedtak) {
+    internal fun håndter(avsluttetUtenVedtak: no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak) {
         val vedtakBuilder = SykepengevedtakBuilder()
         avsluttetUtenVedtak.byggMelding(vedtakBuilder)
         observers.forEach { it.vedtakFattet(vedtakBuilder.build()) }
@@ -165,7 +164,7 @@ internal class Generasjon private constructor(
     }
 
     internal fun avsluttetUtenVedtak(
-        avsluttetUtenVedtak: AvsluttetUtenVedtak,
+        avsluttetUtenVedtak: no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak,
         sykepengevedtakBuilder: SykepengevedtakBuilder,
     ) {
         if (spleisBehandlingId == null) spleisBehandlingId = avsluttetUtenVedtak.spleisBehandlingId()
@@ -247,7 +246,7 @@ internal class Generasjon private constructor(
 
         fun toDto(): TilstandDto {
             return when (this) {
-                AvsluttetUtenUtbetaling -> TilstandDto.AvsluttetUtenUtbetaling
+                AvsluttetUtenVedtak -> TilstandDto.AvsluttetUtenVedtak
                 VedtakFattet -> TilstandDto.VedtakFattet
                 VidereBehandlingAvklares -> TilstandDto.VidereBehandlingAvklares
                 UtenUtbetalingMåVurderes -> TilstandDto.UtenUtbetalingMåVurderes
@@ -374,7 +373,7 @@ internal class Generasjon private constructor(
             val nesteTilstand =
                 when {
                     generasjon.varsler.isNotEmpty() -> UtenUtbetalingMåVurderes
-                    else -> AvsluttetUtenUtbetaling
+                    else -> AvsluttetUtenVedtak
                 }
             generasjon.nyTilstand(this, nesteTilstand, UUID.randomUUID())
             generasjon.supplerAvsluttetUtenVedtak(sykepengevedtakBuilder)
@@ -393,8 +392,8 @@ internal class Generasjon private constructor(
         }
     }
 
-    internal data object AvsluttetUtenUtbetaling : Tilstand {
-        override fun navn(): String = "AvsluttetUtenUtbetaling"
+    internal data object AvsluttetUtenVedtak : Tilstand {
+        override fun navn(): String = "AvsluttetUtenVedtak"
 
         override fun nySpleisBehandling(
             generasjon: Generasjon,
@@ -416,7 +415,7 @@ internal class Generasjon private constructor(
             generasjon: Generasjon,
             sykepengevedtakBuilder: SykepengevedtakBuilder,
         ) {
-            sikkerlogg.warn("Spesialist mottar avsluttet_uten_vedtak når den allerede er i tilstand AvsluttetUtenUtbetaling")
+            sikkerlogg.warn("Spesialist mottar avsluttet_uten_vedtak når den allerede er i tilstand AvsluttetUtenVedtak")
             generasjon.supplerAvsluttetUtenVedtak(sykepengevedtakBuilder)
         }
     }
@@ -429,7 +428,7 @@ internal class Generasjon private constructor(
             ident: String,
             hendelseId: UUID,
         ) {
-            generasjon.nyTilstand(this, AvsluttetUtenUtbetaling, hendelseId)
+            generasjon.nyTilstand(this, AvsluttetUtenVedtak, hendelseId)
         }
 
         override fun avsluttetUtenVedtak(
@@ -446,7 +445,7 @@ internal class Generasjon private constructor(
             spleisBehandling: SpleisBehandling,
         ) {
             vedtaksperiode.nyGenerasjon(generasjon.nyBehandling(spleisBehandling.spleisBehandlingId))
-            generasjon.nyTilstand(this, AvsluttetUtenUtbetaling, UUID.randomUUID())
+            generasjon.nyTilstand(this, AvsluttetUtenVedtak, UUID.randomUUID())
         }
     }
 

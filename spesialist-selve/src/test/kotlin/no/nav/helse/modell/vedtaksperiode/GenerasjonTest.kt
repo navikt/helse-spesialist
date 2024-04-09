@@ -347,7 +347,7 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
             mockk(relaxed = true),
             SpleisBehandling("9878654321", vedtaksperiodeId, UUID.randomUUID(), 1.januar, 31.januar),
         )
-        assertEquals(TilstandDto.AvsluttetUtenUtbetaling, generasjon.toDto().tilstand)
+        assertEquals(TilstandDto.AvsluttetUtenVedtak, generasjon.toDto().tilstand)
     }
 
     @Test
@@ -503,7 +503,7 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
     fun `generasjonTilstand toDto`() {
         assertEquals(TilstandDto.VedtakFattet, Generasjon.VedtakFattet.toDto())
         assertEquals(TilstandDto.VidereBehandlingAvklares, Generasjon.VidereBehandlingAvklares.toDto())
-        assertEquals(TilstandDto.AvsluttetUtenUtbetaling, Generasjon.AvsluttetUtenUtbetaling.toDto())
+        assertEquals(TilstandDto.AvsluttetUtenVedtak, Generasjon.AvsluttetUtenVedtak.toDto())
         assertEquals(TilstandDto.UtenUtbetalingMåVurderes, Generasjon.UtenUtbetalingMåVurderes.toDto())
     }
 

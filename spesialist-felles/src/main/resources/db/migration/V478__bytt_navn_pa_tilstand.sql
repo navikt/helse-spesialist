@@ -1,0 +1,1 @@
+ALTER TYPE generasjon_tilstand RENAME VALUE 'AvsluttetUtenUtbetaling' TO 'AvsluttetUtenVedtak';
