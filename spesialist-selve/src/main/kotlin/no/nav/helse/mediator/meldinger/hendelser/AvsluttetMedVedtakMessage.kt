@@ -81,12 +81,10 @@ internal class AvsluttetMedVedtakMessage(
         )
 
     internal fun sendInnTil(sykefraværstilfelle: Sykefraværstilfelle) {
-        val tags: List<String> =
-            generasjonDao.finnTagsFor(spleisBehandlingId) ?: emptyList<String>().also {
-                // Hypotese: Vi forventer en del av disse av disse frem til alle perioder har blitt påminnet, slik at spesialist kun fatter vedtak i tilfeller der tags eksisterte på godkjenningsbehovet
-                log.info("Ingen generasjon å hente tags fra med spleisBehandlingId: $spleisBehandlingId på vedtaksperiodeId: $vedtaksperiodeId")
-                sikkerLogg.info("Ingen generasjon å hente tags fra med spleisBehandlingId: $spleisBehandlingId på vedtaksperiodeId: $vedtaksperiodeId, json: ${toJson()}")
-            }
+        val tags: List<String> = generasjonDao.finnTagsFor(spleisBehandlingId) ?: emptyList()
+        if (tags.isEmpty()) {
+            sikkerLogg.info("Ingen tags funnet for spleisBehandlingId: $spleisBehandlingId på vedtaksperiodeId: $vedtaksperiodeId, json: ${toJson()}")
+        }
         sykefraværstilfelle.håndter(avsluttetMedVedtak, tags)
     }
 
