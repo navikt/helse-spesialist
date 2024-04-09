@@ -45,7 +45,7 @@ internal class GenerasjonTilstandTest {
     }
 
     @Test
-    fun `Går fra VidereBehandlingAvklares til UtenUtbetalingMåVurderes ved avsluttet uten vedtak og har varsler`() {
+    fun `Går fra VidereBehandlingAvklares til AvsluttetUtenVedtakMedVarsler ved avsluttet uten vedtak og har varsler`() {
         val generasjonId = UUID.randomUUID()
         val generasjon = generasjon(generasjonId, UUID.randomUUID())
         generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID()), UUID.randomUUID())
@@ -117,12 +117,12 @@ internal class GenerasjonTilstandTest {
         observer.assertTilstandsendring(generasjonId, Generasjon.VidereBehandlingAvklares, Generasjon.AvsluttetUtenVedtak, 0)
 
         generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
-        observer.assertTilstandsendring(generasjonId, Generasjon.AvsluttetUtenVedtak, Generasjon.UtenUtbetalingMåVurderes, 1)
+        observer.assertTilstandsendring(generasjonId, Generasjon.AvsluttetUtenVedtak, Generasjon.AvsluttetUtenVedtakMedVarsler, 1)
         assertEquals(1, observer.opprettedeVarsler.size)
     }
 
     @Test
-    fun `UtenUtbetalingMåVurderes - godkjent forlengelse medfører tilstandsendring`() {
+    fun `AvsluttetUtenVedtakMedVarsler - godkjent forlengelse medfører tilstandsendring`() {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjon(generasjonId, vedtaksperiodeId)
@@ -132,15 +132,15 @@ internal class GenerasjonTilstandTest {
         observer.assertTilstandsendring(generasjonId, Generasjon.VidereBehandlingAvklares, Generasjon.AvsluttetUtenVedtak, 0)
 
         generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
-        observer.assertTilstandsendring(generasjonId, Generasjon.AvsluttetUtenVedtak, Generasjon.UtenUtbetalingMåVurderes, 1)
+        observer.assertTilstandsendring(generasjonId, Generasjon.AvsluttetUtenVedtak, Generasjon.AvsluttetUtenVedtakMedVarsler, 1)
         assertEquals(1, observer.opprettedeVarsler.size)
 
         generasjon.håndterGodkjentAvSaksbehandler("123456", UUID.randomUUID())
-        observer.assertTilstandsendring(generasjonId, Generasjon.UtenUtbetalingMåVurderes, Generasjon.AvsluttetUtenVedtak, 2)
+        observer.assertTilstandsendring(generasjonId, Generasjon.AvsluttetUtenVedtakMedVarsler, Generasjon.AvsluttetUtenVedtak, 2)
     }
 
     @Test
-    fun `UtenUtbetalingMåVurderes - håndterer ikke vedtak fattet`() {
+    fun `AvsluttetUtenVedtakMedVarsler - håndterer ikke vedtak fattet`() {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjon(generasjonId, vedtaksperiodeId)
@@ -150,10 +150,10 @@ internal class GenerasjonTilstandTest {
         observer.assertTilstandsendring(generasjonId, Generasjon.VidereBehandlingAvklares, Generasjon.AvsluttetUtenVedtak, 0)
 
         generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
-        observer.assertTilstandsendring(generasjonId, Generasjon.AvsluttetUtenVedtak, Generasjon.UtenUtbetalingMåVurderes, 1)
+        observer.assertTilstandsendring(generasjonId, Generasjon.AvsluttetUtenVedtak, Generasjon.AvsluttetUtenVedtakMedVarsler, 1)
 
         generasjon.håndterVedtakFattet(UUID.randomUUID())
-        observer.assertGjeldendeTilstand(generasjonId, Generasjon.UtenUtbetalingMåVurderes)
+        observer.assertGjeldendeTilstand(generasjonId, Generasjon.AvsluttetUtenVedtakMedVarsler)
     }
 
     private fun generasjon(

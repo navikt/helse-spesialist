@@ -249,7 +249,7 @@ internal class Generasjon private constructor(
                 AvsluttetUtenVedtak -> TilstandDto.AvsluttetUtenVedtak
                 VedtakFattet -> TilstandDto.VedtakFattet
                 VidereBehandlingAvklares -> TilstandDto.VidereBehandlingAvklares
-                UtenUtbetalingMåVurderes -> TilstandDto.UtenUtbetalingMåVurderes
+                AvsluttetUtenVedtakMedVarsler -> TilstandDto.AvsluttetUtenVedtakMedVarsler
                 KlarTilBehandling -> TilstandDto.KlarTilBehandling
             }
         }
@@ -372,7 +372,7 @@ internal class Generasjon private constructor(
             ) { "Mottatt avsluttet_uten_vedtak på generasjon som har utbetaling. Det gir ingen mening." }
             val nesteTilstand =
                 when {
-                    generasjon.varsler.isNotEmpty() -> UtenUtbetalingMåVurderes
+                    generasjon.varsler.isNotEmpty() -> AvsluttetUtenVedtakMedVarsler
                     else -> AvsluttetUtenVedtak
                 }
             generasjon.nyTilstand(this, nesteTilstand, UUID.randomUUID())
@@ -408,7 +408,7 @@ internal class Generasjon private constructor(
             varsel: Varsel,
             hendelseId: UUID,
         ) {
-            generasjon.nyTilstand(this, UtenUtbetalingMåVurderes, hendelseId)
+            generasjon.nyTilstand(this, AvsluttetUtenVedtakMedVarsler, hendelseId)
         }
 
         override fun avsluttetUtenVedtak(
@@ -420,8 +420,8 @@ internal class Generasjon private constructor(
         }
     }
 
-    internal data object UtenUtbetalingMåVurderes : Tilstand {
-        override fun navn(): String = "UtenUtbetalingMåVurderes"
+    internal data object AvsluttetUtenVedtakMedVarsler : Tilstand {
+        override fun navn(): String = "AvsluttetUtenVedtakMedVarsler"
 
         override fun håndterGodkjenning(
             generasjon: Generasjon,
@@ -435,7 +435,7 @@ internal class Generasjon private constructor(
             generasjon: Generasjon,
             sykepengevedtakBuilder: SykepengevedtakBuilder,
         ) {
-            sikkerlogg.warn("Spesialist mottar avsluttet_uten_vedtak når den allerede er i tilstand UtenUtbetalingMåVurderes")
+            sikkerlogg.warn("Spesialist mottar avsluttet_uten_vedtak når den allerede er i tilstand AvsluttetUtenVedtakMedVarsler")
             generasjon.supplerAvsluttetUtenVedtak(sykepengevedtakBuilder)
         }
 

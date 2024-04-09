@@ -21,6 +21,6 @@ enum class TilstandDto {
     VedtakFattet,
     VidereBehandlingAvklares,
     AvsluttetUtenVedtak,
-    UtenUtbetalingMåVurderes,
+    AvsluttetUtenVedtakMedVarsler,
     KlarTilBehandling,
 }

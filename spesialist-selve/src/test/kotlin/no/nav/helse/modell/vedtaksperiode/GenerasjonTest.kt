@@ -331,11 +331,11 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjonMedVarsel(vedtaksperiodeId = vedtaksperiodeId)
         generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
-        assertEquals(TilstandDto.UtenUtbetalingMåVurderes, generasjon.toDto().tilstand)
+        assertEquals(TilstandDto.AvsluttetUtenVedtakMedVarsler, generasjon.toDto().tilstand)
         assertDoesNotThrow {
             generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
         }
-        assertEquals(TilstandDto.UtenUtbetalingMåVurderes, generasjon.toDto().tilstand)
+        assertEquals(TilstandDto.AvsluttetUtenVedtakMedVarsler, generasjon.toDto().tilstand)
     }
 
     @Test
@@ -504,7 +504,7 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
         assertEquals(TilstandDto.VedtakFattet, Generasjon.VedtakFattet.toDto())
         assertEquals(TilstandDto.VidereBehandlingAvklares, Generasjon.VidereBehandlingAvklares.toDto())
         assertEquals(TilstandDto.AvsluttetUtenVedtak, Generasjon.AvsluttetUtenVedtak.toDto())
-        assertEquals(TilstandDto.UtenUtbetalingMåVurderes, Generasjon.UtenUtbetalingMåVurderes.toDto())
+        assertEquals(TilstandDto.AvsluttetUtenVedtakMedVarsler, Generasjon.AvsluttetUtenVedtakMedVarsler.toDto())
     }
 
     private fun generasjonMedVarsel(
