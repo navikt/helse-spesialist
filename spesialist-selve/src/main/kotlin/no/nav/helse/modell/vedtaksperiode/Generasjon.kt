@@ -314,7 +314,9 @@ internal class Generasjon private constructor(
             generasjon: Generasjon,
             varsel: Varsel,
             hendelseId: UUID,
-        ) {}
+        ) {
+            logg.error("Mottar varsel i tilstand ${navn()} som ikke støttes.")
+        }
 
         fun håndterGodkjenning(
             generasjon: Generasjon,
