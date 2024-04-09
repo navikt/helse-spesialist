@@ -11,8 +11,6 @@ spec:
   liveness:
     path: isalive
     initialDelay: 5
-  strategy:
-    type: Recreate
   readiness:
     path: isready
     initialDelay: 5
