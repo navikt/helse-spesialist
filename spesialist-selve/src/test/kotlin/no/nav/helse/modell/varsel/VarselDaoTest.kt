@@ -1,8 +1,6 @@
 package no.nav.helse.modell.varsel
 
 import DatabaseIntegrationTest
-import java.time.LocalDateTime
-import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.januar
@@ -19,9 +17,10 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class VarselDaoTest : DatabaseIntegrationTest() {
-
     private val varselDao = VarselDao(dataSource)
     private val definisjonDao = DefinisjonDao(dataSource)
 
@@ -35,7 +34,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
             UUID.randomUUID(),
             1.januar,
             Periode(1.januar, 31.januar),
-            Generasjon.Åpen
+            Generasjon.VidereBehandlingAvklares,
         )
         varselDao.lagreVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), VEDTAKSPERIODE, generasjonId)
         assertEquals(1, alleVarslerFor(VEDTAKSPERIODE).size)
@@ -44,7 +43,15 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `lagre flere varsler`() {
         definisjonDao.lagreDefinisjon(UUID.randomUUID(), "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
-        definisjonDao.lagreDefinisjon(UUID.randomUUID(), "EN_ANNEN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
+        definisjonDao.lagreDefinisjon(
+            UUID.randomUUID(),
+            "EN_ANNEN_KODE",
+            "EN_TITTEL",
+            "EN_FORKLARING",
+            "EN_HANDLING",
+            false,
+            LocalDateTime.now(),
+        )
         val generasjonId = UUID.randomUUID()
         generasjonDao.opprettFor(
             generasjonId,
@@ -52,7 +59,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
             UUID.randomUUID(),
             1.januar,
             Periode(1.januar, 31.januar),
-            Generasjon.Åpen
+            Generasjon.VidereBehandlingAvklares,
         )
         varselDao.lagreVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), VEDTAKSPERIODE, generasjonId)
         varselDao.lagreVarsel(UUID.randomUUID(), "EN_ANNEN_KODE", LocalDateTime.now(), VEDTAKSPERIODE, generasjonId)
@@ -69,7 +76,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
             UUID.randomUUID(),
             1.januar,
             Periode(1.januar, 31.januar),
-            Generasjon.Åpen
+            Generasjon.VidereBehandlingAvklares,
         )
         varselDao.lagreVarsel(UUID.randomUUID(), "KODE_33", LocalDateTime.now(), VEDTAKSPERIODE, generasjonId)
         assertEquals(AKTIV, varselDao.finnVarselstatus(VEDTAKSPERIODE, "KODE_33"))
@@ -86,7 +93,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
             UUID.randomUUID(),
             1.januar,
             Periode(1.januar, 31.januar),
-            Generasjon.Åpen
+            Generasjon.VidereBehandlingAvklares,
         )
         varselDao.lagreVarsel(UUID.randomUUID(), "KODE_24", LocalDateTime.now(), VEDTAKSPERIODE, generasjonId)
         varselDao.oppdaterStatus(VEDTAKSPERIODE, generasjonId, "KODE_24", INAKTIV, "EN_IDENT", definisjonId)
@@ -105,7 +112,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
             UUID.randomUUID(),
             1.januar,
             Periode(1.januar, 31.januar),
-            Generasjon.Åpen
+            Generasjon.VidereBehandlingAvklares,
         )
         varselDao.lagreVarsel(varselId, "EN_KODE", LocalDateTime.now(), VEDTAKSPERIODE, generasjonId)
         varselDao.oppdaterStatus(VEDTAKSPERIODE, generasjonId, "EN_KODE", INAKTIV, "ident", definisjonId)
@@ -126,8 +133,22 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
         val v2 = UUID.randomUUID()
         val generasjonIdv1 = UUID.randomUUID()
         val generasjonIdv2 = UUID.randomUUID()
-        generasjonDao.opprettFor(generasjonIdv1, v1, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar), Generasjon.Åpen)
-        generasjonDao.opprettFor(generasjonIdv2, v2, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar), Generasjon.Åpen)
+        generasjonDao.opprettFor(
+            generasjonIdv1,
+            v1,
+            UUID.randomUUID(),
+            1.januar,
+            Periode(1.januar, 31.januar),
+            Generasjon.VidereBehandlingAvklares,
+        )
+        generasjonDao.opprettFor(
+            generasjonIdv2,
+            v2,
+            UUID.randomUUID(),
+            1.januar,
+            Periode(1.januar, 31.januar),
+            Generasjon.VidereBehandlingAvklares,
+        )
         varselDao.lagreVarsel(UUID.randomUUID(), "KODE_337", LocalDateTime.now(), v1, generasjonIdv1)
         varselDao.lagreVarsel(UUID.randomUUID(), "KODE_337", LocalDateTime.now(), v2, generasjonIdv2)
         varselDao.oppdaterStatus(v1, generasjonIdv1, "KODE_337", INAKTIV, "EN_IDENT", definisjonId)
@@ -139,10 +160,25 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
     fun `sletter varsel`() {
         val definisjonId = UUID.randomUUID()
         definisjonDao.lagreDefinisjon(definisjonId, "KODE_EN", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
-        definisjonDao.lagreDefinisjon(definisjonId, "KODE_TO", "EN_ANNEN_TITTEL", "EN_ANNEN_FORKLARING", "EN_ANNEN_HANDLING", false, LocalDateTime.now())
+        definisjonDao.lagreDefinisjon(
+            definisjonId,
+            "KODE_TO",
+            "EN_ANNEN_TITTEL",
+            "EN_ANNEN_FORKLARING",
+            "EN_ANNEN_HANDLING",
+            false,
+            LocalDateTime.now(),
+        )
         val v1 = UUID.randomUUID()
         val generasjonIdv1 = UUID.randomUUID()
-        generasjonDao.opprettFor(generasjonIdv1, v1, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar), Generasjon.Åpen)
+        generasjonDao.opprettFor(
+            generasjonIdv1,
+            v1,
+            UUID.randomUUID(),
+            1.januar,
+            Periode(1.januar, 31.januar),
+            Generasjon.VidereBehandlingAvklares,
+        )
         varselDao.lagreVarsel(UUID.randomUUID(), "KODE_EN", LocalDateTime.now(), v1, generasjonIdv1)
         varselDao.lagreVarsel(UUID.randomUUID(), "KODE_TO", LocalDateTime.now(), v1, generasjonIdv1)
         varselDao.slettFor(v1, generasjonIdv1, "KODE_EN")
@@ -155,7 +191,14 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
         definisjonDao.lagreDefinisjon(definisjonId, "KODE_99", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
-        generasjonDao.opprettFor(generasjonId, vedtaksperiodeId, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar), Generasjon.Åpen)
+        generasjonDao.opprettFor(
+            generasjonId,
+            vedtaksperiodeId,
+            UUID.randomUUID(),
+            1.januar,
+            Periode(1.januar, 31.januar),
+            Generasjon.VidereBehandlingAvklares,
+        )
         varselDao.lagreVarsel(UUID.randomUUID(), "KODE_99", LocalDateTime.now(), vedtaksperiodeId, generasjonId)
         varselDao.avvikleVarsel("KODE_99", definisjonId)
         assertEquals(AVVIKLET, varselDao.finnVarselstatus(vedtaksperiodeId, "KODE_99"))
@@ -167,7 +210,14 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
         definisjonDao.lagreDefinisjon(definisjonId, "KODE_42", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
-        generasjonDao.opprettFor(generasjonId, vedtaksperiodeId, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar), Generasjon.Åpen)
+        generasjonDao.opprettFor(
+            generasjonId,
+            vedtaksperiodeId,
+            UUID.randomUUID(),
+            1.januar,
+            Periode(1.januar, 31.januar),
+            Generasjon.VidereBehandlingAvklares,
+        )
         varselDao.lagreVarsel(UUID.randomUUID(), "KODE_42", LocalDateTime.now(), vedtaksperiodeId, generasjonId)
 
         varselDao.oppdaterStatus(vedtaksperiodeId, generasjonId, "KODE_42", VURDERT, "EN_IDENT", definisjonId)
@@ -187,7 +237,14 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
         definisjonDao.lagreDefinisjon(definisjonId, "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
         val v1 = UUID.randomUUID()
         val generasjonIdv1 = UUID.randomUUID()
-        generasjonDao.opprettFor(generasjonIdv1, v1, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar), Generasjon.Åpen)
+        generasjonDao.opprettFor(
+            generasjonIdv1,
+            v1,
+            UUID.randomUUID(),
+            1.januar,
+            Periode(1.januar, 31.januar),
+            Generasjon.VidereBehandlingAvklares,
+        )
         varselDao.lagreVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), v1, generasjonIdv1)
         varselDao.oppdaterStatus(v1, generasjonIdv1, "EN_KODE", VURDERT, "saksbehandler 1", definisjonId)
         assertThrows<IllegalStateException> {
@@ -207,7 +264,14 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
         val varselId = UUID.randomUUID()
         val opprettet = LocalDateTime.now()
         val generasjonId = UUID.randomUUID()
-        generasjonDao.opprettFor(generasjonId, v1, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar), Generasjon.Åpen)
+        generasjonDao.opprettFor(
+            generasjonId,
+            v1,
+            UUID.randomUUID(),
+            1.januar,
+            Periode(1.januar, 31.januar),
+            Generasjon.VidereBehandlingAvklares,
+        )
         varselDao.lagreVarsel(varselId, "EN_KODE", LocalDateTime.now(), v1, generasjonId)
         assertEquals(listOf(Varsel(varselId, "EN_KODE", opprettet, v1)), alleVarslerFor(v1))
     }
@@ -223,7 +287,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
             UUID.randomUUID(),
             1.januar,
             Periode(1.januar, 31.januar),
-            Generasjon.Åpen
+            Generasjon.VidereBehandlingAvklares,
         )
         generasjonDao.opprettFor(
             generasjonIdv2,
@@ -231,7 +295,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
             UUID.randomUUID(),
             1.januar,
             Periode(1.januar, 31.januar),
-            Generasjon.Åpen
+            Generasjon.VidereBehandlingAvklares,
         )
         val varselId = UUID.randomUUID()
         varselDao.lagreVarsel(varselId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId, generasjonIdv1)
@@ -241,22 +305,30 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
         assertVarslerFor(generasjonIdv2, 1)
     }
 
-    private fun assertDefinisjonFor(varselId: UUID, forventetFinnes: Boolean) {
+    private fun assertDefinisjonFor(
+        varselId: UUID,
+        forventetFinnes: Boolean,
+    ) {
         @Language("PostgreSQL")
         val query = "SELECT definisjon_ref FROM selve_varsel WHERE unik_id = ?"
-        val definisjon = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, varselId).map { it.longOrNull("definisjon_ref") }.asSingle)
-        }
+        val definisjon =
+            sessionOf(dataSource).use { session ->
+                session.run(queryOf(query, varselId).map { it.longOrNull("definisjon_ref") }.asSingle)
+            }
         if (!forventetFinnes) return assertNull(definisjon)
         assertNotNull(definisjon)
     }
 
-    private fun assertIdentFor(varselId: UUID, forventetFinnes: Boolean) {
+    private fun assertIdentFor(
+        varselId: UUID,
+        forventetFinnes: Boolean,
+    ) {
         @Language("PostgreSQL")
         val query = "SELECT status_endret_ident FROM selve_varsel WHERE unik_id = ?"
-        val statusEndretIdent = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, varselId).map { it.stringOrNull("status_endret_ident") }.asSingle)
-        }
+        val statusEndretIdent =
+            sessionOf(dataSource).use { session ->
+                session.run(queryOf(query, varselId).map { it.stringOrNull("status_endret_ident") }.asSingle)
+            }
         if (!forventetFinnes) return assertNull(statusEndretIdent)
         assertNotNull(statusEndretIdent)
     }
@@ -272,25 +344,28 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
                         it.uuid("unik_id"),
                         it.string("kode"),
                         it.localDateTime("opprettet"),
-                        vedtaksperiodeId
+                        vedtaksperiodeId,
                     )
-                }.asList
+                }.asList,
             )
         }
     }
 
-    private fun assertVarslerFor(generasjonId: UUID, forventetAntall: Int) {
+    private fun assertVarslerFor(
+        generasjonId: UUID,
+        forventetAntall: Int,
+    ) {
         @Language("PostgreSQL")
         val query =
             """SELECT count(1) FROM selve_varsel WHERE generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = :generasjon_id)"""
 
-        val antall = sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(query, mapOf("generasjon_id" to generasjonId)).map { it.int(1) }.asSingle
-            )
-        }
+        val antall =
+            sessionOf(dataSource).use { session ->
+                session.run(
+                    queryOf(query, mapOf("generasjon_id" to generasjonId)).map { it.int(1) }.asSingle,
+                )
+            }
 
         assertEquals(antall, forventetAntall)
     }
-
 }

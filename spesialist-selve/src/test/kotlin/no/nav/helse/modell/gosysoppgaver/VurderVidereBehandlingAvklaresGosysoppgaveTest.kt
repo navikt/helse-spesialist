@@ -4,9 +4,6 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
@@ -24,62 +21,80 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
-
-internal class VurderÅpenGosysoppgaveTest {
-
+internal class VurderVidereBehandlingAvklaresGosysoppgaveTest {
     private companion object {
         private const val FNR = "12345678911"
         private const val AKTØR_ID = "1234567891112"
         private val VEDTAKPERIODE_ID = UUID.randomUUID()
     }
-    private val vedtaksperiodeObserver = object : IVedtaksperiodeObserver {
-        val deaktiverteVarsler = mutableListOf<Varselkode>()
-        val opprettedeVarsler = mutableListOf<String>()
 
-        override fun varselOpprettet(
-            varselId: UUID,
-            vedtaksperiodeId: UUID,
-            generasjonId: UUID,
-            varselkode: String,
-            opprettet: LocalDateTime
-        ) {
-            opprettedeVarsler.add(varselkode)
-        }
+    private val vedtaksperiodeObserver =
+        object : IVedtaksperiodeObserver {
+            val deaktiverteVarsler = mutableListOf<Varselkode>()
+            val opprettedeVarsler = mutableListOf<String>()
 
-        override fun varselDeaktivert(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID) {
-            deaktiverteVarsler.add(Varselkode.valueOf(varselkode))
-        }
+            override fun varselOpprettet(
+                varselId: UUID,
+                vedtaksperiodeId: UUID,
+                generasjonId: UUID,
+                varselkode: String,
+                opprettet: LocalDateTime,
+            ) {
+                opprettedeVarsler.add(varselkode)
+            }
 
-        fun reset() {
-            deaktiverteVarsler.clear()
-            opprettedeVarsler.clear()
+            override fun varselDeaktivert(
+                varselId: UUID,
+                varselkode: String,
+                generasjonId: UUID,
+                vedtaksperiodeId: UUID,
+            ) {
+                deaktiverteVarsler.add(Varselkode.valueOf(varselkode))
+            }
+
+            fun reset() {
+                deaktiverteVarsler.clear()
+                opprettedeVarsler.clear()
+            }
         }
-    }
 
     private val generasjon = generasjon(VEDTAKPERIODE_ID).also { it.registrer(vedtaksperiodeObserver) }
     private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(generasjon), emptyList())
     private val dao = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
 
-    private fun command(harTildeltOppgave: Boolean = false, skjæringstidspunkt: LocalDate = LocalDate.now()) = VurderÅpenGosysoppgave(
+    private fun command(
+        harTildeltOppgave: Boolean = false,
+        skjæringstidspunkt: LocalDate = LocalDate.now(),
+    ) = VurderÅpenGosysoppgave(
         UUID.randomUUID(),
         AKTØR_ID,
         dao,
-        mockk<GenerasjonRepository> { every { skjæringstidspunktFor(VEDTAKPERIODE_ID) } returns skjæringstidspunkt},
+        mockk<GenerasjonRepository> { every { skjæringstidspunktFor(VEDTAKPERIODE_ID) } returns skjæringstidspunkt },
         VEDTAKPERIODE_ID,
         sykefraværstilfelle,
         harTildeltOppgave = harTildeltOppgave,
     )
+
     private lateinit var context: CommandContext
 
-    private val observer = object : CommandContextObserver {
-        val behov = mutableMapOf<String, Map<String, Any>>()
-        override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {
-            this.behov[behov] = detaljer
-        }
+    private val observer =
+        object : CommandContextObserver {
+            val behov = mutableMapOf<String, Map<String, Any>>()
 
-        override fun hendelse(hendelse: String) {}
-    }
+            override fun behov(
+                behov: String,
+                ekstraKontekst: Map<String, Any>,
+                detaljer: Map<String, Any>,
+            ) {
+                this.behov[behov] = detaljer
+            }
+
+            override fun hendelse(hendelse: String) {}
+        }
 
     @BeforeEach
     fun setup() {
@@ -98,15 +113,17 @@ internal class VurderÅpenGosysoppgaveTest {
 
     @Test
     fun `Baserer ikkeEldreEnn på dagens dato hvis det ikke fins noen generasjon`() {
-        assertFalse(VurderÅpenGosysoppgave(
-            UUID.randomUUID(),
-            AKTØR_ID,
-            dao,
-            mockk<GenerasjonRepository> { every { skjæringstidspunktFor(VEDTAKPERIODE_ID) } throws IllegalStateException("testfeil")},
-            VEDTAKPERIODE_ID,
-            sykefraværstilfelle,
-            harTildeltOppgave = false,
-        ).execute(context))
+        assertFalse(
+            VurderÅpenGosysoppgave(
+                UUID.randomUUID(),
+                AKTØR_ID,
+                dao,
+                mockk<GenerasjonRepository> { every { skjæringstidspunktFor(VEDTAKPERIODE_ID) } throws IllegalStateException("testfeil") },
+                VEDTAKPERIODE_ID,
+                sykefraværstilfelle,
+                harTildeltOppgave = false,
+            ).execute(context),
+        )
         assertEquals(listOf("ÅpneOppgaver"), observer.behov.keys.toList())
         assertEquals(LocalDate.now().minusYears(1), observer.behov["ÅpneOppgaver"]!!["ikkeEldreEnn"])
     }
@@ -167,11 +184,12 @@ internal class VurderÅpenGosysoppgaveTest {
         assertEquals(SB_EX_1.name, vedtaksperiodeObserver.opprettedeVarsler[0])
     }
 
-    private fun generasjon(vedtaksperiodeId: UUID = UUID.randomUUID()) = Generasjon(
-        id = UUID.randomUUID(),
-        vedtaksperiodeId = vedtaksperiodeId,
-        fom = 1.januar,
-        tom = 31.januar,
-        skjæringstidspunkt = 1.januar
-    )
+    private fun generasjon(vedtaksperiodeId: UUID = UUID.randomUUID()) =
+        Generasjon(
+            id = UUID.randomUUID(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            fom = 1.januar,
+            tom = 31.januar,
+            skjæringstidspunkt = 1.januar,
+        )
 }

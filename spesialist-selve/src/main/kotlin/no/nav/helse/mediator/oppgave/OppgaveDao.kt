@@ -393,8 +393,8 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                     WHERE skjæringstidspunkt=(
                         SELECT skjæringstidspunkt 
                             FROM selve_vedtaksperiode_generasjon
-                            WHERE vedtaksperiode_id=:vedtaksperiodeId AND tilstand='Åpen'
-                        ) AND tilstand='Åpen'
+                            WHERE vedtaksperiode_id=:vedtaksperiodeId AND tilstand='VidereBehandlingAvklares'
+                        ) AND tilstand='VidereBehandlingAvklares'
                     )
         """,
             mapOf(

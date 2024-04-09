@@ -36,7 +36,17 @@ internal class Generasjon private constructor(
         tom: LocalDate,
         skjæringstidspunkt: LocalDate,
         spleisBehandlingId: UUID? = null,
-    ) : this(id, vedtaksperiodeId, null, spleisBehandlingId, skjæringstidspunkt, Periode(fom, tom), Åpen, emptyList(), emptySet())
+    ) : this(
+        id,
+        vedtaksperiodeId,
+        null,
+        spleisBehandlingId,
+        skjæringstidspunkt,
+        Periode(fom, tom),
+        VidereBehandlingAvklares,
+        emptyList(),
+        emptySet(),
+    )
 
     private val varsler: MutableList<Varsel> = varsler.toMutableList()
     private val observers = mutableSetOf<IVedtaksperiodeObserver>()
@@ -239,7 +249,7 @@ internal class Generasjon private constructor(
             return when (this) {
                 AvsluttetUtenUtbetaling -> TilstandDto.AvsluttetUtenUtbetaling
                 Låst -> TilstandDto.Låst
-                Åpen -> TilstandDto.Åpen
+                VidereBehandlingAvklares -> TilstandDto.VidereBehandlingAvklares
                 UtenUtbetalingMåVurderes -> TilstandDto.UtenUtbetalingMåVurderes
                 KlarTilBehandling -> TilstandDto.KlarTilBehandling
             }
@@ -330,12 +340,12 @@ internal class Generasjon private constructor(
             utbetalingId: UUID,
         ) {
             generasjon.utbetalingId = null
-            generasjon.nyTilstand(this, Åpen, UUID.randomUUID())
+            generasjon.nyTilstand(this, VidereBehandlingAvklares, UUID.randomUUID())
         }
     }
 
-    internal data object Åpen : Tilstand {
-        override fun navn(): String = "Åpen"
+    internal data object VidereBehandlingAvklares : Tilstand {
+        override fun navn(): String = "VidereBehandlingAvklares"
 
         override fun nyUtbetaling(
             generasjon: Generasjon,

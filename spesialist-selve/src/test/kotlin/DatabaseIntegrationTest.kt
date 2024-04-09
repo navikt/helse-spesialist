@@ -2,10 +2,6 @@ import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.Random
-import java.util.UUID
 import kotliquery.Query
 import kotliquery.Row
 import kotliquery.action.QueryAction
@@ -64,6 +60,10 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUberegnetPeriode
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.fail
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.Random
+import java.util.UUID
 import kotlin.random.Random.Default.nextLong
 
 abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
@@ -78,12 +78,14 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val EGENSKAP = EgenskapForDatabase.SØKNAD
     protected val OPPGAVESTATUS = "AvventerSaksbehandler"
 
-    protected val ORGNUMMER = with(testperson) {
-        1.arbeidsgiver.organisasjonsnummer
-    }
-    protected val ORGNAVN = with(testperson) {
-        1.arbeidsgiver.organisasjonsnavn
-    }
+    protected val ORGNUMMER =
+        with(testperson) {
+            1.arbeidsgiver.organisasjonsnummer
+        }
+    protected val ORGNAVN =
+        with(testperson) {
+            1.arbeidsgiver.organisasjonsnavn
+        }
 
     protected val BRANSJER = listOf("EN BRANSJE")
 
@@ -107,10 +109,12 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected open val SAKSBEHANDLER_IDENT = "Z999999"
 
     protected val PERIODE = Periode(UUID.randomUUID(), LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
+
     protected companion object {
-        internal val objectMapper = jacksonObjectMapper()
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .registerModule(JavaTimeModule())
+        internal val objectMapper =
+            jacksonObjectMapper()
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .registerModule(JavaTimeModule())
     }
 
     internal var personId: Long = -1
@@ -185,15 +189,18 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                     hendelseId,
                     fødselsnummer.toLong(),
                     json,
-                    type
-                ).asExecute
+                    type,
+                ).asExecute,
             )
         }
     }
 
     protected fun nyttAutomatiseringsinnslag(automatisert: Boolean) {
-        if (automatisert) automatiseringDao.automatisert(VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
-        else automatiseringDao.manuellSaksbehandling(listOf("Dårlig ånde"), VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
+        if (automatisert) {
+            automatiseringDao.automatisert(VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
+        } else {
+            automatiseringDao.manuellSaksbehandling(listOf("Dårlig ånde"), VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
+        }
     }
 
     protected fun nyPerson(
@@ -214,17 +221,20 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         opprettVedtaksperiode(
             vedtaksperiodeId = vedtaksperiodeId,
             periodetype = periodetype,
-            inntektskilde = inntektskilde
+            inntektskilde = inntektskilde,
         )
         opprettOppgave(
             contextId = contextId,
             vedtaksperiodeId = vedtaksperiodeId,
             egenskaper = oppgaveEgenskaper,
-            hendelseId = hendelseId
+            hendelseId = hendelseId,
         )
     }
 
-    private fun opprettCommandContext(hendelse: TestMelding, contextId: UUID) {
+    private fun opprettCommandContext(
+        hendelse: TestMelding,
+        contextId: UUID,
+    ) {
         commandContextDao.opprett(hendelse.id, contextId)
     }
 
@@ -232,7 +242,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         oppgaveId: Long = OPPGAVE_ID,
         saksbehandlerOid: UUID,
         navn: String = SAKSBEHANDLER_NAVN,
-        egenskaper: List<EgenskapForDatabase> = listOf(EgenskapForDatabase.SØKNAD)
+        egenskaper: List<EgenskapForDatabase> = listOf(EgenskapForDatabase.SØKNAD),
     ) {
         opprettSaksbehandler(saksbehandlerOid, navn = navn, epost = SAKSBEHANDLER_EPOST, ident = SAKSBEHANDLER_IDENT)
         oppgaveDao.updateOppgave(oppgaveId, oppgavestatus = "AvventerSaksbehandler", egenskaper = egenskaper)
@@ -266,7 +276,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             personId = personId,
             personinfoId = personinfoId,
             enhetId = enhetId,
-            infotrygdutbetalingerId = infotrygdutbetalingerId
+            infotrygdutbetalingerId = infotrygdutbetalingerId,
         )
     }
 
@@ -302,7 +312,10 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         snapshotId = snapshotDao.lagre(fødselsnummer, person)
     }
 
-    protected fun opprettGenerasjon(vedtaksperiodeId: UUID = VEDTAKSPERIODE, generasjonId: UUID = UUID.randomUUID()) {
+    protected fun opprettGenerasjon(
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
+        generasjonId: UUID = UUID.randomUUID(),
+    ) {
         generasjonDao.finnSisteGenerasjonFor(vedtaksperiodeId)?.also {
             generasjonDao.oppdaterTilstandFor(generasjonId = it, ny = Generasjon.Låst, endretAv = UUID.randomUUID())
         }
@@ -312,7 +325,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             UUID.randomUUID(),
             1.januar,
             Periode(1.januar, 31.januar),
-            Generasjon.Åpen
+            Generasjon.VidereBehandlingAvklares,
         )
     }
 
@@ -344,33 +357,42 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ) {
         val hendelse = testhendelse(hendelseId = hendelseId)
         opprettCommandContext(hendelse, contextId)
-        oppgaveId = oppgaveDao.opprettOppgave(
-            nextLong().also { OPPGAVE_ID = it },
-            contextId,
-            egenskaper,
-            vedtaksperiodeId,
-            utbetalingId,
-            kanAvvises,
-        )
+        oppgaveId =
+            oppgaveDao.opprettOppgave(
+                nextLong().also { OPPGAVE_ID = it },
+                contextId,
+                egenskaper,
+                vedtaksperiodeId,
+                utbetalingId,
+                kanAvvises,
+            )
     }
 
-    protected fun avventerSystem(oppgaveId: Long, ferdigstiltAv: String, ferdigstiltAvOid: UUID) {
+    protected fun avventerSystem(
+        oppgaveId: Long,
+        ferdigstiltAv: String,
+        ferdigstiltAvOid: UUID,
+    ) {
         oppgaveDao.updateOppgave(
             oppgaveId = oppgaveId,
             oppgavestatus = "AvventerSystem",
             ferdigstiltAv = ferdigstiltAv,
             oid = ferdigstiltAvOid,
-            egenskaper = listOf(EGENSKAP)
+            egenskaper = listOf(EGENSKAP),
         )
     }
 
-    protected fun ferdigstillOppgave(oppgaveId: Long, ferdigstiltAv: String? = null, ferdigstiltAvOid: UUID? = null) {
+    protected fun ferdigstillOppgave(
+        oppgaveId: Long,
+        ferdigstiltAv: String? = null,
+        ferdigstiltAvOid: UUID? = null,
+    ) {
         oppgaveDao.updateOppgave(
             oppgaveId = oppgaveId,
             oppgavestatus = "Ferdigstilt",
             ferdigstiltAv = ferdigstiltAv,
             oid = ferdigstiltAvOid,
-            egenskaper = listOf(EGENSKAP)
+            egenskaper = listOf(EGENSKAP),
         )
     }
 
@@ -400,10 +422,22 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         utbetalingDao.opprettKobling(vedtaksperiodeId, utbetalingId)
     }
 
-    protected fun utbetalingsopplegg(beløpTilArbeidsgiver: Int, beløpTilSykmeldt: Int, utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING) {
+    protected fun utbetalingsopplegg(
+        beløpTilArbeidsgiver: Int,
+        beløpTilSykmeldt: Int,
+        utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
+    ) {
         val arbeidsgiveroppdragId = lagArbeidsgiveroppdrag(fagsystemId())
         val personOppdragId = lagPersonoppdrag(fagsystemId())
-        val utbetaling_idId = lagUtbetalingId(arbeidsgiveroppdragId, personOppdragId, UTBETALING_ID, arbeidsgiverbeløp = beløpTilArbeidsgiver, personbeløp = beløpTilSykmeldt, utbetalingtype = utbetalingtype)
+        val utbetaling_idId =
+            lagUtbetalingId(
+                arbeidsgiveroppdragId,
+                personOppdragId,
+                UTBETALING_ID,
+                arbeidsgiverbeløp = beløpTilArbeidsgiver,
+                personbeløp = beløpTilSykmeldt,
+                utbetalingtype = utbetalingtype,
+            )
         utbetalingDao.nyUtbetalingStatus(utbetaling_idId, Utbetalingsstatus.UTBETALT, LocalDateTime.now(), "{}")
         opprettUtbetalingKobling(VEDTAKSPERIODE, UTBETALING_ID)
     }
@@ -411,11 +445,9 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun lagArbeidsgiveroppdrag(
         fagsystemId: String = fagsystemId(),
         mottaker: String = ORGNUMMER,
-    ) =
-        utbetalingDao.nyttOppdrag(fagsystemId, mottaker)!!
+    ) = utbetalingDao.nyttOppdrag(fagsystemId, mottaker)!!
 
-    protected fun lagPersonoppdrag(fagsystemId: String = fagsystemId()) =
-        utbetalingDao.nyttOppdrag(fagsystemId, FNR)!!
+    protected fun lagPersonoppdrag(fagsystemId: String = fagsystemId()) = utbetalingDao.nyttOppdrag(fagsystemId, FNR)!!
 
     protected fun lagUtbetalingId(
         arbeidsgiverOppdragId: Long,
@@ -423,7 +455,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         utbetalingId: UUID = UUID.randomUUID(),
         arbeidsgiverbeløp: Int = 2000,
         personbeløp: Int = 2000,
-        utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING
+        utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
     ): Long =
         utbetalingDao.opprettUtbetalingId(
             utbetalingId = utbetalingId,
@@ -437,12 +469,17 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             personbeløp = personbeløp,
         )
 
-    protected fun lagLinje(oppdrag: Long, fom: LocalDate, tom: LocalDate, totalbeløp: Int? = null) {
+    protected fun lagLinje(
+        oppdrag: Long,
+        fom: LocalDate,
+        tom: LocalDate,
+        totalbeløp: Int? = null,
+    ) {
         utbetalingDao.nyLinje(
             oppdragId = oppdrag,
             fom = fom,
             tom = tom,
-            totalbeløp = totalbeløp
+            totalbeløp = totalbeløp,
         )
     }
 
@@ -461,41 +498,45 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         versjon: Int = 1,
     ): GraphQLClientResponse<HentSnapshot.Result> =
         object : GraphQLClientResponse<HentSnapshot.Result> {
-            override val data = HentSnapshot.Result(
-                GraphQLPerson(
-                    versjon = versjon,
-                    aktorId = aktørId,
-                    fodselsnummer = fødselsnummer,
-                    arbeidsgivere = listOf(
-                        GraphQLArbeidsgiver(
-                            organisasjonsnummer = "987654321",
-                            ghostPerioder = emptyList(),
-                            generasjoner = listOf(
-                                GraphQLGenerasjon(
-                                    id = UUID.randomUUID(),
-                                    perioder = listOf(
-                                        GraphQLUberegnetPeriode(
-                                            erForkastet = false,
-                                            fom = "2020-01-01",
-                                            tom = "2020-01-31",
-                                            inntektstype = GraphQLInntektstype.ENARBEIDSGIVER,
-                                            opprettet = "2020-01-31",
-                                            periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
-                                            tidslinje = emptyList(),
-                                            vedtaksperiodeId = UUID.randomUUID(),
-                                            periodetilstand = GraphQLPeriodetilstand.VENTERPAANNENPERIODE,
-                                            skjaeringstidspunkt = "2020-01-01",
-                                            hendelser = emptyList(),
-                                        )
-                                    )
-                                )
-                            )
-                        )
+            override val data =
+                HentSnapshot.Result(
+                    GraphQLPerson(
+                        versjon = versjon,
+                        aktorId = aktørId,
+                        fodselsnummer = fødselsnummer,
+                        arbeidsgivere =
+                            listOf(
+                                GraphQLArbeidsgiver(
+                                    organisasjonsnummer = "987654321",
+                                    ghostPerioder = emptyList(),
+                                    generasjoner =
+                                        listOf(
+                                            GraphQLGenerasjon(
+                                                id = UUID.randomUUID(),
+                                                perioder =
+                                                    listOf(
+                                                        GraphQLUberegnetPeriode(
+                                                            erForkastet = false,
+                                                            fom = "2020-01-01",
+                                                            tom = "2020-01-31",
+                                                            inntektstype = GraphQLInntektstype.ENARBEIDSGIVER,
+                                                            opprettet = "2020-01-31",
+                                                            periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
+                                                            tidslinje = emptyList(),
+                                                            vedtaksperiodeId = UUID.randomUUID(),
+                                                            periodetilstand = GraphQLPeriodetilstand.VENTERPAANNENPERIODE,
+                                                            skjaeringstidspunkt = "2020-01-01",
+                                                            hendelser = emptyList(),
+                                                        ),
+                                                    ),
+                                            ),
+                                        ),
+                                ),
+                            ),
+                        dodsdato = null,
+                        vilkarsgrunnlag = emptyList(),
                     ),
-                    dodsdato = null,
-                    vilkarsgrunnlag = emptyList(),
                 )
-            )
         }
 
     protected fun nyttVarsel(
@@ -523,8 +564,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                 LocalDateTime.now(),
                 status,
                 if (endretTidspunkt != null) "EN_IDENT" else null,
-                endretTidspunkt
-            ).asExecute
+                endretTidspunkt,
+            ).asExecute,
         )
     }
 
@@ -532,52 +573,66 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         tittel: String = "EN_TITTEL",
         kode: String = "EN_KODE",
         definisjonId: UUID = UUID.randomUUID(),
-    ): Long = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-        @Language("PostgreSQL")
-        val query = """
+    ): Long =
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            @Language("PostgreSQL")
+            val query = """
             INSERT INTO api_varseldefinisjon(unik_id, kode, tittel, forklaring, handling, opprettet) 
             VALUES (?, ?, ?, ?, ?, ?)    
         """
-        requireNotNull(
-            session.run(
-                queryOf(
-                    query,
-                    definisjonId,
-                    kode,
-                    tittel,
-                    null,
-                    null,
-                    LocalDateTime.now()
-                ).asUpdateAndReturnGeneratedKey
+            requireNotNull(
+                session.run(
+                    queryOf(
+                        query,
+                        definisjonId,
+                        kode,
+                        tittel,
+                        null,
+                        null,
+                        LocalDateTime.now(),
+                    ).asUpdateAndReturnGeneratedKey,
+                ),
             )
-        )
-    }
+        }
 
-    protected fun settSaksbehandler(vedtaksperiodeId: UUID, saksbehandlerOid: UUID) = query(
+    protected fun settSaksbehandler(
+        vedtaksperiodeId: UUID,
+        saksbehandlerOid: UUID,
+    ) = query(
         """
-            UPDATE totrinnsvurdering
-            SET saksbehandler = :saksbehandlerOid, oppdatert = now()
-            WHERE vedtaksperiode_id = :vedtaksperiodeId AND utbetaling_id_ref IS null
-        """.trimIndent(), "vedtaksperiodeId" to vedtaksperiodeId, "saksbehandlerOid" to saksbehandlerOid
+        UPDATE totrinnsvurdering
+        SET saksbehandler = :saksbehandlerOid, oppdatert = now()
+        WHERE vedtaksperiode_id = :vedtaksperiodeId AND utbetaling_id_ref IS null
+        """.trimIndent(),
+        "vedtaksperiodeId" to vedtaksperiodeId,
+        "saksbehandlerOid" to saksbehandlerOid,
     ).execute()
 
-    protected fun assertGodkjenteVarsler(generasjonId: UUID, forventetAntall: Int) {
+    protected fun assertGodkjenteVarsler(
+        generasjonId: UUID,
+        forventetAntall: Int,
+    ) {
         @Language("PostgreSQL")
         val query =
             "SELECT COUNT(1) FROM selve_varsel sv WHERE sv.generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?) AND status = 'GODKJENT'"
-        val antall = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, generasjonId).map { it.int(1) }.asSingle)
-        }
+        val antall =
+            sessionOf(dataSource).use { session ->
+                session.run(queryOf(query, generasjonId).map { it.int(1) }.asSingle)
+            }
         Assertions.assertEquals(forventetAntall, antall)
     }
 
-    protected fun assertAvvisteVarsler(generasjonId: UUID, forventetAntall: Int) {
+    protected fun assertAvvisteVarsler(
+        generasjonId: UUID,
+        forventetAntall: Int,
+    ) {
         @Language("PostgreSQL")
         val query =
             "SELECT COUNT(1) FROM selve_varsel sv WHERE sv.generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?) AND status = 'AVVIST'"
-        val antall = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, generasjonId).map { it.int(1) }.asSingle)
-        }
+        val antall =
+            sessionOf(dataSource).use { session ->
+                session.run(queryOf(query, generasjonId).map { it.int(1) }.asSingle)
+            }
         Assertions.assertEquals(forventetAntall, antall)
     }
 
@@ -587,12 +642,17 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val tom: LocalDate,
     )
 
-    protected fun query(@Language("postgresql") query: String, vararg params: Pair<String, Any?>) =
-        queryOf(query, params.toMap())
+    protected fun query(
+        @Language("postgresql") query: String,
+        vararg params: Pair<String, Any?>,
+    ) = queryOf(query, params.toMap())
 
     protected fun <T> Query.single(mapper: (Row) -> T?) = map(mapper).asSingle.runInSession()
+
     protected fun <T> Query.list(mapper: (Row) -> T?) = map(mapper).asList.runInSession()
+
     protected fun Query.update() = asUpdate.runInSession()
+
     protected fun Query.execute() = asExecute.runInSession()
 
     private fun <T> QueryAction<T>.runInSession() = sessionOf(dataSource).use(::runWithSession)

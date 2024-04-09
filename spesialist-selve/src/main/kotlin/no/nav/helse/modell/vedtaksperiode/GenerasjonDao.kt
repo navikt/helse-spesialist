@@ -62,15 +62,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
                     skjæringstidspunkt = row.localDateOrNull("skjæringstidspunkt") ?: row.localDate("fom"),
                     fom = row.localDate("fom"),
                     tom = row.localDate("tom"),
-                    tilstand =
-                        when (val tilstand = row.string("tilstand")) {
-                            "Låst" -> TilstandDto.Låst
-                            "Åpen" -> TilstandDto.Åpen
-                            "AvsluttetUtenUtbetaling" -> TilstandDto.AvsluttetUtenUtbetaling
-                            "UtenUtbetalingMåVurderes" -> TilstandDto.UtenUtbetalingMåVurderes
-                            "KlarTilBehandling" -> TilstandDto.KlarTilBehandling
-                            else -> throw IllegalArgumentException("$tilstand er ikke en gyldig generasjontilstand")
-                        },
+                    tilstand = enumValueOf(row.string("tilstand")),
                     tags = row.array<String>("tags").toList(),
                     varsler = finnVarsler(generasjonRef),
                 )
@@ -209,15 +201,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
                     skjæringstidspunkt = row.localDate("skjæringstidspunkt"),
                     fom = row.localDate("fom"),
                     tom = row.localDate("tom"),
-                    tilstand =
-                        when (val tilstand = row.string("tilstand")) {
-                            "Låst" -> TilstandDto.Låst
-                            "Åpen" -> TilstandDto.Åpen
-                            "AvsluttetUtenUtbetaling" -> TilstandDto.AvsluttetUtenUtbetaling
-                            "UtenUtbetalingMåVurderes" -> TilstandDto.UtenUtbetalingMåVurderes
-                            "KlarTilBehandling" -> TilstandDto.KlarTilBehandling
-                            else -> throw IllegalArgumentException("$tilstand er ikke en gyldig generasjontilstand")
-                        },
+                    tilstand = enumValueOf(row.string("tilstand")),
                     tags = row.array<String>("tags").toList(),
                     varsler = finnVarsler(generasjonRef),
                 )

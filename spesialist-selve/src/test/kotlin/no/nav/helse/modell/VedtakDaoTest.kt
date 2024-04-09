@@ -1,9 +1,6 @@
 package no.nav.helse.modell
 
 import DatabaseIntegrationTest
-import java.sql.SQLException
-import java.time.LocalDate
-import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.januar
@@ -20,9 +17,11 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.sql.SQLException
+import java.time.LocalDate
+import java.util.UUID
 
 internal class VedtakDaoTest : DatabaseIntegrationTest() {
-
     @Test
     fun `lagre vedtak`() {
         opprettPerson()
@@ -44,25 +43,39 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
                 with(vedtakDao) {
                     it.lagreVedtaksperiode(
                         fødselsnummer = FNR,
-                        vedtaksperiodeDto = VedtaksperiodeDto(
-                            organisasjonsnummer = ORGNUMMER,
-                            vedtaksperiodeId = VEDTAKSPERIODE,
-                            forkastet = false,
-                            generasjoner = listOf(
-                                GenerasjonDto(UUID.randomUUID(), VEDTAKSPERIODE, null, UUID.randomUUID(), 1.januar, 1.januar, 31.januar, TilstandDto.Åpen, emptyList(), emptyList())
-                            )
-                        )
+                        vedtaksperiodeDto =
+                            VedtaksperiodeDto(
+                                organisasjonsnummer = ORGNUMMER,
+                                vedtaksperiodeId = VEDTAKSPERIODE,
+                                forkastet = false,
+                                generasjoner =
+                                    listOf(
+                                        GenerasjonDto(
+                                            UUID.randomUUID(),
+                                            VEDTAKSPERIODE,
+                                            null,
+                                            UUID.randomUUID(),
+                                            1.januar,
+                                            1.januar,
+                                            31.januar,
+                                            TilstandDto.VidereBehandlingAvklares,
+                                            emptyList(),
+                                            emptyList(),
+                                        ),
+                                    ),
+                            ),
                     )
                 }
             }
         }
-        val vedtaksperiode = sessionOf(dataSource).use {
-            it.transaction {
-                with(vedtakDao) {
-                    it.finnVedtaksperiode(VEDTAKSPERIODE)
+        val vedtaksperiode =
+            sessionOf(dataSource).use {
+                it.transaction {
+                    with(vedtakDao) {
+                        it.finnVedtaksperiode(VEDTAKSPERIODE)
+                    }
                 }
             }
-        }
         assertNotNull(vedtaksperiode)
         assertEquals(VEDTAKSPERIODE, vedtaksperiode?.vedtaksperiodeId)
         assertEquals(ORGNUMMER, vedtaksperiode?.organisasjonsnummer)
@@ -79,25 +92,39 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
                 with(vedtakDao) {
                     it.lagreVedtaksperiode(
                         fødselsnummer = FNR,
-                        vedtaksperiodeDto = VedtaksperiodeDto(
-                            organisasjonsnummer = ORGNUMMER,
-                            vedtaksperiodeId = VEDTAKSPERIODE,
-                            forkastet = true,
-                            generasjoner = listOf(
-                                GenerasjonDto(UUID.randomUUID(), VEDTAKSPERIODE, null, UUID.randomUUID(), 1.januar, 1.januar, 31.januar, TilstandDto.Åpen, emptyList(), emptyList())
-                            )
-                        )
+                        vedtaksperiodeDto =
+                            VedtaksperiodeDto(
+                                organisasjonsnummer = ORGNUMMER,
+                                vedtaksperiodeId = VEDTAKSPERIODE,
+                                forkastet = true,
+                                generasjoner =
+                                    listOf(
+                                        GenerasjonDto(
+                                            UUID.randomUUID(),
+                                            VEDTAKSPERIODE,
+                                            null,
+                                            UUID.randomUUID(),
+                                            1.januar,
+                                            1.januar,
+                                            31.januar,
+                                            TilstandDto.VidereBehandlingAvklares,
+                                            emptyList(),
+                                            emptyList(),
+                                        ),
+                                    ),
+                            ),
                     )
                 }
             }
         }
-        val vedtaksperiode = sessionOf(dataSource).use {
-            it.transaction {
-                with(vedtakDao) {
-                    it.finnVedtaksperiode(VEDTAKSPERIODE)
+        val vedtaksperiode =
+            sessionOf(dataSource).use {
+                it.transaction {
+                    with(vedtakDao) {
+                        it.finnVedtaksperiode(VEDTAKSPERIODE)
+                    }
                 }
             }
-        }
         assertNotNull(vedtaksperiode)
         assertEquals(VEDTAKSPERIODE, vedtaksperiode?.vedtaksperiodeId)
         assertEquals(ORGNUMMER, vedtaksperiode?.organisasjonsnummer)
@@ -119,7 +146,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
                 nyFom,
                 nyTom,
                 personId,
-                arbeidsgiverId
+                arbeidsgiverId,
             )
         }
     }
@@ -213,48 +240,60 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         assertFalse(vedtakDao.erSpesialsak(VEDTAKSPERIODE))
     }
 
-    private fun assertForkastet(vedtaksperiodeId: UUID, forventetHendelseId: UUID) {
+    private fun assertForkastet(
+        vedtaksperiodeId: UUID,
+        forventetHendelseId: UUID,
+    ) {
         @Language("PostgreSQL")
         val query =
             "SELECT forkastet, forkastet_av_hendelse, forkastet_tidspunkt FROM vedtak WHERE vedtaksperiode_id = ?"
-        val respons = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, vedtaksperiodeId).map {
-                Triple(
-                    it.boolean("forkastet"),
-                    it.uuidOrNull("forkastet_av_hendelse"),
-                    it.localDateTimeOrNull("forkastet_tidspunkt")
+        val respons =
+            sessionOf(dataSource).use { session ->
+                session.run(
+                    queryOf(query, vedtaksperiodeId).map {
+                        Triple(
+                            it.boolean("forkastet"),
+                            it.uuidOrNull("forkastet_av_hendelse"),
+                            it.localDateTimeOrNull("forkastet_tidspunkt"),
+                        )
+                    }.asSingle,
                 )
-            }.asSingle)
-        }
+            }
         assertNotNull(respons)
         assertEquals(true, respons?.first)
         assertEquals(forventetHendelseId, respons?.second)
         assertNotNull(respons?.third)
     }
 
-    private fun finnKobling(hendelseId: UUID) = sessionOf(dataSource).use {
-        it.run(
-            queryOf("SELECT vedtaksperiode_id FROM vedtaksperiode_hendelse WHERE hendelse_ref = ?", hendelseId)
-                .map { row -> row.uuid("vedtaksperiode_id") }.asSingle
-        )
-    }
-
-    private fun vedtak(fødselsnummer: String = FNR) = sessionOf(dataSource).use {
-        @Language("PostgreSQL") val query = """
-            SELECT vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, forkastet
-            FROM vedtak
-            JOIN person p on vedtak.person_ref = p.id
-            WHERE fodselsnummer = :foedselsnummer
-        """.trimIndent()
-        it.run(queryOf(query, mapOf("foedselsnummer" to fødselsnummer.toLong())).map { row ->
-            Vedtak(
-                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                personRef = row.long("person_ref"),
-                arbeidsgiverRef = row.long("arbeidsgiver_ref"),
-                forkastet = row.boolean("forkastet")
+    private fun finnKobling(hendelseId: UUID) =
+        sessionOf(dataSource).use {
+            it.run(
+                queryOf("SELECT vedtaksperiode_id FROM vedtaksperiode_hendelse WHERE hendelse_ref = ?", hendelseId)
+                    .map { row -> row.uuid("vedtaksperiode_id") }.asSingle,
             )
-        }.asList)
-    }
+        }
+
+    private fun vedtak(fødselsnummer: String = FNR) =
+        sessionOf(dataSource).use {
+            @Language("PostgreSQL")
+            val query =
+                """
+                SELECT vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, forkastet
+                FROM vedtak
+                JOIN person p on vedtak.person_ref = p.id
+                WHERE fodselsnummer = :foedselsnummer
+                """.trimIndent()
+            it.run(
+                queryOf(query, mapOf("foedselsnummer" to fødselsnummer.toLong())).map { row ->
+                    Vedtak(
+                        vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                        personRef = row.long("person_ref"),
+                        arbeidsgiverRef = row.long("arbeidsgiver_ref"),
+                        forkastet = row.boolean("forkastet"),
+                    )
+                }.asList,
+            )
+        }
 
     private fun opprettSpesialsak(vedtaksperiodeId: UUID) {
         @Language("PostgreSQL")

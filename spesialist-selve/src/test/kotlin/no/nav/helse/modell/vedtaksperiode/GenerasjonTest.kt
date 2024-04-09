@@ -502,7 +502,7 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
     @Test
     fun `generasjonTilstand toDto`() {
         assertEquals(TilstandDto.Låst, Generasjon.Låst.toDto())
-        assertEquals(TilstandDto.Åpen, Generasjon.Åpen.toDto())
+        assertEquals(TilstandDto.VidereBehandlingAvklares, Generasjon.VidereBehandlingAvklares.toDto())
         assertEquals(TilstandDto.AvsluttetUtenUtbetaling, Generasjon.AvsluttetUtenUtbetaling.toDto())
         assertEquals(TilstandDto.UtenUtbetalingMåVurderes, Generasjon.UtenUtbetalingMåVurderes.toDto())
     }
@@ -531,7 +531,7 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
                 UUID.randomUUID(),
                 1.januar,
                 1.januar til 31.januar,
-                Generasjon.Åpen,
+                Generasjon.VidereBehandlingAvklares,
             )
         generasjon.registrer(generasjonRepository)
         return generasjon

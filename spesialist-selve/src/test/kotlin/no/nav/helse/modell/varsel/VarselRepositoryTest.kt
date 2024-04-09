@@ -44,7 +44,7 @@ internal class VarselRepositoryTest : AbstractDatabaseTest() {
                 UUID.randomUUID(),
                 1.januar,
                 Periode(1.januar, 31.januar),
-                Generasjon.Åpen,
+                Generasjon.VidereBehandlingAvklares,
             )
         generasjon.registrer(generasjonRepository, varselRepository)
     }
