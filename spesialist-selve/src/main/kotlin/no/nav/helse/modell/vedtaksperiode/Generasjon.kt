@@ -408,6 +408,7 @@ internal class Generasjon private constructor(
             varsel: Varsel,
             hendelseId: UUID,
         ) {
+            sikkerlogg.warn("Mottar nytt varsel i tilstand ${navn()}")
             generasjon.nyTilstand(this, AvsluttetUtenVedtakMedVarsler, hendelseId)
         }
 
@@ -415,7 +416,7 @@ internal class Generasjon private constructor(
             generasjon: Generasjon,
             sykepengevedtakBuilder: SykepengevedtakBuilder,
         ) {
-            sikkerlogg.warn("Spesialist mottar avsluttet_uten_vedtak når den allerede er i tilstand AvsluttetUtenVedtak")
+            sikkerlogg.warn("Spesialist mottar avsluttet_uten_vedtak når den allerede er i tilstand ${navn()}")
             generasjon.supplerAvsluttetUtenVedtak(sykepengevedtakBuilder)
         }
     }
