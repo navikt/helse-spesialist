@@ -28,7 +28,7 @@ internal class SykepengevedtakBuilder {
     private var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta? = null
     private var skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlag? = null
     private var skjønnsfastsettingopplysninger: SkjønnsfastsettingopplysningerDto? = null
-    private val tags: MutableList<String> = mutableListOf()
+    private val tags: MutableSet<String> = mutableSetOf()
 
     internal fun fødselsnummer(fødselsnummer: String) = apply { this.fødselsnummer = fødselsnummer }
 

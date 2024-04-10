@@ -22,7 +22,7 @@ internal sealed class Sykepengevedtak(
     val begrensning: String,
     val inntekt: Double,
     val vedtakFattetTidspunkt: LocalDateTime,
-    val tags: List<String>,
+    val tags: Set<String>,
 ) {
     override fun equals(other: Any?) =
         this === other || (
@@ -82,7 +82,7 @@ internal sealed class Sykepengevedtak(
         begrensning: String,
         inntekt: Double,
         vedtakFattetTidspunkt: LocalDateTime,
-        tags: List<String>,
+        tags: Set<String>,
     ) : Sykepengevedtak(
             fødselsnummer,
             aktørId,
@@ -123,7 +123,7 @@ internal sealed class Sykepengevedtak(
         val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
         val skjønnsfastsettingopplysninger: SkjønnsfastsettingopplysningerDto?,
         vedtakFattetTidspunkt: LocalDateTime,
-        tags: List<String>,
+        tags: Set<String>,
     ) : Sykepengevedtak(
             fødselsnummer,
             aktørId,

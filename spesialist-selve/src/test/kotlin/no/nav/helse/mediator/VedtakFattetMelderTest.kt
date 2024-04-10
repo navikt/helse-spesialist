@@ -54,7 +54,7 @@ internal class VedtakFattetMelderTest {
             begrensning = "VET_IKKE",
             inntekt = 0.0,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
-            tags = listOf("IngenNyArbeidsgiverperiode")
+            tags = setOf("IngenNyArbeidsgiverperiode")
         )
         vedtakFattetMelder.vedtakFattet(auuVedtak)
         vedtakFattetMelder.publiserUtgåendeMeldinger()
@@ -110,7 +110,7 @@ internal class VedtakFattetMelderTest {
                 omregnetÅrsinntekt = 10000.0
             ),
             skjønnsfastsettingopplysninger = null,
-            tags = listOf("IngenNyArbeidsgiverperiode")
+            tags = setOf("IngenNyArbeidsgiverperiode")
         )
         vedtakFattetMelder.vedtakFattet(infotrygd)
         vedtakFattetMelder.publiserUtgåendeMeldinger()
@@ -180,7 +180,7 @@ internal class VedtakFattetMelderTest {
                 )
             ),
             skjønnsfastsettingopplysninger = null,
-            tags = listOf("IngenNyArbeidsgiverperiode")
+            tags = setOf("IngenNyArbeidsgiverperiode")
         )
         vedtakFattetMelder.vedtakFattet(infotrygd)
         vedtakFattetMelder.publiserUtgåendeMeldinger()
@@ -265,7 +265,7 @@ internal class VedtakFattetMelderTest {
                 skjønnsfastsatt = 13000.0
             ),
             skjønnsfastsettingopplysninger = SkjønnsfastsettingopplysningerDto("Mal", "Fritekst", "Konklusjon", Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT, Skjønnsfastsettingsårsak.ANDRE_AVSNITT),
-            tags = listOf("IngenNyArbeidsgiverperiode")
+            tags = setOf("IngenNyArbeidsgiverperiode")
         )
         vedtakFattetMelder.vedtakFattet(infotrygd)
         vedtakFattetMelder.publiserUtgåendeMeldinger()

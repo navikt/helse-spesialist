@@ -120,7 +120,7 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
     @Test
     fun `behandlingsinformasjon fra godkjenningsbehovet skal sendes på vedtak_fattet`() {
         val spleisBehandlingId = UUID.randomUUID()
-        val tagsFraGodkjenningsbehovet = listOf("Arbeidsgiverutbetaling", "Personutbetaling")
+        val tagsFraGodkjenningsbehovet = listOf("Arbeidsgiverutbetaling", "Personutbetaling", "SykepengegrunnlagUnder2G", "IngenNyArbeidsgiverperiode")
         val tagsFraAvsluttetMedVedtak = listOf("SykepengegrunnlagUnder2G", "IngenNyArbeidsgiverperiode")
         val godkjenningsbehov = GodkjenningsbehovTestdata(
             fødselsnummer = FØDSELSNUMMER,
@@ -140,7 +140,8 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         val sisteHendelse = inspektør.meldinger().last()
         assertEquals("vedtak_fattet", sisteHendelse["@event_name"].asText())
         assertEquals(spleisBehandlingId, UUID.fromString(sisteHendelse["behandlingId"].asText()))
-        assertEquals(tagsFraGodkjenningsbehovet + tagsFraAvsluttetMedVedtak, sisteHendelse["tags"].map { it.asText() })
+        val forventet = (tagsFraGodkjenningsbehovet + tagsFraAvsluttetMedVedtak).toSet()
+        assertEquals(forventet, sisteHendelse["tags"].map { it.asText() }.toSet())
     }
 
 }

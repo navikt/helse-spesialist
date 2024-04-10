@@ -90,7 +90,7 @@ class SykepengevedtakBuilderTest {
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_HOVEDREGEL),
                 utbetalingId = utbetalingId,
                 skjønnsfastsettingopplysninger = null,
-                tags = listOf("IngenNyArbeidsgiverperiode")
+                tags = setOf("IngenNyArbeidsgiverperiode")
             ), utkast
         )
     }
@@ -141,7 +141,7 @@ class SykepengevedtakBuilderTest {
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_SKJØNN),
                 utbetalingId = utbetalingId,
                 skjønnsfastsettingopplysninger = SkjønnsfastsettingopplysningerDto("Mal", "Fritekst", "Konklusjon", Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT, Skjønnsfastsettingsårsak.ANDRE_AVSNITT),
-                tags = listOf("IngenNyArbeidsgiverperiode")
+                tags = setOf("IngenNyArbeidsgiverperiode")
             ), utkast
         )
     }
@@ -191,7 +191,7 @@ class SykepengevedtakBuilderTest {
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(I_INFOTRYGD),
                 utbetalingId = utbetalingId,
                 skjønnsfastsettingopplysninger = null,
-                tags = listOf("IngenNyArbeidsgiverperiode")
+                tags = setOf("IngenNyArbeidsgiverperiode")
             ), utkast
         )
     }
@@ -236,7 +236,7 @@ class SykepengevedtakBuilderTest {
                 begrensning = begrensning,
                 inntekt = inntekt,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
-                tags = listOf("IngenNyArbeidsgiverperiode")
+                tags = setOf("IngenNyArbeidsgiverperiode")
             ), utkast
         )
     }
@@ -386,7 +386,7 @@ class SykepengevedtakBuilderTest {
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_HOVEDREGEL),
                 utbetalingId = utbetalingId,
                 skjønnsfastsettingopplysninger = null,
-                tags = listOf("IngenNyArbeidsgiverperiode"),
+                tags = setOf("IngenNyArbeidsgiverperiode"),
             ), utkast
         )
     }

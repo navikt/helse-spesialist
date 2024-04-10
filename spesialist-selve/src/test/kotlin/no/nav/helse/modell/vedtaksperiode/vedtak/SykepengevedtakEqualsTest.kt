@@ -33,7 +33,7 @@ class SykepengevedtakEqualsTest {
         private const val innrapportertÅrsinntekt = 300000.00
         private const val avviksprosent = 0.0
         private const val seksG2023 = 6 * 118620.0
-        private val tags = listOf("IngenNyArbeidsgiverperiode")
+        private val tags = setOf("IngenNyArbeidsgiverperiode")
     }
 
     @Test
@@ -244,7 +244,7 @@ class SykepengevedtakEqualsTest {
         begrensning: String = Companion.begrensning,
         inntekt: Double = Companion.inntekt,
         vedtakFattetTidspunkt: LocalDateTime = Companion.vedtakFattetTidspunkt,
-        tags: List<String> = Companion.tags,
+        tags: Set<String> = Companion.tags,
     ) = Sykepengevedtak.AuuVedtak(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId,
