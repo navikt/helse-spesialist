@@ -53,7 +53,7 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterSaksbehandlerløsning()
-        håndterAvsluttetMedVedtak(fastsattType = "EtterHovedregel")
+        håndterAvsluttetMedVedtak(fastsattType = "EtterHovedregel", tagsPåSykepengegrunnlagsfakta = emptyList())
         val sisteHendelse = inspektør.meldinger().last()
         assertEquals("vedtak_fattet", sisteHendelse["@event_name"].asText())
         assertEquals(0, sisteHendelse["begrunnelser"].size())
@@ -68,7 +68,7 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         håndterSkjønnsfastsattSykepengegrunnlag()
         håndterSaksbehandlerløsning()
 
-        håndterAvsluttetMedVedtak(fastsattType = "EtterSkjønn")
+        håndterAvsluttetMedVedtak(fastsattType = "EtterSkjønn", tagsPåSykepengegrunnlagsfakta = emptyList())
         val sisteHendelse = inspektør.meldinger().last()
         assertEquals("vedtak_fattet", sisteHendelse["@event_name"].asText())
         assertEquals(3, sisteHendelse["begrunnelser"].size())
@@ -86,7 +86,7 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         håndterSkjønnsfastsattSykepengegrunnlag()
         håndterSaksbehandlerløsning()
 
-        håndterAvsluttetMedVedtak(fastsattType = "IInfotrygd")
+        håndterAvsluttetMedVedtak(fastsattType = "IInfotrygd", tagsPåSykepengegrunnlagsfakta = emptyList())
         val sisteHendelse = inspektør.meldinger().last()
         assertEquals("vedtak_fattet", sisteHendelse["@event_name"].asText())
         assertEquals(0, sisteHendelse["begrunnelser"].size())
@@ -107,7 +107,11 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
             )
         )
         håndterSaksbehandlerløsning()
-        håndterAvsluttetMedVedtak(fastsattType = "EtterHovedregel", settInnAvviksvurderingFraSpleis = false)
+        håndterAvsluttetMedVedtak(
+            fastsattType = "EtterHovedregel",
+            settInnAvviksvurderingFraSpleis = false,
+            tagsPåSykepengegrunnlagsfakta = emptyList()
+        )
 
         val sisteHendelse = inspektør.meldinger().last()
         assertEquals("vedtak_fattet", sisteHendelse["@event_name"].asText())
@@ -120,7 +124,7 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
     @Test
     fun `behandlingsinformasjon fra godkjenningsbehovet skal sendes på vedtak_fattet`() {
         val spleisBehandlingId = UUID.randomUUID()
-        val tagsFraGodkjenningsbehovet = listOf("Arbeidsgiverutbetaling", "Personutbetaling", "SykepengegrunnlagUnder2G", "IngenNyArbeidsgiverperiode")
+        val tagsFraGodkjenningsbehovet = listOf("Arbeidsgiverutbetaling", "Personutbetaling", "SykepengegrunnlagUnder2G", "IngenNyArbeidsgiverperiode", "6GBegrenset")
         val tagsFraAvsluttetMedVedtak = listOf("SykepengegrunnlagUnder2G", "IngenNyArbeidsgiverperiode")
         val godkjenningsbehov = GodkjenningsbehovTestdata(
             fødselsnummer = FØDSELSNUMMER,
@@ -135,13 +139,20 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         spleisOppretterNyBehandling(spleisBehandlingId = spleisBehandlingId)
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(godkjenningsbehovTestdata = godkjenningsbehov)
         håndterSaksbehandlerløsning()
-        håndterAvsluttetMedVedtak(tags = tagsFraAvsluttetMedVedtak, spleisBehandlingId = spleisBehandlingId)
+        håndterAvsluttetMedVedtak(
+            spleisBehandlingId = spleisBehandlingId,
+            tags = tagsFraAvsluttetMedVedtak,
+            tagsPåSykepengegrunnlagsfakta = listOf("6GBegrenset")
+        )
 
         val sisteHendelse = inspektør.meldinger().last()
         assertEquals("vedtak_fattet", sisteHendelse["@event_name"].asText())
         assertEquals(spleisBehandlingId, UUID.fromString(sisteHendelse["behandlingId"].asText()))
-        val forventet = (tagsFraGodkjenningsbehovet + tagsFraAvsluttetMedVedtak).toSet()
+        val tagsSomSkalISykepengegrunnlagsfakta = listOf("6GBegrenset")
+        val forventet = (tagsFraGodkjenningsbehovet + tagsFraAvsluttetMedVedtak - tagsSomSkalISykepengegrunnlagsfakta).toSet()
         assertEquals(forventet, sisteHendelse["tags"].map { it.asText() }.toSet())
+        val sykepengegrunnlagsfakta = sisteHendelse["sykepengegrunnlagsfakta"]
+        assertEquals(tagsSomSkalISykepengegrunnlagsfakta, sykepengegrunnlagsfakta["tags"].map { it.asText() } )
     }
 
 }

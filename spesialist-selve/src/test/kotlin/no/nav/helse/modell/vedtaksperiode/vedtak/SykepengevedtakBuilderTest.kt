@@ -399,7 +399,7 @@ class SykepengevedtakBuilderTest {
                 avviksprosent = avviksprosent,
                 seksG = seksG2023,
                 skjønnsfastsatt = 650000.0,
-                tags = emptyList(),
+                tags = mutableSetOf(),
                 arbeidsgivere = listOf(
                     Arbeidsgiver.EtterSkjønn(organisasjonsnummer, 300000.0, 300000.0, 325000.0),
                     Arbeidsgiver.EtterSkjønn("987654321", 300000.0, 300000.0, 325000.0)
@@ -410,7 +410,7 @@ class SykepengevedtakBuilderTest {
                 innrapportertÅrsinntekt = innrapportertÅrsinntekt,
                 avviksprosent = avviksprosent,
                 seksG = seksG2023,
-                tags = emptyList(),
+                tags = mutableSetOf(),
                 arbeidsgivere = listOf(
                     Arbeidsgiver.EtterHovedregel(organisasjonsnummer, 300000.0, 300000.0),
                     Arbeidsgiver.EtterHovedregel("987654321", 300000.0, 300000.0)

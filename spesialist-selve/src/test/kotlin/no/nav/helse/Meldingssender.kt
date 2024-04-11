@@ -672,6 +672,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         fastsattType: String,
         settInnAvviksvurderingFraSpleis: Boolean = true,
         tags: List<String> = emptyList(),
+        tagsPåSykepengegrunnlagsfakta: List<String> = emptyList(),
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(
             Testmeldingfabrikk.lagAvsluttetMedVedtak(
@@ -687,7 +688,8 @@ internal class Meldingssender(private val testRapid: TestRapid) {
                 fastsattType = fastsattType,
                 id = id,
                 settInnAvviksvurderingFraSpleis = settInnAvviksvurderingFraSpleis,
-                tags = tags
+                tags = tags,
+                tagsPåSykepengegrunnlagsfakta = tagsPåSykepengegrunnlagsfakta
             )
         )
     }

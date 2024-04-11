@@ -170,7 +170,7 @@ internal class VedtakFattetMelderTest {
                 innrapportertÅrsinntekt = 10000.0,
                 avviksprosent = 0.0,
                 seksG = 711720.0,
-                tags = emptyList(),
+                tags = mutableSetOf(),
                 arbeidsgivere = listOf(
                     Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
                         organisasjonsnummer = organisasjonsnummer,
@@ -253,7 +253,7 @@ internal class VedtakFattetMelderTest {
                 innrapportertÅrsinntekt = 13000.0,
                 avviksprosent = 30.0,
                 seksG = 711720.0,
-                tags = emptyList(),
+                tags = mutableSetOf(),
                 arbeidsgivere = listOf(
                     Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
                         organisasjonsnummer = organisasjonsnummer,

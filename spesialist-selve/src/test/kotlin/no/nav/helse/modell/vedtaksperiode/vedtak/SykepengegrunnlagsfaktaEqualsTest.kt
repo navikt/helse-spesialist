@@ -17,7 +17,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
 
         assertEquals(sykepengegrunnlagsfakta, sykepengegrunnlagsfakta)
@@ -32,7 +32,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
 
         assertEquals(sykepengegrunnlagsfakta, sykepengegrunnlagsfakta)
@@ -56,7 +56,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterSkjønn(
             arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 500000.0, 600000.0)),
@@ -65,7 +65,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
 
         assertEquals(sykepengegrunnlagsfakta1, sykepengegrunnlagsfakta2)
@@ -80,7 +80,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterHovedregel(
             arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0, 500000.0)),
@@ -88,7 +88,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
 
         assertEquals(sykepengegrunnlagsfakta1, sykepengegrunnlagsfakta2)
@@ -113,7 +113,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterSkjønn(
             arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer2", 400000.0, 400000.0, 300000.0)),
@@ -122,7 +122,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
 
         assertNotEquals(sykepengegrunnlagsfakta1, sykepengegrunnlagsfakta2)
@@ -138,7 +138,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterSkjønn(
             arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 500000.0, 600000.0)),
@@ -147,7 +147,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
 
         assertNotEquals(sykepengegrunnlagsfakta1, sykepengegrunnlagsfakta2)
@@ -163,7 +163,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterSkjønn(
             arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 500000.0, 600000.0)),
@@ -172,7 +172,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
 
         assertNotEquals(sykepengegrunnlagsfakta1, sykepengegrunnlagsfakta2)
@@ -188,7 +188,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterSkjønn(
             arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 500000.0, 600000.0)),
@@ -197,7 +197,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             avviksprosent = 26.0,
             seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
 
         assertNotEquals(sykepengegrunnlagsfakta1, sykepengegrunnlagsfakta2)
@@ -213,7 +213,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterSkjønn(
             arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 500000.0, 600000.0)),
@@ -222,7 +222,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             avviksprosent = 25.0,
             seksG = 6 * 100000.0,
             skjønnsfastsatt = 600000.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
 
         assertNotEquals(sykepengegrunnlagsfakta1, sykepengegrunnlagsfakta2)
@@ -238,7 +238,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterSkjønn(
             arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 500000.0, 600000.0)),
@@ -247,7 +247,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
             skjønnsfastsatt = 500000.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
 
         assertNotEquals(sykepengegrunnlagsfakta1, sykepengegrunnlagsfakta2)
@@ -263,7 +263,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
-            tags = listOf("TAG1")
+            tags = mutableSetOf("TAG1")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterSkjønn(
             arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 500000.0, 600000.0)),
@@ -272,7 +272,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
-            tags = listOf("TAG2")
+            tags = mutableSetOf("TAG2")
         )
 
         assertNotEquals(sykepengegrunnlagsfakta1, sykepengegrunnlagsfakta2)
@@ -287,7 +287,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterHovedregel(
             arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer2", 400000.0, 400000.0)),
@@ -295,7 +295,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
 
         assertNotEquals(sykepengegrunnlagsfakta1, sykepengegrunnlagsfakta2)
@@ -310,7 +310,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterHovedregel(
             arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0, 500000.0)),
@@ -318,7 +318,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
 
         assertNotEquals(sykepengegrunnlagsfakta1, sykepengegrunnlagsfakta2)
@@ -333,7 +333,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterHovedregel(
             arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0, 500000.0)),
@@ -341,7 +341,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             innrapportertÅrsinntekt = 400000.0,
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
 
         assertNotEquals(sykepengegrunnlagsfakta1, sykepengegrunnlagsfakta2)
@@ -356,7 +356,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterHovedregel(
             arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0, 500000.0)),
@@ -364,7 +364,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 26.0,
             seksG = 6 * 118620.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
 
         assertNotEquals(sykepengegrunnlagsfakta1, sykepengegrunnlagsfakta2)
@@ -379,7 +379,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterHovedregel(
             arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0, 500000.0)),
@@ -387,7 +387,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
             seksG = 6 * 100000.0,
-            tags = listOf("TAG")
+            tags = mutableSetOf("TAG")
         )
 
         assertNotEquals(sykepengegrunnlagsfakta1, sykepengegrunnlagsfakta2)
@@ -402,7 +402,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
-            tags = listOf("TAG1")
+            tags = mutableSetOf("TAG1")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterHovedregel(
             arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0, 500000.0)),
@@ -410,7 +410,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
             seksG = 6 * 118620.0,
-            tags = listOf("TAG2")
+            tags = mutableSetOf("TAG2")
         )
 
         assertNotEquals(sykepengegrunnlagsfakta1, sykepengegrunnlagsfakta2)

@@ -120,7 +120,7 @@ internal class AvsluttetMedVedtakMessage(
                     avviksprosent = avviksprosent,
                     seksG = packet["sykepengegrunnlagsfakta.6G"].asDouble(),
                     skjønnsfastsatt = packet["sykepengegrunnlagsfakta.skjønnsfastsatt"].asDouble(),
-                    tags = packet["sykepengegrunnlagsfakta.tags"].map { it.asText() },
+                    tags = packet["sykepengegrunnlagsfakta.tags"].map { it.asText() }.toMutableSet(),
                     arbeidsgivere =
                         packet["sykepengegrunnlagsfakta.arbeidsgivere"].map { arbeidsgiver ->
                             val organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText()
@@ -139,7 +139,7 @@ internal class AvsluttetMedVedtakMessage(
                     innrapportertÅrsinntekt = innrapportertÅrsinntekt,
                     avviksprosent = avviksprosent,
                     seksG = packet["sykepengegrunnlagsfakta.6G"].asDouble(),
-                    tags = packet["sykepengegrunnlagsfakta.tags"].map { it.asText() },
+                    tags = packet["sykepengegrunnlagsfakta.tags"].map { it.asText() }.toMutableSet(),
                     arbeidsgivere =
                         packet["sykepengegrunnlagsfakta.arbeidsgivere"].map { arbeidsgiver ->
                             val organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText()

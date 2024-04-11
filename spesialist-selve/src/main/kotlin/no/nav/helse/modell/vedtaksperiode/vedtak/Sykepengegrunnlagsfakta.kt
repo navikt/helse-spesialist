@@ -10,6 +10,7 @@ internal sealed class Sykepengegrunnlagsfakta(
         )
 
     override fun hashCode() = omregnetÅrsinntekt.hashCode()
+    open fun medtags(tagsForSykepengegrunnlagsfakta: MutableSet<String>): Sykepengegrunnlagsfakta = this
 
     internal class Infotrygd(omregnetÅrsinntekt: Double) : Sykepengegrunnlagsfakta(omregnetÅrsinntekt)
 
@@ -18,9 +19,14 @@ internal sealed class Sykepengegrunnlagsfakta(
         val innrapportertÅrsinntekt: Double,
         val avviksprosent: Double,
         val seksG: Double,
-        val tags: List<String>,
+        val tags: MutableSet<String>,
         val arbeidsgivere: List<Arbeidsgiver>,
     ) : Sykepengegrunnlagsfakta(omregnetÅrsinntekt) {
+        override fun medtags(tagsForSykepengegrunnlagsfakta: MutableSet<String>): Sykepengegrunnlagsfakta {
+            this.tags.addAll(tagsForSykepengegrunnlagsfakta)
+            return this
+        }
+
         override fun equals(other: Any?): Boolean =
             this === other || (
                 super.equals(other) &&
@@ -48,7 +54,7 @@ internal sealed class Sykepengegrunnlagsfakta(
             avviksprosent: Double,
             seksG: Double,
             val skjønnsfastsatt: Double,
-            tags: List<String>,
+            tags: MutableSet<String>,
             arbeidsgivere: List<Arbeidsgiver.EtterSkjønn>,
         ) : Spleis(
                 omregnetÅrsinntekt,
@@ -78,7 +84,7 @@ internal sealed class Sykepengegrunnlagsfakta(
             innrapportertÅrsinntekt: Double,
             avviksprosent: Double,
             seksG: Double,
-            tags: List<String>,
+            tags: MutableSet<String>,
             arbeidsgivere: List<Arbeidsgiver.EtterHovedregel>,
         ) : Spleis(
                 omregnetÅrsinntekt,

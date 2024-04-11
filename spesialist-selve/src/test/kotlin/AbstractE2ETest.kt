@@ -283,7 +283,12 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         )
         håndterRisikovurderingløsning(vedtaksperiodeId = vedtaksperiodeId)
         håndterUtbetalingUtbetalt()
-        håndterAvsluttetMedVedtak(fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
+        håndterAvsluttetMedVedtak(
+            fom = fom,
+            tom = tom,
+            skjæringstidspunkt = skjæringstidspunkt,
+            tagsPåSykepengegrunnlagsfakta = emptyList()
+        )
         håndterVedtakFattet()
     }
 
@@ -303,7 +308,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         )
         håndterSaksbehandlerløsning(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
         håndterUtbetalingUtbetalt()
-        håndterAvsluttetMedVedtak()
+        håndterAvsluttetMedVedtak(tagsPåSykepengegrunnlagsfakta = emptyList())
         håndterVedtakFattet(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
     }
 
@@ -1073,6 +1078,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         skjæringstidspunkt: LocalDate = fom,
         settInnAvviksvurderingFraSpleis: Boolean = true,
         tags: List<String> = emptyList(),
+        tagsPåSykepengegrunnlagsfakta: List<String> = emptyList(),
     ) {
         val utbetalingId = if (this::utbetalingId.isInitialized) this.utbetalingId else null
         sisteMeldingId =
@@ -1089,6 +1095,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 fastsattType = fastsattType,
                 settInnAvviksvurderingFraSpleis = settInnAvviksvurderingFraSpleis,
                 tags = tags,
+                tagsPåSykepengegrunnlagsfakta= tagsPåSykepengegrunnlagsfakta,
             )
     }
 

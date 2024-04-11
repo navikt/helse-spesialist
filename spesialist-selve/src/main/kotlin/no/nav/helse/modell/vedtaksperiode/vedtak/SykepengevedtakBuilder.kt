@@ -29,6 +29,7 @@ internal class SykepengevedtakBuilder {
     private var skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlag? = null
     private var skjønnsfastsettingopplysninger: SkjønnsfastsettingopplysningerDto? = null
     private val tags: MutableSet<String> = mutableSetOf()
+    private val tagsForSykepengegrunnlagsfakta: MutableSet<String> = mutableSetOf()
 
     internal fun fødselsnummer(fødselsnummer: String) = apply { this.fødselsnummer = fødselsnummer }
 
@@ -68,7 +69,7 @@ internal class SykepengevedtakBuilder {
 
     internal fun sykepengegrunnlagsfakta(sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta) =
         apply {
-            this.sykepengegrunnlagsfakta = sykepengegrunnlagsfakta
+            this.sykepengegrunnlagsfakta = sykepengegrunnlagsfakta.medtags(tagsForSykepengegrunnlagsfakta)
         }
 
     internal fun skjønnsfastsattSykepengegrunnlag(skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlag) =
@@ -79,7 +80,8 @@ internal class SykepengevedtakBuilder {
 
     internal fun tags(tags: List<String>) =
         apply {
-            this.tags.addAll(tags)
+            this.tags.addAll(tags.filterNot { TAGS_SOM_SKAL_LIGGE_I_SYKEPENGEGRUNNLAGSFAKTA.contains(it) })
+            this.tagsForSykepengegrunnlagsfakta.addAll(tags.filter { TAGS_SOM_SKAL_LIGGE_I_SYKEPENGEGRUNNLAGSFAKTA.contains(it) })
         }
 
     internal fun skjønnsfastsettingData(
@@ -184,5 +186,9 @@ internal class SykepengevedtakBuilder {
             skjønnsfastsettingopplysninger = null,
             tags = tags,
         )
+    }
+
+    companion object {
+        private val TAGS_SOM_SKAL_LIGGE_I_SYKEPENGEGRUNNLAGSFAKTA = listOf("6GBegrenset")
     }
 }
