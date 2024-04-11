@@ -15,6 +15,7 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class FattVedtakE2ETest: AbstractE2ETest() {
@@ -53,7 +54,7 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterSaksbehandlerløsning()
-        håndterAvsluttetMedVedtak(fastsattType = "EtterHovedregel", tagsPåSykepengegrunnlagsfakta = emptyList())
+        håndterAvsluttetMedVedtak(fastsattType = "EtterHovedregel")
         val sisteHendelse = inspektør.meldinger().last()
         assertEquals("vedtak_fattet", sisteHendelse["@event_name"].asText())
         assertEquals(0, sisteHendelse["begrunnelser"].size())
@@ -68,7 +69,7 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         håndterSkjønnsfastsattSykepengegrunnlag()
         håndterSaksbehandlerløsning()
 
-        håndterAvsluttetMedVedtak(fastsattType = "EtterSkjønn", tagsPåSykepengegrunnlagsfakta = emptyList())
+        håndterAvsluttetMedVedtak(fastsattType = "EtterSkjønn")
         val sisteHendelse = inspektør.meldinger().last()
         assertEquals("vedtak_fattet", sisteHendelse["@event_name"].asText())
         assertEquals(3, sisteHendelse["begrunnelser"].size())
@@ -86,7 +87,7 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         håndterSkjønnsfastsattSykepengegrunnlag()
         håndterSaksbehandlerløsning()
 
-        håndterAvsluttetMedVedtak(fastsattType = "IInfotrygd", tagsPåSykepengegrunnlagsfakta = emptyList())
+        håndterAvsluttetMedVedtak(fastsattType = "IInfotrygd")
         val sisteHendelse = inspektør.meldinger().last()
         assertEquals("vedtak_fattet", sisteHendelse["@event_name"].asText())
         assertEquals(0, sisteHendelse["begrunnelser"].size())
@@ -109,8 +110,7 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         håndterSaksbehandlerløsning()
         håndterAvsluttetMedVedtak(
             fastsattType = "EtterHovedregel",
-            settInnAvviksvurderingFraSpleis = false,
-            tagsPåSykepengegrunnlagsfakta = emptyList()
+            settInnAvviksvurderingFraSpleis = false
         )
 
         val sisteHendelse = inspektør.meldinger().last()
@@ -124,8 +124,15 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
     @Test
     fun `behandlingsinformasjon fra godkjenningsbehovet skal sendes på vedtak_fattet`() {
         val spleisBehandlingId = UUID.randomUUID()
-        val tagsFraGodkjenningsbehovet = listOf("Arbeidsgiverutbetaling", "Personutbetaling", "SykepengegrunnlagUnder2G", "IngenNyArbeidsgiverperiode", "6GBegrenset")
-        val tagsFraAvsluttetMedVedtak = listOf("SykepengegrunnlagUnder2G", "IngenNyArbeidsgiverperiode")
+        val tagsFraGodkjenningsbehovet = listOf(
+            "Arbeidsgiverutbetaling",
+            "Personutbetaling",
+            "SykepengegrunnlagUnder2G",
+            "IngenNyArbeidsgiverperiode",
+            "6GBegrenset",
+            "SykepengegrunnlagUnder2G",
+            "IngenNyArbeidsgiverperiode"
+        )
         val godkjenningsbehov = GodkjenningsbehovTestdata(
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR,
@@ -139,20 +146,51 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         spleisOppretterNyBehandling(spleisBehandlingId = spleisBehandlingId)
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(godkjenningsbehovTestdata = godkjenningsbehov)
         håndterSaksbehandlerløsning()
-        håndterAvsluttetMedVedtak(
-            spleisBehandlingId = spleisBehandlingId,
-            tags = tagsFraAvsluttetMedVedtak,
-            tagsPåSykepengegrunnlagsfakta = listOf("6GBegrenset")
-        )
+        håndterAvsluttetMedVedtak(spleisBehandlingId = spleisBehandlingId)
 
         val sisteHendelse = inspektør.meldinger().last()
         assertEquals("vedtak_fattet", sisteHendelse["@event_name"].asText())
         assertEquals(spleisBehandlingId, UUID.fromString(sisteHendelse["behandlingId"].asText()))
         val tagsSomSkalISykepengegrunnlagsfakta = listOf("6GBegrenset")
-        val forventet = (tagsFraGodkjenningsbehovet + tagsFraAvsluttetMedVedtak - tagsSomSkalISykepengegrunnlagsfakta).toSet()
+        val forventet = (tagsFraGodkjenningsbehovet - tagsSomSkalISykepengegrunnlagsfakta).toSet()
         assertEquals(forventet, sisteHendelse["tags"].map { it.asText() }.toSet())
         val sykepengegrunnlagsfakta = sisteHendelse["sykepengegrunnlagsfakta"]
         assertEquals(tagsSomSkalISykepengegrunnlagsfakta, sykepengegrunnlagsfakta["tags"].map { it.asText() } )
+    }
+
+    @Test
+    fun `behandlingsinformasjon fra godkjenningsbehovet skal sendes på vedtak_fattet - uten tag på sykepengegrunnlagsfakta`() {
+        val spleisBehandlingId = UUID.randomUUID()
+        val tagsFraGodkjenningsbehovet = listOf(
+            "Arbeidsgiverutbetaling",
+            "Personutbetaling",
+            "SykepengegrunnlagUnder2G",
+            "IngenNyArbeidsgiverperiode",
+            "SykepengegrunnlagUnder2G",
+            "IngenNyArbeidsgiverperiode"
+        )
+        val godkjenningsbehov = GodkjenningsbehovTestdata(
+            fødselsnummer = FØDSELSNUMMER,
+            aktørId = AKTØR,
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID,
+            spleisBehandlingId = spleisBehandlingId,
+            tags = tagsFraGodkjenningsbehovet
+        )
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling(spleisBehandlingId = spleisBehandlingId)
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(godkjenningsbehovTestdata = godkjenningsbehov)
+        håndterSaksbehandlerløsning()
+        håndterAvsluttetMedVedtak(spleisBehandlingId = spleisBehandlingId)
+
+        val sisteHendelse = inspektør.meldinger().last()
+        assertEquals("vedtak_fattet", sisteHendelse["@event_name"].asText())
+        assertEquals(spleisBehandlingId, UUID.fromString(sisteHendelse["behandlingId"].asText()))
+        val forventet = tagsFraGodkjenningsbehovet.toSet()
+        assertEquals(forventet, sisteHendelse["tags"].map { it.asText() }.toSet())
+        val sykepengegrunnlagsfakta = sisteHendelse["sykepengegrunnlagsfakta"]
+        assertTrue(sykepengegrunnlagsfakta["tags"].isEmpty)
     }
 
 }

@@ -30,7 +30,7 @@ internal class AvsluttetMedVedtakRiver(
                     "grunnlagForSykepengegrunnlag",
                     "grunnlagForSykepengegrunnlagPerArbeidsgiver",
                 )
-                it.requireKey("begrensning", "inntekt", "vedtakFattetTidspunkt", "tags")
+                it.requireKey("begrensning", "inntekt", "vedtakFattetTidspunkt")
                 it.requireKey("utbetalingId", "behandlingId")
 
                 it.requireAny(
@@ -43,7 +43,6 @@ internal class AvsluttetMedVedtakRiver(
                         "EtterHovedregel" -> {
                             it.requireKey(
                                 "sykepengegrunnlagsfakta.6G",
-                                "sykepengegrunnlagsfakta.tags",
                                 "sykepengegrunnlagsfakta.arbeidsgivere",
                             )
                         }
@@ -51,7 +50,6 @@ internal class AvsluttetMedVedtakRiver(
                         "EtterSkjønn" -> {
                             it.requireKey(
                                 "sykepengegrunnlagsfakta.6G",
-                                "sykepengegrunnlagsfakta.tags",
                                 "sykepengegrunnlagsfakta.arbeidsgivere",
                                 "sykepengegrunnlagsfakta.skjønnsfastsatt",
                             )

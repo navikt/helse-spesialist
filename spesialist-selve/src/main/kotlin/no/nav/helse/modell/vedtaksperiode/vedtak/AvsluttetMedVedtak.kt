@@ -21,8 +21,7 @@ internal class AvsluttetMedVedtak(
     private val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
     private val fom: LocalDate,
     private val tom: LocalDate,
-    private val vedtakFattetTidspunkt: LocalDateTime,
-    private val tags: List<String>,
+    private val vedtakFattetTidspunkt: LocalDateTime
 ) {
     fun byggVedtak(vedtakBuilder: SykepengevedtakBuilder) {
         vedtakBuilder.fødselsnummer(fødselsnummer)
@@ -41,7 +40,6 @@ internal class AvsluttetMedVedtak(
         vedtakBuilder.tom(tom)
         vedtakBuilder.aktørId(aktørId)
         vedtakBuilder.vedtakFattetTidspunkt(vedtakFattetTidspunkt)
-        vedtakBuilder.tags(tags)
         vedtakBuilder.sykepengegrunnlagsfakta(sykepengegrunnlagsfakta)
     }
 }

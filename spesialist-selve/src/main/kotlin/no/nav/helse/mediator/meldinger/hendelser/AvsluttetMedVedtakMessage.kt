@@ -43,9 +43,7 @@ internal class AvsluttetMedVedtakMessage(
         )
     private val begrensning = packet["begrensning"].asText()
     private val inntekt = packet["inntekt"].asDouble()
-    private val tags = packet["tags"].map { it.asText() }
     private val sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(packet, faktatype(packet))
-    private val log = LoggerFactory.getLogger(this::class.java)
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
     internal fun skjæringstidspunkt() = skjæringstidspunkt
@@ -76,14 +74,13 @@ internal class AvsluttetMedVedtakMessage(
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
             fom = fom,
             tom = tom,
-            vedtakFattetTidspunkt = vedtakFattetTidspunkt,
-            tags = tags,
+            vedtakFattetTidspunkt = vedtakFattetTidspunkt
         )
 
     internal fun sendInnTil(sykefraværstilfelle: Sykefraværstilfelle) {
         val tags: List<String> = generasjonDao.finnTagsFor(spleisBehandlingId) ?: emptyList()
         if (tags.isEmpty()) {
-            sikkerLogg.info("Ingen tags funnet for spleisBehandlingId: $spleisBehandlingId på vedtaksperiodeId: $vedtaksperiodeId, json: ${toJson()}")
+            sikkerLogg.error("Ingen tags funnet for spleisBehandlingId: $spleisBehandlingId på vedtaksperiodeId: $vedtaksperiodeId, json: ${toJson()}")
         }
         sykefraværstilfelle.håndter(avsluttetMedVedtak, tags)
     }
@@ -120,7 +117,7 @@ internal class AvsluttetMedVedtakMessage(
                     avviksprosent = avviksprosent,
                     seksG = packet["sykepengegrunnlagsfakta.6G"].asDouble(),
                     skjønnsfastsatt = packet["sykepengegrunnlagsfakta.skjønnsfastsatt"].asDouble(),
-                    tags = packet["sykepengegrunnlagsfakta.tags"].map { it.asText() }.toMutableSet(),
+                    tags = mutableSetOf(),
                     arbeidsgivere =
                         packet["sykepengegrunnlagsfakta.arbeidsgivere"].map { arbeidsgiver ->
                             val organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText()
@@ -139,7 +136,7 @@ internal class AvsluttetMedVedtakMessage(
                     innrapportertÅrsinntekt = innrapportertÅrsinntekt,
                     avviksprosent = avviksprosent,
                     seksG = packet["sykepengegrunnlagsfakta.6G"].asDouble(),
-                    tags = packet["sykepengegrunnlagsfakta.tags"].map { it.asText() }.toMutableSet(),
+                    tags = mutableSetOf(),
                     arbeidsgivere =
                         packet["sykepengegrunnlagsfakta.arbeidsgivere"].map { arbeidsgiver ->
                             val organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText()

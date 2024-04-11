@@ -978,8 +978,6 @@ internal object Testmeldingfabrikk {
         fastsattType: String,
         id: UUID,
         settInnAvviksvurderingFraSpleis: Boolean = true,
-        tags: List<String> = emptyList(),
-        tagsPåSykepengegrunnlagsfakta: List<String> = emptyList(),
     ): String = nyHendelse(
         id, "avsluttet_med_vedtak", mutableMapOf(
             "aktørId" to aktørId,
@@ -996,14 +994,13 @@ internal object Testmeldingfabrikk {
             "begrensning" to "VET_IKKE",
             "inntekt" to 600000.0,
             "vedtakFattetTidspunkt" to LocalDateTime.now(),
-            "hendelser" to emptyList<String>(),
-            "tags" to tags
+            "hendelser" to emptyList<String>()
         ).apply {
             compute("utbetalingId") { _, _ -> utbetalingId }
             if (utbetalingId != null) {
                 val sykepengegrunnlagsfakta = when (fastsattType) {
-                    "EtterSkjønn" -> fastsattEtterSkjønn(organisasjonsnummer, settInnAvviksvurderingFraSpleis, tagsPåSykepengegrunnlagsfakta)
-                    "EtterHovedregel" -> fastsattEtterHovedregel(organisasjonsnummer, settInnAvviksvurderingFraSpleis, tagsPåSykepengegrunnlagsfakta)
+                    "EtterSkjønn" -> fastsattEtterSkjønn(organisasjonsnummer, settInnAvviksvurderingFraSpleis)
+                    "EtterHovedregel" -> fastsattEtterHovedregel(organisasjonsnummer, settInnAvviksvurderingFraSpleis)
                     "IInfotrygd" -> fastsattIInfotrygd()
                     else -> throw IllegalArgumentException("$fastsattType er ikke en gyldig fastsatt-type")
                 }
@@ -1040,14 +1037,12 @@ internal object Testmeldingfabrikk {
     private fun fastsattEtterSkjønn(
         organisasjonsnummer: String,
         settInnAvviksvurderingFraSpleis: Boolean = true,
-        tagsPåSykepengegrunnlagsfakta: List<String> = emptyList(),
     ): Map<String, Any> {
         return mutableMapOf(
             "fastsatt" to "EtterSkjønn",
             "omregnetÅrsinntekt" to 500000.0,
             "skjønnsfastsatt" to 600000.0,
             "6G" to 6 * 118620.0,
-            "tags" to tagsPåSykepengegrunnlagsfakta,
             "arbeidsgivere" to listOf(
                 mapOf(
                     "arbeidsgiver" to organisasjonsnummer,
@@ -1066,14 +1061,12 @@ internal object Testmeldingfabrikk {
 
     private fun fastsattEtterHovedregel(
         organisasjonsnummer: String,
-        settInnAvviksvurderingFraSpleis: Boolean = true,
-        tagsPåSykepengegrunnlagsfakta: List<String> = emptyList(),
+        settInnAvviksvurderingFraSpleis: Boolean = true
     ): Map<String, Any> {
         return mutableMapOf(
             "fastsatt" to "EtterHovedregel",
             "omregnetÅrsinntekt" to 600000.0,
             "6G" to 6 * 118620.0,
-            "tags" to tagsPåSykepengegrunnlagsfakta,
             "arbeidsgivere" to listOf(
                 mapOf(
                     "arbeidsgiver" to organisasjonsnummer,
