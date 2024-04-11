@@ -10,6 +10,9 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.time.LocalDate.now
+import java.time.Month
 import java.util.UUID
 
 internal class VedtaksperiodeEndretRiver(
@@ -45,6 +48,16 @@ internal class VedtaksperiodeEndretRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
+        if (packet["vedtaksperiodeId"].asText() in
+            setOf(
+                "5bc7f788-0b34-410e-9d7a-21932c1c5be7",
+                "1d04a606-893f-43ca-a102-29b3a48f5f74",
+                "d244cffb-e6dd-4c06-bb60-4713c44329b3",
+            ) && now() == LocalDate.of(2024, Month.APRIL, 11)
+        ) {
+            logg.info("ignorerer flokemelding")
+            return
+        }
         logg.info(
             "Mottok vedtaksperiode endret {}, {}, {}",
             keyValue("vedtaksperiodeId", UUID.fromString(packet["vedtaksperiodeId"].asText())),
