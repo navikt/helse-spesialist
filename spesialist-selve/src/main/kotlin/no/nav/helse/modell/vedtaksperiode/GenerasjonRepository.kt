@@ -65,6 +65,15 @@ internal class GenerasjonRepository(private val dataSource: DataSource) : IVedta
         }
         with(dao) {
             vedtaksperiode.generasjoner.forEach { generasjonDto ->
+                if (generasjonDto.vedtaksperiodeId.toString() in
+                    setOf(
+                        "5bc7f788-0b34-410e-9d7a-21932c1c5be7",
+                        "1d04a606-893f-43ca-a102-29b3a48f5f74",
+                        "d244cffb-e6dd-4c06-bb60-4713c44329b3",
+                    ) && generasjonDto.tilstand == TilstandDto.AvsluttetUtenVedtak
+                ) {
+                    return@forEach
+                }
                 lagreGenerasjon(generasjonDto)
             }
         }
