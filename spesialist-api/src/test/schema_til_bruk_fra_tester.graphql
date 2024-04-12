@@ -1180,9 +1180,9 @@ input AnnulleringDataInput {
     begrunnelser: [String!]!
     fodselsnummer: String!
     kommentar: String
-    organisasjonsnummer: String
-    utbetalingId: String
-    vedtaksperiodeId: String
+    organisasjonsnummer: String!
+    utbetalingId: String!
+    vedtaksperiodeId: String!
 }
 
 input ArbeidsforholdOverstyringHandlingInput {

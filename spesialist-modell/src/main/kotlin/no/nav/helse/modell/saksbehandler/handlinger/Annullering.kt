@@ -8,8 +8,8 @@ class Annullering(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
-    private val vedtaksperiodeId: UUID?,
-    private val utbetalingId: UUID?,
+    private val vedtaksperiodeId: UUID,
+    private val utbetalingId: UUID,
     private val begrunnelser: List<String> = emptyList(),
     private val kommentar: String?,
 ) : Handling {

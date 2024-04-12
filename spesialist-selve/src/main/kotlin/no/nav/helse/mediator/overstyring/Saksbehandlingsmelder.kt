@@ -113,10 +113,10 @@ internal class Saksbehandlingsmelder(private val rapidsConnection: RapidsConnect
                             "ident" to event.saksbehandlerIdent,
                         ),
                     "begrunnelser" to event.begrunnelser,
+                    "utbetalingId" to event.utbetalingId,
+                    "vedtaksperiodeId" to event.vedtaksperiodeId,
                 ).apply {
                     compute("kommentar") { _, _ -> event.kommentar }
-                    compute("vedtaksperiodeId") { _, _ -> event.vedtaksperiodeId }
-                    compute("utbetalingId") { _, _ -> event.utbetalingId }
                 },
             )
         rapidsConnection.publish(fødselsnummer, jsonMessage.toJson())

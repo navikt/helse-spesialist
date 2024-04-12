@@ -26,9 +26,9 @@ class AnnulleringMutation(
                 AnnulleringHandlingFraApi(
                     aktørId = annullering.aktorId,
                     fødselsnummer = annullering.fodselsnummer,
-                    organisasjonsnummer = annullering.organisasjonsnummer ?: "",
-                    vedtaksperiodeId = annullering.vedtaksperiodeId?.let { UUID.fromString(it) },
-                    utbetalingId = annullering.utbetalingId?.let { UUID.fromString(it) },
+                    organisasjonsnummer = annullering.organisasjonsnummer,
+                    vedtaksperiodeId = UUID.fromString(annullering.vedtaksperiodeId),
+                    utbetalingId = UUID.fromString(annullering.utbetalingId),
                     begrunnelser = annullering.begrunnelser,
                     kommentar = annullering.kommentar,
                 )
