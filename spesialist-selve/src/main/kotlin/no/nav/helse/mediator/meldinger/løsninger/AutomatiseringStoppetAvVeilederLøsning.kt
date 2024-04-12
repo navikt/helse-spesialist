@@ -43,7 +43,7 @@ internal class AutomatiseringStoppetAvVeilederLøsning(
             sikkerLogg.info("Mottok melding AutomatiseringStoppetAvVeileder:\n{}", packet.toJson())
             val opprettet = packet["@opprettet"].asLocalDateTime()
             val contextId = UUID.fromString(packet["contextId"].asText())
-            val hendelsesId = UUID.fromString(packet["hendelsesId"].asText())
+            val hendelseId = UUID.fromString(packet["hendelseId"].asText())
             val fødselsnummer = packet["fødselsnummer"].asText()
 
             val automatiseringErStoppet = packet["@løsning.automatiseringStoppet"].asBoolean()
@@ -57,7 +57,7 @@ internal class AutomatiseringStoppetAvVeilederLøsning(
                     årsaker = årsaker,
                 )
             mediator.løsning(
-                hendelseId = hendelsesId,
+                hendelseId = hendelseId,
                 contextId = contextId,
                 behovId = UUID.fromString(packet["@id"].asText()),
                 løsning = automatiseringStoppetAvVeilederLøsning,
