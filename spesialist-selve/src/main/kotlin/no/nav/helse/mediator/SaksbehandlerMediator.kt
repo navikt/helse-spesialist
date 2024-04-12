@@ -410,7 +410,7 @@ internal class SaksbehandlerMediator(
             aktørId = this.aktørId,
             fødselsnummer = this.fødselsnummer,
             organisasjonsnummer = this.organisasjonsnummer,
-            fagsystemId = this.fagsystemId,
+            vedtaksperiodeId = this.vedtaksperiodeId,
             utbetalingId = this.utbetalingId,
             begrunnelser = this.begrunnelser,
             kommentar = this.kommentar,

@@ -4,7 +4,7 @@ data class AnnulleringData(
     val aktorId: String,
     val fodselsnummer: String,
     val organisasjonsnummer: String?,
-    val fagsystemId: String?,
+    val vedtaksperiodeId: String?,
     val utbetalingId: String?,
     val begrunnelser: List<String>,
     val kommentar: String?,

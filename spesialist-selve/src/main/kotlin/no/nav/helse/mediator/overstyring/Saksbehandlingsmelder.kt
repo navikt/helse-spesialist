@@ -115,7 +115,7 @@ internal class Saksbehandlingsmelder(private val rapidsConnection: RapidsConnect
                     "begrunnelser" to event.begrunnelser,
                 ).apply {
                     compute("kommentar") { _, _ -> event.kommentar }
-                    compute("fagsystemId") { _, _ -> event.fagsystemId }
+                    compute("vedtaksperiodeId") { _, _ -> event.vedtaksperiodeId }
                     compute("utbetalingId") { _, _ -> event.utbetalingId }
                 },
             )

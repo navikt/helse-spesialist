@@ -1178,11 +1178,11 @@ scalar UUID
 input AnnulleringDataInput {
     aktorId: String!
     begrunnelser: [String!]!
-    fagsystemId: String
     fodselsnummer: String!
     kommentar: String
     organisasjonsnummer: String
     utbetalingId: String
+    vedtaksperiodeId: String
 }
 
 input ArbeidsforholdOverstyringHandlingInput {

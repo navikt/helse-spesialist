@@ -10,6 +10,7 @@ import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.schema.AnnulleringData
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandlingFraApi
+import java.util.UUID
 
 class AnnulleringMutation(
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
@@ -26,7 +27,7 @@ class AnnulleringMutation(
                     aktørId = annullering.aktorId,
                     fødselsnummer = annullering.fodselsnummer,
                     organisasjonsnummer = annullering.organisasjonsnummer ?: "",
-                    fagsystemId = annullering.fagsystemId,
+                    vedtaksperiodeId = annullering.vedtaksperiodeId?.let { UUID.fromString(it) },
                     utbetalingId = annullering.utbetalingId,
                     begrunnelser = annullering.begrunnelser,
                     kommentar = annullering.kommentar,

@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.graphql.mutation
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class AnnulleringMutationTest : AbstractGraphQLApiTest() {
     @Test
@@ -14,7 +15,7 @@ internal class AnnulleringMutationTest : AbstractGraphQLApiTest() {
                     organisasjonsnummer: "et-organisasjonsnummer", 
                     fodselsnummer: "et-fødselsnummer", 
                     aktorId: "en-aktørid", 
-                    fagsystemId: "en-fagsystemid",
+                    utbetalingId: "${UUID.randomUUID()}",
                     kommentar: "En kommentar", 
                     begrunnelser: ["Det første", "Det andre"]
                 })
@@ -34,7 +35,7 @@ internal class AnnulleringMutationTest : AbstractGraphQLApiTest() {
                     organisasjonsnummer: "et-organisasjonsnummer", 
                     fodselsnummer: "et-fødselsnummer", 
                     aktorId: "en-aktørid", 
-                    fagsystemId: "en-fagsystemid",
+                    utbetalingId: "${UUID.randomUUID()}",
                     begrunnelser: []
                 })
             }
