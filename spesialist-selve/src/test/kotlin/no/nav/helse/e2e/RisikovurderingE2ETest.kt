@@ -1,15 +1,15 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
-import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.Risikofunn
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
-private class RisikovurderingE2ETest : AbstractE2ETest() {
+internal class RisikovurderingE2ETest : AbstractE2ETest() {
 
     private val funnSomKreverRiskTilgang = listOf(Risikofunn(
         kategori = listOf("8-4"),
