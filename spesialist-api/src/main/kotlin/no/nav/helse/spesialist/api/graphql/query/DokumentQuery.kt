@@ -365,6 +365,7 @@ class DokumentQuery(
             "DATOER" -> Svartype.DATOER
             "BELOP" -> Svartype.BELOP
             "KILOMETER" -> Svartype.KILOMETER
+            "GRUPPE_AV_UNDERSPORSMAL" -> Svartype.GRUPPE_AV_UNDERSPORSMAL
             else -> {
                 sikkerLogg.error("Søknad har ny Svartype som må støttes: {}, returnerer UKJENT enn så lenge", this)
                 return Svartype.UKJENT

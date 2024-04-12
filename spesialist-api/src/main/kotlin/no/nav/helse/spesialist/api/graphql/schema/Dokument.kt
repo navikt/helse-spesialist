@@ -66,6 +66,7 @@ enum class Svartype {
     DATOER,
     BELOP,
     KILOMETER,
+    GRUPPE_AV_UNDERSPORSMAL,
     UKJENT,
 }
 
