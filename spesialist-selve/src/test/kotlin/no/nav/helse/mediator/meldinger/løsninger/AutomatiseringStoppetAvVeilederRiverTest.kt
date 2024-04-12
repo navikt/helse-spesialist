@@ -22,7 +22,7 @@ class AutomatiseringStoppetAvVeilederRiverTest {
 
     @ParameterizedTest
     @MethodSource("stoppårsakerArguments")
-    fun `leser AutomatiseringStoppetAvVeilder`(årsaker: Set<String>) {
+    fun `leser AutomatiseringStoppetAvVeileder`(årsaker: Set<String>) {
         testRapid.sendTestMessage(melding(true, årsaker))
         testRapid.sendTestMessage(melding(false, årsaker))
         verify(exactly = 2) {
