@@ -30,6 +30,7 @@ import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsforholdRiver
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsgiverRiver
+import no.nav.helse.mediator.meldinger.løsninger.AutomatiseringStoppetAvVeilederLøsning
 import no.nav.helse.mediator.meldinger.løsninger.DokumentRiver
 import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
 import no.nav.helse.mediator.meldinger.løsninger.FlerePersoninfoRiver
@@ -127,6 +128,7 @@ internal class MeldingMediator(
             AdressebeskyttelseEndretRiver(it, this)
             OverstyringIgangsattRiver(it, this)
             EgenAnsattløsning.EgenAnsattRiver(it, this)
+            AutomatiseringStoppetAvVeilederLøsning.AutomatiseringStoppetAvVeilederRiver(it, this)
             Vergemålløsning.VergemålRiver(it, this)
             ÅpneGosysOppgaverløsning.ÅpneGosysOppgaverRiver(it, this)
             Risikovurderingløsning.V2River(it, this)
