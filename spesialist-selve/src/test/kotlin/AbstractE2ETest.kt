@@ -282,11 +282,12 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 ),
         )
         håndterRisikovurderingløsning(vedtaksperiodeId = vedtaksperiodeId)
+        håndterAutomatiseringStoppetAvVeilederløsning()
         håndterUtbetalingUtbetalt()
         håndterAvsluttetMedVedtak(
             fom = fom,
             tom = tom,
-            skjæringstidspunkt = skjæringstidspunkt
+            skjæringstidspunkt = skjæringstidspunkt,
         )
         håndterVedtakFattet()
     }
@@ -417,7 +418,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         regelverksvarsler: List<String> = emptyList(),
         fullmakter: List<Fullmakt> = emptyList(),
         risikofunn: List<Risikofunn> = emptyList(),
+        stoppKnappTrykket: Boolean = false,
         harRisikovurdering: Boolean = false,
+        harOppdatertStoppknapp: Boolean = false,
         harOppdatertMetadata: Boolean = false,
         kanGodkjennesAutomatisk: Boolean = false,
         snapshotversjon: Int = 1,
@@ -444,6 +447,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
             )
         }
+        if (!harOppdatertStoppknapp) håndterAutomatiseringStoppetAvVeilederløsning(stoppet = stoppKnappTrykket)
         if (!erFerdigstilt(sisteGodkjenningsbehovId)) håndterInntektløsning()
     }
 
@@ -1012,6 +1016,15 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 kanGodkjennesAutomatisk,
                 risikofunn,
             )
+    }
+
+    protected fun håndterAutomatiseringStoppetAvVeilederløsning(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        stoppet: Boolean = false,
+    ) {
+        assertEtterspurteBehov("AutomatiseringStoppetAvVeileder")
+        sisteMeldingId = meldingssender.sendAutomatiseringStoppetAvVeileder(aktørId, fødselsnummer, stoppet)
     }
 
     protected fun håndterSaksbehandlerløsning(

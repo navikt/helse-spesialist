@@ -1,5 +1,4 @@
-import java.util.UUID
-import javax.sql.DataSource
+
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.ReservasjonDao
@@ -21,6 +20,7 @@ import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.stoppknapp.UnntaFraAutomatiseringDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vergemal.VergemålDao
@@ -30,6 +30,8 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.testEnv
+import java.util.UUID
+import javax.sql.DataSource
 
 internal class TestMediator(
     testRapid: TestRapid,
@@ -72,6 +74,7 @@ internal class TestMediator(
     private val saksbehandlerMediator = SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, oppgaveMediator, tilgangsgrupper)
     private val automatisering = Automatisering(
         risikovurderingDao = RisikovurderingDao(dataSource),
+        unntaFraAutomatiseringDao = UnntaFraAutomatiseringDao(dataSource),
         automatiseringDao = AutomatiseringDao(dataSource),
         åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource),
         vergemålDao = VergemålDao(dataSource),

@@ -3,7 +3,6 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import ToggleHelpers.disable
 import ToggleHelpers.enable
-import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.januar
@@ -13,6 +12,7 @@ import no.nav.helse.modell.Toggle
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class AutomatiseringE2ETest : AbstractE2ETest() {
     @Test
@@ -58,6 +58,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning(antall = 1)
         håndterRisikovurderingløsning()
+        håndterAutomatiseringStoppetAvVeilederløsning()
 
         assertGodkjenningsbehovIkkeBesvart()
         assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
@@ -82,6 +83,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
                 Risikofunn(kategori = emptyList(), beskrivelse = "faresignaler ikke ok", kreverSupersaksbehandler = false)
             ),
         )
+        håndterAutomatiseringStoppetAvVeilederløsning()
 
         assertGodkjenningsbehovBesvart(godkjent = true, automatiskBehandlet = true)
         assertSaksbehandleroppgaveBleIkkeOpprettet()
@@ -99,11 +101,11 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         spleisOppretterNyBehandling(vedtaksperiodeId = VEDTAKSPERIODE_ID)
         opprettSpesialsak(vedtaksperiodeId = VEDTAKSPERIODE_ID)
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
+            fullmakter = listOf(Testmeldingfabrikk.VergemålJson.Fullmakt(listOf(Testmeldingfabrikk.VergemålJson.Område.Syk), 1.januar, 31.januar)),
             risikofunn = listOf(
                 Risikofunn(kategori = emptyList(), beskrivelse = "faresignaler ikke ok", kreverSupersaksbehandler = false)
             ),
             kanGodkjennesAutomatisk = false,
-            fullmakter = listOf(Testmeldingfabrikk.VergemålJson.Fullmakt(listOf(Testmeldingfabrikk.VergemålJson.Område.Syk), 1.januar, 31.januar)),
             arbeidsgiverbeløp = 1000,
             personbeløp = 0
         )

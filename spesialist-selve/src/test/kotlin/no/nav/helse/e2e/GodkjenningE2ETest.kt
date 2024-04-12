@@ -5,8 +5,6 @@ import AbstractE2ETest.Kommandokjedetilstand.AVBRUTT
 import AbstractE2ETest.Kommandokjedetilstand.FERDIG
 import AbstractE2ETest.Kommandokjedetilstand.NY
 import AbstractE2ETest.Kommandokjedetilstand.SUSPENDERT
-import java.time.LocalDate
-import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import lagFødselsnummer
@@ -21,6 +19,8 @@ import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.UUID
 
 internal class GodkjenningE2ETest : AbstractE2ETest() {
     private companion object {
@@ -75,7 +75,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertGodkjenningsbehovBesvart(false, automatiskBehandlet = true)
         assertKommandokjedetilstander(
             sisteGodkjenningsbehovId,
-            NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, FERDIG
+            NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, FERDIG
         )
     }
 
@@ -202,6 +202,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         håndterVergemålløsning(vergemål = listOf(VergemålJson.Vergemål(voksen)))
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
+        håndterAutomatiseringStoppetAvVeilederløsning()
         assertGodkjenningsbehovBesvart(godkjent = false, automatiskBehandlet = true, "Vergemål")
     }
 
@@ -213,6 +214,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         håndterVergemålløsning()
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
+        håndterAutomatiseringStoppetAvVeilederløsning()
         assertGodkjenningsbehovBesvart(godkjent = true, automatiskBehandlet = true)
     }
 
@@ -232,6 +234,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         )
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
+        håndterAutomatiseringStoppetAvVeilederløsning()
         assertSaksbehandleroppgave(VEDTAKSPERIODE_ID, AvventerSaksbehandler)
     }
 
@@ -243,6 +246,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         håndterVergemålløsning(fremtidsfullmakter = listOf(VergemålJson.Vergemål(voksen)))
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
+        håndterAutomatiseringStoppetAvVeilederløsning()
         assertSaksbehandleroppgave(VEDTAKSPERIODE_ID, AvventerSaksbehandler)
     }
 
@@ -255,9 +259,10 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         håndterVergemålløsning(vergemål = listOf(VergemålJson.Vergemål(voksen)))
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
+        håndterAutomatiseringStoppetAvVeilederløsning()
         assertKommandokjedetilstander(
             sisteGodkjenningsbehovId,
-            NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, FERDIG
+            NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, FERDIG
         )
         assertGodkjenningsbehovBesvart(godkjent = false, automatiskBehandlet = true, "Vergemål")
 

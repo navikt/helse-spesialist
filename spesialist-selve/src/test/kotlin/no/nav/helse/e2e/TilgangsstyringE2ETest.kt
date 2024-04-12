@@ -110,6 +110,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
         håndterVergemålløsning()
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
+        håndterAutomatiseringStoppetAvVeilederløsning()
     }
 
     private fun fetchPerson() = runBlocking { personQuery.person(FØDSELSNUMMER, null, dataFetchingEnvironment) }

@@ -31,7 +31,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         håndterVedtaksperiodeReberegnet()
         assertKommandokjedetilstander(
             sisteGodkjenningsbehovId,
-            NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, FERDIG
+            NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, FERDIG
         )
         assertSaksbehandleroppgave(oppgavestatus = Oppgavestatus.Invalidert)
     }
@@ -48,10 +48,14 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         )
         assertSaksbehandleroppgaveBleIkkeOpprettet()
 
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave(harOppdatertMetadata = true, harRisikovurdering = false)
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
+            harRisikovurdering = false,
+            harOppdatertStoppknapp = false,
+            harOppdatertMetadata = true
+        )
         assertKommandokjedetilstander(
             sisteGodkjenningsbehovId,
-            NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, FERDIG
+            NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, FERDIG
         )
         assertSaksbehandleroppgave(oppgavestatus = Oppgavestatus.AvventerSaksbehandler)
     }

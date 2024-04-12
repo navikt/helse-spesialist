@@ -1,7 +1,6 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
-import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.TestRapidHelpers.oppgaveId
@@ -14,6 +13,7 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
     @Test
@@ -25,6 +25,7 @@ internal class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
         )
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
+        håndterAutomatiseringStoppetAvVeilederløsning()
 
         assertGodkjenningsbehovIkkeBesvart()
         val oppgaveId = inspektør.oppgaveId().toInt()
@@ -45,6 +46,7 @@ internal class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
         )
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
+        håndterAutomatiseringStoppetAvVeilederløsning()
 
         assertGodkjenningsbehovIkkeBesvart()
         val oppgaveId = inspektør.oppgaveId().toInt()
@@ -63,6 +65,7 @@ internal class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
         spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver(regelverksvarsler = listOf("RV_SØ_3"),)
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
+        håndterAutomatiseringStoppetAvVeilederløsning()
         håndterInntektløsning()
         assertVarsel("RV_SØ_3", VEDTAKSPERIODE_ID, Varsel.Status.AKTIV)
 
@@ -77,6 +80,7 @@ internal class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
         spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver(regelverksvarsler = listOf("RV_SØ_3"),)
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
+        håndterAutomatiseringStoppetAvVeilederløsning()
         håndterInntektløsning()
 
         val vedtaksperiodeId2 = UUID.randomUUID()

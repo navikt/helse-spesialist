@@ -4,6 +4,7 @@ import no.nav.helse.mediator.meldinger.løsninger.AutomatiseringStoppetAvVeilede
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime.now
 
 internal class KontrollerStoppknapp(
     private val fødselsnummer: String,
@@ -35,6 +36,5 @@ internal class KontrollerStoppknapp(
     }
 
     private fun harOppdatertInformasjon() =
-//        unntaFraAutomatiseringDao.sistOppdatert(fødselsnummer)?.let { it > now().minusHours(1) } ?: false
-        true
+        unntaFraAutomatiseringDao.sistOppdatert(fødselsnummer)?.let { it > now().minusHours(1) } ?: false
 }

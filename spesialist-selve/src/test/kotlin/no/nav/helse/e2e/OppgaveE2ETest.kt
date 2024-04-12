@@ -1,12 +1,12 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
-import java.util.UUID
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Ferdigstilt
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Invalidert
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class OppgaveE2ETest: AbstractE2ETest() {
 
@@ -46,8 +46,9 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
         håndterUtbetalingForkastet()
         assertSaksbehandleroppgave(oppgavestatus = Invalidert)
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
-            harOppdatertMetadata = true,
             harRisikovurdering = true,
+            harOppdatertStoppknapp = true,
+            harOppdatertMetadata = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
         )
         assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
@@ -72,8 +73,9 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
         håndterUtbetalingForkastet()
         assertSaksbehandleroppgave(oppgavestatus = Invalidert)
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
-            harOppdatertMetadata = true,
             harRisikovurdering = true,
+            harOppdatertStoppknapp = true,
+            harOppdatertMetadata = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
         )
         assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
@@ -87,8 +89,9 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
         håndterUtbetalingForkastet()
         assertSaksbehandleroppgave(oppgavestatus = Invalidert)
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
-            harOppdatertMetadata = true,
             harRisikovurdering = true,
+            harOppdatertStoppknapp = true,
+            harOppdatertMetadata = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
         )
         assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)

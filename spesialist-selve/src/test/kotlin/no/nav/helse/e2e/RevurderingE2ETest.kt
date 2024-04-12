@@ -1,9 +1,9 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
-import java.util.UUID
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class RevurderingE2ETest : AbstractE2ETest() {
 
@@ -18,7 +18,12 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
 
         val utbetalingId2 = UUID.randomUUID()
 
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave(harOppdatertMetadata = true, godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = utbetalingId2), harRisikovurdering = true)
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
+            harRisikovurdering = true,
+            harOppdatertStoppknapp = true,
+            harOppdatertMetadata = true,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = utbetalingId2),
+        )
         assertSaksbehandleroppgave(oppgavestatus = Oppgavestatus.AvventerSaksbehandler)
     }
 
@@ -32,12 +37,13 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
         val utbetalingId2 = UUID.randomUUID()
 
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
-            harOppdatertMetadata = true,
             harRisikovurdering = true,
+            harOppdatertStoppknapp = true,
+            harOppdatertMetadata = true,
             kanGodkjennesAutomatisk = true,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = utbetalingId2),
             arbeidsgiverbeløp = -200,
-            personbeløp = 0
+            personbeløp = 0,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = utbetalingId2)
         )
         assertSaksbehandleroppgave(oppgavestatus = Oppgavestatus.AvventerSaksbehandler)
     }
@@ -51,12 +57,13 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
         val utbetalingId2 = UUID.randomUUID()
 
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
-            harOppdatertMetadata = true,
             harRisikovurdering = true,
+            harOppdatertStoppknapp = true,
+            harOppdatertMetadata = true,
             kanGodkjennesAutomatisk = true,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = utbetalingId2),
             arbeidsgiverbeløp = 200,
-            personbeløp = 0
+            personbeløp = 0,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = utbetalingId2)
         )
         assertSaksbehandleroppgaveBleIkkeOpprettet()
     }

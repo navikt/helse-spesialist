@@ -4,7 +4,6 @@ import AbstractE2ETest
 import graphql.schema.DataFetchingEnvironment
 import io.mockk.every
 import io.mockk.mockk
-import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -41,6 +40,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class OverstyringE2ETest : AbstractE2ETest() {
 
@@ -64,7 +64,12 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertOppgaver(UTBETALING_ID, "AvventerSaksbehandler", 0)
 
         val nyUtbetalingId = UUID.randomUUID()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave(harOppdatertMetadata = true, harRisikovurdering = true, godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId))
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
+            harRisikovurdering = true,
+            harOppdatertStoppknapp = true,
+            harOppdatertMetadata = true,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId)
+        )
         assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
     }
 
@@ -113,7 +118,12 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertOppgaver(UTBETALING_ID, "AvventerSaksbehandler", 0)
 
         val nyUtbetalingId = UUID.randomUUID()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave(harOppdatertMetadata = true, harRisikovurdering = true, godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId))
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
+            harRisikovurdering = true,
+            harOppdatertStoppknapp = true,
+            harOppdatertMetadata = true,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId)
+        )
 
         assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
         assertTildeling(SAKSBEHANDLER_EPOST, nyUtbetalingId)
@@ -139,7 +149,12 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertOverstyrArbeidsforhold(FØDSELSNUMMER, 1)
 
         val nyUtbetalingId = UUID.randomUUID()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave(harOppdatertMetadata = true, harRisikovurdering = true, godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId))
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
+            harRisikovurdering = true,
+            harOppdatertStoppknapp = true,
+            harOppdatertMetadata = true,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId)
+        )
 
         assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
         assertTildeling(SAKSBEHANDLER_EPOST, nyUtbetalingId)
@@ -152,14 +167,16 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterOverstyrTidslinje()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
-            harOppdatertMetadata = true,
             harRisikovurdering = true,
+            harOppdatertStoppknapp = true,
+            harOppdatertMetadata = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
         )
         håndterOverstyrInntektOgRefusjon()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
-            harOppdatertMetadata = true,
             harRisikovurdering = true,
+            harOppdatertStoppknapp = true,
+            harOppdatertMetadata = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
         )
         håndterOverstyrArbeidsforhold()
@@ -169,7 +186,12 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         every { dataFetchingEnvironment.graphQlContext.get<SaksbehandlerTilganger>("tilganger") } returns SAKSBEHANDLERTILGANGER_UTEN_TILGANGER
 
         val nyUtbetalingId = UUID.randomUUID()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave(harOppdatertMetadata = true, harRisikovurdering = true, godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId))
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
+            harRisikovurdering = true,
+            harOppdatertStoppknapp = true,
+            harOppdatertMetadata = true,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId)
+        )
         assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
 
         val snapshot: Person = runBlocking { personQuery.person(FØDSELSNUMMER, null, dataFetchingEnvironment).data!! }

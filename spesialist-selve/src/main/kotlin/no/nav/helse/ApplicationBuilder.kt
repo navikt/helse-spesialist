@@ -54,6 +54,7 @@ import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.stoppknapp.UnntaFraAutomatiseringDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
@@ -205,6 +206,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val periodehistorikkDao = PeriodehistorikkDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
     private val risikovurderingDao = RisikovurderingDao(dataSource)
+    private val unntaFraAutomatiseringDao = UnntaFraAutomatiseringDao(dataSource)
     private val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val tildelingApiDao = TildelingApiDao(dataSource)
@@ -360,6 +362,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     val automatisering =
         Automatisering(
             risikovurderingDao = risikovurderingDao,
+            unntaFraAutomatiseringDao = unntaFraAutomatiseringDao,
             automatiseringDao = automatiseringDao,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             vergemålDao = vergemålDao,

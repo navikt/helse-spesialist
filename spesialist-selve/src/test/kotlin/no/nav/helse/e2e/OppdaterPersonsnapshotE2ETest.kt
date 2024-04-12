@@ -16,7 +16,10 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
         val snapshot = snapshot(2, fødselsnummer = FØDSELSNUMMER, aktørId = AKTØR, organisasjonsnummer = ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID)
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave(godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(vedtaksperiodeId = v1), snapshotversjon = 1)
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
+            snapshotversjon = 1,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(vedtaksperiodeId = v1)
+        )
         håndterSaksbehandlerløsning(vedtaksperiodeId = v1)
         håndterVedtakFattet(vedtaksperiodeId = v1)
 

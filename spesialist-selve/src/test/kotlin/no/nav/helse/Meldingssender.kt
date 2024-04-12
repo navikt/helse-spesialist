@@ -1,8 +1,5 @@
 package no.nav.helse
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
@@ -18,6 +15,9 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class Meldingssender(private val testRapid: TestRapid) {
     private val newUUID get() = UUID.randomUUID()
@@ -612,6 +612,28 @@ internal class Meldingssender(private val testRapid: TestRapid) {
                 vedtaksperiodeId = vedtaksperiodeId,
                 kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
                 funn = funn,
+                id = id,
+                hendelseId = hendelseId,
+                contextId = contextId,
+            )
+        )
+    }
+
+    fun sendAutomatiseringStoppetAvVeileder(
+        aktørId: String,
+        fødselsnummer: String,
+        stoppet: Boolean = false,
+    ): UUID = newUUID.also { id ->
+        val behov = testRapid.inspektør.siste("behov")
+        assertEquals("AutomatiseringStoppetAvVeileder", behov["@behov"].map { it.asText() }.single())
+        val contextId = UUID.fromString(behov["contextId"].asText())
+        val hendelseId = UUID.fromString(behov["hendelseId"].asText())
+
+        testRapid.sendTestMessage(
+            Testmeldingfabrikk.lagAutomatiseringStoppetAvVeilederløsning(
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                stoppet = stoppet,
                 id = id,
                 hendelseId = hendelseId,
                 contextId = contextId,

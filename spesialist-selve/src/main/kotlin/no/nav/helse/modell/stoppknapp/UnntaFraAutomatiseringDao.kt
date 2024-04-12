@@ -45,6 +45,18 @@ internal class UnntaFraAutomatiseringDao(private val dataSource: DataSource) {
             session.run(queryOf(statement, mapOf("fnr" to fødselsnummer.toLong())).map { it.localDateTimeOrNull(1) }.asSingle)
         }
     }
+
+    fun erUnntatt(fødselsnummer: String): Boolean {
+        @Language("postgresql")
+        val statement =
+            """
+            select unnta from unnta_fra_automatisk_godkjenning
+            where fødselsnummer = :fnr
+            """.trimIndent()
+        return sessionOf(dataSource).use { session ->
+            session.run(queryOf(statement, mapOf("fnr" to fødselsnummer.toLong())).map { it.boolean(1) }.asSingle)
+        } ?: false
+    }
 }
 
 fun <T> Iterable<T>.somDbArray() = joinToString { "'$it'" }

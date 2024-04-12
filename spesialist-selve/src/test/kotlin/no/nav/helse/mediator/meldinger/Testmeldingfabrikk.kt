@@ -1,11 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
-import java.time.LocalDate
-import java.time.LocalDate.now
-import java.time.LocalDateTime
-import java.time.YearMonth
-import java.util.UUID
 import no.nav.helse.AvviksvurderingTestdata
 import no.nav.helse.Testdata
 import no.nav.helse.februar
@@ -19,6 +14,11 @@ import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
+import java.time.LocalDate
+import java.time.LocalDate.now
+import java.time.LocalDateTime
+import java.time.YearMonth
+import java.util.UUID
 import kotlin.random.Random.Default.nextLong
 
 internal object Testmeldingfabrikk {
@@ -865,6 +865,32 @@ internal object Testmeldingfabrikk {
             )
         )
 
+    fun lagAutomatiseringStoppetAvVeilederløsning(
+        aktørId: String,
+        fødselsnummer: String,
+        stoppet: Boolean = false,
+        årsaker: Set<String> = emptySet(),
+        id: UUID = UUID.randomUUID(),
+        hendelseId: UUID = UUID.randomUUID(),
+        contextId: UUID = UUID.randomUUID(),
+    ): String =
+        nyHendelse(
+            id,
+            "behov", mapOf(
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer,
+                "@final" to true,
+                "@behov" to listOf("AutomatiseringStoppetAvVeileder"),
+                "contextId" to contextId,
+                "hendelseId" to hendelseId,
+                "@løsning" to mapOf(
+                    "AutomatiseringStoppetAvVeileder" to mapOf(
+                        "automatiseringStoppet" to stoppet,
+                        "årsaker" to årsaker,
+                    )
+                )
+            )
+        )
 
     fun lagAktivitetsloggNyAktivitet(
         fødselsnummer: String,

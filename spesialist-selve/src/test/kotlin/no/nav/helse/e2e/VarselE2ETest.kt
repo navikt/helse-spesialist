@@ -1,8 +1,6 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
-import java.time.LocalDate
-import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.Risikofunn
@@ -21,6 +19,8 @@ import no.nav.helse.modell.varsel.Varselkode.SB_RV_3
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.UUID
 
 internal class VarselE2ETest : AbstractE2ETest() {
 
@@ -79,6 +79,7 @@ internal class VarselE2ETest : AbstractE2ETest() {
         spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning(antall = 1)
         håndterRisikovurderingløsning()
+        håndterAutomatiseringStoppetAvVeilederløsning()
         håndterInntektløsning()
         håndterGosysOppgaveEndret()
         håndterÅpneOppgaverløsning(antall = 1)
@@ -92,6 +93,7 @@ internal class VarselE2ETest : AbstractE2ETest() {
         spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning(antall = 1)
         håndterRisikovurderingløsning()
+        håndterAutomatiseringStoppetAvVeilederløsning()
         håndterInntektløsning()
         håndterGosysOppgaveEndret()
         håndterÅpneOppgaverløsning(antall = 0)
@@ -115,6 +117,7 @@ internal class VarselE2ETest : AbstractE2ETest() {
         spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning(antall = 0, oppslagFeilet = true)
         håndterRisikovurderingløsning()
+        håndterAutomatiseringStoppetAvVeilederløsning()
         håndterInntektløsning()
         håndterGosysOppgaveEndret()
         håndterÅpneOppgaverløsning(antall = 0)
@@ -128,6 +131,7 @@ internal class VarselE2ETest : AbstractE2ETest() {
         spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning(antall = 0)
         håndterRisikovurderingløsning(kanGodkjennesAutomatisk = false)
+        håndterAutomatiseringStoppetAvVeilederløsning()
         håndterInntektløsning()
         håndterGosysOppgaveEndret()
         håndterÅpneOppgaverløsning(antall = 1)
@@ -153,6 +157,7 @@ internal class VarselE2ETest : AbstractE2ETest() {
         spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning(oppslagFeilet = false)
         håndterRisikovurderingløsning(kanGodkjennesAutomatisk = false)
+        håndterAutomatiseringStoppetAvVeilederløsning()
         håndterInntektløsning()
         håndterGosysOppgaveEndret()
         håndterÅpneOppgaverløsning(oppslagFeilet = true)

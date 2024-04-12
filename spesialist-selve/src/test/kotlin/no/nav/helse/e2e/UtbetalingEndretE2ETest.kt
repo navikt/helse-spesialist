@@ -1,7 +1,6 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
-import java.util.UUID
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -9,6 +8,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class UtbetalingEndretE2ETest : AbstractE2ETest() {
 
@@ -36,8 +36,9 @@ internal class UtbetalingEndretE2ETest : AbstractE2ETest() {
         håndterUtbetalingErstattet(arbeidsgiverbeløp = 20000, personbeløp = 20000, utbetalingId = utbetalingId2)
         håndterVedtaksperiodeReberegnet()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
-            harOppdatertMetadata = true,
             harRisikovurdering = true,
+            harOppdatertStoppknapp = true,
+            harOppdatertMetadata = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = utbetalingId2)
         )
 

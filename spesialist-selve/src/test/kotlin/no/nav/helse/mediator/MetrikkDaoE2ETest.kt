@@ -36,6 +36,7 @@ internal class MetrikkDaoE2ETest : AbstractE2ETest() {
         spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning(antall = 1)
         håndterRisikovurderingløsning()
+        håndterAutomatiseringStoppetAvVeilederløsning()
 
         val contextId = inspektør.contextId()
         assertEquals(GodkjenningsbehovUtfall.ManuellOppgave, dao.finnUtfallForGodkjenningsbehov(contextId))

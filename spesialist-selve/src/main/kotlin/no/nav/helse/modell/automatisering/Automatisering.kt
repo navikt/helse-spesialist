@@ -11,6 +11,7 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.stoppknapp.UnntaFraAutomatiseringDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.utbetaling.Utbetaling
@@ -26,6 +27,7 @@ import java.util.UUID
 
 internal class Automatisering(
     private val risikovurderingDao: RisikovurderingDao,
+    private val unntaFraAutomatiseringDao: UnntaFraAutomatiseringDao,
     private val automatiseringDao: AutomatiseringDao,
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     private val vergemålDao: VergemålDao,
@@ -213,6 +215,7 @@ internal class Automatisering(
         val risikovurdering =
             risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
                 ?: validering("Mangler vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning") { false }
+        val unntattFraAutomatisering = unntaFraAutomatiseringDao.erUnntatt(fødselsnummer)
         val forhindrerAutomatisering = sykefraværstilfelle.forhindrerAutomatisering(vedtaksperiodeId)
         val harVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
         val tilhørerUtlandsenhet = erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
@@ -224,6 +227,7 @@ internal class Automatisering(
 
         return valider(
             risikovurdering,
+            validering("Unntatt fra automatisk godkjenning") { !unntattFraAutomatisering },
             validering("Har varsler") { !forhindrerAutomatisering },
             validering("Det finnes åpne oppgaver på sykepenger i Gosys") {
                 antallÅpneGosysoppgaver?.let { it == 0 } ?: false
