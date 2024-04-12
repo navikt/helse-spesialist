@@ -136,13 +136,6 @@ INSERT INTO periodehistorikk(id, type, timestamp, generasjon_id, saksbehandler_o
 VALUES (${sequence_number}, 'TOTRINNSVURDERING_RETUR', now(), '${generasjon_id}', '${saksbehandler_oid}',
         ${sequence_number});
 
-INSERT INTO risikovurdering(id, vedtaksperiode_id, samlet_score, ufullstendig, opprettet)
-VALUES (${sequence_number}, '${vedtaksperiode_id}', 1000, false, now());
-INSERT INTO risikovurdering_arbeidsuforhetvurdering(id, risikovurdering_ref, tekst)
-VALUES (${sequence_number}, ${sequence_number}, 'TESTTEKST');
-INSERT INTO risikovurdering_faresignal(id, risikovurdering_ref, tekst)
-VALUES (${sequence_number}, ${sequence_number}, 'TESTTEKST');
-
 INSERT INTO feilende_meldinger(id, event_name, opprettet, blob)
 VALUES (gen_random_uuid(), 'FEILENDE_TESTHENDELSE', now(), '{}'::json);
 

@@ -131,6 +131,9 @@ internal abstract class AbstractDatabaseTest {
                 "melding_duplikatkontroll",
                 "poison_pill",
                 "dialog",
+                "risikovurdering",
+                "risikovurdering_arbeidsuforhetvurdering",
+                "risikovurdering_faresignal",
             ),
         )
         tabeller.forEach { tabellnavn ->

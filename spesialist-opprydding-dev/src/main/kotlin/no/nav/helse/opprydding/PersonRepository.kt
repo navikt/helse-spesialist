@@ -383,11 +383,8 @@ internal class PersonRepository(private val dataSource: DataSource) {
     }
 
     private fun TransactionalSession.slettRisikovurdering(personRef: Int) {
-        slettRisikovurdering2021(personRef)
-        slettRisikovurderingFaresignal(personRef)
-        slettRisikovurderingArbeidsuførhetsvurdering(personRef)
         @Language("PostgreSQL")
-        val query = "DELETE FROM risikovurdering WHERE vedtaksperiode_id IN (SELECT vedtaksperiode_id FROM vedtak WHERE person_ref = ?)"
+        val query = "DELETE FROM risikovurdering_2021 WHERE vedtaksperiode_id IN (SELECT vedtaksperiode_id FROM vedtak WHERE person_ref = ?)"
         run(queryOf(query, personRef).asExecute)
     }
 
@@ -401,36 +398,6 @@ internal class PersonRepository(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val query = "DELETE FROM stans_automatisering WHERE fødselsnummer = ?"
         run(queryOf(query, fødselsnummer).asExecute)
-    }
-
-    private fun TransactionalSession.slettRisikovurdering2021(personRef: Int) {
-        @Language("PostgreSQL")
-        val query = "DELETE FROM risikovurdering_2021 WHERE vedtaksperiode_id IN (SELECT vedtaksperiode_id FROM vedtak WHERE person_ref = ?)"
-        run(queryOf(query, personRef).asExecute)
-    }
-
-    private fun TransactionalSession.slettRisikovurderingFaresignal(personRef: Int) {
-        @Language("PostgreSQL")
-        val query = """
-            DELETE FROM risikovurdering_faresignal 
-            WHERE risikovurdering_ref IN (
-                SELECT r.id FROM risikovurdering r 
-                INNER JOIN vedtak v ON r.vedtaksperiode_id = v.vedtaksperiode_id 
-                WHERE person_ref = ?
-            )"""
-        run(queryOf(query, personRef).asExecute)
-    }
-
-    private fun TransactionalSession.slettRisikovurderingArbeidsuførhetsvurdering(personRef: Int) {
-        @Language("PostgreSQL")
-        val query = """
-            DELETE FROM risikovurdering_arbeidsuforhetvurdering 
-            WHERE risikovurdering_ref IN (
-                SELECT r.id FROM risikovurdering r 
-                INNER JOIN vedtak v ON r.vedtaksperiode_id = v.vedtaksperiode_id 
-                WHERE person_ref = ?
-            )"""
-        run(queryOf(query, personRef).asExecute)
     }
 
     private fun TransactionalSession.slettUtbetalingIdVedtaksperiodeId(personRef: Int) {
