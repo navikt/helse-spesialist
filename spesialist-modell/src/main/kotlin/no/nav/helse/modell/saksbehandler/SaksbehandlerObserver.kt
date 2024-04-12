@@ -132,7 +132,7 @@ data class AnnullertUtbetalingEvent(
     val saksbehandlerIdent: String,
     val saksbehandlerEpost: String,
     val vedtaksperiodeId: UUID?,
-    val utbetalingId: String?,
+    val utbetalingId: UUID?,
     val begrunnelser: List<String>,
     val kommentar: String?,
 )

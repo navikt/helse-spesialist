@@ -307,6 +307,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         assertEquals(SAKSBEHANDLER_IDENT, melding["saksbehandler"]["ident"].asText())
 
         assertEquals(VEDTAKSPERIODE, melding["vedtaksperiodeId"].asUUID())
+        assertEquals(UTBETALING_ID, melding["utbetalingId"].asUUID())
         assertEquals("EN_KOMMENTAR", melding["kommentar"]?.asText())
         assertEquals(1, melding["begrunnelser"].map { it.asText() }.size)
         assertEquals("EN_BEGRUNNELSE", melding["begrunnelser"][0].asText())
@@ -327,6 +328,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         assertEquals(SAKSBEHANDLER_IDENT, melding["saksbehandler"]["ident"].asText())
 
         assertEquals(VEDTAKSPERIODE, melding["vedtaksperiodeId"].asUUID())
+        assertEquals(UTBETALING_ID, melding["utbetalingId"].asUUID())
         assertEquals(null, melding["kommentar"]?.asText())
         assertEquals(0, melding["begrunnelser"].map { it.asText() }.size)
     }
@@ -631,7 +633,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         fødselsnummer = FØDSELSNUMMER,
         organisasjonsnummer = ORGANISASJONSNUMMER,
         vedtaksperiodeId = VEDTAKSPERIODE,
-        utbetalingId = null,
+        utbetalingId = UTBETALING_ID,
         begrunnelser = begrunnelser,
         kommentar = kommentar
     )

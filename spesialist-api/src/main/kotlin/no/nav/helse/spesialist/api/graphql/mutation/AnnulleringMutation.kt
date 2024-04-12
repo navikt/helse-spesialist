@@ -28,7 +28,7 @@ class AnnulleringMutation(
                     fødselsnummer = annullering.fodselsnummer,
                     organisasjonsnummer = annullering.organisasjonsnummer ?: "",
                     vedtaksperiodeId = annullering.vedtaksperiodeId?.let { UUID.fromString(it) },
-                    utbetalingId = annullering.utbetalingId,
+                    utbetalingId = annullering.utbetalingId?.let { UUID.fromString(it) },
                     begrunnelser = annullering.begrunnelser,
                     kommentar = annullering.kommentar,
                 )
