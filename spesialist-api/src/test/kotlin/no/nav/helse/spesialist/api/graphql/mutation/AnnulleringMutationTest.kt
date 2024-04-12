@@ -16,6 +16,7 @@ internal class AnnulleringMutationTest : AbstractGraphQLApiTest() {
                     fodselsnummer: "et-fødselsnummer", 
                     aktorId: "en-aktørid", 
                     utbetalingId: "${UUID.randomUUID()}",
+                    vedtaksperiodeId: "${UUID.randomUUID()}",
                     kommentar: "En kommentar", 
                     begrunnelser: ["Det første", "Det andre"]
                 })
@@ -36,6 +37,7 @@ internal class AnnulleringMutationTest : AbstractGraphQLApiTest() {
                     fodselsnummer: "et-fødselsnummer", 
                     aktorId: "en-aktørid", 
                     utbetalingId: "${UUID.randomUUID()}",
+                    vedtaksperiodeId: "${UUID.randomUUID()}",
                     begrunnelser: []
                 })
             }
