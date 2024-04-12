@@ -36,7 +36,11 @@ internal class AutomatiseringStoppetAvVeilederLøsning(
                     it.demandKey("contextId")
                     it.requireKey("@id")
                     it.require("@opprettet") { message -> message.asLocalDateTime() }
-                    it.requireKey("@løsning.automatiseringStoppet", "@løsning.årsaker")
+                    it.requireKey("@løsning.AutomatiseringStoppetAvVeileder")
+                    it.requireKey(
+                        "@løsning.AutomatiseringStoppetAvVeileder.automatiseringStoppet",
+                        "@løsning.AutomatiseringStoppetAvVeileder.årsaker",
+                    )
                 }
             }.register(this)
         }
@@ -51,8 +55,9 @@ internal class AutomatiseringStoppetAvVeilederLøsning(
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())
             val fødselsnummer = packet["fødselsnummer"].asText()
 
-            val automatiseringErStoppet = packet["@løsning.automatiseringStoppet"].asBoolean()
-            val årsaker = packet["@løsning.årsaker"].map { it.asText() }.toSet()
+            val løsning = packet["@løsning.AutomatiseringStoppetAvVeileder"]
+            val automatiseringErStoppet = løsning["automatiseringStoppet"].asBoolean()
+            val årsaker = løsning["årsaker"].map { it.asText() }.toSet()
 
             val automatiseringStoppetAvVeilederLøsning =
                 AutomatiseringStoppetAvVeilederLøsning(

@@ -49,8 +49,10 @@ class AutomatiseringStoppetAvVeilederRiverTest {
             "@id": "${UUID.randomUUID()}",
             "fødselsnummer": "11223312345",
             "@løsning": {
-                "automatiseringStoppet": $stoppet,
-                "årsaker": ${årsaker.map { "\"$it\"" }}
+                "AutomatiseringStoppetAvVeileder": {
+                    "automatiseringStoppet": $stoppet,
+                    "årsaker": ${årsaker.map { "\"$it\"" }}
+                }
             },
             "@final": true,
             "hendelseId": "${UUID.randomUUID()}",
