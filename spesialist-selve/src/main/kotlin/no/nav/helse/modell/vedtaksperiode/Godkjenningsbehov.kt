@@ -36,6 +36,8 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.risiko.VurderVurderingsmomenter
+import no.nav.helse.modell.stoppknapp.KontrollerStoppknapp
+import no.nav.helse.modell.stoppknapp.UnntaFraAutomatiseringDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.utbetaling.Utbetaling
@@ -189,6 +191,7 @@ internal class GodkjenningsbehovCommand(
     utbetalingDao: UtbetalingDao,
     vergemålDao: VergemålDao,
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
+    unntaFraAutomatiseringDao: UnntaFraAutomatiseringDao,
     risikovurderingDao: RisikovurderingDao,
     påVentDao: PåVentDao,
     overstyringDao: OverstyringDao,
@@ -269,6 +272,10 @@ internal class GodkjenningsbehovCommand(
                 førstegangsbehandling = førstegangsbehandling,
                 sykefraværstilfelle = sykefraværstilfelle,
                 utbetaling = utbetaling,
+            ),
+            KontrollerStoppknapp(
+                fødselsnummer = fødselsnummer,
+                unntaFraAutomatiseringDao = unntaFraAutomatiseringDao,
             ),
             VurderAutomatiskAvvisning(
                 fødselsnummer = fødselsnummer,

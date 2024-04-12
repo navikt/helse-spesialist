@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.meldinger.løsninger
 
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.modell.stoppknapp.UnntaFraAutomatiseringDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -14,8 +15,12 @@ internal class AutomatiseringStoppetAvVeilederLøsning(
     private val opprettet: LocalDateTime,
     private val fødselsnummer: String,
     private val automatiseringErStoppet: Boolean,
-    private val årsaker: List<String>,
+    private val årsaker: Set<String>,
 ) {
+    fun lagre(unntaFraAutomatiseringDao: UnntaFraAutomatiseringDao) {
+        unntaFraAutomatiseringDao.lagre(fødselsnummer, automatiseringErStoppet, årsaker)
+    }
+
     internal class AutomatiseringStoppetAvVeilederRiver(
         rapidsConnection: RapidsConnection,
         private val mediator: MeldingMediator,
@@ -47,7 +52,7 @@ internal class AutomatiseringStoppetAvVeilederLøsning(
             val fødselsnummer = packet["fødselsnummer"].asText()
 
             val automatiseringErStoppet = packet["@løsning.automatiseringStoppet"].asBoolean()
-            val årsaker = packet["@løsning.årsaker"].map { it.asText() }
+            val årsaker = packet["@løsning.årsaker"].map { it.asText() }.toSet()
 
             val automatiseringStoppetAvVeilederLøsning =
                 AutomatiseringStoppetAvVeilederLøsning(
