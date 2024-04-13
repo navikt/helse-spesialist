@@ -17,11 +17,13 @@ class SnapshotApiDao(private val dataSource: DataSource) {
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val statement =
-                """ SELECT * FROM person AS p
-                    INNER JOIN person_info as pi ON pi.id = p.info_ref
-                    INNER JOIN snapshot AS s ON s.person_ref = p.id
+                """
+                SELECT * FROM person AS p
+                INNER JOIN person_info as pi ON pi.id = p.info_ref
+                INNER JOIN snapshot AS s ON s.person_ref = p.id
+                LEFT JOIN unnta_fra_automatisk_godkjenning u ON p.fodselsnummer = u.fødselsnummer
                 WHERE p.fodselsnummer = :fnr;
-            """
+                """.trimIndent()
             session.run(
                 queryOf(
                     statement,
@@ -36,6 +38,7 @@ class SnapshotApiDao(private val dataSource: DataSource) {
                             kjonn = row.stringOrNull("kjonn")?.let(Kjonn::valueOf) ?: Kjonn.Ukjent,
                             adressebeskyttelse = row.string("adressebeskyttelse").let(Adressebeskyttelse::valueOf),
                             reservasjon = null,
+                            unntattFraAutomatiskGodkjenning = row.boolean("unnta"),
                         )
                     val snapshot = objectMapper.readValue<GraphQLPerson>(row.string("data"))
                     personinfo to snapshot

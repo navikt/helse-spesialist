@@ -17,9 +17,6 @@ import io.mockk.MockKAnswerScope
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.util.UUID
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.mediator.IBehandlingsstatistikkMediator
@@ -96,6 +93,9 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSimuleringsutbetaling
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetaling
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLVurdering
 import no.nav.helse.spleis.graphql.hentsnapshot.Sykepengedager
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.UUID
 
 fun main() = runBlocking {
     val jwtStub = JwtStub()
@@ -402,6 +402,7 @@ private fun enPersoninfo() = Personinfo(
     kjonn = Kjonn.Kvinne,
     adressebeskyttelse = Adressebeskyttelse.Ugradert,
     reservasjon = null, // Denne hentes runtime ved hjelp av et kall til KRR
+    unntattFraAutomatiskGodkjenning = false,
 )
 
 private fun enPeriode() = GraphQLBeregnetPeriode(
