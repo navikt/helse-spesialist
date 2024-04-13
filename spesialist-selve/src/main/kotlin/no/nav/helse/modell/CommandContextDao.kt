@@ -94,15 +94,20 @@ internal class CommandContextDao(private val dataSource: DataSource) {
         sessionOf(dataSource).use {
             @Language("PostgreSQL")
             val query =
-                """INSERT INTO command_context(context_id,hendelse_id,tilstand,data,hash) VALUES (?, ?, ?, ?::json, ?)"""
+                """
+                INSERT INTO command_context(context_id, hendelse_id, tilstand, data, hash)
+                VALUES (:contextId, :hendelseId, :tilstand, :data::json, :hash)
+                """.trimIndent()
             it.run(
                 queryOf(
                     query,
-                    contextId,
-                    hendelseId,
-                    tilstand.name,
-                    mapper.writeValueAsString(CommandContextDto(sti)),
-                    hash,
+                    mapOf(
+                        "contextId" to contextId,
+                        "hendelseId" to hendelseId,
+                        "tilstand" to tilstand.name,
+                        "data" to mapper.writeValueAsString(CommandContextDto(sti)),
+                        "hash" to hash,
+                    ),
                 ).asExecute,
             )
         }
