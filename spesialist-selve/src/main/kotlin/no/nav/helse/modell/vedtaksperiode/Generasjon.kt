@@ -213,9 +213,9 @@ internal class Generasjon private constructor(
     ) {
         sikkerlogg.warn(
             "Oppretter ny generasjon fra godkjenningsbehov fordi gjeldende generasjon er i tilstand=${tilstand.navn()}",
-            vedtaksperiodeId,
-            spleisBehandlingId,
-            utbetalingId,
+            kv("vedtaksperiodeId", vedtaksperiodeId),
+            kv("spleisBehandlingId", spleisBehandlingId),
+            kv("utbetalingId", utbetalingId),
         )
         val nyGenerasjon = this.nyBehandling(spleisVedtaksperiode.spleisBehandlingId)
         nyGenerasjon.spleisVedtaksperiode(spleisVedtaksperiode)
