@@ -317,7 +317,7 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
     fun `oppdaterer fom, tom, skjæringstidspunkt, behandlingId`() {
         val behandlingId = UUID.randomUUID()
         val generasjon = generasjon(fom = 1.januar, tom = 31.januar, skjæringstidspunkt = 1.januar)
-        generasjon.håndter(SpleisVedtaksperiode(UUID.randomUUID(), behandlingId, 2.januar, 30.januar, 2.januar))
+        generasjon.håndter(mockk(relaxed = true), SpleisVedtaksperiode(UUID.randomUUID(), behandlingId, 2.januar, 30.januar, 2.januar))
         val dto = generasjon.toDto()
 
         assertEquals(2.januar, dto.fom)

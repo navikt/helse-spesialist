@@ -48,7 +48,7 @@ class Person private constructor(
     }
 
     fun mottaSpleisVedtaksperioder(perioder: List<SpleisVedtaksperiode>) {
-        vedtaksperioder.forEach { it.håndter(perioder) }
+        vedtaksperioder.forEach { it.nyttGodkjenningsbehov(perioder) }
     }
 
     internal fun vedtakFattet(vedtakFattet: VedtakFattet) {

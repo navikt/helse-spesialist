@@ -97,7 +97,14 @@ internal class Generasjon private constructor(
 
     internal fun forhindrerAutomatisering(): Boolean = varsler.forhindrerAutomatisering()
 
-    internal fun håndter(spleisVedtaksperiode: SpleisVedtaksperiode) {
+    internal fun håndter(
+        vedtaksperiode: Vedtaksperiode,
+        spleisVedtaksperiode: SpleisVedtaksperiode,
+    ) {
+        tilstand.spleisVedtaksperiode(vedtaksperiode, this, spleisVedtaksperiode)
+    }
+
+    private fun spleisVedtaksperiode(spleisVedtaksperiode: SpleisVedtaksperiode) {
         this.periode = Periode(spleisVedtaksperiode.fom, spleisVedtaksperiode.tom)
         this.skjæringstidspunkt = spleisVedtaksperiode.skjæringstidspunkt
         this.spleisBehandlingId = spleisVedtaksperiode.spleisBehandlingId
@@ -199,6 +206,17 @@ internal class Generasjon private constructor(
         return nyGenerasjon
     }
 
+    private fun nyGenerasjonFraGodkjenningsbehov(
+        tilstand: Tilstand,
+        vedtaksperiode: Vedtaksperiode,
+        spleisVedtaksperiode: SpleisVedtaksperiode,
+    ) {
+        sikkerlogg.warn("Oppretter ny generasjon fra godkjenningsbehov fordi gjeldende generasjon er i tilstand=${tilstand.navn()}")
+        val nyGenerasjon = this.nyBehandling(spleisVedtaksperiode.spleisBehandlingId)
+        nyGenerasjon.spleisVedtaksperiode(spleisVedtaksperiode)
+        vedtaksperiode.nyGenerasjon(nyGenerasjon)
+    }
+
     private fun flyttAktiveVarslerTil(generasjon: Generasjon) {
         val aktiveVarsler = varsler.filter(Varsel::erAktiv)
         this.varsler.removeAll(aktiveVarsler)
@@ -268,6 +286,12 @@ internal class Generasjon private constructor(
             sikkerlogg.info("Forventet ikke vedtak_fattet i {}", kv("tilstand", this::class.simpleName))
         }
 
+        fun spleisVedtaksperiode(
+            vedtaksperiode: Vedtaksperiode,
+            generasjon: Generasjon,
+            spleisVedtaksperiode: SpleisVedtaksperiode,
+        )
+
         fun nySpleisBehandling(
             generasjon: Generasjon,
             vedtaksperiode: Vedtaksperiode,
@@ -323,26 +347,6 @@ internal class Generasjon private constructor(
         ) {}
     }
 
-    internal data object KlarTilBehandling : Tilstand {
-        override fun navn(): String = "KlarTilBehandling"
-
-        override fun vedtakFattet(
-            generasjon: Generasjon,
-            hendelseId: UUID,
-        ) {
-            checkNotNull(generasjon.utbetalingId) { "Mottatt vedtak_fattet i tilstand=${navn()}, men mangler utbetalingId" }
-            generasjon.nyTilstand(this, VedtakFattet, hendelseId)
-        }
-
-        override fun invaliderUtbetaling(
-            generasjon: Generasjon,
-            utbetalingId: UUID,
-        ) {
-            generasjon.utbetalingId = null
-            generasjon.nyTilstand(this, VidereBehandlingAvklares, UUID.randomUUID())
-        }
-    }
-
     internal data object VidereBehandlingAvklares : Tilstand {
         override fun navn(): String = "VidereBehandlingAvklares"
 
@@ -363,6 +367,14 @@ internal class Generasjon private constructor(
             sikkerlogg.warn("Forventer ikke ny Spleis-behandling, gjeldende generasjon i Spesialist er ikke lukket")
         }
 
+        override fun spleisVedtaksperiode(
+            vedtaksperiode: Vedtaksperiode,
+            generasjon: Generasjon,
+            spleisVedtaksperiode: SpleisVedtaksperiode,
+        ) {
+            generasjon.spleisVedtaksperiode(spleisVedtaksperiode)
+        }
+
         override fun avsluttetUtenVedtak(
             generasjon: Generasjon,
             sykepengevedtakBuilder: SykepengevedtakBuilder,
@@ -380,6 +392,34 @@ internal class Generasjon private constructor(
         }
     }
 
+    internal data object KlarTilBehandling : Tilstand {
+        override fun navn(): String = "KlarTilBehandling"
+
+        override fun vedtakFattet(
+            generasjon: Generasjon,
+            hendelseId: UUID,
+        ) {
+            checkNotNull(generasjon.utbetalingId) { "Mottatt vedtak_fattet i tilstand=${navn()}, men mangler utbetalingId" }
+            generasjon.nyTilstand(this, VedtakFattet, hendelseId)
+        }
+
+        override fun invaliderUtbetaling(
+            generasjon: Generasjon,
+            utbetalingId: UUID,
+        ) {
+            generasjon.utbetalingId = null
+            generasjon.nyTilstand(this, VidereBehandlingAvklares, UUID.randomUUID())
+        }
+
+        override fun spleisVedtaksperiode(
+            vedtaksperiode: Vedtaksperiode,
+            generasjon: Generasjon,
+            spleisVedtaksperiode: SpleisVedtaksperiode,
+        ) {
+            generasjon.spleisVedtaksperiode(spleisVedtaksperiode)
+        }
+    }
+
     internal data object VedtakFattet : Tilstand {
         override fun navn(): String = "VedtakFattet"
 
@@ -389,6 +429,15 @@ internal class Generasjon private constructor(
             spleisBehandling: SpleisBehandling,
         ) {
             vedtaksperiode.nyGenerasjon(generasjon.nyBehandling(spleisBehandling.spleisBehandlingId))
+        }
+
+        override fun spleisVedtaksperiode(
+            vedtaksperiode: Vedtaksperiode,
+            generasjon: Generasjon,
+            spleisVedtaksperiode: SpleisVedtaksperiode,
+        ) {
+            if (generasjon.spleisBehandlingId == spleisVedtaksperiode.spleisBehandlingId) return
+            generasjon.nyGenerasjonFraGodkjenningsbehov(this, vedtaksperiode, spleisVedtaksperiode)
         }
     }
 
@@ -419,6 +468,15 @@ internal class Generasjon private constructor(
             sikkerlogg.warn("Spesialist mottar avsluttet_uten_vedtak når den allerede er i tilstand ${navn()}")
             generasjon.supplerAvsluttetUtenVedtak(sykepengevedtakBuilder)
         }
+
+        override fun spleisVedtaksperiode(
+            vedtaksperiode: Vedtaksperiode,
+            generasjon: Generasjon,
+            spleisVedtaksperiode: SpleisVedtaksperiode,
+        ) {
+            if (generasjon.spleisBehandlingId == spleisVedtaksperiode.spleisBehandlingId) return
+            generasjon.nyGenerasjonFraGodkjenningsbehov(this, vedtaksperiode, spleisVedtaksperiode)
+        }
     }
 
     internal data object AvsluttetUtenVedtakMedVarsler : Tilstand {
@@ -446,6 +504,16 @@ internal class Generasjon private constructor(
             spleisBehandling: SpleisBehandling,
         ) {
             vedtaksperiode.nyGenerasjon(generasjon.nyBehandling(spleisBehandling.spleisBehandlingId))
+            generasjon.nyTilstand(this, AvsluttetUtenVedtak, UUID.randomUUID())
+        }
+
+        override fun spleisVedtaksperiode(
+            vedtaksperiode: Vedtaksperiode,
+            generasjon: Generasjon,
+            spleisVedtaksperiode: SpleisVedtaksperiode,
+        ) {
+            if (generasjon.spleisBehandlingId == spleisVedtaksperiode.spleisBehandlingId) return
+            generasjon.nyGenerasjonFraGodkjenningsbehov(this, vedtaksperiode, spleisVedtaksperiode)
             generasjon.nyTilstand(this, AvsluttetUtenVedtak, UUID.randomUUID())
         }
     }

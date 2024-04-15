@@ -40,10 +40,10 @@ internal class Vedtaksperiode private constructor(
         gjeldendeGenerasjon.deaktiverVarsel(varselkode)
     }
 
-    internal fun håndter(spleisVedtaksperioder: List<SpleisVedtaksperiode>) {
+    internal fun nyttGodkjenningsbehov(spleisVedtaksperioder: List<SpleisVedtaksperiode>) {
         if (forkastet) return
         val spleisVedtaksperiode = spleisVedtaksperioder.find { it.erRelevant(vedtaksperiodeId) } ?: return
-        gjeldendeGenerasjon.håndter(spleisVedtaksperiode)
+        gjeldendeGenerasjon.håndter(this, spleisVedtaksperiode)
     }
 
     internal fun nySpleisBehandling(spleisBehandling: SpleisBehandling) {
