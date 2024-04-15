@@ -1,5 +1,6 @@
 package no.nav.helse.modell.stoppknapp
 
+import no.nav.helse.mediator.erProd
 import no.nav.helse.mediator.meldinger.løsninger.AutomatiseringStoppetAvVeilederLøsning
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
@@ -21,6 +22,7 @@ internal class KontrollerStoppknapp(
     private fun behandle(context: CommandContext): Boolean {
         val løsning = context.get<AutomatiseringStoppetAvVeilederLøsning>()
         return when {
+            erProd() -> true
             harOppdatertInformasjon() -> true
             løsning != null -> {
                 løsning.lagre(unntaFraAutomatiseringDao)
