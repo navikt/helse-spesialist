@@ -441,7 +441,7 @@ internal class Generasjon private constructor(
             generasjon: Generasjon,
             spleisVedtaksperiode: SpleisVedtaksperiode,
         ) {
-            if (generasjon.spleisBehandlingId == spleisVedtaksperiode.spleisBehandlingId) return
+            if (generasjon.spleisBehandlingId == null || generasjon.spleisBehandlingId == spleisVedtaksperiode.spleisBehandlingId) return
             generasjon.nyGenerasjonFraGodkjenningsbehov(this, vedtaksperiode, spleisVedtaksperiode)
         }
     }
@@ -479,7 +479,7 @@ internal class Generasjon private constructor(
             generasjon: Generasjon,
             spleisVedtaksperiode: SpleisVedtaksperiode,
         ) {
-            if (generasjon.spleisBehandlingId == spleisVedtaksperiode.spleisBehandlingId) return
+            if (generasjon.spleisBehandlingId == null || generasjon.spleisBehandlingId == spleisVedtaksperiode.spleisBehandlingId) return
             generasjon.nyGenerasjonFraGodkjenningsbehov(this, vedtaksperiode, spleisVedtaksperiode)
         }
     }
@@ -517,7 +517,7 @@ internal class Generasjon private constructor(
             generasjon: Generasjon,
             spleisVedtaksperiode: SpleisVedtaksperiode,
         ) {
-            if (generasjon.spleisBehandlingId == spleisVedtaksperiode.spleisBehandlingId) return
+            if (generasjon.spleisBehandlingId == null || generasjon.spleisBehandlingId == spleisVedtaksperiode.spleisBehandlingId) return
             generasjon.nyGenerasjonFraGodkjenningsbehov(this, vedtaksperiode, spleisVedtaksperiode)
             generasjon.nyTilstand(this, AvsluttetUtenVedtak, UUID.randomUUID())
         }
