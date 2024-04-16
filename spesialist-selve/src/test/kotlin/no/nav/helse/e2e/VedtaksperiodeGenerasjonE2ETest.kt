@@ -84,8 +84,9 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
     @Test
     fun `Flytter aktive varsler for auu`() {
         vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        håndterAvsluttetUtenVedtak()
+        val spleisBehandlingId = UUID.randomUUID()
+        spleisOppretterNyBehandling(spleisBehandlingId = spleisBehandlingId)
+        håndterAvsluttetUtenVedtak(spleisBehandlingId = spleisBehandlingId)
         håndterAktivitetsloggNyAktivitet(varselkoder = listOf("RV_IM_1"))
 
         val utbetalingId = UUID.randomUUID()

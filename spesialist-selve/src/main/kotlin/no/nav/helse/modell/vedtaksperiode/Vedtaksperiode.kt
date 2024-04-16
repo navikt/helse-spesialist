@@ -84,7 +84,16 @@ internal class Vedtaksperiode private constructor(
     ) {
         if (forkastet) return
         val sykepengevedtakBuilder = SykepengevedtakBuilder()
-        gjeldendeGenerasjon.avsluttetUtenVedtak(avsluttetUtenVedtak, sykepengevedtakBuilder)
+
+        val relevantGenerasjon = generasjoner.finnGenerasjonForSpleisBehandling(avsluttetUtenVedtak.spleisBehandlingId())
+        if (relevantGenerasjon == null) {
+            logg.error(
+                "Fant ikke generasjon for {} som kan håndtere avsluttet_uten_vedtak",
+                kv("spleisBehandlingId", avsluttetUtenVedtak.spleisBehandlingId()),
+            )
+            return
+        }
+        relevantGenerasjon.avsluttetUtenVedtak(avsluttetUtenVedtak, sykepengevedtakBuilder)
         sykepengevedtakBuilder
             .organisasjonsnummer(organisasjonsnummer)
             .vedtaksperiodeId(vedtaksperiodeId)
