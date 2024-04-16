@@ -243,7 +243,11 @@ internal class MeldingMediator(
         }
 
         generasjonRepository.brukVedtaksperiode(godkjenningsbehov.fødselsnummer(), godkjenningsbehov.vedtaksperiodeId()) { vedtaksperiode ->
-            vedtaksperiode.mottaBehandlingsinformasjon(godkjenningsbehov.tags, godkjenningsbehov.spleisBehandlingId)
+            vedtaksperiode.mottaBehandlingsinformasjon(
+                godkjenningsbehov.tags,
+                godkjenningsbehov.spleisBehandlingId,
+                godkjenningsbehov.utbetalingId,
+            )
         }
 
         val utbetalingId = godkjenningsbehov.utbetalingId

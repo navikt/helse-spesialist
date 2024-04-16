@@ -154,9 +154,11 @@ internal class Generasjon private constructor(
     internal fun oppdaterBehandlingsinformasjon(
         tags: List<String>,
         spleisBehandlingId: UUID,
+        utbetalingId: UUID,
     ) {
         this.tags = tags
         this.spleisBehandlingId = spleisBehandlingId
+        this.utbetalingId = utbetalingId
     }
 
     internal fun håndterGodkjentAvSaksbehandler(

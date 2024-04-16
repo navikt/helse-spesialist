@@ -95,9 +95,10 @@ internal class Vedtaksperiode private constructor(
     internal fun mottaBehandlingsinformasjon(
         tags: List<String>,
         spleisBehandlingId: UUID,
+        utbetalingId: UUID,
     ) {
         if (forkastet) return
-        gjeldendeGenerasjon.oppdaterBehandlingsinformasjon(tags, spleisBehandlingId)
+        gjeldendeGenerasjon.oppdaterBehandlingsinformasjon(tags, spleisBehandlingId, utbetalingId)
     }
 
     internal fun nyUtbetaling(
