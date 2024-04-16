@@ -2,13 +2,13 @@ package no.nav.helse.mediator.meldinger
 
 import io.mockk.mockk
 import io.mockk.verify
-import java.time.LocalDateTime
-import java.util.*
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class VedtakFattetRiverTest {
 
@@ -34,7 +34,8 @@ internal class VedtakFattetRiverTest {
       "aktørId": "1111100000000",
       "fødselsnummer": "11111100000",
       "organisasjonsnummer": "987654321",
-      "vedtaksperiodeId": "${UUID.randomUUID()}"
+      "vedtaksperiodeId": "${UUID.randomUUID()}",
+      "behandlingId": "${UUID.randomUUID()}"
     }
 """
 }

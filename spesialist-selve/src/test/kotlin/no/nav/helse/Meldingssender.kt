@@ -669,6 +669,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         fødselsnummer: String,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
+        spleisBehandlingId: UUID,
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(
             Testmeldingfabrikk.lagVedtakFattet(
@@ -676,6 +677,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
+                spleisBehandlingId = spleisBehandlingId,
                 id = id,
             )
         )

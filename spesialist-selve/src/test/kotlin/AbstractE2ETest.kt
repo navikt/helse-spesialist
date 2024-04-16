@@ -1135,9 +1135,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
+        spleisBehandlingId: UUID = UUID.randomUUID(),
     ) {
         if (this::utbetalingId.isInitialized) håndterUtbetalingUtbetalt(aktørId, fødselsnummer, organisasjonsnummer)
-        sisteMeldingId = meldingssender.sendVedtakFattet(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
+        sisteMeldingId = meldingssender.sendVedtakFattet(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId, spleisBehandlingId)
     }
 
     protected fun håndterAdressebeskyttelseEndret(

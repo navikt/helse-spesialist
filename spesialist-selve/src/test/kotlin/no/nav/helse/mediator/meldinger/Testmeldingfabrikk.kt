@@ -981,13 +981,15 @@ internal object Testmeldingfabrikk {
         fødselsnummer: String,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
+        spleisBehandlingId: UUID = UUID.randomUUID(),
         id: UUID,
     ): String = nyHendelse(
         id, "vedtak_fattet", mapOf(
             "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
             "organisasjonsnummer" to organisasjonsnummer,
-            "vedtaksperiodeId" to vedtaksperiodeId
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            "behandlingId" to spleisBehandlingId
         )
     )
 

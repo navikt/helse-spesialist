@@ -14,23 +14,28 @@ internal class VedtakFattet private constructor(
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
     private val json: String,
+    private val spleisBehandlingId: UUID,
 ) : Vedtaksperiodemelding {
     internal constructor(packet: JsonMessage) : this(
         id = UUID.fromString(packet["@id"].asText()),
         fødselsnummer = packet["fødselsnummer"].asText(),
         vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
+        spleisBehandlingId = packet["behandlingId"].asUUID(),
         json = packet.toJson(),
     )
     internal constructor(jsonNode: JsonNode) : this(
         id = UUID.fromString(jsonNode["@id"].asText()),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
         vedtaksperiodeId = jsonNode["vedtaksperiodeId"].asUUID(),
+        spleisBehandlingId = jsonNode["behandlingId"].asUUID(),
         json = jsonNode.toString(),
     )
 
     override fun fødselsnummer(): String = fødselsnummer
 
     override fun vedtaksperiodeId(): UUID = vedtaksperiodeId
+
+    internal fun spleisBehandlingId() = spleisBehandlingId
 
     override fun toJson(): String = json
 

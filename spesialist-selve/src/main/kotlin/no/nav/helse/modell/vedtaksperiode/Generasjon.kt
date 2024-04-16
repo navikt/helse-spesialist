@@ -13,6 +13,7 @@ import no.nav.helse.modell.varsel.Varsel.Companion.inneholderVarselOmAvvik
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderVarselOmNegativtBeløp
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderVarselOmTilbakedatering
 import no.nav.helse.modell.vedtaksperiode.vedtak.SykepengevedtakBuilder
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
@@ -570,11 +571,14 @@ internal class Generasjon private constructor(
     }
 
     internal companion object {
-        private val logg = LoggerFactory.getLogger(Generasjon::class.java)
+        val logg: Logger = LoggerFactory.getLogger(Generasjon::class.java)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
         internal fun List<Generasjon>.finnGenerasjon(vedtaksperiodeId: UUID): Generasjon? =
             this.find { it.vedtaksperiodeId == vedtaksperiodeId }
+
+        internal fun List<Generasjon>.finnGenerasjonForSpleisBehandling(spleisBehandlingId: UUID): Generasjon? =
+            this.find { it.spleisBehandlingId == spleisBehandlingId }
 
         internal fun fraLagring(
             id: UUID,

@@ -15,11 +15,12 @@ internal class VedtakFattetE2ETest : AbstractE2ETest() {
     @Test
     fun `vedtak fattet medfører låsing av vedtaksperiode-generasjon`() {
         vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
+        val spleisBehandlingId = UUID.randomUUID()
+        spleisOppretterNyBehandling(spleisBehandlingId = spleisBehandlingId)
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterSaksbehandlerløsning()
         assertDoesNotThrow {
-            håndterVedtakFattet()
+            håndterVedtakFattet(spleisBehandlingId = spleisBehandlingId)
         }
         assertFerdigBehandledeGenerasjoner(VEDTAKSPERIODE_ID)
     }

@@ -53,7 +53,7 @@ class Person private constructor(
 
     internal fun vedtakFattet(vedtakFattet: VedtakFattet) {
         finnVedtaksperiode(vedtakFattet.vedtaksperiodeId())
-            ?.vedtakFattet(vedtakFattet.id)
+            ?.vedtakFattet(vedtakFattet.id, vedtakFattet.spleisBehandlingId())
     }
 
     internal fun avsluttetUtenVedtak(avsluttetUtenVedtak: AvsluttetUtenVedtak) {

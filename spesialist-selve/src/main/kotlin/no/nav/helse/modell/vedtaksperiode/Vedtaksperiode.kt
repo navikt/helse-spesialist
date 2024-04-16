@@ -1,9 +1,12 @@
 package no.nav.helse.modell.vedtaksperiode
 
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.VarselStatusDto
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForSpleisBehandling
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.logg
 import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtaksperiode.vedtak.SykepengevedtakBuilder
 import java.util.UUID
@@ -62,9 +65,17 @@ internal class Vedtaksperiode private constructor(
         generasjoner.addLast(generasjon)
     }
 
-    internal fun vedtakFattet(meldingId: UUID) {
+    internal fun vedtakFattet(
+        meldingId: UUID,
+        spleisBehandlingId: UUID,
+    ) {
         if (forkastet) return
-        gjeldendeGenerasjon.håndterVedtakFattet(meldingId)
+        // Finn den generasjonen som ble avsluttet, det kan ha blitt opprettet nye generasjoner etter at vedtak_fattet
+        // ble sendt ut
+        generasjoner.finnGenerasjonForSpleisBehandling(spleisBehandlingId)?.håndterVedtakFattet(meldingId) ?: logg.error(
+            "Fant ikke generasjon for {} som kan håndtere vedtak_fattet",
+            kv("spleisBehandlingId", spleisBehandlingId),
+        )
     }
 
     internal fun avsluttetUtenVedtak(

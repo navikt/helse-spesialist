@@ -24,7 +24,7 @@ internal class VedtakFattetRiver(
         River(rapidsConnection).apply {
             validate {
                 it.demandValue("@event_name", "vedtak_fattet")
-                it.requireKey("@id", "fødselsnummer", "vedtaksperiodeId")
+                it.requireKey("@id", "fødselsnummer", "vedtaksperiodeId", "behandlingId")
             }
         }.register(this)
     }

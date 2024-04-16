@@ -28,20 +28,22 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
     @Test
     fun `Låser gjeldende generasjon når perioden er godkjent og utbetalt`() {
         vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
+        val spleisBehandlingId = UUID.randomUUID()
+        spleisOppretterNyBehandling(spleisBehandlingId = spleisBehandlingId)
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterSaksbehandlerløsning()
-        håndterVedtakFattet()
+        håndterVedtakFattet(spleisBehandlingId = spleisBehandlingId)
         assertFerdigBehandledeGenerasjoner(VEDTAKSPERIODE_ID, 1)
     }
 
     @Test
     fun `Oppretter ny generasjon når perioden blir revurdert`() {
         vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
+        val spleisBehandlingId = UUID.randomUUID()
+        spleisOppretterNyBehandling(spleisBehandlingId = spleisBehandlingId)
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterSaksbehandlerløsning()
-        håndterVedtakFattet()
+        håndterVedtakFattet(spleisBehandlingId = spleisBehandlingId)
 
         spleisOppretterNyBehandling()
         assertGenerasjoner(VEDTAKSPERIODE_ID, 2)
@@ -96,10 +98,11 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
     @Test
     fun `Flytter aktive varsler for vanlige generasjoner`() {
         vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
+        val spleisBehandlingId = UUID.randomUUID()
+        spleisOppretterNyBehandling(spleisBehandlingId = spleisBehandlingId)
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterSaksbehandlerløsning()
-        håndterVedtakFattet()
+        håndterVedtakFattet(spleisBehandlingId = spleisBehandlingId)
         håndterAktivitetsloggNyAktivitet(varselkoder = listOf("RV_IM_1"))
 
         val utbetalingId = UUID.randomUUID()

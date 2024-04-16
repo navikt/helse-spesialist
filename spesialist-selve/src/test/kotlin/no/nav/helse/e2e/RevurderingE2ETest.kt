@@ -31,9 +31,10 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
     @Test
     fun `revurdering av periode med negativt beløp medfører oppgave`() {
         vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
+        val spleisBehandlingId = UUID.randomUUID()
+        spleisOppretterNyBehandling(spleisBehandlingId = spleisBehandlingId)
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(kanGodkjennesAutomatisk = true)
-        håndterVedtakFattet()
+        håndterVedtakFattet(spleisBehandlingId = spleisBehandlingId)
 
         val utbetalingId2 = UUID.randomUUID()
 
