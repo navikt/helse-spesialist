@@ -277,6 +277,8 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val revurdertUtbetaling = UUID.randomUUID()
         val kanAvvises = false
 
+        spleisOppretterNyBehandling()
+        håndterVedtaksperiodeNyUtbetaling(utbetalingId = revurdertUtbetaling)
         håndterGodkjenningsbehov(
             harOppdatertMetainfo = true,
             godkjenningsbehovTestdata = GodkjenningsbehovTestdata(

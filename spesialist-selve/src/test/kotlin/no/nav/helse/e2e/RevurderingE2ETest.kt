@@ -18,6 +18,7 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
 
         val utbetalingId2 = UUID.randomUUID()
 
+        spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harRisikovurdering = true,
             harOppdatertStoppknapp = true,
@@ -36,6 +37,7 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
 
         val utbetalingId2 = UUID.randomUUID()
 
+        spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harRisikovurdering = true,
             harOppdatertStoppknapp = true,
@@ -56,6 +58,7 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
 
         val utbetalingId2 = UUID.randomUUID()
 
+        spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harRisikovurdering = true,
             harOppdatertStoppknapp = true,

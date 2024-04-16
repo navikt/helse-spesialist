@@ -156,9 +156,7 @@ internal class Generasjon private constructor(
         spleisBehandlingId: UUID,
         utbetalingId: UUID,
     ) {
-        this.tags = tags
-        this.spleisBehandlingId = spleisBehandlingId
-        this.utbetalingId = utbetalingId
+        tilstand.oppdaterBehandlingsinformasjon(this, tags, spleisBehandlingId, utbetalingId)
     }
 
     internal fun håndterGodkjentAvSaksbehandler(
@@ -352,6 +350,15 @@ internal class Generasjon private constructor(
             ident: String,
             hendelseId: UUID,
         ) {}
+
+        fun oppdaterBehandlingsinformasjon(
+            generasjon: Generasjon,
+            tags: List<String>,
+            spleisBehandlingId: UUID,
+            utbetalingId: UUID,
+        ) {
+            throw IllegalStateException("Mottatt godkjenningsbehov i tilstand=${navn()}")
+        }
     }
 
     internal data object VidereBehandlingAvklares : Tilstand {
@@ -408,6 +415,17 @@ internal class Generasjon private constructor(
         ) {
             checkNotNull(generasjon.utbetalingId) { "Mottatt vedtak_fattet i tilstand=${navn()}, men mangler utbetalingId" }
             generasjon.nyTilstand(this, VedtakFattet, hendelseId)
+        }
+
+        override fun oppdaterBehandlingsinformasjon(
+            generasjon: Generasjon,
+            tags: List<String>,
+            spleisBehandlingId: UUID,
+            utbetalingId: UUID,
+        ) {
+            generasjon.tags = tags
+            generasjon.spleisBehandlingId = spleisBehandlingId
+            generasjon.utbetalingId = utbetalingId
         }
 
         override fun invaliderUtbetaling(
