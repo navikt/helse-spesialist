@@ -349,7 +349,12 @@ internal class MeldingMediator(
         meldingId: UUID,
         contextId: UUID,
     ): Påminnelse? {
-        if (contextId.toString() == "8a6bb0a2-747a-4856-af75-436e55dc6d5e") {
+        if (contextId.toString() in
+            setOf(
+                "8a6bb0a2-747a-4856-af75-436e55dc6d5e",
+                "be0352b1-0e38-4e8a-9bc9-bf9bfa95050f",
+            )
+        ) {
             logg.info("Ignorerer spesifikk kommandokontekst som ikke lar seg gjenoppta")
             return null
         }
