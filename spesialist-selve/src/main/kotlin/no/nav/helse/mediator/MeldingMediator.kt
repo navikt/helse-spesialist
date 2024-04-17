@@ -349,6 +349,10 @@ internal class MeldingMediator(
         meldingId: UUID,
         contextId: UUID,
     ): Påminnelse? {
+        if (contextId.toString() == "8a6bb0a2-747a-4856-af75-436e55dc6d5e") {
+            logg.info("Ignorerer spesifikk kommandokontekst som ikke lar seg gjenoppta")
+            return null
+        }
         val commandContext =
             commandContextDao.finnSuspendertEllerFeil(contextId) ?: run {
                 logg.info("Ignorerer melding fordi kommandokonteksten ikke er suspendert eller feil")
