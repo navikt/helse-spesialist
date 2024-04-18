@@ -16,7 +16,8 @@ import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.VarselStatusDto
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjon
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForVedtaksperiode
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForSpleisBehandlingEllerEnesteMedNull
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverSkjønnsfastsettelse
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverTotrinnsvurdering
 import no.nav.helse.modell.vedtaksperiode.Periode.Companion.til
@@ -263,13 +264,28 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
         val generasjonV1 = generasjon(vedtaksperiodeId = vedtaksperiodeId1)
         val generasjonV2 = generasjon(vedtaksperiodeId = vedtaksperiodeId2)
 
-        assertNotNull(listOf(generasjonV1, generasjonV2).finnGenerasjon(vedtaksperiodeId1))
+        assertNotNull(listOf(generasjonV1, generasjonV2).finnGenerasjonForVedtaksperiode(vedtaksperiodeId1))
+    }
+
+    @Test
+    fun `finn generasjon med spleisBehandlingId eller eneste generasjon som ikke har denne satt`() {
+        val spleisBehandlingId = UUID.randomUUID()
+        val generasjoner = mutableListOf(
+            generasjon(spleisBehandlingId = spleisBehandlingId),
+            generasjon(spleisBehandlingId = UUID.randomUUID()),
+            generasjon(spleisBehandlingId = null)
+        )
+        assertEquals(spleisBehandlingId, generasjoner.finnGenerasjonForSpleisBehandlingEllerEnesteMedNull(spleisBehandlingId)?.spleisBehandlingId())
+        assertNull(generasjoner.finnGenerasjonForSpleisBehandlingEllerEnesteMedNull(UUID.randomUUID())!!.spleisBehandlingId())
+
+        generasjoner.add(generasjon(spleisBehandlingId = null))
+        assertNull(generasjoner.finnGenerasjonForSpleisBehandlingEllerEnesteMedNull(UUID.randomUUID()))
     }
 
     @Test
     fun `finner ikke generasjon`() {
         val generasjonV1 = generasjon()
-        assertNull(listOf(generasjonV1).finnGenerasjon(UUID.randomUUID()))
+        assertNull(listOf(generasjonV1).finnGenerasjonForVedtaksperiode(UUID.randomUUID()))
     }
 
     @Test
@@ -442,8 +458,8 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
     fun `forskjellig periode`() {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon1 = generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar)
-        val generasjon2 = generasjon(generasjonId, vedtaksperiodeId, 1.februar, 28.februar)
+        val generasjon1 = generasjon(generasjonId, vedtaksperiodeId, fom = 1.januar, tom = 31.januar)
+        val generasjon2 = generasjon(generasjonId, vedtaksperiodeId, fom = 1.februar, tom = 28.februar)
         assertNotEquals(generasjon1, generasjon2)
         assertNotEquals(generasjon1.hashCode(), generasjon2.hashCode())
     }
@@ -547,12 +563,14 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
     private fun generasjon(
         generasjonId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
+        spleisBehandlingId: UUID? = null,
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
         skjæringstidspunkt: LocalDate = 1.januar,
     ) = Generasjon(
         id = generasjonId,
         vedtaksperiodeId = vedtaksperiodeId,
+        spleisBehandlingId = spleisBehandlingId,
         fom = fom,
         tom = tom,
         skjæringstidspunkt = skjæringstidspunkt,

@@ -57,6 +57,8 @@ internal class Generasjon private constructor(
 
     internal fun hasterÅBehandle() = varsler.inneholderVarselOmNegativtBeløp()
 
+    internal fun spleisBehandlingId() = spleisBehandlingId
+
     internal fun fom() = periode.fom()
 
     internal fun tom() = periode.tom()
@@ -574,11 +576,21 @@ internal class Generasjon private constructor(
         val logg: Logger = LoggerFactory.getLogger(Generasjon::class.java)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-        internal fun List<Generasjon>.finnGenerasjon(vedtaksperiodeId: UUID): Generasjon? =
+        internal fun List<Generasjon>.finnGenerasjonForVedtaksperiode(vedtaksperiodeId: UUID): Generasjon? =
             this.find { it.vedtaksperiodeId == vedtaksperiodeId }
 
-        internal fun List<Generasjon>.finnGenerasjonForSpleisBehandling(spleisBehandlingId: UUID): Generasjon? =
-            this.find { it.spleisBehandlingId == spleisBehandlingId }
+        internal fun List<Generasjon>.finnGenerasjonForSpleisBehandlingEllerEnesteMedNull(spleisBehandlingId: UUID): Generasjon? {
+            return this.find { it.spleisBehandlingId == spleisBehandlingId }
+                ?: this.filter { it.spleisBehandlingId == null }.singleOrNull().also {
+                    if (it != null) {
+                        logg.info(
+                            "Fant ikke generasjon basert på {}, velger eneste generasjon der spleisBehandlingId er null {}",
+                            kv("spleisBehandlingId", spleisBehandlingId),
+                            kv("unikId", it.id)
+                        )
+                    }
+                }
+        }
 
         internal fun fraLagring(
             id: UUID,

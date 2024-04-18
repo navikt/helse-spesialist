@@ -6,7 +6,7 @@ import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.deaktiver
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.erTilbakedatert
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjon
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForVedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterGodkjent
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterNyttVarsel
@@ -35,14 +35,14 @@ internal class Sykefraværstilfelle(
 
     internal fun haster(vedtaksperiodeId: UUID): Boolean {
         val generasjon =
-            gjeldendeGenerasjoner.finnGenerasjon(vedtaksperiodeId)
+            gjeldendeGenerasjoner.finnGenerasjonForVedtaksperiode(vedtaksperiodeId)
                 ?: throw IllegalArgumentException("Finner ikke generasjon med vedtaksperiodeId=$vedtaksperiodeId i sykefraværstilfelle med skjæringstidspunkt=$skjæringstidspunkt")
         return generasjon.hasterÅBehandle()
     }
 
     internal fun forhindrerAutomatisering(vedtaksperiodeId: UUID): Boolean {
         val generasjonForPeriode =
-            gjeldendeGenerasjoner.finnGenerasjon(vedtaksperiodeId)
+            gjeldendeGenerasjoner.finnGenerasjonForVedtaksperiode(vedtaksperiodeId)
                 ?: throw IllegalStateException("Sykefraværstilfellet må inneholde generasjon for vedtaksperiodeId=$vedtaksperiodeId")
         return gjeldendeGenerasjoner.forhindrerAutomatisering(generasjonForPeriode)
     }
@@ -55,13 +55,13 @@ internal class Sykefraværstilfelle(
     }
 
     internal fun spesialsakSomKanAutomatiseres(vedtaksperiodeId: UUID): Boolean {
-        val generasjon = gjeldendeGenerasjoner.finnGenerasjon(vedtaksperiodeId) ?: return false
+        val generasjon = gjeldendeGenerasjoner.finnGenerasjonForVedtaksperiode(vedtaksperiodeId) ?: return false
         return generasjon.erSpesialsakSomKanAutomatiseres()
     }
 
     internal fun automatiskGodkjennSpesialsakvarsler(vedtaksperiodeId: UUID) {
         val generasjon =
-            gjeldendeGenerasjoner.finnGenerasjon(vedtaksperiodeId)
+            gjeldendeGenerasjoner.finnGenerasjonForVedtaksperiode(vedtaksperiodeId)
                 ?: throw IllegalStateException("Forventer å finne generasjon for perioden")
         generasjon.automatiskGodkjennSpesialsakvarsler()
     }

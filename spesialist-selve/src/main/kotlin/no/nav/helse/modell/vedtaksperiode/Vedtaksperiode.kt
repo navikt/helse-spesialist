@@ -5,7 +5,7 @@ import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.VarselStatusDto
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForSpleisBehandling
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForSpleisBehandlingEllerEnesteMedNull
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.logg
 import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtaksperiode.vedtak.SykepengevedtakBuilder
@@ -72,7 +72,7 @@ internal class Vedtaksperiode private constructor(
         if (forkastet) return
         // Finn den generasjonen som ble avsluttet, det kan ha blitt opprettet nye generasjoner etter at vedtak_fattet
         // ble sendt ut
-        generasjoner.finnGenerasjonForSpleisBehandling(spleisBehandlingId)?.håndterVedtakFattet(meldingId) ?: logg.error(
+        generasjoner.finnGenerasjonForSpleisBehandlingEllerEnesteMedNull(spleisBehandlingId)?.håndterVedtakFattet(meldingId) ?: logg.error(
             "Fant ikke generasjon for {} som kan håndtere vedtak_fattet",
             kv("spleisBehandlingId", spleisBehandlingId),
         )
@@ -85,7 +85,7 @@ internal class Vedtaksperiode private constructor(
         if (forkastet) return
         val sykepengevedtakBuilder = SykepengevedtakBuilder()
 
-        val relevantGenerasjon = generasjoner.finnGenerasjonForSpleisBehandling(avsluttetUtenVedtak.spleisBehandlingId())
+        val relevantGenerasjon = generasjoner.finnGenerasjonForSpleisBehandlingEllerEnesteMedNull(avsluttetUtenVedtak.spleisBehandlingId())
         if (relevantGenerasjon == null) {
             logg.error(
                 "Fant ikke generasjon for {} som kan håndtere avsluttet_uten_vedtak",
