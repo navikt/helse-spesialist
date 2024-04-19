@@ -1,0 +1,17 @@
+update selve_vedtaksperiode_generasjon set tilstand='AvsluttetUtenVedtak', spleis_behandling_id='29824184-3de1-4fc2-9921-2dd70faf0faa' where id=11326376;
+update selve_vedtaksperiode_generasjon set tilstand='AvsluttetUtenVedtak' where id=12304673;
+update selve_vedtaksperiode_generasjon set tilstand='AvsluttetUtenVedtak' where id=11912250;
+update selve_vedtaksperiode_generasjon set tilstand='AvsluttetUtenVedtak' where id=21250300;
+update selve_vedtaksperiode_generasjon set tilstand='AvsluttetUtenVedtak', spleis_behandling_id='6eaf2af8-5363-43c5-9115-fad06d794762' where id=10136822;
+update selve_vedtaksperiode_generasjon set tilstand='AvsluttetUtenVedtak' where id=24166688;
+update selve_vedtaksperiode_generasjon set tilstand='AvsluttetUtenVedtak' where id=11381928;
+update selve_vedtaksperiode_generasjon set tilstand='AvsluttetUtenVedtak' where id=17181763;
+update selve_vedtaksperiode_generasjon set spleis_behandling_id='d3579366-7de1-4cb0-bbe9-2fd7f0825f40' where id=9149166;
+update selve_vedtaksperiode_generasjon set tilstand='AvsluttetUtenVedtak', spleis_behandling_id='b040bf0d-a1e6-4ca1-9cc5-327a13982aab' where id=9226329;
+update selve_vedtaksperiode_generasjon set tilstand='AvsluttetUtenVedtak', spleis_behandling_id='04d9fc8d-691f-4c40-b2ec-5a2575f95b2d' where id=25530731;
+update selve_vedtaksperiode_generasjon set tilstand='AvsluttetUtenVedtak', spleis_behandling_id='ee1b6913-f81a-443e-a80e-274b9c3b124c' where id=18887468;
+update selve_vedtaksperiode_generasjon set tilstand='AvsluttetUtenVedtak' where id=15931709;
+update selve_vedtaksperiode_generasjon set tilstand='AvsluttetUtenVedtak', spleis_behandling_id='be006111-dc5b-4856-b022-7393af6e6309' where id=29087746;
+update selve_vedtaksperiode_generasjon set tilstand='AvsluttetUtenVedtak', spleis_behandling_id='5930b139-7eed-4336-8905-fd08d9ef797d' where id=10959922;
+update selve_vedtaksperiode_generasjon set tilstand='AvsluttetUtenVedtak', spleis_behandling_id='af140a1e-0604-453a-9fa8-75a6161e3934' where id=10175313;
+update selve_vedtaksperiode_generasjon set spleis_behandling_id='1f68f479-9fbf-4521-a589-a6483c3d0372' where id=10175245;
