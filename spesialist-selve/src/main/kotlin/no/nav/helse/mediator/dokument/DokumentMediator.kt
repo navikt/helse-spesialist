@@ -16,7 +16,7 @@ import java.util.UUID
 class DokumentMediator(
     private val dokumentDao: DokumentDao,
     private val rapidsConnection: RapidsConnection,
-    private val retries: Int = 30,
+    private val retries: Int = 50,
 ) : Dokumenthåndterer {
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
