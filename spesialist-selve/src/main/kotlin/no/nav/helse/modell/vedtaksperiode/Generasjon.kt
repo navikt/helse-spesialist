@@ -53,6 +53,8 @@ internal class Generasjon private constructor(
 
     internal fun skjæringstidspunkt() = skjæringstidspunkt
 
+    internal fun unikId() = id
+
     internal fun utbetalingId() = utbetalingId
 
     internal fun hasterÅBehandle() = varsler.inneholderVarselOmNegativtBeløp()
@@ -579,18 +581,11 @@ internal class Generasjon private constructor(
         internal fun List<Generasjon>.finnGenerasjonForVedtaksperiode(vedtaksperiodeId: UUID): Generasjon? =
             this.find { it.vedtaksperiodeId == vedtaksperiodeId }
 
-        internal fun List<Generasjon>.finnGenerasjonForSpleisBehandlingEllerEnesteMedNull(spleisBehandlingId: UUID): Generasjon? {
-            return this.find { it.spleisBehandlingId == spleisBehandlingId }
-                ?: this.filter { it.spleisBehandlingId == null }.singleOrNull().also {
-                    if (it != null) {
-                        logg.info(
-                            "Fant ikke generasjon basert på {}, velger eneste generasjon der spleisBehandlingId er null {}",
-                            kv("spleisBehandlingId", spleisBehandlingId),
-                            kv("unikId", it.id)
-                        )
-                    }
-                }
-        }
+        internal fun List<Generasjon>.finnGenerasjonForSpleisBehandling(spleisBehandlingId: UUID): Generasjon? =
+            this.find { it.spleisBehandlingId == spleisBehandlingId }
+
+        internal fun List<Generasjon>.finnEnesteGenerasjonUtenSpleisBehandlingId(): Generasjon? =
+            this.singleOrNull { it.spleisBehandlingId == null }
 
         internal fun fraLagring(
             id: UUID,

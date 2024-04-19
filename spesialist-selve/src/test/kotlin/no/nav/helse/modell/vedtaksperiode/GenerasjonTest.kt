@@ -16,8 +16,9 @@ import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.VarselStatusDto
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnEnesteGenerasjonUtenSpleisBehandlingId
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForVedtaksperiode
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForSpleisBehandlingEllerEnesteMedNull
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForSpleisBehandling
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverSkjønnsfastsettelse
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverTotrinnsvurdering
 import no.nav.helse.modell.vedtaksperiode.Periode.Companion.til
@@ -258,7 +259,7 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
     }
 
     @Test
-    fun `finn generasjon`() {
+    fun `finn generasjon med vedtaksperiodeId`() {
         val vedtaksperiodeId1 = UUID.randomUUID()
         val vedtaksperiodeId2 = UUID.randomUUID()
         val generasjonV1 = generasjon(vedtaksperiodeId = vedtaksperiodeId1)
@@ -268,18 +269,27 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
     }
 
     @Test
-    fun `finn generasjon med spleisBehandlingId eller eneste generasjon som ikke har denne satt`() {
+    fun `finn generasjon med spleisBehandlingId`() {
         val spleisBehandlingId = UUID.randomUUID()
-        val generasjoner = mutableListOf(
+        val generasjoner = listOf(
             generasjon(spleisBehandlingId = spleisBehandlingId),
             generasjon(spleisBehandlingId = UUID.randomUUID()),
             generasjon(spleisBehandlingId = null)
         )
-        assertEquals(spleisBehandlingId, generasjoner.finnGenerasjonForSpleisBehandlingEllerEnesteMedNull(spleisBehandlingId)?.spleisBehandlingId())
-        assertNull(generasjoner.finnGenerasjonForSpleisBehandlingEllerEnesteMedNull(UUID.randomUUID())!!.spleisBehandlingId())
+        assertEquals(spleisBehandlingId, generasjoner.finnGenerasjonForSpleisBehandling(spleisBehandlingId)?.spleisBehandlingId())
+        assertNull(generasjoner.finnGenerasjonForSpleisBehandling(UUID.randomUUID()))
+    }
+    @Test
+    fun `finn generasjon uten spleisBehandlingId`() {
+        val generasjoner = mutableListOf(
+            generasjon(spleisBehandlingId = UUID.randomUUID()),
+            generasjon(spleisBehandlingId = null),
+            generasjon(spleisBehandlingId = UUID.randomUUID())
+        )
+        assertNull(generasjoner.finnEnesteGenerasjonUtenSpleisBehandlingId()!!.spleisBehandlingId())
 
         generasjoner.add(generasjon(spleisBehandlingId = null))
-        assertNull(generasjoner.finnGenerasjonForSpleisBehandlingEllerEnesteMedNull(UUID.randomUUID()))
+        assertNull(generasjoner.finnEnesteGenerasjonUtenSpleisBehandlingId())
     }
 
     @Test
