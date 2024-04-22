@@ -41,6 +41,12 @@ data class Reservasjon(
     val reservert: Boolean,
 )
 
+data class UnntattFraAutomatiskGodkjenning(
+    val erUntatt: Boolean,
+    val arsaker: List<String>,
+    val tidspunkt: DateTimeString?,
+)
+
 data class Enhet(
     val id: String,
     val navn: String,

@@ -23,4 +23,5 @@ data class Personinfo(
     val adressebeskyttelse: Adressebeskyttelse,
     val reservasjon: Reservasjon? = null,
     val unntattFraAutomatiskGodkjenning: Boolean,
+    val unntattFraAutomatisering: UnntattFraAutomatiskGodkjenning,
 )

@@ -7,6 +7,7 @@ import kotliquery.sessionOf
 import no.nav.helse.spesialist.api.graphql.schema.Adressebeskyttelse
 import no.nav.helse.spesialist.api.graphql.schema.Kjonn
 import no.nav.helse.spesialist.api.graphql.schema.Personinfo
+import no.nav.helse.spesialist.api.graphql.schema.UnntattFraAutomatiskGodkjenning
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.intellij.lang.annotations.Language
@@ -39,6 +40,12 @@ class SnapshotApiDao(private val dataSource: DataSource) {
                             adressebeskyttelse = row.string("adressebeskyttelse").let(Adressebeskyttelse::valueOf),
                             reservasjon = null,
                             unntattFraAutomatiskGodkjenning = row.boolean("unnta"),
+                            unntattFraAutomatisering =
+                                UnntattFraAutomatiskGodkjenning(
+                                    erUntatt = row.boolean("unnta"),
+                                    arsaker = row.arrayOrNull<String>("årsaker")?.toList() ?: emptyList(),
+                                    tidspunkt = row.localDateTimeOrNull("oppdatert").toString(),
+                                ),
                         )
                     val snapshot = objectMapper.readValue<GraphQLPerson>(row.string("data"))
                     personinfo to snapshot

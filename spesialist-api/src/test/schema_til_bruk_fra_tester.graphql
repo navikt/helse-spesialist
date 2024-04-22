@@ -463,6 +463,7 @@ type Personinfo {
     kjonn: Kjonn!
     mellomnavn: String
     reservasjon: Reservasjon
+    unntattFraAutomatisering: UnntattFraAutomatiskGodkjenning!
     unntattFraAutomatiskGodkjenning: Boolean!
 }
 
@@ -736,6 +737,12 @@ type UberegnetVilkarsprovdPeriode implements Periode {
     varsler: [VarselDTO!]!
     vedtaksperiodeId: UUID!
     vilkarsgrunnlagId: UUID
+}
+
+type UnntattFraAutomatiskGodkjenning {
+    arsaker: [String!]!
+    erUntatt: Boolean!
+    tidspunkt: String
 }
 
 type Utbetaling {
