@@ -455,7 +455,6 @@ private fun enPersoninfo() =
         kjonn = Kjonn.Kvinne,
         adressebeskyttelse = Adressebeskyttelse.Ugradert,
         reservasjon = null, // Denne hentes runtime ved hjelp av et kall til KRR
-        unntattFraAutomatiskGodkjenning = null,
         unntattFraAutomatisering =
             UnntattFraAutomatiskGodkjenning(
                 erUntatt = false,

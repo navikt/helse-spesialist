@@ -464,7 +464,6 @@ type Personinfo {
     mellomnavn: String
     reservasjon: Reservasjon
     unntattFraAutomatisering: UnntattFraAutomatiskGodkjenning!
-    unntattFraAutomatiskGodkjenning: Boolean
 }
 
 type Personnavn {
