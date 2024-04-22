@@ -39,7 +39,6 @@ class SnapshotApiDao(private val dataSource: DataSource) {
                             kjonn = row.stringOrNull("kjonn")?.let(Kjonn::valueOf) ?: Kjonn.Ukjent,
                             adressebeskyttelse = row.string("adressebeskyttelse").let(Adressebeskyttelse::valueOf),
                             reservasjon = null,
-                            unntattFraAutomatiskGodkjenning = row.boolean("unnta"),
                             unntattFraAutomatisering =
                                 UnntattFraAutomatiskGodkjenning(
                                     erUntatt = row.boolean("unnta"),
