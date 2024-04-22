@@ -4,7 +4,6 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
@@ -18,6 +17,7 @@ import no.nav.helse.modell.vergemal.VergemålDao
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class VurderAutomatiskAvvisningTest {
     private lateinit var context: CommandContext
@@ -97,41 +97,44 @@ internal class VurderAutomatiskAvvisningTest {
         assertIkkeAvvisning(lagCommand(kanAvvises = false))
     }
 
-    private fun assertAvvisning(command: VurderAutomatiskAvvisning, forventetÅrsak: String) {
+    private fun assertAvvisning(
+        command: VurderAutomatiskAvvisning,
+        forventetÅrsak: String,
+    ) {
         assertTrue(command.execute(context))
-        verify (exactly = 1) { godkjenningMediator.automatiskAvvisning(
-            publiserer = any(),
-            vedtaksperiodeId = any(),
-            begrunnelser = listOf(forventetÅrsak),
-            utbetaling = any(),
-            hendelseId = any(),
-            spleisBehandlingId = any()
-        ) }
+        verify(exactly = 1) {
+            godkjenningMediator.automatiskAvvisning(
+                publiserer = any(),
+                vedtaksperiodeId = any(),
+                begrunnelser = listOf(forventetÅrsak),
+                utbetaling = any(),
+                hendelseId = any(),
+                spleisBehandlingId = any(),
+            )
+        }
     }
 
     private fun assertIkkeAvvisning(command: VurderAutomatiskAvvisning) {
         assertTrue(command.execute(context))
-        verify (exactly = 0) { godkjenningMediator.automatiskAvvisning(any(), any(), any()) }
-        verify (exactly = 0) { godkjenningMediator.automatiskAvvisning(any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { godkjenningMediator.automatiskAvvisning(any(), any(), any()) }
+        verify(exactly = 0) { godkjenningMediator.automatiskAvvisning(any(), any(), any(), any(), any(), any()) }
     }
 
     private fun lagCommand(
         utbetalingstype: Utbetalingtype = Utbetalingtype.UTBETALING,
         kanAvvises: Boolean = true,
         fødselsnummer: String = "12345678910",
-    ) =
-        VurderAutomatiskAvvisning(
-            fødselsnummer = fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            spleisBehandlingId = null,
-            personDao = personDao,
-            vergemålDao = vergemålDao,
-            godkjenningMediator = godkjenningMediator,
-            hendelseId = hendelseId,
-            utbetaling = Utbetaling(utbetalingId, 1000, 1000, utbetalingstype),
-            kanAvvises = kanAvvises,
-            sykefraværstilfelle = sykefraværstilfelle
-        )
+    ) = VurderAutomatiskAvvisning(
+        fødselsnummer = fødselsnummer,
+        vedtaksperiodeId = vedtaksperiodeId,
+        spleisBehandlingId = null,
+        personDao = personDao,
+        vergemålDao = vergemålDao,
+        godkjenningMediator = godkjenningMediator,
+        hendelseId = hendelseId,
+        utbetaling = Utbetaling(utbetalingId, 1000, 1000, utbetalingstype),
+        kanAvvises = kanAvvises,
+    )
 
     private companion object {
         private const val fødselsnummer = "12345678910"

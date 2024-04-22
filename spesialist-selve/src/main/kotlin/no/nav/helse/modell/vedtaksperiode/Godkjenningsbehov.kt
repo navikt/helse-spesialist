@@ -287,7 +287,6 @@ internal class GodkjenningsbehovCommand(
                 hendelseId = id,
                 utbetaling = utbetaling,
                 kanAvvises = kanAvvises,
-                sykefraværstilfelle = sykefraværstilfelle,
             ),
             VurderAutomatiskInnvilgelse(
                 fødselsnummer = fødselsnummer,
