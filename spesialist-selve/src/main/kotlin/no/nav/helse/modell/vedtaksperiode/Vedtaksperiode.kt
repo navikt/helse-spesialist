@@ -5,7 +5,7 @@ import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.VarselStatusDto
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnEnesteGenerasjonUtenSpleisBehandlingId
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnSisteGenerasjonUtenSpleisBehandlingId
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForSpleisBehandling
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.logg
 import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
@@ -87,10 +87,10 @@ internal class Vedtaksperiode private constructor(
         val sykepengevedtakBuilder = SykepengevedtakBuilder()
 
         val relevantGenerasjon = generasjoner.finnGenerasjonForSpleisBehandling(avsluttetUtenVedtak.spleisBehandlingId())
-            ?: generasjoner.finnEnesteGenerasjonUtenSpleisBehandlingId().also {
+            ?: generasjoner.finnSisteGenerasjonUtenSpleisBehandlingId().also {
                 if (it != null) {
                     logg.info(
-                        "Fant ikke generasjon basert på {}, velger eneste generasjon der spleisBehandlingId er null {}",
+                        "Fant ikke generasjon basert på {}, velger siste generasjon der spleisBehandlingId er null {}",
                         kv("spleisBehandlingId", avsluttetUtenVedtak.spleisBehandlingId()),
                         kv("unikId", it.unikId())
                     )

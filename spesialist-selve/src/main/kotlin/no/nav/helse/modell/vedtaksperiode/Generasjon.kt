@@ -59,8 +59,6 @@ internal class Generasjon private constructor(
 
     internal fun hasterÅBehandle() = varsler.inneholderVarselOmNegativtBeløp()
 
-    internal fun spleisBehandlingId() = spleisBehandlingId
-
     internal fun fom() = periode.fom()
 
     internal fun tom() = periode.tom()
@@ -584,8 +582,8 @@ internal class Generasjon private constructor(
         internal fun List<Generasjon>.finnGenerasjonForSpleisBehandling(spleisBehandlingId: UUID): Generasjon? =
             this.find { it.spleisBehandlingId == spleisBehandlingId }
 
-        internal fun List<Generasjon>.finnEnesteGenerasjonUtenSpleisBehandlingId(): Generasjon? =
-            this.singleOrNull { it.spleisBehandlingId == null }
+        internal fun List<Generasjon>.finnSisteGenerasjonUtenSpleisBehandlingId(): Generasjon? =
+            this.lastOrNull { it.spleisBehandlingId == null }
 
         internal fun fraLagring(
             id: UUID,
