@@ -1,5 +1,6 @@
 package no.nav.helse.modell.stoppknapp
 
+import no.nav.helse.db.UnntaFraAutomatiseringDao
 import no.nav.helse.mediator.erProd
 import no.nav.helse.mediator.meldinger.løsninger.AutomatiseringStoppetAvVeilederLøsning
 import no.nav.helse.modell.kommando.Command

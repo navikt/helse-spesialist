@@ -1,6 +1,7 @@
 package no.nav.helse.modell.stoppknapp
 
 import DatabaseIntegrationTest
+import no.nav.helse.db.UnntaFraAutomatiseringDao
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -9,7 +10,6 @@ import java.time.LocalDateTime.now
 import java.time.temporal.ChronoUnit.SECONDS
 
 internal class UnntaFraAutomatiseringDaoTest : DatabaseIntegrationTest() {
-
     val dao = UnntaFraAutomatiseringDao(dataSource)
 
     @Test
@@ -60,15 +60,20 @@ internal class UnntaFraAutomatiseringDaoTest : DatabaseIntegrationTest() {
         assertEquals(data<LocalDateTime>(fnr, "oppdatert"), sistOppdatert)
     }
 
-    private inline fun <reified T> data(fnr: String, kolonne: String): T = query(
-        "select $kolonne from unnta_fra_automatisk_godkjenning where fødselsnummer = :fnr", "fnr" to fnr.toLong()
-    ).single { row ->
-        when (T::class) {
-            Set::class -> row.array<String>(1).filterNot(String::isBlank).map { it.replace("'", "") }.toSet() as T
-            Boolean::class -> row.boolean(1) as T
-            LocalDateTime::class -> row.localDateTime(1) as T
+    private inline fun <reified T> data(
+        fnr: String,
+        kolonne: String,
+    ): T =
+        query(
+            "select $kolonne from unnta_fra_automatisk_godkjenning where fødselsnummer = :fnr",
+            "fnr" to fnr.toLong(),
+        ).single { row ->
+            when (T::class) {
+                Set::class -> row.array<String>(1).filterNot(String::isBlank).map { it.replace("'", "") }.toSet() as T
+                Boolean::class -> row.boolean(1) as T
+                LocalDateTime::class -> row.localDateTime(1) as T
 
-            else -> error("Mangler mapping for ${T::class}")
-        }
-    }!!
+                else -> error("Mangler mapping for ${T::class}")
+            }
+        }!!
 }

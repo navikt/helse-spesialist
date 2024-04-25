@@ -1,7 +1,7 @@
 package no.nav.helse.mediator.meldinger.løsninger
 
+import no.nav.helse.db.UnntaFraAutomatiseringDao
 import no.nav.helse.mediator.MeldingMediator
-import no.nav.helse.modell.stoppknapp.UnntaFraAutomatiseringDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection

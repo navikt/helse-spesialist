@@ -5,6 +5,7 @@ import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
+import no.nav.helse.db.UnntaFraAutomatiseringDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.MeldingMediator
@@ -20,7 +21,6 @@ import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
-import no.nav.helse.modell.stoppknapp.UnntaFraAutomatiseringDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vergemal.VergemålDao
@@ -50,57 +50,68 @@ internal class TestMediator(
     private val tildelingDao = TildelingDao(dataSource)
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
 
-    private val godkjenningMediator = GodkjenningMediator(
-        vedtakDao,
-        opptegnelseDao,
-        oppgaveDao,
-        utbetalingDao,
-        meldingDao,
-        generasjonDao,
-    )
+    private val godkjenningMediator =
+        GodkjenningMediator(
+            vedtakDao,
+            opptegnelseDao,
+            oppgaveDao,
+            utbetalingDao,
+            meldingDao,
+            generasjonDao,
+        )
     private val tilgangsgrupper = Tilgangsgrupper(testEnv)
-    private val oppgaveMediator = OppgaveMediator(
-        meldingDao = meldingDao,
-        oppgaveDao = OppgaveDao(dataSource),
-        tildelingDao = tildelingDao,
-        reservasjonDao = ReservasjonDao(dataSource),
-        opptegnelseDao = opptegnelseDao,
-        totrinnsvurderingRepository = totrinnsvurderingDao,
-        saksbehandlerRepository = saksbehandlerDao,
-        rapidsConnection = testRapid,
-        tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
-        tilgangsgrupper = tilgangsgrupper
-    )
+    private val oppgaveMediator =
+        OppgaveMediator(
+            meldingDao = meldingDao,
+            oppgaveDao = OppgaveDao(dataSource),
+            tildelingDao = tildelingDao,
+            reservasjonDao = ReservasjonDao(dataSource),
+            opptegnelseDao = opptegnelseDao,
+            totrinnsvurderingRepository = totrinnsvurderingDao,
+            saksbehandlerRepository = saksbehandlerDao,
+            rapidsConnection = testRapid,
+            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
+            tilgangsgrupper = tilgangsgrupper,
+        )
     private val saksbehandlerMediator = SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, oppgaveMediator, tilgangsgrupper)
-    private val automatisering = Automatisering(
-        risikovurderingDao = RisikovurderingDao(dataSource),
-        unntaFraAutomatiseringDao = UnntaFraAutomatiseringDao(dataSource),
-        automatiseringDao = AutomatiseringDao(dataSource),
-        åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource),
-        vergemålDao = VergemålDao(dataSource),
-        personDao = PersonDao(dataSource),
-        vedtakDao = vedtakDao,
-        overstyringDao = OverstyringDao(dataSource),
-        stikkprøver = object : Stikkprøver {
-            override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
-            override fun utsFlereArbeidsgivereForlengelse() = false
-            override fun utsEnArbeidsgiverFørstegangsbehandling() = false
-            override fun utsEnArbeidsgiverForlengelse() = false
-            override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() = false
-            override fun fullRefusjonFlereArbeidsgivereForlengelse() = false
-            override fun fullRefusjonEnArbeidsgiver() = false
-        },
-        meldingDao = meldingDao,
-        generasjonDao = generasjonDao,
-    )
+    private val automatisering =
+        Automatisering(
+            risikovurderingDao = RisikovurderingDao(dataSource),
+            unntaFraAutomatiseringDao = UnntaFraAutomatiseringDao(dataSource),
+            automatiseringDao = AutomatiseringDao(dataSource),
+            åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource),
+            vergemålDao = VergemålDao(dataSource),
+            personDao = PersonDao(dataSource),
+            vedtakDao = vedtakDao,
+            overstyringDao = OverstyringDao(dataSource),
+            stikkprøver =
+                object : Stikkprøver {
+                    override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
 
-    private val kommandofabrikk = Kommandofabrikk(
-        dataSource = dataSource,
-        snapshotClient = snapshotClient,
-        oppgaveMediator = { oppgaveMediator },
-        godkjenningMediator = godkjenningMediator,
-        automatisering = automatisering,
-    )
+                    override fun utsFlereArbeidsgivereForlengelse() = false
+
+                    override fun utsEnArbeidsgiverFørstegangsbehandling() = false
+
+                    override fun utsEnArbeidsgiverForlengelse() = false
+
+                    override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() = false
+
+                    override fun fullRefusjonFlereArbeidsgivereForlengelse() = false
+
+                    override fun fullRefusjonEnArbeidsgiver() = false
+                },
+            meldingDao = meldingDao,
+            generasjonDao = generasjonDao,
+        )
+
+    private val kommandofabrikk =
+        Kommandofabrikk(
+            dataSource = dataSource,
+            snapshotClient = snapshotClient,
+            oppgaveMediator = { oppgaveMediator },
+            godkjenningMediator = godkjenningMediator,
+            automatisering = automatisering,
+        )
 
     init {
         MeldingMediator(
@@ -115,7 +126,10 @@ internal class TestMediator(
     internal fun overstyringstyperForVedtaksperiode(vedtaksperiodeId: UUID) =
         overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId)
 
-    internal fun håndter(handling: HandlingFraApi, saksbehandlerFraApi: SaksbehandlerFraApi) {
+    internal fun håndter(
+        handling: HandlingFraApi,
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+    ) {
         saksbehandlerMediator.håndter(handling, saksbehandlerFraApi)
     }
 }
