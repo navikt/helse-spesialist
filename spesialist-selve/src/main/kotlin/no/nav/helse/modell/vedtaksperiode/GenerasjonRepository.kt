@@ -4,6 +4,7 @@ import kotliquery.TransactionalSession
 import kotliquery.sessionOf
 import no.nav.helse.mediator.builders.GenerasjonBuilder
 import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.person.vedtaksperiode.IVedtaksperiodeObserver
 import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource

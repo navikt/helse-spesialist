@@ -1,5 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
+import no.nav.helse.modell.person.vedtaksperiode.IVedtaksperiodeObserver
 import no.nav.helse.modell.vedtak.Sykepengevedtak
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDateTime

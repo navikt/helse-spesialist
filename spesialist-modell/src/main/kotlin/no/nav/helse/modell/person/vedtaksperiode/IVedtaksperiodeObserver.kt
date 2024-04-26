@@ -1,10 +1,10 @@
-package no.nav.helse.modell.vedtaksperiode
+package no.nav.helse.modell.person.vedtaksperiode
 
 import no.nav.helse.modell.person.PersonObserver
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal interface IVedtaksperiodeObserver : PersonObserver {
+interface IVedtaksperiodeObserver : PersonObserver {
     fun varselOpprettet(
         varselId: UUID,
         vedtaksperiodeId: UUID,

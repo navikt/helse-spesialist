@@ -1,10 +1,10 @@
 package no.nav.helse.modell.varsel
 
 import no.nav.helse.mediator.builders.GenerasjonBuilder
+import no.nav.helse.modell.person.vedtaksperiode.IVedtaksperiodeObserver
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
-import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
 import no.nav.helse.tellInaktivtVarsel
 import no.nav.helse.tellVarsel
 import java.time.LocalDateTime

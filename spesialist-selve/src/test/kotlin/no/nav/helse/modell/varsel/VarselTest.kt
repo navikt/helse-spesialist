@@ -1,7 +1,6 @@
 package no.nav.helse.modell.varsel
 
-import java.time.LocalDateTime
-import java.util.UUID
+import no.nav.helse.modell.person.vedtaksperiode.IVedtaksperiodeObserver
 import no.nav.helse.modell.varsel.Varsel.Companion.finnEksisterendeVarsel
 import no.nav.helse.modell.varsel.Varsel.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderMedlemskapsvarsel
@@ -13,7 +12,6 @@ import no.nav.helse.modell.varsel.Varsel.Status.AVVIST
 import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.VURDERT
-import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -22,9 +20,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.ValueSource
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class VarselTest {
-
     @Test
     fun lagre() {
         val varselId = UUID.randomUUID()
@@ -229,114 +228,135 @@ internal class VarselTest {
         assertNotEquals(nyttVarsel(kode = "EN_ANNEN_KODE"), varsel)
         assertNotEquals(
             Varsel(UUID.randomUUID(), "EN_ANNEN_KODE", LocalDateTime.now(), UUID.randomUUID()).hashCode(),
-            varsel.hashCode()
+            varsel.hashCode(),
         )
     }
 
-    private fun nyttVarsel(varselId: UUID = UUID.randomUUID(), vedtaksperiodeId: UUID = UUID.randomUUID(), kode: String = "EN_KODE", status: Status = AKTIV): Varsel {
+    private fun nyttVarsel(
+        varselId: UUID = UUID.randomUUID(),
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        kode: String = "EN_KODE",
+        status: Status = AKTIV,
+    ): Varsel {
         return Varsel(varselId, kode, LocalDateTime.now(), vedtaksperiodeId, status).also {
             it.registrer(observer)
         }
     }
 
-    private val observer = object : IVedtaksperiodeObserver {
+    private val observer =
+        object : IVedtaksperiodeObserver {
+            val opprettedeVarsler = mutableMapOf<UUID, Opprettelse>()
+            val reaktiverteVarsler = mutableMapOf<UUID, Reaktivering>()
+            val deaktiverteVarsler = mutableMapOf<UUID, Deaktivering>()
+            val godkjenteVarsler = mutableMapOf<UUID, Godkjent>()
 
-        val opprettedeVarsler = mutableMapOf<UUID, Opprettelse>()
-        val reaktiverteVarsler = mutableMapOf<UUID, Reaktivering>()
-        val deaktiverteVarsler = mutableMapOf<UUID, Deaktivering>()
-        val godkjenteVarsler = mutableMapOf<UUID, Godkjent>()
+            private inner class Opprettelse(
+                val vedtaksperiodeId: UUID,
+                val generasjonId: UUID,
+                val varselId: UUID,
+                val varselkode: String,
+                val opprettet: LocalDateTime,
+            )
 
-        private inner class Opprettelse(
-            val vedtaksperiodeId: UUID,
-            val generasjonId: UUID,
-            val varselId: UUID,
-            val varselkode: String,
-            val opprettet: LocalDateTime,
-        )
+            private inner class Reaktivering(
+                val vedtaksperiodeId: UUID,
+                val generasjonId: UUID,
+                val varselId: UUID,
+                val varselkode: String,
+            )
 
-        private inner class Reaktivering(
-            val vedtaksperiodeId: UUID,
-            val generasjonId: UUID,
-            val varselId: UUID,
-            val varselkode: String,
-        )
+            private inner class Deaktivering(
+                val vedtaksperiodeId: UUID,
+                val generasjonId: UUID,
+                val varselId: UUID,
+                val varselkode: String,
+            )
 
-        private inner class Deaktivering(
-            val vedtaksperiodeId: UUID,
-            val generasjonId: UUID,
-            val varselId: UUID,
-            val varselkode: String,
-        )
+            private inner class Godkjent(
+                val vedtaksperiodeId: UUID,
+                val generasjonId: UUID,
+                val varselId: UUID,
+                val varselkode: String,
+                val statusEndretAv: String,
+            )
 
-        private inner class Godkjent(
-            val vedtaksperiodeId: UUID,
-            val generasjonId: UUID,
-            val varselId: UUID,
-            val varselkode: String,
-            val statusEndretAv: String,
-        )
+            override fun varselReaktivert(
+                varselId: UUID,
+                varselkode: String,
+                generasjonId: UUID,
+                vedtaksperiodeId: UUID,
+            ) {
+                reaktiverteVarsler[varselId] = Reaktivering(vedtaksperiodeId, generasjonId, varselId, varselkode)
+            }
 
-        override fun varselReaktivert(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID) {
-            reaktiverteVarsler[varselId] = Reaktivering(vedtaksperiodeId, generasjonId, varselId, varselkode)
+            override fun varselDeaktivert(
+                varselId: UUID,
+                varselkode: String,
+                generasjonId: UUID,
+                vedtaksperiodeId: UUID,
+            ) {
+                deaktiverteVarsler[varselId] = Deaktivering(vedtaksperiodeId, generasjonId, varselId, varselkode)
+            }
+
+            override fun varselOpprettet(
+                varselId: UUID,
+                vedtaksperiodeId: UUID,
+                generasjonId: UUID,
+                varselkode: String,
+                opprettet: LocalDateTime,
+            ) {
+                opprettedeVarsler[varselId] = Opprettelse(vedtaksperiodeId, generasjonId, varselId, varselkode, opprettet)
+            }
+
+            override fun varselGodkjent(
+                varselId: UUID,
+                varselkode: String,
+                generasjonId: UUID,
+                vedtaksperiodeId: UUID,
+                statusEndretAv: String,
+            ) {
+                godkjenteVarsler[varselId] = Godkjent(vedtaksperiodeId, generasjonId, varselId, varselkode, statusEndretAv)
+            }
+
+            fun assertOpprettelse(
+                forventetVedtaksperiodeId: UUID,
+                forventetGenerasjonId: UUID,
+                forventetVarselId: UUID,
+                forventetVarselkode: String,
+                forventetOpprettet: LocalDateTime,
+            ) {
+                val opprettelse = opprettedeVarsler[forventetVarselId]
+                assertEquals(forventetVedtaksperiodeId, opprettelse?.vedtaksperiodeId)
+                assertEquals(forventetGenerasjonId, opprettelse?.generasjonId)
+                assertEquals(forventetVarselkode, opprettelse?.varselkode)
+                assertEquals(forventetVarselId, opprettelse?.varselId)
+                assertEquals(forventetOpprettet, opprettelse?.opprettet)
+            }
+
+            fun assertReaktivering(
+                forventetVedtaksperiodeId: UUID,
+                forventetGenerasjonId: UUID,
+                forventetVarselId: UUID,
+                forventetVarselkode: String,
+            ) {
+                val reaktivering = reaktiverteVarsler[forventetVarselId]
+                assertEquals(forventetVedtaksperiodeId, reaktivering?.vedtaksperiodeId)
+                assertEquals(forventetGenerasjonId, reaktivering?.generasjonId)
+                assertEquals(forventetVarselkode, reaktivering?.varselkode)
+                assertEquals(forventetVarselId, reaktivering?.varselId)
+            }
+
+            fun assertDeaktivering(
+                forventetVedtaksperiodeId: UUID,
+                forventetGenerasjonId: UUID,
+                forventetVarselId: UUID,
+                forventetVarselkode: String,
+            ) {
+                val deaktivering = deaktiverteVarsler[forventetVarselId]
+                assertEquals(forventetVedtaksperiodeId, deaktivering?.vedtaksperiodeId)
+                assertEquals(forventetGenerasjonId, deaktivering?.generasjonId)
+                assertEquals(forventetVarselkode, deaktivering?.varselkode)
+                assertEquals(forventetVarselId, deaktivering?.varselId)
+            }
         }
-
-        override fun varselDeaktivert(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID) {
-            deaktiverteVarsler[varselId] = Deaktivering(vedtaksperiodeId, generasjonId, varselId, varselkode)
-        }
-
-        override fun varselOpprettet(varselId: UUID, vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, opprettet: LocalDateTime) {
-            opprettedeVarsler[varselId] = Opprettelse(vedtaksperiodeId, generasjonId, varselId, varselkode, opprettet)
-        }
-
-        override fun varselGodkjent(
-            varselId: UUID,
-            varselkode: String,
-            generasjonId: UUID,
-            vedtaksperiodeId: UUID,
-            statusEndretAv: String
-        ) {
-            godkjenteVarsler[varselId] = Godkjent(vedtaksperiodeId, generasjonId, varselId, varselkode, statusEndretAv)
-        }
-
-        fun assertOpprettelse(
-            forventetVedtaksperiodeId: UUID,
-            forventetGenerasjonId: UUID,
-            forventetVarselId: UUID,
-            forventetVarselkode: String,
-            forventetOpprettet: LocalDateTime,
-        ) {
-            val opprettelse = opprettedeVarsler[forventetVarselId]
-            assertEquals(forventetVedtaksperiodeId, opprettelse?.vedtaksperiodeId)
-            assertEquals(forventetGenerasjonId, opprettelse?.generasjonId)
-            assertEquals(forventetVarselkode, opprettelse?.varselkode)
-            assertEquals(forventetVarselId, opprettelse?.varselId)
-            assertEquals(forventetOpprettet, opprettelse?.opprettet)
-        }
-
-        fun assertReaktivering(
-            forventetVedtaksperiodeId: UUID,
-            forventetGenerasjonId: UUID,
-            forventetVarselId: UUID,
-            forventetVarselkode: String,
-        ) {
-            val reaktivering = reaktiverteVarsler[forventetVarselId]
-            assertEquals(forventetVedtaksperiodeId, reaktivering?.vedtaksperiodeId)
-            assertEquals(forventetGenerasjonId, reaktivering?.generasjonId)
-            assertEquals(forventetVarselkode, reaktivering?.varselkode)
-            assertEquals(forventetVarselId, reaktivering?.varselId)
-        }
-
-        fun assertDeaktivering(
-            forventetVedtaksperiodeId: UUID,
-            forventetGenerasjonId: UUID,
-            forventetVarselId: UUID,
-            forventetVarselkode: String,
-        ) {
-            val deaktivering = deaktiverteVarsler[forventetVarselId]
-            assertEquals(forventetVedtaksperiodeId, deaktivering?.vedtaksperiodeId)
-            assertEquals(forventetGenerasjonId, deaktivering?.generasjonId)
-            assertEquals(forventetVarselkode, deaktivering?.varselkode)
-            assertEquals(forventetVarselId, deaktivering?.varselId)
-        }
-    }
 }
