@@ -434,7 +434,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
 
     internal fun oppdaterTilstandFor(
         generasjonId: UUID,
-        ny: Generasjon.Tilstand,
+        ny: String,
         endretAv: UUID,
     ) {
         @Language("PostgreSQL")
@@ -448,7 +448,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
                 queryOf(
                     query,
                     mapOf(
-                        "tilstand" to ny.navn(),
+                        "tilstand" to ny,
                         "endret_tidspunkt" to LocalDateTime.now(),
                         "endret_av_hendelse" to endretAv,
                         "generasjon_id" to generasjonId,

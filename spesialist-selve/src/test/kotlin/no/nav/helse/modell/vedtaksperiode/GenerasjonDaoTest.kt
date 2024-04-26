@@ -63,7 +63,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             Periode(1.januar, 31.januar),
             Generasjon.VidereBehandlingAvklares,
         )
-        generasjonDao.oppdaterTilstandFor(generasjonId1, Generasjon.VedtakFattet, UUID.randomUUID())
+        generasjonDao.oppdaterTilstandFor(generasjonId1, Generasjon.VedtakFattet.navn(), UUID.randomUUID())
         generasjonDao.opprettFor(
             generasjonId2,
             vedtaksperiodeId,
@@ -322,7 +322,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             Periode(1.januar, 31.januar),
             Generasjon.VidereBehandlingAvklares,
         )
-        generasjonDao.oppdaterTilstandFor(generasjonId, Generasjon.VedtakFattet, UUID.randomUUID())
+        generasjonDao.oppdaterTilstandFor(generasjonId, Generasjon.VedtakFattet.navn(), UUID.randomUUID())
 
         assertTilstand(VEDTAKSPERIODE, Generasjon.VedtakFattet)
     }
@@ -589,7 +589,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             Periode(1.januar, 31.januar),
             Generasjon.VidereBehandlingAvklares,
         )
-        generasjonDao.oppdaterTilstandFor(generasjonId, Generasjon.VedtakFattet, UUID.randomUUID())
+        generasjonDao.oppdaterTilstandFor(generasjonId, Generasjon.VedtakFattet.navn(), UUID.randomUUID())
 
         assertNotNull(generasjonDao.førsteGenerasjonVedtakFattetTidspunkt(VEDTAKSPERIODE))
     }

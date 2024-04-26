@@ -38,8 +38,8 @@ internal interface IVedtaksperiodeObserver : PersonObserver {
     fun tilstandEndret(
         generasjonId: UUID,
         vedtaksperiodeId: UUID,
-        gammel: Generasjon.Tilstand,
-        ny: Generasjon.Tilstand,
+        gammel: String,
+        ny: String,
         hendelseId: UUID,
     ) {}
 }

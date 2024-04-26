@@ -1,13 +1,12 @@
 package no.nav.helse.modell.vedtaksperiode
 
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengevedtak
 import org.junit.jupiter.api.Assertions.assertEquals
+import java.time.LocalDateTime
+import java.util.UUID
 
-internal class GenerasjonTestObserver: IVedtaksperiodeObserver {
-
-    private val tilstandsendringer = mutableMapOf<UUID, MutableList<Pair<Generasjon.Tilstand, Generasjon.Tilstand>>>()
+internal class GenerasjonTestObserver : IVedtaksperiodeObserver {
+    private val tilstandsendringer = mutableMapOf<UUID, MutableList<Pair<String, String>>>()
     val utbetalingerPåGenerasjoner = mutableMapOf<UUID, UUID?>()
     val opprettedeVarsler = mutableMapOf<UUID, MutableList<String>>()
     val vedtakFattet = mutableListOf<Sykepengevedtak>()
@@ -19,9 +18,9 @@ internal class GenerasjonTestObserver: IVedtaksperiodeObserver {
     override fun tilstandEndret(
         generasjonId: UUID,
         vedtaksperiodeId: UUID,
-        gammel: Generasjon.Tilstand,
-        ny: Generasjon.Tilstand,
-        hendelseId: UUID
+        gammel: String,
+        ny: String,
+        hendelseId: UUID,
     ) {
         tilstandsendringer.getOrPut(generasjonId) { mutableListOf() }.add(gammel to ny)
     }
@@ -31,14 +30,14 @@ internal class GenerasjonTestObserver: IVedtaksperiodeObserver {
         vedtaksperiodeId: UUID,
         generasjonId: UUID,
         varselkode: String,
-        opprettet: LocalDateTime
+        opprettet: LocalDateTime,
     ) {
         opprettedeVarsler.getOrPut(generasjonId) { mutableListOf() }.add(varselkode)
     }
 
     fun assertUtbetaling(
         generasjonId: UUID,
-        forventetUtbetalingId: UUID?
+        forventetUtbetalingId: UUID?,
     ) {
         assertEquals(forventetUtbetalingId, utbetalingerPåGenerasjoner[generasjonId])
     }
@@ -47,15 +46,18 @@ internal class GenerasjonTestObserver: IVedtaksperiodeObserver {
         generasjonId: UUID,
         forventetGammel: Generasjon.Tilstand,
         forventetNy: Generasjon.Tilstand,
-        index: Int
+        index: Int,
     ) {
         val (gammel, ny) = tilstandsendringer[generasjonId]!![index]
-        assertEquals(forventetGammel, gammel)
-        assertEquals(forventetNy, ny)
+        assertEquals(forventetGammel.navn(), gammel)
+        assertEquals(forventetNy.navn(), ny)
     }
 
-    fun assertGjeldendeTilstand(generasjonId: UUID, forventetTilstand: Generasjon.Tilstand) {
+    fun assertGjeldendeTilstand(
+        generasjonId: UUID,
+        forventetTilstand: Generasjon.Tilstand,
+    ) {
         val tilstand = tilstandsendringer[generasjonId]?.last()
-        assertEquals(forventetTilstand, tilstand?.second)
+        assertEquals(forventetTilstand.navn(), tilstand?.second)
     }
 }

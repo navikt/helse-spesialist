@@ -317,7 +317,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         generasjonId: UUID = UUID.randomUUID(),
     ) {
         generasjonDao.finnSisteGenerasjonFor(vedtaksperiodeId)?.also {
-            generasjonDao.oppdaterTilstandFor(generasjonId = it, ny = Generasjon.VedtakFattet, endretAv = UUID.randomUUID())
+            generasjonDao.oppdaterTilstandFor(generasjonId = it, ny = Generasjon.VedtakFattet.navn(), endretAv = UUID.randomUUID())
         }
         generasjonDao.opprettFor(
             generasjonId,

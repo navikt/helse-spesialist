@@ -186,7 +186,7 @@ internal class Generasjon private constructor(
         ny: Tilstand,
         hendelseId: UUID,
     ) {
-        observers.forEach { it.tilstandEndret(id, vedtaksperiodeId, gammel, ny, hendelseId) }
+        observers.forEach { it.tilstandEndret(id, vedtaksperiodeId, gammel.navn(), ny.navn(), hendelseId) }
         this.tilstand = ny
     }
 

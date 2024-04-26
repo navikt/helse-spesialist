@@ -104,8 +104,8 @@ internal class GenerasjonRepository(private val dataSource: DataSource) : IVedta
     override fun tilstandEndret(
         generasjonId: UUID,
         vedtaksperiodeId: UUID,
-        gammel: Generasjon.Tilstand,
-        ny: Generasjon.Tilstand,
+        gammel: String,
+        ny: String,
         hendelseId: UUID,
     ) {
         dao.oppdaterTilstandFor(generasjonId, ny, hendelseId)
