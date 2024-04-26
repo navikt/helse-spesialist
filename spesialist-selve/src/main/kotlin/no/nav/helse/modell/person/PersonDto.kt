@@ -1,6 +1,6 @@
 package no.nav.helse.modell.person
 
-import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastsattSykepengegrunnlagDto
+import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
 
 data class PersonDto(

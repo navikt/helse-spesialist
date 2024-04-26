@@ -5,11 +5,11 @@ import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.VarselStatusDto
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnSisteGenerasjonUtenSpleisBehandlingId
+import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForSpleisBehandling
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnSisteGenerasjonUtenSpleisBehandlingId
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.logg
 import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
-import no.nav.helse.modell.vedtaksperiode.vedtak.SykepengevedtakBuilder
 import java.util.UUID
 
 internal class Vedtaksperiode private constructor(
@@ -86,16 +86,17 @@ internal class Vedtaksperiode private constructor(
         if (forkastet) return
         val sykepengevedtakBuilder = SykepengevedtakBuilder()
 
-        val relevantGenerasjon = generasjoner.finnGenerasjonForSpleisBehandling(avsluttetUtenVedtak.spleisBehandlingId())
-            ?: generasjoner.finnSisteGenerasjonUtenSpleisBehandlingId().also {
-                if (it != null) {
-                    logg.info(
-                        "Fant ikke generasjon basert på {}, velger siste generasjon der spleisBehandlingId er null {}",
-                        kv("spleisBehandlingId", avsluttetUtenVedtak.spleisBehandlingId()),
-                        kv("unikId", it.unikId())
-                    )
+        val relevantGenerasjon =
+            generasjoner.finnGenerasjonForSpleisBehandling(avsluttetUtenVedtak.spleisBehandlingId())
+                ?: generasjoner.finnSisteGenerasjonUtenSpleisBehandlingId().also {
+                    if (it != null) {
+                        logg.info(
+                            "Fant ikke generasjon basert på {}, velger siste generasjon der spleisBehandlingId er null {}",
+                            kv("spleisBehandlingId", avsluttetUtenVedtak.spleisBehandlingId()),
+                            kv("unikId", it.unikId()),
+                        )
+                    }
                 }
-            }
 
         if (relevantGenerasjon == null) {
             logg.error(

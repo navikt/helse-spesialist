@@ -1,12 +1,10 @@
-package no.nav.helse.modell.vedtaksperiode.vedtak
+package no.nav.helse.modell.vedtak
 
-import no.nav.helse.modell.sykefraværstilfelle.Skjønnsfastsettingstype
-import no.nav.helse.modell.sykefraværstilfelle.Skjønnsfastsettingsårsak
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal sealed class Sykepengevedtak(
+sealed class Sykepengevedtak(
     val fødselsnummer: String,
     val aktørId: String,
     val vedtaksperiodeId: UUID,
@@ -66,7 +64,7 @@ internal sealed class Sykepengevedtak(
     }
 
     @Suppress("EqualsOrHashCode")
-    internal class AuuVedtak(
+    class AuuVedtak(
         fødselsnummer: String,
         aktørId: String,
         vedtaksperiodeId: UUID,
@@ -104,7 +102,7 @@ internal sealed class Sykepengevedtak(
         override fun equals(other: Any?) = this === other || (super.equals(other) && other is AuuVedtak)
     }
 
-    internal class Vedtak(
+    class Vedtak(
         fødselsnummer: String,
         aktørId: String,
         organisasjonsnummer: String,
@@ -161,7 +159,7 @@ internal sealed class Sykepengevedtak(
     }
 }
 
-internal data class SkjønnsfastsettingopplysningerDto(
+data class SkjønnsfastsettingopplysningerDto(
     val begrunnelseFraMal: String,
     val begrunnelseFraFritekst: String,
     val begrunnelseFraKonklusjon: String,

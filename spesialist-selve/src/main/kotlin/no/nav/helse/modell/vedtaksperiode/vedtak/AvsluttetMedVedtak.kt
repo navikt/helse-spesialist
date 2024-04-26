@@ -1,5 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode.vedtak
 
+import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
+import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -21,7 +23,7 @@ internal class AvsluttetMedVedtak(
     private val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
     private val fom: LocalDate,
     private val tom: LocalDate,
-    private val vedtakFattetTidspunkt: LocalDateTime
+    private val vedtakFattetTidspunkt: LocalDateTime,
 ) {
     fun byggVedtak(vedtakBuilder: SykepengevedtakBuilder) {
         vedtakBuilder.fødselsnummer(fødselsnummer)

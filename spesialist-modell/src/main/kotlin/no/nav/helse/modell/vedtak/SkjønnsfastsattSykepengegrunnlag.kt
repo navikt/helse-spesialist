@@ -1,10 +1,9 @@
-package no.nav.helse.modell.sykefraværstilfelle
+package no.nav.helse.modell.vedtak
 
-import no.nav.helse.modell.vedtaksperiode.vedtak.SykepengevedtakBuilder
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-internal class SkjønnsfastsattSykepengegrunnlag(
+class SkjønnsfastsattSykepengegrunnlag(
     private val type: Skjønnsfastsettingstype,
     private val årsak: Skjønnsfastsettingsårsak,
     private val skjæringstidspunkt: LocalDate,
@@ -23,7 +22,7 @@ internal class SkjønnsfastsattSykepengegrunnlag(
         )
     }
 
-    internal fun toDto() =
+    fun toDto() =
         SkjønnsfastsattSykepengegrunnlagDto(
             type = type.toDto(),
             årsak = årsak.toDto(),
@@ -62,10 +61,10 @@ internal class SkjønnsfastsattSykepengegrunnlag(
         return result
     }
 
-    internal companion object {
-        internal fun List<SkjønnsfastsattSykepengegrunnlag>.sortert() = sortedBy { it.opprettet }
+    companion object {
+        fun List<SkjønnsfastsattSykepengegrunnlag>.sortert() = sortedBy { it.opprettet }
 
-        internal fun gjenopprett(
+        fun gjenopprett(
             type: SkjønnsfastsettingstypeDto,
             årsak: SkjønnsfastsettingsårsakDto,
             skjæringstidspunkt: LocalDate,
@@ -85,7 +84,7 @@ internal class SkjønnsfastsattSykepengegrunnlag(
     }
 }
 
-internal enum class Skjønnsfastsettingstype {
+enum class Skjønnsfastsettingstype {
     OMREGNET_ÅRSINNTEKT,
     RAPPORTERT_ÅRSINNTEKT,
     ANNET,
@@ -98,7 +97,7 @@ internal fun SkjønnsfastsettingstypeDto.tilSkjønnsfastsettingtype() =
         SkjønnsfastsettingstypeDto.ANNET -> Skjønnsfastsettingstype.ANNET
     }
 
-internal enum class Skjønnsfastsettingsårsak {
+enum class Skjønnsfastsettingsårsak {
     ANDRE_AVSNITT,
     TREDJE_AVSNITT,
 }

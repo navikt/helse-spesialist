@@ -1,14 +1,11 @@
-package no.nav.helse.modell.vedtaksperiode.vedtak
+package no.nav.helse.modell.vedtak
 
-import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastsattSykepengegrunnlag
-import no.nav.helse.modell.sykefraværstilfelle.Skjønnsfastsettingstype
-import no.nav.helse.modell.sykefraværstilfelle.Skjønnsfastsettingsårsak
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.properties.Delegates
 
-internal class SykepengevedtakBuilder {
+class SykepengevedtakBuilder {
     private lateinit var fødselsnummer: String
     private lateinit var aktørId: String
     private lateinit var vedtaksperiodeId: UUID
@@ -31,70 +28,77 @@ internal class SykepengevedtakBuilder {
     private val tags: MutableSet<String> = mutableSetOf()
     private val tagsForSykepengegrunnlagsfakta: MutableSet<String> = mutableSetOf()
 
-    internal fun fødselsnummer(fødselsnummer: String) = apply { this.fødselsnummer = fødselsnummer }
+    fun fødselsnummer(fødselsnummer: String) = apply { this.fødselsnummer = fødselsnummer }
 
-    internal fun aktørId(aktørId: String) = apply { this.aktørId = aktørId }
+    fun aktørId(aktørId: String) = apply { this.aktørId = aktørId }
 
-    internal fun vedtaksperiodeId(vedtaksperiodeId: UUID) = apply { this.vedtaksperiodeId = vedtaksperiodeId }
+    fun vedtaksperiodeId(vedtaksperiodeId: UUID) = apply { this.vedtaksperiodeId = vedtaksperiodeId }
 
-    internal fun spleisBehandlingId(spleisBehandlingId: UUID) = apply { this.spleisBehandlingId = spleisBehandlingId }
+    fun spleisBehandlingId(spleisBehandlingId: UUID) = apply { this.spleisBehandlingId = spleisBehandlingId }
 
-    internal fun organisasjonsnummer(organisasjonsnummer: String) = apply { this.organisasjonsnummer = organisasjonsnummer }
+    fun organisasjonsnummer(organisasjonsnummer: String) = apply { this.organisasjonsnummer = organisasjonsnummer }
 
-    internal fun fom(fom: LocalDate) = apply { this.fom = fom }
+    fun fom(fom: LocalDate) = apply { this.fom = fom }
 
-    internal fun tom(tom: LocalDate) = apply { this.tom = tom }
+    fun tom(tom: LocalDate) = apply { this.tom = tom }
 
-    internal fun skjæringstidspunkt(skjæringstidspunkt: LocalDate) = apply { this.skjæringstidspunkt = skjæringstidspunkt }
+    fun skjæringstidspunkt(skjæringstidspunkt: LocalDate) = apply { this.skjæringstidspunkt = skjæringstidspunkt }
 
-    internal fun hendelser(hendelser: List<UUID>) = apply { this.hendelser = hendelser }
+    fun hendelser(hendelser: List<UUID>) = apply { this.hendelser = hendelser }
 
-    internal fun sykepengegrunnlag(sykepengegrunnlag: Double) = apply { this.sykepengegrunnlag = sykepengegrunnlag }
+    fun sykepengegrunnlag(sykepengegrunnlag: Double) = apply { this.sykepengegrunnlag = sykepengegrunnlag }
 
-    internal fun grunnlagForSykepengegrunnlag(grunnlagForSykepengegrunnlag: Double) =
+    fun grunnlagForSykepengegrunnlag(grunnlagForSykepengegrunnlag: Double) =
         apply {
             this.grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag
         }
 
-    internal fun grunnlagForSykepengegrunnlagPerArbeidsgiver(grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>) =
+    fun grunnlagForSykepengegrunnlagPerArbeidsgiver(grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>) =
         apply { this.grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver }
 
-    internal fun begrensning(begrensning: String) = apply { this.begrensning = begrensning }
+    fun begrensning(begrensning: String) = apply { this.begrensning = begrensning }
 
-    internal fun inntekt(inntekt: Double) = apply { this.inntekt = inntekt }
+    fun inntekt(inntekt: Double) = apply { this.inntekt = inntekt }
 
-    internal fun vedtakFattetTidspunkt(vedtakFattetTidspunkt: LocalDateTime) = apply { this.vedtakFattetTidspunkt = vedtakFattetTidspunkt }
+    fun vedtakFattetTidspunkt(vedtakFattetTidspunkt: LocalDateTime) = apply { this.vedtakFattetTidspunkt = vedtakFattetTidspunkt }
 
-    internal fun utbetalingId(utbetalingId: UUID) = apply { this.utbetalingId = utbetalingId }
+    fun utbetalingId(utbetalingId: UUID) = apply { this.utbetalingId = utbetalingId }
 
-    internal fun sykepengegrunnlagsfakta(sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta) =
+    fun sykepengegrunnlagsfakta(sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta) =
         apply {
             this.sykepengegrunnlagsfakta = sykepengegrunnlagsfakta.medtags(tagsForSykepengegrunnlagsfakta)
         }
 
-    internal fun skjønnsfastsattSykepengegrunnlag(skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlag) =
+    fun skjønnsfastsattSykepengegrunnlag(skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlag) =
         apply {
             this.skjønnsfastsattSykepengegrunnlag = skjønnsfastsattSykepengegrunnlag
             skjønnsfastsattSykepengegrunnlag.byggVedtak(this)
         }
 
-    internal fun tags(tags: List<String>) =
+    fun tags(tags: List<String>) =
         apply {
             this.tags.addAll(tags.filterNot { TAGS_SOM_SKAL_LIGGE_I_SYKEPENGEGRUNNLAGSFAKTA.contains(it) })
             this.tagsForSykepengegrunnlagsfakta.addAll(tags.filter { TAGS_SOM_SKAL_LIGGE_I_SYKEPENGEGRUNNLAGSFAKTA.contains(it) })
         }
 
-    internal fun skjønnsfastsettingData(
+    fun skjønnsfastsettingData(
         begrunnelseFraMal: String,
         begrunnelseFraFritekst: String,
         begrunnelseFraKonklusjon: String,
         type: Skjønnsfastsettingstype,
         årsak: Skjønnsfastsettingsårsak,
     ) = apply {
-        this.skjønnsfastsettingopplysninger = SkjønnsfastsettingopplysningerDto(begrunnelseFraMal, begrunnelseFraFritekst, begrunnelseFraKonklusjon, type, årsak)
+        this.skjønnsfastsettingopplysninger =
+            SkjønnsfastsettingopplysningerDto(
+                begrunnelseFraMal,
+                begrunnelseFraFritekst,
+                begrunnelseFraKonklusjon,
+                type,
+                årsak,
+            )
     }
 
-    internal fun build(): Sykepengevedtak {
+    fun build(): Sykepengevedtak {
         if (utbetalingId != null && sykepengegrunnlagsfakta != null) return buildVedtak()
         return buildAuuVedtak()
     }

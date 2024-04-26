@@ -1,6 +1,6 @@
-package no.nav.helse.modell.vedtaksperiode.vedtak
+package no.nav.helse.modell.vedtak
 
-internal sealed class Sykepengegrunnlagsfakta(
+sealed class Sykepengegrunnlagsfakta(
     val omregnetÅrsinntekt: Double,
 ) {
     override fun equals(other: Any?): Boolean =
@@ -10,11 +10,12 @@ internal sealed class Sykepengegrunnlagsfakta(
         )
 
     override fun hashCode() = omregnetÅrsinntekt.hashCode()
+
     open fun medtags(tagsForSykepengegrunnlagsfakta: MutableSet<String>): Sykepengegrunnlagsfakta = this
 
-    internal class Infotrygd(omregnetÅrsinntekt: Double) : Sykepengegrunnlagsfakta(omregnetÅrsinntekt)
+    class Infotrygd(omregnetÅrsinntekt: Double) : Sykepengegrunnlagsfakta(omregnetÅrsinntekt)
 
-    internal sealed class Spleis(
+    sealed class Spleis(
         omregnetÅrsinntekt: Double,
         val innrapportertÅrsinntekt: Double,
         val avviksprosent: Double,
@@ -48,7 +49,7 @@ internal sealed class Sykepengegrunnlagsfakta(
             return result
         }
 
-        internal class EtterSkjønn(
+        class EtterSkjønn(
             omregnetÅrsinntekt: Double,
             innrapportertÅrsinntekt: Double,
             avviksprosent: Double,
@@ -79,7 +80,7 @@ internal sealed class Sykepengegrunnlagsfakta(
         }
 
         @Suppress("EqualsOrHashCode")
-        internal class EtterHovedregel(
+        class EtterHovedregel(
             omregnetÅrsinntekt: Double,
             innrapportertÅrsinntekt: Double,
             avviksprosent: Double,
@@ -97,7 +98,7 @@ internal sealed class Sykepengegrunnlagsfakta(
             override fun equals(other: Any?): Boolean = this === other || (super.equals(other) && other is EtterHovedregel)
         }
 
-        internal sealed class Arbeidsgiver(
+        sealed class Arbeidsgiver(
             val organisasjonsnummer: String,
             val omregnetÅrsinntekt: Double,
             val innrapportertÅrsinntekt: Double,
@@ -117,7 +118,7 @@ internal sealed class Sykepengegrunnlagsfakta(
                 return result
             }
 
-            internal class EtterSkjønn(
+            class EtterSkjønn(
                 organisasjonsnummer: String,
                 omregnetÅrsinntekt: Double,
                 innrapportertÅrsinntekt: Double,
@@ -138,7 +139,7 @@ internal sealed class Sykepengegrunnlagsfakta(
             }
 
             @Suppress("EqualsOrHashCode")
-            internal class EtterHovedregel(
+            class EtterHovedregel(
                 organisasjonsnummer: String,
                 omregnetÅrsinntekt: Double,
                 innrapportertÅrsinntekt: Double,
@@ -149,7 +150,7 @@ internal sealed class Sykepengegrunnlagsfakta(
     }
 }
 
-internal enum class Faktatype {
+enum class Faktatype {
     ETTER_SKJØNN,
     ETTER_HOVEDREGEL,
     I_INFOTRYGD,

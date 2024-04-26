@@ -1,12 +1,12 @@
-package no.nav.helse.modell.vedtaksperiode.vedtak
+package no.nav.helse.modell.vedtak
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
-import no.nav.helse.januar
+import no.nav.helse.modell.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 class SykepengevedtakEqualsTest {
     private companion object {
@@ -22,10 +22,11 @@ class SykepengevedtakEqualsTest {
         private val hendelser = listOf(UUID.randomUUID(), UUID.randomUUID())
         private const val sykepengegrunnlag = 600000.00
         private const val grunnlagForSykepengegrunnlag = 600000.00
-        private val grunnlagForSykepengegrunnlagPerArbeidsgiver = mapOf(
-            organisasjonsnummer to 300000.00,
-            "987654321" to 300000.00
-        )
+        private val grunnlagForSykepengegrunnlagPerArbeidsgiver =
+            mapOf(
+                organisasjonsnummer to 300000.00,
+                "987654321" to 300000.00,
+            )
         private const val begrensning = "ER_6G_BEGRENSET"
         private const val inntekt = 25000.00
         private val vedtakFattetTidspunkt = LocalDateTime.now()
@@ -46,9 +47,10 @@ class SykepengevedtakEqualsTest {
 
     @Test
     fun `referential equals - Vedtak`() {
-        val vedtak = vedtak(
-            sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(Faktatype.ETTER_HOVEDREGEL)
-        )
+        val vedtak =
+            vedtak(
+                sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(Faktatype.ETTER_HOVEDREGEL),
+            )
 
         assertEquals(vedtak, vedtak)
         assertEquals(vedtak.hashCode(), vedtak.hashCode())
@@ -65,13 +67,15 @@ class SykepengevedtakEqualsTest {
 
     @Test
     fun `structural equals - Vedtak`() {
-        val vedtak1 = vedtak(
-            sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(Faktatype.ETTER_HOVEDREGEL)
-        )
+        val vedtak1 =
+            vedtak(
+                sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(Faktatype.ETTER_HOVEDREGEL),
+            )
 
-        val vedtak2 = vedtak(
-            sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(Faktatype.ETTER_HOVEDREGEL)
-        )
+        val vedtak2 =
+            vedtak(
+                sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(Faktatype.ETTER_HOVEDREGEL),
+            )
 
         assertEquals(vedtak1, vedtak2)
         assertEquals(vedtak1.hashCode(), vedtak2.hashCode())
@@ -214,15 +218,17 @@ class SykepengevedtakEqualsTest {
 
     @Test
     fun `not equals - Vedtak - utbetalingId`() {
-        val vedtak1 = vedtak(
-            sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(Faktatype.ETTER_HOVEDREGEL),
-            utbetalingId = UUID.randomUUID(),
-        )
+        val vedtak1 =
+            vedtak(
+                sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(Faktatype.ETTER_HOVEDREGEL),
+                utbetalingId = UUID.randomUUID(),
+            )
 
-        val vedtak2 = vedtak(
-            sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(Faktatype.ETTER_HOVEDREGEL),
-            utbetalingId = UUID.randomUUID(),
-        )
+        val vedtak2 =
+            vedtak(
+                sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(Faktatype.ETTER_HOVEDREGEL),
+                utbetalingId = UUID.randomUUID(),
+            )
 
         assertNotEquals(vedtak1, vedtak2)
         assertNotEquals(vedtak1.hashCode(), vedtak2.hashCode())
@@ -307,34 +313,39 @@ class SykepengevedtakEqualsTest {
 
     private fun sykepengegrunnlagsfakta(faktatype: Faktatype): Sykepengegrunnlagsfakta {
         return when (faktatype) {
-            Faktatype.ETTER_SKJØNN -> Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
-                omregnetÅrsinntekt = omregnetÅrsinntekt,
-                innrapportertÅrsinntekt = innrapportertÅrsinntekt,
-                avviksprosent = avviksprosent,
-                seksG = seksG2023,
-                skjønnsfastsatt = 650000.0,
-                tags = mutableSetOf(),
-                arbeidsgivere = listOf(
-                    Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(organisasjonsnummer, 300000.0, 300000.0, 325000.0),
-                    Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn("987654321", 300000.0, 300000.0, 325000.0)
+            Faktatype.ETTER_SKJØNN ->
+                Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
+                    omregnetÅrsinntekt = omregnetÅrsinntekt,
+                    innrapportertÅrsinntekt = innrapportertÅrsinntekt,
+                    avviksprosent = avviksprosent,
+                    seksG = seksG2023,
+                    skjønnsfastsatt = 650000.0,
+                    tags = mutableSetOf(),
+                    arbeidsgivere =
+                        listOf(
+                            Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(organisasjonsnummer, 300000.0, 300000.0, 325000.0),
+                            Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn("987654321", 300000.0, 300000.0, 325000.0),
+                        ),
                 )
-            )
 
-            Faktatype.ETTER_HOVEDREGEL -> Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
-                omregnetÅrsinntekt = omregnetÅrsinntekt,
-                innrapportertÅrsinntekt = innrapportertÅrsinntekt,
-                avviksprosent = avviksprosent,
-                seksG = seksG2023,
-                tags = mutableSetOf(),
-                arbeidsgivere = listOf(
-                    Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(organisasjonsnummer, 300000.0, 300000.0),
-                    Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel("987654321", 300000.0, 300000.0)
+            Faktatype.ETTER_HOVEDREGEL ->
+                Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
+                    omregnetÅrsinntekt = omregnetÅrsinntekt,
+                    innrapportertÅrsinntekt = innrapportertÅrsinntekt,
+                    avviksprosent = avviksprosent,
+                    seksG = seksG2023,
+                    tags = mutableSetOf(),
+                    arbeidsgivere =
+                        listOf(
+                            Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(organisasjonsnummer, 300000.0, 300000.0),
+                            Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel("987654321", 300000.0, 300000.0),
+                        ),
                 )
-            )
 
-            Faktatype.I_INFOTRYGD -> Sykepengegrunnlagsfakta.Infotrygd(
-                omregnetÅrsinntekt = omregnetÅrsinntekt,
-            )
+            Faktatype.I_INFOTRYGD ->
+                Sykepengegrunnlagsfakta.Infotrygd(
+                    omregnetÅrsinntekt = omregnetÅrsinntekt,
+                )
         }
     }
 }

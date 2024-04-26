@@ -1,4 +1,4 @@
-package no.nav.helse.modell.sykefraværstilfelle
+package no.nav.helse.modell.vedtak
 
 import java.time.LocalDate
 import java.time.LocalDateTime

@@ -2,8 +2,8 @@ package no.nav.helse.modell.vedtaksperiode
 
 import no.nav.helse.januar
 import no.nav.helse.modell.varsel.Varsel
+import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
-import no.nav.helse.modell.vedtaksperiode.vedtak.SykepengevedtakBuilder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

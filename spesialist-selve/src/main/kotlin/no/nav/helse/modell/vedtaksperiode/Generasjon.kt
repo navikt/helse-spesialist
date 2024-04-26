@@ -12,7 +12,7 @@ import no.nav.helse.modell.varsel.Varsel.Companion.inneholderSvartelistedeVarsle
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderVarselOmAvvik
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderVarselOmNegativtBeløp
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderVarselOmTilbakedatering
-import no.nav.helse.modell.vedtaksperiode.vedtak.SykepengevedtakBuilder
+import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate

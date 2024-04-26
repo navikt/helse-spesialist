@@ -1,8 +1,11 @@
 package no.nav.helse.modell.sykefraværstilfelle
 
 import no.nav.helse.modell.person.PersonObserver
-import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastsattSykepengegrunnlag.Companion.sortert
 import no.nav.helse.modell.varsel.Varsel
+import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
+import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag.Companion.sortert
+import no.nav.helse.modell.vedtak.Sykepengevedtak
+import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.deaktiver
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.erTilbakedatert
@@ -13,8 +16,6 @@ import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterNyttVarse
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverSkjønnsfastsettelse
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverTotrinnsvurdering
 import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetMedVedtak
-import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengevedtak
-import no.nav.helse.modell.vedtaksperiode.vedtak.SykepengevedtakBuilder
 import java.time.LocalDate
 import java.util.UUID
 
@@ -36,7 +37,9 @@ internal class Sykefraværstilfelle(
     internal fun haster(vedtaksperiodeId: UUID): Boolean {
         val generasjon =
             gjeldendeGenerasjoner.finnGenerasjonForVedtaksperiode(vedtaksperiodeId)
-                ?: throw IllegalArgumentException("Finner ikke generasjon med vedtaksperiodeId=$vedtaksperiodeId i sykefraværstilfelle med skjæringstidspunkt=$skjæringstidspunkt")
+                ?: throw IllegalArgumentException(
+                    "Finner ikke generasjon med vedtaksperiodeId=$vedtaksperiodeId i sykefraværstilfelle med skjæringstidspunkt=$skjæringstidspunkt",
+                )
         return generasjon.hasterÅBehandle()
     }
 

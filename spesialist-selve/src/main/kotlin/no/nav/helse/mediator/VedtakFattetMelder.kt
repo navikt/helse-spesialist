@@ -2,10 +2,10 @@ package no.nav.helse.mediator
 
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.person.PersonObserver
+import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Infotrygd
+import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis
+import no.nav.helse.modell.vedtak.Sykepengevedtak
 import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
-import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengegrunnlagsfakta.Infotrygd
-import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengegrunnlagsfakta.Spleis
-import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengevedtak
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import org.slf4j.LoggerFactory
@@ -69,14 +69,15 @@ internal class VedtakFattetMelder(
                     "sykepengegrunnlagsfakta" to
                         when (sykepengevedtak.sykepengegrunnlagsfakta) {
                             is Spleis -> {
+                                val sykepengegrunnlagsfakta = (sykepengevedtak.sykepengegrunnlagsfakta as Spleis)
                                 mutableMapOf(
-                                    "omregnetÅrsinntekt" to sykepengevedtak.sykepengegrunnlagsfakta.omregnetÅrsinntekt,
-                                    "innrapportertÅrsinntekt" to sykepengevedtak.sykepengegrunnlagsfakta.innrapportertÅrsinntekt,
-                                    "avviksprosent" to sykepengevedtak.sykepengegrunnlagsfakta.avviksprosent,
-                                    "6G" to sykepengevedtak.sykepengegrunnlagsfakta.seksG,
-                                    "tags" to sykepengevedtak.sykepengegrunnlagsfakta.tags,
+                                    "omregnetÅrsinntekt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
+                                    "innrapportertÅrsinntekt" to sykepengegrunnlagsfakta.innrapportertÅrsinntekt,
+                                    "avviksprosent" to sykepengegrunnlagsfakta.avviksprosent,
+                                    "6G" to sykepengegrunnlagsfakta.seksG,
+                                    "tags" to sykepengegrunnlagsfakta.tags,
                                     "arbeidsgivere" to
-                                        sykepengevedtak.sykepengegrunnlagsfakta.arbeidsgivere.map {
+                                        sykepengegrunnlagsfakta.arbeidsgivere.map {
                                             mutableMapOf(
                                                 "arbeidsgiver" to it.organisasjonsnummer,
                                                 "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
@@ -91,15 +92,21 @@ internal class VedtakFattetMelder(
                                             }
                                         },
                                 ).apply {
-                                    when (sykepengevedtak.sykepengegrunnlagsfakta) {
+                                    when (sykepengegrunnlagsfakta) {
                                         is Spleis.EtterHovedregel -> put("fastsatt", "EtterHovedregel")
                                         is Spleis.EtterSkjønn -> {
                                             put("fastsatt", "EtterSkjønn")
-                                            put("skjønnsfastsettingtype", checkNotNull(sykepengevedtak.skjønnsfastsettingopplysninger?.skjønnsfastsettingtype))
-                                            put("skjønnsfastsettingårsak", checkNotNull(sykepengevedtak.skjønnsfastsettingopplysninger?.skjønnsfastsettingsårsak))
+                                            put(
+                                                "skjønnsfastsettingtype",
+                                                checkNotNull(sykepengevedtak.skjønnsfastsettingopplysninger?.skjønnsfastsettingtype),
+                                            )
+                                            put(
+                                                "skjønnsfastsettingårsak",
+                                                checkNotNull(sykepengevedtak.skjønnsfastsettingopplysninger?.skjønnsfastsettingsårsak),
+                                            )
                                             put(
                                                 "skjønnsfastsatt",
-                                                sykepengevedtak.sykepengegrunnlagsfakta.skjønnsfastsatt,
+                                                (sykepengevedtak.sykepengegrunnlagsfakta as Spleis.EtterSkjønn).skjønnsfastsatt,
                                             )
                                         }
                                     }
@@ -124,7 +131,8 @@ internal class VedtakFattetMelder(
                                     "perioder" to
                                         listOf(
                                             mapOf(
-                                                "fom" to "${sykepengevedtak.fom}", "tom" to "${sykepengevedtak.tom}",
+                                                "fom" to "${sykepengevedtak.fom}",
+                                                "tom" to "${sykepengevedtak.tom}",
                                             ),
                                         ),
                                 ),
@@ -134,7 +142,8 @@ internal class VedtakFattetMelder(
                                     "perioder" to
                                         listOf(
                                             mapOf(
-                                                "fom" to "${sykepengevedtak.fom}", "tom" to "${sykepengevedtak.tom}",
+                                                "fom" to "${sykepengevedtak.fom}",
+                                                "tom" to "${sykepengevedtak.tom}",
                                             ),
                                         ),
                                 ),
@@ -144,7 +153,8 @@ internal class VedtakFattetMelder(
                                     "perioder" to
                                         listOf(
                                             mapOf(
-                                                "fom" to "${sykepengevedtak.fom}", "tom" to "${sykepengevedtak.tom}",
+                                                "fom" to "${sykepengevedtak.fom}",
+                                                "tom" to "${sykepengevedtak.tom}",
                                             ),
                                         ),
                                 ),

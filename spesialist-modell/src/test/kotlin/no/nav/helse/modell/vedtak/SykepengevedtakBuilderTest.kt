@@ -1,24 +1,20 @@
-package no.nav.helse.modell.vedtaksperiode.vedtak
+package no.nav.helse.modell.vedtak
 
-import java.time.LocalDateTime
-import java.util.UUID
-import no.nav.helse.januar
-import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastsattSykepengegrunnlag
-import no.nav.helse.modell.sykefraværstilfelle.Skjønnsfastsettingstype
-import no.nav.helse.modell.sykefraværstilfelle.Skjønnsfastsettingsårsak
-import no.nav.helse.modell.vedtaksperiode.vedtak.Faktatype.ETTER_HOVEDREGEL
-import no.nav.helse.modell.vedtaksperiode.vedtak.Faktatype.ETTER_SKJØNN
-import no.nav.helse.modell.vedtaksperiode.vedtak.Faktatype.I_INFOTRYGD
-import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengegrunnlagsfakta.Infotrygd
-import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengegrunnlagsfakta.Spleis
-import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver
+import no.nav.helse.modell.januar
+import no.nav.helse.modell.vedtak.Faktatype.ETTER_HOVEDREGEL
+import no.nav.helse.modell.vedtak.Faktatype.ETTER_SKJØNN
+import no.nav.helse.modell.vedtak.Faktatype.I_INFOTRYGD
+import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Infotrygd
+import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis
+import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDateTime
+import java.util.UUID
 
 class SykepengevedtakBuilderTest {
-
     private companion object {
         private const val fødselsnummer = "12345678910"
         private const val aktørId = "1234567891011"
@@ -32,10 +28,11 @@ class SykepengevedtakBuilderTest {
         private val hendelser = listOf(UUID.randomUUID(), UUID.randomUUID())
         private const val sykepengegrunnlag = 600000.00
         private const val grunnlagForSykepengegrunnlag = 600000.00
-        private val grunnlagForSykepengegrunnlagPerArbeidsgiver = mapOf(
-            organisasjonsnummer to 300000.00,
-            "987654321" to 300000.00
-        )
+        private val grunnlagForSykepengegrunnlagPerArbeidsgiver =
+            mapOf(
+                organisasjonsnummer to 300000.00,
+                "987654321" to 300000.00,
+            )
         private const val begrensning = "ER_6G_BEGRENSET"
         private const val inntekt = 25000.00
         private val vedtakFattetTidspunkt = LocalDateTime.now()
@@ -90,8 +87,9 @@ class SykepengevedtakBuilderTest {
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_HOVEDREGEL),
                 utbetalingId = utbetalingId,
                 skjønnsfastsettingopplysninger = null,
-                tags = setOf("IngenNyArbeidsgiverperiode")
-            ), utkast
+                tags = setOf("IngenNyArbeidsgiverperiode"),
+            ),
+            utkast,
         )
     }
 
@@ -116,7 +114,17 @@ class SykepengevedtakBuilderTest {
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_SKJØNN))
-            .skjønnsfastsattSykepengegrunnlag(SkjønnsfastsattSykepengegrunnlag(Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT, Skjønnsfastsettingsårsak.ANDRE_AVSNITT, skjæringstidspunkt, "Mal", "Fritekst", "Konklusjon", LocalDateTime.now()))
+            .skjønnsfastsattSykepengegrunnlag(
+                SkjønnsfastsattSykepengegrunnlag(
+                    Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
+                    Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
+                    skjæringstidspunkt,
+                    "Mal",
+                    "Fritekst",
+                    "Konklusjon",
+                    LocalDateTime.now(),
+                ),
+            )
             .tags(listOf("IngenNyArbeidsgiverperiode"))
 
         val utkast = builder.build()
@@ -140,9 +148,17 @@ class SykepengevedtakBuilderTest {
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_SKJØNN),
                 utbetalingId = utbetalingId,
-                skjønnsfastsettingopplysninger = SkjønnsfastsettingopplysningerDto("Mal", "Fritekst", "Konklusjon", Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT, Skjønnsfastsettingsårsak.ANDRE_AVSNITT),
-                tags = setOf("IngenNyArbeidsgiverperiode")
-            ), utkast
+                skjønnsfastsettingopplysninger =
+                    SkjønnsfastsettingopplysningerDto(
+                        "Mal",
+                        "Fritekst",
+                        "Konklusjon",
+                        Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
+                        Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
+                    ),
+                tags = setOf("IngenNyArbeidsgiverperiode"),
+            ),
+            utkast,
         )
     }
 
@@ -191,8 +207,9 @@ class SykepengevedtakBuilderTest {
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(I_INFOTRYGD),
                 utbetalingId = utbetalingId,
                 skjønnsfastsettingopplysninger = null,
-                tags = setOf("IngenNyArbeidsgiverperiode")
-            ), utkast
+                tags = setOf("IngenNyArbeidsgiverperiode"),
+            ),
+            utkast,
         )
     }
 
@@ -236,8 +253,9 @@ class SykepengevedtakBuilderTest {
                 begrensning = begrensning,
                 inntekt = inntekt,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
-                tags = setOf("IngenNyArbeidsgiverperiode")
-            ), utkast
+                tags = setOf("IngenNyArbeidsgiverperiode"),
+            ),
+            utkast,
         )
     }
 
@@ -361,7 +379,13 @@ class SykepengevedtakBuilderTest {
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_HOVEDREGEL))
-            .skjønnsfastsettingData("Fritekst", "Mal", "Konklusjon", Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT, Skjønnsfastsettingsårsak.ANDRE_AVSNITT)
+            .skjønnsfastsettingData(
+                "Fritekst",
+                "Mal",
+                "Konklusjon",
+                Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT,
+                Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
+            )
             .tags(listOf("IngenNyArbeidsgiverperiode"))
 
         val utkast = builder.build()
@@ -387,38 +411,44 @@ class SykepengevedtakBuilderTest {
                 utbetalingId = utbetalingId,
                 skjønnsfastsettingopplysninger = null,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-            ), utkast
+            ),
+            utkast,
         )
     }
 
     private fun sykepengegrunnlagsfakta(faktatype: Faktatype): Sykepengegrunnlagsfakta {
-        return when(faktatype) {
-            ETTER_SKJØNN -> Spleis.EtterSkjønn(
-                omregnetÅrsinntekt = omregnetÅrsinntekt,
-                innrapportertÅrsinntekt = innrapportertÅrsinntekt,
-                avviksprosent = avviksprosent,
-                seksG = seksG2023,
-                skjønnsfastsatt = 650000.0,
-                tags = mutableSetOf(),
-                arbeidsgivere = listOf(
-                    Arbeidsgiver.EtterSkjønn(organisasjonsnummer, 300000.0, 300000.0, 325000.0),
-                    Arbeidsgiver.EtterSkjønn("987654321", 300000.0, 300000.0, 325000.0)
+        return when (faktatype) {
+            ETTER_SKJØNN ->
+                Spleis.EtterSkjønn(
+                    omregnetÅrsinntekt = omregnetÅrsinntekt,
+                    innrapportertÅrsinntekt = innrapportertÅrsinntekt,
+                    avviksprosent = avviksprosent,
+                    seksG = seksG2023,
+                    skjønnsfastsatt = 650000.0,
+                    tags = mutableSetOf(),
+                    arbeidsgivere =
+                        listOf(
+                            Arbeidsgiver.EtterSkjønn(organisasjonsnummer, 300000.0, 300000.0, 325000.0),
+                            Arbeidsgiver.EtterSkjønn("987654321", 300000.0, 300000.0, 325000.0),
+                        ),
                 )
-            )
-            ETTER_HOVEDREGEL -> Spleis.EtterHovedregel(
-                omregnetÅrsinntekt = omregnetÅrsinntekt,
-                innrapportertÅrsinntekt = innrapportertÅrsinntekt,
-                avviksprosent = avviksprosent,
-                seksG = seksG2023,
-                tags = mutableSetOf(),
-                arbeidsgivere = listOf(
-                    Arbeidsgiver.EtterHovedregel(organisasjonsnummer, 300000.0, 300000.0),
-                    Arbeidsgiver.EtterHovedregel("987654321", 300000.0, 300000.0)
+            ETTER_HOVEDREGEL ->
+                Spleis.EtterHovedregel(
+                    omregnetÅrsinntekt = omregnetÅrsinntekt,
+                    innrapportertÅrsinntekt = innrapportertÅrsinntekt,
+                    avviksprosent = avviksprosent,
+                    seksG = seksG2023,
+                    tags = mutableSetOf(),
+                    arbeidsgivere =
+                        listOf(
+                            Arbeidsgiver.EtterHovedregel(organisasjonsnummer, 300000.0, 300000.0),
+                            Arbeidsgiver.EtterHovedregel("987654321", 300000.0, 300000.0),
+                        ),
                 )
-            )
-            I_INFOTRYGD -> Infotrygd(
-                omregnetÅrsinntekt = omregnetÅrsinntekt,
-            )
+            I_INFOTRYGD ->
+                Infotrygd(
+                    omregnetÅrsinntekt = omregnetÅrsinntekt,
+                )
         }
     }
 }

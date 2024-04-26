@@ -1,5 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode.vedtak
 
+import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import java.time.LocalDateTime
 import java.util.UUID
 

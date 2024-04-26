@@ -3,10 +3,10 @@ package no.nav.helse.db
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.TransactionalSession
 import no.nav.helse.HelseDao
-import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastsattSykepengegrunnlag
-import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastsattSykepengegrunnlagDto
-import no.nav.helse.modell.sykefraværstilfelle.Skjønnsfastsettingsårsak
-import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastsettingsårsakDto
+import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
+import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
+import no.nav.helse.modell.vedtak.Skjønnsfastsettingsårsak
+import no.nav.helse.modell.vedtak.SkjønnsfastsettingsårsakDto
 import no.nav.helse.objectMapper
 import java.time.LocalDate
 import javax.sql.DataSource

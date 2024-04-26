@@ -16,6 +16,7 @@ import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.VarselStatusDto
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
+import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForSpleisBehandling
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForVedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnSisteGenerasjonUtenSpleisBehandlingId
@@ -23,7 +24,6 @@ import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverSkjønnsfas
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverTotrinnsvurdering
 import no.nav.helse.modell.vedtaksperiode.Periode.Companion.til
 import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
-import no.nav.helse.modell.vedtaksperiode.vedtak.SykepengevedtakBuilder
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -272,22 +272,25 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
     fun `finn generasjon med spleisBehandlingId`() {
         val spleisBehandlingId = UUID.randomUUID()
         val generasjonDetSøkesEtter = generasjon(spleisBehandlingId = spleisBehandlingId)
-        val generasjoner = listOf(
-            generasjonDetSøkesEtter,
-            generasjon(spleisBehandlingId = UUID.randomUUID()),
-            generasjon(spleisBehandlingId = null)
-        )
+        val generasjoner =
+            listOf(
+                generasjonDetSøkesEtter,
+                generasjon(spleisBehandlingId = UUID.randomUUID()),
+                generasjon(spleisBehandlingId = null),
+            )
         assertEquals(generasjonDetSøkesEtter, generasjoner.finnGenerasjonForSpleisBehandling(spleisBehandlingId))
         assertNull(generasjoner.finnGenerasjonForSpleisBehandling(UUID.randomUUID()))
     }
+
     @Test
     fun `finn siste generasjon uten spleisBehandlingId`() {
         val generasjonMedBehandlingIdNull = generasjon(spleisBehandlingId = null)
-        val generasjoner = mutableListOf(
-            generasjon(spleisBehandlingId = UUID.randomUUID()),
-            generasjonMedBehandlingIdNull,
-            generasjon(spleisBehandlingId = UUID.randomUUID())
-        )
+        val generasjoner =
+            mutableListOf(
+                generasjon(spleisBehandlingId = UUID.randomUUID()),
+                generasjonMedBehandlingIdNull,
+                generasjon(spleisBehandlingId = UUID.randomUUID()),
+            )
         assertEquals(generasjonMedBehandlingIdNull, generasjoner.finnSisteGenerasjonUtenSpleisBehandlingId())
 
         val nyGenerasjonMedBehandlingIdNull = generasjon(spleisBehandlingId = null)

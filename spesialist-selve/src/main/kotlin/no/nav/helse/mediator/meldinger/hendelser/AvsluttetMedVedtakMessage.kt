@@ -8,10 +8,10 @@ import no.nav.helse.mediator.meldinger.VedtaksperiodemeldingOld
 import no.nav.helse.modell.avviksvurdering.Avviksvurdering.Companion.finnRiktigAvviksvurdering
 import no.nav.helse.modell.avviksvurdering.InnrapportertInntektDto
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
+import no.nav.helse.modell.vedtak.Faktatype
+import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetMedVedtak
-import no.nav.helse.modell.vedtaksperiode.vedtak.Faktatype
-import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -74,13 +74,15 @@ internal class AvsluttetMedVedtakMessage(
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
             fom = fom,
             tom = tom,
-            vedtakFattetTidspunkt = vedtakFattetTidspunkt
+            vedtakFattetTidspunkt = vedtakFattetTidspunkt,
         )
 
     internal fun sendInnTil(sykefraværstilfelle: Sykefraværstilfelle) {
         val tags: List<String> = generasjonDao.finnTagsFor(spleisBehandlingId) ?: emptyList()
         if (tags.isEmpty()) {
-            sikkerLogg.error("Ingen tags funnet for spleisBehandlingId: $spleisBehandlingId på vedtaksperiodeId: $vedtaksperiodeId, json: ${toJson()}")
+            sikkerLogg.error(
+                "Ingen tags funnet for spleisBehandlingId: $spleisBehandlingId på vedtaksperiodeId: $vedtaksperiodeId, json: ${toJson()}",
+            )
         }
         sykefraværstilfelle.håndter(avsluttetMedVedtak, tags)
     }
