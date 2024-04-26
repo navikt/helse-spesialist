@@ -39,8 +39,6 @@ internal class VedtakFattet private constructor(
 
     override fun toJson(): String = json
 
-    internal fun erRelevantFor(vedtaksperiodeId: UUID) = this.vedtaksperiodeId == vedtaksperiodeId
-
     internal fun doFinally(vedtakDao: VedtakDao) {
         if (vedtakDao.erSpesialsak(vedtaksperiodeId)) vedtakDao.spesialsakFerdigbehandlet(vedtaksperiodeId)
     }

@@ -61,5 +61,5 @@ class TotrinnsvurderingMediator(
 
     fun hentAktiv(vedtaksperiodeId: UUID): TotrinnsvurderingOld? = dao.hentAktiv(vedtaksperiodeId)
 
-    fun hentAktiv(oppgaveId: Long): TotrinnsvurderingOld? = dao.hentAktiv(oppgaveId)
+    private fun hentAktiv(oppgaveId: Long): TotrinnsvurderingOld? = dao.hentAktiv(oppgaveId)
 }

@@ -47,8 +47,6 @@ internal class VedtaksperiodeForkastet private constructor(
         kommandofabrikk.iverksettVedtaksperiodeForkastet(this)
     }
 
-    internal fun erRelevantFor(vedtaksperiodeId: UUID) = this.vedtaksperiodeId == vedtaksperiodeId
-
     override fun toJson() = json
 }
 

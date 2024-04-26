@@ -269,45 +269,6 @@ class GenerasjonDao(private val dataSource: DataSource) {
         return queryOf(query, vedtaksperiodeId)
     }
 
-    internal fun utbetalingFor(
-        generasjonId: UUID,
-        utbetalingId: UUID,
-    ): Generasjon? {
-        @Language("PostgreSQL")
-        val query = """
-            UPDATE selve_vedtaksperiode_generasjon 
-            SET utbetaling_id = ? 
-            WHERE unik_id = ?
-            RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, spleis_behandling_id, skjæringstidspunkt, fom, tom, tilstand, tags;
-            """
-
-        return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, utbetalingId, generasjonId).map(::toGenerasjon).asSingle)
-        }
-    }
-
-    internal fun fjernUtbetalingFor(generasjonId: UUID): Generasjon? {
-        @Language("PostgreSQL")
-        val query = """
-            UPDATE selve_vedtaksperiode_generasjon 
-            SET utbetaling_id = null 
-            WHERE unik_id = ?
-            RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, spleis_behandling_id, skjæringstidspunkt, fom, tom, tilstand, tags;
-            """
-
-        return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, generasjonId).map(::toGenerasjon).asSingle)
-        }
-    }
-
-    internal fun finnVedtaksperiodeIderFor(utbetalingId: UUID): Set<UUID> {
-        @Language("PostgreSQL")
-        val query = """SELECT vedtaksperiode_id FROM selve_vedtaksperiode_generasjon WHERE utbetaling_id = ?"""
-        return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, utbetalingId).map { it.uuid("vedtaksperiode_id") }.asList).toSet()
-        }
-    }
-
     internal fun finnVedtaksperiodeIderFor(
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate,

@@ -403,21 +403,6 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `kan sette utbetaling_id for siste generasjon hvis den er åpen`() {
-        val generasjonId = UUID.randomUUID()
-        generasjonDao.opprettFor(
-            generasjonId,
-            VEDTAKSPERIODE,
-            UUID.randomUUID(),
-            1.januar,
-            Periode(1.januar, 31.januar),
-            Generasjon.VidereBehandlingAvklares,
-        )
-        generasjonDao.utbetalingFor(generasjonId, UTBETALING_ID)
-        assertUtbetaling(generasjonId, UTBETALING_ID)
-    }
-
-    @Test
     fun `generasjon hentes opp sammen med varsler`() {
         generasjonDao.opprettFor(
             UUID.randomUUID(),
@@ -494,50 +479,6 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         val vedtaksperiodeIder = generasjonDao.finnVedtaksperiodeIderFor(FNR, 1.januar)
         assertEquals(1, vedtaksperiodeIder.size)
         assertTrue(vedtaksperiodeIder.contains(VEDTAKSPERIODE))
-    }
-
-    @Test
-    fun `finner alle generasjoner knyttet til en utbetalingId`() {
-        val generasjonId1 = UUID.randomUUID()
-        val generasjonId2 = UUID.randomUUID()
-        val utbetalingId = UUID.randomUUID()
-        generasjonDao.opprettFor(
-            generasjonId1,
-            UUID.randomUUID(),
-            UUID.randomUUID(),
-            1.januar,
-            Periode(1.januar, 31.januar),
-            Generasjon.VidereBehandlingAvklares,
-        )
-        generasjonDao.opprettFor(
-            generasjonId2,
-            UUID.randomUUID(),
-            UUID.randomUUID(),
-            1.januar,
-            Periode(1.januar, 31.januar),
-            Generasjon.VidereBehandlingAvklares,
-        )
-        generasjonDao.utbetalingFor(generasjonId1, utbetalingId)
-        generasjonDao.utbetalingFor(generasjonId2, utbetalingId)
-
-        assertEquals(2, generasjonDao.finnVedtaksperiodeIderFor(utbetalingId).size)
-    }
-
-    @Test
-    fun `Kan fjerne utbetaling fra generasjon`() {
-        val generasjonId = UUID.randomUUID()
-        generasjonDao.opprettFor(
-            generasjonId,
-            VEDTAKSPERIODE,
-            UUID.randomUUID(),
-            1.januar,
-            Periode(1.januar, 31.januar),
-            Generasjon.VidereBehandlingAvklares,
-        )
-        generasjonDao.utbetalingFor(generasjonId, UTBETALING_ID)
-        assertUtbetaling(generasjonId, UTBETALING_ID)
-        generasjonDao.fjernUtbetalingFor(generasjonId)
-        assertUtbetaling(generasjonId, null)
     }
 
     @Test
@@ -696,26 +637,6 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             }
 
         assertEquals(forventetTilstand.navn(), tilstand)
-    }
-
-    private fun assertUtbetaling(
-        generasjonId: UUID,
-        forventetUtbetalingId: UUID?,
-    ) {
-        val utbetalingId =
-            sessionOf(dataSource).use { session ->
-                @Language("PostgreSQL")
-                val query =
-                    "SELECT utbetaling_id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?"
-
-                session.run(
-                    queryOf(query, generasjonId).map {
-                        it.uuidOrNull("utbetaling_id")
-                    }.asSingle,
-                )
-            }
-
-        assertEquals(forventetUtbetalingId, utbetalingId)
     }
 
     private fun finnSøknadMottatt(vedtaksperiodeId: UUID) =
