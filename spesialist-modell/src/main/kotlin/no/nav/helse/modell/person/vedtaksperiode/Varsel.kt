@@ -1,24 +1,23 @@
-package no.nav.helse.modell.varsel
+package no.nav.helse.modell.person.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.modell.person.vedtaksperiode.IVedtaksperiodeObserver
-import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
-import no.nav.helse.modell.varsel.Varsel.Status.AVVIST
-import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
-import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
-import no.nav.helse.modell.varsel.Varsel.Status.VURDERT
+import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AKTIV
+import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AVVIST
+import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.GODKJENT
+import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.INAKTIV
+import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.VURDERT
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class Varsel(
+class Varsel(
     private val id: UUID,
     private val varselkode: String,
     private val opprettet: LocalDateTime,
     private val vedtaksperiodeId: UUID,
     private var status: Status = AKTIV,
 ) {
-    internal enum class Status {
+    enum class Status {
         AKTIV,
         INAKTIV,
         GODKJENT,
@@ -27,7 +26,7 @@ internal class Varsel(
         AVVIKLET,
         ;
 
-        internal fun toDto(): VarselStatusDto {
+        fun toDto(): VarselStatusDto {
             return when (this) {
                 AKTIV -> VarselStatusDto.AKTIV
                 INAKTIV -> VarselStatusDto.INAKTIV
@@ -41,33 +40,33 @@ internal class Varsel(
 
     private val observers = mutableSetOf<IVedtaksperiodeObserver>()
 
-    internal fun vedtaksperiodeId() = vedtaksperiodeId
+    fun vedtaksperiodeId() = vedtaksperiodeId
 
-    internal fun registrer(vararg observer: IVedtaksperiodeObserver) {
+    fun registrer(vararg observer: IVedtaksperiodeObserver) {
         observers.addAll(observer)
     }
 
-    internal fun toDto(): VarselDto {
+    fun toDto(): VarselDto {
         return VarselDto(id, varselkode, opprettet, vedtaksperiodeId, status.toDto())
     }
 
-    internal fun erAktiv(): Boolean = this.status == AKTIV
+    fun erAktiv(): Boolean = this.status == AKTIV
 
-    internal fun erVarselOmAvvik(): Boolean {
+    fun erVarselOmAvvik(): Boolean {
         return this.varselkode == "RV_IV_2"
     }
 
-    internal fun opprett(generasjonId: UUID) {
+    fun opprett(generasjonId: UUID) {
         observers.forEach { it.varselOpprettet(id, vedtaksperiodeId, generasjonId, varselkode, opprettet) }
     }
 
-    internal fun reaktiver(generasjonId: UUID) {
+    fun reaktiver(generasjonId: UUID) {
         if (status != INAKTIV) return
         this.status = AKTIV
         observers.forEach { it.varselReaktivert(id, varselkode, generasjonId, vedtaksperiodeId) }
     }
 
-    internal fun deaktiver(generasjonId: UUID) {
+    fun deaktiver(generasjonId: UUID) {
         if (status != AKTIV) return
         this.status = INAKTIV
         observers.forEach { it.varselDeaktivert(id, varselkode, generasjonId, vedtaksperiodeId) }
@@ -95,48 +94,48 @@ internal class Varsel(
         return result
     }
 
-    internal fun erRelevantFor(vedtaksperiodeId: UUID): Boolean = this.vedtaksperiodeId == vedtaksperiodeId
+    fun erRelevantFor(vedtaksperiodeId: UUID): Boolean = this.vedtaksperiodeId == vedtaksperiodeId
 
-    internal fun godkjennSpesialsakvarsel(generasjonId: UUID) {
+    fun godkjennSpesialsakvarsel(generasjonId: UUID) {
         if (status == GODKJENT) return
         status = GODKJENT
         observers.forEach { it.varselGodkjent(id, varselkode, generasjonId, vedtaksperiodeId, "Automatisk godkjent - spesialsak") }
     }
 
-    internal companion object {
-        internal fun List<Varsel>.finnEksisterendeVarsel(varsel: Varsel): Varsel? {
+    companion object {
+        fun List<Varsel>.finnEksisterendeVarsel(varsel: Varsel): Varsel? {
             return find { it.varselkode == varsel.varselkode }
         }
 
-        internal fun List<Varsel>.finnEksisterendeVarsel(varselkode: String): Varsel? {
+        fun List<Varsel>.finnEksisterendeVarsel(varselkode: String): Varsel? {
             return find { it.varselkode == varselkode }
         }
 
-        internal fun List<Varsel>.inneholderMedlemskapsvarsel(): Boolean {
+        fun List<Varsel>.inneholderMedlemskapsvarsel(): Boolean {
             return any { it.status == AKTIV && it.varselkode == "RV_MV_1" }
         }
 
-        internal fun List<Varsel>.inneholderVarselOmNegativtBeløp(): Boolean {
+        fun List<Varsel>.inneholderVarselOmNegativtBeløp(): Boolean {
             return any { it.status == AKTIV && it.varselkode == "RV_UT_23" }
         }
 
-        internal fun List<Varsel>.inneholderAktivtVarselOmAvvik(): Boolean {
+        fun List<Varsel>.inneholderAktivtVarselOmAvvik(): Boolean {
             return any { it.status == AKTIV && it.varselkode == "RV_IV_2" }
         }
 
-        internal fun List<Varsel>.inneholderVarselOmAvvik(): Boolean {
+        fun List<Varsel>.inneholderVarselOmAvvik(): Boolean {
             return any { it.varselkode == "RV_IV_2" }
         }
 
-        internal fun List<Varsel>.inneholderVarselOmTilbakedatering(): Boolean {
+        fun List<Varsel>.inneholderVarselOmTilbakedatering(): Boolean {
             return any { it.status == AKTIV && it.varselkode == "RV_SØ_3" }
         }
 
-        internal fun List<Varsel>.inneholderSvartelistedeVarsler(): Boolean {
+        fun List<Varsel>.inneholderSvartelistedeVarsler(): Boolean {
             return any { it.varselkode in neiVarsler }
         }
 
-        internal fun List<Varsel>.automatiskGodkjennSpesialsakvarsler(generasjonId: UUID) {
+        fun List<Varsel>.automatiskGodkjennSpesialsakvarsler(generasjonId: UUID) {
             forEach { it.godkjennSpesialsakvarsel(generasjonId) }
         }
 
@@ -150,9 +149,9 @@ internal class Varsel(
                 "SB_RV_3",
             )
 
-        internal fun List<Varsel>.forhindrerAutomatisering() = any { it.status in listOf(VURDERT, AKTIV, AVVIST) }
+        fun List<Varsel>.forhindrerAutomatisering() = any { it.status in listOf(VURDERT, AKTIV, AVVIST) }
 
-        internal fun JsonNode.varsler(): List<Varsel> {
+        fun JsonNode.varsler(): List<Varsel> {
             return this
                 .filter { it["nivå"].asText() == "VARSEL" && it["varselkode"]?.asText() != null }
                 .filter { it["kontekster"].any { kontekst -> kontekst["konteksttype"].asText() == "Vedtaksperiode" } }

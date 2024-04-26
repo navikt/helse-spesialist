@@ -5,15 +5,16 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import java.util.UUID
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.vergemal.VergemålDao
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class VurderEnhetUtlandTest {
     private lateinit var context: CommandContext
@@ -33,7 +34,7 @@ internal class VurderEnhetUtlandTest {
         val slot = slot<Varsel>()
         every { personDao.finnEnhetId(fødselsnummer) } returns "0393"
         assertTrue(hentCommand().execute(context))
-        verify (exactly = 1) { sykefraværstilfelle.håndter(capture(slot), hendelseId) }
+        verify(exactly = 1) { sykefraværstilfelle.håndter(capture(slot), hendelseId) }
         assertEquals("SB_EX_5", slot.captured.toDto().varselkode)
     }
 
@@ -42,7 +43,7 @@ internal class VurderEnhetUtlandTest {
         val slot = slot<Varsel>()
         every { personDao.finnEnhetId(fødselsnummer) } returns "0393"
         assertTrue(hentCommand().execute(context))
-        verify (exactly = 1) { sykefraværstilfelle.håndter(capture(slot), hendelseId) }
+        verify(exactly = 1) { sykefraværstilfelle.håndter(capture(slot), hendelseId) }
         assertEquals("SB_EX_5", slot.captured.toDto().varselkode)
     }
 
@@ -52,7 +53,7 @@ internal class VurderEnhetUtlandTest {
             vedtaksperiodeId = vedtaksperiodeId,
             personDao = personDao,
             hendelseId = hendelseId,
-            sykefraværstilfelle = sykefraværstilfelle
+            sykefraværstilfelle = sykefraværstilfelle,
         )
 
     private companion object {
@@ -60,5 +61,4 @@ internal class VurderEnhetUtlandTest {
         private val vedtaksperiodeId = UUID.randomUUID()
         private val hendelseId = UUID.randomUUID()
     }
-
 }

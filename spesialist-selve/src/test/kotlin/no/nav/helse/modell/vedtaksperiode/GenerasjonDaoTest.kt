@@ -6,10 +6,10 @@ import kotliquery.sessionOf
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mediator.builders.GenerasjonBuilder
+import no.nav.helse.modell.person.vedtaksperiode.VarselDto
+import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import no.nav.helse.modell.varsel.VarselDao
-import no.nav.helse.modell.varsel.VarselDto
 import no.nav.helse.modell.varsel.VarselRepository
-import no.nav.helse.modell.varsel.VarselStatusDto
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse

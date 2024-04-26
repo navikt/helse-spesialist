@@ -1,5 +1,6 @@
 package no.nav.helse.modell.varsel
 
+import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import java.time.LocalDateTime
 import java.util.UUID
 

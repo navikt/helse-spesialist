@@ -1,4 +1,4 @@
-package no.nav.helse.modell.varsel
+package no.nav.helse.modell.person.vedtaksperiode
 
 import java.time.LocalDateTime
 import java.util.UUID

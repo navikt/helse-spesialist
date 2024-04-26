@@ -6,9 +6,9 @@ import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.builders.GenerasjonBuilder
-import no.nav.helse.modell.varsel.Varsel
-import no.nav.helse.modell.varsel.VarselDto
-import no.nav.helse.modell.varsel.VarselStatusDto
+import no.nav.helse.modell.person.vedtaksperiode.Varsel
+import no.nav.helse.modell.person.vedtaksperiode.VarselDto
+import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import java.time.LocalDateTime

@@ -3,16 +3,14 @@ package no.nav.helse.modell.kommando
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
+import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
-import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -20,10 +18,10 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
-
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class VurderBehovForTotrinnskontrollTest {
-
     private companion object {
         private val VEDTAKSPERIODE_ID_2 = UUID.randomUUID()
         private val VEDTAKSPERIODE_ID_1 = UUID.randomUUID()
@@ -35,23 +33,25 @@ internal class VurderBehovForTotrinnskontrollTest {
     private val overstyringDao = mockk<OverstyringDao>(relaxed = true)
     private lateinit var context: CommandContext
 
-    val sykefraværstilfelle = Sykefraværstilfelle(
-        FØDSELSNUMMER,
-        1.januar,
-        listOf(
-            Generasjon(UUID.randomUUID(), VEDTAKSPERIODE_ID_1, 1.januar, 31.januar, 1.januar),
-            Generasjon(UUID.randomUUID(), VEDTAKSPERIODE_ID_2, 1.februar, 28.februar, 1.januar)
-        ),
-        emptyList()
-    )
-    private val command = VurderBehovForTotrinnskontroll(
-        fødselsnummer = FØDSELSNUMMER,
-        vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
-        oppgaveMediator = oppgaveMediator,
-        overstyringDao = overstyringDao,
-        totrinnsvurderingMediator = totrinnsvurderingMediator,
-        sykefraværstilfelle = sykefraværstilfelle
-    )
+    val sykefraværstilfelle =
+        Sykefraværstilfelle(
+            FØDSELSNUMMER,
+            1.januar,
+            listOf(
+                Generasjon(UUID.randomUUID(), VEDTAKSPERIODE_ID_1, 1.januar, 31.januar, 1.januar),
+                Generasjon(UUID.randomUUID(), VEDTAKSPERIODE_ID_2, 1.februar, 28.februar, 1.januar),
+            ),
+            emptyList(),
+        )
+    private val command =
+        VurderBehovForTotrinnskontroll(
+            fødselsnummer = FØDSELSNUMMER,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
+            oppgaveMediator = oppgaveMediator,
+            overstyringDao = overstyringDao,
+            totrinnsvurderingMediator = totrinnsvurderingMediator,
+            sykefraværstilfelle = sykefraværstilfelle,
+        )
 
     @BeforeEach
     fun setUp() {
@@ -71,19 +71,22 @@ internal class VurderBehovForTotrinnskontrollTest {
     fun `Oppretter totrinssvurdering dersom vedtaksperioden har varsel for lovvalg og medlemskap, og ikke har hatt oppgave som har vært ferdigstilt før`() {
         sykefraværstilfelle.håndter(
             Varsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), VEDTAKSPERIODE_ID_2),
-            UUID.randomUUID()
+            UUID.randomUUID(),
         )
         every { oppgaveMediator.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
         assertTrue(command.execute(context))
         verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
     }
+
     @ParameterizedTest
     @EnumSource(value = Varsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
-    fun `Oppretter ikke totrinnssvurdering dersom tidligere vedtaksperiode har varsel for lovvalg og medlemskap og er utbetalt`(status: Varsel.Status) {
+    fun `Oppretter ikke totrinnssvurdering dersom tidligere vedtaksperiode har varsel for lovvalg og medlemskap og er utbetalt`(
+        status: Varsel.Status,
+    ) {
         sykefraværstilfelle.håndter(
             Varsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), VEDTAKSPERIODE_ID_1, status),
-            UUID.randomUUID()
+            UUID.randomUUID(),
         )
         every { oppgaveMediator.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
@@ -96,37 +99,39 @@ internal class VurderBehovForTotrinnskontrollTest {
         val saksbehander = UUID.randomUUID()
 
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
-        every { totrinnsvurderingMediator.opprett(any()) } returns TotrinnsvurderingOld(
-            vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
-            erRetur = false,
-            saksbehandler = saksbehander,
-            beslutter = null,
-            utbetalingIdRef = null,
-            opprettet = LocalDateTime.now(),
-            oppdatert = null
-        )
+        every { totrinnsvurderingMediator.opprett(any()) } returns
+            TotrinnsvurderingOld(
+                vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
+                erRetur = false,
+                saksbehandler = saksbehander,
+                beslutter = null,
+                utbetalingIdRef = null,
+                opprettet = LocalDateTime.now(),
+                oppdatert = null,
+            )
 
         assertTrue(command.execute(context))
 
         verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
         verify(exactly = 1) { oppgaveMediator.reserverOppgave(saksbehander, FØDSELSNUMMER) }
-
     }
 
     @Test
-    fun `Hvis totrinnsvurdering har beslutter skal totrinnsvurderingen markeres som retur`() { val saksbehander = UUID.randomUUID()
+    fun `Hvis totrinnsvurdering har beslutter skal totrinnsvurderingen markeres som retur`() {
+        val saksbehander = UUID.randomUUID()
         val beslutter = UUID.randomUUID()
 
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
-        every { totrinnsvurderingMediator.opprett(any()) } returns TotrinnsvurderingOld(
-            vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
-            erRetur = false,
-            saksbehandler = saksbehander,
-            beslutter = beslutter,
-            utbetalingIdRef = null,
-            opprettet = LocalDateTime.now(),
-            oppdatert = null
-        )
+        every { totrinnsvurderingMediator.opprett(any()) } returns
+            TotrinnsvurderingOld(
+                vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
+                erRetur = false,
+                saksbehandler = saksbehander,
+                beslutter = beslutter,
+                utbetalingIdRef = null,
+                opprettet = LocalDateTime.now(),
+                oppdatert = null,
+            )
 
         assertTrue(command.execute(context))
 

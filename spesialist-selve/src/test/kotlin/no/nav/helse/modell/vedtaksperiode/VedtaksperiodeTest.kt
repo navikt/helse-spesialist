@@ -3,7 +3,7 @@ package no.nav.helse.modell.vedtaksperiode
 import io.mockk.mockk
 import no.nav.helse.februar
 import no.nav.helse.januar
-import no.nav.helse.modell.varsel.Varsel
+import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -98,7 +98,9 @@ class VedtaksperiodeTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
         vedtaksperiode.nyUtbetaling(UUID.randomUUID(), UUID.randomUUID())
-        vedtaksperiode.nyttGodkjenningsbehov(listOf(SpleisVedtaksperiode(vedtaksperiodeId, UUID.randomUUID(), 1.februar, 28.februar, 1.februar)))
+        vedtaksperiode.nyttGodkjenningsbehov(
+            listOf(SpleisVedtaksperiode(vedtaksperiodeId, UUID.randomUUID(), 1.februar, 28.februar, 1.februar)),
+        )
         val dto = vedtaksperiode.toDto()
         assertEquals(1, dto.generasjoner.size)
         assertEquals(1.februar, dto.generasjoner.single().fom)
@@ -110,7 +112,9 @@ class VedtaksperiodeTest {
     fun `oppdater gjeldende generasjon dersom gjeldende generasjon avventer videre avklaring ved godkjenningsbehov`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
-        vedtaksperiode.nyttGodkjenningsbehov(listOf(SpleisVedtaksperiode(vedtaksperiodeId, UUID.randomUUID(), 1.februar, 28.februar, 1.februar)))
+        vedtaksperiode.nyttGodkjenningsbehov(
+            listOf(SpleisVedtaksperiode(vedtaksperiodeId, UUID.randomUUID(), 1.februar, 28.februar, 1.februar)),
+        )
         val dto = vedtaksperiode.toDto()
         assertEquals(1, dto.generasjoner.size)
         assertEquals(1.februar, dto.generasjoner.single().fom)
@@ -125,7 +129,9 @@ class VedtaksperiodeTest {
         val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId, spleisBehandlingId)
         vedtaksperiode.nyUtbetaling(UUID.randomUUID(), UUID.randomUUID())
         vedtaksperiode.vedtakFattet(UUID.randomUUID(), spleisBehandlingId)
-        vedtaksperiode.nyttGodkjenningsbehov(listOf(SpleisVedtaksperiode(vedtaksperiodeId, UUID.randomUUID(), 1.januar, 31.januar, 1.januar)))
+        vedtaksperiode.nyttGodkjenningsbehov(
+            listOf(SpleisVedtaksperiode(vedtaksperiodeId, UUID.randomUUID(), 1.januar, 31.januar, 1.januar)),
+        )
         val dto = vedtaksperiode.toDto()
         assertEquals(2, dto.generasjoner.size)
     }
@@ -137,7 +143,9 @@ class VedtaksperiodeTest {
         val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId, spleisBehandlingId)
         vedtaksperiode.nyUtbetaling(UUID.randomUUID(), UUID.randomUUID())
         vedtaksperiode.vedtakFattet(UUID.randomUUID(), UUID.randomUUID())
-        vedtaksperiode.nyttGodkjenningsbehov(listOf(SpleisVedtaksperiode(vedtaksperiodeId, spleisBehandlingId, 1.januar, 31.januar, 1.januar)))
+        vedtaksperiode.nyttGodkjenningsbehov(
+            listOf(SpleisVedtaksperiode(vedtaksperiodeId, spleisBehandlingId, 1.januar, 31.januar, 1.januar)),
+        )
         val dto = vedtaksperiode.toDto()
         assertEquals(1, dto.generasjoner.size)
     }
@@ -148,7 +156,9 @@ class VedtaksperiodeTest {
         val spleisBehandlingId = UUID.randomUUID()
         val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId, spleisBehandlingId)
         vedtaksperiode.avsluttetUtenVedtak(mockk(relaxed = true), AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), spleisBehandlingId))
-        vedtaksperiode.nyttGodkjenningsbehov(listOf(SpleisVedtaksperiode(vedtaksperiodeId, UUID.randomUUID(), 1.januar, 31.januar, 1.januar)))
+        vedtaksperiode.nyttGodkjenningsbehov(
+            listOf(SpleisVedtaksperiode(vedtaksperiodeId, UUID.randomUUID(), 1.januar, 31.januar, 1.januar)),
+        )
         val dto = vedtaksperiode.toDto()
         assertEquals(2, dto.generasjoner.size)
     }
@@ -159,7 +169,9 @@ class VedtaksperiodeTest {
         val spleisBehandlingId = UUID.randomUUID()
         val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId, spleisBehandlingId)
         vedtaksperiode.avsluttetUtenVedtak(mockk(relaxed = true), AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), spleisBehandlingId))
-        vedtaksperiode.nyttGodkjenningsbehov(listOf(SpleisVedtaksperiode(vedtaksperiodeId, spleisBehandlingId, 1.januar, 31.januar, 1.januar)))
+        vedtaksperiode.nyttGodkjenningsbehov(
+            listOf(SpleisVedtaksperiode(vedtaksperiodeId, spleisBehandlingId, 1.januar, 31.januar, 1.januar)),
+        )
         val dto = vedtaksperiode.toDto()
         assertEquals(1, dto.generasjoner.size)
     }
@@ -174,7 +186,9 @@ class VedtaksperiodeTest {
         val dtoFørNyttGodkjenningsbehov = vedtaksperiode.toDto()
         assertEquals(TilstandDto.AvsluttetUtenVedtakMedVarsler, dtoFørNyttGodkjenningsbehov.generasjoner.first().tilstand)
 
-        vedtaksperiode.nyttGodkjenningsbehov(listOf(SpleisVedtaksperiode(vedtaksperiodeId, UUID.randomUUID(), 1.januar, 31.januar, 1.januar)))
+        vedtaksperiode.nyttGodkjenningsbehov(
+            listOf(SpleisVedtaksperiode(vedtaksperiodeId, UUID.randomUUID(), 1.januar, 31.januar, 1.januar)),
+        )
         val dtoEtterNyttGodkjenningsbehov = vedtaksperiode.toDto()
         assertEquals(2, dtoEtterNyttGodkjenningsbehov.generasjoner.size)
         assertEquals(TilstandDto.AvsluttetUtenVedtak, dtoEtterNyttGodkjenningsbehov.generasjoner[0].tilstand)
@@ -189,7 +203,9 @@ class VedtaksperiodeTest {
         vedtaksperiode.nyeVarsler(listOf(Varsel(UUID.randomUUID(), "RV_IM_1", LocalDateTime.now(), vedtaksperiodeId)))
         vedtaksperiode.avsluttetUtenVedtak(mockk(relaxed = true), AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), spleisBehandlingId))
 
-        vedtaksperiode.nyttGodkjenningsbehov(listOf(SpleisVedtaksperiode(vedtaksperiodeId, spleisBehandlingId, 1.januar, 31.januar, 1.januar)))
+        vedtaksperiode.nyttGodkjenningsbehov(
+            listOf(SpleisVedtaksperiode(vedtaksperiodeId, spleisBehandlingId, 1.januar, 31.januar, 1.januar)),
+        )
         val dto = vedtaksperiode.toDto()
         assertEquals(1, dto.generasjoner.size)
         assertEquals(TilstandDto.AvsluttetUtenVedtakMedVarsler, dto.generasjoner[0].tilstand)
@@ -202,13 +218,18 @@ class VedtaksperiodeTest {
         }
     }
 
-    private fun nySpleisBehandling(vedtaksperiodeId: UUID, spleisBehandlingId: UUID = UUID.randomUUID()) =
-        SpleisBehandling("987654321", vedtaksperiodeId, spleisBehandlingId, 1.januar, 31.januar)
+    private fun nySpleisBehandling(
+        vedtaksperiodeId: UUID,
+        spleisBehandlingId: UUID = UUID.randomUUID(),
+    ) = SpleisBehandling("987654321", vedtaksperiodeId, spleisBehandlingId, 1.januar, 31.januar)
 
     private fun nyttVarsel(
         vedtaksperiodeId: UUID,
         varselkode: String = "SB_EX_1",
     ) = Varsel(UUID.randomUUID(), varselkode, LocalDateTime.now(), vedtaksperiodeId)
 
-    private fun nyVedtaksperiode(vedtaksperiodeId: UUID, spleisBehandlingId: UUID = UUID.randomUUID()) = Vedtaksperiode.nyVedtaksperiode(nySpleisBehandling(vedtaksperiodeId, spleisBehandlingId))
+    private fun nyVedtaksperiode(
+        vedtaksperiodeId: UUID,
+        spleisBehandlingId: UUID = UUID.randomUUID(),
+    ) = Vedtaksperiode.nyVedtaksperiode(nySpleisBehandling(vedtaksperiodeId, spleisBehandlingId))
 }

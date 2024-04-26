@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.builders
 
-import no.nav.helse.modell.varsel.Varsel
+import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository

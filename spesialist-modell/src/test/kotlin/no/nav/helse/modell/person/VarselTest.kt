@@ -1,17 +1,14 @@
-package no.nav.helse.modell.varsel
+package no.nav.helse.modell.person
 
 import no.nav.helse.modell.person.vedtaksperiode.IVedtaksperiodeObserver
-import no.nav.helse.modell.varsel.Varsel.Companion.finnEksisterendeVarsel
-import no.nav.helse.modell.varsel.Varsel.Companion.forhindrerAutomatisering
-import no.nav.helse.modell.varsel.Varsel.Companion.inneholderMedlemskapsvarsel
-import no.nav.helse.modell.varsel.Varsel.Companion.inneholderSvartelistedeVarsler
-import no.nav.helse.modell.varsel.Varsel.Companion.inneholderVarselOmNegativtBeløp
-import no.nav.helse.modell.varsel.Varsel.Status
-import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
-import no.nav.helse.modell.varsel.Varsel.Status.AVVIST
-import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
-import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
-import no.nav.helse.modell.varsel.Varsel.Status.VURDERT
+import no.nav.helse.modell.person.vedtaksperiode.Varsel
+import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.finnEksisterendeVarsel
+import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.forhindrerAutomatisering
+import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderMedlemskapsvarsel
+import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderSvartelistedeVarsler
+import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmNegativtBeløp
+import no.nav.helse.modell.person.vedtaksperiode.VarselDto
+import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -65,7 +62,7 @@ internal class VarselTest {
         val varselId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
-        val varsel = Varsel(varselId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId, INAKTIV)
+        val varsel = Varsel(varselId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId, Varsel.Status.INAKTIV)
         varsel.registrer(observer)
         varsel.reaktiver(generasjonId)
         observer.assertReaktivering(vedtaksperiodeId, generasjonId, varselId, "EN_KODE")
@@ -87,15 +84,15 @@ internal class VarselTest {
         val varselId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
-        val varsel = Varsel(varselId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId, AKTIV)
+        val varsel = Varsel(varselId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId, Varsel.Status.AKTIV)
         varsel.registrer(observer)
         varsel.deaktiver(generasjonId)
         observer.assertDeaktivering(vedtaksperiodeId, generasjonId, varselId, "EN_KODE")
     }
 
     @ParameterizedTest
-    @EnumSource(value = Status::class, names = ["INAKTIV"], mode = EnumSource.Mode.EXCLUDE)
-    fun `kan ikke reaktivere varsel som ikke er inaktivt`(status: Status) {
+    @EnumSource(value = Varsel.Status::class, names = ["INAKTIV"], mode = EnumSource.Mode.EXCLUDE)
+    fun `kan ikke reaktivere varsel som ikke er inaktivt`(status: Varsel.Status) {
         val varsel = nyttVarsel(status = status)
         val enGenerasjonId = UUID.randomUUID()
         varsel.reaktiver(enGenerasjonId)
@@ -103,8 +100,8 @@ internal class VarselTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
-    fun `kan ikke deaktivere varsel som ikke er aktivt`(status: Status) {
+    @EnumSource(value = Varsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
+    fun `kan ikke deaktivere varsel som ikke er aktivt`(status: Varsel.Status) {
         val varsel = nyttVarsel(status = status)
         val enGenerasjonId = UUID.randomUUID()
         varsel.deaktiver(enGenerasjonId)
@@ -112,35 +109,35 @@ internal class VarselTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = Status::class, names = ["AKTIV", "VURDERT", "AVVIST"], mode = EnumSource.Mode.EXCLUDE)
-    fun `forhindrer ikke automatisering`(status: Status) {
+    @EnumSource(value = Varsel.Status::class, names = ["AKTIV", "VURDERT", "AVVIST"], mode = EnumSource.Mode.EXCLUDE)
+    fun `forhindrer ikke automatisering`(status: Varsel.Status) {
         val varsel = nyttVarsel(status = status)
         assertFalse(listOf(varsel).forhindrerAutomatisering())
     }
 
     @ParameterizedTest
-    @EnumSource(value = Status::class, names = ["AKTIV", "VURDERT", "AVVIST"])
-    fun `forhindrer automatisering`(status: Status) {
+    @EnumSource(value = Varsel.Status::class, names = ["AKTIV", "VURDERT", "AVVIST"])
+    fun `forhindrer automatisering`(status: Varsel.Status) {
         val varsel = nyttVarsel(status = status)
         assertTrue(listOf(varsel).forhindrerAutomatisering())
     }
 
     @ParameterizedTest
-    @EnumSource(value = Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
-    fun `inneholder ikke medlemskapsvarsel`(status: Status) {
+    @EnumSource(value = Varsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
+    fun `inneholder ikke medlemskapsvarsel`(status: Varsel.Status) {
         val varsel = nyttVarsel(status = status, kode = "RV_MV_1")
         assertFalse(listOf(varsel).inneholderMedlemskapsvarsel())
     }
 
     @Test
     fun `inneholder medlemskapsvarsel`() {
-        val varsel = nyttVarsel(status = AKTIV, kode = "RV_MV_1")
+        val varsel = nyttVarsel(status = Varsel.Status.AKTIV, kode = "RV_MV_1")
         assertTrue(listOf(varsel).inneholderMedlemskapsvarsel())
     }
 
     @ParameterizedTest
-    @EnumSource(value = Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
-    fun `inneholder ikke varsel om negativt beløp`(status: Status) {
+    @EnumSource(value = Varsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
+    fun `inneholder ikke varsel om negativt beløp`(status: Varsel.Status) {
         val varsel = nyttVarsel(status = status, kode = "RV_UT_23")
         assertFalse(listOf(varsel).inneholderVarselOmNegativtBeløp())
     }
@@ -148,20 +145,20 @@ internal class VarselTest {
     @ParameterizedTest
     @ValueSource(strings = ["RV_IT_3", "RV_SI_3", "RV_UT_23", "RV_VV_8", "SB_RV_2"])
     fun `inneholder svartelistet varsel`(varselkode: String) {
-        val varsel = nyttVarsel(status = AKTIV, kode = varselkode)
+        val varsel = nyttVarsel(status = Varsel.Status.AKTIV, kode = varselkode)
         assertTrue(listOf(varsel).inneholderSvartelistedeVarsler())
     }
 
     @ParameterizedTest
-    @EnumSource(value = Status::class)
-    fun `inneholder svartelistet varsel uavhengig av status`(status: Status) {
+    @EnumSource(value = Varsel.Status::class)
+    fun `inneholder svartelistet varsel uavhengig av status`(status: Varsel.Status) {
         val varsel = nyttVarsel(status = status, kode = "RV_IT_3")
         assertTrue(listOf(varsel).inneholderSvartelistedeVarsler())
     }
 
     @Test
     fun `inneholder varsel om negativt beløp`() {
-        val varsel = nyttVarsel(status = AKTIV, kode = "RV_UT_23")
+        val varsel = nyttVarsel(status = Varsel.Status.AKTIV, kode = "RV_UT_23")
         assertTrue(listOf(varsel).inneholderVarselOmNegativtBeløp())
     }
 
@@ -170,7 +167,7 @@ internal class VarselTest {
         val varselId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
-        val varsel = nyttVarsel(varselId = varselId, vedtaksperiodeId = vedtaksperiodeId, status = AKTIV, kode = "RV_UT_23")
+        val varsel = nyttVarsel(varselId = varselId, vedtaksperiodeId = vedtaksperiodeId, status = Varsel.Status.AKTIV, kode = "RV_UT_23")
         varsel.godkjennSpesialsakvarsel(generasjonId)
         val godkjentVarsel = observer.godkjenteVarsler[varselId]
         assertEquals(varselId, godkjentVarsel?.varselId)
@@ -185,7 +182,8 @@ internal class VarselTest {
         val varselId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
-        val varsel = nyttVarsel(varselId = varselId, vedtaksperiodeId = vedtaksperiodeId, status = GODKJENT, kode = "RV_UT_23")
+        val varsel =
+            nyttVarsel(varselId = varselId, vedtaksperiodeId = vedtaksperiodeId, status = Varsel.Status.GODKJENT, kode = "RV_UT_23")
         varsel.godkjennSpesialsakvarsel(generasjonId)
         val godkjentVarsel = observer.godkjenteVarsler[varselId]
         assertEquals(null, godkjentVarsel)
@@ -196,18 +194,18 @@ internal class VarselTest {
         val varselId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val opprettet = LocalDateTime.now()
-        val varsel = Varsel(varselId, "SB_EX_1", opprettet, vedtaksperiodeId, AKTIV)
+        val varsel = Varsel(varselId, "SB_EX_1", opprettet, vedtaksperiodeId, Varsel.Status.AKTIV)
         val dto = varsel.toDto()
         assertEquals(VarselDto(varselId, "SB_EX_1", opprettet, vedtaksperiodeId, VarselStatusDto.AKTIV), dto)
     }
 
     @Test
     fun `varselStatus toDto`() {
-        assertEquals(VarselStatusDto.AKTIV, AKTIV.toDto())
-        assertEquals(VarselStatusDto.INAKTIV, INAKTIV.toDto())
-        assertEquals(VarselStatusDto.VURDERT, VURDERT.toDto())
-        assertEquals(VarselStatusDto.GODKJENT, GODKJENT.toDto())
-        assertEquals(VarselStatusDto.AVVIST, AVVIST.toDto())
+        assertEquals(VarselStatusDto.AKTIV, Varsel.Status.AKTIV.toDto())
+        assertEquals(VarselStatusDto.INAKTIV, Varsel.Status.INAKTIV.toDto())
+        assertEquals(VarselStatusDto.VURDERT, Varsel.Status.VURDERT.toDto())
+        assertEquals(VarselStatusDto.GODKJENT, Varsel.Status.GODKJENT.toDto())
+        assertEquals(VarselStatusDto.AVVIST, Varsel.Status.AVVIST.toDto())
     }
 
     @Test
@@ -236,7 +234,7 @@ internal class VarselTest {
         varselId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         kode: String = "EN_KODE",
-        status: Status = AKTIV,
+        status: Varsel.Status = Varsel.Status.AKTIV,
     ): Varsel {
         return Varsel(varselId, kode, LocalDateTime.now(), vedtaksperiodeId, status).also {
             it.registrer(observer)

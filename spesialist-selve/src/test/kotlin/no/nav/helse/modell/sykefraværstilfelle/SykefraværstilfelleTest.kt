@@ -1,20 +1,19 @@
 package no.nav.helse.modell.sykefraværstilfelle
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.januar
-import no.nav.helse.modell.varsel.Varsel
+import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.forhindrerAutomatisering
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class SykefraværstilfelleTest {
-
     @Test
     fun `Kan ikke opprette et sykefraværstilfelle uten å ha en generasjon`() {
         assertThrows<IllegalStateException> {
@@ -52,7 +51,7 @@ internal class SykefraværstilfelleTest {
         val gjeldendeGenerasjon2 = generasjon(vedtaksperiodeId2)
         gjeldendeGenerasjon2.håndterNyttVarsel(
             Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId2),
-            UUID.randomUUID()
+            UUID.randomUUID(),
         )
         assertTrue(listOf(gjeldendeGenerasjon1, gjeldendeGenerasjon2).forhindrerAutomatisering(28.februar))
     }
@@ -62,13 +61,14 @@ internal class SykefraværstilfelleTest {
         assertThrows<IllegalArgumentException> { sykefraværstilfelle().haster(UUID.randomUUID()) }
     }
 
-    private fun generasjon(vedtaksperiodeId: UUID = UUID.randomUUID()) = Generasjon(
-        id = UUID.randomUUID(),
-        vedtaksperiodeId = vedtaksperiodeId,
-        fom = 1.januar,
-        tom = 31.januar,
-        skjæringstidspunkt = 1.januar
-    )
+    private fun generasjon(vedtaksperiodeId: UUID = UUID.randomUUID()) =
+        Generasjon(
+            id = UUID.randomUUID(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            fom = 1.januar,
+            tom = 31.januar,
+            skjæringstidspunkt = 1.januar,
+        )
 
     private fun sykefraværstilfelle(
         fødselsnummer: String = "12345678910",

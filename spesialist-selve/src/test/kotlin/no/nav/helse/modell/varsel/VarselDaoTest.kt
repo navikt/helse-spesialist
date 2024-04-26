@@ -4,11 +4,12 @@ import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.januar
-import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
-import no.nav.helse.modell.varsel.Varsel.Status.AVVIKLET
-import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
-import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
-import no.nav.helse.modell.varsel.Varsel.Status.VURDERT
+import no.nav.helse.modell.person.vedtaksperiode.Varsel
+import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AKTIV
+import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AVVIKLET
+import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.GODKJENT
+import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.INAKTIV
+import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.VURDERT
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Periode
 import org.intellij.lang.annotations.Language

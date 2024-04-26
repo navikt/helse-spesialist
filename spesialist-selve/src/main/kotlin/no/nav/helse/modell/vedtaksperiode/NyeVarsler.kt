@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.person.Person
-import no.nav.helse.modell.varsel.Varsel
-import no.nav.helse.modell.varsel.Varsel.Companion.varsler
+import no.nav.helse.modell.person.vedtaksperiode.Varsel
+import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.varsler
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.util.UUID
 

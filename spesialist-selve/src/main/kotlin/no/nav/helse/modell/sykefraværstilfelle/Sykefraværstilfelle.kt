@@ -1,7 +1,7 @@
 package no.nav.helse.modell.sykefraværstilfelle
 
 import no.nav.helse.modell.person.PersonObserver
-import no.nav.helse.modell.varsel.Varsel
+import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag.Companion.sortert
 import no.nav.helse.modell.vedtak.Sykepengevedtak

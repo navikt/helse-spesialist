@@ -7,7 +7,7 @@ import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.varsel.Varsel
+import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import org.intellij.lang.annotations.Language
@@ -62,7 +62,7 @@ internal class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
     fun `fjern varsel om tilbakedatering dersom tilbakedatert sykmelding er godkjent`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver(regelverksvarsler = listOf("RV_SØ_3"),)
+        spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver(regelverksvarsler = listOf("RV_SØ_3"))
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
         håndterAutomatiseringStoppetAvVeilederløsning()
@@ -77,7 +77,7 @@ internal class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
     fun `fjern varsel om tilbakedatering på alle overlappende perioder i sykefraværstilfellet for ok-sykmelding`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver(regelverksvarsler = listOf("RV_SØ_3"),)
+        spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver(regelverksvarsler = listOf("RV_SØ_3"))
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
         håndterAutomatiseringStoppetAvVeilederløsning()
@@ -86,7 +86,9 @@ internal class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
         val vedtaksperiodeId2 = UUID.randomUUID()
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling(vedtaksperiodeId = vedtaksperiodeId2)
-        håndterAktivitetsloggNyAktivitet(varselkoder = listOf("RV_SØ_3"), vedtaksperiodeId = vedtaksperiodeId2
+        håndterAktivitetsloggNyAktivitet(
+            varselkoder = listOf("RV_SØ_3"),
+            vedtaksperiodeId = vedtaksperiodeId2,
         )
 
         assertVarsel("RV_SØ_3", VEDTAKSPERIODE_ID, Varsel.Status.AKTIV)
@@ -97,21 +99,26 @@ internal class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
         assertVarsel("RV_SØ_3", vedtaksperiodeId2, Varsel.Status.INAKTIV)
     }
 
-    private fun assertVarsel(varselkode: String, vedtaksperiodeId: UUID, status: Varsel.Status) {
-        val antallVarsler = sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = "SELECT count(*) FROM selve_varsel WHERE kode = ? AND vedtaksperiode_id = ? AND status = ?"
-            requireNotNull(
-                session.run(
-                    queryOf(
-                        query,
-                        varselkode,
-                        vedtaksperiodeId,
-                        status.name
-                    ).map { it.int(1) }.asSingle
+    private fun assertVarsel(
+        varselkode: String,
+        vedtaksperiodeId: UUID,
+        status: Varsel.Status,
+    ) {
+        val antallVarsler =
+            sessionOf(dataSource).use { session ->
+                @Language("PostgreSQL")
+                val query = "SELECT count(*) FROM selve_varsel WHERE kode = ? AND vedtaksperiode_id = ? AND status = ?"
+                requireNotNull(
+                    session.run(
+                        queryOf(
+                            query,
+                            varselkode,
+                            vedtaksperiodeId,
+                            status.name,
+                        ).map { it.int(1) }.asSingle,
+                    ),
                 )
-            )
-        }
+            }
         Assertions.assertEquals(1, antallVarsler)
     }
 }

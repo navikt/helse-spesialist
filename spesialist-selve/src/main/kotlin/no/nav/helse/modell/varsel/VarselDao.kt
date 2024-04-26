@@ -3,7 +3,8 @@ package no.nav.helse.modell.varsel
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
-import no.nav.helse.modell.varsel.Varsel.Status
+import no.nav.helse.modell.person.vedtaksperiode.Varsel
+import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status
 import org.intellij.lang.annotations.Language
 import java.time.LocalDateTime
 import java.util.UUID

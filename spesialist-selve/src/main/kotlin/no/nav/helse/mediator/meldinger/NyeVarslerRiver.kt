@@ -3,7 +3,7 @@ package no.nav.helse.mediator.meldinger
 import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.MeldingMediator
-import no.nav.helse.modell.varsel.Varsel.Companion.varsler
+import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.varsler
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
