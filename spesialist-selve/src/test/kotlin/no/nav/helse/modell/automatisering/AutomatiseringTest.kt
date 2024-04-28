@@ -6,8 +6,8 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import lagFødselsnummer
-import lagOrganisasjonsnummer
+import no.nav.helse.spesialist.test.lagFødselsnummer
+import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import no.nav.helse.db.UnntaFraAutomatiseringDao
 import no.nav.helse.januar
 import no.nav.helse.modell.MeldingDao

@@ -3,13 +3,11 @@ package no.nav.helse.modell.person
 import DatabaseIntegrationTest
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
-import java.time.LocalDate
-import java.time.YearMonth
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
-import no.nav.helse.spesialist.api.person.Kjønn
+import no.nav.helse.spesialist.typer.Kjønn
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -18,6 +16,8 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Isolated
+import java.time.LocalDate
+import java.time.YearMonth
 
 @Isolated
 internal class PersonDaoTest : DatabaseIntegrationTest() {

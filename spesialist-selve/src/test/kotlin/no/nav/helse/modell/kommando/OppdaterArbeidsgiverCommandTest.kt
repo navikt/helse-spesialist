@@ -4,19 +4,19 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.arbeidsgiver.Arbeidsgiverinformasjonløsning
 import no.nav.helse.modell.person.HentPersoninfoløsning
 import no.nav.helse.modell.person.HentPersoninfoløsninger
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
-import no.nav.helse.spesialist.api.person.Kjønn
+import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.UUID
 
 internal class OppdaterArbeidsgiverCommandTest {
     private companion object {

@@ -1,8 +1,6 @@
 package no.nav.helse.modell.overstyring
 
 import DatabaseIntegrationTest
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.db.ArbeidsforholdForDatabase
 import no.nav.helse.db.LovhjemmelForDatabase
 import no.nav.helse.db.OverstyrtArbeidsforholdForDatabase
@@ -18,11 +16,13 @@ import no.nav.helse.januar
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
-import no.nav.helse.spesialist.api.person.Kjønn
+import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.UUID
 
 internal class OverstyringDaoTest : DatabaseIntegrationTest() {
 

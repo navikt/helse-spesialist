@@ -5,7 +5,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
-import lagFødselsnummer
+import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.rapids_rivers.testsupport.TestRapid

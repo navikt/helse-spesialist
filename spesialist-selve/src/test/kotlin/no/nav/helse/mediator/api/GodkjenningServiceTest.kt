@@ -1,19 +1,19 @@
 package no.nav.helse.mediator.api
 
 import AbstractIntegrationTest
-import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import lagEtternavn
-import lagFornavn
-import lagSaksbehandlerident
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
+import no.nav.helse.spesialist.test.lagEtternavn
+import no.nav.helse.spesialist.test.lagFornavn
+import no.nav.helse.spesialist.test.lagSaksbehandlerident
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class GodkjenningServiceTest : AbstractIntegrationTest() {
 

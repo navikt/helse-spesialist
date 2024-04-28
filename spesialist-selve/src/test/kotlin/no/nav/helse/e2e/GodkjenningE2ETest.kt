@@ -7,7 +7,7 @@ import AbstractE2ETest.Kommandokjedetilstand.NY
 import AbstractE2ETest.Kommandokjedetilstand.SUSPENDERT
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import lagFødselsnummer
+import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson

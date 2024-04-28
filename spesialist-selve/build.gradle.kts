@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":spesialist-api"))
     implementation(project(":spesialist-modell"))
 
+    testImplementation(testFixtures(project(":spesialist-felles")))
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
 }
 

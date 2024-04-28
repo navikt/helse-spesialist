@@ -2,18 +2,18 @@ package no.nav.helse.modell.tildeling
 
 import DatabaseIntegrationTest
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
-import no.nav.helse.spesialist.api.person.Kjønn
+import no.nav.helse.spesialist.typer.Kjønn
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
 

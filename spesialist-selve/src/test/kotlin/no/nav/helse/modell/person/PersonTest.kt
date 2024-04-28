@@ -1,8 +1,8 @@
 package no.nav.helse.modell.person
 
-import TestPerson
 import no.nav.helse.januar
 import no.nav.helse.modell.vedtaksperiode.SpleisBehandling
+import no.nav.helse.spesialist.test.TestPerson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID

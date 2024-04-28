@@ -13,7 +13,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
 import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
-import no.nav.helse.spesialist.api.person.Kjønn
+import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate
 import java.time.LocalDateTime

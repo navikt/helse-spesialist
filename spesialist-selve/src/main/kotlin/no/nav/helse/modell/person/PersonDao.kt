@@ -8,7 +8,7 @@ import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
-import no.nav.helse.spesialist.api.person.Kjønn
+import no.nav.helse.spesialist.typer.Kjønn
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import java.time.LocalDateTime

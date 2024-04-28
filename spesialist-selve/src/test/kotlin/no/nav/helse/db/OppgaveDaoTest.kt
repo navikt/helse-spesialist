@@ -1,11 +1,6 @@
 package no.nav.helse.db
 
 import DatabaseIntegrationTest
-import java.time.LocalDate
-import java.util.UUID
-import lagAktørId
-import lagFødselsnummer
-import lagOrganisasjonsnummer
 import no.nav.helse.db.EgenskapForDatabase.BESLUTTER
 import no.nav.helse.db.EgenskapForDatabase.DELVIS_REFUSJON
 import no.nav.helse.db.EgenskapForDatabase.EN_ARBEIDSGIVER
@@ -27,6 +22,9 @@ import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import no.nav.helse.spesialist.test.lagAktørId
+import no.nav.helse.spesialist.test.lagFødselsnummer
+import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -38,6 +36,8 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.parallel.Execution
 import org.junit.jupiter.api.parallel.ExecutionMode
 import org.junit.jupiter.api.parallel.Isolated
+import java.time.LocalDate
+import java.util.UUID
 
 @Isolated
 @Execution(ExecutionMode.SAME_THREAD)

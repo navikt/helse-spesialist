@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import lagFødselsnummer
+import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.meldinger.GosysOppgaveEndretRiver

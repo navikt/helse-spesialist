@@ -6,9 +6,9 @@ import java.time.LocalDate
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import lagAktørId
-import lagFødselsnummer
-import lagOrganisasjonsnummer
+import no.nav.helse.spesialist.test.lagAktørId
+import no.nav.helse.spesialist.test.lagFødselsnummer
+import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.SaksbehandlerDao

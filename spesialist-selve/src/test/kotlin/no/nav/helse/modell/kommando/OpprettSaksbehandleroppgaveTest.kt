@@ -6,7 +6,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import java.util.UUID
-import lagFødselsnummer
+import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.automatisering.Automatisering

@@ -2,7 +2,7 @@ package no.nav.helse.modell.person
 
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
-import no.nav.helse.spesialist.api.person.Kjønn
+import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
 
 internal class HentPersoninfoløsninger(private val løsninger: List<HentPersoninfoløsning>) {

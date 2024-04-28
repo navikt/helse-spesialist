@@ -49,6 +49,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.spleis.graphql.HentSnapshot
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
