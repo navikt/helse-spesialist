@@ -26,6 +26,7 @@ import java.util.UUID
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavetype as OppgavetypeForApi
 
 internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
+    override fun graphQLServerWithUniqueMocks() = buildGraphQLServer()
 
     @Test
     fun `oppgaver query uten parametere returnerer oppgave`() {

@@ -17,18 +17,35 @@ import io.ktor.server.routing.route
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.helse.mediator.IBehandlingsstatistikkMediator
+import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering
 import no.nav.helse.spesialist.api.avviksvurdering.Beregningsgrunnlag
 import no.nav.helse.spesialist.api.avviksvurdering.InnrapportertInntekt
 import no.nav.helse.spesialist.api.avviksvurdering.Inntekt
 import no.nav.helse.spesialist.api.avviksvurdering.OmregnetÅrsinntekt
 import no.nav.helse.spesialist.api.avviksvurdering.Sammenligningsgrunnlag
+import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.endepunkter.ApiTesting
 import no.nav.helse.spesialist.api.graphql.ContextFactory
 import no.nav.helse.spesialist.api.graphql.RequestParser
 import no.nav.helse.spesialist.api.graphql.SchemaBuilder
 import no.nav.helse.spesialist.api.graphql.queryHandler
+import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.notat.NotatMediator
+import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
+import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
+import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.person.PersonApiDao
+import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
+import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
+import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
+import no.nav.helse.spesialist.api.snapshot.SnapshotClient
+import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
+import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
+import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiver
 import org.intellij.lang.annotations.Language
 import java.time.YearMonth
@@ -44,19 +61,22 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
 
     private val reservasjonClient = mockk<ReservasjonClient>(relaxed = true)
     private val behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkMediator>(relaxed = true)
-    protected open val saksbehandlerhåndterer = mockk<Saksbehandlerhåndterer>(relaxed = true)
-    protected open val godkjenninghåndterer = mockk<Godkjenninghåndterer>(relaxed = true)
-    protected open val personhåndterer = mockk<Personhåndterer>(relaxed = true)
-    protected open val dokumenthåndterer = mockk<Dokumenthåndterer>(relaxed = true)
+    protected val saksbehandlerhåndterer = mockk<Saksbehandlerhåndterer>(relaxed = true)
+    private val godkjenninghåndterer = mockk<Godkjenninghåndterer>(relaxed = true)
+    private val personhåndterer = mockk<Personhåndterer>(relaxed = true)
+    protected val dokumenthåndterer = mockk<Dokumenthåndterer>(relaxed = true)
     private val avviksvurderinghenter = mockk<Avviksvurderinghenter>(relaxed = true)
+
+    protected open fun graphQLServerWithUniqueMocks(): GraphQLServer<ApplicationRequest>? = null
 
     private val apiTesting = ApiTesting(jwtStub) {
         route("graphql") {
-            queryHandler(graphQLServer)
+            queryHandler(graphQLServerWithUniqueMocks() ?: graphQLServer)
         }
     }
 
-    private val graphQLServer: GraphQLServer<ApplicationRequest> by lazy {
+    // Oppretter en GraphQLServer med egne mocker per test, som testene kan verifye mot
+    protected fun buildGraphQLServer(): GraphQLServer<ApplicationRequest> {
         val schema = SchemaBuilder(
             personApiDao = personApiDao,
             egenAnsattApiDao = egenAnsattApiDao,
@@ -83,7 +103,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
             dokumenthåndterer = dokumenthåndterer,
         ).build()
 
-        GraphQLServer(
+        return GraphQLServer(
             requestParser = RequestParser(),
             contextFactory = ContextFactory(
                 kode7Saksbehandlergruppe,
@@ -158,6 +178,47 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
         private val requiredGroup: UUID = UUID.randomUUID()
         private const val clientId = "client_id"
         private const val issuer = "https://jwt-provider-domain"
+
+        // En GraphQLServer med "singleton"-mocks, som derfor ikke er gjenbrukbar på tvers av tester som verifyer
+        private val graphQLServer = run {
+            val notatDao = NotatDao(dataSource)
+            val schemaBuilder = SchemaBuilder(
+                personApiDao = PersonApiDao(dataSource),
+                egenAnsattApiDao = EgenAnsattApiDao(dataSource),
+                tildelingDao = TildelingDao(dataSource),
+                arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource),
+                overstyringApiDao = OverstyringApiDao(dataSource),
+                risikovurderingApiDao = RisikovurderingApiDao(dataSource),
+                varselRepository = ApiVarselRepository(dataSource),
+                oppgaveApiDao = OppgaveApiDao(dataSource),
+                periodehistorikkDao = PeriodehistorikkDao(dataSource),
+                snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), mockk<SnapshotClient>(relaxed = true)),
+                notatDao = notatDao,
+                totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource),
+                påVentApiDao = PåVentApiDao(dataSource),
+                reservasjonClient = mockk<ReservasjonClient>(relaxed = true),
+                avviksvurderinghenter = mockk<Avviksvurderinghenter>(relaxed = true),
+                behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkMediator>(relaxed = true),
+                notatMediator = NotatMediator(notatDao),
+                saksbehandlerhåndterer = mockk<Saksbehandlerhåndterer>(relaxed = true),
+                oppgavehåndterer = mockk<Oppgavehåndterer>(relaxed = true),
+                totrinnsvurderinghåndterer = mockk<Totrinnsvurderinghåndterer>(relaxed = true),
+                godkjenninghåndterer = mockk<Godkjenninghåndterer>(relaxed = true),
+                personhåndterer = mockk<Personhåndterer>(relaxed = true),
+                dokumenthåndterer = mockk<Dokumenthåndterer>(relaxed = true),
+            )
+            GraphQLServer(
+                requestParser = RequestParser(),
+                contextFactory = ContextFactory(
+                    UUID.randomUUID(),
+                    UUID.randomUUID(),
+                    UUID.randomUUID(),
+                ),
+                requestHandler = GraphQLRequestHandler(
+                    GraphQL.newGraphQL(schemaBuilder.build()).build()
+                )
+            )
+        }
 
         fun HttpRequestBuilder.authentication(
             navn: String,

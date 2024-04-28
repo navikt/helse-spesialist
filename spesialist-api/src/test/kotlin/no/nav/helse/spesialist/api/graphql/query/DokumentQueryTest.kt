@@ -2,9 +2,6 @@ package no.nav.helse.spesialist.api.graphql.query
 
 import io.mockk.every
 import io.mockk.verify
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.graphql.schema.Soknadstype
 import no.nav.helse.spesialist.api.objectMapper
@@ -12,8 +9,12 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class DokumentQueryTest : AbstractGraphQLApiTest() {
+    override fun graphQLServerWithUniqueMocks() = buildGraphQLServer()
 
     @Test
     fun `Får 400 dersom man gjør oppslag uten dokumentId`() {

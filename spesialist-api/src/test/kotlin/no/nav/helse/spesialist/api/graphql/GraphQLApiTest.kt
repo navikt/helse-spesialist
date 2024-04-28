@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
 internal class GraphQLApiTest : AbstractGraphQLApiTest() {
+    override fun graphQLServerWithUniqueMocks() = buildGraphQLServer()
 
     @Test
     fun `henter refusjonsopplysninger`() {

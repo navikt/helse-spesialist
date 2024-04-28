@@ -3,9 +3,7 @@ package no.nav.helse.spesialist.api.graphql.query
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.mockk.every
-import io.mockk.mockk
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
-import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelsetype.REVURDERING_FERDIGBEHANDLET
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelsetype.UTBETALING_ANNULLERING_FEILET
@@ -14,7 +12,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class OpptegnelseQueryTest: AbstractGraphQLApiTest() {
-    override val saksbehandlerhåndterer: Saksbehandlerhåndterer = mockk(relaxed = true)
+    override fun graphQLServerWithUniqueMocks() = buildGraphQLServer()
 
     @Test
     fun `hent opptegnelser uten sekvensId`() {
