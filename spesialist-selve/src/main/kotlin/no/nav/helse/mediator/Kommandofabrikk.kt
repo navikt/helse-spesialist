@@ -124,7 +124,7 @@ internal class Kommandofabrikk(
     private val sykefraværstilfelleDao = SykefraværstilfelleDao(dataSource)
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
     private val metrikkDao = MetrikkDao(dataSource)
-    private val oppgaveMediator: OppgaveMediator = oppgaveMediator()
+    private val oppgaveMediator: OppgaveMediator by lazy { oppgaveMediator() }
     private var commandContext: CommandContext? = null
     private val observers: MutableList<CommandContextObserver> = mutableListOf()
 
