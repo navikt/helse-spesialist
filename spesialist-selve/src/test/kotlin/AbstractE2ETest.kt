@@ -1,7 +1,6 @@
 
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -41,7 +40,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Periode
-import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
@@ -61,7 +59,6 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHan
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spleis.graphql.HentSnapshot
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -1461,43 +1458,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asList)
             }
         assertEquals(0, antallOppgaver.size)
-    }
-
-    protected fun assertSnapshot(
-        forventet: GraphQLClientResponse<HentSnapshot.Result>,
-        vedtaksperiodeId: UUID,
-    ) {
-        val forventetPersonsnapshot = forventet.data?.person
-        val personsnaphot =
-            sessionOf(dataSource).use {
-                @Language("PostgreSQL")
-                val query =
-                    "SELECT data FROM snapshot WHERE id = (SELECT snapshot_ref FROM vedtak WHERE vedtaksperiode_id=?)"
-                it.run(
-                    queryOf(query, vedtaksperiodeId).map { row ->
-                        objectMapper.readValue<GraphQLPerson>(row.string("data"))
-                    }.asSingle,
-                )
-            }
-        assertEquals(forventetPersonsnapshot, personsnaphot)
-    }
-
-    protected fun assertSnapshotversjon(
-        vedtaksperiodeId: UUID,
-        forventetVersjon: Int,
-    ) {
-        val versjon =
-            sessionOf(dataSource).use {
-                @Language("PostgreSQL")
-                val query =
-                    "SELECT versjon FROM snapshot WHERE id = (SELECT snapshot_ref FROM vedtak WHERE vedtaksperiode_id=?)"
-                it.run(
-                    queryOf(query, vedtaksperiodeId).map { row ->
-                        row.int("versjon")
-                    }.asSingle,
-                )
-            }
-        assertEquals(forventetVersjon, versjon)
     }
 
     protected fun assertVarsler(
