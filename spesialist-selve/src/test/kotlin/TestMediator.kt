@@ -108,7 +108,7 @@ internal class TestMediator(
         Kommandofabrikk(
             dataSource = dataSource,
             snapshotClient = snapshotClient,
-            oppgaveMediator = oppgaveMediator,
+            oppgaveMediator = { oppgaveMediator },
             godkjenningMediator = godkjenningMediator,
             automatisering = automatisering,
         )

@@ -196,6 +196,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val msGraphClient = MsGraphClient(httpClient = httpClient, tokenClient = accessTokenClient)
 
     private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
+    private lateinit var meldingMediator: MeldingMediator
+    private lateinit var saksbehandlerMediator: SaksbehandlerMediator
 
     private val personDao = PersonDao(dataSource)
     private val personApiDao = PersonApiDao(dataSource)
@@ -238,27 +240,9 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
 
     private val behandlingsstatistikkMediator = BehandlingsstatistikkMediator(behandlingsstatistikkDao)
 
-    private val tilgangsgrupper = Tilgangsgrupper(System.getenv())
-    private val tilgangskontrollørForReservasjon = TilgangskontrollørForReservasjon(msGraphClient, tilgangsgrupper)
+    private lateinit var oppgaveMediator: OppgaveMediator
 
-    private val oppgaveMediator: OppgaveMediator =
-        OppgaveMediator(
-            meldingDao = meldingDao,
-            oppgaveDao = oppgaveDao,
-            tildelingDao = tildelingDao,
-            reservasjonDao = reservasjonDao,
-            opptegnelseDao = opptegnelseDao,
-            totrinnsvurderingRepository = totrinnsvurderingDao,
-            saksbehandlerRepository = saksbehandlerDao,
-            rapidsConnection = rapidsConnection,
-            tilgangskontroll = tilgangskontrollørForReservasjon,
-            tilgangsgrupper = tilgangsgrupper,
-        )
-
-    private val dokumentMediator: DokumentMediator = DokumentMediator(dokumentDao, rapidsConnection)
-
-    private val saksbehandlerMediator: SaksbehandlerMediator =
-        SaksbehandlerMediator(dataSource, versjonAvKode(env), rapidsConnection, oppgaveMediator, tilgangsgrupper)
+    private lateinit var dokumentMediator: DokumentMediator
 
     private val godkjenningMediator =
         GodkjenningMediator(
@@ -308,15 +292,71 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             override fun fullRefusjonEnArbeidsgiver() = plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_EN_AG_DIVISOR"])
         }
 
-    private lateinit var rapidsConnection: RapidsConnection
+    private val tilgangsgrupper = Tilgangsgrupper(System.getenv())
+    private val tilgangskontrollørForReservasjon = TilgangskontrollørForReservasjon(msGraphClient, tilgangsgrupper)
 
-    private val godkjenningService: GodkjenningService =
-        GodkjenningService(
-            dataSource = dataSource,
-            rapidsConnection = rapidsConnection,
-            oppgaveMediator = oppgaveMediator,
-            saksbehandlerRepository = saksbehandlerDao,
-        )
+    private val rapidsConnection =
+        RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
+            install(CORS) {
+                allowHeader(HttpHeaders.AccessControlAllowOrigin)
+                allowHost("spesialist.intern.dev.nav.no", listOf("https"))
+            }
+            install(CallId) {
+                retrieveFromHeader(HttpHeaders.XRequestId)
+                generate {
+                    UUID.randomUUID().toString()
+                }
+            }
+            install(WebSockets)
+            installErrorHandling()
+            install(CallLogging) {
+                disableDefaultColors()
+                logger = httpTraceLog
+                level = Level.INFO
+                callIdMdc("callId")
+                filter { call -> call.request.path().startsWith("/api/") }
+            }
+            install(DoubleReceive)
+            install(ContentNegotiationServer) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
+            requestResponseTracing(httpTraceLog)
+            azureAdAppAuthentication(azureAdAppConfig)
+            graphQLApi(
+                personApiDao = personApiDao,
+                egenAnsattApiDao = egenAnsattApiDao,
+                tildelingDao = tildelingApiDao,
+                arbeidsgiverApiDao = arbeidsgiverApiDao,
+                overstyringApiDao = overstyringApiDao,
+                risikovurderingApiDao = risikovurderingApiDao,
+                varselRepository = apiVarselRepository,
+                oppgaveApiDao = oppgaveApiDao,
+                periodehistorikkDao = periodehistorikkDao,
+                notatDao = notatDao,
+                totrinnsvurderingApiDao = totrinnsvurderingApiDao,
+                påVentApiDao = påVentApiDao,
+                reservasjonClient = reservasjonClient,
+                avviksvurderinghenter = avviksvurderinghenter,
+                skjermedePersonerGruppeId = tilgangsgrupper.skjermedePersonerGruppeId,
+                kode7Saksbehandlergruppe = tilgangsgrupper.kode7GruppeId,
+                beslutterGruppeId = tilgangsgrupper.beslutterGruppeId,
+                snapshotMediator = snapshotMediator,
+                behandlingsstatistikkMediator = behandlingsstatistikkMediator,
+                notatMediator = notatMediator,
+                saksbehandlerhåndterer = saksbehandlerMediator,
+                oppgavehåndterer = oppgaveMediator,
+                totrinnsvurderinghåndterer = totrinnsvurderingMediator,
+                godkjenninghåndterer = godkjenningService,
+                personhåndterer = meldingMediator,
+                dokumenthåndterer = dokumentMediator,
+            )
+
+            routing {
+                authenticate("oidc") {
+                    opptegnelseApi()
+                }
+            }
+        }.build()
+
+    private val godkjenningService: GodkjenningService
 
     private val automatiseringDao = AutomatiseringDao(dataSource)
     val automatisering =
@@ -338,82 +378,43 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         Kommandofabrikk(
             dataSource = dataSource,
             snapshotClient = snapshotClient,
-            oppgaveMediator = oppgaveMediator,
+            oppgaveMediator = { oppgaveMediator },
             godkjenningMediator = godkjenningMediator,
             automatisering = automatisering,
         )
 
-    private val meldingMediator: MeldingMediator =
-        MeldingMediator(
-            dataSource = dataSource,
-            rapidsConnection = rapidsConnection,
-            kommandofabrikk = kommandofabrikk,
-            avviksvurderingDao = avviksvurderingDao,
-            generasjonDao = generasjonDao,
-        )
-
     init {
-        rapidsConnection =
-            RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
-                install(CORS) {
-                    allowHeader(HttpHeaders.AccessControlAllowOrigin)
-                    allowHost("spesialist.intern.dev.nav.no", listOf("https"))
-                }
-                install(CallId) {
-                    retrieveFromHeader(HttpHeaders.XRequestId)
-                    generate {
-                        UUID.randomUUID().toString()
-                    }
-                }
-                install(WebSockets)
-                installErrorHandling()
-                install(CallLogging) {
-                    disableDefaultColors()
-                    logger = httpTraceLog
-                    level = Level.INFO
-                    callIdMdc("callId")
-                    filter { call -> call.request.path().startsWith("/api/") }
-                }
-                install(DoubleReceive)
-                install(ContentNegotiationServer) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
-                requestResponseTracing(httpTraceLog)
-                azureAdAppAuthentication(azureAdAppConfig)
-                graphQLApi(
-                    personApiDao = personApiDao,
-                    egenAnsattApiDao = egenAnsattApiDao,
-                    tildelingDao = tildelingApiDao,
-                    arbeidsgiverApiDao = arbeidsgiverApiDao,
-                    overstyringApiDao = overstyringApiDao,
-                    risikovurderingApiDao = risikovurderingApiDao,
-                    varselRepository = apiVarselRepository,
-                    oppgaveApiDao = oppgaveApiDao,
-                    periodehistorikkDao = periodehistorikkDao,
-                    notatDao = notatDao,
-                    totrinnsvurderingApiDao = totrinnsvurderingApiDao,
-                    påVentApiDao = påVentApiDao,
-                    reservasjonClient = reservasjonClient,
-                    avviksvurderinghenter = avviksvurderinghenter,
-                    skjermedePersonerGruppeId = tilgangsgrupper.skjermedePersonerGruppeId,
-                    kode7Saksbehandlergruppe = tilgangsgrupper.kode7GruppeId,
-                    beslutterGruppeId = tilgangsgrupper.beslutterGruppeId,
-                    snapshotMediator = snapshotMediator,
-                    behandlingsstatistikkMediator = behandlingsstatistikkMediator,
-                    notatMediator = notatMediator,
-                    saksbehandlerhåndterer = saksbehandlerMediator,
-                    oppgavehåndterer = oppgaveMediator,
-                    totrinnsvurderinghåndterer = totrinnsvurderingMediator,
-                    godkjenninghåndterer = godkjenningService,
-                    personhåndterer = meldingMediator,
-                    dokumenthåndterer = dokumentMediator,
-                )
-
-                routing {
-                    authenticate("oidc") {
-                        opptegnelseApi()
-                    }
-                }
-            }.build()
         rapidsConnection.register(this)
+        oppgaveMediator =
+            OppgaveMediator(
+                meldingDao = meldingDao,
+                oppgaveDao = oppgaveDao,
+                tildelingDao = tildelingDao,
+                reservasjonDao = reservasjonDao,
+                opptegnelseDao = opptegnelseDao,
+                totrinnsvurderingRepository = totrinnsvurderingDao,
+                saksbehandlerRepository = saksbehandlerDao,
+                rapidsConnection = rapidsConnection,
+                tilgangskontroll = tilgangskontrollørForReservasjon,
+                tilgangsgrupper = tilgangsgrupper,
+            )
+        meldingMediator =
+            MeldingMediator(
+                dataSource = dataSource,
+                rapidsConnection = rapidsConnection,
+                kommandofabrikk = kommandofabrikk,
+                avviksvurderingDao = avviksvurderingDao,
+                generasjonDao = generasjonDao,
+            )
+        saksbehandlerMediator = SaksbehandlerMediator(dataSource, versjonAvKode(env), rapidsConnection, oppgaveMediator, tilgangsgrupper)
+        dokumentMediator = DokumentMediator(dokumentDao, rapidsConnection)
+        godkjenningService =
+            GodkjenningService(
+                dataSource = dataSource,
+                rapidsConnection = rapidsConnection,
+                oppgaveMediator = oppgaveMediator,
+                saksbehandlerRepository = saksbehandlerDao,
+            )
     }
 
     fun start() =
