@@ -3,7 +3,6 @@ package no.nav.helse.mediator.meldinger
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.AvviksvurderingTestdata
 import no.nav.helse.Testdata
-import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Risikofunn.Companion.tilJson
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
@@ -154,33 +153,6 @@ internal object Testmeldingfabrikk {
                 ),
                 "fom" to fom,
                 "tom" to tom
-            )
-        )
-
-    fun lagVedtaksperiodeOpprettet(
-        id: UUID = UUID.randomUUID(),
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-        forårsaketAvId: UUID = UUID.randomUUID(),
-        fom: LocalDate = 1.januar,
-        tom: LocalDate = 31.januar,
-        skjæringstidspunkt: LocalDate = 1.januar,
-    ) =
-        nyHendelse(
-            id, "vedtaksperiode_opprettet", mapOf(
-                "vedtaksperiodeId" to "$vedtaksperiodeId",
-                "fødselsnummer" to fødselsnummer,
-                "aktørId" to aktørId,
-                "organisasjonsnummer" to organisasjonsnummer,
-                "@forårsaket_av" to mapOf(
-                    "id" to forårsaketAvId,
-                    "opprettet" to 1.februar.atStartOfDay()
-                ),
-                "fom" to fom,
-                "tom" to tom,
-                "skjæringstidspunkt" to skjæringstidspunkt
             )
         )
 
@@ -491,19 +463,6 @@ internal object Testmeldingfabrikk {
                 "epost" to saksbehandlerEpost
             ).let { if (personFagsystemId != null) it.plus("personFagsystemId" to personFagsystemId) else it }
         )
-
-    fun lagSykefraværstilfeller(
-        fødselsnummer: String,
-        aktørId: String,
-        tilfeller: List<Map<String, Any>>,
-        id: UUID = UUID.randomUUID(),
-    ) = nyHendelse(
-        id, "sykefraværstilfeller", mapOf(
-            "fødselsnummer" to fødselsnummer,
-            "aktørId" to aktørId,
-            "tilfeller" to tilfeller,
-        )
-    )
 
     fun lagPersoninfoløsning(
         aktørId: String,

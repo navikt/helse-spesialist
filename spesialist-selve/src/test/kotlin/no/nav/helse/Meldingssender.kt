@@ -60,31 +60,6 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         )
     }
 
-    fun sendVedtaksperiodeOpprettet(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-        fom: LocalDate,
-        tom: LocalDate,
-        skjæringstidspunkt: LocalDate,
-        forårsaketAvId: UUID = UUID.randomUUID(),
-    ): UUID = newUUID.also { id ->
-        testRapid.sendTestMessage(
-            Testmeldingfabrikk.lagVedtaksperiodeOpprettet(
-                id = id,
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
-                forårsaketAvId = forårsaketAvId,
-                fom = fom,
-                tom = tom,
-                skjæringstidspunkt = skjæringstidspunkt
-            )
-        )
-    }
-
     fun sendBehandlingOpprettet(
         aktørId: String,
         fødselsnummer: String,
@@ -143,22 +118,6 @@ internal class Meldingssender(private val testRapid: TestRapid) {
                     organisasjonsnummer,
                     vedtaksperiodeId,
                     varselkoder
-                )
-            )
-        }
-
-    fun sendSykefraværstilfeller(
-        aktørId: String,
-        fødselsnummer: String,
-        tilfeller: List<Map<String, Any>>,
-    ): UUID =
-        newUUID.also { id ->
-            testRapid.sendTestMessage(
-                Testmeldingfabrikk.lagSykefraværstilfeller(
-                    fødselsnummer,
-                    aktørId,
-                    tilfeller,
-                    id,
                 )
             )
         }
