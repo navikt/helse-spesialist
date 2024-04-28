@@ -1,8 +1,5 @@
 package no.nav.helse.spesialist.api.varsel
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest
@@ -17,7 +14,12 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.parallel.Isolated
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
+@Isolated
 internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
 
     private val apiVarselDao = ApiVarselDao(dataSource)
@@ -201,7 +203,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef2)
         apiVarselDao.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT")
         apiVarselDao.godkjennVarslerFor(listOf(PERIODE.id))
-        val antallGodkjenteVarsler = finnVarslerFor(GODKJENT)
+        val antallGodkjenteVarsler = finnVarslerFor(GODKJENT, PERIODE.id)
 
         assertEquals(1, antallGodkjenteVarsler)
     }
@@ -509,11 +511,20 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         assertNotNull(vurdering?.tidspunkt)
     }
 
-    private fun finnVarslerFor(status: Varselstatus): Int = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val query = "SELECT count(1) FROM selve_varsel WHERE status = :status;"
-        return requireNotNull(session.run(queryOf(query, mapOf("status" to status.name)).map { it.int(1) }.asSingle))
-    }
+    private fun finnVarslerFor(status: Varselstatus, vedtaksperiodeId: UUID): Int =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query =
+                "SELECT count(1) FROM selve_varsel WHERE status = :status and vedtaksperiode_id = :vedtaksperiodeId;"
+            return requireNotNull(
+                session.run(
+                    queryOf(
+                        query,
+                        mapOf("status" to status.name, "vedtaksperiodeId" to vedtaksperiodeId)
+                    ).map { it.int(1) }.asSingle
+                )
+            )
+        }
 
     private fun finnVurderingFor(varselId: UUID): TestVurdering? {
         @Language("PostgreSQL")

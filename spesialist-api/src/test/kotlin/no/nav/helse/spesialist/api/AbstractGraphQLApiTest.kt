@@ -16,8 +16,6 @@ import io.ktor.server.request.ApplicationRequest
 import io.ktor.server.routing.route
 import io.mockk.every
 import io.mockk.mockk
-import java.time.YearMonth
-import java.util.UUID
 import no.nav.helse.mediator.IBehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering
 import no.nav.helse.spesialist.api.avviksvurdering.Beregningsgrunnlag
@@ -33,10 +31,9 @@ import no.nav.helse.spesialist.api.graphql.queryHandler
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiver
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.TestInstance
+import java.time.YearMonth
+import java.util.UUID
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
 
     protected val kode7Saksbehandlergruppe: UUID = UUID.randomUUID()
@@ -53,15 +50,13 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     protected open val dokumenthåndterer = mockk<Dokumenthåndterer>(relaxed = true)
     private val avviksvurderinghenter = mockk<Avviksvurderinghenter>(relaxed = true)
 
-    private lateinit var graphQLServer: GraphQLServer<ApplicationRequest>
-
     private val apiTesting = ApiTesting(jwtStub) {
         route("graphql") {
             queryHandler(graphQLServer)
         }
     }
 
-    private fun setupGraphQLServer() {
+    private val graphQLServer: GraphQLServer<ApplicationRequest> by lazy {
         val schema = SchemaBuilder(
             personApiDao = personApiDao,
             egenAnsattApiDao = egenAnsattApiDao,
@@ -88,7 +83,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
             dokumenthåndterer = dokumenthåndterer,
         ).build()
 
-        graphQLServer = GraphQLServer(
+        GraphQLServer(
             requestParser = RequestParser(),
             contextFactory = ContextFactory(
                 kode7Saksbehandlergruppe,
@@ -99,11 +94,6 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                 GraphQL.newGraphQL(schema).build()
             )
         )
-    }
-
-    @BeforeAll
-    fun setup() {
-        setupGraphQLServer()
     }
 
     override fun mockSnapshot(fødselsnummer: String, avviksprosent: Double, arbeidsgivere: List<GraphQLArbeidsgiver>) {

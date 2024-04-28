@@ -2,14 +2,13 @@ package no.nav.helse.spesialist.api.db
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import java.util.UUID
-import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.flywaydb.core.Flyway
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.BeforeEach
 import org.testcontainers.containers.PostgreSQLContainer
+import java.util.UUID
+import javax.sql.DataSource
 
 abstract class AbstractDatabaseTest {
 
@@ -26,7 +25,7 @@ abstract class AbstractDatabaseTest {
                 jdbcUrl = postgres.jdbcUrl
                 username = postgres.username
                 password = postgres.password
-                maximumPoolSize = 5
+                maximumPoolSize = 100
                 connectionTimeout = 500
                 initializationFailTimeout = 5000
             })
@@ -39,13 +38,13 @@ abstract class AbstractDatabaseTest {
                 .migrate()
 
             createTruncateFunction(dataSource)
+            resetDatabase()
         }
-    }
 
-    @BeforeEach
-    fun resetDatabase() {
-        sessionOf(dataSource).use  {
-            it.run(queryOf("SELECT truncate_tables()").asExecute)
+        private fun resetDatabase() {
+            sessionOf(dataSource).use  {
+                it.run(queryOf("SELECT truncate_tables()").asExecute)
+            }
         }
     }
 }

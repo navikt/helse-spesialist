@@ -24,7 +24,7 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
         """
         )
 
-        assertEquals(1,body["data"]["feilregistrerNotat"]["id"].asInt())
+        assertEquals(notatId, body["data"]["feilregistrerNotat"]["id"].asLong())
     }
 
     @Test
@@ -97,7 +97,7 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
         val body = runQuery(
             """
             mutation LeggTilKommentar {
-                leggTilKommentar(notatId: 1, tekst: "En kommentar", saksbehandlerident: "${SAKSBEHANDLER.ident}") {
+                leggTilKommentar(notatId: 42, tekst: "En kommentar", saksbehandlerident: "${SAKSBEHANDLER.ident}") {
                     id
                 }
             }

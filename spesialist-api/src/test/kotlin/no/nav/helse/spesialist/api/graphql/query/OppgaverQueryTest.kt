@@ -2,9 +2,6 @@ package no.nav.helse.spesialist.api.graphql.query
 
 import io.mockk.every
 import io.mockk.verify
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.graphql.schema.AntallArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
@@ -23,10 +20,11 @@ import no.nav.helse.spesialist.api.graphql.schema.Personnavn
 import no.nav.helse.spesialist.api.graphql.schema.Sorteringsnokkel
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavetype as OppgavetypeForApi
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
 
     @Test

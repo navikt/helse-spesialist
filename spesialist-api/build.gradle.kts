@@ -14,6 +14,8 @@ dependencies {
     api("io.ktor:ktor-server-double-receive:$ktorVersion")
     implementation(project(":spesialist-felles"))
     implementation("com.expediagroup:graphql-kotlin-server:$graphQLKotlinVersion")
+
+    testImplementation(testFixtures(project(":spesialist-felles")))
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
     testImplementation("io.ktor:ktor-server-netty:$ktorVersion")
 }

@@ -33,6 +33,13 @@ import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
+import no.nav.helse.spesialist.test.lagAktørId
+import no.nav.helse.spesialist.test.lagEtternavn
+import no.nav.helse.spesialist.test.lagFornavn
+import no.nav.helse.spesialist.test.lagFødselsnummer
+import no.nav.helse.spesialist.test.lagOrganisasjonsnavn
+import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.test.lagSaksbehandlerident
 import no.nav.helse.spleis.graphql.HentSnapshot
 import no.nav.helse.spleis.graphql.enums.GraphQLHendelsetype
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektskilde
@@ -67,25 +74,25 @@ import java.util.UUID
 import kotlin.properties.Delegates
 
 internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
-    protected companion object {
-        val NAVN = Navn("Ola", "Kari", "Nordhen")
-        val ENHET = Enhet(101, "Halden")
-        val PERIODE = Periode(UUID.randomUUID(), LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
-        val ARBEIDSFORHOLD = Arbeidsforhold(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 2), "EN TITTEL", 100)
-        val SAKSBEHANDLER =
-            Saksbehandler(
-                oid = UUID.randomUUID(),
-                navn = "Jan Banan",
-                ident = "B123456",
-                epost = "jan.banan@nav.no",
-            )
+    private val NAVN = Navn(lagFornavn(), lagFornavn(), lagEtternavn())
+    private val ENHET = Enhet(101, "Halden")
+    protected val PERIODE = Periode(UUID.randomUUID(), LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
 
-        const val FØDSELSNUMMER = "01017011111"
-        const val AKTØRID = "1017011111111"
-        const val ARBEIDSGIVER_NAVN = "EN ARBEIDSGIVER"
-        const val ORGANISASJONSNUMMER = "987654321"
-        const val ORGANISASJONSNUMMER_GHOST = "123456789"
-    }
+    protected val ARBEIDSFORHOLD = Arbeidsforhold(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 2), "EN TITTEL", 100)
+    protected val SAKSBEHANDLER =
+        Saksbehandler(
+            oid = UUID.randomUUID(),
+            navn = "Jan Banan",
+            ident = lagSaksbehandlerident(),
+            epost = "jan.banan@nav.no",
+        )
+
+    val FØDSELSNUMMER = lagFødselsnummer()
+    val AKTØRID = lagAktørId()
+    val ARBEIDSGIVER_NAVN = lagOrganisasjonsnavn()
+    val ORGANISASJONSNUMMER = lagOrganisasjonsnummer()
+    val ORGANISASJONSNUMMER_GHOST = lagOrganisasjonsnummer()
+
 
     protected val apiVarselRepository = ApiVarselRepository(dataSource)
     protected val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
@@ -686,11 +693,10 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         avviksprosent: Double = 0.0,
         arbeidsgivere: List<GraphQLArbeidsgiver> = emptyList(),
     ) {
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns
-            object :
-                GraphQLClientResponse<HentSnapshot.Result> {
-                override val data = HentSnapshot.Result(snapshot(fødselsnummer, arbeidsgivere))
-            }
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns object :
+            GraphQLClientResponse<HentSnapshot.Result> {
+            override val data = HentSnapshot.Result(snapshot(fødselsnummer, arbeidsgivere))
+        }
     }
 
     private fun snapshot(

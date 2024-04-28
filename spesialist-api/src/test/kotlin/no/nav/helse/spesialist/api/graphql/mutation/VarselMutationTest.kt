@@ -1,10 +1,10 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
-import java.util.UUID
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class VarselMutationTest : AbstractGraphQLApiTest() {
 
@@ -136,20 +136,20 @@ internal class VarselMutationTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `får 500-feil dersom oppdateringen tryner for settVarselstatus`() {
-        // Vi lar være å opprette definisjon for å fremprovosere at oppdateringen feiler
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
         opprettSaksbehandler()
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
-        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef)
+        val kode = "DENNE_KODEN_FINNES_FORHÅPENTLIGVIS_IKKE_I_DATABASEN"
+        nyttVarsel(kode = kode, vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef)
 
         val body = runQuery(
             """
             mutation SettVarselstatus {
                 settVarselstatus(
                     generasjonIdString: "$generasjonId", 
-                    varselkode: "EN_KODE", 
+                    varselkode: "$kode", 
                     ident: "${SAKSBEHANDLER.oid}" 
                 ) {
                     kode

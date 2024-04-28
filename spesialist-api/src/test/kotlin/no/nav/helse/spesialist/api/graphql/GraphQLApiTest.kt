@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql
 
-import java.time.YearMonth
 import no.nav.helse.rapids_rivers.asYearMonth
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.april
@@ -12,10 +11,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.TestInstance.Lifecycle
+import java.time.YearMonth
 
-@TestInstance(Lifecycle.PER_CLASS)
 internal class GraphQLApiTest : AbstractGraphQLApiTest() {
 
     @Test

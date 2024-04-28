@@ -9,10 +9,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import graphql.GraphQLException
-import io.mockk.clearMocks
 import io.mockk.every
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.graphql.schema.Handling
 import no.nav.helse.spesialist.api.graphql.schema.Periodehandling
@@ -21,23 +18,20 @@ import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.parallel.ResourceLock
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.util.UUID
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class PersonQueryTest : AbstractGraphQLApiTest() {
-    @AfterEach
-    fun clean() {
-        clearMocks(snapshotClient, egenAnsattApiDao)
-    }
 
     @Test
+    @ResourceLock("auditlogg-lytter")
     fun `henter person`() {
         mockSnapshot()
         val logglytter = opprettLogglytter()
@@ -66,6 +60,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     }
 
     @Test
+    @ResourceLock("auditlogg-lytter")
     fun `får 404-feil når personen man søker etter ikke finnes`() {
         val logglytter = opprettLogglytter()
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
@@ -75,6 +70,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     }
 
     @Test
+    @ResourceLock("auditlogg-lytter")
     fun `får personens fødselsnummer-identer når hen har flere`() {
         val dNummer = "41017012345"
         opprettPerson(fødselsnummer = dNummer, aktørId = AKTØRID)
@@ -89,6 +85,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     }
 
     @Test
+    @ResourceLock("auditlogg-lytter")
     fun `kan slå opp kode7-personer med riktige tilganger`() {
         mockSnapshot()
         opprettVedtaksperiode(opprettPerson(adressebeskyttelse = Adressebeskyttelse.Fortrolig), opprettArbeidsgiver())
@@ -101,6 +98,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     }
 
     @Test
+    @ResourceLock("auditlogg-lytter")
     fun `får 403-feil ved oppslag av kode7-personer uten riktige tilganger`() {
         opprettVedtaksperiode(opprettPerson(adressebeskyttelse = Adressebeskyttelse.Fortrolig), opprettArbeidsgiver())
 
@@ -112,6 +110,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     }
 
     @Test
+    @ResourceLock("auditlogg-lytter")
     fun `kan slå opp skjermede personer med riktige tilganger`() {
         mockSnapshot()
         every { egenAnsattApiDao.erEgenAnsatt(FØDSELSNUMMER) } returns true
@@ -125,6 +124,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     }
 
     @Test
+    @ResourceLock("auditlogg-lytter")
     fun `får 403-feil ved oppslag av skjermede personer`() {
         every { egenAnsattApiDao.erEgenAnsatt(FØDSELSNUMMER) } returns true
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
@@ -137,6 +137,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     }
 
     @Test
+    @ResourceLock("auditlogg-lytter")
     fun `får 501-feil når oppdatering av snapshot feiler`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } throws GraphQLException("Oops")
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
