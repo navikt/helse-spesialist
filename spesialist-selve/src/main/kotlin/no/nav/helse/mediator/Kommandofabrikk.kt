@@ -94,7 +94,7 @@ internal class Kommandofabrikk(
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     private val generasjonDao: GenerasjonDao = GenerasjonDao(dataSource),
     private val snapshotClient: SnapshotClient,
-    oppgaveMediator: () -> OppgaveMediator,
+    private val oppgaveMediator: OppgaveMediator,
     private val totrinnsvurderingDao: TotrinnsvurderingDao = TotrinnsvurderingDao(dataSource),
     private val notatDao: NotatDao = NotatDao(dataSource),
     private val notatMediator: NotatMediator = NotatMediator(notatDao),
@@ -124,7 +124,6 @@ internal class Kommandofabrikk(
     private val sykefraværstilfelleDao = SykefraværstilfelleDao(dataSource)
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
     private val metrikkDao = MetrikkDao(dataSource)
-    private val oppgaveMediator: OppgaveMediator by lazy { oppgaveMediator() }
     private var commandContext: CommandContext? = null
     private val observers: MutableList<CommandContextObserver> = mutableListOf()
 
