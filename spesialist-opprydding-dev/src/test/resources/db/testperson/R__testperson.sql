@@ -51,6 +51,8 @@ INSERT INTO risikovurdering_2021(id, vedtaksperiode_id, kan_godkjennes_automatis
 VALUES (${sequence_number}, '${vedtaksperiode_id}', false, false, '{}'::json, now());
 INSERT INTO unnta_fra_automatisk_godkjenning
 VALUES (${fødselsnummer}, false, array[]::varchar[], now());
+INSERT INTO stans_automatisering
+VALUES (${sequence_number},${fødselsnummer}, 'STOPP_AUTOMATIKK', array[]::varchar[], now(), 'ISYFO', '{}');
 INSERT INTO automatisering(vedtaksperiode_ref, hendelse_ref, automatisert, stikkprøve, opprettet, utbetaling_id)
 VALUES (${sequence_number}, '${hendelse_id}', false, false, now(), '${utbetaling_id}');
 INSERT INTO automatisering_problem(id, vedtaksperiode_ref, hendelse_ref, problem)

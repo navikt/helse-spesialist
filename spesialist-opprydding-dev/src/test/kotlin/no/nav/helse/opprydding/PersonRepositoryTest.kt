@@ -5,8 +5,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class PersonRepositoryTest: AbstractDatabaseTest() {
-
+internal class PersonRepositoryTest : AbstractDatabaseTest() {
     @Test
     fun `sletting av person`() {
         opprettPerson(FØDSELSNUMMER)
@@ -17,6 +16,6 @@ internal class PersonRepositoryTest: AbstractDatabaseTest() {
 
     @Test
     fun `antall tabeller - du må antakelig rette opp i sletting i dev dersom du har lagt til eller fjernet tabeller`() {
-        assertEquals(73, finnTabeller().size)
+        assertEquals(74, finnTabeller().size)
     }
 }

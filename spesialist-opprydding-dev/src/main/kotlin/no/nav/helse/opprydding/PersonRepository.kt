@@ -225,6 +225,7 @@ internal class PersonRepository(private val dataSource: DataSource) {
         slettAutomatisering(personRef)
         slettRisikovurdering(personRef)
         slettUnntaFraAutomatisering(personRef)
+        slettStansAutomatisering(personRef)
         slettAutomatiseringProblem(personRef)
         slettSaksbehandleroppgavetype(personRef)
         slettVedtaksperiodegenerasjoner(personRef)
@@ -349,6 +350,12 @@ internal class PersonRepository(private val dataSource: DataSource) {
     private fun TransactionalSession.slettUnntaFraAutomatisering(personRef: Int) {
         @Language("PostgreSQL")
         val query = "DELETE FROM unnta_fra_automatisk_godkjenning WHERE fødselsnummer IN (SELECT fodselsnummer FROM person WHERE id = ?)"
+        run(queryOf(query, personRef).asExecute)
+    }
+
+    private fun TransactionalSession.slettStansAutomatisering(personRef: Int) {
+        @Language("PostgreSQL")
+        val query = "DELETE FROM stans_automatisering WHERE fødselsnummer IN (SELECT fodselsnummer FROM person WHERE id = ?)"
         run(queryOf(query, personRef).asExecute)
     }
 
