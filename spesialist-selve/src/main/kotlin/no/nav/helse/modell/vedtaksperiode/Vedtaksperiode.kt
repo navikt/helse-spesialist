@@ -52,7 +52,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun nySpleisBehandling(spleisBehandling: SpleisBehandling) {
         if (forkastet || !spleisBehandling.erRelevantFor(vedtaksperiodeId)) return
-        gjeldendeGenerasjon.nySpleisBehandling(this, spleisBehandling)
+        nyGenerasjon(gjeldendeGenerasjon.nySpleisBehandling(spleisBehandling))
     }
 
     internal fun utbetalingForkastet(utbetalingEndret: UtbetalingEndret) {

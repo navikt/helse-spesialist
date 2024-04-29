@@ -99,6 +99,8 @@ internal class Generasjon private constructor(
         tilstand.nySpleisBehandling(this, vedtaksperiode, spleisBehandling)
     }
 
+    internal fun nySpleisBehandling(spleisBehandling: SpleisBehandling) = nyBehandling(spleisBehandling)
+
     internal fun forhindrerAutomatisering(): Boolean = varsler.forhindrerAutomatisering()
 
     internal fun håndter(
@@ -206,6 +208,20 @@ internal class Generasjon private constructor(
 
     private fun nyBehandling(spleisBehandlingId: UUID): Generasjon {
         val nyGenerasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, fom(), tom(), skjæringstidspunkt, spleisBehandlingId)
+        flyttAktiveVarslerTil(nyGenerasjon)
+        return nyGenerasjon
+    }
+
+    private fun nyBehandling(spleisBehandling: SpleisBehandling): Generasjon {
+        val nyGenerasjon =
+            Generasjon(
+                id = UUID.randomUUID(),
+                vedtaksperiodeId = vedtaksperiodeId,
+                fom = spleisBehandling.fom,
+                tom = spleisBehandling.tom,
+                skjæringstidspunkt = skjæringstidspunkt,
+                spleisBehandlingId = spleisBehandling.spleisBehandlingId,
+            )
         flyttAktiveVarslerTil(nyGenerasjon)
         return nyGenerasjon
     }

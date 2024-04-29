@@ -7,23 +7,12 @@ import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
 import java.util.UUID
 
 class VedtaksperiodeTest {
-    @Disabled
-    @Test
-    fun `ugyldig tilstand om Spesialist mottar ny behandling når gjeldende generasjon ikke er lukket`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
-        assertThrows<IllegalStateException> {
-            vedtaksperiode.nySpleisBehandling(nySpleisBehandling(vedtaksperiodeId))
-        }
-    }
-
     @Test
     fun `ignorerer behandling som ikke er relevant for vedtaksperioden`() {
         val vedtaksperiodeId = UUID.randomUUID()
@@ -35,6 +24,18 @@ class VedtaksperiodeTest {
 
         val antallGenerasjoner = vedtaksperiode.toDto().generasjoner.size
         assertEquals(1, antallGenerasjoner) // Det har ikke blitt opprettet noen ny generasjon for denne vedtaksperioden
+    }
+
+    @Test
+    fun `oppretter generasjon når Spleis forteller om ny behandling uavhengig av tilstand på tidligere generasjon - Spleis er master for behandlinger`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
+
+        vedtaksperiode.nySpleisBehandling(nySpleisBehandling(vedtaksperiodeId))
+
+        val generasjoner = vedtaksperiode.toDto().generasjoner
+        assertEquals(TilstandDto.VidereBehandlingAvklares, generasjoner.first().tilstand) // tilstand på tidligere generasjon er ikke avgjørende for om vi oppretter generasjon
+        assertEquals(2, generasjoner.size) // Det har ikke blitt opprettet noen ny generasjon for denne vedtaksperioden
     }
 
     @Test
