@@ -29,7 +29,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class PersonQueryTest : AbstractGraphQLApiTest() {
-    override fun graphQLServerWithUniqueMocks() = buildGraphQLServer()
+    override val useGraphQLServerWithSeparateMocks = true
 
     @Test
     @ResourceLock("auditlogg-lytter")

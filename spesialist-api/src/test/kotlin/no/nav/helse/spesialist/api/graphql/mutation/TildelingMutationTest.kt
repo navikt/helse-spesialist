@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
-import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.verify
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
@@ -12,17 +11,11 @@ import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class TildelingMutationTest : AbstractGraphQLApiTest() {
-    override fun graphQLServerWithUniqueMocks() = buildGraphQLServer()
-
-    @BeforeEach
-    fun beforeEach() {
-        clearMocks(oppgavehåndterer, saksbehandlerhåndterer)
-    }
+    override val useGraphQLServerWithSeparateMocks = true
 
     @Test
     fun `oppretter tildeling`() {

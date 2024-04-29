@@ -22,6 +22,7 @@ internal class TotrinnsvurderingMutationTest : AbstractGraphQLApiTest() {
 
         assertTrue(body["data"]["sendTilGodkjenning"].asBoolean())
     }
+
     @Test
     fun `send oppgave i retur`() {
         opprettSaksbehandler()

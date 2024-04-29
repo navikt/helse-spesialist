@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class OpptegnelseQueryTest: AbstractGraphQLApiTest() {
-    override fun graphQLServerWithUniqueMocks() = buildGraphQLServer()
+    override val useGraphQLServerWithSeparateMocks = true
 
     @Test
     fun `hent opptegnelser uten sekvensId`() {

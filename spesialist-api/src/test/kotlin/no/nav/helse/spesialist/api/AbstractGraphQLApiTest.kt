@@ -67,16 +67,16 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     protected val dokumenthåndterer = mockk<Dokumenthåndterer>(relaxed = true)
     private val avviksvurderinghenter = mockk<Avviksvurderinghenter>(relaxed = true)
 
-    protected open fun graphQLServerWithUniqueMocks(): GraphQLServer<ApplicationRequest>? = null
+    protected open val useGraphQLServerWithSeparateMocks: Boolean = false
 
     private val apiTesting = ApiTesting(jwtStub) {
         route("graphql") {
-            queryHandler(graphQLServerWithUniqueMocks() ?: graphQLServer)
+            queryHandler(if (useGraphQLServerWithSeparateMocks) buildGraphQLServer() else graphQLServer)
         }
     }
 
     // Oppretter en GraphQLServer med egne mocker per test, som testene kan verifye mot
-    protected fun buildGraphQLServer(): GraphQLServer<ApplicationRequest> {
+    private fun buildGraphQLServer(): GraphQLServer<ApplicationRequest> {
         val schema = SchemaBuilder(
             personApiDao = personApiDao,
             egenAnsattApiDao = egenAnsattApiDao,
