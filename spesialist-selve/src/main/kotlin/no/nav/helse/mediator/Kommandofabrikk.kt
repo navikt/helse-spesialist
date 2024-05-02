@@ -5,7 +5,6 @@ import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SykefraværstilfelleDao
 import no.nav.helse.db.TotrinnsvurderingDao
-import no.nav.helse.db.UnntaFraAutomatiseringDao
 import no.nav.helse.mediator.builders.GenerasjonBuilder
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
@@ -89,7 +88,6 @@ internal class Kommandofabrikk(
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
     private val risikovurderingDao: RisikovurderingDao = RisikovurderingDao(dataSource),
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource),
-    private val unntaFraAutomatiseringDao: UnntaFraAutomatiseringDao = UnntaFraAutomatiseringDao(dataSource),
     private val snapshotDao: SnapshotDao = SnapshotDao(dataSource),
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     private val generasjonDao: GenerasjonDao = GenerasjonDao(dataSource),
@@ -415,7 +413,6 @@ internal class Kommandofabrikk(
             utbetalingDao = utbetalingDao,
             vergemålDao = vergemålDao,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
-            unntaFraAutomatiseringDao = unntaFraAutomatiseringDao,
             risikovurderingDao = risikovurderingDao,
             påVentDao = påVentDao,
             overstyringDao = overstyringDao,

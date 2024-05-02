@@ -12,6 +12,7 @@ import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
+import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.januar
 import no.nav.helse.mediator.oppgave.OppgaveDao
@@ -158,6 +159,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
     internal val dokumentDao = DokumentDao(dataSource)
     internal val påVentDao = PåVentDao(dataSource)
+    internal val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(dataSource)
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,

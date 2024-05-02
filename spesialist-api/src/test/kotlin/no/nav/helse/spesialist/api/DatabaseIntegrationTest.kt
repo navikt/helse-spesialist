@@ -93,7 +93,6 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     val ORGANISASJONSNUMMER = lagOrganisasjonsnummer()
     val ORGANISASJONSNUMMER_GHOST = lagOrganisasjonsnummer()
 
-
     protected val apiVarselRepository = ApiVarselRepository(dataSource)
     protected val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     protected val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
@@ -693,10 +692,11 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         avviksprosent: Double = 0.0,
         arbeidsgivere: List<GraphQLArbeidsgiver> = emptyList(),
     ) {
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns object :
-            GraphQLClientResponse<HentSnapshot.Result> {
-            override val data = HentSnapshot.Result(snapshot(fødselsnummer, arbeidsgivere))
-        }
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns
+            object :
+                GraphQLClientResponse<HentSnapshot.Result> {
+                override val data = HentSnapshot.Result(snapshot(fødselsnummer, arbeidsgivere))
+            }
     }
 
     private fun snapshot(

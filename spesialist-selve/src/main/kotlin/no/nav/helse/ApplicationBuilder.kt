@@ -31,9 +31,9 @@ import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
+import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
-import no.nav.helse.db.UnntaFraAutomatiseringDao
 import no.nav.helse.mediator.BehandlingsstatistikkMediator
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.GodkjenningService
@@ -55,6 +55,7 @@ import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingService
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
@@ -206,7 +207,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val periodehistorikkDao = PeriodehistorikkDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
     private val risikovurderingDao = RisikovurderingDao(dataSource)
-    private val unntaFraAutomatiseringDao = UnntaFraAutomatiseringDao(dataSource)
     private val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val tildelingApiDao = TildelingApiDao(dataSource)
@@ -256,6 +256,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
 
     private val totrinnsvurderingMediator =
         TotrinnsvurderingMediator(TotrinnsvurderingDao(dataSource), oppgaveDao, periodehistorikkDao, notatMediator)
+
+    private val stansAutomatiskBehandlingService = StansAutomatiskBehandlingService(StansAutomatiskBehandlingDao(dataSource))
 
     private val snapshotMediator =
         SnapshotMediator(
@@ -347,6 +349,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 godkjenninghåndterer = godkjenningService,
                 personhåndterer = meldingMediator,
                 dokumenthåndterer = dokumentMediator,
+                stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlingService,
             )
 
             routing {
@@ -362,7 +365,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     val automatisering =
         Automatisering(
             risikovurderingDao = risikovurderingDao,
-            unntaFraAutomatiseringDao = unntaFraAutomatiseringDao,
+            stansAutomatiskBehandlingService = stansAutomatiskBehandlingService,
             automatiseringDao = automatiseringDao,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             vergemålDao = vergemålDao,

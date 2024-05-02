@@ -42,7 +42,7 @@ data class Reservasjon(
 )
 
 data class UnntattFraAutomatiskGodkjenning(
-    val erUntatt: Boolean,
+    val erUnntatt: Boolean,
     val arsaker: List<String>,
     val tidspunkt: DateTimeString?,
 )

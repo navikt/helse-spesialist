@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class TilgangsstyringE2ETest : AbstractE2ETest() {
-
     @Test
     fun `Gir 404 når det ikke er noe å vise ennå, selv om saksbehandler har tilgang`() {
         every { dataFetchingEnvironment.graphQlContext.get<String>(ContextValues.SAKSBEHANDLER_IDENT.key) } returns "A123456"
@@ -58,7 +57,6 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
 
         sendMeldingerOppTilEgenAnsatt()
 
-
         assertKanIkkeHentePerson("Finner ikke data for person med fødselsnummer ")
         håndterEgenansattløsning(erEgenAnsatt = false)
         assertKanIkkeHentePerson("Finner ikke data for person med fødselsnummer ")
@@ -73,7 +71,6 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
         settOppDefaultDataOgTilganger()
 
         sendMeldingerOppTilEgenAnsatt()
-
 
         assertKanIkkeHentePerson("Finner ikke data for person med fødselsnummer ")
         håndterEgenansattløsning(erEgenAnsatt = false)
@@ -110,7 +107,6 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
         håndterVergemålløsning()
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
-        håndterAutomatiseringStoppetAvVeilederløsning()
     }
 
     private fun fetchPerson() = runBlocking { personQuery.person(FØDSELSNUMMER, null, dataFetchingEnvironment) }
@@ -136,34 +132,40 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
     }
 
     private fun saksbehandlertilgangTilSkjermede(harTilgang: Boolean) {
-        every { dataFetchingEnvironment.graphQlContext.get<SaksbehandlerTilganger>("tilganger") } returns mockk(relaxed = true) {
-            every { harTilgangTilSkjermedePersoner() } returns harTilgang
-        }
+        every { dataFetchingEnvironment.graphQlContext.get<SaksbehandlerTilganger>("tilganger") } returns
+            mockk(relaxed = true) {
+                every { harTilgangTilSkjermedePersoner() } returns harTilgang
+            }
     }
 
     private val dataFetchingEnvironment = mockk<DataFetchingEnvironment>(relaxed = true)
 
-    private val personQuery = PersonQuery(
-        personApiDao = PersonApiDao(dataSource),
-        egenAnsattApiDao = EgenAnsattApiDao(dataSource),
-        tildelingDao = TildelingDao(dataSource),
-        arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource),
-        overstyringApiDao = OverstyringApiDao(dataSource),
-        risikovurderingApiDao = RisikovurderingApiDao(dataSource),
-        varselRepository = ApiVarselRepository(dataSource),
-        oppgaveApiDao = OppgaveApiDao(dataSource),
-        periodehistorikkDao = PeriodehistorikkDao(dataSource),
-        notatDao = NotatDao(dataSource),
-        totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource),
-        påVentApiDao = PåVentApiDao(dataSource),
-        snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), snapshotClient),
-        reservasjonClient = mockk(relaxed = true),
-        oppgavehåndterer = mockk(relaxed = true),
-        avviksvurderinghenter = mockk(relaxed = true),
-    )
+    private val personQuery =
+        PersonQuery(
+            personApiDao = PersonApiDao(dataSource),
+            egenAnsattApiDao = EgenAnsattApiDao(dataSource),
+            tildelingDao = TildelingDao(dataSource),
+            arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource),
+            overstyringApiDao = OverstyringApiDao(dataSource),
+            risikovurderingApiDao = RisikovurderingApiDao(dataSource),
+            varselRepository = ApiVarselRepository(dataSource),
+            oppgaveApiDao = OppgaveApiDao(dataSource),
+            periodehistorikkDao = PeriodehistorikkDao(dataSource),
+            notatDao = NotatDao(dataSource),
+            totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource),
+            påVentApiDao = PåVentApiDao(dataSource),
+            snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), snapshotClient),
+            reservasjonClient = mockk(relaxed = true),
+            oppgavehåndterer = mockk(relaxed = true),
+            avviksvurderinghenter = mockk(relaxed = true),
+            stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
+        )
 
     companion object {
-        private fun assertFeilmelding(feilmelding: String, errors: List<GraphQLError>) {
+        private fun assertFeilmelding(
+            feilmelding: String,
+            errors: List<GraphQLError>,
+        ) {
             assertTrue(errors.any { it.message.contains(feilmelding) }) {
                 "Forventet at $errors skulle inneholde \"$feilmelding\""
             }

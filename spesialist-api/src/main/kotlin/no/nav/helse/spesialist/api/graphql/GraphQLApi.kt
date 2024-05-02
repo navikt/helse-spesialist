@@ -22,6 +22,7 @@ import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.GraphQLMetrikker
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
+import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
@@ -73,6 +74,7 @@ fun Application.graphQLApi(
     godkjenninghåndterer: Godkjenninghåndterer,
     personhåndterer: Personhåndterer,
     dokumenthåndterer: Dokumenthåndterer,
+    stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
 ) {
     val schema =
         SchemaBuilder(
@@ -99,6 +101,7 @@ fun Application.graphQLApi(
             godkjenninghåndterer = godkjenninghåndterer,
             personhåndterer = personhåndterer,
             dokumenthåndterer = dokumenthåndterer,
+            stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
         ).build()
 
     val server =

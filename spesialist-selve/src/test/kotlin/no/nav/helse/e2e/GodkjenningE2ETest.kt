@@ -7,7 +7,6 @@ import AbstractE2ETest.Kommandokjedetilstand.NY
 import AbstractE2ETest.Kommandokjedetilstand.SUSPENDERT
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson
@@ -16,6 +15,7 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemå
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSystem
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -75,7 +75,17 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertGodkjenningsbehovBesvart(false, automatiskBehandlet = true)
         assertKommandokjedetilstander(
             sisteGodkjenningsbehovId,
-            NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, FERDIG
+            NY,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            FERDIG,
         )
     }
 
@@ -115,14 +125,14 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             kanGodkjennesAutomatisk = true,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(tags = tags1, spleisBehandlingId = spleisBehandlingId1)
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(tags = tags1, spleisBehandlingId = spleisBehandlingId1),
         )
         assertBehandlingsinformasjon(VEDTAKSPERIODE_ID, tags1, spleisBehandlingId1)
 
         val spleisBehandlingId2 = UUID.randomUUID()
         val tags2 = listOf("tag 2", "tag 3")
         håndterGodkjenningsbehovUtenValidering(
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(tags = tags2, spleisBehandlingId = spleisBehandlingId2)
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(tags = tags2, spleisBehandlingId = spleisBehandlingId2),
         )
         assertBehandlingsinformasjon(VEDTAKSPERIODE_ID, tags2, spleisBehandlingId2)
     }
@@ -133,7 +143,9 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterVedtaksperiodeNyUtbetaling()
-        håndterGodkjenningsbehov(godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(orgnummereMedRelevanteArbeidsforhold = andreArbeidsgivere))
+        håndterGodkjenningsbehov(
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(orgnummereMedRelevanteArbeidsforhold = andreArbeidsgivere),
+        )
         håndterPersoninfoløsning()
         håndterEnhetløsning()
         håndterInfotrygdutbetalingerløsning()
@@ -152,7 +164,9 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterVedtaksperiodeNyUtbetaling()
-        håndterGodkjenningsbehov(godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(orgnummereMedRelevanteArbeidsforhold = andreArbeidsforhold))
+        håndterGodkjenningsbehov(
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(orgnummereMedRelevanteArbeidsforhold = andreArbeidsforhold),
+        )
         håndterPersoninfoløsning()
         håndterEnhetløsning()
         håndterInfotrygdutbetalingerløsning()
@@ -175,7 +189,9 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val andreArbeidsforhold = listOf(arbeidsgiver2, arbeidsgiver3)
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        håndterGodkjenningsbehov(godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(orgnummereMedRelevanteArbeidsforhold = andreArbeidsforhold))
+        håndterGodkjenningsbehov(
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(orgnummereMedRelevanteArbeidsforhold = andreArbeidsforhold),
+        )
         håndterPersoninfoløsning()
         håndterEnhetløsning()
         håndterInfotrygdutbetalingerløsning()
@@ -202,7 +218,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         håndterVergemålløsning(vergemål = listOf(VergemålJson.Vergemål(voksen)))
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
-        håndterAutomatiseringStoppetAvVeilederløsning()
         assertGodkjenningsbehovBesvart(godkjent = false, automatiskBehandlet = true, "Vergemål")
     }
 
@@ -214,7 +229,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         håndterVergemålløsning()
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
-        håndterAutomatiseringStoppetAvVeilederløsning()
         assertGodkjenningsbehovBesvart(godkjent = true, automatiskBehandlet = true)
     }
 
@@ -224,17 +238,17 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilVergemål()
         håndterVergemålløsning(
-            fullmakter = listOf(
-                VergemålJson.Fullmakt(
-                    områder = listOf(VergemålJson.Område.Syk),
-                    gyldigTilOgMed = LocalDate.now(),
-                    gyldigFraOgMed = LocalDate.now()
-                )
-            )
+            fullmakter =
+                listOf(
+                    VergemålJson.Fullmakt(
+                        områder = listOf(VergemålJson.Område.Syk),
+                        gyldigTilOgMed = LocalDate.now(),
+                        gyldigFraOgMed = LocalDate.now(),
+                    ),
+                ),
         )
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
-        håndterAutomatiseringStoppetAvVeilederløsning()
         assertSaksbehandleroppgave(VEDTAKSPERIODE_ID, AvventerSaksbehandler)
     }
 
@@ -246,7 +260,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         håndterVergemålløsning(fremtidsfullmakter = listOf(VergemålJson.Vergemål(voksen)))
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
-        håndterAutomatiseringStoppetAvVeilederløsning()
         assertSaksbehandleroppgave(VEDTAKSPERIODE_ID, AvventerSaksbehandler)
     }
 
@@ -259,13 +272,21 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         håndterVergemålløsning(vergemål = listOf(VergemålJson.Vergemål(voksen)))
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
-        håndterAutomatiseringStoppetAvVeilederløsning()
         assertKommandokjedetilstander(
             sisteGodkjenningsbehovId,
-            NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, FERDIG
+            NY,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            FERDIG,
         )
         assertGodkjenningsbehovBesvart(godkjent = false, automatiskBehandlet = true, "Vergemål")
-
     }
 
     @Test
@@ -281,16 +302,17 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         håndterVedtaksperiodeNyUtbetaling(utbetalingId = revurdertUtbetaling)
         håndterGodkjenningsbehov(
             harOppdatertMetainfo = true,
-            godkjenningsbehovTestdata = GodkjenningsbehovTestdata(
-                periodeFom = 11.januar,
-                periodeTom = 31.januar,
-                vedtaksperiodeId = VEDTAKSPERIODE_ID,
-                utbetalingId = revurdertUtbetaling,
-                kanAvvises = kanAvvises,
-                fødselsnummer = FØDSELSNUMMER,
-                aktørId = AKTØR,
-                organisasjonsnummer = ORGNR,
-            )
+            godkjenningsbehovTestdata =
+                GodkjenningsbehovTestdata(
+                    periodeFom = 11.januar,
+                    periodeTom = 31.januar,
+                    vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                    utbetalingId = revurdertUtbetaling,
+                    kanAvvises = kanAvvises,
+                    fødselsnummer = FØDSELSNUMMER,
+                    aktørId = AKTØR,
+                    organisasjonsnummer = ORGNR,
+                ),
         )
 
         håndterVergemålløsning(vergemål = listOf(VergemålJson.Vergemål(type = mindreaarig)))
@@ -303,17 +325,19 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     private fun assertBehandlingsinformasjon(
         vedtaksperiodeId: UUID,
         forventedeTags: List<String>,
-        forventetSpleisBehandlingId: UUID
+        forventetSpleisBehandlingId: UUID,
     ) {
         @Language("PostgreSQL")
         val query =
             "SELECT tags, spleis_behandling_id FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = :vedtaksperiodeId;"
 
-        val (tags, spleisBehandlingId) = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, mapOf("vedtaksperiodeId" to vedtaksperiodeId))
-                .map { it.array<String>("tags").toList() to it.uuid("spleis_behandling_id") }.asSingle
-            )
-        }!!
+        val (tags, spleisBehandlingId) =
+            sessionOf(dataSource).use { session ->
+                session.run(
+                    queryOf(query, mapOf("vedtaksperiodeId" to vedtaksperiodeId))
+                        .map { it.array<String>("tags").toList() to it.uuid("spleis_behandling_id") }.asSingle,
+                )
+            }!!
 
         assertEquals(forventedeTags, tags)
         assertEquals(forventetSpleisBehandlingId, spleisBehandlingId)

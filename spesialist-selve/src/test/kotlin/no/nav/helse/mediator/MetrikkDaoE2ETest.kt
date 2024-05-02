@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class MetrikkDaoE2ETest : AbstractE2ETest() {
-
     private val dao = MetrikkDao(dataSource)
 
     @Test
@@ -36,7 +35,6 @@ internal class MetrikkDaoE2ETest : AbstractE2ETest() {
         spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning(antall = 1)
         håndterRisikovurderingløsning()
-        håndterAutomatiseringStoppetAvVeilederløsning()
 
         val contextId = inspektør.contextId()
         assertEquals(GodkjenningsbehovUtfall.ManuellOppgave, dao.finnUtfallForGodkjenningsbehov(contextId))

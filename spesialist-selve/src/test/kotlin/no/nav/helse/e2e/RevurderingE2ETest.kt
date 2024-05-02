@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class RevurderingE2ETest : AbstractE2ETest() {
-
     @Test
     fun `revurdering ved saksbehandlet oppgave`() {
         vedtaksløsningenMottarNySøknad()
@@ -21,7 +20,6 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harRisikovurdering = true,
-            harOppdatertStoppknapp = true,
             harOppdatertMetadata = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = utbetalingId2),
         )
@@ -41,15 +39,15 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harRisikovurdering = true,
-            harOppdatertStoppknapp = true,
             harOppdatertMetadata = true,
             kanGodkjennesAutomatisk = true,
             arbeidsgiverbeløp = -200,
             personbeløp = 0,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = utbetalingId2)
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = utbetalingId2),
         )
         assertSaksbehandleroppgave(oppgavestatus = Oppgavestatus.AvventerSaksbehandler)
     }
+
     @Test
     fun `revurdering av periode med positivt beløp og ingen varsler medfører ikke oppgave`() {
         vedtaksløsningenMottarNySøknad()
@@ -62,12 +60,11 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harRisikovurdering = true,
-            harOppdatertStoppknapp = true,
             harOppdatertMetadata = true,
             kanGodkjennesAutomatisk = true,
             arbeidsgiverbeløp = 200,
             personbeløp = 0,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = utbetalingId2)
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = utbetalingId2),
         )
         assertSaksbehandleroppgaveBleIkkeOpprettet()
     }

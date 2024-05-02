@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
-
     @Test
     fun `sak blir trukket til totrinnsvurdering ved overstyring av inntekt og refusjon`() {
         vedtaksløsningenMottarNySøknad()
@@ -18,7 +17,6 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
         håndterOverstyrInntektOgRefusjon()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harRisikovurdering = true,
-            harOppdatertStoppknapp = true,
             harOppdatertMetadata = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
         )
@@ -31,24 +29,25 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(
-                orgnummereMedRelevanteArbeidsforhold = listOf(ORGNR_GHOST),
-            )
+            godkjenningsbehovTestdata =
+                godkjenningsbehovTestdata.copy(
+                    orgnummereMedRelevanteArbeidsforhold = listOf(ORGNR_GHOST),
+                ),
         )
         håndterOverstyrArbeidsforhold(
-            overstyrteArbeidsforhold = listOf(
-                OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi(
-                    orgnummer = ORGNR_GHOST,
-                    deaktivert = true,
-                    begrunnelse = "begrunnelse",
-                    forklaring = "forklaring",
-                    lovhjemmel = LovhjemmelFraApi("8-15", null, null, "folketrygdloven", "1998-12-18"),
-                )
-            )
+            overstyrteArbeidsforhold =
+                listOf(
+                    OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi(
+                        orgnummer = ORGNR_GHOST,
+                        deaktivert = true,
+                        begrunnelse = "begrunnelse",
+                        forklaring = "forklaring",
+                        lovhjemmel = LovhjemmelFraApi("8-15", null, null, "folketrygdloven", "1998-12-18"),
+                    ),
+                ),
         )
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harRisikovurdering = true,
-            harOppdatertStoppknapp = true,
             harOppdatertMetadata = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
         )
@@ -64,7 +63,6 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
         håndterOverstyrTidslinje()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harRisikovurdering = true,
-            harOppdatertStoppknapp = true,
             harOppdatertMetadata = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
         )

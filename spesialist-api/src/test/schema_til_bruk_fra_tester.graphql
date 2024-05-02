@@ -463,7 +463,7 @@ type Personinfo {
     kjonn: Kjonn!
     mellomnavn: String
     reservasjon: Reservasjon
-    unntattFraAutomatisering: UnntattFraAutomatiskGodkjenning!
+    unntattFraAutomatisering: UnntattFraAutomatiskGodkjenning
 }
 
 type Personnavn {
@@ -740,7 +740,7 @@ type UberegnetVilkarsprovdPeriode implements Periode {
 
 type UnntattFraAutomatiskGodkjenning {
     arsaker: [String!]!
-    erUntatt: Boolean!
+    erUnntatt: Boolean!
     tidspunkt: String
 }
 

@@ -43,22 +43,24 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class OverstyringE2ETest : AbstractE2ETest() {
-
     @Test
     fun `saksbehandler overstyrer sykdomstidslinje`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
-        håndterOverstyrTidslinje(dager = listOf(
-            OverstyrTidslinjeHandlingFraApi.OverstyrDagFraApi(
-                dato = 20.januar,
-                type = "Feriedag",
-                fraType = "Sykedag",
-                grad = null,
-                fraGrad = 100,
-                lovhjemmel = null
-            )
-        ))
+        håndterOverstyrTidslinje(
+            dager =
+                listOf(
+                    OverstyrTidslinjeHandlingFraApi.OverstyrDagFraApi(
+                        dato = 20.januar,
+                        type = "Feriedag",
+                        fraType = "Sykedag",
+                        grad = null,
+                        fraGrad = 100,
+                        lovhjemmel = null,
+                    ),
+                ),
+        )
         assertOverstyrTidslinje(FØDSELSNUMMER, 1)
 
         assertOppgaver(UTBETALING_ID, "AvventerSaksbehandler", 0)
@@ -66,9 +68,8 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         val nyUtbetalingId = UUID.randomUUID()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harRisikovurdering = true,
-            harOppdatertStoppknapp = true,
             harOppdatertMetadata = true,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId)
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId),
         )
         assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
     }
@@ -78,16 +79,26 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
-        håndterOverstyrTidslinje(dager = listOf(
-            OverstyrTidslinjeHandlingFraApi.OverstyrDagFraApi(
-                dato = 20.januar,
-                type = "Feriedag",
-                fraType = "Sykedag",
-                grad = null,
-                fraGrad = 100,
-                lovhjemmel = LovhjemmelFraApi(paragraf = "EN PARAGRAF", ledd = "ET LEDD", bokstav = "EN BOKSTAV", lovverk = "folketrygdloven", lovverksversjon = "1970-01-01")
-            )
-        ))
+        håndterOverstyrTidslinje(
+            dager =
+                listOf(
+                    OverstyrTidslinjeHandlingFraApi.OverstyrDagFraApi(
+                        dato = 20.januar,
+                        type = "Feriedag",
+                        fraType = "Sykedag",
+                        grad = null,
+                        fraGrad = 100,
+                        lovhjemmel =
+                            LovhjemmelFraApi(
+                                paragraf = "EN PARAGRAF",
+                                ledd = "ET LEDD",
+                                bokstav = "EN BOKSTAV",
+                                lovverk = "folketrygdloven",
+                                lovverksversjon = "1970-01-01",
+                            ),
+                    ),
+                ),
+        )
         assertOverstyrTidslinje(FØDSELSNUMMER, 1)
         val subsumsjon = inspektør.siste("subsumsjon").path("subsumsjon")
 
@@ -100,17 +111,19 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterOverstyrInntektOgRefusjon(
-            arbeidsgivere = listOf(
-                OverstyrArbeidsgiverFraApi(
-                    organisasjonsnummer = ORGNR,
-                    månedligInntekt = 25000.0,
-                    fraMånedligInntekt = 25001.0,
-                    forklaring = "testbortforklaring",
-                    lovhjemmel = LovhjemmelFraApi("8-28", "LEDD_1", "BOKSTAV_A", "folketrygdloven", "1970-01-01"),
-                    refusjonsopplysninger = null,
-                    fraRefusjonsopplysninger = null,
-                    begrunnelse = "begrunnelse")
-            ),
+            arbeidsgivere =
+                listOf(
+                    OverstyrArbeidsgiverFraApi(
+                        organisasjonsnummer = ORGNR,
+                        månedligInntekt = 25000.0,
+                        fraMånedligInntekt = 25001.0,
+                        forklaring = "testbortforklaring",
+                        lovhjemmel = LovhjemmelFraApi("8-28", "LEDD_1", "BOKSTAV_A", "folketrygdloven", "1970-01-01"),
+                        refusjonsopplysninger = null,
+                        fraRefusjonsopplysninger = null,
+                        begrunnelse = "begrunnelse",
+                    ),
+                ),
             skjæringstidspunkt = 1.januar,
         )
 
@@ -120,9 +133,8 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         val nyUtbetalingId = UUID.randomUUID()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harRisikovurdering = true,
-            harOppdatertStoppknapp = true,
             harOppdatertMetadata = true,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId)
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId),
         )
 
         assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
@@ -135,15 +147,16 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterOverstyrArbeidsforhold(
-            overstyrteArbeidsforhold = listOf(
-                OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi(
-                    orgnummer = ORGNR,
-                    deaktivert = true,
-                    begrunnelse = "begrunnelse",
-                    forklaring = "forklaring",
-                    lovhjemmel = LovhjemmelFraApi("8-15", null, null, "folketrygdloven", "1998-12-18"),
-                )
-            )
+            overstyrteArbeidsforhold =
+                listOf(
+                    OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi(
+                        orgnummer = ORGNR,
+                        deaktivert = true,
+                        begrunnelse = "begrunnelse",
+                        forklaring = "forklaring",
+                        lovhjemmel = LovhjemmelFraApi("8-15", null, null, "folketrygdloven", "1998-12-18"),
+                    ),
+                ),
         )
         assertOppgaver(UTBETALING_ID, "AvventerSaksbehandler", 0)
         assertOverstyrArbeidsforhold(FØDSELSNUMMER, 1)
@@ -151,9 +164,8 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         val nyUtbetalingId = UUID.randomUUID()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harRisikovurdering = true,
-            harOppdatertStoppknapp = true,
             harOppdatertMetadata = true,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId)
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId),
         )
 
         assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
@@ -168,14 +180,12 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         håndterOverstyrTidslinje()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harRisikovurdering = true,
-            harOppdatertStoppknapp = true,
             harOppdatertMetadata = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
         )
         håndterOverstyrInntektOgRefusjon()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harRisikovurdering = true,
-            harOppdatertStoppknapp = true,
             harOppdatertMetadata = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
         )
@@ -183,14 +193,17 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
 
         every { dataFetchingEnvironment.graphQlContext.get<String>("saksbehandlerNavn") } returns "saksbehandler"
         every { dataFetchingEnvironment.graphQlContext.get<String>(ContextValues.SAKSBEHANDLER_IDENT.key) } returns "A123456"
-        every { dataFetchingEnvironment.graphQlContext.get<SaksbehandlerTilganger>("tilganger") } returns SAKSBEHANDLERTILGANGER_UTEN_TILGANGER
+        every {
+            dataFetchingEnvironment.graphQlContext.get<SaksbehandlerTilganger>(
+                "tilganger",
+            )
+        } returns SAKSBEHANDLERTILGANGER_UTEN_TILGANGER
 
         val nyUtbetalingId = UUID.randomUUID()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harRisikovurdering = true,
-            harOppdatertStoppknapp = true,
             harOppdatertMetadata = true,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId)
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId),
         )
         assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
 
@@ -207,16 +220,24 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertFalse(overstyringer.last().ferdigstilt)
     }
 
-    private fun assertOppgaver(utbetalingId: UUID, status: String, forventetAntall: Int) {
+    private fun assertOppgaver(
+        utbetalingId: UUID,
+        status: String,
+        forventetAntall: Int,
+    ) {
         @Language("PostgreSQL")
         val query = "SELECT COUNT(1) FROM oppgave o WHERE o.utbetaling_id = ? AND o.status = ?::oppgavestatus"
-        val antallOppgaver = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, utbetalingId, status).map { it.int(1) }.asSingle) ?: 0
-        }
+        val antallOppgaver =
+            sessionOf(dataSource).use { session ->
+                session.run(queryOf(query, utbetalingId, status).map { it.int(1) }.asSingle) ?: 0
+            }
         assertEquals(forventetAntall, antallOppgaver)
     }
 
-    private fun assertOverstyrTidslinje(fødselsnummer: String, forventetAntall: Int) {
+    private fun assertOverstyrTidslinje(
+        fødselsnummer: String,
+        forventetAntall: Int,
+    ) {
         @Language("PostgreSQL")
         val query =
             """
@@ -224,16 +245,25 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                 INNER JOIN overstyring_tidslinje ot on o.id = ot.overstyring_ref 
                 WHERE o.person_ref = (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer)
             """
-        val antallOverstyrTidslinje = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, mapOf(
-                "fodselsnummer" to fødselsnummer.toLong()
-            )).map { it.int(1) }.asSingle)
-        } ?: 0
+        val antallOverstyrTidslinje =
+            sessionOf(dataSource).use { session ->
+                session.run(
+                    queryOf(
+                        query,
+                        mapOf(
+                            "fodselsnummer" to fødselsnummer.toLong(),
+                        ),
+                    ).map { it.int(1) }.asSingle,
+                )
+            } ?: 0
 
         assertEquals(forventetAntall, antallOverstyrTidslinje)
     }
 
-    private fun assertOverstyrArbeidsforhold(fødselsnummer: String, forventetAntall: Int) {
+    private fun assertOverstyrArbeidsforhold(
+        fødselsnummer: String,
+        forventetAntall: Int,
+    ) {
         @Language("PostgreSQL")
         val query =
             """
@@ -241,16 +271,25 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                 INNER JOIN overstyring_arbeidsforhold oa on o.id = oa.overstyring_ref
                 WHERE o.person_ref = (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer)
             """
-        val antallOverstyrArbeidsforhold = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, mapOf(
-                "fodselsnummer" to fødselsnummer.toLong()
-            )).map { it.int(1) }.asSingle)
-        } ?: 0
+        val antallOverstyrArbeidsforhold =
+            sessionOf(dataSource).use { session ->
+                session.run(
+                    queryOf(
+                        query,
+                        mapOf(
+                            "fodselsnummer" to fødselsnummer.toLong(),
+                        ),
+                    ).map { it.int(1) }.asSingle,
+                )
+            } ?: 0
 
         assertEquals(forventetAntall, antallOverstyrArbeidsforhold)
     }
 
-    private fun assertOverstyrInntektOgRefusjon(fødselsnummer: String, forventetAntall: Int) {
+    private fun assertOverstyrInntektOgRefusjon(
+        fødselsnummer: String,
+        forventetAntall: Int,
+    ) {
         @Language("PostgreSQL")
         val query =
             """
@@ -258,16 +297,25 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                 INNER JOIN overstyring_inntekt oi on o.id = oi.overstyring_ref
                 WHERE o.person_ref = (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer)
             """
-        val antallOverstyrInntektOgRefusjon = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, mapOf(
-                "fodselsnummer" to fødselsnummer.toLong()
-            )).map { it.int(1) }.asSingle)
-        } ?: 0
+        val antallOverstyrInntektOgRefusjon =
+            sessionOf(dataSource).use { session ->
+                session.run(
+                    queryOf(
+                        query,
+                        mapOf(
+                            "fodselsnummer" to fødselsnummer.toLong(),
+                        ),
+                    ).map { it.int(1) }.asSingle,
+                )
+            } ?: 0
 
         assertEquals(forventetAntall, antallOverstyrInntektOgRefusjon)
     }
 
-    private fun assertTildeling(saksbehandlerEpost: String, utbetalingId: UUID) {
+    private fun assertTildeling(
+        saksbehandlerEpost: String,
+        utbetalingId: UUID,
+    ) {
         @Language("PostgreSQL")
         val query =
             """
@@ -276,30 +324,33 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                 INNER JOIN oppgave o on o.id = t.oppgave_id_ref
                 WHERE o.utbetaling_id = ?
             """
-        val tildeltEpost = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, utbetalingId).map { it.string("epost") }.asSingle)
-        }
+        val tildeltEpost =
+            sessionOf(dataSource).use { session ->
+                session.run(queryOf(query, utbetalingId).map { it.string("epost") }.asSingle)
+            }
         assertEquals(saksbehandlerEpost, tildeltEpost)
     }
 
     private val dataFetchingEnvironment = mockk<DataFetchingEnvironment>(relaxed = true)
 
-    private val personQuery = PersonQuery(
-        personApiDao = PersonApiDao(dataSource),
-        egenAnsattApiDao = EgenAnsattApiDao(dataSource),
-        tildelingDao = TildelingDao(dataSource),
-        arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource),
-        overstyringApiDao = OverstyringApiDao(dataSource),
-        risikovurderingApiDao = RisikovurderingApiDao(dataSource),
-        varselRepository = ApiVarselRepository(dataSource),
-        oppgaveApiDao = OppgaveApiDao(dataSource),
-        periodehistorikkDao = PeriodehistorikkDao(dataSource),
-        notatDao = NotatDao(dataSource),
-        totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource),
-        påVentApiDao = PåVentApiDao(dataSource),
-        snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), snapshotClient),
-        reservasjonClient = mockk(relaxed = true),
-        oppgavehåndterer = mockk(relaxed = true),
-        avviksvurderinghenter = mockk(relaxed = true),
-    )
+    private val personQuery =
+        PersonQuery(
+            personApiDao = PersonApiDao(dataSource),
+            egenAnsattApiDao = EgenAnsattApiDao(dataSource),
+            tildelingDao = TildelingDao(dataSource),
+            arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource),
+            overstyringApiDao = OverstyringApiDao(dataSource),
+            risikovurderingApiDao = RisikovurderingApiDao(dataSource),
+            varselRepository = ApiVarselRepository(dataSource),
+            oppgaveApiDao = OppgaveApiDao(dataSource),
+            periodehistorikkDao = PeriodehistorikkDao(dataSource),
+            notatDao = NotatDao(dataSource),
+            totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource),
+            påVentApiDao = PåVentApiDao(dataSource),
+            snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), snapshotClient),
+            reservasjonClient = mockk(relaxed = true),
+            oppgavehåndterer = mockk(relaxed = true),
+            avviksvurderinghenter = mockk(relaxed = true),
+            stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
+        )
 }

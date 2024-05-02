@@ -52,12 +52,10 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
-
     protected val kode7Saksbehandlergruppe: UUID = UUID.randomUUID()
     protected val skjermedePersonerGruppeId: UUID = UUID.randomUUID()
     private val beslutterGruppeId: UUID = UUID.randomUUID()
     private val avviksvurderingId: UUID = UUID.randomUUID()
-
 
     private val reservasjonClient = mockk<ReservasjonClient>(relaxed = true)
     private val behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkMediator>(relaxed = true)
@@ -66,111 +64,128 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     private val personhåndterer = mockk<Personhåndterer>(relaxed = true)
     protected val dokumenthåndterer = mockk<Dokumenthåndterer>(relaxed = true)
     private val avviksvurderinghenter = mockk<Avviksvurderinghenter>(relaxed = true)
+    private val stansAutomatiskBehandlinghåndterer = mockk<StansAutomatiskBehandlinghåndterer>(relaxed = true)
 
     protected open val useGraphQLServerWithSeparateMocks: Boolean = false
 
-    private val apiTesting = ApiTesting(jwtStub) {
-        route("graphql") {
-            queryHandler(if (useGraphQLServerWithSeparateMocks) buildGraphQLServer() else graphQLServer)
+    private val apiTesting =
+        ApiTesting(jwtStub) {
+            route("graphql") {
+                queryHandler(if (useGraphQLServerWithSeparateMocks) buildGraphQLServer() else graphQLServer)
+            }
         }
-    }
 
     // Oppretter en GraphQLServer med egne mocker per test, som testene kan verifye mot
     private fun buildGraphQLServer(): GraphQLServer<ApplicationRequest> {
-        val schema = SchemaBuilder(
-            personApiDao = personApiDao,
-            egenAnsattApiDao = egenAnsattApiDao,
-            tildelingDao = tildelingDao,
-            arbeidsgiverApiDao = arbeidsgiverApiDao,
-            overstyringApiDao = overstyringApiDao,
-            risikovurderingApiDao = risikovurderingApiDao,
-            varselRepository = apiVarselRepository,
-            oppgaveApiDao = oppgaveApiDao,
-            periodehistorikkDao = periodehistorikkDao,
-            snapshotMediator = snapshotMediator,
-            notatDao = notatDao,
-            totrinnsvurderingApiDao = totrinnsvurderingApiDao,
-            påVentApiDao = påVentApiDao,
-            reservasjonClient = reservasjonClient,
-            avviksvurderinghenter = avviksvurderinghenter,
-            behandlingsstatistikkMediator = behandlingsstatistikkMediator,
-            notatMediator = notatMediator,
-            saksbehandlerhåndterer = saksbehandlerhåndterer,
-            oppgavehåndterer = oppgavehåndterer,
-            totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
-            godkjenninghåndterer = godkjenninghåndterer,
-            personhåndterer = personhåndterer,
-            dokumenthåndterer = dokumenthåndterer,
-        ).build()
+        val schema =
+            SchemaBuilder(
+                personApiDao = personApiDao,
+                egenAnsattApiDao = egenAnsattApiDao,
+                tildelingDao = tildelingDao,
+                arbeidsgiverApiDao = arbeidsgiverApiDao,
+                overstyringApiDao = overstyringApiDao,
+                risikovurderingApiDao = risikovurderingApiDao,
+                varselRepository = apiVarselRepository,
+                oppgaveApiDao = oppgaveApiDao,
+                periodehistorikkDao = periodehistorikkDao,
+                snapshotMediator = snapshotMediator,
+                notatDao = notatDao,
+                totrinnsvurderingApiDao = totrinnsvurderingApiDao,
+                påVentApiDao = påVentApiDao,
+                reservasjonClient = reservasjonClient,
+                avviksvurderinghenter = avviksvurderinghenter,
+                behandlingsstatistikkMediator = behandlingsstatistikkMediator,
+                notatMediator = notatMediator,
+                saksbehandlerhåndterer = saksbehandlerhåndterer,
+                oppgavehåndterer = oppgavehåndterer,
+                totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
+                godkjenninghåndterer = godkjenninghåndterer,
+                personhåndterer = personhåndterer,
+                dokumenthåndterer = dokumenthåndterer,
+                stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
+            ).build()
 
         return GraphQLServer(
             requestParser = RequestParser(),
-            contextFactory = ContextFactory(
-                kode7Saksbehandlergruppe,
-                skjermedePersonerGruppeId,
-                beslutterGruppeId,
-            ),
-            requestHandler = GraphQLRequestHandler(
-                GraphQL.newGraphQL(schema).build()
-            )
+            contextFactory =
+                ContextFactory(
+                    kode7Saksbehandlergruppe,
+                    skjermedePersonerGruppeId,
+                    beslutterGruppeId,
+                ),
+            requestHandler =
+                GraphQLRequestHandler(
+                    GraphQL.newGraphQL(schema).build(),
+                ),
         )
     }
 
-    override fun mockSnapshot(fødselsnummer: String, avviksprosent: Double, arbeidsgivere: List<GraphQLArbeidsgiver>) {
+    override fun mockSnapshot(
+        fødselsnummer: String,
+        avviksprosent: Double,
+        arbeidsgivere: List<GraphQLArbeidsgiver>,
+    ) {
         super.mockSnapshot(fødselsnummer, avviksprosent, arbeidsgivere)
-        every { avviksvurderinghenter.hentAvviksvurdering(any()) } returns Avviksvurdering(
-            unikId = avviksvurderingId,
-            vilkårsgrunnlagId = UUID.randomUUID(),
-            fødselsnummer = fødselsnummer,
-            skjæringstidspunkt = 1.januar,
-            opprettet = 1.januar.atStartOfDay(),
-            avviksprosent = avviksprosent,
-            sammenligningsgrunnlag = Sammenligningsgrunnlag(
-                totalbeløp = 10000.0,
-                innrapporterteInntekter = listOf(
-                    InnrapportertInntekt(
-                        arbeidsgiverreferanse = ORGANISASJONSNUMMER,
-                        inntekter = listOf(
-                            Inntekt(
-                                årMåned = YearMonth.from(1.januar),
-                                beløp = 2000.0
+        every { avviksvurderinghenter.hentAvviksvurdering(any()) } returns
+            Avviksvurdering(
+                unikId = avviksvurderingId,
+                vilkårsgrunnlagId = UUID.randomUUID(),
+                fødselsnummer = fødselsnummer,
+                skjæringstidspunkt = 1.januar,
+                opprettet = 1.januar.atStartOfDay(),
+                avviksprosent = avviksprosent,
+                sammenligningsgrunnlag =
+                    Sammenligningsgrunnlag(
+                        totalbeløp = 10000.0,
+                        innrapporterteInntekter =
+                            listOf(
+                                InnrapportertInntekt(
+                                    arbeidsgiverreferanse = ORGANISASJONSNUMMER,
+                                    inntekter =
+                                        listOf(
+                                            Inntekt(
+                                                årMåned = YearMonth.from(1.januar),
+                                                beløp = 2000.0,
+                                            ),
+                                            Inntekt(
+                                                årMåned = YearMonth.from(1.februar),
+                                                beløp = 2000.0,
+                                            ),
+                                        ),
+                                ),
+                                InnrapportertInntekt(
+                                    arbeidsgiverreferanse = "987656789",
+                                    inntekter =
+                                        listOf(
+                                            Inntekt(
+                                                årMåned = YearMonth.from(1.januar),
+                                                beløp = 1500.0,
+                                            ),
+                                            Inntekt(
+                                                årMåned = YearMonth.from(1.februar),
+                                                beløp = 1500.0,
+                                            ),
+                                            Inntekt(
+                                                årMåned = YearMonth.from(1.mars),
+                                                beløp = 1500.0,
+                                            ),
+                                            Inntekt(
+                                                årMåned = YearMonth.from(1.april),
+                                                beløp = 1500.0,
+                                            ),
+                                        ),
+                                ),
                             ),
-                            Inntekt(
-                                årMåned = YearMonth.from(1.februar),
-                                beløp = 2000.0
-                            )
-                        )
                     ),
-                    InnrapportertInntekt(
-                        arbeidsgiverreferanse = "987656789",
-                        inntekter = listOf(
-                            Inntekt(
-                                årMåned = YearMonth.from(1.januar),
-                                beløp = 1500.0
+                beregningsgrunnlag =
+                    Beregningsgrunnlag(
+                        totalbeløp = 10000.0,
+                        omregnedeÅrsinntekter =
+                            listOf(
+                                OmregnetÅrsinntekt(arbeidsgiverreferanse = ORGANISASJONSNUMMER, beløp = 10000.0),
                             ),
-                            Inntekt(
-                                årMåned = YearMonth.from(1.februar),
-                                beløp = 1500.0
-                            ),
-                            Inntekt(
-                                årMåned = YearMonth.from(1.mars),
-                                beløp = 1500.0
-                            ),
-                            Inntekt(
-                                årMåned = YearMonth.from(1.april),
-                                beløp = 1500.0
-                            )
-                        )
-                    )
-                )
-            ),
-            beregningsgrunnlag = Beregningsgrunnlag(
-                totalbeløp = 10000.0,
-                omregnedeÅrsinntekter = listOf(
-                    OmregnetÅrsinntekt(arbeidsgiverreferanse = ORGANISASJONSNUMMER, beløp = 10000.0)
-                )
+                    ),
             )
-        )
     }
 
     companion object {
@@ -180,45 +195,50 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
         private const val issuer = "https://jwt-provider-domain"
 
         // En GraphQLServer med "singleton"-mocks, som derfor ikke er gjenbrukbar på tvers av tester som verifyer
-        private val graphQLServer = run {
-            val notatDao = NotatDao(dataSource)
-            val schemaBuilder = SchemaBuilder(
-                personApiDao = PersonApiDao(dataSource),
-                egenAnsattApiDao = EgenAnsattApiDao(dataSource),
-                tildelingDao = TildelingDao(dataSource),
-                arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource),
-                overstyringApiDao = OverstyringApiDao(dataSource),
-                risikovurderingApiDao = RisikovurderingApiDao(dataSource),
-                varselRepository = ApiVarselRepository(dataSource),
-                oppgaveApiDao = OppgaveApiDao(dataSource),
-                periodehistorikkDao = PeriodehistorikkDao(dataSource),
-                snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), mockk<SnapshotClient>(relaxed = true)),
-                notatDao = notatDao,
-                totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource),
-                påVentApiDao = PåVentApiDao(dataSource),
-                reservasjonClient = mockk<ReservasjonClient>(relaxed = true),
-                avviksvurderinghenter = mockk<Avviksvurderinghenter>(relaxed = true),
-                behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkMediator>(relaxed = true),
-                notatMediator = NotatMediator(notatDao),
-                saksbehandlerhåndterer = mockk<Saksbehandlerhåndterer>(relaxed = true),
-                oppgavehåndterer = mockk<Oppgavehåndterer>(relaxed = true),
-                totrinnsvurderinghåndterer = mockk<Totrinnsvurderinghåndterer>(relaxed = true),
-                godkjenninghåndterer = mockk<Godkjenninghåndterer>(relaxed = true),
-                personhåndterer = mockk<Personhåndterer>(relaxed = true),
-                dokumenthåndterer = mockk<Dokumenthåndterer>(relaxed = true),
-            )
-            GraphQLServer(
-                requestParser = RequestParser(),
-                contextFactory = ContextFactory(
-                    UUID.randomUUID(),
-                    UUID.randomUUID(),
-                    UUID.randomUUID(),
-                ),
-                requestHandler = GraphQLRequestHandler(
-                    GraphQL.newGraphQL(schemaBuilder.build()).build()
+        private val graphQLServer =
+            run {
+                val notatDao = NotatDao(dataSource)
+                val schemaBuilder =
+                    SchemaBuilder(
+                        personApiDao = PersonApiDao(dataSource),
+                        egenAnsattApiDao = EgenAnsattApiDao(dataSource),
+                        tildelingDao = TildelingDao(dataSource),
+                        arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource),
+                        overstyringApiDao = OverstyringApiDao(dataSource),
+                        risikovurderingApiDao = RisikovurderingApiDao(dataSource),
+                        varselRepository = ApiVarselRepository(dataSource),
+                        oppgaveApiDao = OppgaveApiDao(dataSource),
+                        periodehistorikkDao = PeriodehistorikkDao(dataSource),
+                        snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), mockk<SnapshotClient>(relaxed = true)),
+                        notatDao = notatDao,
+                        totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource),
+                        påVentApiDao = PåVentApiDao(dataSource),
+                        reservasjonClient = mockk<ReservasjonClient>(relaxed = true),
+                        avviksvurderinghenter = mockk<Avviksvurderinghenter>(relaxed = true),
+                        behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkMediator>(relaxed = true),
+                        notatMediator = NotatMediator(notatDao),
+                        saksbehandlerhåndterer = mockk<Saksbehandlerhåndterer>(relaxed = true),
+                        oppgavehåndterer = mockk<Oppgavehåndterer>(relaxed = true),
+                        totrinnsvurderinghåndterer = mockk<Totrinnsvurderinghåndterer>(relaxed = true),
+                        godkjenninghåndterer = mockk<Godkjenninghåndterer>(relaxed = true),
+                        personhåndterer = mockk<Personhåndterer>(relaxed = true),
+                        dokumenthåndterer = mockk<Dokumenthåndterer>(relaxed = true),
+                        stansAutomatiskBehandlinghåndterer = mockk<StansAutomatiskBehandlinghåndterer>(relaxed = true),
+                    )
+                GraphQLServer(
+                    requestParser = RequestParser(),
+                    contextFactory =
+                        ContextFactory(
+                            UUID.randomUUID(),
+                            UUID.randomUUID(),
+                            UUID.randomUUID(),
+                        ),
+                    requestHandler =
+                        GraphQLRequestHandler(
+                            GraphQL.newGraphQL(schemaBuilder.build()).build(),
+                        ),
                 )
-            )
-        }
+            }
 
         fun HttpRequestBuilder.authentication(
             navn: String,
@@ -237,14 +257,17 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                         clientId = clientId,
                         issuer = issuer,
                         navn = navn,
-                        navIdent = ident
+                        navIdent = ident,
                     )
-                }"
+                }",
             )
         }
     }
 
-    protected fun runQuery(@Language("GraphQL") query: String, group: UUID? = null): JsonNode =
+    protected fun runQuery(
+        @Language("GraphQL") query: String,
+        group: UUID? = null,
+    ): JsonNode =
         apiTesting.spesialistApi { client ->
             client.post("/graphql") {
                 contentType(ContentType.Application.Json)
@@ -254,7 +277,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                     epost = SAKSBEHANDLER.epost,
                     ident = SAKSBEHANDLER.ident,
                     oid = SAKSBEHANDLER.oid.toString(),
-                    group = group?.toString()
+                    group = group?.toString(),
                 )
                 setBody(mapOf("query" to query))
             }.body<String>()

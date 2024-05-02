@@ -26,6 +26,7 @@ import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.JwtStub
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
+import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.TestApplication
 import no.nav.helse.spesialist.api.TestdataGenerator
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
@@ -51,7 +52,6 @@ import no.nav.helse.spesialist.api.graphql.schema.Personinfo
 import no.nav.helse.spesialist.api.graphql.schema.Reservasjon
 import no.nav.helse.spesialist.api.graphql.schema.Sorteringsnokkel
 import no.nav.helse.spesialist.api.graphql.schema.Tildeling
-import no.nav.helse.spesialist.api.graphql.schema.UnntattFraAutomatiskGodkjenning
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.objectMapper
@@ -141,6 +141,7 @@ fun main() =
             val godkjenninghåndterer = mockk<Godkjenninghåndterer>(relaxed = true)
             val personhåndterer = mockk<Personhåndterer>(relaxed = true)
             val dokumenthåndterer = mockk<Dokumenthåndterer>(relaxed = true)
+            val stansAutomatiskBehandlinghåndterer = mockk<StansAutomatiskBehandlinghåndterer>(relaxed = true)
 
             every { snapshotApiDao.utdatert(any()) } returns false
             every { snapshotApiDao.hentSnapshotMedMetadata(any()) } answers withDelay(800) { (enPersoninfo() to enPerson()) }
@@ -249,6 +250,7 @@ fun main() =
                 godkjenninghåndterer = godkjenninghåndterer,
                 personhåndterer = personhåndterer,
                 dokumenthåndterer = dokumenthåndterer,
+                stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
             )
         }
     }
@@ -455,12 +457,7 @@ private fun enPersoninfo() =
         kjonn = Kjonn.Kvinne,
         adressebeskyttelse = Adressebeskyttelse.Ugradert,
         reservasjon = null, // Denne hentes runtime ved hjelp av et kall til KRR
-        unntattFraAutomatisering =
-            UnntattFraAutomatiskGodkjenning(
-                erUntatt = false,
-                arsaker = emptyList(),
-                tidspunkt = null,
-            ),
+        unntattFraAutomatisering = null,
     )
 
 private fun enPeriode() =

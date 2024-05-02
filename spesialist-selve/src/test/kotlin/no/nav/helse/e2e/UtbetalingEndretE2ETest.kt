@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class UtbetalingEndretE2ETest : AbstractE2ETest() {
-
     @Test
     fun `Lagrer personbeløp og arbeidsgiverbeløp ved innlesing av utbetaling_endret`() {
         vedtaksløsningenMottarNySøknad()
@@ -37,29 +36,33 @@ internal class UtbetalingEndretE2ETest : AbstractE2ETest() {
         håndterVedtaksperiodeReberegnet()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harRisikovurdering = true,
-            harOppdatertStoppknapp = true,
             harOppdatertMetadata = true,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = utbetalingId2)
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = utbetalingId2),
         )
 
         val oppgaveId2 = finnNyOppgaveId(forrigeOppgaveId = oppgaveId)
         assertEquals(saksbehandlerOid, finnOidForTildeling(oppgaveId2))
     }
 
-    private fun finnNyOppgaveId(forrigeOppgaveId: Long) = oppgaveIdFor(VEDTAKSPERIODE_ID).also { nyOppgaveId ->
-        assertNotEquals(forrigeOppgaveId, nyOppgaveId) {
-            "Det er meningen at det skal ha blitt opprettet en ny oppgave"
+    private fun finnNyOppgaveId(forrigeOppgaveId: Long) =
+        oppgaveIdFor(VEDTAKSPERIODE_ID).also { nyOppgaveId ->
+            assertNotEquals(forrigeOppgaveId, nyOppgaveId) {
+                "Det er meningen at det skal ha blitt opprettet en ny oppgave"
+            }
         }
-    }
 
-    private fun oppgaveIdFor(vedtaksperiodeId: UUID): Long = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val query =
-            "SELECT id FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?) ORDER BY id DESC;"
-        requireNotNull(session.run(queryOf(query, vedtaksperiodeId).map { it.long(1) }.asSingle))
-    }
+    private fun oppgaveIdFor(vedtaksperiodeId: UUID): Long =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query =
+                "SELECT id FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?) ORDER BY id DESC;"
+            requireNotNull(session.run(queryOf(query, vedtaksperiodeId).map { it.long(1) }.asSingle))
+        }
 
-    private fun tildelOppgave(oppgaveId: Long, saksbehandlerOid: UUID) {
+    private fun tildelOppgave(
+        oppgaveId: Long,
+        saksbehandlerOid: UUID,
+    ) {
         sessionOf(dataSource).use {
             it.run(
                 queryOf(
@@ -67,30 +70,34 @@ internal class UtbetalingEndretE2ETest : AbstractE2ETest() {
                     mapOf(
                         "oppgave_id_ref" to oppgaveId,
                         "saksbehandler_ref" to saksbehandlerOid,
-                    )
-                ).asUpdate
+                    ),
+                ).asUpdate,
             )
         }
     }
 
-    private fun finnOidForTildeling(oppgaveId: Long) = hentFraTildeling<UUID?>(oppgaveId) {
-        it.uuid("saksbehandler_ref")
-    }
-
-    private fun <T> hentFraTildeling(oppgaveId: Long, mapping: (Row) -> T) =
-        sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(
-                    "SELECT * FROM tildeling WHERE oppgave_id_ref=?;", oppgaveId
-                ).map(mapping).asSingle
-            )
+    private fun finnOidForTildeling(oppgaveId: Long) =
+        hentFraTildeling<UUID?>(oppgaveId) {
+            it.uuid("saksbehandler_ref")
         }
+
+    private fun <T> hentFraTildeling(
+        oppgaveId: Long,
+        mapping: (Row) -> T,
+    ) = sessionOf(dataSource).use { session ->
+        session.run(
+            queryOf(
+                "SELECT * FROM tildeling WHERE oppgave_id_ref=?;",
+                oppgaveId,
+            ).map(mapping).asSingle,
+        )
+    }
 
     private fun opprettSaksbehandler(
         oid: UUID,
         navn: String,
         epost: String,
-        ident: String
+        ident: String,
     ) {
         sessionOf(dataSource).use {
             val opprettSaksbehandlerQuery = "INSERT INTO saksbehandler(oid, navn, epost, ident) VALUES (:oid, :navn, :epost, :ident)"
@@ -98,9 +105,12 @@ internal class UtbetalingEndretE2ETest : AbstractE2ETest() {
                 queryOf(
                     opprettSaksbehandlerQuery,
                     mapOf<String, Any>(
-                        "oid" to oid, "navn" to navn, "epost" to epost, "ident" to ident
-                    )
-                ).asUpdate
+                        "oid" to oid,
+                        "navn" to navn,
+                        "epost" to epost,
+                        "ident" to ident,
+                    ),
+                ).asUpdate,
             )
         }
     }

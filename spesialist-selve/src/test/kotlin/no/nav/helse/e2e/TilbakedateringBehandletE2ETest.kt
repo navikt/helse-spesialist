@@ -25,7 +25,6 @@ internal class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
         )
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
-        håndterAutomatiseringStoppetAvVeilederløsning()
 
         assertGodkjenningsbehovIkkeBesvart()
         val oppgaveId = inspektør.oppgaveId().toInt()
@@ -46,7 +45,6 @@ internal class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
         )
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
-        håndterAutomatiseringStoppetAvVeilederløsning()
 
         assertGodkjenningsbehovIkkeBesvart()
         val oppgaveId = inspektør.oppgaveId().toInt()
@@ -65,7 +63,6 @@ internal class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
         spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver(regelverksvarsler = listOf("RV_SØ_3"))
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
-        håndterAutomatiseringStoppetAvVeilederløsning()
         håndterInntektløsning()
         assertVarsel("RV_SØ_3", VEDTAKSPERIODE_ID, Varsel.Status.AKTIV)
 
@@ -80,7 +77,6 @@ internal class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
         spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver(regelverksvarsler = listOf("RV_SØ_3"))
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
-        håndterAutomatiseringStoppetAvVeilederløsning()
         håndterInntektløsning()
 
         val vedtaksperiodeId2 = UUID.randomUUID()

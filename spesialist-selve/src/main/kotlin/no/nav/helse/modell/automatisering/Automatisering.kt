@@ -2,7 +2,6 @@ package no.nav.helse.modell.automatisering
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.db.UnntaFraAutomatiseringDao
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.MeldingDao.OverstyringIgangsattKorrigertSøknad
 import no.nav.helse.modell.Toggle
@@ -21,13 +20,14 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vergemal.VergemålDao
+import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
 
 internal class Automatisering(
     private val risikovurderingDao: RisikovurderingDao,
-    private val unntaFraAutomatiseringDao: UnntaFraAutomatiseringDao,
+    private val stansAutomatiskBehandlingService: StansAutomatiskBehandlinghåndterer,
     private val automatiseringDao: AutomatiseringDao,
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     private val vergemålDao: VergemålDao,
@@ -215,7 +215,7 @@ internal class Automatisering(
         val risikovurdering =
             risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
                 ?: validering("Mangler vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning") { false }
-        val unntattFraAutomatisering = unntaFraAutomatiseringDao.erUnntatt(fødselsnummer)
+        val unntattFraAutomatisering = stansAutomatiskBehandlingService.erUnntatt(fødselsnummer)
         val forhindrerAutomatisering = sykefraværstilfelle.forhindrerAutomatisering(vedtaksperiodeId)
         val harVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
         val tilhørerUtlandsenhet = erEnhetUtland(personDao.finnEnhetId(fødselsnummer))

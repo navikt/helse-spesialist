@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
+import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.auditLogTeller
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
@@ -51,6 +52,7 @@ class PersonQuery(
     private val reservasjonClient: ReservasjonClient,
     private val oppgavehåndterer: Oppgavehåndterer,
     private val avviksvurderinghenter: Avviksvurderinghenter,
+    private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
 ) : AbstractPersonQuery(personApiDao, egenAnsattApiDao) {
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
     private val auditLog = LoggerFactory.getLogger("auditLogger")
@@ -81,7 +83,8 @@ class PersonQuery(
                     } catch (e: Exception) {
                         val fødselsnumre = personApiDao.finnFødselsnumre(aktorId.toLong()).toSet()
                         auditLog(env.graphQlContext, aktorId, null, getFlereFødselsnumreError(fødselsnumre).message)
-                        return DataFetcherResult.newResult<Person?>().error(getFlereFødselsnumreError(fødselsnumre)).build()
+                        return DataFetcherResult.newResult<Person?>().error(getFlereFødselsnumreError(fødselsnumre))
+                            .build()
                     }
                 }
             }
@@ -98,6 +101,8 @@ class PersonQuery(
             return DataFetcherResult.newResult<Person?>().error(getForbiddenError(fødselsnummer)).build()
         }
 
+        val unntattFraAutomatiskGodkjenning = unntattFraAutomatiskGodkjenning(fødselsnummer)
+
         val snapshot =
             try {
                 snapshotMediator.hentSnapshot(fødselsnummer)
@@ -111,7 +116,10 @@ class PersonQuery(
             snapshot?.let { (personinfo, personSnapshot) ->
                 Person(
                     snapshot = personSnapshot,
-                    personinfo = personinfo.copy(reservasjon = reservasjon.await()),
+                    personinfo =
+                        personinfo.copy(
+                            reservasjon = reservasjon.await(),
+                        ).copy(unntattFraAutomatisering = unntattFraAutomatiskGodkjenning),
                     personApiDao = personApiDao,
                     tildelingDao = tildelingDao,
                     arbeidsgiverApiDao = arbeidsgiverApiDao,
@@ -137,6 +145,9 @@ class PersonQuery(
             DataFetcherResult.newResult<Person?>().data(person).build()
         }
     }
+
+    private fun unntattFraAutomatiskGodkjenning(fødselsnummer: String) =
+        stansAutomatiskBehandlinghåndterer.unntattFraAutomatiskGodkjenning(fødselsnummer)
 
     private fun finnReservasjonsstatus(fødselsnummer: String) =
         if (erDev()) {

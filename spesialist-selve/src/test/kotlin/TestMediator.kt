@@ -3,9 +3,9 @@ import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
+import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
-import no.nav.helse.db.UnntaFraAutomatiseringDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.MeldingMediator
@@ -21,6 +21,7 @@ import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingService
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vergemal.VergemålDao
@@ -77,7 +78,7 @@ internal class TestMediator(
     private val automatisering =
         Automatisering(
             risikovurderingDao = RisikovurderingDao(dataSource),
-            unntaFraAutomatiseringDao = UnntaFraAutomatiseringDao(dataSource),
+            stansAutomatiskBehandlingService = StansAutomatiskBehandlingService(StansAutomatiskBehandlingDao(dataSource)),
             automatiseringDao = AutomatiseringDao(dataSource),
             åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource),
             vergemålDao = VergemålDao(dataSource),

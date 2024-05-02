@@ -18,7 +18,16 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         håndterVedtaksperiodeReberegnet()
         assertKommandokjedetilstander(
             sisteGodkjenningsbehovId,
-            NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, AVBRUTT
+            NY,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            AVBRUTT,
         )
         assertSaksbehandleroppgaveBleIkkeOpprettet()
     }
@@ -31,7 +40,18 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         håndterVedtaksperiodeReberegnet()
         assertKommandokjedetilstander(
             sisteGodkjenningsbehovId,
-            NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, FERDIG
+            NY,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            FERDIG,
         )
         assertSaksbehandleroppgave(oppgavestatus = Oppgavestatus.Invalidert)
     }
@@ -44,18 +64,31 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         håndterVedtaksperiodeReberegnet()
         assertKommandokjedetilstander(
             sisteGodkjenningsbehovId,
-            NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, AVBRUTT
+            NY,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            AVBRUTT,
         )
         assertSaksbehandleroppgaveBleIkkeOpprettet()
 
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harRisikovurdering = false,
-            harOppdatertStoppknapp = false,
-            harOppdatertMetadata = true
+            harOppdatertMetadata = true,
         )
         assertKommandokjedetilstander(
             sisteGodkjenningsbehovId,
-            NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, FERDIG
+            NY,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            SUSPENDERT,
+            FERDIG,
         )
         assertSaksbehandleroppgave(oppgavestatus = Oppgavestatus.AvventerSaksbehandler)
     }

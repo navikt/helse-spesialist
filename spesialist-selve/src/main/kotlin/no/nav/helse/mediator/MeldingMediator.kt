@@ -3,6 +3,7 @@ package no.nav.helse.mediator
 import SøknadSendtArbeidsledigRiver
 import no.nav.helse.MetrikkRiver
 import no.nav.helse.db.AvviksvurderingDao
+import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.mediator.meldinger.AvsluttetMedVedtakRiver
 import no.nav.helse.mediator.meldinger.AvsluttetUtenVedtakRiver
 import no.nav.helse.mediator.meldinger.AvvikVurdertRiver
@@ -16,6 +17,7 @@ import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshotRiver
 import no.nav.helse.mediator.meldinger.OverstyringIgangsattRiver
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.PersonmeldingOld
+import no.nav.helse.mediator.meldinger.StansAutomatiskBehandlingRiver
 import no.nav.helse.mediator.meldinger.SøknadSendtRiver
 import no.nav.helse.mediator.meldinger.TilbakedateringBehandletRiver
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullertRiver
@@ -30,7 +32,6 @@ import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsforholdRiver
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsgiverRiver
-import no.nav.helse.mediator.meldinger.løsninger.AutomatiseringStoppetAvVeilederLøsning
 import no.nav.helse.mediator.meldinger.løsninger.DokumentRiver
 import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
 import no.nav.helse.mediator.meldinger.løsninger.FlerePersoninfoRiver
@@ -58,6 +59,9 @@ import no.nav.helse.modell.person.OppdaterPersonsnapshot
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.PersonRepository
 import no.nav.helse.modell.person.SøknadSendt
+import no.nav.helse.modell.stoppautomatiskbehandling.Kilde
+import no.nav.helse.modell.stoppautomatiskbehandling.Status
+import no.nav.helse.modell.stoppautomatiskbehandling.Årsak
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
@@ -75,6 +79,7 @@ import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
 import no.nav.helse.spesialist.api.Personhåndterer
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -93,6 +98,7 @@ internal class MeldingMediator(
     private val varselRepository: VarselRepository = VarselRepository(dataSource),
     private val generasjonRepository: GenerasjonRepository = GenerasjonRepository(dataSource),
     private val metrikkDao: MetrikkDao = MetrikkDao(dataSource),
+    private val stansAutomatiskBehandlingDao: StansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(dataSource),
     private val generasjonDao: GenerasjonDao,
 ) : Personhåndterer {
     private companion object {
@@ -128,7 +134,6 @@ internal class MeldingMediator(
             AdressebeskyttelseEndretRiver(it, this)
             OverstyringIgangsattRiver(it, this)
             EgenAnsattløsning.EgenAnsattRiver(it, this)
-            AutomatiseringStoppetAvVeilederLøsning.AutomatiseringStoppetAvVeilederRiver(it, this)
             Vergemålløsning.VergemålRiver(it, this)
             ÅpneGosysOppgaverløsning.ÅpneGosysOppgaverRiver(it, this)
             Risikovurderingløsning.V2River(it, this)
@@ -152,6 +157,7 @@ internal class MeldingMediator(
             MidnattRiver(it, this)
             BehandlingOpprettetRiver(it, this)
             KommandokjedePåminnelseRiver(it, this)
+            StansAutomatiskBehandlingRiver(it, this)
         }
     }
 
@@ -314,6 +320,24 @@ internal class MeldingMediator(
             )
             håndter(tilbakedateringBehandlet, context)
         } ?: sikkerlogg.info("Ingen åpne oppgaver for {} ifm. godkjent tilbakedatering", fødselsnummer)
+    }
+
+    fun stansAutomatiskBehandling(
+        fødselsnummer: String,
+        status: Status,
+        årsaker: Set<Årsak>,
+        opprettet: LocalDateTime,
+        originalMelding: String,
+        kilde: Kilde,
+    ) {
+        stansAutomatiskBehandlingDao.lagre(
+            fødselsnummer = fødselsnummer,
+            status = status,
+            årsaker = årsaker,
+            opprettet = opprettet,
+            originalMelding = originalMelding,
+            kilde = kilde,
+        )
     }
 
     fun slettGamleDokumenter(): Int {

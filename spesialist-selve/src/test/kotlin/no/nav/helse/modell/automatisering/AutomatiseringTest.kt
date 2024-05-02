@@ -6,9 +6,6 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.spesialist.test.lagFødselsnummer
-import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
-import no.nav.helse.db.UnntaFraAutomatiseringDao
 import no.nav.helse.januar
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.Toggle
@@ -20,6 +17,7 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.risiko.Risikovurdering
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingService
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -28,6 +26,8 @@ import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
+import no.nav.helse.spesialist.test.lagFødselsnummer
+import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.ResourceLock
@@ -49,8 +49,8 @@ internal class AutomatiseringTest {
         mockk<RisikovurderingDao> {
             every { hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(true)
         }
-    private val unntaFraAutomatiseringDaoMock =
-        mockk<UnntaFraAutomatiseringDao> { every { erUnntatt(fødselsnummer) } returns false }
+    private val stansAutomatiskBehandlingServiceMock =
+        mockk<StansAutomatiskBehandlingService> { every { erUnntatt(fødselsnummer) } returns false }
     private val åpneGosysOppgaverDaoMock = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val personDaoMock = mockk<PersonDao>(relaxed = true)
@@ -82,7 +82,7 @@ internal class AutomatiseringTest {
     private val automatisering =
         Automatisering(
             risikovurderingDao = risikovurderingDaoMock,
-            unntaFraAutomatiseringDao = unntaFraAutomatiseringDaoMock,
+            stansAutomatiskBehandlingService = stansAutomatiskBehandlingServiceMock,
             automatiseringDao = automatiseringDaoMock,
             åpneGosysOppgaverDao = åpneGosysOppgaverDaoMock,
             vergemålDao = vergemålDaoMock,

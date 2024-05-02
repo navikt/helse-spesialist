@@ -27,7 +27,7 @@ internal class PersonRepository(private val dataSource: DataSource) {
                 it.slettPeriodehistorikk(personId)
                 it.slettTotrinnsvurdering(personId)
                 it.slettUtbetaling(personId)
-                it.slettVedtak(personId)
+                it.slettVedtak(personId, fødselsnummer)
                 it.slettArbeidsforhold(personId)
                 it.slettSnapshot(personId)
                 it.slettGosysoppgaver(personId)
@@ -217,7 +217,10 @@ internal class PersonRepository(private val dataSource: DataSource) {
         run(queryOf(query, begrunnelseRef).asExecute)
     }
 
-    private fun TransactionalSession.slettVedtak(personRef: Int) {
+    private fun TransactionalSession.slettVedtak(
+        personRef: Int,
+        fødselsnummer: String,
+    ) {
         slettKommentarer(personRef)
         slettNotat(personRef)
         slettOppgave(personRef)
@@ -225,7 +228,7 @@ internal class PersonRepository(private val dataSource: DataSource) {
         slettAutomatisering(personRef)
         slettRisikovurdering(personRef)
         slettUnntaFraAutomatisering(personRef)
-        slettStansAutomatisering(personRef)
+        slettStansAutomatisering(fødselsnummer)
         slettAutomatiseringProblem(personRef)
         slettSaksbehandleroppgavetype(personRef)
         slettVedtaksperiodegenerasjoner(personRef)
@@ -353,10 +356,10 @@ internal class PersonRepository(private val dataSource: DataSource) {
         run(queryOf(query, personRef).asExecute)
     }
 
-    private fun TransactionalSession.slettStansAutomatisering(personRef: Int) {
+    private fun TransactionalSession.slettStansAutomatisering(fødselsnummer: String) {
         @Language("PostgreSQL")
-        val query = "DELETE FROM stans_automatisering WHERE fødselsnummer IN (SELECT fodselsnummer FROM person WHERE id = ?)"
-        run(queryOf(query, personRef).asExecute)
+        val query = "DELETE FROM stans_automatisering WHERE fødselsnummer = ?"
+        run(queryOf(query, fødselsnummer).asExecute)
     }
 
     private fun TransactionalSession.slettRisikovurdering2021(personRef: Int) {
