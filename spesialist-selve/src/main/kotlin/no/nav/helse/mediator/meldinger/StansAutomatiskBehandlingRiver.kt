@@ -39,13 +39,6 @@ internal class StansAutomatiskBehandlingRiver(
         sikkerlogg.error("Forstod ikke stoppknapp-melding:\n${problems.toExtendedReport()}")
     }
 
-    override fun onSevere(
-        error: MessageProblems.MessageException,
-        context: MessageContext,
-    ) {
-        sikkerlogg.error("Forstod ikke stoppknapp-melding:\n${error.message}")
-    }
-
     override fun onPacket(
         packet: JsonMessage,
         context: MessageContext,
