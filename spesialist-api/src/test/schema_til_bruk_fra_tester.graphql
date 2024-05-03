@@ -319,7 +319,7 @@ type Mutation {
     feilregistrerNotat(id: Int!): Notat
     fjernPaVent(oppgaveId: String!): Boolean
     fjernTildeling(oppgaveId: String!): Boolean!
-    innvilgVedtak(oppgavereferanse: String!): Boolean!
+    innvilgVedtak(avslag: AvslagInput, oppgavereferanse: String!): Boolean!
     leggPaVent(begrunnelse: String, frist: String!, notatTekst: String!, notatType: NotatType!, oppgaveId: String!, tildeling: Boolean!): PaVent
     leggTilKommentar(notatId: Int!, saksbehandlerident: String!, tekst: String!): Kommentar
     leggTilNotat(saksbehandlerOid: String!, tekst: String!, type: NotatType!, vedtaksperiodeId: String!): Notat
@@ -833,6 +833,11 @@ enum AntallArbeidsforhold {
     FLERE_ARBEIDSFORHOLD
 }
 
+enum Avslagstype {
+    AVSLAG
+    DELVIS_AVSLAG
+}
+
 enum Begrunnelse {
     ANDREYTELSER
     EGENMELDING_UTENFOR_ARBEIDSGIVERPERIODE
@@ -1197,6 +1202,11 @@ input ArbeidsforholdOverstyringHandlingInput {
     fodselsnummer: String!
     overstyrteArbeidsforhold: [OverstyringArbeidsforholdInput!]!
     skjaringstidspunkt: String!
+}
+
+input AvslagInput {
+    begrunnelse: String!
+    type: Avslagstype!
 }
 
 input FiltreringInput {
