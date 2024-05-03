@@ -82,7 +82,7 @@ internal class AutomatiseringTest {
     private val automatisering =
         Automatisering(
             risikovurderingDao = risikovurderingDaoMock,
-            stansAutomatiskBehandlingService = stansAutomatiskBehandlingServiceMock,
+            stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlingServiceMock,
             automatiseringDao = automatiseringDaoMock,
             åpneGosysOppgaverDao = åpneGosysOppgaverDaoMock,
             vergemålDao = vergemålDaoMock,

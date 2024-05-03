@@ -1,13 +1,6 @@
 package no.nav.helse.modell.stoppknapp
 
 import DatabaseIntegrationTest
-import no.nav.helse.modell.stoppautomatiskbehandling.Kilde
-import no.nav.helse.modell.stoppautomatiskbehandling.Kilde.ISYFO
-import no.nav.helse.modell.stoppautomatiskbehandling.Status
-import no.nav.helse.modell.stoppautomatiskbehandling.Status.STOPP_AUTOMATIKK
-import no.nav.helse.modell.stoppautomatiskbehandling.Årsak
-import no.nav.helse.modell.stoppautomatiskbehandling.Årsak.AKTIVITETSKRAV
-import no.nav.helse.modell.stoppautomatiskbehandling.Årsak.MEDISINSK_VILKAR
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -21,10 +14,10 @@ internal class StansAutomatiskBehandlingDaoTest : DatabaseIntegrationTest() {
         lagre()
 
         assertEquals(FNR, data<String>(FNR, "fødselsnummer"))
-        assertEquals(STOPP_AUTOMATIKK, data<Status>(FNR, "status"))
-        assertEquals(setOf(MEDISINSK_VILKAR, AKTIVITETSKRAV), data<Set<Årsak>>(FNR, "årsaker"))
+        assertEquals("STOPP_AUTOMATIKK", data<String>(FNR, "status"))
+        assertEquals(setOf("MEDISINSK_VILKAR", "AKTIVITETSKRAV"), data<Set<String>>(FNR, "årsaker"))
         assertTrue(SECONDS.between(now(), data<LocalDateTime>(FNR, "opprettet")) < 5)
-        assertEquals(ISYFO, data<Kilde>(FNR, "kilde"))
+        assertEquals("ISYFO", data<String>(FNR, "kilde"))
     }
 
     @Test
@@ -40,11 +33,11 @@ internal class StansAutomatiskBehandlingDaoTest : DatabaseIntegrationTest() {
     private fun lagre(fødselsnummer: String = FNR) =
         stansAutomatiskBehandlingDao.lagre(
             fødselsnummer = fødselsnummer,
-            status = STOPP_AUTOMATIKK,
-            årsaker = setOf(MEDISINSK_VILKAR, AKTIVITETSKRAV),
+            status = "STOPP_AUTOMATIKK",
+            årsaker = setOf("MEDISINSK_VILKAR", "AKTIVITETSKRAV"),
             opprettet = now(),
             originalMelding = "{}",
-            kilde = ISYFO,
+            kilde = "ISYFO",
         )
 
     private inline fun <reified T> data(
@@ -56,12 +49,10 @@ internal class StansAutomatiskBehandlingDaoTest : DatabaseIntegrationTest() {
             "fnr" to fnr,
         ).single { row ->
             when (T::class) {
-                Set::class -> row.array<String>(1).map { enumValueOf<Årsak>(it) }.toSet() as T
+                Set::class -> row.array<String>(1).toSet() as T
                 Boolean::class -> row.boolean(1) as T
                 LocalDateTime::class -> row.localDateTime(1) as T
                 String::class -> row.string(1) as T
-                Status::class -> enumValueOf<Status>(row.string(1)) as T
-                Kilde::class -> enumValueOf<Kilde>(row.string(1)) as T
 
                 else -> error("Mangler mapping for ${T::class}")
             }

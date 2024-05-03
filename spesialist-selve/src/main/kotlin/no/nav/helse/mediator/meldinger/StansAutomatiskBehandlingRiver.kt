@@ -1,9 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
 import no.nav.helse.mediator.MeldingMediator
-import no.nav.helse.modell.stoppautomatiskbehandling.Kilde.ISYFO
-import no.nav.helse.modell.stoppautomatiskbehandling.Status
-import no.nav.helse.modell.stoppautomatiskbehandling.Årsak
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -46,8 +43,8 @@ internal class StansAutomatiskBehandlingRiver(
         sikkerlogg.info("Mottok melding stans_automatisk_behandling:\n{}", packet.toJson())
 
         val fødselsnummer = packet["fødselsnummer"].asText()
-        val status = Status.valueOf(packet["status"].asText())
-        val årsaker = packet["årsaker"].map { Årsak.valueOf(it.asText()) }.toSet()
+        val status = packet["status"].asText()
+        val årsaker = packet["årsaker"].map { it.asText() }.toSet()
         val opprettet = packet["opprettet"].asLocalDateTime()
         val originalMelding = packet["originalMelding"].asText()
 
@@ -57,7 +54,7 @@ internal class StansAutomatiskBehandlingRiver(
             årsaker,
             opprettet,
             originalMelding,
-            ISYFO,
+            "ISYFO",
         )
     }
 }

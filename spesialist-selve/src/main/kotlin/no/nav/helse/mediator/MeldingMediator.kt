@@ -4,7 +4,6 @@ import SøknadSendtArbeidsledigRiver
 import no.nav.helse.MetrikkRiver
 import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.AvviksvurderingDao
-import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.mediator.meldinger.AvsluttetMedVedtakRiver
 import no.nav.helse.mediator.meldinger.AvsluttetUtenVedtakRiver
 import no.nav.helse.mediator.meldinger.AvvikVurdertRiver
@@ -60,9 +59,6 @@ import no.nav.helse.modell.person.OppdaterPersonsnapshot
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.PersonRepository
 import no.nav.helse.modell.person.SøknadSendt
-import no.nav.helse.modell.stoppautomatiskbehandling.Kilde
-import no.nav.helse.modell.stoppautomatiskbehandling.Status
-import no.nav.helse.modell.stoppautomatiskbehandling.Årsak
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
@@ -79,6 +75,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
 import no.nav.helse.spesialist.api.Personhåndterer
+import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
@@ -99,7 +96,7 @@ internal class MeldingMediator(
     private val varselRepository: VarselRepository = VarselRepository(dataSource),
     private val generasjonRepository: GenerasjonRepository = GenerasjonRepository(dataSource),
     private val metrikkDao: MetrikkDao = MetrikkDao(dataSource),
-    private val stansAutomatiskBehandlingDao: StansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(dataSource),
+    private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
     private val generasjonDao: GenerasjonDao,
     private val avslagDao: AvslagDao,
 ) : Personhåndterer {
@@ -329,13 +326,13 @@ internal class MeldingMediator(
 
     fun stansAutomatiskBehandling(
         fødselsnummer: String,
-        status: Status,
-        årsaker: Set<Årsak>,
+        status: String,
+        årsaker: Set<String>,
         opprettet: LocalDateTime,
         originalMelding: String,
-        kilde: Kilde,
+        kilde: String,
     ) {
-        stansAutomatiskBehandlingDao.lagre(
+        stansAutomatiskBehandlinghåndterer.lagre(
             fødselsnummer = fødselsnummer,
             status = status,
             årsaker = årsaker,

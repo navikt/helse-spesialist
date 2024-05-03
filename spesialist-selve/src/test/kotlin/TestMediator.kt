@@ -1,5 +1,6 @@
 
 import no.nav.helse.Tilgangsgrupper
+import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
@@ -17,7 +18,6 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.automatisering.Stikkprøver
-import no.nav.helse.db.AvslagDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
@@ -52,6 +52,7 @@ internal class TestMediator(
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
+    private val stansAutomatiskBehandlingService = StansAutomatiskBehandlingService(StansAutomatiskBehandlingDao(dataSource))
 
     private val godkjenningMediator =
         GodkjenningMediator(
@@ -80,7 +81,7 @@ internal class TestMediator(
     private val automatisering =
         Automatisering(
             risikovurderingDao = RisikovurderingDao(dataSource),
-            stansAutomatiskBehandlingService = StansAutomatiskBehandlingService(StansAutomatiskBehandlingDao(dataSource)),
+            stansAutomatiskBehandlinghåndterer = StansAutomatiskBehandlingService(StansAutomatiskBehandlingDao(dataSource)),
             automatiseringDao = AutomatiseringDao(dataSource),
             åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource),
             vergemålDao = VergemålDao(dataSource),
@@ -124,6 +125,7 @@ internal class TestMediator(
             avviksvurderingDao = avviksvurderingDao,
             generasjonDao = generasjonDao,
             avslagDao = avslagDao,
+            stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlingService,
         )
     }
 

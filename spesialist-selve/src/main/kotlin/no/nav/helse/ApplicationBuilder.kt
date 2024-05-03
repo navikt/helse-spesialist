@@ -367,7 +367,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     val automatisering =
         Automatisering(
             risikovurderingDao = risikovurderingDao,
-            stansAutomatiskBehandlingService = stansAutomatiskBehandlingService,
+            stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlingService,
             automatiseringDao = automatiseringDao,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             vergemålDao = vergemålDao,
@@ -411,6 +411,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 avviksvurderingDao = avviksvurderingDao,
                 generasjonDao = generasjonDao,
                 avslagDao = avslagDao,
+                stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlingService,
             )
         saksbehandlerMediator = SaksbehandlerMediator(dataSource, versjonAvKode(env), rapidsConnection, oppgaveMediator, tilgangsgrupper)
         dokumentMediator = DokumentMediator(dokumentDao, rapidsConnection)

@@ -1,20 +1,17 @@
 package no.nav.helse.db
 
 import no.nav.helse.HelseDao
-import no.nav.helse.modell.stoppautomatiskbehandling.Kilde
-import no.nav.helse.modell.stoppautomatiskbehandling.Status
-import no.nav.helse.modell.stoppautomatiskbehandling.Årsak
 import java.time.LocalDateTime
 import javax.sql.DataSource
 
 class StansAutomatiskBehandlingDao(dataSource: DataSource) : HelseDao(dataSource) {
     fun lagre(
         fødselsnummer: String,
-        status: Status,
-        årsaker: Set<Årsak>,
+        status: String,
+        årsaker: Set<String>,
         opprettet: LocalDateTime,
         originalMelding: String,
-        kilde: Kilde,
+        kilde: String,
     ) = asSQL(
         """
         insert into stans_automatisering (fødselsnummer, status, årsaker, opprettet, kilde, original_melding) 
@@ -22,9 +19,9 @@ class StansAutomatiskBehandlingDao(dataSource: DataSource) : HelseDao(dataSource
         """.trimIndent(),
         mapOf(
             "fnr" to fødselsnummer,
-            "status" to status.name,
+            "status" to status,
             "opprettet" to opprettet,
-            "kilde" to kilde.name,
+            "kilde" to kilde,
             "originalMelding" to originalMelding,
         ),
     ).update()
@@ -40,11 +37,11 @@ class StansAutomatiskBehandlingDao(dataSource: DataSource) : HelseDao(dataSource
         ).list { row ->
             StansAutomatiskBehandlingFraDatabase(
                 fødselsnummer = row.string("fødselsnummer"),
-                status = enumValueOf(row.string("status")),
-                årsaker = row.array<String>("årsaker").map { enumValueOf<Årsak>(it) }.toSet(),
+                status = row.string("status"),
+                årsaker = row.array<String>("årsaker").toSet(),
                 opprettet = row.localDateTime("opprettet"),
             )
         }
 }
 
-fun Iterable<Årsak>.somDbArray() = joinToString { """ "${it.name}" """ }
+fun <T> Iterable<T>.somDbArray() = joinToString { " $it " }

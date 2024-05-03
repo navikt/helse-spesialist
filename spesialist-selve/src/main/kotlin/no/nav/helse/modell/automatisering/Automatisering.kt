@@ -27,7 +27,7 @@ import java.util.UUID
 
 internal class Automatisering(
     private val risikovurderingDao: RisikovurderingDao,
-    private val stansAutomatiskBehandlingService: StansAutomatiskBehandlinghåndterer,
+    private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
     private val automatiseringDao: AutomatiseringDao,
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     private val vergemålDao: VergemålDao,
@@ -215,7 +215,7 @@ internal class Automatisering(
         val risikovurdering =
             risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
                 ?: validering("Mangler vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning") { false }
-        val unntattFraAutomatisering = stansAutomatiskBehandlingService.erUnntatt(fødselsnummer)
+        val unntattFraAutomatisering = stansAutomatiskBehandlinghåndterer.erUnntatt(fødselsnummer)
         val forhindrerAutomatisering = sykefraværstilfelle.forhindrerAutomatisering(vedtaksperiodeId)
         val harVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
         val tilhørerUtlandsenhet = erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
