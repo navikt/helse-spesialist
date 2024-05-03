@@ -1,12 +1,14 @@
 package no.nav.helse.opprydding
 
-import java.time.LocalDateTime
-import java.util.UUID
+import no.nav.helse.opprydding.Comparison.AT_LEAST
+import no.nav.helse.opprydding.Comparison.EXACTLY
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.time.LocalDateTime
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class AppTest: AbstractDatabaseTest() {
@@ -21,18 +23,18 @@ internal class AppTest: AbstractDatabaseTest() {
     @Test
     fun `slettemelding medfører at person slettes fra databasen`() {
         opprettPerson("123")
-        assertTabellinnhold { (it >= 1) to ">= 1" }
+        assertTabellinnhold(AT_LEAST, 1)
         testRapid.sendTestMessage(slettemelding("123"))
-        assertTabellinnhold { (it == 0) to "0" }
+        assertTabellinnhold(EXACTLY, 0)
     }
 
     @Test
     fun `sletter kun aktuelt fnr`() {
         opprettPerson("123")
         opprettPerson("1234", sequenceNumber = 2)
-        assertTabellinnhold { (it >= 2) to ">= 2" }
+        assertTabellinnhold(AT_LEAST, 2)
         testRapid.sendTestMessage(slettemelding("123"))
-        assertTabellinnhold { (it == 1) to "1" }
+        assertTabellinnhold(EXACTLY, 1)
     }
 
     @Language("JSON")

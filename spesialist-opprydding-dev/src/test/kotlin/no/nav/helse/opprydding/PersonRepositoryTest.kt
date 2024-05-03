@@ -1,5 +1,7 @@
 package no.nav.helse.opprydding
 
+import no.nav.helse.opprydding.Comparison.AT_LEAST
+import no.nav.helse.opprydding.Comparison.EXACTLY
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -9,9 +11,9 @@ internal class PersonRepositoryTest : AbstractDatabaseTest() {
     @Test
     fun `sletting av person`() {
         opprettPerson(FØDSELSNUMMER)
-        assertTabellinnhold { (it >= 1) to ">= 1" }
+        assertTabellinnhold(AT_LEAST, 1)
         personRepository.slett(FØDSELSNUMMER)
-        assertTabellinnhold { (it == 0) to "0" }
+        assertTabellinnhold(EXACTLY, 0)
     }
 
     @Test

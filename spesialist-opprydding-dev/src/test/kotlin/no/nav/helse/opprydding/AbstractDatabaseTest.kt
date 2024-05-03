@@ -2,16 +2,15 @@ package no.nav.helse.opprydding
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import java.util.UUID
-import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.flywaydb.core.Flyway
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.testcontainers.containers.PostgreSQLContainer
+import java.util.UUID
+import javax.sql.DataSource
 import kotlin.random.Random
 
 internal abstract class AbstractDatabaseTest {
@@ -101,7 +100,7 @@ internal abstract class AbstractDatabaseTest {
             .migrate()
     }
 
-    protected fun assertTabellinnhold(booleanExpressionBlock: (actualTabellCount: Int) -> Pair<Boolean, String>) {
+    protected fun assertTabellinnhold(comparison: Comparison, numRows: Int) {
         val tabeller = finnTabeller().toMutableList()
         tabeller.removeAll(
             listOf(
@@ -128,19 +127,16 @@ internal abstract class AbstractDatabaseTest {
                 "passert_filter_for_skjonnsfastsettelse",
             )
         )
-        tabeller.forEach {
-            val rowCount = finnRowCount(it)
-            if (it in listOf("oppdrag", "utbetalingslinje")) {
-                assertEquals(0, rowCount % 2) { "The table '$it' should have an even number of rows, but it has $rowCount"}
-                val (expression1, explanation1) = booleanExpressionBlock(rowCount / 2)
-                assertTrue((expression1)) { "$it has $rowCount rows, expected it to be $explanation1" }
-            } else if (it in listOf("begrunnelse")) {
-                val (expression1, explanation1) = booleanExpressionBlock(rowCount / 4)
-                assertTrue((expression1)) { "$it has $rowCount rows, expected it to be $explanation1" }
-            } else {
-                val (expression2, explanation2) = booleanExpressionBlock(rowCount)
-                assertTrue(expression2) { "$it has $rowCount rows, expected it to be $explanation2" }
+        tabeller.forEach { tabellnavn ->
+            val expectedRowCount = when (tabellnavn) {
+                in listOf("oppdrag", "utbetalingslinje") -> numRows * 2
+                in listOf("begrunnelse") -> numRows * 4
+                else -> numRows
             }
+            val rowCount = finnRowCount(tabellnavn)
+            assertTrue(
+                comparison.compare(rowCount, expectedRowCount)
+            ) { "Table '$tabellnavn' has $rowCount row(s), expected it to be ${comparison.label} $expectedRowCount" }
         }
     }
 
@@ -166,4 +162,9 @@ internal abstract class AbstractDatabaseTest {
             it.run(queryOf("SELECT truncate_tables()").asExecute)
         }
     }
+}
+
+enum class Comparison(val label: String, val compare: (Int, Int) -> Boolean) {
+    EXACTLY("exactly", { a, b -> a == b }),
+    AT_LEAST("at least", { a, b -> a >= b })
 }
