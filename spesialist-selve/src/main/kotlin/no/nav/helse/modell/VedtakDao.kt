@@ -73,7 +73,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
             SELECT vedtaksperiode_id, opprettet_tidspunkt
             FROM selve_vedtaksperiode_generasjon
             WHERE vedtaksperiode_id = :vedtaksperiode_id
-            ORDER BY opprettet_tidspunkt ASC LIMIT 1
+            ORDER BY opprettet_tidspunkt LIMIT 1
             ON CONFLICT DO NOTHING;
             """.trimIndent()
         run(queryOf(query, mapOf("vedtaksperiode_id" to vedtaksperiodeId)).asUpdate)
@@ -206,6 +206,8 @@ internal class VedtakDao(private val dataSource: DataSource) {
             SELECT automatisert FROM automatisering 
             WHERE utbetaling_id = ?
             AND (inaktiv_fra IS NULL OR inaktiv_fra > now())
+            ORDER BY id DESC
+            LIMIT 1
         """
             session.run(queryOf(query, utbetalingId).map { it.boolean("automatisert") }.asSingle)
         } ?: false
