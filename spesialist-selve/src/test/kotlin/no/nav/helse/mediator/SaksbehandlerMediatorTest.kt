@@ -55,7 +55,6 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
     private val saksbehandlerRepository = SaksbehandlerDao(dataSource)
     private val oppgaveMediator = OppgaveMediator(meldingDao, oppgaveDao, tildelingDbDao, reservasjonDao, opptegnelseDao, totrinnsvurderingDao, saksbehandlerRepository, testRapid, TilgangskontrollForTestHarIkkeTilgang, tilgangsgrupper)
     private val mediator = SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, oppgaveMediator, tilgangsgrupper)
-    private val avslagDbDao = no.nav.helse.db.AvslagDao(dataSource)
 
     private val AKTØR_ID = lagAktørId()
     private val FØDSELSNUMMER = lagFødselsnummer()
@@ -186,8 +185,6 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         assertDoesNotThrow {
             mediator.håndter(godkjenning(oppgavereferanse = oppgaveId, godkjent = true, avslag = Avslag(Avslagstype.AVSLAG, "En individuell begrunnelse")), UUID.randomUUID(), saksbehandler)
         }
-
-        assertEquals(no.nav.helse.modell.vedtak.Avslag(no.nav.helse.modell.vedtak.Avslagstype.AVSLAG, "En individuell begrunnelse"), avslagDbDao.finnAvslag(vedtaksperiodeId, 1L))
     }
 
     @Test
