@@ -2,6 +2,7 @@ package no.nav.helse.mediator
 
 import SøknadSendtArbeidsledigRiver
 import no.nav.helse.MetrikkRiver
+import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.mediator.meldinger.AvsluttetMedVedtakRiver
@@ -100,6 +101,7 @@ internal class MeldingMediator(
     private val metrikkDao: MetrikkDao = MetrikkDao(dataSource),
     private val stansAutomatiskBehandlingDao: StansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(dataSource),
     private val generasjonDao: GenerasjonDao,
+    private val avslagDao: AvslagDao,
 ) : Personhåndterer {
     private companion object {
         private val logg = LoggerFactory.getLogger(MeldingMediator::class.java)
@@ -152,7 +154,7 @@ internal class MeldingMediator(
             VarseldefinisjonRiver(it, this)
             VedtaksperiodeNyUtbetalingRiver(it, this)
             MetrikkRiver(it)
-            AvsluttetMedVedtakRiver(it, this, avviksvurderingDao, generasjonDao)
+            AvsluttetMedVedtakRiver(it, this, avviksvurderingDao, generasjonDao, avslagDao)
             AvsluttetUtenVedtakRiver(it, this)
             MidnattRiver(it, this)
             BehandlingOpprettetRiver(it, this)

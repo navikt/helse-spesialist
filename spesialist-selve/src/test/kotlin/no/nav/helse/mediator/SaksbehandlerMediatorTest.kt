@@ -20,6 +20,8 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
+import no.nav.helse.spesialist.api.graphql.mutation.Avslag
+import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
@@ -53,6 +55,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
     private val saksbehandlerRepository = SaksbehandlerDao(dataSource)
     private val oppgaveMediator = OppgaveMediator(meldingDao, oppgaveDao, tildelingDbDao, reservasjonDao, opptegnelseDao, totrinnsvurderingDao, saksbehandlerRepository, testRapid, TilgangskontrollForTestHarIkkeTilgang, tilgangsgrupper)
     private val mediator = SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, oppgaveMediator, tilgangsgrupper)
+    private val avslagDbDao = no.nav.helse.db.AvslagDao(dataSource)
 
     private val AKTØR_ID = lagAktørId()
     private val FØDSELSNUMMER = lagFødselsnummer()
@@ -172,6 +175,19 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         assertDoesNotThrow {
             mediator.håndterTotrinnsvurdering(oppgaveId)
         }
+    }
+
+    @Test
+    fun `håndterer godkjenning med avslag`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        nyPerson(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId)
+
+        assertDoesNotThrow {
+            mediator.håndter(godkjenning(oppgavereferanse = oppgaveId, godkjent = true, avslag = Avslag(Avslagstype.AVSLAG, "En individuell begrunnelse")), UUID.randomUUID(), saksbehandler)
+        }
+
+        assertEquals(no.nav.helse.modell.vedtak.Avslag(no.nav.helse.modell.vedtak.Avslagstype.AVSLAG, "En individuell begrunnelse"), avslagDbDao.finnAvslag(vedtaksperiodeId, 1L))
     }
 
     @Test
@@ -616,13 +632,15 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         oppgavereferanse: Long,
         godkjent: Boolean,
         ident: String = SAKSBEHANDLER_IDENT,
+        avslag: Avslag? = null
     ) = GodkjenningDto(
         oppgavereferanse = oppgavereferanse,
         saksbehandlerIdent = ident,
         godkjent = godkjent,
         begrunnelser = emptyList(),
         kommentar = if (!godkjent) "Kommentar" else null,
-        årsak = if (!godkjent) "Årsak" else null
+        årsak = if (!godkjent) "Årsak" else null,
+        avslag = avslag
     )
 
     private fun annullering(

@@ -20,6 +20,10 @@ class ApiGenerasjonRepository(dataSource: DataSource) {
         return generasjonDao.gjeldendeGenerasjonFor(oppgaveId, varselDao::finnVarslerFor)
     }
 
+    fun generasjonsIdFor(oppgaveId: Long): Long {
+        return generasjonDao.finnGenerasjonId(oppgaveId)
+    }
+
     private fun Set<Vedtaksperiode>.tidligereEnnOgSammenhengende(periode: Vedtaksperiode): Set<Vedtaksperiode> {
         return this.filter { other ->
             other.tidligereEnnOgSammenhengende(periode)

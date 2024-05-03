@@ -25,6 +25,7 @@ class SykepengevedtakBuilder {
     private var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta? = null
     private var skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlag? = null
     private var skjønnsfastsettingopplysninger: SkjønnsfastsettingopplysningerDto? = null
+    private var avslag: AvslagDto? = null
     private val tags: MutableSet<String> = mutableSetOf()
     private val tagsForSykepengegrunnlagsfakta: MutableSet<String> = mutableSetOf()
 
@@ -75,6 +76,11 @@ class SykepengevedtakBuilder {
             skjønnsfastsattSykepengegrunnlag.byggVedtak(this)
         }
 
+    fun avslag(avslag: Avslag) =
+        apply {
+            avslag.byggVedtak(this)
+        }
+
     fun tags(tags: List<String>) =
         apply {
             this.tags.addAll(tags.filterNot { TAGS_SOM_SKAL_LIGGE_I_SYKEPENGEGRUNNLAGSFAKTA.contains(it) })
@@ -96,6 +102,13 @@ class SykepengevedtakBuilder {
                 type,
                 årsak,
             )
+    }
+
+    fun avslagData(
+        type: Avslagstype,
+        begrunnelse: String,
+    ) = apply {
+        this.avslag = AvslagDto(type, begrunnelse)
     }
 
     fun build(): Sykepengevedtak {
@@ -162,6 +175,7 @@ class SykepengevedtakBuilder {
             skjønnsfastsettingopplysninger = skjønnsfastsettingopplysninger,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
             tags = tags,
+            avslag = avslag,
         )
     }
 
@@ -189,6 +203,7 @@ class SykepengevedtakBuilder {
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
             skjønnsfastsettingopplysninger = null,
             tags = tags,
+            avslag = avslag,
         )
     }
 

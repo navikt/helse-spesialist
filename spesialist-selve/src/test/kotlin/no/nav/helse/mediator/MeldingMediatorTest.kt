@@ -13,6 +13,7 @@ import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.meldinger.GosysOppgaveEndretRiver
 import no.nav.helse.mediator.meldinger.TilbakedateringBehandletRiver
 import no.nav.helse.mediator.oppgave.OppgaveDao
+import no.nav.helse.db.AvslagDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
@@ -34,6 +35,7 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val avviksvurderingDao = mockk<AvviksvurderingDao>()
     private val generasjonDao = mockk<GenerasjonDao>()
+    private val avslagDao = mockk<AvslagDao>()
 
     private val kommandofabrikk = mockk<Kommandofabrikk>(relaxed = true)
 
@@ -44,6 +46,7 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
         kommandofabrikk = kommandofabrikk,
         avviksvurderingDao = avviksvurderingDao,
         generasjonDao = generasjonDao,
+        avslagDao = avslagDao
     )
 
     init {

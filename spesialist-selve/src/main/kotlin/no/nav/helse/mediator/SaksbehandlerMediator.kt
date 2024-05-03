@@ -2,6 +2,7 @@ package no.nav.helse.mediator
 
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Tilgangsgrupper
+import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
@@ -85,6 +86,7 @@ internal class SaksbehandlerMediator(
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
     private val påVentDao = PåVentDao(dataSource)
+    private val avslagDao = AvslagDao(dataSource)
 
     override fun <T : HandlingFraApi> håndter(
         handlingFraApi: T,
@@ -207,6 +209,10 @@ internal class SaksbehandlerMediator(
 
         påVentDao.slettPåVent(godkjenning.oppgavereferanse)
         oppgaveApiDao.lagreBehandlingsreferanse(godkjenning.oppgavereferanse, behandlingId)
+        godkjenning.avslag?.let {
+            val generasjonsId = generasjonRepository.generasjonsIdFor(godkjenning.oppgavereferanse)
+            avslagDao.lagreAvslag(godkjenning.oppgavereferanse, generasjonsId, it, saksbehandler.oid())
+        }
     }
 
     override fun håndterTotrinnsvurdering(oppgavereferanse: Long) {

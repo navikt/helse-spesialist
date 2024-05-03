@@ -3,6 +3,8 @@ package no.nav.helse.mediator
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.januar
+import no.nav.helse.modell.vedtak.AvslagDto
+import no.nav.helse.modell.vedtak.Avslagstype
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingopplysningerDto
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingstype
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingsårsak
@@ -114,7 +116,8 @@ internal class VedtakFattetMelderTest {
                     ),
                 skjønnsfastsettingopplysninger = null,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-            )
+            avslag = null,
+        )
         vedtakFattetMelder.vedtakFattet(infotrygd)
         vedtakFattetMelder.publiserUtgåendeMeldinger()
         val eventer = testRapid.inspektør.meldinger()
@@ -187,7 +190,8 @@ internal class VedtakFattetMelderTest {
                     ),
                 skjønnsfastsettingopplysninger = null,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-            )
+            avslag = null,
+        )
         vedtakFattetMelder.vedtakFattet(infotrygd)
         vedtakFattetMelder.publiserUtgåendeMeldinger()
         val eventer = testRapid.inspektør.meldinger()
@@ -237,6 +241,96 @@ internal class VedtakFattetMelderTest {
     }
 
     @Test
+    fun `vanlig vedtak sykepengegrunnlag fastsatt etter hovedregel med delvis avslag`() {
+        val spleis =
+            Sykepengevedtak.Vedtak(
+                fødselsnummer = fødselsnummer,
+                aktørId = aktørId,
+                vedtaksperiodeId = vedtaksperiodeId,
+                organisasjonsnummer = organisasjonsnummer,
+                spleisBehandlingId = spleisBehandlingId,
+                fom = fom,
+                tom = tom,
+                skjæringstidspunkt = skjæringstidspunkt,
+                hendelser = hendelser,
+                sykepengegrunnlag = 10000.0,
+                grunnlagForSykepengegrunnlag = 10000.0,
+                grunnlagForSykepengegrunnlagPerArbeidsgiver = mapOf(organisasjonsnummer to 10000.0),
+                begrensning = "ER_IKKE_6G_BEGRENSET",
+                inntekt = 10000.0,
+                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+                utbetalingId = utbetalingId,
+                sykepengegrunnlagsfakta =
+                    Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
+                        omregnetÅrsinntekt = 10000.0,
+                        innrapportertÅrsinntekt = 10000.0,
+                        avviksprosent = 0.0,
+                        seksG = 711720.0,
+                        tags = mutableSetOf(),
+                        arbeidsgivere =
+                            listOf(
+                                Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
+                                    organisasjonsnummer = organisasjonsnummer,
+                                    omregnetÅrsinntekt = 10000.0,
+                                    innrapportertÅrsinntekt = 10000.0,
+                                ),
+                            ),
+                    ),
+                skjønnsfastsettingopplysninger = null,
+                tags = setOf("IngenNyArbeidsgiverperiode"),
+                avslag = AvslagDto(Avslagstype.DELVIS_AVSLAG, "En individuell begrunnelse"),
+        )
+        vedtakFattetMelder.vedtakFattet(spleis)
+        vedtakFattetMelder.publiserUtgåendeMeldinger()
+        val eventer = testRapid.inspektør.meldinger()
+
+        assertEquals(1, eventer.size)
+
+        val event = eventer.first()
+
+        assertEquals("vedtak_fattet", event["@event_name"].asText())
+        assertEquals(fødselsnummer, event["fødselsnummer"].asText())
+        assertEquals(aktørId, event["aktørId"].asText())
+        assertEquals(vedtaksperiodeId.toString(), event["vedtaksperiodeId"].asText())
+        assertEquals(organisasjonsnummer, event["organisasjonsnummer"].asText())
+        assertEquals(fom, event["fom"].asLocalDate())
+        assertEquals(tom, event["tom"].asLocalDate())
+        assertEquals(skjæringstidspunkt, event["skjæringstidspunkt"].asLocalDate())
+        assertEquals(hendelser, event["hendelser"].map { UUID.fromString(it.asText()) })
+        assertEquals(10000.0, event["sykepengegrunnlag"].asDouble())
+        assertEquals(10000.0, event["grunnlagForSykepengegrunnlag"].asDouble())
+        assertEquals(
+            mapOf(organisasjonsnummer to 10000.0),
+            objectMapper.convertValue(event["grunnlagForSykepengegrunnlagPerArbeidsgiver"]),
+        )
+        assertEquals("ER_IKKE_6G_BEGRENSET", event["begrensning"].asText())
+        assertEquals(10000.0, event["inntekt"].asDouble())
+        assertEquals(vedtakFattetTidspunkt, event["vedtakFattetTidspunkt"].asLocalDateTime())
+        assertEquals(utbetalingId.toString(), event["utbetalingId"].asText())
+        assertEquals("EtterHovedregel", event["sykepengegrunnlagsfakta"]["fastsatt"].asText())
+        assertEquals(10000.0, event["sykepengegrunnlagsfakta"]["omregnetÅrsinntekt"].asDouble())
+        assertEquals(10000.0, event["sykepengegrunnlagsfakta"]["innrapportertÅrsinntekt"].asDouble())
+        assertEquals(0.0, event["sykepengegrunnlagsfakta"]["avviksprosent"].asDouble())
+        assertEquals(711720.0, event["sykepengegrunnlagsfakta"]["6G"].asDouble())
+        assertEquals(emptyList<String>(), objectMapper.convertValue(event["sykepengegrunnlagsfakta"]["tags"]))
+        assertEquals(
+            listOf(
+                mapOf(
+                    "arbeidsgiver" to organisasjonsnummer,
+                    "omregnetÅrsinntekt" to 10000.0,
+                    "innrapportertÅrsinntekt" to 10000.0,
+                ),
+            ),
+            objectMapper.convertValue(event["sykepengegrunnlagsfakta"]["arbeidsgivere"]),
+        )
+        assertEquals(0, event["begrunnelser"].size())
+        assertEquals(1, event["tags"].size())
+        assertEquals("IngenNyArbeidsgiverperiode", event["tags"].first().asText())
+        assertEquals(Avslagstype.DELVIS_AVSLAG, enumValueOf<Avslagstype>(event["avslag"]["type"].asText()))
+        assertEquals("En individuell begrunnelse", event["avslag"]["begrunnelse"].asText())
+    }
+
+    @Test
     fun `vanlig vedtak sykepengegrunnlag fastsatt etter skjønn`() {
         val infotrygd =
             Sykepengevedtak.Vedtak(
@@ -283,7 +377,8 @@ internal class VedtakFattetMelderTest {
                         Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
                     ),
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-            )
+            avslag = null,
+        )
         vedtakFattetMelder.vedtakFattet(infotrygd)
         vedtakFattetMelder.publiserUtgåendeMeldinger()
         val eventer = testRapid.inspektør.meldinger()
@@ -355,5 +450,132 @@ internal class VedtakFattetMelderTest {
 
         assertEquals(1, event["tags"].size())
         assertEquals("IngenNyArbeidsgiverperiode", event["tags"].first().asText())
+    }
+
+    @Test
+    fun `vanlig vedtak sykepengegrunnlag fastsatt etter skjønn med avslag`() {
+        val infotrygd =
+            Sykepengevedtak.Vedtak(
+                fødselsnummer = fødselsnummer,
+                aktørId = aktørId,
+                vedtaksperiodeId = vedtaksperiodeId,
+                organisasjonsnummer = organisasjonsnummer,
+                spleisBehandlingId = spleisBehandlingId,
+                fom = fom,
+                tom = tom,
+                skjæringstidspunkt = skjæringstidspunkt,
+                hendelser = hendelser,
+                sykepengegrunnlag = 10000.0,
+                grunnlagForSykepengegrunnlag = 10000.0,
+                grunnlagForSykepengegrunnlagPerArbeidsgiver = mapOf(organisasjonsnummer to 10000.0),
+                begrensning = "ER_IKKE_6G_BEGRENSET",
+                inntekt = 10000.0,
+                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+                utbetalingId = utbetalingId,
+                sykepengegrunnlagsfakta =
+                    Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
+                        omregnetÅrsinntekt = 10000.0,
+                        innrapportertÅrsinntekt = 13000.0,
+                        avviksprosent = 30.0,
+                        seksG = 711720.0,
+                        tags = mutableSetOf(),
+                        arbeidsgivere =
+                            listOf(
+                                Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
+                                    organisasjonsnummer = organisasjonsnummer,
+                                    omregnetÅrsinntekt = 10000.0,
+                                    skjønnsfastsatt = 13000.0,
+                                    innrapportertÅrsinntekt = 13000.0,
+                                ),
+                            ),
+                        skjønnsfastsatt = 13000.0,
+                    ),
+                skjønnsfastsettingopplysninger =
+                    SkjønnsfastsettingopplysningerDto(
+                        "Mal",
+                        "Fritekst",
+                        "Konklusjon",
+                        Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
+                        Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
+                    ),
+                tags = setOf("IngenNyArbeidsgiverperiode"),
+            avslag = AvslagDto(
+                Avslagstype.AVSLAG,
+                "En individuell begrunnelse"
+            ),
+        )
+        vedtakFattetMelder.vedtakFattet(infotrygd)
+        vedtakFattetMelder.publiserUtgåendeMeldinger()
+        val eventer = testRapid.inspektør.meldinger()
+
+        assertEquals(1, eventer.size)
+
+        val event = eventer.first()
+
+        assertEquals("vedtak_fattet", event["@event_name"].asText())
+        assertEquals(fødselsnummer, event["fødselsnummer"].asText())
+        assertEquals(aktørId, event["aktørId"].asText())
+        assertEquals(vedtaksperiodeId.toString(), event["vedtaksperiodeId"].asText())
+        assertEquals(organisasjonsnummer, event["organisasjonsnummer"].asText())
+        assertEquals(fom, event["fom"].asLocalDate())
+        assertEquals(tom, event["tom"].asLocalDate())
+        assertEquals(skjæringstidspunkt, event["skjæringstidspunkt"].asLocalDate())
+        assertEquals(hendelser, event["hendelser"].map { UUID.fromString(it.asText()) })
+        assertEquals(10000.0, event["sykepengegrunnlag"].asDouble())
+        assertEquals(10000.0, event["grunnlagForSykepengegrunnlag"].asDouble())
+        assertEquals(
+            mapOf(organisasjonsnummer to 10000.0),
+            objectMapper.convertValue(event["grunnlagForSykepengegrunnlagPerArbeidsgiver"]),
+        )
+        assertEquals("ER_IKKE_6G_BEGRENSET", event["begrensning"].asText())
+        assertEquals(10000.0, event["inntekt"].asDouble())
+        assertEquals(vedtakFattetTidspunkt, event["vedtakFattetTidspunkt"].asLocalDateTime())
+        assertEquals(utbetalingId.toString(), event["utbetalingId"].asText())
+        assertEquals("EtterSkjønn", event["sykepengegrunnlagsfakta"]["fastsatt"].asText())
+        assertEquals(10000.0, event["sykepengegrunnlagsfakta"]["omregnetÅrsinntekt"].asDouble())
+        assertEquals(13000.0, event["sykepengegrunnlagsfakta"]["innrapportertÅrsinntekt"].asDouble())
+        assertEquals(30.0, event["sykepengegrunnlagsfakta"]["avviksprosent"].asDouble())
+        assertEquals(711720.0, event["sykepengegrunnlagsfakta"]["6G"].asDouble())
+        assertEquals(emptyList<String>(), objectMapper.convertValue(event["sykepengegrunnlagsfakta"]["tags"]))
+        assertEquals(
+            listOf(
+                mapOf(
+                    "arbeidsgiver" to organisasjonsnummer,
+                    "omregnetÅrsinntekt" to 10000.0,
+                    "innrapportertÅrsinntekt" to 13000.0,
+                    "skjønnsfastsatt" to 13000.0,
+                ),
+            ),
+            objectMapper.convertValue(event["sykepengegrunnlagsfakta"]["arbeidsgivere"]),
+        )
+        assertEquals(13000.0, event["sykepengegrunnlagsfakta"]["skjønnsfastsatt"].asDouble())
+
+        assertEquals(3, event["begrunnelser"].size())
+
+        assertEquals("SkjønnsfastsattSykepengegrunnlagMal", event["begrunnelser"][0]["type"].asText())
+        assertEquals("Mal", event["begrunnelser"][0]["begrunnelse"].asText())
+        assertEquals(
+            listOf(mapOf("fom" to fom, "tom" to tom)),
+            objectMapper.convertValue<List<Map<String, LocalDate>>>(event["begrunnelser"][0]["perioder"]),
+        )
+
+        assertEquals("SkjønnsfastsattSykepengegrunnlagFritekst", event["begrunnelser"][1]["type"].asText())
+        assertEquals("Fritekst", event["begrunnelser"][1]["begrunnelse"].asText())
+        assertEquals(
+            listOf(mapOf("fom" to fom, "tom" to tom)),
+            objectMapper.convertValue<List<Map<String, LocalDate>>>(event["begrunnelser"][1]["perioder"]),
+        )
+
+        assertEquals("SkjønnsfastsattSykepengegrunnlagKonklusjon", event["begrunnelser"][2]["type"].asText())
+        assertEquals("Konklusjon", event["begrunnelser"][2]["begrunnelse"].asText())
+        assertEquals(
+            listOf(mapOf("fom" to fom, "tom" to tom)),
+            objectMapper.convertValue<List<Map<String, LocalDate>>>(event["begrunnelser"][2]["perioder"]),
+        )
+
+        assertEquals(1, event["tags"].size())
+        assertEquals("IngenNyArbeidsgiverperiode", event["tags"].first().asText())
+        assertEquals(Avslagstype.AVSLAG, enumValueOf<Avslagstype>(event["avslag"]["type"].asText()))
+        assertEquals("En individuell begrunnelse", event["avslag"]["begrunnelse"].asText())
     }
 }

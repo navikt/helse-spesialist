@@ -103,4 +103,21 @@ internal class GenerasjonDao(dataSource: DataSource) : HelseDao(dataSource) {
                 varselGetter(it.uuid("unik_id")),
             )
         }.toSet()
+
+    internal fun finnGenerasjonId(oppgaveId: Long): Long =
+        requireNotNull(
+            asSQL(
+                """
+                SELECT svg.id
+                FROM vedtak v 
+                INNER JOIN selve_vedtaksperiode_generasjon svg on v.vedtaksperiode_id = svg.vedtaksperiode_id
+                JOIN oppgave o ON v.id = o.vedtak_ref
+                WHERE o.id = :oppgave_id
+                ORDER BY svg.id DESC LIMIT 1;
+            """,
+                mapOf("oppgave_id" to oppgaveId),
+            ).single {
+                it.long("id")
+            },
+        )
 }

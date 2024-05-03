@@ -2,12 +2,14 @@ package no.nav.helse.mediator.meldinger.hendelser
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.VedtaksperiodemeldingOld
 import no.nav.helse.modell.avviksvurdering.Avviksvurdering.Companion.finnRiktigAvviksvurdering
 import no.nav.helse.modell.avviksvurdering.InnrapportertInntektDto
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
+import no.nav.helse.modell.vedtak.Avslag
 import no.nav.helse.modell.vedtak.Faktatype
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
@@ -23,6 +25,7 @@ internal class AvsluttetMedVedtakMessage(
     private val packet: JsonMessage,
     private val avviksvurderingDao: AvviksvurderingDao,
     private val generasjonDao: GenerasjonDao,
+    private val avslagDao: AvslagDao,
 ) : VedtaksperiodemeldingOld {
     private val fødselsnummer = packet["fødselsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
@@ -84,7 +87,12 @@ internal class AvsluttetMedVedtakMessage(
                 "Ingen tags funnet for spleisBehandlingId: $spleisBehandlingId på vedtaksperiodeId: $vedtaksperiodeId, json: ${toJson()}",
             )
         }
-        sykefraværstilfelle.håndter(avsluttetMedVedtak, tags)
+
+        val generasjonsId = generasjonDao.finnSisteGenerasjonIdFor(vedtaksperiodeId)
+        if (generasjonsId == null) sikkerLogg.error("Finner ikke generasjonsId for vedtaksperiodeId: $vedtaksperiodeId, json: ${toJson()}")
+        val avslag: Avslag? = if (generasjonsId != null) avslagDao.finnAvslag(vedtaksperiodeId, generasjonsId) else null
+
+        sykefraværstilfelle.håndter(avsluttetMedVedtak, tags, avslag)
     }
 
     private fun faktatype(packet: JsonMessage): Faktatype {

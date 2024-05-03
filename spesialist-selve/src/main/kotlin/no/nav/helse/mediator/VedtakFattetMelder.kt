@@ -163,6 +163,14 @@ internal class VedtakFattetMelder(
                     } else {
                         put("begrunnelser", emptyList<Map<String, Any>>())
                     }
+                    compute("avslag") { _, _ ->
+                        sykepengevedtak.avslag?.let {
+                            mapOf(
+                                "type" to it.type,
+                                "begrunnelse" to it.begrunnelse,
+                            )
+                        }
+                    }
                 },
             )
 

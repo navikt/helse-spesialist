@@ -21,6 +21,7 @@ internal class PersonRepository(private val dataSource: DataSource) {
                         return@transaction
                     }
                 it.slettOverstyring(personId)
+                it.slettAvslag(personId)
                 it.slettReserverPerson(personId)
                 it.slettOpptegnelse(personId)
                 it.slettPåVent(personId)
@@ -208,6 +209,18 @@ internal class PersonRepository(private val dataSource: DataSource) {
         begrunnelseRef?.forEach {
             it?.let { slettBegrunnelse(it) }
         }
+    }
+
+    private fun TransactionalSession.slettAvslag(personRef: Int) {
+        @Language("PostgreSQL")
+        val query = "DELETE FROM avslag WHERE vedtaksperiode_id IN (SELECT vedtaksperiode_id FROM vedtak WHERE person_ref = ?) RETURNING begrunnelse_ref"
+        val begrunnelseRef =
+            run(
+                queryOf(query, personRef).map {
+                    it.longOrNull("begrunnelse_ref")
+                }.asSingle,
+            )
+        begrunnelseRef?.let { slettBegrunnelse(it) }
     }
 
     private fun TransactionalSession.slettBegrunnelse(begrunnelseRef: Long) {

@@ -8,6 +8,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.flywaydb.core.Flyway
 import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.testcontainers.containers.PostgreSQLContainer
@@ -129,8 +130,12 @@ internal abstract class AbstractDatabaseTest {
         )
         tabeller.forEach {
             val rowCount = finnRowCount(it)
-            if (it in listOf("oppdrag", "utbetalingslinje", "begrunnelse")) {
+            if (it in listOf("oppdrag", "utbetalingslinje")) {
+                assertEquals(0, rowCount % 2) { "The table '$it' should have an even number of rows, but it has $rowCount"}
                 val (expression1, explanation1) = booleanExpressionBlock(rowCount / 2)
+                assertTrue((expression1)) { "$it has $rowCount rows, expected it to be $explanation1" }
+            } else if (it in listOf("begrunnelse")) {
+                val (expression1, explanation1) = booleanExpressionBlock(rowCount / 4)
                 assertTrue((expression1)) { "$it has $rowCount rows, expected it to be $explanation1" }
             } else {
                 val (expression2, explanation2) = booleanExpressionBlock(rowCount)

@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.vedtak
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import no.nav.helse.spesialist.api.graphql.mutation.Avslag
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class GodkjenningDto(
@@ -10,6 +11,7 @@ data class GodkjenningDto(
     val årsak: String?,
     val begrunnelser: List<String>?,
     val kommentar: String?,
+    val avslag: Avslag? = null,
 ) {
     init {
         if (!godkjent) requireNotNull(årsak)

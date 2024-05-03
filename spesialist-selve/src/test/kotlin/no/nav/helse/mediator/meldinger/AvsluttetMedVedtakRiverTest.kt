@@ -10,6 +10,7 @@ import java.util.UUID
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
+import no.nav.helse.db.AvslagDao
 import no.nav.helse.modell.avviksvurdering.Avviksvurdering
 import no.nav.helse.modell.avviksvurdering.BeregningsgrunnlagDto
 import no.nav.helse.modell.avviksvurdering.InnrapportertInntektDto
@@ -25,10 +26,11 @@ internal class AvsluttetMedVedtakRiverTest {
     private val mediator = mockk<MeldingMediator>(relaxed = true)
     private val avviksvurderingDao = mockk<AvviksvurderingDao>(relaxed = true)
     private val generasjonDao = mockk<GenerasjonDao>(relaxed = true)
+    private val avslagDao = mockk<AvslagDao>(relaxed = true)
     private val testRapid = TestRapid()
 
     init {
-        AvsluttetMedVedtakRiver(testRapid, mediator, avviksvurderingDao, generasjonDao)
+        AvsluttetMedVedtakRiver(testRapid, mediator, avviksvurderingDao, generasjonDao, avslagDao)
     }
 
     @Test

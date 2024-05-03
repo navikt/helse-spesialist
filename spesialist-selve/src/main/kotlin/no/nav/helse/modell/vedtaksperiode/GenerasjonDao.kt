@@ -257,6 +257,12 @@ class GenerasjonDao(private val dataSource: DataSource) {
         }
     }
 
+    internal fun finnSisteGenerasjonIdFor(vedtaksperiodeId: UUID): Long? {
+        return sessionOf(dataSource).use { session ->
+            session.run(finnSiste(vedtaksperiodeId).map { it.long("id") }.asSingle)
+        }
+    }
+
     internal fun harGenerasjonFor(vedtaksperiodeId: UUID): Boolean = finnSisteGenerasjonFor(vedtaksperiodeId) != null
 
     private fun finnSiste(vedtaksperiodeId: UUID): Query {

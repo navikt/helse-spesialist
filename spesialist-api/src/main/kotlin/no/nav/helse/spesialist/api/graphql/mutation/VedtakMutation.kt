@@ -35,6 +35,7 @@ class VedtakMutation(
     suspend fun innvilgVedtak(
         oppgavereferanse: String,
         env: DataFetchingEnvironment,
+        avslag: Avslag?,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
             val saksbehandler: Lazy<SaksbehandlerFraApi> = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
@@ -44,7 +45,7 @@ class VedtakMutation(
             when (val vedtak = kanFatteVedtak(oppgavereferanse.toLong(), saksbehandler.value, tilganger)) {
                 is VedtakResultat.Success -> {
                     val behandlingId = UUID.randomUUID()
-                    val godkjenning = GodkjenningDto(oppgavereferanse.toLong(), true, saksbehandler.value.ident, null, null, null)
+                    val godkjenning = GodkjenningDto(oppgavereferanse.toLong(), true, saksbehandler.value.ident, null, null, null, avslag)
 
                     saksbehandlerhåndterer.håndter(godkjenning, behandlingId, saksbehandler.value)
                     godkjenninghåndterer.håndter(godkjenning, saksbehandler.value.epost, saksbehandler.value.oid, behandlingId)
@@ -169,4 +170,14 @@ class VedtakMutation(
     ): GraphQLError =
         GraphqlErrorException.newErrorException().message(melding)
             .extensions(mapOf("code" to code, "exception" to exception)).build()
+}
+
+data class Avslag(
+    val type: Avslagstype,
+    val begrunnelse: String,
+)
+
+enum class Avslagstype {
+    AVSLAG,
+    DELVIS_AVSLAG,
 }

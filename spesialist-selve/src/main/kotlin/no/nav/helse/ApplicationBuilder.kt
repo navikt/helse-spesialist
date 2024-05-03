@@ -27,6 +27,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.routing
 import io.ktor.server.websocket.WebSockets
+import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.ReservasjonDao
@@ -229,6 +230,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val meldingDao = MeldingDao(dataSource)
     private val dokumentDao = DokumentDao(dataSource)
     private val generasjonDao = GenerasjonDao(dataSource)
+    private val avslagDao = AvslagDao(dataSource)
     private val påVentApiDao = PåVentApiDao(dataSource)
     private val avviksvurderinghenter =
         object : Avviksvurderinghenter {
@@ -408,6 +410,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 kommandofabrikk = kommandofabrikk,
                 avviksvurderingDao = avviksvurderingDao,
                 generasjonDao = generasjonDao,
+                avslagDao = avslagDao,
             )
         saksbehandlerMediator = SaksbehandlerMediator(dataSource, versjonAvKode(env), rapidsConnection, oppgaveMediator, tilgangsgrupper)
         dokumentMediator = DokumentMediator(dokumentDao, rapidsConnection)

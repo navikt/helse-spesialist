@@ -2,6 +2,7 @@ package no.nav.helse.modell.sykefraværstilfelle
 
 import no.nav.helse.modell.person.PersonObserver
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
+import no.nav.helse.modell.vedtak.Avslag
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag.Companion.sortert
 import no.nav.helse.modell.vedtak.Sykepengevedtak
@@ -24,6 +25,7 @@ internal class Sykefraværstilfelle(
     private val skjæringstidspunkt: LocalDate,
     private val gjeldendeGenerasjoner: List<Generasjon>,
     skjønnsfastatteSykepengegrunnlag: List<SkjønnsfastsattSykepengegrunnlag>,
+    private val avslag: Avslag? = null,
 ) {
     init {
         check(gjeldendeGenerasjoner.isNotEmpty()) { "Kan ikke opprette et sykefraværstilfelle uten generasjoner" }
@@ -72,12 +74,14 @@ internal class Sykefraværstilfelle(
     internal fun håndter(
         avsluttetMedVedtak: AvsluttetMedVedtak,
         tags: List<String>,
+        avslag: Avslag?,
     ) {
         val vedtakBuilder = SykepengevedtakBuilder()
         val skjønnsfastsattSykepengegrunnlag = skjønnsfastatteSykepengegrunnlag.lastOrNull()
         skjønnsfastsattSykepengegrunnlag?.also {
             vedtakBuilder.skjønnsfastsattSykepengegrunnlag(it)
         }
+        avslag?.also { vedtakBuilder.avslag(it) }
         if (tags.isNotEmpty()) {
             vedtakBuilder.tags(tags)
         }

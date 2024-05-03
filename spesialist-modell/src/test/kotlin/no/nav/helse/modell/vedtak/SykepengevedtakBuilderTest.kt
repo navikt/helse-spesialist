@@ -88,6 +88,7 @@ class SykepengevedtakBuilderTest {
                 utbetalingId = utbetalingId,
                 skjønnsfastsettingopplysninger = null,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
+                avslag = null,
             ),
             utkast,
         )
@@ -157,6 +158,141 @@ class SykepengevedtakBuilderTest {
                         Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
                     ),
                 tags = setOf("IngenNyArbeidsgiverperiode"),
+                avslag = null,
+            ),
+            utkast,
+        )
+    }
+
+    @Test
+    fun `Bygg vanlig vedtak - med delvis avslag`() {
+        val builder = SykepengevedtakBuilder()
+        builder
+            .fødselsnummer(fødselsnummer)
+            .aktørId(aktørId)
+            .organisasjonsnummer(organisasjonsnummer)
+            .vedtaksperiodeId(vedtaksperiodeId)
+            .spleisBehandlingId(spleisBehandlingId)
+            .utbetalingId(utbetalingId)
+            .fom(fom)
+            .tom(tom)
+            .skjæringstidspunkt(skjæringstidspunkt)
+            .hendelser(hendelser)
+            .sykepengegrunnlag(sykepengegrunnlag)
+            .grunnlagForSykepengegrunnlag(grunnlagForSykepengegrunnlag)
+            .grunnlagForSykepengegrunnlagPerArbeidsgiver(grunnlagForSykepengegrunnlagPerArbeidsgiver)
+            .begrensning(begrensning)
+            .inntekt(inntekt)
+            .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
+            .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_HOVEDREGEL))
+            .avslag(
+                Avslag(
+                    Avslagstype.DELVIS_AVSLAG,
+                    "En individuell begrunnelse for avslag"
+                )
+            )
+            .tags(listOf("IngenNyArbeidsgiverperiode"))
+
+        val utkast = builder.build()
+        assertTrue(utkast is Sykepengevedtak.Vedtak)
+        assertEquals(
+            Sykepengevedtak.Vedtak(
+                fødselsnummer = fødselsnummer,
+                aktørId = aktørId,
+                vedtaksperiodeId = vedtaksperiodeId,
+                organisasjonsnummer = organisasjonsnummer,
+                spleisBehandlingId = spleisBehandlingId,
+                fom = fom,
+                tom = tom,
+                skjæringstidspunkt = skjæringstidspunkt,
+                hendelser = hendelser,
+                sykepengegrunnlag = sykepengegrunnlag,
+                grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag,
+                grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
+                begrensning = begrensning,
+                inntekt = inntekt,
+                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+                sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_HOVEDREGEL),
+                utbetalingId = utbetalingId,
+                skjønnsfastsettingopplysninger = null,
+                tags = setOf("IngenNyArbeidsgiverperiode"),
+                avslag = AvslagDto(Avslagstype.DELVIS_AVSLAG, "En individuell begrunnelse for avslag"),
+            ),
+            utkast,
+        )
+    }
+
+    @Test
+    fun `Bygg vanlig vedtak - sykepengegrunnlag fastsatt skjønn med avslag`() {
+        val builder = SykepengevedtakBuilder()
+        builder
+            .fødselsnummer(fødselsnummer)
+            .aktørId(aktørId)
+            .organisasjonsnummer(organisasjonsnummer)
+            .vedtaksperiodeId(vedtaksperiodeId)
+            .spleisBehandlingId(spleisBehandlingId)
+            .utbetalingId(utbetalingId)
+            .fom(fom)
+            .tom(tom)
+            .skjæringstidspunkt(skjæringstidspunkt)
+            .hendelser(hendelser)
+            .sykepengegrunnlag(sykepengegrunnlag)
+            .grunnlagForSykepengegrunnlag(grunnlagForSykepengegrunnlag)
+            .grunnlagForSykepengegrunnlagPerArbeidsgiver(grunnlagForSykepengegrunnlagPerArbeidsgiver)
+            .begrensning(begrensning)
+            .inntekt(inntekt)
+            .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
+            .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_SKJØNN))
+            .skjønnsfastsattSykepengegrunnlag(
+                SkjønnsfastsattSykepengegrunnlag(
+                    Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
+                    Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
+                    skjæringstidspunkt,
+                    "Mal",
+                    "Fritekst",
+                    "Konklusjon",
+                    LocalDateTime.now(),
+                ),
+            )
+            .avslag(
+                Avslag(
+                    Avslagstype.AVSLAG,
+                    "En individuell begrunnelse for avslag"
+                )
+            )
+            .tags(listOf("IngenNyArbeidsgiverperiode"))
+
+        val utkast = builder.build()
+        assertTrue(utkast is Sykepengevedtak.Vedtak)
+        assertEquals(
+            Sykepengevedtak.Vedtak(
+                fødselsnummer = fødselsnummer,
+                aktørId = aktørId,
+                vedtaksperiodeId = vedtaksperiodeId,
+                organisasjonsnummer = organisasjonsnummer,
+                spleisBehandlingId = spleisBehandlingId,
+                fom = fom,
+                tom = tom,
+                skjæringstidspunkt = skjæringstidspunkt,
+                hendelser = hendelser,
+                sykepengegrunnlag = sykepengegrunnlag,
+                grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag,
+                grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
+                begrensning = begrensning,
+                inntekt = inntekt,
+                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+                sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_SKJØNN),
+                utbetalingId = utbetalingId,
+                skjønnsfastsettingopplysninger =
+                SkjønnsfastsettingopplysningerDto(
+                    "Mal",
+                    "Fritekst",
+                    "Konklusjon",
+                    Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
+                    Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
+                ),
+                tags = setOf("IngenNyArbeidsgiverperiode"),
+                avslag = AvslagDto(Avslagstype.AVSLAG, "En individuell begrunnelse for avslag"),
             ),
             utkast,
         )
@@ -208,6 +344,7 @@ class SykepengevedtakBuilderTest {
                 utbetalingId = utbetalingId,
                 skjønnsfastsettingopplysninger = null,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
+                avslag = null,
             ),
             utkast,
         )
@@ -411,6 +548,7 @@ class SykepengevedtakBuilderTest {
                 utbetalingId = utbetalingId,
                 skjønnsfastsettingopplysninger = null,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
+                avslag = null,
             ),
             utkast,
         )
