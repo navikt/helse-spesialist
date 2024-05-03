@@ -27,21 +27,10 @@ class AbonnementDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             val sekvensnummerQuery =
                 asSQL(
                     """
-                    -- hmm, kanskje vi egentlig bare burde sette max(sekvensnummer), ikke joine inn aktuell person?
-                    with aktuelt_sekvensnummer as (
-                        -- Forklaring: høyeste for person, dernest høyeste globalt, dernest 0
-                        select coalesce(max(sekvensnummer), (select max(sekvensnummer) from opptegnelse), 0) sekvensnummeret
-                        from opptegnelse o
-                        join person p on o.person_id = p.id
-                        where aktor_id = :aktorId
-                    )
-                    
                     insert into saksbehandler_opptegnelse_sekvensnummer
-                    select :saksbehandlerId, (select sekvensnummeret from aktuelt_sekvensnummer)
-                    from person p
-                    where aktor_id = :aktorId
+                    values (:saksbehandlerId, coalesce((select max(sekvensnummer) from opptegnelse), 0))
                     on conflict (saksbehandler_id) do update
-                        set siste_sekvensnummer = (select sekvensnummeret from aktuelt_sekvensnummer)
+                        set siste_sekvensnummer = (coalesce((select max(sekvensnummer) from opptegnelse), 0))
                     """.trimIndent(),
                     mapOf("saksbehandlerId" to saksbehandlerId, "aktorId" to aktørId),
                 )

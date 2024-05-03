@@ -5,6 +5,7 @@ import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.parallel.Isolated
 import java.util.UUID
 
@@ -28,19 +29,6 @@ internal class AbonnementDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `får satt nyeste sekvensnummer for personen hvis saksbehandler aldri tidligere har opprettet abonnement`() {
-        val saksbehandlerId = opprettSaksbehandler()
-        val sekvensnummerForPersonen = 9696
-        val aktørId = lagAktørId()
-        val personId = opprettPerson(aktørId = aktørId)
-        lagOpptegnelse(personId, sekvensnummerForPersonen)
-
-        abonnementDao.opprettAbonnement(saksbehandlerId, aktørId.toLong())
-
-        assertEquals(sekvensnummerForPersonen, finnSekvensnummer(saksbehandlerId))
-    }
-
-    @Test
     fun `får satt nyeste globale sekvensnummer hvis verken person eller saksbehandler har noen`() {
         val saksbehandlerId = opprettSaksbehandler()
         val sekvensnummerForEnUrelatertPerson = 4095
@@ -55,30 +43,6 @@ internal class AbonnementDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `sekvensnummer blir 0 når det ikke fins noen opptegnelser for personen`() {
-        val saksbehandlerId = opprettSaksbehandler()
-        val aktørId = lagAktørId()
-        opprettPerson(aktørId = aktørId)
-
-        abonnementDao.opprettAbonnement(saksbehandlerId, aktørId.toLong())
-
-        assertEquals(0, finnSekvensnummer(saksbehandlerId))
-    }
-
-    @Test
-    fun `nyeste sekvensnummer for personen settes når saksbehandler oppretter abonnement`() {
-        val saksbehandlerId = opprettSaksbehandler()
-        val sekvensnummerForPersonen = 9696
-        val aktørId = lagAktørId()
-        val personId = opprettPerson(aktørId = aktørId)
-        lagOpptegnelse(personId, sekvensnummerForPersonen)
-
-        abonnementDao.opprettAbonnement(saksbehandlerId, aktørId.toLong())
-
-        assertEquals(sekvensnummerForPersonen, finnSekvensnummer(saksbehandlerId))
-    }
-
-    @Test
     fun `alle tidligere abonnement slettes når et nytt opprettes`() {
         val saksbehandlerId = opprettSaksbehandler()
         val aktørId1 = lagAktørId()
@@ -90,6 +54,20 @@ internal class AbonnementDaoTest : DatabaseIntegrationTest() {
         assertEquals(listOf(aktørId1), finnPersonerSaksbehandlerAbonnererPå(saksbehandlerId))
         abonnementDao.opprettAbonnement(saksbehandlerId, aktørId2.toLong())
         assertEquals(listOf(aktørId2), finnPersonerSaksbehandlerAbonnererPå(saksbehandlerId))
+    }
+
+    @Test
+    fun `fungerer også for personer med flere fødselsnumre`() {
+        val saksbehandlerId = opprettSaksbehandler()
+        val aktørId1 = lagAktørId()
+        val dNummer = lagFødselsnummer()
+        val fødselsnummer = lagFødselsnummer()
+        opprettPerson(aktørId = aktørId1, fødselsnummer = dNummer)
+        opprettPerson(aktørId = aktørId1, fødselsnummer = fødselsnummer)
+
+        assertDoesNotThrow {
+            abonnementDao.opprettAbonnement(saksbehandlerId, aktørId1.toLong())
+        }
     }
 
     private fun settSekvensnummer(saksbehandlerId: UUID, sekvensnummer: Int) = query(
