@@ -114,7 +114,7 @@ internal class MeldingMediator(
         if (erProd()) return true
         val jsonNode = objectMapper.readTree(melding)
         val eventName = jsonNode["@event_name"]?.asText()
-        if (eventName in setOf("sendt_søknad_arbeidsgiver", "sendt_søknad_nav")) return true
+        if (eventName in setOf("sendt_søknad_arbeidsgiver", "sendt_søknad_nav", "stans_automatisk_behandling")) return true
         val fødselsnummer = jsonNode["fødselsnummer"]?.asText() ?: return true
         if (fødselsnummer.toDoubleOrNull() == null) return true
         val harPerson = personDao.findPersonByFødselsnummer(fødselsnummer) != null
