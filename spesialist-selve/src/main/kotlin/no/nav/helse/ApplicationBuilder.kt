@@ -259,7 +259,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val totrinnsvurderingMediator =
         TotrinnsvurderingMediator(TotrinnsvurderingDao(dataSource), oppgaveDao, periodehistorikkDao, notatMediator)
 
-    private val stansAutomatiskBehandlingService = StansAutomatiskBehandlingService(StansAutomatiskBehandlingDao(dataSource))
+    private val stansAutomatiskBehandlingService =
+        StansAutomatiskBehandlingService(StansAutomatiskBehandlingDao(dataSource))
 
     private val snapshotMediator =
         SnapshotMediator(
@@ -413,7 +414,14 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 avslagDao = avslagDao,
                 stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlingService,
             )
-        saksbehandlerMediator = SaksbehandlerMediator(dataSource, versjonAvKode(env), rapidsConnection, oppgaveMediator, tilgangsgrupper)
+        saksbehandlerMediator =
+            SaksbehandlerMediator(
+                dataSource,
+                versjonAvKode(env),
+                rapidsConnection,
+                oppgaveMediator,
+                tilgangsgrupper,
+            )
         dokumentMediator = DokumentMediator(dokumentDao, rapidsConnection)
         godkjenningService =
             GodkjenningService(

@@ -16,6 +16,7 @@ import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.mutation.AnnulleringMutation
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutation
+import no.nav.helse.spesialist.api.graphql.mutation.OpphevStansMutation
 import no.nav.helse.spesialist.api.graphql.mutation.OpptegnelseMutation
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutation
 import no.nav.helse.spesialist.api.graphql.mutation.PaVentMutation
@@ -184,6 +185,9 @@ internal class SchemaBuilder(
                             notatMediator = notatMediator,
                             periodehistorikkDao = periodehistorikkDao,
                         ),
+                    ),
+                    TopLevelObject(
+                        OpphevStansMutation(saksbehandlerhåndterer = saksbehandlerhåndterer),
                     ),
                 ),
         )

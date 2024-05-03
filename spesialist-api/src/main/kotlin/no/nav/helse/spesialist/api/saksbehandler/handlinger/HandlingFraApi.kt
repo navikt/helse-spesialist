@@ -6,6 +6,8 @@ import java.util.UUID
 
 sealed interface HandlingFraApi
 
+data class OpphevStans(val fødselsnummer: String, val årsak: String) : HandlingFraApi
+
 data class TildelOppgave(val oppgaveId: Long) : HandlingFraApi
 
 data class AvmeldOppgave(val oppgaveId: Long) : HandlingFraApi

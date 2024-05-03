@@ -10,7 +10,7 @@ class StansAutomatiskBehandlingDao(dataSource: DataSource) : HelseDao(dataSource
         status: String,
         årsaker: Set<String>,
         opprettet: LocalDateTime,
-        originalMelding: String,
+        originalMelding: String?,
         kilde: String,
     ) = asSQL(
         """

@@ -1,0 +1,1 @@
+alter table stans_automatisering alter column original_melding drop not null;

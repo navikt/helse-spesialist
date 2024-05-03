@@ -10,6 +10,12 @@ interface Handling {
     fun loggnavn(): String
 }
 
+interface Personhandling : Handling {
+    fun gjelderFødselsnummer(): String
+
+    fun årsak(): String
+}
+
 interface Overstyring : Handling {
     fun gjelderFødselsnummer(): String
 }

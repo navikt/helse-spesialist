@@ -5,6 +5,7 @@ import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
+import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.mediator.overstyring.Overstyringlagrer
 import no.nav.helse.mediator.overstyring.Saksbehandlingsmelder
@@ -30,10 +31,12 @@ import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtInntektOgRefusjon
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinjedag
+import no.nav.helse.modell.saksbehandler.handlinger.Personhandling
 import no.nav.helse.modell.saksbehandler.handlinger.PåVent
 import no.nav.helse.modell.saksbehandler.handlinger.Refusjonselement
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
+import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingService
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -52,6 +55,7 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernPåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LeggPåVent
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OpphevStans
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
@@ -67,6 +71,7 @@ import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.godkjennVarsl
 import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.harAktiveVarsler
 import no.nav.helse.spesialist.api.vedtaksperiode.ApiGenerasjonRepository
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -87,6 +92,8 @@ internal class SaksbehandlerMediator(
     private val overstyringDao = OverstyringDao(dataSource)
     private val påVentDao = PåVentDao(dataSource)
     private val avslagDao = AvslagDao(dataSource)
+    private val stansAutomatiskBehandlingService =
+        StansAutomatiskBehandlingService(StansAutomatiskBehandlingDao(dataSource))
 
     override fun <T : HandlingFraApi> håndter(
         handlingFraApi: T,
@@ -111,6 +118,7 @@ internal class SaksbehandlerMediator(
                 is Overstyring -> håndter(modellhandling, saksbehandler)
                 is Oppgavehandling -> håndter(modellhandling, saksbehandler)
                 is PåVent -> håndter(modellhandling, saksbehandler)
+                is Personhandling -> håndter(modellhandling, saksbehandler)
                 else -> modellhandling.utførAv(saksbehandler)
             }
             sikkerlogg.info("Handling ${modellhandling.loggnavn()} utført")
@@ -126,6 +134,25 @@ internal class SaksbehandlerMediator(
         } catch (e: Modellfeil) {
             throw e.tilApiversjon()
         }
+    }
+
+    private fun håndter(
+        handling: Personhandling,
+        saksbehandler: Saksbehandler,
+    ) = try {
+        // TODO: sende med saksbehandler for å lagre hvem som har opphevet stansen?
+        stansAutomatiskBehandlingService.lagre(
+            handling.gjelderFødselsnummer(),
+            "NORMAL",
+            setOf(handling.årsak()),
+            LocalDateTime.now(),
+            null,
+            "SPEIL",
+        )
+        // TODO: lagre i periodehistorikk? personhistorikk?
+        handling.utførAv(saksbehandler)
+    } catch (e: Modellfeil) {
+        throw e.tilApiversjon()
     }
 
     private fun håndter(
@@ -201,7 +228,12 @@ internal class SaksbehandlerMediator(
             if (perioderTilBehandling.harAktiveVarsler()) {
                 throw ManglerVurderingAvVarsler(godkjenning.oppgavereferanse)
             }
-            perioderTilBehandling.godkjennVarsler(fødselsnummer, behandlingId, saksbehandler.ident(), this::vurderVarsel)
+            perioderTilBehandling.godkjennVarsler(
+                fødselsnummer,
+                behandlingId,
+                saksbehandler.ident(),
+                this::vurderVarsel,
+            )
         } else {
             val periodeTilGodkjenning = generasjonRepository.periodeTilGodkjenning(godkjenning.oppgavereferanse)
             periodeTilGodkjenning.avvisVarsler(fødselsnummer, behandlingId, saksbehandler.ident(), this::vurderVarsel)
@@ -265,14 +297,30 @@ internal class SaksbehandlerMediator(
                 is no.nav.helse.modell.OppgaveIkkeTildelt -> OppgaveIkkeTildelt(oppgaveId)
                 is OppgaveTildeltNoenAndre -> {
                     val (oid, navn, epost) = this.saksbehandler.tilApiversjon()
-                    no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre(TildelingApiDto(navn, epost, oid))
+                    no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre(
+                        TildelingApiDto(
+                            navn,
+                            epost,
+                            oid,
+                        ),
+                    )
                 }
-                is OppgaveAlleredeSendtBeslutter -> no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter(oppgaveId)
-                is OppgaveAlleredeSendtIRetur -> no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur(oppgaveId)
+
+                is OppgaveAlleredeSendtBeslutter ->
+                    no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter(
+                        oppgaveId,
+                    )
+
+                is OppgaveAlleredeSendtIRetur ->
+                    no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur(
+                        oppgaveId,
+                    )
+
                 is OppgaveKreverVurderingAvToSaksbehandlere ->
                     no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverVurderingAvToSaksbehandlere(
                         oppgaveId,
                     )
+
                 is ManglerTilgang -> IkkeTilgang(oid, oppgaveId)
             }
         }
@@ -292,6 +340,7 @@ internal class SaksbehandlerMediator(
             is AvmeldOppgave -> this.tilModellversjon()
             is LeggPåVent -> this.tilModellversjon()
             is FjernPåVent -> this.tilModellversjon()
+            is OpphevStans -> this.tilModellversjon()
         }
     }
 
@@ -438,4 +487,7 @@ internal class SaksbehandlerMediator(
     private fun AvmeldOppgave.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.AvmeldOppgave {
         return no.nav.helse.modell.saksbehandler.handlinger.AvmeldOppgave(this.oppgaveId)
     }
+
+    private fun OpphevStans.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.OpphevStans =
+        no.nav.helse.modell.saksbehandler.handlinger.OpphevStans(this.fødselsnummer, this.årsak)
 }
