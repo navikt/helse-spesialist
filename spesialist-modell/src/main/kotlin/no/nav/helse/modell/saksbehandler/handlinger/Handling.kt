@@ -13,7 +13,7 @@ interface Handling {
 interface Personhandling : Handling {
     fun gjelderFødselsnummer(): String
 
-    fun årsak(): String
+    fun begrunnelse(): String
 }
 
 interface Overstyring : Handling {

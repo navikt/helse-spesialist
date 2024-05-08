@@ -13,7 +13,7 @@ internal class OpphevStansMutationTest : AbstractGraphQLApiTest() {
                 mutation OpphevStans {
                     opphevStans(
                         fodselsnummer: "$FØDSELSNUMMER",
-                        arsak: "EN_ÅRSAK"
+                        begrunnelse: "EN_BEGRUNNELSE"
                     )
                 }
                 """.trimIndent(),

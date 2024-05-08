@@ -324,7 +324,7 @@ type Mutation {
     leggTilKommentar(notatId: Int!, saksbehandlerident: String!, tekst: String!): Kommentar
     leggTilNotat(saksbehandlerOid: String!, tekst: String!, type: NotatType!, vedtaksperiodeId: String!): Notat
     oppdaterPerson(fodselsnummer: String!): Boolean!
-    opphevStans(arsak: String!, fodselsnummer: String!): Boolean!
+    opphevStans(begrunnelse: String!, fodselsnummer: String!): Boolean!
     opprettAbonnement(personidentifikator: String!): Boolean!
     opprettTildeling(oppgaveId: String!): Tildeling
     overstyrArbeidsforhold(overstyring: ArbeidsforholdOverstyringHandlingInput!): Boolean!

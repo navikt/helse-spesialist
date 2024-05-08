@@ -144,7 +144,7 @@ internal class SaksbehandlerMediator(
         stansAutomatiskBehandlingService.lagre(
             handling.gjelderFødselsnummer(),
             "NORMAL",
-            setOf(handling.årsak()),
+            emptySet(),
             LocalDateTime.now(),
             null,
             "SPEIL",
@@ -489,5 +489,5 @@ internal class SaksbehandlerMediator(
     }
 
     private fun OpphevStans.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.OpphevStans =
-        no.nav.helse.modell.saksbehandler.handlinger.OpphevStans(this.fødselsnummer, this.årsak)
+        no.nav.helse.modell.saksbehandler.handlinger.OpphevStans(this.fødselsnummer, this.begrunnelse)
 }

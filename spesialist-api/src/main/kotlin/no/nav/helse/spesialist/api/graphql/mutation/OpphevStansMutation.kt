@@ -15,11 +15,11 @@ class OpphevStansMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
     suspend fun opphevStans(
         env: DataFetchingEnvironment,
         fodselsnummer: String,
-        arsak: String,
+        begrunnelse: String,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
             val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(ContextValues.SAKSBEHANDLER.key).value
-            saksbehandlerhåndterer.håndter(OpphevStans(fodselsnummer, arsak), saksbehandler)
+            saksbehandlerhåndterer.håndter(OpphevStans(fodselsnummer, begrunnelse), saksbehandler)
             DataFetcherResult.newResult<Boolean>().data(true).build()
         }
 }
