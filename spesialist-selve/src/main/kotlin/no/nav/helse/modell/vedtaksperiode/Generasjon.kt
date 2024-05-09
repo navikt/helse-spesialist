@@ -86,12 +86,6 @@ internal class Generasjon private constructor(
 
     internal fun tilhører(dato: LocalDate): Boolean = periode.tom() <= dato
 
-    internal fun håndter(avsluttetUtenVedtak: no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak) {
-        val vedtakBuilder = SykepengevedtakBuilder()
-        avsluttetUtenVedtak.byggMelding(vedtakBuilder)
-        observers.forEach { it.vedtakFattet(vedtakBuilder.build()) }
-    }
-
     internal fun nySpleisBehandling(
         vedtaksperiode: Vedtaksperiode,
         spleisBehandling: SpleisBehandling,
@@ -177,7 +171,7 @@ internal class Generasjon private constructor(
     }
 
     internal fun avsluttetUtenVedtak(
-        avsluttetUtenVedtak: no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak,
+        avsluttetUtenVedtak: no.nav.helse.modell.vedtak.AvsluttetUtenVedtak,
         sykepengevedtakBuilder: SykepengevedtakBuilder,
     ) {
         if (spleisBehandlingId == null) spleisBehandlingId = avsluttetUtenVedtak.spleisBehandlingId()

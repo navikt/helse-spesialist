@@ -5,11 +5,11 @@ import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
+import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForSpleisBehandling
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnSisteGenerasjonUtenSpleisBehandlingId
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.logg
-import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
 import java.util.UUID
 
 internal class Vedtaksperiode private constructor(

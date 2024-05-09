@@ -1,6 +1,7 @@
 package no.nav.helse.modell.person
 
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
+import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
@@ -12,7 +13,6 @@ import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
-import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import org.slf4j.LoggerFactory
 import java.util.UUID

@@ -5,7 +5,7 @@ import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.person.Person
-import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
+import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.util.UUID
 

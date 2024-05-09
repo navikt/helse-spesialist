@@ -1,10 +1,9 @@
-package no.nav.helse.modell.vedtaksperiode.vedtak
+package no.nav.helse.modell.vedtak
 
-import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class AvsluttetUtenVedtak(
+class AvsluttetUtenVedtak(
     private val vedtaksperiodeId: UUID,
     private val hendelser: List<UUID>,
     private val spleisBehandlingId: UUID,
