@@ -55,7 +55,7 @@ class AvslagDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         generasjonId: Long,
     ) = asSQL(
         """
-        SELECT begrunnelse_ref FROM avslag WHERE vedtaksperiode_id = :vedtaksperiodeId AND generasjon_ref = :generasjonId LIMIT 1
+        SELECT begrunnelse_ref FROM avslag WHERE vedtaksperiode_id = :vedtaksperiodeId AND generasjon_ref = :generasjonId ORDER BY opprettet DESC LIMIT 1
         """.trimIndent(),
         mapOf(
             "vedtaksperiodeId" to vedtaksperiodeId,
