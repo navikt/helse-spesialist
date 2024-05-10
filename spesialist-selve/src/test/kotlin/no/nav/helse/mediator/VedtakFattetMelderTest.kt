@@ -323,11 +323,16 @@ internal class VedtakFattetMelderTest {
             ),
             objectMapper.convertValue(event["sykepengegrunnlagsfakta"]["arbeidsgivere"]),
         )
-        assertEquals(0, event["begrunnelser"].size())
+
+        assertEquals(1, event["begrunnelser"].size())
         assertEquals(1, event["tags"].size())
         assertEquals("IngenNyArbeidsgiverperiode", event["tags"].first().asText())
-        assertEquals(Avslagstype.DELVIS_AVSLAG, enumValueOf<Avslagstype>(event["avslag"]["type"].asText()))
-        assertEquals("En individuell begrunnelse", event["avslag"]["begrunnelse"].asText())
+        assertEquals("DelvisAvslag", event["begrunnelser"][0]["type"].asText())
+        assertEquals("En individuell begrunnelse", event["begrunnelser"][0]["begrunnelse"].asText())
+        assertEquals(
+            listOf(mapOf("fom" to fom, "tom" to tom)),
+            objectMapper.convertValue<List<Map<String, LocalDate>>>(event["begrunnelser"][0]["perioder"]),
+        )
     }
 
     @Test
@@ -550,7 +555,7 @@ internal class VedtakFattetMelderTest {
         )
         assertEquals(13000.0, event["sykepengegrunnlagsfakta"]["skjønnsfastsatt"].asDouble())
 
-        assertEquals(3, event["begrunnelser"].size())
+        assertEquals(4, event["begrunnelser"].size())
 
         assertEquals("SkjønnsfastsattSykepengegrunnlagMal", event["begrunnelser"][0]["type"].asText())
         assertEquals("Mal", event["begrunnelser"][0]["begrunnelse"].asText())
@@ -573,9 +578,14 @@ internal class VedtakFattetMelderTest {
             objectMapper.convertValue<List<Map<String, LocalDate>>>(event["begrunnelser"][2]["perioder"]),
         )
 
+        assertEquals("Avslag", event["begrunnelser"][3]["type"].asText())
+        assertEquals("En individuell begrunnelse", event["begrunnelser"][3]["begrunnelse"].asText())
+        assertEquals(
+            listOf(mapOf("fom" to fom, "tom" to tom)),
+            objectMapper.convertValue<List<Map<String, LocalDate>>>(event["begrunnelser"][3]["perioder"]),
+        )
+
         assertEquals(1, event["tags"].size())
         assertEquals("IngenNyArbeidsgiverperiode", event["tags"].first().asText())
-        assertEquals(Avslagstype.AVSLAG, enumValueOf<Avslagstype>(event["avslag"]["type"].asText()))
-        assertEquals("En individuell begrunnelse", event["avslag"]["begrunnelse"].asText())
     }
 }

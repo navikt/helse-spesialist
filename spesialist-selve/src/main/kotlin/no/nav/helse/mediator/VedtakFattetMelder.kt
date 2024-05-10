@@ -3,6 +3,7 @@ package no.nav.helse.mediator
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.person.PersonObserver
 import no.nav.helse.modell.person.vedtaksperiode.IVedtaksperiodeObserver
+import no.nav.helse.modell.vedtak.Avslagstype
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Infotrygd
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis
 import no.nav.helse.modell.vedtak.Sykepengevedtak
@@ -45,6 +46,7 @@ internal class VedtakFattetMelder(
     }
 
     private fun vedtakJson(sykepengevedtak: Sykepengevedtak.Vedtak): String {
+        var begrunnelser: MutableList<Map<String, Any>> = mutableListOf()
         val message =
             JsonMessage.newMessage(
                 "vedtak_fattet",
@@ -122,9 +124,8 @@ internal class VedtakFattetMelder(
                 ).apply {
                     if (sykepengevedtak.sykepengegrunnlagsfakta is Spleis.EtterSkjønn) {
                         val skjønnsfastsettingopplysninger = sykepengevedtak.skjønnsfastsettingopplysninger!!
-                        put(
-                            "begrunnelser",
-                            listOf(
+                        begrunnelser =
+                            mutableListOf(
                                 mapOf(
                                     "type" to "SkjønnsfastsattSykepengegrunnlagMal",
                                     "begrunnelse" to skjønnsfastsettingopplysninger.begrunnelseFraMal,
@@ -158,19 +159,30 @@ internal class VedtakFattetMelder(
                                             ),
                                         ),
                                 ),
+                            )
+                    }
+
+                    if (sykepengevedtak.avslag != null) {
+                        begrunnelser.addLast(
+                            mapOf(
+                                "type" to
+                                    when (sykepengevedtak.avslag!!.type) {
+                                        Avslagstype.AVSLAG -> "Avslag"
+                                        Avslagstype.DELVIS_AVSLAG -> "DelvisAvslag"
+                                    },
+                                "begrunnelse" to sykepengevedtak.avslag!!.begrunnelse,
+                                "perioder" to
+                                    listOf(
+                                        mapOf(
+                                            "fom" to "${sykepengevedtak.fom}",
+                                            "tom" to "${sykepengevedtak.tom}",
+                                        ),
+                                    ),
                             ),
                         )
-                    } else {
-                        put("begrunnelser", emptyList<Map<String, Any>>())
                     }
-                    compute("avslag") { _, _ ->
-                        sykepengevedtak.avslag?.let {
-                            mapOf(
-                                "type" to it.type,
-                                "begrunnelse" to it.begrunnelse,
-                            )
-                        }
-                    }
+
+                    put("begrunnelser", begrunnelser)
                 },
             )
 
