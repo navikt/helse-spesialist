@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
+import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.auditLogTeller
@@ -51,6 +52,7 @@ class PersonQuery(
     private val snapshotMediator: SnapshotMediator,
     private val reservasjonClient: ReservasjonClient,
     private val oppgavehåndterer: Oppgavehåndterer,
+    private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
     private val avviksvurderinghenter: Avviksvurderinghenter,
     private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
 ) : AbstractPersonQuery(personApiDao, egenAnsattApiDao) {
@@ -134,6 +136,7 @@ class PersonQuery(
                     avviksvurderinghenter = avviksvurderinghenter,
                     tilganger = env.graphQlContext.get("tilganger"),
                     oppgavehåndterer = oppgavehåndterer,
+                    saksbehandlerhåndterer = saksbehandlerhåndterer,
                 )
             }
 

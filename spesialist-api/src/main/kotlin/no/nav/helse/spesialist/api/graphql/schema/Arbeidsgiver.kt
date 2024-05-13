@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api.graphql.schema
 
 import io.ktor.utils.io.core.toByteArray
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
+import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
@@ -140,6 +141,7 @@ data class Arbeidsgiver(
     private val fødselsnummer: String,
     private val generasjoner: List<GraphQLGenerasjon>,
     private val oppgavehåndterer: Oppgavehåndterer,
+    private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
     private val overstyringApiDao: OverstyringApiDao,
     private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
     private val risikovurderingApiDao: RisikovurderingApiDao,
@@ -173,6 +175,7 @@ data class Arbeidsgiver(
                                 BeregnetPeriode(
                                     orgnummer = organisasjonsnummer,
                                     periode = it,
+                                    generasjonId = generasjon.id,
                                     risikovurderingApiDao = risikovurderingApiDao,
                                     varselRepository = varselRepository,
                                     oppgaveApiDao = oppgaveApiDao,
@@ -184,6 +187,7 @@ data class Arbeidsgiver(
                                     erSisteGenerasjon = index == 0,
                                     index = index,
                                     oppgavehåndterer = oppgavehåndterer,
+                                    saksbehandlerhåndterer = saksbehandlerhåndterer,
                                 )
 
                             is GraphQLUberegnetVilkarsprovdPeriode ->

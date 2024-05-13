@@ -11,6 +11,8 @@ import com.fasterxml.jackson.module.kotlin.treeToValue
 import graphql.GraphQLException
 import io.mockk.every
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
+import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
+import no.nav.helse.spesialist.api.graphql.schema.Avslag
 import no.nav.helse.spesialist.api.graphql.schema.Handling
 import no.nav.helse.spesialist.api.graphql.schema.Periodehandling
 import no.nav.helse.spesialist.api.januar
@@ -26,6 +28,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.ResourceLock
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.time.OffsetDateTime.now
 import java.util.UUID
 
 internal class PersonQueryTest : AbstractGraphQLApiTest() {
@@ -286,6 +289,29 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     }
 
     @Test
+    fun `periode med avslag`() {
+        val avslagsbegrunnelse = "En individuell begrunnelse"
+        every { saksbehandlerhåndterer.hentAvslag(any(), any()) } returns listOf(Avslag(type = Avslagstype.AVSLAG, begrunnelse = avslagsbegrunnelse, opprettet = now().toString(), saksbehandlerIdent = "AIDENT"))
+
+        val personRef = opprettPerson()
+        val arbeidsgiverRef = opprettArbeidsgiver()
+        val snapshotGenerasjonId1 = UUID.randomUUID()
+        opprettVedtaksperiode(personRef, arbeidsgiverRef)
+        val graphQLperiodeMedOppgave = opprettBeregnetPeriode("2023-01-04", "2023-01-05", PERIODE.id)
+        val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave), snapshotGenerasjonId1)
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(listOf(snapshotGenerasjon))
+        mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
+
+        val body = runPersonQuery(null)
+
+        val avslag = body["data"]["person"]["arbeidsgivere"].first()["generasjoner"].first()["perioder"].first()["avslag"].first()
+        assertNotNull(avslag)
+        assertEquals(Avslagstype.AVSLAG, enumValueOf<Avslagstype>(avslag["type"].textValue()))
+        assertEquals(avslagsbegrunnelse, avslag["begrunnelse"].textValue())
+        assertEquals("AIDENT", avslag["saksbehandlerIdent"].textValue())
+    }
+
+    @Test
     fun `sjekke at kanAvvises-flagget inkluderes i GraphQL svaret`() {
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver(), kanAvvises = false)
         val (id, fom, tom) = PERIODE
@@ -327,7 +353,10 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
                                     varsler {
                                         generasjonId
                                         kode
-                                    }                      
+                                    }         
+                                    avslag {
+                                        type, begrunnelse, opprettet, saksbehandlerIdent
+                                    }
                                 }
                                 hendelser {
                                     ... on SoknadArbeidsledig {
@@ -393,6 +422,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val generasjonId: UUID,
         val kode: String,
     )
+
     private fun Periode.tilBeregnetPeriode(): GraphQLBeregnetPeriode =
         opprettBeregnetPeriode(fom.toString(), tom.toString(), id)
 

@@ -36,6 +36,7 @@ import no.nav.helse.spesialist.api.behandlingsstatistikk.Statistikk
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.schema.Adressebeskyttelse
 import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
+import no.nav.helse.spesialist.api.graphql.schema.Avslag
 import no.nav.helse.spesialist.api.graphql.schema.BehandledeOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
 import no.nav.helse.spesialist.api.graphql.schema.Egenskap
@@ -290,6 +291,10 @@ private class SneakySaksbehandlerhåndterer(
         sisteSekvensId: Int,
     ): List<Opptegnelse> {
         return mock.hentAbonnerteOpptegnelser(saksbehandlerFraApi, sisteSekvensId)
+    }
+
+    override fun hentAvslag(vedtaksperiodeId: UUID, generasjonId: UUID): List<Avslag> {
+        return mock.hentAvslag(vedtaksperiodeId, generasjonId)
     }
 
     override fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi): List<Opptegnelse> {

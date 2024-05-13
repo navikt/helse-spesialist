@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.utils.io.core.toByteArray
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
+import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.Toggle
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.objectMapper
@@ -447,7 +448,9 @@ data class Handling(val type: Periodehandling, val tillatt: Boolean, val begrunn
 data class BeregnetPeriode(
     private val orgnummer: String,
     private val periode: GraphQLBeregnetPeriode,
+    private val generasjonId: UUID,
     private val oppgavehåndterer: Oppgavehåndterer,
+    private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
     private val risikovurderingApiDao: RisikovurderingApiDao,
     private val varselRepository: ApiVarselRepository,
     private val oppgaveApiDao: OppgaveApiDao,
@@ -622,6 +625,8 @@ data class BeregnetPeriode(
                 oid = it.oid,
             )
         }
+
+    fun avslag(): List<Avslag> = saksbehandlerhåndterer.hentAvslag(periode.vedtaksperiodeId, generasjonId)
 }
 
 private fun GraphQLOppdrag.tilSimulering(): Simulering =

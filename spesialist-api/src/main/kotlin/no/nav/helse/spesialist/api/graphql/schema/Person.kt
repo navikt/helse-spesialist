@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
+import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
@@ -64,6 +66,13 @@ data class PaVent(
     val oid: UUID,
 )
 
+data class Avslag(
+    val type: Avslagstype,
+    val begrunnelse: String,
+    val opprettet: DateTimeString,
+    val saksbehandlerIdent: String,
+)
+
 data class Person(
     private val snapshot: GraphQLPerson,
     private val personinfo: Personinfo,
@@ -81,6 +90,7 @@ data class Person(
     private val avviksvurderinghenter: Avviksvurderinghenter,
     private val tilganger: SaksbehandlerTilganger,
     private val oppgavehåndterer: Oppgavehåndterer,
+    private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
 ) {
     fun versjon(): Int = snapshot.versjon
 
@@ -123,6 +133,7 @@ data class Person(
                 påVentApiDao = påVentApiDao,
                 tilganger = tilganger,
                 oppgavehåndterer = oppgavehåndterer,
+                saksbehandlerhåndterer = saksbehandlerhåndterer,
             )
         }
 

@@ -157,6 +157,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
             snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), snapshotClient),
             reservasjonClient = mockk(relaxed = true),
             oppgavehåndterer = mockk(relaxed = true),
+            saksbehandlerhåndterer = mockk(relaxed = true),
             avviksvurderinghenter = mockk(relaxed = true),
             stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
         )

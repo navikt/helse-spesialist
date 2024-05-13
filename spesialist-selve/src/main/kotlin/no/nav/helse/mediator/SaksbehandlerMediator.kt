@@ -47,6 +47,7 @@ import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.feilhåndtering.IkkeTilgang
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
+import no.nav.helse.spesialist.api.graphql.schema.Avslag
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
@@ -213,6 +214,13 @@ internal class SaksbehandlerMediator(
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         SaksbehandlerLagrer(saksbehandlerDao).lagre(saksbehandler)
         return opptegnelseDao.finnOpptegnelser(saksbehandler.oid())
+    }
+
+    override fun hentAvslag(
+        vedtaksperiodeId: UUID,
+        generasjonId: UUID,
+    ): List<Avslag> {
+        return avslagDao.finnAlleAvslag(vedtaksperiodeId, generasjonId)
     }
 
     override fun håndter(

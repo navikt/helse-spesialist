@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api
 
+import no.nav.helse.spesialist.api.graphql.schema.Avslag
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
@@ -31,4 +32,9 @@ interface Saksbehandlerhåndterer {
     )
 
     fun håndterTotrinnsvurdering(oppgavereferanse: Long)
+
+    fun hentAvslag(
+        vedtaksperiodeId: UUID,
+        generasjonId: UUID,
+    ): List<Avslag>
 }

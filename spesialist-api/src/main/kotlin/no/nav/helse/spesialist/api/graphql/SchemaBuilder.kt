@@ -104,6 +104,7 @@ internal class SchemaBuilder(
                             snapshotMediator = snapshotMediator,
                             reservasjonClient = reservasjonClient,
                             oppgavehåndterer = oppgavehåndterer,
+                            saksbehandlerhåndterer = saksbehandlerhåndterer,
                             avviksvurderinghenter = avviksvurderinghenter,
                             stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
                         ),

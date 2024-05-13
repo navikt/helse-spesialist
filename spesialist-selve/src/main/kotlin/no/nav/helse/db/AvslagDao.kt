@@ -73,4 +73,40 @@ class AvslagDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             }
         }
     }
+
+    internal fun finnAlleAvslag(
+        vedtaksperiodeId: UUID,
+        generasjonUnikId: UUID,
+    ): List<no.nav.helse.spesialist.api.graphql.schema.Avslag> =
+        asSQL(
+            """
+            SELECT begrunnelse_ref FROM avslag a 
+            INNER JOIN selve_vedtaksperiode_generasjon svg ON a.generasjon_ref = svg.unik_id 
+            WHERE a.vedtaksperiode_id = :vedtaksperiodeId AND svg.unik_id = :generasjonUnikId 
+            ORDER BY opprettet DESC
+            """.trimIndent(),
+            mapOf(
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "generasjonUnikId" to generasjonUnikId,
+            ),
+        ).list { avslag ->
+            val begrunnelseRefs = avslag.map { it.longOrNull("begrunnelse_ref") }
+            begrunnelseRefs.let {
+                asSQL(
+                    """
+                    SELECT b.type, b.tekst, s.ident FROM begrunnelse b
+                    INNER JOIN sakbehandler s ON s.oid = b.saksbehandler_ref
+                    WHERE b.id in :begrunnelseRefs
+                    """.trimIndent(),
+                    mapOf("begrunnelseRef" to begrunnelseRefs),
+                ).single { begrunnelse ->
+                    no.nav.helse.spesialist.api.graphql.schema.Avslag(
+                        enumValueOf(begrunnelse.string("type")),
+                        begrunnelse.string("tekst"),
+                        avslag.localDateTime("opprettet").toString(),
+                        begrunnelse.string("ident"),
+                    )
+                }
+            }
+        }
 }

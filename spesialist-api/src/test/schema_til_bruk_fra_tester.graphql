@@ -111,6 +111,13 @@ type AvsenderSystem {
     versjon: String
 }
 
+type Avslag {
+    begrunnelse: String!
+    opprettet: String!
+    saksbehandlerIdent: String!
+    type: Avslagstype!
+}
+
 type BehandledeOppgaver {
     oppgaver: [BehandletOppgave!]!
     totaltAntallOppgaver: Int!
@@ -146,6 +153,7 @@ type Behandlingsstatistikk {
 }
 
 type BeregnetPeriode implements Periode {
+    avslag: [Avslag!]!
     beregningId: UUID!
     egenskaper: [Oppgaveegenskap!]!
     erForkastet: Boolean!
