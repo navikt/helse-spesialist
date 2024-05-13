@@ -626,7 +626,7 @@ data class BeregnetPeriode(
             )
         }
 
-    fun avslag(): List<Avslag> = saksbehandlerhåndterer.hentAvslag(periode.vedtaksperiodeId, generasjonId)
+    fun avslag(): List<Avslag> = saksbehandlerhåndterer.hentAvslag(periode.vedtaksperiodeId, generasjonId).toList()
 }
 
 private fun GraphQLOppdrag.tilSimulering(): Simulering =

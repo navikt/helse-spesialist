@@ -36,5 +36,5 @@ interface Saksbehandlerhåndterer {
     fun hentAvslag(
         vedtaksperiodeId: UUID,
         generasjonId: UUID,
-    ): List<Avslag>
+    ): Set<Avslag>
 }

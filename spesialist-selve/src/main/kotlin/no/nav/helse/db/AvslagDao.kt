@@ -77,11 +77,13 @@ class AvslagDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     internal fun finnAlleAvslag(
         vedtaksperiodeId: UUID,
         generasjonUnikId: UUID,
-    ): List<no.nav.helse.spesialist.api.graphql.schema.Avslag> =
+    ): Set<no.nav.helse.spesialist.api.graphql.schema.Avslag> =
         asSQL(
             """
-            SELECT begrunnelse_ref FROM avslag a 
-            INNER JOIN selve_vedtaksperiode_generasjon svg ON a.generasjon_ref = svg.unik_id 
+            SELECT b.type, b.tekst, a.opprettet, s.ident FROM avslag a 
+            INNER JOIN selve_vedtaksperiode_generasjon svg ON a.generasjon_ref = svg.id 
+            INNER JOIN begrunnelse b ON b.id = a.begrunnelse_ref
+            INNER JOIN saksbehandler s ON s.oid = b.saksbehandler_ref
             WHERE a.vedtaksperiode_id = :vedtaksperiodeId AND svg.unik_id = :generasjonUnikId 
             ORDER BY opprettet DESC
             """.trimIndent(),
@@ -90,23 +92,11 @@ class AvslagDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 "generasjonUnikId" to generasjonUnikId,
             ),
         ).list { avslag ->
-            val begrunnelseRefs = avslag.map { it.longOrNull("begrunnelse_ref") }
-            begrunnelseRefs.let {
-                asSQL(
-                    """
-                    SELECT b.type, b.tekst, s.ident FROM begrunnelse b
-                    INNER JOIN sakbehandler s ON s.oid = b.saksbehandler_ref
-                    WHERE b.id in :begrunnelseRefs
-                    """.trimIndent(),
-                    mapOf("begrunnelseRef" to begrunnelseRefs),
-                ).single { begrunnelse ->
-                    no.nav.helse.spesialist.api.graphql.schema.Avslag(
-                        enumValueOf(begrunnelse.string("type")),
-                        begrunnelse.string("tekst"),
-                        avslag.localDateTime("opprettet").toString(),
-                        begrunnelse.string("ident"),
-                    )
-                }
-            }
-        }
+            no.nav.helse.spesialist.api.graphql.schema.Avslag(
+                enumValueOf(avslag.string("type")),
+                avslag.string("tekst"),
+                avslag.localDateTime("opprettet").toString(),
+                avslag.string("ident"),
+            )
+        }.toSet()
 }

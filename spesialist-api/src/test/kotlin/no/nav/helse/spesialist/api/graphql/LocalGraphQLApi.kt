@@ -293,7 +293,7 @@ private class SneakySaksbehandlerhåndterer(
         return mock.hentAbonnerteOpptegnelser(saksbehandlerFraApi, sisteSekvensId)
     }
 
-    override fun hentAvslag(vedtaksperiodeId: UUID, generasjonId: UUID): List<Avslag> {
+    override fun hentAvslag(vedtaksperiodeId: UUID, generasjonId: UUID): Set<Avslag> {
         return mock.hentAvslag(vedtaksperiodeId, generasjonId)
     }
 
