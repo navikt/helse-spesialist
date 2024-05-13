@@ -108,9 +108,10 @@ internal class MeldingMediator(
 
     private fun skalBehandleMelding(melding: String): Boolean {
         val jsonNode = objectMapper.readTree(melding)
-        val id = jsonNode["@id"].asUUID()
-        if (meldingDao.erBehandlet(id)) {
-            logg.info("Ville ha ignorert melding {}", id)
+        jsonNode["@id"]?.asUUID()?.let { id ->
+            if (meldingDao.erBehandlet(id)) {
+                logg.info("Ville ha ignorert melding {}", id)
+            }
         }
         if (erProd()) return true
         val eventName = jsonNode["@event_name"]?.asText()
