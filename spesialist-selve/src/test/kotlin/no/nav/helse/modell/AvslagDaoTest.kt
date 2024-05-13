@@ -1,6 +1,8 @@
 package no.nav.helse.modell
 
 import DatabaseIntegrationTest
+import kotliquery.queryOf
+import kotliquery.sessionOf
 import java.util.UUID
 import no.nav.helse.db.AvslagDao
 import no.nav.helse.spesialist.api.graphql.mutation.Avslag
@@ -19,25 +21,26 @@ internal class AvslagDaoTest : DatabaseIntegrationTest() {
         nyPerson()
         nySaksbehandler(oid)
         val avslag = Avslag(Avslagstype.AVSLAG, "En individuell begrunelse")
-        nyDao.lagreAvslag(OPPGAVE_ID, 1L, avslag,  oid)
+        nyDao.lagreAvslag(OPPGAVE_ID, 1L, avslag, oid)
 
         val lagretAvslag = nyDao.finnAvslag(VEDTAKSPERIODE, 1L)
         assertNotNull(lagretAvslag)
-//        assertEquals(Avslagstype.AVSLAG, lagretAvslag?.type)
     }
 
     @Test
     fun `finner alle Avslag for periode`() {
         val oid = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
-        nyPerson(generasjonId = generasjonId)
+        val generasjonUnikId = UUID.randomUUID()
+        nyPerson(generasjonId = generasjonUnikId)
         nySaksbehandler(oid)
         val avslag = Avslag(Avslagstype.AVSLAG, "En individuell begrunelse")
         val avslag2 = Avslag(Avslagstype.DELVIS_AVSLAG, "En individuell begrunelse delvis avslag retter skrivefeil")
-        nyDao.lagreAvslag(OPPGAVE_ID, 1L, avslag,  oid)
-        nyDao.lagreAvslag(OPPGAVE_ID, 1L, avslag2,  oid)
+        val generasjonId = finnGenereasjonId(generasjonUnikId)
+        nyDao.lagreAvslag(OPPGAVE_ID, generasjonId, avslag, oid)
+        nyDao.lagreAvslag(OPPGAVE_ID, generasjonId, avslag2, oid)
 
-        val lagredeAvslag: List<no.nav.helse.spesialist.api.graphql.schema.Avslag> = nyDao.finnAlleAvslag(VEDTAKSPERIODE, generasjonId).toList()
+        val lagredeAvslag: List<no.nav.helse.spesialist.api.graphql.schema.Avslag> =
+            nyDao.finnAlleAvslag(VEDTAKSPERIODE, generasjonUnikId).toList()
 
         assertEquals(2, lagredeAvslag.size)
         assertEquals(Avslagstype.AVSLAG, lagredeAvslag.last().type)
@@ -52,4 +55,14 @@ internal class AvslagDaoTest : DatabaseIntegrationTest() {
     private fun nySaksbehandler(oid: UUID = UUID.randomUUID()) {
         saksbehandlerDao.opprettSaksbehandler(oid, "Navn Navnesen", "navn@navnesen.no", "Z999999")
     }
+
+    private fun finnGenereasjonId(unikId: UUID): Long =
+        requireNotNull(
+            sessionOf(dataSource).use { session ->
+                session.run(
+                    queryOf("SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?", unikId)
+                        .map { it.long("id") }.asSingle
+                )
+            }
+        )
 }
