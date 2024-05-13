@@ -107,8 +107,12 @@ internal class MeldingMediator(
     }
 
     private fun skalBehandleMelding(melding: String): Boolean {
-        if (erProd()) return true
         val jsonNode = objectMapper.readTree(melding)
+        val id = jsonNode["@id"].asUUID()
+        if (meldingDao.erBehandlet(id)) {
+            logg.info("Ville ha ignorert melding {}", id)
+        }
+        if (erProd()) return true
         val eventName = jsonNode["@event_name"]?.asText()
         if (eventName in setOf("sendt_søknad_arbeidsgiver", "sendt_søknad_nav", "stans_automatisk_behandling")) return true
         val fødselsnummer = jsonNode["fødselsnummer"]?.asText() ?: return true
@@ -435,6 +439,7 @@ internal class MeldingMediator(
             sikkerlogg.info("Melding $meldingnavn mottatt:\n${melding.toJson()}")
             meldingDao.lagre(melding)
             behandleMelding(melding, messageContext)
+            meldingDao.settBehandlet(melding.id)
 
             logg.info("Melding $meldingnavn lest")
             sikkerlogg.info("Melding $meldingnavn lest")
@@ -554,6 +559,7 @@ internal class MeldingMediator(
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")
             }
             utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, messageContext)
+            meldingDao.settBehandlet(melding.id)
         } catch (e: Exception) {
             logg.error("Feil ved behandling av melding $hendelsenavn", e.message, e)
             throw e

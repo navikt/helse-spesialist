@@ -3,18 +3,19 @@ package no.nav.helse.modell
 import DatabaseIntegrationTest
 import io.mockk.every
 import io.mockk.mockk
-import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
+import java.util.UUID
 
 internal class MeldingDaoTest : DatabaseIntegrationTest() {
     private val godkjenningsbehov: Godkjenningsbehov = mockGodkjenningsbehov()
@@ -80,6 +81,19 @@ internal class MeldingDaoTest : DatabaseIntegrationTest() {
         nyPerson()
         godkjenningsbehov(HENDELSE_ID)
         assertEquals(FNR, meldingDao.finnFødselsnummer(HENDELSE_ID))
+    }
+
+    @Test
+    fun `behandlet-tidspunkt er ikke satt i utgangspunktet`() {
+        val id = testhendelse().id
+        assertFalse(meldingDao.erBehandlet(id))
+    }
+
+    @Test
+    fun `kan sette behandlet-tidspunkt for meldinger`() {
+        val id = testhendelse().id
+        meldingDao.settBehandlet(id)
+        assertTrue(meldingDao.erBehandlet(id))
     }
 
     private fun mockOverstyringIgangsatt(fødselsnummer: String, berørtePeriodeIder: List<UUID>, årsak: String): OverstyringIgangsatt {
