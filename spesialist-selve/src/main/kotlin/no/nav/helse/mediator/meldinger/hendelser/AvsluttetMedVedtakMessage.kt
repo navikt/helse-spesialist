@@ -6,8 +6,8 @@ import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.VedtaksperiodemeldingOld
-import no.nav.helse.modell.avviksvurdering.Avviksvurdering.Companion.finnRiktigAvviksvurdering
-import no.nav.helse.modell.avviksvurdering.InnrapportertInntektDto
+import no.nav.helse.modell.Avviksvurdering.Companion.finnRiktigAvviksvurdering
+import no.nav.helse.modell.InnrapportertInntektDto
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.vedtak.Avslag
 import no.nav.helse.modell.vedtak.Faktatype

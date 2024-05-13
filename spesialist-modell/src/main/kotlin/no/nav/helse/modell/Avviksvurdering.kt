@@ -1,10 +1,10 @@
-package no.nav.helse.modell.avviksvurdering
+package no.nav.helse.modell
 
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class Avviksvurdering(
+class Avviksvurdering(
     private val unikId: UUID,
     private val vilkårsgrunnlagId: UUID?,
     private val fødselsnummer: String,
@@ -15,11 +15,11 @@ internal class Avviksvurdering(
     private val beregningsgrunnlag: BeregningsgrunnlagDto,
 ) {
     companion object {
-        internal fun List<Avviksvurdering>.finnRiktigAvviksvurdering(skjæringstidspunkt: LocalDate) =
+        fun List<Avviksvurdering>.finnRiktigAvviksvurdering(skjæringstidspunkt: LocalDate) =
             filter { it.skjæringstidspunkt == skjæringstidspunkt }.maxByOrNull { it.opprettet }
     }
 
-    internal fun toDto() =
+    fun toDto() =
         AvviksvurderingDto(
             unikId = unikId,
             vilkårsgrunnlagId = vilkårsgrunnlagId,

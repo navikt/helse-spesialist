@@ -3,17 +3,15 @@ package no.nav.helse.mediator.meldinger
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.MeldingMediator
-import no.nav.helse.modell.avviksvurdering.AvviksvurderingDto
+import no.nav.helse.modell.AvviksvurderingDto
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class AvvikVurdertRiverTest {
-
     private val testRapid = TestRapid()
     private val mediator = mockk<MeldingMediator>(relaxed = true)
-
 
     init {
         AvvikVurdertRiver(testRapid, mediator)
@@ -21,7 +19,7 @@ class AvvikVurdertRiverTest {
 
     @BeforeEach
     fun beforeEach() {
-       testRapid.reset()
+        testRapid.reset()
     }
 
     @Test
@@ -37,7 +35,8 @@ class AvvikVurdertRiverTest {
     }
 
     @Language("JSON")
-    private fun event() = """
+    private fun event() =
+        """
     {
       "@event_name": "avvik_vurdert",
       "fødselsnummer": "12345678910",
@@ -84,7 +83,8 @@ class AvvikVurdertRiverTest {
     }"""
 
     @Language("JSON")
-    private fun eventUtenSammenligningsgrunnlag() = """
+    private fun eventUtenSammenligningsgrunnlag() =
+        """
     {
       "@event_name": "avvik_vurdert",
       "fødselsnummer": "12345678910",

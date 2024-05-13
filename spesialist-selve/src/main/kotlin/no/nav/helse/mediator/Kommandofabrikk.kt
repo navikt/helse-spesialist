@@ -11,6 +11,7 @@ import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
+import no.nav.helse.modell.AvviksvurderingDto
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.SnapshotDao
@@ -18,7 +19,6 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
-import no.nav.helse.modell.avviksvurdering.AvviksvurderingDto
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommand

@@ -4,10 +4,10 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
-import no.nav.helse.modell.avviksvurdering.Avviksvurdering
-import no.nav.helse.modell.avviksvurdering.AvviksvurderingDto
-import no.nav.helse.modell.avviksvurdering.BeregningsgrunnlagDto
-import no.nav.helse.modell.avviksvurdering.SammenligningsgrunnlagDto
+import no.nav.helse.modell.Avviksvurdering
+import no.nav.helse.modell.AvviksvurderingDto
+import no.nav.helse.modell.BeregningsgrunnlagDto
+import no.nav.helse.modell.SammenligningsgrunnlagDto
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.avviksvurdering.Beregningsgrunnlag
 import no.nav.helse.spesialist.api.avviksvurdering.Sammenligningsgrunnlag

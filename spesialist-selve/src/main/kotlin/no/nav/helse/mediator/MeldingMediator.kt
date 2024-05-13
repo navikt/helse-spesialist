@@ -45,10 +45,10 @@ import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.mediator.meldinger.påminnelser.KommandokjedePåminnelseRiver
 import no.nav.helse.mediator.oppgave.OppgaveDao
+import no.nav.helse.modell.AvviksvurderingDto
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.avviksvurdering.AvviksvurderingDto
 import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.kommando.Command

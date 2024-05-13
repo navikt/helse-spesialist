@@ -1,4 +1,4 @@
-package no.nav.helse.modell.avviksvurdering
+package no.nav.helse.modell
 
 import java.time.LocalDate
 import java.time.LocalDateTime
