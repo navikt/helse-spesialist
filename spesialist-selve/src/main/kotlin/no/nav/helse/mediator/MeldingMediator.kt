@@ -99,13 +99,12 @@ internal class MeldingMediator(
     private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
     private val generasjonDao: GenerasjonDao,
     private val avslagDao: AvslagDao,
+    private val personRepository: PersonRepository = PersonRepository(dataSource),
 ) : Personhåndterer {
     private companion object {
         private val logg = LoggerFactory.getLogger(MeldingMediator::class.java)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
-
-    private val personRepository = PersonRepository(dataSource)
 
     private fun skalBehandleMelding(melding: String): Boolean {
         if (erProd()) return true
