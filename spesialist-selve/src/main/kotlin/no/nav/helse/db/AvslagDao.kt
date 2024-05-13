@@ -22,20 +22,20 @@ class AvslagDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
     internal fun lagreAvslag(
         oppgaveId: Long,
-        generasjonId: Long,
         avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag,
         saksbehandlerOid: UUID,
     ) = asSQL(
         """
-        SELECT v.vedtaksperiode_id
+        SELECT v.vedtaksperiode_id, svg.id AS generasjon_id
         FROM vedtak v
         INNER JOIN oppgave o on v.id = o.vedtak_ref
+        INNER JOIN selve_vedtaksperiode_generasjon svg ON svg.unik_id = o.generasjon_ref
         WHERE o.id = :oppgaveId 
         """.trimIndent(),
         mapOf(
             "oppgaveId" to oppgaveId,
         ),
-    ).single { it.uuid("vedtaksperiode_id") }.let { vedtaksperiodeId ->
+    ).single { Pair(it.uuid("vedtaksperiode_id"), it.long("generasjon_id")) }?.let { (vedtaksperiodeId, generasjonId) ->
         lagreBegrunnelse(avslag, saksbehandlerOid).let { begrunnelseId ->
             asSQL(
                 """

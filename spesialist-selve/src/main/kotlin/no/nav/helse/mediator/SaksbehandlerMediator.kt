@@ -250,8 +250,7 @@ internal class SaksbehandlerMediator(
         påVentDao.slettPåVent(godkjenning.oppgavereferanse)
         oppgaveApiDao.lagreBehandlingsreferanse(godkjenning.oppgavereferanse, behandlingId)
         godkjenning.avslag?.let {
-            val generasjonsId = generasjonRepository.generasjonsIdFor(godkjenning.oppgavereferanse)
-            avslagDao.lagreAvslag(godkjenning.oppgavereferanse, generasjonsId, it, saksbehandler.oid())
+            avslagDao.lagreAvslag(godkjenning.oppgavereferanse, it, saksbehandler.oid())
         }
     }
 

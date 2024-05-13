@@ -18,12 +18,15 @@ internal class AvslagDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `lagrer og finner avslag`() {
         val oid = UUID.randomUUID()
-        nyPerson()
+        val generasjonUnikId = UUID.randomUUID()
+        nyPerson(generasjonId = generasjonUnikId)
         nySaksbehandler(oid)
         val avslag = Avslag(Avslagstype.AVSLAG, "En individuell begrunelse")
-        nyDao.lagreAvslag(OPPGAVE_ID, 1L, avslag, oid)
+        nyDao.lagreAvslag(OPPGAVE_ID, avslag, oid)
 
-        val lagretAvslag = nyDao.finnAvslag(VEDTAKSPERIODE, 1L)
+        val generasjonId = finnGenereasjonId(generasjonUnikId)
+
+        val lagretAvslag = nyDao.finnAvslag(VEDTAKSPERIODE, generasjonId)
         assertNotNull(lagretAvslag)
     }
 
@@ -35,9 +38,8 @@ internal class AvslagDaoTest : DatabaseIntegrationTest() {
         nySaksbehandler(oid)
         val avslag = Avslag(Avslagstype.AVSLAG, "En individuell begrunelse")
         val avslag2 = Avslag(Avslagstype.DELVIS_AVSLAG, "En individuell begrunelse delvis avslag retter skrivefeil")
-        val generasjonId = finnGenereasjonId(generasjonUnikId)
-        nyDao.lagreAvslag(OPPGAVE_ID, generasjonId, avslag, oid)
-        nyDao.lagreAvslag(OPPGAVE_ID, generasjonId, avslag2, oid)
+        nyDao.lagreAvslag(OPPGAVE_ID, avslag, oid)
+        nyDao.lagreAvslag(OPPGAVE_ID, avslag2, oid)
 
         val lagredeAvslag: List<no.nav.helse.spesialist.api.graphql.schema.Avslag> =
             nyDao.finnAlleAvslag(VEDTAKSPERIODE, generasjonUnikId).toList()
