@@ -86,13 +86,6 @@ internal class Generasjon private constructor(
 
     internal fun tilhører(dato: LocalDate): Boolean = periode.tom() <= dato
 
-    internal fun nySpleisBehandling(
-        vedtaksperiode: Vedtaksperiode,
-        spleisBehandling: SpleisBehandling,
-    ) {
-        tilstand.nySpleisBehandling(this, vedtaksperiode, spleisBehandling)
-    }
-
     internal fun nySpleisBehandling(spleisBehandling: SpleisBehandling) = nyBehandling(spleisBehandling)
 
     internal fun forhindrerAutomatisering(): Boolean = varsler.forhindrerAutomatisering()
@@ -311,12 +304,6 @@ internal class Generasjon private constructor(
             spleisVedtaksperiode: SpleisVedtaksperiode,
         )
 
-        fun nySpleisBehandling(
-            generasjon: Generasjon,
-            vedtaksperiode: Vedtaksperiode,
-            spleisBehandling: SpleisBehandling,
-        ) {}
-
         fun nyUtbetaling(
             generasjon: Generasjon,
             hendelseId: UUID,
@@ -387,14 +374,6 @@ internal class Generasjon private constructor(
             generasjon.nyTilstand(this, KlarTilBehandling, hendelseId)
         }
 
-        override fun nySpleisBehandling(
-            generasjon: Generasjon,
-            vedtaksperiode: Vedtaksperiode,
-            spleisBehandling: SpleisBehandling,
-        ) {
-            sikkerlogg.warn("Forventer ikke ny Spleis-behandling, gjeldende generasjon i Spesialist er ikke lukket")
-        }
-
         override fun spleisVedtaksperiode(
             vedtaksperiode: Vedtaksperiode,
             generasjon: Generasjon,
@@ -462,14 +441,6 @@ internal class Generasjon private constructor(
     internal data object VedtakFattet : Tilstand {
         override fun navn(): String = "VedtakFattet"
 
-        override fun nySpleisBehandling(
-            generasjon: Generasjon,
-            vedtaksperiode: Vedtaksperiode,
-            spleisBehandling: SpleisBehandling,
-        ) {
-            vedtaksperiode.nyGenerasjon(generasjon.nyBehandling(spleisBehandling.spleisBehandlingId))
-        }
-
         override fun spleisVedtaksperiode(
             vedtaksperiode: Vedtaksperiode,
             generasjon: Generasjon,
@@ -482,14 +453,6 @@ internal class Generasjon private constructor(
 
     internal data object AvsluttetUtenVedtak : Tilstand {
         override fun navn(): String = "AvsluttetUtenVedtak"
-
-        override fun nySpleisBehandling(
-            generasjon: Generasjon,
-            vedtaksperiode: Vedtaksperiode,
-            spleisBehandling: SpleisBehandling,
-        ) {
-            vedtaksperiode.nyGenerasjon(generasjon.nyBehandling(spleisBehandling.spleisBehandlingId))
-        }
 
         override fun nyttVarsel(
             generasjon: Generasjon,
@@ -535,15 +498,6 @@ internal class Generasjon private constructor(
         ) {
             sikkerlogg.warn("Spesialist mottar avsluttet_uten_vedtak når den allerede er i tilstand AvsluttetUtenVedtakMedVarsler")
             generasjon.supplerAvsluttetUtenVedtak(sykepengevedtakBuilder)
-        }
-
-        override fun nySpleisBehandling(
-            generasjon: Generasjon,
-            vedtaksperiode: Vedtaksperiode,
-            spleisBehandling: SpleisBehandling,
-        ) {
-            vedtaksperiode.nyGenerasjon(generasjon.nyBehandling(spleisBehandling.spleisBehandlingId))
-            generasjon.nyTilstand(this, AvsluttetUtenVedtak, UUID.randomUUID())
         }
 
         override fun spleisVedtaksperiode(

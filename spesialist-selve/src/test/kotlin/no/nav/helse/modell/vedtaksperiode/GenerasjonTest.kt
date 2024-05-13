@@ -371,18 +371,6 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
     }
 
     @Test
-    fun `bytter tilstand ved mottak av ny behandling i IngenUtbetalingMåVurderes`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = generasjonMedVarsel(vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
-        generasjon.nySpleisBehandling(
-            mockk(relaxed = true),
-            SpleisBehandling("9878654321", vedtaksperiodeId, UUID.randomUUID(), 1.januar, 31.januar),
-        )
-        assertEquals(TilstandDto.AvsluttetUtenVedtak, generasjon.toDto().tilstand)
-    }
-
-    @Test
     fun `referential equals`() {
         val generasjon = generasjon(UUID.randomUUID(), UUID.randomUUID())
         assertEquals(generasjon, generasjon)
