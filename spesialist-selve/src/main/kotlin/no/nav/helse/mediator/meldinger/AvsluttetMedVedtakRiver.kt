@@ -76,6 +76,7 @@ internal class AvsluttetMedVedtakRiver(
         context: MessageContext,
     ) {
         sikkerlogg.info("Mottok melding avsluttet_med_vedtak:\n${packet.toJson()}")
+        if (packet["@id"].asText() == "dc162abd-7085-44d4-8334-a359763aa9ac") return
         mediator.håndter(AvsluttetMedVedtakMessage(packet, avviksvurderingDao, generasjonDao, avslagDao), context)
     }
 
