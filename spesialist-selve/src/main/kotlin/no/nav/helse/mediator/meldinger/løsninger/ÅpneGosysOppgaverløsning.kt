@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.meldinger.løsninger
 
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.mediator.SpesialistRiver
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
@@ -8,7 +9,6 @@ import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
@@ -67,6 +67,7 @@ internal class ÅpneGosysOppgaverløsning(
             antall > 0 -> {
                 sykefraværstilfelle.håndter(SB_EX_1.nyttVarsel(vedtaksperiodeId), hendelseId)
             }
+
             antall == 0 && !harTildeltOppgave -> {
                 sykefraværstilfelle.deaktiver(SB_EX_1.nyttVarsel(vedtaksperiodeId))
             }
@@ -74,24 +75,20 @@ internal class ÅpneGosysOppgaverløsning(
     }
 
     internal class ÅpneGosysOppgaverRiver(
-        rapidsConnection: RapidsConnection,
         private val meldingMediator: MeldingMediator,
-    ) : River.PacketListener {
+    ) : SpesialistRiver {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
-        init {
-            River(rapidsConnection).apply {
-                validate {
-                    it.demandValue("@event_name", "behov")
-                    it.demandValue("@final", true)
-                    it.demandAll("@behov", listOf("ÅpneOppgaver"))
-                    it.require("@opprettet") { message -> message.asLocalDateTime() }
-                    it.requireKey("@id", "contextId", "hendelseId", "fødselsnummer")
-                    it.require("@løsning.ÅpneOppgaver.antall") {}
-                    it.requireKey("@løsning.ÅpneOppgaver.oppslagFeilet")
-                }
-            }.register(this)
-        }
+        override fun validations() =
+            River.PacketValidation {
+                it.demandValue("@event_name", "behov")
+                it.demandValue("@final", true)
+                it.demandAll("@behov", listOf("ÅpneOppgaver"))
+                it.require("@opprettet") { message -> message.asLocalDateTime() }
+                it.requireKey("@id", "contextId", "hendelseId", "fødselsnummer")
+                it.require("@løsning.ÅpneOppgaver.antall") {}
+                it.requireKey("@løsning.ÅpneOppgaver.oppslagFeilet")
+            }
 
         override fun onPacket(
             packet: JsonMessage,

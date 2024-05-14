@@ -2,10 +2,10 @@ package no.nav.helse.mediator.meldinger
 
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.mediator.SpesialistRiver
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -14,26 +14,22 @@ import java.util.UUID
 // I skrivende stund er det kun meldinger der tilbakedateringen er godkjent som
 // kommer til Spesialist, dvs. sendes på rapiden. Andre meldinger filtreres ut i sparkel-appen
 internal class TilbakedateringBehandletRiver(
-    rapidsConnection: RapidsConnection,
     private val mediator: MeldingMediator,
-) : River.PacketListener {
+) : SpesialistRiver {
     private val logg = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
-    init {
-        River(rapidsConnection).apply {
-            validate {
-                it.demandValue("@event_name", "tilbakedatering_behandlet")
-                it.requireKey("@opprettet")
-                it.requireKey("@id")
-                it.requireKey("fødselsnummer")
-                it.requireKey("sykmeldingId")
-                it.requireArray("perioder") {
-                    requireKey("fom", "tom")
-                }
+    override fun validations() =
+        River.PacketValidation {
+            it.demandValue("@event_name", "tilbakedatering_behandlet")
+            it.requireKey("@opprettet")
+            it.requireKey("@id")
+            it.requireKey("fødselsnummer")
+            it.requireKey("sykmeldingId")
+            it.requireArray("perioder") {
+                requireKey("fom", "tom")
             }
-        }.register(this)
-    }
+        }
 
     override fun onPacket(
         packet: JsonMessage,

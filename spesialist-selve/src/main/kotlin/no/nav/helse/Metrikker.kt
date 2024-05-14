@@ -5,9 +5,9 @@ import io.prometheus.client.Counter
 import io.prometheus.client.Histogram
 import io.prometheus.client.Summary
 import no.nav.helse.mediator.GodkjenningsbehovUtfall
+import no.nav.helse.mediator.SpesialistRiver
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
@@ -69,20 +69,17 @@ internal fun registrerTidsbrukForGodkjenningsbehov(
     tidBruktMs: Int,
 ) = godkjenningsbehovUtfall.labels(utfall.name).observe(tidBruktMs.toDouble())
 
-internal class MetrikkRiver(rapidsConnection: RapidsConnection) : River.PacketListener {
+internal class MetrikkRiver : SpesialistRiver {
     val log: Logger = LoggerFactory.getLogger("MetrikkRiver")
 
-    init {
-        River(rapidsConnection).apply {
-            validate {
-                it.demandValue("@event_name", "behov")
-                it.demandValue("@final", true)
-                it.requireKey("@besvart", "@behov", "system_participating_services")
-                it.interestedIn("@løsning.Godkjenning.godkjent")
-                it.interestedIn("@løsning.Godkjenning.automatiskBehandling")
-            }
-        }.register(this)
-    }
+    override fun validations() =
+        River.PacketValidation {
+            it.demandValue("@event_name", "behov")
+            it.demandValue("@final", true)
+            it.requireKey("@besvart", "@behov", "system_participating_services")
+            it.interestedIn("@løsning.Godkjenning.godkjent")
+            it.interestedIn("@løsning.Godkjenning.automatiskBehandling")
+        }
 
     override fun onPacket(
         packet: JsonMessage,

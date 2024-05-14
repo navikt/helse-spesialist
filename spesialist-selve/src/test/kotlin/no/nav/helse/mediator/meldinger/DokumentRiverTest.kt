@@ -2,13 +2,14 @@ package no.nav.helse.mediator.meldinger
 
 import io.mockk.mockk
 import io.mockk.verify
-import java.util.UUID
+import no.nav.helse.medRivers
 import no.nav.helse.mediator.meldinger.løsninger.DokumentRiver
 import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class DokumentRiverTest {
     private companion object {
@@ -17,9 +18,7 @@ internal class DokumentRiverTest {
     }
 
     private val dokumentDao = mockk<DokumentDao>(relaxed = true)
-    private val testRapid = TestRapid().apply {
-        DokumentRiver(this, dokumentDao)
-    }
+    private val testRapid = TestRapid().medRivers(DokumentRiver(dokumentDao))
 
     @BeforeEach
     fun setup() {

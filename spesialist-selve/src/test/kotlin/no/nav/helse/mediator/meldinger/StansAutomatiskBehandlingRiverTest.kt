@@ -2,6 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
@@ -11,11 +12,7 @@ import java.util.UUID
 
 internal class StansAutomatiskBehandlingRiverTest {
     private val mediator = mockk<MeldingMediator>(relaxed = true)
-    private val testRapid = TestRapid()
-
-    init {
-        StansAutomatiskBehandlingRiver(testRapid, mediator)
-    }
+    private val testRapid = TestRapid().medRivers(StansAutomatiskBehandlingRiver(mediator))
 
     @Test
     fun `Leser stans automatisk behandling`() {

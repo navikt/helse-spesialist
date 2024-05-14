@@ -2,30 +2,26 @@ package no.nav.helse.mediator.meldinger
 
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.mediator.SpesialistRiver
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
 internal class MidnattRiver(
-    rapidsConnection: RapidsConnection,
     private val mediator: MeldingMediator,
-) : River.PacketListener {
+) : SpesialistRiver {
     private companion object {
         private val logg = LoggerFactory.getLogger(this::class.java)
     }
 
-    init {
-        River(rapidsConnection).apply {
-            validate {
-                it.demandAny("@event_name", listOf("midnatt", "slett_gamle_dokumenter_spesialist"))
-                it.requireKey("@id")
-            }
-        }.register(this)
-    }
+    override fun validations() =
+        River.PacketValidation {
+            it.demandAny("@event_name", listOf("midnatt", "slett_gamle_dokumenter_spesialist"))
+            it.requireKey("@id")
+        }
 
     override fun onError(
         problems: MessageProblems,

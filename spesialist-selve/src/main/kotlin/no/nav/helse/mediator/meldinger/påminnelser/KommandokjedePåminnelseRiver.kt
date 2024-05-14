@@ -2,32 +2,28 @@ package no.nav.helse.mediator.meldinger.påminnelser
 
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.mediator.SpesialistRiver
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
 internal class KommandokjedePåminnelseRiver(
-    rapidsConnection: RapidsConnection,
     private val mediator: MeldingMediator,
-) : River.PacketListener {
+) : SpesialistRiver {
     private companion object {
         private val logg: Logger = LoggerFactory.getLogger(this::class.java)
     }
 
-    init {
-        River(rapidsConnection).apply {
-            validate {
-                it.demandValue("@event_name", "kommandokjede_påminnelse")
-                it.requireKey("@id", "commandContextId", "meldingId")
-            }
-        }.register(this)
-    }
+    override fun validations() =
+        River.PacketValidation {
+            it.demandValue("@event_name", "kommandokjede_påminnelse")
+            it.requireKey("@id", "commandContextId", "meldingId")
+        }
 
     override fun onError(
         problems: MessageProblems,

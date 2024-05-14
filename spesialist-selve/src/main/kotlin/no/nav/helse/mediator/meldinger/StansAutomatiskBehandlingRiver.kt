@@ -1,33 +1,29 @@
 package no.nav.helse.mediator.meldinger
 
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.mediator.SpesialistRiver
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.slf4j.LoggerFactory
 
 internal class StansAutomatiskBehandlingRiver(
-    rapidsConnection: RapidsConnection,
     private val mediator: MeldingMediator,
-) : River.PacketListener {
+) : SpesialistRiver {
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-    init {
-        River(rapidsConnection).apply {
-            validate {
-                it.demandValue("@event_name", "stans_automatisk_behandling")
-                it.requireKey("@id")
-                it.requireKey("fødselsnummer")
-                it.requireKey("status")
-                it.requireKey("årsaker")
-                it.requireKey("opprettet")
-                it.requireKey("originalMelding")
-            }
-        }.register(this)
-    }
+    override fun validations() =
+        River.PacketValidation {
+            it.demandValue("@event_name", "stans_automatisk_behandling")
+            it.requireKey("@id")
+            it.requireKey("fødselsnummer")
+            it.requireKey("status")
+            it.requireKey("årsaker")
+            it.requireKey("opprettet")
+            it.requireKey("originalMelding")
+        }
 
     override fun onError(
         problems: MessageProblems,

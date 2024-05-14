@@ -3,11 +3,11 @@ package no.nav.helse.mediator.meldinger
 import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.mediator.SpesialistRiver
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.varsler
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.slf4j.Logger
@@ -15,30 +15,26 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 internal class NyeVarslerRiver(
-    rapidsConnection: RapidsConnection,
     private val mediator: MeldingMediator,
-) : River.PacketListener {
+) : SpesialistRiver {
     private companion object {
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
     }
 
-    init {
-        River(rapidsConnection).apply {
-            validate {
-                it.demandAny("@event_name", listOf("aktivitetslogg_ny_aktivitet", "nye_varsler"))
-                it.requireKey("@id", "fødselsnummer")
-                it.require("@opprettet") { message -> message.asLocalDateTime() }
-                it.requireArray("aktiviteter") {
-                    requireKey("melding", "nivå", "id")
-                    interestedIn("varselkode")
-                    require("tidsstempel", JsonNode::asLocalDateTime)
-                    requireArray("kontekster") {
-                        requireKey("konteksttype", "kontekstmap")
-                    }
+    override fun validations() =
+        River.PacketValidation {
+            it.demandAny("@event_name", listOf("aktivitetslogg_ny_aktivitet", "nye_varsler"))
+            it.requireKey("@id", "fødselsnummer")
+            it.require("@opprettet") { message -> message.asLocalDateTime() }
+            it.requireArray("aktiviteter") {
+                requireKey("melding", "nivå", "id")
+                interestedIn("varselkode")
+                require("tidsstempel", JsonNode::asLocalDateTime)
+                requireArray("kontekster") {
+                    requireKey("konteksttype", "kontekstmap")
                 }
             }
-        }.register(this)
-    }
+        }
 
     override fun onPacket(
         packet: JsonMessage,

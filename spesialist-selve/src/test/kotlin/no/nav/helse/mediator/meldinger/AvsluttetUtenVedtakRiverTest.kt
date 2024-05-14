@@ -2,20 +2,17 @@ package no.nav.helse.mediator.meldinger
 
 import io.mockk.mockk
 import io.mockk.verify
-import java.util.UUID
+import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetUtenVedtakMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class AvsluttetUtenVedtakRiverTest {
     private val mediator = mockk<MeldingMediator>(relaxed = true)
-    private val testRapid = TestRapid()
-
-    init {
-        AvsluttetUtenVedtakRiver(testRapid, mediator)
-    }
+    private val testRapid = TestRapid().medRivers(AvsluttetUtenVedtakRiver(mediator))
 
     @Test
     fun `Leser inn utkast_til_vedtak-event`() {

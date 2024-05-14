@@ -2,21 +2,18 @@ package no.nav.helse.mediator.meldinger.påminnelser
 
 import io.mockk.mockk
 import io.mockk.verify
-import java.util.UUID
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.medRivers
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 class KommandokjedePåminnelseRiverTest {
 
-    private val testRapid = TestRapid()
     private val mediator = mockk<MeldingMediator>(relaxed = true)
-
-    init {
-        KommandokjedePåminnelseRiver(testRapid, mediator)
-    }
+    private val testRapid = TestRapid().medRivers(KommandokjedePåminnelseRiver(mediator))
 
     @BeforeEach
     fun beforeEach() {

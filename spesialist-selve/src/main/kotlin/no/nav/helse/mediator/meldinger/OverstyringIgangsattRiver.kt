@@ -2,36 +2,32 @@ package no.nav.helse.mediator.meldinger
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.mediator.SpesialistRiver
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
 internal class OverstyringIgangsattRiver(
-    rapidsConnection: RapidsConnection,
     private val mediator: MeldingMediator,
-) : River.PacketListener {
+) : SpesialistRiver {
     private val log = LoggerFactory.getLogger(this::class.java)
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
-    init {
-        River(rapidsConnection).apply {
-            validate {
-                it.demandValue("@event_name", "overstyring_igangsatt")
-                it.requireKey("kilde")
-                it.requireArray("berørtePerioder") {
-                    requireKey("vedtaksperiodeId")
-                }
-                it.requireKey("@id")
-                it.requireKey("fødselsnummer")
+    override fun validations() =
+        River.PacketValidation {
+            it.demandValue("@event_name", "overstyring_igangsatt")
+            it.requireKey("kilde")
+            it.requireArray("berørtePerioder") {
+                requireKey("vedtaksperiodeId")
             }
-        }.register(this)
-    }
+            it.requireKey("@id")
+            it.requireKey("fødselsnummer")
+        }
 
     override fun onError(
         problems: MessageProblems,

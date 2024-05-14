@@ -3,6 +3,7 @@ package no.nav.helse.mediator.meldinger
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
+import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsgiverRiver
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
@@ -22,11 +23,7 @@ internal class ArbeidsgiverinformasjonløsningTest {
 
     private val dao = mockk<ArbeidsgiverDao>(relaxed = true)
     private val mediator = mockk<MeldingMediator>(relaxed = true)
-    private val rapid = TestRapid()
-
-    init {
-        ArbeidsgiverRiver(rapid, mediator)
-    }
+    private val rapid = TestRapid().medRivers(ArbeidsgiverRiver(mediator))
 
     @BeforeEach
     internal fun resetTestSetup() {

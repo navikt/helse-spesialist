@@ -2,6 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -10,12 +11,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class AvvikVurdertRiverTest {
-    private val testRapid = TestRapid()
     private val mediator = mockk<MeldingMediator>(relaxed = true)
-
-    init {
-        AvvikVurdertRiver(testRapid, mediator)
-    }
+    private val testRapid = TestRapid().medRivers(AvvikVurdertRiver(mediator))
 
     @BeforeEach
     fun beforeEach() {

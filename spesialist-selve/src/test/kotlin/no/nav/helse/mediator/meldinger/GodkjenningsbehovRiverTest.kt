@@ -2,8 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import io.mockk.mockk
 import io.mockk.verify
-import java.time.LocalDate
-import java.util.UUID
+import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -12,6 +11,8 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.UUID
 
 internal class GodkjenningsbehovRiverTest {
     private val HENDELSE = UUID.randomUUID()
@@ -24,9 +25,7 @@ internal class GodkjenningsbehovRiverTest {
     private val TOM = LocalDate.of(2020, 1, 31)
 
     private val mediator = mockk<MeldingMediator>(relaxed = true)
-    private val testRapid = TestRapid().apply {
-        GodkjenningsbehovRiver(this, mediator)
-    }
+    private val testRapid = TestRapid().medRivers(GodkjenningsbehovRiver(mediator))
 
     @BeforeEach
     fun setup() {

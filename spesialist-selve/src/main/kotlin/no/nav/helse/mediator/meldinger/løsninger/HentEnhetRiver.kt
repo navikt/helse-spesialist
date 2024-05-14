@@ -1,32 +1,27 @@
 package no.nav.helse.mediator.meldinger.løsninger
 
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.mediator.SpesialistRiver
 import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
 internal class HentEnhetRiver(
-    rapidsConnection: RapidsConnection,
     private val mediator: MeldingMediator,
-) : River.PacketListener {
+) : SpesialistRiver {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
-    init {
-        River(rapidsConnection)
-            .apply {
-                validate {
-                    it.demandValue("@event_name", "behov")
-                    it.demandValue("@final", true)
-                    it.demandAll("@behov", listOf("HentEnhet"))
-                    it.requireKey("@id", "contextId", "hendelseId", "@løsning.HentEnhet")
-                }
-            }.register(this)
-    }
+    override fun validations() =
+        River.PacketValidation {
+            it.demandValue("@event_name", "behov")
+            it.demandValue("@final", true)
+            it.demandAll("@behov", listOf("HentEnhet"))
+            it.requireKey("@id", "contextId", "hendelseId", "@løsning.HentEnhet")
+        }
 
     override fun onError(
         problems: MessageProblems,

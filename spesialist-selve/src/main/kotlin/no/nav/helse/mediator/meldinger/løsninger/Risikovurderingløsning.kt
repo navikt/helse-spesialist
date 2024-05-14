@@ -2,13 +2,13 @@ package no.nav.helse.mediator.meldinger.løsninger
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.mediator.SpesialistRiver
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_2
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_3
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.slf4j.LoggerFactory
@@ -64,31 +64,27 @@ internal class Risikovurderingløsning(
         !kanGodkjennesAutomatisk && løsning["funn"].any { !it["kategori"].toList().map { it.asText() }.contains("8-4") }
 
     internal class V2River(
-        rapidsConnection: RapidsConnection,
         private val meldingMediator: MeldingMediator,
-    ) : River.PacketListener {
+    ) : SpesialistRiver {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
-        init {
-            River(rapidsConnection).apply {
-                validate {
-                    it.requireKey("@id")
-                    it.demandValue("@event_name", "behov")
-                    it.demandValue("@final", true)
-                    it.demandAll("@behov", listOf("Risikovurdering"))
-                    it.require("@opprettet") { message -> message.asLocalDateTime() }
-                    it.require("Risikovurdering.vedtaksperiodeId") { message -> UUID.fromString(message.asText()) }
-                    it.demandKey("contextId")
-                    it.demandKey("hendelseId")
-                    it.requireKey("@løsning.Risikovurdering")
-                    it.requireKey(
-                        "@løsning.Risikovurdering.kanGodkjennesAutomatisk",
-                        "@løsning.Risikovurdering.funn",
-                        "@løsning.Risikovurdering.kontrollertOk",
-                    )
-                }
-            }.register(this)
-        }
+        override fun validations() =
+            River.PacketValidation {
+                it.requireKey("@id")
+                it.demandValue("@event_name", "behov")
+                it.demandValue("@final", true)
+                it.demandAll("@behov", listOf("Risikovurdering"))
+                it.require("@opprettet") { message -> message.asLocalDateTime() }
+                it.require("Risikovurdering.vedtaksperiodeId") { message -> UUID.fromString(message.asText()) }
+                it.demandKey("contextId")
+                it.demandKey("hendelseId")
+                it.requireKey("@løsning.Risikovurdering")
+                it.requireKey(
+                    "@løsning.Risikovurdering.kanGodkjennesAutomatisk",
+                    "@løsning.Risikovurdering.funn",
+                    "@løsning.Risikovurdering.kontrollertOk",
+                )
+            }
 
         override fun onPacket(
             packet: JsonMessage,

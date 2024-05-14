@@ -3,9 +3,7 @@ package no.nav.helse.mediator.meldinger
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
+import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
@@ -14,16 +12,15 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class TilbakedateringBehandletRiverTest {
 
     private val mediator = mockk<MeldingMediator>(relaxed = true)
-    private val testRapid = TestRapid()
+    private val testRapid = TestRapid().medRivers(TilbakedateringBehandletRiver(mediator))
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
-
-    init {
-        TilbakedateringBehandletRiver(testRapid, mediator)
-    }
 
     @Test
     fun `Leser tilbakedatering behandlet`() {

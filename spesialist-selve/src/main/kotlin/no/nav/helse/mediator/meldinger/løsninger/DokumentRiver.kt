@@ -1,35 +1,30 @@
 package no.nav.helse.mediator.meldinger.løsninger
 
 import net.logstash.logback.argument.StructuredArguments
+import no.nav.helse.mediator.SpesialistRiver
 import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
 internal class DokumentRiver(
-    rapidsConnection: RapidsConnection,
     private val dokumentDao: DokumentDao,
-) : River.PacketListener {
+) : SpesialistRiver {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
-    init {
-        River(rapidsConnection)
-            .apply {
-                validate {
-                    it.demandValue("@event_name", "hent-dokument")
-                    it.demandKey("@løsning.dokument")
-                    it.requireKey(
-                        "@id",
-                        "fødselsnummer",
-                        "dokumentId",
-                    )
-                }
-            }.register(this)
-    }
+    override fun validations() =
+        River.PacketValidation {
+            it.demandValue("@event_name", "hent-dokument")
+            it.demandKey("@løsning.dokument")
+            it.requireKey(
+                "@id",
+                "fødselsnummer",
+                "dokumentId",
+            )
+        }
 
     override fun onError(
         problems: MessageProblems,

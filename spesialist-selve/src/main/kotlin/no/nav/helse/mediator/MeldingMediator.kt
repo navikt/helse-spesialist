@@ -74,6 +74,7 @@ import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
 import no.nav.helse.spesialist.api.Personhåndterer
@@ -81,6 +82,10 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
+
+internal interface SpesialistRiver : River.PacketListener {
+    fun validations(): River.PacketValidation
+}
 
 internal class MeldingMediator(
     private val dataSource: DataSource,
@@ -99,8 +104,8 @@ internal class MeldingMediator(
     private val generasjonRepository: GenerasjonRepository = GenerasjonRepository(dataSource),
     private val metrikkDao: MetrikkDao = MetrikkDao(dataSource),
     private val stansAutomatiskBehandlingMediator: StansAutomatiskBehandlingMediator,
-    private val generasjonDao: GenerasjonDao,
-    private val avslagDao: AvslagDao,
+    generasjonDao: GenerasjonDao,
+    avslagDao: AvslagDao,
     private val personRepository: PersonRepository = PersonRepository(dataSource),
 ) : Personhåndterer {
     private companion object {
@@ -126,50 +131,59 @@ internal class MeldingMediator(
     }
 
     init {
-        DelegatedRapid(rapidsConnection, ::forbered, ::skalBehandleMelding, ::fortsett, ::errorHandler).also {
-            GodkjenningsbehovRiver(it, this)
-            SøknadSendtRiver(it, this)
-            SøknadSendtArbeidsledigRiver(it, this)
-            PersoninfoRiver(it, this)
-            FlerePersoninfoRiver(it, this)
-            HentEnhetRiver(it, this)
-            InfotrygdutbetalingerRiver(it, this)
-            SaksbehandlerløsningRiver(it, this)
-            ArbeidsgiverRiver(it, this)
-            ArbeidsforholdRiver(it, this)
-            VedtaksperiodeForkastetRiver(it, this)
-            VedtaksperiodeEndretRiver(it, this)
-            AdressebeskyttelseEndretRiver(it, this)
-            OverstyringIgangsattRiver(it, this)
-            EgenAnsattløsning.EgenAnsattRiver(it, this)
-            Vergemålløsning.VergemålRiver(it, this)
-            ÅpneGosysOppgaverløsning.ÅpneGosysOppgaverRiver(it, this)
-            Risikovurderingløsning.V2River(it, this)
-            Inntektløsning.InntektRiver(it, this)
-            UtbetalingAnnullertRiver(it, this)
-            OppdaterPersonsnapshotRiver(it, this)
-            UtbetalingEndretRiver(it, this)
-            VedtaksperiodeReberegnetRiver(it, this)
-            GosysOppgaveEndretRiver(it, this)
-            TilbakedateringBehandletRiver(it, this)
-            EndretSkjermetinfoRiver(it, this)
-            DokumentRiver(it, dokumentDao)
-            VedtakFattetRiver(it, this)
-            NyeVarslerRiver(it, this)
-            AvvikVurdertRiver(it, this)
-            VarseldefinisjonRiver(it, this)
-            VedtaksperiodeNyUtbetalingRiver(it, this)
-            MetrikkRiver(it)
-            AvsluttetMedVedtakRiver(it, this, avviksvurderingDao, generasjonDao, avslagDao)
-            AvsluttetUtenVedtakRiver(it, this)
-            MidnattRiver(it, this)
-            BehandlingOpprettetRiver(it, this)
-            KommandokjedePåminnelseRiver(it, this)
-            StansAutomatiskBehandlingRiver(it, this)
+        val delegatedRapid =
+            DelegatedRapid(rapidsConnection, ::forbered, ::skalBehandleMelding, ::fortsett, ::errorHandler)
+        val rivers =
+            setOf(
+                GodkjenningsbehovRiver(this),
+                SøknadSendtRiver(this),
+                SøknadSendtArbeidsledigRiver(this),
+                PersoninfoRiver(this),
+                FlerePersoninfoRiver(this),
+                HentEnhetRiver(this),
+                InfotrygdutbetalingerRiver(this),
+                SaksbehandlerløsningRiver(this),
+                ArbeidsgiverRiver(this),
+                ArbeidsforholdRiver(this),
+                VedtaksperiodeForkastetRiver(this),
+                VedtaksperiodeEndretRiver(this),
+                AdressebeskyttelseEndretRiver(this),
+                OverstyringIgangsattRiver(this),
+                EgenAnsattløsning.EgenAnsattRiver(this),
+                Vergemålløsning.VergemålRiver(this),
+                ÅpneGosysOppgaverløsning.ÅpneGosysOppgaverRiver(this),
+                Risikovurderingløsning.V2River(this),
+                Inntektløsning.InntektRiver(this),
+                UtbetalingAnnullertRiver(this),
+                OppdaterPersonsnapshotRiver(this),
+                UtbetalingEndretRiver(this),
+                VedtaksperiodeReberegnetRiver(this),
+                GosysOppgaveEndretRiver(this),
+                TilbakedateringBehandletRiver(this),
+                EndretSkjermetinfoRiver(this),
+                DokumentRiver(dokumentDao),
+                VedtakFattetRiver(this),
+                NyeVarslerRiver(this),
+                AvvikVurdertRiver(this),
+                VarseldefinisjonRiver(this),
+                VedtaksperiodeNyUtbetalingRiver(this),
+                MetrikkRiver(),
+                AvsluttetMedVedtakRiver(this, avviksvurderingDao, generasjonDao, avslagDao),
+                AvsluttetUtenVedtakRiver(this),
+                MidnattRiver(this),
+                BehandlingOpprettetRiver(this),
+                KommandokjedePåminnelseRiver(this),
+                StansAutomatiskBehandlingRiver(this),
+            )
+        rivers.forEach { river ->
+            River(delegatedRapid).validate(river.validations()).register(river).onSuccess { _, _ ->
+                meldingPasserteValidering = true
+            }
         }
     }
 
     private var løsninger: Løsninger? = null
+    private var meldingPasserteValidering = false
 
     // samler opp løsninger
     fun løsning(
@@ -345,6 +359,7 @@ internal class MeldingMediator(
 
     private fun forbered() {
         løsninger = null
+        meldingPasserteValidering = false
     }
 
     private fun løsninger(
@@ -400,10 +415,12 @@ internal class MeldingMediator(
     // fortsetter en command (resume) med oppsamlet løsninger
     private fun fortsett(message: String) {
         løsninger?.fortsett(this, message)
-        val jsonNode = objectMapper.readTree(message)
-        jsonNode["@id"]?.asUUID()?.let { id ->
-            val type = jsonNode["@event_name"]?.asText() ?: "ukjent"
-            meldingDuplikatkontrollDao.lagre(id, type)
+        if (meldingPasserteValidering) {
+            val jsonNode = objectMapper.readTree(message)
+            jsonNode["@id"]?.asUUID()?.let { id ->
+                val type = jsonNode["@event_name"]?.asText() ?: "ukjent"
+                meldingDuplikatkontrollDao.lagre(id, type)
+            }
         }
     }
 

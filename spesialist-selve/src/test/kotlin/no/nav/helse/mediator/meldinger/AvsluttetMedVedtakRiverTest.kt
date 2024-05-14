@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.AvviksvurderingDao
+import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
@@ -27,11 +28,8 @@ internal class AvsluttetMedVedtakRiverTest {
     private val avviksvurderingDao = mockk<AvviksvurderingDao>(relaxed = true)
     private val generasjonDao = mockk<GenerasjonDao>(relaxed = true)
     private val avslagDao = mockk<AvslagDao>(relaxed = true)
-    private val testRapid = TestRapid()
-
-    init {
-        AvsluttetMedVedtakRiver(testRapid, mediator, avviksvurderingDao, generasjonDao, avslagDao)
-    }
+    private val testRapid =
+        TestRapid().medRivers(AvsluttetMedVedtakRiver(mediator, avviksvurderingDao, generasjonDao, avslagDao))
 
     @Test
     fun `Leser inn utkast_til_vedtak-event`() {

@@ -2,6 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -13,11 +14,7 @@ import java.util.UUID
 internal class VedtakFattetRiverTest {
 
     private val mediator = mockk<MeldingMediator>(relaxed = true)
-    private val testRapid = TestRapid()
-
-    init {
-        VedtakFattetRiver(testRapid, mediator)
-    }
+    private val testRapid = TestRapid().medRivers(VedtakFattetRiver(mediator))
 
     @Test
     fun `Leser inn vedtak_fattet-event`() {

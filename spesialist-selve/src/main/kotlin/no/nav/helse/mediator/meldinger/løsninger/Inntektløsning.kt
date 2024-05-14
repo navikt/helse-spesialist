@@ -2,11 +2,11 @@ package no.nav.helse.mediator.meldinger.løsninger
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.mediator.SpesialistRiver
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asYearMonth
 import org.slf4j.LoggerFactory
@@ -24,33 +24,27 @@ internal class Inntektløsning(
     ): Long? = personDao.insertInntekter(fødselsnummer, skjæringstidspunkt, inntekter)
 
     internal class InntektRiver(
-        rapidsConnection: RapidsConnection,
         private val mediator: MeldingMediator,
-    ) :
-        River.PacketListener {
+    ) : SpesialistRiver {
         private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
         private val behov = "InntekterForSykepengegrunnlag"
 
-        init {
-            River(rapidsConnection)
-                .apply {
-                    validate {
-                        it.demandValue("@event_name", "behov")
-                        it.demandValue("@final", true)
-                        it.demandAll("@behov", listOf(behov))
-                        it.demandKey("contextId")
-                        it.demandKey("hendelseId")
-                        it.requireKey("@id")
-                        it.requireArray("@løsning.$behov") {
-                            require("årMåned", JsonNode::asYearMonth)
-                            requireArray("inntektsliste") {
-                                requireKey("beløp")
-                                interestedIn("orgnummer")
-                            }
-                        }
+        override fun validations() =
+            River.PacketValidation {
+                it.demandValue("@event_name", "behov")
+                it.demandValue("@final", true)
+                it.demandAll("@behov", listOf(behov))
+                it.demandKey("contextId")
+                it.demandKey("hendelseId")
+                it.requireKey("@id")
+                it.requireArray("@løsning.$behov") {
+                    require("årMåned", JsonNode::asYearMonth)
+                    requireArray("inntektsliste") {
+                        requireKey("beløp")
+                        interestedIn("orgnummer")
                     }
-                }.register(this)
-        }
+                }
+            }
 
         override fun onError(
             problems: MessageProblems,

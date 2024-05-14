@@ -2,12 +2,12 @@ package no.nav.helse.mediator.meldinger.løsninger
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.mediator.SpesialistRiver
 import no.nav.helse.modell.person.HentPersoninfoløsning
 import no.nav.helse.modell.person.HentPersoninfoløsninger
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.isMissingOrNull
@@ -17,32 +17,26 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 internal class PersoninfoRiver(
-    rapidsConnection: RapidsConnection,
     private val mediator: MeldingMediator,
-) :
-    River.PacketListener {
+) : SpesialistRiver {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
-    init {
-        River(rapidsConnection)
-            .apply {
-                validate {
-                    it.demandValue("@event_name", "behov")
-                    it.demandValue("@final", true)
-                    it.demandAll("@behov", listOf("HentPersoninfoV2"))
-                    it.demand("@løsning.HentPersoninfoV2") { require(it.isObject) }
-                    it.requireKey("@id", "contextId", "hendelseId")
-                    it.requireKey(
-                        "@løsning.HentPersoninfoV2.fornavn",
-                        "@løsning.HentPersoninfoV2.etternavn",
-                        "@løsning.HentPersoninfoV2.fødselsdato",
-                        "@løsning.HentPersoninfoV2.kjønn",
-                        "@løsning.HentPersoninfoV2.adressebeskyttelse",
-                    )
-                    it.interestedIn("@løsning.HentPersoninfoV2.mellomnavn")
-                }
-            }.register(this)
-    }
+    override fun validations() =
+        River.PacketValidation {
+            it.demandValue("@event_name", "behov")
+            it.demandValue("@final", true)
+            it.demandAll("@behov", listOf("HentPersoninfoV2"))
+            it.demand("@løsning.HentPersoninfoV2") { require(it.isObject) }
+            it.requireKey("@id", "contextId", "hendelseId")
+            it.requireKey(
+                "@løsning.HentPersoninfoV2.fornavn",
+                "@løsning.HentPersoninfoV2.etternavn",
+                "@løsning.HentPersoninfoV2.fødselsdato",
+                "@løsning.HentPersoninfoV2.kjønn",
+                "@løsning.HentPersoninfoV2.adressebeskyttelse",
+            )
+            it.interestedIn("@løsning.HentPersoninfoV2.mellomnavn")
+        }
 
     override fun onError(
         problems: MessageProblems,
@@ -68,28 +62,22 @@ internal class PersoninfoRiver(
 }
 
 internal class FlerePersoninfoRiver(
-    rapidsConnection: RapidsConnection,
     private val mediator: MeldingMediator,
-) :
-    River.PacketListener {
+) : SpesialistRiver {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
-    init {
-        River(rapidsConnection)
-            .apply {
-                validate {
-                    it.demandValue("@event_name", "behov")
-                    it.demandValue("@final", true)
-                    it.demandAll("@behov", listOf("HentPersoninfoV2"))
-                    it.demand("@løsning.HentPersoninfoV2") { require(it.isArray) }
-                    it.requireKey("@id", "contextId", "hendelseId")
-                    it.requireArray("@løsning.HentPersoninfoV2") {
-                        requireKey("ident", "fornavn", "etternavn", "fødselsdato", "kjønn", "adressebeskyttelse")
-                        interestedIn("mellomnavn")
-                    }
-                }
-            }.register(this)
-    }
+    override fun validations() =
+        River.PacketValidation {
+            it.demandValue("@event_name", "behov")
+            it.demandValue("@final", true)
+            it.demandAll("@behov", listOf("HentPersoninfoV2"))
+            it.demand("@løsning.HentPersoninfoV2") { require(it.isArray) }
+            it.requireKey("@id", "contextId", "hendelseId")
+            it.requireArray("@løsning.HentPersoninfoV2") {
+                requireKey("ident", "fornavn", "etternavn", "fødselsdato", "kjønn", "adressebeskyttelse")
+                interestedIn("mellomnavn")
+            }
+        }
 
     override fun onError(
         problems: MessageProblems,

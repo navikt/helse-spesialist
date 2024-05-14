@@ -2,22 +2,19 @@ package no.nav.helse.mediator.meldinger
 
 import io.mockk.mockk
 import io.mockk.verify
-import java.time.LocalDateTime
-import java.util.UUID
+import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class UtbetalingEndretRiverTest {
 
     private val mediator = mockk<MeldingMediator>(relaxed = true)
-    private val testRapid = TestRapid()
-
-    init {
-        UtbetalingEndretRiver(testRapid, mediator)
-    }
+    private val testRapid = TestRapid().medRivers(UtbetalingEndretRiver(mediator))
 
     @Test
     fun `Leser inn utbetaling_endret-event`() {

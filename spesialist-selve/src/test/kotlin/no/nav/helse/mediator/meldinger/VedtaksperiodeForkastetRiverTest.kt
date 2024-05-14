@@ -4,23 +4,20 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.mockk
 import io.mockk.verify
-import java.util.UUID
-import no.nav.helse.spesialist.test.lagFødselsnummer
+import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class VedtaksperiodeForkastetRiverTest {
 
-    private val rapid = TestRapid()
     private val mediator = mockk<MeldingMediator>(relaxed = true)
+    private val rapid = TestRapid().medRivers(VedtaksperiodeForkastetRiver(mediator))
     private val mapper = jacksonObjectMapper()
-
-    init {
-        VedtaksperiodeForkastetRiver(rapid, mediator)
-    }
 
     @Test
     fun `tar imot forkastet-message`() {

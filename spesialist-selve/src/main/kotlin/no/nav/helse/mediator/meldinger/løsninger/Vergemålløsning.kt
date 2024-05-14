@@ -1,11 +1,15 @@
 package no.nav.helse.mediator.meldinger.løsninger
 
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.mediator.SpesialistRiver
 import no.nav.helse.modell.vergemal.Vergemål
 import no.nav.helse.modell.vergemal.VergemålDao
-import no.nav.helse.rapids_rivers.*
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 internal class Vergemålløsning(
     private val fødselsnummer: String,
@@ -16,26 +20,22 @@ internal class Vergemålløsning(
     }
 
     internal class VergemålRiver(
-        rapidsConnection: RapidsConnection,
         private val meldingMediator: MeldingMediator,
-    ) : River.PacketListener {
+    ) : SpesialistRiver {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
-        init {
-            River(rapidsConnection).apply {
-                validate {
-                    it.demandValue("@event_name", "behov")
-                    it.demandValue("@final", true)
-                    it.demandAll("@behov", listOf("Vergemål"))
-                    it.demandKey("contextId")
-                    it.demandKey("hendelseId")
-                    it.demandKey("fødselsnummer")
-                    it.requireKey("@id")
-                    it.require("@opprettet") { message -> message.asLocalDateTime() }
-                    it.requireKey("@løsning.Vergemål")
-                }
-            }.register(this)
-        }
+        override fun validations() =
+            River.PacketValidation {
+                it.demandValue("@event_name", "behov")
+                it.demandValue("@final", true)
+                it.demandAll("@behov", listOf("Vergemål"))
+                it.demandKey("contextId")
+                it.demandKey("hendelseId")
+                it.demandKey("fødselsnummer")
+                it.requireKey("@id")
+                it.require("@opprettet") { node -> node.asLocalDateTime() }
+                it.requireKey("@løsning.Vergemål")
+            }
 
         override fun onPacket(
             packet: JsonMessage,

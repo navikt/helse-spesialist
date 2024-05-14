@@ -2,21 +2,18 @@ package no.nav.helse.mediator.meldinger
 
 import io.mockk.mockk
 import io.mockk.verify
-import java.util.UUID
-import no.nav.helse.spesialist.test.lagFødselsnummer
+import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class EndretSkjermetinfoRiverTest {
 
-    private val testRapid = TestRapid()
     private val mediator = mockk<MeldingMediator>(relaxed = true)
-
-    init {
-        EndretSkjermetinfoRiver(testRapid, mediator)
-    }
+    private val testRapid = TestRapid().medRivers(EndretSkjermetinfoRiver(mediator))
 
     @Test
     fun `leser endret_skjermetinfo`() {

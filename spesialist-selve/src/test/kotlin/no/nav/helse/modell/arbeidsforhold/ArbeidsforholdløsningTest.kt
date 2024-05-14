@@ -2,14 +2,15 @@ package no.nav.helse.modell.arbeidsforhold
 
 import io.mockk.mockk
 import io.mockk.verify
-import java.time.LocalDate
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsforholdRiver
+import no.nav.helse.medRivers
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class ArbeidsforholdløsningTest {
     private companion object {
@@ -24,11 +25,7 @@ internal class ArbeidsforholdløsningTest {
 
     private val dao = mockk<ArbeidsforholdDao>(relaxed = true)
     private val mediator = mockk<MeldingMediator>(relaxed = true)
-    private val rapid = TestRapid()
-
-    init {
-        ArbeidsforholdRiver(rapid, mediator)
-    }
+    private val rapid = TestRapid().medRivers(ArbeidsforholdRiver(mediator))
 
     @BeforeEach
     internal fun resetTestSetup() {

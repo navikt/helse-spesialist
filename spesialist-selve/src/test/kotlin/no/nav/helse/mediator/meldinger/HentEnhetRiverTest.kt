@@ -2,13 +2,14 @@ package no.nav.helse.mediator.meldinger
 
 import io.mockk.mockk
 import io.mockk.verify
-import java.util.UUID
+import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.løsninger.HentEnhetRiver
 import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class HentEnhetRiverTest {
     private companion object {
@@ -19,9 +20,7 @@ internal class HentEnhetRiverTest {
     }
 
     private val mediator = mockk<MeldingMediator>(relaxed = true)
-    private val testRapid = TestRapid().apply {
-        HentEnhetRiver(this, mediator)
-    }
+    private val testRapid = TestRapid().medRivers(HentEnhetRiver(mediator))
 
     @BeforeEach
     fun setup() {

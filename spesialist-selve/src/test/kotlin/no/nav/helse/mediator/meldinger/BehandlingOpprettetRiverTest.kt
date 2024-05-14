@@ -4,24 +4,21 @@ import io.mockk.called
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
-import java.util.UUID
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
+import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.vedtaksperiode.BehandlingOpprettet
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class BehandlingOpprettetRiverTest {
 
-    private val rapid = TestRapid()
     private val mediator = mockk<MeldingMediator>(relaxed = true)
-
-    init {
-        BehandlingOpprettetRiver(rapid, mediator)
-    }
+    private val rapid = TestRapid().medRivers(BehandlingOpprettetRiver(mediator))
 
     @BeforeEach
     fun setup() {

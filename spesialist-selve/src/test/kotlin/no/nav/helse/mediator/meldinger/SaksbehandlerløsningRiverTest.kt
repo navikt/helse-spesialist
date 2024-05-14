@@ -2,7 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import io.mockk.mockk
 import io.mockk.verify
-import java.util.UUID
+import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.løsninger.SaksbehandlerløsningRiver
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
@@ -10,6 +10,7 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class SaksbehandlerløsningRiverTest {
     private companion object {
@@ -20,9 +21,7 @@ internal class SaksbehandlerløsningRiverTest {
     }
 
     private val mediator = mockk<MeldingMediator>(relaxed = true)
-    private val testRapid = TestRapid().apply {
-        SaksbehandlerløsningRiver(this, mediator)
-    }
+    private val testRapid = TestRapid().medRivers(SaksbehandlerløsningRiver(mediator))
 
     @BeforeEach
     fun setup() {

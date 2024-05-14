@@ -1,11 +1,15 @@
 package no.nav.helse.mediator.meldinger.løsninger
 
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.mediator.SpesialistRiver
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
-import no.nav.helse.rapids_rivers.*
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 internal class EgenAnsattløsning(
     private val opprettet: LocalDateTime,
@@ -17,26 +21,22 @@ internal class EgenAnsattløsning(
     }
 
     internal class EgenAnsattRiver(
-        rapidsConnection: RapidsConnection,
         private val mediator: MeldingMediator,
-    ) : River.PacketListener {
+    ) : SpesialistRiver {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
-        init {
-            River(rapidsConnection).apply {
-                validate {
-                    it.demandValue("@event_name", "behov")
-                    it.demandValue("@final", true)
-                    it.demandAll("@behov", listOf("EgenAnsatt"))
-                    it.demandKey("fødselsnummer")
-                    it.demandKey("hendelseId")
-                    it.demandKey("contextId")
-                    it.requireKey("@id")
-                    it.require("@opprettet") { message -> message.asLocalDateTime() }
-                    it.requireKey("@løsning.EgenAnsatt")
-                }
-            }.register(this)
-        }
+        override fun validations() =
+            River.PacketValidation {
+                it.demandValue("@event_name", "behov")
+                it.demandValue("@final", true)
+                it.demandAll("@behov", listOf("EgenAnsatt"))
+                it.demandKey("fødselsnummer")
+                it.demandKey("hendelseId")
+                it.demandKey("contextId")
+                it.requireKey("@id")
+                it.require("@opprettet") { message -> message.asLocalDateTime() }
+                it.requireKey("@løsning.EgenAnsatt")
+            }
 
         override fun onPacket(
             packet: JsonMessage,

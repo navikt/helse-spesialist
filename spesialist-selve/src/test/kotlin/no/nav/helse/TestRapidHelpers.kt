@@ -1,10 +1,12 @@
 package no.nav.helse
 
 import com.fasterxml.jackson.databind.JsonNode
-import java.util.UUID
+import no.nav.helse.mediator.SpesialistRiver
+import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
+import java.util.UUID
 
 object TestRapidHelpers {
     fun TestRapid.RapidInspector.meldinger() =
@@ -128,4 +130,9 @@ object TestRapidHelpers {
         val type: String
     )
 
+}
+
+internal fun TestRapid.medRivers(vararg river: SpesialistRiver): TestRapid {
+    river.forEach { River(this).validate(it.validations()).register(it) }
+    return this
 }
