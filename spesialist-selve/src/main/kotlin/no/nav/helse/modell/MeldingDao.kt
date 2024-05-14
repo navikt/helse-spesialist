@@ -48,7 +48,6 @@ import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDate
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -218,41 +217,6 @@ internal class MeldingDao(private val dataSource: DataSource) {
                 tilMeldingtype(melding).name,
             ).asUpdate,
         )
-    }
-
-    fun erBehandlet(id: UUID): Boolean {
-        @Language("PostgreSQL")
-        val query =
-            """
-            select true from hendelse
-            where id = :id and behandlet_tidspunkt is not null;
-            """.trimIndent()
-        return sessionOf(dataSource).use {
-            it.run(
-                queryOf(
-                    query,
-                    mapOf("id" to id),
-                ).map { it.boolean(1) }.asSingle,
-            )
-        } ?: false
-    }
-
-    fun settBehandlet(id: UUID) {
-        @Language("PostgreSQL")
-        val query =
-            """
-            update hendelse
-            set behandlet_tidspunkt = :behandletTidspunkt
-            where id = :id;
-            """.trimIndent()
-        sessionOf(dataSource).use {
-            it.run(
-                queryOf(
-                    query,
-                    mapOf("id" to id, "behandletTidspunkt" to LocalDateTime.now()),
-                ).asUpdate,
-            )
-        }
     }
 
     private fun TransactionalSession.opprettKobling(

@@ -48,6 +48,7 @@ import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.AvviksvurderingDto
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.MeldingDao
+import no.nav.helse.modell.MeldingDuplikatkontrollDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
@@ -89,6 +90,7 @@ internal class MeldingMediator(
     private val personDao: PersonDao = PersonDao(dataSource),
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
     private val meldingDao: MeldingDao = MeldingDao(dataSource),
+    private val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao = MeldingDuplikatkontrollDao(dataSource),
     private val kommandofabrikk: Kommandofabrikk,
     private val dokumentDao: DokumentDao = DokumentDao(dataSource),
     private val avviksvurderingDao: AvviksvurderingDao,
@@ -109,7 +111,7 @@ internal class MeldingMediator(
     private fun skalBehandleMelding(melding: String): Boolean {
         val jsonNode = objectMapper.readTree(melding)
         jsonNode["@id"]?.asUUID()?.let { id ->
-            if (meldingDao.erBehandlet(id)) {
+            if (meldingDuplikatkontrollDao.erBehandlet(id)) {
                 logg.info("Ville ha ignorert melding {}", id)
             }
         }
@@ -406,6 +408,11 @@ internal class MeldingMediator(
     // fortsetter en command (resume) med oppsamlet løsninger
     private fun fortsett(message: String) {
         løsninger?.fortsett(this, message)
+        val jsonNode = objectMapper.readTree(message)
+        jsonNode["@id"]?.asUUID()?.let { id ->
+            val type = jsonNode["@event_name"]?.asText() ?: "ukjent"
+            meldingDuplikatkontrollDao.lagre(id, type)
+        }
     }
 
     private fun errorHandler(
@@ -441,8 +448,6 @@ internal class MeldingMediator(
             sikkerlogg.info("Melding $meldingnavn mottatt:\n${melding.toJson()}")
             meldingDao.lagre(melding)
             behandleMelding(melding, messageContext)
-            meldingDao.settBehandlet(melding.id)
-
             logg.info("Melding $meldingnavn lest")
             sikkerlogg.info("Melding $meldingnavn lest")
         }
@@ -561,7 +566,6 @@ internal class MeldingMediator(
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")
             }
             utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, messageContext)
-            meldingDao.settBehandlet(melding.id)
         } catch (e: Exception) {
             logg.error("Feil ved behandling av melding $hendelsenavn", e.message, e)
             throw e

@@ -125,6 +125,7 @@ internal abstract class AbstractDatabaseTest {
                 "vilkarsgrunnlag_per_avviksvurdering_spinnvillgate",
                 "sammenligningsgrunnlag_spinnvillgate",
                 "passert_filter_for_skjonnsfastsettelse",
+                "melding_duplikatkontroll",
             )
         )
         tabeller.forEach { tabellnavn ->
