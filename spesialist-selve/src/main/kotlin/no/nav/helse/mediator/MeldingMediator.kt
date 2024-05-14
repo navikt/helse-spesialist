@@ -372,14 +372,13 @@ internal class MeldingMediator(
         meldingId: UUID,
         contextId: UUID,
     ): Påminnelse? {
-        if (contextId.toString() in
+        if (meldingId.toString() in
             setOf(
-                "617769fa-e4f1-448f-af94-f32633fc8795",
-                "72c98fd0-d4af-4872-a541-42177a082d89",
-                "87ab7e63-75bf-4a45-bdd3-e964882cc616",
+                "c2ffe6ca-4b63-421d-b4e8-e57f34da5bef",
+                "20bf35c2-1ff7-4af1-933c-0ffc91e206c6",
             )
         ) {
-            logg.info("Ignorerer påminnelse for context_id=$contextId som ikke lar seg gjenoppta")
+            logg.info("Ignorerer påminnelse for kontekster for melding_id=$meldingId som ikke lar seg gjenoppta")
             return null
         }
         val commandContext =
