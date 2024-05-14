@@ -1,0 +1,1 @@
+ALTER TABLE hendelse DROP COLUMN behandlet_tidspunkt;
