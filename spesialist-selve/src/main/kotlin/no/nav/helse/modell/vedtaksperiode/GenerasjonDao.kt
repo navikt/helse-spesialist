@@ -311,11 +311,12 @@ class GenerasjonDao(private val dataSource: DataSource) {
         skjæringstidspunkt: LocalDate,
         periode: Periode,
         tilstand: Generasjon.Tilstand,
+        utbetalingId: UUID?,
     ): Generasjon {
         @Language("PostgreSQL")
         val query = """
-            INSERT INTO selve_vedtaksperiode_generasjon (unik_id, vedtaksperiode_id, opprettet_av_hendelse, skjæringstidspunkt, fom, tom, tilstand) 
-            VALUES (?, ?, ?, ?, ?, ?, ?::generasjon_tilstand)
+            INSERT INTO selve_vedtaksperiode_generasjon (unik_id, vedtaksperiode_id, utbetaling_id, opprettet_av_hendelse, skjæringstidspunkt, fom, tom, tilstand) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?::generasjon_tilstand)
             RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, spleis_behandling_id, skjæringstidspunkt, fom, tom, tilstand, tags
         """
 
@@ -337,6 +338,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
                                 query,
                                 id,
                                 vedtaksperiodeId,
+                                utbetalingId,
                                 hendelseId,
                                 skjæringstidspunkt,
                                 periode.fom(),

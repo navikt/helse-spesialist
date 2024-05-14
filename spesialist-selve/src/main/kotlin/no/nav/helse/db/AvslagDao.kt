@@ -76,7 +76,7 @@ class AvslagDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
     internal fun finnAlleAvslag(
         vedtaksperiodeId: UUID,
-        generasjonUnikId: UUID,
+        utbetalingId: UUID,
     ): Set<no.nav.helse.spesialist.api.graphql.schema.Avslag> =
         asSQL(
             """
@@ -84,12 +84,12 @@ class AvslagDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             INNER JOIN selve_vedtaksperiode_generasjon svg ON a.generasjon_ref = svg.id 
             INNER JOIN begrunnelse b ON b.id = a.begrunnelse_ref
             INNER JOIN saksbehandler s ON s.oid = b.saksbehandler_ref
-            WHERE a.vedtaksperiode_id = :vedtaksperiodeId AND svg.unik_id = :generasjonUnikId 
+            WHERE a.vedtaksperiode_id = :vedtaksperiodeId AND svg.utbetaling_id = :utbetalingId 
             ORDER BY opprettet DESC
             """.trimIndent(),
             mapOf(
                 "vedtaksperiodeId" to vedtaksperiodeId,
-                "generasjonUnikId" to generasjonUnikId,
+                "utbetalingId" to utbetalingId,
             ),
         ).list { avslag ->
             no.nav.helse.spesialist.api.graphql.schema.Avslag(

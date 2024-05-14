@@ -175,7 +175,6 @@ data class Arbeidsgiver(
                                 BeregnetPeriode(
                                     orgnummer = organisasjonsnummer,
                                     periode = it,
-                                    generasjonId = generasjon.id,
                                     risikovurderingApiDao = risikovurderingApiDao,
                                     varselRepository = varselRepository,
                                     oppgaveApiDao = oppgaveApiDao,

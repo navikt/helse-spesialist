@@ -206,9 +206,9 @@ internal class SaksbehandlerMediator(
 
     override fun hentAvslag(
         vedtaksperiodeId: UUID,
-        generasjonId: UUID,
+        utbetalingId: UUID,
     ): Set<Avslag> {
-        return avslagDao.finnAlleAvslag(vedtaksperiodeId, generasjonId)
+        return avslagDao.finnAlleAvslag(vedtaksperiodeId, utbetalingId)
     }
 
     override fun håndterAvslag(

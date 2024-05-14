@@ -42,7 +42,7 @@ internal class AvslagDaoTest : DatabaseIntegrationTest() {
         nyDao.lagreAvslag(OPPGAVE_ID, avslag2, oid)
 
         val lagredeAvslag: List<no.nav.helse.spesialist.api.graphql.schema.Avslag> =
-            nyDao.finnAlleAvslag(VEDTAKSPERIODE, generasjonUnikId).toList()
+            nyDao.finnAlleAvslag(VEDTAKSPERIODE, UTBETALING_ID).toList()
 
         assertEquals(2, lagredeAvslag.size)
         assertEquals(Avslagstype.AVSLAG, lagredeAvslag.last().type)

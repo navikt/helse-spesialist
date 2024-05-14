@@ -559,6 +559,7 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
                 1.januar,
                 1.januar til 31.januar,
                 Generasjon.VidereBehandlingAvklares,
+                null
             )
         generasjon.registrer(generasjonRepository)
         return generasjon

@@ -37,10 +37,11 @@ internal class Generasjon private constructor(
         tom: LocalDate,
         skjæringstidspunkt: LocalDate,
         spleisBehandlingId: UUID? = null,
+        utbetalingId: UUID? = null,
     ) : this(
         id,
         vedtaksperiodeId,
-        null,
+        utbetalingId,
         spleisBehandlingId,
         skjæringstidspunkt,
         Periode(fom, tom),

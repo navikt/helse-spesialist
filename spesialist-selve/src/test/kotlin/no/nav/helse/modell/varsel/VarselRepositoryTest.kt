@@ -46,6 +46,7 @@ internal class VarselRepositoryTest : AbstractDatabaseTest() {
                 1.januar,
                 Periode(1.januar, 31.januar),
                 Generasjon.VidereBehandlingAvklares,
+                null,
             )
         generasjon.registrer(generasjonRepository, varselRepository)
     }

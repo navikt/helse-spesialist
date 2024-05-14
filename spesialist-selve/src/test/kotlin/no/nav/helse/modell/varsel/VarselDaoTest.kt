@@ -36,6 +36,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
             1.januar,
             Periode(1.januar, 31.januar),
             Generasjon.VidereBehandlingAvklares,
+            null,
         )
         varselDao.lagreVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), VEDTAKSPERIODE, generasjonId)
         assertEquals(1, alleVarslerFor(VEDTAKSPERIODE).size)
@@ -61,6 +62,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
             1.januar,
             Periode(1.januar, 31.januar),
             Generasjon.VidereBehandlingAvklares,
+            null,
         )
         varselDao.lagreVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), VEDTAKSPERIODE, generasjonId)
         varselDao.lagreVarsel(UUID.randomUUID(), "EN_ANNEN_KODE", LocalDateTime.now(), VEDTAKSPERIODE, generasjonId)
@@ -78,6 +80,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
             1.januar,
             Periode(1.januar, 31.januar),
             Generasjon.VidereBehandlingAvklares,
+            null,
         )
         varselDao.lagreVarsel(UUID.randomUUID(), "KODE_33", LocalDateTime.now(), VEDTAKSPERIODE, generasjonId)
         assertEquals(AKTIV, varselDao.finnVarselstatus(VEDTAKSPERIODE, "KODE_33"))
@@ -95,6 +98,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
             1.januar,
             Periode(1.januar, 31.januar),
             Generasjon.VidereBehandlingAvklares,
+            null,
         )
         varselDao.lagreVarsel(UUID.randomUUID(), "KODE_24", LocalDateTime.now(), VEDTAKSPERIODE, generasjonId)
         varselDao.oppdaterStatus(VEDTAKSPERIODE, generasjonId, "KODE_24", INAKTIV, "EN_IDENT", definisjonId)
@@ -114,6 +118,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
             1.januar,
             Periode(1.januar, 31.januar),
             Generasjon.VidereBehandlingAvklares,
+            null,
         )
         varselDao.lagreVarsel(varselId, "EN_KODE", LocalDateTime.now(), VEDTAKSPERIODE, generasjonId)
         varselDao.oppdaterStatus(VEDTAKSPERIODE, generasjonId, "EN_KODE", INAKTIV, "ident", definisjonId)
@@ -141,6 +146,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
             1.januar,
             Periode(1.januar, 31.januar),
             Generasjon.VidereBehandlingAvklares,
+            null,
         )
         generasjonDao.opprettFor(
             generasjonIdv2,
@@ -149,6 +155,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
             1.januar,
             Periode(1.januar, 31.januar),
             Generasjon.VidereBehandlingAvklares,
+            null,
         )
         varselDao.lagreVarsel(UUID.randomUUID(), "KODE_337", LocalDateTime.now(), v1, generasjonIdv1)
         varselDao.lagreVarsel(UUID.randomUUID(), "KODE_337", LocalDateTime.now(), v2, generasjonIdv2)
@@ -179,6 +186,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
             1.januar,
             Periode(1.januar, 31.januar),
             Generasjon.VidereBehandlingAvklares,
+            null,
         )
         varselDao.lagreVarsel(UUID.randomUUID(), "KODE_EN", LocalDateTime.now(), v1, generasjonIdv1)
         varselDao.lagreVarsel(UUID.randomUUID(), "KODE_TO", LocalDateTime.now(), v1, generasjonIdv1)
@@ -199,6 +207,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
             1.januar,
             Periode(1.januar, 31.januar),
             Generasjon.VidereBehandlingAvklares,
+            null,
         )
         varselDao.lagreVarsel(UUID.randomUUID(), "KODE_99", LocalDateTime.now(), vedtaksperiodeId, generasjonId)
         varselDao.avvikleVarsel("KODE_99", definisjonId)
@@ -218,6 +227,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
             1.januar,
             Periode(1.januar, 31.januar),
             Generasjon.VidereBehandlingAvklares,
+            null,
         )
         varselDao.lagreVarsel(UUID.randomUUID(), "KODE_42", LocalDateTime.now(), vedtaksperiodeId, generasjonId)
 
@@ -245,6 +255,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
             1.januar,
             Periode(1.januar, 31.januar),
             Generasjon.VidereBehandlingAvklares,
+            null,
         )
         varselDao.lagreVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), v1, generasjonIdv1)
         varselDao.oppdaterStatus(v1, generasjonIdv1, "EN_KODE", VURDERT, "saksbehandler 1", definisjonId)
@@ -272,6 +283,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
             1.januar,
             Periode(1.januar, 31.januar),
             Generasjon.VidereBehandlingAvklares,
+            null,
         )
         varselDao.lagreVarsel(varselId, "EN_KODE", LocalDateTime.now(), v1, generasjonId)
         assertEquals(listOf(Varsel(varselId, "EN_KODE", opprettet, v1)), alleVarslerFor(v1))
@@ -289,6 +301,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
             1.januar,
             Periode(1.januar, 31.januar),
             Generasjon.VidereBehandlingAvklares,
+            null,
         )
         generasjonDao.opprettFor(
             generasjonIdv2,
@@ -297,6 +310,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
             1.januar,
             Periode(1.januar, 31.januar),
             Generasjon.VidereBehandlingAvklares,
+            null,
         )
         val varselId = UUID.randomUUID()
         varselDao.lagreVarsel(varselId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId, generasjonIdv1)

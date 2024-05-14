@@ -217,6 +217,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         organisasjonsnummer: String = ORGNUMMER,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
+        utbetalingId: UUID = UTBETALING_ID,
         generasjonId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
@@ -224,7 +225,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ) {
         opprettPerson(fødselsnummer = fødselsnummer, aktørId = aktørId)
         opprettArbeidsgiver(organisasjonsnummer = organisasjonsnummer)
-        opprettGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
+        opprettGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
         opprettVedtaksperiode(
             vedtaksperiodeId = vedtaksperiodeId,
             periodetype = periodetype,
@@ -322,6 +323,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun opprettGenerasjon(
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         generasjonId: UUID = UUID.randomUUID(),
+        utbetalingId: UUID? = null,
     ) {
         generasjonDao.finnSisteGenerasjonFor(vedtaksperiodeId)?.also {
             generasjonDao.oppdaterTilstandFor(generasjonId = it, ny = Generasjon.VedtakFattet.navn(), endretAv = UUID.randomUUID())
@@ -333,6 +335,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             1.januar,
             Periode(1.januar, 31.januar),
             Generasjon.VidereBehandlingAvklares,
+            utbetalingId
         )
     }
 

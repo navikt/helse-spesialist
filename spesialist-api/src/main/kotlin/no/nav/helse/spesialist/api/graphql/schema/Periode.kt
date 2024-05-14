@@ -449,7 +449,6 @@ data class Handling(val type: Periodehandling, val tillatt: Boolean, val begrunn
 data class BeregnetPeriode(
     private val orgnummer: String,
     private val periode: GraphQLBeregnetPeriode,
-    private val generasjonId: UUID,
     private val oppgavehåndterer: Oppgavehåndterer,
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
     private val risikovurderingApiDao: RisikovurderingApiDao,
@@ -627,7 +626,7 @@ data class BeregnetPeriode(
             )
         }
 
-    fun avslag(): List<Avslag> = saksbehandlerhåndterer.hentAvslag(periode.vedtaksperiodeId, generasjonId).toList()
+    fun avslag(): List<Avslag> = saksbehandlerhåndterer.hentAvslag(periode.vedtaksperiodeId, periode.utbetaling.id).toList()
 }
 
 private fun GraphQLOppdrag.tilSimulering(): Simulering =
