@@ -990,6 +990,7 @@ enum Naturalytelse {
 
 enum NotatType {
     Generelt
+    OpphevStans
     PaaVent
     Retur
 }
@@ -1024,7 +1025,6 @@ enum Periodehandling {
 enum PeriodehistorikkType {
     FJERN_FRA_PA_VENT
     STANS_AUTOMATISK_BEHANDLING
-    STANS_AUTOMATISK_BEHANDLING_OPPHEVET
     TOTRINNSVURDERING_ATTESTERT
     TOTRINNSVURDERING_RETUR
     TOTRINNSVURDERING_TIL_GODKJENNING

@@ -190,6 +190,7 @@ enum class NotatType {
     Retur,
     Generelt,
     PaaVent,
+    OpphevStans,
 }
 
 data class PeriodeHistorikkElement(
