@@ -8,8 +8,6 @@ import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.AvviksvurderingDao
-import no.nav.helse.mediator.meldinger.GosysOppgaveEndretRiver
-import no.nav.helse.mediator.meldinger.TilbakedateringBehandletRiver
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
@@ -50,11 +48,6 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
             avslagDao = avslagDao,
             stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
         )
-
-    init {
-        GosysOppgaveEndretRiver(testRapid, meldingMediator)
-        TilbakedateringBehandletRiver(testRapid, meldingMediator)
-    }
 
     @BeforeEach
     internal fun resetTestSetup() {

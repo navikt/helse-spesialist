@@ -5,7 +5,6 @@ import io.mockk.mockk
 import io.prometheus.client.CollectorRegistry
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.Meldingssender
-import no.nav.helse.mediator.meldinger.SøknadSendtRiver
 import no.nav.helse.modell.person.SøknadSendtCommand
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.test.lagFødselsnummer
@@ -21,7 +20,7 @@ internal class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
     private val kommandofabrikk = mockk<Kommandofabrikk>(relaxed = true)
     private val meldingssender = Meldingssender(testRapid)
 
-    private val meldingMediator =
+    init {
         MeldingMediator(
             dataSource = dataSource,
             rapidsConnection = testRapid,
@@ -33,9 +32,6 @@ internal class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
             stansAutomatiskBehandlingMediator = mockk(relaxed = true),
             personRepository = mockk(relaxed = true),
         )
-
-    init {
-        SøknadSendtRiver(testRapid, meldingMediator)
     }
 
     @Test
