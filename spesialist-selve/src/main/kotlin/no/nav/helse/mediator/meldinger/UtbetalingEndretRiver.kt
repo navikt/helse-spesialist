@@ -66,6 +66,7 @@ internal class UtbetalingEndretRiver(
         context: MessageContext,
     ) {
         val utbetalingId = UUID.fromString(packet["utbetalingId"].asText())
+        if (ignorer(packet)) return
         val fødselsnummer = packet["fødselsnummer"].asText()
         val gjeldendeStatus = packet["gjeldendeStatus"].asText()
 
@@ -77,4 +78,11 @@ internal class UtbetalingEndretRiver(
         )
         mediator.mottaMelding(UtbetalingEndret(packet), context)
     }
+
+    private fun ignorer(packet: JsonMessage) =
+        packet["arbeidsgiverOppdrag.fagsystemId"].asText() in
+            setOf(
+                "2YG7TGWMJJHNPPY5JP5CHUIFII",
+                "PJV6BYWUEVFCZIDNXG4MYR6ICM",
+            )
 }
