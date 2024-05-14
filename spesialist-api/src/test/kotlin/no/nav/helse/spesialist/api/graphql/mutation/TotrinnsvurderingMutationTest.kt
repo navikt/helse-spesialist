@@ -15,7 +15,7 @@ internal class TotrinnsvurderingMutationTest : AbstractGraphQLApiTest() {
         val body = runQuery(
             """
             mutation TotrinnsvurderingMutation {
-                sendTilGodkjenning(oppgavereferanse: "$oppgaveRef")
+                sendTilGodkjenning(oppgavereferanse: "$oppgaveRef", avslag: null)
             }
         """
         )

@@ -37,4 +37,10 @@ interface Saksbehandlerhåndterer {
         vedtaksperiodeId: UUID,
         generasjonId: UUID,
     ): Set<Avslag>
+
+    fun håndterAvslag(
+        oppgaveId: Long,
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+        avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag,
+    )
 }

@@ -223,6 +223,14 @@ internal class SaksbehandlerMediator(
         return avslagDao.finnAlleAvslag(vedtaksperiodeId, generasjonId)
     }
 
+    override fun håndterAvslag(
+        oppgaveId: Long,
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+        avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag,
+    ) {
+        avslagDao.lagreAvslag(oppgaveId, avslag, saksbehandlerFraApi.oid)
+    }
+
     override fun håndter(
         godkjenning: GodkjenningDto,
         behandlingId: UUID,

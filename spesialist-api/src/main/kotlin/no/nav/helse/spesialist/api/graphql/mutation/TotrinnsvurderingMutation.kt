@@ -32,6 +32,7 @@ class TotrinnsvurderingMutation(
     @Suppress("unused")
     suspend fun sendTilGodkjenning(
         oppgavereferanse: String,
+        avslag: Avslag?,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
@@ -53,6 +54,7 @@ class TotrinnsvurderingMutation(
             }
 
             try {
+                avslag?.let { saksbehandlerhåndterer.håndterAvslag(oppgavereferanse.toLong(), behandlendeSaksbehandler, it) }
                 oppgavehåndterer.sendTilBeslutter(oppgavereferanse.toLong(), behandlendeSaksbehandler)
                 saksbehandlerhåndterer.håndter(FjernPåVent(oppgavereferanse.toLong()), behandlendeSaksbehandler)
             } catch (modellfeil: Modellfeil) {

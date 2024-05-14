@@ -297,6 +297,15 @@ private class SneakySaksbehandlerhåndterer(
         return mock.hentAvslag(vedtaksperiodeId, generasjonId)
     }
 
+
+    override fun håndterAvslag(
+        oppgaveId: Long,
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+        avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag
+    ) {
+        return mock.håndterAvslag(oppgaveId, saksbehandlerFraApi, avslag)
+    }
+
     override fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi): List<Opptegnelse> {
         return mock.hentAbonnerteOpptegnelser(saksbehandlerFraApi)
     }
