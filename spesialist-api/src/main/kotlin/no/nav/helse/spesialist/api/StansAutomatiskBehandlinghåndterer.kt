@@ -13,6 +13,8 @@ interface StansAutomatiskBehandlinghåndterer {
         kilde: String,
     )
 
+    fun lagrePeriodehistorikk(fødselsnummer: String)
+
     fun unntattFraAutomatiskGodkjenning(fødselsnummer: String): UnntattFraAutomatiskGodkjenning
 
     fun erUnntatt(fødselsnummer: String): Boolean

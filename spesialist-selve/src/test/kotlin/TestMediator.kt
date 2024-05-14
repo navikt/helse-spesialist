@@ -28,6 +28,7 @@ import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
@@ -43,6 +44,7 @@ internal class TestMediator(
     private val vedtakDao = VedtakDao(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
+    private val periodehistorikkDao = PeriodehistorikkDao(dataSource)
     private val utbetalingDao = UtbetalingDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
     private val meldingDao = MeldingDao(dataSource)
@@ -52,7 +54,8 @@ internal class TestMediator(
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
-    private val stansAutomatiskBehandlingService = StansAutomatiskBehandlingService(StansAutomatiskBehandlingDao(dataSource))
+    private val stansAutomatiskBehandlingService =
+        StansAutomatiskBehandlingService(StansAutomatiskBehandlingDao(dataSource), periodehistorikkDao, oppgaveDao)
 
     private val godkjenningMediator =
         GodkjenningMediator(
@@ -77,11 +80,12 @@ internal class TestMediator(
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = tilgangsgrupper,
         )
-    private val saksbehandlerMediator = SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, oppgaveMediator, tilgangsgrupper)
+    private val saksbehandlerMediator =
+        SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, oppgaveMediator, tilgangsgrupper, stansAutomatiskBehandlingService)
     private val automatisering =
         Automatisering(
             risikovurderingDao = RisikovurderingDao(dataSource),
-            stansAutomatiskBehandlinghåndterer = StansAutomatiskBehandlingService(StansAutomatiskBehandlingDao(dataSource)),
+            stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlingService,
             automatiseringDao = AutomatiseringDao(dataSource),
             åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource),
             vergemålDao = VergemålDao(dataSource),

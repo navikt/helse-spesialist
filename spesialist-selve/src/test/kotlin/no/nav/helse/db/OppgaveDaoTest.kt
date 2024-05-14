@@ -76,7 +76,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             null,
             null,
             vedtakId,
-            CONTEXT_ID
+            CONTEXT_ID,
         )
     }
 
@@ -94,7 +94,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             vedtaksperiodeId = vedtaksperiodeId,
             fom = TOM.plusDays(1),
             tom = TOM.plusDays(10),
-            periodetype = Periodetype.FORLENGELSE
+            periodetype = Periodetype.FORLENGELSE,
         )
         assertThrows<IllegalArgumentException> {
             opprettOppgave(contextId = CONTEXT_ID, vedtaksperiodeId = vedtaksperiodeId)
@@ -109,7 +109,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             null,
             null,
             vedtakIdPåOppgave,
-            CONTEXT_ID
+            CONTEXT_ID,
         )
     }
 
@@ -128,7 +128,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             vedtaksperiodeId = vedtaksperiodeId2,
             fom = TOM.plusDays(1),
             tom = TOM.plusDays(10),
-            periodetype = Periodetype.FORLENGELSE
+            periodetype = Periodetype.FORLENGELSE,
         )
         opprettOppgave(contextId = CONTEXT_ID, vedtaksperiodeId = vedtaksperiodeId2)
         assertEquals(1, oppgave(vedtaksperiodeId2).size)
@@ -149,7 +149,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             null,
             null,
             vedtakId,
-            CONTEXT_ID
+            CONTEXT_ID,
         )
     }
 
@@ -168,7 +168,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             null,
             null,
             vedtakId,
-            CONTEXT_ID
+            CONTEXT_ID,
         )
     }
 
@@ -187,7 +187,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             null,
             null,
             vedtakId,
-            CONTEXT_ID
+            CONTEXT_ID,
         )
     }
 
@@ -219,7 +219,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             fødselsnummer = FNR.reversed(),
             aktørId = AKTØR.reversed(),
             organisasjonsnummer = ORGNUMMER.reversed(),
-            vedtaksperiodeId = UUID.randomUUID()
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         assertEquals(oppgaveId, oppgaveDao.finnOppgaveId(FNR.reversed()))
     }
@@ -253,7 +253,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 utbetalingId = UTBETALING_ID,
                 hendelseId = hendelseId,
                 kanAvvises = true,
-            ), oppgave
+            ),
+            oppgave,
         )
     }
 
@@ -271,7 +272,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 utbetalingId = UTBETALING_ID,
                 hendelseId = hendelseId,
                 kanAvvises = true,
-            ), oppgave
+            ),
+            oppgave,
         )
     }
 
@@ -299,8 +301,9 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 SAKSBEHANDLER_EPOST,
                 saksbehandlerOid,
                 SAKSBEHANDLER_NAVN,
-                SAKSBEHANDLER_IDENT
-            ), førsteOppgave.tildelt
+                SAKSBEHANDLER_IDENT,
+            ),
+            førsteOppgave.tildelt,
         )
         assertEquals(vedtaksperiodeId, førsteOppgave.vedtaksperiodeId)
     }
@@ -331,19 +334,39 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     fun `Finn behandlede oppgaver for visning`() {
         val saksbehandlerOid = UUID.randomUUID()
         val annenSaksbehandlerOid = UUID.randomUUID()
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         tildelOppgave(saksbehandlerOid = saksbehandlerOid)
         ferdigstillOppgave(OPPGAVE_ID, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
 
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         tildelOppgave(saksbehandlerOid = saksbehandlerOid)
         ferdigstillOppgave(OPPGAVE_ID, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
 
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         tildelOppgave(saksbehandlerOid = saksbehandlerOid)
         avventerSystem(OPPGAVE_ID, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
 
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         tildelOppgave(saksbehandlerOid = annenSaksbehandlerOid)
         ferdigstillOppgave(OPPGAVE_ID, ferdigstiltAvOid = annenSaksbehandlerOid, ferdigstiltAv = "ANNEN_SAKSBEHANDLER")
 
@@ -379,41 +402,123 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `Finn oppgaver for visning`() {
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID())
         assertEquals(3, oppgaver.size)
     }
 
     @Test
     fun `Finn oppgaver med bestemte egenskaper`() {
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer(), oppgaveEgenskaper = listOf(SØKNAD, RISK_QA, FORTROLIG_ADRESSE))
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+            oppgaveEgenskaper = listOf(SØKNAD, RISK_QA, FORTROLIG_ADRESSE),
+        )
         val oppgaveId2 = OPPGAVE_ID
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer(), oppgaveEgenskaper = listOf(RISK_QA, SØKNAD))
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+            oppgaveEgenskaper = listOf(RISK_QA, SØKNAD),
+        )
         val oppgaveId3 = OPPGAVE_ID
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), grupperteFiltrerteEgenskaper = mapOf(Egenskap.Kategori.Ukategorisert to listOf(RISK_QA), Egenskap.Kategori.Oppgavetype to listOf(SØKNAD)))
+        val oppgaver =
+            oppgaveDao.finnOppgaverForVisning(
+                emptyList(),
+                UUID.randomUUID(),
+                grupperteFiltrerteEgenskaper =
+                    mapOf(
+                        Egenskap.Kategori.Ukategorisert to listOf(RISK_QA),
+                        Egenskap.Kategori.Oppgavetype to listOf(SØKNAD),
+                    ),
+            )
         assertEquals(2, oppgaver.size)
         assertEquals(listOf(oppgaveId3, oppgaveId2), oppgaver.map { it.id })
     }
 
     @Test
     fun `Finner ikke oppgaver som ikke har alle de gitte egenskapene`() {
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer(), oppgaveEgenskaper = listOf(SØKNAD))
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer(), oppgaveEgenskaper = listOf(RISK_QA))
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), grupperteFiltrerteEgenskaper = mapOf(Egenskap.Kategori.Ukategorisert to listOf(RISK_QA), Egenskap.Kategori.Oppgavetype to listOf(SØKNAD)))
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+            oppgaveEgenskaper = listOf(SØKNAD),
+        )
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+            oppgaveEgenskaper = listOf(RISK_QA),
+        )
+        val oppgaver =
+            oppgaveDao.finnOppgaverForVisning(
+                emptyList(),
+                UUID.randomUUID(),
+                grupperteFiltrerteEgenskaper =
+                    mapOf(
+                        Egenskap.Kategori.Ukategorisert to listOf(RISK_QA),
+                        Egenskap.Kategori.Oppgavetype to listOf(SØKNAD),
+                    ),
+            )
         assertEquals(0, oppgaver.size)
     }
 
     @Test
     fun `Finn oppgaver for visning med offset og limit`() {
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId1 = OPPGAVE_ID
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId2 = OPPGAVE_ID
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), 1, 2)
         assertEquals(2, oppgaver.size)
         assertEquals(listOf(oppgaveId2, oppgaveId1), oppgaver.map { it.id })
@@ -422,15 +527,30 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Finn behandlede oppgaver med offset og limit`() {
         val saksbehandlerOid = UUID.randomUUID()
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId1 = OPPGAVE_ID
         ferdigstillOppgave(oppgaveId1, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
 
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId2 = OPPGAVE_ID
         ferdigstillOppgave(oppgaveId2, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
 
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId3 = OPPGAVE_ID
         ferdigstillOppgave(oppgaveId3, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
 
@@ -441,11 +561,26 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `Tar kun med oppgaver som avventer saksbehandler`() {
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId1 = OPPGAVE_ID
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId2 = OPPGAVE_ID
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId3 = OPPGAVE_ID
         avventerSystem(oppgaveId3, ferdigstiltAv = "navn", ferdigstiltAvOid = UUID.randomUUID())
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID())
@@ -455,166 +590,383 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `Sorterer oppgaver på opprettet stigende`() {
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId1 = OPPGAVE_ID
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId2 = OPPGAVE_ID
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId3 = OPPGAVE_ID
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), sortering = listOf(
-            OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.OPPRETTET, true)
-        ))
+        val oppgaver =
+            oppgaveDao.finnOppgaverForVisning(
+                emptyList(),
+                UUID.randomUUID(),
+                sortering =
+                    listOf(
+                        OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.OPPRETTET, true),
+                    ),
+            )
         assertEquals(3, oppgaver.size)
         assertEquals(listOf(oppgaveId1, oppgaveId2, oppgaveId3), oppgaver.map { it.id })
     }
 
     @Test
     fun `Sorterer oppgaver på opprettet fallende`() {
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId1 = OPPGAVE_ID
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId2 = OPPGAVE_ID
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId3 = OPPGAVE_ID
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), sortering = listOf(
-            OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.OPPRETTET, false)
-        ))
+        val oppgaver =
+            oppgaveDao.finnOppgaverForVisning(
+                emptyList(),
+                UUID.randomUUID(),
+                sortering =
+                    listOf(
+                        OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.OPPRETTET, false),
+                    ),
+            )
         assertEquals(3, oppgaver.size)
         assertEquals(listOf(oppgaveId3, oppgaveId2, oppgaveId1), oppgaver.map { it.id })
     }
 
     @Test
     fun `Sorterer oppgaver på opprinneligSøknadsdato stigende`() {
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId1 = OPPGAVE_ID
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId2 = OPPGAVE_ID
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId3 = OPPGAVE_ID
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), sortering = listOf(
-            OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.SØKNAD_MOTTATT, true)
-        ))
+        val oppgaver =
+            oppgaveDao.finnOppgaverForVisning(
+                emptyList(),
+                UUID.randomUUID(),
+                sortering =
+                    listOf(
+                        OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.SØKNAD_MOTTATT, true),
+                    ),
+            )
         assertEquals(3, oppgaver.size)
         assertEquals(listOf(oppgaveId1, oppgaveId2, oppgaveId3), oppgaver.map { it.id })
     }
 
     @Test
     fun `Sorterer oppgaver på opprinneligSøknadsdato fallende`() {
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId1 = OPPGAVE_ID
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId2 = OPPGAVE_ID
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId3 = OPPGAVE_ID
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), sortering = listOf(
-            OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.SØKNAD_MOTTATT, false)
-        ))
+        val oppgaver =
+            oppgaveDao.finnOppgaverForVisning(
+                emptyList(),
+                UUID.randomUUID(),
+                sortering =
+                    listOf(
+                        OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.SØKNAD_MOTTATT, false),
+                    ),
+            )
         assertEquals(3, oppgaver.size)
         assertEquals(listOf(oppgaveId3, oppgaveId2, oppgaveId1), oppgaver.map { it.id })
     }
 
     @Test
     fun `Sorterer oppgaver på tildeling stigende`() {
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId1 = OPPGAVE_ID
         tildelOppgave(oppgaveId1, UUID.randomUUID(), "A")
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId2 = OPPGAVE_ID
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId3 = OPPGAVE_ID
         tildelOppgave(oppgaveId3, UUID.randomUUID(), "B")
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), sortering = listOf(
-            OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.TILDELT_TIL, true)
-        ))
+        val oppgaver =
+            oppgaveDao.finnOppgaverForVisning(
+                emptyList(),
+                UUID.randomUUID(),
+                sortering =
+                    listOf(
+                        OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.TILDELT_TIL, true),
+                    ),
+            )
         assertEquals(3, oppgaver.size)
         assertEquals(listOf(oppgaveId1, oppgaveId3, oppgaveId2), oppgaver.map { it.id })
     }
 
     @Test
     fun `Sorterer oppgaver på tildeling fallende`() {
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId1 = OPPGAVE_ID
         tildelOppgave(oppgaveId1, UUID.randomUUID(), "A")
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId2 = OPPGAVE_ID
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId3 = OPPGAVE_ID
         tildelOppgave(oppgaveId3, UUID.randomUUID(), "B")
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), sortering = listOf(
-            OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.TILDELT_TIL, false)
-        ))
+        val oppgaver =
+            oppgaveDao.finnOppgaverForVisning(
+                emptyList(),
+                UUID.randomUUID(),
+                sortering =
+                    listOf(
+                        OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.TILDELT_TIL, false),
+                    ),
+            )
         assertEquals(3, oppgaver.size)
         assertEquals(listOf(oppgaveId3, oppgaveId1, oppgaveId2), oppgaver.map { it.id })
     }
 
     @Test
     fun `Sorterer oppgaver på tildeling stigende først, deretter opprettet fallende`() {
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId1 = OPPGAVE_ID
         tildelOppgave(oppgaveId1, UUID.randomUUID(), "A")
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId2 = OPPGAVE_ID
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId3 = OPPGAVE_ID
         val saksbehandlerOid2 = UUID.randomUUID()
         tildelOppgave(oppgaveId3, saksbehandlerOid2, "B")
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId4 = OPPGAVE_ID
         tildelOppgave(oppgaveId4, saksbehandlerOid2, "B")
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), sortering = listOf(
-            OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.TILDELT_TIL, true),
-            OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.OPPRETTET, false),
-        ))
+        val oppgaver =
+            oppgaveDao.finnOppgaverForVisning(
+                emptyList(),
+                UUID.randomUUID(),
+                sortering =
+                    listOf(
+                        OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.TILDELT_TIL, true),
+                        OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.OPPRETTET, false),
+                    ),
+            )
         assertEquals(4, oppgaver.size)
         assertEquals(listOf(oppgaveId1, oppgaveId4, oppgaveId3, oppgaveId2), oppgaver.map { it.id })
     }
 
     @Test
     fun `Tar kun med oppgaver som saksbehandler har tilgang til`() {
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
-        val oppgaveId1 = OPPGAVE_ID
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer(), oppgaveEgenskaper = listOf(
-            BESLUTTER
-        ))
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer(), oppgaveEgenskaper = listOf(
-            RISK_QA, FORTROLIG_ADRESSE
-        ))
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(
-            ekskluderEgenskaper = listOf("BESLUTTER", "RISK_QA"),
-            UUID.randomUUID()
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
         )
+        val oppgaveId1 = OPPGAVE_ID
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+            oppgaveEgenskaper =
+                listOf(
+                    BESLUTTER,
+                ),
+        )
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+            oppgaveEgenskaper =
+                listOf(
+                    RISK_QA,
+                    FORTROLIG_ADRESSE,
+                ),
+        )
+        val oppgaver =
+            oppgaveDao.finnOppgaverForVisning(
+                ekskluderEgenskaper = listOf("BESLUTTER", "RISK_QA"),
+                UUID.randomUUID(),
+            )
         assertEquals(1, oppgaver.size)
         assertEquals(listOf(oppgaveId1), oppgaver.map { it.id })
     }
 
     @Test
     fun `Ekskluderer ukategoriserte egenskaper`() {
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
-        val oppgaveId1 = OPPGAVE_ID
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer(), oppgaveEgenskaper = listOf(
-            BESLUTTER
-        ))
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer(), oppgaveEgenskaper = listOf(
-            RISK_QA, FORTROLIG_ADRESSE
-        ))
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer(), oppgaveEgenskaper = listOf(
-            UTLAND, HASTER
-        ))
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(
-            ekskluderEgenskaper = listOf("BESLUTTER", "RISK_QA") + Egenskap.alleUkategoriserteEgenskaper.map(Egenskap::toString),
-            UUID.randomUUID()
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
         )
+        val oppgaveId1 = OPPGAVE_ID
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+            oppgaveEgenskaper =
+                listOf(
+                    BESLUTTER,
+                ),
+        )
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+            oppgaveEgenskaper =
+                listOf(
+                    RISK_QA,
+                    FORTROLIG_ADRESSE,
+                ),
+        )
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+            oppgaveEgenskaper =
+                listOf(
+                    UTLAND,
+                    HASTER,
+                ),
+        )
+        val oppgaver =
+            oppgaveDao.finnOppgaverForVisning(
+                ekskluderEgenskaper = listOf("BESLUTTER", "RISK_QA") + Egenskap.alleUkategoriserteEgenskaper.map(Egenskap::toString),
+                UUID.randomUUID(),
+            )
         assertEquals(1, oppgaver.size)
         assertEquals(listOf(oppgaveId1), oppgaver.map { it.id })
     }
 
     @Test
     fun `Får kun oppgaver som er tildelt hvis tildelt er satt til true`() {
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId1 = OPPGAVE_ID
         tildelOppgave(oppgaveId1, saksbehandlerOid = UUID.randomUUID())
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
 
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), tildelt = true)
         assertEquals(1, oppgaver.size)
@@ -624,12 +976,27 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `Får kun oppgaver som ikke er tildelt hvis tildelt er satt til false`() {
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId1 = OPPGAVE_ID
         tildelOppgave(oppgaveId1, saksbehandlerOid = UUID.randomUUID())
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId2 = OPPGAVE_ID
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId3 = OPPGAVE_ID
 
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), tildelt = false)
@@ -640,12 +1007,27 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `Får både tildelte og ikke tildelte oppgaver hvis tildelt er satt til null`() {
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId1 = OPPGAVE_ID
         tildelOppgave(oppgaveId1, saksbehandlerOid = UUID.randomUUID())
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId2 = OPPGAVE_ID
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId3 = OPPGAVE_ID
 
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), tildelt = null)
@@ -656,13 +1038,31 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `Tar med alle oppgaver som saksbehandler har tilgang til`() {
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId1 = OPPGAVE_ID
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId2 = OPPGAVE_ID
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer(), oppgaveEgenskaper = listOf(
-            RISK_QA, FORTROLIG_ADRESSE
-        ))
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+            oppgaveEgenskaper =
+                listOf(
+                    RISK_QA,
+                    FORTROLIG_ADRESSE,
+                ),
+        )
         val oppgaveId3 = OPPGAVE_ID
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID())
         assertEquals(3, oppgaver.size)
@@ -673,18 +1073,52 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Tar kun med oppgaver som er tildelt saksbehandler når dette bes om`() {
         val saksbehandlerOid = UUID.randomUUID()
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId1 = OPPGAVE_ID
         tildelOppgave(oppgaveId1, saksbehandlerOid = saksbehandlerOid)
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer(), oppgaveEgenskaper = listOf(PÅ_VENT))
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+            oppgaveEgenskaper = listOf(PÅ_VENT),
+        )
         val oppgaveId2 = OPPGAVE_ID
         tildelOppgave(oppgaveId2, saksbehandlerOid = saksbehandlerOid, egenskaper = listOf(SØKNAD, PÅ_VENT))
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId3 = OPPGAVE_ID
 
-        val oppgaverSomErTildelt = oppgaveDao.finnOppgaverForVisning(emptyList(), saksbehandlerOid = saksbehandlerOid, egneSaker = true, egneSakerPåVent = false)
-        val oppgaverSomErTildeltOgPåvent = oppgaveDao.finnOppgaverForVisning(emptyList(), saksbehandlerOid = saksbehandlerOid, egneSaker = true, egneSakerPåVent = true)
-        val alleOppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), saksbehandlerOid = saksbehandlerOid, egneSaker = false, egneSakerPåVent = false)
+        val oppgaverSomErTildelt =
+            oppgaveDao.finnOppgaverForVisning(
+                emptyList(),
+                saksbehandlerOid = saksbehandlerOid,
+                egneSaker = true,
+                egneSakerPåVent = false,
+            )
+        val oppgaverSomErTildeltOgPåvent =
+            oppgaveDao.finnOppgaverForVisning(
+                emptyList(),
+                saksbehandlerOid = saksbehandlerOid,
+                egneSaker = true,
+                egneSakerPåVent = true,
+            )
+        val alleOppgaver =
+            oppgaveDao.finnOppgaverForVisning(
+                emptyList(),
+                saksbehandlerOid = saksbehandlerOid,
+                egneSaker = false,
+                egneSakerPåVent = false,
+            )
         assertEquals(2, oppgaverSomErTildelt.size)
         assertEquals(1, oppgaverSomErTildeltOgPåvent.size)
         assertEquals(3, alleOppgaver.size)
@@ -697,9 +1131,16 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     fun `Saksbehandler får ikke med oppgaver hen har sendt til beslutter selv om hen har beslutter-tilgang`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val saksbehandlerOid = UUID.randomUUID()
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = vedtaksperiodeId, organisasjonsnummer = lagOrganisasjonsnummer(), oppgaveEgenskaper = listOf(
-            BESLUTTER
-        ))
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+            oppgaveEgenskaper =
+                listOf(
+                    BESLUTTER,
+                ),
+        )
         opprettSaksbehandler(saksbehandlerOid)
         opprettTotrinnsvurdering(vedtaksperiodeId, saksbehandlerOid)
         val oppgaver = oppgaveDao.finnOppgaverForVisning(ekskluderEgenskaper = emptyList(), saksbehandlerOid = saksbehandlerOid)
@@ -710,66 +1151,120 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     fun `Saksbehandler får ikke med oppgaver med egenskap STRENGT_FORTROLIG_ADRESSE`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val saksbehandlerOid = UUID.randomUUID()
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = vedtaksperiodeId, organisasjonsnummer = lagOrganisasjonsnummer(), oppgaveEgenskaper = listOf(
-            STRENGT_FORTROLIG_ADRESSE
-        ))
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+            oppgaveEgenskaper =
+                listOf(
+                    STRENGT_FORTROLIG_ADRESSE,
+                ),
+        )
         opprettSaksbehandler(saksbehandlerOid)
         opprettTotrinnsvurdering(vedtaksperiodeId, saksbehandlerOid)
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(ekskluderEgenskaper = listOf("STRENGT_FORTROLIG_ADRESSE"), saksbehandlerOid = saksbehandlerOid)
+        val oppgaver =
+            oppgaveDao.finnOppgaverForVisning(
+                ekskluderEgenskaper = listOf("STRENGT_FORTROLIG_ADRESSE"),
+                saksbehandlerOid = saksbehandlerOid,
+            )
         assertEquals(0, oppgaver.size)
     }
 
     @Test
     fun `Oppgaver blir filtrert riktig`() {
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer(), oppgaveEgenskaper = listOf(
-            SØKNAD, HASTER, UTLAND, FORSTEGANGSBEHANDLING, DELVIS_REFUSJON, FLERE_ARBEIDSGIVERE
-        ))
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+            oppgaveEgenskaper =
+                listOf(
+                    SØKNAD,
+                    HASTER,
+                    UTLAND,
+                    FORSTEGANGSBEHANDLING,
+                    DELVIS_REFUSJON,
+                    FLERE_ARBEIDSGIVERE,
+                ),
+        )
         val oppgaveId1 = OPPGAVE_ID
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer(), oppgaveEgenskaper = listOf(
-            REVURDERING, HASTER
-        ))
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer(), oppgaveEgenskaper = listOf(
-            SØKNAD, UTLAND
-        ))
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer(), oppgaveEgenskaper = listOf(
-            UTBETALING_TIL_SYKMELDT, EN_ARBEIDSGIVER
-        ))
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+            oppgaveEgenskaper =
+                listOf(
+                    REVURDERING,
+                    HASTER,
+                ),
+        )
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+            oppgaveEgenskaper =
+                listOf(
+                    SØKNAD,
+                    UTLAND,
+                ),
+        )
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+            oppgaveEgenskaper =
+                listOf(
+                    UTBETALING_TIL_SYKMELDT,
+                    EN_ARBEIDSGIVER,
+                ),
+        )
         val oppgaveId4 = OPPGAVE_ID
 
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(
-            ekskluderEgenskaper = emptyList(),
-            saksbehandlerOid = UUID.randomUUID(),
-            grupperteFiltrerteEgenskaper = mapOf(Egenskap.Kategori.Oppgavetype to listOf(SØKNAD, REVURDERING))
-        )
-        val oppgaver1 = oppgaveDao.finnOppgaverForVisning(
-            ekskluderEgenskaper = emptyList(),
-            saksbehandlerOid = UUID.randomUUID(),
-            grupperteFiltrerteEgenskaper = mapOf(Egenskap.Kategori.Ukategorisert to listOf(HASTER, UTLAND))
-        )
-        val oppgaver2 = oppgaveDao.finnOppgaverForVisning(
-            ekskluderEgenskaper = emptyList(),
-            saksbehandlerOid = UUID.randomUUID(),
-            grupperteFiltrerteEgenskaper = mapOf(
-                Egenskap.Kategori.Ukategorisert to listOf(HASTER, UTLAND),
-                Egenskap.Kategori.Oppgavetype to listOf(SØKNAD),
-                Egenskap.Kategori.Periodetype to listOf(FORSTEGANGSBEHANDLING),
-                Egenskap.Kategori.Mottaker to listOf(DELVIS_REFUSJON),
-                Egenskap.Kategori.Inntektskilde to listOf(FLERE_ARBEIDSGIVERE),
+        val oppgaver =
+            oppgaveDao.finnOppgaverForVisning(
+                ekskluderEgenskaper = emptyList(),
+                saksbehandlerOid = UUID.randomUUID(),
+                grupperteFiltrerteEgenskaper = mapOf(Egenskap.Kategori.Oppgavetype to listOf(SØKNAD, REVURDERING)),
             )
-        )
-        val oppgaver3 = oppgaveDao.finnOppgaverForVisning(
-            ekskluderEgenskaper = emptyList(),
-            saksbehandlerOid = UUID.randomUUID(),
-            grupperteFiltrerteEgenskaper = mapOf(
-                Egenskap.Kategori.Mottaker to listOf(UTBETALING_TIL_SYKMELDT),
-                Egenskap.Kategori.Inntektskilde to listOf(EN_ARBEIDSGIVER)
+        val oppgaver1 =
+            oppgaveDao.finnOppgaverForVisning(
+                ekskluderEgenskaper = emptyList(),
+                saksbehandlerOid = UUID.randomUUID(),
+                grupperteFiltrerteEgenskaper = mapOf(Egenskap.Kategori.Ukategorisert to listOf(HASTER, UTLAND)),
             )
-        )
-        val oppgaver5 = oppgaveDao.finnOppgaverForVisning(
-            ekskluderEgenskaper = emptyList(),
-            saksbehandlerOid = UUID.randomUUID(),
-            grupperteFiltrerteEgenskaper = emptyMap()
-        )
+        val oppgaver2 =
+            oppgaveDao.finnOppgaverForVisning(
+                ekskluderEgenskaper = emptyList(),
+                saksbehandlerOid = UUID.randomUUID(),
+                grupperteFiltrerteEgenskaper =
+                    mapOf(
+                        Egenskap.Kategori.Ukategorisert to listOf(HASTER, UTLAND),
+                        Egenskap.Kategori.Oppgavetype to listOf(SØKNAD),
+                        Egenskap.Kategori.Periodetype to listOf(FORSTEGANGSBEHANDLING),
+                        Egenskap.Kategori.Mottaker to listOf(DELVIS_REFUSJON),
+                        Egenskap.Kategori.Inntektskilde to listOf(FLERE_ARBEIDSGIVERE),
+                    ),
+            )
+        val oppgaver3 =
+            oppgaveDao.finnOppgaverForVisning(
+                ekskluderEgenskaper = emptyList(),
+                saksbehandlerOid = UUID.randomUUID(),
+                grupperteFiltrerteEgenskaper =
+                    mapOf(
+                        Egenskap.Kategori.Mottaker to listOf(UTBETALING_TIL_SYKMELDT),
+                        Egenskap.Kategori.Inntektskilde to listOf(EN_ARBEIDSGIVER),
+                    ),
+            )
+        val oppgaver5 =
+            oppgaveDao.finnOppgaverForVisning(
+                ekskluderEgenskaper = emptyList(),
+                saksbehandlerOid = UUID.randomUUID(),
+                grupperteFiltrerteEgenskaper = emptyMap(),
+            )
 
         assertEquals(3, oppgaver.size)
         assertEquals(1, oppgaver1.size)
@@ -783,25 +1278,51 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `Grupperte filtrerte egenskaper fungerer sammen med ekskluderte egenskaper`() {
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer(), oppgaveEgenskaper = listOf(
-            SØKNAD, FORSTEGANGSBEHANDLING, DELVIS_REFUSJON, FLERE_ARBEIDSGIVERE, PÅ_VENT
-        ))
-        val oppgaveId1 = OPPGAVE_ID
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer(), oppgaveEgenskaper = listOf(
-            SØKNAD, HASTER, UTLAND, FORSTEGANGSBEHANDLING, DELVIS_REFUSJON, FLERE_ARBEIDSGIVERE, PÅ_VENT
-        ))
-
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(
-            ekskluderEgenskaper = Egenskap.alleUkategoriserteEgenskaper.map(Egenskap::toString),
-            saksbehandlerOid = UUID.randomUUID(),
-            grupperteFiltrerteEgenskaper = mapOf(
-                Egenskap.Kategori.Oppgavetype to listOf(SØKNAD),
-                Egenskap.Kategori.Periodetype to listOf(FORSTEGANGSBEHANDLING),
-                Egenskap.Kategori.Mottaker to listOf(DELVIS_REFUSJON),
-                Egenskap.Kategori.Inntektskilde to listOf(FLERE_ARBEIDSGIVERE),
-                Egenskap.Kategori.Status to listOf(PÅ_VENT),
-            )
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+            oppgaveEgenskaper =
+                listOf(
+                    SØKNAD,
+                    FORSTEGANGSBEHANDLING,
+                    DELVIS_REFUSJON,
+                    FLERE_ARBEIDSGIVERE,
+                    PÅ_VENT,
+                ),
         )
+        val oppgaveId1 = OPPGAVE_ID
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+            oppgaveEgenskaper =
+                listOf(
+                    SØKNAD,
+                    HASTER,
+                    UTLAND,
+                    FORSTEGANGSBEHANDLING,
+                    DELVIS_REFUSJON,
+                    FLERE_ARBEIDSGIVERE,
+                    PÅ_VENT,
+                ),
+        )
+
+        val oppgaver =
+            oppgaveDao.finnOppgaverForVisning(
+                ekskluderEgenskaper = Egenskap.alleUkategoriserteEgenskaper.map(Egenskap::toString),
+                saksbehandlerOid = UUID.randomUUID(),
+                grupperteFiltrerteEgenskaper =
+                    mapOf(
+                        Egenskap.Kategori.Oppgavetype to listOf(SØKNAD),
+                        Egenskap.Kategori.Periodetype to listOf(FORSTEGANGSBEHANDLING),
+                        Egenskap.Kategori.Mottaker to listOf(DELVIS_REFUSJON),
+                        Egenskap.Kategori.Inntektskilde to listOf(FLERE_ARBEIDSGIVERE),
+                        Egenskap.Kategori.Status to listOf(PÅ_VENT),
+                    ),
+            )
 
         assertEquals(1, oppgaver.size)
         assertEquals(oppgaveId1, oppgaver.first().id)
@@ -831,7 +1352,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             SAKSBEHANDLER_EPOST,
             SAKSBEHANDLER_OID,
             vedtakId,
-            CONTEXT_ID
+            CONTEXT_ID,
         )
     }
 
@@ -848,12 +1369,24 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `sjekker om det fins aktiv oppgave med to oppgaver`() {
         nyPerson()
-        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "Ferdigstilt", egenskaper = listOf(
-            EGENSKAP))
+        oppgaveDao.updateOppgave(
+            oppgaveId = oppgaveId,
+            oppgavestatus = "Ferdigstilt",
+            egenskaper =
+                listOf(
+                    EGENSKAP,
+                ),
+        )
 
         opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE)
-        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "AvventerSaksbehandler", egenskaper = listOf(
-            EGENSKAP))
+        oppgaveDao.updateOppgave(
+            oppgaveId = oppgaveId,
+            oppgavestatus = "AvventerSaksbehandler",
+            egenskaper =
+                listOf(
+                    EGENSKAP,
+                ),
+        )
 
         assertTrue(oppgaveDao.harGyldigOppgave(UTBETALING_ID))
     }
@@ -861,8 +1394,14 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `sjekker at det ikke fins ferdigstilt oppgave`() {
         nyPerson()
-        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "AvventerSaksbehandler", egenskaper = listOf(
-            EGENSKAP))
+        oppgaveDao.updateOppgave(
+            oppgaveId = oppgaveId,
+            oppgavestatus = "AvventerSaksbehandler",
+            egenskaper =
+                listOf(
+                    EGENSKAP,
+                ),
+        )
 
         assertFalse(oppgaveDao.harFerdigstiltOppgave(VEDTAKSPERIODE))
     }
@@ -933,7 +1472,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettOppgave(
             vedtaksperiodeId = vedtaksperiodeId2,
             egenskaper = listOf(SØKNAD, PÅ_VENT),
-            utbetalingId = utbetalingId2
+            utbetalingId = utbetalingId2,
         )
 
         oppgaveDao.invaliderOppgaveFor(fødselsnummer = FNR)
@@ -942,7 +1481,6 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val egenskaperOppgaveId2 = oppgaveDao.finnEgenskaper(vedtaksperiodeId2, utbetalingId2)
         assertEquals(setOf(SØKNAD), egenskaperOppgaveId1)
         assertEquals(setOf(SØKNAD, PÅ_VENT), egenskaperOppgaveId2)
-
     }
 
     @Test
@@ -950,19 +1488,39 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val saksbehandlerOid = UUID.randomUUID()
         opprettSaksbehandler(saksbehandlerOid)
 
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId1 = OPPGAVE_ID
         tildelOppgave(oppgaveId = oppgaveId1, saksbehandlerOid = saksbehandlerOid)
 
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId2 = OPPGAVE_ID
         tildelOppgave(oppgaveId = oppgaveId2, saksbehandlerOid = saksbehandlerOid)
 
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId3 = OPPGAVE_ID
         tildelOppgave(oppgaveId = oppgaveId3, saksbehandlerOid = saksbehandlerOid, egenskaper = listOf(SØKNAD, PÅ_VENT))
 
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
         val oppgaveId4 = OPPGAVE_ID
         tildelOppgave(oppgaveId = oppgaveId4, saksbehandlerOid = UUID.randomUUID(), egenskaper = listOf(SØKNAD, PÅ_VENT))
 
@@ -978,7 +1536,12 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettSaksbehandler(saksbehandlerOid)
 
         val vedtaksperiodeId1 = UUID.randomUUID()
-        nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = vedtaksperiodeId1, organisasjonsnummer = lagOrganisasjonsnummer())
+        nyPerson(
+            fødselsnummer = lagFødselsnummer(),
+            aktørId = lagAktørId(),
+            vedtaksperiodeId = vedtaksperiodeId1,
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+        )
 
         val antallOppgaver = oppgaveDao.finnAntallOppgaver(saksbehandlerOid)
 
@@ -986,7 +1549,10 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         assertEquals(0, antallOppgaver.antallMineSakerPåVent)
     }
 
-    private fun assertOppgaveStatus(oppgaveId: Long, forventetStatus: Oppgave.Tilstand) {
+    private fun assertOppgaveStatus(
+        oppgaveId: Long,
+        forventetStatus: Oppgave.Tilstand,
+    ) {
         val status = query("SELECT * FROM oppgave where id = :id", "id" to oppgaveId).single { it.string("status") }
         assertEquals(forventetStatus.toString(), status)
     }
@@ -994,7 +1560,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     private fun oppgave(vedtaksperiodeId: UUID = VEDTAKSPERIODE) =
         query(
             "SELECT o.* FROM oppgave o JOIN vedtak v on o.vedtak_ref = v.id WHERE v.vedtaksperiode_id = :vedtaksperiodeId ORDER BY id DESC",
-            "vedtaksperiodeId" to vedtaksperiodeId
+            "vedtaksperiodeId" to vedtaksperiodeId,
         ).list { row ->
             OppgaveAssertions(
                 oppdatert = row.localDate("oppdatert"),
@@ -1004,7 +1570,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 ferdigstiltAv = row.stringOrNull("ferdigstilt_av"),
                 ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString),
                 vedtakRef = row.longOrNull("vedtak_ref"),
-                commandContextId = row.stringOrNull("command_context_id")?.let(UUID::fromString)
+                commandContextId = row.stringOrNull("command_context_id")?.let(UUID::fromString),
             )
         }
 
@@ -1016,7 +1582,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         private val ferdigstiltAv: String?,
         private val ferdigstiltAvOid: UUID?,
         private val vedtakRef: Long?,
-        private val commandContextId: UUID?
+        private val commandContextId: UUID?,
     ) {
         fun assertEquals(
             forventetOppdatert: LocalDate,
@@ -1026,7 +1592,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             forventetFerdigstilAv: String?,
             forventetFerdigstilAvOid: UUID?,
             forventetVedtakRef: Long?,
-            forventetCommandContextId: UUID
+            forventetCommandContextId: UUID,
         ) {
             assertEquals(forventetOppdatert, oppdatert)
             assertEquals(forventetEgenskaper, egenskaper)

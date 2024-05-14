@@ -344,6 +344,7 @@ internal class MeldingMediator(
             originalMelding = originalMelding,
             kilde = kilde,
         )
+        stansAutomatiskBehandlinghåndterer.lagrePeriodehistorikk(fødselsnummer = fødselsnummer)
     }
 
     fun slettGamleDokumenter(): Int {

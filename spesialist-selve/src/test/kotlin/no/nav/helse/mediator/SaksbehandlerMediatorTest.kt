@@ -10,6 +10,7 @@ import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mediator.oppgave.OppgaveMediator
+import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingService
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
@@ -53,6 +54,12 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private val testRapid = TestRapid()
     private val tildelingDbDao = no.nav.helse.db.TildelingDao(dataSource)
     private val saksbehandlerRepository = SaksbehandlerDao(dataSource)
+    private val stansAutomatiskBehandlingService =
+        StansAutomatiskBehandlingService(
+            stansAutomatiskBehandlingDao,
+            periodehistorikkDao,
+            oppgaveDao,
+        )
     private val oppgaveMediator =
         OppgaveMediator(
             meldingDao,
@@ -66,7 +73,8 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper,
         )
-    private val mediator = SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, oppgaveMediator, tilgangsgrupper)
+    private val mediator =
+        SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, oppgaveMediator, tilgangsgrupper, stansAutomatiskBehandlingService)
 
     private val AKTØR_ID = lagAktørId()
     private val FØDSELSNUMMER = lagFødselsnummer()
@@ -99,7 +107,12 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         val generasjonId = UUID.randomUUID()
         nyPerson(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId)
         val definisjonRef = opprettVarseldefinisjon()
-        nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId, status = "VURDERT", definisjonRef = definisjonRef)
+        nyttVarsel(
+            vedtaksperiodeId = vedtaksperiodeId,
+            generasjonId = generasjonId,
+            status = "VURDERT",
+            definisjonRef = definisjonRef,
+        )
         nyttVarsel(
             kode = "EN_ANNEN_KODE",
             vedtaksperiodeId = vedtaksperiodeId,
@@ -120,7 +133,12 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         nyPerson(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
 
         val definisjonRef = opprettVarseldefinisjon()
-        nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId, status = "AKTIV", definisjonRef = definisjonRef)
+        nyttVarsel(
+            vedtaksperiodeId = vedtaksperiodeId,
+            generasjonId = generasjonId,
+            status = "AKTIV",
+            definisjonRef = definisjonRef,
+        )
         assertThrows<ManglerVurderingAvVarsler> {
             mediator.håndter(godkjenning(oppgaveId, true), UUID.randomUUID(), saksbehandler)
         }
@@ -158,7 +176,12 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         nyPerson(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId)
 
         val definisjonRef = opprettVarseldefinisjon()
-        nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId, status = "AKTIV", definisjonRef = definisjonRef)
+        nyttVarsel(
+            vedtaksperiodeId = vedtaksperiodeId,
+            generasjonId = generasjonId,
+            status = "AKTIV",
+            definisjonRef = definisjonRef,
+        )
         mediator.håndter(godkjenning(oppgaveId, false), UUID.randomUUID(), saksbehandler)
         assertGodkjenteVarsler(generasjonId, 0)
         assertAvvisteVarsler(generasjonId, 1)
@@ -170,7 +193,12 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         val generasjonId = UUID.randomUUID()
         nyPerson(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId)
         val definisjonRef = opprettVarseldefinisjon()
-        nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId, status = "VURDERT", definisjonRef = definisjonRef)
+        nyttVarsel(
+            vedtaksperiodeId = vedtaksperiodeId,
+            generasjonId = generasjonId,
+            status = "VURDERT",
+            definisjonRef = definisjonRef,
+        )
         assertDoesNotThrow {
             mediator.håndterTotrinnsvurdering(oppgaveId)
         }
@@ -182,7 +210,12 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         val generasjonId = UUID.randomUUID()
         nyPerson(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId)
         val definisjonRef = opprettVarseldefinisjon()
-        nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId, status = "AKTIV", definisjonRef = definisjonRef)
+        nyttVarsel(
+            vedtaksperiodeId = vedtaksperiodeId,
+            generasjonId = generasjonId,
+            status = "AKTIV",
+            definisjonRef = definisjonRef,
+        )
         assertThrows<ManglerVurderingAvVarsler> {
             mediator.håndterTotrinnsvurdering(oppgaveId)
         }
@@ -334,7 +367,10 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     fun `legg på vent`() {
         nyPerson()
         val oppgaveId = OPPGAVE_ID
-        mediator.håndter(LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), true, ""), saksbehandler)
+        mediator.håndter(
+            LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), true, ""),
+            saksbehandler,
+        )
         val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
         assertTrue(melding["egenskaper"].map { it.asText() }.contains("PÅ_VENT"))
     }
@@ -343,7 +379,10 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     fun `fjern på vent`() {
         nyPerson()
         val oppgaveId = OPPGAVE_ID
-        mediator.håndter(LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), false, ""), saksbehandler)
+        mediator.håndter(
+            LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), false, ""),
+            saksbehandler,
+        )
         mediator.håndter(FjernPåVent(oppgaveId), saksbehandler)
         val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
         assertFalse(melding["egenskaper"].map { it.asText() }.contains("PÅ_VENT"))
@@ -683,10 +722,16 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
     private fun finnOverstyringId(fødselsnummer: String): UUID? {
         @Language("PostgreSQL")
-        val query = " select ekstern_hendelse_id from overstyring where person_ref = (select id from person where fodselsnummer = :fodselsnummer) "
+        val query =
+            " select ekstern_hendelse_id from overstyring where person_ref = (select id from person where fodselsnummer = :fodselsnummer) "
 
         return sessionOf(dataSource).use {
-            it.run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer.toLong())).map { it.uuid("ekstern_hendelse_id") }.asSingle)
+            it.run(
+                queryOf(
+                    query,
+                    mapOf("fodselsnummer" to fødselsnummer.toLong()),
+                ).map { it.uuid("ekstern_hendelse_id") }.asSingle,
+            )
         }
     }
 

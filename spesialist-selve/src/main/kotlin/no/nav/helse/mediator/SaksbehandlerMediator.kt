@@ -5,7 +5,6 @@ import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
-import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.mediator.overstyring.Overstyringlagrer
 import no.nav.helse.mediator.overstyring.Saksbehandlingsmelder
@@ -36,12 +35,12 @@ import no.nav.helse.modell.saksbehandler.handlinger.PåVent
 import no.nav.helse.modell.saksbehandler.handlinger.Refusjonselement
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
-import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingService
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.withMDC
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
+import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.feilhåndtering.IkkeTilgang
@@ -82,6 +81,7 @@ internal class SaksbehandlerMediator(
     private val rapidsConnection: RapidsConnection,
     private val oppgaveMediator: OppgaveMediator,
     private val tilgangsgrupper: Tilgangsgrupper,
+    private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
 ) : Saksbehandlerhåndterer {
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val generasjonRepository = ApiGenerasjonRepository(dataSource)
@@ -93,8 +93,6 @@ internal class SaksbehandlerMediator(
     private val overstyringDao = OverstyringDao(dataSource)
     private val påVentDao = PåVentDao(dataSource)
     private val avslagDao = AvslagDao(dataSource)
-    private val stansAutomatiskBehandlingService =
-        StansAutomatiskBehandlingService(StansAutomatiskBehandlingDao(dataSource))
 
     override fun <T : HandlingFraApi> håndter(
         handlingFraApi: T,
@@ -142,7 +140,7 @@ internal class SaksbehandlerMediator(
         saksbehandler: Saksbehandler,
     ) = try {
         // TODO: sende med saksbehandler for å lagre hvem som har opphevet stansen?
-        stansAutomatiskBehandlingService.lagre(
+        stansAutomatiskBehandlinghåndterer.lagre(
             handling.gjelderFødselsnummer(),
             "NORMAL",
             emptySet(),
