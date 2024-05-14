@@ -1,0 +1,1 @@
+alter type notattype add value 'OpphevStans';
