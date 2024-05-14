@@ -35,12 +35,12 @@ import no.nav.helse.modell.saksbehandler.handlinger.PåVent
 import no.nav.helse.modell.saksbehandler.handlinger.Refusjonselement
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
+import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.withMDC
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
-import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.feilhåndtering.IkkeTilgang
@@ -71,7 +71,6 @@ import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.godkjennVarsl
 import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.harAktiveVarsler
 import no.nav.helse.spesialist.api.vedtaksperiode.ApiGenerasjonRepository
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -81,7 +80,7 @@ internal class SaksbehandlerMediator(
     private val rapidsConnection: RapidsConnection,
     private val oppgaveMediator: OppgaveMediator,
     private val tilgangsgrupper: Tilgangsgrupper,
-    private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
+    private val stansAutomatiskBehandlingMediator: StansAutomatiskBehandlingMediator,
 ) : Saksbehandlerhåndterer {
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val generasjonRepository = ApiGenerasjonRepository(dataSource)
@@ -139,16 +138,7 @@ internal class SaksbehandlerMediator(
         handling: Personhandling,
         saksbehandler: Saksbehandler,
     ) = try {
-        // TODO: sende med saksbehandler for å lagre hvem som har opphevet stansen?
-        stansAutomatiskBehandlinghåndterer.lagre(
-            handling.gjelderFødselsnummer(),
-            "NORMAL",
-            emptySet(),
-            LocalDateTime.now(),
-            null,
-            "SPEIL",
-        )
-        // TODO: lagre i periodehistorikk? personhistorikk?
+        stansAutomatiskBehandlingMediator.håndter(handling, saksbehandler)
         handling.utførAv(saksbehandler)
     } catch (e: Modellfeil) {
         throw e.tilApiversjon()

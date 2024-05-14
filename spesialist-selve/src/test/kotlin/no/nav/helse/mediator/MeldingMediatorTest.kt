@@ -14,7 +14,7 @@ import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
-import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingService
+import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
@@ -37,7 +37,7 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
     private val generasjonDao = mockk<GenerasjonDao>()
     private val avslagDao = mockk<AvslagDao>()
     private val kommandofabrikk = mockk<Kommandofabrikk>(relaxed = true)
-    private val stansAutomatiskBehandlingService = mockk<StansAutomatiskBehandlingService>(relaxed = true)
+    private val stansAutomatiskBehandlingMediator = mockk<StansAutomatiskBehandlingMediator>(relaxed = true)
 
     private val meldingMediator =
         MeldingMediator(
@@ -48,7 +48,7 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
             avviksvurderingDao = avviksvurderingDao,
             generasjonDao = generasjonDao,
             avslagDao = avslagDao,
-            stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlingService,
+            stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
         )
 
     init {

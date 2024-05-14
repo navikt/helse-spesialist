@@ -3,23 +3,68 @@ package no.nav.helse.modell.stoppautomatiskbehandling
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
 import no.nav.helse.mediator.oppgave.OppgaveDao
+import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.modell.saksbehandler.handlinger.Personhandling
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
+import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.graphql.schema.UnntattFraAutomatiskGodkjenning
+import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 
-class StansAutomatiskBehandlingService(
+class StansAutomatiskBehandlingMediator(
     private val stansAutomatiskBehandlingDao: StansAutomatiskBehandlingDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val oppgaveDao: OppgaveDao,
+    private val notatMediator: NotatMediator,
 ) : StansAutomatiskBehandlinghåndterer {
     private val logg = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-    override fun lagre(
+    internal fun håndter(
+        handling: Personhandling,
+        saksbehandler: Saksbehandler,
+    ) {
+        lagre(
+            fødselsnummer = handling.gjelderFødselsnummer(),
+            status = "NORMAL",
+            årsaker = emptySet(),
+            opprettet = LocalDateTime.now(),
+            originalMelding = null,
+            kilde = "SPEIL",
+        )
+        lagreNotat(handling.gjelderFødselsnummer(), handling.begrunnelse(), saksbehandler.oid())
+    }
+
+    internal fun håndter(
+        fødselsnummer: String,
+        status: String,
+        årsaker: Set<String>,
+        opprettet: LocalDateTime,
+        originalMelding: String,
+        kilde: String,
+    ) {
+        lagre(
+            fødselsnummer = fødselsnummer,
+            status = status,
+            årsaker = årsaker,
+            opprettet = opprettet,
+            originalMelding = originalMelding,
+            kilde = kilde,
+        )
+        lagrePeriodehistorikk(fødselsnummer)
+    }
+
+    override fun unntattFraAutomatiskGodkjenning(fødselsnummer: String): UnntattFraAutomatiskGodkjenning =
+        stansAutomatiskBehandlingDao.hent(fødselsnummer).filtrerGjeldendeStopp().tilUnntattFraAutomatiskGodkjenning()
+
+    override fun erUnntatt(fødselsnummer: String) = stansAutomatiskBehandlingDao.hent(fødselsnummer).filtrerGjeldendeStopp().isNotEmpty()
+
+    private fun lagre(
         fødselsnummer: String,
         status: String,
         årsaker: Set<String>,
@@ -37,10 +82,9 @@ class StansAutomatiskBehandlingService(
         )
     }
 
-    override fun lagrePeriodehistorikk(fødselsnummer: String) {
+    private fun lagrePeriodehistorikk(fødselsnummer: String) {
         try {
-            val oppgaveId =
-                oppgaveDao.finnOppgaveId(fødselsnummer) ?: oppgaveDao.finnOppgaveIdUansettStatus(fødselsnummer)
+            val oppgaveId = fødselsnummer.finnOppgaveId()
             oppgaveDao.finnUtbetalingId(oppgaveId)?.also {
                 periodehistorikkDao.lagre(STANS_AUTOMATISK_BEHANDLING, null, it, null)
             }
@@ -49,10 +93,18 @@ class StansAutomatiskBehandlingService(
         }
     }
 
-    override fun unntattFraAutomatiskGodkjenning(fødselsnummer: String): UnntattFraAutomatiskGodkjenning =
-        stansAutomatiskBehandlingDao.hent(fødselsnummer).filtrerGjeldendeStopp().tilUnntattFraAutomatiskGodkjenning()
+    private fun lagreNotat(
+        fødselsnummer: String,
+        begrunnelse: String,
+        saksbehandlerOid: UUID,
+    ) = try {
+        val oppgaveId = fødselsnummer.finnOppgaveId()
+        notatMediator.lagreForOppgaveId(oppgaveId, begrunnelse, saksbehandlerOid, NotatType.OpphevStans)
+    } catch (e: Exception) {
+        sikkerlogg.error("Fant ikke oppgave for $fødselsnummer. Fikk ikke lagret notat om oppheving av stans")
+    }
 
-    override fun erUnntatt(fødselsnummer: String) = stansAutomatiskBehandlingDao.hent(fødselsnummer).filtrerGjeldendeStopp().isNotEmpty()
+    private fun String.finnOppgaveId() = oppgaveDao.finnOppgaveId(this) ?: oppgaveDao.finnOppgaveIdUansettStatus(this)
 
     private fun List<StansAutomatiskBehandlingFraDatabase>.filtrerGjeldendeStopp(): List<StansAutomatiskBehandlingFraDatabase> {
         val gjeldende = mutableListOf<StansAutomatiskBehandlingFraDatabase>()

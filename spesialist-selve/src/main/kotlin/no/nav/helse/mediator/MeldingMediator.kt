@@ -60,6 +60,7 @@ import no.nav.helse.modell.person.OppdaterPersonsnapshot
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.PersonRepository
 import no.nav.helse.modell.person.SøknadSendt
+import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
@@ -76,7 +77,6 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
 import no.nav.helse.spesialist.api.Personhåndterer
-import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
@@ -98,7 +98,7 @@ internal class MeldingMediator(
     private val varselRepository: VarselRepository = VarselRepository(dataSource),
     private val generasjonRepository: GenerasjonRepository = GenerasjonRepository(dataSource),
     private val metrikkDao: MetrikkDao = MetrikkDao(dataSource),
-    private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
+    private val stansAutomatiskBehandlingMediator: StansAutomatiskBehandlingMediator,
     private val generasjonDao: GenerasjonDao,
     private val avslagDao: AvslagDao,
     private val personRepository: PersonRepository = PersonRepository(dataSource),
@@ -337,17 +337,7 @@ internal class MeldingMediator(
         opprettet: LocalDateTime,
         originalMelding: String,
         kilde: String,
-    ) {
-        stansAutomatiskBehandlinghåndterer.lagre(
-            fødselsnummer = fødselsnummer,
-            status = status,
-            årsaker = årsaker,
-            opprettet = opprettet,
-            originalMelding = originalMelding,
-            kilde = kilde,
-        )
-        stansAutomatiskBehandlinghåndterer.lagrePeriodehistorikk(fødselsnummer = fødselsnummer)
-    }
+    ) = stansAutomatiskBehandlingMediator.håndter(fødselsnummer, status, årsaker, opprettet, originalMelding, kilde)
 
     fun slettGamleDokumenter(): Int {
         return dokumentDao.slettGamleDokumenter()

@@ -10,7 +10,7 @@ import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mediator.oppgave.OppgaveMediator
-import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingService
+import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
@@ -18,6 +18,7 @@ import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.graphql.mutation.Avslag
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
+import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
@@ -54,11 +55,12 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private val testRapid = TestRapid()
     private val tildelingDbDao = no.nav.helse.db.TildelingDao(dataSource)
     private val saksbehandlerRepository = SaksbehandlerDao(dataSource)
-    private val stansAutomatiskBehandlingService =
-        StansAutomatiskBehandlingService(
+    private val stansAutomatiskBehandlingMediator =
+        StansAutomatiskBehandlingMediator(
             stansAutomatiskBehandlingDao,
             periodehistorikkDao,
             oppgaveDao,
+            NotatMediator(notatDao),
         )
     private val oppgaveMediator =
         OppgaveMediator(
@@ -74,7 +76,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             tilgangsgrupper,
         )
     private val mediator =
-        SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, oppgaveMediator, tilgangsgrupper, stansAutomatiskBehandlingService)
+        SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, oppgaveMediator, tilgangsgrupper, stansAutomatiskBehandlingMediator)
 
     private val AKTØR_ID = lagAktørId()
     private val FØDSELSNUMMER = lagFødselsnummer()

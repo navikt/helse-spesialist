@@ -46,6 +46,7 @@ import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
@@ -162,6 +163,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val dokumentDao = DokumentDao(dataSource)
     internal val påVentDao = PåVentDao(dataSource)
     internal val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(dataSource)
+    internal val notatDao = NotatDao(dataSource)
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,
