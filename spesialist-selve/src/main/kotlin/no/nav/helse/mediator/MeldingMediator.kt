@@ -177,7 +177,7 @@ internal class MeldingMediator(
             )
         rivers.forEach { river ->
             River(delegatedRapid).validate(river.validations()).register(river).onSuccess { packet, _ ->
-                packet.interestedIn("@d", "@event_name")
+                packet.interestedIn("@id", "@event_name")
                 val id = packet["@id"].asText() ?: "ukjent"
                 val type = packet["@event_name"].asText() ?: "ukjent"
                 logg.info("${river.name()} leste melding id=$id, event_name=$type, meldingPasserteValidering=$meldingPasserteValidering")
