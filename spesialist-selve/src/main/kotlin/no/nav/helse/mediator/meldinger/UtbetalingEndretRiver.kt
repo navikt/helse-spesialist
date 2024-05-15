@@ -85,5 +85,6 @@ internal class UtbetalingEndretRiver(
                 "2YG7TGWMJJHNPPY5JP5CHUIFII",
                 "PJV6BYWUEVFCZIDNXG4MYR6ICM",
                 "GUEFZE3CIJHHJNYIIOWG3XJUW4",
+                "FT574IJ4AZCXRHXNMSEWJV7JBM",
             )
 }
