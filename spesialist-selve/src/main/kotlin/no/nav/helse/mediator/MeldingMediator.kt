@@ -376,6 +376,7 @@ internal class MeldingMediator(
             setOf(
                 "c2ffe6ca-4b63-421d-b4e8-e57f34da5bef",
                 "20bf35c2-1ff7-4af1-933c-0ffc91e206c6",
+                "08625b54-dfbe-4bf4-94b8-3bf6f81fbf73",
             )
         ) {
             logg.info("Ignorerer påminnelse for kontekster for melding_id=$meldingId som ikke lar seg gjenoppta")
