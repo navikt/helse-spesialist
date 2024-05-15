@@ -176,7 +176,11 @@ internal class MeldingMediator(
                 StansAutomatiskBehandlingRiver(this),
             )
         rivers.forEach { river ->
-            River(delegatedRapid).validate(river.validations()).register(river).onSuccess { _, _ ->
+            River(delegatedRapid).validate(river.validations()).register(river).onSuccess { packet, _ ->
+                packet.interestedIn("@d", "@event_name")
+                val id = packet["@id"].asText() ?: "ukjent"
+                val type = packet["@event_name"].asText() ?: "ukjent"
+                logg.info("${river.name()} leste melding id=$id, event_name=$type, meldingPasserteValidering=$meldingPasserteValidering")
                 meldingPasserteValidering = true
             }
         }
@@ -419,6 +423,7 @@ internal class MeldingMediator(
             val jsonNode = objectMapper.readTree(message)
             jsonNode["@id"]?.asUUID()?.let { id ->
                 val type = jsonNode["@event_name"]?.asText() ?: "ukjent"
+                logg.info("Markerer melding id=$id, type=$type som behandlet i duplikatkontroll")
                 meldingDuplikatkontrollDao.lagre(id, type)
             }
         }
