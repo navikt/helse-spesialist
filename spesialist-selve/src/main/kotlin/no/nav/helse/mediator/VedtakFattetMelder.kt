@@ -168,7 +168,7 @@ internal class VedtakFattetMelder(
                                 "type" to
                                     when (sykepengevedtak.avslag!!.type) {
                                         Avslagstype.AVSLAG -> "Avslag"
-                                        Avslagstype.DELVIS_AVSLAG -> "DelvisAvslag"
+                                        Avslagstype.DELVIS_AVSLAG -> "DelvisInnvilgelse"
                                     },
                                 "begrunnelse" to sykepengevedtak.avslag!!.begrunnelse,
                                 "perioder" to

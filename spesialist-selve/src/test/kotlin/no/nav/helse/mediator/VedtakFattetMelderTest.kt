@@ -327,7 +327,7 @@ internal class VedtakFattetMelderTest {
         assertEquals(1, event["begrunnelser"].size())
         assertEquals(1, event["tags"].size())
         assertEquals("IngenNyArbeidsgiverperiode", event["tags"].first().asText())
-        assertEquals("DelvisAvslag", event["begrunnelser"][0]["type"].asText())
+        assertEquals("DelvisInnvilgelse", event["begrunnelser"][0]["type"].asText())
         assertEquals("En individuell begrunnelse", event["begrunnelser"][0]["begrunnelse"].asText())
         assertEquals(
             listOf(mapOf("fom" to fom, "tom" to tom)),
