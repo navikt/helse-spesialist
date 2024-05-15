@@ -7,13 +7,13 @@ import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
-import no.nav.helse.modell.Avviksvurdering
-import no.nav.helse.modell.BeregningsgrunnlagDto
-import no.nav.helse.modell.InnrapportertInntektDto
-import no.nav.helse.modell.InntektDto
-import no.nav.helse.modell.OmregnetÅrsinntektDto
-import no.nav.helse.modell.SammenligningsgrunnlagDto
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
+import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
+import no.nav.helse.modell.vilkårsprøving.BeregningsgrunnlagDto
+import no.nav.helse.modell.vilkårsprøving.InnrapportertInntektDto
+import no.nav.helse.modell.vilkårsprøving.InntektDto
+import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntektDto
+import no.nav.helse.modell.vilkårsprøving.SammenligningsgrunnlagDto
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
@@ -44,8 +44,8 @@ internal class AvsluttetMedVedtakRiverTest {
         verify(exactly = 3) { mediator.håndter(any<AvsluttetMedVedtakMessage>(), any()) }
     }
 
-    private fun avviksvurdering(): Avviksvurdering =
-        Avviksvurdering(
+    private fun avviksvurdering(): AvviksvurderingDto =
+        AvviksvurderingDto(
             unikId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID(),
             fødselsnummer = "12345678910",

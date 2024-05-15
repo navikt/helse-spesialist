@@ -1,4 +1,4 @@
-package no.nav.helse.modell
+package no.nav.helse.modell.vilkårsprøving
 
 import java.time.LocalDate
 import java.time.LocalDateTime

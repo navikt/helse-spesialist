@@ -4,10 +4,9 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
-import no.nav.helse.modell.Avviksvurdering
-import no.nav.helse.modell.AvviksvurderingDto
-import no.nav.helse.modell.BeregningsgrunnlagDto
-import no.nav.helse.modell.SammenligningsgrunnlagDto
+import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
+import no.nav.helse.modell.vilkårsprøving.BeregningsgrunnlagDto
+import no.nav.helse.modell.vilkårsprøving.SammenligningsgrunnlagDto
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.avviksvurdering.Beregningsgrunnlag
 import no.nav.helse.spesialist.api.avviksvurdering.Sammenligningsgrunnlag
@@ -84,7 +83,7 @@ class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSour
         }
     }
 
-    internal fun finnAvviksvurderinger(fødselsnummer: String): List<Avviksvurdering> =
+    internal fun finnAvviksvurderinger(fødselsnummer: String): List<AvviksvurderingDto> =
         asSQL(
             """
             SELECT av.unik_id, vpa.vilkårsgrunnlag_id, av.fødselsnummer, av.skjæringstidspunkt, av.opprettet, avviksprosent, beregningsgrunnlag, sg.sammenligningsgrunnlag FROM avviksvurdering av 
@@ -97,7 +96,7 @@ class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSour
                 "fodselsnummer" to fødselsnummer,
             ),
         ).list {
-            Avviksvurdering(
+            AvviksvurderingDto(
                 unikId = it.uuid("unik_id"),
                 vilkårsgrunnlagId = it.uuid("vilkårsgrunnlag_id"),
                 fødselsnummer = it.string("fødselsnummer"),

@@ -4,13 +4,12 @@ import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.januar
-import no.nav.helse.modell.Avviksvurdering
-import no.nav.helse.modell.AvviksvurderingDto
-import no.nav.helse.modell.BeregningsgrunnlagDto
-import no.nav.helse.modell.InnrapportertInntektDto
-import no.nav.helse.modell.InntektDto
-import no.nav.helse.modell.OmregnetÅrsinntektDto
-import no.nav.helse.modell.SammenligningsgrunnlagDto
+import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
+import no.nav.helse.modell.vilkårsprøving.BeregningsgrunnlagDto
+import no.nav.helse.modell.vilkårsprøving.InnrapportertInntektDto
+import no.nav.helse.modell.vilkårsprøving.InntektDto
+import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntektDto
+import no.nav.helse.modell.vilkårsprøving.SammenligningsgrunnlagDto
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -273,8 +272,8 @@ internal class AvviksvurderingDaoTest : DatabaseIntegrationTest() {
         unikId: UUID,
         vilkårsgrunnlagId: UUID,
         opprettet: LocalDateTime,
-    ): Avviksvurdering {
-        return Avviksvurdering(
+    ): AvviksvurderingDto {
+        return AvviksvurderingDto(
             unikId = unikId,
             vilkårsgrunnlagId = vilkårsgrunnlagId,
             fødselsnummer = fødselsnummer,

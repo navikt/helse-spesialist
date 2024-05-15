@@ -3,7 +3,7 @@ package no.nav.helse.mediator.meldinger
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.MeldingMediator
-import no.nav.helse.modell.AvviksvurderingDto
+import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.BeforeEach

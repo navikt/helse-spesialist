@@ -3,12 +3,12 @@ package no.nav.helse.mediator.meldinger.hendelser
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.modell.Avviksvurdering
-import no.nav.helse.modell.BeregningsgrunnlagDto
-import no.nav.helse.modell.InnrapportertInntektDto
-import no.nav.helse.modell.InntektDto
-import no.nav.helse.modell.OmregnetÅrsinntektDto
-import no.nav.helse.modell.SammenligningsgrunnlagDto
+import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
+import no.nav.helse.modell.vilkårsprøving.BeregningsgrunnlagDto
+import no.nav.helse.modell.vilkårsprøving.InnrapportertInntektDto
+import no.nav.helse.modell.vilkårsprøving.InntektDto
+import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntektDto
+import no.nav.helse.modell.vilkårsprøving.SammenligningsgrunnlagDto
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -27,7 +27,7 @@ class AvvikVurdertMessage(packet: JsonMessage) {
 
     private val avviksvurdering
         get() =
-            Avviksvurdering(
+            AvviksvurderingDto(
                 unikId = unikId,
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
                 fødselsnummer = fødselsnummer,
@@ -36,7 +36,7 @@ class AvvikVurdertMessage(packet: JsonMessage) {
                 avviksprosent = avviksprosent,
                 sammenligningsgrunnlag = sammenligningsgrunnlag,
                 beregningsgrunnlag = beregningsgrunnlag,
-            ).toDto()
+            )
 
     internal fun sendInnTil(mediator: MeldingMediator) {
         mediator.håndter(avviksvurdering)
