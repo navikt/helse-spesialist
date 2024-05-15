@@ -42,7 +42,7 @@ internal class AvviksvurderingDaoTest : DatabaseIntegrationTest() {
         val skjæringstidspunkt = 1.januar
         val unikId = UUID.randomUUID()
         val vilkårsgrunnlagId = UUID.randomUUID()
-        val opprettet = LocalDateTime.now()
+        val opprettet = LocalDateTime.now().withNano(0)
         avviksvurderingDao.lagre(
             avviksvurdering(
                 fødselsnummer = FNR,
