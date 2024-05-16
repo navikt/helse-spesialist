@@ -26,6 +26,10 @@ spec:
       memory: 128Mi
   replicas:
     disableAutoScaling: true
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
   prometheus:
     enabled: true
     path: /metrics
