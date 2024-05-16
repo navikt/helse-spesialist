@@ -60,6 +60,7 @@ internal class TestMediator(
             StansAutomatiskBehandlingDao(dataSource),
             periodehistorikkDao,
             oppgaveDao,
+            utbetalingDao,
             NotatMediator(NotatDao(dataSource)),
         )
 

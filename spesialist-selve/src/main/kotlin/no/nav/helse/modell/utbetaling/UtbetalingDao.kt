@@ -2,13 +2,14 @@ package no.nav.helse.modell.utbetaling
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.HelseDao
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-class UtbetalingDao(private val dataSource: DataSource) {
+class UtbetalingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     fun erUtbetaltFør(aktørId: String): Boolean {
         @Language("PostgreSQL")
         val statement = """
@@ -258,7 +259,8 @@ class UtbetalingDao(private val dataSource: DataSource) {
 
     internal fun utbetalingFor(utbetalingId: UUID): Utbetaling? {
         @Language("PostgreSQL")
-        val query = "SELECT arbeidsgiverbeløp, personbeløp, type FROM utbetaling_id u WHERE u.utbetaling_id = :utbetaling_id"
+        val query =
+            "SELECT arbeidsgiverbeløp, personbeløp, type FROM utbetaling_id u WHERE u.utbetaling_id = :utbetaling_id"
         return sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(query, mapOf("utbetaling_id" to utbetalingId)).map {
@@ -275,7 +277,8 @@ class UtbetalingDao(private val dataSource: DataSource) {
 
     internal fun utbetalingFor(oppgaveId: Long): Utbetaling? {
         @Language("PostgreSQL")
-        val query = "SELECT utbetaling_id, arbeidsgiverbeløp, personbeløp, type FROM utbetaling_id u WHERE u.utbetaling_id = (SELECT utbetaling_id FROM oppgave o WHERE o.id = :oppgave_id)"
+        val query =
+            "SELECT utbetaling_id, arbeidsgiverbeløp, personbeløp, type FROM utbetaling_id u WHERE u.utbetaling_id = (SELECT utbetaling_id FROM oppgave o WHERE o.id = :oppgave_id)"
         return sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(query, mapOf("oppgave_id" to oppgaveId)).map {
@@ -314,4 +317,18 @@ class UtbetalingDao(private val dataSource: DataSource) {
             )
         }
     }
+
+    internal fun sisteUtbetalingIdFor(fødselsnummer: String) =
+        asSQL(
+            """
+            select ui.utbetaling_id from utbetaling_id ui 
+            join person p on ui.person_ref = p.id 
+            where p.fodselsnummer = :fnr
+            order by ui.id desc
+            limit 1;
+            """.trimIndent(),
+            mapOf(
+                "fnr" to fødselsnummer.toLong(),
+            ),
+        ).single { it.uuid("utbetaling_id") }
 }

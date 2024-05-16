@@ -1,8 +1,6 @@
 package no.nav.helse.modell
 
 import DatabaseIntegrationTest
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.juli
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
@@ -15,10 +13,11 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import java.time.LocalDateTime
+import java.util.UUID
 import kotlin.random.Random.Default.nextLong
 
 class UtbetalingDaoTest : DatabaseIntegrationTest() {
-
     @Test
     fun `Ingen tidligere utbetalinger`() {
         nyPerson()
@@ -47,7 +46,17 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
         val arbeidsgiveroppdragId1 = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
         val personOppdragId1 = lagPersonoppdrag(personFagsystemId)
         val utbetalingId = UUID.randomUUID()
-        utbetalingDao.opprettUtbetalingId(utbetalingId, FNR, ORGNUMMER, Utbetalingtype.UTBETALING, LocalDateTime.now(), arbeidsgiveroppdragId1, personOppdragId1, 2000, 2000)
+        utbetalingDao.opprettUtbetalingId(
+            utbetalingId,
+            FNR,
+            ORGNUMMER,
+            Utbetalingtype.UTBETALING,
+            LocalDateTime.now(),
+            arbeidsgiveroppdragId1,
+            personOppdragId1,
+            2000,
+            2000,
+        )
 
         val utbetaling = utbetalingDao.utbetalingFor(utbetalingId)
         assertEquals(Utbetaling(utbetalingId, 2000, 2000, Utbetalingtype.UTBETALING), utbetaling)
@@ -63,18 +72,65 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
         val personOppdragId1 = lagPersonoppdrag(personFagsystemId)
         val utbetalingId = UUID.randomUUID()
         oppgaveDao.updateOppgave(oppgaveId = OPPGAVE_ID, oppgavestatus = "Ferdigstilt", egenskaper = listOf(EGENSKAP))
-        val oppgaveId = oppgaveDao.opprettOppgave(
-            nextLong(),
-            UUID.randomUUID(),
-            listOf(EGENSKAP),
-            VEDTAKSPERIODE,
+        val oppgaveId =
+            oppgaveDao.opprettOppgave(
+                nextLong(),
+                UUID.randomUUID(),
+                listOf(EGENSKAP),
+                VEDTAKSPERIODE,
+                utbetalingId,
+                true,
+            )
+        utbetalingDao.opprettUtbetalingId(
             utbetalingId,
-            true
+            FNR,
+            ORGNUMMER,
+            Utbetalingtype.UTBETALING,
+            LocalDateTime.now(),
+            arbeidsgiveroppdragId1,
+            personOppdragId1,
+            2000,
+            2000,
         )
-        utbetalingDao.opprettUtbetalingId(utbetalingId, FNR, ORGNUMMER, Utbetalingtype.UTBETALING, LocalDateTime.now(), arbeidsgiveroppdragId1, personOppdragId1, 2000, 2000)
 
         val utbetaling = utbetalingDao.utbetalingFor(oppgaveId)
         assertEquals(Utbetaling(utbetalingId, 2000, 2000, Utbetalingtype.UTBETALING), utbetaling)
+    }
+
+    @Test
+    fun `finner siste utbetaling for fødselsnummer`() {
+        nyPerson()
+        val arbeidsgiveroppdragId1 = lagArbeidsgiveroppdrag(fagsystemId())
+        val arbeidsgiveroppdragId2 = lagArbeidsgiveroppdrag(fagsystemId())
+        val personOppdragId1 = lagPersonoppdrag(fagsystemId())
+        val personOppdragId2 = lagPersonoppdrag(fagsystemId())
+        val utbetalingId = UUID.randomUUID()
+
+        utbetalingDao.opprettUtbetalingId(
+            UUID.randomUUID(),
+            FNR,
+            ORGNUMMER,
+            Utbetalingtype.UTBETALING,
+            LocalDateTime.now(),
+            arbeidsgiveroppdragId1,
+            personOppdragId1,
+            2000,
+            2000,
+        )
+        utbetalingDao.opprettUtbetalingId(
+            utbetalingId,
+            FNR,
+            ORGNUMMER,
+            Utbetalingtype.UTBETALING,
+            LocalDateTime.now(),
+            arbeidsgiveroppdragId2,
+            personOppdragId2,
+            3000,
+            3000,
+        )
+        val sisteUtbetalingId = utbetalingDao.sisteUtbetalingIdFor(FNR)
+
+        assertEquals(utbetalingId, sisteUtbetalingId)
     }
 
     @Test
@@ -123,7 +179,17 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
         val arbeidsgiveroppdragId1 = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
         val personOppdragId1 = lagPersonoppdrag(personFagsystemId)
         val utbetalingId = UUID.randomUUID()
-        utbetalingDao.opprettUtbetalingId(utbetalingId, FNR, ORGNUMMER, Utbetalingtype.UTBETALING, LocalDateTime.now(), arbeidsgiveroppdragId1, personOppdragId1, 2000, 2000)
+        utbetalingDao.opprettUtbetalingId(
+            utbetalingId,
+            FNR,
+            ORGNUMMER,
+            Utbetalingtype.UTBETALING,
+            LocalDateTime.now(),
+            arbeidsgiveroppdragId1,
+            personOppdragId1,
+            2000,
+            2000,
+        )
         assertArbeidsgiverbeløp(2000, utbetalingId)
         assertPersonbeløp(2000, utbetalingId)
     }
@@ -146,19 +212,27 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
         }
     }
 
-    private fun assertArbeidsgiverbeløp(beløp: Int, utbetalingId: UUID) {
-        val arbeidsgiverbeløp = query(
-            "SELECT arbeidsgiverbeløp FROM utbetaling_id WHERE utbetaling_id = :utbetalingId",
-            "utbetalingId" to utbetalingId
-        ).single { it.intOrNull("arbeidsgiverbeløp") }
+    private fun assertArbeidsgiverbeløp(
+        beløp: Int,
+        utbetalingId: UUID,
+    ) {
+        val arbeidsgiverbeløp =
+            query(
+                "SELECT arbeidsgiverbeløp FROM utbetaling_id WHERE utbetaling_id = :utbetalingId",
+                "utbetalingId" to utbetalingId,
+            ).single { it.intOrNull("arbeidsgiverbeløp") }
         assertEquals(beløp, arbeidsgiverbeløp)
     }
 
-    private fun assertPersonbeløp(beløp: Int, utbetalingId: UUID) {
-        val personbeløp = query(
-            "SELECT personbeløp FROM utbetaling_id WHERE utbetaling_id = :utbetalingId",
-            "utbetalingId" to utbetalingId
-        ).single { it.intOrNull("personbeløp") }
+    private fun assertPersonbeløp(
+        beløp: Int,
+        utbetalingId: UUID,
+    ) {
+        val personbeløp =
+            query(
+                "SELECT personbeløp FROM utbetaling_id WHERE utbetaling_id = :utbetalingId",
+                "utbetalingId" to utbetalingId,
+            ).single { it.intOrNull("personbeløp") }
         assertEquals(beløp, personbeløp)
     }
 }

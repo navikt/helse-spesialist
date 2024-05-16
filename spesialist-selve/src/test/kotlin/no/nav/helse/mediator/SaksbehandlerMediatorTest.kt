@@ -60,6 +60,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             stansAutomatiskBehandlingDao,
             periodehistorikkDao,
             oppgaveDao,
+            utbetalingDao,
             NotatMediator(notatDao),
         )
     private val oppgaveMediator =

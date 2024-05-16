@@ -204,6 +204,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val personDao = PersonDao(dataSource)
     private val personApiDao = PersonApiDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
+    private val utbetalingDao = UtbetalingDao(dataSource)
     private val oppgaveApiDao = OppgaveApiDao(dataSource)
     private val periodehistorikkDao = PeriodehistorikkDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
@@ -251,7 +252,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             vedtakDao,
             opptegnelseDao,
             oppgaveDao,
-            UtbetalingDao(dataSource),
+            utbetalingDao,
             meldingDao,
             generasjonDao,
         )
@@ -260,7 +261,13 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         TotrinnsvurderingMediator(TotrinnsvurderingDao(dataSource), oppgaveDao, periodehistorikkDao, notatMediator)
 
     private val stansAutomatiskBehandlingMediator =
-        StansAutomatiskBehandlingMediator(StansAutomatiskBehandlingDao(dataSource), periodehistorikkDao, oppgaveDao, notatMediator)
+        StansAutomatiskBehandlingMediator(
+            StansAutomatiskBehandlingDao(dataSource),
+            periodehistorikkDao,
+            oppgaveDao,
+            utbetalingDao,
+            notatMediator,
+        )
 
     private val snapshotMediator =
         SnapshotMediator(

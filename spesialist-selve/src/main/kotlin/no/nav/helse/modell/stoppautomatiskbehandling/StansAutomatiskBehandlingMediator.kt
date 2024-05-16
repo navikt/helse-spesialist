@@ -5,6 +5,7 @@ import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.Personhandling
+import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.graphql.schema.UnntattFraAutomatiskGodkjenning
@@ -20,6 +21,7 @@ class StansAutomatiskBehandlingMediator(
     private val stansAutomatiskBehandlingDao: StansAutomatiskBehandlingDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val oppgaveDao: OppgaveDao,
+    private val utbetalingDao: UtbetalingDao,
     private val notatMediator: NotatMediator,
 ) : StansAutomatiskBehandlinghåndterer {
     private val logg = LoggerFactory.getLogger(this::class.java)
@@ -83,12 +85,12 @@ class StansAutomatiskBehandlingMediator(
     }
 
     private fun lagrePeriodehistorikk(fødselsnummer: String) {
-        try {
-            val oppgaveId = fødselsnummer.finnOppgaveId()
-            oppgaveDao.finnUtbetalingId(oppgaveId)?.also {
-                periodehistorikkDao.lagre(STANS_AUTOMATISK_BEHANDLING, null, it, null)
-            }
-        } catch (e: Exception) {
+        val utbetalingId =
+            oppgaveDao.finnOppgaveId(fødselsnummer)?.let { oppgaveDao.finnUtbetalingId(it) }
+                ?: utbetalingDao.sisteUtbetalingIdFor(fødselsnummer)
+        if (utbetalingId != null) {
+            periodehistorikkDao.lagre(STANS_AUTOMATISK_BEHANDLING, null, utbetalingId, null)
+        } else {
             sikkerlogg.error("Fant ikke oppgave for $fødselsnummer. Fikk ikke lagret historikkinnslag om stans av automatisk behandling")
         }
     }
