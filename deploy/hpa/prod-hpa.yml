@@ -1,2 +1,2 @@
-minReplicas: 8
-maxReplicas: 8
+minReplicas: 4
+maxReplicas: 24
