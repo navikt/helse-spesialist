@@ -1,6 +1,7 @@
 package no.nav.helse.mediator
 
 import SøknadSendtArbeidsledigRiver
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.MetrikkRiver
 import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.AvviksvurderingDao
@@ -115,14 +116,29 @@ internal class MeldingMediator(
 
     private fun skalBehandleMelding(melding: String): Boolean {
         val jsonNode = objectMapper.readTree(melding)
+        if (erDuplikat(jsonNode)) return false
+        if (erProd()) return true
+        return skalBehandleMeldingIDev(jsonNode)
+    }
+
+    private fun erDuplikat(jsonNode: JsonNode): Boolean {
         jsonNode["@id"]?.asUUID()?.let { id ->
             if (meldingDuplikatkontrollDao.erBehandlet(id)) {
-                logg.info("Ville ha ignorert melding {}", id)
+                logg.info("Ignorerer melding {} pga duplikatkontroll", id)
+                return true
             }
         }
-        if (erProd()) return true
+        return false
+    }
+
+    private fun skalBehandleMeldingIDev(jsonNode: JsonNode): Boolean {
         val eventName = jsonNode["@event_name"]?.asText()
-        if (eventName in setOf("sendt_søknad_arbeidsgiver", "sendt_søknad_nav", "stans_automatisk_behandling")) return true
+        if (eventName in setOf(
+                "sendt_søknad_arbeidsgiver",
+                "sendt_søknad_nav",
+                "stans_automatisk_behandling"
+            )
+        ) return true
         val fødselsnummer = jsonNode["fødselsnummer"]?.asText() ?: return true
         if (fødselsnummer.toDoubleOrNull() == null) return true
         val harPerson = personDao.findPersonByFødselsnummer(fødselsnummer) != null
