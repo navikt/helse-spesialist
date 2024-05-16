@@ -132,7 +132,7 @@ internal class MeldingMediator(
 
     init {
         val delegatedRapid =
-            DelegatedRapid(rapidsConnection, ::forbered, ::skalBehandleMelding, ::fortsett, ::errorHandler)
+            DelegatedRapid(rapidsConnection, ::nullstillTilstand, ::skalBehandleMelding, ::fortsett, ::errorHandler)
         val rivers =
             setOf(
                 GodkjenningsbehovRiver(this),
@@ -361,7 +361,7 @@ internal class MeldingMediator(
         return dokumentDao.slettGamleDokumenter()
     }
 
-    private fun forbered() {
+    private fun nullstillTilstand() {
         løsninger = null
         meldingPasserteValidering = false
     }
