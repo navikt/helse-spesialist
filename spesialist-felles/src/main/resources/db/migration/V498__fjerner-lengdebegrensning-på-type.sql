@@ -1,0 +1,1 @@
+ALTER TABLE melding_duplikatkontroll ALTER COLUMN type TYPE VARCHAR;
