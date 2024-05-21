@@ -291,7 +291,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     @Test
     fun `periode med avslag`() {
         val avslagsbegrunnelse = "En individuell begrunnelse"
-        every { saksbehandlerhåndterer.hentAvslag(any(), any()) } returns setOf(Avslag(type = Avslagstype.AVSLAG, begrunnelse = avslagsbegrunnelse, opprettet = now().toString(), saksbehandlerIdent = "AIDENT"))
+        every { saksbehandlerhåndterer.hentAvslag(any(), any()) } returns setOf(Avslag(type = Avslagstype.AVSLAG, begrunnelse = avslagsbegrunnelse, opprettet = now().toString(), saksbehandlerIdent = "AIDENT", invalidert = false))
 
         val personRef = opprettPerson()
         val arbeidsgiverRef = opprettArbeidsgiver()

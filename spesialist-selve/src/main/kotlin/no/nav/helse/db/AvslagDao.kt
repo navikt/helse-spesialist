@@ -104,7 +104,7 @@ class AvslagDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     ): Set<no.nav.helse.spesialist.api.graphql.schema.Avslag> =
         asSQL(
             """
-            SELECT b.type, b.tekst, a.opprettet, s.ident FROM avslag a 
+            SELECT b.type, b.tekst, a.opprettet, s.ident, a.invalidert FROM avslag a 
             INNER JOIN selve_vedtaksperiode_generasjon svg ON a.generasjon_ref = svg.id 
             INNER JOIN begrunnelse b ON b.id = a.begrunnelse_ref
             INNER JOIN saksbehandler s ON s.oid = b.saksbehandler_ref
@@ -121,6 +121,7 @@ class AvslagDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 avslag.string("tekst"),
                 avslag.localDateTime("opprettet").toString(),
                 avslag.string("ident"),
+                avslag.boolean("invalidert"),
             )
         }.toSet()
 }

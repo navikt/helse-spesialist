@@ -8,6 +8,7 @@ import no.nav.helse.db.AvslagDao
 import no.nav.helse.spesialist.api.graphql.mutation.Avslag
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -66,6 +67,8 @@ internal class AvslagDaoTest : DatabaseIntegrationTest() {
         assertEquals("En individuell begrunelse delvis avslag retter skrivefeil", lagredeAvslag.first().begrunnelse)
         assertEquals(SAKSBEHANDLER_IDENT, lagredeAvslag.last().saksbehandlerIdent)
         assertEquals(SAKSBEHANDLER_IDENT, lagredeAvslag.first().saksbehandlerIdent)
+        assertFalse(lagredeAvslag.last().invalidert!!)
+        assertFalse(lagredeAvslag.first().invalidert!!)
     }
 
 

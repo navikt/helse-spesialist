@@ -113,6 +113,7 @@ type AvsenderSystem {
 
 type Avslag {
     begrunnelse: String!
+    invalidert: Boolean
     opprettet: String!
     saksbehandlerIdent: String!
     type: Avslagstype!
