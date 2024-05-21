@@ -405,6 +405,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 tildelingDao = tildelingDao,
                 reservasjonDao = reservasjonDao,
                 opptegnelseDao = opptegnelseDao,
+                generasjonDao = generasjonDao,
                 totrinnsvurderingRepository = totrinnsvurderingDao,
                 saksbehandlerRepository = saksbehandlerDao,
                 rapidsConnection = rapidsConnection,

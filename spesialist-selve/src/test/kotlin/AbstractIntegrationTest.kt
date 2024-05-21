@@ -11,6 +11,7 @@ import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
+import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.notat.NotatDao
@@ -33,36 +34,40 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     private val meldingDao = MeldingDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
 
-    private val oppgaveMediator = OppgaveMediator(
-        oppgaveDao = OppgaveDao(dataSource),
-        tildelingDao = TildelingDao(dataSource),
-        reservasjonDao = reservasjonDao,
-        opptegnelseDao = OpptegnelseDao(dataSource),
-        totrinnsvurderingRepository = totrinnsvurderingDao,
-        saksbehandlerRepository = SaksbehandlerDao(dataSource),
-        rapidsConnection = testRapid,
-        meldingDao = meldingDao,
-        tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
-        tilgangsgrupper = Tilgangsgrupper(testEnv),
-    )
+    private val oppgaveMediator =
+        OppgaveMediator(
+            meldingDao = meldingDao,
+            oppgaveDao = OppgaveDao(dataSource),
+            tildelingDao = TildelingDao(dataSource),
+            reservasjonDao = reservasjonDao,
+            opptegnelseDao = OpptegnelseDao(dataSource),
+            generasjonDao = GenerasjonDao(dataSource),
+            totrinnsvurderingRepository = totrinnsvurderingDao,
+            saksbehandlerRepository = SaksbehandlerDao(dataSource),
+            rapidsConnection = testRapid,
+            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
+            tilgangsgrupper = Tilgangsgrupper(testEnv),
+        )
 
-    val godkjenningService = GodkjenningService(
-        dataSource = dataSource,
-        oppgaveDao = oppgaveDao,
-        meldingDao = meldingDao,
-        overstyringDao = OverstyringDao(dataSource),
-        rapidsConnection = testRapid,
-        oppgaveMediator = oppgaveMediator,
-        reservasjonDao = reservasjonDao,
-        periodehistorikkDao = periodehistorikkDao,
-        saksbehandlerRepository = saksbehandlerDao,
-        totrinnsvurderingMediator = TotrinnsvurderingMediator(
-            totrinnsvurderingDao,
-            oppgaveDao,
-            periodehistorikkDao,
-            NotatMediator(NotatDao(dataSource)),
-        ),
-    )
+    val godkjenningService =
+        GodkjenningService(
+            dataSource = dataSource,
+            oppgaveDao = oppgaveDao,
+            meldingDao = meldingDao,
+            overstyringDao = OverstyringDao(dataSource),
+            rapidsConnection = testRapid,
+            oppgaveMediator = oppgaveMediator,
+            reservasjonDao = reservasjonDao,
+            periodehistorikkDao = periodehistorikkDao,
+            saksbehandlerRepository = saksbehandlerDao,
+            totrinnsvurderingMediator =
+                TotrinnsvurderingMediator(
+                    totrinnsvurderingDao,
+                    oppgaveDao,
+                    periodehistorikkDao,
+                    NotatMediator(NotatDao(dataSource)),
+                ),
+        )
 
     protected fun sisteOppgaveId() = testRapid.inspektør.oppgaveId()
 
@@ -91,7 +96,10 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
             assertEquals(årsakerTilAvvist.toSet(), begrunnelser.toSet())
         }
 
-        if (totrinnsvurdering) assertNotNull(løsning["beslutter"])
-        else assertNull(løsning["beslutter"])
+        if (totrinnsvurdering) {
+            assertNotNull(løsning["beslutter"])
+        } else {
+            assertNull(løsning["beslutter"])
+        }
     }
 }

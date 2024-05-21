@@ -81,6 +81,7 @@ internal class TestMediator(
             tildelingDao = tildelingDao,
             reservasjonDao = ReservasjonDao(dataSource),
             opptegnelseDao = opptegnelseDao,
+            generasjonDao = generasjonDao,
             totrinnsvurderingRepository = totrinnsvurderingDao,
             saksbehandlerRepository = saksbehandlerDao,
             rapidsConnection = testRapid,

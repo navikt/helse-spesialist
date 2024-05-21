@@ -29,6 +29,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import no.nav.helse.modell.saksbehandler.handlinger.PåVent
+import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
@@ -59,6 +60,7 @@ internal class OppgaveMediator(
     private val tildelingDao: TildelingDao,
     private val reservasjonDao: ReservasjonDao,
     private val opptegnelseDao: OpptegnelseDao,
+    private val generasjonDao: GenerasjonDao,
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
     private val saksbehandlerRepository: SaksbehandlerRepository,
     private val rapidsConnection: RapidsConnection,
@@ -75,7 +77,7 @@ internal class OppgaveMediator(
     ) {
         val nesteId = oppgaveDao.reserverNesteId()
         val oppgave = opprettOppgaveBlock(nesteId)
-        val oppgavemelder = Oppgavemelder(meldingDao, rapidsConnection)
+        val oppgavemelder = Oppgavemelder(meldingDao, generasjonDao, rapidsConnection)
         oppgave.register(oppgavemelder)
         tildelVedReservasjon(fødselsnummer, oppgave)
         Oppgavelagrer(tildelingDao).apply {
@@ -96,7 +98,7 @@ internal class OppgaveMediator(
                 saksbehandlerRepository,
                 tilgangskontroll,
             ).oppgave(id)
-        oppgave.register(Oppgavemelder(meldingDao, rapidsConnection))
+        oppgave.register(Oppgavemelder(meldingDao, generasjonDao, rapidsConnection))
         val returverdi = oppgaveBlock(oppgave)
         Oppgavelagrer(tildelingDao).apply {
             oppgave.accept(this)
