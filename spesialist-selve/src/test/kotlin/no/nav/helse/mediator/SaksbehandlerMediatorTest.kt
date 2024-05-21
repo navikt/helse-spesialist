@@ -65,17 +65,16 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         )
     private val oppgaveMediator =
         OppgaveMediator(
-            meldingDao = meldingDao,
-            oppgaveDao = oppgaveDao,
-            tildelingDao = tildelingDbDao,
-            reservasjonDao = reservasjonDao,
-            opptegnelseDao = opptegnelseDao,
-            generasjonDao = generasjonDao,
-            totrinnsvurderingRepository = totrinnsvurderingDao,
-            saksbehandlerRepository = saksbehandlerRepository,
-            rapidsConnection = testRapid,
-            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
-            tilgangsgrupper = tilgangsgrupper,
+            meldingDao,
+            oppgaveDao,
+            tildelingDbDao,
+            reservasjonDao,
+            opptegnelseDao,
+            totrinnsvurderingDao,
+            saksbehandlerRepository,
+            testRapid,
+            TilgangskontrollForTestHarIkkeTilgang,
+            tilgangsgrupper,
         )
     private val mediator =
         SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, oppgaveMediator, tilgangsgrupper, stansAutomatiskBehandlingMediator)

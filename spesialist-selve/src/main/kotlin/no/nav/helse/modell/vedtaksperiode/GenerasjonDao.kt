@@ -70,23 +70,6 @@ class GenerasjonDao(private val dataSource: DataSource) {
         )
     }
 
-    internal fun finnVedtaksperiodeMetadataFor(oppgaveId: Long): Pair<UUID, UUID>? {
-        @Language("PostgreSQL")
-        val query =
-            """
-            SELECT vedtaksperiode_id, spleis_behandling_id FROM selve_vedtaksperiode_generasjon svg
-            JOIN oppgave o ON o.generasjon_ref = svg.unik_id
-            WHERE o.id = :oppgave_id
-            """.trimIndent()
-        return sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(query, mapOf("oppgave_id" to oppgaveId)).map { row ->
-                    row.uuid("vedtaksperiode_id") to row.uuid("spleis_behandling_id")
-                }.asSingle,
-            )
-        }
-    }
-
     internal fun finnTagsFor(spleisBehandlingId: UUID): List<String>? {
         val tags =
             sessionOf(dataSource).use { session ->

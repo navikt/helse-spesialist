@@ -8,7 +8,6 @@ import no.nav.helse.modell.oppgave.OppgaveObserver
 import no.nav.helse.modell.oppgave.OppgaveVisitor
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import java.time.LocalDateTime
@@ -17,7 +16,6 @@ import kotlin.properties.Delegates
 
 internal class Oppgavemelder(
     private val meldingDao: MeldingDao,
-    private val generasjonDao: GenerasjonDao,
     private val rapidsConnection: RapidsConnection,
 ) : OppgaveObserver {
     internal fun oppgaveOpprettet(oppgave: Oppgave) {
@@ -37,11 +35,6 @@ internal class Oppgavemelder(
         oppgavemelding: OppgaveForKafkaBygger.Oppgavemelding,
     ): Pair<String, JsonMessage> {
         val fødselsnummer: String = meldingDao.finnFødselsnummer(oppgavemelding.hendelseId)
-        val (vedtaksperiodeId, spleisBehandlingId) =
-            generasjonDao.finnVedtaksperiodeMetadataFor(oppgavemelding.oppgaveId)
-                ?: throw IllegalStateException(
-                    "Forventer å finne vedtaksperiodeId og Spleis behandlingId for oppgave med id=${oppgavemelding.oppgaveId}",
-                )
         return fødselsnummer to
             JsonMessage.newMessage(
                 eventName,
@@ -52,8 +45,6 @@ internal class Oppgavemelder(
                     "tilstand" to oppgavemelding.tilstand,
                     "fødselsnummer" to fødselsnummer,
                     "egenskaper" to oppgavemelding.egenskaper,
-                    "vedtaksperiodeId" to vedtaksperiodeId,
-                    "spleisBehandlingId" to spleisBehandlingId,
                 ).apply {
                     compute("beslutter") { _, _ -> oppgavemelding.beslutter }
                     compute("saksbehandler") { _, _ -> oppgavemelding.saksbehandler }
