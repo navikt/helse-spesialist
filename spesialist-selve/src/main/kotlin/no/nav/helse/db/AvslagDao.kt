@@ -50,12 +50,36 @@ class AvslagDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         }
     }
 
+    internal fun invaliderAvslag(oppgaveId: Long) =
+        asSQL(
+            """
+            WITH t as ( 
+                SELECT v.vedtaksperiode_id, svg.id 
+                FROM vedtak v
+                INNER JOIN oppgave o ON v.id = o.vedtak_ref
+                INNER JOIN selve_vedtaksperiode_generasjon svg ON o.generasjon_ref = svg.unik_id
+                WHERE o.id = :oppgaveId
+            )
+            UPDATE avslag a
+            SET invalidert = true
+            FROM t
+            WHERE a.vedtaksperiode_id = t.vedtaksperiode_id AND a.generasjon_ref = t.id
+            """.trimIndent(),
+            mapOf(
+                "oppgaveId" to oppgaveId,
+            ),
+        ).update()
+
     internal fun finnAvslag(
         vedtaksperiodeId: UUID,
         generasjonId: Long,
     ) = asSQL(
         """
-        SELECT begrunnelse_ref FROM avslag WHERE vedtaksperiode_id = :vedtaksperiodeId AND generasjon_ref = :generasjonId ORDER BY opprettet DESC LIMIT 1
+        SELECT begrunnelse_ref FROM avslag 
+        WHERE vedtaksperiode_id = :vedtaksperiodeId 
+        AND generasjon_ref = :generasjonId 
+        AND invalidert = false 
+        ORDER BY opprettet DESC LIMIT 1
         """.trimIndent(),
         mapOf(
             "vedtaksperiodeId" to vedtaksperiodeId,

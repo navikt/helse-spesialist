@@ -1,0 +1,1 @@
+ALTER TABLE avslag ADD COLUMN invalidert BOOLEAN default false;

@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.api.graphql.mutation.Avslag
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 internal class AvslagDaoTest : DatabaseIntegrationTest() {
@@ -28,6 +29,20 @@ internal class AvslagDaoTest : DatabaseIntegrationTest() {
 
         val lagretAvslag = nyDao.finnAvslag(VEDTAKSPERIODE, generasjonId)
         assertNotNull(lagretAvslag)
+    }
+
+    @Test
+    fun `invaliderer avslag`() {
+        val oid = UUID.randomUUID()
+        val generasjonUnikId = UUID.randomUUID()
+        nyPerson(generasjonId = generasjonUnikId)
+        nySaksbehandler(oid)
+        val generasjonId = finnGenereasjonId(generasjonUnikId)
+        val avslag = Avslag(Avslagstype.AVSLAG, "En individuell begrunelse")
+        nyDao.lagreAvslag(OPPGAVE_ID, avslag, oid)
+        nyDao.invaliderAvslag(OPPGAVE_ID)
+        val lagretAvslag = nyDao.finnAvslag(VEDTAKSPERIODE, generasjonId)
+        assertNull(lagretAvslag)
     }
 
     @Test

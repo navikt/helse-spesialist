@@ -54,7 +54,7 @@ class TotrinnsvurderingMutation(
             }
 
             try {
-                avslag?.let { saksbehandlerhåndterer.håndterAvslag(oppgavereferanse.toLong(), behandlendeSaksbehandler, it) }
+                saksbehandlerhåndterer.håndterAvslag(oppgavereferanse.toLong(), behandlendeSaksbehandler, avslag)
                 oppgavehåndterer.sendTilBeslutter(oppgavereferanse.toLong(), behandlendeSaksbehandler)
                 saksbehandlerhåndterer.håndter(FjernPåVent(oppgavereferanse.toLong()), behandlendeSaksbehandler)
             } catch (modellfeil: Modellfeil) {

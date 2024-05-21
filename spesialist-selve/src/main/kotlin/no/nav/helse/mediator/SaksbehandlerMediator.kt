@@ -214,9 +214,13 @@ internal class SaksbehandlerMediator(
     override fun håndterAvslag(
         oppgaveId: Long,
         saksbehandlerFraApi: SaksbehandlerFraApi,
-        avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag,
+        avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag?,
     ) {
-        avslagDao.lagreAvslag(oppgaveId, avslag, saksbehandlerFraApi.oid)
+        if (avslag == null) {
+            avslagDao.invaliderAvslag(oppgaveId)
+        } else {
+            avslagDao.lagreAvslag(oppgaveId, avslag, saksbehandlerFraApi.oid)
+        }
     }
 
     override fun håndter(
