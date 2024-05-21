@@ -309,6 +309,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         assertEquals(Avslagstype.AVSLAG, enumValueOf<Avslagstype>(avslag["type"].textValue()))
         assertEquals(avslagsbegrunnelse, avslag["begrunnelse"].textValue())
         assertEquals("AIDENT", avslag["saksbehandlerIdent"].textValue())
+        assertFalse(avslag["invalidert"].booleanValue())
     }
 
     @Test
@@ -355,7 +356,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
                                         kode
                                     }         
                                     avslag {
-                                        type, begrunnelse, opprettet, saksbehandlerIdent
+                                        type, begrunnelse, opprettet, saksbehandlerIdent, invalidert
                                     }
                                 }
                                 hendelser {

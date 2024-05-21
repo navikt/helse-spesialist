@@ -67,8 +67,8 @@ internal class AvslagDaoTest : DatabaseIntegrationTest() {
         assertEquals("En individuell begrunelse delvis avslag retter skrivefeil", lagredeAvslag.first().begrunnelse)
         assertEquals(SAKSBEHANDLER_IDENT, lagredeAvslag.last().saksbehandlerIdent)
         assertEquals(SAKSBEHANDLER_IDENT, lagredeAvslag.first().saksbehandlerIdent)
-        assertFalse(lagredeAvslag.last().invalidert!!)
-        assertFalse(lagredeAvslag.first().invalidert!!)
+        assertFalse(lagredeAvslag.last().invalidert)
+        assertFalse(lagredeAvslag.first().invalidert)
     }
 
 

@@ -71,7 +71,7 @@ data class Avslag(
     val begrunnelse: String,
     val opprettet: DateTimeString,
     val saksbehandlerIdent: String,
-    val invalidert: Boolean?,
+    val invalidert: Boolean,
 )
 
 data class Person(
