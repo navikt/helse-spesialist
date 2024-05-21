@@ -76,13 +76,13 @@ internal class OppgaveMediator(
         val nesteId = oppgaveDao.reserverNesteId()
         val oppgave = opprettOppgaveBlock(nesteId)
         val oppgavemelder = Oppgavemelder(meldingDao, rapidsConnection)
-        oppgavemelder.oppgaveOpprettet(oppgave)
         oppgave.register(oppgavemelder)
         tildelVedReservasjon(fødselsnummer, oppgave)
         Oppgavelagrer(tildelingDao).apply {
             oppgave.accept(this)
             this.lagre(this@OppgaveMediator, contextId)
         }
+        oppgavemelder.oppgaveOpprettet(oppgave)
     }
 
     fun <T> oppgave(
@@ -220,7 +220,10 @@ internal class OppgaveMediator(
                 .alleUkategoriserteEgenskaper
                 .map(Egenskap::toString)
 
-        val ekskluderteEgenskaper = filtrering.ekskluderteEgenskaper?.tilDatabaseversjon()?.map(EgenskapForDatabase::toString) ?: emptyList()
+        val ekskluderteEgenskaper =
+            filtrering.ekskluderteEgenskaper?.tilDatabaseversjon()?.map(
+                EgenskapForDatabase::toString,
+            ) ?: emptyList()
 
         val egenskaperSomSkalEkskluderes =
             egenskaperSaksbehandlerIkkeHarTilgangTil + ekskluderteEgenskaper + if (filtrering.ingenUkategoriserteEgenskaper) alleUkategoriserteEgenskaper else emptyList()
