@@ -15,7 +15,7 @@ class PersonTest {
 
     @Test
     fun `oppretter ny vedtaksperiode ved ny Spleis-behandling dersom perioden ikke er kjent fra før`() {
-        val person = Person.gjenopprett(aktørId, fødselsnummer, emptyList(), emptyList())
+        val person = Person.gjenopprett(aktørId, fødselsnummer, emptyList(), emptyList(), emptyList())
         person.nySpleisBehandling(nySpleisBehandling(UUID.randomUUID()))
         val dto = person.toDto()
         assertEquals(1, dto.vedtaksperioder.size)
