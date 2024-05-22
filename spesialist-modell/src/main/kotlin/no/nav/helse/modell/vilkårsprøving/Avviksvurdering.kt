@@ -19,7 +19,7 @@ class Avviksvurdering private constructor(
         fun List<Avviksvurdering>.finnRiktigAvviksvurdering(skjæringstidspunkt: LocalDate) =
             filter { it.skjæringstidspunkt == skjæringstidspunkt }.maxByOrNull { it.opprettet }
 
-        internal fun gjenopprett(avviksvurderingDto: AvviksvurderingDto): Avviksvurdering {
+        fun gjenopprett(avviksvurderingDto: AvviksvurderingDto): Avviksvurdering {
             return Avviksvurdering(
                 unikId = avviksvurderingDto.unikId,
                 vilkårsgrunnlagId = avviksvurderingDto.vilkårsgrunnlagId,

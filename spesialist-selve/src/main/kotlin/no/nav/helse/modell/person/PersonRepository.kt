@@ -2,6 +2,7 @@ package no.nav.helse.modell.person
 
 import kotliquery.TransactionalSession
 import kotliquery.sessionOf
+import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.SykefraværstilfelleDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import javax.sql.DataSource
@@ -9,6 +10,7 @@ import javax.sql.DataSource
 internal class PersonRepository(private val dataSource: DataSource) {
     private val personDao = PersonDao(dataSource)
     private val sykefraværstilfelleDao = SykefraværstilfelleDao(dataSource)
+    private val avviksvurderingDao = AvviksvurderingDao(dataSource)
     private val generasjonRepository = GenerasjonRepository(dataSource)
 
     fun brukPersonHvisFinnes(
@@ -30,11 +32,23 @@ internal class PersonRepository(private val dataSource: DataSource) {
                 ?.copy(vedtaksperioder = with(generasjonRepository) { finnVedtaksperioder(fødselsnummer) })
                 ?.copy(
                     skjønnsfastsatteSykepengegrunnlag =
-                        with(
-                            sykefraværstilfelleDao,
-                        ) { finnSkjønnsfastsatteSykepengegrunnlag(fødselsnummer) },
+                        with(sykefraværstilfelleDao) { finnSkjønnsfastsatteSykepengegrunnlag(fødselsnummer) },
                 )
-                ?.let { Person.gjenopprett(it.aktørId, it.fødselsnummer, it.vedtaksperioder, it.skjønnsfastsatteSykepengegrunnlag) }
+                ?.copy(
+                    avviksvurderinger =
+                        with(avviksvurderingDao) {
+                            this@hentPerson.finnAvviksvurderinger(fødselsnummer)
+                        },
+                )
+                ?.let {
+                    Person.gjenopprett(
+                        aktørId = it.aktørId,
+                        fødselsnummer = it.fødselsnummer,
+                        vedtaksperioder = it.vedtaksperioder,
+                        skjønnsfastsattSykepengegrunnlag = it.skjønnsfastsatteSykepengegrunnlag,
+                        avviksvurderinger = it.avviksvurderinger,
+                    )
+                }
         }
     }
 

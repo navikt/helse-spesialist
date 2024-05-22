@@ -1,6 +1,7 @@
 package no.nav.helse.db
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
@@ -96,6 +97,31 @@ class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSour
                 "fodselsnummer" to fødselsnummer,
             ),
         ).list {
+            AvviksvurderingDto(
+                unikId = it.uuid("unik_id"),
+                vilkårsgrunnlagId = it.uuid("vilkårsgrunnlag_id"),
+                fødselsnummer = it.string("fødselsnummer"),
+                skjæringstidspunkt = it.localDate("skjæringstidspunkt"),
+                opprettet = it.localDateTime("opprettet"),
+                avviksprosent = it.double("avviksprosent"),
+                sammenligningsgrunnlag = objectMapper.readValue<SammenligningsgrunnlagDto>(it.string("sammenligningsgrunnlag")),
+                beregningsgrunnlag = objectMapper.readValue<BeregningsgrunnlagDto>(it.string("beregningsgrunnlag")),
+            )
+        }
+
+    internal fun TransactionalSession.finnAvviksvurderinger(fødselsnummer: String): List<AvviksvurderingDto> =
+        asSQL(
+            """
+            SELECT av.unik_id, vpa.vilkårsgrunnlag_id, av.fødselsnummer, av.skjæringstidspunkt, av.opprettet, avviksprosent, beregningsgrunnlag, sg.sammenligningsgrunnlag FROM avviksvurdering av 
+            INNER JOIN sammenligningsgrunnlag sg ON av.sammenligningsgrunnlag_ref = sg.id
+            INNER JOIN vilkarsgrunnlag_per_avviksvurdering vpa ON vpa.avviksvurdering_ref = av.unik_id
+            WHERE av.fødselsnummer = :fodselsnummer
+            AND av.slettet IS NULL;
+            """.trimIndent(),
+            mapOf(
+                "fodselsnummer" to fødselsnummer,
+            ),
+        ).list(this) {
             AvviksvurderingDto(
                 unikId = it.uuid("unik_id"),
                 vilkårsgrunnlagId = it.uuid("vilkårsgrunnlag_id"),

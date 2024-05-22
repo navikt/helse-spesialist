@@ -14,6 +14,8 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
+import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
+import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -22,6 +24,7 @@ class Person private constructor(
     private val fødselsnummer: String,
     vedtaksperioder: List<Vedtaksperiode>,
     private val skjønnsfastsatteSykepengegrunnlag: List<SkjønnsfastsattSykepengegrunnlag>,
+    private val avviksvurderinger: List<Avviksvurdering>,
 ) {
     private val vedtaksperioder = vedtaksperioder.toMutableList()
     private val observers = mutableSetOf<PersonObserver>()
@@ -40,6 +43,7 @@ class Person private constructor(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             vedtaksperioder = vedtaksperioder.map { it.toDto() },
+            avviksvurderinger = avviksvurderinger.map { it.toDto() },
             skjønnsfastsatteSykepengegrunnlag = skjønnsfastsatteSykepengegrunnlag.map { it.toDto() },
         )
 
@@ -103,6 +107,7 @@ class Person private constructor(
             fødselsnummer: String,
             vedtaksperioder: List<VedtaksperiodeDto>,
             skjønnsfastsattSykepengegrunnlag: List<SkjønnsfastsattSykepengegrunnlagDto>,
+            avviksvurderinger: List<AvviksvurderingDto>,
         ): Person {
             return Person(
                 aktørId = aktørId,
@@ -116,6 +121,7 @@ class Person private constructor(
                             it.generasjoner,
                         )
                     },
+                avviksvurderinger = avviksvurderinger.map { Avviksvurdering.gjenopprett(it) },
                 skjønnsfastsatteSykepengegrunnlag =
                     skjønnsfastsattSykepengegrunnlag.map {
                         SkjønnsfastsattSykepengegrunnlag.gjenopprett(
