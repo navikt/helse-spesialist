@@ -1,19 +1,13 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import io.mockk.mockk
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
-import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AKTIV
-import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.INAKTIV
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.VURDERT
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
-import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
 import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
@@ -23,34 +17,19 @@ import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonFor
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnSisteGenerasjonUtenSpleisBehandlingId
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverSkjønnsfastsettelse
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverTotrinnsvurdering
-import no.nav.helse.modell.vedtaksperiode.Periode.Companion.til
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class GenerasjonTest : AbstractDatabaseTest() {
-    private val varselRepository = VarselRepository(dataSource)
-    private val generasjonRepository = GenerasjonRepository(dataSource)
-    private val generasjonDao = GenerasjonDao(dataSource)
-    private lateinit var generasjonId: UUID
-    private lateinit var observer: GenerasjonTestObserver
-
-    @BeforeEach
-    internal fun beforeEach() {
-        lagVarseldefinisjoner()
-        observer = GenerasjonTestObserver()
-    }
-
+internal class GenerasjonTest {
     @Test
     fun `generasjon ligger før dato`() {
         val generasjon = Generasjon(UUID.randomUUID(), UUID.randomUUID(), 1.januar, 31.januar, 1.januar)
@@ -93,25 +72,23 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
     @Test
     fun `deaktiverer enkelt varsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.registrer(generasjonRepository, varselRepository)
+        val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
         val varsel = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId)
         generasjon.håndterNyttVarsel(varsel, UUID.randomUUID())
         generasjon.håndterDeaktivertVarsel(varsel)
-        assertVarsler(generasjonId, 0, AKTIV, SB_EX_1)
-        assertVarsler(generasjonId, 1, INAKTIV, SB_EX_1)
+        generasjon.assertVarsler(0, VarselStatusDto.AKTIV, SB_EX_1)
+        generasjon.assertVarsler(1, VarselStatusDto.INAKTIV, SB_EX_1)
     }
 
     @Test
     fun `deaktiverer enkelt varsel basert på varselkode`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.registrer(generasjonRepository, varselRepository)
+        val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
         val varsel = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId)
         generasjon.håndterNyttVarsel(varsel, UUID.randomUUID())
         generasjon.deaktiverVarsel("SB_EX_1")
-        assertVarsler(generasjonId, 0, AKTIV, SB_EX_1)
-        assertVarsler(generasjonId, 1, INAKTIV, SB_EX_1)
+        generasjon.assertVarsler(0, VarselStatusDto.AKTIV, SB_EX_1)
+        generasjon.assertVarsler(1, VarselStatusDto.INAKTIV, SB_EX_1)
     }
 
     @Test
@@ -121,68 +98,61 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
         val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
         generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "RV_IV_2", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
         generasjon.håndterNyttVarsel(Varsel(varselId, "RV_IV_2", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
-        val varsler = generasjon.toDto().varsler
-        assertEquals(1, varsler.size)
-        val varsel = varsler.single()
-        assertEquals(VarselStatusDto.AKTIV, varsel.status)
-        assertEquals("RV_IV_2", varsel.varselkode)
+        generasjon.assertVarsler(1, VarselStatusDto.AKTIV, "RV_IV_2")
     }
 
     @Test
     fun `Lagrer kun én utgave av et aktivt varsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.registrer(generasjonRepository, varselRepository)
+        val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
         generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
         generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
 
-        assertVarsler(generasjonId, 1, AKTIV, SB_EX_1)
+        generasjon.assertVarsler(1, VarselStatusDto.AKTIV, SB_EX_1)
     }
 
     @Test
     fun `kan reaktivere deaktivert varsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.registrer(generasjonRepository, varselRepository)
+        val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
         val varsel = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId)
         generasjon.håndterNyttVarsel(varsel, UUID.randomUUID())
         generasjon.håndterDeaktivertVarsel(varsel)
-        assertVarsler(generasjonId, 1, INAKTIV, SB_EX_1)
+        generasjon.assertVarsler(1, VarselStatusDto.INAKTIV, SB_EX_1)
 
         generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
 
-        assertVarsler(generasjonId, 0, INAKTIV, SB_EX_1)
-        assertVarsler(generasjonId, 1, AKTIV, SB_EX_1)
+        generasjon.assertVarsler(0, VarselStatusDto.INAKTIV, SB_EX_1)
+        generasjon.assertVarsler(1, VarselStatusDto.AKTIV, SB_EX_1)
     }
 
     @Test
     fun `kan deaktivere reaktivert varsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.registrer(generasjonRepository, varselRepository)
+        val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
         val varsel = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId)
         generasjon.håndterNyttVarsel(varsel, UUID.randomUUID())
-        assertVarsler(generasjonId, 1, AKTIV, SB_EX_1)
+        generasjon.assertVarsler(1, VarselStatusDto.AKTIV, SB_EX_1)
         generasjon.håndterDeaktivertVarsel(varsel)
-        assertVarsler(generasjonId, 1, INAKTIV, SB_EX_1)
+        generasjon.assertVarsler(1, VarselStatusDto.INAKTIV, SB_EX_1)
         generasjon.håndterNyttVarsel(varsel, UUID.randomUUID())
-        assertVarsler(generasjonId, 1, AKTIV, SB_EX_1)
+        generasjon.assertVarsler(1, VarselStatusDto.AKTIV, SB_EX_1)
         generasjon.håndterDeaktivertVarsel(varsel)
 
-        assertVarsler(generasjonId, 1, INAKTIV, SB_EX_1)
-        assertVarsler(generasjonId, 0, AKTIV, SB_EX_1)
+        generasjon.assertVarsler(1, VarselStatusDto.INAKTIV, SB_EX_1)
+        generasjon.assertVarsler(0, VarselStatusDto.AKTIV, SB_EX_1)
     }
 
     @Test
     fun `Generasjon kan motta ny utbetalingId`() {
-        val generasjon = nyGenerasjon()
+        val generasjon = generasjon()
         val utbetalingId = UUID.randomUUID()
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
     }
 
     @Test
     fun `Generasjon kan motta ny utbetalingId så lenge generasjonen ikke er ferdig behandlet`() {
-        val generasjon = nyGenerasjon()
+        val generasjon = generasjon()
         val gammelUtbetalingId = UUID.randomUUID()
         val nyUtbetalingId = UUID.randomUUID()
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), gammelUtbetalingId)
@@ -196,30 +166,24 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
     fun `Lagrer varsel på generasjon selvom den er ferdig behandlet`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
-        val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId, id = generasjonId)
-        generasjon.registrer(observer)
+        val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId)
         generasjon.håndterVedtakFattet(UUID.randomUUID())
         val varsel = Varsel(UUID.randomUUID(), "RV_IM_1", LocalDateTime.now(), vedtaksperiodeId)
         generasjon.håndterNyttVarsel(varsel, UUID.randomUUID())
-
-        assertEquals(1, observer.opprettedeVarsler[generasjonId]?.size)
-        assertEquals("RV_IM_1", observer.opprettedeVarsler[generasjonId]?.get(0))
-        assertAntallGenerasjoner(1, vedtaksperiodeId)
+        generasjon.assertVarsler(1, VarselStatusDto.AKTIV, "RV_IM_1")
     }
 
     @Test
     fun `Skal kunne opprette varsel på generasjon`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.registrer(generasjonRepository, varselRepository)
+        val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
         generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), SB_EX_1.name, LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
-        assertAntallGenerasjoner(1, vedtaksperiodeId)
-        assertVarsler(generasjonId, 1, AKTIV, SB_EX_1)
+        generasjon.assertVarsler(1, VarselStatusDto.AKTIV, SB_EX_1)
     }
 
     @Test
     fun `kan ikke knytte utbetalingId til ferdig behandlet generasjon som har utbetalingId fra før`() {
-        val generasjon = nyGenerasjon()
+        val generasjon = generasjon()
         val gammelUtbetalingId = UUID.randomUUID()
         val nyUtbetalingId = UUID.randomUUID()
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), gammelUtbetalingId)
@@ -231,31 +195,35 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
 
     @Test
     fun `kan ikke knytte utbetalingId til ferdig behandlet generasjon som ikke har utbetalingId fra før`() {
-        val generasjon = nyGenerasjon()
+        val utbetalingId = UUID.randomUUID()
         val nyUtbetalingId = UUID.randomUUID()
+
+        val generasjon = generasjon()
+        generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
+
         generasjon.håndterVedtakFattet(UUID.randomUUID())
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), nyUtbetalingId)
-        assertIkkeUtbetaling(generasjonId, nyUtbetalingId)
+        generasjon.assertUtbetalingId(utbetalingId)
     }
 
     @Test
     fun `kan fjerne utbetalingId fra ubehandlet generasjon`() {
-        val generasjon = nyGenerasjon()
+        val generasjon = generasjon()
         val utbetalingId = UUID.randomUUID()
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
-        assertEquals(utbetalingId, generasjon.toDto().utbetalingId)
+        generasjon.assertUtbetalingId(utbetalingId)
         generasjon.håndterForkastetUtbetaling(utbetalingId)
-        assertEquals(null, generasjon.toDto().utbetalingId)
+        generasjon.assertUtbetalingId(null)
     }
 
     @Test
     fun `kan ikke fjerne utbetalingId fra ferdig behandlet generasjon`() {
-        val generasjon = nyGenerasjon()
+        val generasjon = generasjon()
         val utbetalingId = UUID.randomUUID()
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
         generasjon.håndterVedtakFattet(UUID.randomUUID())
         generasjon.håndterForkastetUtbetaling(utbetalingId)
-        assertEquals(utbetalingId, generasjon.toDto().utbetalingId)
+        generasjon.assertUtbetalingId(utbetalingId)
     }
 
     @Test
@@ -542,27 +510,7 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
     ): Generasjon {
         return generasjon(vedtaksperiodeId = vedtaksperiodeId, fom = fom, tom = tom).also {
             it.håndterNyttVarsel(Varsel(UUID.randomUUID(), varselkode, LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
-            it.registrer(observer)
         }
-    }
-
-    private fun nyGenerasjon(
-        id: UUID = UUID.randomUUID(),
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-    ): Generasjon {
-        generasjonId = id
-        val generasjon =
-            generasjonDao.opprettFor(
-                generasjonId,
-                vedtaksperiodeId,
-                UUID.randomUUID(),
-                1.januar,
-                1.januar til 31.januar,
-                Generasjon.VidereBehandlingAvklares,
-                null
-            )
-        generasjon.registrer(generasjonRepository)
-        return generasjon
     }
 
     private fun generasjon(
@@ -579,109 +527,29 @@ internal class GenerasjonTest : AbstractDatabaseTest() {
         fom = fom,
         tom = tom,
         skjæringstidspunkt = skjæringstidspunkt,
-    ).also {
-        it.registrer(observer)
-    }
+    )
 
-    private fun assertVarsler(
-        generasjonId: UUID,
+    private fun Generasjon.assertVarsler(
         forventetAntall: Int,
-        status: Status,
-        varselkode: String,
-        varselId: UUID? = null,
-    ) {
-        @Language("PostgreSQL")
-        val query =
-            """SELECT COUNT(1) FROM selve_varsel sv INNER JOIN selve_vedtaksperiode_generasjon svg ON sv.generasjon_ref = svg.id
-               WHERE svg.unik_id = :generasjonId 
-               AND sv.status = :status 
-               AND sv.kode = :varselkode
-               AND 
-                 CASE 
-                   WHEN :skalSjekkeVarselId = true THEN sv.unik_id = :varselId
-                   ELSE true
-                 END
-            """
-        val antall =
-            sessionOf(dataSource).use { session ->
-                session.run(
-                    queryOf(
-                        query,
-                        mapOf(
-                            "generasjonId" to generasjonId,
-                            "status" to status.name,
-                            "varselkode" to varselkode,
-                            "skalSjekkeVarselId" to (varselId != null),
-                            "varselId" to varselId,
-                        ),
-                    ).map { it.int(1) }.asSingle,
-                )
-            }
-        assertEquals(forventetAntall, antall)
-    }
-
-    private fun assertVarsler(
-        generasjonId: UUID,
-        forventetAntall: Int,
-        status: Status,
+        status: VarselStatusDto,
         varselkode: Varselkode,
-        varselId: UUID? = null,
     ) {
-        assertVarsler(generasjonId, forventetAntall, status, varselkode.name, varselId)
+        this.assertVarsler(forventetAntall, status, varselkode.name)
     }
 
-    private fun assertIkkeUtbetaling(
-        generasjonId: UUID,
-        utbetalingId: UUID,
-    ) {
-        @Language("PostgreSQL")
-        val query =
-            """SELECT COUNT(1) FROM selve_vedtaksperiode_generasjon svg WHERE svg.unik_id = ? AND utbetaling_id = ?
-            """
-        val antall =
-            sessionOf(dataSource).use { session ->
-                session.run(queryOf(query, generasjonId, utbetalingId).map { it.int(1) }.asSingle)
-            }
-        assertEquals(0, antall)
-    }
-
-    private fun assertAntallGenerasjoner(
+    private fun Generasjon.assertVarsler(
         forventetAntall: Int,
-        vedtaksperiodeId: UUID,
+        status: VarselStatusDto,
+        varselkode: String,
     ) {
-        @Language("PostgreSQL")
-        val query =
-            """SELECT COUNT(1) FROM selve_vedtaksperiode_generasjon svg WHERE svg.vedtaksperiode_id = ?
-            """
-        val antall =
-            sessionOf(dataSource).use { session ->
-                session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
-            }
-        assertEquals(forventetAntall, antall)
+        val dto = this.toDto()
+        val varsler = dto.varsler
+        val varsel = varsler.filter { it.varselkode == varselkode && it.status == status }
+        assertEquals(forventetAntall, varsel.size)
     }
 
-    private fun lagVarseldefinisjoner() {
-        Varselkode.entries.forEach { varselkode ->
-            lagVarseldefinisjon(varselkode.name)
-        }
-    }
-
-    private fun lagVarseldefinisjon(varselkode: String) {
-        @Language("PostgreSQL")
-        val query = "INSERT INTO api_varseldefinisjon(unik_id, kode, tittel, forklaring, handling, avviklet, opprettet) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (unik_id) DO NOTHING"
-        sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(
-                    query,
-                    UUID.nameUUIDFromBytes(varselkode.toByteArray()),
-                    varselkode,
-                    "En tittel for varselkode=$varselkode",
-                    "En forklaring for varselkode=$varselkode",
-                    "En handling for varselkode=$varselkode",
-                    false,
-                    LocalDateTime.now(),
-                ).asUpdate,
-            )
-        }
+    private fun Generasjon.assertUtbetalingId(utbetalingId: UUID?) {
+        val dto = this.toDto()
+        assertEquals(utbetalingId, dto.utbetalingId)
     }
 }
