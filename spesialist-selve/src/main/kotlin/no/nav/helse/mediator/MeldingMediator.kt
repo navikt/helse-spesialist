@@ -25,6 +25,7 @@ import no.nav.helse.mediator.meldinger.UtbetalingAnnullertRiver
 import no.nav.helse.mediator.meldinger.UtbetalingEndretRiver
 import no.nav.helse.mediator.meldinger.VarseldefinisjonRiver
 import no.nav.helse.mediator.meldinger.VedtakFattetRiver
+import no.nav.helse.mediator.meldinger.VedtaksperiodeEndretRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeNyUtbetalingRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnetRiver
@@ -132,15 +133,12 @@ internal class MeldingMediator(
 
     private fun skalBehandleMeldingIDev(jsonNode: JsonNode): Boolean {
         val eventName = jsonNode["@event_name"]?.asText()
-        if (eventName in
-            setOf(
+        if (eventName in setOf(
                 "sendt_søknad_arbeidsgiver",
                 "sendt_søknad_nav",
-                "stans_automatisk_behandling",
+                "stans_automatisk_behandling"
             )
-        ) {
-            return true
-        }
+        ) return true
         val fødselsnummer = jsonNode["fødselsnummer"]?.asText() ?: return true
         if (fødselsnummer.toDoubleOrNull() == null) return true
         val harPerson = personDao.findPersonByFødselsnummer(fødselsnummer) != null
@@ -164,6 +162,7 @@ internal class MeldingMediator(
                 ArbeidsgiverRiver(this),
                 ArbeidsforholdRiver(this),
                 VedtaksperiodeForkastetRiver(this),
+                VedtaksperiodeEndretRiver(this),
                 AdressebeskyttelseEndretRiver(this),
                 OverstyringIgangsattRiver(this),
                 EgenAnsattløsning.EgenAnsattRiver(this),
@@ -439,12 +438,11 @@ internal class MeldingMediator(
         if (meldingPasserteValidering) {
             val jsonNode = objectMapper.readTree(message)
             jsonNode["@id"]?.asUUID()?.let { id ->
-                val type =
-                    when (val eventName = jsonNode["@event_name"]?.asText()) {
-                        null -> "ukjent"
-                        "behov" -> "behov: " + jsonNode["@behov"].map { it.asText() }.joinToString()
-                        else -> eventName
-                    }
+                val type = when(val eventName = jsonNode["@event_name"]?.asText()) {
+                    null -> "ukjent"
+                    "behov" -> "behov: " + jsonNode["@behov"].map { it.asText() }.joinToString()
+                    else -> eventName
+                }
                 logg.info("Markerer melding id=$id, type=$type som behandlet i duplikatkontroll")
                 meldingDuplikatkontrollDao.lagre(id, type)
             }
