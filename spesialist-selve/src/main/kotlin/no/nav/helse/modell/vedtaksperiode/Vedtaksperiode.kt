@@ -10,6 +10,7 @@ import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForSpleisBehandling
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnSisteGenerasjonUtenSpleisBehandlingId
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.logg
+import java.time.LocalDate
 import java.util.UUID
 
 internal class Vedtaksperiode private constructor(
@@ -23,6 +24,7 @@ internal class Vedtaksperiode private constructor(
     private val fom get() = gjeldendeGenerasjon.fom()
     private val tom get() = gjeldendeGenerasjon.tom()
     private val gjeldendeUtbetalingId get() = gjeldendeGenerasjon.utbetalingId()
+    private val gjeldendeSkjæringstidspunkt get() = gjeldendeGenerasjon.skjæringstidspunkt()
 
     fun vedtaksperiodeId() = vedtaksperiodeId
 
@@ -176,6 +178,10 @@ internal class Vedtaksperiode private constructor(
                 generasjoner = generasjoner.map { it.tilGenerasjon() },
             )
         }
+
+        internal fun List<Vedtaksperiode>.relevanteFor(skjæringstidspunkt: LocalDate) =
+            filter { it.gjeldendeSkjæringstidspunkt == skjæringstidspunkt }
+                .map { it.gjeldendeGenerasjon }
 
         private fun GenerasjonDto.tilGenerasjon(): Generasjon {
             return Generasjon.fraLagring(

@@ -1,8 +1,10 @@
 package no.nav.helse.modell.person
 
+import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
+import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag.Companion.relevanteFor
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
@@ -10,6 +12,7 @@ import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.modell.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
+import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.relevanteFor
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
@@ -17,6 +20,7 @@ import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.util.UUID
 
 class Person private constructor(
@@ -82,6 +86,16 @@ class Person private constructor(
             .find { spleisBehandling.erRelevantFor(it.vedtaksperiodeId()) }
             ?.nySpleisBehandling(spleisBehandling)
             ?: vedtaksperioder.add(Vedtaksperiode.nyVedtaksperiode(spleisBehandling))
+    }
+
+    internal fun sykefraværstilfelle(skjæringstidspunkt: LocalDate): Sykefraværstilfelle {
+        val gjeldendeGenerasjoner = vedtaksperioder.relevanteFor(skjæringstidspunkt)
+        return Sykefraværstilfelle(
+            fødselsnummer = fødselsnummer,
+            skjæringstidspunkt = skjæringstidspunkt,
+            gjeldendeGenerasjoner = gjeldendeGenerasjoner,
+            skjønnsfastatteSykepengegrunnlag = skjønnsfastsatteSykepengegrunnlag.relevanteFor(skjæringstidspunkt),
+        )
     }
 
     internal fun nyeVarsler(nyeVarsler: NyeVarsler) {
