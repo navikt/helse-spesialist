@@ -21,7 +21,6 @@ import no.nav.helse.modell.MeldingDao.Meldingtype.SAKSBEHANDLERLØSNING
 import no.nav.helse.modell.MeldingDao.Meldingtype.SØKNAD_SENDT
 import no.nav.helse.modell.MeldingDao.Meldingtype.UTBETALING_ANNULLERT
 import no.nav.helse.modell.MeldingDao.Meldingtype.UTBETALING_ENDRET
-import no.nav.helse.modell.MeldingDao.Meldingtype.VEDTAKSPERIODE_ENDRET
 import no.nav.helse.modell.MeldingDao.Meldingtype.VEDTAKSPERIODE_FORKASTET
 import no.nav.helse.modell.MeldingDao.Meldingtype.VEDTAKSPERIODE_NY_UTBETALING
 import no.nav.helse.modell.MeldingDao.Meldingtype.VEDTAKSPERIODE_REBEREGNET
@@ -38,7 +37,6 @@ import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.vedtaksperiode.BehandlingOpprettet
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
-import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
@@ -253,7 +251,6 @@ internal class MeldingDao(private val dataSource: DataSource) {
             GODKJENNING -> Godkjenningsbehov(jsonNode)
             OPPDATER_PERSONSNAPSHOT -> OppdaterPersonsnapshot(jsonNode)
             GOSYS_OPPGAVE_ENDRET -> GosysOppgaveEndret(jsonNode)
-            VEDTAKSPERIODE_ENDRET -> VedtaksperiodeEndret(jsonNode)
             VEDTAKSPERIODE_FORKASTET -> VedtaksperiodeForkastet(jsonNode)
             UTBETALING_ANNULLERT -> UtbetalingAnnullert(jsonNode)
             GODKJENT_TILBAKEDATERT_SYKMELDING -> TilbakedateringBehandlet(jsonNode)
@@ -274,7 +271,6 @@ internal class MeldingDao(private val dataSource: DataSource) {
     private fun tilMeldingtype(melding: PersonmeldingOld) =
         when (melding) {
             is AdressebeskyttelseEndret -> ADRESSEBESKYTTELSE_ENDRET
-            is VedtaksperiodeEndret -> VEDTAKSPERIODE_ENDRET
             is VedtaksperiodeForkastet -> VEDTAKSPERIODE_FORKASTET
             is Godkjenningsbehov -> GODKJENNING
             is OverstyringIgangsatt -> OVERSTYRING_IGANGSATT
@@ -297,7 +293,6 @@ internal class MeldingDao(private val dataSource: DataSource) {
 
     private enum class Meldingtype {
         ADRESSEBESKYTTELSE_ENDRET,
-        VEDTAKSPERIODE_ENDRET,
         VEDTAKSPERIODE_FORKASTET,
         GODKJENNING,
         SAKSBEHANDLERLØSNING,
