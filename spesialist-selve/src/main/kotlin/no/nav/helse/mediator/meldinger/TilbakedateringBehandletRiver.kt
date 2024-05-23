@@ -37,7 +37,6 @@ internal class TilbakedateringBehandletRiver(
     ) {
         val hendelseId = UUID.fromString(packet["@id"].asText())
         val sykmeldingId = packet["sykmeldingId"].asText()
-        val fødselsnummer = packet["fødselsnummer"].asText()
 
         logg.info(
             "Mottok tilbakedatering_behandlet med {}",
@@ -50,6 +49,6 @@ internal class TilbakedateringBehandletRiver(
             StructuredArguments.keyValue("hendelse", packet.toJson()),
         )
 
-        mediator.tilbakedateringBehandlet(fødselsnummer, TilbakedateringBehandlet(packet), context)
+        mediator.håndter(TilbakedateringBehandlet(packet), context)
     }
 }

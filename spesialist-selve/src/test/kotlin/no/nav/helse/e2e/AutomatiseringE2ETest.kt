@@ -57,7 +57,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver()
-        håndterÅpneOppgaverløsning(antall = 1)
+        håndterÅpneOppgaverløsning(antallÅpneOppgaverIGosys = 1)
         håndterRisikovurderingløsning()
 
         assertGodkjenningsbehovIkkeBesvart()
@@ -79,7 +79,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             arbeidsgiverbeløp = 0,
             personbeløp = 0,
         )
-        håndterÅpneOppgaverløsning(antall = 1)
+        håndterÅpneOppgaverløsning(antallÅpneOppgaverIGosys = 1)
         håndterRisikovurderingløsning(
             kanGodkjennesAutomatisk = false,
             risikofunn =

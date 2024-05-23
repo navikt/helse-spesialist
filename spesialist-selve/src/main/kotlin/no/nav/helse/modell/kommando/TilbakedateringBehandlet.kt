@@ -43,6 +43,13 @@ internal class TilbakedateringBehandlet private constructor(
     override fun fødselsnummer() = fødselsnummer
 
     override fun toJson(): String = json
+
+    internal lateinit var oppgavedataForAutomatisering: OppgaveDataForAutomatisering
+        private set
+
+    internal fun oppgavedataForAutomatisering(oppgavedataForAutomatisering: OppgaveDataForAutomatisering) {
+        this.oppgavedataForAutomatisering = oppgavedataForAutomatisering
+    }
 }
 
 internal class TilbakedateringGodkjentCommand(

@@ -26,6 +26,7 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 import no.nav.helse.modell.kommando.OverstyringIgangsattCommand
+import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.kommando.TilbakedateringGodkjentCommand
 import no.nav.helse.modell.kommando.UtbetalingsgodkjenningCommand
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -116,7 +117,6 @@ internal class Kommandofabrikk(
     private val varselRepository: VarselRepository = VarselRepository(dataSource),
 ) {
     private companion object {
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
         private val logg = LoggerFactory.getLogger(this::class.java)
     }
 
@@ -218,19 +218,16 @@ internal class Kommandofabrikk(
         )
     }
 
-    fun tilbakedateringGodkjent(fødselsnummer: String): TilbakedateringGodkjentCommand {
-        val oppgaveDataForAutomatisering =
-            oppgaveDao.finnOppgaveIdUansettStatus(fødselsnummer).let { oppgaveId ->
-                oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)!!
-            }
-        val sykefraværstilfelle = sykefraværstilfelle(fødselsnummer, oppgaveDataForAutomatisering.skjæringstidspunkt)
+    fun tilbakedateringGodkjent(
+        fødselsnummer: String,
+        melding: TilbakedateringBehandlet,
+        person: Person,
+    ): TilbakedateringGodkjentCommand {
+        val oppgaveDataForAutomatisering = melding.oppgavedataForAutomatisering
+        val sykefraværstilfelle = person.sykefraværstilfelle(oppgaveDataForAutomatisering.vedtaksperiodeId)
         val utbetaling = utbetalingDao.hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
         val spleisBehandlingId =
-            generasjonDao.finnGjeldendeGenerasjon(oppgaveDataForAutomatisering.vedtaksperiodeId)?.spleisBehandlingId
-
-        sikkerlogg.info(
-            "Henter oppgaveDataForAutomatisering ifm. godkjent tilbakedatering for fnr $fødselsnummer og vedtaksperiodeId ${oppgaveDataForAutomatisering.vedtaksperiodeId}",
-        )
+            person.vedtaksperiode(oppgaveDataForAutomatisering.vedtaksperiodeId)?.gjeldendeBehandlingId
 
         return TilbakedateringGodkjentCommand(
             fødselsnummer = fødselsnummer,

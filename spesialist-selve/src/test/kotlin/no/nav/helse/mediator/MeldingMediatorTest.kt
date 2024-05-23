@@ -1,22 +1,17 @@
 package no.nav.helse.mediator
 
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.oppgave.OppgaveDao
-import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
-import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -25,8 +20,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class MeldingMediatorTest : AbstractDatabaseTest() {
-    private val fødselsnummer = lagFødselsnummer()
-
     private val testRapid = TestRapid()
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
@@ -60,77 +53,6 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
         val varseldefinisjon = Varseldefinisjon(id, "SB_EX_1", "En tittel", null, null, false, LocalDateTime.now())
         meldingMediator.håndter(varseldefinisjon)
         assertVarseldefinisjon(id)
-    }
-
-    @Test
-    fun `Utfører kommando ved TilbakedateringBehandlet`() {
-        val event =
-            mockk<TilbakedateringBehandlet>(relaxed = true) {
-                every { fødselsnummer() } returns fødselsnummer
-                every { toJson() } returns "{}"
-            }
-        every { oppgaveDao.oppgaveDataForAutomatisering(any()) } returns
-            mockk(relaxed = true) {
-                every { periodeOverlapperMed(any()) } returns true
-            }
-        every { kommandofabrikk.sykefraværstilfelle(any(), any()) } returns
-            mockk(relaxed = true) {
-                every { erTilbakedatert(any()) } returns true
-            }
-        meldingMediator.tilbakedateringBehandlet(fødselsnummer, event, testRapid)
-        verify(exactly = 1) { kommandofabrikk.tilbakedateringGodkjent(fødselsnummer) }
-    }
-
-    @Test
-    fun `Returnerer tidlig ved TilbakedateringBehandlet hvis oppgave ikke er til godkjenning`() {
-        val event =
-            mockk<TilbakedateringBehandlet>(relaxed = true) {
-                every { fødselsnummer() } returns fødselsnummer
-                every { toJson() } returns "{}"
-            }
-        every { oppgaveDao.oppgaveDataForAutomatisering(any()) } returns
-            mockk(relaxed = true) {
-                every { periodeOverlapperMed(any()) } returns true
-            }
-        every { oppgaveDao.finnOppgaveId(fødselsnummer) } returns null
-        meldingMediator.tilbakedateringBehandlet(fødselsnummer, event, testRapid)
-
-        verify(exactly = 1) { oppgaveDao.finnOppgaveId(fødselsnummer) }
-        verify(exactly = 0) { kommandofabrikk.tilbakedateringGodkjent(any()) }
-        verify(exactly = 0) { oppgaveDao.oppgaveDataForAutomatisering(any()) }
-    }
-
-    @Test
-    fun `Returnerer tidlig ved TilbakedateringBehandlet hvis vi ikke har commanddata for oppgave`() {
-        val event =
-            mockk<TilbakedateringBehandlet>(relaxed = true) {
-                every { fødselsnummer() } returns fødselsnummer
-                every { toJson() } returns "{}"
-            }
-        every { oppgaveDao.oppgaveDataForAutomatisering(any()) } returns null
-        meldingMediator.tilbakedateringBehandlet(fødselsnummer, event, testRapid)
-        verify(exactly = 1) { oppgaveDao.finnOppgaveId(fødselsnummer) }
-        verify(exactly = 1) { oppgaveDao.oppgaveDataForAutomatisering(any()) }
-        verify(exactly = 0) { kommandofabrikk.tilbakedateringGodkjent(any()) }
-    }
-
-    @Test
-    fun `Returnerer tidlig ved TilbakedateringBehandlet hvis sykmeldingen ikke overlapper med perioden med oppgave`() {
-        val event =
-            mockk<TilbakedateringBehandlet>(relaxed = true) {
-                every { fødselsnummer() } returns fødselsnummer
-                every { toJson() } returns "{}"
-            }
-        val oppgaveDataForAutomatiseringMock =
-            mockk<OppgaveDataForAutomatisering>(relaxed = true) {
-                every { periodeOverlapperMed(any()) } returns false
-            }
-        every { oppgaveDao.oppgaveDataForAutomatisering(any()) } returns oppgaveDataForAutomatiseringMock
-        meldingMediator.tilbakedateringBehandlet(fødselsnummer, event, testRapid)
-        verify(exactly = 1) { oppgaveDao.finnOppgaveId(fødselsnummer) }
-        verify(exactly = 1) { oppgaveDao.oppgaveDataForAutomatisering(any()) }
-        verify(exactly = 1) { oppgaveDataForAutomatiseringMock.periodeOverlapperMed(any()) }
-        verify(exactly = 0) { kommandofabrikk.tilbakedateringGodkjent(any()) }
     }
 
     private fun assertVarseldefinisjon(id: UUID) {

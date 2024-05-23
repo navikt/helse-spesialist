@@ -876,11 +876,11 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected fun håndterÅpneOppgaverløsning(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
-        antall: Int = 0,
+        antallÅpneOppgaverIGosys: Int = 0,
         oppslagFeilet: Boolean = false,
     ) {
         assertEtterspurteBehov("ÅpneOppgaver")
-        sisteMeldingId = meldingssender.sendÅpneGosysOppgaverløsning(aktørId, fødselsnummer, antall, oppslagFeilet)
+        sisteMeldingId = meldingssender.sendÅpneGosysOppgaverløsning(aktørId, fødselsnummer, antallÅpneOppgaverIGosys, oppslagFeilet)
     }
 
     protected fun håndterRisikovurderingløsning(

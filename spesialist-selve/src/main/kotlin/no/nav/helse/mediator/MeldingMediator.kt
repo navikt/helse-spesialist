@@ -352,35 +352,34 @@ internal class MeldingMediator(
         }
     }
 
-    fun tilbakedateringBehandlet(
+    private fun tilbakedateringBehandlet(
         fødselsnummer: String,
         tilbakedateringBehandlet: TilbakedateringBehandlet,
-        context: MessageContext,
+        commandContext: CommandContext,
     ) {
         personRepository.brukPersonHvisFinnes(fødselsnummer) {
             behandleTilbakedateringBehandlet(tilbakedateringBehandlet.perioder)
         }
-        oppgaveDao.finnOppgaveId(fødselsnummer)?.also { oppgaveId ->
-            sikkerlogg.info("Fant en oppgave for {}: {}", fødselsnummer, oppgaveId)
+        val oppgaveDataForAutomatisering =
+            finnOppgavedata(fødselsnummer)
+                ?: return commandContext.avbryt(commandContextDao, tilbakedateringBehandlet.id)
 
-            val oppgaveDataForAutomatisering =
-                oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)
-                    ?: return@also sikkerlogg.info("Fant ikke commandData for {} og {}", fødselsnummer, oppgaveId)
-
-            if (!oppgaveDataForAutomatisering.periodeOverlapperMed(tilbakedateringBehandlet.perioder)) {
-                sikkerlogg.info(
-                    "Ingen av periodene i sykmeldingen er innenfor vedtaksperiodens fom og tom, for tilbakedateringen {} og {}",
-                    fødselsnummer,
-                    oppgaveId,
-                )
-                return
-            }
-
+        if (!oppgaveDataForAutomatisering.periodeOverlapperMed(tilbakedateringBehandlet.perioder)) {
             sikkerlogg.info(
-                "Har oppgave til_godkjenning og commandData for fnr $fødselsnummer og vedtaksperiodeId ${oppgaveDataForAutomatisering.vedtaksperiodeId}",
+                "Ingen av periodene i sykmeldingen er innenfor vedtaksperiodens fom og tom, for tilbakedateringen {} og {}",
+                fødselsnummer,
+                oppgaveDataForAutomatisering.oppgaveId,
             )
-            håndter(tilbakedateringBehandlet, context)
-        } ?: sikkerlogg.info("Ingen åpne oppgaver for {} ifm. godkjent tilbakedatering", fødselsnummer)
+            return
+        }
+        tilbakedateringBehandlet.oppgavedataForAutomatisering(oppgaveDataForAutomatisering)
+        personRepository.brukPersonHvisFinnes(fødselsnummer) {
+            iverksett(
+                command = kommandofabrikk.tilbakedateringGodkjent(fødselsnummer, tilbakedateringBehandlet, this),
+                hendelseId = tilbakedateringBehandlet.id,
+                commandContext = commandContext,
+            )
+        }
     }
 
     fun stansAutomatiskBehandling(
@@ -603,12 +602,7 @@ internal class MeldingMediator(
         try {
             when (melding) {
                 is GosysOppgaveEndret -> gosysOppgaveEndret(melding.fødselsnummer(), melding, commandContext)
-                is TilbakedateringBehandlet ->
-                    iverksett(
-                        kommandofabrikk.tilbakedateringGodkjent(melding.fødselsnummer()),
-                        melding.id,
-                        commandContext,
-                    )
+                is TilbakedateringBehandlet -> tilbakedateringBehandlet(melding.fødselsnummer(), melding, commandContext)
                 is SøknadSendt -> iverksett(kommandofabrikk.søknadSendt(melding), melding.id, commandContext)
                 is Godkjenningsbehov -> iverksett(kommandofabrikk.godkjenningsbehov(melding), melding.id, commandContext)
                 is Saksbehandlerløsning -> iverksett(kommandofabrikk.utbetalingsgodkjenning(melding), melding.id, commandContext)

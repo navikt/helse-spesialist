@@ -68,7 +68,7 @@ internal class VarselE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver()
-        håndterÅpneOppgaverløsning(antall = 1)
+        håndterÅpneOppgaverløsning(antallÅpneOppgaverIGosys = 1)
         assertVarsel(SB_EX_1, VEDTAKSPERIODE_ID, AKTIV)
         assertIngenVarsel(SB_EX_3, VEDTAKSPERIODE_ID)
     }
@@ -78,11 +78,11 @@ internal class VarselE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver()
-        håndterÅpneOppgaverløsning(antall = 1)
+        håndterÅpneOppgaverløsning(antallÅpneOppgaverIGosys = 1)
         håndterRisikovurderingløsning()
         håndterInntektløsning()
         håndterGosysOppgaveEndret()
-        håndterÅpneOppgaverløsning(antall = 1)
+        håndterÅpneOppgaverløsning(antallÅpneOppgaverIGosys = 1)
         assertVarsel(SB_EX_1, VEDTAKSPERIODE_ID, AKTIV)
     }
 
@@ -91,11 +91,11 @@ internal class VarselE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver()
-        håndterÅpneOppgaverløsning(antall = 1)
+        håndterÅpneOppgaverløsning(antallÅpneOppgaverIGosys = 1)
         håndterRisikovurderingløsning()
         håndterInntektløsning()
         håndterGosysOppgaveEndret()
-        håndterÅpneOppgaverløsning(antall = 0)
+        håndterÅpneOppgaverløsning(antallÅpneOppgaverIGosys = 0)
         assertVarsel(SB_EX_1, VEDTAKSPERIODE_ID, INAKTIV)
         assertIngenVarsel(SB_EX_3, VEDTAKSPERIODE_ID)
     }
@@ -105,7 +105,7 @@ internal class VarselE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver()
-        håndterÅpneOppgaverløsning(antall = 0, oppslagFeilet = true)
+        håndterÅpneOppgaverløsning(antallÅpneOppgaverIGosys = 0, oppslagFeilet = true)
         assertVarsel(SB_EX_3, VEDTAKSPERIODE_ID, AKTIV)
     }
 
@@ -114,11 +114,11 @@ internal class VarselE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver()
-        håndterÅpneOppgaverløsning(antall = 0, oppslagFeilet = true)
+        håndterÅpneOppgaverløsning(antallÅpneOppgaverIGosys = 0, oppslagFeilet = true)
         håndterRisikovurderingløsning()
         håndterInntektløsning()
         håndterGosysOppgaveEndret()
-        håndterÅpneOppgaverløsning(antall = 0)
+        håndterÅpneOppgaverløsning(antallÅpneOppgaverIGosys = 0)
         assertVarsel(SB_EX_3, VEDTAKSPERIODE_ID, INAKTIV)
     }
 
@@ -127,11 +127,11 @@ internal class VarselE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver()
-        håndterÅpneOppgaverløsning(antall = 0)
+        håndterÅpneOppgaverløsning(antallÅpneOppgaverIGosys = 0)
         håndterRisikovurderingløsning(kanGodkjennesAutomatisk = false)
         håndterInntektløsning()
         håndterGosysOppgaveEndret()
-        håndterÅpneOppgaverløsning(antall = 1)
+        håndterÅpneOppgaverløsning(antallÅpneOppgaverIGosys = 1)
         assertVarsel(SB_EX_1, VEDTAKSPERIODE_ID, AKTIV)
         assertIngenVarsel(SB_EX_3, VEDTAKSPERIODE_ID)
     }

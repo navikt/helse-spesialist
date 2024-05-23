@@ -33,7 +33,7 @@ internal class MetrikkDaoE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver()
-        håndterÅpneOppgaverløsning(antall = 1)
+        håndterÅpneOppgaverløsning(antallÅpneOppgaverIGosys = 1)
         håndterRisikovurderingløsning()
 
         val contextId = inspektør.contextId()
