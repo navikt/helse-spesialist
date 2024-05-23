@@ -17,7 +17,6 @@ import no.nav.helse.TestRapidHelpers.løsning
 import no.nav.helse.TestRapidHelpers.løsningOrNull
 import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.TestRapidHelpers.sisteBehov
-import no.nav.helse.Testdata.ENHET_OSLO
 import no.nav.helse.Testdata.snapshot
 import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Risikofunn
@@ -71,6 +70,7 @@ import java.util.UUID
 
 internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val testperson = TestPerson().also { println("Bruker testdata: $it") }
+
     val FØDSELSNUMMER = testperson.fødselsnummer
     val ORGNR =
         with(testperson) {
@@ -115,6 +115,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             ident = SAKSBEHANDLER_IDENT,
             grupper = emptyList(),
         )
+    private val enhetsnummerOslo = "0301"
 
     @BeforeEach
     internal fun resetTestSetup() {
@@ -205,7 +206,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         regelverksvarsler: List<String> = emptyList(),
         harOppdatertMetadata: Boolean = false,
         snapshotversjon: Int = 1,
-        enhet: String = ENHET_OSLO,
+        enhet: String = enhetsnummerOslo,
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
         avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
@@ -229,7 +230,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fullmakter: List<Fullmakt> = emptyList(),
         harOppdatertMetadata: Boolean = false,
         snapshotversjon: Int = 1,
-        enhet: String = ENHET_OSLO,
+        enhet: String = enhetsnummerOslo,
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
         avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
@@ -252,7 +253,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         regelverksvarsler: List<String> = emptyList(),
         harOppdatertMetadata: Boolean = false,
         snapshotversjon: Int = 1,
-        enhet: String = ENHET_OSLO,
+        enhet: String = enhetsnummerOslo,
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
         avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
@@ -303,7 +304,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun spesialistBehandlerGodkjenningsbehovFremTilOppgave(
-        enhet: String = ENHET_OSLO,
+        enhet: String = enhetsnummerOslo,
         regelverksvarsler: List<String> = emptyList(),
         fullmakter: List<Fullmakt> = emptyList(),
         risikofunn: List<Risikofunn> = emptyList(),
@@ -338,7 +339,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     private fun spesialistBehandlerGodkjenningsbehovFremTilRisikovurdering(
-        enhet: String = ENHET_OSLO,
+        enhet: String = enhetsnummerOslo,
         regelverksvarsler: List<String> = emptyList(),
         fullmakter: List<Fullmakt> = emptyList(),
         harOppdatertMetadata: Boolean = false,

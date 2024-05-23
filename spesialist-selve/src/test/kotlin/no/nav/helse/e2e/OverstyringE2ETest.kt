@@ -8,7 +8,6 @@ import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.TestRapidHelpers.siste
-import no.nav.helse.Testdata.SAKSBEHANDLERTILGANGER_UTEN_TILGANGER
 import no.nav.helse.januar
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
@@ -172,6 +171,14 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertTildeling(SAKSBEHANDLER_EPOST, nyUtbetalingId)
     }
 
+    private val saksbehandlertilgangerIngenTilganger =
+        SaksbehandlerTilganger(
+            gruppetilganger = emptyList(),
+            kode7Saksbehandlergruppe = UUID.randomUUID(),
+            beslutterSaksbehandlergruppe = UUID.randomUUID(),
+            skjermedePersonerSaksbehandlergruppe = UUID.randomUUID(),
+        )
+
     @Test
     fun `legger ved overstyringer i speil snapshot`() {
         vedtaksløsningenMottarNySøknad()
@@ -197,7 +204,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             dataFetchingEnvironment.graphQlContext.get<SaksbehandlerTilganger>(
                 "tilganger",
             )
-        } returns SAKSBEHANDLERTILGANGER_UTEN_TILGANGER
+        } returns saksbehandlertilgangerIngenTilganger
 
         val nyUtbetalingId = UUID.randomUUID()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(

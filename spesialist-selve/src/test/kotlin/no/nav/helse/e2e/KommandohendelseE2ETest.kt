@@ -4,12 +4,11 @@ import AbstractE2ETest
 import AbstractE2ETest.Kommandokjedetilstand.AVBRUTT
 import AbstractE2ETest.Kommandokjedetilstand.NY
 import AbstractE2ETest.Kommandokjedetilstand.SUSPENDERT
-import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.Testdata
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class KommandohendelseE2ETest : AbstractE2ETest() {
 
@@ -23,7 +22,7 @@ internal class KommandohendelseE2ETest : AbstractE2ETest() {
     fun `vedtaksperiode forkastet`() {
         håndterVedtaksperiodeForkastet()
         assertIkkeHendelse(sisteMeldingId)
-        assertVedtaksperiodeEksistererIkke(Testdata.VEDTAKSPERIODE_ID)
+        assertVedtaksperiodeEksistererIkke(VEDTAKSPERIODE_ID)
     }
 
     @Test

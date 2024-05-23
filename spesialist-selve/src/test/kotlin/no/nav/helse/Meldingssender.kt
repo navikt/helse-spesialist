@@ -723,7 +723,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         orgnummer: String,
         berørtePerioder: List<Map<String, String>> = listOf(
             mapOf(
-                "vedtaksperiodeId" to "${Testdata.VEDTAKSPERIODE_ID}",
+                "vedtaksperiodeId" to "${UUID.randomUUID()}",
                 "skjæringstidspunkt" to "2022-01-01",
                 "periodeFom" to "2022-01-01",
                 "periodeTom" to "2022-01-31",

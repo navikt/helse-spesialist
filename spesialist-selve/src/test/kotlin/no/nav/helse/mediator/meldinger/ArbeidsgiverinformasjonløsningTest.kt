@@ -2,7 +2,6 @@ package no.nav.helse.mediator.meldinger
 
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsgiverRiver
@@ -11,6 +10,7 @@ import no.nav.helse.modell.arbeidsgiver.Arbeidsgiverinformasjonløsning
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class ArbeidsgiverinformasjonløsningTest {
     private companion object {
@@ -19,6 +19,7 @@ internal class ArbeidsgiverinformasjonløsningTest {
         private val BRANSJER = listOf("Spaghettikoding")
         private const val FØDSELSNUMMER = "12345678910"
         private const val AKTØRID = "123456789"
+        private val VEDTAKSPERIODE_ID = UUID.randomUUID()
     }
 
     private val dao = mockk<ArbeidsgiverDao>(relaxed = true)

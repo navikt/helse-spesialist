@@ -2,24 +2,20 @@ package no.nav.helse.mediator.meldinger
 
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.Testdata.AKTØR
-import no.nav.helse.Testdata.FØDSELSNUMMER
-import no.nav.helse.Testdata.ORGNR
-import no.nav.helse.Testdata.UTBETALING_ID
-import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.spesialist.test.TestPerson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class VedtaksperiodeNyUtbetalingRiverTest {
-
     private val mediator = mockk<MeldingMediator>(relaxed = true)
     private val testRapid = TestRapid().medRivers(VedtaksperiodeNyUtbetalingRiver(mediator))
+    private val testperson = TestPerson()
 
     @BeforeEach
     fun setUp() {
@@ -32,22 +28,23 @@ internal class VedtaksperiodeNyUtbetalingRiverTest {
         testRapid.sendTestMessage(
             Testmeldingfabrikk.lagVedtaksperiodeNyUtbetaling(
                 id = hendelseId,
-                aktørId = AKTØR,
-                fødselsnummer = FØDSELSNUMMER,
-                organisasjonsnummer = ORGNR,
-                vedtaksperiodeId = VEDTAKSPERIODE_ID,
-                utbetalingId = UTBETALING_ID,
-            )
+                aktørId = testperson.aktørId,
+                fødselsnummer = testperson.fødselsnummer,
+                organisasjonsnummer = testperson.orgnummer,
+                vedtaksperiodeId = testperson.vedtaksperiodeId1,
+                utbetalingId = testperson.utbetalingId1,
+            ),
         )
         verify(exactly = 1) {
             mediator.mottaMelding(
-                melding = withArg<VedtaksperiodeNyUtbetaling> {
-                    assertEquals(hendelseId, it.id)
-                    assertEquals(FØDSELSNUMMER, it.fødselsnummer())
-                    assertEquals(VEDTAKSPERIODE_ID, it.vedtaksperiodeId())
-                    assertEquals(UTBETALING_ID, it.utbetalingId)
-                },
-                messageContext = any()
+                melding =
+                    withArg<VedtaksperiodeNyUtbetaling> {
+                        assertEquals(hendelseId, it.id)
+                        assertEquals(testperson.fødselsnummer, it.fødselsnummer())
+                        assertEquals(testperson.vedtaksperiodeId1, it.vedtaksperiodeId())
+                        assertEquals(testperson.utbetalingId1, it.utbetalingId)
+                    },
+                messageContext = any(),
             )
         }
     }

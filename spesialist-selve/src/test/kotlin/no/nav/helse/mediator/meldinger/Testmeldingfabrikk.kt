@@ -2,7 +2,6 @@ package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.AvviksvurderingTestdata
-import no.nav.helse.Testdata
 import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Risikofunn.Companion.tilJson
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
@@ -791,7 +790,7 @@ internal object Testmeldingfabrikk {
     fun lagRisikovurderingløsning(
         aktørId: String,
         fødselsnummer: String,
-        organisasjonsnummer: String = Testdata.ORGNR,
+        organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
         kanGodkjennesAutomatisk: Boolean = true,
         funn: List<Risikofunn>,

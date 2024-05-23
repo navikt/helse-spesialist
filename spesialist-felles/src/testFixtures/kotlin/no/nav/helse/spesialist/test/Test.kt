@@ -69,7 +69,7 @@ class TestPerson {
     private val arbeidsgiver2 = nyArbeidsgiver()
     private val vedtaksperiode1 = arbeidsgiver1.nyVedtaksperiode()
     private val vedtaksperiode2 = arbeidsgiver1.nyVedtaksperiode()
-    private val orgnummer: String = arbeidsgiver1.organisasjonsnummer
+    val orgnummer: String = arbeidsgiver1.organisasjonsnummer
     val orgnummer2: String = arbeidsgiver2.organisasjonsnummer
     val vedtaksperiodeId1 = vedtaksperiode1.vedtaksperiodeId
     val vedtaksperiodeId2 = vedtaksperiode2.vedtaksperiodeId
