@@ -512,7 +512,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected fun håndterGosysOppgaveEndret(fødselsnummer: String = FØDSELSNUMMER) {
         sisteMeldingId = meldingssender.sendGosysOppgaveEndret(fødselsnummer)
-        assertEtterspurteBehov("ÅpneOppgaver")
     }
 
     protected fun håndterTilbakedateringBehandlet(

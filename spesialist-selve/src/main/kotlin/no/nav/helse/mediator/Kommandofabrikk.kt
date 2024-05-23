@@ -34,6 +34,7 @@ import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.EndretEgenAnsattStatusCommand
 import no.nav.helse.modell.person.OppdaterPersonsnapshot
 import no.nav.helse.modell.person.OppdaterPersonsnapshotCommand
+import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.SøknadSendtCommand
@@ -191,26 +192,20 @@ internal class Kommandofabrikk(
     fun gosysOppgaveEndret(
         fødselsnummer: String,
         hendelse: GosysOppgaveEndret,
+        person: Person,
     ): GosysOppgaveEndretCommand {
-        val oppgaveDataForAutomatisering =
-            oppgaveDao.finnOppgaveIdUansettStatus(fødselsnummer).let { oppgaveId ->
-                oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)!!
-            }
-
-        val skjæringstidspunkt = generasjonRepository.skjæringstidspunktFor(oppgaveDataForAutomatisering.vedtaksperiodeId)
+        val oppgaveDataForAutomatisering = hendelse.oppgavedataForAutomatisering
 
         val utbetaling = utbetalingDao.hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
-        val oppgaveId by lazy { oppgaveDao.finnOppgaveId(fødselsnummer) }
-        val harTildeltOppgave = oppgaveId?.let { tildelingDao.tildelingForOppgave(it) != null } ?: false
-        val spleisBehandlingId =
-            generasjonDao.finnGjeldendeGenerasjon(oppgaveDataForAutomatisering.vedtaksperiodeId)?.spleisBehandlingId
+        val harTildeltOppgave = tildelingDao.tildelingForOppgave(oppgaveDataForAutomatisering.oppgaveId) != null
+        val spleisBehandlingId = person.vedtaksperiode(oppgaveDataForAutomatisering.vedtaksperiodeId)?.gjeldendeBehandlingId
 
         return GosysOppgaveEndretCommand(
             id = hendelse.id,
             fødselsnummer = fødselsnummer,
-            aktørId = requireNotNull(personDao.finnAktørId(fødselsnummer)),
+            aktørId = person.aktørId(),
             utbetaling = utbetaling,
-            sykefraværstilfelle = sykefraværstilfelle(fødselsnummer, skjæringstidspunkt),
+            sykefraværstilfelle = person.sykefraværstilfelle(oppgaveDataForAutomatisering.vedtaksperiodeId),
             harTildeltOppgave = harTildeltOppgave,
             oppgavedataForAutomatisering = oppgaveDataForAutomatisering,
             automatisering = automatisering,

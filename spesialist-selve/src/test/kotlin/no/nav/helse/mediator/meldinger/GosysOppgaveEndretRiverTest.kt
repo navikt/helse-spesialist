@@ -12,23 +12,22 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class GosysOppgaveEndretRiverTest {
-
     private val mediator = mockk<MeldingMediator>(relaxed = true)
     private val testRapid = TestRapid().medRivers(GosysOppgaveEndretRiver(mediator))
 
     @Test
     fun `Leser GosysOppgaveEndret`() {
         testRapid.sendTestMessage(event())
-        verify(exactly = 1) { mediator.gosysOppgaveEndret(any(), any<GosysOppgaveEndret>(), any()) }
+        verify(exactly = 1) { mediator.håndter(any<GosysOppgaveEndret>(), any()) }
     }
 
     @Language("JSON")
-    private fun event() = """
+    private fun event() =
+        """
     {
       "@event_name": "gosys_oppgave_endret",
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "${LocalDateTime.now()}",
       "fødselsnummer": "11111100000"
     }"""
-
 }

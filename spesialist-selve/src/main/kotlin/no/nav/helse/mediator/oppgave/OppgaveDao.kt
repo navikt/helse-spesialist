@@ -590,6 +590,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             val json = objectMapper.readTree(it.string("godkjenningbehovJson"))
             val skjæringstidspunkt = json.path("Godkjenning").path("skjæringstidspunkt").asLocalDate()
             OppgaveDataForAutomatisering(
+                oppgaveId = oppgaveId,
                 vedtaksperiodeId = it.uuid("vedtaksperiode_id"),
                 periodeFom = it.localDate("fom"),
                 periodeTom = it.localDate("tom"),

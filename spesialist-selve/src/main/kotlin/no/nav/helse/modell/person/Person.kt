@@ -20,7 +20,6 @@ import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.util.UUID
 
 class Person private constructor(
@@ -33,13 +32,10 @@ class Person private constructor(
     private val vedtaksperioder = vedtaksperioder.toMutableList()
     private val observers = mutableSetOf<PersonObserver>()
 
+    internal fun aktørId() = aktørId
+
     internal fun nyObserver(observer: PersonObserver) {
         observers.add(observer)
-    }
-
-    private fun finnVedtaksperiode(vedtaksperiodeId: UUID): Vedtaksperiode? {
-        return vedtaksperioder.find { it.vedtaksperiodeId() == vedtaksperiodeId }
-            ?: logg.warn("Vedtaksperiode med id={} finnes ikke", vedtaksperiodeId).let { return null }
     }
 
     fun toDto() =
@@ -60,17 +56,17 @@ class Person private constructor(
     }
 
     internal fun vedtakFattet(vedtakFattet: VedtakFattet) {
-        finnVedtaksperiode(vedtakFattet.vedtaksperiodeId())
+        vedtaksperiode(vedtakFattet.vedtaksperiodeId())
             ?.vedtakFattet(vedtakFattet.id, vedtakFattet.spleisBehandlingId())
     }
 
     internal fun avsluttetUtenVedtak(avsluttetUtenVedtak: AvsluttetUtenVedtak) {
-        finnVedtaksperiode(avsluttetUtenVedtak.vedtaksperiodeId())
+        vedtaksperiode(avsluttetUtenVedtak.vedtaksperiodeId())
             ?.avsluttetUtenVedtak(this, avsluttetUtenVedtak)
     }
 
     internal fun vedtaksperiodeForkastet(vedtaksperiodeForkastet: VedtaksperiodeForkastet) {
-        finnVedtaksperiode(vedtaksperiodeForkastet.vedtaksperiodeId())
+        vedtaksperiode(vedtaksperiodeForkastet.vedtaksperiodeId())
             ?.vedtaksperiodeForkastet()
     }
 
@@ -88,7 +84,15 @@ class Person private constructor(
             ?: vedtaksperioder.add(Vedtaksperiode.nyVedtaksperiode(spleisBehandling))
     }
 
-    internal fun sykefraværstilfelle(skjæringstidspunkt: LocalDate): Sykefraværstilfelle {
+    internal fun vedtaksperiode(vedtaksperiodeId: UUID): Vedtaksperiode? {
+        return vedtaksperioder.find { it.vedtaksperiodeId() == vedtaksperiodeId }
+            ?: logg.warn("Vedtaksperiode med id={} finnes ikke", vedtaksperiodeId).let { return null }
+    }
+
+    internal fun sykefraværstilfelle(vedtaksperiodeId: UUID): Sykefraværstilfelle {
+        val skjæringstidspunkt =
+            vedtaksperiode(vedtaksperiodeId)?.gjeldendeSkjæringstidspunkt
+                ?: throw IllegalStateException("Forventer å finne vedtaksperiode med id=$vedtaksperiodeId")
         val gjeldendeGenerasjoner = vedtaksperioder.relevanteFor(skjæringstidspunkt)
         return Sykefraværstilfelle(
             fødselsnummer = fødselsnummer,
@@ -109,7 +113,7 @@ class Person private constructor(
     }
 
     internal fun nyUtbetalingForVedtaksperiode(vedtaksperiodeNyUtbetaling: VedtaksperiodeNyUtbetaling) {
-        finnVedtaksperiode(vedtaksperiodeNyUtbetaling.vedtaksperiodeId())
+        vedtaksperiode(vedtaksperiodeNyUtbetaling.vedtaksperiodeId())
             ?.nyUtbetaling(vedtaksperiodeNyUtbetaling.id, vedtaksperiodeNyUtbetaling.utbetalingId)
     }
 

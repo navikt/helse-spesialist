@@ -53,6 +53,8 @@ internal class Generasjon private constructor(
     private val varsler: MutableList<Varsel> = varsler.toMutableList()
     private val observers = mutableSetOf<IVedtaksperiodeObserver>()
 
+    internal fun spleisBehandlingId() = spleisBehandlingId
+
     internal fun skjæringstidspunkt() = skjæringstidspunkt
 
     internal fun unikId() = id

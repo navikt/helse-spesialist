@@ -34,6 +34,13 @@ internal class GosysOppgaveEndret private constructor(
         json = jsonNode.toString(),
     )
 
+    internal lateinit var oppgavedataForAutomatisering: OppgaveDataForAutomatisering
+        private set
+
+    internal fun oppgavedataForAutomatisering(oppgavedataForAutomatisering: OppgaveDataForAutomatisering) {
+        this.oppgavedataForAutomatisering = oppgavedataForAutomatisering
+    }
+
     override fun fødselsnummer() = fødselsnummer
 
     override fun toJson(): String = json

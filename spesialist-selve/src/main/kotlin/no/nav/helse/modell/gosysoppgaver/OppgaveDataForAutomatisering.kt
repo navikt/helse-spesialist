@@ -7,6 +7,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 data class OppgaveDataForAutomatisering(
+    val oppgaveId: Long,
     val vedtaksperiodeId: UUID,
     val periodeFom: LocalDate,
     val periodeTom: LocalDate,

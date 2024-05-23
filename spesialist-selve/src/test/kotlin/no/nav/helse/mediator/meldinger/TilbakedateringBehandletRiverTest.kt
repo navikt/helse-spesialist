@@ -17,7 +17,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class TilbakedateringBehandletRiverTest {
-
     private val mediator = mockk<MeldingMediator>(relaxed = true)
     private val testRapid = TestRapid().medRivers(TilbakedateringBehandletRiver(mediator))
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
@@ -30,24 +29,27 @@ internal class TilbakedateringBehandletRiverTest {
     }
 
     private fun mocks(
-        oppgaveId: Long? = 1L,
-        commandData: OppgaveDataForAutomatisering? = OppgaveDataForAutomatisering(
-            vedtaksperiodeId = UUID.randomUUID(),
-            periodeFom = LocalDate.now(),
-            periodeTom = LocalDate.now(),
-            utbetalingId = UUID.randomUUID(),
-            hendelseId = UUID.randomUUID(),
-            godkjenningsbehovJson = "{}",
-            periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-            skjæringstidspunkt = LocalDate.now()
-        )
+        oppgaveId: Long = 1L,
+        commandData: OppgaveDataForAutomatisering? =
+            OppgaveDataForAutomatisering(
+                oppgaveId = oppgaveId,
+                vedtaksperiodeId = UUID.randomUUID(),
+                periodeFom = LocalDate.now(),
+                periodeTom = LocalDate.now(),
+                utbetalingId = UUID.randomUUID(),
+                hendelseId = UUID.randomUUID(),
+                godkjenningsbehovJson = "{}",
+                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+                skjæringstidspunkt = LocalDate.now(),
+            ),
     ) {
         every { oppgaveDao.finnOppgaveId(any<String>()) }.returns(oppgaveId)
         every { oppgaveDao.oppgaveDataForAutomatisering(any()) }.returns(commandData)
     }
 
     @Language("JSON")
-    private fun event() = """
+    private fun event() =
+        """
     {
       "@event_name": "tilbakedatering_behandlet",
       "@id": "${UUID.randomUUID()}",
@@ -62,5 +64,4 @@ internal class TilbakedateringBehandletRiverTest {
           }
       ]
     }"""
-
 }

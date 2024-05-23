@@ -24,7 +24,8 @@ internal class Vedtaksperiode private constructor(
     private val fom get() = gjeldendeGenerasjon.fom()
     private val tom get() = gjeldendeGenerasjon.tom()
     private val gjeldendeUtbetalingId get() = gjeldendeGenerasjon.utbetalingId()
-    private val gjeldendeSkjæringstidspunkt get() = gjeldendeGenerasjon.skjæringstidspunkt()
+    internal val gjeldendeSkjæringstidspunkt get() = gjeldendeGenerasjon.skjæringstidspunkt()
+    internal val gjeldendeBehandlingId get() = gjeldendeGenerasjon.spleisBehandlingId()
 
     fun vedtaksperiodeId() = vedtaksperiodeId
 

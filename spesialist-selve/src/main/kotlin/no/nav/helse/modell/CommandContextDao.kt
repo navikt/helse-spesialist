@@ -33,6 +33,13 @@ internal class CommandContextDao(private val dataSource: DataSource) {
         lagre(hendelseId, contextId, FERDIG, null)
     }
 
+    internal fun avbrutt(
+        hendelseId: UUID,
+        contextId: UUID,
+    ) {
+        lagre(hendelseId, contextId, AVBRUTT, null)
+    }
+
     internal fun feil(
         hendelseId: UUID,
         contextId: UUID,

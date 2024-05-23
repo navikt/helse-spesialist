@@ -3,7 +3,6 @@ package no.nav.helse.modell.kommando
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import java.util.UUID
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.kommando.CommandContext.Companion.convertToUUID
@@ -15,9 +14,9 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.util.UUID
 
 internal class CommandContextTest {
-
     private lateinit var context: CommandContext
 
     private companion object {
@@ -27,23 +26,28 @@ internal class CommandContextTest {
 
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
 
-    private val observer = object : CommandContextObserver {
-        val behov = mutableMapOf<String, Map<String, Any>>()
-        val hendelser = mutableListOf<String>()
-        val utgåendeTilstandEndringer = mutableListOf<String>()
+    private val observer =
+        object : CommandContextObserver {
+            val behov = mutableMapOf<String, Map<String, Any>>()
+            val hendelser = mutableListOf<String>()
+            val utgåendeTilstandEndringer = mutableListOf<String>()
 
-        override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {
-            this.behov[behov] = detaljer
-        }
+            override fun behov(
+                behov: String,
+                ekstraKontekst: Map<String, Any>,
+                detaljer: Map<String, Any>,
+            ) {
+                this.behov[behov] = detaljer
+            }
 
-        override fun hendelse(hendelse: String) {
-            this.hendelser.add(hendelse)
-        }
+            override fun hendelse(hendelse: String) {
+                this.hendelser.add(hendelse)
+            }
 
-        override fun tilstandEndring(hendelse: String) {
-            this.utgåendeTilstandEndringer.add(hendelse)
+            override fun tilstandEndring(hendelse: String) {
+                this.utgåendeTilstandEndringer.add(hendelse)
+            }
         }
-    }
 
     @BeforeEach
     fun setupEach() {
@@ -121,15 +125,15 @@ internal class CommandContextTest {
 
     @Test
     fun ferdigstiller() {
-        TestCommand(executeAction = { this.ferdigstill(context)}).apply {
+        TestCommand(executeAction = { this.ferdigstill(context) }).apply {
             context.utfør(commandContextDao, this.id, this)
-            verify(exactly = 1) { commandContextDao.ferdig(any(), any())}
+            verify(exactly = 1) { commandContextDao.ferdig(any(), any()) }
         }
     }
 
     @Test
     fun `lager kommandokjede_ferdigstilt hendelse når kommandokjeden ferdigstilles`() {
-        TestCommand(executeAction = { this.ferdigstill(context)}).apply {
+        TestCommand(executeAction = { this.ferdigstill(context) }).apply {
             context.utfør(commandContextDao, this.id, this)
         }
         val result = observer.utgåendeTilstandEndringer
@@ -157,7 +161,7 @@ internal class CommandContextTest {
         }).apply {
             context.utfør(commandContextDao, this.id, this)
         }
-        context.avbryt(commandContextDao, UUID.randomUUID())
+        context.avbrytAlleForPeriode(commandContextDao, UUID.randomUUID())
         val result = observer.utgåendeTilstandEndringer
         assertTrue(result.isNotEmpty())
         assertTrue(result.last().contains("kommandokjede_avbrutt"))
@@ -182,7 +186,7 @@ internal class CommandContextTest {
             false
         }).apply {
             context.utfør(commandContextDao, this.id, this)
-            verify(exactly = 1) { commandContextDao.ferdig(any(), any())}
+            verify(exactly = 1) { commandContextDao.ferdig(any(), any()) }
         }
     }
 
@@ -234,22 +238,30 @@ internal class CommandContextTest {
     fun `overskriver behov som allerede finnes`() {
         context.behov("type 1", mapOf("param 1" to 1))
         context.behov("type 2", mapOf("param 2" to 1))
-        assertEquals(mapOf(
-            "type 1" to mapOf("param 1" to 1),
-            "type 2" to mapOf("param 2" to 1)
-        ), observer.behov)
+        assertEquals(
+            mapOf(
+                "type 1" to mapOf("param 1" to 1),
+                "type 2" to mapOf("param 2" to 1),
+            ),
+            observer.behov,
+        )
         context.behov("type 1", mapOf("param 1" to 2))
-        assertEquals(mapOf(
-            "type 1" to mapOf("param 1" to 2),
-            "type 2" to mapOf("param 2" to 1)
-        ), observer.behov)
+        assertEquals(
+            mapOf(
+                "type 1" to mapOf("param 1" to 2),
+                "type 2" to mapOf("param 2" to 1),
+            ),
+            observer.behov,
+        )
     }
 
     private class TestObject1
+
     private class TestObject2
+
     private class TestCommand(
         private val executeAction: Command.() -> Boolean = { true },
-        private val resumeAction: Command.() -> Boolean = { true }
+        private val resumeAction: Command.() -> Boolean = { true },
     ) : Command {
         var executed = false
         var resumed = false

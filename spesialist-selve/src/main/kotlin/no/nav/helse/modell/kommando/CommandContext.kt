@@ -72,20 +72,35 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
 
     internal fun avbryt(
         commandContextDao: CommandContextDao,
+        meldingId: UUID,
+    ) {
+        commandContextDao.avbrutt(meldingId, id)
+        publiserAvbrutt(id, meldingId)
+    }
+
+    internal fun avbrytAlleForPeriode(
+        commandContextDao: CommandContextDao,
         vedtaksperiodeId: UUID,
     ) {
         val avbrutteKommandokjeder = commandContextDao.avbryt(vedtaksperiodeId, id)
         avbrutteKommandokjeder.forEach {
-            publiserTilstandEndring(
-                JsonMessage.newMessage(
-                    "kommandokjede_avbrutt",
-                    mutableMapOf(
-                        "commandContextId" to it.first,
-                        "meldingId" to it.second,
-                    ),
-                ).toJson(),
-            )
+            publiserAvbrutt(it.first, it.second)
         }
+    }
+
+    private fun publiserAvbrutt(
+        contextId: UUID,
+        meldingId: UUID,
+    ) {
+        publiserTilstandEndring(
+            JsonMessage.newMessage(
+                "kommandokjede_avbrutt",
+                mutableMapOf(
+                    "commandContextId" to contextId,
+                    "meldingId" to meldingId,
+                ),
+            ).toJson(),
+        )
     }
 
     private fun ferdigstill() {

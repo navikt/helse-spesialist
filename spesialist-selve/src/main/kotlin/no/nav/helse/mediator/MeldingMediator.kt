@@ -52,6 +52,7 @@ import no.nav.helse.modell.MeldingDuplikatkontrollDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
+import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
@@ -133,12 +134,15 @@ internal class MeldingMediator(
 
     private fun skalBehandleMeldingIDev(jsonNode: JsonNode): Boolean {
         val eventName = jsonNode["@event_name"]?.asText()
-        if (eventName in setOf(
+        if (eventName in
+            setOf(
                 "sendt_søknad_arbeidsgiver",
                 "sendt_søknad_nav",
-                "stans_automatisk_behandling"
+                "stans_automatisk_behandling",
             )
-        ) return true
+        ) {
+            return true
+        }
         val fødselsnummer = jsonNode["fødselsnummer"]?.asText() ?: return true
         if (fødselsnummer.toDoubleOrNull() == null) return true
         val harPerson = personDao.findPersonByFødselsnummer(fødselsnummer) != null
@@ -314,23 +318,38 @@ internal class MeldingMediator(
         håndter(godkjenningsbehov, context)
     }
 
-    fun gosysOppgaveEndret(
+    private fun finnOppgavedata(fødselsnummer: String): OppgaveDataForAutomatisering? {
+        return oppgaveDao.finnOppgaveId(fødselsnummer)?.let { oppgaveId ->
+            sikkerlogg.info("Fant en oppgave for {}: {}", fødselsnummer, oppgaveId)
+            val oppgaveDataForAutomatisering = oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)
+
+            if (oppgaveDataForAutomatisering == null) {
+                sikkerlogg.info("Fant ikke oppgavedata for {} og {}", fødselsnummer, oppgaveId)
+                return null
+            } else {
+                sikkerlogg.info(
+                    "Har aktiv saksbehandleroppgave og oppgavedata for fnr $fødselsnummer og vedtaksperiodeId ${oppgaveDataForAutomatisering.vedtaksperiodeId}",
+                )
+                return oppgaveDataForAutomatisering
+            }
+        } ?: kotlin.run {
+            sikkerlogg.info("Ingen åpne oppgaver i Speil for {}", fødselsnummer)
+            null
+        }
+    }
+
+    private fun gosysOppgaveEndret(
         fødselsnummer: String,
         oppgaveEndret: GosysOppgaveEndret,
-        context: MessageContext,
+        commandContext: CommandContext,
     ) {
-        oppgaveDao.finnOppgaveId(fødselsnummer)?.also { oppgaveId ->
-            sikkerlogg.info("Fant en oppgave for {}: {}", fødselsnummer, oppgaveId)
-            val commandData = oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)
-            if (commandData == null) {
-                sikkerlogg.info("Fant ikke commandData for {} og {}", fødselsnummer, oppgaveId)
-                return
-            }
-            sikkerlogg.info(
-                "Har oppgave til_godkjenning og commandData for fnr $fødselsnummer og vedtaksperiodeId ${commandData.vedtaksperiodeId}",
-            )
-            håndter(oppgaveEndret, context)
-        } ?: sikkerlogg.info("Ingen åpne oppgaver i Speil for {}", fødselsnummer)
+        val oppgavedata =
+            finnOppgavedata(fødselsnummer)
+                ?: return commandContext.avbryt(commandContextDao, oppgaveEndret.id)
+        oppgaveEndret.oppgavedataForAutomatisering(oppgavedata)
+        personRepository.brukPersonHvisFinnes(fødselsnummer) {
+            iverksett(kommandofabrikk.gosysOppgaveEndret(fødselsnummer, oppgaveEndret, this), oppgaveEndret.id, commandContext)
+        }
     }
 
     fun tilbakedateringBehandlet(
@@ -438,11 +457,12 @@ internal class MeldingMediator(
         if (meldingPasserteValidering) {
             val jsonNode = objectMapper.readTree(message)
             jsonNode["@id"]?.asUUID()?.let { id ->
-                val type = when(val eventName = jsonNode["@event_name"]?.asText()) {
-                    null -> "ukjent"
-                    "behov" -> "behov: " + jsonNode["@behov"].map { it.asText() }.joinToString()
-                    else -> eventName
-                }
+                val type =
+                    when (val eventName = jsonNode["@event_name"]?.asText()) {
+                        null -> "ukjent"
+                        "behov" -> "behov: " + jsonNode["@behov"].map { it.asText() }.joinToString()
+                        else -> eventName
+                    }
                 logg.info("Markerer melding id=$id, type=$type som behandlet i duplikatkontroll")
                 meldingDuplikatkontrollDao.lagre(id, type)
             }
@@ -582,12 +602,7 @@ internal class MeldingMediator(
         val hendelsenavn = melding::class.simpleName ?: "ukjent hendelse"
         try {
             when (melding) {
-                is GosysOppgaveEndret ->
-                    iverksett(
-                        kommandofabrikk.gosysOppgaveEndret(melding.fødselsnummer(), melding),
-                        melding.id,
-                        commandContext,
-                    )
+                is GosysOppgaveEndret -> gosysOppgaveEndret(melding.fødselsnummer(), melding, commandContext)
                 is TilbakedateringBehandlet ->
                     iverksett(
                         kommandofabrikk.tilbakedateringGodkjent(melding.fødselsnummer()),

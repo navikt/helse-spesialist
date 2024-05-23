@@ -9,7 +9,6 @@ import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.oppgave.OppgaveDao
-import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
@@ -61,35 +60,6 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
         val varseldefinisjon = Varseldefinisjon(id, "SB_EX_1", "En tittel", null, null, false, LocalDateTime.now())
         meldingMediator.håndter(varseldefinisjon)
         assertVarseldefinisjon(id)
-    }
-
-    @Test
-    fun `Utfører kommando ved GosysOppgaveEndret`() {
-        val event = mockk<GosysOppgaveEndret>(relaxed = true)
-        every { event.fødselsnummer() } returns fødselsnummer
-        every { event.toJson() } returns "{}"
-        meldingMediator.gosysOppgaveEndret(fødselsnummer, event, testRapid)
-        verify(exactly = 1) { kommandofabrikk.gosysOppgaveEndret(fødselsnummer, event) }
-    }
-
-    @Test
-    fun `Returnerer tidlig ved GosysOppgaveEndret hvis oppgave ikke er til_godkjenning`() {
-        val event = mockk<GosysOppgaveEndret>(relaxed = true)
-        every { event.fødselsnummer() } returns fødselsnummer
-        every { event.toJson() } returns "{}"
-        every { oppgaveDao.finnOppgaveId(fødselsnummer) } returns null
-        meldingMediator.gosysOppgaveEndret(fødselsnummer, event, testRapid)
-        verify(exactly = 0) { kommandofabrikk.gosysOppgaveEndret(any(), any()) }
-    }
-
-    @Test
-    fun `Returnerer tidlig ved GosysOppgaveEndret hvis vi ikke har commanddata for oppgave`() {
-        val event = mockk<GosysOppgaveEndret>(relaxed = true)
-        every { event.fødselsnummer() } returns fødselsnummer
-        every { event.toJson() } returns "{}"
-        every { oppgaveDao.oppgaveDataForAutomatisering(any()) } returns null
-        meldingMediator.gosysOppgaveEndret(fødselsnummer, event, testRapid)
-        verify(exactly = 0) { kommandofabrikk.gosysOppgaveEndret(any(), any()) }
     }
 
     @Test
