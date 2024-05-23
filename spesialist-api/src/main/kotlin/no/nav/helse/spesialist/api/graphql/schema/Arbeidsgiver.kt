@@ -22,7 +22,6 @@ import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGenerasjon
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUberegnetPeriode
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUberegnetVilkarsprovdPeriode
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 
@@ -187,18 +186,6 @@ data class Arbeidsgiver(
                                     index = index,
                                     oppgavehåndterer = oppgavehåndterer,
                                     saksbehandlerhåndterer = saksbehandlerhåndterer,
-                                )
-
-                            is GraphQLUberegnetVilkarsprovdPeriode ->
-                                UberegnetVilkarsprovdPeriode(
-                                    vilkarsgrunnlagId = it.vilkarsgrunnlagId,
-                                    varselRepository = varselRepository,
-                                    periode = it,
-                                    // Antakelse om at hvis det ikke finnes oppgave er det en periode som skal skjønnsfastsettes. Da vil vi vise varsler.
-                                    // Dette kans fjernes når skjønnsfastsettingperioder også har oppgave.
-                                    skalViseAktiveVarsler = if (oppgaveId == null) true else index == 0 && perioderSomSkalViseAktiveVarsler.contains(it.vedtaksperiodeId),
-                                    notatDao = notatDao,
-                                    index = index,
                                 )
 
                             else -> throw Exception("Ukjent tidslinjeperiode")

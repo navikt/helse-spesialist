@@ -390,54 +390,6 @@ data class UberegnetPeriode(
     fun notater(): List<Notat> = notater(notatDao, vedtaksperiodeId())
 }
 
-@Suppress("unused")
-data class UberegnetVilkarsprovdPeriode(
-    val vilkarsgrunnlagId: UUID,
-    private val varselRepository: ApiVarselRepository,
-    private val periode: GraphQLTidslinjeperiode,
-    private val skalViseAktiveVarsler: Boolean,
-    private val notatDao: NotatDao,
-    private val index: Int,
-) : Periode {
-    override fun erForkastet(): Boolean = erForkastet(periode)
-
-    override fun fom(): DateString = fom(periode)
-
-    override fun tom(): DateString = tom(periode)
-
-    override fun id(): UUID = UUID.nameUUIDFromBytes(vedtaksperiodeId().toString().toByteArray() + index.toByte())
-
-    override fun inntektstype(): Inntektstype = inntektstype(periode)
-
-    override fun opprettet(): DateTimeString = opprettet(periode)
-
-    override fun periodetype(): Periodetype = periodetype(periode)
-
-    override fun tidslinje(): List<Dag> = tidslinje(periode)
-
-    override fun vedtaksperiodeId(): UUID = periode.vedtaksperiodeId
-
-    override fun periodetilstand(): Periodetilstand = periodetilstand(periode.periodetilstand, true)
-
-    override fun skjaeringstidspunkt(): DateString = periode.skjaeringstidspunkt
-
-    override fun hendelser(): List<Hendelse> = periode.hendelser.map { it.tilHendelse() }
-
-    override fun varsler(): List<VarselDTO> =
-        if (skalViseAktiveVarsler) {
-            varselRepository.finnVarslerForUberegnetPeriode(vedtaksperiodeId()).toList()
-        } else {
-            varselRepository.finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId()).toList()
-        }
-
-    fun notater(): List<Notat> = notater(notatDao, vedtaksperiodeId())
-
-    // Det blir litt for tungvint å håndtere i Speil at vilkarsgrunnlag kan være både null og ikke-null.
-    // Feltet må være nullable i BeregnetPeriode pga. at spleis bruker BeregnetPeriode for annullerte perioder, og de
-    // har vilkarsgrunnlag = null
-    fun vilkarsgrunnlagId(): UUID? = vilkarsgrunnlagId
-}
-
 enum class Periodehandling {
     UTBETALE,
     AVVISE,
