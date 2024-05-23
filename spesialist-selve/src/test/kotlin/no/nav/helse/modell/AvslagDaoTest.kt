@@ -6,6 +6,8 @@ import kotliquery.sessionOf
 import java.util.UUID
 import no.nav.helse.db.AvslagDao
 import no.nav.helse.spesialist.api.graphql.mutation.Avslag
+import no.nav.helse.spesialist.api.graphql.mutation.Avslagsdata
+import no.nav.helse.spesialist.api.graphql.mutation.Avslagshandling
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -23,8 +25,8 @@ internal class AvslagDaoTest : DatabaseIntegrationTest() {
         val generasjonUnikId = UUID.randomUUID()
         nyPerson(generasjonId = generasjonUnikId)
         nySaksbehandler(oid)
-        val avslag = Avslag(Avslagstype.AVSLAG, "En individuell begrunelse")
-        nyDao.lagreAvslag(OPPGAVE_ID, avslag, oid)
+        val avslag = Avslag(handling = Avslagshandling.OPPRETT, data = Avslagsdata(Avslagstype.AVSLAG, "En individuell begrunelse"))
+        nyDao.lagreAvslag(OPPGAVE_ID, avslag.data!!, oid)
 
         val generasjonId = finnGenereasjonId(generasjonUnikId)
 
@@ -39,8 +41,8 @@ internal class AvslagDaoTest : DatabaseIntegrationTest() {
         nyPerson(generasjonId = generasjonUnikId)
         nySaksbehandler(oid)
         val generasjonId = finnGenereasjonId(generasjonUnikId)
-        val avslag = Avslag(Avslagstype.AVSLAG, "En individuell begrunelse")
-        nyDao.lagreAvslag(OPPGAVE_ID, avslag, oid)
+        val avslag = Avslag(handling = Avslagshandling.OPPRETT, data = Avslagsdata(Avslagstype.AVSLAG, "En individuell begrunelse"))
+        nyDao.lagreAvslag(OPPGAVE_ID, avslag.data!!, oid)
         nyDao.invaliderAvslag(OPPGAVE_ID)
         val lagretAvslag = nyDao.finnAvslag(VEDTAKSPERIODE, generasjonId)
         assertNull(lagretAvslag)
@@ -52,10 +54,10 @@ internal class AvslagDaoTest : DatabaseIntegrationTest() {
         val generasjonUnikId = UUID.randomUUID()
         nyPerson(generasjonId = generasjonUnikId)
         nySaksbehandler(oid)
-        val avslag = Avslag(Avslagstype.AVSLAG, "En individuell begrunelse")
-        val avslag2 = Avslag(Avslagstype.DELVIS_AVSLAG, "En individuell begrunelse delvis avslag retter skrivefeil")
-        nyDao.lagreAvslag(OPPGAVE_ID, avslag, oid)
-        nyDao.lagreAvslag(OPPGAVE_ID, avslag2, oid)
+        val avslag = Avslag(handling = Avslagshandling.OPPRETT, data = Avslagsdata(Avslagstype.AVSLAG, "En individuell begrunelse"))
+        val avslag2 = Avslag(handling = Avslagshandling.OPPRETT, data = Avslagsdata(Avslagstype.DELVIS_AVSLAG, "En individuell begrunelse delvis avslag retter skrivefeil"))
+        nyDao.lagreAvslag(OPPGAVE_ID, avslag.data!!, oid)
+        nyDao.lagreAvslag(OPPGAVE_ID, avslag2.data!!, oid)
 
         val lagredeAvslag: List<no.nav.helse.spesialist.api.graphql.schema.Avslag> =
             nyDao.finnAlleAvslag(VEDTAKSPERIODE, UTBETALING_ID).toList()

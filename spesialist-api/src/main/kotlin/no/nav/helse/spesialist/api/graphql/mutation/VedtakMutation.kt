@@ -173,6 +173,11 @@ class VedtakMutation(
 }
 
 data class Avslag(
+    val handling: Avslagshandling,
+    val data: Avslagsdata?,
+)
+
+data class Avslagsdata(
     val type: Avslagstype,
     val begrunnelse: String,
 )
@@ -180,4 +185,9 @@ data class Avslag(
 enum class Avslagstype {
     AVSLAG,
     DELVIS_AVSLAG,
+}
+
+enum class Avslagshandling {
+    OPPRETT,
+    INVALIDER,
 }

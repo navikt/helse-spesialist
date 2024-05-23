@@ -843,6 +843,11 @@ enum AntallArbeidsforhold {
     FLERE_ARBEIDSFORHOLD
 }
 
+enum Avslagshandling {
+    INVALIDER
+    OPPRETT
+}
+
 enum Avslagstype {
     AVSLAG
     DELVIS_AVSLAG
@@ -1217,6 +1222,11 @@ input ArbeidsforholdOverstyringHandlingInput {
 }
 
 input AvslagInput {
+    data: AvslagsdataInput
+    handling: Avslagshandling!
+}
+
+input AvslagsdataInput {
     begrunnelse: String!
     type: Avslagstype!
 }

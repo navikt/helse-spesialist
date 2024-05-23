@@ -17,6 +17,8 @@ import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.graphql.mutation.Avslag
+import no.nav.helse.spesialist.api.graphql.mutation.Avslagsdata
+import no.nav.helse.spesialist.api.graphql.mutation.Avslagshandling
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
@@ -244,7 +246,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
                 godkjenning(
                     oppgavereferanse = oppgaveId,
                     godkjent = true,
-                    avslag = Avslag(Avslagstype.AVSLAG, "En individuell begrunnelse"),
+                    avslag = Avslag(handling = Avslagshandling.OPPRETT, data = Avslagsdata(Avslagstype.AVSLAG, "En individuell begrunnelse")),
                 ),
                 UUID.randomUUID(),
                 saksbehandler,

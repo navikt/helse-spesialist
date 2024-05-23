@@ -2,27 +2,28 @@ package no.nav.helse.db
 
 import no.nav.helse.HelseDao
 import no.nav.helse.modell.vedtak.Avslag
+import no.nav.helse.spesialist.api.graphql.mutation.Avslagsdata
 import java.util.UUID
 import javax.sql.DataSource
 
 class AvslagDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     private fun lagreBegrunnelse(
-        avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag,
+        avslagsdata: Avslagsdata,
         saksbehandlerOid: UUID,
     ) = asSQL(
         """
         INSERT INTO begrunnelse(tekst, type, saksbehandler_ref) VALUES (:tekst, :type, :saksbehandler_ref)
         """.trimIndent(),
         mapOf(
-            "tekst" to avslag.begrunnelse,
-            "type" to avslag.type.toString(),
+            "tekst" to avslagsdata.begrunnelse,
+            "type" to avslagsdata.type.toString(),
             "saksbehandler_ref" to saksbehandlerOid,
         ),
     ).updateAndReturnGeneratedKey()
 
     internal fun lagreAvslag(
         oppgaveId: Long,
-        avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag,
+        avslagsdata: Avslagsdata,
         saksbehandlerOid: UUID,
     ) = asSQL(
         """
@@ -36,7 +37,7 @@ class AvslagDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             "oppgaveId" to oppgaveId,
         ),
     ).single { Pair(it.uuid("vedtaksperiode_id"), it.long("generasjon_id")) }?.let { (vedtaksperiodeId, generasjonId) ->
-        lagreBegrunnelse(avslag, saksbehandlerOid).let { begrunnelseId ->
+        lagreBegrunnelse(avslagsdata, saksbehandlerOid).let { begrunnelseId ->
             asSQL(
                 """
                 INSERT INTO avslag (vedtaksperiode_id, begrunnelse_ref, generasjon_ref) VALUES (:vedtaksperiodeId, :begrunnelseId, :generasjonId)

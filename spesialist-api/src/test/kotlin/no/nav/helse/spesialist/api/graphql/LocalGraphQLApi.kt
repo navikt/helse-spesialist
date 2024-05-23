@@ -301,7 +301,7 @@ private class SneakySaksbehandlerhåndterer(
     override fun håndterAvslag(
         oppgaveId: Long,
         saksbehandlerFraApi: SaksbehandlerFraApi,
-        avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag?
+        avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag
     ) {
         return mock.håndterAvslag(oppgaveId, saksbehandlerFraApi, avslag)
     }

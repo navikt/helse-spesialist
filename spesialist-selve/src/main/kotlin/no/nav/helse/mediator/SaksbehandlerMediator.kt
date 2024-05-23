@@ -46,6 +46,7 @@ import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.feilhåndtering.IkkeTilgang
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
+import no.nav.helse.spesialist.api.graphql.mutation.Avslagshandling
 import no.nav.helse.spesialist.api.graphql.schema.Avslag
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
@@ -214,12 +215,12 @@ internal class SaksbehandlerMediator(
     override fun håndterAvslag(
         oppgaveId: Long,
         saksbehandlerFraApi: SaksbehandlerFraApi,
-        avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag?,
+        avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag,
     ) {
-        if (avslag == null) {
+        if (avslag.handling == Avslagshandling.INVALIDER) {
             avslagDao.invaliderAvslag(oppgaveId)
         } else {
-            avslagDao.lagreAvslag(oppgaveId, avslag, saksbehandlerFraApi.oid)
+            avslagDao.lagreAvslag(oppgaveId, avslag.data!!, saksbehandlerFraApi.oid)
         }
     }
 
@@ -250,7 +251,11 @@ internal class SaksbehandlerMediator(
         påVentDao.slettPåVent(godkjenning.oppgavereferanse)
         oppgaveApiDao.lagreBehandlingsreferanse(godkjenning.oppgavereferanse, behandlingId)
         godkjenning.avslag?.let {
-            avslagDao.lagreAvslag(godkjenning.oppgavereferanse, it, saksbehandler.oid())
+            if (it.handling == Avslagshandling.INVALIDER) {
+                avslagDao.invaliderAvslag(godkjenning.oppgavereferanse)
+            } else {
+                avslagDao.lagreAvslag(godkjenning.oppgavereferanse, it.data!!, saksbehandler.oid())
+            }
         }
     }
 
