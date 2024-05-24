@@ -68,6 +68,5 @@ private fun GraphQLInntektskilde.tilInntektskilde(): Inntektskilde =
         GraphQLInntektskilde.INNTEKTSMELDING -> Inntektskilde.INNTEKTSMELDING
         GraphQLInntektskilde.SAKSBEHANDLER -> Inntektskilde.SAKSBEHANDLER
         GraphQLInntektskilde.IKKERAPPORTERT -> Inntektskilde.IKKE_RAPPORTERT
-        GraphQLInntektskilde.SKJONNSMESSIGFASTSATT -> Inntektskilde.SKJONNSMESSIG_FASTSATT
         else -> throw Exception("Ukjent inntektskilde ${this.name}")
     }

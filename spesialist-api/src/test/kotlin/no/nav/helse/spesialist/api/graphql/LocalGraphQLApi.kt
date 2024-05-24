@@ -293,15 +293,17 @@ private class SneakySaksbehandlerhåndterer(
         return mock.hentAbonnerteOpptegnelser(saksbehandlerFraApi, sisteSekvensId)
     }
 
-    override fun hentAvslag(vedtaksperiodeId: UUID, utbetalingId: UUID): Set<Avslag> {
+    override fun hentAvslag(
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+    ): Set<Avslag> {
         return mock.hentAvslag(vedtaksperiodeId, utbetalingId)
     }
-
 
     override fun håndterAvslag(
         oppgaveId: Long,
         saksbehandlerFraApi: SaksbehandlerFraApi,
-        avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag
+        avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag,
     ) {
         return mock.håndterAvslag(oppgaveId, saksbehandlerFraApi, avslag)
     }
@@ -575,6 +577,7 @@ private fun enPeriode() =
             ),
         vilkarsgrunnlagId = null,
         periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING,
+        behandlingId = UUID.randomUUID(),
     )
 
 private fun enGenerasjon() =

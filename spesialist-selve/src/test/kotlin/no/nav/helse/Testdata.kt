@@ -33,74 +33,83 @@ object Testdata {
         utbetalingId: UUID = testperson.utbetalingId1,
         arbeidsgiverbeløp: Int = 30000,
         personbeløp: Int = 0,
-        utbetaling: GraphQLUtbetaling = GraphQLUtbetaling(
-            id = utbetalingId,
-            arbeidsgiverFagsystemId = "EN_FAGSYSTEMID",
-            arbeidsgiverNettoBelop = arbeidsgiverbeløp,
-            personFagsystemId = "EN_FAGSYSTEMID",
-            personNettoBelop = personbeløp,
-            statusEnum = GraphQLUtbetalingstatus.UBETALT,
-            typeEnum = Utbetalingtype.UTBETALING,
-            vurdering = null,
-            personoppdrag = null,
-            arbeidsgiveroppdrag = null
-        ),
+        utbetaling: GraphQLUtbetaling =
+            GraphQLUtbetaling(
+                id = utbetalingId,
+                arbeidsgiverFagsystemId = "EN_FAGSYSTEMID",
+                arbeidsgiverNettoBelop = arbeidsgiverbeløp,
+                personFagsystemId = "EN_FAGSYSTEMID",
+                personNettoBelop = personbeløp,
+                statusEnum = GraphQLUtbetalingstatus.UBETALT,
+                typeEnum = Utbetalingtype.UTBETALING,
+                vurdering = null,
+                personoppdrag = null,
+                arbeidsgiveroppdrag = null,
+            ),
     ): GraphQLClientResponse<HentSnapshot.Result> =
         object : GraphQLClientResponse<HentSnapshot.Result> {
-            override val data = HentSnapshot.Result(
-                GraphQLPerson(
-                    aktorId = aktørId,
-                    fodselsnummer = fødselsnummer,
-                    versjon = versjon,
-                    arbeidsgivere = listOf(
-                        GraphQLArbeidsgiver(
-                            organisasjonsnummer = organisasjonsnummer,
-                            ghostPerioder = emptyList(),
-                            generasjoner = listOf(
-                                GraphQLGenerasjon(
-                                    id = UUID.randomUUID(),
-                                    perioder = listOf(
-                                        GraphQLBeregnetPeriode(
-                                            vedtaksperiodeId = vedtaksperiodeId,
-                                            utbetaling = utbetaling,
-                                            erForkastet = false,
-                                            fom = "2020-01-01",
-                                            tom = "2020-01-31",
-                                            inntektstype = GraphQLInntektstype.ENARBEIDSGIVER,
-                                            opprettet = "2020-01-31",
-                                            periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
-                                            tidslinje = emptyList(),
-                                            beregningId = UUID.randomUUID(),
-                                            forbrukteSykedager = null,
-                                            gjenstaendeSykedager = null,
-                                            hendelser = emptyList(),
-                                            maksdato = "2021-01-01",
-                                            periodevilkar = GraphQLPeriodevilkar(
-                                                alder = Alder(
-                                                    alderSisteSykedag = 30,
-                                                    oppfylt = true,
-                                                ),
-                                                sykepengedager = Sykepengedager(
-                                                    forbrukteSykedager = null,
-                                                    gjenstaendeSykedager = null,
-                                                    maksdato = "2021-01-01",
-                                                    skjaeringstidspunkt = "2020-01-01",
-                                                    oppfylt = true,
-                                                )
+            override val data =
+                HentSnapshot.Result(
+                    GraphQLPerson(
+                        aktorId = aktørId,
+                        fodselsnummer = fødselsnummer,
+                        versjon = versjon,
+                        arbeidsgivere =
+                            listOf(
+                                GraphQLArbeidsgiver(
+                                    organisasjonsnummer = organisasjonsnummer,
+                                    ghostPerioder = emptyList(),
+                                    generasjoner =
+                                        listOf(
+                                            GraphQLGenerasjon(
+                                                id = UUID.randomUUID(),
+                                                perioder =
+                                                    listOf(
+                                                        GraphQLBeregnetPeriode(
+                                                            behandlingId = UUID.randomUUID(),
+                                                            vedtaksperiodeId = vedtaksperiodeId,
+                                                            utbetaling = utbetaling,
+                                                            erForkastet = false,
+                                                            fom = "2020-01-01",
+                                                            tom = "2020-01-31",
+                                                            inntektstype = GraphQLInntektstype.ENARBEIDSGIVER,
+                                                            opprettet = "2020-01-31",
+                                                            periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
+                                                            tidslinje = emptyList(),
+                                                            beregningId = UUID.randomUUID(),
+                                                            forbrukteSykedager = null,
+                                                            gjenstaendeSykedager = null,
+                                                            hendelser = emptyList(),
+                                                            maksdato = "2021-01-01",
+                                                            periodevilkar =
+                                                                GraphQLPeriodevilkar(
+                                                                    alder =
+                                                                        Alder(
+                                                                            alderSisteSykedag = 30,
+                                                                            oppfylt = true,
+                                                                        ),
+                                                                    sykepengedager =
+                                                                        Sykepengedager(
+                                                                            forbrukteSykedager = null,
+                                                                            gjenstaendeSykedager = null,
+                                                                            maksdato = "2021-01-01",
+                                                                            skjaeringstidspunkt = "2020-01-01",
+                                                                            oppfylt = true,
+                                                                        ),
+                                                                ),
+                                                            skjaeringstidspunkt = "2020-01-01",
+                                                            vilkarsgrunnlagId = null,
+                                                            periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING,
+                                                        ),
+                                                    ),
                                             ),
-                                            skjaeringstidspunkt = "2020-01-01",
-                                            vilkarsgrunnlagId = null,
-                                            periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING
-                                        )
-                                    )
-                                )
+                                        ),
+                                ),
                             ),
-                        )
+                        dodsdato = null,
+                        vilkarsgrunnlag = emptyList(),
                     ),
-                    dodsdato = null,
-                    vilkarsgrunnlag = emptyList(),
                 )
-            )
         }
 }
 
@@ -122,12 +131,12 @@ internal data class GodkjenningsbehovTestdata(
     val avviksvurderingId: UUID = UUID.randomUUID(),
     val vilkårsgrunnlagId: UUID = UUID.randomUUID(),
     val spleisBehandlingId: UUID = UUID.randomUUID(),
-    val tags: List<String> = emptyList()
+    val tags: List<String> = emptyList(),
 )
 
 internal data class AvviksvurderingTestdata(
     val avviksprosent: Double = 10.0,
     val sammenligningsgrunnlag: Double = 650_000.0,
     val skjæringstidspunkt: LocalDate = 1.januar,
-    val avviksvurderingId: UUID = UUID.randomUUID()
+    val avviksvurderingId: UUID = UUID.randomUUID(),
 )

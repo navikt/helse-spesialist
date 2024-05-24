@@ -86,6 +86,7 @@ query HentSnapshot($fnr: String!) {
                 id
                 perioder {
                     __typename
+                    behandlingId
                     erForkastet
                     fom
                     tom
@@ -184,10 +185,6 @@ query HentSnapshot($fnr: String!) {
                     vedtaksperiodeId
                     ... on GraphQLUberegnetPeriode {
                         __typename
-                    }
-                    ... on GraphQLUberegnetVilkarsprovdPeriode {
-                        __typename
-                        vilkarsgrunnlagId
                     }
                     ... on GraphQLBeregnetPeriode {
                         __typename

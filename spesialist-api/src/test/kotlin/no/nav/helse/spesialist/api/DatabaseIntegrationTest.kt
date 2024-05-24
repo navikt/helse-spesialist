@@ -798,6 +798,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         tom: String = LocalDate.now().toString(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         utbetalingId: UUID = UUID.randomUUID(),
+        behandlingId: UUID = UUID.randomUUID(),
         hendelser: List<GraphQLHendelse> = emptyList(),
     ) = GraphQLBeregnetPeriode(
         erForkastet = false,
@@ -826,6 +827,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                         skjaeringstidspunkt = LocalDate.now().toString(),
                     ),
             ),
+        behandlingId = behandlingId,
         utbetaling =
             GraphQLUtbetaling(
                 id = utbetalingId,
@@ -842,6 +844,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         fom: String = LocalDate.now().toString(),
         tom: String = LocalDate.now().toString(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
+        behandlingId: UUID = UUID.randomUUID(),
     ) = GraphQLUberegnetPeriode(
         erForkastet = false,
         fom = fom,
@@ -853,6 +856,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         skjaeringstidspunkt = LocalDate.now().toString(),
         tidslinje = emptyList(),
         vedtaksperiodeId = vedtaksperiodeId,
+        behandlingId = behandlingId,
         hendelser = emptyList(),
     )
 

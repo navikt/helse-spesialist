@@ -187,7 +187,6 @@ data class Arbeidsgiver(
                                     oppgavehåndterer = oppgavehåndterer,
                                     saksbehandlerhåndterer = saksbehandlerhåndterer,
                                 )
-
                             else -> throw Exception("Ukjent tidslinjeperiode")
                         }
                     },

@@ -33,10 +33,12 @@ interface GraphQLHendelse {
 }
 
 interface GraphQLTidslinjeperiode {
+  behandlingId: UUID!
   erForkastet: Boolean!
   fom: LocalDate!
   hendelser: [GraphQLHendelse!]!
   inntektstype: GraphQLInntektstype!
+  kilde: UUID!
   opprettet: LocalDateTime!
   periodetilstand: GraphQLPeriodetilstand!
   periodetype: GraphQLPeriodetype!
@@ -72,6 +74,7 @@ type GraphQLArbeidsgiverinntekt {
   deaktivert: Boolean
   omregnetArsinntekt: GraphQLOmregnetArsinntekt!
   skjonnsmessigFastsatt: GraphQLSkjonnsmessigFastsatt
+  skjonnsmessigFastsattAarlig: Float
 }
 
 type GraphQLArbeidsgiverrefusjon {
@@ -80,6 +83,7 @@ type GraphQLArbeidsgiverrefusjon {
 }
 
 type GraphQLBeregnetPeriode implements GraphQLTidslinjeperiode {
+  behandlingId: UUID!
   beregningId: UUID!
   erForkastet: Boolean!
   fom: LocalDate!
@@ -87,6 +91,7 @@ type GraphQLBeregnetPeriode implements GraphQLTidslinjeperiode {
   gjenstaendeSykedager: Int
   hendelser: [GraphQLHendelse!]!
   inntektstype: GraphQLInntektstype!
+  kilde: UUID!
   maksdato: LocalDate!
   opprettet: LocalDateTime!
   periodetilstand: GraphQLPeriodetilstand!
@@ -112,6 +117,7 @@ type GraphQLDag {
 
 type GraphQLGenerasjon {
   id: UUID!
+  kildeTilGenerasjon: UUID!
   perioder: [GraphQLTidslinjeperiode!]!
 }
 
@@ -219,8 +225,6 @@ type GraphQLSimuleringsutbetaling {
 
 type GraphQLSkjonnsmessigFastsatt {
   belop: Float!
-  inntekterFraAOrdningen: [GraphQLInntekterFraAOrdningen!]
-  kilde: GraphQLInntektskilde!
   manedsbelop: Float!
 }
 
@@ -312,10 +316,12 @@ type GraphQLSykmelding implements GraphQLHendelse {
 }
 
 type GraphQLUberegnetPeriode implements GraphQLTidslinjeperiode {
+  behandlingId: UUID!
   erForkastet: Boolean!
   fom: LocalDate!
   hendelser: [GraphQLHendelse!]!
   inntektstype: GraphQLInntektstype!
+  kilde: UUID!
   opprettet: LocalDateTime!
   periodetilstand: GraphQLPeriodetilstand!
   periodetype: GraphQLPeriodetype!
@@ -323,21 +329,6 @@ type GraphQLUberegnetPeriode implements GraphQLTidslinjeperiode {
   tidslinje: [GraphQLDag!]!
   tom: LocalDate!
   vedtaksperiodeId: UUID!
-}
-
-type GraphQLUberegnetVilkarsprovdPeriode implements GraphQLTidslinjeperiode {
-  erForkastet: Boolean!
-  fom: LocalDate!
-  hendelser: [GraphQLHendelse!]!
-  inntektstype: GraphQLInntektstype!
-  opprettet: LocalDateTime!
-  periodetilstand: GraphQLPeriodetilstand!
-  periodetype: GraphQLPeriodetype!
-  skjaeringstidspunkt: LocalDate!
-  tidslinje: [GraphQLDag!]!
-  tom: LocalDate!
-  vedtaksperiodeId: UUID!
-  vilkarsgrunnlagId: UUID!
 }
 
 type GraphQLUtbetaling {
@@ -427,7 +418,6 @@ enum GraphQLInntektskilde {
   Infotrygd
   Inntektsmelding
   Saksbehandler
-  SkjonnsmessigFastsatt
 }
 
 enum GraphQLInntektstype {

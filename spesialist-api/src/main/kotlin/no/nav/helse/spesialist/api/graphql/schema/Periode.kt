@@ -228,6 +228,8 @@ data class VarselDTO(
 }
 
 interface Periode {
+    fun behandlingId(): UUID
+
     fun erForkastet(): Boolean
 
     fun fom(): DateString
@@ -356,6 +358,8 @@ data class UberegnetPeriode(
     private val notatDao: NotatDao,
     private val index: Int,
 ) : Periode {
+    override fun behandlingId(): UUID = periode.behandlingId
+
     override fun erForkastet(): Boolean = erForkastet(periode)
 
     override fun fom(): DateString = fom(periode)
@@ -415,6 +419,8 @@ data class BeregnetPeriode(
     private val index: Int,
 ) : Periode {
     private val periodetilstand = periodetilstand(periode.periodetilstand, erSisteGenerasjon)
+
+    override fun behandlingId(): UUID = periode.behandlingId
 
     override fun erForkastet(): Boolean = erForkastet(periode)
 
