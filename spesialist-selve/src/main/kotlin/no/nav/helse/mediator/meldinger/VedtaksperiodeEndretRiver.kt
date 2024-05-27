@@ -21,7 +21,7 @@ internal class VedtaksperiodeEndretRiver(
     override fun validations() =
         River.PacketValidation {
             it.demandValue("@event_name", "vedtaksperiode_endret")
-            it.rejectValue("forrigeTilstand", "START")
+            it.demandValue("gjeldendeTilstand", "AVSLUTTET")
             it.requireKey("vedtaksperiodeId")
             it.requireKey("fødselsnummer")
             it.requireKey("@id")

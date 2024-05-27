@@ -54,7 +54,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun nySpleisBehandling(spleisBehandling: SpleisBehandling) {
-        if (forkastet || !spleisBehandling.erRelevantFor(vedtaksperiodeId)) return
+        if (forkastet || !spleisBehandling.erRelevantFor(vedtaksperiodeId) || finnes(spleisBehandling)) return
         nyGenerasjon(gjeldendeGenerasjon.nySpleisBehandling(spleisBehandling))
     }
 
@@ -142,6 +142,10 @@ internal class Vedtaksperiode private constructor(
     ) {
         if (forkastet) return
         gjeldendeGenerasjon.håndterNyUtbetaling(meldingId, utbetalingId)
+    }
+
+    private fun finnes(spleisBehandling: SpleisBehandling): Boolean {
+        return generasjoner.finnGenerasjonForSpleisBehandling(spleisBehandling.spleisBehandlingId) != null
     }
 
     companion object {

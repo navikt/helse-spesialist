@@ -23,25 +23,26 @@ internal class VedtaksperiodeEndretRiverTest {
     }
 
     @Test
-    fun `leser vedtaksperiode_endret`() {
+    fun `leser vedtaksperiode_endret så lenge gjeldende tilstand er AVSLUTTET`() {
         rapid.sendTestMessage(
             Testmeldingfabrikk.lagVedtaksperiodeEndret(
                 aktørId = testperson.aktørId,
                 fødselsnummer = testperson.fødselsnummer,
+                gjeldendeTilstand = "AVSLUTTET",
             ),
         )
         verify(exactly = 1) { mediator.mottaMelding(any<VedtaksperiodeEndret>(), messageContext = any()) }
     }
 
     @Test
-    fun `leser ikke vedtaksperiode_endret der forrigeTilstand=START`() {
+    fun `leser ikke vedtaksperiode_endret så lenge gjeldende tilstand ikke er AVSLUTTET`() {
         rapid.sendTestMessage(
             Testmeldingfabrikk.lagVedtaksperiodeEndret(
                 aktørId = testperson.aktørId,
                 fødselsnummer = testperson.fødselsnummer,
-                forrigeTilstand = "START",
+                gjeldendeTilstand = "NOE ANNET",
             ),
         )
-        verify(exactly = 0) { mediator.håndter(any(), any(), any()) }
+        verify(exactly = 0) { mediator.mottaMelding(any<VedtaksperiodeEndret>(), messageContext = any()) }
     }
 }
