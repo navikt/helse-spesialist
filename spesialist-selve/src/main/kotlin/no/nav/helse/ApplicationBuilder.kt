@@ -310,7 +310,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
             install(CORS) {
                 allowHeader(HttpHeaders.AccessControlAllowOrigin)
-                allowHost("spesialist.intern.dev.nav.no", listOf("https"))
+                allowHost("spesialist.intern.dev.nav.no", listOf("https", "wss"))
             }
             install(CallId) {
                 retrieveFromHeader(HttpHeaders.XRequestId)
@@ -325,7 +325,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 logger = httpTraceLog
                 level = Level.INFO
                 callIdMdc("callId")
-                filter { call -> call.request.path().startsWith("/api/") }
+                filter { call -> call.request.path().startsWith("/api/") || call.request.path().startsWith("/ws/") }
             }
             install(DoubleReceive)
             install(ContentNegotiationServer) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }

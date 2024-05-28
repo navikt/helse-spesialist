@@ -32,7 +32,6 @@ import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.TestApplication
 import no.nav.helse.spesialist.api.TestdataGenerator
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
-import no.nav.helse.spesialist.api.websockets.webSocketsApi
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkResponse
 import no.nav.helse.spesialist.api.behandlingsstatistikk.Statistikk
@@ -78,6 +77,7 @@ import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
+import no.nav.helse.spesialist.api.websockets.webSocketsApi
 import no.nav.helse.spleis.graphql.LocalDate
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
