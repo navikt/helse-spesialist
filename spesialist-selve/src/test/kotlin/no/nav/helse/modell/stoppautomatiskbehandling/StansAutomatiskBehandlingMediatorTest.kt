@@ -57,35 +57,4 @@ class StansAutomatiskBehandlingMediatorTest {
             )
         }
     }
-
-    @Test
-    fun `Lagrer ikke periodehistorikk hvis opprettet er før dagens dato`() {
-        mediator.håndter(
-            fødselsnummer = "12345678910",
-            status = "STOPP_AUTOMATIKK",
-            årsaker = setOf("MEDISINSK_VILKAR"),
-            opprettet = now().minusDays(1),
-            originalMelding = "{}",
-            kilde = "ISYFO",
-        )
-
-        verify(exactly = 1) {
-            stansAutomatiskBehandlingDao.lagre(
-                fødselsnummer = "12345678910",
-                status = "STOPP_AUTOMATIKK",
-                årsaker = setOf("MEDISINSK_VILKAR"),
-                opprettet = any(),
-                originalMelding = "{}",
-                kilde = "ISYFO",
-            )
-        }
-        verify(exactly = 0) {
-            periodehistorikkDao.lagre(
-                historikkType = any(),
-                saksbehandlerOid = any(),
-                utbetalingId = any(),
-                notatId = any(),
-            )
-        }
-    }
 }

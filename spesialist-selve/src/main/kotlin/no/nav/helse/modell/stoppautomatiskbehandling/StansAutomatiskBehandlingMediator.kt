@@ -13,7 +13,6 @@ import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING
 import org.slf4j.LoggerFactory
-import java.time.LocalDate.now
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
@@ -59,9 +58,6 @@ class StansAutomatiskBehandlingMediator(
             originalMelding = originalMelding,
             kilde = kilde,
         )
-
-        if (opprettet.toLocalDate().isBefore(now())) return
-
         lagrePeriodehistorikk(fødselsnummer)
     }
 
