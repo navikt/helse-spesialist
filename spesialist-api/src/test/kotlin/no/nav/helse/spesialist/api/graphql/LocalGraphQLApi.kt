@@ -11,6 +11,8 @@ import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.doublereceive.DoubleReceive
+import io.ktor.server.routing.routing
+import io.ktor.server.websocket.WebSockets
 import io.ktor.util.decodeBase64String
 import io.mockk.Call
 import io.mockk.MockKAnswerScope
@@ -30,6 +32,7 @@ import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.TestApplication
 import no.nav.helse.spesialist.api.TestdataGenerator
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
+import no.nav.helse.spesialist.api.websockets.webSocketsApi
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkResponse
 import no.nav.helse.spesialist.api.behandlingsstatistikk.Statistikk
@@ -206,7 +209,7 @@ fun main() =
 
             install(CallLogging)
             install(DoubleReceive)
-
+            install(WebSockets)
             authentication {
                 provider("oidc") {
                     authenticate { authenticationContext ->
@@ -253,6 +256,9 @@ fun main() =
                 dokumenthåndterer = dokumenthåndterer,
                 stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
             )
+            routing {
+                webSocketsApi()
+            }
         }
     }
 
