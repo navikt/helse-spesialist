@@ -75,7 +75,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
             sessionOf(dataSource).use { session ->
                 @Language("PostgreSQL")
                 val query =
-                    "SELECT tags FROM selve_vedtaksperiode_generasjon WHERE spleis_behandling_id = ?;"
+                    "SELECT tags FROM selve_vedtaksperiode_generasjon WHERE spleis_behandling_id = ? order by array_length(tags, 1) desc;"
 
                 session.run(
                     queryOf(query, spleisBehandlingId).map {

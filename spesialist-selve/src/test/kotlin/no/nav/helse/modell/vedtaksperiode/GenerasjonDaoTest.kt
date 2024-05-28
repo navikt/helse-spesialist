@@ -349,6 +349,20 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         val tags = generasjonDao.finnTagsFor(spleisBehandlingId)
         assertTrue(tags != null && tags.isEmpty())
     }
+    @Test
+    fun `henter tags fra generasjon som har flest tags`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val spleisBehandlingId = UUID.randomUUID()
+        val generasjon1 = nyGenerasjonDto(vedtaksperiodeId = vedtaksperiodeId, spleisBehandlingId = spleisBehandlingId, tags = listOf("tag1", "tag2"))
+        val generasjon2 = nyGenerasjonDto(vedtaksperiodeId = vedtaksperiodeId, spleisBehandlingId = spleisBehandlingId, tags = listOf("tag1", "tag2", "tag3"))
+        val generasjon3 = nyGenerasjonDto(vedtaksperiodeId = vedtaksperiodeId, spleisBehandlingId = spleisBehandlingId, tags = listOf("tag1"))
+        generasjonDao.lagre(generasjon1)
+        generasjonDao.lagre(generasjon2)
+        generasjonDao.lagre(generasjon3)
+        val tags = generasjonDao.finnTagsFor(spleisBehandlingId)
+        assertTrue(tags != null)
+        assertEquals(3, tags!!.size)
+    }
 
     @Test
     fun `gir false tilbake dersom vi ikke finner noen generasjon`() {
