@@ -16,7 +16,6 @@ import io.ktor.server.application.install
 import io.ktor.server.plugins.callid.CallId
 import io.ktor.server.plugins.callid.callIdMdc
 import io.ktor.server.plugins.callloging.CallLogging
-import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.doublereceive.DoubleReceive
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.request.httpMethod
@@ -308,10 +307,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
 
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
-            install(CORS) {
-                allowHeader(HttpHeaders.AccessControlAllowOrigin)
-                allowHost("spesialist.intern.dev.nav.no", listOf("https"))
-            }
             install(CallId) {
                 retrieveFromHeader(HttpHeaders.XRequestId)
                 generate {
