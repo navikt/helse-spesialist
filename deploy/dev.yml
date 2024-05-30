@@ -55,8 +55,7 @@ spec:
   accessPolicy:
     inbound:
       rules:
-        - application: "speil*"
-          namespace: tbd
+        - application: "*"
           cluster: dev-gcp
     outbound:
       rules:
