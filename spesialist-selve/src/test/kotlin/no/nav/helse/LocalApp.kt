@@ -5,8 +5,12 @@ import com.expediagroup.graphql.client.serializer.GraphQLClientSerializer
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.ktor.server.application.call
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
+import io.ktor.server.response.respond
+import io.ktor.server.routing.get
+import io.ktor.server.routing.routing
 import no.nav.helse.bootstrap.SpesialistApp
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.AzureConfig
@@ -60,6 +64,11 @@ fun main() {
     val server =
         embeddedServer(CIO, port = 4321) {
             spesialistApp.ktorApp(this)
+            routing {
+                get("/local-token") {
+                    return@get call.respond(message = token)
+                }
+            }
         }
     spesialistApp.start()
     server.start(wait = true)
