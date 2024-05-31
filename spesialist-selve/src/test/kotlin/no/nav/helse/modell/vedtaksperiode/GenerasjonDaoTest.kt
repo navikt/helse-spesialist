@@ -17,6 +17,8 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import java.sql.SQLException
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -350,18 +352,14 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         assertTrue(tags != null && tags.isEmpty())
     }
     @Test
-    fun `henter tags fra generasjon som har flest tags`() {
+    fun `kaster feil dersom spørring gir mer enn et treff`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val spleisBehandlingId = UUID.randomUUID()
-        val generasjon1 = nyGenerasjonDto(vedtaksperiodeId = vedtaksperiodeId, spleisBehandlingId = spleisBehandlingId, tags = listOf("tag1", "tag2"))
-        val generasjon2 = nyGenerasjonDto(vedtaksperiodeId = vedtaksperiodeId, spleisBehandlingId = spleisBehandlingId, tags = listOf("tag1", "tag2", "tag3"))
-        val generasjon3 = nyGenerasjonDto(vedtaksperiodeId = vedtaksperiodeId, spleisBehandlingId = spleisBehandlingId, tags = listOf("tag1"))
+        val generasjon1 = nyGenerasjonDto(vedtaksperiodeId = vedtaksperiodeId, spleisBehandlingId = spleisBehandlingId)
+        val generasjon2 = nyGenerasjonDto(vedtaksperiodeId = vedtaksperiodeId, spleisBehandlingId = spleisBehandlingId)
         generasjonDao.lagre(generasjon1)
         generasjonDao.lagre(generasjon2)
-        generasjonDao.lagre(generasjon3)
-        val tags = generasjonDao.finnTagsFor(spleisBehandlingId)
-        assertTrue(tags != null)
-        assertEquals(3, tags!!.size)
+        assertThrows<SQLException> { generasjonDao.finnTagsFor(spleisBehandlingId) }
     }
 
     @Test
