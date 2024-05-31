@@ -4,8 +4,8 @@ import DatabaseIntegrationTest
 import TilgangskontrollForTestHarIkkeTilgang
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.SpeilTilgangsgrupper
 import no.nav.helse.TestRapidHelpers.hendelser
-import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.februar
 import no.nav.helse.januar
@@ -53,7 +53,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
-    private val tilgangsgrupper = Tilgangsgrupper(testEnv)
+    private val tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
     private val testRapid = TestRapid()
     private val tildelingDbDao = no.nav.helse.db.TildelingDao(dataSource)
     private val saksbehandlerRepository = SaksbehandlerDao(dataSource)
@@ -246,7 +246,11 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
                 godkjenning(
                     oppgavereferanse = oppgaveId,
                     godkjent = true,
-                    avslag = Avslag(handling = Avslagshandling.OPPRETT, data = Avslagsdata(Avslagstype.AVSLAG, "En individuell begrunnelse")),
+                    avslag =
+                        Avslag(
+                            handling = Avslagshandling.OPPRETT,
+                            data = Avslagsdata(Avslagstype.AVSLAG, "En individuell begrunnelse"),
+                        ),
                 ),
                 UUID.randomUUID(),
                 saksbehandler,

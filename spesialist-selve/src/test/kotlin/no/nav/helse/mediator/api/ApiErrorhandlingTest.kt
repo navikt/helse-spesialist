@@ -7,13 +7,12 @@ import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.routing.get
 import io.ktor.server.testing.*
-import no.nav.helse.installErrorHandling
+import no.nav.helse.bootstrap.installErrorHandling
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class ApiErrorhandlingTest {
-
     @Test
     fun `vi logger ikke ut fnr i url om en request bobler helt opp`() {
         testApplication {

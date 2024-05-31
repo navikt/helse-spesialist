@@ -244,16 +244,17 @@ fun main() =
                 snapshotMediator = SnapshotMediator(snapshotApiDao, mockk(relaxed = true)),
                 behandlingsstatistikkMediator = behandlingsstatistikkMediator,
                 notatMediator = notatMediator,
-                saksbehandlerhåndterer = SneakySaksbehandlerhåndterer(randomOppgaver),
-                oppgavehåndterer =
+                saksbehandlerhåndtererProvider = { SneakySaksbehandlerhåndterer(randomOppgaver) },
+                oppgavehåndtererProvider = {
                     SneakyOppgaveHåndterer(
                         randomOppgaver = randomOppgaver,
                         randomBehandledeOppgaver = randomBehandledeOppgaver,
-                    ),
+                    )
+                },
                 totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
-                godkjenninghåndterer = godkjenninghåndterer,
-                personhåndterer = personhåndterer,
-                dokumenthåndterer = dokumenthåndterer,
+                godkjenninghåndtererProvider = { godkjenninghåndterer },
+                personhåndtererProvider = { personhåndterer },
+                dokumenthåndtererProvider = { dokumenthåndterer },
                 stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
             )
             routing {

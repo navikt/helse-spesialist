@@ -25,6 +25,10 @@ import java.io.IOException
 import java.net.URI
 import java.util.UUID
 
+interface ISnapshotClient {
+    fun hentSnapshot(fnr: String): GraphQLClientResponse<HentSnapshot.Result>
+}
+
 class SnapshotClient(
     private val httpClient: HttpClient,
     private val accessTokenClient: AccessTokenClient,
@@ -32,13 +36,13 @@ class SnapshotClient(
     private val spleisClientId: String,
     private val retries: Int = 5,
     private val retryInterval: Long = 5000L,
-) {
+) : ISnapshotClient {
     private companion object {
         val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
         val serializer: GraphQLClientSerializer = GraphQLClientJacksonSerializer(jacksonObjectMapper().disable(FAIL_ON_UNKNOWN_PROPERTIES))
     }
 
-    fun hentSnapshot(fnr: String): GraphQLClientResponse<HentSnapshot.Result> {
+    override fun hentSnapshot(fnr: String): GraphQLClientResponse<HentSnapshot.Result> {
         val request = HentSnapshot(variables = HentSnapshot.Variables(fnr = fnr))
 
         return runBlocking {

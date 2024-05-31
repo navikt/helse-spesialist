@@ -13,7 +13,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.abonnement.PersonOppdatertPayload
-import no.nav.helse.spesialist.api.snapshot.SnapshotClient
+import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
 import java.time.LocalDate
 import java.util.UUID
 
@@ -52,7 +52,7 @@ internal class OppdaterPersonsnapshotCommand(
     personDao: PersonDao,
     snapshotDao: SnapshotDao,
     opptegnelseDao: OpptegnelseDao,
-    snapshotClient: SnapshotClient,
+    snapshotClient: ISnapshotClient,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(

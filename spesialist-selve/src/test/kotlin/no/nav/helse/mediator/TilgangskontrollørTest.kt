@@ -1,12 +1,10 @@
 package no.nav.helse.mediator
 
-import java.util.EnumSet
-import java.util.UUID
 import no.nav.helse.Gruppe
 import no.nav.helse.Gruppe.KODE7
 import no.nav.helse.Gruppe.SKJERMEDE
 import no.nav.helse.Gruppekontroll
-import no.nav.helse.Tilgangsgrupper
+import no.nav.helse.SpeilTilgangsgrupper
 import no.nav.helse.idForGruppe
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
@@ -20,19 +18,24 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import java.util.EnumSet
+import java.util.UUID
 
 class TilgangskontrollørTest {
-
-    private val tilgangsgrupper = Tilgangsgrupper(testEnv)
+    private val tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
 
     private val forespørsler = mutableMapOf<UUID, List<String>>()
 
-    private val gruppekontroll = object : Gruppekontroll {
-        override suspend fun erIGrupper(oid: UUID, gruppeIder: List<UUID>): Boolean {
-            forespørsler[oid] = gruppeIder.map { it.toString() }
-            return true
+    private val gruppekontroll =
+        object : Gruppekontroll {
+            override suspend fun erIGrupper(
+                oid: UUID,
+                gruppeIder: List<UUID>,
+            ): Boolean {
+                forespørsler[oid] = gruppeIder.map { it.toString() }
+                return true
+            }
         }
-    }
 
     private val tilgangskontrollørForReservasjon = TilgangskontrollørForReservasjon(gruppekontroll, tilgangsgrupper)
 
@@ -93,8 +96,8 @@ class TilgangskontrollørTest {
         Egenskap.alleTilgangsstyrteEgenskaper
             .filterNot { it == STRENGT_FORTROLIG_ADRESSE } // Ingen har tilgang til disse i Speil foreløpig
             .forEach {
-            assertEquals(true, tilgangskontrollørForApi.harTilgangTil(UUID.randomUUID(), listOf(it)))
-        }
+                assertEquals(true, tilgangskontrollørForApi.harTilgangTil(UUID.randomUUID(), listOf(it)))
+            }
     }
 
     @Test

@@ -68,14 +68,19 @@ fun Application.graphQLApi(
     snapshotMediator: SnapshotMediator,
     behandlingsstatistikkMediator: IBehandlingsstatistikkMediator,
     notatMediator: NotatMediator,
-    saksbehandlerhåndterer: Saksbehandlerhåndterer,
-    oppgavehåndterer: Oppgavehåndterer,
+    saksbehandlerhåndtererProvider: () -> Saksbehandlerhåndterer,
+    oppgavehåndtererProvider: () -> Oppgavehåndterer,
     totrinnsvurderinghåndterer: Totrinnsvurderinghåndterer,
-    godkjenninghåndterer: Godkjenninghåndterer,
-    personhåndterer: Personhåndterer,
-    dokumenthåndterer: Dokumenthåndterer,
+    godkjenninghåndtererProvider: () -> Godkjenninghåndterer,
+    personhåndtererProvider: () -> Personhåndterer,
+    dokumenthåndtererProvider: () -> Dokumenthåndterer,
     stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
 ) {
+    val saksbehandlerhåndterer: Saksbehandlerhåndterer by lazy { saksbehandlerhåndtererProvider() }
+    val oppgavehåndterer: Oppgavehåndterer by lazy { oppgavehåndtererProvider() }
+    val godkjenninghåndterer: Godkjenninghåndterer by lazy { godkjenninghåndtererProvider() }
+    val personhåndterer: Personhåndterer by lazy { personhåndtererProvider() }
+    val dokumenthåndterer: Dokumenthåndterer by lazy { dokumenthåndtererProvider() }
     val schema =
         SchemaBuilder(
             personApiDao = personApiDao,

@@ -13,12 +13,16 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class ReservasjonClient(
+interface ReservasjonClient {
+    suspend fun hentReservasjonsstatus(fnr: String): Reservasjon?
+}
+
+class KRRClient(
     private val httpClient: HttpClient,
     private val apiUrl: String,
     private val scope: String,
     private val accessTokenClient: AccessTokenClient,
-) {
+) : ReservasjonClient {
     private val logg: Logger = LoggerFactory.getLogger(this.javaClass)
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
@@ -30,7 +34,7 @@ class ReservasjonClient(
                 .register()
     }
 
-    internal suspend fun hentReservasjonsstatus(fnr: String): Reservasjon? {
+    override suspend fun hentReservasjonsstatus(fnr: String): Reservasjon? {
         val timer = responstidReservasjonsstatus.startTimer()
         try {
             val accessToken = accessTokenClient.hentAccessToken(scope)

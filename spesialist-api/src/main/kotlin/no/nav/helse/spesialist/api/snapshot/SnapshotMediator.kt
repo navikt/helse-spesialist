@@ -5,7 +5,7 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class SnapshotMediator(private val snapshotDao: SnapshotApiDao, private val snapshotClient: SnapshotClient) {
+class SnapshotMediator(private val snapshotDao: SnapshotApiDao, private val snapshotClient: ISnapshotClient) {
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
     private fun oppdaterSnapshot(fødselsnummer: String) {

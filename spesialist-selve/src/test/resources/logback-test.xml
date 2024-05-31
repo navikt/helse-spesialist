@@ -16,6 +16,7 @@
     <logger name="org.eclipse" level="WARN" />
     <logger name="io.netty" level="WARN" />
     <logger name="ktor.application" level="WARN" />
+    <logger name="io.ktor" level="INFO" />
     <logger name="org.testcontainers" level="WARN" />
     <logger name="tjenestekall" level="debug" />
 

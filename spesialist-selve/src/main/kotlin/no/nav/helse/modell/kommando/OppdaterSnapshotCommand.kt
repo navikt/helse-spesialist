@@ -2,11 +2,11 @@ package no.nav.helse.modell.kommando
 
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.spesialist.api.snapshot.SnapshotClient
+import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
 import org.slf4j.LoggerFactory
 
 internal class OppdaterSnapshotCommand(
-    private val snapshotClient: SnapshotClient,
+    private val snapshotClient: ISnapshotClient,
     private val snapshotDao: SnapshotDao,
     private val fødselsnummer: String,
     private val personDao: PersonDao,

@@ -12,7 +12,7 @@ import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.spesialist.api.snapshot.SnapshotClient
+import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -61,7 +61,7 @@ internal class UtbetalingAnnullertCommand(
     utbetalingDao: UtbetalingDao,
     personDao: PersonDao,
     snapshotDao: SnapshotDao,
-    snapshotClient: SnapshotClient,
+    snapshotClient: ISnapshotClient,
     saksbehandlerDao: SaksbehandlerDao,
 ) : MacroCommand() {
     override val commands: List<Command> =

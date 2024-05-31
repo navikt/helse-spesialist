@@ -13,7 +13,7 @@ import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.spesialist.api.snapshot.SnapshotClient
+import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
 import java.util.UUID
 
 internal class VedtaksperiodeForkastet private constructor(
@@ -57,7 +57,7 @@ internal class VedtaksperiodeForkastetCommand(
     personDao: PersonDao,
     commandContextDao: CommandContextDao,
     snapshotDao: SnapshotDao,
-    snapshotClient: SnapshotClient,
+    snapshotClient: ISnapshotClient,
     oppgaveMediator: OppgaveMediator,
 ) : MacroCommand() {
     override val commands: List<Command> =

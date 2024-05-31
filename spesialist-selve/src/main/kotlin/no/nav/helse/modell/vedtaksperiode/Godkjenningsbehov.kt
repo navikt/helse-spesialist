@@ -48,7 +48,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
-import no.nav.helse.spesialist.api.snapshot.SnapshotClient
+import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
 import java.time.LocalDate
 import java.util.UUID
 
@@ -194,7 +194,7 @@ internal class GodkjenningsbehovCommand(
     overstyringDao: OverstyringDao,
     periodehistorikkDao: PeriodehistorikkDao,
     snapshotDao: SnapshotDao,
-    snapshotClient: SnapshotClient,
+    snapshotClient: ISnapshotClient,
     oppgaveMediator: OppgaveMediator,
     generasjonRepository: GenerasjonRepository,
     godkjenningMediator: GodkjenningMediator,
@@ -345,7 +345,7 @@ private class ForberedVisningCommand(
     arbeidsgiverDao: ArbeidsgiverDao,
     arbeidsforholdDao: ArbeidsforholdDao,
     snapshotDao: SnapshotDao,
-    snapshotClient: SnapshotClient,
+    snapshotClient: ISnapshotClient,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(

@@ -1,4 +1,4 @@
-import no.nav.helse.Tilgangsgrupper
+import no.nav.helse.SpeilTilgangsgrupper
 import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.ReservasjonDao
@@ -73,7 +73,7 @@ internal class TestMediator(
             meldingDao,
             generasjonDao,
         )
-    private val tilgangsgrupper = Tilgangsgrupper(testEnv)
+    private val tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
     private val oppgaveMediator =
         OppgaveMediator(
             meldingDao = meldingDao,

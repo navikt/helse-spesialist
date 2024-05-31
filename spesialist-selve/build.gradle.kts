@@ -1,5 +1,6 @@
 val graphQLKotlinVersion = "7.0.2"
 val testcontainersVersion = "1.19.7"
+val mockOAuth2ServerVersion = "2.1.2"
 
 plugins {
     kotlin("plugin.serialization") version "1.9.22"
@@ -15,6 +16,7 @@ dependencies {
 
     testImplementation(testFixtures(project(":spesialist-felles")))
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
+    testImplementation("no.nav.security:mock-oauth2-server:$mockOAuth2ServerVersion")
 }
 
 tasks {

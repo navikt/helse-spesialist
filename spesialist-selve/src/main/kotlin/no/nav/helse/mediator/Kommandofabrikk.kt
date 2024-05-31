@@ -69,7 +69,7 @@ import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
-import no.nav.helse.spesialist.api.snapshot.SnapshotClient
+import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -93,7 +93,7 @@ internal class Kommandofabrikk(
     private val snapshotDao: SnapshotDao = SnapshotDao(dataSource),
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     private val generasjonDao: GenerasjonDao = GenerasjonDao(dataSource),
-    private val snapshotClient: SnapshotClient,
+    private val snapshotClient: ISnapshotClient,
     oppgaveMediator: () -> OppgaveMediator,
     private val totrinnsvurderingDao: TotrinnsvurderingDao = TotrinnsvurderingDao(dataSource),
     private val notatDao: NotatDao = NotatDao(dataSource),
