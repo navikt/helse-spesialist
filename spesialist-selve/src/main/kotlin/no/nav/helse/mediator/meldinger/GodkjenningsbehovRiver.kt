@@ -66,7 +66,7 @@ internal class GodkjenningsbehovRiver(
     ) {
         val hendelseId = UUID.fromString(packet["@id"].asText())
 
-        if (hendelseId == UUID.fromString("bd77593d-c3d4-46a4-99ba-abcbca02fe9c")) {
+        if (hendelseId == UUID.fromString("390911c8-d94d-4b53-8854-e0f6b813edd4")) {
             return
         }
         logg.info(
