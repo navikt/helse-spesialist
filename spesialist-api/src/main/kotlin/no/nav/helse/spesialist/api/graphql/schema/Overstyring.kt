@@ -14,6 +14,7 @@ data class InntektOgRefusjonOverstyring(
     val fodselsnummer: String,
     val skjaringstidspunkt: DateString,
     val arbeidsgivere: List<OverstyringArbeidsgiver>,
+    val vedtaksperiodeId: String? = null,
 )
 
 data class ArbeidsforholdOverstyringHandling(
@@ -21,6 +22,7 @@ data class ArbeidsforholdOverstyringHandling(
     val aktorId: String,
     val skjaringstidspunkt: DateString,
     val overstyrteArbeidsforhold: List<OverstyringArbeidsforhold>,
+    val vedtaksperiodeId: String? = null,
 )
 
 data class OverstyringArbeidsforhold(

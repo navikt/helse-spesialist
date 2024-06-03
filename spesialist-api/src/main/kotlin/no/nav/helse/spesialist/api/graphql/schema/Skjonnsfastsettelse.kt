@@ -5,6 +5,7 @@ data class Skjonnsfastsettelse(
     val fodselsnummer: String,
     val skjaringstidspunkt: DateString,
     val arbeidsgivere: List<SkjonnsfastsettelseArbeidsgiver>,
+    val vedtaksperiodeId: String? = null,
 )
 
 data class SkjonnsfastsettelseArbeidsgiver(
