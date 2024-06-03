@@ -29,6 +29,8 @@ internal class Vedtaksperiode private constructor(
 
     fun vedtaksperiodeId() = vedtaksperiodeId
 
+    fun organisasjonsnummer() = organisasjonsnummer
+
     internal fun toDto(): VedtaksperiodeDto {
         return VedtaksperiodeDto(
             organisasjonsnummer = organisasjonsnummer,

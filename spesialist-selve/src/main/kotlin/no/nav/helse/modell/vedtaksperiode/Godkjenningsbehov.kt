@@ -292,6 +292,7 @@ internal class GodkjenningsbehovCommand(
                 periodetype = periodetype,
                 sykefraværstilfelle = sykefraværstilfelle,
                 spleisBehandlingId = spleisBehandlingId,
+                organisasjonsnummer = organisasjonsnummer,
             ),
             OpprettSaksbehandleroppgave(
                 fødselsnummer = fødselsnummer,

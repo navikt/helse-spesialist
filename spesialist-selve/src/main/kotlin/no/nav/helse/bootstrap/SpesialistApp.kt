@@ -18,6 +18,7 @@ import no.nav.helse.mediator.GodkjenningService
 import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SaksbehandlerMediator
+import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.TilgangskontrollørForReservasjon
 import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.mediator.oppgave.OppgaveDao
@@ -122,12 +123,14 @@ internal class SpesialistApp(
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
     private val automatiseringDao = AutomatiseringDao(dataSource)
     private val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(dataSource)
+    private val subsumsjonsmelder = Subsumsjonsmelder(versjonAvKode, rapidsConnection)
 
     private lateinit var meldingMediator: MeldingMediator
     private lateinit var saksbehandlerMediator: SaksbehandlerMediator
     private lateinit var oppgaveMediator: OppgaveMediator
-
     private lateinit var dokumentMediator: DokumentMediator
+    private lateinit var stansAutomatiskBehandlingMediator: StansAutomatiskBehandlingMediator
+
     private val behandlingsstatistikkMediator = BehandlingsstatistikkMediator(behandlingsstatistikkDao = behandlingsstatistikkDao)
     private val godkjenningMediator =
         GodkjenningMediator(
@@ -146,14 +149,7 @@ internal class SpesialistApp(
             periodehistorikkDao = periodehistorikkDao,
             notatMediator = notatMediator,
         )
-    private val stansAutomatiskBehandlingMediator =
-        StansAutomatiskBehandlingMediator(
-            stansAutomatiskBehandlingDao = stansAutomatiskBehandlingDao,
-            periodehistorikkDao = periodehistorikkDao,
-            oppgaveDao = oppgaveDao,
-            utbetalingDao = utbetalingDao,
-            notatMediator = notatMediator,
-        )
+
     private val snapshotMediator = SnapshotMediator(snapshotDao = snapshotApiDao, snapshotClient = snapshotClient)
     private lateinit var godkjenningService: GodkjenningService
 
@@ -298,6 +294,15 @@ internal class SpesialistApp(
                 rapidsConnection = rapidsConnection,
                 oppgaveMediator = oppgaveMediator,
                 saksbehandlerRepository = saksbehandlerDao,
+            )
+        stansAutomatiskBehandlingMediator =
+            StansAutomatiskBehandlingMediator(
+                stansAutomatiskBehandlingDao,
+                periodehistorikkDao,
+                oppgaveDao,
+                utbetalingDao,
+                notatMediator,
+                subsumsjonsmelder,
             )
 
         rapidsConnection.start().also {

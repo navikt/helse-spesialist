@@ -1,6 +1,8 @@
 package no.nav.helse.modell.stoppknapp
 
 import DatabaseIntegrationTest
+import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.AKTIVITETSKRAV
+import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.MEDISINSK_VILKAR
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -25,7 +27,7 @@ internal class StansAutomatiskBehandlingDaoTest : DatabaseIntegrationTest() {
         lagre(fødselsnummer = FNR)
         lagre(fødselsnummer = FNR)
         lagre(fødselsnummer = "01987654321")
-        val rader = stansAutomatiskBehandlingDao.hent(FNR)
+        val rader = stansAutomatiskBehandlingDao.hentFor(FNR)
 
         assertEquals(2, rader.size)
     }
@@ -34,7 +36,7 @@ internal class StansAutomatiskBehandlingDaoTest : DatabaseIntegrationTest() {
         stansAutomatiskBehandlingDao.lagre(
             fødselsnummer = fødselsnummer,
             status = "STOPP_AUTOMATIKK",
-            årsaker = setOf("MEDISINSK_VILKAR", "AKTIVITETSKRAV"),
+            årsaker = setOf(MEDISINSK_VILKAR, AKTIVITETSKRAV),
             opprettet = now(),
             originalMelding = "{}",
             kilde = "ISYFO",

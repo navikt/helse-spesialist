@@ -22,13 +22,22 @@ internal class VurderAutomatiskInnvilgelse(
     private val utbetaling: Utbetaling,
     private val periodetype: Periodetype,
     private val sykefraværstilfelle: Sykefraværstilfelle,
+    private val organisasjonsnummer: String,
 ) : Command {
     private companion object {
         private val logg = LoggerFactory.getLogger(VurderAutomatiskInnvilgelse::class.java)
     }
 
     override fun execute(context: CommandContext): Boolean {
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetaling, periodetype, sykefraværstilfelle) {
+        automatisering.utfør(
+            fødselsnummer,
+            vedtaksperiodeId,
+            hendelseId,
+            utbetaling,
+            periodetype,
+            sykefraværstilfelle,
+            organisasjonsnummer,
+        ) {
             val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson, utbetaling)
             godkjenningMediator.automatiskUtbetaling(
                 context = context,

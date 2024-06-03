@@ -10,6 +10,7 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SaksbehandlerMediator
+import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.MeldingDao
@@ -62,6 +63,7 @@ internal class TestMediator(
             oppgaveDao,
             utbetalingDao,
             NotatMediator(NotatDao(dataSource)),
+            Subsumsjonsmelder("versjonAvKode", testRapid),
         )
 
     private val godkjenningMediator =

@@ -37,7 +37,6 @@ class Subsumsjon(
     abstract class Sporing(
         private val vedtaksperioder: List<UUID>,
         private val organisasjonsnummer: List<String>,
-        private val saksbehandler: List<String>,
     ) {
         protected abstract fun ekstraSporing(): Map<String, List<String>>
 
@@ -45,29 +44,39 @@ class Subsumsjon(
             mapOf(
                 "vedtaksperiode" to vedtaksperioder.map { it.toString() },
                 "organisasjonsnummer" to organisasjonsnummer,
-                "saksbehandler" to saksbehandler,
             ) + ekstraSporing()
+    }
+
+    class SporingStansAutomatiskBehandling(
+        vedtaksperioder: List<UUID>,
+        organisasjonsnummer: List<String>,
+        private val stoppAutomatikkmelding: List<String>,
+    ) : Sporing(vedtaksperioder, organisasjonsnummer) {
+        override fun ekstraSporing(): Map<String, List<String>> = mapOf("stoppautomatikkmelding" to stoppAutomatikkmelding)
     }
 
     class SporingOverstyrtTidslinje(
         vedtaksperioder: List<UUID>,
         organisasjonsnummer: List<String>,
-        saksbehandler: List<String>,
+        private val saksbehandler: List<String>,
         private val overstyrtTidslinjeId: UUID,
-    ) : Sporing(vedtaksperioder, organisasjonsnummer, saksbehandler) {
-        override fun ekstraSporing(): Map<String, List<String>> = mapOf("overstyrtidslinje" to listOf(overstyrtTidslinjeId.toString()))
+    ) : Sporing(vedtaksperioder, organisasjonsnummer) {
+        override fun ekstraSporing(): Map<String, List<String>> =
+            mapOf("saksbehandler" to saksbehandler, "overstyrtidslinje" to listOf(overstyrtTidslinjeId.toString()))
     }
 
     class SporingSkjønnsfastsattSykepengegrunnlag(
         vedtaksperioder: List<UUID>,
         organisasjonsnummer: List<String>,
-        saksbehandler: List<String>,
-    ) : Sporing(vedtaksperioder, organisasjonsnummer, saksbehandler) {
-        override fun ekstraSporing(): Map<String, List<String>> = emptyMap()
+        private val saksbehandler: List<String>,
+    ) : Sporing(vedtaksperioder, organisasjonsnummer) {
+        override fun ekstraSporing(): Map<String, List<String>> = mapOf("saksbehandler" to saksbehandler)
     }
 
     enum class Utfall {
         VILKAR_BEREGNET,
+        VILKAR_OPPFYLT,
+        VILKAR_UAVKLART,
     }
 }
 

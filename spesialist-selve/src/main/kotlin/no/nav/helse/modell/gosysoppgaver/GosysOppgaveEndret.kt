@@ -61,6 +61,7 @@ internal class GosysOppgaveEndretCommand(
     generasjonRepository: GenerasjonRepository,
     godkjenningMediator: GodkjenningMediator,
     spleisBehandlingId: UUID?,
+    organisasjonsnummer: String,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -91,6 +92,7 @@ internal class GosysOppgaveEndretCommand(
                 periodetype = oppgavedataForAutomatisering.periodetype,
                 sykefraværstilfelle = sykefraværstilfelle,
                 spleisBehandlingId = spleisBehandlingId,
+                organisasjonsnummer = organisasjonsnummer,
             ),
         )
 }

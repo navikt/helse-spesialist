@@ -23,13 +23,22 @@ internal class AutomatiseringForEksisterendeOppgaveCommand(
     private val periodetype: Periodetype,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val spleisBehandlingId: UUID?,
+    private val organisasjonsnummer: String,
 ) : Command {
     private companion object {
         private val logg = LoggerFactory.getLogger(AutomatiseringForEksisterendeOppgaveCommand::class.java)
     }
 
     override fun execute(context: CommandContext): Boolean {
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetaling, periodetype, sykefraværstilfelle) {
+        automatisering.utfør(
+            fødselsnummer,
+            vedtaksperiodeId,
+            hendelseId,
+            utbetaling,
+            periodetype,
+            sykefraværstilfelle,
+            organisasjonsnummer,
+        ) {
             val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson, utbetaling)
             godkjenningMediator.automatiskUtbetaling(
                 context = context,

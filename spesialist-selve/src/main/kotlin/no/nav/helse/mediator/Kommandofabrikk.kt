@@ -153,7 +153,12 @@ internal class Kommandofabrikk(
                 fødselsnummer,
                 skjæringstidspunkt,
             )
-        return Sykefraværstilfelle(fødselsnummer, skjæringstidspunkt, gjeldendeGenerasjoner, skjønnsfastsatteSykepengegrunnlag)
+        return Sykefraværstilfelle(
+            fødselsnummer,
+            skjæringstidspunkt,
+            gjeldendeGenerasjoner,
+            skjønnsfastsatteSykepengegrunnlag,
+        )
     }
 
     private fun generasjonerFor(
@@ -198,7 +203,11 @@ internal class Kommandofabrikk(
 
         val utbetaling = utbetalingDao.hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
         val harTildeltOppgave = tildelingDao.tildelingForOppgave(oppgaveDataForAutomatisering.oppgaveId) != null
-        val spleisBehandlingId = person.vedtaksperiode(oppgaveDataForAutomatisering.vedtaksperiodeId)?.gjeldendeBehandlingId
+        val vedtaksperiodeId = oppgaveDataForAutomatisering.vedtaksperiodeId
+        val vedtaksperiode =
+            checkNotNull(person.vedtaksperiode(vedtaksperiodeId)) {
+                "Forventer ikke at denne funksjonen kalles når det ikke finnes en vedtaksperiode med vedtaksperiodeId=$vedtaksperiodeId"
+            }
 
         return GosysOppgaveEndretCommand(
             id = hendelse.id,
@@ -214,7 +223,8 @@ internal class Kommandofabrikk(
             oppgaveMediator = oppgaveMediator,
             generasjonRepository = generasjonRepository,
             godkjenningMediator = godkjenningMediator,
-            spleisBehandlingId = spleisBehandlingId,
+            spleisBehandlingId = vedtaksperiode.gjeldendeBehandlingId,
+            organisasjonsnummer = vedtaksperiode.organisasjonsnummer(),
         )
     }
 
@@ -224,10 +234,13 @@ internal class Kommandofabrikk(
         person: Person,
     ): TilbakedateringGodkjentCommand {
         val oppgaveDataForAutomatisering = melding.oppgavedataForAutomatisering
-        val sykefraværstilfelle = person.sykefraværstilfelle(oppgaveDataForAutomatisering.vedtaksperiodeId)
+        val vedtaksperiodeId = oppgaveDataForAutomatisering.vedtaksperiodeId
+        val sykefraværstilfelle = person.sykefraværstilfelle(vedtaksperiodeId)
         val utbetaling = utbetalingDao.hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
-        val spleisBehandlingId =
-            person.vedtaksperiode(oppgaveDataForAutomatisering.vedtaksperiodeId)?.gjeldendeBehandlingId
+        val vedtaksperiode =
+            checkNotNull(person.vedtaksperiode(vedtaksperiodeId)) {
+                "Forventer ikke at denne funksjonen kalles når det ikke finnes en vedtaksperiode med vedtaksperiodeId=$vedtaksperiodeId"
+            }
 
         return TilbakedateringGodkjentCommand(
             fødselsnummer = fødselsnummer,
@@ -237,7 +250,8 @@ internal class Kommandofabrikk(
             oppgaveDataForAutomatisering = oppgaveDataForAutomatisering,
             oppgaveMediator = oppgaveMediator,
             godkjenningMediator = godkjenningMediator,
-            spleisBehandlingId = spleisBehandlingId,
+            spleisBehandlingId = vedtaksperiode.gjeldendeBehandlingId,
+            organisasjonsnummer = vedtaksperiode.organisasjonsnummer(),
         )
     }
 
@@ -482,7 +496,10 @@ internal class Kommandofabrikk(
                 if (commandContext.utfør(commandContextDao, meldingId, command)) {
                     val kjøretid = commandContextDao.tidsbrukForContext(contextId)
                     metrikker(command.name, kjøretid, contextId)
-                    logg.info("Kommando(er) for ${command.name} er utført ferdig. Det tok ca {}ms å kjøre hele kommandokjeden", kjøretid)
+                    logg.info(
+                        "Kommando(er) for ${command.name} er utført ferdig. Det tok ca {}ms å kjøre hele kommandokjeden",
+                        kjøretid,
+                    )
                 } else {
                     logg.info("${command.name} er suspendert")
                 }

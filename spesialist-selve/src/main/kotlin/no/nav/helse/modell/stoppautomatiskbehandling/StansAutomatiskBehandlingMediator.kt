@@ -2,10 +2,21 @@ package no.nav.helse.modell.stoppautomatiskbehandling
 
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
+import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.Personhandling
+import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.AKTIVITETSKRAV
+import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.BESTRIDELSE_SYKMELDING
+import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.MANGLENDE_MEDVIRKING
+import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.MEDISINSK_VILKAR
 import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
+import no.nav.helse.modell.vilkårsprøving.Subsumsjon
+import no.nav.helse.modell.vilkårsprøving.Subsumsjon.SporingStansAutomatiskBehandling
+import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_OPPFYLT
+import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_UAVKLART
+import no.nav.helse.modell.vilkårsprøving.SubsumsjonEvent
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.graphql.schema.UnntattFraAutomatiskGodkjenning
@@ -23,6 +34,7 @@ class StansAutomatiskBehandlingMediator(
     private val oppgaveDao: OppgaveDao,
     private val utbetalingDao: UtbetalingDao,
     private val notatMediator: NotatMediator,
+    private val subsumsjonsmelder: Subsumsjonsmelder,
 ) : StansAutomatiskBehandlinghåndterer {
     private val logg = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -31,7 +43,7 @@ class StansAutomatiskBehandlingMediator(
         handling: Personhandling,
         saksbehandler: Saksbehandler,
     ) {
-        lagre(
+        stansAutomatiskBehandlingDao.lagre(
             fødselsnummer = handling.gjelderFødselsnummer(),
             status = "NORMAL",
             årsaker = emptySet(),
@@ -45,12 +57,12 @@ class StansAutomatiskBehandlingMediator(
     internal fun håndter(
         fødselsnummer: String,
         status: String,
-        årsaker: Set<String>,
+        årsaker: Set<StoppknappÅrsak>,
         opprettet: LocalDateTime,
         originalMelding: String,
         kilde: String,
     ) {
-        lagre(
+        stansAutomatiskBehandlingDao.lagre(
             fødselsnummer = fødselsnummer,
             status = status,
             årsaker = årsaker,
@@ -62,26 +74,19 @@ class StansAutomatiskBehandlingMediator(
     }
 
     override fun unntattFraAutomatiskGodkjenning(fødselsnummer: String): UnntattFraAutomatiskGodkjenning =
-        stansAutomatiskBehandlingDao.hent(fødselsnummer).filtrerGjeldendeStopp().tilUnntattFraAutomatiskGodkjenning()
+        stansAutomatiskBehandlingDao.hentFor(fødselsnummer).filtrerGjeldendeStopp().tilUnntattFraAutomatiskGodkjenning()
 
-    override fun erUnntatt(fødselsnummer: String) = stansAutomatiskBehandlingDao.hent(fødselsnummer).filtrerGjeldendeStopp().isNotEmpty()
-
-    private fun lagre(
+    override fun sjekkOmAutomatiseringErStanset(
         fødselsnummer: String,
-        status: String,
-        årsaker: Set<String>,
-        opprettet: LocalDateTime,
-        originalMelding: String?,
-        kilde: String,
-    ) {
-        stansAutomatiskBehandlingDao.lagre(
-            fødselsnummer = fødselsnummer,
-            status = status,
-            årsaker = årsaker,
-            opprettet = opprettet,
-            originalMelding = originalMelding,
-            kilde = kilde,
-        )
+        vedtaksperiodeId: UUID,
+        organisasjonsnummer: String,
+    ): Boolean {
+        val stoppmeldinger =
+            stansAutomatiskBehandlingDao.hentFor(fødselsnummer).filtrerGjeldendeStopp().map {
+                StoppknappmeldingForSubsumsjon(it.årsaker, it.meldingId!!)
+            }
+        sendSubsumsjonMeldinger(stoppmeldinger, fødselsnummer, vedtaksperiodeId, organisasjonsnummer)
+        return stoppmeldinger.isNotEmpty()
     }
 
     private fun lagrePeriodehistorikk(fødselsnummer: String) {
@@ -110,7 +115,7 @@ class StansAutomatiskBehandlingMediator(
 
     private fun List<StansAutomatiskBehandlingFraDatabase>.filtrerGjeldendeStopp(): List<StansAutomatiskBehandlingFraDatabase> {
         val gjeldende = mutableListOf<StansAutomatiskBehandlingFraDatabase>()
-        this.sortedWith { a, b ->
+        sortedWith { a, b ->
             a.opprettet.compareTo(b.opprettet)
         }.forEach {
             when (it.status) {
@@ -125,8 +130,8 @@ class StansAutomatiskBehandlingMediator(
         return gjeldende
     }
 
-    private fun List<StansAutomatiskBehandlingFraDatabase>.tilUnntattFraAutomatiskGodkjenning(): UnntattFraAutomatiskGodkjenning =
-        if (this.isEmpty()) {
+    private fun List<StansAutomatiskBehandlingFraDatabase>.tilUnntattFraAutomatiskGodkjenning() =
+        if (isEmpty()) {
             UnntattFraAutomatiskGodkjenning(
                 erUnntatt = false,
                 arsaker = emptyList(),
@@ -135,8 +140,90 @@ class StansAutomatiskBehandlingMediator(
         } else {
             UnntattFraAutomatiskGodkjenning(
                 erUnntatt = true,
-                arsaker = this.flatMap { it.årsaker }.toList(),
-                tidspunkt = this.last().opprettet.format(DateTimeFormatter.ISO_DATE_TIME),
+                arsaker = flatMap { it.årsaker.map(StoppknappÅrsak::name) },
+                tidspunkt = last().opprettet.format(DateTimeFormatter.ISO_DATE_TIME),
             )
         }
+
+    private fun sendSubsumsjonMeldinger(
+        stoppmeldinger: List<StoppknappmeldingForSubsumsjon>,
+        fødselsnummer: String,
+        vedtaksperiodeId: UUID,
+        organisasjonsnummer: String,
+    ) = stoppmeldinger.byggSubsumsjonEventer(fødselsnummer, vedtaksperiodeId, organisasjonsnummer).toMutableList()
+        .apply {
+            if (none { it.paragraf == "8-4" }) {
+                add(åtteFireOppfyltEvent(fødselsnummer, vedtaksperiodeId, organisasjonsnummer))
+            }
+        }.forEach {
+            subsumsjonsmelder.nySubsumsjon(fødselsnummer, it)
+        }
+
+    private fun List<StoppknappmeldingForSubsumsjon>.byggSubsumsjonEventer(
+        fødselsnummer: String,
+        vedtaksperiodeId: UUID,
+        organisasjonsnummer: String,
+    ): List<SubsumsjonEvent> =
+        tilLovhjemler().map { (meldingId, årsak, lovhjemmel) ->
+            subsumsjonEvent(fødselsnummer, vedtaksperiodeId, organisasjonsnummer, årsak, meldingId, lovhjemmel)
+        }
+
+    private fun subsumsjonEvent(
+        fødselsnummer: String,
+        vedtaksperiodeId: UUID,
+        organisasjonsnummer: String,
+        årsak: StoppknappÅrsak,
+        meldingId: String,
+        lovhjemmel: Lovhjemmel,
+    ) = Subsumsjon(
+        lovhjemmel = lovhjemmel,
+        fødselsnummer = fødselsnummer,
+        input = mapOf("syfostopp" to true, "årsak" to årsak),
+        output = emptyMap(),
+        utfall = VILKAR_UAVKLART,
+        sporing =
+            SporingStansAutomatiskBehandling(
+                listOf(vedtaksperiodeId),
+                listOf(organisasjonsnummer),
+                listOf(meldingId),
+            ),
+    ).byggEvent()
+
+    private fun åtteFireOppfyltEvent(
+        fødselsnummer: String,
+        vedtaksperiodeId: UUID,
+        organisasjonsnummer: String,
+    ): SubsumsjonEvent =
+        Subsumsjon(
+            lovhjemmel = Lovhjemmel("8-4", "1", null, "folketrygdloven", "2021-05-21"),
+            fødselsnummer = fødselsnummer,
+            input = emptyMap(),
+            output = emptyMap(),
+            utfall = VILKAR_OPPFYLT,
+            sporing =
+                SporingStansAutomatiskBehandling(
+                    listOf(vedtaksperiodeId),
+                    listOf(organisasjonsnummer),
+                    emptyList(),
+                ),
+        ).byggEvent()
+
+    private fun List<StoppknappmeldingForSubsumsjon>.tilLovhjemler() =
+        map { melding ->
+            melding.årsaker.map {
+                val lovhjemmel =
+                    when (it) {
+                        MEDISINSK_VILKAR -> Lovhjemmel("8-4", "1", null, "folketrygdloven", "2021-05-21")
+                        BESTRIDELSE_SYKMELDING -> Lovhjemmel("8-4", "1", null, "folketrygdloven", "2021-05-21")
+                        AKTIVITETSKRAV -> Lovhjemmel("8-8", "2", null, "folketrygdloven", "2021-05-21")
+                        MANGLENDE_MEDVIRKING -> Lovhjemmel("8-8", "1", null, "folketrygdloven", "2021-05-21")
+                    }
+                Triple(melding.meldingId, it, lovhjemmel)
+            }
+        }.flatten()
+
+    private class StoppknappmeldingForSubsumsjon(
+        val årsaker: Set<StoppknappÅrsak>,
+        val meldingId: String,
+    )
 }

@@ -50,7 +50,9 @@ internal class AutomatiseringTest {
             every { hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(true)
         }
     private val stansAutomatiskBehandlingMediatorMock =
-        mockk<StansAutomatiskBehandlingMediator> { every { erUnntatt(fødselsnummer) } returns false }
+        mockk<StansAutomatiskBehandlingMediator> {
+            every { sjekkOmAutomatiseringErStanset(fødselsnummer, vedtaksperiodeId, orgnummer) } returns false
+        }
     private val åpneGosysOppgaverDaoMock = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val personDaoMock = mockk<PersonDao>(relaxed = true)
@@ -355,6 +357,7 @@ internal class AutomatiseringTest {
                 utbetaling,
                 periodetype,
                 sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, generasjoner, emptyList()),
+                orgnummer,
                 onAutomatiserbar,
             )
 

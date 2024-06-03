@@ -58,10 +58,11 @@ internal class Automatisering(
         utbetaling: Utbetaling,
         periodetype: Periodetype,
         sykefraværstilfelle: Sykefraværstilfelle,
+        organisasjonsnummer: String,
         onAutomatiserbar: () -> Unit,
     ) {
         val problemer =
-            vurder(fødselsnummer, vedtaksperiodeId, utbetaling, periodetype, sykefraværstilfelle)
+            vurder(fødselsnummer, vedtaksperiodeId, utbetaling, periodetype, sykefraværstilfelle, organisasjonsnummer)
         val erUTS = utbetaling.harEndringIUtbetalingTilSykmeldt()
         val flereArbeidsgivere = vedtakDao.finnInntektskilde(vedtaksperiodeId) == Inntektskilde.FLERE_ARBEIDSGIVERE
         val erFørstegangsbehandling = periodetype == FØRSTEGANGSBEHANDLING
@@ -211,11 +212,17 @@ internal class Automatisering(
         utbetaling: Utbetaling,
         periodetype: Periodetype,
         sykefraværstilfelle: Sykefraværstilfelle,
+        organisasjonsnummer: String,
     ): List<String> {
         val risikovurdering =
             risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
                 ?: validering("Mangler vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning") { false }
-        val unntattFraAutomatisering = stansAutomatiskBehandlinghåndterer.erUnntatt(fødselsnummer)
+        val unntattFraAutomatisering =
+            stansAutomatiskBehandlinghåndterer.sjekkOmAutomatiseringErStanset(
+                fødselsnummer,
+                vedtaksperiodeId,
+                organisasjonsnummer,
+            )
         val forhindrerAutomatisering = sykefraværstilfelle.forhindrerAutomatisering(vedtaksperiodeId)
         val harVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
         val tilhørerUtlandsenhet = erEnhetUtland(personDao.finnEnhetId(fødselsnummer))

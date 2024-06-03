@@ -61,6 +61,7 @@ internal class TilbakedateringGodkjentCommand(
     oppgaveMediator: OppgaveMediator,
     godkjenningMediator: GodkjenningMediator,
     spleisBehandlingId: UUID?,
+    organisasjonsnummer: String,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -84,6 +85,7 @@ internal class TilbakedateringGodkjentCommand(
                 periodetype = oppgaveDataForAutomatisering.periodetype,
                 sykefraværstilfelle = sykefraværstilfelle,
                 spleisBehandlingId = spleisBehandlingId,
+                organisasjonsnummer = organisasjonsnummer,
             ),
         )
 }

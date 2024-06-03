@@ -7,7 +7,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
-internal class Subsumsjonsmelder(private val versjonAvKode: String, private val rapidsConnection: RapidsConnection) :
+class Subsumsjonsmelder(private val versjonAvKode: String, private val rapidsConnection: RapidsConnection) :
     SaksbehandlerObserver {
     private val versjon = "1.0.0"
 

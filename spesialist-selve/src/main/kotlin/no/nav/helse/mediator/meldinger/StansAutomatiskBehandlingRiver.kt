@@ -2,6 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
+import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -40,7 +41,7 @@ internal class StansAutomatiskBehandlingRiver(
 
         val fødselsnummer = packet["fødselsnummer"].asText()
         val status = packet["status"].asText()
-        val årsaker = packet["årsaker"].map { it.asText() }.toSet()
+        val årsaker = packet["årsaker"].map { enumValueOf<StoppknappÅrsak>(it.asText()) }.toSet()
         val opprettet = packet["opprettet"].asLocalDateTime()
         val originalMelding = packet["originalMelding"].asText()
 

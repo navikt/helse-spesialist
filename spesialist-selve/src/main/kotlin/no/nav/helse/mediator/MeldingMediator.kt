@@ -62,6 +62,7 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.PersonRepository
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
+import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
@@ -385,7 +386,7 @@ internal class MeldingMediator(
     fun stansAutomatiskBehandling(
         fødselsnummer: String,
         status: String,
-        årsaker: Set<String>,
+        årsaker: Set<StoppknappÅrsak>,
         opprettet: LocalDateTime,
         originalMelding: String,
         kilde: String,
