@@ -123,13 +123,13 @@ internal class SpesialistApp(
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
     private val automatiseringDao = AutomatiseringDao(dataSource)
     private val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(dataSource)
-    private val subsumsjonsmelder = Subsumsjonsmelder(versjonAvKode, rapidsConnection)
 
     private lateinit var meldingMediator: MeldingMediator
     private lateinit var saksbehandlerMediator: SaksbehandlerMediator
     private lateinit var oppgaveMediator: OppgaveMediator
     private lateinit var dokumentMediator: DokumentMediator
     private lateinit var stansAutomatiskBehandlingMediator: StansAutomatiskBehandlingMediator
+    private lateinit var subsumsjonsmelder: Subsumsjonsmelder
 
     private val behandlingsstatistikkMediator = BehandlingsstatistikkMediator(behandlingsstatistikkDao = behandlingsstatistikkDao)
     private val godkjenningMediator =
@@ -295,6 +295,7 @@ internal class SpesialistApp(
                 oppgaveMediator = oppgaveMediator,
                 saksbehandlerRepository = saksbehandlerDao,
             )
+        subsumsjonsmelder = Subsumsjonsmelder(versjonAvKode, rapidsConnection)
         stansAutomatiskBehandlingMediator =
             StansAutomatiskBehandlingMediator(
                 stansAutomatiskBehandlingDao,
