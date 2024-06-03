@@ -65,6 +65,10 @@ internal class GodkjenningsbehovRiver(
         context: MessageContext,
     ) {
         val hendelseId = UUID.fromString(packet["@id"].asText())
+
+        if (hendelseId == UUID.fromString("bd77593d-c3d4-46a4-99ba-abcbca02fe9c")) {
+            return
+        }
         logg.info(
             "Mottok godkjenningsbehov med {}",
             StructuredArguments.keyValue("hendelseId", hendelseId),
