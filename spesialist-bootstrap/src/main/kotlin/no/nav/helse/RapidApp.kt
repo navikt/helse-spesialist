@@ -22,7 +22,7 @@ fun main() {
 }
 
 internal class RapidApp(env: Map<String, String>) {
-    private lateinit var rapidsConnection: RapidsConnection
+    private val rapidsConnection: RapidsConnection
     private val azureConfig =
         AzureConfig(
             clientId = env.getValue("AZURE_APP_CLIENT_ID"),
@@ -63,9 +63,7 @@ internal class RapidApp(env: Map<String, String>) {
             tilgangsgrupper = tilgangsgrupper,
             reservasjonClient = reservasjonClient,
             versjonAvKode = versjonAvKode(env),
-        ) {
-            rapidsConnection
-        }
+        )
 
     private fun versjonAvKode(env: Map<String, String>): String {
         return env["NAIS_APP_IMAGE"] ?: throw IllegalArgumentException("NAIS_APP_IMAGE env variable is missing")
@@ -85,5 +83,5 @@ internal class RapidApp(env: Map<String, String>) {
             )
     }
 
-    fun start() = spesialistApp.start()
+    fun start() = spesialistApp.start(rapidsConnection)
 }

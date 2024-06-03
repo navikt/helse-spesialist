@@ -81,8 +81,6 @@ object LocalApp {
         start()
     }
 
-    private lateinit var rapidsConnection: RapidsConnection
-
     private val spesialistApp =
         SpesialistApp(
             env = Environment(database.envvars + mapOf("LOKAL_UTVIKLING" to "true")),
@@ -92,7 +90,6 @@ object LocalApp {
             tilgangsgrupper = tilgangsgrupper,
             reservasjonClient = reservasjonClient,
             versjonAvKode = "versjon_1",
-            rapidsConnectionProvider = { rapidsConnection },
         )
 
     private val localModule: Application.() -> Unit  = {
@@ -105,8 +102,7 @@ object LocalApp {
     }
 
     fun start() {
-        rapidsConnection = lagRapidsConnection()
-        spesialistApp.start()
+        spesialistApp.start(lagRapidsConnection())
     }
 
     private fun lagRapidsConnection(): RapidsConnection {
