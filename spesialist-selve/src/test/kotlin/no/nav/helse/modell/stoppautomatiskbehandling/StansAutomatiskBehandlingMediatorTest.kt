@@ -56,8 +56,7 @@ class StansAutomatiskBehandlingMediatorTest {
             oppgaveDao,
             utbetalingDao,
             notatMediator,
-            subsumsjonsmelder,
-        )
+        ) { subsumsjonsmelder }
 
     @BeforeEach
     fun beforeEach() {

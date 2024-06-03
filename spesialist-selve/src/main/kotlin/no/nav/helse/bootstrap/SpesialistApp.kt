@@ -128,7 +128,6 @@ internal class SpesialistApp(
     private lateinit var saksbehandlerMediator: SaksbehandlerMediator
     private lateinit var oppgaveMediator: OppgaveMediator
     private lateinit var dokumentMediator: DokumentMediator
-    private lateinit var stansAutomatiskBehandlingMediator: StansAutomatiskBehandlingMediator
     private lateinit var subsumsjonsmelder: Subsumsjonsmelder
 
     private val behandlingsstatistikkMediator = BehandlingsstatistikkMediator(behandlingsstatistikkDao = behandlingsstatistikkDao)
@@ -142,6 +141,14 @@ internal class SpesialistApp(
             generasjonDao = generasjonDao,
         )
     private val notatMediator = NotatMediator(notatDao = notatDao)
+    private val stansAutomatiskBehandlingMediator =
+        StansAutomatiskBehandlingMediator(
+            stansAutomatiskBehandlingDao,
+            periodehistorikkDao,
+            oppgaveDao,
+            utbetalingDao,
+            notatMediator,
+        ) { subsumsjonsmelder }
     private val totrinnsvurderingMediator =
         TotrinnsvurderingMediator(
             dao = totrinnsvurderingDao,
@@ -296,15 +303,6 @@ internal class SpesialistApp(
                 saksbehandlerRepository = saksbehandlerDao,
             )
         subsumsjonsmelder = Subsumsjonsmelder(versjonAvKode, rapidsConnection)
-        stansAutomatiskBehandlingMediator =
-            StansAutomatiskBehandlingMediator(
-                stansAutomatiskBehandlingDao,
-                periodehistorikkDao,
-                oppgaveDao,
-                utbetalingDao,
-                notatMediator,
-                subsumsjonsmelder,
-            )
 
         rapidsConnection.start().also {
             val beans: List<GarbageCollectorMXBean> = ManagementFactory.getGarbageCollectorMXBeans()

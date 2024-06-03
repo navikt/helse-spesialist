@@ -64,8 +64,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             oppgaveDao,
             utbetalingDao,
             NotatMediator(notatDao),
-            Subsumsjonsmelder("versjonAvKode", testRapid),
-        )
+        ) { Subsumsjonsmelder("versjonAvKode", testRapid) }
     private val oppgaveMediator =
         OppgaveMediator(
             meldingDao,

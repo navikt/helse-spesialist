@@ -34,10 +34,12 @@ class StansAutomatiskBehandlingMediator(
     private val oppgaveDao: OppgaveDao,
     private val utbetalingDao: UtbetalingDao,
     private val notatMediator: NotatMediator,
-    private val subsumsjonsmelder: Subsumsjonsmelder,
+    private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
 ) : StansAutomatiskBehandlinghåndterer {
     private val logg = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+
+    private val subsumsjonsmelder by lazy { subsumsjonsmelderProvider() }
 
     internal fun håndter(
         handling: Personhandling,

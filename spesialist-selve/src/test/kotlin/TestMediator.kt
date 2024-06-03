@@ -63,8 +63,7 @@ internal class TestMediator(
             oppgaveDao,
             utbetalingDao,
             NotatMediator(NotatDao(dataSource)),
-            Subsumsjonsmelder("versjonAvKode", testRapid),
-        )
+        ) { Subsumsjonsmelder("versjonAvKode", testRapid) }
 
     private val godkjenningMediator =
         GodkjenningMediator(
