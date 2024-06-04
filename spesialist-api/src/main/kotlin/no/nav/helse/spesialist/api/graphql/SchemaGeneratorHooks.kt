@@ -71,7 +71,11 @@ private object LocalDateTimeCoercing : Coercing<LocalDateTime, String> {
         dataFetcherResult: Any,
         graphQLContext: GraphQLContext,
         locale: Locale,
-    ) = dataFetcherResult.toString()
+    ): String =
+        when (dataFetcherResult) {
+            is StringValue -> dataFetcherResult.value
+            else -> dataFetcherResult.toString()
+        }
 
     override fun parseValue(
         input: Any,
