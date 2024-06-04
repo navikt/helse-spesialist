@@ -18,6 +18,7 @@ interface Overstyring {
 }
 
 interface Periode {
+    behandlingId: UUID!
     erForkastet: Boolean!
     fom: String!
     hendelser: [Hendelse!]!
@@ -155,6 +156,7 @@ type Behandlingsstatistikk {
 
 type BeregnetPeriode implements Periode {
     avslag: [Avslag!]!
+    behandlingId: UUID!
     beregningId: UUID!
     egenskaper: [Oppgaveegenskap!]!
     erForkastet: Boolean!
@@ -714,6 +716,7 @@ type Totrinnsvurdering {
 }
 
 type UberegnetPeriode implements Periode {
+    behandlingId: UUID!
     erForkastet: Boolean!
     fom: String!
     hendelser: [Hendelse!]!
@@ -728,24 +731,6 @@ type UberegnetPeriode implements Periode {
     tom: String!
     varsler: [VarselDTO!]!
     vedtaksperiodeId: UUID!
-}
-
-type UberegnetVilkarsprovdPeriode implements Periode {
-    erForkastet: Boolean!
-    fom: String!
-    hendelser: [Hendelse!]!
-    id: UUID!
-    inntektstype: Inntektstype!
-    notater: [Notat!]!
-    opprettet: String!
-    periodetilstand: Periodetilstand!
-    periodetype: Periodetype!
-    skjaeringstidspunkt: String!
-    tidslinje: [Dag!]!
-    tom: String!
-    varsler: [VarselDTO!]!
-    vedtaksperiodeId: UUID!
-    vilkarsgrunnlagId: UUID
 }
 
 type UnntattFraAutomatiskGodkjenning {
@@ -1219,6 +1204,7 @@ input ArbeidsforholdOverstyringHandlingInput {
     fodselsnummer: String!
     overstyrteArbeidsforhold: [OverstyringArbeidsforholdInput!]!
     skjaringstidspunkt: String!
+    vedtaksperiodeId: String!
 }
 
 input AvslagInput {
@@ -1245,6 +1231,7 @@ input InntektOgRefusjonOverstyringInput {
     arbeidsgivere: [OverstyringArbeidsgiverInput!]!
     fodselsnummer: String!
     skjaringstidspunkt: String!
+    vedtaksperiodeId: String!
 }
 
 input LovhjemmelInput {
@@ -1317,6 +1304,7 @@ input SkjonnsfastsettelseInput {
     arbeidsgivere: [SkjonnsfastsettelseArbeidsgiverInput!]!
     fodselsnummer: String!
     skjaringstidspunkt: String!
+    vedtaksperiodeId: String!
 }
 
 input TidslinjeOverstyringInput {

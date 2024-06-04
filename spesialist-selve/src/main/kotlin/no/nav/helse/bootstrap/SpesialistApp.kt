@@ -73,7 +73,7 @@ import kotlin.random.Random
 private val logg = LoggerFactory.getLogger("SpesialistApp")
 
 internal class SpesialistApp(
-    env: Map<String, String>,
+    private val env: Map<String, String>,
     gruppekontroll: Gruppekontroll,
     snapshotClient: ISnapshotClient,
     private val azureConfig: AzureConfig,
@@ -225,6 +225,7 @@ internal class SpesialistApp(
             installPlugins()
             azureAdAppAuthentication(azureConfig)
             graphQLApi(
+                env = env,
                 personApiDao = personApiDao,
                 egenAnsattApiDao = egenAnsattApiDao,
                 tildelingDao = tildelingApiDao,

@@ -27,6 +27,7 @@ import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.erDev
+import no.nav.helse.spesialist.api.erLokalt
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.objectMapper
@@ -48,6 +49,7 @@ import java.time.Duration
 import java.util.UUID
 
 fun Application.graphQLApi(
+    env: Map<String, String>,
     personApiDao: PersonApiDao,
     egenAnsattApiDao: EgenAnsattApiDao,
     tildelingDao: TildelingDao,
@@ -132,7 +134,7 @@ fun Application.graphQLApi(
                 playground()
             }
 
-            if (erDev()) {
+            if (erDev() || erLokalt(env)) {
                 route("introspection") {
                     queryHandler(server)
                 }

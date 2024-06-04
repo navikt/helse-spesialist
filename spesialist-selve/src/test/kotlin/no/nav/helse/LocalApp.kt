@@ -50,7 +50,7 @@ fun main() {
 
     val spesialistApp =
         SpesialistApp(
-            env = database.envvars,
+            env = database.envvars + mapOf("LOKAL_UTVIKLING" to "true"),
             gruppekontroll = gruppekontroll,
             snapshotClient = snapshotClient,
             azureConfig = azureConfig,

@@ -53,7 +53,8 @@ internal abstract class AbstractOverstyringApiTest() : AbstractGraphQLApiTest() 
                                 }
                             """
                         }
-                    }
+                    },
+                    vedtaksperiodeId: "${overstyring.vedtaksperiodeId}"
                 })
             }
         """
@@ -69,42 +70,43 @@ internal abstract class AbstractOverstyringApiTest() : AbstractGraphQLApiTest() 
                     arbeidsgivere: ${
                         overstyring.arbeidsgivere.map {
                             """
-                                {
-                                    forklaring: "${it.forklaring}",
-                                    begrunnelse: "${it.begrunnelse}",
-                                    organisasjonsnummer: "${it.organisasjonsnummer}",
-                                    fraManedligInntekt: ${it.fraManedligInntekt},
-                                    manedligInntekt: ${it.manedligInntekt},
-                                    lovhjemmel: {bokstav: "A", ledd: "Albue", lovverk: "Norske lover", lovverksversjon: "1803", paragraf: "8-30"},
-                                    refusjonsopplysninger: ${
-                                        it.refusjonsopplysninger?.map { opplysning ->
-                                            """
-                                                {
-                                                belop: ${opplysning.belop},
-                                                fom: "${opplysning.fom}",
-                                                tom: ${opplysning.tom?.let { """"$it"""" }}
-                                                }
-                                            """
-                                        }
-                                    },
-                                    fraRefusjonsopplysninger: ${
-                                        it.fraRefusjonsopplysninger?.map { opplysning ->
-                                            """
-                                                {
-                                                belop: ${opplysning.belop},
-                                                fom: "${opplysning.fom}",
-                                                tom: ${opplysning.tom?.let { """"$it"""" }}
-                                                }
-                                            """
-                                        }
-                                    }
+                                            {
+                                                forklaring: "${it.forklaring}",
+                                                begrunnelse: "${it.begrunnelse}",
+                                                organisasjonsnummer: "${it.organisasjonsnummer}",
+                                                fraManedligInntekt: ${it.fraManedligInntekt},
+                                                manedligInntekt: ${it.manedligInntekt},
+                                                lovhjemmel: {bokstav: "A", ledd: "Albue", lovverk: "Norske lover", lovverksversjon: "1803", paragraf: "8-30"},
+                                                refusjonsopplysninger: ${
+                                it.refusjonsopplysninger?.map { opplysning ->
+                                    """
+                                                            {
+                                                            belop: ${opplysning.belop},
+                                                            fom: "${opplysning.fom}",
+                                                            tom: ${opplysning.tom?.let { """"$it"""" }}
+                                                            }
+                                                        """
                                 }
-                            """
+                            },
+                                                fraRefusjonsopplysninger: ${
+                                it.fraRefusjonsopplysninger?.map { opplysning ->
+                                    """
+                                                            {
+                                                            belop: ${opplysning.belop},
+                                                            fom: "${opplysning.fom}",
+                                                            tom: ${opplysning.tom?.let { """"$it"""" }}
+                                                            }
+                                                        """
+                                }
+                            }
+                                            }
+                                        """
                         }
-                    }}
-                )
-            }
-
+                    },
+                    vedtaksperiodeId: "${overstyring.vedtaksperiodeId}"
+                }
+            )
+        }
         """
     )
 }

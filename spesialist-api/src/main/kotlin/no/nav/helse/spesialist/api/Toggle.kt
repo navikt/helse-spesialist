@@ -9,3 +9,4 @@ abstract class Toggle(private var _enabled: Boolean) {
 }
 
 internal fun erDev() = "dev-gcp" == System.getenv("NAIS_CLUSTER_NAME")
+internal fun erLokalt(env: Map<String, String>) = "true" == env["LOKAL_UTVIKLING"]

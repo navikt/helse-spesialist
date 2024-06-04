@@ -224,6 +224,7 @@ fun main() =
             val randomBehandledeOppgaver = MutableList(32) { TestdataGenerator.behandletOppgave() }
 
             graphQLApi(
+                env = emptyMap(),
                 personApiDao = personApiDao,
                 egenAnsattApiDao = egenAnsattApiDao,
                 tildelingDao = tildelingDao,
