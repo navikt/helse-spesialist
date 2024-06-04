@@ -1,9 +1,11 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
+import java.time.LocalDateTime
+
 data class Soknad(
     val type: Soknadstype?,
     val arbeidGjenopptatt: DateString?,
-    val sykmeldingSkrevet: DateTimeString?,
+    val sykmeldingSkrevet: LocalDateTime?,
     val egenmeldingsdagerFraSykmelding: List<DateString>?,
     val soknadsperioder: List<Soknadsperioder>?,
     val sporsmal: List<Sporsmal>?,

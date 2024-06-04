@@ -24,8 +24,8 @@ internal object OppgaveMapper {
             val egenskaper = oppgave.egenskaper.tilModellversjoner()
             OppgaveTilBehandling(
                 id = oppgave.id.toString(),
-                opprettet = oppgave.opprettet.toString(),
-                opprinneligSoknadsdato = oppgave.opprinneligSøknadsdato.toString(),
+                opprettet = oppgave.opprettet,
+                opprinneligSoknadsdato = oppgave.opprinneligSøknadsdato,
                 tidsfrist = oppgave.tidsfrist?.toString(),
                 vedtaksperiodeId = oppgave.vedtaksperiodeId,
                 navn =
@@ -72,7 +72,7 @@ internal object OppgaveMapper {
                 oppgavetype = egenskaper.oppgavetype(),
                 periodetype = egenskaper.periodetype(),
                 antallArbeidsforhold = egenskaper.antallArbeidsforhold(),
-                ferdigstiltTidspunkt = it.ferdigstiltTidspunkt.toString(),
+                ferdigstiltTidspunkt = it.ferdigstiltTidspunkt,
                 ferdigstiltAv = it.ferdigstiltAv,
                 personnavn =
                     Personnavn(

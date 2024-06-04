@@ -27,6 +27,7 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLOppdrag
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLTidslinjeperiode
 import no.nav.helse.spleis.graphql.hentsnapshot.Sykepengedager
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.spleis.graphql.enums.Utbetalingtype as GraphQLUtbetalingtype
 
@@ -92,7 +93,7 @@ data class Vurdering(
     val automatisk: Boolean,
     val godkjent: Boolean,
     val ident: String,
-    val tidsstempel: DateTimeString,
+    val tidsstempel: LocalDateTime,
 )
 
 data class Simuleringslinje(
@@ -134,7 +135,7 @@ data class Simuleringsperiode(
 
 data class Simulering(
     val fagsystemId: String,
-    val tidsstempel: DateTimeString,
+    val tidsstempel: LocalDateTime,
     val utbetalingslinjer: List<Simuleringslinje>,
     val totalbelop: Int?,
     val perioder: List<Simuleringsperiode>?,
@@ -161,9 +162,9 @@ data class Periodevilkar(
 data class Kommentar(
     val id: Int,
     val tekst: String,
-    val opprettet: DateTimeString,
+    val opprettet: LocalDateTime,
     val saksbehandlerident: String,
-    val feilregistrert_tidspunkt: DateTimeString?,
+    val feilregistrert_tidspunkt: LocalDateTime?,
 )
 
 data class Notater(
@@ -174,14 +175,14 @@ data class Notater(
 data class Notat(
     val id: Int,
     val tekst: String,
-    val opprettet: DateTimeString,
+    val opprettet: LocalDateTime,
     val saksbehandlerOid: UUID,
     val saksbehandlerNavn: String,
     val saksbehandlerEpost: String,
     val saksbehandlerIdent: String,
     val vedtaksperiodeId: UUID,
     val feilregistrert: Boolean,
-    val feilregistrert_tidspunkt: DateTimeString?,
+    val feilregistrert_tidspunkt: LocalDateTime?,
     val type: NotatType,
     val kommentarer: List<Kommentar>,
 )
@@ -195,7 +196,7 @@ enum class NotatType {
 
 data class PeriodeHistorikkElement(
     val type: PeriodehistorikkType,
-    val timestamp: DateTimeString,
+    val timestamp: LocalDateTime,
     val saksbehandler_ident: String?,
     val notat_id: Int?,
 )
@@ -213,7 +214,7 @@ data class Risikovurdering(
 data class VarselDTO(
     val generasjonId: UUID,
     val definisjonId: UUID,
-    val opprettet: DateTimeString,
+    val opprettet: LocalDateTime,
     val kode: String,
     val tittel: String,
     val forklaring: String?,
@@ -222,7 +223,7 @@ data class VarselDTO(
 ) {
     data class VarselvurderingDTO(
         val ident: String,
-        val tidsstempel: DateTimeString,
+        val tidsstempel: LocalDateTime,
         val status: Varselstatus,
     )
 }
@@ -240,7 +241,7 @@ interface Periode {
 
     fun inntektstype(): Inntektstype
 
-    fun opprettet(): DateTimeString
+    fun opprettet(): LocalDateTime
 
     fun periodetype(): Periodetype
 
@@ -281,6 +282,7 @@ interface Periode {
                 Periodetilstand.UtbetaltVenterPaEnAnnenPeriode
             }
         }
+
         GraphQLPeriodetilstand.TILSKJONNSFASTSETTELSE -> Periodetilstand.TilSkjonnsfastsettelse
         else -> Periodetilstand.Ukjent
     }
@@ -303,7 +305,7 @@ interface Periode {
         }
 
     @GraphQLIgnore
-    fun opprettet(periode: GraphQLTidslinjeperiode): DateTimeString = periode.opprettet
+    fun opprettet(periode: GraphQLTidslinjeperiode): LocalDateTime = periode.opprettet
 
     @GraphQLIgnore
     fun periodetype(periode: GraphQLTidslinjeperiode): Periodetype =
@@ -324,23 +326,23 @@ interface Periode {
             Notat(
                 id = it.id,
                 tekst = it.tekst,
-                opprettet = it.opprettet.toString(),
+                opprettet = it.opprettet,
                 saksbehandlerOid = it.saksbehandlerOid,
                 saksbehandlerNavn = it.saksbehandlerNavn,
                 saksbehandlerEpost = it.saksbehandlerEpost,
                 saksbehandlerIdent = it.saksbehandlerIdent,
                 vedtaksperiodeId = it.vedtaksperiodeId,
                 feilregistrert = it.feilregistrert,
-                feilregistrert_tidspunkt = it.feilregistrert_tidspunkt.toString(),
+                feilregistrert_tidspunkt = it.feilregistrert_tidspunkt,
                 type = it.type,
                 kommentarer =
                     it.kommentarer.map { kommentar ->
                         Kommentar(
                             id = kommentar.id,
                             tekst = kommentar.tekst,
-                            opprettet = kommentar.opprettet.toString(),
+                            opprettet = kommentar.opprettet,
                             saksbehandlerident = kommentar.saksbehandlerident,
-                            feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt?.toString(),
+                            feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
                         )
                     },
             )
@@ -370,7 +372,7 @@ data class UberegnetPeriode(
 
     override fun inntektstype(): Inntektstype = inntektstype(periode)
 
-    override fun opprettet(): DateTimeString = opprettet(periode)
+    override fun opprettet(): LocalDateTime = opprettet(periode)
 
     override fun periodetype(): Periodetype = periodetype(periode)
 
@@ -432,7 +434,7 @@ data class BeregnetPeriode(
 
     override fun inntektstype(): Inntektstype = inntektstype(periode)
 
-    override fun opprettet(): DateTimeString = opprettet(periode)
+    override fun opprettet(): LocalDateTime = opprettet(periode)
 
     override fun periodetype(): Periodetype = periodetype(periode)
 
@@ -467,7 +469,7 @@ data class BeregnetPeriode(
             PeriodeHistorikkElement(
                 type = it.type,
                 saksbehandler_ident = it.saksbehandler_ident,
-                timestamp = it.timestamp.toString(),
+                timestamp = it.timestamp,
                 notat_id = it.notat_id,
             )
         }

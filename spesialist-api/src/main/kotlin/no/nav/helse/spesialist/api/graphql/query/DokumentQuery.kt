@@ -7,6 +7,7 @@ import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
@@ -245,7 +246,7 @@ class DokumentQuery(
     private fun JsonNode.tilSøknad(): Soknad {
         val type = this.path("type").takeUnless { it.isMissingOrNull() }?.asText()?.tilSoknadstype()
         val arbeidGjenopptatt = this.path("arbeidGjenopptatt").takeUnless { it.isMissingOrNull() }?.asText()
-        val sykmeldingSkrevet = this.path("sykmeldingSkrevet").takeUnless { it.isMissingOrNull() }?.asText()
+        val sykmeldingSkrevet = this.path("sykmeldingSkrevet").takeUnless { it.isMissingOrNull() }?.asLocalDateTime()
         val egenmeldingsdagerFraSykmelding =
             this.path("egenmeldingsdagerFraSykmelding").takeUnless { it.isMissingOrNull() }?.map { it.asText() }
         val soknadsperioder =

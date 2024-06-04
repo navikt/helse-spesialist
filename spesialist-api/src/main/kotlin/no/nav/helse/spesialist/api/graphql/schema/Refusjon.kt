@@ -10,8 +10,8 @@ data class Arbeidsgiverrefusjon(
 )
 
 data class Refusjonselement(
-    val fom: DateTimeString,
-    val tom: DateTimeString?,
+    val fom: DateString,
+    val tom: DateString?,
     val belop: Double,
     val meldingsreferanseId: UUID,
 )

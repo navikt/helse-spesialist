@@ -25,7 +25,6 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 class StansAutomatiskBehandlingMediator(
@@ -143,7 +142,7 @@ class StansAutomatiskBehandlingMediator(
             UnntattFraAutomatiskGodkjenning(
                 erUnntatt = true,
                 arsaker = flatMap { it.årsaker.map(StoppknappÅrsak::name) },
-                tidspunkt = last().opprettet.format(DateTimeFormatter.ISO_DATE_TIME),
+                tidspunkt = last().opprettet,
             )
         }
 

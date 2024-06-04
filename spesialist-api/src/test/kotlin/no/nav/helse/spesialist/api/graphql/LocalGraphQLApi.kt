@@ -99,7 +99,6 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetaling
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLVurdering
 import no.nav.helse.spleis.graphql.hentsnapshot.Sykepengedager
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 fun main() =
@@ -490,7 +489,7 @@ private fun enPeriode() =
         fom = "2020-01-01",
         tom = "2020-01-31",
         inntektstype = GraphQLInntektstype.ENARBEIDSGIVER,
-        opprettet = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME),
+        opprettet = LocalDateTime.now(),
         periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
         tidslinje = emptyList(),
         vedtaksperiodeId = UUID.randomUUID(),
@@ -529,19 +528,19 @@ private fun enPeriode() =
                         automatisk = false,
                         godkjent = true,
                         ident = "AB123456",
-                        tidsstempel = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME),
+                        tidsstempel = LocalDateTime.now(),
                     ),
                 personoppdrag =
                     GraphQLOppdrag(
                         fagsystemId = "EN-PERSONFAGSYSTEMID",
-                        tidsstempel = "2021-01-01",
+                        tidsstempel = LocalDateTime.parse("2021-01-01"),
                         utbetalingslinjer = emptyList(),
                         simulering = null,
                     ),
                 arbeidsgiveroppdrag =
                     GraphQLOppdrag(
                         fagsystemId = "EN-ARBEIDSGIVERFAGSYSTEMID",
-                        tidsstempel = "2021-01-01",
+                        tidsstempel = LocalDateTime.parse("2021-01-01"),
                         utbetalingslinjer = emptyList(),
                         simulering =
                             GraphQLSimulering(

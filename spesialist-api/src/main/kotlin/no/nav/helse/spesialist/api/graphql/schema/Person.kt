@@ -21,6 +21,7 @@ import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGhostPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
+import java.time.LocalDateTime
 import java.util.UUID
 
 data class Infotrygdutbetaling(
@@ -46,7 +47,7 @@ data class Reservasjon(
 data class UnntattFraAutomatiskGodkjenning(
     val erUnntatt: Boolean,
     val arsaker: List<String>,
-    val tidspunkt: DateTimeString?,
+    val tidspunkt: LocalDateTime?,
 )
 
 data class Enhet(
@@ -61,7 +62,7 @@ data class Tildeling(
 )
 
 data class PaVent(
-    val frist: DateTimeString?,
+    val frist: DateString?,
     val begrunnelse: String?,
     val oid: UUID,
 )
@@ -69,7 +70,7 @@ data class PaVent(
 data class Avslag(
     val type: Avslagstype,
     val begrunnelse: String,
-    val opprettet: DateTimeString,
+    val opprettet: LocalDateTime,
     val saksbehandlerIdent: String,
     val invalidert: Boolean,
 )

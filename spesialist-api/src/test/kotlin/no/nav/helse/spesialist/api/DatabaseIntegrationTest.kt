@@ -783,8 +783,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             eksternDokumentId = eksternDokumentId.toString(),
             fom = "2022-05-11",
             tom = "2022-05-30",
-            rapportertDato = "2023-10-10",
-            sendtNav = "2023-10-10",
+            rapportertDato = 10.oktober(2023).atStartOfDay(),
+            sendtNav = 10.oktober(2023).atStartOfDay(),
             type = GraphQLHendelsetype.SENDTSOKNADARBEIDSLEDIG,
         )
 
@@ -805,7 +805,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         fom = fom,
         tom = tom,
         inntektstype = GraphQLInntektstype.ENARBEIDSGIVER,
-        opprettet = LocalDateTime.now().toString(),
+        opprettet = LocalDateTime.now(),
         periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
         periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING,
         skjaeringstidspunkt = LocalDate.now().toString(),
@@ -850,7 +850,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         fom = fom,
         tom = tom,
         inntektstype = GraphQLInntektstype.ENARBEIDSGIVER,
-        opprettet = LocalDateTime.now().toString(),
+        opprettet = LocalDateTime.now(),
         periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
         periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING,
         skjaeringstidspunkt = LocalDate.now().toString(),

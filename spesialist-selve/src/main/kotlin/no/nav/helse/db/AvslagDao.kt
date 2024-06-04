@@ -120,7 +120,7 @@ class AvslagDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             no.nav.helse.spesialist.api.graphql.schema.Avslag(
                 enumValueOf(avslag.string("type")),
                 avslag.string("tekst"),
-                avslag.localDateTime("opprettet").toString(),
+                avslag.localDateTime("opprettet"),
                 avslag.string("ident"),
                 avslag.boolean("invalidert"),
             )

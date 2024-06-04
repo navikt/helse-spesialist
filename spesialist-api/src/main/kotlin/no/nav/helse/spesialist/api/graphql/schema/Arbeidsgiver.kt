@@ -22,6 +22,7 @@ import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGenerasjon
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUberegnetPeriode
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 
@@ -44,14 +45,14 @@ data class ArbeidsgiverInntekterFraAOrdningen(
 
 interface Overstyring {
     val hendelseId: UUID
-    val timestamp: DateTimeString
+    val timestamp: LocalDateTime
     val saksbehandler: Saksbehandler
     val ferdigstilt: Boolean
 }
 
 data class Dagoverstyring(
     override val hendelseId: UUID,
-    override val timestamp: DateTimeString,
+    override val timestamp: LocalDateTime,
     override val saksbehandler: Saksbehandler,
     override val ferdigstilt: Boolean,
     val dager: List<OverstyrtDag>,
@@ -68,7 +69,7 @@ data class Dagoverstyring(
 
 data class Inntektoverstyring(
     override val hendelseId: UUID,
-    override val timestamp: DateTimeString,
+    override val timestamp: LocalDateTime,
     override val saksbehandler: Saksbehandler,
     override val ferdigstilt: Boolean,
     val inntekt: OverstyrtInntekt,
@@ -78,7 +79,7 @@ data class Inntektoverstyring(
         val begrunnelse: String,
         val manedligInntekt: Double,
         val fraManedligInntekt: Double?,
-        val skjaeringstidspunkt: DateTimeString,
+        val skjaeringstidspunkt: DateString,
         val refusjonsopplysninger: List<Refusjonsopplysning>?,
         val fraRefusjonsopplysninger: List<Refusjonsopplysning>?,
     )
@@ -92,7 +93,7 @@ data class Inntektoverstyring(
 
 data class Sykepengegrunnlagskjonnsfastsetting(
     override val hendelseId: UUID,
-    override val timestamp: DateTimeString,
+    override val timestamp: LocalDateTime,
     override val saksbehandler: Saksbehandler,
     override val ferdigstilt: Boolean,
     val skjonnsfastsatt: SkjonnsfastsattSykepengegrunnlag,
@@ -106,13 +107,13 @@ data class Sykepengegrunnlagskjonnsfastsetting(
         val begrunnelseKonklusjon: String?,
         val arlig: Double,
         val fraArlig: Double?,
-        val skjaeringstidspunkt: DateTimeString,
+        val skjaeringstidspunkt: DateString,
     )
 }
 
 data class Arbeidsforholdoverstyring(
     override val hendelseId: UUID,
-    override val timestamp: DateTimeString,
+    override val timestamp: LocalDateTime,
     override val saksbehandler: Saksbehandler,
     override val ferdigstilt: Boolean,
     val deaktivert: Boolean,
@@ -224,7 +225,7 @@ private fun OverstyringTidslinjeDto.tilDagoverstyring() =
     Dagoverstyring(
         hendelseId = hendelseId,
         begrunnelse = begrunnelse,
-        timestamp = timestamp.format(DateTimeFormatter.ISO_DATE_TIME),
+        timestamp = timestamp,
         saksbehandler =
             Saksbehandler(
                 navn = saksbehandlerNavn,
@@ -246,7 +247,7 @@ private fun OverstyringTidslinjeDto.tilDagoverstyring() =
 private fun OverstyringInntektDto.tilInntektoverstyring() =
     Inntektoverstyring(
         hendelseId = hendelseId,
-        timestamp = timestamp.format(DateTimeFormatter.ISO_DATE_TIME),
+        timestamp = timestamp,
         saksbehandler =
             Saksbehandler(
                 navn = saksbehandlerNavn,
@@ -283,7 +284,7 @@ private fun OverstyringArbeidsforholdDto.tilArbeidsforholdoverstyring() =
     Arbeidsforholdoverstyring(
         hendelseId = hendelseId,
         begrunnelse = begrunnelse,
-        timestamp = timestamp.format(DateTimeFormatter.ISO_DATE_TIME),
+        timestamp = timestamp,
         saksbehandler =
             Saksbehandler(
                 navn = saksbehandlerNavn,
@@ -298,7 +299,7 @@ private fun OverstyringArbeidsforholdDto.tilArbeidsforholdoverstyring() =
 private fun SkjønnsfastsettingSykepengegrunnlagDto.tilSykepengegrunnlagSkjønnsfastsetting() =
     Sykepengegrunnlagskjonnsfastsetting(
         hendelseId = hendelseId,
-        timestamp = timestamp.format(DateTimeFormatter.ISO_DATE_TIME),
+        timestamp = timestamp,
         saksbehandler =
             Saksbehandler(
                 navn = saksbehandlerNavn,

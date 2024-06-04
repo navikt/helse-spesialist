@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
+import java.time.LocalDateTime
 import java.util.UUID
 
 enum class Oppgavetype {
@@ -92,8 +93,8 @@ data class AntallOppgaver(
 
 data class OppgaveTilBehandling(
     val id: String,
-    val opprettet: DateTimeString,
-    val opprinneligSoknadsdato: DateTimeString,
+    val opprettet: LocalDateTime,
+    val opprinneligSoknadsdato: LocalDateTime,
     val tidsfrist: DateString?,
     val vedtaksperiodeId: UUID,
     val navn: Personnavn,
@@ -141,7 +142,7 @@ data class BehandletOppgave(
     val oppgavetype: Oppgavetype,
     val periodetype: Periodetype,
     val antallArbeidsforhold: AntallArbeidsforhold,
-    val ferdigstiltTidspunkt: DateTimeString,
+    val ferdigstiltTidspunkt: LocalDateTime,
     val ferdigstiltAv: String?,
     val personnavn: Personnavn,
 )

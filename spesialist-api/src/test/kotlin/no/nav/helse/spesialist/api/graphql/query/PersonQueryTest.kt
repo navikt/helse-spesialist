@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.ResourceLock
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
-import java.time.OffsetDateTime.now
+import java.time.LocalDateTime
 import java.util.UUID
 
 internal class PersonQueryTest : AbstractGraphQLApiTest() {
@@ -44,7 +44,12 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
 
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
-        assertEquals(1, logglytter.list.filter { it.message.contains("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery") && it.level == Level.INFO }.size)
+        assertEquals(
+            1,
+            logglytter.list.filter {
+                it.message.contains("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery") && it.level == Level.INFO
+            }.size,
+        )
     }
 
     @Test
@@ -70,7 +75,14 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
 
         assertEquals(404, body["errors"].first()["extensions"]["code"].asInt())
-        assertEquals(1, logglytter.list.filter { it.message.contains("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery msg=Finner ikke data for person med fødselsnummer $FØDSELSNUMMER") && it.level == Level.WARN }.size)
+        assertEquals(
+            1,
+            logglytter.list.filter {
+                it.message.contains(
+                    "suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery msg=Finner ikke data for person med fødselsnummer $FØDSELSNUMMER",
+                ) && it.level == Level.WARN
+            }.size,
+        )
     }
 
     @Test
@@ -85,7 +97,14 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val extensions = body["errors"].first()["extensions"]
         assertEquals(500, extensions["code"].asInt())
         assertEquals(setOf(dNummer, FØDSELSNUMMER), extensions["fodselsnumre"].map(JsonNode::asText).toSet())
-        assertEquals(1, logglytter.list.filter { it.message.contains("suid=${SAKSBEHANDLER.ident} duid=$AKTØRID operation=PersonQuery msg=Mer enn ett fødselsnummer for personen") && it.level == Level.WARN }.size)
+        assertEquals(
+            1,
+            logglytter.list.filter {
+                it.message.contains(
+                    "suid=${SAKSBEHANDLER.ident} duid=$AKTØRID operation=PersonQuery msg=Mer enn ett fødselsnummer for personen",
+                ) && it.level == Level.WARN
+            }.size,
+        )
     }
 
     @Test
@@ -98,7 +117,12 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""", kode7Saksbehandlergruppe)
 
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
-        assertEquals(1, logglytter.list.filter { it.message.contains("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER") && it.level == Level.INFO }.size)
+        assertEquals(
+            1,
+            logglytter.list.filter {
+                it.message.contains("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER") && it.level == Level.INFO
+            }.size,
+        )
     }
 
     @Test
@@ -110,7 +134,14 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
 
         assertEquals(403, body["errors"].first()["extensions"]["code"].asInt())
-        assertEquals(1, logglytter.list.filter { it.message.contains("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery flexString1=Deny") && it.level == Level.WARN }.size)
+        assertEquals(
+            1,
+            logglytter.list.filter {
+                it.message.contains(
+                    "suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery flexString1=Deny",
+                ) && it.level == Level.WARN
+            }.size,
+        )
     }
 
     @Test
@@ -124,7 +155,12 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""", skjermedePersonerGruppeId)
 
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
-        assertEquals(1, logglytter.list.filter { it.message.contains("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery") && it.level == Level.INFO }.size)
+        assertEquals(
+            1,
+            logglytter.list.filter {
+                it.message.contains("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery") && it.level == Level.INFO
+            }.size,
+        )
     }
 
     @Test
@@ -137,7 +173,14 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
 
         assertEquals(403, body["errors"].first()["extensions"]["code"].asInt())
-        assertEquals(1, logglytter.list.filter { it.message.contains("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery flexString1=Deny") && it.level == Level.WARN }.size)
+        assertEquals(
+            1,
+            logglytter.list.filter {
+                it.message.contains(
+                    "suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery flexString1=Deny",
+                ) && it.level == Level.WARN
+            }.size,
+        )
     }
 
     @Test
@@ -150,7 +193,14 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
 
         assertEquals(501, body["errors"].first()["extensions"]["code"].asInt())
-        assertEquals(1, logglytter.list.filter { it.message.contains("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery msg=Lagret snapshot stemmer ikke overens med forventet format. Dette kommer som regel av at noen har gjort endringer på formatet men glemt å bumpe versjonsnummeret.") && it.level == Level.WARN }.size)
+        assertEquals(
+            1,
+            logglytter.list.filter {
+                it.message.contains(
+                    "suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery msg=Lagret snapshot stemmer ikke overens med forventet format. Dette kommer som regel av at noen har gjort endringer på formatet men glemt å bumpe versjonsnummeret.",
+                ) && it.level == Level.WARN
+            }.size,
+        )
     }
 
     @Test
@@ -162,7 +212,13 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         opprettVedtaksperiode(personRef, arbeidsgiverRef, periode = periodeMedOppgave, skjæringstidspunkt = 2.januar)
         opprettVedtak(personRef, arbeidsgiverRef, periode = uberegnetPeriode, skjæringstidspunkt = 2.januar)
         val generasjonId = UUID.randomUUID()
-        val generasjonRef = nyGenerasjon(vedtaksperiodeId = uberegnetPeriode.id, generasjonId = generasjonId, periode = uberegnetPeriode, skjæringstidspunkt = 2.januar)
+        val generasjonRef =
+            nyGenerasjon(
+                vedtaksperiodeId = uberegnetPeriode.id,
+                generasjonId = generasjonId,
+                periode = uberegnetPeriode,
+                skjæringstidspunkt = 2.januar,
+            )
         val graphQLUberegnetPeriode = opprettUberegnetPeriode("2023-01-02", "2023-01-03", uberegnetPeriode.id)
         val graphQLperiodeMedOppgave = opprettBeregnetPeriode("2023-01-04", "2023-01-05", periodeMedOppgave.id)
         val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLUberegnetPeriode, graphQLperiodeMedOppgave))
@@ -206,12 +262,26 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         opprettVedtak(personRef, arbeidsgiverRef, periode = uberegnetPeriode, skjæringstidspunkt = 2.januar)
         val generasjonId1 = UUID.randomUUID()
         val generasjonId2 = UUID.randomUUID()
-        val generasjonRef1 = nyGenerasjon(vedtaksperiodeId = uberegnetPeriode.id, generasjonId = generasjonId1, periode = uberegnetPeriode, skjæringstidspunkt = 2.januar)
-        val generasjonRef2 = nyGenerasjon(vedtaksperiodeId = uberegnetPeriode.id, generasjonId = generasjonId2, periode = uberegnetPeriode, skjæringstidspunkt = 2.januar)
+        val generasjonRef1 =
+            nyGenerasjon(
+                vedtaksperiodeId = uberegnetPeriode.id,
+                generasjonId = generasjonId1,
+                periode = uberegnetPeriode,
+                skjæringstidspunkt = 2.januar,
+            )
+        val generasjonRef2 =
+            nyGenerasjon(
+                vedtaksperiodeId = uberegnetPeriode.id,
+                generasjonId = generasjonId2,
+                periode = uberegnetPeriode,
+                skjæringstidspunkt = 2.januar,
+            )
         val graphQLUberegnetPeriode = opprettUberegnetPeriode("2023-01-02", "2023-01-03", uberegnetPeriode.id)
         val graphQLperiodeMedOppgave = opprettBeregnetPeriode("2023-01-04", "2023-01-05", periodeMedOppgave.id)
-        val snapshotGenerasjon1 = opprettSnapshotGenerasjon(listOf(graphQLUberegnetPeriode, graphQLperiodeMedOppgave), snapshotGenerasjonId1)
-        val snapshotGenerasjon2 = opprettSnapshotGenerasjon(listOf(graphQLUberegnetPeriode, graphQLperiodeMedOppgave), snapshotGenerasjonId2)
+        val snapshotGenerasjon1 =
+            opprettSnapshotGenerasjon(listOf(graphQLUberegnetPeriode, graphQLperiodeMedOppgave), snapshotGenerasjonId1)
+        val snapshotGenerasjon2 =
+            opprettSnapshotGenerasjon(listOf(graphQLUberegnetPeriode, graphQLperiodeMedOppgave), snapshotGenerasjonId2)
         val arbeidsgiver = opprettSnapshotArbeidsgiver(listOf(snapshotGenerasjon1, snapshotGenerasjon2))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
         opprettVarseldefinisjon()
@@ -246,8 +316,12 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         assertEquals(2, perioder.size())
         val responseperiode1 = perioder.first { it["vedtaksperiodeId"].textValue() == periode1.id.toString() }
         val responseperiode2 = perioder.first { it["vedtaksperiodeId"].textValue() == periode2.id.toString() }
-        assertFalse(responseperiode1["handlinger"].first { it["type"].textValue() == Periodehandling.UTBETALE.name }["tillatt"].booleanValue())
-        assertTrue(responseperiode2["handlinger"].first { it["type"].textValue() == Periodehandling.UTBETALE.name }["tillatt"].booleanValue())
+        assertFalse(
+            responseperiode1["handlinger"].first { it["type"].textValue() == Periodehandling.UTBETALE.name }["tillatt"].booleanValue(),
+        )
+        assertTrue(
+            responseperiode2["handlinger"].first { it["type"].textValue() == Periodehandling.UTBETALE.name }["tillatt"].booleanValue(),
+        )
     }
 
     @Test
@@ -291,7 +365,18 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     @Test
     fun `periode med avslag`() {
         val avslagsbegrunnelse = "En individuell begrunnelse"
-        every { saksbehandlerhåndterer.hentAvslag(any(), any()) } returns setOf(Avslag(type = Avslagstype.AVSLAG, begrunnelse = avslagsbegrunnelse, opprettet = now().toString(), saksbehandlerIdent = "AIDENT", invalidert = false))
+        every {
+            saksbehandlerhåndterer.hentAvslag(any(), any())
+        } returns
+            setOf(
+                Avslag(
+                    type = Avslagstype.AVSLAG,
+                    begrunnelse = avslagsbegrunnelse,
+                    opprettet = LocalDateTime.now(),
+                    saksbehandlerIdent = "AIDENT",
+                    invalidert = false,
+                ),
+            )
 
         val personRef = opprettPerson()
         val arbeidsgiverRef = opprettArbeidsgiver()
@@ -324,16 +409,18 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val body = runPersonQuery()
 
         val periode = body["data"]["person"]["arbeidsgivere"].first()["generasjoner"].first()["perioder"].first()
-        val forventedeHandlinger = setOf(
-            Handling(Periodehandling.UTBETALE, true, null),
-            Handling(Periodehandling.AVVISE, false, "Spleis støtter ikke å avvise perioden")
-        )
+        val forventedeHandlinger =
+            setOf(
+                Handling(Periodehandling.UTBETALE, true, null),
+                Handling(Periodehandling.AVVISE, false, "Spleis støtter ikke å avvise perioden"),
+            )
         assertFalse(periode["handlinger"].isEmpty)
         assertEquals(objectMapper.convertValue<Set<ObjectNode>>(forventedeHandlinger), periode["handlinger"].toSet())
     }
 
-    private fun runPersonQuery(group: UUID? = null) = runQuery(
-        """
+    private fun runPersonQuery(group: UUID? = null) =
+        runQuery(
+            """
             { 
                 person(fnr: "$FØDSELSNUMMER") { 
                     aktorId
@@ -385,14 +472,17 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
                 } 
             }
         """,
-        group
-    )
+            group,
+        )
 
-    private fun periode(fom: String, tom: String): Periode {
+    private fun periode(
+        fom: String,
+        tom: String,
+    ): Periode {
         return Periode(
             UUID.randomUUID(),
             LocalDate.parse(fom),
-            LocalDate.parse(tom)
+            LocalDate.parse(tom),
         )
     }
 
@@ -402,7 +492,10 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         return perioder.first { periode -> vedtaksperiodeId == periode.vedtaksperiodeId }
     }
 
-    private fun JsonNode.plukkUtPeriodeMed(vedtaksperiodeId: UUID, generasjonId: UUID): PersonQueryTestPeriode {
+    private fun JsonNode.plukkUtPeriodeMed(
+        vedtaksperiodeId: UUID,
+        generasjonId: UUID,
+    ): PersonQueryTestPeriode {
         val jsonNode = this["data"]["person"]["arbeidsgivere"].first()["generasjoner"]
         val generasjoner = objectMapper.treeToValue<List<PersonQueryTestGenerasjon>>(jsonNode)
         val generasjon = generasjoner.first { generasjon -> generasjonId == generasjon.id }
@@ -411,12 +504,12 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
 
     private data class PersonQueryTestGenerasjon(
         val id: UUID,
-        val perioder: List<PersonQueryTestPeriode>
+        val perioder: List<PersonQueryTestPeriode>,
     )
 
     private data class PersonQueryTestPeriode(
         val vedtaksperiodeId: UUID,
-        val varsler: Set<PersonQueryTestVarsel>
+        val varsler: Set<PersonQueryTestVarsel>,
     )
 
     private data class PersonQueryTestVarsel(
@@ -424,11 +517,11 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val kode: String,
     )
 
-    private fun Periode.tilBeregnetPeriode(): GraphQLBeregnetPeriode =
-        opprettBeregnetPeriode(fom.toString(), tom.toString(), id)
+    private fun Periode.tilBeregnetPeriode(): GraphQLBeregnetPeriode = opprettBeregnetPeriode(fom.toString(), tom.toString(), id)
 
-    private fun opprettLogglytter() = ListAppender<ILoggingEvent>().apply {
-        (LoggerFactory.getLogger("auditLogger") as Logger).addAppender(this)
-        start()
-    }
+    private fun opprettLogglytter() =
+        ListAppender<ILoggingEvent>().apply {
+            (LoggerFactory.getLogger("auditLogger") as Logger).addAppender(this)
+            start()
+        }
 }

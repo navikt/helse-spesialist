@@ -31,7 +31,7 @@ data class Varsel(
         VarselDTO(
             generasjonId,
             definisjonId,
-            opprettet.toString(),
+            opprettet,
             kode,
             tittel,
             forklaring,
@@ -74,9 +74,9 @@ data class Varsel(
     ) {
         internal fun toDto(status: Varselstatus) =
             VarselvurderingDTO(
-                ident,
-                tidsstempel.toString(),
-                no.nav.helse.spesialist.api.graphql.schema.Varselstatus.valueOf(status.name),
+                ident = ident,
+                tidsstempel = tidsstempel,
+                status = no.nav.helse.spesialist.api.graphql.schema.Varselstatus.valueOf(status.name),
             )
     }
 

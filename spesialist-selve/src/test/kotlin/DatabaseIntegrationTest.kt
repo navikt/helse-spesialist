@@ -530,7 +530,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                                                             fom = "2020-01-01",
                                                             tom = "2020-01-31",
                                                             inntektstype = GraphQLInntektstype.ENARBEIDSGIVER,
-                                                            opprettet = "2020-01-31",
+                                                            opprettet = 31.januar(2020).atStartOfDay(),
                                                             periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
                                                             tidslinje = emptyList(),
                                                             vedtaksperiodeId = UUID.randomUUID(),
