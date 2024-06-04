@@ -1,7 +1,9 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
+import java.util.UUID
+
 data class TidslinjeOverstyring(
-    val vedtaksperiodeId: String,
+    val vedtaksperiodeId: UUID,
     val organisasjonsnummer: String,
     val fodselsnummer: String,
     val aktorId: String,
@@ -14,7 +16,7 @@ data class InntektOgRefusjonOverstyring(
     val fodselsnummer: String,
     val skjaringstidspunkt: DateString,
     val arbeidsgivere: List<OverstyringArbeidsgiver>,
-    val vedtaksperiodeId: String,
+    val vedtaksperiodeId: UUID,
 )
 
 data class ArbeidsforholdOverstyringHandling(
@@ -22,7 +24,7 @@ data class ArbeidsforholdOverstyringHandling(
     val aktorId: String,
     val skjaringstidspunkt: DateString,
     val overstyrteArbeidsforhold: List<OverstyringArbeidsforhold>,
-    val vedtaksperiodeId: String,
+    val vedtaksperiodeId: UUID,
 )
 
 data class OverstyringArbeidsforhold(

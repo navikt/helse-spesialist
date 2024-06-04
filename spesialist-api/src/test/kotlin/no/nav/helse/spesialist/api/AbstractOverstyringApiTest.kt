@@ -6,9 +6,9 @@ import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
 
 internal abstract class AbstractOverstyringApiTest() : AbstractGraphQLApiTest() {
-
-    fun overstyrTidslinje(overstyring: TidslinjeOverstyring): JsonNode = runQuery(
-        """
+    fun overstyrTidslinje(overstyring: TidslinjeOverstyring): JsonNode =
+        runQuery(
+            """
             mutation OverstyrTidsline {
                 overstyrDager(overstyring:{
                     aktorId: "${overstyring.aktorId}", 
@@ -17,8 +17,8 @@ internal abstract class AbstractOverstyringApiTest() : AbstractGraphQLApiTest() 
                     organisasjonsnummer: "${overstyring.organisasjonsnummer}", 
                     vedtaksperiodeId: "${overstyring.vedtaksperiodeId}",
                     dager: ${
-                        overstyring.dager.map {
-                            """
+                overstyring.dager.map {
+                    """
                                 {
                                 dato: "${it.dato}",
                                 fraGrad: ${it.fraGrad},
@@ -28,23 +28,24 @@ internal abstract class AbstractOverstyringApiTest() : AbstractGraphQLApiTest() 
                                 lovhjemmel: {bokstav: "A", ledd: "Albue", lovverk: "Norske lover", lovverksversjon: "1803", paragraf: "8-30"}
                                 }
                             """
-                        }
-                    }
+                }
+            }
                 })
             }
-        """
-    )
+        """,
+        )
 
-    fun overstyrArbeidsforhold(overstyring: ArbeidsforholdOverstyringHandling): JsonNode = runQuery(
-        """
+    fun overstyrArbeidsforhold(overstyring: ArbeidsforholdOverstyringHandling): JsonNode =
+        runQuery(
+            """
             mutation OverstyrArbeidsforhold {
                 overstyrArbeidsforhold(overstyring: {
                     aktorId: "${overstyring.aktorId}",
                     skjaringstidspunkt: "${overstyring.skjaringstidspunkt}",
                     fodselsnummer: "${overstyring.fodselsnummer}",
                     overstyrteArbeidsforhold: ${
-                        overstyring.overstyrteArbeidsforhold.map {
-                            """
+                overstyring.overstyrteArbeidsforhold.map {
+                    """
                                 {
                                 begrunnelse: "${it.begrunnelse}",
                                 deaktivert: ${it.deaktivert},
@@ -52,24 +53,25 @@ internal abstract class AbstractOverstyringApiTest() : AbstractGraphQLApiTest() 
                                 orgnummer: "${it.orgnummer}",
                                 }
                             """
-                        }
-                    },
+                }
+            },
                     vedtaksperiodeId: "${overstyring.vedtaksperiodeId}"
                 })
             }
-        """
-    )
+        """,
+        )
 
-    fun overstyrInntektOgRefusjon(overstyring: InntektOgRefusjonOverstyring): JsonNode = runQuery(
-        """
+    fun overstyrInntektOgRefusjon(overstyring: InntektOgRefusjonOverstyring): JsonNode =
+        runQuery(
+            """
             mutation OverstyrInntektOgRefusjon {
                 overstyrInntektOgRefusjon(overstyring: {
                     aktorId: "${overstyring.aktorId}",
                     skjaringstidspunkt: "${overstyring.skjaringstidspunkt}",
                     fodselsnummer: "${overstyring.fodselsnummer}",
                     arbeidsgivere: ${
-                        overstyring.arbeidsgivere.map {
-                            """
+                overstyring.arbeidsgivere.map {
+                    """
                                             {
                                                 forklaring: "${it.forklaring}",
                                                 begrunnelse: "${it.begrunnelse}",
@@ -78,35 +80,35 @@ internal abstract class AbstractOverstyringApiTest() : AbstractGraphQLApiTest() 
                                                 manedligInntekt: ${it.manedligInntekt},
                                                 lovhjemmel: {bokstav: "A", ledd: "Albue", lovverk: "Norske lover", lovverksversjon: "1803", paragraf: "8-30"},
                                                 refusjonsopplysninger: ${
-                                it.refusjonsopplysninger?.map { opplysning ->
-                                    """
+                        it.refusjonsopplysninger?.map { opplysning ->
+                            """
                                                             {
                                                             belop: ${opplysning.belop},
                                                             fom: "${opplysning.fom}",
                                                             tom: ${opplysning.tom?.let { """"$it"""" }}
                                                             }
                                                         """
-                                }
-                            },
-                                                fraRefusjonsopplysninger: ${
-                                it.fraRefusjonsopplysninger?.map { opplysning ->
-                                    """
-                                                            {
-                                                            belop: ${opplysning.belop},
-                                                            fom: "${opplysning.fom}",
-                                                            tom: ${opplysning.tom?.let { """"$it"""" }}
-                                                            }
-                                                        """
-                                }
-                            }
-                                            }
-                                        """
                         }
                     },
+                                                fraRefusjonsopplysninger: ${
+                        it.fraRefusjonsopplysninger?.map { opplysning ->
+                            """
+                                                            {
+                                                            belop: ${opplysning.belop},
+                                                            fom: "${opplysning.fom}",
+                                                            tom: ${opplysning.tom?.let { """"$it"""" }}
+                                                            }
+                                                        """
+                        }
+                    }
+                                            }
+                                        """
+                }
+            },
                     vedtaksperiodeId: "${overstyring.vedtaksperiodeId}"
                 }
             )
         }
-        """
-    )
+        """,
+        )
 }

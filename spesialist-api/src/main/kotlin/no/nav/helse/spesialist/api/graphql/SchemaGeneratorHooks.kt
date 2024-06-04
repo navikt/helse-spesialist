@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.graphql
 import com.expediagroup.graphql.generator.hooks.SchemaGeneratorHooks
 import graphql.GraphQLContext
 import graphql.execution.CoercedVariables
+import graphql.language.StringValue
 import graphql.language.Value
 import graphql.schema.Coercing
 import graphql.schema.GraphQLScalarType
@@ -45,7 +46,11 @@ private object UuidCoercing : Coercing<UUID, String> {
         dataFetcherResult: Any,
         graphQLContext: GraphQLContext,
         locale: Locale,
-    ) = dataFetcherResult.toString()
+    ): String =
+        when (dataFetcherResult) {
+            is StringValue -> dataFetcherResult.value
+            else -> dataFetcherResult.toString()
+        }
 
     override fun parseValue(
         input: Any,

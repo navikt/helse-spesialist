@@ -20,7 +20,6 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHan
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
-import java.util.UUID
 
 class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhåndterer) : Mutation {
     private companion object {
@@ -37,7 +36,7 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
             try {
                 val handling =
                     OverstyrTidslinjeHandlingFraApi(
-                        vedtaksperiodeId = UUID.fromString(overstyring.vedtaksperiodeId),
+                        vedtaksperiodeId = overstyring.vedtaksperiodeId,
                         organisasjonsnummer = overstyring.organisasjonsnummer,
                         fødselsnummer = overstyring.fodselsnummer,
                         aktørId = overstyring.aktorId,
