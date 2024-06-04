@@ -99,12 +99,17 @@ private object LocalDateTimeCoercing : Coercing<LocalDateTime, String> {
         locale: Locale,
     ): LocalDateTime = LocalDateTime.parse(serialize(input, graphQLContext, locale))
 }
+
 private object LocalDateCoercing : Coercing<LocalDate, String> {
     override fun serialize(
         dataFetcherResult: Any,
         graphQLContext: GraphQLContext,
         locale: Locale,
-    ) = dataFetcherResult.toString()
+    ): String =
+        when (dataFetcherResult) {
+            is StringValue -> dataFetcherResult.value
+            else -> dataFetcherResult.toString()
+        }
 
     override fun parseValue(
         input: Any,
@@ -118,8 +123,6 @@ private object LocalDateCoercing : Coercing<LocalDate, String> {
         graphQLContext: GraphQLContext,
         locale: Locale,
     ): LocalDate {
-        val s = serialize(input, graphQLContext, locale)
-        val d = LocalDate.parse(s)
-        return d
+        return LocalDate.parse(serialize(input, graphQLContext, locale))
     }
 }
