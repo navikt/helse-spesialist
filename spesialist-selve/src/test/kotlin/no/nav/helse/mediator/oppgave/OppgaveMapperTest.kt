@@ -74,7 +74,7 @@ internal class OppgaveMapperTest {
         assertEquals(Personnavn("fornavn", "etternavn", "mellomnavn"), oppgaveTilBehandling.navn)
         assertEquals(opprettet, oppgaveTilBehandling.opprettet)
         assertEquals(opprinneligSøknadsdato, oppgaveTilBehandling.opprinneligSoknadsdato)
-        assertEquals(tidsfrist.toString(), oppgaveTilBehandling.tidsfrist)
+        assertEquals(tidsfrist, oppgaveTilBehandling.tidsfrist)
         assertEquals(AntallArbeidsforhold.ET_ARBEIDSFORHOLD, oppgaveTilBehandling.antallArbeidsforhold)
         assertEquals(Mottaker.BEGGE, oppgaveTilBehandling.mottaker)
         assertEquals(Oppgavetype.SOKNAD, oppgaveTilBehandling.oppgavetype)

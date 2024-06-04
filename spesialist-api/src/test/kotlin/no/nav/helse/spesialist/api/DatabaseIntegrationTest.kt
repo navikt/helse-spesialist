@@ -729,7 +729,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                     ),
                 omregnetArsinntekt = 1_000_000.0,
                 skjonnsmessigFastsattAarlig = 0.0,
-                skjaeringstidspunkt = "2020-01-01",
+                skjaeringstidspunkt = 1.januar(2020),
                 sykepengegrunnlag = 1_000_000.0,
                 antallOpptjeningsdagerErMinst = 123,
                 grunnbelop = 100_000,
@@ -737,12 +737,12 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                     GraphQLSykepengegrunnlagsgrense(
                         grunnbelop = 100_000,
                         grense = 600_000,
-                        virkningstidspunkt = "2020-01-01",
+                        virkningstidspunkt = 1.januar(2020),
                     ),
                 oppfyllerKravOmMedlemskap = true,
                 oppfyllerKravOmMinstelonn = true,
                 oppfyllerKravOmOpptjening = true,
-                opptjeningFra = "2000-01-01",
+                opptjeningFra = 1.januar(2000),
                 arbeidsgiverrefusjoner =
                     listOf(
                         GraphQLArbeidsgiverrefusjon(
@@ -750,7 +750,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                             refusjonsopplysninger =
                                 listOf(
                                     GraphQLRefusjonselement(
-                                        fom = "2020-01-01",
+                                        fom = 1.januar(2020),
                                         tom = null,
                                         belop = 30000.0,
                                         meldingsreferanseId = UUID.randomUUID(),
@@ -781,8 +781,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         GraphQLSoknadArbeidsledig(
             id = UUID.randomUUID().toString(),
             eksternDokumentId = eksternDokumentId.toString(),
-            fom = "2022-05-11",
-            tom = "2022-05-30",
+            fom = 11.mai(2022),
+            tom = 30.mai(2022),
             rapportertDato = 10.oktober(2023).atStartOfDay(),
             sendtNav = 10.oktober(2023).atStartOfDay(),
             type = GraphQLHendelsetype.SENDTSOKNADARBEIDSLEDIG,
@@ -794,8 +794,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ) = GraphQLGenerasjon(id = id, perioder = perioder)
 
     protected fun opprettBeregnetPeriode(
-        fom: String = LocalDate.now().toString(),
-        tom: String = LocalDate.now().toString(),
+        fom: LocalDate = LocalDate.now(),
+        tom: LocalDate = LocalDate.now(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         utbetalingId: UUID = UUID.randomUUID(),
         behandlingId: UUID = UUID.randomUUID(),
@@ -808,23 +808,23 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         opprettet = LocalDateTime.now(),
         periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
         periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING,
-        skjaeringstidspunkt = LocalDate.now().toString(),
+        skjaeringstidspunkt = LocalDate.now(),
         tidslinje = emptyList(),
         vedtaksperiodeId = vedtaksperiodeId,
         beregningId = UUID.randomUUID(),
         forbrukteSykedager = null,
         gjenstaendeSykedager = null,
         hendelser = hendelser,
-        maksdato = LocalDate.now().toString(),
+        maksdato = LocalDate.now(),
         vilkarsgrunnlagId = null,
         periodevilkar =
             GraphQLPeriodevilkar(
                 alder = Alder(55, true),
                 sykepengedager =
                     Sykepengedager(
-                        maksdato = LocalDate.now().toString(),
+                        maksdato = LocalDate.now(),
                         oppfylt = true,
-                        skjaeringstidspunkt = LocalDate.now().toString(),
+                        skjaeringstidspunkt = LocalDate.now(),
                     ),
             ),
         behandlingId = behandlingId,
@@ -841,8 +841,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     )
 
     protected fun opprettUberegnetPeriode(
-        fom: String = LocalDate.now().toString(),
-        tom: String = LocalDate.now().toString(),
+        fom: LocalDate = LocalDate.now(),
+        tom: LocalDate = LocalDate.now(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         behandlingId: UUID = UUID.randomUUID(),
     ) = GraphQLUberegnetPeriode(
@@ -853,7 +853,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         opprettet = LocalDateTime.now(),
         periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
         periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING,
-        skjaeringstidspunkt = LocalDate.now().toString(),
+        skjaeringstidspunkt = LocalDate.now(),
         tidslinje = emptyList(),
         vedtaksperiodeId = vedtaksperiodeId,
         behandlingId = behandlingId,

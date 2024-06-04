@@ -7,6 +7,7 @@ import no.nav.helse.spleis.graphql.enums.GraphQLUtbetalingsdagType
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLDag
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSykdomsdagkilde
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetalingsinfo
+import java.time.LocalDate
 import java.util.UUID
 
 enum class Kildetype {
@@ -81,7 +82,7 @@ data class Utbetalingsinfo(
 )
 
 data class Dag(
-    val dato: DateString,
+    val dato: LocalDate,
     val grad: Double?,
     val kilde: Kilde,
     val sykdomsdagtype: Sykdomsdagtype,

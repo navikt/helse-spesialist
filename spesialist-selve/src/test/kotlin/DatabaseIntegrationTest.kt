@@ -527,15 +527,15 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                                                     listOf(
                                                         GraphQLUberegnetPeriode(
                                                             erForkastet = false,
-                                                            fom = "2020-01-01",
-                                                            tom = "2020-01-31",
+                                                            fom = 1.januar(2020),
+                                                            tom = 31.januar(2020),
                                                             inntektstype = GraphQLInntektstype.ENARBEIDSGIVER,
                                                             opprettet = 31.januar(2020).atStartOfDay(),
                                                             periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
                                                             tidslinje = emptyList(),
                                                             vedtaksperiodeId = UUID.randomUUID(),
                                                             periodetilstand = GraphQLPeriodetilstand.VENTERPAANNENPERIODE,
-                                                            skjaeringstidspunkt = "2020-01-01",
+                                                            skjaeringstidspunkt = 1.januar(2020),
                                                             hendelser = emptyList(),
                                                             behandlingId = UUID.randomUUID(),
                                                         ),

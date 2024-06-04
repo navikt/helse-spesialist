@@ -14,7 +14,6 @@ import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER_OID
-import no.nav.helse.spesialist.api.graphql.schema.DateString
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.graphql.schema.PaVent
 import no.nav.helse.spesialist.api.notat.NotatMediator
@@ -42,7 +41,7 @@ class PaVentMutation(
         oppgaveId: String,
         notatTekst: String,
         notatType: NotatType,
-        frist: DateString,
+        frist: LocalDate,
         tildeling: Boolean,
         begrunnelse: String?,
         env: DataFetchingEnvironment,
@@ -54,7 +53,7 @@ class PaVentMutation(
             try {
                 notatMediator.lagreForOppgaveId(oppgaveId.toLong(), notatTekst, saksbehandlerOid, notatType)
                 saksbehandlerhåndterer.håndter(
-                    LeggPåVent(oppgaveId.toLong(), saksbehandler.oid, LocalDate.parse(frist), tildeling, begrunnelse),
+                    LeggPåVent(oppgaveId.toLong(), saksbehandler.oid, frist, tildeling, begrunnelse),
                     saksbehandler,
                 )
                 newResult<PaVent?>().data(

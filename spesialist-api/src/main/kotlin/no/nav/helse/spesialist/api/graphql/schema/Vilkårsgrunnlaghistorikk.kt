@@ -6,6 +6,7 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInfotrygdVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSpleisVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSykepengegrunnlagsgrense
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLVilkarsgrunnlag
+import java.time.LocalDate
 import java.util.UUID
 
 enum class Vilkarsgrunnlagtype { INFOTRYGD, SPLEIS, UKJENT }
@@ -16,7 +17,7 @@ interface Vilkarsgrunnlag {
     val inntekter: List<Arbeidsgiverinntekt>
     val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>
     val omregnetArsinntekt: Double
-    val skjaeringstidspunkt: DateString
+    val skjaeringstidspunkt: LocalDate
     val sykepengegrunnlag: Double
 }
 
@@ -26,7 +27,7 @@ data class VilkarsgrunnlagInfotrygd(
     override val inntekter: List<Arbeidsgiverinntekt>,
     override val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>,
     override val omregnetArsinntekt: Double,
-    override val skjaeringstidspunkt: DateString,
+    override val skjaeringstidspunkt: LocalDate,
     override val sykepengegrunnlag: Double,
 ) : Vilkarsgrunnlag
 
@@ -35,7 +36,7 @@ data class VilkarsgrunnlagSpleis(
     override val vilkarsgrunnlagtype: Vilkarsgrunnlagtype,
     override val inntekter: List<Arbeidsgiverinntekt>,
     override val omregnetArsinntekt: Double,
-    override val skjaeringstidspunkt: DateString,
+    override val skjaeringstidspunkt: LocalDate,
     override val sykepengegrunnlag: Double,
     override val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>,
     val sammenligningsgrunnlag: Double?,
@@ -47,7 +48,7 @@ data class VilkarsgrunnlagSpleis(
     val oppfyllerKravOmMedlemskap: Boolean?,
     val oppfyllerKravOmMinstelonn: Boolean,
     val oppfyllerKravOmOpptjening: Boolean,
-    val opptjeningFra: DateString,
+    val opptjeningFra: LocalDate,
 ) : Vilkarsgrunnlag
 
 internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Avviksvurderinghenter): Vilkarsgrunnlag {
@@ -138,5 +139,5 @@ internal fun GraphQLSykepengegrunnlagsgrense.tilSykepengegrunnlaggrense() = Syke
 data class Sykepengegrunnlagsgrense(
     val grunnbelop: Int,
     val grense: Int,
-    val virkningstidspunkt: DateString,
+    val virkningstidspunkt: LocalDate,
 )

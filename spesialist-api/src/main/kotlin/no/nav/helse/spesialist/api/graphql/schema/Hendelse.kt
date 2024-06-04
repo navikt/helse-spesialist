@@ -8,6 +8,7 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadFrilans
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadNav
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadSelvstendig
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSykmelding
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -38,8 +39,8 @@ data class Inntektsmelding(
 data class SoknadArbeidsgiver(
     override val id: UUID,
     override val type: Hendelsetype,
-    val fom: DateString,
-    val tom: DateString,
+    val fom: LocalDate,
+    val tom: LocalDate,
     val rapportertDato: LocalDateTime,
     val sendtArbeidsgiver: LocalDateTime,
     val eksternDokumentId: UUID?,
@@ -48,8 +49,8 @@ data class SoknadArbeidsgiver(
 data class SoknadNav(
     override val id: UUID,
     override val type: Hendelsetype,
-    val fom: DateString,
-    val tom: DateString,
+    val fom: LocalDate,
+    val tom: LocalDate,
     val rapportertDato: LocalDateTime,
     val sendtNav: LocalDateTime,
     val eksternDokumentId: UUID?,
@@ -58,8 +59,8 @@ data class SoknadNav(
 data class SoknadArbeidsledig(
     override val id: UUID,
     override val type: Hendelsetype,
-    val fom: DateString,
-    val tom: DateString,
+    val fom: LocalDate,
+    val tom: LocalDate,
     val rapportertDato: LocalDateTime,
     val sendtNav: LocalDateTime,
     val eksternDokumentId: UUID?,
@@ -68,8 +69,8 @@ data class SoknadArbeidsledig(
 data class SoknadFrilans(
     override val id: UUID,
     override val type: Hendelsetype,
-    val fom: DateString,
-    val tom: DateString,
+    val fom: LocalDate,
+    val tom: LocalDate,
     val rapportertDato: LocalDateTime,
     val sendtNav: LocalDateTime,
     val eksternDokumentId: UUID?,
@@ -78,8 +79,8 @@ data class SoknadFrilans(
 data class SoknadSelvstendig(
     override val id: UUID,
     override val type: Hendelsetype,
-    val fom: DateString,
-    val tom: DateString,
+    val fom: LocalDate,
+    val tom: LocalDate,
     val rapportertDato: LocalDateTime,
     val sendtNav: LocalDateTime,
     val eksternDokumentId: UUID?,
@@ -88,8 +89,8 @@ data class SoknadSelvstendig(
 data class Sykmelding(
     override val id: UUID,
     override val type: Hendelsetype,
-    val fom: DateString,
-    val tom: DateString,
+    val fom: LocalDate,
+    val tom: LocalDate,
     val rapportertDato: LocalDateTime,
 ) : Hendelse
 

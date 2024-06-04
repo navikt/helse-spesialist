@@ -33,7 +33,7 @@ class SnapshotApiDao(private val dataSource: DataSource) {
                             fornavn = row.string("fornavn"),
                             mellomnavn = row.stringOrNull("mellomnavn"),
                             etternavn = row.string("etternavn"),
-                            fodselsdato = row.stringOrNull("fodselsdato"),
+                            fodselsdato = row.localDateOrNull("fodselsdato"),
                             kjonn = row.stringOrNull("kjonn")?.let(Kjonn::valueOf) ?: Kjonn.Ukjent,
                             adressebeskyttelse = row.string("adressebeskyttelse").let(Adressebeskyttelse::valueOf),
                             reservasjon = null,

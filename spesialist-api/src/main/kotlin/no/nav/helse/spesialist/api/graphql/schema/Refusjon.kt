@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api.graphql.schema
 
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiverrefusjon
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLRefusjonselement
+import java.time.LocalDate
 import java.util.UUID
 
 data class Arbeidsgiverrefusjon(
@@ -10,8 +11,8 @@ data class Arbeidsgiverrefusjon(
 )
 
 data class Refusjonselement(
-    val fom: DateString,
-    val tom: DateString?,
+    val fom: LocalDate,
+    val tom: LocalDate?,
     val belop: Double,
     val meldingsreferanseId: UUID,
 )

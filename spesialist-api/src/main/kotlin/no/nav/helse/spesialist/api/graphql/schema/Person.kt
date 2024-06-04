@@ -21,6 +21,7 @@ import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGhostPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -62,7 +63,7 @@ data class Tildeling(
 )
 
 data class PaVent(
-    val frist: DateString?,
+    val frist: LocalDate?,
     val begrunnelse: String?,
     val oid: UUID,
 )
@@ -100,7 +101,7 @@ data class Person(
 
     fun fodselsnummer(): String = snapshot.fodselsnummer
 
-    fun dodsdato(): DateString? = snapshot.dodsdato
+    fun dodsdato(): LocalDate? = snapshot.dodsdato
 
     fun personinfo(): Personinfo = personinfo
 

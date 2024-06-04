@@ -1,12 +1,13 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class Soknad(
     val type: Soknadstype?,
-    val arbeidGjenopptatt: DateString?,
+    val arbeidGjenopptatt: LocalDate?,
     val sykmeldingSkrevet: LocalDateTime?,
-    val egenmeldingsdagerFraSykmelding: List<DateString>?,
+    val egenmeldingsdagerFraSykmelding: List<LocalDate>?,
     val soknadsperioder: List<Soknadsperioder>?,
     val sporsmal: List<Sporsmal>?,
 )
@@ -25,8 +26,8 @@ enum class Soknadstype {
 }
 
 data class Soknadsperioder(
-    val fom: DateString,
-    val tom: DateString,
+    val fom: LocalDate,
+    val tom: LocalDate,
     val grad: Int?,
     val faktiskGrad: Int?,
     val sykmeldingsgrad: Int?,
@@ -87,14 +88,14 @@ data class DokumentInntektsmelding(
     val begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
     val bruttoUtbetalt: Double?,
     val beregnetInntekt: Double?,
-    val inntektsdato: DateString?,
+    val inntektsdato: LocalDate?,
     val refusjon: Refusjon?,
     val endringIRefusjoner: List<EndringIRefusjon>?,
     val opphoerAvNaturalytelser: List<OpphoerAvNaturalytelse>?,
     val gjenopptakelseNaturalytelser: List<GjenopptakelseNaturalytelse>?,
     val arbeidsgiverperioder: List<IMPeriode>?,
     val ferieperioder: List<IMPeriode>?,
-    val foersteFravaersdag: DateString?,
+    val foersteFravaersdag: LocalDate?,
     val naerRelasjon: Boolean?,
     val innsenderFulltNavn: String?,
     val innsenderTelefon: String?,
@@ -104,17 +105,17 @@ data class DokumentInntektsmelding(
 
 data class Refusjon(
     val beloepPrMnd: Double?,
-    val opphoersdato: DateString?,
+    val opphoersdato: LocalDate?,
 )
 
 data class EndringIRefusjon(
-    val endringsdato: DateString?,
+    val endringsdato: LocalDate?,
     val beloep: Double?,
 )
 
 data class OpphoerAvNaturalytelse(
     val naturalytelse: Naturalytelse? = null,
-    val fom: DateString? = null,
+    val fom: LocalDate? = null,
     val beloepPrMnd: Double? = null,
 )
 
@@ -143,20 +144,20 @@ enum class Naturalytelse {
 
 data class GjenopptakelseNaturalytelse(
     val naturalytelse: Naturalytelse? = null,
-    val fom: DateString? = null,
+    val fom: LocalDate? = null,
     val beloepPrMnd: Double? = null,
 )
 
 data class IMPeriode(
-    val fom: DateString?,
-    val tom: DateString?,
+    val fom: LocalDate?,
+    val tom: LocalDate?,
 )
 
 data class InntektEndringAarsak(
     val aarsak: String,
     val perioder: List<IMPeriode>? = null,
-    val gjelderFra: DateString? = null,
-    val bleKjent: DateString? = null,
+    val gjelderFra: LocalDate? = null,
+    val bleKjent: LocalDate? = null,
 )
 
 data class AvsenderSystem(

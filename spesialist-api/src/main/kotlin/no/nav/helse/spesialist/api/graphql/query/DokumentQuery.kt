@@ -7,6 +7,7 @@ import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spesialist.api.Dokumenthåndterer
@@ -95,7 +96,8 @@ class DokumentQuery(
                     return DataFetcherResult.newResult<DokumentInntektsmelding>()
                         .error(getNotFoundErrorEkstern()).build()
                 } else if (error == 408) {
-                    return DataFetcherResult.newResult<DokumentInntektsmelding>().error(getEmptyResultTimeoutError()).build()
+                    return DataFetcherResult.newResult<DokumentInntektsmelding>().error(getEmptyResultTimeoutError())
+                        .build()
                 }
                 return@let it.tilInntektsmelding()
             }
@@ -108,7 +110,8 @@ class DokumentQuery(
             .extensions(mapOf("code" to 400)).build()
 
     private fun getEmptyResultTimeoutError(): GraphQLError =
-        GraphqlErrorException.newErrorException().message("Det tar litt lengre tid enn forventet å hente dokumentet, vennligst prøv igjen.")
+        GraphqlErrorException.newErrorException()
+            .message("Det tar litt lengre tid enn forventet å hente dokumentet, vennligst prøv igjen.")
             .extensions(mapOf("code" to 408)).build()
 
     private fun getExpectationFailedError(): GraphQLError =
@@ -116,99 +119,99 @@ class DokumentQuery(
             .extensions(mapOf("code" to 417)).build()
 
     private fun getNotFoundErrorEkstern(): GraphQLError =
-        GraphqlErrorException.newErrorException().message("Speil har ikke tilgang til denne inntektsmeldingen, den må åpnes i Gosys.")
+        GraphqlErrorException.newErrorException()
+            .message("Speil har ikke tilgang til denne inntektsmeldingen, den må åpnes i Gosys.")
             .extensions(mapOf("code" to 404)).build()
 
     private fun JsonNode.tilInntektsmelding(): DokumentInntektsmelding {
         return DokumentInntektsmelding(
             begrunnelseForReduksjonEllerIkkeUtbetalt =
-                this.path("begrunnelseForReduksjonEllerIkkeUtbetalt")
-                    .takeUnless { it.isMissingOrNull() }?.asText(),
+            this.path("begrunnelseForReduksjonEllerIkkeUtbetalt")
+                .takeUnless { it.isMissingOrNull() }?.asText(),
             bruttoUtbetalt = this.path("bruttoUtbetalt").takeUnless { it.isMissingOrNull() }?.asDouble(),
             beregnetInntekt = this.path("beregnetInntekt").takeUnless { it.isMissingOrNull() }?.asDouble(),
-            inntektsdato = this.path("inntektsdato").takeUnless { it.isMissingOrNull() }?.asText(),
+            inntektsdato = this.path("inntektsdato").takeUnless { it.isMissingOrNull() }?.asLocalDate(),
             refusjon =
-                this.path("refusjon").takeUnless { it.isMissingOrNull() }?.let { refusjon ->
-                    Refusjon(
-                        beloepPrMnd = refusjon["beloepPrMnd"].takeUnless { it.isMissingOrNull() }?.asDouble(),
-                        opphoersdato = refusjon["opphoersdato"].takeUnless { it.isMissingOrNull() }?.asText(),
-                    )
-                },
+            this.path("refusjon").takeUnless { it.isMissingOrNull() }?.let { refusjon ->
+                Refusjon(
+                    beloepPrMnd = refusjon["beloepPrMnd"].takeUnless { it.isMissingOrNull() }?.asDouble(),
+                    opphoersdato = refusjon["opphoersdato"].takeUnless { it.isMissingOrNull() }?.asLocalDate(),
+                )
+            },
             endringIRefusjoner =
-                this.path("endringIRefusjoner").takeUnless { it.isMissingOrNull() }
-                    ?.map { endringIRefusjon ->
-                        EndringIRefusjon(
-                            endringsdato =
-                                endringIRefusjon["endringsdato"].takeUnless { it.isMissingOrNull() }
-                                    ?.asText(),
-                            beloep = endringIRefusjon["beloep"].takeUnless { it.isMissingOrNull() }?.asDouble(),
-                        )
-                    },
-            opphoerAvNaturalytelser =
-                this.path("opphoerAvNaturalytelser").takeUnless { it.isMissingOrNull() }
-                    ?.map { opphørAvNaturalytelse ->
-                        OpphoerAvNaturalytelse(
-                            opphørAvNaturalytelse["naturalytelse"].takeUnless { it.isMissingOrNull() }
-                                ?.asText()?.tilNaturalytelse(),
-                            fom = opphørAvNaturalytelse["fom"].takeUnless { it.isMissingOrNull() }?.asText(),
-                            beloepPrMnd =
-                                opphørAvNaturalytelse["beloepPrMnd"].takeUnless { it.isMissingOrNull() }
-                                    ?.asDouble(),
-                        )
-                    },
-            gjenopptakelseNaturalytelser =
-                this.path("gjenopptakelseNaturalytelser").takeUnless { it.isMissingOrNull() }
-                    ?.map { gjenopptakelseNaturalytelse ->
-                        GjenopptakelseNaturalytelse(
-                            gjenopptakelseNaturalytelse["naturalytelse"].takeUnless { it.isMissingOrNull() }
-                                ?.asText()?.tilNaturalytelse(),
-                            fom = gjenopptakelseNaturalytelse["fom"].takeUnless { it.isMissingOrNull() }?.asText(),
-                            beloepPrMnd =
-                                gjenopptakelseNaturalytelse["beloepPrMnd"].takeUnless { it.isMissingOrNull() }
-                                    ?.asDouble(),
-                        )
-                    },
-            arbeidsgiverperioder =
-                this.path("arbeidsgiverperioder").takeUnless { it.isMissingOrNull() }
-                    ?.map { arbeidsgiverperiode ->
-                        IMPeriode(
-                            fom = arbeidsgiverperiode["fom"].takeUnless { it.isMissingOrNull() }?.asText(),
-                            tom = arbeidsgiverperiode["tom"].takeUnless { it.isMissingOrNull() }?.asText(),
-                        )
-                    },
-            ferieperioder =
-                this.path("ferieperioder").takeUnless { it.isMissingOrNull() }?.map { ferieperiode ->
-                    IMPeriode(
-                        fom = ferieperiode["fom"].takeUnless { it.isMissingOrNull() }?.asText(),
-                        tom = ferieperiode["tom"].takeUnless { it.isMissingOrNull() }?.asText(),
+            this.path("endringIRefusjoner").takeUnless { it.isMissingOrNull() }
+                ?.map { endringIRefusjon ->
+                    EndringIRefusjon(
+                        endringsdato =
+                        endringIRefusjon["endringsdato"].takeUnless { it.isMissingOrNull() }?.asLocalDate(),
+                        beloep = endringIRefusjon["beloep"].takeUnless { it.isMissingOrNull() }?.asDouble(),
                     )
                 },
-            foersteFravaersdag = this.path("foersteFravaersdag").takeUnless { it.isMissingOrNull() }?.asText(),
+            opphoerAvNaturalytelser =
+            this.path("opphoerAvNaturalytelser").takeUnless { it.isMissingOrNull() }
+                ?.map { opphørAvNaturalytelse ->
+                    OpphoerAvNaturalytelse(
+                        opphørAvNaturalytelse["naturalytelse"].takeUnless { it.isMissingOrNull() }
+                            ?.asText()?.tilNaturalytelse(),
+                        fom = opphørAvNaturalytelse["fom"].takeUnless { it.isMissingOrNull() }?.asLocalDate(),
+                        beloepPrMnd =
+                        opphørAvNaturalytelse["beloepPrMnd"].takeUnless { it.isMissingOrNull() }
+                            ?.asDouble(),
+                    )
+                },
+            gjenopptakelseNaturalytelser =
+            this.path("gjenopptakelseNaturalytelser").takeUnless { it.isMissingOrNull() }
+                ?.map { gjenopptakelseNaturalytelse ->
+                    GjenopptakelseNaturalytelse(
+                        gjenopptakelseNaturalytelse["naturalytelse"].takeUnless { it.isMissingOrNull() }
+                            ?.asText()?.tilNaturalytelse(),
+                        fom = gjenopptakelseNaturalytelse["fom"].takeUnless { it.isMissingOrNull() }?.asLocalDate(),
+                        beloepPrMnd =
+                        gjenopptakelseNaturalytelse["beloepPrMnd"].takeUnless { it.isMissingOrNull() }
+                            ?.asDouble(),
+                    )
+                },
+            arbeidsgiverperioder =
+            this.path("arbeidsgiverperioder").takeUnless { it.isMissingOrNull() }
+                ?.map { arbeidsgiverperiode ->
+                    IMPeriode(
+                        fom = arbeidsgiverperiode["fom"].takeUnless { it.isMissingOrNull() }?.asLocalDate(),
+                        tom = arbeidsgiverperiode["tom"].takeUnless { it.isMissingOrNull() }?.asLocalDate(),
+                    )
+                },
+            ferieperioder =
+            this.path("ferieperioder").takeUnless { it.isMissingOrNull() }?.map { ferieperiode ->
+                IMPeriode(
+                    fom = ferieperiode["fom"].takeUnless { it.isMissingOrNull() }?.asLocalDate(),
+                    tom = ferieperiode["tom"].takeUnless { it.isMissingOrNull() }?.asLocalDate(),
+                )
+            },
+            foersteFravaersdag = this.path("foersteFravaersdag").takeUnless { it.isMissingOrNull() }?.asLocalDate(),
             naerRelasjon = this.path("naerRelasjon").takeUnless { it.isMissingOrNull() }?.asBoolean(),
             innsenderFulltNavn = this.path("innsenderFulltNavn").takeUnless { it.isMissingOrNull() }?.asText(),
             innsenderTelefon = this.path("innsenderTelefon").takeUnless { it.isMissingOrNull() }?.asText(),
             inntektEndringAarsak =
-                this.path("inntektEndringAarsak").takeUnless { it.isMissingOrNull() }?.let { endringAarsak ->
-                    InntektEndringAarsak(
-                        aarsak = endringAarsak["aarsak"].asText(),
-                        perioder =
-                            endringAarsak["perioder"].takeUnless { it.isMissingOrNull() }?.map { periode ->
-                                IMPeriode(
-                                    fom = periode["fom"].takeUnless { it.isMissingOrNull() }?.asText(),
-                                    tom = periode["tom"].takeUnless { it.isMissingOrNull() }?.asText(),
-                                )
-                            },
-                        gjelderFra = endringAarsak["gjelderFra"].takeUnless { it.isMissingOrNull() }?.asText(),
-                        bleKjent = endringAarsak["bleKjent"].takeUnless { it.isMissingOrNull() }?.asText(),
-                    )
-                },
+            this.path("inntektEndringAarsak").takeUnless { it.isMissingOrNull() }?.let { endringAarsak ->
+                InntektEndringAarsak(
+                    aarsak = endringAarsak["aarsak"].asText(),
+                    perioder =
+                    endringAarsak["perioder"].takeUnless { it.isMissingOrNull() }?.map { periode ->
+                        IMPeriode(
+                            fom = periode["fom"].takeUnless { it.isMissingOrNull() }?.asLocalDate(),
+                            tom = periode["tom"].takeUnless { it.isMissingOrNull() }?.asLocalDate(),
+                        )
+                    },
+                    gjelderFra = endringAarsak["gjelderFra"].takeUnless { it.isMissingOrNull() }?.asLocalDate(),
+                    bleKjent = endringAarsak["bleKjent"].takeUnless { it.isMissingOrNull() }?.asLocalDate(),
+                )
+            },
             avsenderSystem =
-                this.path("avsenderSystem").takeUnless { it.isMissingOrNull() }?.let { avsenderSystem ->
-                    AvsenderSystem(
-                        navn = avsenderSystem["navn"].takeUnless { it.isMissingOrNull() }?.asText(),
-                        versjon = avsenderSystem["versjon"].takeUnless { it.isMissingOrNull() }?.asText(),
-                    )
-                },
+            this.path("avsenderSystem").takeUnless { it.isMissingOrNull() }?.let { avsenderSystem ->
+                AvsenderSystem(
+                    navn = avsenderSystem["navn"].takeUnless { it.isMissingOrNull() }?.asText(),
+                    versjon = avsenderSystem["versjon"].takeUnless { it.isMissingOrNull() }?.asText(),
+                )
+            },
         )
     }
 
@@ -245,10 +248,10 @@ class DokumentQuery(
 
     private fun JsonNode.tilSøknad(): Soknad {
         val type = this.path("type").takeUnless { it.isMissingOrNull() }?.asText()?.tilSoknadstype()
-        val arbeidGjenopptatt = this.path("arbeidGjenopptatt").takeUnless { it.isMissingOrNull() }?.asText()
+        val arbeidGjenopptatt = this.path("arbeidGjenopptatt").takeUnless { it.isMissingOrNull() }?.asLocalDate()
         val sykmeldingSkrevet = this.path("sykmeldingSkrevet").takeUnless { it.isMissingOrNull() }?.asLocalDateTime()
         val egenmeldingsdagerFraSykmelding =
-            this.path("egenmeldingsdagerFraSykmelding").takeUnless { it.isMissingOrNull() }?.map { it.asText() }
+            this.path("egenmeldingsdagerFraSykmelding").takeUnless { it.isMissingOrNull() }?.map { it.asLocalDate() }
         val soknadsperioder =
             this.path("soknadsperioder").takeUnless { it.isMissingOrNull() }?.map { it.tilSøknadsperioder() }
         val sporsmal =
@@ -286,8 +289,8 @@ class DokumentQuery(
 
     private fun JsonNode.tilSøknadsperioder(): Soknadsperioder {
         return Soknadsperioder(
-            fom = this.path("fom").asText(),
-            tom = this.path("tom").asText(),
+            fom = this.path("fom").asLocalDate(),
+            tom = this.path("tom").asLocalDate(),
             grad = this.path("grad").takeUnless { it.isMissingOrNull() }?.asInt(),
             sykmeldingsgrad = this.path("sykmeldingsgrad").takeUnless { it.isMissingOrNull() }?.asInt(),
             faktiskGrad = this.path("faktiskGrad").takeUnless { it.isMissingOrNull() }?.asInt(),

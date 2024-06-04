@@ -26,7 +26,7 @@ internal class OverstyringMutationTest : AbstractOverstyringApiTest() {
                     AKTØRID,
                     "En begrunnelse",
                     listOf(
-                        OverstyringDag(10.januar.toString(), "Feriedag", "Sykedag", null, 100, null),
+                        OverstyringDag(10.januar, "Feriedag", "Sykedag", null, 100, null),
                     ),
                 ),
             )
@@ -44,7 +44,7 @@ internal class OverstyringMutationTest : AbstractOverstyringApiTest() {
                     AKTØRID,
                     "En begrunnelse",
                     listOf(
-                        OverstyringDag(10.januar.toString(), "Arbeidsdag", "Sykedag", null, 100, null),
+                        OverstyringDag(10.januar, "Arbeidsdag", "Sykedag", null, 100, null),
                     ),
                 ),
             )
@@ -62,7 +62,7 @@ internal class OverstyringMutationTest : AbstractOverstyringApiTest() {
                     AKTØRID,
                     "En begrunnelse",
                     listOf(
-                        OverstyringDag(10.januar.toString(), "Sykedag", "Arbeidsdag", null, 100, null),
+                        OverstyringDag(10.januar, "Sykedag", "Arbeidsdag", null, 100, null),
                     ),
                 ),
             )
@@ -76,7 +76,7 @@ internal class OverstyringMutationTest : AbstractOverstyringApiTest() {
                 ArbeidsforholdOverstyringHandling(
                     FØDSELSNUMMER,
                     AKTØRID,
-                    10.januar.toString(),
+                    10.januar,
                     listOf(
                         OverstyringArbeidsforhold(ORGANISASJONSNUMMER_GHOST, true, "En begrunnelse", "En forklaring", null),
                     ),
@@ -93,19 +93,19 @@ internal class OverstyringMutationTest : AbstractOverstyringApiTest() {
                 InntektOgRefusjonOverstyring(
                     AKTØRID,
                     FØDSELSNUMMER,
-                    10.januar.toString(),
+                    9.januar,
                     listOf(
                         OverstyringArbeidsgiver(
                             ORGANISASJONSNUMMER_GHOST,
                             24000.0,
                             25000.0,
                             listOf(
-                                OverstyringRefusjonselement(10.januar.toString(), 31.januar.toString(), 24000.0),
-                                OverstyringRefusjonselement(1.februar.toString(), null, 24000.0),
+                                OverstyringRefusjonselement(10.januar, 31.januar, 24000.0),
+                                OverstyringRefusjonselement(1.februar, null, 24000.0),
                             ),
                             listOf(
-                                OverstyringRefusjonselement(10.januar.toString(), 31.januar.toString(), 25000.0),
-                                OverstyringRefusjonselement(1.februar.toString(), null, 25000.0),
+                                OverstyringRefusjonselement(10.januar, 31.januar, 25000.0),
+                                OverstyringRefusjonselement(1.februar, null, 25000.0),
                             ),
                             "En begrunnelse",
                             "En forklaring",

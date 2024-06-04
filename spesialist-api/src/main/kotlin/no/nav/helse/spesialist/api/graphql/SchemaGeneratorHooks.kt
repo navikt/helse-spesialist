@@ -8,6 +8,7 @@ import graphql.language.Value
 import graphql.schema.Coercing
 import graphql.schema.GraphQLScalarType
 import graphql.schema.GraphQLType
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Locale
 import java.util.UUID
@@ -23,6 +24,7 @@ internal val schemaGeneratorHooks =
             when (type.classifier as? KClass<*>) {
                 UUID::class -> graphQLUUID
                 LocalDateTime::class -> graphQLLocalDateTime
+                LocalDate::class -> graphQLLocalDate
                 else -> null
             }
     }
@@ -32,6 +34,13 @@ private val graphQLLocalDateTime: GraphQLScalarType =
         .name(LocalDateTime::class.simpleName)
         .description(LocalDateTime::class.toString())
         .coercing(LocalDateTimeCoercing)
+        .build()
+
+private val graphQLLocalDate: GraphQLScalarType =
+    GraphQLScalarType.newScalar()
+        .name(LocalDate::class.simpleName)
+        .description(LocalDate::class.toString())
+        .coercing(LocalDateCoercing)
         .build()
 
 private val graphQLUUID: GraphQLScalarType =
@@ -89,4 +98,28 @@ private object LocalDateTimeCoercing : Coercing<LocalDateTime, String> {
         graphQLContext: GraphQLContext,
         locale: Locale,
     ): LocalDateTime = LocalDateTime.parse(serialize(input, graphQLContext, locale))
+}
+private object LocalDateCoercing : Coercing<LocalDate, String> {
+    override fun serialize(
+        dataFetcherResult: Any,
+        graphQLContext: GraphQLContext,
+        locale: Locale,
+    ) = dataFetcherResult.toString()
+
+    override fun parseValue(
+        input: Any,
+        graphQLContext: GraphQLContext,
+        locale: Locale,
+    ): LocalDate = LocalDate.parse(serialize(input, graphQLContext, locale))
+
+    override fun parseLiteral(
+        input: Value<*>,
+        variables: CoercedVariables,
+        graphQLContext: GraphQLContext,
+        locale: Locale,
+    ): LocalDate {
+        val s = serialize(input, graphQLContext, locale)
+        val d = LocalDate.parse(s)
+        return d
+    }
 }

@@ -14,7 +14,7 @@ internal class PåVentApiDaoTest : DatabaseIntegrationTest() {
         opprettPåVent(vedtaksperiodeId)
         val påvent = påVentApiDao.hentAktivPåVent(vedtaksperiodeId)
         assertNotNull(påvent)
-        assertEquals(LocalDate.now().plusDays(21).toString(), påvent?.frist)
+        assertEquals(LocalDate.now().plusDays(21), påvent?.frist)
         assertEquals("En begrunnelse", påvent?.begrunnelse)
         assertEquals(SAKSBEHANDLER.oid, påvent?.oid)
     }

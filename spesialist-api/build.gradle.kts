@@ -29,11 +29,16 @@ graphql {
         // Ved å sette opp UUID her vil koden som genereres for spleis-typene bruke UUID
         customScalars =
             listOf(
-                GraphQLScalar("UUID", "java.util.UUID", "no.nav.helse.spesialist.api.graphql.schema.UUIDScalarConverter"),
+                GraphQLScalar("UUID", "java.util.UUID", "no.nav.helse.spesialist.api.graphql.schema.converter.UUIDScalarConverter"),
                 GraphQLScalar(
                     "LocalDateTime",
                     "java.time.LocalDateTime",
-                    "no.nav.helse.spesialist.api.graphql.schema.LocalDateTimeScalarConverter",
+                    "no.nav.helse.spesialist.api.graphql.schema.converter.LocalDateTimeScalarConverter",
+                ),
+                GraphQLScalar(
+                    "LocalDate",
+                    "java.time.LocalDate",
+                    "no.nav.helse.spesialist.api.graphql.schema.converter.LocalDateScalarConverter",
                 ),
             )
         queryFileDirectory = graphqlDir

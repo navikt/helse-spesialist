@@ -21,7 +21,6 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSyke
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi.SkjønnsfastsettingstypeDto.RAPPORTERT_ÅRSINNTEKT
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 
 class SkjonnsfastsettelseMutation(private val saksbehandlerhåndterer: Saksbehandlerhåndterer) : Mutation {
     private companion object {
@@ -40,7 +39,7 @@ class SkjonnsfastsettelseMutation(private val saksbehandlerhåndterer: Saksbehan
                     SkjønnsfastsettSykepengegrunnlagHandlingFraApi(
                         skjonnsfastsettelse.aktorId,
                         skjonnsfastsettelse.fodselsnummer,
-                        LocalDate.parse(skjonnsfastsettelse.skjaringstidspunkt),
+                        skjonnsfastsettelse.skjaringstidspunkt,
                         skjonnsfastsettelse.arbeidsgivere.map { arbeidsgiver ->
                             SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi(
                                 arbeidsgiver.organisasjonsnummer,

@@ -1,9 +1,11 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
+import java.time.LocalDate
+
 data class Skjonnsfastsettelse(
     val aktorId: String,
     val fodselsnummer: String,
-    val skjaringstidspunkt: DateString,
+    val skjaringstidspunkt: LocalDate,
     val arbeidsgivere: List<SkjonnsfastsettelseArbeidsgiver>,
     val vedtaksperiodeId: String,
 )

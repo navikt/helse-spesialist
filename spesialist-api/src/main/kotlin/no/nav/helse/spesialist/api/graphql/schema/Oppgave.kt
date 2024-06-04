@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -95,7 +96,7 @@ data class OppgaveTilBehandling(
     val id: String,
     val opprettet: LocalDateTime,
     val opprinneligSoknadsdato: LocalDateTime,
-    val tidsfrist: DateString?,
+    val tidsfrist: LocalDate?,
     val vedtaksperiodeId: UUID,
     val navn: Personnavn,
     val aktorId: String,

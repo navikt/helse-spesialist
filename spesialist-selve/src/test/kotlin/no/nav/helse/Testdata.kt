@@ -70,8 +70,8 @@ object Testdata {
                                                             vedtaksperiodeId = vedtaksperiodeId,
                                                             utbetaling = utbetaling,
                                                             erForkastet = false,
-                                                            fom = "2020-01-01",
-                                                            tom = "2020-01-31",
+                                                            fom = 1.januar(2020),
+                                                            tom = 31.januar(2020),
                                                             inntektstype = GraphQLInntektstype.ENARBEIDSGIVER,
                                                             opprettet = 31.januar(2020).atStartOfDay(),
                                                             periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
@@ -80,7 +80,7 @@ object Testdata {
                                                             forbrukteSykedager = null,
                                                             gjenstaendeSykedager = null,
                                                             hendelser = emptyList(),
-                                                            maksdato = "2021-01-01",
+                                                            maksdato = 1.januar(2021),
                                                             periodevilkar =
                                                                 GraphQLPeriodevilkar(
                                                                     alder =
@@ -92,12 +92,12 @@ object Testdata {
                                                                         Sykepengedager(
                                                                             forbrukteSykedager = null,
                                                                             gjenstaendeSykedager = null,
-                                                                            maksdato = "2021-01-01",
-                                                                            skjaeringstidspunkt = "2020-01-01",
+                                                                            maksdato = 1.januar(2021),
+                                                                            skjaeringstidspunkt = 1.januar(2020),
                                                                             oppfylt = true,
                                                                         ),
                                                                 ),
-                                                            skjaeringstidspunkt = "2020-01-01",
+                                                            skjaeringstidspunkt = 1.januar(2020),
                                                             vilkarsgrunnlagId = null,
                                                             periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING,
                                                         ),

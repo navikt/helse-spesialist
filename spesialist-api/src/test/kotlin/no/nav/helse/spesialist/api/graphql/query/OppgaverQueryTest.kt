@@ -215,7 +215,7 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
             id = UUID.randomUUID().toString(),
             opprettet = LocalDateTime.now(),
             opprinneligSoknadsdato = LocalDateTime.now(),
-            tidsfrist = LocalDate.now().toString(),
+            tidsfrist = LocalDate.now(),
             vedtaksperiodeId = UUID.randomUUID(),
             navn =
                 Personnavn(

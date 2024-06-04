@@ -78,7 +78,6 @@ import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
 import no.nav.helse.spesialist.api.websockets.webSocketsApi
-import no.nav.helse.spleis.graphql.LocalDate
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetype
@@ -98,6 +97,7 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSimuleringsutbetaling
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetaling
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLVurdering
 import no.nav.helse.spleis.graphql.hentsnapshot.Sykepengedager
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -172,7 +172,7 @@ fun main() =
                 )
             every { påVentApiDao.hentAktivPåVent(any()) } returns
                 PaVent(
-                    frist = LocalDate(),
+                    frist = LocalDate.now(),
                     begrunnelse = null,
                     oid = UUID.randomUUID(),
                 )
@@ -476,7 +476,7 @@ private fun enPersoninfo() =
         fornavn = "Luke",
         mellomnavn = null,
         etternavn = "Skywalker",
-        fodselsdato = "2000-01-01",
+        fodselsdato = LocalDate.parse("2000-01-01"),
         kjonn = Kjonn.Kvinne,
         adressebeskyttelse = Adressebeskyttelse.Ugradert,
         reservasjon = null, // Denne hentes runtime ved hjelp av et kall til KRR
@@ -486,8 +486,8 @@ private fun enPersoninfo() =
 private fun enPeriode() =
     GraphQLBeregnetPeriode(
         erForkastet = false,
-        fom = "2020-01-01",
-        tom = "2020-01-31",
+        fom = LocalDate.parse("2020-01-01"),
+        tom = LocalDate.parse("2020-01-31"),
         inntektstype = GraphQLInntektstype.ENARBEIDSGIVER,
         opprettet = LocalDateTime.now(),
         periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
@@ -497,7 +497,7 @@ private fun enPeriode() =
         forbrukteSykedager = 10,
         gjenstaendeSykedager = 270,
         hendelser = emptyList(),
-        maksdato = "2021-01-01",
+        maksdato = LocalDate.parse("2021-01-01"),
         periodevilkar =
             GraphQLPeriodevilkar(
                 Alder(
@@ -508,12 +508,12 @@ private fun enPeriode() =
                     Sykepengedager(
                         forbrukteSykedager = 10,
                         gjenstaendeSykedager = 270,
-                        maksdato = "2021-01-01",
+                        maksdato = LocalDate.parse("2021-01-01"),
                         oppfylt = true,
-                        skjaeringstidspunkt = "2020-01-01",
+                        skjaeringstidspunkt = LocalDate.parse("2020-01-01"),
                     ),
             ),
-        skjaeringstidspunkt = "2020-01-01",
+        skjaeringstidspunkt = LocalDate.parse("2020-01-01"),
         utbetaling =
             GraphQLUtbetaling(
                 id = UUID.randomUUID(),
@@ -548,22 +548,22 @@ private fun enPeriode() =
                                 perioder =
                                     listOf(
                                         GraphQLSimuleringsperiode(
-                                            fom = "2020-01-01",
-                                            tom = "2020-01-31",
+                                            fom = LocalDate.parse("2020-01-01"),
+                                            tom = LocalDate.parse("2020-01-31"),
                                             utbetalinger =
                                                 listOf(
                                                     GraphQLSimuleringsutbetaling(
                                                         utbetalesTilNavn = "EN-PERSON",
                                                         utbetalesTilId = "EN-PERSONID",
                                                         feilkonto = false,
-                                                        forfall = "2022-01-01",
+                                                        forfall = LocalDate.parse("2022-01-01"),
                                                         detaljer =
                                                             listOf(
                                                                 GraphQLSimuleringsdetaljer(
                                                                     belop = 30000,
                                                                     antallSats = 1,
-                                                                    faktiskFom = "2020-01-01",
-                                                                    faktiskTom = "2020-01-31",
+                                                                    faktiskFom = LocalDate.parse("2020-01-01"),
+                                                                    faktiskTom = LocalDate.parse("2020-01-31"),
                                                                     klassekode = "EN-KLASSEKODE",
                                                                     klassekodeBeskrivelse = "EN-KLASSEKODEBESKRIVELSE",
                                                                     konto = "EN-KONTO",

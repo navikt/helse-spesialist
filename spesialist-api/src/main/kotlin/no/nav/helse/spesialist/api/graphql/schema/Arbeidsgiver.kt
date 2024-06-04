@@ -22,15 +22,15 @@ import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGenerasjon
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUberegnetPeriode
+import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 data class Arbeidsforhold(
     val stillingstittel: String,
     val stillingsprosent: Int,
-    val startdato: DateString,
-    val sluttdato: DateString?,
+    val startdato: LocalDate,
+    val sluttdato: LocalDate?,
 )
 
 data class Generasjon(
@@ -59,7 +59,7 @@ data class Dagoverstyring(
     val begrunnelse: String,
 ) : Overstyring {
     data class OverstyrtDag(
-        val dato: DateString,
+        val dato: LocalDate,
         val type: Dagtype,
         val fraType: Dagtype?,
         val grad: Int?,
@@ -79,14 +79,14 @@ data class Inntektoverstyring(
         val begrunnelse: String,
         val manedligInntekt: Double,
         val fraManedligInntekt: Double?,
-        val skjaeringstidspunkt: DateString,
+        val skjaeringstidspunkt: LocalDate,
         val refusjonsopplysninger: List<Refusjonsopplysning>?,
         val fraRefusjonsopplysninger: List<Refusjonsopplysning>?,
     )
 
     data class Refusjonsopplysning(
-        val fom: DateString,
-        val tom: DateString?,
+        val fom: LocalDate,
+        val tom: LocalDate?,
         val belop: Double,
     )
 }
@@ -107,7 +107,7 @@ data class Sykepengegrunnlagskjonnsfastsetting(
         val begrunnelseKonklusjon: String?,
         val arlig: Double,
         val fraArlig: Double?,
-        val skjaeringstidspunkt: DateString,
+        val skjaeringstidspunkt: LocalDate,
     )
 }
 
@@ -117,20 +117,20 @@ data class Arbeidsforholdoverstyring(
     override val saksbehandler: Saksbehandler,
     override val ferdigstilt: Boolean,
     val deaktivert: Boolean,
-    val skjaeringstidspunkt: DateString,
+    val skjaeringstidspunkt: LocalDate,
     val forklaring: String,
     val begrunnelse: String,
 ) : Overstyring
 
 data class GhostPeriode(
-    val fom: DateString,
-    val tom: DateString,
-    val skjaeringstidspunkt: DateString,
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val skjaeringstidspunkt: LocalDate,
     val vilkarsgrunnlagId: UUID?,
     val deaktivert: Boolean,
     val organisasjonsnummer: String,
 ) {
-    val id = UUID.nameUUIDFromBytes(fom.toByteArray() + organisasjonsnummer.toByteArray()).toString()
+    val id = UUID.nameUUIDFromBytes(fom.toString().toByteArray() + organisasjonsnummer.toByteArray()).toString()
 }
 
 data class Arbeidsgiver(
@@ -209,8 +209,8 @@ data class Arbeidsgiver(
             Arbeidsforhold(
                 stillingstittel = it.stillingstittel,
                 stillingsprosent = it.stillingsprosent,
-                startdato = it.startdato.format(DateTimeFormatter.ISO_DATE),
-                sluttdato = it.sluttdato?.format(DateTimeFormatter.ISO_DATE),
+                startdato = it.startdato,
+                sluttdato = it.sluttdato,
             )
         }
 
@@ -234,7 +234,7 @@ private fun OverstyringTidslinjeDto.tilDagoverstyring() =
         dager =
             overstyrteDager.map { dag ->
                 Dagoverstyring.OverstyrtDag(
-                    dato = dag.dato.format(DateTimeFormatter.ISO_DATE),
+                    dato = dag.dato,
                     type = dag.type,
                     fraType = dag.fraType,
                     grad = dag.grad,
@@ -259,20 +259,20 @@ private fun OverstyringInntektDto.tilInntektoverstyring() =
                 begrunnelse = begrunnelse,
                 manedligInntekt = månedligInntekt,
                 fraManedligInntekt = fraMånedligInntekt,
-                skjaeringstidspunkt = skjæringstidspunkt.format(DateTimeFormatter.ISO_DATE),
+                skjaeringstidspunkt = skjæringstidspunkt,
                 refusjonsopplysninger =
                     refusjonsopplysninger?.map {
                         Inntektoverstyring.Refusjonsopplysning(
-                            fom = it.fom.toString(),
-                            tom = it.tom?.toString(),
+                            fom = it.fom,
+                            tom = it.tom,
                             belop = it.beløp,
                         )
                     } ?: emptyList(),
                 fraRefusjonsopplysninger =
                     fraRefusjonsopplysninger?.map {
                         Inntektoverstyring.Refusjonsopplysning(
-                            fom = it.fom.toString(),
-                            tom = it.tom?.toString(),
+                            fom = it.fom,
+                            tom = it.tom,
                             belop = it.beløp,
                         )
                     } ?: emptyList(),
@@ -291,7 +291,7 @@ private fun OverstyringArbeidsforholdDto.tilArbeidsforholdoverstyring() =
                 ident = saksbehandlerIdent,
             ),
         deaktivert = deaktivert,
-        skjaeringstidspunkt = skjæringstidspunkt.format(DateTimeFormatter.ISO_DATE),
+        skjaeringstidspunkt = skjæringstidspunkt,
         forklaring = forklaring,
         ferdigstilt = ferdigstilt,
     )
@@ -315,7 +315,7 @@ private fun SkjønnsfastsettingSykepengegrunnlagDto.tilSykepengegrunnlagSkjønns
                 begrunnelseKonklusjon = begrunnelseKonklusjon,
                 arlig = årlig,
                 fraArlig = fraÅrlig,
-                skjaeringstidspunkt = skjæringstidspunkt.format(DateTimeFormatter.ISO_DATE),
+                skjaeringstidspunkt = skjæringstidspunkt,
             ),
         ferdigstilt = ferdigstilt,
     )
