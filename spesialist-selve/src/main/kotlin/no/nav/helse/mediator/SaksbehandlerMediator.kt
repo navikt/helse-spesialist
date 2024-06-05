@@ -51,6 +51,10 @@ import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandl
 import no.nav.helse.spesialist.api.graphql.schema.Avslag
 import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
+import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse
+import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.ANNET
+import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.OMREGNET_ARSINNTEKT
+import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.RAPPORTERT_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
@@ -60,8 +64,6 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernPåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OpphevStans
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi.SkjønnsfastsettingstypeDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
@@ -346,7 +348,7 @@ internal class SaksbehandlerMediator(
             is ArbeidsforholdOverstyringHandling -> this.tilModellversjon()
             is InntektOgRefusjonOverstyring -> this.tilModellversjon()
             is TidslinjeOverstyring -> this.tilModellversjon()
-            is SkjønnsfastsettSykepengegrunnlagHandlingFraApi -> this.tilModellversjon()
+            is Skjonnsfastsettelse -> this.tilModellversjon()
             is AnnulleringHandlingFraApi -> this.tilModellversjon()
             is TildelOppgave -> this.tilModellversjon()
             is AvmeldOppgave -> this.tilModellversjon()
@@ -375,6 +377,34 @@ internal class SaksbehandlerMediator(
                             },
                     )
                 },
+        )
+    }
+
+    private fun Skjonnsfastsettelse.tilModellversjon(): SkjønnsfastsattSykepengegrunnlag {
+        return SkjønnsfastsattSykepengegrunnlag(
+            aktørId = aktorId,
+            fødselsnummer = fodselsnummer,
+            skjæringstidspunkt = skjaringstidspunkt,
+            arbeidsgivere = arbeidsgivere.map { ag ->
+                SkjønnsfastsattArbeidsgiver(
+                    organisasjonsnummer = ag.organisasjonsnummer,
+                    årlig = ag.arlig,
+                    fraÅrlig = ag.fraArlig,
+                    årsak = ag.arsak,
+                    type = when (ag.type) {
+                        OMREGNET_ARSINNTEKT -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT
+                        RAPPORTERT_ARSINNTEKT -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT
+                        ANNET -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.ANNET
+                    },
+                    begrunnelseMal = ag.begrunnelseMal,
+                    begrunnelseFritekst = ag.begrunnelseFritekst,
+                    begrunnelseKonklusjon = ag.begrunnelseKonklusjon,
+                    lovhjemmel = ag.lovhjemmel?.let {
+                        Lovhjemmel(it.paragraf, it.ledd, it.bokstav, it.lovverk, it.lovverksversjon)
+                    },
+                    initierendeVedtaksperiodeId = ag.initierendeVedtaksperiodeId
+                )
+            }
         )
     }
 
@@ -433,43 +463,6 @@ internal class SaksbehandlerMediator(
                     )
                 },
             begrunnelse = begrunnelse,
-        )
-    }
-
-    private fun SkjønnsfastsettSykepengegrunnlagHandlingFraApi.tilModellversjon(): SkjønnsfastsattSykepengegrunnlag {
-        return SkjønnsfastsattSykepengegrunnlag(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            skjæringstidspunkt = skjæringstidspunkt,
-            arbeidsgivere =
-                arbeidsgivere.map {
-                    SkjønnsfastsattArbeidsgiver(
-                        it.organisasjonsnummer,
-                        it.årlig,
-                        it.fraÅrlig,
-                        it.årsak,
-                        type =
-                            when (it.type) {
-                                SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT
-                                SkjønnsfastsettingstypeDto.RAPPORTERT_ÅRSINNTEKT -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT
-                                SkjønnsfastsettingstypeDto.ANNET -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.ANNET
-                            },
-                        begrunnelseMal = it.begrunnelseMal,
-                        begrunnelseFritekst = it.begrunnelseFritekst,
-                        begrunnelseKonklusjon = it.begrunnelseKonklusjon,
-                        lovhjemmel =
-                            it.lovhjemmel?.let { lovhjemmel ->
-                                Lovhjemmel(
-                                    paragraf = lovhjemmel.paragraf,
-                                    ledd = lovhjemmel.ledd,
-                                    bokstav = lovhjemmel.bokstav,
-                                    lovverk = lovhjemmel.lovverk,
-                                    lovverksversjon = lovhjemmel.lovverksversjon,
-                                )
-                            },
-                        initierendeVedtaksperiodeId = it.initierendeVedtaksperiodeId,
-                    )
-                },
         )
     }
 

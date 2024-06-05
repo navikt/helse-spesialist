@@ -26,6 +26,7 @@ import no.nav.helse.spesialist.api.graphql.schema.Lovhjemmel
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringDag
+import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse
 import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
@@ -33,10 +34,7 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandlingF
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernPåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LeggPåVent
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OpphevStans
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi.SkjønnsfastsettingstypeDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import no.nav.helse.spesialist.test.lagAktørId
@@ -653,37 +651,38 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     fun `håndterer skjønnsfastsetting av sykepengegrunnlag`() {
         nyPerson(fødselsnummer = FØDSELSNUMMER, organisasjonsnummer = ORGANISASJONSNUMMER, aktørId = AKTØR_ID)
         val skjønnsfastsetting =
-            SkjønnsfastsettSykepengegrunnlagHandlingFraApi(
-                fødselsnummer = FØDSELSNUMMER,
-                aktørId = AKTØR_ID,
-                skjæringstidspunkt = 1.januar,
+            Skjonnsfastsettelse(
+                fodselsnummer = FØDSELSNUMMER,
+                aktorId = AKTØR_ID,
+                skjaringstidspunkt = 1.januar,
                 arbeidsgivere =
                     listOf(
-                        SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi(
+                        Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver(
                             organisasjonsnummer = ORGANISASJONSNUMMER,
-                            årlig = 25000.0,
-                            fraÅrlig = 25001.0,
-                            lovhjemmel = LovhjemmelFraApi("8-28", "3", null, "folketrygdloven", "1970-01-01"),
-                            årsak = "En årsak",
-                            type = SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT,
+                            arlig = 25000.0,
+                            fraArlig = 25001.0,
+                            lovhjemmel = Lovhjemmel("8-28", "3", null, "folketrygdloven", "1970-01-01"),
+                            arsak = "En årsak",
+                            type = Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.OMREGNET_ARSINNTEKT,
                             begrunnelseMal = "En begrunnelsemal",
                             begrunnelseFritekst = "begrunnelsefritekst",
                             begrunnelseKonklusjon = "begrunnelseKonklusjon",
                             initierendeVedtaksperiodeId = PERIODE.id.toString(),
                         ),
-                        SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi(
+                        Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver(
                             organisasjonsnummer = ORGANISASJONSNUMMER_GHOST,
-                            årlig = 21000.0,
-                            fraÅrlig = 25001.0,
-                            lovhjemmel = LovhjemmelFraApi("8-28", "3", null, "folketrygdloven", "1970-01-01"),
-                            årsak = "En årsak 2",
-                            type = SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT,
+                            arlig = 21000.0,
+                            fraArlig = 25001.0,
+                            lovhjemmel = Lovhjemmel("8-28", "3", null, "folketrygdloven", "1970-01-01"),
+                            arsak = "En årsak 2",
+                            type = Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.OMREGNET_ARSINNTEKT,
                             begrunnelseMal = "En begrunnelsemal",
                             begrunnelseFritekst = "begrunnelsefritekst",
                             begrunnelseKonklusjon = "begrunnelseKonklusjon",
                             initierendeVedtaksperiodeId = UUID.randomUUID().toString(),
                         ),
                     ),
+                vedtaksperiodeId = PERIODE.id.toString(),
             )
 
         mediator.håndter(skjønnsfastsetting, saksbehandler)

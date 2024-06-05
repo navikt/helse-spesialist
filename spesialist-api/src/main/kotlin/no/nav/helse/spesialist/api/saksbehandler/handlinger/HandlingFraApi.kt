@@ -12,40 +12,6 @@ data class TildelOppgave(val oppgaveId: Long) : HandlingFraApi
 
 data class AvmeldOppgave(val oppgaveId: Long) : HandlingFraApi
 
-data class SkjønnsfastsettSykepengegrunnlagHandlingFraApi(
-    val aktørId: String,
-    val fødselsnummer: String,
-    val skjæringstidspunkt: LocalDate,
-    val arbeidsgivere: List<SkjønnsfastsattArbeidsgiverFraApi>,
-) : HandlingFraApi {
-    data class SkjønnsfastsattArbeidsgiverFraApi(
-        val organisasjonsnummer: String,
-        val årlig: Double,
-        val fraÅrlig: Double,
-        val årsak: String,
-        val type: SkjønnsfastsettingstypeDto,
-        val begrunnelseMal: String?,
-        val begrunnelseFritekst: String?,
-        val begrunnelseKonklusjon: String?,
-        val lovhjemmel: LovhjemmelFraApi?,
-        val initierendeVedtaksperiodeId: String?,
-    ) {
-        enum class SkjønnsfastsettingstypeDto {
-            OMREGNET_ÅRSINNTEKT,
-            RAPPORTERT_ÅRSINNTEKT,
-            ANNET,
-        }
-    }
-}
-
-data class LovhjemmelFraApi(
-    val paragraf: String,
-    val ledd: String? = null,
-    val bokstav: String? = null,
-    val lovverk: String,
-    val lovverksversjon: String,
-)
-
 @JsonIgnoreProperties
 data class AnnulleringHandlingFraApi(
     val aktørId: String,

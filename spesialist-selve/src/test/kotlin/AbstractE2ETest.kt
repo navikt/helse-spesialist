@@ -48,14 +48,13 @@ import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsgiver.OverstyringRefusjonselement
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringDag
+import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse
 import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.spleis.graphql.HentSnapshot
@@ -1044,19 +1043,19 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
         skjæringstidspunkt: LocalDate = 1.januar,
-        arbeidsgivere: List<SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi> =
+        arbeidsgivere: List<Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver> =
             listOf(
-                SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi(
+                Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver(
                     organisasjonsnummer = organisasjonsnummer,
-                    årlig = 1.0,
-                    fraÅrlig = 1.0,
-                    årsak = "årsak",
-                    type = SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi.SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT,
+                    arlig = 1.0,
+                    fraArlig = 1.0,
+                    arsak = "årsak",
+                    type = Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.OMREGNET_ARSINNTEKT,
                     begrunnelseMal = "begrunnelseMal",
                     begrunnelseKonklusjon = "begrunnelseKonklusjon",
                     begrunnelseFritekst = "begrunnelseFritekst",
                     lovhjemmel =
-                        LovhjemmelFraApi(
+                        Lovhjemmel(
                             paragraf = "paragraf",
                             ledd = "ledd",
                             bokstav = "bokstav",
@@ -1069,11 +1068,12 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     ) {
         håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "skjønnsmessig_fastsettelse") {
             val handling =
-                SkjønnsfastsettSykepengegrunnlagHandlingFraApi(
-                    aktørId = aktørId,
-                    fødselsnummer = fødselsnummer,
-                    skjæringstidspunkt = skjæringstidspunkt,
+                Skjonnsfastsettelse(
+                    aktorId = aktørId,
+                    fodselsnummer = fødselsnummer,
+                    skjaringstidspunkt = skjæringstidspunkt,
                     arbeidsgivere = arbeidsgivere,
+                    vedtaksperiodeId = vedtaksperiodeId.toString()
                 )
             testMediator.håndter(handling, saksbehandler)
             // Her må det gjøres kall til api for å sende inn skjønnsfastsettelse
