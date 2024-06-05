@@ -40,6 +40,11 @@ graphql {
                     "java.time.LocalDate",
                     "no.nav.helse.spesialist.api.graphql.schema.converter.LocalDateScalarConverter",
                 ),
+                GraphQLScalar(
+                    "YearMonth",
+                    "java.time.YearMonth",
+                    "no.nav.helse.spesialist.api.graphql.schema.converter.YearMonthScalarConverter",
+                ),
             )
         queryFileDirectory = graphqlDir
         packageName = "no.nav.helse.spleis.graphql"

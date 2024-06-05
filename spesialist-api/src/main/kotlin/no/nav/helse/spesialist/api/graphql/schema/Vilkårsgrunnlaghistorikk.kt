@@ -78,7 +78,7 @@ internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Av
                                     inntektFraAOrdningen =
                                         sammenligningsgrunnlagInntekt.inntekter.map { inntekt ->
                                             InntektFraAOrdningen(
-                                                maned = inntekt.årMåned.toString(),
+                                                maned = inntekt.årMåned,
                                                 sum = inntekt.beløp,
                                             )
                                         },

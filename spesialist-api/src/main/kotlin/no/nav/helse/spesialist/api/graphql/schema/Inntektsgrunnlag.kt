@@ -4,6 +4,7 @@ import no.nav.helse.spleis.graphql.enums.GraphQLInntektskilde
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntekterFraAOrdningen
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLOmregnetArsinntekt
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSkjonnsmessigFastsatt
+import java.time.YearMonth
 
 data class Arbeidsgiverinntekt(
     val arbeidsgiver: String,
@@ -26,7 +27,7 @@ data class OmregnetArsinntekt(
 )
 
 data class InntektFraAOrdningen(
-    val maned: YearMonthString,
+    val maned: YearMonth,
     val sum: Double,
 )
 

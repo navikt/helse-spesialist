@@ -64,7 +64,7 @@ class ArbeidsgiverApiDao(dataSource: DataSource) : HelseDao(dataSource) {
                                 ?.let { inntekter.copy(inntektsliste = it) }
                         }.map { inntekter ->
                             InntektFraAOrdningen(
-                                maned = inntekter.årMåned.toString(),
+                                maned = inntekter.årMåned,
                                 sum = inntekter.inntektsliste.sumOf { it.beløp },
                             )
                         },
