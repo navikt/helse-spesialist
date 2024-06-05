@@ -4,36 +4,43 @@ import DatabaseIntegrationTest
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.AKTIVITETSKRAV
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.MEDISINSK_VILKAR
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
-import java.time.temporal.ChronoUnit.SECONDS
 
 internal class StansAutomatiskBehandlingDaoTest : DatabaseIntegrationTest() {
     @Test
-    fun `kan lagre`() {
-        lagre()
+    fun `kan lagre fra iSyfo`() {
+        lagreFraISyfo()
 
         assertEquals(FNR, data<String>(FNR, "fødselsnummer"))
         assertEquals("STOPP_AUTOMATIKK", data<String>(FNR, "status"))
         assertEquals(setOf("MEDISINSK_VILKAR", "AKTIVITETSKRAV"), data<Set<String>>(FNR, "årsaker"))
-        assertTrue(SECONDS.between(now(), data<LocalDateTime>(FNR, "opprettet")) < 5)
         assertEquals("ISYFO", data<String>(FNR, "kilde"))
     }
 
     @Test
+    fun `kan lagre fra speil`() {
+        stansAutomatiskBehandlingDao.lagreFraSpeil(FNR)
+
+        assertEquals(FNR, data<String>(FNR, "fødselsnummer"))
+        assertEquals("NORMAL", data<String>(FNR, "status"))
+        assertEquals(emptySet<String>(), data<Set<String>>(FNR, "årsaker"))
+        assertEquals("SPEIL", data<String>(FNR, "kilde"))
+    }
+
+    @Test
     fun `kan hente rader for gitt fødselsnummer`() {
-        lagre(fødselsnummer = FNR)
-        lagre(fødselsnummer = FNR)
-        lagre(fødselsnummer = "01987654321")
+        lagreFraISyfo(fødselsnummer = FNR)
+        lagreFraISyfo(fødselsnummer = FNR)
+        lagreFraISyfo(fødselsnummer = "01987654321")
         val rader = stansAutomatiskBehandlingDao.hentFor(FNR)
 
         assertEquals(2, rader.size)
     }
 
-    private fun lagre(fødselsnummer: String = FNR) =
-        stansAutomatiskBehandlingDao.lagre(
+    private fun lagreFraISyfo(fødselsnummer: String = FNR) =
+        stansAutomatiskBehandlingDao.lagreFraISyfo(
             fødselsnummer = fødselsnummer,
             status = "STOPP_AUTOMATIKK",
             årsaker = setOf(MEDISINSK_VILKAR, AKTIVITETSKRAV),

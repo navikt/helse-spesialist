@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 import javax.sql.DataSource
 
 class StansAutomatiskBehandlingDao(dataSource: DataSource) : HelseDao(dataSource) {
-    fun lagre(
+    fun lagreFraISyfo(
         fødselsnummer: String,
         status: String,
         årsaker: Set<StoppknappÅrsak>,
@@ -16,7 +16,9 @@ class StansAutomatiskBehandlingDao(dataSource: DataSource) : HelseDao(dataSource
     ) = asSQL(
         """
         insert into stans_automatisering (fødselsnummer, status, årsaker, opprettet, kilde, original_melding) 
-        values (:fnr, :status, '{${årsaker.map(StoppknappÅrsak::name).somDbArray()}}', :opprettet, :kilde, cast(:originalMelding as json))
+        values (:fnr, :status, '{${
+            årsaker.map(StoppknappÅrsak::name).somDbArray()
+        }}', :opprettet, :kilde, cast(:originalMelding as json))
         """.trimIndent(),
         mapOf(
             "fnr" to fødselsnummer,
@@ -26,6 +28,18 @@ class StansAutomatiskBehandlingDao(dataSource: DataSource) : HelseDao(dataSource
             "originalMelding" to originalMelding,
         ),
     ).update()
+
+    fun lagreFraSpeil(fødselsnummer: String) =
+        asSQL(
+            """
+            insert into stans_automatisering (fødselsnummer, status, årsaker, opprettet, kilde, original_melding) 
+            values (:fnr, 'NORMAL', '{}', now(), 'SPEIL', cast(:originalMelding as json))
+            """.trimIndent(),
+            mapOf(
+                "fnr" to fødselsnummer,
+                "originalMelding" to null,
+            ),
+        ).update()
 
     fun hentFor(fødselsnummer: String) =
         asSQL(

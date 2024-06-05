@@ -75,7 +75,7 @@ class StansAutomatiskBehandlingMediatorTest {
         )
 
         verify(exactly = 1) {
-            stansAutomatiskBehandlingDao.lagre(
+            stansAutomatiskBehandlingDao.lagreFraISyfo(
                 fødselsnummer = FNR,
                 status = "STOPP_AUTOMATIKK",
                 årsaker = setOf(MEDISINSK_VILKAR),
@@ -109,16 +109,7 @@ class StansAutomatiskBehandlingMediatorTest {
                 ),
         )
 
-        verify(exactly = 1) {
-            stansAutomatiskBehandlingDao.lagre(
-                fødselsnummer = FNR,
-                status = "NORMAL",
-                årsaker = emptySet(),
-                opprettet = any(),
-                originalMelding = null,
-                kilde = "SPEIL",
-            )
-        }
+        verify(exactly = 1) { stansAutomatiskBehandlingDao.lagreFraSpeil(fødselsnummer = FNR) }
         verify(exactly = 1) {
             notatMediator.lagreForOppgaveId(
                 oppgaveId = any(),

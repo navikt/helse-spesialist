@@ -44,14 +44,7 @@ class StansAutomatiskBehandlingMediator(
         handling: Personhandling,
         saksbehandler: Saksbehandler,
     ) {
-        stansAutomatiskBehandlingDao.lagre(
-            fødselsnummer = handling.gjelderFødselsnummer(),
-            status = "NORMAL",
-            årsaker = emptySet(),
-            opprettet = LocalDateTime.now(),
-            originalMelding = null,
-            kilde = "SPEIL",
-        )
+        stansAutomatiskBehandlingDao.lagreFraSpeil(handling.gjelderFødselsnummer())
         lagreNotat(handling.gjelderFødselsnummer(), handling.begrunnelse(), saksbehandler.oid())
     }
 
@@ -63,7 +56,7 @@ class StansAutomatiskBehandlingMediator(
         originalMelding: String,
         kilde: String,
     ) {
-        stansAutomatiskBehandlingDao.lagre(
+        stansAutomatiskBehandlingDao.lagreFraISyfo(
             fødselsnummer = fødselsnummer,
             status = status,
             årsaker = årsaker,
