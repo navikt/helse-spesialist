@@ -18,6 +18,7 @@ import no.nav.helse.spesialist.api.graphql.schema.Arbeidsforholdoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Dagoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Inntektoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Lovhjemmel
+import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.Person
 import no.nav.helse.spesialist.api.notat.NotatDao
@@ -29,7 +30,6 @@ import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
@@ -113,12 +113,12 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         håndterOverstyrInntektOgRefusjon(
             arbeidsgivere =
                 listOf(
-                    OverstyrArbeidsgiverFraApi(
+                    OverstyringArbeidsgiver(
                         organisasjonsnummer = ORGNR,
-                        månedligInntekt = 25000.0,
-                        fraMånedligInntekt = 25001.0,
+                        manedligInntekt = 25000.0,
+                        fraManedligInntekt = 25001.0,
                         forklaring = "testbortforklaring",
-                        lovhjemmel = LovhjemmelFraApi("8-28", "LEDD_1", "BOKSTAV_A", "folketrygdloven", "1970-01-01"),
+                        lovhjemmel = Lovhjemmel("8-28", "LEDD_1", "BOKSTAV_A", "folketrygdloven", "1970-01-01"),
                         refusjonsopplysninger = null,
                         fraRefusjonsopplysninger = null,
                         begrunnelse = "begrunnelse",

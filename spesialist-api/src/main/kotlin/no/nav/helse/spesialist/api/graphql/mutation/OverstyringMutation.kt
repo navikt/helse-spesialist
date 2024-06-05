@@ -15,7 +15,6 @@ import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -49,49 +48,7 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
         withContext(Dispatchers.IO) {
             val saksbehandler: Lazy<SaksbehandlerFraApi> = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
             try {
-                val handling =
-                    OverstyrInntektOgRefusjonHandlingFraApi(
-                        aktørId = overstyring.aktorId,
-                        fødselsnummer = overstyring.fodselsnummer,
-                        skjæringstidspunkt = overstyring.skjaringstidspunkt,
-                        arbeidsgivere =
-                            overstyring.arbeidsgivere.map { arbeidsgiver ->
-                                OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi(
-                                    organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-                                    månedligInntekt = arbeidsgiver.manedligInntekt,
-                                    fraMånedligInntekt = arbeidsgiver.fraManedligInntekt,
-                                    refusjonsopplysninger =
-                                        arbeidsgiver.refusjonsopplysninger?.map { refusjonselement ->
-                                            OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi.RefusjonselementFraApi(
-                                                fom = refusjonselement.fom,
-                                                tom = refusjonselement.tom,
-                                                beløp = refusjonselement.belop,
-                                            )
-                                        },
-                                    fraRefusjonsopplysninger =
-                                        arbeidsgiver.fraRefusjonsopplysninger?.map { refusjonselement ->
-                                            OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi.RefusjonselementFraApi(
-                                                fom = refusjonselement.fom,
-                                                tom = refusjonselement.tom,
-                                                beløp = refusjonselement.belop,
-                                            )
-                                        },
-                                    begrunnelse = arbeidsgiver.begrunnelse,
-                                    forklaring = arbeidsgiver.forklaring,
-                                    lovhjemmel =
-                                        arbeidsgiver.lovhjemmel?.let { lovhjemmel ->
-                                            LovhjemmelFraApi(
-                                                paragraf = lovhjemmel.paragraf,
-                                                ledd = lovhjemmel.ledd,
-                                                bokstav = lovhjemmel.bokstav,
-                                                lovverk = lovhjemmel.lovverk,
-                                                lovverksversjon = lovhjemmel.lovverksversjon,
-                                            )
-                                        },
-                                )
-                            },
-                    )
-                withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(handling, saksbehandler.value) }
+                withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(overstyring, saksbehandler.value) }
             } catch (e: Exception) {
                 val kunneIkkeOverstyreError = kunneIkkeOverstyreError("inntekt og refusjon")
                 logg.error(kunneIkkeOverstyreError.message, e)

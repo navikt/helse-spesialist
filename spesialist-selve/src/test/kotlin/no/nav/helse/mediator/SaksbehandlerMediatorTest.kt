@@ -20,6 +20,9 @@ import no.nav.helse.spesialist.api.graphql.mutation.Avslag
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagsdata
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagshandling
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
+import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
+import no.nav.helse.spesialist.api.graphql.schema.Lovhjemmel
+import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
 import no.nav.helse.spesialist.api.notat.NotatMediator
@@ -31,8 +34,6 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OpphevStans
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi.SkjønnsfastsettingstypeDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
@@ -564,45 +565,46 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     fun `håndterer overstyring av inntekt og refusjon`() {
         nyPerson(fødselsnummer = FØDSELSNUMMER, organisasjonsnummer = ORGANISASJONSNUMMER, aktørId = AKTØR_ID)
         val overstyring =
-            OverstyrInntektOgRefusjonHandlingFraApi(
-                fødselsnummer = FØDSELSNUMMER,
-                aktørId = AKTØR_ID,
-                skjæringstidspunkt = 1.januar,
+            InntektOgRefusjonOverstyring(
+                fodselsnummer = FØDSELSNUMMER,
+                aktorId = AKTØR_ID,
+                skjaringstidspunkt = 1.januar,
+                vedtaksperiodeId = UUID.randomUUID(),
                 arbeidsgivere =
                     listOf(
-                        OverstyrArbeidsgiverFraApi(
+                        OverstyringArbeidsgiver(
                             organisasjonsnummer = ORGANISASJONSNUMMER,
-                            månedligInntekt = 25000.0,
-                            fraMånedligInntekt = 25001.0,
+                            manedligInntekt = 25000.0,
+                            fraManedligInntekt = 25001.0,
                             refusjonsopplysninger =
                                 listOf(
-                                    OverstyrArbeidsgiverFraApi.RefusjonselementFraApi(1.januar, 31.januar, 25000.0),
-                                    OverstyrArbeidsgiverFraApi.RefusjonselementFraApi(1.februar, null, 24000.0),
+                                    OverstyringArbeidsgiver.OverstyringRefusjonselement(1.januar, 31.januar, 25000.0),
+                                    OverstyringArbeidsgiver.OverstyringRefusjonselement(1.februar, null, 24000.0),
                                 ),
                             fraRefusjonsopplysninger =
                                 listOf(
-                                    OverstyrArbeidsgiverFraApi.RefusjonselementFraApi(1.januar, 31.januar, 24000.0),
-                                    OverstyrArbeidsgiverFraApi.RefusjonselementFraApi(1.februar, null, 23000.0),
+                                    OverstyringArbeidsgiver.OverstyringRefusjonselement(1.januar, 31.januar, 24000.0),
+                                    OverstyringArbeidsgiver.OverstyringRefusjonselement(1.februar, null, 23000.0),
                                 ),
-                            lovhjemmel = LovhjemmelFraApi("8-28", "3", null, "folketrygdloven", "1970-01-01"),
+                            lovhjemmel = Lovhjemmel("8-28", "3", null, "folketrygdloven", "1970-01-01"),
                             begrunnelse = "En begrunnelse",
                             forklaring = "En forklaring",
                         ),
-                        OverstyrArbeidsgiverFraApi(
+                        OverstyringArbeidsgiver(
                             organisasjonsnummer = ORGANISASJONSNUMMER_GHOST,
-                            månedligInntekt = 21000.0,
-                            fraMånedligInntekt = 25001.0,
+                            manedligInntekt = 21000.0,
+                            fraManedligInntekt = 25001.0,
                             refusjonsopplysninger =
                                 listOf(
-                                    OverstyrArbeidsgiverFraApi.RefusjonselementFraApi(1.januar, 31.januar, 21000.0),
-                                    OverstyrArbeidsgiverFraApi.RefusjonselementFraApi(1.februar, null, 22000.0),
+                                    OverstyringArbeidsgiver.OverstyringRefusjonselement(1.januar, 31.januar, 21000.0),
+                                    OverstyringArbeidsgiver.OverstyringRefusjonselement(1.februar, null, 22000.0),
                                 ),
                             fraRefusjonsopplysninger =
                                 listOf(
-                                    OverstyrArbeidsgiverFraApi.RefusjonselementFraApi(1.januar, 31.januar, 22000.0),
-                                    OverstyrArbeidsgiverFraApi.RefusjonselementFraApi(1.februar, null, 23000.0),
+                                    OverstyringArbeidsgiver.OverstyringRefusjonselement(1.januar, 31.januar, 22000.0),
+                                    OverstyringArbeidsgiver.OverstyringRefusjonselement(1.februar, null, 23000.0),
                                 ),
-                            lovhjemmel = LovhjemmelFraApi("8-28", "3", null, "folketrygdloven", "1970-01-01"),
+                            lovhjemmel = Lovhjemmel("8-28", "3", null, "folketrygdloven", "1970-01-01"),
                             begrunnelse = "En begrunnelse 2",
                             forklaring = "En forklaring 2",
                         ),

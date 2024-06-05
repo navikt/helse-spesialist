@@ -41,6 +41,10 @@ import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
+import no.nav.helse.spesialist.api.graphql.schema.Lovhjemmel
+import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsgiver
+import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsgiver.OverstyringRefusjonselement
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
@@ -51,9 +55,6 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi.RefusjonselementFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.test.TestPerson
@@ -1108,14 +1109,15 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         skjæringstidspunkt: LocalDate = 1.januar(1970),
-        arbeidsgivere: List<OverstyrArbeidsgiverFraApi> =
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        arbeidsgivere: List<OverstyringArbeidsgiver> =
             listOf(
-                OverstyrArbeidsgiverFraApi(
+                OverstyringArbeidsgiver(
                     organisasjonsnummer = ORGNR,
-                    månedligInntekt = 25000.0,
-                    fraMånedligInntekt = 25001.0,
+                    manedligInntekt = 25000.0,
+                    fraManedligInntekt = 25001.0,
                     forklaring = "testbortforklaring",
-                    lovhjemmel = LovhjemmelFraApi("8-28", "LEDD_1", "BOKSTAV_A", "folketrygdloven", "1970-01-01"),
+                    lovhjemmel = Lovhjemmel("8-28", "LEDD_1", "BOKSTAV_A", "folketrygdloven", "1970-01-01"),
                     refusjonsopplysninger = null,
                     fraRefusjonsopplysninger = null,
                     begrunnelse = "en begrunnelse",
@@ -1124,7 +1126,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     ) {
         håndterOverstyring(aktørId, fødselsnummer, ORGNR, "overstyr_inntekt_og_refusjon") {
             val handling =
-                OverstyrInntektOgRefusjonHandlingFraApi(aktørId, fødselsnummer, skjæringstidspunkt, arbeidsgivere)
+                InntektOgRefusjonOverstyring(aktørId, fødselsnummer, skjæringstidspunkt, arbeidsgivere, vedtaksperiodeId)
             testMediator.håndter(handling, saksbehandler)
         }
     }
@@ -1592,12 +1594,12 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         }
     }
 
-    private fun List<OverstyrArbeidsgiverFraApi>.byggOverstyrArbeidsgiverEvent() =
+    private fun List<OverstyringArbeidsgiver>.byggOverstyrArbeidsgiverEvent() =
         this.map {
             OverstyrtArbeidsgiverEvent(
                 organisasjonsnummer = it.organisasjonsnummer,
-                månedligInntekt = it.månedligInntekt,
-                fraMånedligInntekt = it.fraMånedligInntekt,
+                månedligInntekt = it.manedligInntekt,
+                fraMånedligInntekt = it.fraManedligInntekt,
                 refusjonsopplysninger = it.refusjonsopplysninger?.byggRefusjonselementEvent(),
                 fraRefusjonsopplysninger = it.fraRefusjonsopplysninger?.byggRefusjonselementEvent(),
                 begrunnelse = it.begrunnelse,
@@ -1605,12 +1607,12 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             )
         }
 
-    private fun List<RefusjonselementFraApi>.byggRefusjonselementEvent() =
+    private fun List<OverstyringRefusjonselement>.byggRefusjonselementEvent() =
         this.map {
             OverstyrtRefusjonselementEvent(
                 fom = it.fom,
                 tom = it.tom,
-                beløp = it.beløp,
+                beløp = it.belop,
             )
         }
 

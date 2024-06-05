@@ -19,7 +19,7 @@ data class InntektOgRefusjonOverstyring(
     val skjaringstidspunkt: LocalDate,
     val arbeidsgivere: List<OverstyringArbeidsgiver>,
     val vedtaksperiodeId: UUID,
-)
+) : HandlingFraApi
 
 data class ArbeidsforholdOverstyringHandling(
     val fodselsnummer: String,

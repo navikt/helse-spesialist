@@ -48,6 +48,7 @@ import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagshandling
 import no.nav.helse.spesialist.api.graphql.schema.Avslag
+import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
 import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
@@ -59,7 +60,6 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OpphevStans
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi.SkjønnsfastsettingstypeDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
@@ -344,7 +344,7 @@ internal class SaksbehandlerMediator(
     private fun HandlingFraApi.tilModellversjon(): Handling {
         return when (this) {
             is OverstyrArbeidsforholdHandlingFraApi -> this.tilModellversjon()
-            is OverstyrInntektOgRefusjonHandlingFraApi -> this.tilModellversjon()
+            is InntektOgRefusjonOverstyring -> this.tilModellversjon()
             is TidslinjeOverstyring -> this.tilModellversjon()
             is SkjønnsfastsettSykepengegrunnlagHandlingFraApi -> this.tilModellversjon()
             is AnnulleringHandlingFraApi -> this.tilModellversjon()
@@ -378,22 +378,22 @@ internal class SaksbehandlerMediator(
         )
     }
 
-    private fun OverstyrInntektOgRefusjonHandlingFraApi.tilModellversjon(): OverstyrtInntektOgRefusjon {
+    private fun InntektOgRefusjonOverstyring.tilModellversjon(): OverstyrtInntektOgRefusjon {
         return OverstyrtInntektOgRefusjon(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            skjæringstidspunkt = skjæringstidspunkt,
+            aktørId = aktorId,
+            fødselsnummer = fodselsnummer,
+            skjæringstidspunkt = skjaringstidspunkt,
             arbeidsgivere =
                 arbeidsgivere.map { overstyrArbeidsgiver ->
                     OverstyrtArbeidsgiver(
                         overstyrArbeidsgiver.organisasjonsnummer,
-                        overstyrArbeidsgiver.månedligInntekt,
-                        overstyrArbeidsgiver.fraMånedligInntekt,
+                        overstyrArbeidsgiver.manedligInntekt,
+                        overstyrArbeidsgiver.fraManedligInntekt,
                         overstyrArbeidsgiver.refusjonsopplysninger?.map {
-                            Refusjonselement(it.fom, it.tom, it.beløp)
+                            Refusjonselement(it.fom, it.tom, it.belop)
                         },
                         overstyrArbeidsgiver.fraRefusjonsopplysninger?.map {
-                            Refusjonselement(it.fom, it.tom, it.beløp)
+                            Refusjonselement(it.fom, it.tom, it.belop)
                         },
                         begrunnelse = overstyrArbeidsgiver.begrunnelse,
                         forklaring = overstyrArbeidsgiver.forklaring,
