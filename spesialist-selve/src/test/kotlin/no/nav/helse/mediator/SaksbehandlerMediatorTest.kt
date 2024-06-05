@@ -20,8 +20,10 @@ import no.nav.helse.spesialist.api.graphql.mutation.Avslag
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagsdata
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagshandling
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
+import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Lovhjemmel
+import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
@@ -33,7 +35,6 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernPåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OpphevStans
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi.SkjønnsfastsettingstypeDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
@@ -526,18 +527,19 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     fun `håndterer overstyring av arbeidsforhold`() {
         nyPerson(fødselsnummer = FØDSELSNUMMER, organisasjonsnummer = ORGANISASJONSNUMMER, aktørId = AKTØR_ID)
         val overstyring =
-            OverstyrArbeidsforholdHandlingFraApi(
-                fødselsnummer = FØDSELSNUMMER,
-                aktørId = AKTØR_ID,
-                skjæringstidspunkt = 1.januar,
+            ArbeidsforholdOverstyringHandling(
+                fodselsnummer = FØDSELSNUMMER,
+                aktorId = AKTØR_ID,
+                skjaringstidspunkt = 1.januar,
+                vedtaksperiodeId = UUID.randomUUID(),
                 overstyrteArbeidsforhold =
                     listOf(
-                        OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi(
+                        OverstyringArbeidsforhold(
                             orgnummer = ORGANISASJONSNUMMER_GHOST,
                             deaktivert = true,
                             begrunnelse = "en begrunnelse",
                             forklaring = "en forklaring",
-                            lovhjemmel = LovhjemmelFraApi("8-15", null, null, "folketrygdloven", "1998-12-18"),
+                            lovhjemmel = Lovhjemmel("8-15", null, null, "folketrygdloven", "1998-12-18"),
                         ),
                     ),
             )

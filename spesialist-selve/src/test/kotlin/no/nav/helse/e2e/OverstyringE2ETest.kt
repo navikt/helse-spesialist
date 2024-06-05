@@ -18,6 +18,7 @@ import no.nav.helse.spesialist.api.graphql.schema.Arbeidsforholdoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Dagoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Inntektoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Lovhjemmel
+import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.Person
@@ -28,8 +29,6 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
@@ -149,12 +148,12 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         håndterOverstyrArbeidsforhold(
             overstyrteArbeidsforhold =
                 listOf(
-                    OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi(
+                    OverstyringArbeidsforhold(
                         orgnummer = ORGNR,
                         deaktivert = true,
                         begrunnelse = "begrunnelse",
                         forklaring = "forklaring",
-                        lovhjemmel = LovhjemmelFraApi("8-15", null, null, "folketrygdloven", "1998-12-18"),
+                        lovhjemmel = Lovhjemmel("8-15", null, null, "folketrygdloven", "1998-12-18"),
                     ),
                 ),
         )

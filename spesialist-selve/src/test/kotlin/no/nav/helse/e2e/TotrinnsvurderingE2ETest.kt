@@ -1,9 +1,9 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
+import no.nav.helse.spesialist.api.graphql.schema.Lovhjemmel
+import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsforhold
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -38,12 +38,12 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
         håndterOverstyrArbeidsforhold(
             overstyrteArbeidsforhold =
                 listOf(
-                    OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi(
+                    OverstyringArbeidsforhold(
                         orgnummer = orgnrGhost,
                         deaktivert = true,
                         begrunnelse = "begrunnelse",
                         forklaring = "forklaring",
-                        lovhjemmel = LovhjemmelFraApi("8-15", null, null, "folketrygdloven", "1998-12-18"),
+                        lovhjemmel = Lovhjemmel("8-15", null, null, "folketrygdloven", "1998-12-18"),
                     ),
                 ),
         )

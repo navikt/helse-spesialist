@@ -47,6 +47,7 @@ import no.nav.helse.spesialist.api.feilhåndtering.IkkeTilgang
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagshandling
+import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.Avslag
 import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
@@ -59,7 +60,6 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernPåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OpphevStans
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi.SkjønnsfastsettingstypeDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
@@ -343,7 +343,7 @@ internal class SaksbehandlerMediator(
 
     private fun HandlingFraApi.tilModellversjon(): Handling {
         return when (this) {
-            is OverstyrArbeidsforholdHandlingFraApi -> this.tilModellversjon()
+            is ArbeidsforholdOverstyringHandling -> this.tilModellversjon()
             is InntektOgRefusjonOverstyring -> this.tilModellversjon()
             is TidslinjeOverstyring -> this.tilModellversjon()
             is SkjønnsfastsettSykepengegrunnlagHandlingFraApi -> this.tilModellversjon()
@@ -357,11 +357,11 @@ internal class SaksbehandlerMediator(
         }
     }
 
-    private fun OverstyrArbeidsforholdHandlingFraApi.tilModellversjon(): OverstyrtArbeidsforhold {
+    private fun ArbeidsforholdOverstyringHandling.tilModellversjon(): OverstyrtArbeidsforhold {
         return OverstyrtArbeidsforhold(
-            fødselsnummer = fødselsnummer,
-            aktørId = aktørId,
-            skjæringstidspunkt = skjæringstidspunkt,
+            fødselsnummer = fodselsnummer,
+            aktørId = aktorId,
+            skjæringstidspunkt = skjaringstidspunkt,
             overstyrteArbeidsforhold =
                 overstyrteArbeidsforhold.map { overstyrtArbeidsforhold ->
                     Arbeidsforhold(

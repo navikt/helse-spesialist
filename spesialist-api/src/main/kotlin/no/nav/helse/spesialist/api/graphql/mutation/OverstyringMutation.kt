@@ -13,8 +13,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandl
 import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -66,32 +64,7 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
         withContext(Dispatchers.IO) {
             val saksbehandler: Lazy<SaksbehandlerFraApi> = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
             try {
-                val handling =
-                    OverstyrArbeidsforholdHandlingFraApi(
-                        overstyring.fodselsnummer,
-                        aktørId = overstyring.aktorId,
-                        skjæringstidspunkt = overstyring.skjaringstidspunkt,
-                        overstyrteArbeidsforhold =
-                            overstyring.overstyrteArbeidsforhold.map { arbeidsforhold ->
-                                OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi(
-                                    orgnummer = arbeidsforhold.orgnummer,
-                                    deaktivert = arbeidsforhold.deaktivert,
-                                    begrunnelse = arbeidsforhold.begrunnelse,
-                                    forklaring = arbeidsforhold.forklaring,
-                                    lovhjemmel =
-                                        arbeidsforhold.lovhjemmel?.let { lovhjemmel ->
-                                            LovhjemmelFraApi(
-                                                paragraf = lovhjemmel.paragraf,
-                                                ledd = lovhjemmel.ledd,
-                                                bokstav = lovhjemmel.bokstav,
-                                                lovverk = lovhjemmel.lovverk,
-                                                lovverksversjon = lovhjemmel.lovverksversjon,
-                                            )
-                                        },
-                                )
-                            },
-                    )
-                withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(handling, saksbehandler.value) }
+                withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(overstyring, saksbehandler.value) }
             } catch (e: Exception) {
                 val kunneIkkeOverstyreError = kunneIkkeOverstyreError("arbeidsforhold")
                 logg.error(kunneIkkeOverstyreError.message, e)

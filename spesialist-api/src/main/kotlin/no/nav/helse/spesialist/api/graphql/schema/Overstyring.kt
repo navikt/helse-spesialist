@@ -27,7 +27,7 @@ data class ArbeidsforholdOverstyringHandling(
     val skjaringstidspunkt: LocalDate,
     val overstyrteArbeidsforhold: List<OverstyringArbeidsforhold>,
     val vedtaksperiodeId: UUID,
-)
+) : HandlingFraApi
 
 data class OverstyringArbeidsforhold(
     val orgnummer: String,

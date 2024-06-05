@@ -41,8 +41,10 @@ import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Lovhjemmel
+import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsgiver.OverstyringRefusjonselement
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringDag
@@ -53,8 +55,6 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.test.TestPerson
@@ -1136,24 +1136,26 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         skjæringstidspunkt: LocalDate = 1.januar,
-        overstyrteArbeidsforhold: List<ArbeidsforholdFraApi> =
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        overstyrteArbeidsforhold: List<OverstyringArbeidsforhold> =
             listOf(
-                ArbeidsforholdFraApi(
+                OverstyringArbeidsforhold(
                     orgnummer = organisasjonsnummer,
                     deaktivert = true,
                     begrunnelse = "begrunnelse",
                     forklaring = "forklaring",
-                    lovhjemmel = LovhjemmelFraApi("8-15", null, null, "folketrygdloven", "1998-12-18"),
+                    lovhjemmel = Lovhjemmel("8-15", null, null, "folketrygdloven", "1998-12-18"),
                 ),
             ),
     ) {
         håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "overstyr_arbeidsforhold") {
             val handling =
-                OverstyrArbeidsforholdHandlingFraApi(
-                    fødselsnummer,
-                    aktørId,
-                    skjæringstidspunkt,
-                    overstyrteArbeidsforhold,
+                ArbeidsforholdOverstyringHandling(
+                    fodselsnummer = fødselsnummer,
+                    aktorId = aktørId,
+                    skjaringstidspunkt = skjæringstidspunkt,
+                    overstyrteArbeidsforhold = overstyrteArbeidsforhold,
+                    vedtaksperiodeId = vedtaksperiodeId,
                 )
             testMediator.håndter(handling, saksbehandler)
         }

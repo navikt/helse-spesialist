@@ -12,47 +12,6 @@ data class TildelOppgave(val oppgaveId: Long) : HandlingFraApi
 
 data class AvmeldOppgave(val oppgaveId: Long) : HandlingFraApi
 
-data class OverstyrInntektOgRefusjonHandlingFraApi(
-    val aktørId: String,
-    val fødselsnummer: String,
-    val skjæringstidspunkt: LocalDate,
-    val arbeidsgivere: List<OverstyrArbeidsgiverFraApi>,
-) : HandlingFraApi {
-    data class OverstyrArbeidsgiverFraApi(
-        val organisasjonsnummer: String,
-        val månedligInntekt: Double,
-        val fraMånedligInntekt: Double,
-        val refusjonsopplysninger: List<RefusjonselementFraApi>?,
-        val fraRefusjonsopplysninger: List<RefusjonselementFraApi>?,
-        val begrunnelse: String,
-        val forklaring: String,
-        val lovhjemmel: LovhjemmelFraApi?,
-    ) {
-        data class RefusjonselementFraApi(
-            val fom: LocalDate,
-            val tom: LocalDate? = null,
-            val beløp: Double,
-        )
-    }
-}
-
-@JsonIgnoreProperties
-data class OverstyrArbeidsforholdHandlingFraApi(
-    val fødselsnummer: String,
-    val aktørId: String,
-    val skjæringstidspunkt: LocalDate,
-    val overstyrteArbeidsforhold: List<ArbeidsforholdFraApi>,
-) : HandlingFraApi {
-    @JsonIgnoreProperties
-    data class ArbeidsforholdFraApi(
-        val orgnummer: String,
-        val deaktivert: Boolean,
-        val begrunnelse: String,
-        val forklaring: String,
-        val lovhjemmel: LovhjemmelFraApi?,
-    )
-}
-
 data class SkjønnsfastsettSykepengegrunnlagHandlingFraApi(
     val aktørId: String,
     val fødselsnummer: String,
