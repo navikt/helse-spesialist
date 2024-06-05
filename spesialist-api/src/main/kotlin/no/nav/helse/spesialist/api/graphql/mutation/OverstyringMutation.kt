@@ -16,11 +16,8 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.UUID
-import java.time.LocalDate
 
 class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhåndterer) : Mutation {
     private companion object {
@@ -35,35 +32,7 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
         withContext(Dispatchers.IO) {
             val saksbehandler: Lazy<SaksbehandlerFraApi> = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
             try {
-                val handling =
-                    OverstyrTidslinjeHandlingFraApi(
-                        vedtaksperiodeId = overstyring.vedtaksperiodeId,
-                        organisasjonsnummer = overstyring.organisasjonsnummer,
-                        fødselsnummer = overstyring.fodselsnummer,
-                        aktørId = overstyring.aktorId,
-                        begrunnelse = overstyring.begrunnelse,
-                        dager =
-                            overstyring.dager.map { it ->
-                                OverstyrTidslinjeHandlingFraApi.OverstyrDagFraApi(
-                                    dato = it.dato,
-                                    type = it.type,
-                                    fraType = it.fraType,
-                                    grad = it.grad,
-                                    fraGrad = it.fraGrad,
-                                    lovhjemmel =
-                                        it.lovhjemmel?.let { lovhjemmel ->
-                                            LovhjemmelFraApi(
-                                                lovhjemmel.paragraf,
-                                                lovhjemmel.ledd,
-                                                lovhjemmel.bokstav,
-                                                lovhjemmel.lovverk,
-                                                lovhjemmel.lovverksversjon,
-                                            )
-                                        },
-                                )
-                            },
-                    )
-                withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(handling, saksbehandler.value) }
+                withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(overstyring, saksbehandler.value) }
             } catch (e: Exception) {
                 val kunneIkkeOverstyreError = kunneIkkeOverstyreError("dager")
                 logg.error(kunneIkkeOverstyreError.message, e)

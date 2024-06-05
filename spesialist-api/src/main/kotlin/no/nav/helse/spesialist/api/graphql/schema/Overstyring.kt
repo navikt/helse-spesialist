@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import java.time.LocalDate
-
 import java.util.UUID
 
 data class TidslinjeOverstyring(
@@ -11,7 +11,7 @@ data class TidslinjeOverstyring(
     val aktorId: String,
     val begrunnelse: String,
     val dager: List<OverstyringDag>,
-)
+) : HandlingFraApi
 
 data class InntektOgRefusjonOverstyring(
     val aktorId: String,

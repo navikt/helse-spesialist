@@ -17,6 +17,8 @@ import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.spesialist.api.graphql.schema.Arbeidsforholdoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Dagoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Inntektoverstyring
+import no.nav.helse.spesialist.api.graphql.schema.Lovhjemmel
+import no.nav.helse.spesialist.api.graphql.schema.OverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.Person
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
@@ -28,7 +30,6 @@ import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
@@ -50,7 +51,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         håndterOverstyrTidslinje(
             dager =
                 listOf(
-                    OverstyrTidslinjeHandlingFraApi.OverstyrDagFraApi(
+                    OverstyringDag(
                         dato = 20.januar,
                         type = "Feriedag",
                         fraType = "Sykedag",
@@ -81,14 +82,14 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         håndterOverstyrTidslinje(
             dager =
                 listOf(
-                    OverstyrTidslinjeHandlingFraApi.OverstyrDagFraApi(
+                    OverstyringDag(
                         dato = 20.januar,
                         type = "Feriedag",
                         fraType = "Sykedag",
                         grad = null,
                         fraGrad = 100,
                         lovhjemmel =
-                            LovhjemmelFraApi(
+                            Lovhjemmel(
                                 paragraf = "EN PARAGRAF",
                                 ledd = "ET LEDD",
                                 bokstav = "EN BOKSTAV",

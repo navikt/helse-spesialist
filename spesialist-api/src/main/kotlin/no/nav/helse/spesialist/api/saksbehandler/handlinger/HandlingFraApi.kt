@@ -4,33 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.time.LocalDate
 import java.util.UUID
 
-sealed interface HandlingFraApi
+interface HandlingFraApi
 
 data class OpphevStans(val fødselsnummer: String, val begrunnelse: String) : HandlingFraApi
 
 data class TildelOppgave(val oppgaveId: Long) : HandlingFraApi
 
 data class AvmeldOppgave(val oppgaveId: Long) : HandlingFraApi
-
-@JsonIgnoreProperties
-class OverstyrTidslinjeHandlingFraApi(
-    val vedtaksperiodeId: UUID,
-    val organisasjonsnummer: String,
-    val fødselsnummer: String,
-    val aktørId: String,
-    val begrunnelse: String,
-    val dager: List<OverstyrDagFraApi>,
-) : HandlingFraApi {
-    @JsonIgnoreProperties
-    class OverstyrDagFraApi(
-        val dato: LocalDate,
-        val type: String,
-        val fraType: String,
-        val grad: Int?,
-        val fraGrad: Int?,
-        val lovhjemmel: LovhjemmelFraApi?,
-    )
-}
 
 data class OverstyrInntektOgRefusjonHandlingFraApi(
     val aktørId: String,

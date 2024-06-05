@@ -49,6 +49,7 @@ import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagshandling
 import no.nav.helse.spesialist.api.graphql.schema.Avslag
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
+import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandlingFraApi
@@ -59,7 +60,6 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OpphevStans
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi.SkjønnsfastsettingstypeDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
@@ -345,7 +345,7 @@ internal class SaksbehandlerMediator(
         return when (this) {
             is OverstyrArbeidsforholdHandlingFraApi -> this.tilModellversjon()
             is OverstyrInntektOgRefusjonHandlingFraApi -> this.tilModellversjon()
-            is OverstyrTidslinjeHandlingFraApi -> this.tilModellversjon()
+            is TidslinjeOverstyring -> this.tilModellversjon()
             is SkjønnsfastsettSykepengegrunnlagHandlingFraApi -> this.tilModellversjon()
             is AnnulleringHandlingFraApi -> this.tilModellversjon()
             is TildelOppgave -> this.tilModellversjon()
@@ -353,6 +353,7 @@ internal class SaksbehandlerMediator(
             is LeggPåVent -> this.tilModellversjon()
             is FjernPåVent -> this.tilModellversjon()
             is OpphevStans -> this.tilModellversjon()
+            else -> throw IllegalStateException("Støtter ikke handling ${this::class.simpleName}")
         }
     }
 
@@ -405,11 +406,11 @@ internal class SaksbehandlerMediator(
         )
     }
 
-    private fun OverstyrTidslinjeHandlingFraApi.tilModellversjon(): OverstyrtTidslinje {
+    private fun TidslinjeOverstyring.tilModellversjon(): OverstyrtTidslinje {
         return OverstyrtTidslinje(
             vedtaksperiodeId = vedtaksperiodeId,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
+            aktørId = aktorId,
+            fødselsnummer = fodselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             dager =
                 dager.map {

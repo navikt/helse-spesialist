@@ -20,6 +20,8 @@ import no.nav.helse.spesialist.api.graphql.mutation.Avslag
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagsdata
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagshandling
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
+import no.nav.helse.spesialist.api.graphql.schema.OverstyringDag
+import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandlingFraApi
@@ -31,7 +33,6 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.OpphevStans
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi.SkjønnsfastsettingstypeDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
@@ -168,7 +169,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         val generasjonId = UUID.randomUUID()
         nyPerson(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId)
         mediator.håndter(
-            OverstyrTidslinjeHandlingFraApi(VEDTAKSPERIODE, ORGANISASJONSNUMMER, FNR, AKTØR, "", dager = emptyList()),
+            TidslinjeOverstyring(VEDTAKSPERIODE, ORGANISASJONSNUMMER, FNR, AKTØR, "", dager = emptyList()),
             saksbehandler,
         )
         assertOppgave(OPPGAVE_ID, "Invalidert")
@@ -484,15 +485,15 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         nyPerson(fødselsnummer = person.fødselsnummer, aktørId = person.aktørId, organisasjonsnummer = person { 2.ag })
 
         val overstyring =
-            OverstyrTidslinjeHandlingFraApi(
+            TidslinjeOverstyring(
                 vedtaksperiodeId = UUID.randomUUID(),
                 organisasjonsnummer = person { 2.ag },
-                fødselsnummer = person.fødselsnummer,
-                aktørId = person.aktørId,
+                fodselsnummer = person.fødselsnummer,
+                aktorId = person.aktørId,
                 begrunnelse = "En begrunnelse",
                 dager =
                     listOf(
-                        OverstyrTidslinjeHandlingFraApi.OverstyrDagFraApi(
+                        OverstyringDag(
                             dato = 10.januar,
                             type = "Sykedag",
                             fraType = "Arbeidsdag",
