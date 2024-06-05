@@ -9,8 +9,6 @@ import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.schema.AnnulleringData
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandlingFraApi
-import java.util.UUID
 
 class AnnulleringMutation(
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
@@ -22,18 +20,8 @@ class AnnulleringMutation(
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
             val saksbehandler: Lazy<SaksbehandlerFraApi> = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
-            val annulleringHandling =
-                AnnulleringHandlingFraApi(
-                    aktørId = annullering.aktorId,
-                    fødselsnummer = annullering.fodselsnummer,
-                    organisasjonsnummer = annullering.organisasjonsnummer,
-                    vedtaksperiodeId = UUID.fromString(annullering.vedtaksperiodeId),
-                    utbetalingId = UUID.fromString(annullering.utbetalingId),
-                    begrunnelser = annullering.begrunnelser,
-                    kommentar = annullering.kommentar,
-                )
 
-            saksbehandlerhåndterer.håndter(annulleringHandling, saksbehandler.value)
+            saksbehandlerhåndterer.håndter(annullering, saksbehandler.value)
             DataFetcherResult.newResult<Boolean>().data(true).build()
         }
 }

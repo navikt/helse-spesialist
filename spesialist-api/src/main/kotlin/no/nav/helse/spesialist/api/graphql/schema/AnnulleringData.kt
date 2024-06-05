@@ -1,11 +1,14 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
+import java.util.UUID
+
 data class AnnulleringData(
     val aktorId: String,
     val fodselsnummer: String,
     val organisasjonsnummer: String,
-    val vedtaksperiodeId: String,
-    val utbetalingId: String,
+    val vedtaksperiodeId: UUID,
+    val utbetalingId: UUID,
     val begrunnelser: List<String>,
     val kommentar: String?,
-)
+) : HandlingFraApi

@@ -47,6 +47,7 @@ import no.nav.helse.spesialist.api.feilhåndtering.IkkeTilgang
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagshandling
+import no.nav.helse.spesialist.api.graphql.schema.AnnulleringData
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.Avslag
 import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
@@ -58,7 +59,6 @@ import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse.Skjonnsfas
 import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernPåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
@@ -349,7 +349,7 @@ internal class SaksbehandlerMediator(
             is InntektOgRefusjonOverstyring -> this.tilModellversjon()
             is TidslinjeOverstyring -> this.tilModellversjon()
             is Skjonnsfastsettelse -> this.tilModellversjon()
-            is AnnulleringHandlingFraApi -> this.tilModellversjon()
+            is AnnulleringData -> this.tilModellversjon()
             is TildelOppgave -> this.tilModellversjon()
             is AvmeldOppgave -> this.tilModellversjon()
             is LeggPåVent -> this.tilModellversjon()
@@ -385,26 +385,29 @@ internal class SaksbehandlerMediator(
             aktørId = aktorId,
             fødselsnummer = fodselsnummer,
             skjæringstidspunkt = skjaringstidspunkt,
-            arbeidsgivere = arbeidsgivere.map { ag ->
-                SkjønnsfastsattArbeidsgiver(
-                    organisasjonsnummer = ag.organisasjonsnummer,
-                    årlig = ag.arlig,
-                    fraÅrlig = ag.fraArlig,
-                    årsak = ag.arsak,
-                    type = when (ag.type) {
-                        OMREGNET_ARSINNTEKT -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT
-                        RAPPORTERT_ARSINNTEKT -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT
-                        ANNET -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.ANNET
-                    },
-                    begrunnelseMal = ag.begrunnelseMal,
-                    begrunnelseFritekst = ag.begrunnelseFritekst,
-                    begrunnelseKonklusjon = ag.begrunnelseKonklusjon,
-                    lovhjemmel = ag.lovhjemmel?.let {
-                        Lovhjemmel(it.paragraf, it.ledd, it.bokstav, it.lovverk, it.lovverksversjon)
-                    },
-                    initierendeVedtaksperiodeId = ag.initierendeVedtaksperiodeId
-                )
-            }
+            arbeidsgivere =
+                arbeidsgivere.map { ag ->
+                    SkjønnsfastsattArbeidsgiver(
+                        organisasjonsnummer = ag.organisasjonsnummer,
+                        årlig = ag.arlig,
+                        fraÅrlig = ag.fraArlig,
+                        årsak = ag.arsak,
+                        type =
+                            when (ag.type) {
+                                OMREGNET_ARSINNTEKT -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT
+                                RAPPORTERT_ARSINNTEKT -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT
+                                ANNET -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.ANNET
+                            },
+                        begrunnelseMal = ag.begrunnelseMal,
+                        begrunnelseFritekst = ag.begrunnelseFritekst,
+                        begrunnelseKonklusjon = ag.begrunnelseKonklusjon,
+                        lovhjemmel =
+                            ag.lovhjemmel?.let {
+                                Lovhjemmel(it.paragraf, it.ledd, it.bokstav, it.lovverk, it.lovverksversjon)
+                            },
+                        initierendeVedtaksperiodeId = ag.initierendeVedtaksperiodeId,
+                    )
+                },
         )
     }
 
@@ -466,10 +469,10 @@ internal class SaksbehandlerMediator(
         )
     }
 
-    private fun AnnulleringHandlingFraApi.tilModellversjon(): Annullering {
+    private fun AnnulleringData.tilModellversjon(): Annullering {
         return Annullering(
-            aktørId = this.aktørId,
-            fødselsnummer = this.fødselsnummer,
+            aktørId = this.aktorId,
+            fødselsnummer = this.fodselsnummer,
             organisasjonsnummer = this.organisasjonsnummer,
             vedtaksperiodeId = this.vedtaksperiodeId,
             utbetalingId = this.utbetalingId,
