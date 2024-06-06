@@ -10,8 +10,8 @@ import no.nav.helse.spesialist.api.vedtaksperiode.Mottakertype
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 import java.time.LocalDate
 
-class BehandlingsstatistikkMediator(private val behandlingsstatistikkDao: BehandlingsstatistikkDao) :
-    IBehandlingsstatistikkMediator {
+class BehandlingsstatistikkService(private val behandlingsstatistikkDao: BehandlingsstatistikkDao) :
+    IBehandlingsstatistikkService {
     override fun getBehandlingsstatistikk(fom: LocalDate): BehandlingsstatistikkResponse {
         val automatisertPerKombinasjon = behandlingsstatistikkDao.getAutomatiseringPerKombinasjon(fom)
         val manueltUtførteOppgaver = behandlingsstatistikkDao.getManueltUtførteOppgaverPerInntektOgPeriodetype(fom)

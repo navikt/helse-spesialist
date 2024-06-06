@@ -16,7 +16,7 @@ import io.ktor.server.request.ApplicationRequest
 import io.ktor.server.routing.route
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.helse.mediator.IBehandlingsstatistikkMediator
+import no.nav.helse.mediator.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering
 import no.nav.helse.spesialist.api.avviksvurdering.Beregningsgrunnlag
@@ -58,7 +58,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     private val avviksvurderingId: UUID = UUID.randomUUID()
 
     private val reservasjonClient = mockk<ReservasjonClient>(relaxed = true)
-    private val behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkMediator>(relaxed = true)
+    private val behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkService>(relaxed = true)
     protected val saksbehandlerhåndterer = mockk<Saksbehandlerhåndterer>(relaxed = true)
     private val godkjenninghåndterer = mockk<Godkjenninghåndterer>(relaxed = true)
     private val personhåndterer = mockk<Personhåndterer>(relaxed = true)
@@ -215,7 +215,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                         påVentApiDao = PåVentApiDao(dataSource),
                         reservasjonClient = mockk<ReservasjonClient>(relaxed = true),
                         avviksvurderinghenter = mockk<Avviksvurderinghenter>(relaxed = true),
-                        behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkMediator>(relaxed = true),
+                        behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkService>(relaxed = true),
                         notatRepository = NotatRepository(notatDao),
                         saksbehandlerhåndterer = mockk<Saksbehandlerhåndterer>(relaxed = true),
                         oppgavehåndterer = mockk<Oppgavehåndterer>(relaxed = true),

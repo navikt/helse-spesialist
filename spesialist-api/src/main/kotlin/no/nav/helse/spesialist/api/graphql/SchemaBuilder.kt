@@ -4,7 +4,7 @@ import com.expediagroup.graphql.generator.SchemaGeneratorConfig
 import com.expediagroup.graphql.generator.TopLevelObject
 import com.expediagroup.graphql.generator.toSchema
 import graphql.schema.GraphQLSchema
-import no.nav.helse.mediator.IBehandlingsstatistikkMediator
+import no.nav.helse.mediator.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
@@ -63,7 +63,7 @@ internal class SchemaBuilder(
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val reservasjonClient: ReservasjonClient,
     private val avviksvurderinghenter: Avviksvurderinghenter,
-    private val behandlingsstatistikkMediator: IBehandlingsstatistikkMediator,
+    private val behandlingsstatistikkMediator: IBehandlingsstatistikkService,
     private val notatRepository: NotatRepository,
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
     private val oppgavehåndterer: Oppgavehåndterer,

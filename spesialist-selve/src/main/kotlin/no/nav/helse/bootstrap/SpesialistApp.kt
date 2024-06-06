@@ -12,7 +12,7 @@ import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.TotrinnsvurderingDao
-import no.nav.helse.mediator.BehandlingsstatistikkMediator
+import no.nav.helse.mediator.BehandlingsstatistikkService
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.GodkjenningService
 import no.nav.helse.mediator.Kommandofabrikk
@@ -130,7 +130,7 @@ internal class SpesialistApp(
     private lateinit var dokumentMediator: DokumentMediator
     private lateinit var subsumsjonsmelder: Subsumsjonsmelder
 
-    private val behandlingsstatistikkMediator = BehandlingsstatistikkMediator(behandlingsstatistikkDao = behandlingsstatistikkDao)
+    private val behandlingsstatistikkService = BehandlingsstatistikkService(behandlingsstatistikkDao = behandlingsstatistikkDao)
     private val godkjenningMediator =
         GodkjenningMediator(
             vedtakDao = vedtakDao,
@@ -244,7 +244,7 @@ internal class SpesialistApp(
                 kode7Saksbehandlergruppe = tilgangsgrupper.kode7GruppeId,
                 beslutterGruppeId = tilgangsgrupper.beslutterGruppeId,
                 snapshotMediator = snapshotMediator,
-                behandlingsstatistikkMediator = behandlingsstatistikkMediator,
+                behandlingsstatistikkMediator = behandlingsstatistikkService,
                 notatRepository = notatRepository,
                 saksbehandlerhåndtererProvider = { saksbehandlerMediator },
                 oppgavehåndtererProvider = { oppgaveMediator },

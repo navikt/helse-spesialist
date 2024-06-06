@@ -15,7 +15,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
-import no.nav.helse.mediator.IBehandlingsstatistikkMediator
+import no.nav.helse.mediator.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
@@ -68,7 +68,7 @@ fun Application.graphQLApi(
     kode7Saksbehandlergruppe: UUID,
     beslutterGruppeId: UUID,
     snapshotMediator: SnapshotMediator,
-    behandlingsstatistikkMediator: IBehandlingsstatistikkMediator,
+    behandlingsstatistikkMediator: IBehandlingsstatistikkService,
     notatRepository: NotatRepository,
     saksbehandlerhåndtererProvider: () -> Saksbehandlerhåndterer,
     oppgavehåndtererProvider: () -> Oppgavehåndterer,

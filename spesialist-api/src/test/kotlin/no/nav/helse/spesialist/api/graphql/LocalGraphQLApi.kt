@@ -21,7 +21,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.mediator.IBehandlingsstatistikkMediator
+import no.nav.helse.mediator.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
@@ -138,7 +138,7 @@ fun main() =
             val påVentApiDao = mockk<PåVentApiDao>(relaxed = true)
             val reservasjonClient = mockk<ReservasjonClient>(relaxed = true)
             val avviksvurderinghenter = mockk<Avviksvurderinghenter>(relaxed = true)
-            val behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkMediator>(relaxed = true)
+            val behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkService>(relaxed = true)
             val notatRepository = mockk<NotatRepository>(relaxed = true)
             val totrinnsvurderinghåndterer = mockk<Totrinnsvurderinghåndterer>(relaxed = true)
             val godkjenninghåndterer = mockk<Godkjenninghåndterer>(relaxed = true)
