@@ -16,7 +16,7 @@ import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER_OID
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.graphql.schema.PaVent
-import no.nav.helse.spesialist.api.notat.NotatMediator
+import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
@@ -29,7 +29,7 @@ import java.util.UUID
 
 class PaVentMutation(
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
-    private val notatMediator: NotatMediator,
+    private val notatRepository: NotatRepository,
     private val periodehistorikkDao: PeriodehistorikkDao,
 ) : Mutation {
     private companion object {
@@ -51,7 +51,7 @@ class PaVentMutation(
             val saksbehandlerOid = UUID.fromString(env.graphQlContext.get(SAKSBEHANDLER_OID.key))
 
             try {
-                notatMediator.lagreForOppgaveId(oppgaveId.toLong(), notatTekst, saksbehandlerOid, notatType)
+                notatRepository.lagreForOppgaveId(oppgaveId.toLong(), notatTekst, saksbehandlerOid, notatType)
                 saksbehandlerhåndterer.håndter(
                     LeggPåVent(oppgaveId.toLong(), saksbehandler.oid, frist, tildeling, begrunnelse),
                     saksbehandler,

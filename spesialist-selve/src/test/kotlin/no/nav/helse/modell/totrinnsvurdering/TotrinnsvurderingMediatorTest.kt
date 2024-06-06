@@ -3,27 +3,27 @@ package no.nav.helse.modell.totrinnsvurdering
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import java.util.UUID
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.oppgave.OppgaveDao
-import no.nav.helse.spesialist.api.notat.NotatMediator
+import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 class TotrinnsvurderingMediatorTest {
     private val totrinnsvurderingDao = mockk<TotrinnsvurderingDao>(relaxed = true)
-    private val notatMediator = mockk<NotatMediator>(relaxed = true)
-
+    private val notatRepository = mockk<NotatRepository>(relaxed = true)
 
     val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
-    private val totrinnsvurderingMediator = TotrinnsvurderingMediator(
-        totrinnsvurderingDao,
-        oppgaveDao,
-        periodehistorikkDao,
-        notatMediator,
-    )
+    private val totrinnsvurderingMediator =
+        TotrinnsvurderingMediator(
+            totrinnsvurderingDao,
+            oppgaveDao,
+            periodehistorikkDao,
+            notatRepository,
+        )
 
     @Test
     fun `Sett er retur, oppdaterer status på totrinnsvurdering og oppdaterer periodehistorikk med vedtaksperiodeId`() {
@@ -43,7 +43,7 @@ class TotrinnsvurderingMediatorTest {
             periodehistorikkDao.lagre(
                 historikkType = PeriodehistorikkType.TOTRINNSVURDERING_RETUR,
                 saksbehandlerOid = null,
-                utbetalingId = utbetalingId
+                utbetalingId = utbetalingId,
             )
         }
     }

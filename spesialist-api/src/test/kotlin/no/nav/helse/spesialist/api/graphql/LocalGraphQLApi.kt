@@ -56,7 +56,7 @@ import no.nav.helse.spesialist.api.graphql.schema.Reservasjon
 import no.nav.helse.spesialist.api.graphql.schema.Sorteringsnokkel
 import no.nav.helse.spesialist.api.graphql.schema.Tildeling
 import no.nav.helse.spesialist.api.notat.NotatDao
-import no.nav.helse.spesialist.api.notat.NotatMediator
+import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
@@ -139,7 +139,7 @@ fun main() =
             val reservasjonClient = mockk<ReservasjonClient>(relaxed = true)
             val avviksvurderinghenter = mockk<Avviksvurderinghenter>(relaxed = true)
             val behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkMediator>(relaxed = true)
-            val notatMediator = mockk<NotatMediator>(relaxed = true)
+            val notatRepository = mockk<NotatRepository>(relaxed = true)
             val totrinnsvurderinghåndterer = mockk<Totrinnsvurderinghåndterer>(relaxed = true)
             val godkjenninghåndterer = mockk<Godkjenninghåndterer>(relaxed = true)
             val personhåndterer = mockk<Personhåndterer>(relaxed = true)
@@ -243,7 +243,7 @@ fun main() =
                 beslutterGruppeId = UUID.randomUUID(),
                 snapshotMediator = SnapshotMediator(snapshotApiDao, mockk(relaxed = true)),
                 behandlingsstatistikkMediator = behandlingsstatistikkMediator,
-                notatMediator = notatMediator,
+                notatRepository = notatRepository,
                 saksbehandlerhåndtererProvider = { SneakySaksbehandlerhåndterer(randomOppgaver) },
                 oppgavehåndtererProvider = {
                     SneakyOppgaveHåndterer(

@@ -49,7 +49,7 @@ import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.graphQLApi
 import no.nav.helse.spesialist.api.notat.NotatDao
-import no.nav.helse.spesialist.api.notat.NotatMediator
+import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
@@ -140,21 +140,21 @@ internal class SpesialistApp(
             meldingDao = meldingDao,
             generasjonDao = generasjonDao,
         )
-    private val notatMediator = NotatMediator(notatDao = notatDao)
+    private val notatRepository = NotatRepository(notatDao = notatDao)
     private val stansAutomatiskBehandlingMediator =
         StansAutomatiskBehandlingMediator(
             stansAutomatiskBehandlingDao,
             periodehistorikkDao,
             oppgaveDao,
             utbetalingDao,
-            notatMediator,
+            notatRepository,
         ) { subsumsjonsmelder }
     private val totrinnsvurderingMediator =
         TotrinnsvurderingMediator(
             dao = totrinnsvurderingDao,
             oppgaveDao = oppgaveDao,
             periodehistorikkDao = periodehistorikkDao,
-            notatMediator = notatMediator,
+            notatRepository = notatRepository,
         )
 
     private val snapshotMediator = SnapshotMediator(snapshotDao = snapshotApiDao, snapshotClient = snapshotClient)
@@ -245,7 +245,7 @@ internal class SpesialistApp(
                 beslutterGruppeId = tilgangsgrupper.beslutterGruppeId,
                 snapshotMediator = snapshotMediator,
                 behandlingsstatistikkMediator = behandlingsstatistikkMediator,
-                notatMediator = notatMediator,
+                notatRepository = notatRepository,
                 saksbehandlerhåndtererProvider = { saksbehandlerMediator },
                 oppgavehåndtererProvider = { oppgaveMediator },
                 totrinnsvurderinghåndterer = totrinnsvurderingMediator,

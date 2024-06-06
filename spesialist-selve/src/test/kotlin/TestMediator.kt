@@ -29,7 +29,7 @@ import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.notat.NotatDao
-import no.nav.helse.spesialist.api.notat.NotatMediator
+import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
@@ -62,7 +62,7 @@ internal class TestMediator(
             periodehistorikkDao,
             oppgaveDao,
             utbetalingDao,
-            NotatMediator(NotatDao(dataSource)),
+            NotatRepository(NotatDao(dataSource)),
         ) { Subsumsjonsmelder("versjonAvKode", testRapid) }
 
     private val godkjenningMediator =

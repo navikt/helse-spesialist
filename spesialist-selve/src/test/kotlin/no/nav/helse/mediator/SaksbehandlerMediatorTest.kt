@@ -29,7 +29,7 @@ import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse
 import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
-import no.nav.helse.spesialist.api.notat.NotatMediator
+import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernPåVent
@@ -64,7 +64,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             periodehistorikkDao,
             oppgaveDao,
             utbetalingDao,
-            NotatMediator(notatDao),
+            NotatRepository(notatDao),
         ) { Subsumsjonsmelder("versjonAvKode", testRapid) }
     private val oppgaveMediator =
         OppgaveMediator(

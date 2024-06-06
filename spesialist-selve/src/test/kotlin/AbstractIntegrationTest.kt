@@ -14,7 +14,7 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.notat.NotatDao
-import no.nav.helse.spesialist.api.notat.NotatMediator
+import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.testEnv
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -63,7 +63,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
                     totrinnsvurderingDao,
                     oppgaveDao,
                     periodehistorikkDao,
-                    NotatMediator(NotatDao(dataSource)),
+                    NotatRepository(NotatDao(dataSource)),
                 ),
         )
 

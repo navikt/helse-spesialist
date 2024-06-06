@@ -14,7 +14,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.notat.NotatDao
-import no.nav.helse.spesialist.api.notat.NotatMediator
+import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType.TOTRINNSVURDERING_ATTESTERT
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
@@ -39,7 +39,7 @@ internal class GodkjenningService(
             TotrinnsvurderingDao(dataSource),
             oppgaveDao,
             periodehistorikkDao,
-            NotatMediator(
+            NotatRepository(
                 NotatDao(dataSource),
             ),
         ),

@@ -31,7 +31,7 @@ import no.nav.helse.spesialist.api.graphql.RequestParser
 import no.nav.helse.spesialist.api.graphql.SchemaBuilder
 import no.nav.helse.spesialist.api.graphql.queryHandler
 import no.nav.helse.spesialist.api.notat.NotatDao
-import no.nav.helse.spesialist.api.notat.NotatMediator
+import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
@@ -95,7 +95,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                 reservasjonClient = reservasjonClient,
                 avviksvurderinghenter = avviksvurderinghenter,
                 behandlingsstatistikkMediator = behandlingsstatistikkMediator,
-                notatMediator = notatMediator,
+                notatRepository = notatRepository,
                 saksbehandlerhåndterer = saksbehandlerhåndterer,
                 oppgavehåndterer = oppgavehåndterer,
                 totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
@@ -216,7 +216,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                         reservasjonClient = mockk<ReservasjonClient>(relaxed = true),
                         avviksvurderinghenter = mockk<Avviksvurderinghenter>(relaxed = true),
                         behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkMediator>(relaxed = true),
-                        notatMediator = NotatMediator(notatDao),
+                        notatRepository = NotatRepository(notatDao),
                         saksbehandlerhåndterer = mockk<Saksbehandlerhåndterer>(relaxed = true),
                         oppgavehåndterer = mockk<Oppgavehåndterer>(relaxed = true),
                         totrinnsvurderinghåndterer = mockk<Totrinnsvurderinghåndterer>(relaxed = true),

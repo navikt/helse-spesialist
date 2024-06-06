@@ -22,7 +22,7 @@ import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_UAVKLART
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
-import no.nav.helse.spesialist.api.notat.NotatMediator
+import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -39,7 +39,7 @@ class StansAutomatiskBehandlingMediatorTest {
     private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val utbetalingDao = mockk<UtbetalingDao>(relaxed = true)
-    private val notatMediator = mockk<NotatMediator>(relaxed = true)
+    private val notatRepository = mockk<NotatRepository>(relaxed = true)
     private val testRapid = TestRapid()
     private val subsumsjonsmelder = Subsumsjonsmelder("versjonAvKode", testRapid)
 
@@ -55,7 +55,7 @@ class StansAutomatiskBehandlingMediatorTest {
             periodehistorikkDao,
             oppgaveDao,
             utbetalingDao,
-            notatMediator,
+            notatRepository,
         ) { subsumsjonsmelder }
 
     @BeforeEach
@@ -111,7 +111,7 @@ class StansAutomatiskBehandlingMediatorTest {
 
         verify(exactly = 1) { stansAutomatiskBehandlingDao.lagreFraSpeil(fødselsnummer = FNR) }
         verify(exactly = 1) {
-            notatMediator.lagreForOppgaveId(
+            notatRepository.lagreForOppgaveId(
                 oppgaveId = any(),
                 tekst = "begrunnelse",
                 saksbehandler_oid = oid,

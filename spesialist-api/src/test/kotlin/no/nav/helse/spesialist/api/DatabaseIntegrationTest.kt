@@ -15,7 +15,7 @@ import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.notat.NotatDao
-import no.nav.helse.spesialist.api.notat.NotatMediator
+import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
@@ -113,7 +113,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected var sisteCommandContextId by Delegates.notNull<UUID>()
 
     protected val snapshotMediator = SnapshotMediator(snapshotApiDao, snapshotClient)
-    protected val notatMediator = mockk<NotatMediator>(relaxed = true)
+    protected val notatRepository = mockk<NotatRepository>(relaxed = true)
     protected val oppgavehåndterer = mockk<Oppgavehåndterer>(relaxed = true)
     protected val totrinnsvurderinghåndterer = mockk<Totrinnsvurderinghåndterer>(relaxed = true)
 

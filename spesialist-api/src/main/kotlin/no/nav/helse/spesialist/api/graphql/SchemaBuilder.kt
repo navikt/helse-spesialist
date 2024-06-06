@@ -33,7 +33,7 @@ import no.nav.helse.spesialist.api.graphql.query.OppgaverQuery
 import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQuery
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.spesialist.api.notat.NotatDao
-import no.nav.helse.spesialist.api.notat.NotatMediator
+import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
@@ -64,7 +64,7 @@ internal class SchemaBuilder(
     private val reservasjonClient: ReservasjonClient,
     private val avviksvurderinghenter: Avviksvurderinghenter,
     private val behandlingsstatistikkMediator: IBehandlingsstatistikkMediator,
-    private val notatMediator: NotatMediator,
+    private val notatRepository: NotatRepository,
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
     private val oppgavehåndterer: Oppgavehåndterer,
     private val totrinnsvurderinghåndterer: Totrinnsvurderinghåndterer,
@@ -183,7 +183,7 @@ internal class SchemaBuilder(
                     TopLevelObject(
                         PaVentMutation(
                             saksbehandlerhåndterer = saksbehandlerhåndterer,
-                            notatMediator = notatMediator,
+                            notatRepository = notatRepository,
                             periodehistorikkDao = periodehistorikkDao,
                         ),
                     ),

@@ -67,7 +67,7 @@ import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.notat.NotatDao
-import no.nav.helse.spesialist.api.notat.NotatMediator
+import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
@@ -97,7 +97,7 @@ internal class Kommandofabrikk(
     oppgaveMediator: () -> OppgaveMediator,
     private val totrinnsvurderingDao: TotrinnsvurderingDao = TotrinnsvurderingDao(dataSource),
     private val notatDao: NotatDao = NotatDao(dataSource),
-    private val notatMediator: NotatMediator = NotatMediator(notatDao),
+    private val notatRepository: NotatRepository = NotatRepository(notatDao),
     private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
     private val påVentDao: PåVentDao = PåVentDao(dataSource),
     private val totrinnsvurderingMediator: TotrinnsvurderingMediator =
@@ -105,7 +105,7 @@ internal class Kommandofabrikk(
             totrinnsvurderingDao,
             oppgaveDao,
             periodehistorikkDao,
-            notatMediator,
+            notatRepository,
         ),
     private val godkjenningMediator: GodkjenningMediator,
     private val automatisering: Automatisering,

@@ -4,11 +4,11 @@ import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class NotatMediator(
+class NotatRepository(
     private val notatDao: NotatDao,
 ) {
     private companion object {
-        private val log = LoggerFactory.getLogger(NotatMediator::class.java)
+        private val log = LoggerFactory.getLogger(NotatRepository::class.java)
     }
 
     fun lagreForOppgaveId(

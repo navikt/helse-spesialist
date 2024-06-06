@@ -20,7 +20,7 @@ import no.nav.helse.modell.vilkårsprøving.SubsumsjonEvent
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.graphql.schema.UnntattFraAutomatiskGodkjenning
-import no.nav.helse.spesialist.api.notat.NotatMediator
+import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING
 import org.slf4j.LoggerFactory
@@ -32,7 +32,7 @@ class StansAutomatiskBehandlingMediator(
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val oppgaveDao: OppgaveDao,
     private val utbetalingDao: UtbetalingDao,
-    private val notatMediator: NotatMediator,
+    private val notatRepository: NotatRepository,
     private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
 ) : StansAutomatiskBehandlinghåndterer {
     private val logg = LoggerFactory.getLogger(this::class.java)
@@ -100,7 +100,7 @@ class StansAutomatiskBehandlingMediator(
         saksbehandlerOid: UUID,
     ) = try {
         val oppgaveId = fødselsnummer.finnOppgaveId()
-        notatMediator.lagreForOppgaveId(oppgaveId, begrunnelse, saksbehandlerOid, NotatType.OpphevStans)
+        notatRepository.lagreForOppgaveId(oppgaveId, begrunnelse, saksbehandlerOid, NotatType.OpphevStans)
     } catch (e: Exception) {
         sikkerlogg.error("Fant ikke oppgave for $fødselsnummer. Fikk ikke lagret notat om oppheving av stans")
     }
