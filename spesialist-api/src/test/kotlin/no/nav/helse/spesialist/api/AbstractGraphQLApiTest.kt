@@ -42,7 +42,7 @@ import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
-import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
+import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
@@ -88,7 +88,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                 varselRepository = apiVarselRepository,
                 oppgaveApiDao = oppgaveApiDao,
                 periodehistorikkDao = periodehistorikkDao,
-                snapshotMediator = snapshotMediator,
+                snapshotService = snapshotService,
                 notatDao = notatDao,
                 totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                 påVentApiDao = påVentApiDao,
@@ -209,7 +209,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                         varselRepository = ApiVarselRepository(dataSource),
                         oppgaveApiDao = OppgaveApiDao(dataSource),
                         periodehistorikkDao = PeriodehistorikkDao(dataSource),
-                        snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), mockk<SnapshotClient>(relaxed = true)),
+                        snapshotService = SnapshotService(SnapshotApiDao(dataSource), mockk<SnapshotClient>(relaxed = true)),
                         notatDao = notatDao,
                         totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource),
                         påVentApiDao = PåVentApiDao(dataSource),

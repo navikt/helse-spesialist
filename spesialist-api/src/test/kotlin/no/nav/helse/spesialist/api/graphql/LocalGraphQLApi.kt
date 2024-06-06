@@ -71,7 +71,7 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
-import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
+import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
@@ -241,7 +241,7 @@ fun main() =
                 skjermedePersonerGruppeId = UUID.randomUUID(),
                 kode7Saksbehandlergruppe = UUID.randomUUID(),
                 beslutterGruppeId = UUID.randomUUID(),
-                snapshotMediator = SnapshotMediator(snapshotApiDao, mockk(relaxed = true)),
+                snapshotService = SnapshotService(snapshotApiDao, mockk(relaxed = true)),
                 behandlingsstatistikkMediator = behandlingsstatistikkMediator,
                 notatRepository = notatRepository,
                 saksbehandlerhåndtererProvider = { SneakySaksbehandlerhåndterer(randomOppgaver) },

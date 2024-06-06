@@ -30,7 +30,7 @@ import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
-import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
+import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
@@ -354,7 +354,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             notatDao = NotatDao(dataSource),
             totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource),
             påVentApiDao = PåVentApiDao(dataSource),
-            snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), snapshotClient),
+            snapshotService = SnapshotService(SnapshotApiDao(dataSource), snapshotClient),
             reservasjonClient = mockk(relaxed = true),
             oppgavehåndterer = mockk(relaxed = true),
             saksbehandlerhåndterer = mockk(relaxed = true),

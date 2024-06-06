@@ -59,7 +59,7 @@ import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
-import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
+import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
@@ -157,7 +157,7 @@ internal class SpesialistApp(
             notatRepository = notatRepository,
         )
 
-    private val snapshotMediator = SnapshotMediator(snapshotDao = snapshotApiDao, snapshotClient = snapshotClient)
+    private val snapshotService = SnapshotService(snapshotDao = snapshotApiDao, snapshotClient = snapshotClient)
     private lateinit var godkjenningService: GodkjenningService
 
     private val avviksvurderinghenter =
@@ -243,7 +243,7 @@ internal class SpesialistApp(
                 skjermedePersonerGruppeId = tilgangsgrupper.skjermedePersonerGruppeId,
                 kode7Saksbehandlergruppe = tilgangsgrupper.kode7GruppeId,
                 beslutterGruppeId = tilgangsgrupper.beslutterGruppeId,
-                snapshotMediator = snapshotMediator,
+                snapshotService = snapshotService,
                 behandlingsstatistikkMediator = behandlingsstatistikkService,
                 notatRepository = notatRepository,
                 saksbehandlerhåndtererProvider = { saksbehandlerMediator },

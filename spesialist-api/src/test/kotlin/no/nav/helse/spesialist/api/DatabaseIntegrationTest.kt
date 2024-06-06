@@ -27,7 +27,7 @@ import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
-import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
+import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
@@ -112,7 +112,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected var sisteOppgaveId by Delegates.notNull<Long>()
     protected var sisteCommandContextId by Delegates.notNull<UUID>()
 
-    protected val snapshotMediator = SnapshotMediator(snapshotApiDao, snapshotClient)
+    protected val snapshotService = SnapshotService(snapshotApiDao, snapshotClient)
     protected val notatRepository = mockk<NotatRepository>(relaxed = true)
     protected val oppgavehåndterer = mockk<Oppgavehåndterer>(relaxed = true)
     protected val totrinnsvurderinghåndterer = mockk<Totrinnsvurderinghåndterer>(relaxed = true)

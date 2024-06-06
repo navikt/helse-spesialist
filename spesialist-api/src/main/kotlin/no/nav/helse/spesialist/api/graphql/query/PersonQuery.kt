@@ -29,7 +29,7 @@ import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
-import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
+import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
@@ -49,7 +49,7 @@ class PersonQuery(
     private val notatDao: NotatDao,
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val påVentApiDao: PåVentApiDao,
-    private val snapshotMediator: SnapshotMediator,
+    private val snapshotService: SnapshotService,
     private val reservasjonClient: ReservasjonClient,
     private val oppgavehåndterer: Oppgavehåndterer,
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
@@ -107,7 +107,7 @@ class PersonQuery(
 
         val snapshot =
             try {
-                snapshotMediator.hentSnapshot(fødselsnummer)
+                snapshotService.hentSnapshot(fødselsnummer)
             } catch (e: Exception) {
                 sikkerLogg.error("feilet under henting av snapshot for {}", keyValue("fnr", fødselsnummer), e)
                 auditLog(env.graphQlContext, fødselsnummer, null, getSnapshotValidationError().message)
