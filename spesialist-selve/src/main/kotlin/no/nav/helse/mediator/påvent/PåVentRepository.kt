@@ -7,7 +7,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.PåVent
 import java.time.LocalDate
 import java.util.UUID
 
-class PåVentMediator(
+class PåVentRepository(
     private val dao: PåVentDao,
 ) {
     internal fun lagre(

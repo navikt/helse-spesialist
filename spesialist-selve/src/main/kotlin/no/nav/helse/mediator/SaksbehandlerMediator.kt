@@ -8,7 +8,7 @@ import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.mediator.overstyring.Overstyringlagrer
 import no.nav.helse.mediator.overstyring.Saksbehandlingsmelder
-import no.nav.helse.mediator.påvent.PåVentMediator
+import no.nav.helse.mediator.påvent.PåVentRepository
 import no.nav.helse.mediator.saksbehandler.SaksbehandlerLagrer
 import no.nav.helse.mediator.saksbehandler.SaksbehandlerMapper.tilApiversjon
 import no.nav.helse.modell.ManglerTilgang
@@ -153,7 +153,7 @@ internal class SaksbehandlerMediator(
     ) {
         try {
             oppgaveMediator.håndter(handling, saksbehandler)
-            PåVentMediator(påVentDao).apply {
+            PåVentRepository(påVentDao).apply {
                 this.lagre(
                     påVent = handling,
                     saksbehandlerOid = saksbehandler.oid(),
