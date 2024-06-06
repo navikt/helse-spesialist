@@ -22,7 +22,7 @@ import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.idForGruppe
 import no.nav.helse.mediator.oppgave.OppgaveDao
-import no.nav.helse.mediator.oppgave.OppgaveMediator
+import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.TestMelding
@@ -59,7 +59,7 @@ import java.util.UUID
 import kotlin.Int.Companion.MAX_VALUE
 import kotlin.random.Random.Default.nextLong
 
-internal class OppgaveMediatorTest {
+internal class OppgaveServiceTest {
     private companion object {
         private const val FNR = "12345678911"
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
@@ -95,7 +95,7 @@ internal class OppgaveMediatorTest {
     private val testRapid = TestRapid()
 
     private val mediator =
-        OppgaveMediator(
+        OppgaveService(
             meldingDao = meldingDao,
             oppgaveDao = oppgaveDao,
             tildelingDao = tildelingDao,

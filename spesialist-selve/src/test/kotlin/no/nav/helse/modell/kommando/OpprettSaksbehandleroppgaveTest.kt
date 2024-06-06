@@ -5,9 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import java.util.UUID
-import no.nav.helse.spesialist.test.lagFødselsnummer
-import no.nav.helse.mediator.oppgave.OppgaveMediator
+import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
@@ -47,6 +45,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.OVERGANG_FRA_IT
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -54,6 +53,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Execution
 import org.junit.jupiter.api.parallel.ExecutionMode
+import java.util.UUID
 
 @Execution(ExecutionMode.SAME_THREAD)
 internal class OpprettSaksbehandleroppgaveTest {
@@ -62,7 +62,7 @@ internal class OpprettSaksbehandleroppgaveTest {
     private val FNR = lagFødselsnummer()
     private val hendelseId = UUID.randomUUID()
 
-    private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
+    private val oppgaveService = mockk<OppgaveService>(relaxed = true)
     private val automatisering = mockk<Automatisering>(relaxed = true)
     private val personDao = mockk<PersonDao>(relaxed = true)
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
@@ -84,19 +84,20 @@ internal class OpprettSaksbehandleroppgaveTest {
         utbetalingstype = Utbetalingtype.UTBETALING
         every { utbetaling.ingenUtbetaling() } returns true
     }
+
     @BeforeEach
     fun afterEach() {
         contextId = UUID.randomUUID()
         context = CommandContext(contextId)
         utbetalingstype = Utbetalingtype.UTBETALING
-        clearMocks(oppgaveMediator)
+        clearMocks(oppgaveService)
     }
 
     @Test
     fun `oppretter oppgave`() {
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+        verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
         val oppgave = slot.captured.invoke(1L)
         assertEquals(enOppgave(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING), oppgave)
     }
@@ -106,7 +107,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         every { automatisering.erStikkprøve(VEDTAKSPERIODE_ID, any()) } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+        verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         assertEquals(enOppgave(SØKNAD, STIKKPRØVE, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING), oppgave)
@@ -117,7 +118,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         every { risikovurderingDao.kreverSupersaksbehandler(VEDTAKSPERIODE_ID) } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+        verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         assertEquals(enOppgave(SØKNAD, RISK_QA, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING), oppgave)
@@ -128,7 +129,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         utbetalingstype = Utbetalingtype.REVURDERING
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+        verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         assertEquals(enOppgave(REVURDERING, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING), oppgave)
@@ -139,7 +140,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         every { personDao.findAdressebeskyttelse(FNR) } returns Adressebeskyttelse.Fortrolig
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+        verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         assertEquals(enOppgave(SØKNAD, FORTROLIG_ADRESSE, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING), oppgave)
@@ -150,7 +151,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         every { personDao.findAdressebeskyttelse(FNR) } returns Adressebeskyttelse.StrengtFortrolig
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+        verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         assertEquals(enOppgave(SØKNAD, STRENGT_FORTROLIG_ADRESSE, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING), oppgave)
@@ -161,7 +162,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         every { personDao.findAdressebeskyttelse(FNR) } returns Adressebeskyttelse.StrengtFortroligUtland
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+        verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         assertEquals(enOppgave(SØKNAD, STRENGT_FORTROLIG_ADRESSE, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING), oppgave)
@@ -172,7 +173,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         every { utbetaling.kunUtbetalingTilSykmeldt() } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+        verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         assertEquals(enOppgave(SØKNAD, UTBETALING_TIL_SYKMELDT, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING), oppgave)
@@ -183,7 +184,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         every { utbetaling.delvisRefusjon() } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+        verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         assertEquals(enOppgave(SØKNAD, DELVIS_REFUSJON, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING), oppgave)
@@ -194,7 +195,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         every { utbetaling.kunUtbetalingTilArbeidsgiver() } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+        verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
@@ -207,7 +208,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         every { utbetaling.ingenUtbetaling() } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+        verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
@@ -221,7 +222,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         every { sykefraværstilfelle.haster(VEDTAKSPERIODE_ID) } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+        verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
@@ -234,7 +235,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         every { sykefraværstilfelle.kreverSkjønnsfastsettelse(VEDTAKSPERIODE_ID) } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+        verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
@@ -247,7 +248,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         every { sykefraværstilfelle.erTilbakedatert(VEDTAKSPERIODE_ID) } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+        verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
@@ -261,7 +262,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         every { sykefraværstilfelle.haster(VEDTAKSPERIODE_ID) } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+        verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
@@ -274,7 +275,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         every { egenAnsattDao.erEgenAnsatt(FNR) } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+        verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
@@ -287,7 +288,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         every { vedtakDao.erSpesialsak(VEDTAKSPERIODE_ID) } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+        verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
@@ -300,7 +301,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         every { personDao.finnEnhetId(FNR) } returns "0393"
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+        verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
@@ -312,7 +313,7 @@ internal class OpprettSaksbehandleroppgaveTest {
     fun `oppretter oppgave med egenskap FLERE_ARBEIDSGIVERE`() {
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(opprettSaksbehandlerOppgaveCommand(inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE).execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+        verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
@@ -324,7 +325,7 @@ internal class OpprettSaksbehandleroppgaveTest {
     fun `oppretter oppgave med egenskap FORLENGELSE`() {
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(opprettSaksbehandlerOppgaveCommand(periodetype = FORLENGELSE).execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+        verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
@@ -336,7 +337,7 @@ internal class OpprettSaksbehandleroppgaveTest {
     fun `oppretter oppgave med egenskap INFOTRYGDFORLENGELSE`() {
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(opprettSaksbehandlerOppgaveCommand(periodetype = INFOTRYGDFORLENGELSE).execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+        verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
@@ -348,7 +349,7 @@ internal class OpprettSaksbehandleroppgaveTest {
     fun `oppretter oppgave med egenskap OVERGANG_FRA_IT`() {
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(opprettSaksbehandlerOppgaveCommand(periodetype = OVERGANG_FRA_IT).execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+        verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
@@ -361,7 +362,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         every { påVentDao.erPåVent(VEDTAKSPERIODE_ID) } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(opprettSaksbehandlerOppgaveCommand(periodetype = OVERGANG_FRA_IT).execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+        verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
@@ -375,7 +376,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         utbetalingstype = Utbetalingtype.REVURDERING
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+        verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         assertEquals(enOppgave(REVURDERING, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING), oppgave)
@@ -385,33 +386,38 @@ internal class OpprettSaksbehandleroppgaveTest {
     fun `legger til oppgave med kanAvvises lik false`() {
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(opprettSaksbehandlerOppgaveCommand(kanAvvises = false).execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+        verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
         val oppgave = slot.captured.invoke(1L)
         assertEquals(enOppgave(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, kanAvvises = false), oppgave)
     }
 
-    private fun enOppgave(vararg egenskaper: Egenskap, kanAvvises: Boolean = true) =
-        Oppgave.nyOppgave(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), kanAvvises, egenskaper.toList())
+    private fun enOppgave(
+        vararg egenskaper: Egenskap,
+        kanAvvises: Boolean = true,
+    ) = Oppgave.nyOppgave(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), kanAvvises, egenskaper.toList())
 
-    private fun opprettSaksbehandlerOppgaveCommand(inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER, periodetype: Periodetype = FØRSTEGANGSBEHANDLING, kanAvvises: Boolean = true) =
-        OpprettSaksbehandleroppgave(
-            fødselsnummer = FNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            oppgaveMediator = oppgaveMediator,
-            automatisering = automatisering,
-            hendelseId = hendelseId,
-            personDao = personDao,
-            risikovurderingDao = risikovurderingDao,
-            egenAnsattDao = egenAnsattDao,
-            utbetalingId = UTBETALING_ID,
-            utbetalingtype = utbetalingstype,
-            sykefraværstilfelle = sykefraværstilfelle,
-            utbetaling = utbetaling,
-            vergemålDao = vergemålDao,
-            inntektskilde = inntektskilde,
-            periodetype = periodetype,
-            kanAvvises = kanAvvises,
-            vedtakDao = vedtakDao,
-            påVentDao = påVentDao,
-        )
+    private fun opprettSaksbehandlerOppgaveCommand(
+        inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+        periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
+        kanAvvises: Boolean = true,
+    ) = OpprettSaksbehandleroppgave(
+        fødselsnummer = FNR,
+        vedtaksperiodeId = VEDTAKSPERIODE_ID,
+        oppgaveService = oppgaveService,
+        automatisering = automatisering,
+        hendelseId = hendelseId,
+        personDao = personDao,
+        risikovurderingDao = risikovurderingDao,
+        egenAnsattDao = egenAnsattDao,
+        utbetalingId = UTBETALING_ID,
+        utbetalingtype = utbetalingstype,
+        sykefraværstilfelle = sykefraværstilfelle,
+        utbetaling = utbetaling,
+        vergemålDao = vergemålDao,
+        inntektskilde = inntektskilde,
+        periodetype = periodetype,
+        kanAvvises = kanAvvises,
+        vedtakDao = vedtakDao,
+        påVentDao = påVentDao,
+    )
 }

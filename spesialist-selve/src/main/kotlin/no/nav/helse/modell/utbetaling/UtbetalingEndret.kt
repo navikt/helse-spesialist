@@ -5,7 +5,7 @@ import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveDao
-import no.nav.helse.mediator.oppgave.OppgaveMediator
+import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.ReserverPersonHvisTildeltCommand
@@ -113,7 +113,7 @@ internal class UtbetalingEndretCommand(
     reservasjonDao: ReservasjonDao,
     oppgaveDao: OppgaveDao,
     tildelingDao: TildelingDao,
-    oppgaveMediator: OppgaveMediator,
+    oppgaveService: OppgaveService,
     totrinnsvurderingMediator: TotrinnsvurderingMediator,
     json: String,
 ) : MacroCommand() {
@@ -141,6 +141,6 @@ internal class UtbetalingEndretCommand(
                 oppgaveDao = oppgaveDao,
                 totrinnsvurderingMediator = totrinnsvurderingMediator,
             ),
-            OppdaterOppgavestatusCommand(utbetalingId, gjeldendeStatus, oppgaveMediator),
+            OppdaterOppgavestatusCommand(utbetalingId, gjeldendeStatus, oppgaveService),
         )
 }

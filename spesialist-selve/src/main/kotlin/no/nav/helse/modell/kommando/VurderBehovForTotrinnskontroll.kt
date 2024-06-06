@@ -1,6 +1,6 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.mediator.oppgave.OppgaveMediator
+import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
@@ -11,7 +11,7 @@ import java.util.UUID
 internal class VurderBehovForTotrinnskontroll(
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
-    private val oppgaveMediator: OppgaveMediator,
+    private val oppgaveService: OppgaveService,
     private val overstyringDao: OverstyringDao,
     private val totrinnsvurderingMediator: TotrinnsvurderingMediator,
     private val sykefraværstilfelle: Sykefraværstilfelle,
@@ -22,7 +22,7 @@ internal class VurderBehovForTotrinnskontroll(
 
     override fun execute(context: CommandContext): Boolean {
         val kreverTotrinnsvurdering = sykefraværstilfelle.kreverTotrinnsvurdering(vedtaksperiodeId)
-        val vedtaksperiodeHarFerdigstiltOppgave = oppgaveMediator.harFerdigstiltOppgave(vedtaksperiodeId)
+        val vedtaksperiodeHarFerdigstiltOppgave = oppgaveService.harFerdigstiltOppgave(vedtaksperiodeId)
         val overstyringer = finnOverstyringerMedType()
 
         if ((kreverTotrinnsvurdering && !vedtaksperiodeHarFerdigstiltOppgave) || overstyringer.isNotEmpty()) {
@@ -34,7 +34,7 @@ internal class VurderBehovForTotrinnskontroll(
             }
             val behandlendeSaksbehandlerOid = totrinnsvurdering.saksbehandler
             if (behandlendeSaksbehandlerOid != null) {
-                oppgaveMediator.reserverOppgave(
+                oppgaveService.reserverOppgave(
                     saksbehandleroid = behandlendeSaksbehandlerOid,
                     fødselsnummer = fødselsnummer,
                 )

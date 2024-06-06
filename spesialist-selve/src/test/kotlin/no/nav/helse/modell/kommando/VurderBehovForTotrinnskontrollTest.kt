@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.februar
 import no.nav.helse.januar
-import no.nav.helse.mediator.oppgave.OppgaveMediator
+import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
@@ -29,7 +29,7 @@ internal class VurderBehovForTotrinnskontrollTest {
     }
 
     private val totrinnsvurderingMediator = mockk<TotrinnsvurderingMediator>(relaxed = true)
-    private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
+    private val oppgaveService = mockk<OppgaveService>(relaxed = true)
     private val overstyringDao = mockk<OverstyringDao>(relaxed = true)
     private lateinit var context: CommandContext
 
@@ -47,7 +47,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         VurderBehovForTotrinnskontroll(
             fødselsnummer = FØDSELSNUMMER,
             vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
-            oppgaveMediator = oppgaveMediator,
+            oppgaveService = oppgaveService,
             overstyringDao = overstyringDao,
             totrinnsvurderingMediator = totrinnsvurderingMediator,
             sykefraværstilfelle = sykefraværstilfelle,
@@ -73,7 +73,7 @@ internal class VurderBehovForTotrinnskontrollTest {
             Varsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), VEDTAKSPERIODE_ID_2),
             UUID.randomUUID(),
         )
-        every { oppgaveMediator.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
+        every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
         assertTrue(command.execute(context))
         verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
@@ -88,7 +88,7 @@ internal class VurderBehovForTotrinnskontrollTest {
             Varsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), VEDTAKSPERIODE_ID_1, status),
             UUID.randomUUID(),
         )
-        every { oppgaveMediator.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
+        every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
         assertTrue(command.execute(context))
         verify(exactly = 0) { totrinnsvurderingMediator.opprett(any()) }
@@ -113,7 +113,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         assertTrue(command.execute(context))
 
         verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
-        verify(exactly = 1) { oppgaveMediator.reserverOppgave(saksbehander, FØDSELSNUMMER) }
+        verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehander, FØDSELSNUMMER) }
     }
 
     @Test
@@ -136,7 +136,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         assertTrue(command.execute(context))
 
         verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
-        verify(exactly = 1) { oppgaveMediator.reserverOppgave(saksbehander, FØDSELSNUMMER) }
+        verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehander, FØDSELSNUMMER) }
         verify(exactly = 1) { totrinnsvurderingMediator.settAutomatiskRetur(VEDTAKSPERIODE_ID_2) }
     }
 

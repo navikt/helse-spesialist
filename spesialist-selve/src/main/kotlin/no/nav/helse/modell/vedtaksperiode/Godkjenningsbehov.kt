@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.VedtaksperiodemeldingOld
-import no.nav.helse.mediator.oppgave.OppgaveMediator
+import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
@@ -195,7 +195,7 @@ internal class GodkjenningsbehovCommand(
     periodehistorikkDao: PeriodehistorikkDao,
     snapshotDao: SnapshotDao,
     snapshotClient: ISnapshotClient,
-    oppgaveMediator: OppgaveMediator,
+    oppgaveService: OppgaveService,
     generasjonRepository: GenerasjonRepository,
     godkjenningMediator: GodkjenningMediator,
     totrinnsvurderingMediator: TotrinnsvurderingMediator,
@@ -297,7 +297,7 @@ internal class GodkjenningsbehovCommand(
             OpprettSaksbehandleroppgave(
                 fødselsnummer = fødselsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
-                oppgaveMediator = oppgaveMediator,
+                oppgaveService = oppgaveService,
                 automatisering = automatisering,
                 hendelseId = id,
                 personDao = personDao,
@@ -317,7 +317,7 @@ internal class GodkjenningsbehovCommand(
             VurderBehovForTotrinnskontroll(
                 fødselsnummer = fødselsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
-                oppgaveMediator = oppgaveMediator,
+                oppgaveService = oppgaveService,
                 overstyringDao = overstyringDao,
                 totrinnsvurderingMediator = totrinnsvurderingMediator,
                 sykefraværstilfelle = sykefraværstilfelle,

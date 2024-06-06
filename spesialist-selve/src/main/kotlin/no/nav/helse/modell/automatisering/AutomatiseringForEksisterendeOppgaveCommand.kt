@@ -1,7 +1,7 @@
 package no.nav.helse.modell.automatisering
 
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.oppgave.OppgaveMediator
+import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
@@ -18,7 +18,7 @@ internal class AutomatiseringForEksisterendeOppgaveCommand(
     private val automatisering: Automatisering,
     private val godkjenningsbehovJson: String,
     private val godkjenningMediator: GodkjenningMediator,
-    private val oppgaveMediator: OppgaveMediator,
+    private val oppgaveService: OppgaveService,
     private val utbetaling: Utbetaling,
     private val periodetype: Periodetype,
     private val sykefraværstilfelle: Sykefraværstilfelle,
@@ -49,7 +49,7 @@ internal class AutomatiseringForEksisterendeOppgaveCommand(
                 spleisBehandlingId = spleisBehandlingId,
             )
             logg.info("Oppgave avbrytes for vedtaksperiode $vedtaksperiodeId på grunn av automatisering")
-            oppgaveMediator.avbrytOppgaveFor(vedtaksperiodeId)
+            oppgaveService.avbrytOppgaveFor(vedtaksperiodeId)
         }
         return true
     }

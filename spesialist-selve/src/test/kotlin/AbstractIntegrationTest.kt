@@ -7,7 +7,7 @@ import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.GodkjenningService
 import no.nav.helse.mediator.oppgave.OppgaveDao
-import no.nav.helse.mediator.oppgave.OppgaveMediator
+import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
@@ -33,8 +33,8 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     private val meldingDao = MeldingDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
 
-    private val oppgaveMediator =
-        OppgaveMediator(
+    private val oppgaveService =
+        OppgaveService(
             oppgaveDao = OppgaveDao(dataSource),
             tildelingDao = TildelingDao(dataSource),
             reservasjonDao = reservasjonDao,
@@ -54,7 +54,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
             meldingDao = meldingDao,
             overstyringDao = OverstyringDao(dataSource),
             rapidsConnection = testRapid,
-            oppgaveMediator = oppgaveMediator,
+            oppgaveService = oppgaveService,
             reservasjonDao = reservasjonDao,
             periodehistorikkDao = periodehistorikkDao,
             saksbehandlerRepository = saksbehandlerDao,

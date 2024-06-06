@@ -3,7 +3,7 @@ package no.nav.helse.modell.vedtaksperiode
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
-import no.nav.helse.mediator.oppgave.OppgaveMediator
+import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.kommando.AvbrytCommand
@@ -58,11 +58,11 @@ internal class VedtaksperiodeForkastetCommand(
     commandContextDao: CommandContextDao,
     snapshotDao: SnapshotDao,
     snapshotClient: ISnapshotClient,
-    oppgaveMediator: OppgaveMediator,
+    oppgaveService: OppgaveService,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
-            AvbrytCommand(vedtaksperiodeId, commandContextDao, oppgaveMediator),
+            AvbrytCommand(vedtaksperiodeId, commandContextDao, oppgaveService),
             OppdaterSnapshotCommand(
                 snapshotClient = snapshotClient,
                 snapshotDao = snapshotDao,

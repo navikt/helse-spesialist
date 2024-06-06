@@ -12,7 +12,7 @@ import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.oppgave.OppgaveDao
-import no.nav.helse.mediator.oppgave.OppgaveMediator
+import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.automatisering.Automatisering
@@ -75,8 +75,8 @@ internal class TestMediator(
             generasjonDao,
         )
     private val tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
-    private val oppgaveMediator =
-        OppgaveMediator(
+    private val oppgaveService =
+        OppgaveService(
             meldingDao = meldingDao,
             oppgaveDao = OppgaveDao(dataSource),
             tildelingDao = tildelingDao,
@@ -93,7 +93,7 @@ internal class TestMediator(
             dataSource,
             "versjonAvKode",
             testRapid,
-            oppgaveMediator,
+            oppgaveService,
             tilgangsgrupper,
             stansAutomatiskBehandlingMediator,
         )
@@ -131,7 +131,7 @@ internal class TestMediator(
         Kommandofabrikk(
             dataSource = dataSource,
             snapshotClient = snapshotClient,
-            oppgaveMediator = { oppgaveMediator },
+            oppgaveService = { oppgaveService },
             godkjenningMediator = godkjenningMediator,
             automatisering = automatisering,
         )

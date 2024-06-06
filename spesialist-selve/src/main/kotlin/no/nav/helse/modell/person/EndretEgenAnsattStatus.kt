@@ -3,7 +3,7 @@ package no.nav.helse.modell.person
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.meldinger.Personmelding
-import no.nav.helse.mediator.oppgave.OppgaveMediator
+import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
@@ -52,7 +52,7 @@ internal class EndretEgenAnsattStatusCommand(
     erEgenAnsatt: Boolean,
     opprettet: LocalDateTime,
     egenAnsattDao: EgenAnsattDao,
-    oppgaveMediator: OppgaveMediator,
+    oppgaveService: OppgaveService,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -60,7 +60,7 @@ internal class EndretEgenAnsattStatusCommand(
                 egenAnsattDao.lagre(fødselsnummer, erEgenAnsatt, opprettet)
             },
             ikkesuspenderendeCommand("endretEgenAnsattStatus") {
-                oppgaveMediator.endretEgenAnsattStatus(erEgenAnsatt, fødselsnummer)
+                oppgaveService.endretEgenAnsattStatus(erEgenAnsatt, fødselsnummer)
             },
         )
 }

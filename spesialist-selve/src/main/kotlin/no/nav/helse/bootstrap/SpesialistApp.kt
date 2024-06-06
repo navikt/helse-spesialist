@@ -22,7 +22,7 @@ import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.TilgangskontrollørForReservasjon
 import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.mediator.oppgave.OppgaveDao
-import no.nav.helse.mediator.oppgave.OppgaveMediator
+import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.automatisering.Automatisering
@@ -126,7 +126,7 @@ internal class SpesialistApp(
 
     private lateinit var meldingMediator: MeldingMediator
     private lateinit var saksbehandlerMediator: SaksbehandlerMediator
-    private lateinit var oppgaveMediator: OppgaveMediator
+    private lateinit var oppgaveService: OppgaveService
     private lateinit var dokumentMediator: DokumentMediator
     private lateinit var subsumsjonsmelder: Subsumsjonsmelder
 
@@ -215,7 +215,7 @@ internal class SpesialistApp(
         Kommandofabrikk(
             dataSource = dataSource,
             snapshotClient = snapshotClient,
-            oppgaveMediator = { oppgaveMediator },
+            oppgaveService = { oppgaveService },
             godkjenningMediator = godkjenningMediator,
             automatisering = automatisering,
         )
@@ -247,7 +247,7 @@ internal class SpesialistApp(
                 behandlingsstatistikkMediator = behandlingsstatistikkService,
                 notatRepository = notatRepository,
                 saksbehandlerhåndtererProvider = { saksbehandlerMediator },
-                oppgavehåndtererProvider = { oppgaveMediator },
+                oppgavehåndtererProvider = { oppgaveService },
                 totrinnsvurderinghåndterer = totrinnsvurderingMediator,
                 godkjenninghåndtererProvider = { godkjenningService },
                 personhåndtererProvider = { meldingMediator },
@@ -263,8 +263,8 @@ internal class SpesialistApp(
 
     fun start() {
         rapidsConnection.register(this)
-        oppgaveMediator =
-            OppgaveMediator(
+        oppgaveService =
+            OppgaveService(
                 meldingDao = meldingDao,
                 oppgaveDao = oppgaveDao,
                 tildelingDao = tildelingDao,
@@ -291,7 +291,7 @@ internal class SpesialistApp(
                 dataSource = dataSource,
                 versjonAvKode = versjonAvKode,
                 rapidsConnection = rapidsConnection,
-                oppgaveMediator = oppgaveMediator,
+                oppgaveService = oppgaveService,
                 tilgangsgrupper = tilgangsgrupper,
                 stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
             )
@@ -300,7 +300,7 @@ internal class SpesialistApp(
             GodkjenningService(
                 dataSource = dataSource,
                 rapidsConnection = rapidsConnection,
-                oppgaveMediator = oppgaveMediator,
+                oppgaveService = oppgaveService,
                 saksbehandlerRepository = saksbehandlerDao,
             )
         subsumsjonsmelder = Subsumsjonsmelder(versjonAvKode, rapidsConnection)

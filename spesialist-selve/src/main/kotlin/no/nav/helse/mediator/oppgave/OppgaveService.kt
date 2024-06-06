@@ -53,7 +53,7 @@ interface Oppgavefinner {
     )
 }
 
-internal class OppgaveMediator(
+internal class OppgaveService(
     private val meldingDao: MeldingDao,
     private val oppgaveDao: OppgaveDao,
     private val tildelingDao: TildelingDao,
@@ -80,7 +80,7 @@ internal class OppgaveMediator(
         tildelVedReservasjon(fødselsnummer, oppgave)
         Oppgavelagrer(tildelingDao).apply {
             oppgave.accept(this)
-            this.lagre(this@OppgaveMediator, contextId)
+            this.lagre(this@OppgaveService, contextId)
         }
         oppgavemelder.oppgaveOpprettet(oppgave)
     }
@@ -100,7 +100,7 @@ internal class OppgaveMediator(
         val returverdi = oppgaveBlock(oppgave)
         Oppgavelagrer(tildelingDao).apply {
             oppgave.accept(this)
-            oppdater(this@OppgaveMediator)
+            oppdater(this@OppgaveService)
         }
         return returverdi
     }

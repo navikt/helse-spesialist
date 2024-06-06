@@ -5,7 +5,7 @@ import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
-import no.nav.helse.mediator.oppgave.OppgaveMediator
+import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.mediator.overstyring.Overstyringlagrer
 import no.nav.helse.mediator.overstyring.Saksbehandlingsmelder
 import no.nav.helse.mediator.påvent.PåVentRepository
@@ -81,7 +81,7 @@ internal class SaksbehandlerMediator(
     dataSource: DataSource,
     private val versjonAvKode: String,
     private val rapidsConnection: RapidsConnection,
-    private val oppgaveMediator: OppgaveMediator,
+    private val oppgaveService: OppgaveService,
     private val tilgangsgrupper: Tilgangsgrupper,
     private val stansAutomatiskBehandlingMediator: StansAutomatiskBehandlingMediator,
 ) : Saksbehandlerhåndterer {
@@ -131,7 +131,7 @@ internal class SaksbehandlerMediator(
         saksbehandler: Saksbehandler,
     ) {
         try {
-            oppgaveMediator.håndter(handling, saksbehandler)
+            oppgaveService.håndter(handling, saksbehandler)
         } catch (e: Modellfeil) {
             throw e.tilApiversjon()
         }
@@ -152,7 +152,7 @@ internal class SaksbehandlerMediator(
         saksbehandler: Saksbehandler,
     ) {
         try {
-            oppgaveMediator.håndter(handling, saksbehandler)
+            oppgaveService.håndter(handling, saksbehandler)
             PåVentRepository(påVentDao).apply {
                 this.lagre(
                     påVent = handling,
@@ -173,7 +173,7 @@ internal class SaksbehandlerMediator(
         saksbehandler: Saksbehandler,
     ) {
         val fødselsnummer = handling.gjelderFødselsnummer()
-        oppgaveMediator.håndter(handling)
+        oppgaveService.håndter(handling)
         reservasjonDao.reserverPerson(saksbehandler.oid(), fødselsnummer)
         sikkerlogg.info("Reserverer person $fødselsnummer til saksbehandler $saksbehandler")
         Overstyringlagrer(overstyringDao).apply {

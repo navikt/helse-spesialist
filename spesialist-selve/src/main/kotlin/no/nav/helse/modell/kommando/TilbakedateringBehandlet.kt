@@ -3,7 +3,7 @@ package no.nav.helse.modell.kommando
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.meldinger.PersonmeldingOld
-import no.nav.helse.mediator.oppgave.OppgaveMediator
+import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringForEksisterendeOppgaveCommand
 import no.nav.helse.modell.automatisering.SettTidligereAutomatiseringInaktivCommand
@@ -58,7 +58,7 @@ internal class TilbakedateringGodkjentCommand(
     utbetaling: Utbetaling,
     automatisering: Automatisering,
     oppgaveDataForAutomatisering: OppgaveDataForAutomatisering,
-    oppgaveMediator: OppgaveMediator,
+    oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
     spleisBehandlingId: UUID?,
     organisasjonsnummer: String,
@@ -66,7 +66,7 @@ internal class TilbakedateringGodkjentCommand(
     override val commands: List<Command> =
         listOf(
             ikkesuspenderendeCommand("fjernTilbakedatertEgenskap") {
-                oppgaveMediator.fjernTilbakedatert(oppgaveDataForAutomatisering.vedtaksperiodeId)
+                oppgaveService.fjernTilbakedatert(oppgaveDataForAutomatisering.vedtaksperiodeId)
             },
             SettTidligereAutomatiseringInaktivCommand(
                 vedtaksperiodeId = oppgaveDataForAutomatisering.vedtaksperiodeId,
@@ -80,7 +80,7 @@ internal class TilbakedateringGodkjentCommand(
                 automatisering = automatisering,
                 godkjenningsbehovJson = oppgaveDataForAutomatisering.godkjenningsbehovJson,
                 godkjenningMediator = godkjenningMediator,
-                oppgaveMediator = oppgaveMediator,
+                oppgaveService = oppgaveService,
                 utbetaling = utbetaling,
                 periodetype = oppgaveDataForAutomatisering.periodetype,
                 sykefraværstilfelle = sykefraværstilfelle,

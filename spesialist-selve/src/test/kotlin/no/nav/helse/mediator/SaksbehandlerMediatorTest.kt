@@ -9,7 +9,7 @@ import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.februar
 import no.nav.helse.januar
-import no.nav.helse.mediator.oppgave.OppgaveMediator
+import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -66,8 +66,8 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             utbetalingDao,
             NotatRepository(notatDao),
         ) { Subsumsjonsmelder("versjonAvKode", testRapid) }
-    private val oppgaveMediator =
-        OppgaveMediator(
+    private val oppgaveService =
+        OppgaveService(
             meldingDao,
             oppgaveDao,
             tildelingDbDao,
@@ -80,7 +80,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             tilgangsgrupper,
         )
     private val mediator =
-        SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, oppgaveMediator, tilgangsgrupper, stansAutomatiskBehandlingMediator)
+        SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, oppgaveService, tilgangsgrupper, stansAutomatiskBehandlingMediator)
 
     private val AKTØR_ID = lagAktørId()
     private val FØDSELSNUMMER = lagFødselsnummer()

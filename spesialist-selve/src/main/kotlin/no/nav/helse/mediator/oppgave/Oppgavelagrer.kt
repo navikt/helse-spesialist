@@ -18,11 +18,11 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
     private var totrinnsvurderingForLagring: TotrinnsvurderingFraDatabase? = null
 
     internal fun lagre(
-        oppgaveMediator: OppgaveMediator,
+        oppgaveService: OppgaveService,
         contextId: UUID,
     ) {
         val oppgave = oppgaveForLagring
-        oppgaveMediator.opprett(
+        oppgaveService.opprett(
             id = oppgave.id,
             contextId = contextId,
             vedtaksperiodeId = oppgave.vedtaksperiodeId,
@@ -38,12 +38,12 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
         }
 
         val totrinnsvurdering = totrinnsvurderingForLagring
-        if (totrinnsvurdering != null) oppgaveMediator.lagreTotrinnsvurdering(totrinnsvurdering)
+        if (totrinnsvurdering != null) oppgaveService.lagreTotrinnsvurdering(totrinnsvurdering)
     }
 
-    internal fun oppdater(oppgaveMediator: OppgaveMediator) {
+    internal fun oppdater(oppgaveService: OppgaveService) {
         val oppgave = oppgaveForLagring
-        oppgaveMediator.oppdater(
+        oppgaveService.oppdater(
             oppgaveId = oppgave.id,
             status = oppgave.status,
             ferdigstiltAvIdent = oppgave.ferdigstiltAvIdent,
@@ -57,7 +57,7 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
         }
 
         val totrinnsvurdering = totrinnsvurderingForLagring
-        if (totrinnsvurdering != null) oppgaveMediator.lagreTotrinnsvurdering(totrinnsvurdering)
+        if (totrinnsvurdering != null) oppgaveService.lagreTotrinnsvurdering(totrinnsvurdering)
     }
 
     override fun visitOppgave(

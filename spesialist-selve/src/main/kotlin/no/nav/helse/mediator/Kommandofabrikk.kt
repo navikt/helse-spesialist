@@ -10,7 +10,7 @@ import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveDao
-import no.nav.helse.mediator.oppgave.OppgaveMediator
+import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.SnapshotDao
@@ -94,7 +94,7 @@ internal class Kommandofabrikk(
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     private val generasjonDao: GenerasjonDao = GenerasjonDao(dataSource),
     private val snapshotClient: ISnapshotClient,
-    oppgaveMediator: () -> OppgaveMediator,
+    oppgaveService: () -> OppgaveService,
     private val totrinnsvurderingDao: TotrinnsvurderingDao = TotrinnsvurderingDao(dataSource),
     private val notatDao: NotatDao = NotatDao(dataSource),
     private val notatRepository: NotatRepository = NotatRepository(notatDao),
@@ -123,7 +123,7 @@ internal class Kommandofabrikk(
     private val sykefraværstilfelleDao = SykefraværstilfelleDao(dataSource)
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
     private val metrikkDao = MetrikkDao(dataSource)
-    private val oppgaveMediator: OppgaveMediator by lazy { oppgaveMediator() }
+    private val oppgaveService: OppgaveService by lazy { oppgaveService() }
     private var commandContext: CommandContext? = null
     private val observers: MutableList<CommandContextObserver> = mutableListOf()
 
@@ -190,7 +190,7 @@ internal class Kommandofabrikk(
             erEgenAnsatt = melding.erEgenAnsatt,
             opprettet = melding.opprettet,
             egenAnsattDao = egenAnsattDao,
-            oppgaveMediator = oppgaveMediator,
+            oppgaveService = oppgaveService,
         )
     }
 
@@ -220,7 +220,7 @@ internal class Kommandofabrikk(
             automatisering = automatisering,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             oppgaveDao = oppgaveDao,
-            oppgaveMediator = oppgaveMediator,
+            oppgaveService = oppgaveService,
             generasjonRepository = generasjonRepository,
             godkjenningMediator = godkjenningMediator,
             spleisBehandlingId = vedtaksperiode.gjeldendeBehandlingId,
@@ -248,7 +248,7 @@ internal class Kommandofabrikk(
             utbetaling = utbetaling,
             automatisering = automatisering,
             oppgaveDataForAutomatisering = oppgaveDataForAutomatisering,
-            oppgaveMediator = oppgaveMediator,
+            oppgaveService = oppgaveService,
             godkjenningMediator = godkjenningMediator,
             spleisBehandlingId = vedtaksperiode.gjeldendeBehandlingId,
             organisasjonsnummer = vedtaksperiode.organisasjonsnummer(),
@@ -261,7 +261,7 @@ internal class Kommandofabrikk(
             utbetalingDao = utbetalingDao,
             periodehistorikkDao = periodehistorikkDao,
             commandContextDao = commandContextDao,
-            oppgaveMediator = oppgaveMediator,
+            oppgaveService = oppgaveService,
         )
     }
 
@@ -337,7 +337,7 @@ internal class Kommandofabrikk(
             reservasjonDao = reservasjonDao,
             oppgaveDao = oppgaveDao,
             tildelingDao = tildelingDao,
-            oppgaveMediator = oppgaveMediator,
+            oppgaveService = oppgaveService,
             totrinnsvurderingMediator = totrinnsvurderingMediator,
             json = hendelse.toJson(),
         )
@@ -352,7 +352,7 @@ internal class Kommandofabrikk(
             commandContextDao = commandContextDao,
             snapshotDao = snapshotDao,
             snapshotClient = snapshotClient,
-            oppgaveMediator = oppgaveMediator,
+            oppgaveService = oppgaveService,
         )
     }
 
@@ -425,7 +425,7 @@ internal class Kommandofabrikk(
             periodehistorikkDao = periodehistorikkDao,
             snapshotDao = snapshotDao,
             snapshotClient = snapshotClient,
-            oppgaveMediator = oppgaveMediator,
+            oppgaveService = oppgaveService,
             generasjonRepository = generasjonRepository,
             godkjenningMediator = godkjenningMediator,
             totrinnsvurderingMediator = totrinnsvurderingMediator,

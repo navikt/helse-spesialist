@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.meldinger.PersonmeldingOld
 import no.nav.helse.mediator.oppgave.OppgaveDao
-import no.nav.helse.mediator.oppgave.OppgaveMediator
+import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringForEksisterendeOppgaveCommand
 import no.nav.helse.modell.automatisering.SettTidligereAutomatiseringInaktivCommand
@@ -57,7 +57,7 @@ internal class GosysOppgaveEndretCommand(
     automatisering: Automatisering,
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     oppgaveDao: OppgaveDao,
-    oppgaveMediator: OppgaveMediator,
+    oppgaveService: OppgaveService,
     generasjonRepository: GenerasjonRepository,
     godkjenningMediator: GodkjenningMediator,
     spleisBehandlingId: UUID?,
@@ -87,7 +87,7 @@ internal class GosysOppgaveEndretCommand(
                 automatisering = automatisering,
                 godkjenningsbehovJson = oppgavedataForAutomatisering.godkjenningsbehovJson,
                 godkjenningMediator = godkjenningMediator,
-                oppgaveMediator = oppgaveMediator,
+                oppgaveService = oppgaveService,
                 utbetaling = utbetaling,
                 periodetype = oppgavedataForAutomatisering.periodetype,
                 sykefraværstilfelle = sykefraværstilfelle,

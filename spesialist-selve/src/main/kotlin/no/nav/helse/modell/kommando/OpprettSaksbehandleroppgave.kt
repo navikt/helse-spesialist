@@ -1,6 +1,6 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.mediator.oppgave.OppgaveMediator
+import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
@@ -47,7 +47,7 @@ import java.util.UUID
 internal class OpprettSaksbehandleroppgave(
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
-    private val oppgaveMediator: OppgaveMediator,
+    private val oppgaveService: OppgaveService,
     private val automatisering: Automatisering,
     private val hendelseId: UUID,
     private val personDao: PersonDao,
@@ -126,7 +126,7 @@ internal class OpprettSaksbehandleroppgave(
 
         if (sykefraværstilfelle.haster(vedtaksperiodeId) && utbetaling.harEndringIUtbetalingTilSykmeldt()) egenskaper.add(HASTER)
 
-        oppgaveMediator.nyOppgave(fødselsnummer, context.id()) { reservertId ->
+        oppgaveService.nyOppgave(fødselsnummer, context.id()) { reservertId ->
             val oppgave = Oppgave.nyOppgave(reservertId, vedtaksperiodeId, utbetalingId, hendelseId, kanAvvises, egenskaper)
 
             logg.info("Saksbehandleroppgave opprettet, avventer lagring: $oppgave")

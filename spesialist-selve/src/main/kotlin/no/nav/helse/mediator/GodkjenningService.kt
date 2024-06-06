@@ -5,7 +5,7 @@ import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.oppgave.OppgaveDao
-import no.nav.helse.mediator.oppgave.OppgaveMediator
+import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
@@ -30,7 +30,7 @@ internal class GodkjenningService(
     private val meldingDao: MeldingDao = MeldingDao(dataSource),
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
     private val rapidsConnection: RapidsConnection,
-    private val oppgaveMediator: OppgaveMediator,
+    private val oppgaveService: OppgaveService,
     private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
     private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
     private val saksbehandlerRepository: SaksbehandlerRepository,
@@ -102,7 +102,7 @@ internal class GodkjenningService(
         rapidsConnection.publish(fødselsnummer, godkjenningMessage.toJson())
 
         reserverPerson(reserverPersonOid, fødselsnummer)
-        oppgaveMediator.oppgave(godkjenningDTO.oppgavereferanse) {
+        oppgaveService.oppgave(godkjenningDTO.oppgavereferanse) {
             avventerSystem(godkjenningDTO.saksbehandlerIdent, oid)
             overstyringDao.ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId)
 

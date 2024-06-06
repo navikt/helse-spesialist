@@ -5,8 +5,6 @@ import TilgangskontrollForTestHarIkkeTilgang
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
@@ -16,9 +14,11 @@ import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.UUID
 import kotlin.random.Random
 
-class OppgavelagrerTest: DatabaseIntegrationTest() {
+class OppgavelagrerTest : DatabaseIntegrationTest() {
     private val OPPGAVETYPE = SØKNAD
     private val VEDTAKSPERIODE_ID = UUID.randomUUID()
     override val UTBETALING_ID = UUID.randomUUID()
@@ -28,20 +28,22 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
     override val SAKSBEHANDLER_OID = UUID.randomUUID()
     private val BESLUTTER_OID = UUID.randomUUID()
     override var OPPGAVE_ID = Random.nextLong()
-    private val saksbehandler = Saksbehandler(
-        oid = SAKSBEHANDLER_OID,
-        epostadresse = SAKSBEHANDLER_EPOST,
-        navn = SAKSBEHANDLER_NAVN,
-        ident = SAKSBEHANDLER_IDENT,
-        tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
-    )
-    private val beslutter = Saksbehandler(
-        oid = BESLUTTER_OID,
-        epostadresse = SAKSBEHANDLER_EPOST,
-        navn = SAKSBEHANDLER_NAVN,
-        ident = SAKSBEHANDLER_IDENT,
-        tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
-    )
+    private val saksbehandler =
+        Saksbehandler(
+            oid = SAKSBEHANDLER_OID,
+            epostadresse = SAKSBEHANDLER_EPOST,
+            navn = SAKSBEHANDLER_NAVN,
+            ident = SAKSBEHANDLER_IDENT,
+            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
+        )
+    private val beslutter =
+        Saksbehandler(
+            oid = BESLUTTER_OID,
+            epostadresse = SAKSBEHANDLER_EPOST,
+            navn = SAKSBEHANDLER_NAVN,
+            ident = SAKSBEHANDLER_IDENT,
+            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
+        )
 
     private val TOTRINNSVURDERING_OPPRETTET = LocalDateTime.now()
     private val TOTRINNSVURDERING_OPPDATERT = LocalDateTime.now()
@@ -50,11 +52,11 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
     override val HENDELSE_ID = UUID.randomUUID()
 
     private val nyTildelingDao = mockk<TildelingDao>(relaxed = true)
-    private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
+    private val oppgaveService = mockk<OppgaveService>(relaxed = true)
 
     @BeforeEach
     fun beforeEach() {
-        clearMocks(nyTildelingDao, oppgaveMediator)
+        clearMocks(nyTildelingDao, oppgaveService)
     }
 
     @Test
@@ -63,16 +65,18 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
-        oppgavelagrer.lagre(oppgaveMediator, CONTEXT_ID)
-        verify(exactly = 1) { oppgaveMediator.opprett(
-            OPPGAVE_ID,
-            CONTEXT_ID,
-            VEDTAKSPERIODE_ID,
-            UTBETALING_ID,
-            listOf(EgenskapForDatabase.SØKNAD),
-            HENDELSE_ID,
-            true
-        ) }
+        oppgavelagrer.lagre(oppgaveService, CONTEXT_ID)
+        verify(exactly = 1) {
+            oppgaveService.opprett(
+                OPPGAVE_ID,
+                CONTEXT_ID,
+                VEDTAKSPERIODE_ID,
+                UTBETALING_ID,
+                listOf(EgenskapForDatabase.SØKNAD),
+                HENDELSE_ID,
+                true,
+            )
+        }
         verify(exactly = 0) { nyTildelingDao.tildel(any(), any()) }
         verify(exactly = 1) { nyTildelingDao.avmeld(OPPGAVE_ID) }
     }
@@ -83,8 +87,8 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
-        oppgavelagrer.oppdater(oppgaveMediator)
-        verify(exactly = 1) { oppgaveMediator.oppdater(OPPGAVE_ID, "AvventerSaksbehandler", null, null, listOf(EgenskapForDatabase.SØKNAD)) }
+        oppgavelagrer.oppdater(oppgaveService)
+        verify(exactly = 1) { oppgaveService.oppdater(OPPGAVE_ID, "AvventerSaksbehandler", null, null, listOf(EgenskapForDatabase.SØKNAD)) }
         verify(exactly = 0) { nyTildelingDao.tildel(any(), any()) }
         verify(exactly = 1) { nyTildelingDao.avmeld(OPPGAVE_ID) }
     }
@@ -95,18 +99,20 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
-        oppgavelagrer.lagre(oppgaveMediator, CONTEXT_ID)
-        verify(exactly = 1) { oppgaveMediator.opprett(
-            OPPGAVE_ID,
-            CONTEXT_ID,
-            VEDTAKSPERIODE_ID,
-            UTBETALING_ID,
-            listOf(EgenskapForDatabase.SØKNAD),
-            HENDELSE_ID,
-            true
-        ) }
+        oppgavelagrer.lagre(oppgaveService, CONTEXT_ID)
+        verify(exactly = 1) {
+            oppgaveService.opprett(
+                OPPGAVE_ID,
+                CONTEXT_ID,
+                VEDTAKSPERIODE_ID,
+                UTBETALING_ID,
+                listOf(EgenskapForDatabase.SØKNAD),
+                HENDELSE_ID,
+                true,
+            )
+        }
         verify(exactly = 0) { nyTildelingDao.tildel(any(), any()) }
-        verify(exactly = 0) { oppgaveMediator.lagreTotrinnsvurdering(any()) }
+        verify(exactly = 0) { oppgaveService.lagreTotrinnsvurdering(any()) }
     }
 
     @Test
@@ -115,18 +121,32 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
-        oppgavelagrer.lagre(oppgaveMediator, CONTEXT_ID)
-        verify(exactly = 1) { oppgaveMediator.opprett(
-            OPPGAVE_ID,
-            CONTEXT_ID,
-            VEDTAKSPERIODE_ID,
-            UTBETALING_ID,
-            listOf(EgenskapForDatabase.SØKNAD),
-            HENDELSE_ID,
-            true
-        ) }
+        oppgavelagrer.lagre(oppgaveService, CONTEXT_ID)
+        verify(exactly = 1) {
+            oppgaveService.opprett(
+                OPPGAVE_ID,
+                CONTEXT_ID,
+                VEDTAKSPERIODE_ID,
+                UTBETALING_ID,
+                listOf(EgenskapForDatabase.SØKNAD),
+                HENDELSE_ID,
+                true,
+            )
+        }
         verify(exactly = 0) { nyTildelingDao.tildel(any(), any()) }
-        verify(exactly = 1) { oppgaveMediator.lagreTotrinnsvurdering(TotrinnsvurderingFraDatabase(VEDTAKSPERIODE_ID, false, SAKSBEHANDLER_OID, BESLUTTER_OID, UTBETALING_ID, TOTRINNSVURDERING_OPPRETTET, TOTRINNSVURDERING_OPPDATERT)) }
+        verify(exactly = 1) {
+            oppgaveService.lagreTotrinnsvurdering(
+                TotrinnsvurderingFraDatabase(
+                    VEDTAKSPERIODE_ID,
+                    false,
+                    SAKSBEHANDLER_OID,
+                    BESLUTTER_OID,
+                    UTBETALING_ID,
+                    TOTRINNSVURDERING_OPPRETTET,
+                    TOTRINNSVURDERING_OPPDATERT,
+                ),
+            )
+        }
     }
 
     @Test
@@ -136,18 +156,20 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
-        oppgavelagrer.lagre(oppgaveMediator, CONTEXT_ID)
-        verify(exactly = 1) { oppgaveMediator.opprett(
-            OPPGAVE_ID,
-            CONTEXT_ID,
-            VEDTAKSPERIODE_ID,
-            UTBETALING_ID,
-            listOf(EgenskapForDatabase.SØKNAD),
-            HENDELSE_ID,
-            true
-        ) }
+        oppgavelagrer.lagre(oppgaveService, CONTEXT_ID)
+        verify(exactly = 1) {
+            oppgaveService.opprett(
+                OPPGAVE_ID,
+                CONTEXT_ID,
+                VEDTAKSPERIODE_ID,
+                UTBETALING_ID,
+                listOf(EgenskapForDatabase.SØKNAD),
+                HENDELSE_ID,
+                true,
+            )
+        }
         verify(exactly = 1) { nyTildelingDao.tildel(OPPGAVE_ID, SAKSBEHANDLER_OID) }
-        verify(exactly = 0) { oppgaveMediator.lagreTotrinnsvurdering(any()) }
+        verify(exactly = 0) { oppgaveService.lagreTotrinnsvurdering(any()) }
     }
 
     @Test
@@ -157,18 +179,32 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
-        oppgavelagrer.lagre(oppgaveMediator, CONTEXT_ID)
-        verify(exactly = 1) { oppgaveMediator.opprett(
-            OPPGAVE_ID,
-            CONTEXT_ID,
-            VEDTAKSPERIODE_ID,
-            UTBETALING_ID,
-            listOf(EgenskapForDatabase.SØKNAD),
-            HENDELSE_ID,
-            true
-        ) }
+        oppgavelagrer.lagre(oppgaveService, CONTEXT_ID)
+        verify(exactly = 1) {
+            oppgaveService.opprett(
+                OPPGAVE_ID,
+                CONTEXT_ID,
+                VEDTAKSPERIODE_ID,
+                UTBETALING_ID,
+                listOf(EgenskapForDatabase.SØKNAD),
+                HENDELSE_ID,
+                true,
+            )
+        }
         verify(exactly = 1) { nyTildelingDao.tildel(OPPGAVE_ID, SAKSBEHANDLER_OID) }
-        verify(exactly = 1) { oppgaveMediator.lagreTotrinnsvurdering(TotrinnsvurderingFraDatabase(VEDTAKSPERIODE_ID, false, SAKSBEHANDLER_OID, BESLUTTER_OID, UTBETALING_ID, TOTRINNSVURDERING_OPPRETTET, TOTRINNSVURDERING_OPPDATERT)) }
+        verify(exactly = 1) {
+            oppgaveService.lagreTotrinnsvurdering(
+                TotrinnsvurderingFraDatabase(
+                    VEDTAKSPERIODE_ID,
+                    false,
+                    SAKSBEHANDLER_OID,
+                    BESLUTTER_OID,
+                    UTBETALING_ID,
+                    TOTRINNSVURDERING_OPPRETTET,
+                    TOTRINNSVURDERING_OPPDATERT,
+                ),
+            )
+        }
     }
 
     @Test
@@ -179,10 +215,12 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
-        oppgavelagrer.oppdater(oppgaveMediator)
-        verify(exactly = 1) { oppgaveMediator.oppdater(OPPGAVE_ID, "Ferdigstilt", SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID, listOf(EgenskapForDatabase.SØKNAD)) }
+        oppgavelagrer.oppdater(oppgaveService)
+        verify(exactly = 1) {
+            oppgaveService.oppdater(OPPGAVE_ID, "Ferdigstilt", SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID, listOf(EgenskapForDatabase.SØKNAD))
+        }
         verify(exactly = 0) { nyTildelingDao.tildel(any(), any()) }
-        verify(exactly = 0) { oppgaveMediator.lagreTotrinnsvurdering(any()) }
+        verify(exactly = 0) { oppgaveService.lagreTotrinnsvurdering(any()) }
     }
 
     @Test
@@ -193,10 +231,24 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
-        oppgavelagrer.oppdater(oppgaveMediator)
-        verify(exactly = 1) { oppgaveMediator.oppdater(OPPGAVE_ID, "Ferdigstilt", SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID, listOf(EgenskapForDatabase.SØKNAD)) }
+        oppgavelagrer.oppdater(oppgaveService)
+        verify(exactly = 1) {
+            oppgaveService.oppdater(OPPGAVE_ID, "Ferdigstilt", SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID, listOf(EgenskapForDatabase.SØKNAD))
+        }
         verify(exactly = 0) { nyTildelingDao.tildel(any(), any()) }
-        verify(exactly = 1) { oppgaveMediator.lagreTotrinnsvurdering(TotrinnsvurderingFraDatabase(VEDTAKSPERIODE_ID, false, SAKSBEHANDLER_OID, BESLUTTER_OID, UTBETALING_ID, TOTRINNSVURDERING_OPPRETTET, TOTRINNSVURDERING_OPPDATERT)) }
+        verify(exactly = 1) {
+            oppgaveService.lagreTotrinnsvurdering(
+                TotrinnsvurderingFraDatabase(
+                    VEDTAKSPERIODE_ID,
+                    false,
+                    SAKSBEHANDLER_OID,
+                    BESLUTTER_OID,
+                    UTBETALING_ID,
+                    TOTRINNSVURDERING_OPPRETTET,
+                    TOTRINNSVURDERING_OPPDATERT,
+                ),
+            )
+        }
     }
 
     @Test
@@ -208,9 +260,11 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
-        oppgavelagrer.oppdater(oppgaveMediator)
-        verify(exactly = 1) { oppgaveMediator.oppdater(OPPGAVE_ID, "Ferdigstilt", SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID, listOf(EgenskapForDatabase.SØKNAD)) }
-        verify(exactly = 0) { oppgaveMediator.lagreTotrinnsvurdering(any()) }
+        oppgavelagrer.oppdater(oppgaveService)
+        verify(exactly = 1) {
+            oppgaveService.oppdater(OPPGAVE_ID, "Ferdigstilt", SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID, listOf(EgenskapForDatabase.SØKNAD))
+        }
+        verify(exactly = 0) { oppgaveService.lagreTotrinnsvurdering(any()) }
     }
 
     @Test
@@ -222,28 +276,44 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
-        oppgavelagrer.oppdater(oppgaveMediator)
-        verify(exactly = 1) { oppgaveMediator.oppdater(OPPGAVE_ID, "Ferdigstilt", SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID, listOf(EgenskapForDatabase.SØKNAD)) }
-        verify(exactly = 1) { oppgaveMediator.lagreTotrinnsvurdering(TotrinnsvurderingFraDatabase(VEDTAKSPERIODE_ID, false, SAKSBEHANDLER_OID, BESLUTTER_OID, UTBETALING_ID, TOTRINNSVURDERING_OPPRETTET, TOTRINNSVURDERING_OPPDATERT)) }
+        oppgavelagrer.oppdater(oppgaveService)
+        verify(exactly = 1) {
+            oppgaveService.oppdater(OPPGAVE_ID, "Ferdigstilt", SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID, listOf(EgenskapForDatabase.SØKNAD))
+        }
+        verify(exactly = 1) {
+            oppgaveService.lagreTotrinnsvurdering(
+                TotrinnsvurderingFraDatabase(
+                    VEDTAKSPERIODE_ID,
+                    false,
+                    SAKSBEHANDLER_OID,
+                    BESLUTTER_OID,
+                    UTBETALING_ID,
+                    TOTRINNSVURDERING_OPPRETTET,
+                    TOTRINNSVURDERING_OPPDATERT,
+                ),
+            )
+        }
     }
 
-    private fun nyOppgave(medTotrinnsvurdering: Boolean = false) = Oppgave.nyOppgave(
-        id = OPPGAVE_ID,
-        vedtaksperiodeId = VEDTAKSPERIODE_ID,
-        utbetalingId = UTBETALING_ID,
-        hendelseId = HENDELSE_ID,
-        egenskaper = listOf(OPPGAVETYPE),
-        totrinnsvurdering = if (medTotrinnsvurdering) nyTotrinnsvurdering() else null,
-        kanAvvises = true,
-    )
+    private fun nyOppgave(medTotrinnsvurdering: Boolean = false) =
+        Oppgave.nyOppgave(
+            id = OPPGAVE_ID,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID,
+            hendelseId = HENDELSE_ID,
+            egenskaper = listOf(OPPGAVETYPE),
+            totrinnsvurdering = if (medTotrinnsvurdering) nyTotrinnsvurdering() else null,
+            kanAvvises = true,
+        )
 
-    private fun nyTotrinnsvurdering() = Totrinnsvurdering(
-        vedtaksperiodeId = VEDTAKSPERIODE_ID,
-        erRetur = false,
-        saksbehandler = saksbehandler,
-        beslutter = beslutter,
-        utbetalingId = UTBETALING_ID,
-        opprettet = TOTRINNSVURDERING_OPPRETTET,
-        oppdatert = TOTRINNSVURDERING_OPPDATERT
-    )
+    private fun nyTotrinnsvurdering() =
+        Totrinnsvurdering(
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            erRetur = false,
+            saksbehandler = saksbehandler,
+            beslutter = beslutter,
+            utbetalingId = UTBETALING_ID,
+            opprettet = TOTRINNSVURDERING_OPPRETTET,
+            oppdatert = TOTRINNSVURDERING_OPPDATERT,
+        )
 }

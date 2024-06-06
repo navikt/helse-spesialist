@@ -13,10 +13,10 @@ import java.util.UUID
 internal class OppdaterOppgavestatusCommand(
     private val utbetalingId: UUID,
     private val status: Utbetalingsstatus,
-    private val oppgaveMediator: Oppgavefinner,
+    private val oppgavefinner: Oppgavefinner,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
-        oppgaveMediator.oppgave(utbetalingId) {
+        oppgavefinner.oppgave(utbetalingId) {
             when (status) {
                 GODKJENT_UTEN_UTBETALING,
                 UTBETALT,
