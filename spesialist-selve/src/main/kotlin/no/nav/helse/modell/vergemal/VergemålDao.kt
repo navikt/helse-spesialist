@@ -19,20 +19,22 @@ class VergemålDao(val dataSource: DataSource) {
     ) {
         @Language("PostgreSQL")
         val statement = """
-            INSERT INTO vergemal (person_ref, har_vergemal, har_fremtidsfullmakter, har_fullmakter, opprettet)
+            INSERT INTO vergemal (person_ref, har_vergemal, har_fremtidsfullmakter, har_fullmakter, vergemål_oppdatert, fullmakt_oppdatert)
             VALUES (
                 (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer),
                 :har_vergemal,
                 :har_fremtidsfullmakter,
                 :har_fullmakter,
-                :opprettet
+                :vergemal_oppdatert,
+                :fullmakt_oppdatert
             )
             ON CONFLICT (person_ref)
             DO UPDATE SET
                 har_vergemal = :har_vergemal,
                 har_fremtidsfullmakter = :har_fremtidsfullmakter,
                 har_fullmakter = :har_fullmakter,
-                opprettet = :opprettet
+                vergemål_oppdatert = :vergemal_oppdatert,
+                fullmakt_oppdatert = :fullmakt_oppdatert
         """
         sessionOf(dataSource).use { session ->
             session.run(
@@ -43,7 +45,8 @@ class VergemålDao(val dataSource: DataSource) {
                         "har_vergemal" to vergemål.harVergemål,
                         "har_fremtidsfullmakter" to vergemål.harFullmakter,
                         "har_fullmakter" to vergemål.harFullmakter,
-                        "opprettet" to LocalDateTime.now(),
+                        "vergemal_oppdatert" to LocalDateTime.now(),
+                        "fullmakt_oppdatert" to LocalDateTime.now(),
                     ),
                 ).asExecute,
             )
