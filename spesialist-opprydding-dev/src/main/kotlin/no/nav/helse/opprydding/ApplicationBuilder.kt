@@ -11,10 +11,11 @@ internal class ApplicationBuilder(env: Map<String, String>) {
                 "env variable NAIS_CLUSTER_NAME has an unsupported value. Supported values: [dev-gcp]. Prohibited values: [prod-gcp, dev-fss, prod-fss]",
             )
         }
+    private val dataSource by lazy { dataSourceBuilder.getDataSource() }
     private val rapidsConnection = RapidApplication.create(env)
 
     init {
-        SlettPersonRiver(rapidsConnection, PersonRepository(dataSourceBuilder.getDataSource()))
+        SlettPersonRiver(rapidsConnection, PersonRepository(dataSource), CommandContextDao(dataSource))
     }
 
     internal fun start() = rapidsConnection.start()

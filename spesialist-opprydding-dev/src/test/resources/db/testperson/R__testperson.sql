@@ -6,7 +6,7 @@ VALUES ('${hendelse_id}', '{}'::json, 'TESTHENDELSE', ${fødselsnummer});
 INSERT INTO vedtaksperiode_hendelse(hendelse_ref, vedtaksperiode_id)
 VALUES ('${hendelse_id}', '${vedtaksperiode_id}');
 INSERT INTO command_context(context_id, hendelse_id, tilstand, data)
-VALUES ('${command_context_id}', '${hendelse_id}', 'TESTTILSTAND', '{}'::json);
+VALUES ('${command_context_id}', '${hendelse_id}', 'SUSPENDERT', '{}'::json);
 INSERT INTO person_info(id, fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse)
 VALUES (${sequence_number}, 'NAVN', 'MELLOMNAVN', 'NAVNESEN', '2018-01-01', 'Ukjent', 'NEI');
 INSERT INTO infotrygdutbetalinger(id, data)
