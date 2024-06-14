@@ -30,7 +30,7 @@ internal class DataSourceBuilder(env: Map<String, String>) {
             jdbcUrl = dbUrl
             username = databaseUsername
             password = databasePassword
-            maximumPoolSize = 10
+            maximumPoolSize = 20
             minimumIdle = 2
             idleTimeout = Duration.ofMinutes(1).toMillis()
             maxLifetime = idleTimeout * 5
