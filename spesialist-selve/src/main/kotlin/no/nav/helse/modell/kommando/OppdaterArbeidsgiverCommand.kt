@@ -29,20 +29,17 @@ internal class OppdaterArbeidsgiverCommand(
 
     private fun ikkeOppdaterteNavn() =
         orgnummere.filterNot { orgnummer ->
-            val sistOppdatert = arbeidsgiverDao.findNavnSistOppdatert(orgnummer) ?: return@filterNot false
-            sistOppdatert.innenforSisteFjortenDager()
+            arbeidsgiverDao.findNavnSistOppdatert(orgnummer)?.innenforSisteFjortenDager() ?: false
         }
 
     private fun ikkeOppdaterteBransjer() =
         orgnummere.filterNot { orgnummer ->
-            val sistOppdatert = arbeidsgiverDao.findBransjerSistOppdatert(orgnummer) ?: return@filterNot false
-            sistOppdatert.innenforSisteFjortenDager()
+            arbeidsgiverDao.findBransjerSistOppdatert(orgnummer)?.innenforSisteFjortenDager() ?: false
         }
 
     private fun ikkeOppdaterteNavnForPersonidenter() =
         personidenter.filterNot { personlignr ->
-            val sistOppdatert = arbeidsgiverDao.findNavnSistOppdatert(personlignr) ?: return@filterNot false
-            sistOppdatert.innenforSisteFjortenDager()
+            arbeidsgiverDao.findNavnSistOppdatert(personlignr)?.innenforSisteFjortenDager() ?: false
         }
 
     private fun behandle(context: CommandContext): Boolean {

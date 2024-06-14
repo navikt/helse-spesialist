@@ -64,7 +64,7 @@ class DokumentQuery(
                 } else if (error == 408) {
                     return DataFetcherResult.newResult<Soknad>().error(getEmptyResultTimeoutError()).build()
                 }
-                return@let it.tilSøknad()
+                it.tilSøknad()
             }
 
         return DataFetcherResult.newResult<Soknad>().data(dokument).build()
@@ -99,7 +99,7 @@ class DokumentQuery(
                     return DataFetcherResult.newResult<DokumentInntektsmelding>().error(getEmptyResultTimeoutError())
                         .build()
                 }
-                return@let it.tilInntektsmelding()
+                it.tilInntektsmelding()
             }
 
         return DataFetcherResult.newResult<DokumentInntektsmelding>().data(dokument).build()

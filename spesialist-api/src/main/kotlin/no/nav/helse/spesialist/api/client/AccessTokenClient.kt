@@ -4,11 +4,16 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.nimbusds.jose.jwk.RSAKey
-import io.ktor.client.*
+import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.request.*
-import io.ktor.client.request.forms.*
-import io.ktor.http.*
+import io.ktor.client.request.accept
+import io.ktor.client.request.forms.FormDataContent
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.Parameters
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import no.nav.helse.spesialist.api.AzureConfig
@@ -68,7 +73,7 @@ class AccessTokenClient(
                                 throw RuntimeException("Klarte ikke hente nytt token fra Azure AD", e)
                             }
                         tokenMap[scope] = response
-                        return@run response
+                        response
                     }
             ).access_token
         }

@@ -38,10 +38,10 @@ class DokumentMediator(
                         delay(100)
                         hentDokument(fødselsnummer, dokumentId, retries)
                     }
-                return@let response
+                response
+            } else {
+                dokument
             }
-
-            return@let dokument
         }
     }
 
@@ -59,7 +59,7 @@ class DokumentMediator(
                     delay(100)
                     hentDokument(fødselsnummer, dokumentId, retries - 1)
                 } else {
-                    return@runBlocking dokument
+                    dokument
                 }
             }
         return response
