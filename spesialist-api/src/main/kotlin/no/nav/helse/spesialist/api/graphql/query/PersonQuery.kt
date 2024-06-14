@@ -96,13 +96,12 @@ class PersonQuery(
             return DataFetcherResult.newResult<Person?>().error(getNotFoundError(fnr)).build()
         }
 
-        val reservasjon = finnReservasjonsstatus(fødselsnummer)
-
         if (isForbidden(fødselsnummer, env)) {
             auditLog(env.graphQlContext, fødselsnummer, false, null)
             return DataFetcherResult.newResult<Person?>().error(getForbiddenError(fødselsnummer)).build()
         }
 
+        val reservasjon = finnReservasjonsstatus(fødselsnummer)
         val unntattFraAutomatiskGodkjenning = unntattFraAutomatiskGodkjenning(fødselsnummer)
 
         val snapshot =
@@ -121,7 +120,8 @@ class PersonQuery(
                     personinfo =
                         personinfo.copy(
                             reservasjon = reservasjon.await(),
-                        ).copy(unntattFraAutomatisering = unntattFraAutomatiskGodkjenning),
+                            unntattFraAutomatisering = unntattFraAutomatiskGodkjenning,
+                        ),
                     personApiDao = personApiDao,
                     tildelingDao = tildelingDao,
                     arbeidsgiverApiDao = arbeidsgiverApiDao,
