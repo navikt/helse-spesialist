@@ -39,4 +39,10 @@ abstract class AbstractPersonQuery(
             .message("Finner ikke data for person med fødselsnummer $fnr")
             .extensions(mapOf("code" to 404, "field" to "person"))
             .build()
+
+    protected fun getPersonNotReadyError(fnr: String): GraphQLError =
+        GraphqlErrorException.newErrorException()
+            .message("Person med fødselsnummer $fnr er ikke klar for visning ennå")
+            .extensions(mapOf("code" to 409, "field" to "person"))
+            .build()
 }

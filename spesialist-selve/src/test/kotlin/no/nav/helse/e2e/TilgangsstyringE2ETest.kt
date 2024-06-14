@@ -32,22 +32,35 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class TilgangsstyringE2ETest : AbstractE2ETest() {
+
     @Test
-    fun `Gir 404 når det ikke er noe å vise ennå, selv om saksbehandler har tilgang`() {
+    fun `Gir 409 når bare søknad er mottatt`() {
+        every { dataFetchingEnvironment.graphQlContext.get<String>(ContextValues.SAKSBEHANDLER_IDENT.key) } returns "A123456"
+        settOppDefaultDataOgTilganger()
+
+        assertKanIkkeHentePerson("Finner ikke data for person med fødselsnummer ")
+
+        vedtaksløsningenMottarNySøknad(AKTØR, FØDSELSNUMMER, ORGNR)
+
+        assertKanIkkeHentePerson("Person med fødselsnummer $FØDSELSNUMMER er ikke klar for visning ennå")
+    }
+
+    @Test
+    fun `Gir 409 når personen ikke er klar for visning ennå, uavhengig av om saksbehandler har tilgang`() {
         every { dataFetchingEnvironment.graphQlContext.get<String>(ContextValues.SAKSBEHANDLER_IDENT.key) } returns "A123456"
         settOppDefaultDataOgTilganger()
 
         sendMeldingerOppTilEgenAnsatt()
 
-        assertKanIkkeHentePerson("Finner ikke data for person med fødselsnummer ")
+        assertKanIkkeHentePerson("Person med fødselsnummer $FØDSELSNUMMER er ikke klar for visning ennå")
 
         håndterEgenansattløsning(erEgenAnsatt = true)
-        assertKanIkkeHentePerson("Finner ikke data for person med fødselsnummer ")
+        assertKanIkkeHentePerson("Person med fødselsnummer $FØDSELSNUMMER er ikke klar for visning ennå")
 
         assertSaksbehandleroppgaveBleIkkeOpprettet()
 
         saksbehandlertilgangTilSkjermede(harTilgang = true)
-        assertKanIkkeHentePerson("Finner ikke data for person med fødselsnummer ")
+        assertKanIkkeHentePerson("Person med fødselsnummer $FØDSELSNUMMER er ikke klar for visning ennå")
     }
 
     @Test
@@ -57,9 +70,9 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
 
         sendMeldingerOppTilEgenAnsatt()
 
-        assertKanIkkeHentePerson("Finner ikke data for person med fødselsnummer ")
+        assertKanIkkeHentePerson("Person med fødselsnummer $FØDSELSNUMMER er ikke klar for visning ennå")
         håndterEgenansattløsning(erEgenAnsatt = false)
-        assertKanIkkeHentePerson("Finner ikke data for person med fødselsnummer ")
+        assertKanIkkeHentePerson("Person med fødselsnummer $FØDSELSNUMMER er ikke klar for visning ennå")
         sendFramTilOppgave()
         assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
         assertKanHentePerson()
@@ -72,9 +85,9 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
 
         sendMeldingerOppTilEgenAnsatt()
 
-        assertKanIkkeHentePerson("Finner ikke data for person med fødselsnummer ")
+        assertKanIkkeHentePerson("Person med fødselsnummer $FØDSELSNUMMER er ikke klar for visning ennå")
         håndterEgenansattløsning(erEgenAnsatt = false)
-        assertKanIkkeHentePerson("Finner ikke data for person med fødselsnummer ")
+        assertKanIkkeHentePerson("Person med fødselsnummer $FØDSELSNUMMER er ikke klar for visning ennå")
         sendFramTilOppgave()
         assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
 
@@ -168,7 +181,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
             errors: List<GraphQLError>,
         ) {
             assertTrue(errors.any { it.message.contains(feilmelding) }) {
-                "Forventet at $errors skulle inneholde \"$feilmelding\""
+                "Forventet \"$feilmelding\", men fikk ${errors.map { it.message }}"
             }
         }
     }

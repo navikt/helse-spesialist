@@ -90,10 +90,15 @@ class PersonQuery(
                     }
                 }
             }
-        if (fødselsnummer == null || (!erDev() && !personApiDao.spesialistHarPersonKlarForVisningISpeil(fødselsnummer))) {
+        if (fødselsnummer == null) {
             sikkerLogg.info("Svarer not found for parametere fnr=$fnr, aktorId=$aktorId.")
             auditLog(env.graphQlContext, fnr ?: aktorId!!, null, getNotFoundError(fnr).message)
             return DataFetcherResult.newResult<Person?>().error(getNotFoundError(fnr)).build()
+        }
+
+        if (!personApiDao.spesialistHarPersonKlarForVisningISpeil(fødselsnummer)) {
+            auditLog(env.graphQlContext, fødselsnummer, false, null)
+            return DataFetcherResult.newResult<Person?>().error(getPersonNotReadyError(fødselsnummer)).build()
         }
 
         if (isForbidden(fødselsnummer, env)) {
