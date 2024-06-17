@@ -290,7 +290,7 @@ type InntektEndringAarsak {
 }
 
 type InntektFraAOrdningen {
-    maned: String!
+    maned: YearMonth!
     sum: Float!
 }
 
@@ -1195,14 +1195,17 @@ scalar LocalDateTime
 "class java.util.UUID"
 scalar UUID
 
+"class java.time.YearMonth"
+scalar YearMonth
+
 input AnnulleringDataInput {
     aktorId: String!
     begrunnelser: [String!]!
     fodselsnummer: String!
     kommentar: String
     organisasjonsnummer: String!
-    utbetalingId: String!
-    vedtaksperiodeId: String!
+    utbetalingId: UUID!
+    vedtaksperiodeId: UUID!
 }
 
 input ArbeidsforholdOverstyringHandlingInput {
@@ -1210,7 +1213,7 @@ input ArbeidsforholdOverstyringHandlingInput {
     fodselsnummer: String!
     overstyrteArbeidsforhold: [OverstyringArbeidsforholdInput!]!
     skjaringstidspunkt: LocalDate!
-    vedtaksperiodeId: String!
+    vedtaksperiodeId: UUID!
 }
 
 input AvslagInput {
@@ -1237,7 +1240,7 @@ input InntektOgRefusjonOverstyringInput {
     arbeidsgivere: [OverstyringArbeidsgiverInput!]!
     fodselsnummer: String!
     skjaringstidspunkt: LocalDate!
-    vedtaksperiodeId: String!
+    vedtaksperiodeId: UUID!
 }
 
 input LovhjemmelInput {
@@ -1310,7 +1313,7 @@ input SkjonnsfastsettelseInput {
     arbeidsgivere: [SkjonnsfastsettelseArbeidsgiverInput!]!
     fodselsnummer: String!
     skjaringstidspunkt: LocalDate!
-    vedtaksperiodeId: String!
+    vedtaksperiodeId: UUID!
 }
 
 input TidslinjeOverstyringInput {
@@ -1319,5 +1322,5 @@ input TidslinjeOverstyringInput {
     dager: [OverstyringDagInput!]!
     fodselsnummer: String!
     organisasjonsnummer: String!
-    vedtaksperiodeId: String!
+    vedtaksperiodeId: UUID!
 }

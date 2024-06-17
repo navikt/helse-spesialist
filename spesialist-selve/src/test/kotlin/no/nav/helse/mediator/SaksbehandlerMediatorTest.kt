@@ -682,7 +682,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
                             initierendeVedtaksperiodeId = UUID.randomUUID().toString(),
                         ),
                     ),
-                vedtaksperiodeId = PERIODE.id.toString(),
+                vedtaksperiodeId = PERIODE.id,
             )
 
         mediator.håndter(skjønnsfastsetting, saksbehandler)

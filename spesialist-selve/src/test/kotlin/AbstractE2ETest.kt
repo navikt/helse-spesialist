@@ -1073,7 +1073,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     fodselsnummer = fødselsnummer,
                     skjaringstidspunkt = skjæringstidspunkt,
                     arbeidsgivere = arbeidsgivere,
-                    vedtaksperiodeId = vedtaksperiodeId.toString()
+                    vedtaksperiodeId = vedtaksperiodeId
                 )
             testMediator.håndter(handling, saksbehandler)
             // Her må det gjøres kall til api for å sende inn skjønnsfastsettelse
