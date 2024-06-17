@@ -108,7 +108,7 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
                     dokumentId: "${UUID.randomUUID()}"
                     fnr: "$FØDSELSNUMMER"
                 ) {
-                    inntektsdato
+                    foersteFravaersdag
                 }
             }
         """
@@ -277,7 +277,6 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
                     begrunnelseForReduksjonEllerIkkeUtbetalt,
                     bruttoUtbetalt,
                     beregnetInntekt,
-                    inntektsdato,
                     refusjon {
                         beloepPrMnd, opphoersdato
                     },
@@ -312,10 +311,10 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
             )
         }
 
-        assertEquals(16, dokument.size())
+        assertEquals(15, dokument.size())
         assertTrue(dokument["bruttoUtbetalt"].isNull)
         assertEquals(35000.0, dokument["beregnetInntekt"].asDouble())
-        assertEquals("2023-08-01", dokument["inntektsdato"].asText())
+        assertEquals("2023-08-01", dokument["foersteFravaersdag"].asText())
         assertEquals(0.0, dokument["refusjon"]["beloepPrMnd"].asDouble())
         assertTrue(dokument["refusjon"]["opphoersdato"].isNull)
         assertTrue(dokument["endringIRefusjoner"].isEmpty)

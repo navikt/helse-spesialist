@@ -130,7 +130,6 @@ class DokumentQuery(
                     .takeUnless { it.isMissingOrNull() }?.asText(),
             bruttoUtbetalt = this.path("bruttoUtbetalt").takeUnless { it.isMissingOrNull() }?.asDouble(),
             beregnetInntekt = this.path("beregnetInntekt").takeUnless { it.isMissingOrNull() }?.asDouble(),
-            inntektsdato = this.path("inntektsdato").takeUnless { it.isMissingOrNull() }?.asLocalDate(),
             refusjon =
                 this.path("refusjon").takeUnless { it.isMissingOrNull() }?.let { refusjon ->
                     Refusjon(

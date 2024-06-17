@@ -88,7 +88,6 @@ data class DokumentInntektsmelding(
     val begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
     val bruttoUtbetalt: Double?,
     val beregnetInntekt: Double?,
-    val inntektsdato: LocalDate?,
     val refusjon: Refusjon?,
     val endringIRefusjoner: List<EndringIRefusjon>?,
     val opphoerAvNaturalytelser: List<OpphoerAvNaturalytelse>?,

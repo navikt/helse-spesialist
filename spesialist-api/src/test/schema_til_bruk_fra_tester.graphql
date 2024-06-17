@@ -220,7 +220,6 @@ type DokumentInntektsmelding {
     innsenderFulltNavn: String
     innsenderTelefon: String
     inntektEndringAarsak: InntektEndringAarsak
-    inntektsdato: LocalDate
     naerRelasjon: Boolean
     opphoerAvNaturalytelser: [OpphoerAvNaturalytelse!]
     refusjon: Refusjon
