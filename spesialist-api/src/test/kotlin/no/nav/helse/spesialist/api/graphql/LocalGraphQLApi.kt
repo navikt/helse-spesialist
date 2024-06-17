@@ -99,7 +99,9 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLVurdering
 import no.nav.helse.spleis.graphql.hentsnapshot.Sykepengedager
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.UUID
+import kotlin.random.Random
 
 fun main() =
     runBlocking {
@@ -533,14 +535,14 @@ private fun enPeriode() =
                 personoppdrag =
                     GraphQLOppdrag(
                         fagsystemId = "EN-PERSONFAGSYSTEMID",
-                        tidsstempel = LocalDateTime.parse("2021-01-01"),
+                        tidsstempel = localDateTimeMedTilfeldigTidspunkt("2021-01-01"),
                         utbetalingslinjer = emptyList(),
                         simulering = null,
                     ),
                 arbeidsgiveroppdrag =
                     GraphQLOppdrag(
                         fagsystemId = "EN-ARBEIDSGIVERFAGSYSTEMID",
-                        tidsstempel = LocalDateTime.parse("2021-01-01"),
+                        tidsstempel = localDateTimeMedTilfeldigTidspunkt("2021-01-01"),
                         utbetalingslinjer = emptyList(),
                         simulering =
                             GraphQLSimulering(
@@ -586,6 +588,10 @@ private fun enPeriode() =
         periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING,
         behandlingId = UUID.randomUUID(),
     )
+
+private fun localDateTimeMedTilfeldigTidspunkt(dato: String): LocalDateTime =
+    LocalDate.parse(dato).atStartOfDay().plusNanos(Random.nextLong(until = 86_400_000_000_000))
+        .truncatedTo(ChronoUnit.MILLIS)
 
 private fun enGenerasjon() =
     GraphQLGenerasjon(
