@@ -10,6 +10,7 @@ data class OverstyrtInntektOgRefusjonDto(
     val fødselsnummer: String,
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<OverstyrtArbeidsgiverDto>,
+    val vedtaksperiodeId: UUID,
 )
 
 data class OverstyrtArbeidsgiverDto(

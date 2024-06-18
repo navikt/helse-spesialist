@@ -12,6 +12,7 @@ data class OverstyrtTidslinjeForDatabase(
     val dager: List<OverstyrtTidslinjedagForDatabase>,
     val begrunnelse: String,
     val opprettet: LocalDateTime,
+    val vedtaksperiodeId: UUID,
 )
 
 data class OverstyrtTidslinjedagForDatabase(
@@ -30,6 +31,7 @@ data class OverstyrtInntektOgRefusjonForDatabase(
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<OverstyrtArbeidsgiverForDatabase>,
     val opprettet: LocalDateTime,
+    val vedtaksperiodeId: UUID,
 )
 
 data class OverstyrtArbeidsgiverForDatabase(
@@ -56,6 +58,7 @@ data class OverstyrtArbeidsforholdForDatabase(
     val skjæringstidspunkt: LocalDate,
     val overstyrteArbeidsforhold: List<ArbeidsforholdForDatabase>,
     val opprettet: LocalDateTime,
+    val vedtaksperiodeId: UUID,
 )
 
 data class ArbeidsforholdForDatabase(

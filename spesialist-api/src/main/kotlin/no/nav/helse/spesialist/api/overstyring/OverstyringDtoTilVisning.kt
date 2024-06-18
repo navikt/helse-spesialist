@@ -35,6 +35,7 @@ data class OverstyringTidslinjeDto(
     val saksbehandlerIdent: String?,
     val overstyrteDager: List<OverstyringDagDto>,
     val ferdigstilt: Boolean,
+    val vedtaksperiodeId: UUID?,
 )
 
 data class OverstyringDagDto(

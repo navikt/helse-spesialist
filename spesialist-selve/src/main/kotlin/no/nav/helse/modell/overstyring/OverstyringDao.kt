@@ -121,8 +121,8 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
             @Language("PostgreSQL")
             val opprettOverstyringQuery =
                 """
-                INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt)
-                SELECT gen_random_uuid(), :ekstern_hendelse_id, p.id, :saksbehandler_ref, :tidspunkt
+                INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt, vedtaksperiode_id)
+                SELECT gen_random_uuid(), :ekstern_hendelse_id, p.id, :saksbehandler_ref, :tidspunkt, :vedtaksperiode_id
                 FROM person p
                 WHERE p.fodselsnummer = :fodselsnummer
                 """.trimIndent()
@@ -153,6 +153,7 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                                 "fodselsnummer" to overstyrtTidslinje.fødselsnummer.toLong(),
                                 "saksbehandler_ref" to saksbehandlerOid,
                                 "tidspunkt" to overstyrtTidslinje.opprettet,
+                                "vedtaksperiode_id" to overstyrtTidslinje.vedtaksperiodeId,
                             ),
                         ).asUpdateAndReturnGeneratedKey,
                     )
@@ -194,8 +195,8 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
             @Language("PostgreSQL")
             val opprettOverstyringQuery =
                 """
-                INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt)
-                SELECT gen_random_uuid(), :ekstern_hendelse_id, p.id, :saksbehandler_ref, :tidspunkt
+                INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt, vedtaksperiode_id)
+                SELECT gen_random_uuid(), :ekstern_hendelse_id, p.id, :saksbehandler_ref, :tidspunkt, :vedtaksperiode_id
                 FROM person p
                 WHERE p.fodselsnummer = :fodselsnummer
                 """.trimIndent()
@@ -219,6 +220,8 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                                 "fodselsnummer" to overstyrtInntektOgRefusjon.fødselsnummer.toLong(),
                                 "saksbehandler_ref" to saksbehandlerOid,
                                 "tidspunkt" to overstyrtInntektOgRefusjon.opprettet,
+                                "vedtaksperiode_id" to overstyrtInntektOgRefusjon.vedtaksperiodeId,
+
                             ),
                         ).asUpdateAndReturnGeneratedKey,
                     )
@@ -268,8 +271,8 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
             @Language("PostgreSQL")
             val opprettOverstyringQuery =
                 """
-                INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt)
-                SELECT gen_random_uuid(), :ekstern_hendelse_id, p.id, :saksbehandler_ref, :tidspunkt
+                INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt, vedtaksperiode_id)
+                SELECT gen_random_uuid(), :ekstern_hendelse_id, p.id, :saksbehandler_ref, :tidspunkt, :vedtaksperiode_id
                 FROM person p
                 WHERE p.fodselsnummer = :fodselsnummer
                 """.trimIndent()
@@ -306,6 +309,7 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                                 "saksbehandler_ref" to saksbehandlerOid,
                                 "tidspunkt" to skjønnsfastsattSykepengegrunnlag.opprettet,
                                 "fodselsnummer" to skjønnsfastsattSykepengegrunnlag.fødselsnummer.toLong(),
+                                "vedtaksperiode_id" to skjønnsfastsattSykepengegrunnlag.vedtaksperiodeId,
                             ),
                         ).asUpdateAndReturnGeneratedKey,
                     )
@@ -399,8 +403,8 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
             @Language("PostgreSQL")
             val opprettOverstyringQuery =
                 """
-                INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt)
-                SELECT gen_random_uuid(), :ekstern_hendelse_id, p.id, :saksbehandler_ref, :tidspunkt
+                INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt, vedtaksperiode_id)
+                SELECT gen_random_uuid(), :ekstern_hendelse_id, p.id, :saksbehandler_ref, :tidspunkt, :vedtaksperiode_id
                 FROM person p
                 WHERE p.fodselsnummer = :fodselsnummer
                 """.trimIndent()
@@ -423,6 +427,7 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                             "fodselsnummer" to overstyrtArbeidsforhold.fødselsnummer.toLong(),
                             "saksbehandler_ref" to saksbehandlerOid,
                             "tidspunkt" to overstyrtArbeidsforhold.opprettet,
+                            "vedtaksperiode_id" to overstyrtArbeidsforhold.vedtaksperiodeId,
                         ),
                     ).asUpdateAndReturnGeneratedKey,
                 )

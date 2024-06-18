@@ -46,6 +46,7 @@ class OverstyrtTidslinje(
             organisasjonsnummer = organisasjonsnummer,
             dager = dager.map(OverstyrtTidslinjedag::toDto),
             begrunnelse = begrunnelse,
+            vedtaksperiodeId = vedtaksperiodeId,
         )
 
     internal fun byggSubsumsjoner(saksbehandlerEpost: String): List<Subsumsjon> {

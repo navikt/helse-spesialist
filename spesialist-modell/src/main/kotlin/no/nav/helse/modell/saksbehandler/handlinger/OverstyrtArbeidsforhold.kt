@@ -14,6 +14,7 @@ class OverstyrtArbeidsforhold(
     private val aktørId: String,
     private val skjæringstidspunkt: LocalDate,
     private val overstyrteArbeidsforhold: List<Arbeidsforhold>,
+    private val vedtaksperiodeId: UUID,
 ) : Overstyring {
     override fun gjelderFødselsnummer(): String = fødselsnummer
 
@@ -49,6 +50,7 @@ class OverstyrtArbeidsforhold(
             aktørId = aktørId,
             skjæringstidspunkt = skjæringstidspunkt,
             overstyrteArbeidsforhold = overstyrteArbeidsforhold.map(Arbeidsforhold::toDto),
+            vedtaksperiodeId = vedtaksperiodeId,
         )
 }
 

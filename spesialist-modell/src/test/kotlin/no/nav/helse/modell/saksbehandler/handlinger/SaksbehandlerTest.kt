@@ -156,7 +156,8 @@ internal class SaksbehandlerTest {
                 aktørId = "123",
                 fødselsnummer = "1234",
                 skjæringstidspunkt = 1.januar,
-                arbeidsgivere = emptyList()
+                arbeidsgivere = emptyList(),
+                vedtaksperiodeId = UUID.randomUUID(),
             )
         )
         Assertions.assertEquals(true, observert)
@@ -178,7 +179,8 @@ internal class SaksbehandlerTest {
                 aktørId = "123",
                 fødselsnummer = "1234",
                 skjæringstidspunkt = 1.januar,
-                overstyrteArbeidsforhold = emptyList()
+                overstyrteArbeidsforhold = emptyList(),
+                vedtaksperiodeId = UUID.randomUUID(),
             )
         )
         Assertions.assertEquals(true, observert)

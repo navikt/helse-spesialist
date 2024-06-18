@@ -16,7 +16,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
         val finnOverstyringQuery = """
             SELECT o.id, o.tidspunkt, o.person_ref, o.hendelse_ref, o.saksbehandler_ref, o.ekstern_hendelse_id, 
             o.ferdigstilt, ot.id AS overstyring_tidslinje_id, ot.arbeidsgiver_ref, ot.begrunnelse, p.fodselsnummer, 
-            a.orgnummer, s.navn, s.ident FROM overstyring o
+            a.orgnummer, s.navn, s.ident, o.vedtaksperiode_id FROM overstyring o
                 INNER JOIN overstyring_tidslinje ot ON ot.overstyring_ref = o.id
                 INNER JOIN person p ON p.id = o.person_ref
                 INNER JOIN arbeidsgiver a ON a.id = ot.arbeidsgiver_ref
@@ -33,6 +33,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                         hendelseId = overstyringRow.uuid("hendelse_ref"),
                         fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
                         organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
+                        vedtaksperiodeId = overstyringRow.uuidOrNull("vedtaksperiode_id"),
                         begrunnelse = overstyringRow.string("begrunnelse"),
                         timestamp = overstyringRow.localDateTime("tidspunkt"),
                         saksbehandlerNavn = overstyringRow.string("navn"),

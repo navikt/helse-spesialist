@@ -82,6 +82,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                 OVERSTYRTE_DAGER,
                 BEGRUNNELSE,
                 OPPRETTET,
+                VEDTAKSPERIODE,
             ),
             OID,
         )
@@ -103,6 +104,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                 OVERSTYRTE_DAGER,
                 BEGRUNNELSE,
                 OPPRETTET,
+                VEDTAKSPERIODE,
             ),
             OID,
         )
@@ -123,6 +125,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                 OVERSTYRTE_DAGER,
                 BEGRUNNELSE,
                 OPPRETTET,
+                VEDTAKSPERIODE,
             ),
             OID,
         )
@@ -152,6 +155,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                 OVERSTYRTE_DAGER,
                 BEGRUNNELSE,
                 OPPRETTET,
+                VEDTAKSPERIODE,
             ),
             OID,
         )
@@ -177,6 +181,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                 aktørId = AKTØR,
                 skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
                 opprettet = OPPRETTET,
+                vedtaksperiodeId = VEDTAKSPERIODE,
                 overstyrteArbeidsforhold = listOf(
                     ArbeidsforholdForDatabase(
                         organisasjonsnummer = ORGNUMMER,
@@ -212,6 +217,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                 fødselsnummer = FNR,
                 skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
                 opprettet = OPPRETTET,
+                vedtaksperiodeId = VEDTAKSPERIODE,
                 arbeidsgivere = listOf(
                     OverstyrtArbeidsgiverForDatabase(
                         organisasjonsnummer = ORGNUMMER,
@@ -262,6 +268,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                 fødselsnummer = FNR,
                 skjæringstidspunkt = 1.januar,
                 opprettet = OPPRETTET,
+                vedtaksperiodeId = VEDTAKSPERIODE,
                 arbeidsgivere = listOf(
                     SkjønnsfastsattArbeidsgiverForDatabase(
                         organisasjonsnummer = ORGNUMMER,
@@ -312,6 +319,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                 fødselsnummer = FNR,
                 skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
                 opprettet = OPPRETTET,
+                vedtaksperiodeId = VEDTAKSPERIODE,
                 arbeidsgivere = listOf(
                     OverstyrtArbeidsgiverForDatabase(
                         organisasjonsnummer = ORGNUMMER,
@@ -336,6 +344,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                 aktørId = AKTØR,
                 skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
                 opprettet = OPPRETTET,
+                vedtaksperiodeId = VEDTAKSPERIODE,
                 overstyrteArbeidsforhold = listOf(
                     ArbeidsforholdForDatabase(
                         organisasjonsnummer = ORGNUMMER,

@@ -11,6 +11,7 @@ data class SkjønnsfastsattSykepengegrunnlagForDatabase(
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<SkjønnsfastsattArbeidsgiverForDatabase>,
     val opprettet: LocalDateTime,
+    val vedtaksperiodeId: UUID,
 )
 
 data class SkjønnsfastsattArbeidsgiverForDatabase(

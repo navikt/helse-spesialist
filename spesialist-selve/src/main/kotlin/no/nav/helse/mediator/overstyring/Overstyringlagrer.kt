@@ -74,6 +74,7 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
             begrunnelse = begrunnelse,
             opprettet = LocalDateTime.now(),
             dager =
@@ -95,6 +96,7 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
+            vedtaksperiodeId = vedtaksperiodeId,
             opprettet = LocalDateTime.now(),
             arbeidsgivere =
                 arbeidsgivere.map {
@@ -118,6 +120,7 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
             opprettet = LocalDateTime.now(),
+            vedtaksperiodeId = vedtaksperiodeId,
             overstyrteArbeidsforhold =
                 overstyrteArbeidsforhold.map {
                     ArbeidsforholdForDatabase(
@@ -136,6 +139,7 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
             opprettet = LocalDateTime.now(),
+            vedtaksperiodeId = vedtaksperiodeId,
             arbeidsgivere =
                 arbeidsgivere.map {
                     SkjønnsfastsattArbeidsgiverForDatabase(

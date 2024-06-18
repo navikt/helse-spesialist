@@ -11,6 +11,7 @@ data class OverstyrtTidslinjeDto(
     val organisasjonsnummer: String,
     val dager: List<OverstyrtTidslinjedagDto>,
     val begrunnelse: String,
+    val vedtaksperiodeId: UUID,
 )
 
 data class OverstyrtTidslinjedagDto(

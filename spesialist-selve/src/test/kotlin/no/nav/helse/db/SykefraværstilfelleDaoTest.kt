@@ -233,6 +233,7 @@ internal class SykefraværstilfelleDaoTest : DatabaseIntegrationTest() {
             aktørId = AKTØR,
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
+            vedtaksperiodeId = VEDTAKSPERIODE,
             arbeidsgivere =
                 listOf(
                     SkjønnsfastsattArbeidsgiverForDatabase(

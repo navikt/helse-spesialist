@@ -18,6 +18,7 @@ class SkjønnsfastsattSykepengegrunnlag(
     private val fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
     private val arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
+    private val vedtaksperiodeId: UUID,
 ) : Overstyring {
     override fun gjelderFødselsnummer(): String = fødselsnummer
 
@@ -53,6 +54,7 @@ class SkjønnsfastsattSykepengegrunnlag(
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgivere = arbeidsgivere.map(SkjønnsfastsattArbeidsgiver::toDto),
+            vedtaksperiodeId = vedtaksperiodeId,
         )
 
     internal fun byggSubsumsjon(saksbehandlerEpost: String): Subsumsjon {

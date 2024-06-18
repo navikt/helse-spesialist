@@ -364,6 +364,7 @@ internal class SaksbehandlerMediator(
             fødselsnummer = fodselsnummer,
             aktørId = aktorId,
             skjæringstidspunkt = skjaringstidspunkt,
+            vedtaksperiodeId = vedtaksperiodeId,
             overstyrteArbeidsforhold =
                 overstyrteArbeidsforhold.map { overstyrtArbeidsforhold ->
                     Arbeidsforhold(
@@ -385,6 +386,7 @@ internal class SaksbehandlerMediator(
             aktørId = aktorId,
             fødselsnummer = fodselsnummer,
             skjæringstidspunkt = skjaringstidspunkt,
+            vedtaksperiodeId = vedtaksperiodeId,
             arbeidsgivere =
                 arbeidsgivere.map { ag ->
                     SkjønnsfastsattArbeidsgiver(
@@ -416,6 +418,7 @@ internal class SaksbehandlerMediator(
             aktørId = aktorId,
             fødselsnummer = fodselsnummer,
             skjæringstidspunkt = skjaringstidspunkt,
+            vedtaksperiodeId = vedtaksperiodeId,
             arbeidsgivere =
                 arbeidsgivere.map { overstyrArbeidsgiver ->
                     OverstyrtArbeidsgiver(

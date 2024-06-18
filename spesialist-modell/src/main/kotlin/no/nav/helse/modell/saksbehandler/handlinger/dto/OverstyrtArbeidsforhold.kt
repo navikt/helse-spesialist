@@ -9,6 +9,7 @@ data class OverstyrtArbeidsforholdDto(
     val aktørId: String,
     val skjæringstidspunkt: LocalDate,
     val overstyrteArbeidsforhold: List<ArbeidsforholdDto>,
+    val vedtaksperiodeId: UUID,
 )
 
 data class ArbeidsforholdDto(

@@ -11,6 +11,7 @@ data class SkjønnsfastsattSykepengegrunnlagDto(
     val fødselsnummer: String,
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<SkjønnsfastsattArbeidsgiverDto>,
+    val vedtaksperiodeId: UUID,
 )
 
 data class SkjønnsfastsattArbeidsgiverDto(
