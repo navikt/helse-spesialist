@@ -348,7 +348,11 @@ internal class OppgaveService(
         fødselsnummer: String,
         oppgave: Oppgave,
     ) {
-        val (saksbehandlerFraDatabase) = reservasjonDao.hentReservasjonFor(fødselsnummer) ?: return
+        val (saksbehandlerFraDatabase) =
+            reservasjonDao.hentReservasjonFor(fødselsnummer) ?: run {
+                logg.info("Finner ingen reservasjon for $oppgave, blir ikke tildelt.")
+                return
+            }
         val saksbehandler =
             Saksbehandler(
                 epostadresse = saksbehandlerFraDatabase.epostadresse,
