@@ -39,6 +39,7 @@ class SnapshotClient(
 ) : ISnapshotClient {
     private companion object {
         val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
+        val logg: Logger = LoggerFactory.getLogger(SnapshotClient::class.java)
         val serializer: GraphQLClientSerializer = GraphQLClientJacksonSerializer(jacksonObjectMapper().disable(FAIL_ON_UNKNOWN_PROPERTIES))
     }
 
@@ -90,24 +91,26 @@ class SnapshotClient(
         val callId = UUID.randomUUID().toString()
 
         val response =
-            httpClient.post(spleisUrl.resolve("/graphql").toURL()) {
-                header("Authorization", "Bearer $accessToken")
-                header("callId", callId)
-                contentType(ContentType.Application.Json)
-                setBody(
-                    request.query?.let {
-                        GraphQLRequestBody(
-                            query = it,
-                            variables = request.variables,
-                            operationName = request.operationName,
-                        )
-                    },
-                )
-            }.body<String>()
+            httpClient
+                .post(spleisUrl.resolve("/graphql").toURL()) {
+                    header("Authorization", "Bearer $accessToken")
+                    header("callId", callId)
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        request.query?.let {
+                            GraphQLRequestBody(
+                                query = it,
+                                variables = request.variables,
+                                operationName = request.operationName,
+                            )
+                        },
+                    )
+                }.body<String>()
 
         val graphQLResponse = serializer.deserialize(response, request.responseType())
 
         if (graphQLResponse.errors !== null) {
+            logg.error("Feil i graphQL-response. Se sikkerlogg for mer info")
             sikkerLogg.error("Fikk følgende graphql-feil: ${graphQLResponse.errors}")
         }
 
