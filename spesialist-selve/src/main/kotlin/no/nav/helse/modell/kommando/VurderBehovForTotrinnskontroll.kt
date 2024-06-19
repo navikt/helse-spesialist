@@ -4,6 +4,7 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
+import no.nav.helse.modell.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -15,6 +16,7 @@ internal class VurderBehovForTotrinnskontroll(
     private val overstyringDao: OverstyringDao,
     private val totrinnsvurderingMediator: TotrinnsvurderingMediator,
     private val sykefraværstilfelle: Sykefraværstilfelle,
+    private val spleisVedtaksperioder: List<SpleisVedtaksperiode>,
 ) : Command {
     private companion object {
         private val logg = LoggerFactory.getLogger(VurderBehovForTotrinnskontroll::class.java)

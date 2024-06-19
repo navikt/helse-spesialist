@@ -164,35 +164,31 @@ internal class Kommandofabrikk(
     private fun generasjonerFor(
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate,
-    ): List<Generasjon> {
-        return gjeldendeGenerasjoner {
+    ): List<Generasjon> =
+        gjeldendeGenerasjoner {
             generasjonRepository.finnVedtaksperiodeIderFor(fødselsnummer, skjæringstidspunkt)
         }
-    }
 
-    private fun gjeldendeGenerasjoner(iderGetter: () -> Set<UUID>): List<Generasjon> {
-        return iderGetter().map {
+    private fun gjeldendeGenerasjoner(iderGetter: () -> Set<UUID>): List<Generasjon> =
+        iderGetter().map {
             gjeldendeGenerasjon(it)
         }
-    }
 
-    private fun gjeldendeGenerasjon(vedtaksperiodeId: UUID): Generasjon {
-        return GenerasjonBuilder(vedtaksperiodeId = vedtaksperiodeId).build(generasjonRepository, varselRepository)
-    }
+    private fun gjeldendeGenerasjon(vedtaksperiodeId: UUID): Generasjon =
+        GenerasjonBuilder(vedtaksperiodeId = vedtaksperiodeId).build(generasjonRepository, varselRepository)
 
     internal fun avviksvurdering(avviksvurdering: AvviksvurderingDto) {
         avviksvurderingDao.lagre(avviksvurdering)
     }
 
-    private fun endretEgenAnsattStatus(melding: EndretEgenAnsattStatus): EndretEgenAnsattStatusCommand {
-        return EndretEgenAnsattStatusCommand(
+    private fun endretEgenAnsattStatus(melding: EndretEgenAnsattStatus): EndretEgenAnsattStatusCommand =
+        EndretEgenAnsattStatusCommand(
             fødselsnummer = melding.fødselsnummer(),
             erEgenAnsatt = melding.erEgenAnsatt,
             opprettet = melding.opprettet,
             egenAnsattDao = egenAnsattDao,
             oppgaveService = oppgaveService,
         )
-    }
 
     fun gosysOppgaveEndret(
         fødselsnummer: String,
@@ -255,8 +251,8 @@ internal class Kommandofabrikk(
         )
     }
 
-    private fun vedtaksperiodeReberegnet(hendelse: VedtaksperiodeReberegnet): VedtaksperiodeReberegnetCommand {
-        return VedtaksperiodeReberegnetCommand(
+    private fun vedtaksperiodeReberegnet(hendelse: VedtaksperiodeReberegnet): VedtaksperiodeReberegnetCommand =
+        VedtaksperiodeReberegnetCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
             utbetalingDao = utbetalingDao,
@@ -268,32 +264,28 @@ internal class Kommandofabrikk(
             oppgaveDao = oppgaveDao,
             totrinnsvurderingMediator = totrinnsvurderingMediator,
         )
-    }
 
-    private fun vedtaksperiodeNyUtbetaling(hendelse: VedtaksperiodeNyUtbetaling): VedtaksperiodeNyUtbetalingCommand {
-        return VedtaksperiodeNyUtbetalingCommand(
+    private fun vedtaksperiodeNyUtbetaling(hendelse: VedtaksperiodeNyUtbetaling): VedtaksperiodeNyUtbetalingCommand =
+        VedtaksperiodeNyUtbetalingCommand(
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
             utbetalingId = hendelse.utbetalingId,
             utbetalingDao = utbetalingDao,
         )
-    }
 
-    fun søknadSendt(hendelse: SøknadSendt): SøknadSendtCommand {
-        return SøknadSendtCommand(
+    fun søknadSendt(hendelse: SøknadSendt): SøknadSendtCommand =
+        SøknadSendtCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             aktørId = hendelse.aktørId,
             organisasjonsnummer = hendelse.organisasjonsnummer,
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
         )
-    }
 
-    private fun adressebeskyttelseEndret(melding: AdressebeskyttelseEndret): AdressebeskyttelseEndretCommand {
-        return AdressebeskyttelseEndretCommand(melding.fødselsnummer(), personDao, oppgaveDao, godkjenningMediator)
-    }
+    private fun adressebeskyttelseEndret(melding: AdressebeskyttelseEndret): AdressebeskyttelseEndretCommand =
+        AdressebeskyttelseEndretCommand(melding.fødselsnummer(), personDao, oppgaveDao, godkjenningMediator)
 
-    private fun oppdaterPersonsnapshot(hendelse: Personmelding): OppdaterPersonsnapshotCommand {
-        return OppdaterPersonsnapshotCommand(
+    private fun oppdaterPersonsnapshot(hendelse: Personmelding): OppdaterPersonsnapshotCommand =
+        OppdaterPersonsnapshotCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             førsteKjenteDagFinner = { generasjonRepository.førsteKjenteDag(hendelse.fødselsnummer()) },
             personDao = personDao,
@@ -301,18 +293,16 @@ internal class Kommandofabrikk(
             opptegnelseDao = opptegnelseDao,
             snapshotClient = snapshotClient,
         )
-    }
 
-    private fun overstyringIgangsatt(melding: OverstyringIgangsatt): OverstyringIgangsattCommand {
-        return OverstyringIgangsattCommand(
+    private fun overstyringIgangsatt(melding: OverstyringIgangsatt): OverstyringIgangsattCommand =
+        OverstyringIgangsattCommand(
             berørteVedtaksperiodeIder = melding.berørteVedtaksperiodeIder,
             kilde = melding.kilde,
             overstyringDao = overstyringDao,
         )
-    }
 
-    private fun utbetalingAnnullert(hendelse: UtbetalingAnnullert): UtbetalingAnnullertCommand {
-        return UtbetalingAnnullertCommand(
+    private fun utbetalingAnnullert(hendelse: UtbetalingAnnullert): UtbetalingAnnullertCommand =
+        UtbetalingAnnullertCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             utbetalingId = hendelse.utbetalingId,
             saksbehandlerEpost = hendelse.saksbehandlerEpost,
@@ -323,10 +313,9 @@ internal class Kommandofabrikk(
             snapshotClient = snapshotClient,
             saksbehandlerDao = saksbehandlerDao,
         )
-    }
 
-    private fun utbetalingEndret(hendelse: UtbetalingEndret): UtbetalingEndretCommand {
-        return UtbetalingEndretCommand(
+    private fun utbetalingEndret(hendelse: UtbetalingEndret): UtbetalingEndretCommand =
+        UtbetalingEndretCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             organisasjonsnummer = hendelse.organisasjonsnummer,
             utbetalingId = hendelse.utbetalingId,
@@ -346,10 +335,9 @@ internal class Kommandofabrikk(
             totrinnsvurderingMediator = totrinnsvurderingMediator,
             json = hendelse.toJson(),
         )
-    }
 
-    private fun vedtaksperiodeForkastet(hendelse: VedtaksperiodeForkastet): VedtaksperiodeForkastetCommand {
-        return VedtaksperiodeForkastetCommand(
+    private fun vedtaksperiodeForkastet(hendelse: VedtaksperiodeForkastet): VedtaksperiodeForkastetCommand =
+        VedtaksperiodeForkastetCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
             id = hendelse.id,
@@ -363,7 +351,6 @@ internal class Kommandofabrikk(
             oppgaveDao = oppgaveDao,
             totrinnsvurderingMediator = totrinnsvurderingMediator,
         )
-    }
 
     fun utbetalingsgodkjenning(hendelse: Saksbehandlerløsning): UtbetalingsgodkjenningCommand {
         val oppgaveId = hendelse.oppgaveId
@@ -408,6 +395,7 @@ internal class Kommandofabrikk(
             orgnummereMedRelevanteArbeidsforhold = hendelse.orgnummereMedRelevanteArbeidsforhold,
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
             spleisBehandlingId = hendelse.spleisBehandlingId,
+            spleisVedtaksperioder = hendelse.spleisVedtaksperioder,
             periodetype = hendelse.periodetype,
             inntektskilde = hendelse.inntektskilde,
             førstegangsbehandling = hendelse.førstegangsbehandling,
@@ -442,9 +430,8 @@ internal class Kommandofabrikk(
         )
     }
 
-    private fun oppdaterSnapshotCommand(personmelding: Personmelding): OppdaterSnapshotCommand {
-        return OppdaterSnapshotCommand(snapshotClient, snapshotDao, personmelding.fødselsnummer(), personDao)
-    }
+    private fun oppdaterSnapshotCommand(personmelding: Personmelding): OppdaterSnapshotCommand =
+        OppdaterSnapshotCommand(snapshotClient, snapshotDao, personmelding.fødselsnummer(), personDao)
 
     internal fun iverksettOppdaterPersonsnapshot(melding: OppdaterPersonsnapshot) {
         iverksett(oppdaterPersonsnapshot(melding), melding.id)

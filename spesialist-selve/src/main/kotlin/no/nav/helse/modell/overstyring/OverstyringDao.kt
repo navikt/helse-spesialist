@@ -14,6 +14,26 @@ import java.util.UUID
 import javax.sql.DataSource
 
 class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) {
+    fun finnOverstyringerMedTypeForVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<OverstyringType> =
+        asSQL(
+            """ SELECT DISTINCT o.id,
+                CASE
+                    WHEN oi.id IS NOT NULL THEN 'Inntekt'
+                    WHEN oa.id IS NOT NULL THEN 'Arbeidsforhold'
+                    WHEN ot.id IS NOT NULL THEN 'Dager'
+                    WHEN ss.id IS NOT NULL THEN 'Sykepengegrunnlag'
+                END as type
+            FROM overstyring o
+            LEFT JOIN overstyring_arbeidsforhold oa on o.id = oa.overstyring_ref
+            LEFT JOIN overstyring_inntekt oi on o.id = oi.overstyring_ref
+            LEFT JOIN overstyring_tidslinje ot on o.id = ot.overstyring_ref
+            LEFT JOIN skjonnsfastsetting_sykepengegrunnlag ss on o.id = ss.overstyring_ref
+            WHERE o.vedtaksperiode_id IN :vedtaksperiodeIder
+            AND o.ferdigstilt = false
+        """,
+            mapOf("vedtaksperiodeIder" to vedtaksperiodeIder),
+        ).list { OverstyringType.valueOf(it.string("type")) }
+
     fun finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId: UUID): List<OverstyringType> =
         asSQL(
             """ SELECT DISTINCT o.id,
@@ -221,7 +241,6 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                                 "saksbehandler_ref" to saksbehandlerOid,
                                 "tidspunkt" to overstyrtInntektOgRefusjon.opprettet,
                                 "vedtaksperiode_id" to overstyrtInntektOgRefusjon.vedtaksperiodeId,
-
                             ),
                         ).asUpdateAndReturnGeneratedKey,
                     )

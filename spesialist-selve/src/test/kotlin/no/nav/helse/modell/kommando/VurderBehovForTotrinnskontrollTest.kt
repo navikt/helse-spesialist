@@ -51,6 +51,7 @@ internal class VurderBehovForTotrinnskontrollTest {
             overstyringDao = overstyringDao,
             totrinnsvurderingMediator = totrinnsvurderingMediator,
             sykefraværstilfelle = sykefraværstilfelle,
+            spleisVedtaksperioder = spleisVedtaksperioder,
         )
 
     @BeforeEach

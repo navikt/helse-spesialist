@@ -143,9 +143,13 @@ internal class Godkjenningsbehov private constructor(
             },
         spleisBehandlingId = UUID.fromString(jsonNode.path("Godkjenning").path("behandlingId").asText()),
         tags =
-            jsonNode.path("Godkjenning").path("tags").takeUnless(JsonNode::isMissingOrNull)?.map {
-                it.asText()
-            }?.toList() ?: emptyList<String>(),
+            jsonNode
+                .path("Godkjenning")
+                .path("tags")
+                .takeUnless(JsonNode::isMissingOrNull)
+                ?.map {
+                    it.asText()
+                }?.toList() ?: emptyList<String>(),
         utbetalingId = UUID.fromString(jsonNode.path("utbetalingId").asText()),
         skjæringstidspunkt = LocalDate.parse(jsonNode.path("Godkjenning").path("skjæringstidspunkt").asText()),
         periodetype = Periodetype.valueOf(jsonNode.path("Godkjenning").path("periodetype").asText()),
@@ -153,9 +157,11 @@ internal class Godkjenningsbehov private constructor(
         utbetalingtype = Utbetalingtype.valueOf(jsonNode.path("Godkjenning").path("utbetalingtype").asText()),
         inntektskilde = Inntektskilde.valueOf(jsonNode.path("Godkjenning").path("inntektskilde").asText()),
         orgnummereMedRelevanteArbeidsforhold =
-            jsonNode.path("Godkjenning")
+            jsonNode
+                .path("Godkjenning")
                 .path("orgnummereMedRelevanteArbeidsforhold")
-                .takeUnless(JsonNode::isMissingOrNull)?.map { it.asText() } ?: emptyList(),
+                .takeUnless(JsonNode::isMissingOrNull)
+                ?.map { it.asText() } ?: emptyList(),
         kanAvvises = jsonNode.path("Godkjenning").path("kanAvvises").asBoolean(),
         json = jsonNode.toString(),
     )
@@ -200,6 +206,7 @@ internal class GodkjenningsbehovCommand(
     godkjenningMediator: GodkjenningMediator,
     totrinnsvurderingMediator: TotrinnsvurderingMediator,
     json: String,
+    spleisVedtaksperioder: List<SpleisVedtaksperiode>,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -321,6 +328,7 @@ internal class GodkjenningsbehovCommand(
                 overstyringDao = overstyringDao,
                 totrinnsvurderingMediator = totrinnsvurderingMediator,
                 sykefraværstilfelle = sykefraværstilfelle,
+                spleisVedtaksperioder = spleisVedtaksperioder,
             ),
             PersisterPeriodehistorikkCommand(
                 vedtaksperiodeId = vedtaksperiodeId,
