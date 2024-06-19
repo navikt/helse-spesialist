@@ -257,11 +257,16 @@ internal class Kommandofabrikk(
 
     private fun vedtaksperiodeReberegnet(hendelse: VedtaksperiodeReberegnet): VedtaksperiodeReberegnetCommand {
         return VedtaksperiodeReberegnetCommand(
+            fødselsnummer = hendelse.fødselsnummer(),
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
             utbetalingDao = utbetalingDao,
             periodehistorikkDao = periodehistorikkDao,
             commandContextDao = commandContextDao,
             oppgaveService = oppgaveService,
+            reservasjonDao = reservasjonDao,
+            tildelingDao = tildelingDao,
+            oppgaveDao = oppgaveDao,
+            totrinnsvurderingMediator = totrinnsvurderingMediator,
         )
     }
 
@@ -353,6 +358,10 @@ internal class Kommandofabrikk(
             snapshotDao = snapshotDao,
             snapshotClient = snapshotClient,
             oppgaveService = oppgaveService,
+            reservasjonDao = reservasjonDao,
+            tildelingDao = tildelingDao,
+            oppgaveDao = oppgaveDao,
+            totrinnsvurderingMediator = totrinnsvurderingMediator,
         )
     }
 

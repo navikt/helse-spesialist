@@ -1172,8 +1172,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         val sisteOverstyring = testRapid.inspektør.hendelser(overstyringHendelse).last()
         val hendelseId = UUID.fromString(sisteOverstyring["@id"].asText())
         håndterOverstyringIgangsatt(fødselsnummer, hendelseId)
-        håndterUtbetalingErstattet(aktørId, fødselsnummer, organisasjonsnummer, utbetalingId = UUID.randomUUID())
         håndterVedtaksperiodeReberegnet(aktørId, fødselsnummer, organisasjonsnummer)
+        håndterUtbetalingErstattet(aktørId, fødselsnummer, organisasjonsnummer, utbetalingId = UUID.randomUUID())
     }
 
     private fun håndterOverstyringIgangsatt(

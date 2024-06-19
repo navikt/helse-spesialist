@@ -1,6 +1,5 @@
 package no.nav.helse.mediator.meldinger
 
-import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -8,13 +7,11 @@ import no.nav.helse.Testdata.snapshot
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
-import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastetCommand
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
@@ -27,7 +24,6 @@ internal class VedtaksperiodeForkastetCommandTest {
     }
 
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
-    private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val personDao = mockk<PersonDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val graphQLClient = mockk<SnapshotClient>(relaxed = true)
@@ -43,12 +39,11 @@ internal class VedtaksperiodeForkastetCommandTest {
             snapshotDao = snapshotDao,
             snapshotClient = graphQLClient,
             oppgaveService = oppgaveService,
+            reservasjonDao = mockk(relaxed = true),
+            tildelingDao = mockk(relaxed = true),
+            oppgaveDao = mockk(relaxed = true),
+            totrinnsvurderingMediator = mockk(relaxed = true),
         )
-
-    @BeforeEach
-    fun setup() {
-        clearMocks(commandContextDao, vedtakDao, snapshotDao, graphQLClient)
-    }
 
     @Test
     fun `avbryter kommandoer, oppdaterer snapshot og markerer vedtaksperiode som forkastet`() {

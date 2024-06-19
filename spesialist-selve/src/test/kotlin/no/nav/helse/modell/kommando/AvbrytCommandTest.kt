@@ -1,12 +1,10 @@
 package no.nav.helse.modell.kommando
 
-import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.CommandContextDao
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
@@ -14,18 +12,21 @@ internal class AvbrytCommandTest {
     private companion object {
         private val VEDTAKSPERIODE = UUID.randomUUID()
         private val CONTEXT = UUID.randomUUID()
+        private fun lagAvbrytCommand(fødselsnummer: String, vedtaksperiodeId: UUID, commandContextDao: CommandContextDao) = AvbrytCommand(
+            fødselsnummer = fødselsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            commandContextDao = commandContextDao,
+            oppgaveService = mockk<OppgaveService>(relaxed = true),
+            reservasjonDao = mockk(relaxed = true),
+            tildelingDao = mockk(relaxed = true),
+            oppgaveDao = mockk(relaxed = true),
+            totrinnsvurderingMediator = mockk(relaxed = true)
+        )
     }
-
-    private val oppgaveService = mockk<OppgaveService>(relaxed = true)
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
     private val context = CommandContext(CONTEXT)
 
-    private val command = AvbrytCommand(VEDTAKSPERIODE, commandContextDao, oppgaveService)
-
-    @BeforeEach
-    fun setup() {
-        clearMocks(commandContextDao)
-    }
+    private val command = lagAvbrytCommand("fnr", VEDTAKSPERIODE, commandContextDao)
 
     @Test
     fun `avbryter command context`() {

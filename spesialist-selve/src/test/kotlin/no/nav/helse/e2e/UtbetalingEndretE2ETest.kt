@@ -32,8 +32,8 @@ internal class UtbetalingEndretE2ETest : AbstractE2ETest() {
         tildelOppgave(oppgaveId, saksbehandlerOid)
 
         val utbetalingId2 = UUID.randomUUID()
-        håndterUtbetalingErstattet(arbeidsgiverbeløp = 20000, personbeløp = 20000, utbetalingId = utbetalingId2)
         håndterVedtaksperiodeReberegnet()
+        håndterUtbetalingErstattet(arbeidsgiverbeløp = 20000, personbeløp = 20000, utbetalingId = utbetalingId2)
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harRisikovurdering = true,
             harOppdatertMetadata = true,
