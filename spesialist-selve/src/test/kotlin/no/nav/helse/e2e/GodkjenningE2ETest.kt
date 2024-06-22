@@ -44,7 +44,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     fun `løser godkjenningsbehov når saksbehandler godkjenner`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave(regelverksvarsler = listOf("Brukeren har flere inntekter de siste tre måneder"))
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(regelverksvarsler = listOf("RV_SV_4"))
         håndterSaksbehandlerløsning()
 
         assertSaksbehandleroppgave(oppgavestatus = AvventerSystem)
@@ -55,7 +55,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     fun `løser godkjenningsbehov når saksbehandler avslår`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave(regelverksvarsler = listOf("Brukeren har flere inntekter de siste tre måneder"))
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(regelverksvarsler = listOf("RV_SV_4"))
         val begrunnelser = listOf("Mangler opptjening")
         val kommentar = "Vedkommende mangler opptjening"
         håndterSaksbehandlerløsning(godkjent = false, kommentar = kommentar, begrunnelser = begrunnelser)
