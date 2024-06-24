@@ -43,7 +43,7 @@ jobs:
 
     deployProd:
         name: Deploy to prod
-        needs: [build, deployDev]
+        needs: [build]
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
