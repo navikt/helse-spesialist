@@ -260,8 +260,10 @@ internal class PersonRepository(private val dataSource: DataSource) {
 
     private fun TransactionalSession.slettPåVent(personRef: Int) {
         @Language("PostgreSQL")
-        val query = "DELETE FROM pa_vent pv USING vedtak v WHERE pv.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?"
+        val query = "DELETE FROM pa_vent_frist pvf USING pa_vent pv, vedtak v WHERE pvf.pa_vent_ref = pv.id AND pv.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ? RETURNING pvf.pa_vent_ref"
+        val query2 = "DELETE FROM pa_vent pv USING vedtak v WHERE pv.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?"
         run(queryOf(query, personRef).asExecute)
+        run(queryOf(query2, personRef).asExecute)
     }
 
     private fun TransactionalSession.slettVedtaksperiodegenerasjoner(personRef: Int) {

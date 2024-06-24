@@ -66,9 +66,6 @@ VALUES ('${saksbehandler_oid}', ${sequence_number});
 INSERT INTO reserver_person(saksbehandler_ref, person_ref, gyldig_til)
 VALUES ('${saksbehandler_oid}', ${sequence_number}, now());
 
-INSERT INTO pa_vent(id, vedtaksperiode_id, saksbehandler_ref, frist, begrunnelse, opprettet)
-VALUES (${sequence_number}, '${vedtaksperiode_id}', '${saksbehandler_oid}', now(), '', now());
-
 INSERT INTO opptegnelse(person_id, sekvensnummer, payload, type)
 VALUES (${sequence_number}, 1, '{}'::json, 'TESTTYPE');
 INSERT INTO abonnement_for_opptegnelse(saksbehandler_id, person_id)
@@ -82,6 +79,11 @@ INSERT INTO notat(id, tekst, opprettet, saksbehandler_oid, vedtaksperiode_id, fe
 VALUES (${sequence_number}, 'TEST_TEXT', now(), '${saksbehandler_oid}', '${vedtaksperiode_id}', false, now());
 INSERT INTO kommentarer(tekst, notat_ref, feilregistrert_tidspunkt, saksbehandlerident)
 VALUES ('EN_KOMMENTAR', ${sequence_number}, null, '${saksbehandler_oid}');
+
+INSERT INTO pa_vent(id, vedtaksperiode_id, saksbehandler_ref, frist, begrunnelse, opprettet)
+VALUES (${sequence_number}, '${vedtaksperiode_id}', '${saksbehandler_oid}', now(), '', now());
+INSERT INTO pa_vent_frist(id, pa_vent_ref, frist, notat_ref, opprettet)
+VALUES (${sequence_number}, ${sequence_number}, now(), ${sequence_number}, now());
 
 INSERT INTO overstyring(id, tidspunkt, person_ref, hendelse_ref, saksbehandler_ref, vedtaksperiode_id)
 VALUES (${sequence_number}, now(), ${sequence_number}, '${hendelse_id}',
