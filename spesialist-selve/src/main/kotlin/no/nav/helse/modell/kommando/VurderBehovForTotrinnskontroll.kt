@@ -28,22 +28,21 @@ internal class VurderBehovForTotrinnskontroll(
         val overstyringer = finnOverstyringerMedType()
         finnOverstyringer(overstyringer)
 
-        if ((kreverTotrinnsvurdering && !vedtaksperiodeHarFerdigstiltOppgave) || overstyringer.isNotEmpty())
-            {
-                logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
-                val totrinnsvurdering = totrinnsvurderingMediator.opprett(vedtaksperiodeId)
+        if ((kreverTotrinnsvurdering && !vedtaksperiodeHarFerdigstiltOppgave) || overstyringer.isNotEmpty()) {
+            logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
+            val totrinnsvurdering = totrinnsvurderingMediator.opprett(vedtaksperiodeId)
 
-                if (totrinnsvurdering.erBeslutteroppgave()) {
-                    totrinnsvurderingMediator.settAutomatiskRetur(vedtaksperiodeId)
-                }
-                val behandlendeSaksbehandlerOid = totrinnsvurdering.saksbehandler
-                if (behandlendeSaksbehandlerOid != null) {
-                    oppgaveService.reserverOppgave(
-                        saksbehandleroid = behandlendeSaksbehandlerOid,
-                        fødselsnummer = fødselsnummer,
-                    )
-                }
+            if (totrinnsvurdering.erBeslutteroppgave()) {
+                totrinnsvurderingMediator.settAutomatiskRetur(vedtaksperiodeId)
             }
+            val behandlendeSaksbehandlerOid = totrinnsvurdering.saksbehandler
+            if (behandlendeSaksbehandlerOid != null) {
+                oppgaveService.reserverOppgave(
+                    saksbehandleroid = behandlendeSaksbehandlerOid,
+                    fødselsnummer = fødselsnummer,
+                )
+            }
+        }
 
         return true
     }
@@ -51,6 +50,8 @@ internal class VurderBehovForTotrinnskontroll(
     private fun finnOverstyringer(overstyringer: List<OverstyringType>): List<OverstyringType> {
         val spleisVedtaksperiodeIder = spleisVedtaksperioder.map { it.vedtaksperiodeId }
         val vedtaksperiodeOverstyringtyper = overstyringDao.finnOverstyringerMedTypeForVedtaksperioder(spleisVedtaksperiodeIder)
+
+        if (overstyringer.isEmpty() && vedtaksperiodeOverstyringtyper.isEmpty()) return vedtaksperiodeOverstyringtyper
 
         if (overstyringer.toSet() == vedtaksperiodeOverstyringtyper.toSet()) {
             logg.info("Finne overstyringer. Gammel og ny metode fant samme overstyring(er)")
@@ -63,8 +64,11 @@ internal class VurderBehovForTotrinnskontroll(
     // Overstyringer og Revurderinger
     private fun finnOverstyringerMedType(): List<OverstyringType> {
         val vedtaksperiodeOverstyringtyper = overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId)
-
-        logg.info("Vedtaksperioden: $vedtaksperiodeId har blitt overstyrt eller revurdert med typer: $vedtaksperiodeOverstyringtyper")
+        if (vedtaksperiodeOverstyringtyper.isNotEmpty()) {
+            logg.info(
+                "Vedtaksperioden: $vedtaksperiodeId har blitt overstyrt eller revurdert med typer: $vedtaksperiodeOverstyringtyper",
+            )
+        }
 
         return vedtaksperiodeOverstyringtyper
     }
