@@ -12,6 +12,7 @@ import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -51,7 +52,7 @@ internal class VurderBehovForTotrinnskontrollTest {
             overstyringDao = overstyringDao,
             totrinnsvurderingMediator = totrinnsvurderingMediator,
             sykefraværstilfelle = sykefraværstilfelle,
-            spleisVedtaksperioder = spleisVedtaksperioder,
+            spleisVedtaksperioder = listOf(SpleisVedtaksperiode(VEDTAKSPERIODE_ID_1, UUID.randomUUID(), 1.januar, 31.januar, 1.januar), SpleisVedtaksperiode(VEDTAKSPERIODE_ID_2, UUID.randomUUID(), 1.februar, 28.februar, 1.januar)),
         )
 
     @BeforeEach

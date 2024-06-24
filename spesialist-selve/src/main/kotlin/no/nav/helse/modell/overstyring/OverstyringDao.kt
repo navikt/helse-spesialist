@@ -28,10 +28,10 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
             LEFT JOIN overstyring_inntekt oi on o.id = oi.overstyring_ref
             LEFT JOIN overstyring_tidslinje ot on o.id = ot.overstyring_ref
             LEFT JOIN skjonnsfastsetting_sykepengegrunnlag ss on o.id = ss.overstyring_ref
-            WHERE o.vedtaksperiode_id IN :vedtaksperiodeIder
+            WHERE o.vedtaksperiode_id IN (${vedtaksperiodeIder.joinToString { "?" }})
             AND o.ferdigstilt = false
         """,
-            mapOf("vedtaksperiodeIder" to vedtaksperiodeIder),
+            *vedtaksperiodeIder.toTypedArray(),
         ).list { OverstyringType.valueOf(it.string("type")) }
 
     fun finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId: UUID): List<OverstyringType> =
