@@ -30,6 +30,7 @@ import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.automatisering.PlukkTilManuell
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.dokument.DokumentDao
+import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
@@ -123,6 +124,7 @@ internal class SpesialistApp(
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
     private val automatiseringDao = AutomatiseringDao(dataSource)
     private val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(dataSource)
+    private val egenAnsattDao = EgenAnsattDao(dataSource)
 
     private lateinit var meldingMediator: MeldingMediator
     private lateinit var saksbehandlerMediator: SaksbehandlerMediator
@@ -209,6 +211,7 @@ internal class SpesialistApp(
             stikkprøver = stikkprøver,
             meldingDao = meldingDao,
             generasjonDao = generasjonDao,
+            egenAnsattDao = egenAnsattDao,
         )
 
     private val kommandofabrikk =

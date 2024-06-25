@@ -18,6 +18,7 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.automatisering.Stikkprøver
+import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
@@ -56,6 +57,8 @@ internal class TestMediator(
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
+    private val egenAnsattDao = EgenAnsattDao(dataSource)
+
     private val stansAutomatiskBehandlingMediator =
         StansAutomatiskBehandlingMediator(
             StansAutomatiskBehandlingDao(dataSource),
@@ -125,6 +128,7 @@ internal class TestMediator(
                 },
             meldingDao = meldingDao,
             generasjonDao = generasjonDao,
+            egenAnsattDao = egenAnsattDao,
         )
 
     private val kommandofabrikk =

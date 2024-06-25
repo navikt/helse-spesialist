@@ -6,6 +6,7 @@ import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.MeldingDao.OverstyringIgangsattKorrigertSøknad
 import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.HentEnhetløsning.Companion.erEnhetUtland
@@ -21,6 +22,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
+import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
@@ -37,6 +39,7 @@ internal class Automatisering(
     private val stikkprøver: Stikkprøver,
     private val meldingDao: MeldingDao,
     private val generasjonDao: GenerasjonDao,
+    private val egenAnsattDao: EgenAnsattDao,
 ) {
     private companion object {
         private val logger = LoggerFactory.getLogger(Automatisering::class.java)
@@ -104,13 +107,17 @@ internal class Automatisering(
             }
         }
 
-        avgjørStikkprøve(erUTS, flereArbeidsgivere, erFørstegangsbehandling)?.let {
-            tilStikkprøve(it, utfallslogger, vedtaksperiodeId, hendelseId, utbetaling.utbetalingId)
-        } ?: run {
-            utfallslogger("Automatiserer {} ({})")
-            onAutomatiserbar()
-            automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetaling.utbetalingId)
+        if (egenAnsattDao.erEgenAnsatt(fødselsnummer) != true && personDao.findAdressebeskyttelse(fødselsnummer) == Adressebeskyttelse.Ugradert) {
+            avgjørStikkprøve(erUTS, flereArbeidsgivere, erFørstegangsbehandling)?.let {
+                tilStikkprøve(it, utfallslogger, vedtaksperiodeId, hendelseId, utbetaling.utbetalingId)
+                return@utfør
+            }
+        } else {
+            logger.info("Vurderer ikke om det skal tas stikkprøve.")
         }
+        utfallslogger("Automatiserer {} ({})")
+        onAutomatiserbar()
+        automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetaling.utbetalingId)
     }
 
     private fun overstyringIgangsattKorrigertSøknad(

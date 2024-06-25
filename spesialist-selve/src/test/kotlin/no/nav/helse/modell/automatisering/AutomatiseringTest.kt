@@ -26,6 +26,7 @@ import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
+import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import org.junit.jupiter.api.BeforeEach
@@ -55,7 +56,9 @@ internal class AutomatiseringTest {
         }
     private val åpneGosysOppgaverDaoMock = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
-    private val personDaoMock = mockk<PersonDao>(relaxed = true)
+    private val personDaoMock = mockk<PersonDao>(relaxed = true) {
+        every { findAdressebeskyttelse(any()) } returns Adressebeskyttelse.Ugradert
+    }
     private val automatiseringDaoMock = mockk<AutomatiseringDao>(relaxed = true)
     private val vergemålDaoMock = mockk<VergemålDao>(relaxed = true)
     private val overstyringDaoMock = mockk<OverstyringDao>(relaxed = true)
@@ -94,6 +97,7 @@ internal class AutomatiseringTest {
             stikkprøver = stikkprøver,
             meldingDao = meldingDaoMock,
             generasjonDao = generasjonDaoMock,
+            egenAnsattDao = egenAnsattDao,
         )
 
     @BeforeEach
@@ -240,12 +244,6 @@ internal class AutomatiseringTest {
     }
 
     @Test
-    fun `vedtaksperiode med egen ansatt skal automatiseres`() {
-        every { egenAnsattDao.erEgenAnsatt(any()) } returns true
-        gårAutomatisk()
-    }
-
-    @Test
     fun `vedtaksperiode plukket ut til stikkprøve skal ikke automatisk godkjennes`() {
         stikkprøveFullRefusjonEnArbeidsgiver = true
         gårTilManuell()
@@ -310,6 +308,22 @@ internal class AutomatiseringTest {
             )
             assertGikkTilManuell()
         }
+    }
+
+    @Test
+    fun `egenansatt går ikke til stikkprøve`() {
+        stikkprøveFullRefusjonEnArbeidsgiver = true
+        gårTilManuell()
+        every { egenAnsattDao.erEgenAnsatt(any()) } returns true
+        gårAutomatisk()
+    }
+
+    @Test
+    fun `tar ikke stikkprøve når det er gradert adresse`() {
+        stikkprøveFullRefusjonEnArbeidsgiver = true
+        gårTilManuell()
+        every { personDaoMock.findAdressebeskyttelse(any()) } returns Adressebeskyttelse.Fortrolig
+        gårAutomatisk()
     }
 
     @Test
