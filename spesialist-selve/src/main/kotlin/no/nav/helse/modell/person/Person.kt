@@ -66,7 +66,7 @@ class Person private constructor(
     }
 
     internal fun vedtaksperiodeForkastet(vedtaksperiodeForkastet: VedtaksperiodeForkastet) {
-        vedtaksperiode(vedtaksperiodeForkastet.vedtaksperiodeId())
+        vedtaksperioder.find { it.vedtaksperiodeId() == vedtaksperiodeForkastet.vedtaksperiodeId() }
             ?.vedtaksperiodeForkastet()
     }
 
