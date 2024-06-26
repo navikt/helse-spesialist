@@ -458,9 +458,9 @@ internal class MeldingMediator(
 
     // fortsetter en command (resume) med oppsamlet løsninger
     private fun fortsett(message: String) {
-        løsninger?.fortsett(this, message)
+        val jsonNode = objectMapper.readTree(message)
+        løsninger?.fortsett(this, jsonNode)
         if (meldingPasserteValidering) {
-            val jsonNode = objectMapper.readTree(message)
             jsonNode["@id"]?.asUUID()?.let { id ->
                 val type =
                     when (val eventName = jsonNode["@event_name"]?.asText()) {
@@ -674,12 +674,13 @@ internal class MeldingMediator(
 
         fun fortsett(
             mediator: MeldingMediator,
-            message: String,
+            packet: JsonNode,
         ) {
-            logg.info("fortsetter utførelse av kommandokontekst som følge av løsninger på behov for ${melding::class.simpleName}")
-            sikkerlogg.info(
-                "fortsetter utførelse av kommandokontekst som følge av løsninger på behov for ${melding::class.simpleName}\nInnkommende melding:\n\t$message",
-            )
+            val behov = packet["@behov"].map(JsonNode::asText)
+            "fortsetter utførelse av kommandokjede for ${melding::class.simpleName} som følge av løsninger $behov".let {
+                logg.info(it)
+                sikkerlogg.info("$it\nInnkommende melding:\n\t$packet")
+            }
             if (melding is Personmelding) {
                 mediator.gjenopptaMelding(melding, commandContext, messageContext)
             } else {
