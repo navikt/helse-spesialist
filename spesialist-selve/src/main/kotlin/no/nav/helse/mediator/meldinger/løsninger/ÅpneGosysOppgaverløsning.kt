@@ -2,6 +2,7 @@ package no.nav.helse.mediator.meldinger.løsninger
 
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
+import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
@@ -38,9 +39,10 @@ internal class ÅpneGosysOppgaverløsning(
         sykefraværstilfelle: Sykefraværstilfelle,
         hendelseId: UUID,
         harTildeltOppgave: Boolean,
+        oppgaveService: OppgaveService,
     ) {
         varslerForOppslagFeilet(vedtaksperiodeId, sykefraværstilfelle, hendelseId)
-        varslerForÅpneGosysOppgaver(vedtaksperiodeId, sykefraværstilfelle, hendelseId, harTildeltOppgave)
+        varslerForÅpneGosysOppgaver(vedtaksperiodeId, sykefraværstilfelle, hendelseId, harTildeltOppgave, oppgaveService)
     }
 
     private fun varslerForOppslagFeilet(
@@ -60,15 +62,20 @@ internal class ÅpneGosysOppgaverløsning(
         sykefraværstilfelle: Sykefraværstilfelle,
         hendelseId: UUID,
         harTildeltOppgave: Boolean,
+        oppgaveService: OppgaveService,
     ) {
         if (antall == null) return
 
         when {
             antall > 0 -> {
                 sykefraværstilfelle.håndter(SB_EX_1.nyttVarsel(vedtaksperiodeId), hendelseId)
+                if (sykefraværstilfelle.antallVarsler(vedtaksperiodeId) == 1) {
+                    oppgaveService.leggTilGosysEgenskap(vedtaksperiodeId)
+                }
             }
 
             antall == 0 && !harTildeltOppgave -> {
+                oppgaveService.fjernGosysEgenskap(vedtaksperiodeId)
                 sykefraværstilfelle.deaktiver(SB_EX_1.nyttVarsel(vedtaksperiodeId))
             }
         }

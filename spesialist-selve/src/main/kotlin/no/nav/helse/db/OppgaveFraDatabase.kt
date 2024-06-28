@@ -82,4 +82,5 @@ enum class EgenskapForDatabase {
     SKJØNNSFASTSETTELSE,
     PÅ_VENT,
     TILBAKEDATERT,
+    GOSYS,
 }

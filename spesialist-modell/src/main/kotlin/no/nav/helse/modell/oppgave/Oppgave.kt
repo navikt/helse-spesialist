@@ -7,6 +7,7 @@ import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
 import no.nav.helse.modell.oppgave.Egenskap.Companion.tilgangsstyrteEgenskaper
 import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
+import no.nav.helse.modell.oppgave.Egenskap.GOSYS
 import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
 import no.nav.helse.modell.oppgave.Egenskap.RETUR
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
@@ -150,6 +151,18 @@ class Oppgave private constructor(
     fun fjernTilbakedatert() {
         egenskaper.remove(TILBAKEDATERT)
         oppgaveEndret()
+    }
+
+    fun fjernGosys() {
+        egenskaper.remove(GOSYS)
+        oppgaveEndret()
+    }
+
+    fun leggTilGosys() {
+        if (!egenskaper.contains(GOSYS)) {
+            egenskaper.add(GOSYS)
+            oppgaveEndret()
+        }
     }
 
     fun leggPåVent(

@@ -111,6 +111,10 @@ class Varsel(
             return find { it.varselkode == varselkode }
         }
 
+        fun List<Varsel>.finnVarslerFor(vedtaksperiodeId: UUID): List<Varsel> {
+            return filter { it.vedtaksperiodeId == vedtaksperiodeId }
+        }
+
         fun List<Varsel>.inneholderMedlemskapsvarsel(): Boolean {
             return any { it.status == AKTIV && it.varselkode == "RV_MV_1" }
         }

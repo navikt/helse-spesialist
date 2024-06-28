@@ -7,6 +7,7 @@ import io.mockk.verify
 import no.nav.helse.januar
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
+import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.vedtaksperiode.IVedtaksperiodeObserver
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
@@ -65,6 +66,7 @@ internal class VurderVidereBehandlingAvklaresGosysoppgaveTest {
     private val generasjon = generasjon(VEDTAKPERIODE_ID).also { it.registrer(vedtaksperiodeObserver) }
     private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(generasjon), emptyList())
     private val dao = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
+    private val oppgaveService = mockk<OppgaveService>(relaxed = true)
 
     private fun command(
         harTildeltOppgave: Boolean = false,
@@ -77,6 +79,7 @@ internal class VurderVidereBehandlingAvklaresGosysoppgaveTest {
         VEDTAKPERIODE_ID,
         sykefraværstilfelle,
         harTildeltOppgave = harTildeltOppgave,
+        oppgaveService = oppgaveService,
     )
 
     private lateinit var context: CommandContext
@@ -122,6 +125,7 @@ internal class VurderVidereBehandlingAvklaresGosysoppgaveTest {
                 VEDTAKPERIODE_ID,
                 sykefraværstilfelle,
                 harTildeltOppgave = false,
+                oppgaveService = oppgaveService,
             ).execute(context),
         )
         assertEquals(listOf("ÅpneOppgaver"), observer.behov.keys.toList())
@@ -151,6 +155,7 @@ internal class VurderVidereBehandlingAvklaresGosysoppgaveTest {
         verify(exactly = 1) { dao.persisterÅpneGosysOppgaver(any()) }
         assertEquals(0, vedtaksperiodeObserver.opprettedeVarsler.size)
         assertTrue(vedtaksperiodeObserver.deaktiverteVarsler.contains(SB_EX_1))
+        verify(exactly = 1) { oppgaveService.fjernGosysEgenskap(any()) }
     }
 
     @Test
@@ -163,6 +168,7 @@ internal class VurderVidereBehandlingAvklaresGosysoppgaveTest {
     @Test
     fun `Lagrer varsel ved åpne oppgaver, uavhengig om eventuell oppgave er tildelt eller ikke`() {
         lagrerVarselVedÅpneOppgaver(false)
+        verify(exactly = 1) { oppgaveService.leggTilGosysEgenskap(any()) }
         setup()
         lagrerVarselVedÅpneOppgaver(true)
     }
@@ -174,6 +180,13 @@ internal class VurderVidereBehandlingAvklaresGosysoppgaveTest {
         verify(exactly = 1) { dao.persisterÅpneGosysOppgaver(any()) }
         assertEquals(1, vedtaksperiodeObserver.opprettedeVarsler.size)
         assertEquals(SB_EX_3.name, vedtaksperiodeObserver.opprettedeVarsler[0])
+    }
+
+    @Test
+    fun `Lagrer ikke til egenskap for gosys dersom det er andre varsler på perioden`() {
+        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_4", LocalDateTime.now(), VEDTAKPERIODE_ID), UUID.randomUUID())
+        context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
+        verify(exactly = 0) { oppgaveService.leggTilGosysEgenskap(any()) }
     }
 
     private fun lagrerVarselVedÅpneOppgaver(harTildeltOppgave: Boolean) {

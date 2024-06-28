@@ -37,6 +37,7 @@ enum class Egenskap(
     SKJØNNSFASTSETTELSE,
     PÅ_VENT(kategori = Status),
     TILBAKEDATERT,
+    GOSYS,
     VERGEMÅL,
     ;
 

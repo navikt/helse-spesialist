@@ -1,7 +1,5 @@
 package no.nav.helse.modell.oppgave
 
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.modell.ManglerTilgang
 import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
@@ -10,6 +8,7 @@ import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
 import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
 import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
+import no.nav.helse.modell.oppgave.Egenskap.GOSYS
 import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
 import no.nav.helse.modell.oppgave.Egenskap.RETUR
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
@@ -31,6 +30,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import java.time.LocalDateTime
+import java.util.UUID
 import kotlin.random.Random.Default.nextLong
 
 internal class OppgaveTest {
@@ -46,6 +47,7 @@ internal class OppgaveTest {
         private val OPPGAVE_ID = nextLong()
         private val saksbehandlerUtenTilgang = saksbehandler()
         private val beslutter = saksbehandler(oid = BESLUTTER_OID, tilgangskontroll = TilgangskontrollForTestHarTilgang)
+
         private fun saksbehandler(
             epost: String = SAKSBEHANDLER_EPOST,
             oid: UUID = SAKSBEHANDLER_OID,
@@ -454,6 +456,17 @@ internal class OppgaveTest {
     }
 
     @Test
+    fun `legg til egenskap for gosys kun dersom den ikke finnes fra før`() {
+        val oppgave = nyOppgave(SØKNAD)
+        oppgave.leggTilGosys()
+        oppgave.leggTilGosys()
+
+        inspektør(oppgave) {
+            assertEquals(1, egenskaper.filter { it == GOSYS }.size)
+        }
+    }
+
+    @Test
     fun `legg på vent`() {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang)
@@ -475,7 +488,6 @@ internal class OppgaveTest {
             assertEquals(saksbehandlerUtenTilgang, this.tildeltTil)
         }
     }
-
 
     @Test
     fun `legg på vent og skalTildeles ny saksbehandler`() {
@@ -511,7 +523,7 @@ internal class OppgaveTest {
 
         inspektør(oppgave) {
             assertEquals(false, påVent)
-            assertTrue(egenskaper.none{ it == PÅ_VENT})
+            assertTrue(egenskaper.none { it == PÅ_VENT })
             assertNull(this.tildeltTil)
         }
     }
@@ -552,9 +564,15 @@ internal class OppgaveTest {
 
     @Test
     fun equals() {
-        val gjenopptattOppgave = Oppgave.nyOppgave(
-            1L, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), true, listOf(OPPGAVETYPE)
-        )
+        val gjenopptattOppgave =
+            Oppgave.nyOppgave(
+                1L,
+                VEDTAKSPERIODE_ID,
+                UTBETALING_ID,
+                UUID.randomUUID(),
+                true,
+                listOf(OPPGAVETYPE),
+            )
         val oppgave1 =
             Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), true, listOf(SØKNAD))
         val oppgave2 =
@@ -581,7 +599,10 @@ internal class OppgaveTest {
         assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
     }
 
-    private fun nyOppgave(vararg egenskaper: Egenskap, medTotrinnsvurdering: Boolean = false): Oppgave {
+    private fun nyOppgave(
+        vararg egenskaper: Egenskap,
+        medTotrinnsvurdering: Boolean = false,
+    ): Oppgave {
         val totrinnsvurdering = if (medTotrinnsvurdering) totrinnsvurdering() else null
         return Oppgave.nyOppgave(
             OPPGAVE_ID,
@@ -590,24 +611,27 @@ internal class OppgaveTest {
             UUID.randomUUID(),
             true,
             egenskaper.toList(),
-            totrinnsvurdering
+            totrinnsvurdering,
         )
     }
 
-    private fun totrinnsvurdering() = Totrinnsvurdering(
-        vedtaksperiodeId = VEDTAKSPERIODE_ID,
-        erRetur = false,
-        saksbehandler = null,
-        beslutter = null,
-        utbetalingId = null,
-        opprettet = LocalDateTime.now(),
-        oppdatert = null
-    )
+    private fun totrinnsvurdering() =
+        Totrinnsvurdering(
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            erRetur = false,
+            saksbehandler = null,
+            beslutter = null,
+            utbetalingId = null,
+            opprettet = LocalDateTime.now(),
+            oppdatert = null,
+        )
 
-    private val observer = object : OppgaveObserver {
-        val oppgaverEndret = mutableListOf<Oppgave>()
-        override fun oppgaveEndret(oppgave: Oppgave) {
-            oppgaverEndret.add(oppgave)
+    private val observer =
+        object : OppgaveObserver {
+            val oppgaverEndret = mutableListOf<Oppgave>()
+
+            override fun oppgaveEndret(oppgave: Oppgave) {
+                oppgaverEndret.add(oppgave)
+            }
         }
-    }
 }

@@ -267,6 +267,7 @@ internal class GodkjenningsbehovCommand(
                 vedtaksperiodeId = vedtaksperiodeId,
                 sykefraværstilfelle = sykefraværstilfelle,
                 harTildeltOppgave = false,
+                oppgaveService = oppgaveService,
             ),
             VurderVurderingsmomenter(
                 hendelseId = id,

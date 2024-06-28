@@ -6,6 +6,7 @@ import no.nav.helse.modell.person.vedtaksperiode.IVedtaksperiodeObserver
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.automatiskGodkjennSpesialsakvarsler
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.finnEksisterendeVarsel
+import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.finnVarslerFor
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderAktivtVarselOmAvvik
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderMedlemskapsvarsel
@@ -109,6 +110,8 @@ internal class Generasjon private constructor(
     internal fun erSpesialsakSomKanAutomatiseres() = !varsler.inneholderSvartelistedeVarsler()
 
     internal fun automatiskGodkjennSpesialsakvarsler() = varsler.automatiskGodkjennSpesialsakvarsler(this.id)
+
+    internal fun antallVarsler() = varsler.finnVarslerFor(vedtaksperiodeId).size
 
     internal fun håndterNyUtbetaling(
         hendelseId: UUID,

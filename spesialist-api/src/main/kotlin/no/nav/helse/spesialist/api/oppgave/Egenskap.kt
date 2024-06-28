@@ -27,4 +27,5 @@ enum class Egenskap {
     SKJØNNSFASTSETTELSE,
     PÅ_VENT,
     TILBAKEDATERT,
+    GOSYS,
 }

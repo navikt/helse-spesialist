@@ -48,6 +48,7 @@ enum class Egenskap {
     SKJONNSFASTSETTELSE,
     PA_VENT,
     TILBAKEDATERT,
+    GOSYS,
 }
 
 enum class Kategori {

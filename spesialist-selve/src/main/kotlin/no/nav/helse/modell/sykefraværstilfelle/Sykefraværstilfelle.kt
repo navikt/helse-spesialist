@@ -71,6 +71,14 @@ internal class Sykefraværstilfelle(
         generasjon.automatiskGodkjennSpesialsakvarsler()
     }
 
+    internal fun antallVarsler(vedtaksperiodeId: UUID): Int {
+        val generasjon =
+            gjeldendeGenerasjoner.finnGenerasjonForVedtaksperiode(
+                vedtaksperiodeId,
+            ) ?: throw IllegalStateException("Forventer å finne generasjon for perioden")
+        return generasjon.antallVarsler()
+    }
+
     internal fun håndter(
         avsluttetMedVedtak: AvsluttetMedVedtak,
         tags: List<String>,

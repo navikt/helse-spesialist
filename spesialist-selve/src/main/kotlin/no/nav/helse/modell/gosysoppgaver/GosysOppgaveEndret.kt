@@ -73,6 +73,7 @@ internal class GosysOppgaveEndretCommand(
                 vedtaksperiodeId = oppgavedataForAutomatisering.vedtaksperiodeId,
                 sykefraværstilfelle = sykefraværstilfelle,
                 harTildeltOppgave = harTildeltOppgave,
+                oppgaveService = oppgaveService,
             ),
             SjekkAtOppgaveFortsattErÅpenCommand(fødselsnummer = fødselsnummer, oppgaveDao = oppgaveDao),
             SettTidligereAutomatiseringInaktivCommand(
