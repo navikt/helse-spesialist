@@ -30,7 +30,8 @@ internal class VurderVidereBehandlingAvklaresGosysoppgaveTest {
     private companion object {
         private const val FNR = "12345678911"
         private const val AKTØR_ID = "1234567891112"
-        private val VEDTAKPERIODE_ID = UUID.randomUUID()
+        private val VEDTAKPERIODE_ID_AG_1 = UUID.randomUUID()
+        private val VEDTAKPERIODE_ID_AG_2 = UUID.randomUUID()
     }
 
     private val vedtaksperiodeObserver =
@@ -63,8 +64,9 @@ internal class VurderVidereBehandlingAvklaresGosysoppgaveTest {
             }
         }
 
-    private val generasjon = generasjon(VEDTAKPERIODE_ID).also { it.registrer(vedtaksperiodeObserver) }
-    private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(generasjon), emptyList())
+    private val generasjonAg1 = generasjon(VEDTAKPERIODE_ID_AG_1).also { it.registrer(vedtaksperiodeObserver) }
+    private val generasjonAg2 = generasjon(VEDTAKPERIODE_ID_AG_2).also { it.registrer(vedtaksperiodeObserver) }
+    private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(generasjonAg1, generasjonAg2), emptyList())
     private val dao = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
 
@@ -75,8 +77,8 @@ internal class VurderVidereBehandlingAvklaresGosysoppgaveTest {
         UUID.randomUUID(),
         AKTØR_ID,
         dao,
-        mockk<GenerasjonRepository> { every { skjæringstidspunktFor(VEDTAKPERIODE_ID) } returns skjæringstidspunkt },
-        VEDTAKPERIODE_ID,
+        mockk<GenerasjonRepository> { every { skjæringstidspunktFor(VEDTAKPERIODE_ID_AG_1) } returns skjæringstidspunkt },
+        VEDTAKPERIODE_ID_AG_1,
         sykefraværstilfelle,
         harTildeltOppgave = harTildeltOppgave,
         oppgaveService = oppgaveService,
@@ -121,8 +123,11 @@ internal class VurderVidereBehandlingAvklaresGosysoppgaveTest {
                 UUID.randomUUID(),
                 AKTØR_ID,
                 dao,
-                mockk<GenerasjonRepository> { every { skjæringstidspunktFor(VEDTAKPERIODE_ID) } throws IllegalStateException("testfeil") },
-                VEDTAKPERIODE_ID,
+                mockk<GenerasjonRepository> {
+                    every { skjæringstidspunktFor(VEDTAKPERIODE_ID_AG_1) } throws
+                        IllegalStateException("testfeil")
+                },
+                VEDTAKPERIODE_ID_AG_1,
                 sykefraværstilfelle,
                 harTildeltOppgave = false,
                 oppgaveService = oppgaveService,
@@ -147,7 +152,7 @@ internal class VurderVidereBehandlingAvklaresGosysoppgaveTest {
 
     @Test
     fun `Lagrer ikke varsel ved ingen åpne oppgaver og deaktiverer eventuelt eksisterende varsel`() {
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), VEDTAKPERIODE_ID), UUID.randomUUID())
+        generasjonAg1.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1), UUID.randomUUID())
         assertEquals(1, vedtaksperiodeObserver.opprettedeVarsler.size)
         vedtaksperiodeObserver.reset()
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
@@ -183,9 +188,18 @@ internal class VurderVidereBehandlingAvklaresGosysoppgaveTest {
     }
 
     @Test
-    fun `Lagrer ikke til egenskap for gosys dersom det er andre varsler på perioden`() {
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_4", LocalDateTime.now(), VEDTAKPERIODE_ID), UUID.randomUUID())
+    fun `Legger ikke til egenskap for gosys dersom det er andre varsler på perioden`() {
+        generasjonAg1.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_4", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1), UUID.randomUUID())
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
+        command().resume(context)
+        verify(exactly = 0) { oppgaveService.leggTilGosysEgenskap(any()) }
+    }
+
+    @Test
+    fun `Legger ikke til egenskap for gosys dersom det er andre varsler på andre overlappende perioder`() {
+        generasjonAg2.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_4", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_2), UUID.randomUUID())
+        context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
+        command().resume(context)
         verify(exactly = 0) { oppgaveService.leggTilGosysEgenskap(any()) }
     }
 

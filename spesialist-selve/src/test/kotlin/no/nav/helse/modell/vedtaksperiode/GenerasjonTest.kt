@@ -48,6 +48,30 @@ internal class GenerasjonTest {
     }
 
     @Test
+    fun `generasjon har kun gosysvarsel`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
+        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
+        assertTrue(generasjon.harKunGosysvarsel())
+    }
+
+    @Test
+    fun `generasjon har ingen varsler og dermed ikke kun gosysvarsel`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
+        assertFalse(generasjon.harKunGosysvarsel())
+    }
+
+    @Test
+    fun `generasjon har flere varsler og dermed ikke kun gosysvarsel`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
+        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
+        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_2", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
+        assertFalse(generasjon.harKunGosysvarsel())
+    }
+
+    @Test
     fun `generasjon har ikke aktive varsler`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
@@ -507,11 +531,10 @@ internal class GenerasjonTest {
         tom: LocalDate = 31.januar,
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         varselkode: String = "SB_EX_1",
-    ): Generasjon {
-        return generasjon(vedtaksperiodeId = vedtaksperiodeId, fom = fom, tom = tom).also {
+    ): Generasjon =
+        generasjon(vedtaksperiodeId = vedtaksperiodeId, fom = fom, tom = tom).also {
             it.håndterNyttVarsel(Varsel(UUID.randomUUID(), varselkode, LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
         }
-    }
 
     private fun generasjon(
         generasjonId: UUID = UUID.randomUUID(),

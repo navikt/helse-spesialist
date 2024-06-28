@@ -12,6 +12,7 @@ import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.deaktiver
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.erTilbakedatert
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForVedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.forhindrerAutomatisering
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.harKunGosysvarsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterGodkjent
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterNyttVarsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverSkjønnsfastsettelse
@@ -52,6 +53,13 @@ internal class Sykefraværstilfelle(
         return gjeldendeGenerasjoner.forhindrerAutomatisering(generasjonForPeriode)
     }
 
+    internal fun harKunGosysvarsel(vedtaksperiodeId: UUID): Boolean {
+        val generasjonForPeriode =
+            gjeldendeGenerasjoner.finnGenerasjonForVedtaksperiode(vedtaksperiodeId)
+                ?: throw IllegalStateException("Sykefraværstilfellet må inneholde generasjon for vedtaksperiodeId=$vedtaksperiodeId")
+        return gjeldendeGenerasjoner.harKunGosysvarsel(generasjonForPeriode)
+    }
+
     internal fun håndter(
         varsel: Varsel,
         hendelseId: UUID,
@@ -69,14 +77,6 @@ internal class Sykefraværstilfelle(
             gjeldendeGenerasjoner.finnGenerasjonForVedtaksperiode(vedtaksperiodeId)
                 ?: throw IllegalStateException("Forventer å finne generasjon for perioden")
         generasjon.automatiskGodkjennSpesialsakvarsler()
-    }
-
-    internal fun antallVarsler(vedtaksperiodeId: UUID): Int {
-        val generasjon =
-            gjeldendeGenerasjoner.finnGenerasjonForVedtaksperiode(
-                vedtaksperiodeId,
-            ) ?: throw IllegalStateException("Forventer å finne generasjon for perioden")
-        return generasjon.antallVarsler()
     }
 
     internal fun håndter(
@@ -109,17 +109,12 @@ internal class Sykefraværstilfelle(
         gjeldendeGenerasjoner.håndterGodkjent(saksbehandlerIdent, vedtaksperiodeId, hendelseId)
     }
 
-    internal fun kreverTotrinnsvurdering(vedtaksperiodeId: UUID): Boolean {
-        return gjeldendeGenerasjoner.kreverTotrinnsvurdering(vedtaksperiodeId)
-    }
+    internal fun kreverTotrinnsvurdering(vedtaksperiodeId: UUID): Boolean = gjeldendeGenerasjoner.kreverTotrinnsvurdering(vedtaksperiodeId)
 
-    internal fun kreverSkjønnsfastsettelse(vedtaksperiodeId: UUID): Boolean {
-        return gjeldendeGenerasjoner.kreverSkjønnsfastsettelse(vedtaksperiodeId)
-    }
+    internal fun kreverSkjønnsfastsettelse(vedtaksperiodeId: UUID): Boolean =
+        gjeldendeGenerasjoner.kreverSkjønnsfastsettelse(vedtaksperiodeId)
 
-    internal fun erTilbakedatert(vedtaksperiodeId: UUID): Boolean {
-        return gjeldendeGenerasjoner.erTilbakedatert(vedtaksperiodeId)
-    }
+    internal fun erTilbakedatert(vedtaksperiodeId: UUID): Boolean = gjeldendeGenerasjoner.erTilbakedatert(vedtaksperiodeId)
 
     internal fun registrer(observer: PersonObserver) {
         observers.add(observer)

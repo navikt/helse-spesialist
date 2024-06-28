@@ -69,7 +69,7 @@ internal class ÅpneGosysOppgaverløsning(
         when {
             antall > 0 -> {
                 sykefraværstilfelle.håndter(SB_EX_1.nyttVarsel(vedtaksperiodeId), hendelseId)
-                if (sykefraværstilfelle.antallVarsler(vedtaksperiodeId) == 1) {
+                if (sykefraværstilfelle.harKunGosysvarsel(vedtaksperiodeId)) {
                     oppgaveService.leggTilGosysEgenskap(vedtaksperiodeId)
                 }
             }

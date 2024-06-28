@@ -6,7 +6,6 @@ import no.nav.helse.modell.person.vedtaksperiode.IVedtaksperiodeObserver
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.automatiskGodkjennSpesialsakvarsler
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.finnEksisterendeVarsel
-import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.finnVarslerFor
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderAktivtVarselOmAvvik
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderMedlemskapsvarsel
@@ -73,8 +72,8 @@ internal class Generasjon private constructor(
         varsler.forEach { it.registrer(*observer) }
     }
 
-    internal fun toDto(): GenerasjonDto {
-        return GenerasjonDto(
+    internal fun toDto(): GenerasjonDto =
+        GenerasjonDto(
             id = id,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
@@ -86,13 +85,14 @@ internal class Generasjon private constructor(
             tags = tags,
             varsler = varsler.map(Varsel::toDto),
         )
-    }
 
     internal fun tilhører(dato: LocalDate): Boolean = periode.tom() <= dato
 
     internal fun nySpleisBehandling(spleisBehandling: SpleisBehandling) = nyBehandling(spleisBehandling)
 
     internal fun forhindrerAutomatisering(): Boolean = varsler.forhindrerAutomatisering()
+
+    internal fun harKunGosysvarsel() = varsler.size == 1 && varsler.single().erGosysvarsel()
 
     internal fun håndter(
         vedtaksperiode: Vedtaksperiode,
@@ -110,8 +110,6 @@ internal class Generasjon private constructor(
     internal fun erSpesialsakSomKanAutomatiseres() = !varsler.inneholderSvartelistedeVarsler()
 
     internal fun automatiskGodkjennSpesialsakvarsler() = varsler.automatiskGodkjennSpesialsakvarsler(this.id)
-
-    internal fun antallVarsler() = varsler.finnVarslerFor(vedtaksperiodeId).size
 
     internal fun håndterNyUtbetaling(
         hendelseId: UUID,
@@ -280,22 +278,19 @@ internal class Generasjon private constructor(
     internal sealed interface Tilstand {
         fun navn(): String
 
-        fun toDto(): TilstandDto {
-            return when (this) {
+        fun toDto(): TilstandDto =
+            when (this) {
                 AvsluttetUtenVedtak -> TilstandDto.AvsluttetUtenVedtak
                 VedtakFattet -> TilstandDto.VedtakFattet
                 VidereBehandlingAvklares -> TilstandDto.VidereBehandlingAvklares
                 AvsluttetUtenVedtakMedVarsler -> TilstandDto.AvsluttetUtenVedtakMedVarsler
                 KlarTilBehandling -> TilstandDto.KlarTilBehandling
             }
-        }
 
         fun avsluttetUtenVedtak(
             generasjon: Generasjon,
             sykepengevedtakBuilder: SykepengevedtakBuilder,
-        ) {
-            throw IllegalStateException("Forventer ikke avsluttet_uten_vedtak i tilstand=${this::class.simpleName}")
-        }
+        ): Unit = throw IllegalStateException("Forventer ikke avsluttet_uten_vedtak i tilstand=${this::class.simpleName}")
 
         fun vedtakFattet(
             generasjon: Generasjon,
@@ -363,9 +358,7 @@ internal class Generasjon private constructor(
             tags: List<String>,
             spleisBehandlingId: UUID,
             utbetalingId: UUID,
-        ) {
-            throw IllegalStateException("Mottatt godkjenningsbehov i tilstand=${navn()}")
-        }
+        ): Unit = throw IllegalStateException("Mottatt godkjenningsbehov i tilstand=${navn()}")
     }
 
     internal data object VidereBehandlingAvklares : Tilstand {
@@ -520,17 +513,18 @@ internal class Generasjon private constructor(
     override fun toString(): String = "generasjonId=$id, vedtaksperiodeId=$vedtaksperiodeId"
 
     override fun equals(other: Any?): Boolean =
-        this === other || (
-            other is Generasjon &&
-                javaClass == other.javaClass &&
-                id == other.id &&
-                vedtaksperiodeId == other.vedtaksperiodeId &&
-                utbetalingId == other.utbetalingId &&
-                spleisBehandlingId == other.spleisBehandlingId &&
-                tilstand == other.tilstand &&
-                skjæringstidspunkt == other.skjæringstidspunkt &&
-                periode == other.periode
-        )
+        this === other ||
+            (
+                other is Generasjon &&
+                    javaClass == other.javaClass &&
+                    id == other.id &&
+                    vedtaksperiodeId == other.vedtaksperiodeId &&
+                    utbetalingId == other.utbetalingId &&
+                    spleisBehandlingId == other.spleisBehandlingId &&
+                    tilstand == other.tilstand &&
+                    skjæringstidspunkt == other.skjæringstidspunkt &&
+                    periode == other.periode
+            )
 
     override fun hashCode(): Int {
         var result = id.hashCode()
@@ -588,25 +582,39 @@ internal class Generasjon private constructor(
             }
         }
 
-        internal fun List<Generasjon>.forhindrerAutomatisering(tilOgMed: LocalDate): Boolean {
-            return this.filter { it.tilhører(tilOgMed) }.any { it.forhindrerAutomatisering() }
-        }
+        internal fun List<Generasjon>.forhindrerAutomatisering(tilOgMed: LocalDate): Boolean =
+            this
+                .filter {
+                    it.tilhører(tilOgMed)
+                }.any { it.forhindrerAutomatisering() }
 
-        internal fun List<Generasjon>.forhindrerAutomatisering(generasjon: Generasjon): Boolean {
-            return this.filter { it.tilhører(generasjon.periode.tom()) }.any { it.forhindrerAutomatisering() }
-        }
+        internal fun List<Generasjon>.forhindrerAutomatisering(generasjon: Generasjon): Boolean =
+            this
+                .filter {
+                    it.tilhører(generasjon.periode.tom())
+                }.any { it.forhindrerAutomatisering() }
 
-        internal fun List<Generasjon>.kreverTotrinnsvurdering(vedtaksperiodeId: UUID): Boolean {
-            return overlapperMedEllerTidligereEnn(vedtaksperiodeId).any { it.kreverTotrinnsvurdering() }
-        }
+        internal fun List<Generasjon>.harKunGosysvarsel(generasjon: Generasjon): Boolean =
+            this
+                .filter {
+                    it.tilhører(generasjon.periode.tom())
+                }.filter { it.varsler.isNotEmpty() }
+                .all { it.harKunGosysvarsel() }
 
-        internal fun List<Generasjon>.kreverSkjønnsfastsettelse(vedtaksperiodeId: UUID): Boolean {
-            return overlapperMedEllerTidligereEnn(vedtaksperiodeId).any { it.kreverSkjønnsfastsettelse() }
-        }
+        internal fun List<Generasjon>.kreverTotrinnsvurdering(vedtaksperiodeId: UUID): Boolean =
+            overlapperMedEllerTidligereEnn(vedtaksperiodeId).any {
+                it.kreverTotrinnsvurdering()
+            }
 
-        internal fun List<Generasjon>.erTilbakedatert(vedtaksperiodeId: UUID): Boolean {
-            return overlapperMedEllerTidligereEnn(vedtaksperiodeId).any { it.erTilbakedatert() }
-        }
+        internal fun List<Generasjon>.kreverSkjønnsfastsettelse(vedtaksperiodeId: UUID): Boolean =
+            overlapperMedEllerTidligereEnn(vedtaksperiodeId).any {
+                it.kreverSkjønnsfastsettelse()
+            }
+
+        internal fun List<Generasjon>.erTilbakedatert(vedtaksperiodeId: UUID): Boolean =
+            overlapperMedEllerTidligereEnn(vedtaksperiodeId).any {
+                it.erTilbakedatert()
+            }
 
         internal fun List<Generasjon>.deaktiver(varsel: Varsel) {
             find { varsel.erRelevantFor(it.vedtaksperiodeId) }?.håndterDeaktivertVarsel(varsel)

@@ -26,8 +26,8 @@ class Varsel(
         AVVIKLET,
         ;
 
-        fun toDto(): VarselStatusDto {
-            return when (this) {
+        fun toDto(): VarselStatusDto =
+            when (this) {
                 AKTIV -> VarselStatusDto.AKTIV
                 INAKTIV -> VarselStatusDto.INAKTIV
                 GODKJENT -> VarselStatusDto.GODKJENT
@@ -35,7 +35,6 @@ class Varsel(
                 AVVIST -> VarselStatusDto.AVVIST
                 AVVIKLET -> VarselStatusDto.AVVIKLET
             }
-        }
     }
 
     private val observers = mutableSetOf<IVedtaksperiodeObserver>()
@@ -46,15 +45,11 @@ class Varsel(
         observers.addAll(observer)
     }
 
-    fun toDto(): VarselDto {
-        return VarselDto(id, varselkode, opprettet, vedtaksperiodeId, status.toDto())
-    }
+    fun toDto(): VarselDto = VarselDto(id, varselkode, opprettet, vedtaksperiodeId, status.toDto())
 
     fun erAktiv(): Boolean = this.status == AKTIV
 
-    fun erVarselOmAvvik(): Boolean {
-        return this.varselkode == "RV_IV_2"
-    }
+    fun erVarselOmAvvik(): Boolean = this.varselkode == "RV_IV_2"
 
     fun opprett(generasjonId: UUID) {
         observers.forEach { it.varselOpprettet(id, vedtaksperiodeId, generasjonId, varselkode, opprettet) }
@@ -72,19 +67,20 @@ class Varsel(
         observers.forEach { it.varselDeaktivert(id, varselkode, generasjonId, vedtaksperiodeId) }
     }
 
-    override fun toString(): String {
-        return "varselkode=$varselkode, vedtaksperiodeId=$vedtaksperiodeId, status=${status.name}"
-    }
+    fun erGosysvarsel() = varselkode == "SB_EX_1"
+
+    override fun toString(): String = "varselkode=$varselkode, vedtaksperiodeId=$vedtaksperiodeId, status=${status.name}"
 
     override fun equals(other: Any?): Boolean =
-        this === other || (
-            other is Varsel &&
-                javaClass == other.javaClass &&
-                id == other.id &&
-                vedtaksperiodeId == other.vedtaksperiodeId &&
-                opprettet.withNano(0) == other.opprettet.withNano(0) &&
-                varselkode == other.varselkode
-        )
+        this === other ||
+            (
+                other is Varsel &&
+                    javaClass == other.javaClass &&
+                    id == other.id &&
+                    vedtaksperiodeId == other.vedtaksperiodeId &&
+                    opprettet.withNano(0) == other.opprettet.withNano(0) &&
+                    varselkode == other.varselkode
+            )
 
     override fun hashCode(): Int {
         var result = id.hashCode()
@@ -103,41 +99,21 @@ class Varsel(
     }
 
     companion object {
-        fun List<Varsel>.finnEksisterendeVarsel(varsel: Varsel): Varsel? {
-            return find { it.varselkode == varsel.varselkode }
-        }
+        fun List<Varsel>.finnEksisterendeVarsel(varsel: Varsel): Varsel? = find { it.varselkode == varsel.varselkode }
 
-        fun List<Varsel>.finnEksisterendeVarsel(varselkode: String): Varsel? {
-            return find { it.varselkode == varselkode }
-        }
+        fun List<Varsel>.finnEksisterendeVarsel(varselkode: String): Varsel? = find { it.varselkode == varselkode }
 
-        fun List<Varsel>.finnVarslerFor(vedtaksperiodeId: UUID): List<Varsel> {
-            return filter { it.vedtaksperiodeId == vedtaksperiodeId }
-        }
+        fun List<Varsel>.inneholderMedlemskapsvarsel(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_MV_1" }
 
-        fun List<Varsel>.inneholderMedlemskapsvarsel(): Boolean {
-            return any { it.status == AKTIV && it.varselkode == "RV_MV_1" }
-        }
+        fun List<Varsel>.inneholderVarselOmNegativtBeløp(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_UT_23" }
 
-        fun List<Varsel>.inneholderVarselOmNegativtBeløp(): Boolean {
-            return any { it.status == AKTIV && it.varselkode == "RV_UT_23" }
-        }
+        fun List<Varsel>.inneholderAktivtVarselOmAvvik(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_IV_2" }
 
-        fun List<Varsel>.inneholderAktivtVarselOmAvvik(): Boolean {
-            return any { it.status == AKTIV && it.varselkode == "RV_IV_2" }
-        }
+        fun List<Varsel>.inneholderVarselOmAvvik(): Boolean = any { it.varselkode == "RV_IV_2" }
 
-        fun List<Varsel>.inneholderVarselOmAvvik(): Boolean {
-            return any { it.varselkode == "RV_IV_2" }
-        }
+        fun List<Varsel>.inneholderVarselOmTilbakedatering(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_SØ_3" }
 
-        fun List<Varsel>.inneholderVarselOmTilbakedatering(): Boolean {
-            return any { it.status == AKTIV && it.varselkode == "RV_SØ_3" }
-        }
-
-        fun List<Varsel>.inneholderSvartelistedeVarsler(): Boolean {
-            return any { it.varselkode in neiVarsler }
-        }
+        fun List<Varsel>.inneholderSvartelistedeVarsler(): Boolean = any { it.varselkode in neiVarsler }
 
         fun List<Varsel>.automatiskGodkjennSpesialsakvarsler(generasjonId: UUID) {
             forEach { it.godkjennSpesialsakvarsel(generasjonId) }
@@ -155,8 +131,8 @@ class Varsel(
 
         fun List<Varsel>.forhindrerAutomatisering() = any { it.status in listOf(VURDERT, AKTIV, AVVIST) }
 
-        fun JsonNode.varsler(): List<Varsel> {
-            return this
+        fun JsonNode.varsler(): List<Varsel> =
+            this
                 .filter { it["nivå"].asText() == "VARSEL" && it["varselkode"]?.asText() != null }
                 .filter { it["kontekster"].any { kontekst -> kontekst["konteksttype"].asText() == "Vedtaksperiode" } }
                 .map { jsonNode ->
@@ -164,7 +140,8 @@ class Varsel(
                         UUID.fromString(
                             jsonNode["kontekster"]
                                 .find { it["konteksttype"].asText() == "Vedtaksperiode" }!!["kontekstmap"]
-                                .get("vedtaksperiodeId").asText(),
+                                .get("vedtaksperiodeId")
+                                .asText(),
                         )
                     Varsel(
                         UUID.fromString(jsonNode["id"].asText()),
@@ -173,6 +150,5 @@ class Varsel(
                         vedtaksperiodeId,
                     )
                 }
-        }
     }
 }
