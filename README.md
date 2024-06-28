@@ -17,7 +17,7 @@ Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på Git
 
 ## Oppdatere GraphQL schema for tester
 Hvis du nylig har gjort endringer i GraphQL-typer, -mutations, -queries eller -subscriptions og ønsker å teste disse endringene, er det lurt å først oppdatere lokalt testskjema, slik at du får syntax highlighting, code completion og et bedre liv. Da gjør du følgende:
-- Kjør opp [LocalGraphQLApi.kt](spesialist-api/src/test/kotlin/no/nav/helse/spesialist/api/graphql/LocalGraphQLApi.kt) sin main-metode, det starter en lokal GraphQL-server.
+- Kjør opp [LocalApp.kt](spesialist-selve/src/test/kotlin/no/nav/helse/LocalApp.kt) sin main-metode, det starter en lokal GraphQL-server.
 - Finn filen [graphql.config.yml](spesialist-api/src/test/graphql.config.yml) og kjør `spesialist-local`, som vil oppdatere [schema_til_bruk_fra_tester.grapqhl](spesialist-api/src/test/schema_til_bruk_fra_tester.graphql). 
 - Commit endringene i `schema_til_bruk_fra_tester.graphql`.
 
