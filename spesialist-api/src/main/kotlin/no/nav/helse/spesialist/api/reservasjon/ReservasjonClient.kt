@@ -28,7 +28,8 @@ class KRRClient(
 
     companion object {
         private val responstidReservasjonsstatus: Histogram =
-            Histogram.build()
+            Histogram
+                .build()
                 .name("responstid_hent_reservasjonsstatus")
                 .help("Responstid for kall til digdir-krr-proxy")
                 .register()
@@ -40,16 +41,19 @@ class KRRClient(
             val accessToken = accessTokenClient.hentAccessToken(scope)
             val callId = UUID.randomUUID().toString()
 
-            return httpClient.get("$apiUrl/rest/v1/person") {
-                header("Authorization", "Bearer $accessToken")
-                header("Nav-Personident", fnr)
-                header("Nav-Call-Id", callId)
-                accept(ContentType.Application.Json)
-            }.body()
+            sikkerLogg.info("Henter reservasjonsstatus for $fnr")
+            return httpClient
+                .get("$apiUrl/rest/v1/person") {
+                    header("Authorization", "Bearer $accessToken")
+                    header("Nav-Personident", fnr)
+                    header("Nav-Call-Id", callId)
+                    accept(ContentType.Application.Json)
+                }.body()
         } catch (e: Exception) {
             logg.error("Feil under kall til Kontakt- og reservasjonsregisteret")
             sikkerLogg.error("Feil under kall til Kontakt- og reservasjonsregisteret", e)
         } finally {
+            sikkerLogg.info("Kall til KRR har blitt forsøkt hentet for $fnr")
             timer.observeDuration()
         }
 
