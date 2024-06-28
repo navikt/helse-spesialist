@@ -7,7 +7,9 @@ import no.nav.helse.spesialist.api.objectMapper
 import org.intellij.lang.annotations.Language
 import javax.sql.DataSource
 
-class OverstyringApiDao(private val dataSource: DataSource) {
+class OverstyringApiDao(
+    private val dataSource: DataSource,
+) {
     fun finnOverstyringerAvTidslinjer(
         fødselsnummer: String,
         organisasjonsnummer: String,
@@ -23,7 +25,6 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                 INNER JOIN saksbehandler s ON s.oid = o.saksbehandler_ref
             WHERE p.fodselsnummer = ? 
             AND a.orgnummer = ?
-            AND ot.id IN (SELECT overstyring_tidslinje_ref FROM overstyring_dag)
         """
         session.run(
             queryOf(finnOverstyringQuery, fødselsnummer.toLong(), organisasjonsnummer.toLong())
@@ -95,10 +96,12 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                             fraMånedligInntekt = overstyringRow.doubleOrNull("fra_manedlig_inntekt"),
                             skjæringstidspunkt = overstyringRow.localDate("skjaeringstidspunkt"),
                             refusjonsopplysninger =
-                                overstyringRow.stringOrNull("refusjonsopplysninger")
+                                overstyringRow
+                                    .stringOrNull("refusjonsopplysninger")
                                     ?.let { objectMapper.readValue<List<OverstyringInntektDto.Refusjonselement>>(it) },
                             fraRefusjonsopplysninger =
-                                overstyringRow.stringOrNull("fra_refusjonsopplysninger")
+                                overstyringRow
+                                    .stringOrNull("fra_refusjonsopplysninger")
                                     ?.let { objectMapper.readValue<List<OverstyringInntektDto.Refusjonselement>>(it) },
                             ferdigstilt = overstyringRow.boolean("ferdigstilt"),
                         )
@@ -133,7 +136,9 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                             hendelseId = overstyringRow.uuid("hendelse_ref"),
                             fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
                             organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
-                            begrunnelse = overstyringRow.string("mal") + "\n\n" + overstyringRow.string("fritekst") + "\n\n" + overstyringRow.string("konklusjon"),
+                            begrunnelse =
+                                overstyringRow.string("mal") + "\n\n" + overstyringRow.string("fritekst") + "\n\n" +
+                                    overstyringRow.string("konklusjon"),
                             begrunnelseMal = overstyringRow.string("mal"),
                             begrunnelseFritekst = overstyringRow.string("fritekst"),
                             begrunnelseKonklusjon = overstyringRow.string("konklusjon"),
