@@ -53,7 +53,7 @@ class KRRClient(
             logg.error("Feil under kall til Kontakt- og reservasjonsregisteret")
             sikkerLogg.error("Feil under kall til Kontakt- og reservasjonsregisteret", e)
         } finally {
-            sikkerLogg.info("Kall til KRR har blitt forsøkt hentet for $fnr")
+            sikkerLogg.info("Kall til KRR har blitt forsøkt hentet for $fnr, kallet tok ${timer.observeDuration()} sekunder")
             timer.observeDuration()
         }
 
