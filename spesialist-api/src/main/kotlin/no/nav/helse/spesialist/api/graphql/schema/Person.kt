@@ -130,8 +130,9 @@ data class Person(
                 bransjer = arbeidsgiverApiDao.finnBransjer(arbeidsgiver.organisasjonsnummer),
                 ghostPerioder = arbeidsgiver.ghostPerioder.tilGhostPerioder(arbeidsgiver.organisasjonsnummer),
                 fødselsnummer = snapshot.fodselsnummer,
-                overstyringApiDao = overstyringApiDao,
                 generasjoner = arbeidsgiver.generasjoner,
+                oppgavehåndterer = oppgavehåndterer,
+                saksbehandlerhåndterer = saksbehandlerhåndterer,
                 arbeidsgiverApiDao = arbeidsgiverApiDao,
                 risikovurderingApiDao = risikovurderingApiDao,
                 varselRepository = varselRepository,
@@ -141,8 +142,6 @@ data class Person(
                 totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                 påVentApiDao = påVentApiDao,
                 tilganger = tilganger,
-                oppgavehåndterer = oppgavehåndterer,
-                saksbehandlerhåndterer = saksbehandlerhåndterer,
                 overstyringer =
                     overstyringer
                         .filter { it.relevantFor(arbeidsgiver.organisasjonsnummer) }
