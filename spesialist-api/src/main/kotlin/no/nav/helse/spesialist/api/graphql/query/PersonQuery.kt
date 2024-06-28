@@ -101,7 +101,7 @@ class PersonQuery(
             auditLog(env.graphQlContext, fnr ?: aktorId!!, null, getNotFoundError(fnr).message)
             return DataFetcherResult.newResult<Person?>().error(getNotFoundError(fnr)).build()
         }
-        sikkerLogg.info("Personppslag på fnr=$fødselsnummer")
+        sikkerLogg.info("Personoppslag på fnr=$fødselsnummer")
 
         if (!personApiDao.spesialistHarPersonKlarForVisningISpeil(fødselsnummer)) {
             auditLog(env.graphQlContext, fødselsnummer, false, null)
