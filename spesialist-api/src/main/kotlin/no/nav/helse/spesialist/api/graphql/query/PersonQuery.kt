@@ -66,12 +66,16 @@ class PersonQuery(
     ): DataFetcherResult<Person?> {
         if (fnr == null) {
             if (aktorId == null) {
-                return DataFetcherResult.newResult<Person?>()
-                    .error(getBadRequestError("Requesten mangler både fødselsnummer og aktørId")).build()
+                return DataFetcherResult
+                    .newResult<Person?>()
+                    .error(getBadRequestError("Requesten mangler både fødselsnummer og aktørId"))
+                    .build()
             }
             if (aktorId.length != 13) {
-                return DataFetcherResult.newResult<Person?>()
-                    .error(getBadRequestError("Feil lengde på parameter aktorId: ${aktorId.length}")).build()
+                return DataFetcherResult
+                    .newResult<Person?>()
+                    .error(getBadRequestError("Feil lengde på parameter aktorId: ${aktorId.length}"))
+                    .build()
             }
         }
 
@@ -85,7 +89,9 @@ class PersonQuery(
                     } catch (e: Exception) {
                         val fødselsnumre = personApiDao.finnFødselsnumre(aktorId.toLong()).toSet()
                         auditLog(env.graphQlContext, aktorId, null, getFlereFødselsnumreError(fødselsnumre).message)
-                        return DataFetcherResult.newResult<Person?>().error(getFlereFødselsnumreError(fødselsnumre))
+                        return DataFetcherResult
+                            .newResult<Person?>()
+                            .error(getFlereFødselsnumreError(fødselsnumre))
                             .build()
                     }
                 }
@@ -95,6 +101,7 @@ class PersonQuery(
             auditLog(env.graphQlContext, fnr ?: aktorId!!, null, getNotFoundError(fnr).message)
             return DataFetcherResult.newResult<Person?>().error(getNotFoundError(fnr)).build()
         }
+        sikkerLogg.info("Personppslag på fnr=$fødselsnummer")
 
         if (!personApiDao.spesialistHarPersonKlarForVisningISpeil(fødselsnummer)) {
             auditLog(env.graphQlContext, fødselsnummer, false, null)
@@ -167,7 +174,8 @@ class PersonQuery(
         }
 
     private fun getFlereFødselsnumreError(fødselsnumre: Set<String>): GraphQLError =
-        GraphqlErrorException.newErrorException()
+        GraphqlErrorException
+            .newErrorException()
             .message("Mer enn ett fødselsnummer for personen")
             .extensions(
                 mapOf(
@@ -178,15 +186,16 @@ class PersonQuery(
             ).build()
 
     private fun getSnapshotValidationError(): GraphQLError =
-        GraphqlErrorException.newErrorException()
+        GraphqlErrorException
+            .newErrorException()
             .message(
                 "Lagret snapshot stemmer ikke overens med forventet format. Dette kommer som regel av at noen har gjort endringer på formatet men glemt å bumpe versjonsnummeret.",
-            )
-            .extensions(mapOf("code" to 501, "field" to "person"))
+            ).extensions(mapOf("code" to 501, "field" to "person"))
             .build()
 
     private fun getBadRequestError(melding: String): GraphQLError =
-        GraphqlErrorException.newErrorException()
+        GraphqlErrorException
+            .newErrorException()
             .message(melding)
             .extensions(mapOf("code" to 400))
             .build()

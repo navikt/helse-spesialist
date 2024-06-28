@@ -41,7 +41,6 @@ class KRRClient(
             val accessToken = accessTokenClient.hentAccessToken(scope)
             val callId = UUID.randomUUID().toString()
 
-            sikkerLogg.info("Henter reservasjonsstatus for $fnr")
             return httpClient
                 .get("$apiUrl/rest/v1/person") {
                     header("Authorization", "Bearer $accessToken")
@@ -53,8 +52,7 @@ class KRRClient(
             logg.error("Feil under kall til Kontakt- og reservasjonsregisteret")
             sikkerLogg.error("Feil under kall til Kontakt- og reservasjonsregisteret", e)
         } finally {
-            val tidBrukt = timer.observeDuration()
-            sikkerLogg.info("Kall til KRR har blitt forsøkt hentet for $fnr, kallet tok $tidBrukt sekunder")
+            timer.observeDuration()
         }
 
         return null
