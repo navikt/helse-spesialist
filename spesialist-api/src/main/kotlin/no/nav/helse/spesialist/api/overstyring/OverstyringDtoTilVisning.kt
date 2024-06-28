@@ -25,18 +25,28 @@ enum class Dagtype {
     Helg,
 }
 
+sealed interface OverstyringDto {
+    val hendelseId: UUID
+    val fødselsnummer: String
+    val organisasjonsnummer: String
+    val saksbehandlerNavn: String
+    val saksbehandlerIdent: String?
+
+    fun relevantFor(organisasjonsnummer: String) = organisasjonsnummer == this.organisasjonsnummer
+}
+
 data class OverstyringTidslinjeDto(
-    val hendelseId: UUID,
-    val fødselsnummer: String,
-    val organisasjonsnummer: String,
+    override val hendelseId: UUID,
+    override val fødselsnummer: String,
+    override val organisasjonsnummer: String,
     val begrunnelse: String,
     val timestamp: LocalDateTime,
-    val saksbehandlerNavn: String,
-    val saksbehandlerIdent: String?,
+    override val saksbehandlerNavn: String,
+    override val saksbehandlerIdent: String?,
     val overstyrteDager: List<OverstyringDagDto>,
     val ferdigstilt: Boolean,
     val vedtaksperiodeId: UUID?,
-)
+) : OverstyringDto
 
 data class OverstyringDagDto(
     val dato: LocalDate,
@@ -47,21 +57,21 @@ data class OverstyringDagDto(
 )
 
 data class OverstyringInntektDto(
-    val hendelseId: UUID,
-    val fødselsnummer: String,
-    val organisasjonsnummer: String,
+    override val hendelseId: UUID,
+    override val fødselsnummer: String,
+    override val organisasjonsnummer: String,
     val begrunnelse: String,
     val forklaring: String,
     val timestamp: LocalDateTime,
-    val saksbehandlerNavn: String,
-    val saksbehandlerIdent: String?,
+    override val saksbehandlerNavn: String,
+    override val saksbehandlerIdent: String?,
     val månedligInntekt: Double,
     val fraMånedligInntekt: Double?,
     val skjæringstidspunkt: LocalDate,
     val refusjonsopplysninger: List<Refusjonselement>?,
     val fraRefusjonsopplysninger: List<Refusjonselement>?,
     val ferdigstilt: Boolean,
-) {
+) : OverstyringDto {
     data class Refusjonselement(
         val fom: LocalDate,
         val tom: LocalDate?,
@@ -76,12 +86,12 @@ enum class Skjonnsfastsettingstype {
 }
 
 data class SkjønnsfastsettingSykepengegrunnlagDto(
-    val hendelseId: UUID,
-    val fødselsnummer: String,
+    override val hendelseId: UUID,
+    override val fødselsnummer: String,
+    override val organisasjonsnummer: String,
     val timestamp: LocalDateTime,
-    val organisasjonsnummer: String,
-    val saksbehandlerNavn: String,
-    val saksbehandlerIdent: String?,
+    override val saksbehandlerNavn: String,
+    override val saksbehandlerIdent: String?,
     val skjæringstidspunkt: LocalDate,
     val ferdigstilt: Boolean,
     val årlig: Double,
@@ -92,18 +102,18 @@ data class SkjønnsfastsettingSykepengegrunnlagDto(
     val begrunnelseMal: String?,
     val begrunnelseFritekst: String?,
     val begrunnelseKonklusjon: String?,
-)
+) : OverstyringDto
 
 data class OverstyringArbeidsforholdDto(
-    val hendelseId: UUID,
-    val fødselsnummer: String,
-    val organisasjonsnummer: String,
+    override val hendelseId: UUID,
+    override val fødselsnummer: String,
+    override val organisasjonsnummer: String,
     val begrunnelse: String,
     val forklaring: String,
     val timestamp: LocalDateTime,
-    val saksbehandlerNavn: String,
-    val saksbehandlerIdent: String?,
+    override val saksbehandlerNavn: String,
+    override val saksbehandlerIdent: String?,
     val deaktivert: Boolean,
     val skjæringstidspunkt: LocalDate,
     val ferdigstilt: Boolean,
-)
+) : OverstyringDto

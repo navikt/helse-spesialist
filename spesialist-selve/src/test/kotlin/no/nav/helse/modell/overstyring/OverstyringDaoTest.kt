@@ -14,8 +14,12 @@ import no.nav.helse.db.SkjønnsfastsattSykepengegrunnlagForDatabase
 import no.nav.helse.db.SkjønnsfastsettingstypeForDatabase
 import no.nav.helse.januar
 import no.nav.helse.spesialist.api.overstyring.Dagtype
+import no.nav.helse.spesialist.api.overstyring.OverstyringArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
+import no.nav.helse.spesialist.api.overstyring.OverstyringInntektDto
+import no.nav.helse.spesialist.api.overstyring.OverstyringTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
+import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunnlagDto
 import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -25,7 +29,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class OverstyringDaoTest : DatabaseIntegrationTest() {
-
     private val PERSON_FORNAVN = "Per"
     private val PERSON_ETTERNAVN = "Son"
     private val PERSON_FØDSELSDATO = LocalDate.of(1998, 4, 20)
@@ -42,30 +45,32 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
     private val BEGRUNNELSEKONKLUSJON = "BegrunnelseKonklusjon"
     private val FORKLARING = "Forklaring"
     private val ÅRSAK = "Årsak"
-    private val OVERSTYRTE_DAGER = listOf(
-        OverstyrtTidslinjedagForDatabase(
-            dato = LocalDate.of(2020, 1, 1),
-            type = Dagtype.Sykedag.toString(),
-            grad = 100,
-            fraType = Dagtype.Feriedag.toString(),
-            fraGrad = null,
-            lovhjemmel =  null,
+    private val OVERSTYRTE_DAGER =
+        listOf(
+            OverstyrtTidslinjedagForDatabase(
+                dato = LocalDate.of(2020, 1, 1),
+                type = Dagtype.Sykedag.toString(),
+                grad = 100,
+                fraType = Dagtype.Feriedag.toString(),
+                fraGrad = null,
+                lovhjemmel = null,
+            ),
         )
-    )
     private val OPPRETTET = LocalDate.of(2022, 6, 9).atStartOfDay()
     private val INNTEKT = 31000.0
 
     private fun opprettPerson() {
         saksbehandlerDao.opprettSaksbehandler(OID, SAKSBEHANDLER_NAVN, EPOST, SAKSBEHANDLER_IDENT)
         arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ARBEIDSGIVER_NAVN, BRANSJER)
-        val navn_ref = personDao.insertPersoninfo(
-            PERSON_FORNAVN,
-            null,
-            PERSON_ETTERNAVN,
-            PERSON_FØDSELSDATO,
-            PERSON_KJØNN,
-            ADRESSEBESKYTTELSE
-        )
+        val navn_ref =
+            personDao.insertPersoninfo(
+                PERSON_FORNAVN,
+                null,
+                PERSON_ETTERNAVN,
+                PERSON_FØDSELSDATO,
+                PERSON_KJØNN,
+                ADRESSEBESKYTTELSE,
+            )
         val infotrygdutbetaling_ref = personDao.upsertInfotrygdutbetalinger(FNR, objectMapper.createObjectNode())
         personDao.insertPerson(FNR, AKTØR, navn_ref, 420, infotrygdutbetaling_ref)
     }
@@ -131,7 +136,8 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         )
         overstyringDao.kobleOverstyringOgVedtaksperiode(listOf(VEDTAKSPERIODE), EKSTERN_HENDELSE_ID)
 
-        val hentetOverstyring = overstyringApiDao.finnOverstyringerAvTidslinjer(FNR, ORGNUMMER).first()
+        val hentetOverstyring = overstyringApiDao.finnOverstyringer(FNR).first()
+        check(hentetOverstyring is OverstyringTidslinjeDto)
         assertFalse(hentetOverstyring.ferdigstilt)
 
         assertTrue(overstyringDao.harVedtaksperiodePågåendeOverstyring(VEDTAKSPERIODE))
@@ -139,7 +145,8 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         assertFalse(overstyringDao.harVedtaksperiodePågåendeOverstyring(VEDTAKSPERIODE))
 
         val hentetOverstyringEtterFerdigstilling =
-            overstyringApiDao.finnOverstyringerAvTidslinjer(FNR, ORGNUMMER).first()
+            overstyringApiDao.finnOverstyringer(FNR).first()
+        check(hentetOverstyringEtterFerdigstilling is OverstyringTidslinjeDto)
         assertTrue(hentetOverstyringEtterFerdigstilling.ferdigstilt)
     }
 
@@ -159,7 +166,8 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             ),
             OID,
         )
-        val hentetOverstyring = overstyringApiDao.finnOverstyringerAvTidslinjer(FNR, ORGNUMMER).first()
+        val hentetOverstyring = overstyringApiDao.finnOverstyringer(FNR).first()
+        check(hentetOverstyring is OverstyringTidslinjeDto)
 
         assertEquals(BEGRUNNELSE, hentetOverstyring.begrunnelse)
         assertEquals(FNR, hentetOverstyring.fødselsnummer)
@@ -182,18 +190,20 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                 skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
                 opprettet = OPPRETTET,
                 vedtaksperiodeId = VEDTAKSPERIODE,
-                overstyrteArbeidsforhold = listOf(
-                    ArbeidsforholdForDatabase(
-                        organisasjonsnummer = ORGNUMMER,
-                        deaktivert = DEAKTIVERT,
-                        begrunnelse = BEGRUNNELSE,
-                        forklaring = FORKLARING,
-                    )
-                )
+                overstyrteArbeidsforhold =
+                    listOf(
+                        ArbeidsforholdForDatabase(
+                            organisasjonsnummer = ORGNUMMER,
+                            deaktivert = DEAKTIVERT,
+                            begrunnelse = BEGRUNNELSE,
+                            forklaring = FORKLARING,
+                        ),
+                    ),
             ),
             OID,
         )
-        val hentetOverstyring = overstyringApiDao.finnOverstyringerAvArbeidsforhold(FNR, ORGNUMMER).single()
+        val hentetOverstyring = overstyringApiDao.finnOverstyringer(FNR).single()
+        check(hentetOverstyring is OverstyringArbeidsforholdDto)
 
         assertEquals(BEGRUNNELSE, hentetOverstyring.begrunnelse)
         assertEquals(FORKLARING, hentetOverstyring.forklaring)
@@ -218,28 +228,31 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                 skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
                 opprettet = OPPRETTET,
                 vedtaksperiodeId = VEDTAKSPERIODE,
-                arbeidsgivere = listOf(
-                    OverstyrtArbeidsgiverForDatabase(
-                        organisasjonsnummer = ORGNUMMER,
-                        månedligInntekt = INNTEKT,
-                        fraMånedligInntekt = INNTEKT + 1,
-                        refusjonsopplysninger = listOf(
-                            RefusjonselementForDatabase(
-                                fom = 1.januar,
-                                tom = 31.januar,
-                                beløp = 1000.0,
-                            )
+                arbeidsgivere =
+                    listOf(
+                        OverstyrtArbeidsgiverForDatabase(
+                            organisasjonsnummer = ORGNUMMER,
+                            månedligInntekt = INNTEKT,
+                            fraMånedligInntekt = INNTEKT + 1,
+                            refusjonsopplysninger =
+                                listOf(
+                                    RefusjonselementForDatabase(
+                                        fom = 1.januar,
+                                        tom = 31.januar,
+                                        beløp = 1000.0,
+                                    ),
+                                ),
+                            fraRefusjonsopplysninger = null,
+                            begrunnelse = BEGRUNNELSE,
+                            forklaring = FORKLARING,
+                            lovhjemmel = null,
                         ),
-                        fraRefusjonsopplysninger = null,
-                        begrunnelse = BEGRUNNELSE,
-                        forklaring = FORKLARING,
-                        lovhjemmel = null,
-                    )
-                )
+                    ),
             ),
             OID,
         )
-        val hentetOverstyring = overstyringApiDao.finnOverstyringerAvInntekt(FNR, ORGNUMMER).first()
+        val hentetOverstyring = overstyringApiDao.finnOverstyringer(FNR).first()
+        check(hentetOverstyring is OverstyringInntektDto)
 
         assertEquals(FNR, hentetOverstyring.fødselsnummer)
         assertEquals(ORGNUMMER, hentetOverstyring.organisasjonsnummer)
@@ -269,31 +282,33 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                 skjæringstidspunkt = 1.januar,
                 opprettet = OPPRETTET,
                 vedtaksperiodeId = VEDTAKSPERIODE,
-                arbeidsgivere = listOf(
-                    SkjønnsfastsattArbeidsgiverForDatabase(
-                        organisasjonsnummer = ORGNUMMER,
-                        årlig = INNTEKT,
-                        fraÅrlig = INNTEKT + 1,
-                        årsak = ÅRSAK,
-                        type = SkjønnsfastsettingstypeForDatabase.OMREGNET_ÅRSINNTEKT,
-                        begrunnelseMal = BEGRUNNELSEMAL,
-                        begrunnelseKonklusjon = BEGRUNNELSEKONKLUSJON,
-                        begrunnelseFritekst = BEGRUNNELSEFRITEKST,
-                        initierendeVedtaksperiodeId = VEDTAKSPERIODE.toString(),
-                        lovhjemmel = LovhjemmelForDatabase(paragraf = "paragraf")
-                    )
-                ),
+                arbeidsgivere =
+                    listOf(
+                        SkjønnsfastsattArbeidsgiverForDatabase(
+                            organisasjonsnummer = ORGNUMMER,
+                            årlig = INNTEKT,
+                            fraÅrlig = INNTEKT + 1,
+                            årsak = ÅRSAK,
+                            type = SkjønnsfastsettingstypeForDatabase.OMREGNET_ÅRSINNTEKT,
+                            begrunnelseMal = BEGRUNNELSEMAL,
+                            begrunnelseKonklusjon = BEGRUNNELSEKONKLUSJON,
+                            begrunnelseFritekst = BEGRUNNELSEFRITEKST,
+                            initierendeVedtaksperiodeId = VEDTAKSPERIODE.toString(),
+                            lovhjemmel = LovhjemmelForDatabase(paragraf = "paragraf"),
+                        ),
+                    ),
             ),
             OID,
         )
         val hentetSkjønnsfastsetting =
-            overstyringApiDao.finnSkjønnsfastsettingSykepengegrunnlag(FNR, ORGNUMMER).first()
+            overstyringApiDao.finnOverstyringer(FNR).first()
+        check(hentetSkjønnsfastsetting is SkjønnsfastsettingSykepengegrunnlagDto)
 
         assertEquals(FNR, hentetSkjønnsfastsetting.fødselsnummer)
         assertEquals(ORGNUMMER, hentetSkjønnsfastsetting.organisasjonsnummer)
         assertEquals(
             BEGRUNNELSEMAL + "\n\n" + BEGRUNNELSEFRITEKST + "\n\n" + BEGRUNNELSEKONKLUSJON,
-            hentetSkjønnsfastsetting.begrunnelse
+            hentetSkjønnsfastsetting.begrunnelse,
         )
         assertEquals(BEGRUNNELSEMAL, hentetSkjønnsfastsetting.begrunnelseMal)
         assertEquals(BEGRUNNELSEFRITEKST, hentetSkjønnsfastsetting.begrunnelseFritekst)
@@ -320,18 +335,19 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                 skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
                 opprettet = OPPRETTET,
                 vedtaksperiodeId = VEDTAKSPERIODE,
-                arbeidsgivere = listOf(
-                    OverstyrtArbeidsgiverForDatabase(
-                        organisasjonsnummer = ORGNUMMER,
-                        månedligInntekt = INNTEKT,
-                        fraMånedligInntekt = INNTEKT + 1,
-                        refusjonsopplysninger = null,
-                        fraRefusjonsopplysninger = null,
-                        begrunnelse = BEGRUNNELSE,
-                        forklaring = FORKLARING,
-                        lovhjemmel = null,
-                    )
-                )
+                arbeidsgivere =
+                    listOf(
+                        OverstyrtArbeidsgiverForDatabase(
+                            organisasjonsnummer = ORGNUMMER,
+                            månedligInntekt = INNTEKT,
+                            fraMånedligInntekt = INNTEKT + 1,
+                            refusjonsopplysninger = null,
+                            fraRefusjonsopplysninger = null,
+                            begrunnelse = BEGRUNNELSE,
+                            forklaring = FORKLARING,
+                            lovhjemmel = null,
+                        ),
+                    ),
             ),
             OID,
         )
@@ -345,14 +361,15 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                 skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
                 opprettet = OPPRETTET,
                 vedtaksperiodeId = VEDTAKSPERIODE,
-                overstyrteArbeidsforhold = listOf(
-                    ArbeidsforholdForDatabase(
-                        organisasjonsnummer = ORGNUMMER,
-                        deaktivert = DEAKTIVERT,
-                        begrunnelse = BEGRUNNELSE,
-                        forklaring = FORKLARING,
-                    )
-                )
+                overstyrteArbeidsforhold =
+                    listOf(
+                        ArbeidsforholdForDatabase(
+                            organisasjonsnummer = ORGNUMMER,
+                            deaktivert = DEAKTIVERT,
+                            begrunnelse = BEGRUNNELSE,
+                            forklaring = FORKLARING,
+                        ),
+                    ),
             ),
             OID,
         )

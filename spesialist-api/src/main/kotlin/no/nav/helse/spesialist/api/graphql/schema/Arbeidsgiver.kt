@@ -9,11 +9,7 @@ import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
-import no.nav.helse.spesialist.api.overstyring.OverstyringArbeidsforholdDto
-import no.nav.helse.spesialist.api.overstyring.OverstyringInntektDto
-import no.nav.helse.spesialist.api.overstyring.OverstyringTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
-import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunnlagDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
@@ -152,6 +148,7 @@ data class Arbeidsgiver(
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val påVentApiDao: PåVentApiDao,
     private val tilganger: SaksbehandlerTilganger,
+    private val overstyringer: List<Overstyring>,
 ) {
     fun generasjoner(): List<Generasjon> =
         generasjoner.mapIndexed { index, generasjon ->
@@ -194,15 +191,7 @@ data class Arbeidsgiver(
             )
         }
 
-    fun overstyringer(): List<Overstyring> =
-        overstyringApiDao.finnOverstyringerAvTidslinjer(fødselsnummer, organisasjonsnummer)
-            .map { it.tilDagoverstyring() } +
-            overstyringApiDao.finnOverstyringerAvInntekt(fødselsnummer, organisasjonsnummer)
-                .map { it.tilInntektoverstyring() } +
-            overstyringApiDao.finnOverstyringerAvArbeidsforhold(fødselsnummer, organisasjonsnummer)
-                .map { it.tilArbeidsforholdoverstyring() } +
-            overstyringApiDao.finnSkjønnsfastsettingSykepengegrunnlag(fødselsnummer, organisasjonsnummer)
-                .map { it.tilSykepengegrunnlagSkjønnsfastsetting() }
+    fun overstyringer(): List<Overstyring> = overstyringer
 
     fun arbeidsforhold(): List<Arbeidsforhold> =
         arbeidsgiverApiDao.finnArbeidsforhold(fødselsnummer, organisasjonsnummer).map {
@@ -214,108 +203,10 @@ data class Arbeidsgiver(
             )
         }
 
+    @Suppress("unused")
     fun inntekterFraAordningen(): List<ArbeidsgiverInntekterFraAOrdningen> =
         arbeidsgiverApiDao.finnArbeidsgiverInntekterFraAordningen(
             fødselsnummer,
             organisasjonsnummer,
         )
 }
-
-private fun OverstyringTidslinjeDto.tilDagoverstyring() =
-    Dagoverstyring(
-        hendelseId = hendelseId,
-        begrunnelse = begrunnelse,
-        timestamp = timestamp,
-        saksbehandler =
-            Saksbehandler(
-                navn = saksbehandlerNavn,
-                ident = saksbehandlerIdent,
-            ),
-        dager =
-            overstyrteDager.map { dag ->
-                Dagoverstyring.OverstyrtDag(
-                    dato = dag.dato,
-                    type = dag.type,
-                    fraType = dag.fraType,
-                    grad = dag.grad,
-                    fraGrad = dag.fraGrad,
-                )
-            },
-        ferdigstilt = ferdigstilt,
-    )
-
-private fun OverstyringInntektDto.tilInntektoverstyring() =
-    Inntektoverstyring(
-        hendelseId = hendelseId,
-        timestamp = timestamp,
-        saksbehandler =
-            Saksbehandler(
-                navn = saksbehandlerNavn,
-                ident = saksbehandlerIdent,
-            ),
-        inntekt =
-            Inntektoverstyring.OverstyrtInntekt(
-                forklaring = forklaring,
-                begrunnelse = begrunnelse,
-                manedligInntekt = månedligInntekt,
-                fraManedligInntekt = fraMånedligInntekt,
-                skjaeringstidspunkt = skjæringstidspunkt,
-                refusjonsopplysninger =
-                    refusjonsopplysninger?.map {
-                        Inntektoverstyring.Refusjonsopplysning(
-                            fom = it.fom,
-                            tom = it.tom,
-                            belop = it.beløp,
-                        )
-                    } ?: emptyList(),
-                fraRefusjonsopplysninger =
-                    fraRefusjonsopplysninger?.map {
-                        Inntektoverstyring.Refusjonsopplysning(
-                            fom = it.fom,
-                            tom = it.tom,
-                            belop = it.beløp,
-                        )
-                    } ?: emptyList(),
-            ),
-        ferdigstilt = ferdigstilt,
-    )
-
-private fun OverstyringArbeidsforholdDto.tilArbeidsforholdoverstyring() =
-    Arbeidsforholdoverstyring(
-        hendelseId = hendelseId,
-        begrunnelse = begrunnelse,
-        timestamp = timestamp,
-        saksbehandler =
-            Saksbehandler(
-                navn = saksbehandlerNavn,
-                ident = saksbehandlerIdent,
-            ),
-        deaktivert = deaktivert,
-        skjaeringstidspunkt = skjæringstidspunkt,
-        forklaring = forklaring,
-        ferdigstilt = ferdigstilt,
-    )
-
-private fun SkjønnsfastsettingSykepengegrunnlagDto.tilSykepengegrunnlagSkjønnsfastsetting() =
-    Sykepengegrunnlagskjonnsfastsetting(
-        hendelseId = hendelseId,
-        timestamp = timestamp,
-        saksbehandler =
-            Saksbehandler(
-                navn = saksbehandlerNavn,
-                ident = saksbehandlerIdent,
-            ),
-        skjonnsfastsatt =
-            Sykepengegrunnlagskjonnsfastsetting.SkjonnsfastsattSykepengegrunnlag(
-                arsak = årsak,
-                type = type,
-                begrunnelse = begrunnelse,
-                begrunnelseMal = begrunnelseMal,
-                begrunnelseFritekst = begrunnelseFritekst,
-                begrunnelseKonklusjon = begrunnelseKonklusjon,
-                arlig = årlig,
-                fraArlig = fraÅrlig,
-                skjaeringstidspunkt = skjæringstidspunkt,
-            ),
-        ferdigstilt = ferdigstilt,
-    )
