@@ -31,7 +31,7 @@ class ContextFactory(
     private val beslutterSaksbehandlergruppe: UUID,
 ) : GraphQLContextFactory<ApplicationRequest> {
     override suspend fun generateContext(request: ApplicationRequest): GraphQLContext =
-        if (isIntrospectionRequest(request)) {
+        if (!request.isAuthenticated() || request.isIntrospectionRequest()) {
             emptyMap<Any, Any>().toGraphQLContext()
         } else {
             mapOf(
@@ -46,8 +46,10 @@ class ContextFactory(
             ).toGraphQLContext()
         }
 
-    private suspend fun isIntrospectionRequest(request: ApplicationRequest): Boolean {
-        val graphQLRequest = objectMapper.readValue(request.call.receiveText(), GraphQLRequest::class.java)
+    private fun ApplicationRequest.isAuthenticated() = call.principal<JWTPrincipal>() != null
+
+    private suspend fun ApplicationRequest.isIntrospectionRequest(): Boolean {
+        val graphQLRequest = objectMapper.readValue(call.receiveText(), GraphQLRequest::class.java)
         return (graphQLRequest.operationName == "IntrospectionQuery" || graphQLRequest.query.contains("query IntrospectionQuery"))
     }
 }
