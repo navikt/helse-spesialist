@@ -61,6 +61,8 @@ import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernPåVent
@@ -98,6 +100,7 @@ internal class SaksbehandlerMediator(
     private val overstyringDao = OverstyringDao(dataSource)
     private val påVentDao = PåVentDao(dataSource)
     private val notatRepository: NotatRepository = NotatRepository(notatDao = NotatDao(dataSource))
+    private val periodehistorikkDao = PeriodehistorikkDao(dataSource)
     private val avslagDao = AvslagDao(dataSource)
 
     override fun <T : HandlingFraApi> håndter(
@@ -164,7 +167,8 @@ internal class SaksbehandlerMediator(
                         saksbehandler.oid(),
                         NotatType.PaaVent,
                     )
-                is no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent -> Unit
+                is no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent ->
+                    periodehistorikkDao.lagre(PeriodehistorikkType.FJERN_FRA_PA_VENT, saksbehandler.oid(), handling.oppgaveId(), null)
             }
             oppgaveService.håndter(handling, saksbehandler)
             PåVentRepository(påVentDao).apply {

@@ -15,8 +15,6 @@ import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.graphql.schema.PaVent
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernPåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LeggPåVent
@@ -26,7 +24,6 @@ import java.time.LocalDate
 
 class PaVentMutation(
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
-    private val periodehistorikkDao: PeriodehistorikkDao,
 ) : Mutation {
     private companion object {
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
@@ -74,7 +71,6 @@ class PaVentMutation(
         val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(ContextValues.SAKSBEHANDLER.key).value
         return withContext(Dispatchers.IO) {
             try {
-                periodehistorikkDao.lagre(PeriodehistorikkType.FJERN_FRA_PA_VENT, saksbehandler.oid, oppgaveId.toLong(), null)
                 saksbehandlerhåndterer.håndter(FjernPåVent(oppgaveId.toLong()), saksbehandler)
                 newResult<Boolean?>().data(true).build()
             } catch (e: OppgaveIkkeTildelt) {

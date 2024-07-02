@@ -181,7 +181,6 @@ internal class SchemaBuilder(
                     TopLevelObject(
                         PaVentMutation(
                             saksbehandlerhåndterer = saksbehandlerhåndterer,
-                            periodehistorikkDao = periodehistorikkDao,
                         ),
                     ),
                     TopLevelObject(
