@@ -1,6 +1,6 @@
 val testcontainersVersion = "1.19.7"
 val cloudSqlVersion = "1.16.0"
-val postgresqlVersion = "42.7.2"
+val postgresqlVersion = "42.7.3"
 
 dependencies {
     implementation("org.postgresql:postgresql:$postgresqlVersion")
