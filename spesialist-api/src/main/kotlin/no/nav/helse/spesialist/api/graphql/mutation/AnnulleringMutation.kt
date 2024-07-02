@@ -19,9 +19,9 @@ class AnnulleringMutation(
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
-            val saksbehandler: Lazy<SaksbehandlerFraApi> = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
+            val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
 
-            saksbehandlerhåndterer.håndter(annullering, saksbehandler.value)
+            saksbehandlerhåndterer.håndter(annullering, saksbehandler)
             DataFetcherResult.newResult<Boolean>().data(true).build()
         }
 }

@@ -16,7 +16,7 @@ class OpptegnelseQuery(
         sekvensId: Int? = null,
         environment: DataFetchingEnvironment,
     ): DataFetcherResult<List<Opptegnelse>> {
-        val saksbehandler = environment.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(SAKSBEHANDLER.key).value
+        val saksbehandler = environment.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER.key)
         val opptegnelser =
             if (sekvensId != null) {
                 saksbehandlerhåndterer.hentAbonnerteOpptegnelser(saksbehandler, sekvensId)

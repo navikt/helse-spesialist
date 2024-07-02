@@ -17,7 +17,8 @@ import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.auditLogTeller
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.erDev
-import no.nav.helse.spesialist.api.graphql.ContextValues
+import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
+import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
 import no.nav.helse.spesialist.api.graphql.schema.Person
 import no.nav.helse.spesialist.api.graphql.schema.Reservasjon
 import no.nav.helse.spesialist.api.notat.NotatDao
@@ -29,6 +30,7 @@ import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
@@ -146,7 +148,7 @@ class PersonQuery(
                     totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                     påVentApiDao = påVentApiDao,
                     avviksvurderinghenter = avviksvurderinghenter,
-                    tilganger = env.graphQlContext.get("tilganger"),
+                    tilganger = env.graphQlContext.get(TILGANGER.key),
                     oppgavehåndterer = oppgavehåndterer,
                     saksbehandlerhåndterer = saksbehandlerhåndterer,
                 )
@@ -206,7 +208,7 @@ class PersonQuery(
         harTilgang: Boolean?,
         fantIkkePersonErrorMsg: String?,
     ) {
-        val saksbehandlerIdent = graphQLContext.get<String>(ContextValues.SAKSBEHANDLER_IDENT.key)
+        val saksbehandlerIdent = graphQLContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER.key).ident
         auditLogTeller.inc()
 
         if (harTilgang == false) {

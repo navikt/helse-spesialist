@@ -3,16 +3,16 @@ package no.nav.helse.spesialist.api.graphql
 
 import com.expediagroup.graphql.generator.extensions.toGraphQLContext
 import com.expediagroup.graphql.server.execution.GraphQLContextFactory
+import com.expediagroup.graphql.server.types.GraphQLRequest
 import graphql.GraphQLContext
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.request.ApplicationRequest
+import io.ktor.server.request.receiveText
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
-import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDER_EPOST
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
-import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER_IDENT
-import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER_NAVN
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
+import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -22,9 +22,6 @@ private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
 enum class ContextValues(val key: String) {
     TILGANGER("tilganger"),
-    SAKSBEHANDLER_NAVN("saksbehandlerNavn"),
-    SAKSBEHANDER_EPOST("saksbehanderEpost"),
-    SAKSBEHANDLER_IDENT("saksbehandlerIdent"),
     SAKSBEHANDLER("saksbehandler"),
 }
 
@@ -34,19 +31,25 @@ class ContextFactory(
     private val beslutterSaksbehandlergruppe: UUID,
 ) : GraphQLContextFactory<ApplicationRequest> {
     override suspend fun generateContext(request: ApplicationRequest): GraphQLContext =
-        mapOf(
-            TILGANGER.key to
-                SaksbehandlerTilganger(
-                    gruppetilganger = request.getGrupper(),
-                    kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
-                    beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
-                    skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
-                ),
-            SAKSBEHANDLER_NAVN.key to request.getSaksbehandlerName(),
-            SAKSBEHANDER_EPOST.key to request.getSaksbehanderEpost(),
-            SAKSBEHANDLER_IDENT.key to request.getSaksbehandlerIdent(),
-            SAKSBEHANDLER.key to request.saksbehandler(),
-        ).toGraphQLContext()
+        if (isIntrospectionRequest(request)) {
+            emptyMap<Any, Any>().toGraphQLContext()
+        } else {
+            mapOf(
+                TILGANGER.key to
+                    SaksbehandlerTilganger(
+                        gruppetilganger = request.getGrupper(),
+                        kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
+                        beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
+                        skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
+                    ),
+                SAKSBEHANDLER.key to request.saksbehandler(),
+            ).toGraphQLContext()
+        }
+
+    private suspend fun isIntrospectionRequest(request: ApplicationRequest): Boolean {
+        val graphQLRequest = objectMapper.readValue(request.call.receiveText(), GraphQLRequest::class.java)
+        return (graphQLRequest.operationName == "IntrospectionQuery" || graphQLRequest.query.contains("query IntrospectionQuery"))
+    }
 }
 
 private fun ApplicationRequest.getGrupper(): List<UUID> {
@@ -58,25 +61,8 @@ private fun ApplicationRequest.getGrupper(): List<UUID> {
     return accessToken.payload.getClaim("groups")?.asList(String::class.java)?.map(UUID::fromString) ?: emptyList()
 }
 
-private fun ApplicationRequest.getSaksbehandlerName(): String {
+private fun ApplicationRequest.saksbehandler(): SaksbehandlerFraApi {
     val accessToken = call.principal<JWTPrincipal>()
-    return accessToken?.payload?.getClaim("name")?.asString() ?: ""
-}
-
-private fun ApplicationRequest.getSaksbehanderEpost(): String {
-    val accessToken = call.principal<JWTPrincipal>()
-    return accessToken?.payload?.getClaim("preferred_username")?.asString() ?: ""
-}
-
-private fun ApplicationRequest.getSaksbehandlerIdent(): String {
-    val accessToken = call.principal<JWTPrincipal>()
-    return accessToken?.payload?.getClaim("NAVident")?.asString() ?: ""
-}
-
-private fun ApplicationRequest.saksbehandler(): Lazy<SaksbehandlerFraApi> {
-    val accessToken = call.principal<JWTPrincipal>()
-    return lazy {
-        accessToken?.let(SaksbehandlerFraApi::fraOnBehalfOfToken)
-            ?: throw IllegalStateException("Forventer å finne saksbehandler i access token")
-    }
+    return accessToken?.let(SaksbehandlerFraApi::fraOnBehalfOfToken)
+        ?: throw IllegalStateException("Forventer å finne saksbehandler i access token")
 }

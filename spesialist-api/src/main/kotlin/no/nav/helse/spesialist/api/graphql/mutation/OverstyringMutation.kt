@@ -8,7 +8,7 @@ import graphql.schema.DataFetchingEnvironment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
-import no.nav.helse.spesialist.api.graphql.ContextValues
+import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
@@ -27,9 +27,9 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
-            val saksbehandler: Lazy<SaksbehandlerFraApi> = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
+            val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER.key)
             try {
-                withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(overstyring, saksbehandler.value) }
+                withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(overstyring, saksbehandler) }
             } catch (e: Exception) {
                 val kunneIkkeOverstyreError = kunneIkkeOverstyreError("dager")
                 logg.error(kunneIkkeOverstyreError.message, e)
@@ -44,9 +44,9 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
-            val saksbehandler: Lazy<SaksbehandlerFraApi> = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
+            val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER.key)
             try {
-                withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(overstyring, saksbehandler.value) }
+                withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(overstyring, saksbehandler) }
             } catch (e: Exception) {
                 val kunneIkkeOverstyreError = kunneIkkeOverstyreError("inntekt og refusjon")
                 logg.error(kunneIkkeOverstyreError.message, e)
@@ -62,9 +62,9 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
-            val saksbehandler: Lazy<SaksbehandlerFraApi> = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
+            val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER.key)
             try {
-                withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(overstyring, saksbehandler.value) }
+                withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(overstyring, saksbehandler) }
             } catch (e: Exception) {
                 val kunneIkkeOverstyreError = kunneIkkeOverstyreError("arbeidsforhold")
                 logg.error(kunneIkkeOverstyreError.message, e)

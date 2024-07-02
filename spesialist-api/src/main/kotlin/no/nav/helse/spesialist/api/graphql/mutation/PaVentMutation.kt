@@ -12,7 +12,7 @@ import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
-import no.nav.helse.spesialist.api.graphql.ContextValues
+import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.graphql.schema.PaVent
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
@@ -39,7 +39,7 @@ class PaVentMutation(
         begrunnelse: String?,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<PaVent?> {
-        val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(ContextValues.SAKSBEHANDLER.key).value
+        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER.key)
         return withContext(Dispatchers.IO) {
             try {
                 saksbehandlerhåndterer.håndter(
@@ -68,7 +68,7 @@ class PaVentMutation(
         oppgaveId: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean?> {
-        val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(ContextValues.SAKSBEHANDLER.key).value
+        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER.key)
         return withContext(Dispatchers.IO) {
             try {
                 saksbehandlerhåndterer.håndter(FjernPåVent(oppgaveId.toLong()), saksbehandler)

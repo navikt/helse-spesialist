@@ -12,6 +12,8 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.server.application.install
+import io.ktor.server.plugins.doublereceive.DoubleReceive
 import io.ktor.server.request.ApplicationRequest
 import io.ktor.server.routing.route
 import io.mockk.every
@@ -69,6 +71,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
 
     private val apiTesting =
         ApiTesting(jwtStub) {
+            install(DoubleReceive)
             route("graphql") {
                 queryHandler(if (useGraphQLServerWithSeparateMocks) buildGraphQLServer() else graphQLServer)
             }

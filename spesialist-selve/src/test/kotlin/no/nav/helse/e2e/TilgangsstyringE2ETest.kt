@@ -10,7 +10,8 @@ import no.nav.helse.Testdata.snapshot
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
-import no.nav.helse.spesialist.api.graphql.ContextValues
+import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
+import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
@@ -20,6 +21,7 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
@@ -30,12 +32,12 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class TilgangsstyringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Gir 409 når bare søknad er mottatt`() {
-        every { dataFetchingEnvironment.graphQlContext.get<String>(ContextValues.SAKSBEHANDLER_IDENT.key) } returns "A123456"
         settOppDefaultDataOgTilganger()
 
         assertKanIkkeHentePerson("Finner ikke data for person med fødselsnummer ")
@@ -47,7 +49,6 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Gir 409 når personen ikke er klar for visning ennå, uavhengig av om saksbehandler har tilgang`() {
-        every { dataFetchingEnvironment.graphQlContext.get<String>(ContextValues.SAKSBEHANDLER_IDENT.key) } returns "A123456"
         settOppDefaultDataOgTilganger()
 
         sendMeldingerOppTilEgenAnsatt()
@@ -65,7 +66,6 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Kan hente person om den er klar til visning`() {
-        every { dataFetchingEnvironment.graphQlContext.get<String>(ContextValues.SAKSBEHANDLER_IDENT.key) } returns "A123456"
         settOppDefaultDataOgTilganger()
 
         sendMeldingerOppTilEgenAnsatt()
@@ -80,7 +80,6 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Kan ikke hente person hvis tilgang mangler`() {
-        every { dataFetchingEnvironment.graphQlContext.get<String>(ContextValues.SAKSBEHANDLER_IDENT.key) } returns "A123456"
         settOppDefaultDataOgTilganger()
 
         sendMeldingerOppTilEgenAnsatt()
@@ -140,12 +139,14 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
 
     private fun settOppDefaultDataOgTilganger() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot(fødselsnummer = FØDSELSNUMMER)
-        every { dataFetchingEnvironment.graphQlContext.get<String>("saksbehandlerNavn") } returns "saksbehandler"
+        every { dataFetchingEnvironment.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER.key) } returns SaksbehandlerFraApi(
+            UUID.randomUUID(), "epost", "navn", "A123456", emptyList()
+        )
         saksbehandlertilgangTilSkjermede(harTilgang = false)
     }
 
     private fun saksbehandlertilgangTilSkjermede(harTilgang: Boolean) {
-        every { dataFetchingEnvironment.graphQlContext.get<SaksbehandlerTilganger>("tilganger") } returns
+        every { dataFetchingEnvironment.graphQlContext.get<SaksbehandlerTilganger>(TILGANGER.key) } returns
             mockk(relaxed = true) {
                 every { harTilgangTilSkjermedePersoner() } returns harTilgang
             }

@@ -26,7 +26,7 @@ class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
         limit: Int,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<BehandledeOppgaver> {
-        val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(SAKSBEHANDLER.key).value
+        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER.key)
         val behandledeOppgaver =
             withContext(Dispatchers.IO) {
                 oppgavehåndterer.behandledeOppgaver(
@@ -49,7 +49,7 @@ class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
     ): DataFetcherResult<OppgaverTilBehandling> {
         sikkerLogg.info("Henter OppgaverTilBehandling")
         val startTrace = startSporing(env)
-        val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(SAKSBEHANDLER.key).value
+        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER.key)
         val oppgaver =
             withContext(Dispatchers.IO) {
                 oppgavehåndterer.oppgaver(
@@ -69,7 +69,7 @@ class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
     suspend fun antallOppgaver(env: DataFetchingEnvironment): DataFetcherResult<AntallOppgaver> {
         sikkerLogg.info("Henter AntallOppgaver")
         val startTrace = startSporing(env)
-        val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(SAKSBEHANDLER.key).value
+        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER.key)
         val antallOppgaver =
             withContext(Dispatchers.IO) {
                 oppgavehåndterer.antallOppgaver(
@@ -82,7 +82,7 @@ class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
     }
 
     private fun startSporing(env: DataFetchingEnvironment): Long {
-        val hvem = env.graphQlContext.get<String>("saksbehandlerNavn")
+        val hvem = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER.key).navn
         sikkerLogg.trace("Henter oppgaver for $hvem")
         return System.nanoTime()
     }

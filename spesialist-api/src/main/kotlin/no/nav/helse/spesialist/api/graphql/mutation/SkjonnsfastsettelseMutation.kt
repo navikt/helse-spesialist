@@ -8,7 +8,7 @@ import graphql.schema.DataFetchingEnvironment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
-import no.nav.helse.spesialist.api.graphql.ContextValues
+import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
@@ -25,9 +25,9 @@ class SkjonnsfastsettelseMutation(private val saksbehandlerhåndterer: Saksbehan
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
-            val saksbehandler: Lazy<SaksbehandlerFraApi> = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
+            val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER.key)
             try {
-                withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(skjonnsfastsettelse, saksbehandler.value) }
+                withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(skjonnsfastsettelse, saksbehandler) }
             } catch (e: Exception) {
                 val kunneIkkeSkjønnsfastsetteSykepengegrunnlagError = kunneIkkeSkjønnsfastsetteSykepengegrunnlagError()
                 logg.error(kunneIkkeSkjønnsfastsetteSykepengegrunnlagError.message, e)

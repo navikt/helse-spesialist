@@ -14,7 +14,8 @@ import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.erDev
 import no.nav.helse.spesialist.api.feilhåndtering.IkkeÅpenOppgave
-import no.nav.helse.spesialist.api.graphql.ContextValues
+import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
+import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
@@ -38,17 +39,17 @@ class VedtakMutation(
         avslag: Avslag?,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
-            val saksbehandler: Lazy<SaksbehandlerFraApi> = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
-            val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>(ContextValues.TILGANGER.key)
+            val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER.key)
+            val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>(TILGANGER.key)
             logg.info("Fatter vedtak for oppgave $oppgavereferanse")
 
-            when (val vedtak = kanFatteVedtak(oppgavereferanse.toLong(), saksbehandler.value, tilganger)) {
+            when (val vedtak = kanFatteVedtak(oppgavereferanse.toLong(), saksbehandler, tilganger)) {
                 is VedtakResultat.Success -> {
                     val behandlingId = UUID.randomUUID()
-                    val godkjenning = GodkjenningDto(oppgavereferanse.toLong(), true, saksbehandler.value.ident, null, null, null, avslag)
+                    val godkjenning = GodkjenningDto(oppgavereferanse.toLong(), true, saksbehandler.ident, null, null, null, avslag)
 
-                    saksbehandlerhåndterer.håndter(godkjenning, behandlingId, saksbehandler.value)
-                    godkjenninghåndterer.håndter(godkjenning, saksbehandler.value.epost, saksbehandler.value.oid, behandlingId)
+                    saksbehandlerhåndterer.håndter(godkjenning, behandlingId, saksbehandler)
+                    godkjenninghåndterer.håndter(godkjenning, saksbehandler.epost, saksbehandler.oid, behandlingId)
 
                     newResult<Boolean>().data(true).build()
                 }
@@ -75,25 +76,25 @@ class VedtakMutation(
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
-            val saksbehandler: Lazy<SaksbehandlerFraApi> = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
-            val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>(ContextValues.TILGANGER.key)
+            val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER.key)
+            val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>(TILGANGER.key)
             logg.info("Sender oppgave $oppgavereferanse til Infotrygd")
 
-            when (val vedtak = kanFatteVedtak(oppgavereferanse.toLong(), saksbehandler.value, tilganger)) {
+            when (val vedtak = kanFatteVedtak(oppgavereferanse.toLong(), saksbehandler, tilganger)) {
                 is VedtakResultat.Success -> {
                     val behandlingId = UUID.randomUUID()
                     val godkjenning =
                         GodkjenningDto(
                             oppgavereferanse.toLong(),
                             false,
-                            saksbehandler.value.ident,
+                            saksbehandler.ident,
                             arsak,
                             begrunnelser,
                             kommentar,
                         )
 
-                    saksbehandlerhåndterer.håndter(godkjenning, behandlingId, saksbehandler.value)
-                    godkjenninghåndterer.håndter(godkjenning, saksbehandler.value.epost, saksbehandler.value.oid, behandlingId)
+                    saksbehandlerhåndterer.håndter(godkjenning, behandlingId, saksbehandler)
+                    godkjenninghåndterer.håndter(godkjenning, saksbehandler.epost, saksbehandler.oid, behandlingId)
 
                     newResult<Boolean>().data(true).build()
                 }

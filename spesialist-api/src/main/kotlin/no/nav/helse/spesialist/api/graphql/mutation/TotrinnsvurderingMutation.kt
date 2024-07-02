@@ -11,7 +11,7 @@ import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil
-import no.nav.helse.spesialist.api.graphql.ContextValues
+import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
@@ -36,8 +36,7 @@ class TotrinnsvurderingMutation(
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
-            val behandlendeSaksbehandler: SaksbehandlerFraApi =
-                env.graphQlContext.get<Lazy<SaksbehandlerFraApi>?>(ContextValues.SAKSBEHANDLER.key).value
+            val behandlendeSaksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER.key)
 
             try {
                 saksbehandlerhåndterer.håndterTotrinnsvurdering(oppgavereferanse.toLong())
@@ -89,8 +88,7 @@ class TotrinnsvurderingMutation(
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
-            val besluttendeSaksbehandler: SaksbehandlerFraApi =
-                env.graphQlContext.get<Lazy<SaksbehandlerFraApi>?>(ContextValues.SAKSBEHANDLER.key).value
+            val besluttendeSaksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER.key)
 
             sikkerlogg.info(
                 "Oppgave med {} sendes i retur av beslutter med {}",
