@@ -140,9 +140,9 @@ internal class OppgaveService(
         handling: PåVent,
         saksbehandler: Saksbehandler,
     ) {
-        oppgave(handling.oppgaveId()) {
+        oppgave(handling.oppgaveId) {
             when (handling) {
-                is LeggPåVent -> this.leggPåVent(handling.skalTildeles(), saksbehandler)
+                is LeggPåVent -> this.leggPåVent(handling.skalTildeles, saksbehandler)
                 is FjernPåVent -> this.fjernPåVent()
             }
         }

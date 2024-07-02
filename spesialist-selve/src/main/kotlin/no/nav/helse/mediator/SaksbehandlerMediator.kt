@@ -162,13 +162,13 @@ internal class SaksbehandlerMediator(
             when (handling) {
                 is no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent ->
                     notatRepository.lagreForOppgaveId(
-                        handling.oppgaveId(),
-                        handling.notatTekst(),
+                        handling.oppgaveId,
+                        handling.notatTekst,
                         saksbehandler.oid(),
                         NotatType.PaaVent,
                     )
                 is no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent ->
-                    periodehistorikkDao.lagre(PeriodehistorikkType.FJERN_FRA_PA_VENT, saksbehandler.oid(), handling.oppgaveId(), null)
+                    periodehistorikkDao.lagre(PeriodehistorikkType.FJERN_FRA_PA_VENT, saksbehandler.oid(), handling.oppgaveId, null)
             }
             oppgaveService.håndter(handling, saksbehandler)
             PåVentRepository(påVentDao).apply {
@@ -178,9 +178,8 @@ internal class SaksbehandlerMediator(
                 )
             }
             sikkerlogg.info(
-                "Utfører handling ${handling.loggnavn()} på oppgave ${handling.oppgaveId()} på vegne av saksbehandler $saksbehandler",
+                "Utfører handling ${handling.loggnavn()} på oppgave ${handling.oppgaveId} på vegne av saksbehandler $saksbehandler",
             )
-            handling.utførAv(saksbehandler)
         } catch (e: Modellfeil) {
             throw e.tilApiversjon()
         }
