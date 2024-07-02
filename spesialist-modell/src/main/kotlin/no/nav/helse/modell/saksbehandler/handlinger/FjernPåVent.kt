@@ -16,5 +16,7 @@ class FjernPåVent(
 
     override fun begrunnelse(): String? = null
 
+    override fun notatTekst(): String = throw NotImplementedError()
+
     override fun utførAv(saksbehandler: Saksbehandler) {}
 }

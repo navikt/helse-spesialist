@@ -51,12 +51,15 @@ import no.nav.helse.spesialist.api.graphql.schema.AnnulleringData
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.Avslag
 import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
+import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.ANNET
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.OMREGNET_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.RAPPORTERT_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
+import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
@@ -94,6 +97,7 @@ internal class SaksbehandlerMediator(
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
     private val påVentDao = PåVentDao(dataSource)
+    private val notatRepository: NotatRepository = NotatRepository(notatDao = NotatDao(dataSource))
     private val avslagDao = AvslagDao(dataSource)
 
     override fun <T : HandlingFraApi> håndter(
@@ -152,6 +156,16 @@ internal class SaksbehandlerMediator(
         saksbehandler: Saksbehandler,
     ) {
         try {
+            when (handling) {
+                is no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent ->
+                    notatRepository.lagreForOppgaveId(
+                        handling.oppgaveId(),
+                        handling.notatTekst(),
+                        saksbehandler.oid(),
+                        NotatType.PaaVent,
+                    )
+                is no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent -> Unit
+            }
             oppgaveService.håndter(handling, saksbehandler)
             PåVentRepository(påVentDao).apply {
                 this.lagre(
@@ -485,7 +499,7 @@ internal class SaksbehandlerMediator(
     }
 
     private fun LeggPåVent.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent {
-        return no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent(oppgaveId, frist, skalTildeles, begrunnelse)
+        return no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent(oppgaveId, frist, skalTildeles, begrunnelse, notatTekst)
     }
 
     private fun FjernPåVent.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent {

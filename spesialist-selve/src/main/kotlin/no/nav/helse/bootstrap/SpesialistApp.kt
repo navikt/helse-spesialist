@@ -248,7 +248,6 @@ internal class SpesialistApp(
                 beslutterGruppeId = tilgangsgrupper.beslutterGruppeId,
                 snapshotService = snapshotService,
                 behandlingsstatistikkMediator = behandlingsstatistikkService,
-                notatRepository = notatRepository,
                 saksbehandlerhåndtererProvider = { saksbehandlerMediator },
                 oppgavehåndtererProvider = { oppgaveService },
                 totrinnsvurderinghåndterer = totrinnsvurderingMediator,

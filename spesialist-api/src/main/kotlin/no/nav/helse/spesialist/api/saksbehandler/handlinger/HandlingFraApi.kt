@@ -17,6 +17,7 @@ data class LeggPåVent(
     val frist: LocalDate,
     val skalTildeles: Boolean,
     val begrunnelse: String?,
+    val notatTekst: String,
 ) : HandlingFraApi
 
 data class FjernPåVent(

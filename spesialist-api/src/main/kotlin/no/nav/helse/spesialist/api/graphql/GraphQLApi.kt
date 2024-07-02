@@ -29,7 +29,6 @@ import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.erDev
 import no.nav.helse.spesialist.api.erLokalt
 import no.nav.helse.spesialist.api.notat.NotatDao
-import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
@@ -69,7 +68,6 @@ fun Application.graphQLApi(
     beslutterGruppeId: UUID,
     snapshotService: SnapshotService,
     behandlingsstatistikkMediator: IBehandlingsstatistikkService,
-    notatRepository: NotatRepository,
     saksbehandlerhåndtererProvider: () -> Saksbehandlerhåndterer,
     oppgavehåndtererProvider: () -> Oppgavehåndterer,
     totrinnsvurderinghåndterer: Totrinnsvurderinghåndterer,
@@ -94,14 +92,13 @@ fun Application.graphQLApi(
             varselRepository = varselRepository,
             oppgaveApiDao = oppgaveApiDao,
             periodehistorikkDao = periodehistorikkDao,
+            påVentApiDao = påVentApiDao,
             snapshotService = snapshotService,
             notatDao = notatDao,
             totrinnsvurderingApiDao = totrinnsvurderingApiDao,
-            påVentApiDao = påVentApiDao,
             reservasjonClient = reservasjonClient,
             avviksvurderinghenter = avviksvurderinghenter,
             behandlingsstatistikkMediator = behandlingsstatistikkMediator,
-            notatRepository = notatRepository,
             saksbehandlerhåndterer = saksbehandlerhåndterer,
             oppgavehåndterer = oppgavehåndterer,
             totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,

@@ -378,7 +378,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         nyPerson()
         val oppgaveId = OPPGAVE_ID
         mediator.håndter(
-            LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), true, ""),
+            LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), true, "", "notat tekst"),
             saksbehandler,
         )
         val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
@@ -390,7 +390,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         nyPerson()
         val oppgaveId = OPPGAVE_ID
         mediator.håndter(
-            LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), false, ""),
+            LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), false, "", "notat tekst"),
             saksbehandler,
         )
         mediator.håndter(FjernPåVent(oppgaveId), saksbehandler)

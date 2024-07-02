@@ -38,4 +38,6 @@ interface PåVent : Handling {
     fun skalTildeles(): Boolean?
 
     fun begrunnelse(): String?
+
+    fun notatTekst(): String
 }

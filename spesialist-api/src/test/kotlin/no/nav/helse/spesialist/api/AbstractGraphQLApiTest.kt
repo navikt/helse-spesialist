@@ -31,7 +31,6 @@ import no.nav.helse.spesialist.api.graphql.RequestParser
 import no.nav.helse.spesialist.api.graphql.SchemaBuilder
 import no.nav.helse.spesialist.api.graphql.queryHandler
 import no.nav.helse.spesialist.api.notat.NotatDao
-import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
@@ -88,14 +87,13 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                 varselRepository = apiVarselRepository,
                 oppgaveApiDao = oppgaveApiDao,
                 periodehistorikkDao = periodehistorikkDao,
+                påVentApiDao = påVentApiDao,
                 snapshotService = snapshotService,
                 notatDao = notatDao,
                 totrinnsvurderingApiDao = totrinnsvurderingApiDao,
-                påVentApiDao = påVentApiDao,
                 reservasjonClient = reservasjonClient,
                 avviksvurderinghenter = avviksvurderinghenter,
                 behandlingsstatistikkMediator = behandlingsstatistikkMediator,
-                notatRepository = notatRepository,
                 saksbehandlerhåndterer = saksbehandlerhåndterer,
                 oppgavehåndterer = oppgavehåndterer,
                 totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
@@ -209,14 +207,13 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                         varselRepository = ApiVarselRepository(dataSource),
                         oppgaveApiDao = OppgaveApiDao(dataSource),
                         periodehistorikkDao = PeriodehistorikkDao(dataSource),
+                        påVentApiDao = PåVentApiDao(dataSource),
                         snapshotService = SnapshotService(SnapshotApiDao(dataSource), mockk<SnapshotClient>(relaxed = true)),
                         notatDao = notatDao,
                         totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource),
-                        påVentApiDao = PåVentApiDao(dataSource),
                         reservasjonClient = mockk<ReservasjonClient>(relaxed = true),
                         avviksvurderinghenter = mockk<Avviksvurderinghenter>(relaxed = true),
                         behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkService>(relaxed = true),
-                        notatRepository = NotatRepository(notatDao),
                         saksbehandlerhåndterer = mockk<Saksbehandlerhåndterer>(relaxed = true),
                         oppgavehåndterer = mockk<Oppgavehåndterer>(relaxed = true),
                         totrinnsvurderinghåndterer = mockk<Totrinnsvurderinghåndterer>(relaxed = true),

@@ -8,6 +8,7 @@ class LeggPåVent(
     private val frist: LocalDate,
     private val skalTildeles: Boolean,
     private val begrunnelse: String?,
+    private val notatTekst: String,
 ) : PåVent {
     override fun loggnavn(): String = "lagt_på_vent"
 
@@ -18,6 +19,8 @@ class LeggPåVent(
     override fun skalTildeles(): Boolean = skalTildeles
 
     override fun begrunnelse(): String? = begrunnelse
+
+    override fun notatTekst(): String = notatTekst
 
     override fun utførAv(saksbehandler: Saksbehandler) {}
 }

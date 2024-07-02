@@ -12,7 +12,6 @@ import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDER_EPOST
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER_IDENT
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER_NAVN
-import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER_OID
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
@@ -25,7 +24,6 @@ enum class ContextValues(val key: String) {
     TILGANGER("tilganger"),
     SAKSBEHANDLER_NAVN("saksbehandlerNavn"),
     SAKSBEHANDER_EPOST("saksbehanderEpost"),
-    SAKSBEHANDLER_OID("saksbehandlerOid"),
     SAKSBEHANDLER_IDENT("saksbehandlerIdent"),
     SAKSBEHANDLER("saksbehandler"),
 }
@@ -46,7 +44,6 @@ class ContextFactory(
                 ),
             SAKSBEHANDLER_NAVN.key to request.getSaksbehandlerName(),
             SAKSBEHANDER_EPOST.key to request.getSaksbehanderEpost(),
-            SAKSBEHANDLER_OID.key to request.getSaksbehandlerOid(),
             SAKSBEHANDLER_IDENT.key to request.getSaksbehandlerIdent(),
             SAKSBEHANDLER.key to request.saksbehandler(),
         ).toGraphQLContext()
@@ -69,11 +66,6 @@ private fun ApplicationRequest.getSaksbehandlerName(): String {
 private fun ApplicationRequest.getSaksbehanderEpost(): String {
     val accessToken = call.principal<JWTPrincipal>()
     return accessToken?.payload?.getClaim("preferred_username")?.asString() ?: ""
-}
-
-private fun ApplicationRequest.getSaksbehandlerOid(): String {
-    val accessToken = call.principal<JWTPrincipal>()
-    return accessToken?.payload?.getClaim("oid")?.asString() ?: ""
 }
 
 private fun ApplicationRequest.getSaksbehandlerIdent(): String {

@@ -13,10 +13,8 @@ import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.graphql.ContextValues
-import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER_OID
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.graphql.schema.PaVent
-import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
@@ -25,11 +23,9 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.LeggPåVent
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
-import java.util.UUID
 
 class PaVentMutation(
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
-    private val notatRepository: NotatRepository,
     private val periodehistorikkDao: PeriodehistorikkDao,
 ) : Mutation {
     private companion object {
@@ -48,12 +44,9 @@ class PaVentMutation(
     ): DataFetcherResult<PaVent?> {
         val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(ContextValues.SAKSBEHANDLER.key).value
         return withContext(Dispatchers.IO) {
-            val saksbehandlerOid = UUID.fromString(env.graphQlContext.get(SAKSBEHANDLER_OID.key))
-
             try {
-                notatRepository.lagreForOppgaveId(oppgaveId.toLong(), notatTekst, saksbehandlerOid, notatType)
                 saksbehandlerhåndterer.håndter(
-                    LeggPåVent(oppgaveId.toLong(), saksbehandler.oid, frist, tildeling, begrunnelse),
+                    LeggPåVent(oppgaveId.toLong(), saksbehandler.oid, frist, tildeling, begrunnelse, notatTekst),
                     saksbehandler,
                 )
                 newResult<PaVent?>().data(

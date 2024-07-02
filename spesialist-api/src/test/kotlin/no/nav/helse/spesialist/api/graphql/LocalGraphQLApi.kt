@@ -55,7 +55,6 @@ import no.nav.helse.spesialist.api.graphql.schema.Sorteringsnokkel
 import no.nav.helse.spesialist.api.graphql.schema.Tildeling
 import no.nav.helse.spesialist.api.graphql.spleis.enSpleisPerson
 import no.nav.helse.spesialist.api.notat.NotatDao
-import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
@@ -119,7 +118,6 @@ fun main() =
             val reservasjonClient = mockk<ReservasjonClient>(relaxed = true)
             val avviksvurderinghenter = mockk<Avviksvurderinghenter>(relaxed = true)
             val behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkService>(relaxed = true)
-            val notatRepository = mockk<NotatRepository>(relaxed = true)
             val totrinnsvurderinghåndterer = mockk<Totrinnsvurderinghåndterer>(relaxed = true)
             val godkjenninghåndterer = mockk<Godkjenninghåndterer>(relaxed = true)
             val personhåndterer = mockk<Personhåndterer>(relaxed = true)
@@ -141,14 +139,16 @@ fun main() =
             every { personApiDao.spesialistHarPersonKlarForVisningISpeil(any()) } returns true
             every { personApiDao.finnInfotrygdutbetalinger(any()) } returns "[]"
             every { totrinnsvurderingApiDao.hentAktiv(any()) } returns enTotrinnsvurdering()
-            every { påVentApiDao.hentAktivPåVent(any()) } returns PaVent(
-                frist = LocalDate.now(),
-                begrunnelse = null,
-                oid = UUID.randomUUID(),
-            )
-            coEvery { reservasjonClient.hentReservasjonsstatus(any()) } answers withDelay(800) {
-                Reservasjon(kanVarsles = true, reservert = false)
-            }
+            every { påVentApiDao.hentAktivPåVent(any()) } returns
+                PaVent(
+                    frist = LocalDate.now(),
+                    begrunnelse = null,
+                    oid = UUID.randomUUID(),
+                )
+            coEvery { reservasjonClient.hentReservasjonsstatus(any()) } answers
+                withDelay(800) {
+                    Reservasjon(kanVarsles = true, reservert = false)
+                }
             every { behandlingsstatistikkMediator.getBehandlingsstatistikk() } returns enBehandlingsstatistikkResponse()
 
             install(ContentNegotiation) {
@@ -195,7 +195,6 @@ fun main() =
                 beslutterGruppeId = UUID.randomUUID(),
                 snapshotService = SnapshotService(snapshotApiDao, mockk(relaxed = true)),
                 behandlingsstatistikkMediator = behandlingsstatistikkMediator,
-                notatRepository = notatRepository,
                 saksbehandlerhåndtererProvider = { SneakySaksbehandlerhåndterer(randomOppgaver) },
                 oppgavehåndtererProvider = {
                     SneakyOppgaveHåndterer(
@@ -257,8 +256,7 @@ private class SneakySaksbehandlerhåndterer(
         avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag,
     ) = mock.håndterAvslag(oppgaveId, saksbehandlerFraApi, avslag)
 
-    override fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi) =
-        mock.hentAbonnerteOpptegnelser(saksbehandlerFraApi)
+    override fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi) = mock.hentAbonnerteOpptegnelser(saksbehandlerFraApi)
 
     override fun håndterTotrinnsvurdering(oppgavereferanse: Long) = mock.håndterTotrinnsvurdering(oppgavereferanse)
 }
@@ -300,10 +298,11 @@ private class SneakyOppgaveHåndterer(
         )
     }
 
-    override fun antallOppgaver(saksbehandlerFraApi: SaksbehandlerFraApi) = AntallOppgaver(
-        antallMineSaker = randomOppgaver.filter { it.erTildelt(saksbehandlerFraApi) }.size,
-        antallMineSakerPaVent = randomOppgaver.filter { it.erTildeltOgPåVent(saksbehandlerFraApi) }.size,
-    )
+    override fun antallOppgaver(saksbehandlerFraApi: SaksbehandlerFraApi) =
+        AntallOppgaver(
+            antallMineSaker = randomOppgaver.filter { it.erTildelt(saksbehandlerFraApi) }.size,
+            antallMineSakerPaVent = randomOppgaver.filter { it.erTildeltOgPåVent(saksbehandlerFraApi) }.size,
+        )
 
     override fun behandledeOppgaver(
         saksbehandlerFraApi: SaksbehandlerFraApi,
@@ -410,33 +409,35 @@ private fun enPersoninfo() =
         unntattFraAutomatisering = null,
     )
 
-private fun enTotrinnsvurdering() = TotrinnsvurderingApiDao.TotrinnsvurderingDto(
-    opprettet = LocalDateTime.now(),
-    oppdatert = LocalDateTime.now(),
-    saksbehandler = UUID.randomUUID(),
-    beslutter = null,
-    erRetur = false,
-    utbetalingIdRef = 42,
-    vedtaksperiodeId = UUID.randomUUID(),
-)
+private fun enTotrinnsvurdering() =
+    TotrinnsvurderingApiDao.TotrinnsvurderingDto(
+        opprettet = LocalDateTime.now(),
+        oppdatert = LocalDateTime.now(),
+        saksbehandler = UUID.randomUUID(),
+        beslutter = null,
+        erRetur = false,
+        utbetalingIdRef = 42,
+        vedtaksperiodeId = UUID.randomUUID(),
+    )
 
-private fun enBehandlingsstatistikkResponse() = BehandlingsstatistikkResponse(
-    enArbeidsgiver = Statistikk(485, 104, 789),
-    flereArbeidsgivere = Statistikk(254, 58, 301),
-    forstegangsbehandling = Statistikk(201, 75, 405),
-    forlengelser = Statistikk(538, 87, 685),
-    forlengelseIt = Statistikk(2, 10, 0),
-    utbetalingTilArbeidsgiver = Statistikk(123, 12, 1),
-    utbetalingTilSykmeldt = Statistikk(0, 21, 63),
-    faresignaler = Statistikk(0, 12, 2),
-    fortroligAdresse = Statistikk(0, 1, 0),
-    stikkprover = Statistikk(0, 10, 6),
-    revurdering = Statistikk(0, 105, 204),
-    delvisRefusjon = Statistikk(0, 64, 64),
-    beslutter = Statistikk(0, 150, 204),
-    egenAnsatt = Statistikk(0, 3, 10),
-    antallAnnulleringer = 0,
-)
+private fun enBehandlingsstatistikkResponse() =
+    BehandlingsstatistikkResponse(
+        enArbeidsgiver = Statistikk(485, 104, 789),
+        flereArbeidsgivere = Statistikk(254, 58, 301),
+        forstegangsbehandling = Statistikk(201, 75, 405),
+        forlengelser = Statistikk(538, 87, 685),
+        forlengelseIt = Statistikk(2, 10, 0),
+        utbetalingTilArbeidsgiver = Statistikk(123, 12, 1),
+        utbetalingTilSykmeldt = Statistikk(0, 21, 63),
+        faresignaler = Statistikk(0, 12, 2),
+        fortroligAdresse = Statistikk(0, 1, 0),
+        stikkprover = Statistikk(0, 10, 6),
+        revurdering = Statistikk(0, 105, 204),
+        delvisRefusjon = Statistikk(0, 64, 64),
+        beslutter = Statistikk(0, 150, 204),
+        egenAnsatt = Statistikk(0, 3, 10),
+        antallAnnulleringer = 0,
+    )
 
 fun <T, B> withDelay(
     millis: Long,
