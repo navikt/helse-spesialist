@@ -33,7 +33,7 @@ class PaVentMutation(
     suspend fun leggPaVent(
         oppgaveId: String,
         notatTekst: String,
-        notatType: NotatType,
+        notatType: NotatType?,
         frist: LocalDate,
         tildeling: Boolean,
         begrunnelse: String?,
