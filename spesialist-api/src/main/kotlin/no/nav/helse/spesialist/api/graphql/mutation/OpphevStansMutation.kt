@@ -18,7 +18,7 @@ class OpphevStansMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
         begrunnelse: String,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
-            val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(ContextValues.SAKSBEHANDLER.key)
+            val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(ContextValues.SAKSBEHANDLER)
             saksbehandlerhåndterer.håndter(OpphevStans(fodselsnummer, begrunnelse), saksbehandler)
             DataFetcherResult.newResult<Boolean>().data(true).build()
         }

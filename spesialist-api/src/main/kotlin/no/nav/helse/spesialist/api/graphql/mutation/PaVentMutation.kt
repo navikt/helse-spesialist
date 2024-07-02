@@ -39,7 +39,7 @@ class PaVentMutation(
         begrunnelse: String?,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<PaVent?> {
-        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER.key)
+        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         return withContext(Dispatchers.IO) {
             try {
                 saksbehandlerhåndterer.håndter(
@@ -68,7 +68,7 @@ class PaVentMutation(
         oppgaveId: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean?> {
-        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER.key)
+        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         return withContext(Dispatchers.IO) {
             try {
                 saksbehandlerhåndterer.håndter(FjernPåVent(oppgaveId.toLong()), saksbehandler)

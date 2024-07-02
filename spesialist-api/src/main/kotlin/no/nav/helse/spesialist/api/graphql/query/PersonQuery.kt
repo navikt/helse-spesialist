@@ -148,7 +148,7 @@ class PersonQuery(
                     totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                     påVentApiDao = påVentApiDao,
                     avviksvurderinghenter = avviksvurderinghenter,
-                    tilganger = env.graphQlContext.get(TILGANGER.key),
+                    tilganger = env.graphQlContext.get(TILGANGER),
                     oppgavehåndterer = oppgavehåndterer,
                     saksbehandlerhåndterer = saksbehandlerhåndterer,
                 )
@@ -208,7 +208,7 @@ class PersonQuery(
         harTilgang: Boolean?,
         fantIkkePersonErrorMsg: String?,
     ) {
-        val saksbehandlerIdent = graphQLContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER.key).ident
+        val saksbehandlerIdent = graphQLContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER).ident
         auditLogTeller.inc()
 
         if (harTilgang == false) {

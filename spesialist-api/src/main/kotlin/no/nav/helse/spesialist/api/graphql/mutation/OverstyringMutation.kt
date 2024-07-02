@@ -27,7 +27,7 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
-            val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER.key)
+            val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
             try {
                 withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(overstyring, saksbehandler) }
             } catch (e: Exception) {
@@ -44,7 +44,7 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
-            val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER.key)
+            val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
             try {
                 withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(overstyring, saksbehandler) }
             } catch (e: Exception) {
@@ -62,7 +62,7 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
-            val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER.key)
+            val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
             try {
                 withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(overstyring, saksbehandler) }
             } catch (e: Exception) {

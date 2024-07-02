@@ -20,9 +20,9 @@ import java.util.UUID
 
 private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
-enum class ContextValues(val key: String) {
-    TILGANGER("tilganger"),
-    SAKSBEHANDLER("saksbehandler"),
+enum class ContextValues {
+    TILGANGER,
+    SAKSBEHANDLER,
 }
 
 class ContextFactory(
@@ -35,14 +35,14 @@ class ContextFactory(
             emptyMap<Any, Any>().toGraphQLContext()
         } else {
             mapOf(
-                TILGANGER.key to
+                TILGANGER to
                     SaksbehandlerTilganger(
                         gruppetilganger = request.getGrupper(),
                         kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
                         beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
                         skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
                     ),
-                SAKSBEHANDLER.key to request.saksbehandler(),
+                SAKSBEHANDLER to request.saksbehandler(),
             ).toGraphQLContext()
         }
 

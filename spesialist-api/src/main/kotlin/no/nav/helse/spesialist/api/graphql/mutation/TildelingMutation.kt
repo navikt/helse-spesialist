@@ -32,7 +32,7 @@ class TildelingMutation(
         oppgaveId: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Tildeling?> {
-        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER.key)
+        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         return withContext(Dispatchers.IO) {
             try {
                 saksbehandlerhåndterer.håndter(TildelOppgave(oppgaveId.toLong()), saksbehandler)
@@ -52,7 +52,7 @@ class TildelingMutation(
         oppgaveId: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> {
-        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER.key)
+        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         return withContext(Dispatchers.IO) {
             try {
                 saksbehandlerhåndterer.håndter(AvmeldOppgave(oppgaveId.toLong()), saksbehandler)

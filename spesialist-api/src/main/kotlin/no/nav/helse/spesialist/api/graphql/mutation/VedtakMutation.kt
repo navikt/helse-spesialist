@@ -39,8 +39,8 @@ class VedtakMutation(
         avslag: Avslag?,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
-            val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER.key)
-            val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>(TILGANGER.key)
+            val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
+            val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>(TILGANGER)
             logg.info("Fatter vedtak for oppgave $oppgavereferanse")
 
             when (val vedtak = kanFatteVedtak(oppgavereferanse.toLong(), saksbehandler, tilganger)) {
@@ -76,8 +76,8 @@ class VedtakMutation(
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
-            val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER.key)
-            val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>(TILGANGER.key)
+            val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
+            val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>(TILGANGER)
             logg.info("Sender oppgave $oppgavereferanse til Infotrygd")
 
             when (val vedtak = kanFatteVedtak(oppgavereferanse.toLong(), saksbehandler, tilganger)) {

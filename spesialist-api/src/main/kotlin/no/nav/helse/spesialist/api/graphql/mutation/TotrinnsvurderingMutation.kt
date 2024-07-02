@@ -36,7 +36,7 @@ class TotrinnsvurderingMutation(
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
-            val behandlendeSaksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER.key)
+            val behandlendeSaksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
 
             try {
                 saksbehandlerhåndterer.håndterTotrinnsvurdering(oppgavereferanse.toLong())
@@ -88,7 +88,7 @@ class TotrinnsvurderingMutation(
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
-            val besluttendeSaksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER.key)
+            val besluttendeSaksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
 
             sikkerlogg.info(
                 "Oppgave med {} sendes i retur av beslutter med {}",

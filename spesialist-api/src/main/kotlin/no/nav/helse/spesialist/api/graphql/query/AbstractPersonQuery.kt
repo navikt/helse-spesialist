@@ -18,7 +18,7 @@ abstract class AbstractPersonQuery(
         fnr: String,
         env: DataFetchingEnvironment,
     ): Boolean {
-        val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>(TILGANGER.key)
+        val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>(TILGANGER)
         val kanSeSkjermede = tilganger.harTilgangTilSkjermedePersoner()
         val erSkjermet = egenAnsattApiDao.erEgenAnsatt(fnr) ?: return true
         if (erSkjermet && !kanSeSkjermede) return true

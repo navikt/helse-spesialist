@@ -25,7 +25,7 @@ class SkjonnsfastsettelseMutation(private val saksbehandlerhåndterer: Saksbehan
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
-            val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER.key)
+            val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
             try {
                 withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(skjonnsfastsettelse, saksbehandler) }
             } catch (e: Exception) {

@@ -139,14 +139,14 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
 
     private fun settOppDefaultDataOgTilganger() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot(fødselsnummer = FØDSELSNUMMER)
-        every { dataFetchingEnvironment.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER.key) } returns SaksbehandlerFraApi(
+        every { dataFetchingEnvironment.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER) } returns SaksbehandlerFraApi(
             UUID.randomUUID(), "epost", "navn", "A123456", emptyList()
         )
         saksbehandlertilgangTilSkjermede(harTilgang = false)
     }
 
     private fun saksbehandlertilgangTilSkjermede(harTilgang: Boolean) {
-        every { dataFetchingEnvironment.graphQlContext.get<SaksbehandlerTilganger>(TILGANGER.key) } returns
+        every { dataFetchingEnvironment.graphQlContext.get<SaksbehandlerTilganger>(TILGANGER) } returns
             mockk(relaxed = true) {
                 every { harTilgangTilSkjermedePersoner() } returns harTilgang
             }

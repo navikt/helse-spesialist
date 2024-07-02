@@ -200,10 +200,10 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         )
         håndterOverstyrArbeidsforhold()
 
-        every { dataFetchingEnvironment.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER.key) } returns SaksbehandlerFraApi(
+        every { dataFetchingEnvironment.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER) } returns SaksbehandlerFraApi(
             UUID.randomUUID(), "epost", "navn", "A123456", emptyList()
         )
-        every { dataFetchingEnvironment.graphQlContext.get<SaksbehandlerTilganger>(TILGANGER.key) } returns saksbehandlertilgangerIngenTilganger
+        every { dataFetchingEnvironment.graphQlContext.get<SaksbehandlerTilganger>(TILGANGER) } returns saksbehandlertilgangerIngenTilganger
         val nyUtbetalingId = UUID.randomUUID()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harRisikovurdering = true,
