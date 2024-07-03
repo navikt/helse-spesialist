@@ -45,7 +45,7 @@ internal class RapidApp(env: Map<String, String>) {
     private val tilgangsgrupper = SpeilTilgangsgrupper(System.getenv())
     private val spesialistApp =
         SpesialistApp(
-            env = System.getenv(),
+            env = Environment(),
             gruppekontroll = msGraphClient,
             snapshotClient = snapshotClient,
             azureConfig = azureConfig,

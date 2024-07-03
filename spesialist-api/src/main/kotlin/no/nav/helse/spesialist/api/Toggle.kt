@@ -7,6 +7,3 @@ abstract class Toggle(private var _enabled: Boolean) {
 
     object BehandleEnOgEnPeriode : Toggle("BEHANDLE_EN_OG_EN_PERIODE", false)
 }
-
-internal fun erDev() = "dev-gcp" == System.getenv("NAIS_CLUSTER_NAME")
-internal fun erLokalt(env: Map<String, String>) = "true" == env["LOKAL_UTVIKLING"]

@@ -6,11 +6,12 @@ import io.micrometer.core.instrument.Clock
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import io.prometheus.client.CollectorRegistry
+import no.nav.helse.bootstrap.Environment
 import org.flywaydb.core.Flyway
 import java.time.Duration
 import javax.sql.DataSource
 
-internal class DataSourceBuilder(env: Map<String, String>) {
+internal class DataSourceBuilder(env: Environment) {
     private val databaseHost: String = requireNotNull(env["DATABASE_HOST"]) { "host må settes" }
     private val databasePort: String = requireNotNull(env["DATABASE_PORT"]) { "port må settes" }
     private val databaseName: String = requireNotNull(env["DATABASE_DATABASE"]) { "databasenavn må settes" }

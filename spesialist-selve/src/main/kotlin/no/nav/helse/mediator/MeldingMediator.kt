@@ -3,6 +3,7 @@ package no.nav.helse.mediator
 import SøknadSendtArbeidsledigRiver
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.MetrikkRiver
+import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.meldinger.AvsluttetMedVedtakRiver
@@ -112,6 +113,7 @@ internal class MeldingMediator(
     private val personRepository: PersonRepository = PersonRepository(dataSource),
 ) : Personhåndterer {
     private companion object {
+        private val env = Environment()
         private val logg = LoggerFactory.getLogger(MeldingMediator::class.java)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
@@ -119,7 +121,7 @@ internal class MeldingMediator(
     private fun skalBehandleMelding(melding: String): Boolean {
         val jsonNode = objectMapper.readTree(melding)
         if (erDuplikat(jsonNode)) return false
-        if (erProd()) return true
+        if (env.erProd) return true
         return skalBehandleMeldingIDev(jsonNode)
     }
 

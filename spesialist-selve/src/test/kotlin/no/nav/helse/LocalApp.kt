@@ -11,6 +11,7 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
+import no.nav.helse.bootstrap.Environment
 import no.nav.helse.bootstrap.SpesialistApp
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.AzureConfig
@@ -50,7 +51,7 @@ fun main() {
 
     val spesialistApp =
         SpesialistApp(
-            env = database.envvars + mapOf("LOKAL_UTVIKLING" to "true"),
+            env = Environment(database.envvars + mapOf("LOKAL_UTVIKLING" to "true")),
             gruppekontroll = gruppekontroll,
             snapshotClient = snapshotClient,
             azureConfig = azureConfig,

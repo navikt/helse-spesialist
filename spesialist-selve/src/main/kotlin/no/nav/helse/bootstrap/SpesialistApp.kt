@@ -74,7 +74,7 @@ import kotlin.random.Random
 private val logg = LoggerFactory.getLogger("SpesialistApp")
 
 internal class SpesialistApp(
-    private val env: Map<String, String>,
+    private val env: Environment,
     gruppekontroll: Gruppekontroll,
     snapshotClient: ISnapshotClient,
     private val azureConfig: AzureConfig,

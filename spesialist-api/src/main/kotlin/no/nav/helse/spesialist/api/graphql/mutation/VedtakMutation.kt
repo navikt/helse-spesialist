@@ -8,11 +8,11 @@ import graphql.execution.DataFetcherResult.newResult
 import graphql.schema.DataFetchingEnvironment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import no.nav.helse.bootstrap.Environment
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
-import no.nav.helse.spesialist.api.erDev
 import no.nav.helse.spesialist.api.feilhåndtering.IkkeÅpenOppgave
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
@@ -29,6 +29,7 @@ class VedtakMutation(
     private val godkjenninghåndterer: Godkjenninghåndterer,
 ) : Mutation {
     private companion object {
+        private val env = Environment()
         private val logg = LoggerFactory.getLogger(VedtakMutation::class.java)
     }
 
@@ -129,7 +130,7 @@ class VedtakMutation(
         }
 
         if (totrinnsvurderinghåndterer.erBeslutterOppgave(oppgavereferanse)) {
-            if (!tilganger.harTilgangTilBeslutterOppgaver() && !erDev()) {
+            if (!tilganger.harTilgangTilBeslutterOppgaver() && !env.erDev) {
                 return VedtakResultat.Error(
                     VedtakError.TrengerBeslutterRolle(
                         "Saksbehandler trenger beslutter-rolle for å kunne utbetale beslutteroppgaver",
@@ -137,7 +138,7 @@ class VedtakMutation(
                     ),
                 )
             }
-            if (totrinnsvurderinghåndterer.erEgenOppgave(oppgavereferanse, saksbehandler.oid) && !erDev()) {
+            if (totrinnsvurderinghåndterer.erEgenOppgave(oppgavereferanse, saksbehandler.oid) && !env.erDev) {
                 return VedtakResultat.Error(VedtakError.EgenOppgave("Kan ikke beslutte egne oppgaver.", 401))
             }
 

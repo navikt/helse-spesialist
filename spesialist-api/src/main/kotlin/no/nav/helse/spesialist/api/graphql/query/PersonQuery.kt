@@ -10,13 +10,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.bootstrap.Environment
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.auditLogTeller
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
-import no.nav.helse.spesialist.api.erDev
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
 import no.nav.helse.spesialist.api.graphql.schema.Person
@@ -60,6 +60,7 @@ class PersonQuery(
 ) : AbstractPersonQuery(personApiDao, egenAnsattApiDao) {
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
     private val auditLog = LoggerFactory.getLogger("auditLogger")
+    private val env = Environment()
 
     suspend fun person(
         fnr: String? = null,
@@ -167,7 +168,7 @@ class PersonQuery(
         stansAutomatiskBehandlinghåndterer.unntattFraAutomatiskGodkjenning(fødselsnummer)
 
     private fun finnReservasjonsstatus(fødselsnummer: String) =
-        if (erDev()) {
+        if (env.erDev) {
             CompletableDeferred<Reservasjon?>().also { it.complete(null) }
         } else {
             CoroutineScope(Dispatchers.IO).async {

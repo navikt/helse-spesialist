@@ -21,6 +21,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.bootstrap.Environment
 import no.nav.helse.mediator.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Dokumenthåndterer
@@ -175,7 +176,7 @@ fun main() =
             val randomBehandledeOppgaver = MutableList(32) { TestdataGenerator.behandletOppgave() }
 
             graphQLApi(
-                env = emptyMap(),
+                env = Environment(),
                 personApiDao = personApiDao,
                 egenAnsattApiDao = egenAnsattApiDao,
                 tildelingDao = tildelingDao,

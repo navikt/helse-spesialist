@@ -15,6 +15,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import no.nav.helse.bootstrap.Environment
 import no.nav.helse.mediator.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Dokumenthåndterer
@@ -26,8 +27,6 @@ import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
-import no.nav.helse.spesialist.api.erDev
-import no.nav.helse.spesialist.api.erLokalt
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
@@ -48,7 +47,7 @@ import java.time.Duration
 import java.util.UUID
 
 fun Application.graphQLApi(
-    env: Map<String, String>,
+    env: Environment,
     personApiDao: PersonApiDao,
     egenAnsattApiDao: EgenAnsattApiDao,
     tildelingDao: TildelingDao,
@@ -131,7 +130,7 @@ fun Application.graphQLApi(
                 playground()
             }
 
-            if (erDev() || erLokalt(env)) {
+            if (env.erDev || env.erLokal) {
                 route("introspection") {
                     queryHandler(server)
                 }
