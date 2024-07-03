@@ -226,7 +226,7 @@ internal class SpesialistApp(
     internal fun ktorApp(application: Application) {
         application.apply {
             installPlugins()
-            azureAdAppAuthentication(azureConfig)
+            azureAdAppAuthentication(azureConfig, env)
             graphQLApi(
                 env = env,
                 personApiDao = personApiDao,
