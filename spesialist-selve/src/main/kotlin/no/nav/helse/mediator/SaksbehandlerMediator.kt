@@ -62,7 +62,7 @@ import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType.FJERN_FRA_PA_VENT
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernPåVent
@@ -168,7 +168,9 @@ internal class SaksbehandlerMediator(
                         NotatType.PaaVent,
                     )
                 is no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent ->
-                    periodehistorikkDao.lagre(PeriodehistorikkType.FJERN_FRA_PA_VENT, saksbehandler.oid(), handling.oppgaveId, null)
+                    if (påVentDao.erPåVent(handling.oppgaveId)) {
+                        periodehistorikkDao.lagre(FJERN_FRA_PA_VENT, saksbehandler.oid(), handling.oppgaveId)
+                    }
             }
             oppgaveService.håndter(handling, saksbehandler)
             PåVentRepository(påVentDao).apply {

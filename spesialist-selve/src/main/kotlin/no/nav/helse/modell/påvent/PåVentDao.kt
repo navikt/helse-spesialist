@@ -5,7 +5,7 @@ import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 
-class PåVentDao(private val dataSource: DataSource) : HelseDao(dataSource) {
+class PåVentDao(dataSource: DataSource) : HelseDao(dataSource) {
     fun lagrePåVent(
         oppgaveId: Long,
         saksbehandlerOid: UUID,
@@ -61,5 +61,16 @@ class PåVentDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             SELECT 1 FROM pa_vent WHERE vedtaksperiode_id = :vedtaksperiodeId
             """.trimIndent(),
             mapOf("vedtaksperiodeId" to vedtaksperiodeId),
+        ).single { it.boolean(1) } ?: false
+
+    fun erPåVent(oppgaveId: Long) =
+        asSQL(
+            """
+            select 1 from pa_vent
+            join vedtak v on pa_vent.vedtaksperiode_id = v.vedtaksperiode_id
+            join oppgave o on v.id = o.vedtak_ref
+            where o.id = :oppgaveId
+            """.trimIndent(),
+            mapOf("oppgaveId" to oppgaveId),
         ).single { it.boolean(1) } ?: false
 }
