@@ -24,6 +24,7 @@ import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent
+import no.nav.helse.modell.saksbehandler.handlinger.FjernPåVentUtenHistorikkinnslag
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
@@ -143,7 +144,7 @@ internal class OppgaveService(
         oppgave(handling.oppgaveId) {
             when (handling) {
                 is LeggPåVent -> this.leggPåVent(handling.skalTildeles, saksbehandler)
-                is FjernPåVent -> this.fjernPåVent()
+                is FjernPåVent, is FjernPåVentUtenHistorikkinnslag -> this.fjernPåVent()
             }
         }
     }

@@ -66,6 +66,7 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType.FJERN_F
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernPåVent
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernPåVentUtenHistorikkinnslag
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OpphevStans
@@ -171,6 +172,7 @@ internal class SaksbehandlerMediator(
                     if (påVentDao.erPåVent(handling.oppgaveId)) {
                         periodehistorikkDao.lagre(FJERN_FRA_PA_VENT, saksbehandler.oid(), handling.oppgaveId)
                     }
+                is no.nav.helse.modell.saksbehandler.handlinger.FjernPåVentUtenHistorikkinnslag -> Unit
             }
             oppgaveService.håndter(handling, saksbehandler)
             PåVentRepository(påVentDao).apply {
@@ -373,6 +375,7 @@ internal class SaksbehandlerMediator(
             is AvmeldOppgave -> this.tilModellversjon()
             is LeggPåVent -> this.tilModellversjon()
             is FjernPåVent -> this.tilModellversjon()
+            is FjernPåVentUtenHistorikkinnslag -> this.tilModellversjon()
             is OpphevStans -> this.tilModellversjon()
             else -> throw IllegalStateException("Støtter ikke handling ${this::class.simpleName}")
         }
@@ -509,6 +512,10 @@ internal class SaksbehandlerMediator(
 
     private fun FjernPåVent.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent {
         return no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent(oppgaveId)
+    }
+
+    private fun FjernPåVentUtenHistorikkinnslag.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.FjernPåVentUtenHistorikkinnslag {
+        return no.nav.helse.modell.saksbehandler.handlinger.FjernPåVentUtenHistorikkinnslag(oppgaveId)
     }
 
     private fun TildelOppgave.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.TildelOppgave {

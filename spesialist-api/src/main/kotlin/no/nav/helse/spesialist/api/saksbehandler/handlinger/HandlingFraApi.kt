@@ -23,3 +23,7 @@ data class LeggPåVent(
 data class FjernPåVent(
     val oppgaveId: Long,
 ) : HandlingFraApi
+
+data class FjernPåVentUtenHistorikkinnslag(
+    val oppgaveId: Long,
+) : HandlingFraApi

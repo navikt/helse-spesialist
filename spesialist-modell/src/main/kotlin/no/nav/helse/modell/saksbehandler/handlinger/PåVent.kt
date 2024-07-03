@@ -22,3 +22,9 @@ class FjernPåVent(oppgaveId: Long) : PåVent(oppgaveId) {
 
     override fun utførAv(saksbehandler: Saksbehandler) {}
 }
+
+class FjernPåVentUtenHistorikkinnslag(oppgaveId: Long) : PåVent(oppgaveId) {
+    override fun loggnavn(): String = "fjern_på_vent_uten_historikkinnslag"
+
+    override fun utførAv(saksbehandler: Saksbehandler) {}
+}

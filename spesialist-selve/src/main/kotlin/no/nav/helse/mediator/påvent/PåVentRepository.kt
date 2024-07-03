@@ -2,6 +2,7 @@ package no.nav.helse.mediator.påvent
 
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent
+import no.nav.helse.modell.saksbehandler.handlinger.FjernPåVentUtenHistorikkinnslag
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.PåVent
 import java.util.UUID
@@ -14,7 +15,7 @@ class PåVentRepository(
         saksbehandlerOid: UUID,
     ) = when (påVent) {
         is LeggPåVent -> nyttPåVentInnslag(saksbehandlerOid, påVent)
-        is FjernPåVent -> fjernPåvent(påVent.oppgaveId)
+        is FjernPåVent, is FjernPåVentUtenHistorikkinnslag -> fjernPåvent(påVent.oppgaveId)
     }
 
     private fun nyttPåVentInnslag(
