@@ -13,7 +13,6 @@ import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
-import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.graphql.schema.PaVent
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernPåVent
@@ -33,7 +32,6 @@ class PaVentMutation(
     suspend fun leggPaVent(
         oppgaveId: String,
         notatTekst: String,
-        notatType: NotatType?,
         frist: LocalDate,
         tildeling: Boolean,
         begrunnelse: String?,

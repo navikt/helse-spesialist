@@ -17,7 +17,6 @@ internal class PaVentMutationTest : AbstractGraphQLApiTest() {
                     mutation LeggPaVent {
                         leggPaVent(
                             notatTekst: "Dette er et notat",
-                            notatType: PaaVent,
                             frist: "2024-01-01",
                             oppgaveId: "1",
                             tildeling: true,

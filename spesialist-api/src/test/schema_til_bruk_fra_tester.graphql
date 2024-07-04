@@ -330,7 +330,7 @@ type Mutation {
     fjernPaVent(oppgaveId: String!): Boolean
     fjernTildeling(oppgaveId: String!): Boolean!
     innvilgVedtak(avslag: AvslagInput, oppgavereferanse: String!): Boolean!
-    leggPaVent(begrunnelse: String, frist: LocalDate!, notatTekst: String!, notatType: NotatType, oppgaveId: String!, tildeling: Boolean!): PaVent
+    leggPaVent(begrunnelse: String, frist: LocalDate!, notatTekst: String!, oppgaveId: String!, tildeling: Boolean!): PaVent
     leggTilKommentar(notatId: Int!, saksbehandlerident: String!, tekst: String!): Kommentar
     leggTilNotat(saksbehandlerOid: String!, tekst: String!, type: NotatType!, vedtaksperiodeId: String!): Notat
     oppdaterPerson(fodselsnummer: String!): Boolean!
