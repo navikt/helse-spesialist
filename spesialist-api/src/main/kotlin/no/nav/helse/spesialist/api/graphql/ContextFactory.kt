@@ -3,16 +3,13 @@ package no.nav.helse.spesialist.api.graphql
 
 import com.expediagroup.graphql.generator.extensions.toGraphQLContext
 import com.expediagroup.graphql.server.execution.GraphQLContextFactory
-import com.expediagroup.graphql.server.types.GraphQLRequest
 import graphql.GraphQLContext
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.request.ApplicationRequest
-import io.ktor.server.request.receiveText
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
-import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -31,7 +28,7 @@ class ContextFactory(
     private val beslutterSaksbehandlergruppe: UUID,
 ) : GraphQLContextFactory<ApplicationRequest> {
     override suspend fun generateContext(request: ApplicationRequest): GraphQLContext =
-        if (request.isIntrospectionRequest()) {
+        if (!request.isAuthenticated()) {
             emptyMap<Any, Any>().toGraphQLContext()
         } else {
             mapOf(
@@ -46,10 +43,7 @@ class ContextFactory(
             ).toGraphQLContext()
         }
 
-    private suspend fun ApplicationRequest.isIntrospectionRequest(): Boolean {
-        val graphQLRequest = objectMapper.readValue(call.receiveText(), GraphQLRequest::class.java)
-        return (graphQLRequest.operationName == "IntrospectionQuery" || graphQLRequest.query.contains("query IntrospectionQuery"))
-    }
+    private fun ApplicationRequest.isAuthenticated() = call.principal<JWTPrincipal>() != null
 }
 
 private fun ApplicationRequest.getGrupper(): List<UUID> {
