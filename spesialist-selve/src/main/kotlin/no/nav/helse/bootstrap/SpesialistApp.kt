@@ -228,7 +228,6 @@ internal class SpesialistApp(
             installPlugins()
             azureAdAppAuthentication(azureConfig, env)
             graphQLApi(
-                env = env,
                 personApiDao = personApiDao,
                 egenAnsattApiDao = egenAnsattApiDao,
                 tildelingDao = tildelingApiDao,

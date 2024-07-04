@@ -2,4 +2,4 @@ schema: 'schema_til_bruk_fra_tester.graphql'
 extensions:
   endpoints:
     spesialist-local:
-      url: http://0.0.0.0:4321/graphql/introspection
+      url: http://0.0.0.0:4321/graphql

@@ -15,7 +15,6 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
-import no.nav.helse.bootstrap.Environment
 import no.nav.helse.mediator.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Dokumenthåndterer
@@ -47,7 +46,6 @@ import java.time.Duration
 import java.util.UUID
 
 fun Application.graphQLApi(
-    env: Environment,
     personApiDao: PersonApiDao,
     egenAnsattApiDao: EgenAnsattApiDao,
     tildelingDao: TildelingDao,
@@ -128,12 +126,6 @@ fun Application.graphQLApi(
                 install(GraphQLMetrikker)
                 queryHandler(server)
                 playground()
-            }
-
-            if (env.erDev || env.erLokal) {
-                route("introspection") {
-                    queryHandler(server)
-                }
             }
         }
     }

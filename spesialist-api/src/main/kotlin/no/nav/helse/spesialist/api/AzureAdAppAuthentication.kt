@@ -30,5 +30,7 @@ private fun ApplicationRequest.isIntrospectionRequest(): Boolean {
     val body = runBlocking { call.receiveText() }
     if (body.isBlank()) return false
     val graphQLRequest = objectMapper.readValue(body, GraphQLRequest::class.java)
-    return graphQLRequest.operationName == "IntrospectionQuery" || graphQLRequest.query.startsWith("query IntrospectionQuery")
+    return graphQLRequest.operationName == "IntrospectionQuery" ||
+        graphQLRequest.query.trimStart()
+            .startsWith("query IntrospectionQuery")
 }
