@@ -1,4 +1,3 @@
-
 package no.nav.helse.spesialist.api.graphql
 
 import com.expediagroup.graphql.generator.extensions.toGraphQLContext
@@ -27,36 +26,23 @@ class ContextFactory(
     private val skjermedePersonerSaksbehandlergruppe: UUID,
     private val beslutterSaksbehandlergruppe: UUID,
 ) : GraphQLContextFactory<ApplicationRequest> {
-    override suspend fun generateContext(request: ApplicationRequest): GraphQLContext =
-        if (!request.isAuthenticated()) {
-            emptyMap<Any, Any>().toGraphQLContext()
-        } else {
-            mapOf(
-                TILGANGER to
-                    SaksbehandlerTilganger(
-                        gruppetilganger = request.getGrupper(),
-                        kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
-                        beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
-                        skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
-                    ),
-                SAKSBEHANDLER to request.saksbehandler(),
-            ).toGraphQLContext()
-        }
-
-    private fun ApplicationRequest.isAuthenticated() = call.principal<JWTPrincipal>() != null
-}
-
-private fun ApplicationRequest.getGrupper(): List<UUID> {
-    val accessToken = call.principal<JWTPrincipal>()
-    if (accessToken == null) {
-        sikkerlogg.error("Ingen access_token for graphql-kall")
-        return emptyList()
+    override suspend fun generateContext(request: ApplicationRequest): GraphQLContext {
+        val principal =
+            request.call.principal<JWTPrincipal>() ?: run {
+                sikkerlogg.error("Ingen access_token for graphql-kall")
+                return emptyMap<Any, Any>().toGraphQLContext()
+            }
+        return mapOf(
+            TILGANGER to
+                SaksbehandlerTilganger(
+                    gruppetilganger = principal.getGrupper(),
+                    kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
+                    beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
+                    skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
+                ),
+            SAKSBEHANDLER to SaksbehandlerFraApi.fraOnBehalfOfToken(principal),
+        ).toGraphQLContext()
     }
-    return accessToken.payload.getClaim("groups")?.asList(String::class.java)?.map(UUID::fromString) ?: emptyList()
 }
 
-private fun ApplicationRequest.saksbehandler(): SaksbehandlerFraApi {
-    val accessToken = call.principal<JWTPrincipal>()
-    return accessToken?.let(SaksbehandlerFraApi::fraOnBehalfOfToken)
-        ?: throw IllegalStateException("Forventer å finne saksbehandler i access token")
-}
+private fun JWTPrincipal.getGrupper() = payload.getClaim("groups")?.asList(String::class.java)?.map(UUID::fromString) ?: emptyList()
