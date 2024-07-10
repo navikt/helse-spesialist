@@ -15,6 +15,7 @@ import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.HASTER
 import no.nav.helse.modell.oppgave.Egenskap.INFOTRYGDFORLENGELSE
 import no.nav.helse.modell.oppgave.Egenskap.INGEN_UTBETALING
+import no.nav.helse.modell.oppgave.Egenskap.MEDLEMSKAP
 import no.nav.helse.modell.oppgave.Egenskap.OVERGANG_FRA_IT
 import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
 import no.nav.helse.modell.oppgave.Egenskap.REVURDERING
@@ -123,6 +124,8 @@ internal class OpprettSaksbehandleroppgave(
         if (sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId)) egenskaper.add(SKJØNNSFASTSETTELSE)
 
         if (sykefraværstilfelle.erTilbakedatert(vedtaksperiodeId)) egenskaper.add(TILBAKEDATERT)
+
+        if (sykefraværstilfelle.harMedlemskapsvarsel(vedtaksperiodeId)) egenskaper.add(MEDLEMSKAP)
 
         if (sykefraværstilfelle.haster(vedtaksperiodeId) && utbetaling.harEndringIUtbetalingTilSykmeldt()) egenskaper.add(HASTER)
 

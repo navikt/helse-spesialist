@@ -83,4 +83,5 @@ enum class EgenskapForDatabase {
     PÅ_VENT,
     TILBAKEDATERT,
     GOSYS,
+    MEDLEMSKAP,
 }

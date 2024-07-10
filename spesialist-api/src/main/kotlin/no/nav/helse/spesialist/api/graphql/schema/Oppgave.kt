@@ -49,6 +49,7 @@ enum class Egenskap {
     PA_VENT,
     TILBAKEDATERT,
     GOSYS,
+    MEDLEMSKAP,
 }
 
 enum class Kategori {

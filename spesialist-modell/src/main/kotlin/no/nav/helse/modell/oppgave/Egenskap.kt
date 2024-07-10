@@ -38,6 +38,7 @@ enum class Egenskap(
     PÅ_VENT(kategori = Status),
     TILBAKEDATERT,
     GOSYS,
+    MEDLEMSKAP,
     VERGEMÅL,
     ;
 

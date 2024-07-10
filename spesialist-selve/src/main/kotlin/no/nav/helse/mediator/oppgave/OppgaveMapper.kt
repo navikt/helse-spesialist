@@ -166,6 +166,7 @@ internal object OppgaveMapper {
             Egenskap.PÅ_VENT -> EgenskapForApi.PA_VENT
             Egenskap.TILBAKEDATERT -> EgenskapForApi.TILBAKEDATERT
             Egenskap.GOSYS -> EgenskapForApi.GOSYS
+            Egenskap.MEDLEMSKAP -> EgenskapForApi.MEDLEMSKAP
         }
 
     private fun Egenskap.Kategori.tilApiversjon(): Kategori =
@@ -207,6 +208,7 @@ internal object OppgaveMapper {
             EgenskapForDatabase.PÅ_VENT -> Egenskap.PÅ_VENT
             EgenskapForDatabase.TILBAKEDATERT -> Egenskap.TILBAKEDATERT
             EgenskapForDatabase.GOSYS -> Egenskap.GOSYS
+            EgenskapForDatabase.MEDLEMSKAP -> Egenskap.MEDLEMSKAP
         }
 
     internal fun Egenskap.tilDatabaseversjon(): EgenskapForDatabase =
@@ -238,6 +240,7 @@ internal object OppgaveMapper {
             Egenskap.PÅ_VENT -> EgenskapForDatabase.PÅ_VENT
             Egenskap.TILBAKEDATERT -> EgenskapForDatabase.TILBAKEDATERT
             Egenskap.GOSYS -> EgenskapForDatabase.GOSYS
+            Egenskap.MEDLEMSKAP -> EgenskapForDatabase.MEDLEMSKAP
         }
 
     internal fun Egenskap.tilKafkaversjon(): String {
@@ -269,6 +272,7 @@ internal object OppgaveMapper {
             Egenskap.PÅ_VENT -> "PÅ_VENT"
             Egenskap.TILBAKEDATERT -> "TILBAKEDATERT"
             Egenskap.GOSYS -> "GOSYS"
+            Egenskap.MEDLEMSKAP -> "MEDLEMSKAP"
         }
     }
 
@@ -301,5 +305,6 @@ internal object OppgaveMapper {
             EgenskapForApi.PA_VENT -> EgenskapForDatabase.PÅ_VENT
             EgenskapForApi.TILBAKEDATERT -> EgenskapForDatabase.TILBAKEDATERT
             EgenskapForApi.GOSYS -> EgenskapForDatabase.GOSYS
+            EgenskapForApi.MEDLEMSKAP -> EgenskapForDatabase.MEDLEMSKAP
         }
 }

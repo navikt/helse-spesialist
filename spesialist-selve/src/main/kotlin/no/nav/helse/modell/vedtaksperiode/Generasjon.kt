@@ -257,7 +257,7 @@ internal class Generasjon private constructor(
         tilstand.nyttVarsel(this, varsel, hendelseId)
     }
 
-    private fun kreverTotrinnsvurdering(): Boolean {
+    private fun harMedlemskapsvarsel(): Boolean {
         val inneholderMedlemskapsvarsel = varsler.inneholderMedlemskapsvarsel()
         logg.info("$this harMedlemskapsvarsel: $inneholderMedlemskapsvarsel")
         return inneholderMedlemskapsvarsel
@@ -601,9 +601,9 @@ internal class Generasjon private constructor(
                 }.filter { it.varsler.isNotEmpty() }
                 .all { it.harKunGosysvarsel() }
 
-        internal fun List<Generasjon>.kreverTotrinnsvurdering(vedtaksperiodeId: UUID): Boolean =
+        internal fun List<Generasjon>.harMedlemskapsvarsel(vedtaksperiodeId: UUID): Boolean =
             overlapperMedEllerTidligereEnn(vedtaksperiodeId).any {
-                it.kreverTotrinnsvurdering()
+                it.harMedlemskapsvarsel()
             }
 
         internal fun List<Generasjon>.kreverSkjønnsfastsettelse(vedtaksperiodeId: UUID): Boolean =

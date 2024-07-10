@@ -15,8 +15,8 @@ import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForSpleisBehandling
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForVedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnSisteGenerasjonUtenSpleisBehandlingId
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.harMedlemskapsvarsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverSkjønnsfastsettelse
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverTotrinnsvurdering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -297,25 +297,25 @@ internal class GenerasjonTest {
     }
 
     @Test
-    fun `krever totrinnsvurdering hvis generasjonen har medlemskapsvarsel`() {
+    fun `har generasjon medlemskapsvarsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon1 = generasjonMedVarsel(1.februar, 28.februar, vedtaksperiodeId, "RV_MV_1")
-        assertTrue(listOf(generasjon1).kreverTotrinnsvurdering(vedtaksperiodeId))
+        assertTrue(listOf(generasjon1).harMedlemskapsvarsel(vedtaksperiodeId))
     }
 
     @Test
-    fun `krever totrinnsvurdering hvis en generasjon av flere har medlemskapsvarsel`() {
+    fun `har minst en generasjon medlemskapsvarsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon1 = generasjonMedVarsel(1.februar, 28.februar, vedtaksperiodeId, "RV_MV_1")
         val generasjon2 = generasjon(fom = 1.januar, tom = 31.januar, skjæringstidspunkt = 1.januar)
-        assertTrue(listOf(generasjon1, generasjon2).kreverTotrinnsvurdering(vedtaksperiodeId))
+        assertTrue(listOf(generasjon1, generasjon2).harMedlemskapsvarsel(vedtaksperiodeId))
     }
 
     @Test
-    fun `krever ikke totrinnsvurdering hvis generasjonen ikke har medlemskapsvarsel`() {
+    fun `generasjon mangler medlemskapsvarsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon1 = generasjon(vedtaksperiodeId)
-        assertFalse(listOf(generasjon1).kreverTotrinnsvurdering(vedtaksperiodeId))
+        assertFalse(listOf(generasjon1).harMedlemskapsvarsel(vedtaksperiodeId))
     }
 
     @Test

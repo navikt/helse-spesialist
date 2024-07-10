@@ -13,10 +13,10 @@ import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.erTilbakedatert
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForVedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.harKunGosysvarsel
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.harMedlemskapsvarsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterGodkjent
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterNyttVarsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverSkjønnsfastsettelse
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverTotrinnsvurdering
 import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetMedVedtak
 import java.time.LocalDate
 import java.util.UUID
@@ -109,7 +109,7 @@ internal class Sykefraværstilfelle(
         gjeldendeGenerasjoner.håndterGodkjent(saksbehandlerIdent, vedtaksperiodeId, hendelseId)
     }
 
-    internal fun kreverTotrinnsvurdering(vedtaksperiodeId: UUID): Boolean = gjeldendeGenerasjoner.kreverTotrinnsvurdering(vedtaksperiodeId)
+    internal fun harMedlemskapsvarsel(vedtaksperiodeId: UUID): Boolean = gjeldendeGenerasjoner.harMedlemskapsvarsel(vedtaksperiodeId)
 
     internal fun kreverSkjønnsfastsettelse(vedtaksperiodeId: UUID): Boolean =
         gjeldendeGenerasjoner.kreverSkjønnsfastsettelse(vedtaksperiodeId)
