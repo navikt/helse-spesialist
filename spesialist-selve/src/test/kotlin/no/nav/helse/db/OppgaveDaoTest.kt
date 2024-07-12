@@ -1119,10 +1119,10 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 egneSaker = false,
                 egneSakerPåVent = false,
             )
-        assertEquals(2, oppgaverSomErTildelt.size)
+        assertEquals(1, oppgaverSomErTildelt.size)
         assertEquals(1, oppgaverSomErTildeltOgPåvent.size)
         assertEquals(3, alleOppgaver.size)
-        assertEquals(listOf(oppgaveId2, oppgaveId1), oppgaverSomErTildelt.map { it.id })
+        assertEquals(listOf(oppgaveId1), oppgaverSomErTildelt.map { it.id })
         assertEquals(listOf(oppgaveId2), oppgaverSomErTildeltOgPåvent.map { it.id })
         assertEquals(setOf(oppgaveId1, oppgaveId2, oppgaveId3), alleOppgaver.map { it.id }.toSet())
     }
@@ -1526,7 +1526,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
         val antallOppgaver = oppgaveDao.finnAntallOppgaver(saksbehandlerOid)
 
-        assertEquals(3, antallOppgaver.antallMineSaker)
+        assertEquals(2, antallOppgaver.antallMineSaker)
         assertEquals(1, antallOppgaver.antallMineSakerPåVent)
     }
 

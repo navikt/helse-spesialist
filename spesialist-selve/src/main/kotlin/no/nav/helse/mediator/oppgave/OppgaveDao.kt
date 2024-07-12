@@ -134,7 +134,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 AND 
                     CASE 
                         WHEN :egne_saker_pa_vent THEN t.saksbehandler_ref = :oid AND ('PÅ_VENT' = ANY(o.egenskaper))
-                        WHEN :egne_saker THEN t.saksbehandler_ref = :oid
+                        WHEN :egne_saker THEN t.saksbehandler_ref = :oid AND NOT ('PÅ_VENT' = ANY(o.egenskaper))
                         ELSE true
                     END
                 AND
@@ -215,7 +215,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         return asSQL(
             """ 
             SELECT 
-                count(*) AS antall_mine_saker,
+                count(*) FILTER ( WHERE NOT o.egenskaper @> ARRAY['PÅ_VENT']::varchar[] ) AS antall_mine_saker,
                 count(*) FILTER ( WHERE o.egenskaper @> ARRAY['PÅ_VENT']::varchar[] ) AS antall_mine_saker_på_vent
             from oppgave o 
                 LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
