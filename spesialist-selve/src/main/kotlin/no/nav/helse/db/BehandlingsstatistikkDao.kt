@@ -223,4 +223,18 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
         """,
             mapOf("fom" to fom),
         ).single { it.int("annulleringer") } ?: 0
+
+    fun getAntallAvvisninger(fom: LocalDate) =
+        asSQL(
+            """
+            SELECT count(*) as avvisninger
+            FROM vedtak v
+            WHERE id IN (
+                SELECT vedtak_ref
+                FROM oppgave
+                WHERE status = 'Ferdigstilt' AND oppdatert::DATE = :fom)
+            AND forkastet = True;
+        """,
+            mapOf("fom" to fom),
+        ).single { it.int("avvisninger") } ?: 0
 }

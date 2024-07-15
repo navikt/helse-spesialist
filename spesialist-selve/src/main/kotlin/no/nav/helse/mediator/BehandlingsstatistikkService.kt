@@ -133,6 +133,7 @@ class BehandlingsstatistikkService(private val behandlingsstatistikkDao: Behandl
                     tilgjengelig = behandlingsstatistikkDao.getAntallTilgjengeligeEgenAnsattOppgaver(),
                 ),
             antallAnnulleringer = behandlingsstatistikkDao.getAntallAnnulleringer(fom),
+            antallAvvisninger = behandlingsstatistikkDao.getAntallAvvisninger(fom),
         )
     }
 }

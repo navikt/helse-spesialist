@@ -138,6 +138,7 @@ type BehandletOppgave {
 
 type Behandlingsstatistikk {
     antallAnnulleringer: Int!
+    antallAvvisninger: Int!
     beslutter: Antall!
     delvisRefusjon: Antall!
     egenAnsatt: Antall!

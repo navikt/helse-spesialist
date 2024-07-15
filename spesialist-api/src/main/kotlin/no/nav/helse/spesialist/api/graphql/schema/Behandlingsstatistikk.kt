@@ -42,6 +42,8 @@ data class Behandlingsstatistikk(
     fun egenAnsatt(): Antall = behandlingsstatistikkResponse.egenAnsatt.tilAntall()
 
     fun antallAnnulleringer(): Int = behandlingsstatistikkResponse.antallAnnulleringer
+
+    fun antallAvvisninger(): Int = behandlingsstatistikkResponse.antallAvvisninger
 }
 
 private fun Statistikk.tilAntall(): Antall =

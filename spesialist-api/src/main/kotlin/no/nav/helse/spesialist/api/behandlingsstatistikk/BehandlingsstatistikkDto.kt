@@ -27,6 +27,7 @@ data class BehandlingsstatistikkResponse(
     val beslutter: Statistikk,
     val egenAnsatt: Statistikk,
     val antallAnnulleringer: Int,
+    val antallAvvisninger: Int,
 )
 
 data class StatistikkPerKombinasjon(
