@@ -13,6 +13,7 @@ import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderSvar
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmAvvik
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmNegativtBeløp
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmTilbakedatering
+import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmÅpenGosysOppgave
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -273,6 +274,12 @@ internal class Generasjon private constructor(
         val inneholderTilbakedateringsvarsel = varsler.inneholderVarselOmTilbakedatering()
         logg.info("$this harTilbakedateringsvarsel: $inneholderTilbakedateringsvarsel")
         return inneholderTilbakedateringsvarsel
+    }
+
+    private fun harKunÅpenGosysOppgave(): Boolean {
+        val inneholderKunÅpenGosysOppgaveVarsel = varsler.inneholderVarselOmÅpenGosysOppgave() && varsler.size == 1
+        logg.info("$this harKunÅpenGosysOppgavevarsel: $inneholderKunÅpenGosysOppgaveVarsel")
+        return inneholderKunÅpenGosysOppgaveVarsel
     }
 
     internal sealed interface Tilstand {
@@ -614,6 +621,11 @@ internal class Generasjon private constructor(
         internal fun List<Generasjon>.erTilbakedatert(vedtaksperiodeId: UUID): Boolean =
             overlapperMedEllerTidligereEnn(vedtaksperiodeId).any {
                 it.erTilbakedatert()
+            }
+
+        internal fun List<Generasjon>.harÅpenGosysOppgave(vedtaksperiodeId: UUID): Boolean =
+            overlapperMedEllerTidligereEnn(vedtaksperiodeId).any {
+                it.harKunÅpenGosysOppgave()
             }
 
         internal fun List<Generasjon>.deaktiver(varsel: Varsel) {

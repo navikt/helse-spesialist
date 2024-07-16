@@ -16,6 +16,7 @@ import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonFor
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForVedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnSisteGenerasjonUtenSpleisBehandlingId
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.harMedlemskapsvarsel
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.harÅpenGosysOppgave
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverSkjønnsfastsettelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -309,6 +310,23 @@ internal class GenerasjonTest {
         val generasjon1 = generasjonMedVarsel(1.februar, 28.februar, vedtaksperiodeId, "RV_MV_1")
         val generasjon2 = generasjon(fom = 1.januar, tom = 31.januar, skjæringstidspunkt = 1.januar)
         assertTrue(listOf(generasjon1, generasjon2).harMedlemskapsvarsel(vedtaksperiodeId))
+    }
+
+    @Test
+    fun `har kun åpen oppgave i gosys`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjon = generasjonMedVarsel(1.februar, 28.februar, vedtaksperiodeId, "SB_EX_1")
+        assertTrue(listOf(generasjon).harÅpenGosysOppgave(vedtaksperiodeId))
+    }
+
+    @Test
+    fun `flere varsler enn kun åpen oppgave i gosys`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjon = generasjonMedVarsel(1.februar, 28.februar, vedtaksperiodeId, "SB_EX_1")
+        assertTrue(listOf(generasjon).harÅpenGosysOppgave(vedtaksperiodeId))
+
+        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
+        assertFalse(listOf(generasjon).harÅpenGosysOppgave(vedtaksperiodeId))
     }
 
     @Test

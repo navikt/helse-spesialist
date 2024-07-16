@@ -14,6 +14,7 @@ import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonFor
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.harKunGosysvarsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.harMedlemskapsvarsel
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.harÅpenGosysOppgave
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterGodkjent
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterNyttVarsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverSkjønnsfastsettelse
@@ -115,6 +116,8 @@ internal class Sykefraværstilfelle(
         gjeldendeGenerasjoner.kreverSkjønnsfastsettelse(vedtaksperiodeId)
 
     internal fun erTilbakedatert(vedtaksperiodeId: UUID): Boolean = gjeldendeGenerasjoner.erTilbakedatert(vedtaksperiodeId)
+
+    internal fun harKunÅpenGosysOppgave(vedtaksperiodeId: UUID): Boolean = gjeldendeGenerasjoner.harÅpenGosysOppgave(vedtaksperiodeId)
 
     internal fun registrer(observer: PersonObserver) {
         observers.add(observer)

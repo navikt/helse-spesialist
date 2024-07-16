@@ -12,6 +12,7 @@ import no.nav.helse.modell.oppgave.Egenskap.FLERE_ARBEIDSGIVERE
 import no.nav.helse.modell.oppgave.Egenskap.FORLENGELSE
 import no.nav.helse.modell.oppgave.Egenskap.FORSTEGANGSBEHANDLING
 import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
+import no.nav.helse.modell.oppgave.Egenskap.GOSYS
 import no.nav.helse.modell.oppgave.Egenskap.HASTER
 import no.nav.helse.modell.oppgave.Egenskap.INFOTRYGDFORLENGELSE
 import no.nav.helse.modell.oppgave.Egenskap.INGEN_UTBETALING
@@ -124,6 +125,8 @@ internal class OpprettSaksbehandleroppgave(
         if (sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId)) egenskaper.add(SKJØNNSFASTSETTELSE)
 
         if (sykefraværstilfelle.erTilbakedatert(vedtaksperiodeId)) egenskaper.add(TILBAKEDATERT)
+
+        if (sykefraværstilfelle.harKunÅpenGosysOppgave(vedtaksperiodeId)) egenskaper.add(GOSYS)
 
         if (sykefraværstilfelle.harMedlemskapsvarsel(vedtaksperiodeId)) egenskaper.add(MEDLEMSKAP)
 
