@@ -8,6 +8,7 @@ import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
+import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -18,6 +19,8 @@ import java.util.UUID
 
 internal class MeldingDaoTest : DatabaseIntegrationTest() {
     private val godkjenningsbehov: Godkjenningsbehov = mockGodkjenningsbehov()
+
+    private val saksbehandlerløsning: Saksbehandlerløsning = mockSaksbehandlerløsning()
 
     @Test
     fun `finn siste igangsatte overstyring om den er korrigert søknad`() {
@@ -51,6 +54,14 @@ internal class MeldingDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `lagrer og finner hendelser`() {
         meldingDao.lagre(godkjenningsbehov)
+        val actual = meldingDao.finn(HENDELSE_ID)
+            ?: fail { "Forventet å finne en hendelse med id $HENDELSE_ID" }
+        assertEquals(FNR, actual.fødselsnummer())
+    }
+
+    @Test
+    fun `lagrer og finner saksbehandlerløsning`() {
+        meldingDao.lagre(saksbehandlerløsning)
         val actual = meldingDao.finn(HENDELSE_ID)
             ?: fail { "Forventet å finne en hendelse med id $HENDELSE_ID" }
         assertEquals(FNR, actual.fødselsnummer())
@@ -107,6 +118,14 @@ internal class MeldingDaoTest : DatabaseIntegrationTest() {
             every { fødselsnummer() } returns FNR
             every { vedtaksperiodeId() } returns VEDTAKSPERIODE
             every { toJson() } returns Testmeldingfabrikk.lagGodkjenningsbehov(AKTØR, FNR, VEDTAKSPERIODE)
+        }
+    }
+
+    private fun mockSaksbehandlerløsning(): Saksbehandlerløsning {
+        return mockk<Saksbehandlerløsning>(relaxed = true) {
+            every { id } returns HENDELSE_ID
+            every { fødselsnummer() } returns FNR
+            every { toJson() } returns Testmeldingfabrikk.lagSaksbehandlerløsning(FNR)
         }
     }
 

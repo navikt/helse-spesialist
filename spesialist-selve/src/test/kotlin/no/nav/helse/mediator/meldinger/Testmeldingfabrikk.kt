@@ -253,6 +253,29 @@ internal object Testmeldingfabrikk {
             }
         )
 
+    fun lagSaksbehandlerløsning(
+        fødselsnummer: String
+    ) =
+        nyHendelse(
+            UUID.randomUUID(), "saksbehandler_løsning",
+            mutableMapOf(
+                "fødselsnummer" to fødselsnummer,
+                "oppgaveId" to 3333333,
+                "hendelseId" to UUID.randomUUID(),
+                "behandlingId" to UUID.randomUUID(),
+                "godkjent" to true,
+                "saksbehandlerident" to "X001122",
+                "saksbehandleroid" to UUID.randomUUID(),
+                "saksbehandlerepost" to "en.saksbehandler@nav.no",
+                "godkjenttidspunkt" to "2024-07-27T08:05:22.051807803",
+                "saksbehandleroverstyringer" to emptyList<String>(),
+                "saksbehandler" to mapOf(
+                    "ident" to "X001122",
+                    "epostadresse" to "en.saksbehandler@nav.no"
+                )
+            )
+        )
+
     private fun arbeidsgiverinformasjon(ekstraArbeidsgivere: List<ArbeidsgiverinformasjonJson>) =
         ekstraArbeidsgivere.map(ArbeidsgiverinformasjonJson::toBody)
 

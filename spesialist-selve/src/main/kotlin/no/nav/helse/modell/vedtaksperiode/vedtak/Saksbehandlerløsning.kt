@@ -76,14 +76,14 @@ internal class Saksbehandlerløsning private constructor(
         kommentar = jsonNode["kommentar"]?.takeUnless(JsonNode::isMissingOrNull)?.asText(),
         saksbehandler =
             Saksbehandler(
-                jsonNode["saksbehandler.ident"].asText(),
-                jsonNode["saksbehandler.epostadresse"].asText(),
+                jsonNode["saksbehandler"]["ident"].asText(),
+                jsonNode["saksbehandler"]["epostadresse"].asText(),
             ),
         beslutter =
             jsonNode["beslutter"]?.takeUnless(JsonNode::isMissingOrNull)?.let {
                 Saksbehandler(
-                    jsonNode["beslutter.ident"].asText(),
-                    jsonNode["beslutter.epostadresse"].asText(),
+                    jsonNode["beslutter"]["ident"].asText(),
+                    jsonNode["beslutter"]["epostadresse"].asText(),
                 )
             },
         saksbehandleroverstyringer =
