@@ -1,5 +1,6 @@
 package no.nav.helse.modell.kommando
 
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
@@ -20,13 +21,23 @@ internal class VurderBehovForTotrinnskontroll(
 ) : Command {
     private companion object {
         private val logg = LoggerFactory.getLogger(VurderBehovForTotrinnskontroll::class.java)
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
     override fun execute(context: CommandContext): Boolean {
         val kreverTotrinnsvurdering = sykefraværstilfelle.harMedlemskapsvarsel(vedtaksperiodeId)
         val vedtaksperiodeHarFerdigstiltOppgave = oppgaveService.harFerdigstiltOppgave(vedtaksperiodeId)
         val overstyringer = finnOverstyringerMedType()
-        finnOverstyringer(overstyringer)
+        val overstyringerFunnetMedNyttOppslag = finnOverstyringer(overstyringer)
+        if (overstyringer.isEmpty() && overstyringerFunnetMedNyttOppslag.isNotEmpty()) {
+            sikkerlogg.info("Fant overstyring(-er) kun ved nytt oppslag. Skulle perioden gått til totrinns?",
+                kv("fødselsnummer", fødselsnummer),
+                kv("kreverTotrinnsvurdering", kreverTotrinnsvurdering),
+                kv("vedtaksperiodeHarFerdigstiltOppgave", vedtaksperiodeHarFerdigstiltOppgave),
+                kv("vedtaksperiodeId", vedtaksperiodeId),
+                kv("berørteVedtaksperioder", spleisVedtaksperioder.map { it.vedtaksperiodeId })
+            )
+        }
 
         if ((kreverTotrinnsvurdering && !vedtaksperiodeHarFerdigstiltOppgave) || overstyringer.isNotEmpty()) {
             logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
