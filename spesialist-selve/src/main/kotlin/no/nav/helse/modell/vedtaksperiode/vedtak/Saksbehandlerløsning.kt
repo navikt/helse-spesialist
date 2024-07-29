@@ -40,23 +40,23 @@ internal class Saksbehandlerløsning private constructor(
         ident = packet["saksbehandlerident"].asText(),
         epostadresse = packet["saksbehandlerepost"].asText(),
         godkjenttidspunkt = packet["godkjenttidspunkt"].asLocalDateTime(),
-        årsak = packet["årsak"]?.takeUnless(JsonNode::isMissingOrNull)?.asText(),
-        begrunnelser = packet["begrunnelser"]?.takeUnless(JsonNode::isMissingOrNull)?.map(JsonNode::asText),
-        kommentar = packet["kommentar"]?.takeUnless(JsonNode::isMissingOrNull)?.asText(),
+        årsak = packet["årsak"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
+        begrunnelser = packet["begrunnelser"].takeUnless(JsonNode::isMissingOrNull)?.map(JsonNode::asText),
+        kommentar = packet["kommentar"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
         saksbehandler =
             Saksbehandler(
                 packet["saksbehandler.ident"].asText(),
                 packet["saksbehandler.epostadresse"].asText(),
             ),
         beslutter =
-            packet["beslutter"]?.takeUnless(JsonNode::isMissingOrNull)?.let {
+            packet["beslutter"].takeUnless(JsonNode::isMissingOrNull)?.let {
                 Saksbehandler(
                     packet["beslutter.ident"].asText(),
                     packet["beslutter.epostadresse"].asText(),
                 )
             },
         saksbehandleroverstyringer =
-            packet["saksbehandleroverstyringer"]?.takeUnless(JsonNode::isMissingOrNull)?.map {
+            packet["saksbehandleroverstyringer"].takeUnless(JsonNode::isMissingOrNull)?.map {
                 UUID.fromString(it.asText())
             } ?: emptyList(),
         json = packet.toJson(),
@@ -71,23 +71,23 @@ internal class Saksbehandlerløsning private constructor(
         ident = jsonNode["saksbehandlerident"].asText(),
         epostadresse = jsonNode["saksbehandlerepost"].asText(),
         godkjenttidspunkt = jsonNode["godkjenttidspunkt"].asLocalDateTime(),
-        årsak = jsonNode["årsak"]?.takeUnless(JsonNode::isMissingOrNull)?.asText(),
-        begrunnelser = jsonNode["begrunnelser"]?.takeUnless(JsonNode::isMissingOrNull)?.map(JsonNode::asText),
-        kommentar = jsonNode["kommentar"]?.takeUnless(JsonNode::isMissingOrNull)?.asText(),
+        årsak = jsonNode.path("årsak").takeUnless(JsonNode::isMissingOrNull)?.asText(),
+        begrunnelser = jsonNode.path("begrunnelser").takeUnless(JsonNode::isMissingOrNull)?.map(JsonNode::asText),
+        kommentar = jsonNode.path("kommentar").takeUnless(JsonNode::isMissingOrNull)?.asText(),
         saksbehandler =
             Saksbehandler(
                 jsonNode["saksbehandler"]["ident"].asText(),
                 jsonNode["saksbehandler"]["epostadresse"].asText(),
             ),
         beslutter =
-            jsonNode["beslutter"]?.takeUnless(JsonNode::isMissingOrNull)?.let {
+            jsonNode.path("beslutter").takeUnless(JsonNode::isMissingOrNull)?.let {
                 Saksbehandler(
                     jsonNode["beslutter"]["ident"].asText(),
                     jsonNode["beslutter"]["epostadresse"].asText(),
                 )
             },
         saksbehandleroverstyringer =
-            jsonNode["saksbehandleroverstyringer"]?.takeUnless(JsonNode::isMissingOrNull)?.map {
+            jsonNode.path("saksbehandleroverstyringer").takeUnless(JsonNode::isMissingOrNull)?.map {
                 UUID.fromString(it.asText())
             } ?: emptyList(),
         json = jsonNode.toString(),
