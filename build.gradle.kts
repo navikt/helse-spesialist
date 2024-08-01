@@ -8,7 +8,7 @@ val hikariCPVersion = "5.1.0"
 val flywayCoreVersion = "10.9.0"
 val kotliqueryVersion = "1.9.0"
 val mockkVersion = "1.13.10"
-val postgresqlVersion = "42.7.2"
+val postgresqlVersion = "42.7.3"
 
 plugins {
     kotlin("jvm") version "1.9.23"
