@@ -402,7 +402,11 @@ enum class Periodehandling {
     AVVISE,
 }
 
-data class Handling(val type: Periodehandling, val tillatt: Boolean, val begrunnelse: String? = null)
+data class Handling(
+    val type: Periodehandling,
+    val tillatt: Boolean,
+    val begrunnelse: String? = null,
+)
 
 @Suppress("unused")
 data class BeregnetPeriode(
@@ -449,8 +453,8 @@ data class BeregnetPeriode(
 
     fun egenskaper(): List<Oppgaveegenskap> = oppgavehåndterer.hentEgenskaper(periode.vedtaksperiodeId, periode.utbetaling.id)
 
-    private fun byggHandlinger(): List<Handling> {
-        return if (periodetilstand != Periodetilstand.TilGodkjenning) {
+    private fun byggHandlinger(): List<Handling> =
+        if (periodetilstand != Periodetilstand.TilGodkjenning) {
             listOf(
                 Handling(Periodehandling.UTBETALE, false, "perioden er ikke til godkjenning"),
             )
@@ -462,7 +466,6 @@ data class BeregnetPeriode(
                     else -> Handling(Periodehandling.AVVISE, false, "Spleis støtter ikke å avvise perioden")
                 }
         }
-    }
 
     override fun hendelser(): List<Hendelse> = periode.hendelser.map { it.tilHendelse() }
 
@@ -551,15 +554,17 @@ data class BeregnetPeriode(
 
     override fun varsler(): List<VarselDTO> =
         if (erSisteGenerasjon) {
-            varselRepository.finnVarslerSomIkkeErInaktiveForSisteGenerasjon(
-                vedtaksperiodeId(),
-                periode.utbetaling.id,
-            ).toList()
+            varselRepository
+                .finnVarslerSomIkkeErInaktiveForSisteGenerasjon(
+                    vedtaksperiodeId(),
+                    periode.utbetaling.id,
+                ).toList()
         } else {
-            varselRepository.finnVarslerSomIkkeErInaktiveFor(
-                vedtaksperiodeId(),
-                periode.utbetaling.id,
-            ).toList()
+            varselRepository
+                .finnVarslerSomIkkeErInaktiveFor(
+                    vedtaksperiodeId(),
+                    periode.utbetaling.id,
+                ).toList()
         }
 
     @Deprecated("Oppgavereferanse bør hentes fra periodens oppgave")
@@ -591,6 +596,8 @@ data class BeregnetPeriode(
         }
 
     fun avslag(): List<Avslag> = saksbehandlerhåndterer.hentAvslag(periode.vedtaksperiodeId, periode.utbetaling.id).toList()
+
+    fun annullering(): Annullering? = saksbehandlerhåndterer.hentAnnullering(periode.utbetaling.id)
 }
 
 private fun GraphQLOppdrag.tilSimulering(): Simulering =

@@ -25,8 +25,8 @@ class Annullering(
         navn: String,
         epost: String,
         ident: String,
-    ): AnnullertUtbetalingEvent {
-        return AnnullertUtbetalingEvent(
+    ): AnnullertUtbetalingEvent =
+        AnnullertUtbetalingEvent(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             organisasjonsnummer = organisasjonsnummer,
@@ -40,8 +40,28 @@ class Annullering(
             arsaker = arsaker,
             kommentar = kommentar,
         )
-    }
+
+    fun toDto() =
+        AnnulleringDto(
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            årsaker = arsaker,
+            kommentar = kommentar,
+        )
 }
+
+data class AnnulleringDto(
+    val aktørId: String,
+    val fødselsnummer: String,
+    val organisasjonsnummer: String,
+    val vedtaksperiodeId: UUID,
+    val utbetalingId: UUID,
+    val årsaker: List<AnnulleringArsak>? = emptyList(),
+    val kommentar: String?,
+)
 
 data class AnnulleringArsak(
     val key: String,

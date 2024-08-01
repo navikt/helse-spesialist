@@ -2,6 +2,7 @@ package no.nav.helse.mediator
 
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Tilgangsgrupper
+import no.nav.helse.db.AnnulleringDao
 import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
@@ -104,6 +105,7 @@ internal class SaksbehandlerMediator(
     private val notatRepository: NotatRepository = NotatRepository(notatDao = NotatDao(dataSource))
     private val periodehistorikkDao = PeriodehistorikkDao(dataSource)
     private val avslagDao = AvslagDao(dataSource)
+    private val annulleringDao = AnnulleringDao(dataSource)
 
     override fun <T : HandlingFraApi> håndter(
         handlingFraApi: T,
@@ -129,9 +131,22 @@ internal class SaksbehandlerMediator(
                 is Oppgavehandling -> håndter(modellhandling, saksbehandler)
                 is PåVent -> håndter(modellhandling, saksbehandler)
                 is Personhandling -> håndter(modellhandling, saksbehandler)
+                is Annullering -> håndter(modellhandling, saksbehandler)
                 else -> modellhandling.utførAv(saksbehandler)
             }
             sikkerlogg.info("Handling ${modellhandling.loggnavn()} utført")
+        }
+    }
+
+    private fun håndter(
+        handling: Annullering,
+        saksbehandler: Saksbehandler,
+    ) {
+        try {
+            annulleringDao.lagreAnnullering(handling.toDto(), saksbehandler)
+            handling.utførAv(saksbehandler)
+        } catch (e: Modellfeil) {
+            throw e.tilApiversjon()
         }
     }
 
@@ -232,9 +247,7 @@ internal class SaksbehandlerMediator(
     override fun hentAvslag(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
-    ): Set<Avslag> {
-        return avslagDao.finnAlleAvslag(vedtaksperiodeId, utbetalingId)
-    }
+    ): Set<Avslag> = avslagDao.finnAlleAvslag(vedtaksperiodeId, utbetalingId)
 
     override fun håndterAvslag(
         oppgaveId: Long,
@@ -328,8 +341,8 @@ internal class SaksbehandlerMediator(
     internal companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-        internal fun Modellfeil.tilApiversjon(): no.nav.helse.spesialist.api.feilhåndtering.Modellfeil {
-            return when (this) {
+        internal fun Modellfeil.tilApiversjon(): no.nav.helse.spesialist.api.feilhåndtering.Modellfeil =
+            when (this) {
                 is no.nav.helse.modell.OppgaveIkkeTildelt -> OppgaveIkkeTildelt(oppgaveId)
                 is OppgaveTildeltNoenAndre -> {
                     val (oid, navn, epost) = this.saksbehandler.tilApiversjon()
@@ -359,14 +372,13 @@ internal class SaksbehandlerMediator(
 
                 is ManglerTilgang -> IkkeTilgang(oid, oppgaveId)
             }
-        }
     }
 
     private fun SaksbehandlerFraApi.tilSaksbehandler() =
         Saksbehandler(epost, oid, navn, ident, TilgangskontrollørForApi(this.grupper, tilgangsgrupper))
 
-    private fun HandlingFraApi.tilModellversjon(): Handling {
-        return when (this) {
+    private fun HandlingFraApi.tilModellversjon(): Handling =
+        when (this) {
             is ArbeidsforholdOverstyringHandling -> this.tilModellversjon()
             is InntektOgRefusjonOverstyring -> this.tilModellversjon()
             is TidslinjeOverstyring -> this.tilModellversjon()
@@ -380,10 +392,9 @@ internal class SaksbehandlerMediator(
             is OpphevStans -> this.tilModellversjon()
             else -> throw IllegalStateException("Støtter ikke handling ${this::class.simpleName}")
         }
-    }
 
-    private fun ArbeidsforholdOverstyringHandling.tilModellversjon(): OverstyrtArbeidsforhold {
-        return OverstyrtArbeidsforhold(
+    private fun ArbeidsforholdOverstyringHandling.tilModellversjon(): OverstyrtArbeidsforhold =
+        OverstyrtArbeidsforhold(
             fødselsnummer = fodselsnummer,
             aktørId = aktorId,
             skjæringstidspunkt = skjaringstidspunkt,
@@ -402,10 +413,9 @@ internal class SaksbehandlerMediator(
                     )
                 },
         )
-    }
 
-    private fun Skjonnsfastsettelse.tilModellversjon(): SkjønnsfastsattSykepengegrunnlag {
-        return SkjønnsfastsattSykepengegrunnlag(
+    private fun Skjonnsfastsettelse.tilModellversjon(): SkjønnsfastsattSykepengegrunnlag =
+        SkjønnsfastsattSykepengegrunnlag(
             aktørId = aktorId,
             fødselsnummer = fodselsnummer,
             skjæringstidspunkt = skjaringstidspunkt,
@@ -434,10 +444,9 @@ internal class SaksbehandlerMediator(
                     )
                 },
         )
-    }
 
-    private fun InntektOgRefusjonOverstyring.tilModellversjon(): OverstyrtInntektOgRefusjon {
-        return OverstyrtInntektOgRefusjon(
+    private fun InntektOgRefusjonOverstyring.tilModellversjon(): OverstyrtInntektOgRefusjon =
+        OverstyrtInntektOgRefusjon(
             aktørId = aktorId,
             fødselsnummer = fodselsnummer,
             skjæringstidspunkt = skjaringstidspunkt,
@@ -463,10 +472,9 @@ internal class SaksbehandlerMediator(
                     )
                 },
         )
-    }
 
-    private fun TidslinjeOverstyring.tilModellversjon(): OverstyrtTidslinje {
-        return OverstyrtTidslinje(
+    private fun TidslinjeOverstyring.tilModellversjon(): OverstyrtTidslinje =
+        OverstyrtTidslinje(
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktorId,
             fødselsnummer = fodselsnummer,
@@ -493,10 +501,9 @@ internal class SaksbehandlerMediator(
                 },
             begrunnelse = begrunnelse,
         )
-    }
 
-    private fun AnnulleringData.tilModellversjon(): Annullering {
-        return Annullering(
+    private fun AnnulleringData.tilModellversjon(): Annullering =
+        Annullering(
             aktørId = this.aktorId,
             fødselsnummer = this.fodselsnummer,
             organisasjonsnummer = this.organisasjonsnummer,
@@ -506,28 +513,28 @@ internal class SaksbehandlerMediator(
             arsaker = this.arsaker?.map { arsak -> AnnulleringArsak(key = arsak._key, arsak = arsak.arsak) },
             kommentar = this.kommentar,
         )
-    }
 
-    private fun LeggPåVent.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent {
-        return no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent(oppgaveId, frist, skalTildeles, begrunnelse, notatTekst)
-    }
+    private fun LeggPåVent.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent =
+        no.nav.helse.modell.saksbehandler.handlinger
+            .LeggPåVent(oppgaveId, frist, skalTildeles, begrunnelse, notatTekst)
 
-    private fun FjernPåVent.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent {
-        return no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent(oppgaveId)
-    }
+    private fun FjernPåVent.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent =
+        no.nav.helse.modell.saksbehandler.handlinger
+            .FjernPåVent(oppgaveId)
 
-    private fun FjernPåVentUtenHistorikkinnslag.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.FjernPåVentUtenHistorikkinnslag {
-        return no.nav.helse.modell.saksbehandler.handlinger.FjernPåVentUtenHistorikkinnslag(oppgaveId)
-    }
+    private fun FjernPåVentUtenHistorikkinnslag.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.FjernPåVentUtenHistorikkinnslag =
+        no.nav.helse.modell.saksbehandler.handlinger
+            .FjernPåVentUtenHistorikkinnslag(oppgaveId)
 
-    private fun TildelOppgave.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.TildelOppgave {
-        return no.nav.helse.modell.saksbehandler.handlinger.TildelOppgave(this.oppgaveId)
-    }
+    private fun TildelOppgave.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.TildelOppgave =
+        no.nav.helse.modell.saksbehandler.handlinger
+            .TildelOppgave(this.oppgaveId)
 
-    private fun AvmeldOppgave.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.AvmeldOppgave {
-        return no.nav.helse.modell.saksbehandler.handlinger.AvmeldOppgave(this.oppgaveId)
-    }
+    private fun AvmeldOppgave.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.AvmeldOppgave =
+        no.nav.helse.modell.saksbehandler.handlinger
+            .AvmeldOppgave(this.oppgaveId)
 
     private fun OpphevStans.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.OpphevStans =
-        no.nav.helse.modell.saksbehandler.handlinger.OpphevStans(this.fødselsnummer, this.begrunnelse)
+        no.nav.helse.modell.saksbehandler.handlinger
+            .OpphevStans(this.fødselsnummer, this.begrunnelse)
 }

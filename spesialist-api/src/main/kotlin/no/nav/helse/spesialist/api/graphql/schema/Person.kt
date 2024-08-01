@@ -80,6 +80,14 @@ data class Avslag(
     val invalidert: Boolean,
 )
 
+data class Annullering(
+    val saksbehandlerIdent: String,
+    val utbetalingId: UUID,
+    val tidspunkt: LocalDateTime,
+    val årsaker: List<String>,
+    val begrunnelse: String?,
+)
+
 data class Person(
     private val snapshot: GraphQLPerson,
     private val personinfo: Personinfo,
