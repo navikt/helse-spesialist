@@ -1,13 +1,12 @@
 package no.nav.helse.db
 
 import DatabaseIntegrationTest
-import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class SaksbehandlerDaoTest: DatabaseIntegrationTest() {
     private val dao = SaksbehandlerDao(dataSource)
@@ -26,19 +25,6 @@ internal class SaksbehandlerDaoTest: DatabaseIntegrationTest() {
         assertSaksbehandler(0, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
     }
 
-    @Test
-    fun `finner saksbehandler vha epost`() {
-        dao.opprettSaksbehandler(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
-        val saksbehandler = dao.finnOid(SAKSBEHANDLER_EPOST)
-        Assertions.assertNotNull(saksbehandler)
-    }
-
-    @Test
-    fun `finner saksbehandler vha epost uavhengig av store bokstaver`() {
-        dao.opprettSaksbehandler(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST.uppercase(), SAKSBEHANDLER_IDENT)
-        val saksbehandler = dao.finnOid(SAKSBEHANDLER_EPOST.lowercase())
-        Assertions.assertNotNull(saksbehandler)
-    }
 
     private fun assertSaksbehandler(forventetAntall: Int, oid: UUID, navn: String, epost: String, ident: String) {
         @Language("PostgreSQL")

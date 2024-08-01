@@ -10,8 +10,8 @@ class Annullering(
     private val organisasjonsnummer: String,
     private val vedtaksperiodeId: UUID,
     private val utbetalingId: UUID,
-    private val begrunnelser: List<String> = emptyList(),
-    private val kommentar: String?,
+    private val årsaker: List<String> = emptyList(),
+    private val begrunnelse: String?,
 ) : Handling {
     override fun utførAv(saksbehandler: Saksbehandler) {
         saksbehandler.håndter(this)
@@ -35,8 +35,29 @@ class Annullering(
             saksbehandlerEpost = epost,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
-            begrunnelser = begrunnelser,
-            kommentar = kommentar,
+            begrunnelser = årsaker,
+            kommentar = begrunnelse,
         )
     }
+
+    fun toDto() =
+        AnnulleringDto(
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            årsaker = årsaker,
+            begrunnelse = begrunnelse,
+        )
 }
+
+data class AnnulleringDto(
+    val aktørId: String,
+    val fødselsnummer: String,
+    val organisasjonsnummer: String,
+    val vedtaksperiodeId: UUID,
+    val utbetalingId: UUID,
+    val årsaker: List<String> = emptyList(),
+    val begrunnelse: String?,
+)

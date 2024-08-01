@@ -2,6 +2,7 @@ package no.nav.helse.mediator
 
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Tilgangsgrupper
+import no.nav.helse.db.AnnulleringDao
 import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
@@ -103,6 +104,7 @@ internal class SaksbehandlerMediator(
     private val notatRepository: NotatRepository = NotatRepository(notatDao = NotatDao(dataSource))
     private val periodehistorikkDao = PeriodehistorikkDao(dataSource)
     private val avslagDao = AvslagDao(dataSource)
+    private val annulleringDao = AnnulleringDao(dataSource)
 
     override fun <T : HandlingFraApi> håndter(
         handlingFraApi: T,
@@ -128,9 +130,22 @@ internal class SaksbehandlerMediator(
                 is Oppgavehandling -> håndter(modellhandling, saksbehandler)
                 is PåVent -> håndter(modellhandling, saksbehandler)
                 is Personhandling -> håndter(modellhandling, saksbehandler)
+                is Annullering -> håndter(modellhandling, saksbehandler)
                 else -> modellhandling.utførAv(saksbehandler)
             }
             sikkerlogg.info("Handling ${modellhandling.loggnavn()} utført")
+        }
+    }
+
+    private fun håndter(
+        handling: Annullering,
+        saksbehandler: Saksbehandler,
+    ) {
+        try {
+            annulleringDao.lagreAnnullering(handling.toDto(), saksbehandler)
+            handling.utførAv(saksbehandler)
+        } catch (e: Modellfeil) {
+            throw e.tilApiversjon()
         }
     }
 
@@ -501,8 +516,8 @@ internal class SaksbehandlerMediator(
             organisasjonsnummer = this.organisasjonsnummer,
             vedtaksperiodeId = this.vedtaksperiodeId,
             utbetalingId = this.utbetalingId,
-            begrunnelser = this.begrunnelser,
-            kommentar = this.kommentar,
+            årsaker = this.begrunnelser,
+            begrunnelse = this.kommentar,
         )
     }
 

@@ -1,30 +1,27 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.db.SaksbehandlerDao
+import no.nav.helse.db.AnnulleringDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
-import java.time.LocalDateTime
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 internal class LagreAnnulleringCommand(
     private val utbetalingDao: UtbetalingDao,
-    private val saksbehandlerDao: SaksbehandlerDao,
-    private val annullertTidspunkt: LocalDateTime,
-    private val saksbehandlerEpost: String,
+    private val annulleringDao: AnnulleringDao,
     private val utbetalingId: UUID,
 ) : Command {
+    private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+
     override fun execute(context: CommandContext): Boolean {
-        return lagreSaksbehandlerInfo()
+        return leggTilAnnullertAvSaksbehandler()
     }
 
-    private fun lagreSaksbehandlerInfo(): Boolean {
-        val saksbehandlerOid =
-            requireNotNull(saksbehandlerDao.finnOid(saksbehandlerEpost)) {
-                "Finner ikke saksbehandler for annullering med id: $utbetalingId"
-            }
-        val annulleringId = utbetalingDao.nyAnnullering(annullertTidspunkt, saksbehandlerOid)
-
-        utbetalingDao.leggTilAnnullertAvSaksbehandler(utbetalingId, annulleringId)
-
-        return true
+    private fun leggTilAnnullertAvSaksbehandler(): Boolean {
+        annulleringDao.finnAnnulleringId(utbetalingId)?.let { annulleringId ->
+            utbetalingDao.leggTilAnnullertAvSaksbehandler(utbetalingId, annulleringId)
+            return true
+        }
+        sikkerlogg.error("Finner ikke annullering for utbetalingId={}", utbetalingId)
+        return false
     }
 }

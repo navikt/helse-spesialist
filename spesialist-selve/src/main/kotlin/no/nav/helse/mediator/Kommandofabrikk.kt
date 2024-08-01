@@ -1,8 +1,8 @@
 package no.nav.helse.mediator
 
+import no.nav.helse.db.AnnulleringDao
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SykefraværstilfelleDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.builders.GenerasjonBuilder
@@ -86,7 +86,6 @@ internal class Kommandofabrikk(
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
     private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
     private val tildelingDao: TildelingDao = TildelingDao(dataSource),
-    private val saksbehandlerDao: SaksbehandlerDao = SaksbehandlerDao(dataSource),
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
     private val risikovurderingDao: RisikovurderingDao = RisikovurderingDao(dataSource),
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource),
@@ -115,6 +114,7 @@ internal class Kommandofabrikk(
     private val generasjonRepository: GenerasjonRepository = GenerasjonRepository(dataSource),
     private val vergemålDao: VergemålDao = VergemålDao(dataSource),
     private val varselRepository: VarselRepository = VarselRepository(dataSource),
+    private val annulleringDao: AnnulleringDao = AnnulleringDao(dataSource),
 ) {
     private companion object {
         private val logg = LoggerFactory.getLogger(this::class.java)
@@ -305,13 +305,11 @@ internal class Kommandofabrikk(
         UtbetalingAnnullertCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             utbetalingId = hendelse.utbetalingId,
-            saksbehandlerEpost = hendelse.saksbehandlerEpost,
-            annullertTidspunkt = hendelse.annullertTidspunkt,
             utbetalingDao = utbetalingDao,
             personDao = personDao,
             snapshotDao = snapshotDao,
             snapshotClient = snapshotClient,
-            saksbehandlerDao = saksbehandlerDao,
+            annulleringDao = annulleringDao,
         )
 
     private fun utbetalingEndret(hendelse: UtbetalingEndret): UtbetalingEndretCommand =

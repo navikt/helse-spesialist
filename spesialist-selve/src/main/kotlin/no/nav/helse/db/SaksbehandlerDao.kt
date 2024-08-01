@@ -38,12 +38,4 @@ class SaksbehandlerDao(dataSource: DataSource) : HelseDao(dataSource), Saksbehan
                 ident = row.string("ident"),
             )
         }
-
-    fun finnOid(epost: String): UUID? =
-        asSQL(
-            "SELECT oid FROM saksbehandler WHERE epost ILIKE :epost LIMIT 1",
-            mapOf("epost" to epost),
-        ).single { row ->
-            row.uuid("oid")
-        }
 }

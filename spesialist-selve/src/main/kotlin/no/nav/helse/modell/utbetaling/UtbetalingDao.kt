@@ -177,30 +177,6 @@ class UtbetalingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         }
     }
 
-    internal fun nyAnnullering(
-        annullertTidspunkt: LocalDateTime,
-        saksbehandlerRef: UUID,
-    ): Long {
-        @Language("PostgreSQL")
-        val statement = """
-            INSERT INTO annullert_av_saksbehandler(annullert_tidspunkt, saksbehandler_ref)
-            VALUES (:annullertTidspunkt, :saksbehandlerRef)
-        """
-        return sessionOf(dataSource, returnGeneratedKey = true).use {
-            requireNotNull(
-                it.run(
-                    queryOf(
-                        statement,
-                        mapOf(
-                            "annullertTidspunkt" to annullertTidspunkt,
-                            "saksbehandlerRef" to saksbehandlerRef,
-                        ),
-                    ).asUpdateAndReturnGeneratedKey,
-                ),
-            ) { "Kunne ikke opprette annullering" }
-        }
-    }
-
     fun leggTilAnnullertAvSaksbehandler(
         utbetalingId: UUID,
         annullertAvSaksbehandlerRef: Long,
