@@ -8,6 +8,7 @@ import kotliquery.action.QueryAction
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
+import no.nav.helse.db.AnnulleringDao
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.ReservasjonDao
@@ -164,6 +165,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val påVentDao = PåVentDao(dataSource)
     internal val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(dataSource)
     internal val notatDao = NotatDao(dataSource)
+    internal val annulleringDao = AnnulleringDao(dataSource)
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,
