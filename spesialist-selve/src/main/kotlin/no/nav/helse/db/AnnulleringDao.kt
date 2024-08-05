@@ -12,7 +12,11 @@ class AnnulleringDao(
     internal fun lagreAnnullering(
         annulleringDto: AnnulleringDto,
         saksbehandler: Saksbehandler,
-    ) = lagreBegrunnelse(annulleringDto.begrunnelse ?: "Ingen begrunnelse", saksbehandler.oid()).let { begrunnelseId ->
+    ) {
+        val begrunnelseId =
+            annulleringDto.begrunnelse?.let {
+                lagreBegrunnelse(it, saksbehandler.oid())
+            }
         asSQL(
             """
             INSERT INTO annullert_av_saksbehandler (annullert_tidspunkt, saksbehandler_ref, årsaker, begrunnelse_ref, vedtaksperiode_id, utbetaling_id) 
@@ -31,7 +35,7 @@ class AnnulleringDao(
     }
 
     private fun lagreBegrunnelse(
-        begrunnelse: String,
+        begrunnelse: String?,
         saksbehandlerOid: UUID,
     ) = asSQL(
         """
