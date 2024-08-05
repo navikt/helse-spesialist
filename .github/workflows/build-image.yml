@@ -35,7 +35,7 @@ jobs:
           java-version: 21
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Gradle build
         run: ./gradlew :spesialist-selve:build # felles- og api-modulene vil bli bygget fordi selve avhenger av dem
