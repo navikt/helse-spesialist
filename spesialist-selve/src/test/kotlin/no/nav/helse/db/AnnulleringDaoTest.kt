@@ -5,10 +5,17 @@ import TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringDto
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class AnnulleringDaoTest : DatabaseIntegrationTest() {
+class AnnulleringDaoTest: DatabaseIntegrationTest() {
+
+    @BeforeEach
+    fun tømTabeller() {
+        query("truncate annullert_av_saksbehandler, begrunnelse cascade").execute()
+    }
     @Test
     fun `Lagrer annullering med begrunnelse`() {
         saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
@@ -23,6 +30,26 @@ class AnnulleringDaoTest : DatabaseIntegrationTest() {
         annulleringDao.lagreAnnullering(annulleringDto(begrunnelse = null), saksbehandler())
         assertAnnullering()
         assertIngenBegrunnelse()
+    }
+
+    @Test
+    fun `kan finne annullering med begrunnelse`() {
+        saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
+        annulleringDao.lagreAnnullering(annulleringDto(), saksbehandler())
+        val annullering = annulleringDao.finnAnnullering(UTBETALING_ID)
+        assertEquals(UTBETALING_ID, annullering?.utbetalingId)
+        assertEquals(SAKSBEHANDLER_IDENT, annullering?.saksbehandlerIdent)
+        assertNotNull(annullering?.begrunnelse)
+    }
+
+    @Test
+    fun `kan finne annullering uten begrunnelse`() {
+        saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
+        annulleringDao.lagreAnnullering(annulleringDto(begrunnelse = null), saksbehandler())
+        val annullering = annulleringDao.finnAnnullering(UTBETALING_ID)
+        assertEquals(UTBETALING_ID, annullering?.utbetalingId)
+        assertEquals(SAKSBEHANDLER_IDENT, annullering?.saksbehandlerIdent)
+        assertNull(annullering?.begrunnelse)
     }
 
     private fun annulleringDto(begrunnelse: String? = "annulleringsbegrunnelse") =

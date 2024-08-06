@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api
 
+import no.nav.helse.spesialist.api.graphql.schema.Annullering
 import no.nav.helse.spesialist.api.graphql.schema.Avslag
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
@@ -43,4 +44,6 @@ interface Saksbehandlerhåndterer {
         saksbehandlerFraApi: SaksbehandlerFraApi,
         avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag,
     )
+
+    fun hentAnnullering(utbetalingId: UUID): Annullering?
 }
