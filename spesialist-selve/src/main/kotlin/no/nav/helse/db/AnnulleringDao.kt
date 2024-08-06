@@ -3,6 +3,7 @@ package no.nav.helse.db
 import no.nav.helse.HelseDao
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringDto
+import no.nav.helse.spesialist.api.graphql.schema.Annullering
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -57,4 +58,25 @@ class AnnulleringDao(
                 "utbetalingId" to utbetalingId,
             ),
         ).single { it.long("id") }
+
+    fun finnAnnullering(utbetalingId: UUID): Annullering? =
+        asSQL(
+            """
+            select aas.annullert_tidspunkt, s.ident, aas.årsaker, b.tekst from annullert_av_saksbehandler aas
+            inner join public.saksbehandler s on s.oid = aas.saksbehandler_ref
+            left join public.begrunnelse b on b.id = aas.begrunnelse_ref
+            where utbetaling_id = :utbetalingId;
+            """.trimIndent(),
+            mapOf(
+                "utbetalingId" to utbetalingId,
+            ),
+        ).single {
+            Annullering(
+                saksbehandlerIdent = it.string("ident"),
+                utbetalingId = utbetalingId,
+                tidspunkt = it.localDateTime("annullert_tidspunkt"),
+                årsaker = it.array<String>("årsaker").toList(),
+                begrunnelse = it.stringOrNull("tekst"),
+            )
+        }
 }

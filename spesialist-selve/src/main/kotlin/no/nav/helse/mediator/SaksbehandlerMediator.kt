@@ -262,6 +262,10 @@ internal class SaksbehandlerMediator(
         }
     }
 
+    override fun hentAnnullering(utbetalingId: UUID): no.nav.helse.spesialist.api.graphql.schema.Annullering? {
+        return annulleringDao.finnAnnullering(utbetalingId)
+    }
+
     override fun håndter(
         godkjenning: GodkjenningDto,
         behandlingId: UUID,
