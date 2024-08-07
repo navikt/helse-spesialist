@@ -1200,8 +1200,14 @@ scalar UUID
 "class java.time.YearMonth"
 scalar YearMonth
 
+input AnnulleringArsakInput {
+    _key: String!
+    arsak: String!
+}
+
 input AnnulleringDataInput {
     aktorId: String!
+    arsaker: [AnnulleringArsakInput!]
     begrunnelser: [String!]!
     fodselsnummer: String!
     kommentar: String

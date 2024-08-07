@@ -786,6 +786,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         vedtaksperiodeId = VEDTAKSPERIODE,
         utbetalingId = UTBETALING_ID,
         begrunnelser = begrunnelser,
+        arsaker = null,
         kommentar = kommentar,
     )
 }

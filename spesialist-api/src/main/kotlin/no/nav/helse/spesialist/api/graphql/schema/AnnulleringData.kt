@@ -10,5 +10,11 @@ data class AnnulleringData(
     val vedtaksperiodeId: UUID,
     val utbetalingId: UUID,
     val begrunnelser: List<String>,
+    val arsaker: List<AnnulleringArsak>?,
     val kommentar: String?,
 ) : HandlingFraApi
+
+data class AnnulleringArsak(
+    val _key: String,
+    val arsak: String,
+)
