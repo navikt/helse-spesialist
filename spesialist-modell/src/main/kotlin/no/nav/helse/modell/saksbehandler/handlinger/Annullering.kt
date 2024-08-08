@@ -11,6 +11,7 @@ class Annullering(
     private val vedtaksperiodeId: UUID,
     private val utbetalingId: UUID,
     private val begrunnelser: List<String> = emptyList(),
+    private val arsaker: List<AnnulleringArsak>? = emptyList(),
     private val kommentar: String?,
 ) : Handling {
     override fun utførAv(saksbehandler: Saksbehandler) {
@@ -36,7 +37,13 @@ class Annullering(
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
             begrunnelser = begrunnelser,
+            arsaker = arsaker,
             kommentar = kommentar,
         )
     }
 }
+
+data class AnnulleringArsak(
+    val key: String,
+    val arsak: String,
+)

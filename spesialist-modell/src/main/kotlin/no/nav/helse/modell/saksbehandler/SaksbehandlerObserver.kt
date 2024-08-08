@@ -1,5 +1,6 @@
 package no.nav.helse.modell.saksbehandler
 
+import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringArsak
 import no.nav.helse.modell.vilkårsprøving.SubsumsjonEvent
 import java.time.LocalDate
 import java.util.UUID
@@ -134,5 +135,6 @@ data class AnnullertUtbetalingEvent(
     val vedtaksperiodeId: UUID,
     val utbetalingId: UUID,
     val begrunnelser: List<String>,
+    val arsaker: List<AnnulleringArsak>?,
     val kommentar: String?,
 )

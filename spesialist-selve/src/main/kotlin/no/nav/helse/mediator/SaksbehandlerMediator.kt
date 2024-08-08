@@ -21,6 +21,7 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.Annullering
+import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringArsak
 import no.nav.helse.modell.saksbehandler.handlinger.Arbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.Handling
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
@@ -502,6 +503,7 @@ internal class SaksbehandlerMediator(
             vedtaksperiodeId = this.vedtaksperiodeId,
             utbetalingId = this.utbetalingId,
             begrunnelser = this.begrunnelser,
+            arsaker = this.arsaker?.map { arsak -> AnnulleringArsak(key = arsak._key, arsak = arsak.arsak) },
             kommentar = this.kommentar,
         )
     }
