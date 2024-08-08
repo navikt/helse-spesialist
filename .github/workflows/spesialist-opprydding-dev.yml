@@ -27,7 +27,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-      - uses: gradle/actions/setup-gradle@v3
+      - uses: gradle/actions/setup-gradle@v4
       - name: test and build
         env:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
