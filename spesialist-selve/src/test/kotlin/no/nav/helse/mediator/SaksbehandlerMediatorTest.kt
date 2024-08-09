@@ -20,6 +20,7 @@ import no.nav.helse.spesialist.api.graphql.mutation.Avslag
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagsdata
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagshandling
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
+import no.nav.helse.spesialist.api.graphql.schema.AnnulleringArsak
 import no.nav.helse.spesialist.api.graphql.schema.AnnulleringData
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
@@ -416,11 +417,13 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         assertEquals("EN_KOMMENTAR", melding["kommentar"]?.asText())
         assertEquals(1, melding["begrunnelser"].map { it.asText() }.size)
         assertEquals("EN_BEGRUNNELSE", melding["begrunnelser"][0].asText())
+        assertEquals("Ferie", melding["arsaker"][0]["arsak"].asText())
+        assertEquals("key01", melding["arsaker"][0]["key"].asText())
     }
 
     @Test
-    fun `håndterer annullering uten kommentar og begrunnelser`() {
-        mediator.håndter(annullering(emptyList(), null), saksbehandler)
+    fun `håndterer annullering uten kommentar, begrunnelser eller årsak`() {
+        mediator.håndter(annullering(emptyList(), null, null), saksbehandler)
 
         val melding = testRapid.inspektør.message(0)
 
@@ -435,6 +438,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         assertEquals(UTBETALING_ID, melding["utbetalingId"].asUUID())
         assertEquals(null, melding["kommentar"]?.asText())
         assertEquals(0, melding["begrunnelser"].map { it.asText() }.size)
+        assertEquals(null, melding["arsaker"]?.asText())
     }
 
     // Eksperimentering med DSL for å lage testdata
@@ -779,6 +783,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private fun annullering(
         begrunnelser: List<String> = listOf("EN_BEGRUNNELSE"),
         kommentar: String? = "EN_KOMMENTAR",
+        arsaker: List<AnnulleringArsak>? = listOf(AnnulleringArsak(_key = "key01", arsak = "Ferie"))
     ) = AnnulleringData(
         aktorId = AKTØR_ID,
         fodselsnummer = FØDSELSNUMMER,
@@ -786,7 +791,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         vedtaksperiodeId = VEDTAKSPERIODE,
         utbetalingId = UTBETALING_ID,
         begrunnelser = begrunnelser,
-        arsaker = null,
+        arsaker = arsaker,
         kommentar = kommentar,
     )
 }
