@@ -7,6 +7,34 @@ Backend for saksbehandling av sykepengesøknader
 ## Henvendelser
 Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.
 
+## Komme i gang
+
+### Gradleoppsett
+For å kunne kjøre gradle må du legge til `githubUser` og `githubPassword` i `~/.gradle/gradle.properties` filen.
+
+```properties
+  githubUser=x-access-token
+  githubPassword=<token>
+```
+
+### Docker
+For å kjøre tester trenger du docker. Du kan enten installere klienten fra [docker](https://www.docker.com/) eller bruke colima.
+
+#### Colima
+```shell
+brew install colima docker
+```
+For at colima skal virke må disse env variablene settes opp i `~/.zshrc`:
+
+```shell
+export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
+export DOCKER_HOST=unix://$HOME/.colima/default/docker.sock
+```
+
+```shell
+colima start
+```
+
 ## Oppdatere GraphQL schema mot spleis
 - Kjør tasken `graphqlIntrospectSchema` i spesialist-api, enten i IntelliJ eller fra kommandolinja
   - Fra kommandolinja: `./gradlew :spesialist-api:graphqlIntrospectSchema`
