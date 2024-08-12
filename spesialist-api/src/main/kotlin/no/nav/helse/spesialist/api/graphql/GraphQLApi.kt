@@ -153,7 +153,7 @@ private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
 private fun tidBrukt(start: Long): Duration = Duration.ofNanos(System.nanoTime() - start)
 
-internal fun Route.playground() {
+private fun Route.playground() {
     get("playground") {
         call.respondText(buildPlaygroundHtml("graphql", "subscriptions"), ContentType.Text.Html)
     }

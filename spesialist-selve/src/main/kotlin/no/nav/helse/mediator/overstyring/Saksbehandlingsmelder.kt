@@ -118,9 +118,7 @@ internal class Saksbehandlingsmelder(private val rapidsConnection: RapidsConnect
                 ).apply {
                     compute("kommentar") { _, _ -> event.kommentar }
                     compute("arsaker") { _, _ ->
-                        event.arsaker?.let { arsaker ->
-                            arsaker.map { mapOf("arsak" to it.arsak, "key" to it.key) }
-                        }
+                        event.arsaker?.map { mapOf("arsak" to it.arsak, "key" to it.key) }
                     }
                 },
             )

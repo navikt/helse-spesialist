@@ -337,15 +337,15 @@ interface Periode {
                 feilregistrert_tidspunkt = it.feilregistrert_tidspunkt,
                 type = it.type,
                 kommentarer =
-                it.kommentarer.map { kommentar ->
-                    Kommentar(
-                        id = kommentar.id,
-                        tekst = kommentar.tekst,
-                        opprettet = kommentar.opprettet,
-                        saksbehandlerident = kommentar.saksbehandlerident,
-                        feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
-                    )
-                },
+                    it.kommentarer.map { kommentar ->
+                        Kommentar(
+                            id = kommentar.id,
+                            tekst = kommentar.tekst,
+                            opprettet = kommentar.opprettet,
+                            saksbehandlerident = kommentar.saksbehandlerident,
+                            feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+                        )
+                    },
             )
         }
 
@@ -447,8 +447,7 @@ data class BeregnetPeriode(
 
     fun handlinger() = byggHandlinger()
 
-    fun egenskaper(): List<Oppgaveegenskap> =
-        oppgavehåndterer.hentEgenskaper(periode.vedtaksperiodeId, periode.utbetaling.id)
+    fun egenskaper(): List<Oppgaveegenskap> = oppgavehåndterer.hentEgenskaper(periode.vedtaksperiodeId, periode.utbetaling.id)
 
     private fun byggHandlinger(): List<Handling> {
         return if (periodetilstand != Periodetilstand.TilGodkjenning) {
@@ -457,8 +456,11 @@ data class BeregnetPeriode(
             )
         } else {
             val handlinger = listOf(Handling(Periodehandling.UTBETALE, true))
-            val kanAvvises = oppgaveDto?.kanAvvises ?: false
-            handlinger + Handling(Periodehandling.AVVISE, kanAvvises, "Spleis støtter ikke å avvise perioden")
+            handlinger +
+                when (oppgaveDto?.kanAvvises) {
+                    true -> Handling(Periodehandling.AVVISE, true)
+                    else -> Handling(Periodehandling.AVVISE, false, "Spleis støtter ikke å avvise perioden")
+                }
         }
     }
 
@@ -501,37 +503,37 @@ data class BeregnetPeriode(
                 personFagsystemId = it.personFagsystemId,
                 personNettoBelop = it.personNettoBelop,
                 status =
-                when (it.statusEnum) {
-                    GraphQLUtbetalingstatus.ANNULLERT -> Utbetalingstatus.ANNULLERT
-                    GraphQLUtbetalingstatus.FORKASTET -> Utbetalingstatus.FORKASTET
-                    GraphQLUtbetalingstatus.GODKJENT -> Utbetalingstatus.GODKJENT
-                    GraphQLUtbetalingstatus.GODKJENTUTENUTBETALING -> Utbetalingstatus.GODKJENTUTENUTBETALING
-                    GraphQLUtbetalingstatus.IKKEGODKJENT -> Utbetalingstatus.IKKEGODKJENT
-                    GraphQLUtbetalingstatus.OVERFORT -> Utbetalingstatus.OVERFORT
-                    GraphQLUtbetalingstatus.SENDT -> Utbetalingstatus.SENDT
-                    GraphQLUtbetalingstatus.UBETALT -> Utbetalingstatus.UBETALT
-                    GraphQLUtbetalingstatus.UTBETALINGFEILET -> Utbetalingstatus.UTBETALINGFEILET
-                    GraphQLUtbetalingstatus.UTBETALT -> Utbetalingstatus.UTBETALT
-                    GraphQLUtbetalingstatus.__UNKNOWN_VALUE -> Utbetalingstatus.UKJENT
-                },
+                    when (it.statusEnum) {
+                        GraphQLUtbetalingstatus.ANNULLERT -> Utbetalingstatus.ANNULLERT
+                        GraphQLUtbetalingstatus.FORKASTET -> Utbetalingstatus.FORKASTET
+                        GraphQLUtbetalingstatus.GODKJENT -> Utbetalingstatus.GODKJENT
+                        GraphQLUtbetalingstatus.GODKJENTUTENUTBETALING -> Utbetalingstatus.GODKJENTUTENUTBETALING
+                        GraphQLUtbetalingstatus.IKKEGODKJENT -> Utbetalingstatus.IKKEGODKJENT
+                        GraphQLUtbetalingstatus.OVERFORT -> Utbetalingstatus.OVERFORT
+                        GraphQLUtbetalingstatus.SENDT -> Utbetalingstatus.SENDT
+                        GraphQLUtbetalingstatus.UBETALT -> Utbetalingstatus.UBETALT
+                        GraphQLUtbetalingstatus.UTBETALINGFEILET -> Utbetalingstatus.UTBETALINGFEILET
+                        GraphQLUtbetalingstatus.UTBETALT -> Utbetalingstatus.UTBETALT
+                        GraphQLUtbetalingstatus.__UNKNOWN_VALUE -> Utbetalingstatus.UKJENT
+                    },
                 type =
-                when (it.typeEnum) {
-                    GraphQLUtbetalingtype.ANNULLERING -> Utbetalingtype.ANNULLERING
-                    GraphQLUtbetalingtype.ETTERUTBETALING -> Utbetalingtype.ETTERUTBETALING
-                    GraphQLUtbetalingtype.FERIEPENGER -> Utbetalingtype.FERIEPENGER
-                    GraphQLUtbetalingtype.REVURDERING -> Utbetalingtype.REVURDERING
-                    GraphQLUtbetalingtype.UTBETALING -> Utbetalingtype.UTBETALING
-                    GraphQLUtbetalingtype.__UNKNOWN_VALUE -> Utbetalingtype.UKJENT
-                },
+                    when (it.typeEnum) {
+                        GraphQLUtbetalingtype.ANNULLERING -> Utbetalingtype.ANNULLERING
+                        GraphQLUtbetalingtype.ETTERUTBETALING -> Utbetalingtype.ETTERUTBETALING
+                        GraphQLUtbetalingtype.FERIEPENGER -> Utbetalingtype.FERIEPENGER
+                        GraphQLUtbetalingtype.REVURDERING -> Utbetalingtype.REVURDERING
+                        GraphQLUtbetalingtype.UTBETALING -> Utbetalingtype.UTBETALING
+                        GraphQLUtbetalingtype.__UNKNOWN_VALUE -> Utbetalingtype.UKJENT
+                    },
                 vurdering =
-                it.vurdering?.let { vurdering ->
-                    Vurdering(
-                        automatisk = vurdering.automatisk,
-                        godkjent = vurdering.godkjent,
-                        ident = vurdering.ident,
-                        tidsstempel = vurdering.tidsstempel,
-                    )
-                },
+                    it.vurdering?.let { vurdering ->
+                        Vurdering(
+                            automatisk = vurdering.automatisk,
+                            godkjent = vurdering.godkjent,
+                            ident = vurdering.ident,
+                            tidsstempel = vurdering.tidsstempel,
+                        )
+                    },
                 arbeidsgiversimulering = it.arbeidsgiveroppdrag?.tilSimulering(),
                 personsimulering = it.personoppdrag?.tilSimulering(),
             )
@@ -588,8 +590,7 @@ data class BeregnetPeriode(
             )
         }
 
-    fun avslag(): List<Avslag> =
-        saksbehandlerhåndterer.hentAvslag(periode.vedtaksperiodeId, periode.utbetaling.id).toList()
+    fun avslag(): List<Avslag> = saksbehandlerhåndterer.hentAvslag(periode.vedtaksperiodeId, periode.utbetaling.id).toList()
 }
 
 private fun GraphQLOppdrag.tilSimulering(): Simulering =

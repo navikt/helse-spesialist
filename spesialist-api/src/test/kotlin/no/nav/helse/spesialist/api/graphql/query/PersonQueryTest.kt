@@ -398,7 +398,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     }
 
     @Test
-    fun `sjekke at kanAvvises-flagget inkluderes i GraphQL svaret`() {
+    fun `kanAvvises-flagget inkluderes i GraphQL-svaret`() {
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver(), kanAvvises = false)
         val (id, fom, tom) = PERIODE
         val graphQLperiodeMedOppgave = opprettBeregnetPeriode(fom, tom, id)
