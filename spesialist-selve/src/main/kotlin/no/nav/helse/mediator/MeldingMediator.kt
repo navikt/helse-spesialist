@@ -676,12 +676,12 @@ internal class MeldingMediator(
 
         fun fortsett(
             mediator: MeldingMediator,
-            packet: JsonNode,
+            jsonNode: JsonNode,
         ) {
-            val behov = packet["@behov"].map(JsonNode::asText)
+            val behov = jsonNode["@behov"].map(JsonNode::asText)
             "fortsetter utførelse av kommandokjede for ${melding::class.simpleName} som følge av løsninger $behov".let {
                 logg.info(it)
-                sikkerlogg.info("$it\nInnkommende melding:\n\t$packet")
+                sikkerlogg.info("$it\nInnkommende melding:\n\t$jsonNode")
             }
             if (melding is Personmelding) {
                 mediator.gjenopptaMelding(melding, commandContext, messageContext)

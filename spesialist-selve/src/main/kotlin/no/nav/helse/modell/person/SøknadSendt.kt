@@ -21,7 +21,7 @@ internal class SøknadSendt private constructor(
         id = UUID.fromString(jsonNode["@id"].asText()),
         fødselsnummer = jsonNode["fnr"].asText(),
         aktørId = jsonNode["aktorId"].asText(),
-        organisasjonsnummer = jsonNode["arbeidsgiver.orgnummer"]?.asText() ?: jsonNode["tidligereArbeidsgiverOrgnummer"].asText(),
+        organisasjonsnummer = jsonNode.path("arbeidsgiver")["orgnummer"]?.asText() ?: jsonNode["tidligereArbeidsgiverOrgnummer"].asText(),
         json = jsonNode.toString(),
     )
 
