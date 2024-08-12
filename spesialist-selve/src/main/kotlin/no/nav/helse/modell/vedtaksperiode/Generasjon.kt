@@ -632,6 +632,23 @@ internal class Generasjon private constructor(
             find { varsel.erRelevantFor(it.vedtaksperiodeId) }?.håndterDeaktivertVarsel(varsel)
         }
 
+        internal fun List<Generasjon>.flyttEventueltAvviksvarselTil(vedtaksperiodeId: UUID) {
+            val targetGenerasjon =
+                finnGenerasjonForVedtaksperiode(vedtaksperiodeId) ?: run {
+                    logg.warn("Finner ikke generasjon for vedtaksperiode $vedtaksperiodeId, sjekker ikke om avviksvarsel skal flyttes")
+                    return
+                }
+            val varsel = flatMap { it.varsler }.find { it.erVarselOmAvvik() && it.erAktiv() } ?: return
+            val generasjonMedVarsel = first { generasjon -> generasjon.varsler.contains(varsel) }
+
+            logg.info(
+                "Flytter et ikke-vurdert avviksvarsel fra vedtaksperiode ${generasjonMedVarsel.vedtaksperiodeId} til vedtaksperiode $vedtaksperiodeId",
+            )
+
+            generasjonMedVarsel.varsler.remove(varsel)
+            targetGenerasjon.varsler.add(varsel)
+        }
+
         internal fun List<Generasjon>.håndterGodkjent(
             saksbehandlerIdent: String,
             vedtaksperiodeId: UUID,

@@ -300,6 +300,7 @@ internal class MeldingMediator(
 
         personRepository.brukPersonHvisFinnes(godkjenningsbehov.fødselsnummer()) {
             mottaSpleisVedtaksperioder(godkjenningsbehov.spleisVedtaksperioder)
+            flyttEventuelleAvviksvarsler(godkjenningsbehov.vedtaksperiodeId(), godkjenningsbehov.skjæringstidspunkt)
         }
 
         generasjonRepository.brukVedtaksperiode(godkjenningsbehov.fødselsnummer(), godkjenningsbehov.vedtaksperiodeId()) { vedtaksperiode ->

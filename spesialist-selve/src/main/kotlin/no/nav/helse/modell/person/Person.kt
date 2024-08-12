@@ -7,6 +7,7 @@ import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag.Companion.relevanteFor
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.flyttEventueltAvviksvarselTil
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.modell.vedtaksperiode.SpleisBehandling
@@ -20,6 +21,7 @@ import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.util.UUID
 
 class Person private constructor(
@@ -46,6 +48,13 @@ class Person private constructor(
             avviksvurderinger = avviksvurderinger.map { it.toDto() },
             skjønnsfastsatteSykepengegrunnlag = skjønnsfastsatteSykepengegrunnlag.map { it.toDto() },
         )
+
+    fun flyttEventuelleAvviksvarsler(
+        vedtaksperiodeId: UUID,
+        skjæringstidspunkt: LocalDate,
+    ) {
+        vedtaksperioder.relevanteFor(skjæringstidspunkt).flyttEventueltAvviksvarselTil(vedtaksperiodeId)
+    }
 
     fun behandleTilbakedateringBehandlet(perioder: List<Periode>) {
         vedtaksperioder.forEach { it.behandleTilbakedateringGodkjent(perioder) }

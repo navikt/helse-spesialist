@@ -904,6 +904,28 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             )
     }
 
+    protected fun saksbehandlerVurdererVarsel(
+        vedtaksperiodeId: UUID, varselkode: String, saksbehandlerIdent: String = SAKSBEHANDLER_IDENT
+    ) {
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL") val query = """
+                UPDATE selve_varsel 
+                SET status = 'VURDERT', status_endret_ident = :ident, status_endret_tidspunkt = now()
+                WHERE vedtaksperiode_id = :vedtaksperiodeId
+                    AND kode = :varselkode
+                """.trimIndent()
+            session.run(
+                queryOf(
+                    query, mapOf(
+                        "vedtaksperiodeId" to vedtaksperiodeId,
+                        "varselkode" to varselkode,
+                        "ident" to saksbehandlerIdent
+                    )
+                ).asUpdate
+            )
+        }
+    }
+
     protected fun håndterSaksbehandlerløsning(
         fødselsnummer: String = FØDSELSNUMMER,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
@@ -1366,6 +1388,20 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 @Language("PostgreSQL")
                 val query =
                     "SELECT COUNT(1) FROM selve_varsel WHERE vedtaksperiode_id = ? AND kode = ? AND status = 'GODKJENT'"
+                session.run(queryOf(query, vedtaksperiodeId, varselkode).map { it.int(1) }.asSingle)
+            }
+        assertEquals(1, antall)
+    }
+
+    protected fun assertVarsel(
+        vedtaksperiodeId: UUID,
+        varselkode: String,
+    ) {
+        val antall =
+            sessionOf(dataSource).use { session ->
+                @Language("PostgreSQL")
+                val query =
+                    "SELECT COUNT(1) FROM selve_varsel WHERE vedtaksperiode_id = ? AND kode = ?"
                 session.run(queryOf(query, vedtaksperiodeId, varselkode).map { it.int(1) }.asSingle)
             }
         assertEquals(1, antall)

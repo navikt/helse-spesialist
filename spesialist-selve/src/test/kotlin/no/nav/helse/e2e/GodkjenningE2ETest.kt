@@ -322,6 +322,68 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
     }
 
+    @Test
+    fun `flytt eventuelle aktive avviksvarsler til periode som nå er til godkjenning`() {
+        val vedtaksperiodeId1 = UUID.randomUUID()
+        val behandlingId1 = UUID.randomUUID()
+        val vedtaksperiodeId2 = UUID.randomUUID()
+        val behandlingId2 = UUID.randomUUID()
+
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling(vedtaksperiodeId = vedtaksperiodeId1, fom = 1.januar, tom = 15.januar, spleisBehandlingId = behandlingId1) // AUU
+        spleisOppretterNyBehandling(vedtaksperiodeId = vedtaksperiodeId2, fom = 1.januar, tom = 31.januar, spleisBehandlingId = behandlingId2) // Vanlig periode
+        håndterAktivitetsloggNyAktivitet(vedtaksperiodeId = vedtaksperiodeId2, varselkoder = listOf("RV_IV_2")) // avviksvarsel
+
+        // simulerer at første periode omgjøres
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
+            godkjenningsbehovTestdata = GodkjenningsbehovTestdata(
+                fødselsnummer = FØDSELSNUMMER,
+                aktørId = AKTØR,
+                organisasjonsnummer = ORGNR,
+                vedtaksperiodeId = vedtaksperiodeId1,
+                utbetalingId = UTBETALING_ID,
+                spleisBehandlingId = behandlingId1,
+                skjæringstidspunkt = 1.januar
+            ),
+        )
+
+        assertVarsler(vedtaksperiodeId1, 1)
+        assertVarsel(vedtaksperiodeId1, "RV_IV_2")
+        assertVarsler(vedtaksperiodeId2, 0)
+    }
+
+    @Test
+    fun `ikke flytt vurdert avviksvarsel til annen (tidligere) periode som er til godkjenning`() {
+        val vedtaksperiodeId1 = UUID.randomUUID()
+        val behandlingId1 = UUID.randomUUID()
+        val vedtaksperiodeId2 = UUID.randomUUID()
+        val behandlingId2 = UUID.randomUUID()
+
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling(vedtaksperiodeId = vedtaksperiodeId1, fom = 1.januar, tom = 15.januar, spleisBehandlingId = behandlingId1) // AUU
+        spleisOppretterNyBehandling(vedtaksperiodeId = vedtaksperiodeId2, fom = 1.januar, tom = 31.januar, spleisBehandlingId = behandlingId2) // Vanlig periode
+        håndterAktivitetsloggNyAktivitet(vedtaksperiodeId = vedtaksperiodeId2, varselkoder = listOf("RV_IV_2")) // avviksvarsel
+
+        saksbehandlerVurdererVarsel(vedtaksperiodeId2, "RV_IV_2")
+
+        // simulerer at første periode omgjøres
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
+            godkjenningsbehovTestdata = GodkjenningsbehovTestdata(
+                fødselsnummer = FØDSELSNUMMER,
+                aktørId = AKTØR,
+                organisasjonsnummer = ORGNR,
+                vedtaksperiodeId = vedtaksperiodeId1,
+                utbetalingId = UTBETALING_ID,
+                spleisBehandlingId = behandlingId1,
+                skjæringstidspunkt = 1.januar
+            ),
+        )
+
+        assertVarsler(vedtaksperiodeId1, 0)
+        assertVarsel(vedtaksperiodeId2, "RV_IV_2")
+        assertVarsler(vedtaksperiodeId2, 1)
+    }
+
     private fun assertBehandlingsinformasjon(
         vedtaksperiodeId: UUID,
         forventedeTags: List<String>,

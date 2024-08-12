@@ -89,7 +89,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
             session.transaction { tx ->
                 tx.lagre(generasjonDto)
                 generasjonDto.varsler.forEach { varselDto ->
-                    tx.lagre(varselDto, generasjonDto.id)
+                    tx.lagre(varselDto, generasjonDto.vedtaksperiodeId, generasjonDto.id)
                 }
                 tx.slettVarsler(generasjonDto.id, generasjonDto.varsler.map { it.id })
             }
@@ -100,7 +100,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
         this.lagre(generasjonDto)
         this.slettVarsler(generasjonDto.id, generasjonDto.varsler.map { it.id })
         generasjonDto.varsler.forEach { varselDto ->
-            this.lagre(varselDto, generasjonDto.id)
+            this.lagre(varselDto, generasjonDto.vedtaksperiodeId, generasjonDto.id)
         }
     }
 
@@ -133,6 +133,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
 
     private fun TransactionalSession.lagre(
         varselDto: VarselDto,
+        vedtaksperiodeId: UUID,
         generasjonId: UUID,
     ) {
         @Language("PostgreSQL")
@@ -149,7 +150,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
                 mapOf(
                     "unik_id" to varselDto.id,
                     "kode" to varselDto.varselkode,
-                    "vedtaksperiode_id" to varselDto.vedtaksperiodeId,
+                    "vedtaksperiode_id" to vedtaksperiodeId,
                     "generasjon_id" to generasjonId,
                     "opprettet" to varselDto.opprettet,
                     "status" to varselDto.status.name,
