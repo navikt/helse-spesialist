@@ -225,6 +225,7 @@ type DokumentInntektsmelding {
     naerRelasjon: Boolean
     opphoerAvNaturalytelser: [OpphoerAvNaturalytelse!]
     refusjon: Refusjon
+    virksomhetsnummer: String
 }
 
 type EndringIRefusjon {

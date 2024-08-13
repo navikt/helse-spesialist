@@ -128,6 +128,9 @@ class DokumentQuery(
             arbeidsforholdId =
                 this.path("arbeidsforholdId")
                     .takeUnless { it.isMissingOrNull() }?.asText(),
+            virksomhetsnummer =
+                this.path("virksomhetsnummer")
+                    .takeUnless { it.isMissingOrNull() }?.asText(),
             begrunnelseForReduksjonEllerIkkeUtbetalt =
                 this.path("begrunnelseForReduksjonEllerIkkeUtbetalt")
                     .takeUnless { it.isMissingOrNull() }?.asText(),

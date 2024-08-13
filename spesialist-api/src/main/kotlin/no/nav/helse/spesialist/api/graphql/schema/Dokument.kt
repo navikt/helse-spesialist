@@ -86,6 +86,7 @@ data class Svar(
 
 data class DokumentInntektsmelding(
     val arbeidsforholdId: String?,
+    val virksomhetsnummer: String?,
     val begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
     val bruttoUtbetalt: Double?,
     val beregnetInntekt: Double?,
