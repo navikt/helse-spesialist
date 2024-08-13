@@ -209,6 +209,7 @@ type Dagoverstyring implements Overstyring {
 }
 
 type DokumentInntektsmelding {
+    arbeidsforholdId: String
     arbeidsgiverperioder: [IMPeriode!]
     avsenderSystem: AvsenderSystem
     begrunnelseForReduksjonEllerIkkeUtbetalt: String

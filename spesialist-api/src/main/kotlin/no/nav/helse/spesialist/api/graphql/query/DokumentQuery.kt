@@ -125,6 +125,9 @@ class DokumentQuery(
 
     private fun JsonNode.tilInntektsmelding(): DokumentInntektsmelding {
         return DokumentInntektsmelding(
+            arbeidsforholdId =
+                this.path("arbeidsforholdId")
+                    .takeUnless { it.isMissingOrNull() }?.asText(),
             begrunnelseForReduksjonEllerIkkeUtbetalt =
                 this.path("begrunnelseForReduksjonEllerIkkeUtbetalt")
                     .takeUnless { it.isMissingOrNull() }?.asText(),

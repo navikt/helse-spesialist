@@ -274,6 +274,7 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
                     dokumentId: "$dokumentId"
                     fnr: "$FØDSELSNUMMER"
                 ) {
+                    arbeidsforholdId,
                     begrunnelseForReduksjonEllerIkkeUtbetalt,
                     bruttoUtbetalt,
                     beregnetInntekt,
@@ -311,7 +312,7 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
             )
         }
 
-        assertEquals(15, dokument.size())
+        assertEquals(16, dokument.size())
         assertTrue(dokument["bruttoUtbetalt"].isNull)
         assertEquals(35000.0, dokument["beregnetInntekt"].asDouble())
         assertEquals("2023-08-01", dokument["foersteFravaersdag"].asText())
