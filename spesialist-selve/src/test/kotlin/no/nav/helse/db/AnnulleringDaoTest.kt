@@ -19,12 +19,7 @@ class AnnulleringDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `Lagrer annullering med begrunnelse`() {
-        saksbehandlerDao.opprettSaksbehandler(
-            SAKSBEHANDLER_OID,
-            SAKSBEHANDLER_NAVN,
-            SAKSBEHANDLER_EPOST,
-            SAKSBEHANDLER_IDENT,
-        )
+        opprettSaksbehandler()
         annulleringDao.lagreAnnullering(annulleringDto(), saksbehandler())
         assertAnnullering()
         assertBegrunnelse()
@@ -32,12 +27,7 @@ class AnnulleringDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `Lagrer annullering uten begrunnelse`() {
-        saksbehandlerDao.opprettSaksbehandler(
-            SAKSBEHANDLER_OID,
-            SAKSBEHANDLER_NAVN,
-            SAKSBEHANDLER_EPOST,
-            SAKSBEHANDLER_IDENT,
-        )
+        opprettSaksbehandler()
         annulleringDao.lagreAnnullering(annulleringDto(begrunnelse = null), saksbehandler())
         assertAnnullering()
         assertIngenBegrunnelse()
@@ -45,13 +35,13 @@ class AnnulleringDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `kan finne annullering med begrunnelse`() {
-        saksbehandlerDao.opprettSaksbehandler(
-            SAKSBEHANDLER_OID,
-            SAKSBEHANDLER_NAVN,
-            SAKSBEHANDLER_EPOST,
-            SAKSBEHANDLER_IDENT,
-        )
+        nyPerson()
+        utbetalingsopplegg(1000, 0)
+        opprettSaksbehandler()
         annulleringDao.lagreAnnullering(annulleringDto(), saksbehandler())
+        annulleringDao.finnAnnulleringId(UTBETALING_ID)?.let { annulleringId ->
+            utbetalingDao.leggTilAnnullertAvSaksbehandler(UTBETALING_ID, annulleringId)
+        }
         val annullering = annulleringDao.finnAnnullering(UTBETALING_ID)
         assertEquals(UTBETALING_ID, annullering?.utbetalingId)
         assertEquals(SAKSBEHANDLER_IDENT, annullering?.saksbehandlerIdent)
@@ -60,13 +50,13 @@ class AnnulleringDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `kan finne annullering uten begrunnelse`() {
-        saksbehandlerDao.opprettSaksbehandler(
-            SAKSBEHANDLER_OID,
-            SAKSBEHANDLER_NAVN,
-            SAKSBEHANDLER_EPOST,
-            SAKSBEHANDLER_IDENT,
-        )
+        nyPerson()
+        utbetalingsopplegg(1000, 0)
+        opprettSaksbehandler()
         annulleringDao.lagreAnnullering(annulleringDto(begrunnelse = null), saksbehandler())
+        annulleringDao.finnAnnulleringId(UTBETALING_ID)?.let { annulleringId ->
+            utbetalingDao.leggTilAnnullertAvSaksbehandler(UTBETALING_ID, annulleringId)
+        }
         val annullering = annulleringDao.finnAnnullering(UTBETALING_ID)
         assertEquals(UTBETALING_ID, annullering?.utbetalingId)
         assertEquals(SAKSBEHANDLER_IDENT, annullering?.saksbehandlerIdent)
