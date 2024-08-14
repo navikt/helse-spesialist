@@ -88,6 +88,48 @@ internal object Testmeldingfabrikk {
             )
         )
 
+    fun lagFullmaktløsningMedFullmakt(
+        fødselsnummer: String,
+        fom: LocalDate,
+        tom: LocalDate
+    ): String = nyHendelse(
+        id = UUID.randomUUID(), "behov",
+        mapOf(
+            "fødselsnummer" to fødselsnummer,
+            "@final" to true,
+            "@behov" to listOf("Fullmakt"),
+            "contextId" to "${UUID.randomUUID()}",
+            "hendelseId" to "${UUID.randomUUID()}",
+            "@løsning" to listOf(
+                mapOf(
+                    "fullmakt" to mapOf(
+                        "omraade" to listOf("SYK", "SYM"),
+                        "gyldigFraOgMed" to fom,
+                        "gyldigTilOgMed" to tom,
+                    )
+                )
+            )
+        )
+    )
+
+    fun lagFullmaktløsningUtenFullmakter(
+        fødselsnummer: String
+    ): String = nyHendelse(
+        id = UUID.randomUUID(), "behov",
+        mapOf(
+            "fødselsnummer" to fødselsnummer,
+            "@final" to true,
+            "@behov" to listOf("Fullmakt"),
+            "contextId" to "${UUID.randomUUID()}",
+            "hendelseId" to "${UUID.randomUUID()}",
+            "@løsning" to listOf(
+                mapOf(
+                    "fullmakt" to emptyList<Map<String, String>>()
+                )
+            )
+        )
+    )
+
     fun lagEndretSkjermetinfo(
         fødselsnummer: String,
         skjermet: Boolean,
