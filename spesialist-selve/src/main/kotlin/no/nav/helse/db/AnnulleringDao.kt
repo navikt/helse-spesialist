@@ -22,7 +22,7 @@ class AnnulleringDao(
             """
             INSERT INTO annullert_av_saksbehandler (annullert_tidspunkt, saksbehandler_ref, årsaker, begrunnelse_ref, vedtaksperiode_id, utbetaling_id) 
             VALUES (now(), :saksbehandler, '{${
-                annulleringDto.årsaker.somDbArray()
+                annulleringDto.årsaker?.map { it.arsak }?.somDbArray()
             }}', :begrunnelseRef, :vedtaksperiodeId, :utbetalingId)
             """.trimIndent(),
             mapOf(

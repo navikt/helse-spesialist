@@ -3,6 +3,7 @@ package no.nav.helse.db
 import DatabaseIntegrationTest
 import TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringArsak
 import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -10,15 +11,20 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class AnnulleringDaoTest: DatabaseIntegrationTest() {
-
+class AnnulleringDaoTest : DatabaseIntegrationTest() {
     @BeforeEach
     fun tømTabeller() {
         query("truncate annullert_av_saksbehandler, begrunnelse cascade").execute()
     }
+
     @Test
     fun `Lagrer annullering med begrunnelse`() {
-        saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
+        saksbehandlerDao.opprettSaksbehandler(
+            SAKSBEHANDLER_OID,
+            SAKSBEHANDLER_NAVN,
+            SAKSBEHANDLER_EPOST,
+            SAKSBEHANDLER_IDENT,
+        )
         annulleringDao.lagreAnnullering(annulleringDto(), saksbehandler())
         assertAnnullering()
         assertBegrunnelse()
@@ -26,7 +32,12 @@ class AnnulleringDaoTest: DatabaseIntegrationTest() {
 
     @Test
     fun `Lagrer annullering uten begrunnelse`() {
-        saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
+        saksbehandlerDao.opprettSaksbehandler(
+            SAKSBEHANDLER_OID,
+            SAKSBEHANDLER_NAVN,
+            SAKSBEHANDLER_EPOST,
+            SAKSBEHANDLER_IDENT,
+        )
         annulleringDao.lagreAnnullering(annulleringDto(begrunnelse = null), saksbehandler())
         assertAnnullering()
         assertIngenBegrunnelse()
@@ -34,7 +45,12 @@ class AnnulleringDaoTest: DatabaseIntegrationTest() {
 
     @Test
     fun `kan finne annullering med begrunnelse`() {
-        saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
+        saksbehandlerDao.opprettSaksbehandler(
+            SAKSBEHANDLER_OID,
+            SAKSBEHANDLER_NAVN,
+            SAKSBEHANDLER_EPOST,
+            SAKSBEHANDLER_IDENT,
+        )
         annulleringDao.lagreAnnullering(annulleringDto(), saksbehandler())
         val annullering = annulleringDao.finnAnnullering(UTBETALING_ID)
         assertEquals(UTBETALING_ID, annullering?.utbetalingId)
@@ -44,7 +60,12 @@ class AnnulleringDaoTest: DatabaseIntegrationTest() {
 
     @Test
     fun `kan finne annullering uten begrunnelse`() {
-        saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
+        saksbehandlerDao.opprettSaksbehandler(
+            SAKSBEHANDLER_OID,
+            SAKSBEHANDLER_NAVN,
+            SAKSBEHANDLER_EPOST,
+            SAKSBEHANDLER_IDENT,
+        )
         annulleringDao.lagreAnnullering(annulleringDto(begrunnelse = null), saksbehandler())
         val annullering = annulleringDao.finnAnnullering(UTBETALING_ID)
         assertEquals(UTBETALING_ID, annullering?.utbetalingId)
@@ -59,7 +80,7 @@ class AnnulleringDaoTest: DatabaseIntegrationTest() {
             organisasjonsnummer = ORGNUMMER,
             vedtaksperiodeId = VEDTAKSPERIODE,
             utbetalingId = UTBETALING_ID,
-            årsaker = listOf("en årsak", "to årsak"),
+            årsaker = listOf(AnnulleringArsak("key1", "en årsak"), AnnulleringArsak("key2", "to årsak")),
             kommentar = begrunnelse,
         )
 
