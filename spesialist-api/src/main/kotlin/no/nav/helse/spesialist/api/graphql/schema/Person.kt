@@ -84,7 +84,7 @@ data class Annullering(
     val saksbehandlerIdent: String,
     val utbetalingId: UUID,
     val tidspunkt: LocalDateTime,
-    val årsaker: List<String>,
+    val arsaker: List<String>,
     val begrunnelse: String?,
 )
 

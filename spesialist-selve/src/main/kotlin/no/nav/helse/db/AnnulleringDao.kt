@@ -76,7 +76,7 @@ class AnnulleringDao(
                 saksbehandlerIdent = it.string("ident"),
                 utbetalingId = utbetalingId,
                 tidspunkt = it.localDateTime("annullert_tidspunkt"),
-                årsaker = it.array<String>("årsaker").toList(),
+                arsaker = it.array<String>("årsaker").toList(),
                 begrunnelse = it.stringOrNull("tekst"),
             )
         }

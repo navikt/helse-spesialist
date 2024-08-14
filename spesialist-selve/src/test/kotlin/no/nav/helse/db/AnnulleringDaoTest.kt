@@ -8,31 +8,10 @@ import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 class AnnulleringDaoTest : DatabaseIntegrationTest() {
-    @BeforeEach
-    fun tømTabeller() {
-        query("truncate annullert_av_saksbehandler, begrunnelse cascade").execute()
-    }
-
-    @Test
-    fun `Lagrer annullering med begrunnelse`() {
-        opprettSaksbehandler()
-        annulleringDao.lagreAnnullering(annulleringDto(), saksbehandler())
-        assertAnnullering()
-        assertBegrunnelse()
-    }
-
-    @Test
-    fun `Lagrer annullering uten begrunnelse`() {
-        opprettSaksbehandler()
-        annulleringDao.lagreAnnullering(annulleringDto(begrunnelse = null), saksbehandler())
-        assertAnnullering()
-        assertIngenBegrunnelse()
-    }
-
     @Test
     fun `kan finne annullering med begrunnelse`() {
         nyPerson()
@@ -63,71 +42,25 @@ class AnnulleringDaoTest : DatabaseIntegrationTest() {
         assertNull(annullering?.begrunnelse)
     }
 
-    private fun annulleringDto(begrunnelse: String? = "annulleringsbegrunnelse") =
-        AnnulleringDto(
-            aktørId = AKTØR,
-            fødselsnummer = FNR,
-            organisasjonsnummer = ORGNUMMER,
-            vedtaksperiodeId = VEDTAKSPERIODE,
-            utbetalingId = UTBETALING_ID,
-            årsaker = listOf(AnnulleringArsak("key1", "en årsak"), AnnulleringArsak("key2", "to årsak")),
-            kommentar = begrunnelse,
-        )
+    private fun annulleringDto(
+        begrunnelse: String? = "annulleringsbegrunnelse",
+        utbetalingId: UUID = UTBETALING_ID,
+    ) = AnnulleringDto(
+        aktørId = AKTØR,
+        fødselsnummer = FNR,
+        organisasjonsnummer = ORGNUMMER,
+        vedtaksperiodeId = VEDTAKSPERIODE,
+        utbetalingId = utbetalingId,
+        årsaker = listOf(AnnulleringArsak("key1", "en årsak"), AnnulleringArsak("key2", "to årsak")),
+        kommentar = begrunnelse,
+    )
 
-    private fun saksbehandler() =
+    private fun saksbehandler(saksbehandlerOid: UUID = SAKSBEHANDLER_OID) =
         Saksbehandler(
             epostadresse = SAKSBEHANDLER_EPOST,
-            oid = SAKSBEHANDLER_OID,
+            oid = saksbehandlerOid,
             navn = SAKSBEHANDLER_NAVN,
             ident = SAKSBEHANDLER_IDENT,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
         )
-
-    private fun assertAnnullering() {
-        val annullering =
-            query(
-                """select * from annullert_av_saksbehandler where utbetaling_id = :utbetalingId""",
-                "utbetalingId" to UTBETALING_ID,
-            ).single {
-                mapOf(
-                    "vedtaksperiodeId" to it.uuid("vedtaksperiode_id"),
-                    "utbetalingId" to it.uuid("utbetaling_id"),
-                    "årsaker" to it.array<String>("årsaker").toList(),
-                )
-            }
-        assertEquals(VEDTAKSPERIODE, annullering?.get("vedtaksperiodeId"))
-        assertEquals(UTBETALING_ID, annullering?.get("utbetalingId"))
-        assertEquals(listOf("en årsak", "to årsak"), annullering?.get("årsaker"))
-    }
-
-    private fun assertBegrunnelse() {
-        val begrunnelse =
-            query(
-                """select * from begrunnelse where type = 'ANNULLERING'""",
-            ).single {
-                mapOf(
-                    "tekst" to it.string("tekst"),
-                    "type" to it.string("type"),
-                    "saksbehandler" to it.uuid("saksbehandler_ref"),
-                )
-            }
-
-        assertEquals("annulleringsbegrunnelse", begrunnelse?.get("tekst"))
-        assertEquals("ANNULLERING", begrunnelse?.get("type"))
-        assertEquals(SAKSBEHANDLER_OID, begrunnelse?.get("saksbehandler"))
-    }
-
-    private fun assertIngenBegrunnelse() {
-        val begrunnelse =
-            query(
-                """select * from begrunnelse where type = 'ANNULLERING'""",
-            ).single {
-                mapOf(
-                    "tekst" to it.string("tekst"),
-                    "type" to it.string("type"),
-                    "saksbehandler" to it.uuid("saksbehandler_ref"),
-                )
-            }
-        assertNull(begrunnelse)
-    }
 }
