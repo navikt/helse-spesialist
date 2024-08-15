@@ -2,7 +2,6 @@ package no.nav.helse.mediator.meldinger.løsninger
 
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
-import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.River
@@ -13,15 +12,8 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class Fullmaktløsning(
-    private val fødselsnummer: String,
     val harFullmakt: Boolean,
 ) {
-    private val log = LoggerFactory.getLogger(Fullmaktløsning::class.java)
-
-    internal fun lagre(vergemålDao: VergemålDao) {
-        log.info("Lagrer ennå ikke fullmakt")
-    }
-
     internal class FullmaktRiver(
         private val meldingMediator: MeldingMediator,
     ) : SpesialistRiver {
@@ -51,7 +43,6 @@ internal class Fullmaktløsning(
             sikkerLogg.info("Mottok melding Fullmakt:\n{}", packet.toJson())
             val contextId = UUID.fromString(packet["contextId"].asText())
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())
-            val fødselsnummer = packet["fødselsnummer"].asText()
 
             val nå = LocalDate.now()
             val harFullmakt = packet["@løsning"].filter { fullmaktNode ->
@@ -62,7 +53,6 @@ internal class Fullmaktløsning(
             }.isNotEmpty()
 
             val fullmaktløsning = Fullmaktløsning(
-                fødselsnummer = fødselsnummer,
                 harFullmakt = harFullmakt,
             )
 

@@ -25,16 +25,16 @@ class VergemålDao(val dataSource: DataSource) {
                 :har_vergemal,
                 :har_fremtidsfullmakter,
                 :har_fullmakter,
-                :vergemal_oppdatert,
-                :fullmakt_oppdatert
+                :oppdatert,
+                :oppdatert
             )
             ON CONFLICT (person_ref)
             DO UPDATE SET
                 har_vergemal = :har_vergemal,
                 har_fremtidsfullmakter = :har_fremtidsfullmakter,
                 har_fullmakter = :har_fullmakter,
-                vergemål_oppdatert = :vergemal_oppdatert,
-                fullmakt_oppdatert = :fullmakt_oppdatert
+                vergemål_oppdatert = :oppdatert,
+                fullmakt_oppdatert = :oppdatert
         """
         sessionOf(dataSource).use { session ->
             session.run(
@@ -43,10 +43,9 @@ class VergemålDao(val dataSource: DataSource) {
                     mapOf(
                         "fodselsnummer" to fødselsnummer.toLong(),
                         "har_vergemal" to vergemål.harVergemål,
-                        "har_fremtidsfullmakter" to vergemål.harFullmakter,
+                        "har_fremtidsfullmakter" to vergemål.harFremtidsfullmakter,
                         "har_fullmakter" to vergemål.harFullmakter,
-                        "vergemal_oppdatert" to LocalDateTime.now(),
-                        "fullmakt_oppdatert" to LocalDateTime.now(),
+                        "oppdatert" to LocalDateTime.now(),
                     ),
                 ).asExecute,
             )
@@ -75,6 +74,36 @@ class VergemålDao(val dataSource: DataSource) {
                             it.boolean("har_fremtidsfullmakter"),
                             it.boolean("har_fullmakter"),
                         ).harVergemål
+                    }
+                    .asSingle,
+            )
+        }
+    }
+
+    fun harFullmakt(fødselsnummer: String): Boolean? {
+        @Language("PostgreSQL")
+        val query = """
+            SELECT har_vergemal, har_fremtidsfullmakter, har_fullmakter
+                FROM vergemal v
+                    INNER JOIN person p on p.id = v.person_ref
+                WHERE p.fodselsnummer = :fodselsnummer
+            """
+        return sessionOf(dataSource).use { session ->
+            session.run(
+                queryOf(
+                    query,
+                    mapOf(
+                        "fodselsnummer" to fødselsnummer.toLong(),
+                    ),
+                )
+                    .map { row ->
+                        Vergemål(
+                            row.boolean("har_vergemal"),
+                            row.boolean("har_fremtidsfullmakter"),
+                            row.boolean("har_fullmakter"),
+                        ).let {
+                            it.harFullmakter || it.harFremtidsfullmakter
+                        }
                     }
                     .asSingle,
             )

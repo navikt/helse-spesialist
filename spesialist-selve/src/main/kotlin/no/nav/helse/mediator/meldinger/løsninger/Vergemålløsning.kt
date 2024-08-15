@@ -3,7 +3,6 @@ package no.nav.helse.mediator.meldinger.løsninger
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
 import no.nav.helse.modell.vergemal.Vergemål
-import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.River
@@ -12,13 +11,8 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 internal class Vergemålløsning(
-    private val fødselsnummer: String,
     val vergemål: Vergemål,
 ) {
-    internal fun lagre(vergemålDao: VergemålDao) {
-        vergemålDao.lagre(fødselsnummer, vergemål)
-    }
-
     internal class VergemålRiver(
         private val meldingMediator: MeldingMediator,
     ) : SpesialistRiver {
@@ -44,7 +38,6 @@ internal class Vergemålløsning(
             sikkerLogg.info("Mottok melding Vergemål:\n{}", packet.toJson())
             val contextId = UUID.fromString(packet["contextId"].asText())
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())
-            val fødselsnummer = packet["fødselsnummer"].asText()
 
             val vergemålNode = packet["@løsning.Vergemål"]
             val harVergemål = !vergemålNode["vergemål"].isEmpty
@@ -60,7 +53,6 @@ internal class Vergemålløsning(
 
             val vergemålLøsning =
                 Vergemålløsning(
-                    fødselsnummer = fødselsnummer,
                     vergemål = vergemål,
                 )
 

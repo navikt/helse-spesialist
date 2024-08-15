@@ -11,6 +11,7 @@ import java.util.UUID
 
 internal class VurderVergemålOgFullmakt(
     private val hendelseId: UUID,
+    private val fødselsnummer: String,
     private val vergemålDao: VergemålDao,
     private val vedtaksperiodeId: UUID,
     private val sykefraværstilfelle: Sykefraværstilfelle,
@@ -27,7 +28,7 @@ internal class VurderVergemålOgFullmakt(
             return false
         }
 
-        løsning.lagre(vergemålDao)
+        vergemålDao.lagre(fødselsnummer, løsning.vergemål)
 
         if (løsning.harVergemål()) {
             logg.info("Legger til varsel om vergemål på vedtaksperiode $vedtaksperiodeId")

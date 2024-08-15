@@ -99,26 +99,27 @@ internal class Godkjenningsbehov private constructor(
         skjæringstidspunkt = LocalDate.parse(packet["Godkjenning.skjæringstidspunkt"].asText()),
         vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
         spleisVedtaksperioder =
-            packet["Godkjenning.perioderMedSammeSkjæringstidspunkt"].map { periodeNode ->
-                SpleisVedtaksperiode(
-                    vedtaksperiodeId = periodeNode["vedtaksperiodeId"].asUUID(),
-                    spleisBehandlingId = periodeNode["behandlingId"].asUUID(),
-                    fom = periodeNode["fom"].asLocalDate(),
-                    tom = periodeNode["tom"].asLocalDate(),
-                    skjæringstidspunkt = packet["Godkjenning.skjæringstidspunkt"].asLocalDate(),
-                )
-            },
+        packet["Godkjenning.perioderMedSammeSkjæringstidspunkt"].map { periodeNode ->
+            SpleisVedtaksperiode(
+                vedtaksperiodeId = periodeNode["vedtaksperiodeId"].asUUID(),
+                spleisBehandlingId = periodeNode["behandlingId"].asUUID(),
+                fom = periodeNode["fom"].asLocalDate(),
+                tom = periodeNode["tom"].asLocalDate(),
+                skjæringstidspunkt = packet["Godkjenning.skjæringstidspunkt"].asLocalDate(),
+            )
+        },
         spleisBehandlingId = UUID.fromString(packet["Godkjenning.behandlingId"].asText()),
-        tags = packet["Godkjenning.tags"].takeUnless(JsonNode::isMissingOrNull)?.map { it.asText() }?.toList() ?: emptyList<String>(),
+        tags = packet["Godkjenning.tags"].takeUnless(JsonNode::isMissingOrNull)?.map { it.asText() }?.toList()
+            ?: emptyList<String>(),
         utbetalingId = UUID.fromString(packet["utbetalingId"].asText()),
         periodetype = Periodetype.valueOf(packet["Godkjenning.periodetype"].asText()),
         førstegangsbehandling = packet["Godkjenning.førstegangsbehandling"].asBoolean(),
         utbetalingtype = Utbetalingtype.valueOf(packet["Godkjenning.utbetalingtype"].asText()),
         inntektskilde = Inntektskilde.valueOf(packet["Godkjenning.inntektskilde"].asText()),
         orgnummereMedRelevanteArbeidsforhold =
-            packet["Godkjenning.orgnummereMedRelevanteArbeidsforhold"]
-                .takeUnless(JsonNode::isMissingOrNull)
-                ?.map { it.asText() } ?: emptyList(),
+        packet["Godkjenning.orgnummereMedRelevanteArbeidsforhold"]
+            .takeUnless(JsonNode::isMissingOrNull)
+            ?.map { it.asText() } ?: emptyList(),
         kanAvvises = packet["Godkjenning.kanAvvises"].asBoolean(),
         json = packet.toJson(),
     )
@@ -132,24 +133,24 @@ internal class Godkjenningsbehov private constructor(
         periodeTom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeTom").asText()),
         vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
         spleisVedtaksperioder =
-            jsonNode.path("Godkjenning").path("perioderMedSammeSkjæringstidspunkt").map { periodeNode ->
-                SpleisVedtaksperiode(
-                    vedtaksperiodeId = periodeNode["vedtaksperiodeId"].asUUID(),
-                    spleisBehandlingId = periodeNode["behandlingId"].asUUID(),
-                    fom = periodeNode["fom"].asLocalDate(),
-                    tom = periodeNode["tom"].asLocalDate(),
-                    skjæringstidspunkt = jsonNode.path("Godkjenning").path("skjæringstidspunkt").asLocalDate(),
-                )
-            },
+        jsonNode.path("Godkjenning").path("perioderMedSammeSkjæringstidspunkt").map { periodeNode ->
+            SpleisVedtaksperiode(
+                vedtaksperiodeId = periodeNode["vedtaksperiodeId"].asUUID(),
+                spleisBehandlingId = periodeNode["behandlingId"].asUUID(),
+                fom = periodeNode["fom"].asLocalDate(),
+                tom = periodeNode["tom"].asLocalDate(),
+                skjæringstidspunkt = jsonNode.path("Godkjenning").path("skjæringstidspunkt").asLocalDate(),
+            )
+        },
         spleisBehandlingId = UUID.fromString(jsonNode.path("Godkjenning").path("behandlingId").asText()),
         tags =
-            jsonNode
-                .path("Godkjenning")
-                .path("tags")
-                .takeUnless(JsonNode::isMissingOrNull)
-                ?.map {
-                    it.asText()
-                }?.toList() ?: emptyList<String>(),
+        jsonNode
+            .path("Godkjenning")
+            .path("tags")
+            .takeUnless(JsonNode::isMissingOrNull)
+            ?.map {
+                it.asText()
+            }?.toList() ?: emptyList<String>(),
         utbetalingId = UUID.fromString(jsonNode.path("utbetalingId").asText()),
         skjæringstidspunkt = LocalDate.parse(jsonNode.path("Godkjenning").path("skjæringstidspunkt").asText()),
         periodetype = Periodetype.valueOf(jsonNode.path("Godkjenning").path("periodetype").asText()),
@@ -157,11 +158,11 @@ internal class Godkjenningsbehov private constructor(
         utbetalingtype = Utbetalingtype.valueOf(jsonNode.path("Godkjenning").path("utbetalingtype").asText()),
         inntektskilde = Inntektskilde.valueOf(jsonNode.path("Godkjenning").path("inntektskilde").asText()),
         orgnummereMedRelevanteArbeidsforhold =
-            jsonNode
-                .path("Godkjenning")
-                .path("orgnummereMedRelevanteArbeidsforhold")
-                .takeUnless(JsonNode::isMissingOrNull)
-                ?.map { it.asText() } ?: emptyList(),
+        jsonNode
+            .path("Godkjenning")
+            .path("orgnummereMedRelevanteArbeidsforhold")
+            .takeUnless(JsonNode::isMissingOrNull)
+            ?.map { it.asText() } ?: emptyList(),
         kanAvvises = jsonNode.path("Godkjenning").path("kanAvvises").asBoolean(),
         json = jsonNode.toString(),
     )
@@ -248,6 +249,7 @@ internal class GodkjenningsbehovCommand(
             ),
             VurderVergemålOgFullmakt(
                 hendelseId = id,
+                fødselsnummer = fødselsnummer,
                 vergemålDao = vergemålDao,
                 vedtaksperiodeId = vedtaksperiodeId,
                 sykefraværstilfelle = sykefraværstilfelle,

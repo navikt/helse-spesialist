@@ -49,6 +49,7 @@ class VurderVergemålOgFullmaktTest {
     private val command =
         VurderVergemålOgFullmakt(
             hendelseId = UUID.randomUUID(),
+            fødselsnummer = FNR,
             vergemålDao = vergemålDao,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             sykefraværstilfelle = sykefraværstilfelle,
@@ -102,7 +103,7 @@ class VurderVergemålOgFullmaktTest {
 
     @Test
     fun `lagrer svar på vergemål ved løsning ingen vergemål`() {
-        context.add(Vergemålløsning(FNR, ingenVergemål))
+        context.add(Vergemålløsning(ingenVergemål))
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, ingenVergemål) }
         assertEquals(0, observer.hendelser.size)
@@ -111,7 +112,7 @@ class VurderVergemålOgFullmaktTest {
 
     @Test
     fun `lagrer svar på vergemål ved løsning har vergemål`() {
-        context.add(Vergemålløsning(FNR, harVergemål))
+        context.add(Vergemålløsning(harVergemål))
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harVergemål) }
         assertEquals(0, observer.hendelser.size)
@@ -119,7 +120,7 @@ class VurderVergemålOgFullmaktTest {
 
     @Test
     fun `lagrer svar på vergemål ved løsning har fullmakt`() {
-        context.add(Vergemålløsning(FNR, harFullmakt))
+        context.add(Vergemålløsning(harFullmakt))
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harFullmakt) }
         assertEquals(0, observer.hendelser.size)
@@ -128,7 +129,7 @@ class VurderVergemålOgFullmaktTest {
 
     @Test
     fun `lagrer svar på vergemål ved løsning har fremtidsfullmakt`() {
-        context.add(Vergemålløsning(FNR, harFremtidsfullmakt))
+        context.add(Vergemålløsning(harFremtidsfullmakt))
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harFremtidsfullmakt) }
         assertEquals(0, observer.hendelser.size)
@@ -137,7 +138,7 @@ class VurderVergemålOgFullmaktTest {
 
     @Test
     fun `legger til varsel ved vergemål`() {
-        context.add(Vergemålløsning(FNR, harAlt))
+        context.add(Vergemålløsning(harAlt))
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harAlt) }
         assertEquals(0, observer.hendelser.size)
@@ -146,7 +147,7 @@ class VurderVergemålOgFullmaktTest {
 
     @Test
     fun `legger kun til en varsel ved både fullmakt og fremtidsfullmakt`() {
-        context.add(Vergemålløsning(FNR, harBeggeFullmatkstyper))
+        context.add(Vergemålløsning(harBeggeFullmatkstyper))
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harBeggeFullmatkstyper) }
         assertEquals(0, observer.hendelser.size)

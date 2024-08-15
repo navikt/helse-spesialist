@@ -37,6 +37,7 @@ import no.nav.helse.mediator.meldinger.løsninger.ArbeidsgiverRiver
 import no.nav.helse.mediator.meldinger.løsninger.DokumentRiver
 import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
 import no.nav.helse.mediator.meldinger.løsninger.FlerePersoninfoRiver
+import no.nav.helse.mediator.meldinger.løsninger.Fullmaktløsning
 import no.nav.helse.mediator.meldinger.løsninger.HentEnhetRiver
 import no.nav.helse.mediator.meldinger.løsninger.InfotrygdutbetalingerRiver
 import no.nav.helse.mediator.meldinger.løsninger.Inntektløsning
@@ -149,7 +150,11 @@ internal class MeldingMediator(
         val fødselsnummer = jsonNode["fødselsnummer"]?.asText() ?: return true
         if (fødselsnummer.toDoubleOrNull() == null) return true
         val harPerson = personDao.findPersonByFødselsnummer(fødselsnummer) != null
-        if (!harPerson) sikkerlogg.warn("Ignorerer melding med event_name: {}, for fødselsnummer: {}", eventName, fødselsnummer)
+        if (!harPerson) sikkerlogg.warn(
+            "Ignorerer melding med event_name: {}, for fødselsnummer: {}",
+            eventName,
+            fødselsnummer
+        )
         return harPerson
     }
 
@@ -174,6 +179,7 @@ internal class MeldingMediator(
                 OverstyringIgangsattRiver(this),
                 EgenAnsattløsning.EgenAnsattRiver(this),
                 Vergemålløsning.VergemålRiver(this),
+                Fullmaktløsning.FullmaktRiver(this),
                 ÅpneGosysOppgaverløsning.ÅpneGosysOppgaverRiver(this),
                 Risikovurderingløsning.V2River(this),
                 Inntektløsning.InntektRiver(this),
@@ -303,7 +309,10 @@ internal class MeldingMediator(
             flyttEventuelleAvviksvarsler(godkjenningsbehov.vedtaksperiodeId(), godkjenningsbehov.skjæringstidspunkt)
         }
 
-        generasjonRepository.brukVedtaksperiode(godkjenningsbehov.fødselsnummer(), godkjenningsbehov.vedtaksperiodeId()) { vedtaksperiode ->
+        generasjonRepository.brukVedtaksperiode(
+            godkjenningsbehov.fødselsnummer(),
+            godkjenningsbehov.vedtaksperiodeId()
+        ) { vedtaksperiode ->
             vedtaksperiode.mottaBehandlingsinformasjon(
                 godkjenningsbehov.tags,
                 godkjenningsbehov.spleisBehandlingId,
@@ -357,7 +366,11 @@ internal class MeldingMediator(
                 ?: return commandContext.avbryt(commandContextDao, oppgaveEndret.id)
         oppgaveEndret.oppgavedataForAutomatisering(oppgavedata)
         personRepository.brukPersonHvisFinnes(fødselsnummer) {
-            iverksett(kommandofabrikk.gosysOppgaveEndret(fødselsnummer, oppgaveEndret, this), oppgaveEndret.id, commandContext)
+            iverksett(
+                kommandofabrikk.gosysOppgaveEndret(fødselsnummer, oppgaveEndret, this),
+                oppgaveEndret.id,
+                commandContext
+            )
         }
     }
 
@@ -611,10 +624,25 @@ internal class MeldingMediator(
         try {
             when (melding) {
                 is GosysOppgaveEndret -> gosysOppgaveEndret(melding.fødselsnummer(), melding, commandContext)
-                is TilbakedateringBehandlet -> tilbakedateringBehandlet(melding.fødselsnummer(), melding, commandContext)
+                is TilbakedateringBehandlet -> tilbakedateringBehandlet(
+                    melding.fødselsnummer(),
+                    melding,
+                    commandContext
+                )
+
                 is SøknadSendt -> iverksett(kommandofabrikk.søknadSendt(melding), melding.id, commandContext)
-                is Godkjenningsbehov -> iverksett(kommandofabrikk.godkjenningsbehov(melding), melding.id, commandContext)
-                is Saksbehandlerløsning -> iverksett(kommandofabrikk.utbetalingsgodkjenning(melding), melding.id, commandContext)
+                is Godkjenningsbehov -> iverksett(
+                    kommandofabrikk.godkjenningsbehov(melding),
+                    melding.id,
+                    commandContext
+                )
+
+                is Saksbehandlerløsning -> iverksett(
+                    kommandofabrikk.utbetalingsgodkjenning(melding),
+                    melding.id,
+                    commandContext
+                )
+
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")
             }
             utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, messageContext)
@@ -637,7 +665,10 @@ internal class MeldingMediator(
             if (commandContext.utfør(commandContextDao, hendelseId, command)) {
                 val kjøretid = commandContextDao.tidsbrukForContext(contextId)
                 metrikker(command.name, kjøretid, contextId)
-                logg.info("Kommando(er) for ${command.name} er utført ferdig. Det tok ca {}ms å kjøre hele kommandokjeden", kjøretid)
+                logg.info(
+                    "Kommando(er) for ${command.name} er utført ferdig. Det tok ca {}ms å kjøre hele kommandokjeden",
+                    kjøretid
+                )
             } else {
                 logg.info("${command.name} er suspendert")
             }
