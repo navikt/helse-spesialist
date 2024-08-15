@@ -1219,6 +1219,7 @@ input AnnulleringArsakInput {
 
 input AnnulleringDataInput {
     aktorId: String!
+    arbeidsgiverFagsystemId: String
     arsaker: [AnnulleringArsakInput!]
     begrunnelser: [String!]!
     fodselsnummer: String!

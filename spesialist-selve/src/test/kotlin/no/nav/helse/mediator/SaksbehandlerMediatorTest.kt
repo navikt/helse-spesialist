@@ -57,7 +57,9 @@ import java.util.UUID
 internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private val tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
     private val testRapid = TestRapid()
-    private val tildelingDbDao = no.nav.helse.db.TildelingDao(dataSource)
+    private val tildelingDbDao =
+        no.nav.helse.db
+            .TildelingDao(dataSource)
     private val saksbehandlerRepository = SaksbehandlerDao(dataSource)
     private val stansAutomatiskBehandlingMediator =
         StansAutomatiskBehandlingMediator(
@@ -444,7 +446,11 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     // Eksperimentering med DSL for å lage testdata
     // Slett hvis du oppdager denne koden og den ikke er tatt i bruk andre steder 😂
     // Plassert her pga. ren og skjær tilfeldighet
-    private data class PERSON(val fødselsnummer: String, val aktørId: String, val arbeidsgiver: List<ARBEIDSGIVER>) {
+    private data class PERSON(
+        val fødselsnummer: String,
+        val aktørId: String,
+        val arbeidsgiver: List<ARBEIDSGIVER>,
+    ) {
         val Int.ag: String
             get() = arbeidsgiver[this - 1].orgnr
 
@@ -465,11 +471,15 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         return builder.build()
     }
 
-    private data class ARBEIDSGIVERBUILDER(var orgnrs: List<String>) {
+    private data class ARBEIDSGIVERBUILDER(
+        var orgnrs: List<String>,
+    ) {
         fun build() = orgnrs.map(::ARBEIDSGIVER)
     }
 
-    private data class ARBEIDSGIVER(val orgnr: String)
+    private data class ARBEIDSGIVER(
+        val orgnr: String,
+    )
 
     private fun arbeidsgivere(
         antall: Int,
@@ -783,13 +793,14 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private fun annullering(
         begrunnelser: List<String> = listOf("EN_BEGRUNNELSE"),
         kommentar: String? = "EN_KOMMENTAR",
-        arsaker: List<AnnulleringArsak>? = listOf(AnnulleringArsak(_key = "key01", arsak = "Ferie"))
+        arsaker: List<AnnulleringArsak>? = listOf(AnnulleringArsak(_key = "key01", arsak = "Ferie")),
     ) = AnnulleringData(
         aktorId = AKTØR_ID,
         fodselsnummer = FØDSELSNUMMER,
         organisasjonsnummer = ORGANISASJONSNUMMER,
         vedtaksperiodeId = VEDTAKSPERIODE,
         utbetalingId = UTBETALING_ID,
+        arbeidsgiverFagsystemId = "EN-FAGSYSTEMID",
         begrunnelser = begrunnelser,
         arsaker = arsaker,
         kommentar = kommentar,
