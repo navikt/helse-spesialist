@@ -10,6 +10,7 @@ class Annullering(
     private val organisasjonsnummer: String,
     private val vedtaksperiodeId: UUID,
     private val utbetalingId: UUID,
+    private val arbeidsgiverFagsystemId: String,
     private val begrunnelser: List<String> = emptyList(),
     private val arsaker: List<AnnulleringArsak>? = emptyList(),
     private val kommentar: String?,
@@ -36,6 +37,7 @@ class Annullering(
             saksbehandlerEpost = epost,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
+            arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
             begrunnelser = begrunnelser,
             arsaker = arsaker,
             kommentar = kommentar,
@@ -48,6 +50,7 @@ class Annullering(
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
+            arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
             årsaker = arsaker,
             kommentar = kommentar,
         )
@@ -59,6 +62,7 @@ data class AnnulleringDto(
     val organisasjonsnummer: String,
     val vedtaksperiodeId: UUID,
     val utbetalingId: UUID,
+    val arbeidsgiverFagsystemId: String,
     val årsaker: List<AnnulleringArsak>? = emptyList(),
     val kommentar: String?,
 )

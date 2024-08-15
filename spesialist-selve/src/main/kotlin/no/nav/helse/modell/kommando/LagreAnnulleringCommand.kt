@@ -9,15 +9,15 @@ internal class LagreAnnulleringCommand(
     private val utbetalingDao: UtbetalingDao,
     private val annulleringDao: AnnulleringDao,
     private val utbetalingId: UUID,
+    private val arbeidsgiverFagsystemId: String,
 ) : Command {
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-    override fun execute(context: CommandContext): Boolean {
-        return leggTilAnnullertAvSaksbehandler()
-    }
+    override fun execute(context: CommandContext): Boolean = leggTilAnnullertAvSaksbehandler()
 
     private fun leggTilAnnullertAvSaksbehandler(): Boolean {
-        annulleringDao.finnAnnulleringId(utbetalingId)?.let { annulleringId ->
+        annulleringDao.oppdaterAnnullering(arbeidsgiverFagsystemId, utbetalingId)
+        annulleringDao.finnAnnulleringId(arbeidsgiverFagsystemId)?.let { annulleringId ->
             utbetalingDao.leggTilAnnullertAvSaksbehandler(utbetalingId, annulleringId)
             return true
         }

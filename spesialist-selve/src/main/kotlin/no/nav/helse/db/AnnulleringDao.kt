@@ -10,6 +10,19 @@ import javax.sql.DataSource
 class AnnulleringDao(
     dataSource: DataSource,
 ) : HelseDao(dataSource) {
+    internal fun oppdaterAnnullering(
+        arbeidsgiverFagsystemId: String,
+        utbetalingId: UUID,
+    ) = asSQL(
+        """
+        UPDATE annullert_av_saksbehandler SET utbetaling_id = :utbetalingId WHERE arbeidsgiver_fagsystem_id = :arbeidsgiverFagsystemId
+        """.trimIndent(),
+        mapOf(
+            "utbetalingId" to utbetalingId,
+            "arbeidsgiverFagsystemId" to arbeidsgiverFagsystemId,
+        ),
+    ).update()
+
     internal fun lagreAnnullering(
         annulleringDto: AnnulleringDto,
         saksbehandler: Saksbehandler,
@@ -20,10 +33,10 @@ class AnnulleringDao(
             }
         asSQL(
             """
-            INSERT INTO annullert_av_saksbehandler (annullert_tidspunkt, saksbehandler_ref, årsaker, begrunnelse_ref, vedtaksperiode_id, utbetaling_id) 
+            INSERT INTO annullert_av_saksbehandler (annullert_tidspunkt, saksbehandler_ref, årsaker, begrunnelse_ref, vedtaksperiode_id, utbetaling_id, arbeidsgiver_fagsystem_id) 
             VALUES (now(), :saksbehandler, '{${
                 annulleringDto.årsaker?.map { it.arsak }?.somDbArray()
-            }}', :begrunnelseRef, :vedtaksperiodeId, :utbetalingId)
+            }}', :begrunnelseRef, :vedtaksperiodeId, :utbetalingId, :arbeidsgiverFagsystemId)
             """.trimIndent(),
             mapOf(
                 "saksbehandler" to saksbehandler.oid(),
@@ -31,6 +44,7 @@ class AnnulleringDao(
                 "begrunnelseRef" to begrunnelseId,
                 "vedtaksperiodeId" to annulleringDto.vedtaksperiodeId,
                 "utbetalingId" to annulleringDto.utbetalingId,
+                "arbeidsgiverFagsystemId" to annulleringDto.arbeidsgiverFagsystemId,
             ),
         ).update()
     }
@@ -49,32 +63,33 @@ class AnnulleringDao(
         ),
     ).updateAndReturnGeneratedKey()
 
-    internal fun finnAnnulleringId(utbetalingId: UUID) =
+    internal fun finnAnnulleringId(arbeidsgiverFagsystemId: String) =
         asSQL(
             """
-            select id from annullert_av_saksbehandler where utbetaling_id = :utbetalingId limit 1;
+            select id from annullert_av_saksbehandler where arbeidsgiver_fagsystem_id = :arbeidsgiverFagsystemId limit 1;
             """.trimIndent(),
             mapOf(
-                "utbetalingId" to utbetalingId,
+                "arbeidsgiverFagsystemId" to arbeidsgiverFagsystemId,
             ),
         ).single { it.long("id") }
 
-    fun finnAnnullering(utbetalingId: UUID): Annullering? =
+    fun finnAnnullering(arbeidsgiverFagsystemId: String): Annullering? =
         asSQL(
             """
-            select aas.id, aas.annullert_tidspunkt, s.ident, aas.årsaker, b.tekst from annullert_av_saksbehandler aas
+            select aas.id, aas.annullert_tidspunkt, aas.arbeidsgiver_fagsystem_id, aas.utbetaling_id, s.ident, aas.årsaker, b.tekst from annullert_av_saksbehandler aas
             inner join utbetaling u on aas.id = u.annullert_av_saksbehandler_ref 
             inner join saksbehandler s on s.oid = aas.saksbehandler_ref
             left join begrunnelse b on b.id = aas.begrunnelse_ref
-            where utbetaling_id = :utbetalingId;
+            where arbeidsgiver_fagsystem_id = :arbeidsgiverFagsystemId;
             """.trimIndent(),
             mapOf(
-                "utbetalingId" to utbetalingId,
+                "arbeidsgiverFagsystemId" to arbeidsgiverFagsystemId,
             ),
         ).single {
             Annullering(
                 saksbehandlerIdent = it.string("ident"),
-                utbetalingId = utbetalingId,
+                utbetalingId = it.uuid("utbetaling_id"),
+                arbeidsgiverFagsystemId = it.string("arbeidsgiver_fagsystem_id"),
                 tidspunkt = it.localDateTime("annullert_tidspunkt"),
                 arsaker = it.array<String>("årsaker").toList(),
                 begrunnelse = it.stringOrNull("tekst"),

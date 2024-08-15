@@ -8,41 +8,45 @@ import java.util.UUID
 internal class AnnulleringMutationTest : AbstractGraphQLApiTest() {
     @Test
     fun `annullering ok`() {
-        val body = runQuery(
-            """
+        val body =
+            runQuery(
+                """
             mutation Annuller {
                 annuller(annullering: {
                     organisasjonsnummer: "et-organisasjonsnummer", 
                     fodselsnummer: "et-fødselsnummer", 
                     aktorId: "en-aktørid", 
                     utbetalingId: "${UUID.randomUUID()}",
+                    arbeidsgiverFagsystemId: "EN-FAGSYSTEMID",
                     vedtaksperiodeId: "${UUID.randomUUID()}",
                     kommentar: "En kommentar", 
                     begrunnelser: ["Det første", "Det andre"]
                 })
             }
-        """
-        )
+        """,
+            )
 
         assertTrue(body["data"]["annuller"].asBoolean())
     }
 
     @Test
     fun `annullering av tomme verdier`() {
-        val body = runQuery(
-            """
+        val body =
+            runQuery(
+                """
             mutation Annuller {
                 annuller(annullering: {
                     organisasjonsnummer: "et-organisasjonsnummer", 
                     fodselsnummer: "et-fødselsnummer", 
                     aktorId: "en-aktørid", 
                     utbetalingId: "${UUID.randomUUID()}",
+                    arbeidsgiverFagsystemId: "EN-FAGSYSTEMID",
                     vedtaksperiodeId: "${UUID.randomUUID()}",
                     begrunnelser: []
                 })
             }
-        """
-        )
+        """,
+            )
 
         assertTrue(body["data"]["annuller"].asBoolean())
     }

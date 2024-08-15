@@ -83,6 +83,7 @@ data class Avslag(
 data class Annullering(
     val saksbehandlerIdent: String,
     val utbetalingId: UUID,
+    val arbeidsgiverFagsystemId: String,
     val tidspunkt: LocalDateTime,
     val arsaker: List<String>,
     val begrunnelse: String?,

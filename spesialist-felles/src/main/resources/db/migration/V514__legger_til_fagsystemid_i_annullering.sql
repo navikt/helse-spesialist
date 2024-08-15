@@ -1,0 +1,1 @@
+ALTER TABLE annullert_av_saksbehandler ADD COLUMN arbeidsgiver_fagsystem_id VARCHAR;

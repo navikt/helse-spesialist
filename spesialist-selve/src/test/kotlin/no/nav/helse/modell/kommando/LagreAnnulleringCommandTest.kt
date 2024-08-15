@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class LagreAnnulleringCommandTest {
-
     private companion object {
         private val UTBETALING_ID = UUID.randomUUID()
         private val ANNULLERING_ID = 7L
@@ -21,11 +20,13 @@ internal class LagreAnnulleringCommandTest {
     private val utbetalingDao = mockk<UtbetalingDao>(relaxed = true)
     private val annulleringDao = mockk<AnnulleringDao>(relaxed = true)
     private val saksbehandlerDao = mockk<SaksbehandlerDao>(relaxed = true)
-    private val command = LagreAnnulleringCommand(
-        utbetalingDao,
-        annulleringDao,
-        UTBETALING_ID
-    )
+    private val command =
+        LagreAnnulleringCommand(
+            utbetalingDao,
+            annulleringDao,
+            UTBETALING_ID,
+            "EN-FAGSYSTEMID",
+        )
     private lateinit var context: CommandContext
 
     @BeforeEach
@@ -37,7 +38,7 @@ internal class LagreAnnulleringCommandTest {
 
     @Test
     fun `Legg til annullert av saksbehandler`() {
-        every { annulleringDao.finnAnnulleringId(UTBETALING_ID)} returns ANNULLERING_ID
+        every { annulleringDao.finnAnnulleringId("EN-FAGSYSTEMID") } returns ANNULLERING_ID
 
         command.execute(context)
         verify(exactly = 1) { utbetalingDao.leggTilAnnullertAvSaksbehandler(UTBETALING_ID, ANNULLERING_ID) }

@@ -261,9 +261,8 @@ internal class SaksbehandlerMediator(
         }
     }
 
-    override fun hentAnnullering(utbetalingId: UUID): no.nav.helse.spesialist.api.graphql.schema.Annullering? {
-        return annulleringDao.finnAnnullering(utbetalingId)
-    }
+    override fun hentAnnullering(arbeidsgiverFagsystemId: String): no.nav.helse.spesialist.api.graphql.schema.Annullering? =
+        annulleringDao.finnAnnullering(arbeidsgiverFagsystemId)
 
     override fun håndter(
         godkjenning: GodkjenningDto,
@@ -513,6 +512,7 @@ internal class SaksbehandlerMediator(
             organisasjonsnummer = this.organisasjonsnummer,
             vedtaksperiodeId = this.vedtaksperiodeId,
             utbetalingId = this.utbetalingId,
+            arbeidsgiverFagsystemId = this.arbeidsgiverFagsystemId,
             begrunnelser = this.begrunnelser,
             arsaker = this.arsaker?.map { arsak -> AnnulleringArsak(key = arsak._key, arsak = arsak.arsak) },
             kommentar = this.kommentar,

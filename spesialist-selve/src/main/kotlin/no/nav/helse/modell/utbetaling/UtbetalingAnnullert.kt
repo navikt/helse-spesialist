@@ -19,6 +19,7 @@ internal class UtbetalingAnnullert private constructor(
     override val id: UUID,
     private val fødselsnummer: String,
     val utbetalingId: UUID,
+    val arbeidsgiverFagsystemId: String,
     val saksbehandlerEpost: String,
     private val json: String,
 ) : Personmelding {
@@ -26,6 +27,7 @@ internal class UtbetalingAnnullert private constructor(
         id = UUID.fromString(packet["@id"].asText()),
         fødselsnummer = packet["fødselsnummer"].asText(),
         utbetalingId = UUID.fromString(packet["utbetalingId"].asText()),
+        arbeidsgiverFagsystemId = packet["arbeidsgiverFagsystemId"].asText(),
         saksbehandlerEpost = packet["epost"].asText(),
         json = packet.toJson(),
     )
@@ -33,6 +35,7 @@ internal class UtbetalingAnnullert private constructor(
         id = UUID.fromString(jsonNode["@id"].asText()),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
         utbetalingId = UUID.fromString(jsonNode["utbetalingId"].asText()),
+        arbeidsgiverFagsystemId = jsonNode["arbeidsgiverFagsystemId"].asText(),
         saksbehandlerEpost = jsonNode["epost"].asText(),
         json = jsonNode.toString(),
     )
@@ -52,6 +55,7 @@ internal class UtbetalingAnnullert private constructor(
 internal class UtbetalingAnnullertCommand(
     fødselsnummer: String,
     utbetalingId: UUID,
+    arbeidsgiverFagsystemId: String,
     utbetalingDao: UtbetalingDao,
     personDao: PersonDao,
     snapshotDao: SnapshotDao,
@@ -70,6 +74,7 @@ internal class UtbetalingAnnullertCommand(
                 utbetalingDao = utbetalingDao,
                 annulleringDao = annulleringDao,
                 utbetalingId = utbetalingId,
+                arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
             ),
         )
 }

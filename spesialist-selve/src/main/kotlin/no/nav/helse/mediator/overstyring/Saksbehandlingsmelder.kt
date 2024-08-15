@@ -9,7 +9,9 @@ import no.nav.helse.modell.saksbehandler.SkjønnsfastsattSykepengegrunnlagEvent
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 
-internal class Saksbehandlingsmelder(private val rapidsConnection: RapidsConnection) : SaksbehandlerObserver {
+internal class Saksbehandlingsmelder(
+    private val rapidsConnection: RapidsConnection,
+) : SaksbehandlerObserver {
     override fun tidslinjeOverstyrt(
         fødselsnummer: String,
         event: OverstyrtTidslinjeEvent,
@@ -115,6 +117,7 @@ internal class Saksbehandlingsmelder(private val rapidsConnection: RapidsConnect
                     "begrunnelser" to event.begrunnelser,
                     "utbetalingId" to event.utbetalingId,
                     "vedtaksperiodeId" to event.vedtaksperiodeId,
+                    "arbeidsgiverFagsystemId" to event.arbeidsgiverFagsystemId,
                 ).apply {
                     compute("kommentar") { _, _ -> event.kommentar }
                     compute("arsaker") { _, _ ->

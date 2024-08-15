@@ -305,6 +305,7 @@ internal class Kommandofabrikk(
         UtbetalingAnnullertCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             utbetalingId = hendelse.utbetalingId,
+            arbeidsgiverFagsystemId = hendelse.arbeidsgiverFagsystemId,
             utbetalingDao = utbetalingDao,
             personDao = personDao,
             snapshotDao = snapshotDao,

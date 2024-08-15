@@ -9,7 +9,7 @@ data class AnnulleringData(
     val organisasjonsnummer: String,
     val vedtaksperiodeId: UUID,
     val utbetalingId: UUID,
-    val arbeidsgiverFagsystemId: String?,
+    val arbeidsgiverFagsystemId: String,
     val begrunnelser: List<String>,
     val arsaker: List<AnnulleringArsak>?,
     val kommentar: String?,
