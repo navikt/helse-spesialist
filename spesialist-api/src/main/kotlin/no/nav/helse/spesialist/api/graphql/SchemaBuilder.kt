@@ -45,6 +45,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
+import no.nav.helse.spesialist.api.vergemål.VergemålApiDao
 
 internal class SchemaBuilder(
     private val personApiDao: PersonApiDao,
@@ -57,6 +58,7 @@ internal class SchemaBuilder(
     private val oppgaveApiDao: OppgaveApiDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val påVentApiDao: PåVentApiDao,
+    private val vergemålApiDao: VergemålApiDao,
     private val snapshotService: SnapshotService,
     private val notatDao: NotatDao,
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
@@ -99,6 +101,7 @@ internal class SchemaBuilder(
                             notatDao = notatDao,
                             totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                             påVentApiDao = påVentApiDao,
+                            vergemålApiDao = vergemålApiDao,
                             snapshotService = snapshotService,
                             reservasjonClient = reservasjonClient,
                             oppgavehåndterer = oppgavehåndterer,

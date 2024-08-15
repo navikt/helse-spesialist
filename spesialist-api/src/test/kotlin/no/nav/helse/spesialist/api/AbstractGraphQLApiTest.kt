@@ -47,6 +47,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
+import no.nav.helse.spesialist.api.vergemål.VergemålApiDao
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiver
 import org.intellij.lang.annotations.Language
 import java.time.YearMonth
@@ -94,6 +95,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                 snapshotService = snapshotService,
                 notatDao = notatDao,
                 totrinnsvurderingApiDao = totrinnsvurderingApiDao,
+                vergemålApiDao = vergemålApiDao,
                 reservasjonClient = reservasjonClient,
                 avviksvurderinghenter = avviksvurderinghenter,
                 behandlingsstatistikkMediator = behandlingsstatistikkMediator,
@@ -214,6 +216,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                         snapshotService = SnapshotService(SnapshotApiDao(dataSource), mockk<SnapshotClient>(relaxed = true)),
                         notatDao = notatDao,
                         totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource),
+                        vergemålApiDao = VergemålApiDao(dataSource),
                         reservasjonClient = mockk<ReservasjonClient>(relaxed = true),
                         avviksvurderinghenter = mockk<Avviksvurderinghenter>(relaxed = true),
                         behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkService>(relaxed = true),

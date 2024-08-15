@@ -64,6 +64,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
+import no.nav.helse.spesialist.api.vergemål.VergemålApiDao
 import no.nav.helse.spesialist.api.websockets.webSocketsApi
 import org.slf4j.LoggerFactory
 import java.lang.management.GarbageCollectorMXBean
@@ -125,6 +126,7 @@ internal class SpesialistApp(
     private val automatiseringDao = AutomatiseringDao(dataSource)
     private val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(dataSource)
     private val egenAnsattDao = EgenAnsattDao(dataSource)
+    private val vergemålApiDao = VergemålApiDao(dataSource)
 
     private lateinit var meldingMediator: MeldingMediator
     private lateinit var saksbehandlerMediator: SaksbehandlerMediator
@@ -240,6 +242,7 @@ internal class SpesialistApp(
                 notatDao = notatDao,
                 totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                 påVentApiDao = påVentApiDao,
+                vergemålApiDao = vergemålApiDao,
                 reservasjonClient = reservasjonClient,
                 avviksvurderinghenter = avviksvurderinghenter,
                 skjermedePersonerGruppeId = tilgangsgrupper.skjermedePersonerGruppeId,

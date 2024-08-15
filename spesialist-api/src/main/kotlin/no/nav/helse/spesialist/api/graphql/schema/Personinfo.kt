@@ -23,6 +23,7 @@ data class Personinfo(
     val fodselsdato: LocalDate?,
     val kjonn: Kjonn,
     val adressebeskyttelse: Adressebeskyttelse,
+    val fullmakt: Boolean? = null,
     val reservasjon: Reservasjon? = null,
     val unntattFraAutomatisering: UnntattFraAutomatiskGodkjenning? = null,
 )

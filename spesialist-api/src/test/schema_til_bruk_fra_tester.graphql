@@ -49,6 +49,14 @@ type Alder {
     oppfylt: Boolean!
 }
 
+type Annullering {
+    arsaker: [String!]!
+    begrunnelse: String
+    saksbehandlerIdent: String!
+    tidspunkt: LocalDateTime!
+    utbetalingId: UUID!
+}
+
 type Antall {
     automatisk: Int!
     manuelt: Int!
@@ -156,6 +164,7 @@ type Behandlingsstatistikk {
 }
 
 type BeregnetPeriode implements Periode {
+    annullering: Annullering
     avslag: [Avslag!]!
     behandlingId: UUID!
     beregningId: UUID!
@@ -474,6 +483,7 @@ type Personinfo {
     etternavn: String!
     fodselsdato: LocalDate
     fornavn: String!
+    fullmakt: Boolean
     kjonn: Kjonn!
     mellomnavn: String
     reservasjon: Reservasjon

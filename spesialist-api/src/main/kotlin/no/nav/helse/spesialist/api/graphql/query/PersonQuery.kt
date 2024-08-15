@@ -35,6 +35,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
+import no.nav.helse.spesialist.api.vergemål.VergemålApiDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -51,6 +52,7 @@ class PersonQuery(
     private val notatDao: NotatDao,
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val påVentApiDao: PåVentApiDao,
+    private val vergemålApiDao: VergemålApiDao,
     private val snapshotService: SnapshotService,
     private val reservasjonClient: ReservasjonClient,
     private val oppgavehåndterer: Oppgavehåndterer,
@@ -136,6 +138,7 @@ class PersonQuery(
                         personinfo.copy(
                             reservasjon = reservasjon.await(),
                             unntattFraAutomatisering = unntattFraAutomatiskGodkjenning,
+                            fullmakt = vergemålApiDao.harFullmakt(fødselsnummer)
                         ),
                     personApiDao = personApiDao,
                     tildelingDao = tildelingDao,

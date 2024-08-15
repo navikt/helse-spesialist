@@ -40,6 +40,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
+import no.nav.helse.spesialist.api.vergemål.VergemålApiDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -58,6 +59,7 @@ fun Application.graphQLApi(
     notatDao: NotatDao,
     totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     påVentApiDao: PåVentApiDao,
+    vergemålApiDao: VergemålApiDao,
     reservasjonClient: ReservasjonClient,
     avviksvurderinghenter: Avviksvurderinghenter,
     skjermedePersonerGruppeId: UUID,
@@ -93,6 +95,7 @@ fun Application.graphQLApi(
             snapshotService = snapshotService,
             notatDao = notatDao,
             totrinnsvurderingApiDao = totrinnsvurderingApiDao,
+            vergemålApiDao = vergemålApiDao,
             reservasjonClient = reservasjonClient,
             avviksvurderinghenter = avviksvurderinghenter,
             behandlingsstatistikkMediator = behandlingsstatistikkMediator,

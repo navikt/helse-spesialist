@@ -36,6 +36,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
+import no.nav.helse.spesialist.api.vergemål.VergemålApiDao
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -352,6 +353,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             notatDao = NotatDao(dataSource),
             totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource),
             påVentApiDao = PåVentApiDao(dataSource),
+            vergemålApiDao = VergemålApiDao(dataSource),
             snapshotService = SnapshotService(SnapshotApiDao(dataSource), snapshotClient),
             reservasjonClient = mockk(relaxed = true),
             oppgavehåndterer = mockk(relaxed = true),

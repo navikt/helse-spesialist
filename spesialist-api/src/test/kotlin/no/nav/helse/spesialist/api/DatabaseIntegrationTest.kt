@@ -33,6 +33,7 @@ import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
+import no.nav.helse.spesialist.api.vergemål.VergemålApiDao
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagEtternavn
 import no.nav.helse.spesialist.test.lagFornavn
@@ -104,6 +105,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val overstyringApiDao = OverstyringApiDao(dataSource)
     protected val oppgaveApiDao = OppgaveApiDao(dataSource)
     protected val periodehistorikkDao = PeriodehistorikkDao(dataSource)
+    protected val vergemålApiDao = VergemålApiDao(dataSource)
     private val snapshotApiDao = SnapshotApiDao(dataSource)
 
     protected val egenAnsattApiDao = mockk<EgenAnsattApiDao>(relaxed = true)
