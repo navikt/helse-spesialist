@@ -102,7 +102,7 @@ internal class MeldingMediator(
     private val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao = MeldingDuplikatkontrollDao(dataSource),
     private val kommandofabrikk: Kommandofabrikk,
     private val dokumentDao: DokumentDao = DokumentDao(dataSource),
-    private val avviksvurderingDao: AvviksvurderingDao,
+    avviksvurderingDao: AvviksvurderingDao,
     private val varselRepository: VarselRepository = VarselRepository(dataSource),
     private val generasjonRepository: GenerasjonRepository = GenerasjonRepository(dataSource),
     private val metrikkDao: MetrikkDao = MetrikkDao(dataSource),
@@ -295,13 +295,7 @@ internal class MeldingMediator(
     fun godkjenningsbehov(
         godkjenningsbehov: Godkjenningsbehov,
         context: MessageContext,
-        avviksvurderingId: UUID?,
-        vilkårsgrunnlagId: UUID,
     ) {
-        if (avviksvurderingId != null) {
-            avviksvurderingDao.opprettKobling(avviksvurderingId, vilkårsgrunnlagId)
-        }
-
         personRepository.brukPersonHvisFinnes(godkjenningsbehov.fødselsnummer()) {
             mottaSpleisVedtaksperioder(godkjenningsbehov.spleisVedtaksperioder)
             flyttEventuelleAvviksvarsler(godkjenningsbehov.vedtaksperiodeId(), godkjenningsbehov.skjæringstidspunkt)

@@ -1,6 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.VedtaksperiodemeldingOld
@@ -25,6 +26,7 @@ import no.nav.helse.modell.kommando.KlargjørArbeidsgiverCommand
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterPersonCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
+import no.nav.helse.modell.kommando.OpprettKoblingTilAvviksvurdering
 import no.nav.helse.modell.kommando.OpprettKoblingTilHendelseCommand
 import no.nav.helse.modell.kommando.OpprettKoblingTilUtbetalingCommand
 import no.nav.helse.modell.kommando.OpprettSaksbehandleroppgave
@@ -73,6 +75,8 @@ internal class Godkjenningsbehov private constructor(
     val spleisVedtaksperioder: List<SpleisVedtaksperiode>,
     val utbetalingId: UUID,
     val spleisBehandlingId: UUID,
+    val avviksvurderingId: UUID?,
+    val vilkårsgrunnlagId: UUID,
     val tags: List<String>,
     val periodeFom: LocalDate,
     val periodeTom: LocalDate,
@@ -100,6 +104,10 @@ internal class Godkjenningsbehov private constructor(
         periodeTom = LocalDate.parse(packet["Godkjenning.periodeTom"].asText()),
         skjæringstidspunkt = LocalDate.parse(packet["Godkjenning.skjæringstidspunkt"].asText()),
         vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
+        avviksvurderingId =
+        packet["avviksvurderingId"].takeUnless { it.isMissingOrNull() }
+            ?.let { UUID.fromString(it.asText()) },
+        vilkårsgrunnlagId = UUID.fromString(packet["Godkjenning.vilkårsgrunnlagId"].asText()),
         spleisVedtaksperioder =
         packet["Godkjenning.perioderMedSammeSkjæringstidspunkt"].map { periodeNode ->
             SpleisVedtaksperiode(
@@ -134,6 +142,10 @@ internal class Godkjenningsbehov private constructor(
         periodeFom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeFom").asText()),
         periodeTom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeTom").asText()),
         vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
+        avviksvurderingId =
+        jsonNode.path("avviksvurderingId").takeUnless { it.isMissingOrNull() }
+            ?.let { UUID.fromString(it.asText()) },
+        vilkårsgrunnlagId = UUID.fromString(jsonNode.path("Godkjenning").path("vilkårsgrunnlagId").asText()),
         spleisVedtaksperioder =
         jsonNode.path("Godkjenning").path("perioderMedSammeSkjæringstidspunkt").map { periodeNode ->
             SpleisVedtaksperiode(
@@ -178,6 +190,8 @@ internal class GodkjenningsbehovCommand(
     orgnummereMedRelevanteArbeidsforhold: List<String>,
     vedtaksperiodeId: UUID,
     spleisBehandlingId: UUID,
+    avviksvurderingId: UUID?,
+    vilkårsgrunnlagId: UUID,
     periodetype: Periodetype,
     inntektskilde: Inntektskilde,
     førstegangsbehandling: Boolean,
@@ -204,6 +218,7 @@ internal class GodkjenningsbehovCommand(
     periodehistorikkDao: PeriodehistorikkDao,
     snapshotDao: SnapshotDao,
     oppgaveDao: OppgaveDao,
+    avviksvurderingDao: AvviksvurderingDao,
     snapshotClient: ISnapshotClient,
     oppgaveService: OppgaveService,
     generasjonRepository: GenerasjonRepository,
@@ -215,12 +230,17 @@ internal class GodkjenningsbehovCommand(
     override val commands: List<Command> =
         listOf(
             VurderBehovForBehandlingAvGodkjenningsbehov(
-                id,
-                utbetalingId,
-                vedtaksperiodeId,
-                utbetalingDao,
-                oppgaveDao,
-                vedtakDao
+                meldingId = id,
+                utbetalingId = utbetalingId,
+                vedtaksperiodeId = vedtaksperiodeId,
+                utbetalingDao = utbetalingDao,
+                oppgaveDao = oppgaveDao,
+                vedtakDao = vedtakDao
+            ),
+            OpprettKoblingTilAvviksvurdering(
+                avviksvurderingId = avviksvurderingId,
+                vilkårsgrunnlagId = vilkårsgrunnlagId,
+                avviksvurderingDao = avviksvurderingDao
             ),
             OpprettKoblingTilHendelseCommand(
                 hendelseId = id,

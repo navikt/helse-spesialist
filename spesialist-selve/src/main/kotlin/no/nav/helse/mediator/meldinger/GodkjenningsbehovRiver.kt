@@ -10,7 +10,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.River
-import no.nav.helse.rapids_rivers.isMissingOrNull
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -80,10 +79,6 @@ internal class GodkjenningsbehovRiver(
         )
         mediator.godkjenningsbehov(
             Godkjenningsbehov(packet),
-            avviksvurderingId =
-                packet["avviksvurderingId"].takeUnless { it.isMissingOrNull() }
-                    ?.let { UUID.fromString(it.asText()) },
-            vilkårsgrunnlagId = UUID.fromString(packet["Godkjenning.vilkårsgrunnlagId"].asText()),
             context = context,
         )
     }

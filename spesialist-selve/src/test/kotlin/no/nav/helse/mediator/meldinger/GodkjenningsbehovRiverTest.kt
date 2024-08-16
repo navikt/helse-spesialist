@@ -75,9 +75,7 @@ internal class GodkjenningsbehovRiverTest {
                 assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, it.periodetype)
                 assertEquals(Utbetalingtype.UTBETALING, it.utbetalingtype)
             },
-            context = any(),
-            avviksvurderingId = avviksvurderingId,
-            vilkårsgrunnlagId = vilkårsgrunnlagId
+            context = any()
         ) }
     }
 
@@ -104,8 +102,6 @@ internal class GodkjenningsbehovRiverTest {
             mediator.godkjenningsbehov(
                 godkjenningsbehov = any(),
                 context = any(),
-                avviksvurderingId = null,
-                vilkårsgrunnlagId = any(),
             )
         }
     }
