@@ -5,7 +5,6 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_4
-import no.nav.helse.modell.varsel.Varselkode.SB_IK_1
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -34,9 +33,6 @@ internal class VurderVergemålOgFullmakt(
             logg.info("Legger til varsel om vergemål på vedtaksperiode $vedtaksperiodeId")
             sykefraværstilfelle.håndter(SB_EX_4.nyttVarsel(vedtaksperiodeId), hendelseId)
             return true
-        }
-        if (løsning.harFullmakt()) {
-            sykefraværstilfelle.håndter(SB_IK_1.nyttVarsel(vedtaksperiodeId), hendelseId)
         }
 
         return true

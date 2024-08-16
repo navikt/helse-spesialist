@@ -233,7 +233,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `sendes til saksbehandler for godkjenning ved fullmakt`() {
+    fun `avbryter ikke saksbehandling ved fullmakt eller fremtidsfullmakt`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilVergemål()
@@ -246,21 +246,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
                         gyldigFraOgMed = LocalDate.now(),
                     ),
                 ),
+            fremtidsfullmakter = listOf(VergemålJson.Vergemål(voksen))
         )
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
-        assertSaksbehandleroppgave(VEDTAKSPERIODE_ID, AvventerSaksbehandler)
-    }
-
-    @Test
-    fun `sendes til saksbehandler for godkjenning ved fremtidsfullmakt`() {
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilVergemål()
-        håndterVergemålløsning(fremtidsfullmakter = listOf(VergemålJson.Vergemål(voksen)))
-        håndterÅpneOppgaverløsning()
-        håndterRisikovurderingløsning()
-        assertSaksbehandleroppgave(VEDTAKSPERIODE_ID, AvventerSaksbehandler)
+        assertGodkjenningsbehovBesvart(godkjent = true, automatiskBehandlet = true)
     }
 
     @Test

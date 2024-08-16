@@ -4,8 +4,6 @@ import AbstractE2ETest
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.Risikofunn
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Område.Syk
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AKTIV
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.INAKTIV
@@ -19,7 +17,6 @@ import no.nav.helse.modell.varsel.Varselkode.SB_RV_3
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import java.util.UUID
 
 internal class VarselE2ETest : AbstractE2ETest() {
@@ -33,16 +30,6 @@ internal class VarselE2ETest : AbstractE2ETest() {
         assertIngenVarsel(SB_RV_3, VEDTAKSPERIODE_ID)
         assertIngenVarsel(SB_EX_1, VEDTAKSPERIODE_ID)
         assertIngenVarsel(SB_EX_3, VEDTAKSPERIODE_ID)
-    }
-
-    @Test
-    fun `varsel om vergemål`() {
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
-            fullmakter = listOf(Fullmakt(områder = listOf(Syk), LocalDate.MIN, LocalDate.MAX)),
-        )
-        assertVarsel(SB_IK_1, VEDTAKSPERIODE_ID, AKTIV)
     }
 
     @Test

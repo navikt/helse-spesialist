@@ -124,7 +124,6 @@ class VurderVergemålOgFullmaktTest {
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harFullmakt) }
         assertEquals(0, observer.hendelser.size)
-        assertEquals(1, vedtaksperiodeObserver.opprettedeVarsler.size)
     }
 
     @Test
@@ -133,7 +132,6 @@ class VurderVergemålOgFullmaktTest {
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harFremtidsfullmakt) }
         assertEquals(0, observer.hendelser.size)
-        assertEquals(1, vedtaksperiodeObserver.opprettedeVarsler.size)
     }
 
     @Test
@@ -141,15 +139,6 @@ class VurderVergemålOgFullmaktTest {
         context.add(Vergemålløsning(harAlt))
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harAlt) }
-        assertEquals(0, observer.hendelser.size)
-        assertEquals(1, vedtaksperiodeObserver.opprettedeVarsler.size)
-    }
-
-    @Test
-    fun `legger kun til en varsel ved både fullmakt og fremtidsfullmakt`() {
-        context.add(Vergemålløsning(harBeggeFullmatkstyper))
-        assertTrue(command.resume(context))
-        verify(exactly = 1) { vergemålDao.lagre(FNR, harBeggeFullmatkstyper) }
         assertEquals(0, observer.hendelser.size)
         assertEquals(1, vedtaksperiodeObserver.opprettedeVarsler.size)
     }

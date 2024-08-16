@@ -93,7 +93,6 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         assertGodkjentVarsel(VEDTAKSPERIODE_ID, "RV_IM_1")
         assertGodkjentVarsel(VEDTAKSPERIODE_ID, "SB_RV_1")
         assertGodkjentVarsel(VEDTAKSPERIODE_ID, "SB_EX_1")
-        assertGodkjentVarsel(VEDTAKSPERIODE_ID, "SB_IK_1")
         Toggle.AutomatiserSpesialsak.disable()
     }
 
