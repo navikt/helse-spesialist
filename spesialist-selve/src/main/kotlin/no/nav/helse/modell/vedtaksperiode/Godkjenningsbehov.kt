@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.VedtaksperiodemeldingOld
+import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
@@ -30,6 +31,7 @@ import no.nav.helse.modell.kommando.OpprettSaksbehandleroppgave
 import no.nav.helse.modell.kommando.PersisterInntektCommand
 import no.nav.helse.modell.kommando.PersisterPeriodehistorikkCommand
 import no.nav.helse.modell.kommando.PersisterVedtaksperiodetypeCommand
+import no.nav.helse.modell.kommando.VurderBehovForBehandlingAvGodkjenningsbehov
 import no.nav.helse.modell.kommando.VurderBehovForTotrinnskontroll
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
@@ -201,6 +203,7 @@ internal class GodkjenningsbehovCommand(
     overstyringDao: OverstyringDao,
     periodehistorikkDao: PeriodehistorikkDao,
     snapshotDao: SnapshotDao,
+    oppgaveDao: OppgaveDao,
     snapshotClient: ISnapshotClient,
     oppgaveService: OppgaveService,
     generasjonRepository: GenerasjonRepository,
@@ -211,6 +214,14 @@ internal class GodkjenningsbehovCommand(
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
+            VurderBehovForBehandlingAvGodkjenningsbehov(
+                id,
+                utbetalingId,
+                vedtaksperiodeId,
+                utbetalingDao,
+                oppgaveDao,
+                vedtakDao
+            ),
             OpprettKoblingTilHendelseCommand(
                 hendelseId = id,
                 vedtaksperiodeId = vedtaksperiodeId,

@@ -286,9 +286,9 @@ internal class SpesialistApp(
                 rapidsConnection = rapidsConnection,
                 kommandofabrikk = kommandofabrikk,
                 avviksvurderingDao = avviksvurderingDao,
+                stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
                 generasjonDao = generasjonDao,
                 avslagDao = avslagDao,
-                stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
             )
         saksbehandlerMediator =
             SaksbehandlerMediator(

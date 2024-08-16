@@ -65,7 +65,6 @@ import no.nav.helse.modell.person.PersonRepository
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak
-import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
@@ -104,7 +103,6 @@ internal class MeldingMediator(
     private val kommandofabrikk: Kommandofabrikk,
     private val dokumentDao: DokumentDao = DokumentDao(dataSource),
     private val avviksvurderingDao: AvviksvurderingDao,
-    private val utbetalingDao: UtbetalingDao = UtbetalingDao(dataSource),
     private val varselRepository: VarselRepository = VarselRepository(dataSource),
     private val generasjonRepository: GenerasjonRepository = GenerasjonRepository(dataSource),
     private val metrikkDao: MetrikkDao = MetrikkDao(dataSource),
@@ -318,20 +316,6 @@ internal class MeldingMediator(
                 godkjenningsbehov.spleisBehandlingId,
                 godkjenningsbehov.utbetalingId,
             )
-        }
-
-        val utbetalingId = godkjenningsbehov.utbetalingId
-        val vedtaksperiodeId = godkjenningsbehov.vedtaksperiodeId()
-        val id = godkjenningsbehov.id
-        if (utbetalingDao.erUtbetalingForkastet(utbetalingId)) {
-            sikkerlogg.info("Ignorerer godkjenningsbehov med id=$id for utbetalingId=$utbetalingId fordi utbetalingen er forkastet")
-            return
-        }
-        if (oppgaveDao.harGyldigOppgave(utbetalingId) || vedtakDao.erAutomatiskGodkjent(utbetalingId)) {
-            sikkerlogg.info(
-                "vedtaksperiodeId=$vedtaksperiodeId med utbetalingId=$utbetalingId har gyldig oppgave eller er automatisk godkjent. Ignorerer godkjenningsbehov med id=$id",
-            )
-            return
         }
         håndter(godkjenningsbehov, context)
     }

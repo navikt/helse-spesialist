@@ -36,9 +36,9 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
             oppgaveDao = oppgaveDao,
             kommandofabrikk = kommandofabrikk,
             avviksvurderingDao = avviksvurderingDao,
+            stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
             generasjonDao = generasjonDao,
             avslagDao = avslagDao,
-            stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
         )
 
     @BeforeEach

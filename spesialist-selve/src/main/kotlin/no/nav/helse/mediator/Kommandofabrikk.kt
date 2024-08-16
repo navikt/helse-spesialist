@@ -420,6 +420,7 @@ internal class Kommandofabrikk(
             overstyringDao = overstyringDao,
             periodehistorikkDao = periodehistorikkDao,
             snapshotDao = snapshotDao,
+            oppgaveDao = oppgaveDao,
             snapshotClient = snapshotClient,
             oppgaveService = oppgaveService,
             generasjonRepository = generasjonRepository,

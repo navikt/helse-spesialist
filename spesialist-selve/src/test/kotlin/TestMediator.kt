@@ -146,9 +146,9 @@ internal class TestMediator(
             rapidsConnection = testRapid,
             kommandofabrikk = kommandofabrikk,
             avviksvurderingDao = avviksvurderingDao,
+            stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
             generasjonDao = generasjonDao,
             avslagDao = avslagDao,
-            stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
         )
     }
 
