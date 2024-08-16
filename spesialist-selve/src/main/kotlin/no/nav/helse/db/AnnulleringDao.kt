@@ -77,7 +77,6 @@ class AnnulleringDao(
         asSQL(
             """
             select aas.id, aas.annullert_tidspunkt, aas.arbeidsgiver_fagsystem_id, aas.utbetaling_id, s.ident, aas.årsaker, b.tekst from annullert_av_saksbehandler aas
-            inner join utbetaling u on aas.id = u.annullert_av_saksbehandler_ref 
             inner join saksbehandler s on s.oid = aas.saksbehandler_ref
             left join begrunnelse b on b.id = aas.begrunnelse_ref
             where arbeidsgiver_fagsystem_id = :arbeidsgiverFagsystemId;
