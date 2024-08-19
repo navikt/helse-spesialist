@@ -801,6 +801,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         vedtaksperiodeId = VEDTAKSPERIODE,
         utbetalingId = UTBETALING_ID,
         arbeidsgiverFagsystemId = "EN-FAGSYSTEMID",
+        personFagsystemId = "EN-FAGSYSTEMID",
         begrunnelser = begrunnelser,
         arsaker = arsaker,
         kommentar = kommentar,

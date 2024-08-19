@@ -48,6 +48,7 @@ class AnnulleringDaoTest : DatabaseIntegrationTest() {
         begrunnelse: String? = "annulleringsbegrunnelse",
         utbetalingId: UUID = UTBETALING_ID,
         arbeidsgiverFagsystemId: String = "EN-FAGSYSTEMID",
+        personFagsystemId: String = "EN-FAGSYSTEMID",
     ) = AnnulleringDto(
         aktørId = AKTØR,
         fødselsnummer = FNR,
@@ -55,6 +56,7 @@ class AnnulleringDaoTest : DatabaseIntegrationTest() {
         vedtaksperiodeId = VEDTAKSPERIODE,
         utbetalingId = utbetalingId,
         arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
+        personFagsystemId = personFagsystemId,
         årsaker = listOf(AnnulleringArsak("key1", "en årsak"), AnnulleringArsak("key2", "to årsak")),
         kommentar = begrunnelse,
     )

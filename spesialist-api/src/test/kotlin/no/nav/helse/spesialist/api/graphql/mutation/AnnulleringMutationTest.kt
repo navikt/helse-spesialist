@@ -18,6 +18,7 @@ internal class AnnulleringMutationTest : AbstractGraphQLApiTest() {
                     aktorId: "en-aktørid", 
                     utbetalingId: "${UUID.randomUUID()}",
                     arbeidsgiverFagsystemId: "EN-FAGSYSTEMID",
+                    personFagsystemId: "EN-FAGSYSTEMID",
                     vedtaksperiodeId: "${UUID.randomUUID()}",
                     kommentar: "En kommentar", 
                     begrunnelser: ["Det første", "Det andre"]
@@ -41,6 +42,7 @@ internal class AnnulleringMutationTest : AbstractGraphQLApiTest() {
                     aktorId: "en-aktørid", 
                     utbetalingId: "${UUID.randomUUID()}",
                     arbeidsgiverFagsystemId: "EN-FAGSYSTEMID",
+                    personFagsystemId: "EN-FAGSYSTEMID",
                     vedtaksperiodeId: "${UUID.randomUUID()}",
                     begrunnelser: []
                 })

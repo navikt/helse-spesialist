@@ -513,6 +513,7 @@ internal class SaksbehandlerMediator(
             vedtaksperiodeId = this.vedtaksperiodeId,
             utbetalingId = this.utbetalingId,
             arbeidsgiverFagsystemId = this.arbeidsgiverFagsystemId,
+            personFagsystemId = this.personFagsystemId ?: "",
             begrunnelser = this.begrunnelser,
             arsaker = this.arsaker?.map { arsak -> AnnulleringArsak(key = arsak._key, arsak = arsak.arsak) },
             kommentar = this.kommentar,

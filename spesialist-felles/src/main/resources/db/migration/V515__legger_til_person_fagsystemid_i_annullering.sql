@@ -1,0 +1,1 @@
+ALTER TABLE annullert_av_saksbehandler ADD COLUMN person_fagsystem_id VARCHAR;
