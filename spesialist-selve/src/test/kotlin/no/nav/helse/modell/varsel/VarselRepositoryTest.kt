@@ -8,7 +8,6 @@ import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.INAKTIV
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Periode
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -19,7 +18,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class VarselRepositoryTest : AbstractDatabaseTest() {
-    private val generasjonRepository = GenerasjonRepository(dataSource)
     private val varselRepository = VarselRepository(dataSource)
     private val definisjonDao = DefinisjonDao(dataSource)
     private val generasjonDao = GenerasjonDao(dataSource)
@@ -48,7 +46,6 @@ internal class VarselRepositoryTest : AbstractDatabaseTest() {
                 Generasjon.VidereBehandlingAvklares,
                 null,
             )
-        generasjon.registrer(generasjonRepository, varselRepository)
     }
 
     @Test

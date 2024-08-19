@@ -7,8 +7,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.januar
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
+import no.nav.helse.modell.gosysoppgaver.inspektør
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.person.vedtaksperiode.IVedtaksperiodeObserver
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
@@ -27,20 +27,6 @@ import java.util.UUID
 internal class GodkjenningMediatorTest {
     private lateinit var context: CommandContext
     private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
-    private val observer =
-        object : IVedtaksperiodeObserver {
-            val generasjonerMedGodkjenteVarsler = mutableSetOf<UUID>()
-
-            override fun varselOpprettet(
-                varselId: UUID,
-                vedtaksperiodeId: UUID,
-                generasjonId: UUID,
-                varselkode: String,
-                opprettet: LocalDateTime,
-            ) {
-                generasjonerMedGodkjenteVarsler.add(generasjonId)
-            }
-        }
     private val hendelserInspektør =
         object : CommandContextObserver {
             private val hendelser = mutableListOf<JsonNode>()
@@ -378,17 +364,20 @@ internal class GodkjenningMediatorTest {
         val vedtaksperiodeId2 = UUID.randomUUID()
         val generasjon1 = generasjon(generasjonId1, vedtaksperiodeId1)
         val generasjon2 = generasjon(generasjonId2, vedtaksperiodeId2)
-        generasjon1.registrer(observer)
-        generasjon2.registrer(observer)
         val varsel1 = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId1)
         val varsel2 = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId2)
         generasjon1.håndterNyttVarsel(varsel1, UUID.randomUUID())
         generasjon2.håndterNyttVarsel(varsel2, UUID.randomUUID())
 
         godkjenning(listOf(generasjon1, generasjon2))
-        assertEquals(2, observer.generasjonerMedGodkjenteVarsler.size)
-        assertEquals(generasjonId1, observer.generasjonerMedGodkjenteVarsler.toList()[0])
-        assertEquals(generasjonId2, observer.generasjonerMedGodkjenteVarsler.toList()[1])
+        generasjon1.inspektør {
+            assertEquals(1, varsler.size)
+            assertEquals(vedtaksperiodeId1, varsler.first().vedtaksperiodeId)
+        }
+        generasjon2.inspektør {
+            assertEquals(1, varsler.size)
+            assertEquals(vedtaksperiodeId2, varsler.first().vedtaksperiodeId)
+        }
     }
 
     private fun generasjon(

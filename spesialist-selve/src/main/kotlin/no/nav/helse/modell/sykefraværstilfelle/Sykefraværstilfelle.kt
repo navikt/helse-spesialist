@@ -38,6 +38,8 @@ internal class Sykefraværstilfelle(
 
     private fun fattVedtak(vedtak: Sykepengevedtak) = observers.forEach { it.vedtakFattet(vedtak) }
 
+    internal fun skjæringstidspunkt() = skjæringstidspunkt
+
     internal fun haster(vedtaksperiodeId: UUID): Boolean {
         val generasjon =
             gjeldendeGenerasjoner.finnGenerasjonForVedtaksperiode(vedtaksperiodeId)

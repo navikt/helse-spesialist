@@ -5,43 +5,33 @@ import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
 internal class GenerasjonTilstandTest {
-    private lateinit var observer: GenerasjonTestObserver
-
-    @BeforeEach
-    internal fun beforeEach() {
-        observer = GenerasjonTestObserver()
-    }
 
     @Test
     fun `Går fra MedVedtaksforslag til VidereBehandlingAvklares dersom utbetalingen blir forkastet`() {
         val generasjonId = UUID.randomUUID()
         val generasjon = generasjon(generasjonId, UUID.randomUUID())
-        generasjon.registrer(observer)
 
         val utbetalingId = UUID.randomUUID()
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
+        generasjon.assertTilstand(TilstandDto.KlarTilBehandling)
         generasjon.håndterForkastetUtbetaling(utbetalingId)
-        observer.assertUtbetaling(generasjonId, null)
-
-        observer.assertTilstandsendring(generasjonId, Generasjon.VidereBehandlingAvklares, Generasjon.KlarTilBehandling, 0)
-        observer.assertTilstandsendring(generasjonId, Generasjon.KlarTilBehandling, Generasjon.VidereBehandlingAvklares, 1)
+        generasjon.assertTilstand(TilstandDto.VidereBehandlingAvklares)
+        generasjon.assertUtbetaling(null)
     }
 
     @Test
     fun `Går fra VidereBehandlingAvklares til AvsluttetUtenVedtak ved avsluttet uten vedtak`() {
         val generasjonId = UUID.randomUUID()
         val generasjon = generasjon(generasjonId, UUID.randomUUID())
-        generasjon.registrer(observer)
+        generasjon.assertTilstand(TilstandDto.VidereBehandlingAvklares)
         generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(UUID.randomUUID(), emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
-
-        observer.assertTilstandsendring(generasjonId, Generasjon.VidereBehandlingAvklares, Generasjon.AvsluttetUtenVedtak, 0)
+        generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
     }
 
     @Test
@@ -49,29 +39,29 @@ internal class GenerasjonTilstandTest {
         val generasjonId = UUID.randomUUID()
         val generasjon = generasjon(generasjonId, UUID.randomUUID())
         generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID()), UUID.randomUUID())
-        generasjon.registrer(observer)
+        generasjon.assertTilstand(TilstandDto.VidereBehandlingAvklares)
         generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(UUID.randomUUID(), emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
-
-        observer.assertTilstandsendring(generasjonId, Generasjon.VidereBehandlingAvklares, Generasjon.AvsluttetUtenVedtak, 0)
+        generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
     }
 
     @Test
-    fun `Går fra VidereBehandlingAvklares til MedVedtaksforslag når vi mottar utbetaling`() {
+    fun `Går fra VidereBehandlingAvklares til KlarTilBehandling når vi mottar utbetaling`() {
         val generasjonId = UUID.randomUUID()
         val generasjon = generasjon(generasjonId, UUID.randomUUID())
-        generasjon.registrer(observer)
+        generasjon.assertTilstand(TilstandDto.VidereBehandlingAvklares)
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), UUID.randomUUID())
-        observer.assertTilstandsendring(generasjonId, Generasjon.VidereBehandlingAvklares, Generasjon.KlarTilBehandling, 0)
+        generasjon.assertTilstand(TilstandDto.KlarTilBehandling)
     }
 
     @Test
     fun `Går fra KlarTilBehandling til VedtakFattet når vi mottar vedtak_fattet`() {
         val generasjonId = UUID.randomUUID()
         val generasjon = generasjon(generasjonId, UUID.randomUUID())
-        generasjon.registrer(observer)
+        generasjon.assertTilstand(TilstandDto.VidereBehandlingAvklares)
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), UUID.randomUUID())
+        generasjon.assertTilstand(TilstandDto.KlarTilBehandling)
         generasjon.håndterVedtakFattet(UUID.randomUUID())
-        observer.assertTilstandsendring(generasjonId, Generasjon.KlarTilBehandling, Generasjon.VedtakFattet, 1)
+        generasjon.assertTilstand(TilstandDto.VedtakFattet)
     }
 
     @Test
@@ -79,17 +69,16 @@ internal class GenerasjonTilstandTest {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjon(generasjonId, vedtaksperiodeId)
-        generasjon.registrer(observer)
 
         val utbetalingId = UUID.randomUUID()
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
 
+        generasjon.assertTilstand(TilstandDto.KlarTilBehandling)
         generasjon.håndterVedtakFattet(UUID.randomUUID())
-        observer.assertTilstandsendring(generasjonId, Generasjon.VidereBehandlingAvklares, Generasjon.KlarTilBehandling, 0)
-        observer.assertTilstandsendring(generasjonId, Generasjon.KlarTilBehandling, Generasjon.VedtakFattet, 1)
+        generasjon.assertTilstand(TilstandDto.VedtakFattet)
 
         generasjon.håndterVedtakFattet(UUID.randomUUID())
-        observer.assertGjeldendeTilstand(generasjonId, Generasjon.VedtakFattet)
+        generasjon.assertTilstand(TilstandDto.VedtakFattet)
     }
 
     @Test
@@ -97,13 +86,13 @@ internal class GenerasjonTilstandTest {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjon(generasjonId, vedtaksperiodeId)
-        generasjon.registrer(observer)
+        generasjon.assertTilstand(TilstandDto.VidereBehandlingAvklares)
 
         generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
-        observer.assertTilstandsendring(generasjonId, Generasjon.VidereBehandlingAvklares, Generasjon.AvsluttetUtenVedtak, 0)
+        generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
 
         generasjon.håndterVedtakFattet(UUID.randomUUID())
-        observer.assertGjeldendeTilstand(generasjonId, Generasjon.AvsluttetUtenVedtak)
+        generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
     }
 
     @Test
@@ -111,14 +100,13 @@ internal class GenerasjonTilstandTest {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjon(generasjonId, vedtaksperiodeId)
-        generasjon.registrer(observer)
 
         generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
-        observer.assertTilstandsendring(generasjonId, Generasjon.VidereBehandlingAvklares, Generasjon.AvsluttetUtenVedtak, 0)
+        generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
 
         generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
-        observer.assertTilstandsendring(generasjonId, Generasjon.AvsluttetUtenVedtak, Generasjon.AvsluttetUtenVedtakMedVarsler, 1)
-        assertEquals(1, observer.opprettedeVarsler.size)
+        generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtakMedVarsler)
+        generasjon.assertAntallVarsler(1)
     }
 
     @Test
@@ -126,17 +114,16 @@ internal class GenerasjonTilstandTest {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjon(generasjonId, vedtaksperiodeId)
-        generasjon.registrer(observer)
 
         generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
-        observer.assertTilstandsendring(generasjonId, Generasjon.VidereBehandlingAvklares, Generasjon.AvsluttetUtenVedtak, 0)
+        generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
 
         generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
-        observer.assertTilstandsendring(generasjonId, Generasjon.AvsluttetUtenVedtak, Generasjon.AvsluttetUtenVedtakMedVarsler, 1)
-        assertEquals(1, observer.opprettedeVarsler.size)
+        generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtakMedVarsler)
+        generasjon.assertAntallVarsler(1)
 
         generasjon.håndterGodkjentAvSaksbehandler("123456", UUID.randomUUID())
-        observer.assertTilstandsendring(generasjonId, Generasjon.AvsluttetUtenVedtakMedVarsler, Generasjon.AvsluttetUtenVedtak, 2)
+        generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
     }
 
     @Test
@@ -144,16 +131,27 @@ internal class GenerasjonTilstandTest {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjon(generasjonId, vedtaksperiodeId)
-        generasjon.registrer(observer)
 
         generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
-        observer.assertTilstandsendring(generasjonId, Generasjon.VidereBehandlingAvklares, Generasjon.AvsluttetUtenVedtak, 0)
+        generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
 
         generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
-        observer.assertTilstandsendring(generasjonId, Generasjon.AvsluttetUtenVedtak, Generasjon.AvsluttetUtenVedtakMedVarsler, 1)
+        generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtakMedVarsler)
 
         generasjon.håndterVedtakFattet(UUID.randomUUID())
-        observer.assertGjeldendeTilstand(generasjonId, Generasjon.AvsluttetUtenVedtakMedVarsler)
+        generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtakMedVarsler)
+    }
+
+    private fun Generasjon.assertTilstand(tilstandDto: TilstandDto) {
+        assertEquals(tilstandDto, toDto().tilstand)
+    }
+
+    private fun Generasjon.assertAntallVarsler(antall: Int) {
+        assertEquals(antall, toDto().varsler.size)
+    }
+
+    private fun Generasjon.assertUtbetaling(utbetalingId: UUID?) {
+        assertEquals(utbetalingId, toDto().utbetalingId)
     }
 
     private fun generasjon(

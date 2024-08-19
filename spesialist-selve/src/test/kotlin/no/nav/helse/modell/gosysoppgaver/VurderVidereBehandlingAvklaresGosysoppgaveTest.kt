@@ -9,13 +9,11 @@ import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.person.vedtaksperiode.IVedtaksperiodeObserver
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
+import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
-import no.nav.helse.modell.varsel.Varselkode
-import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
-import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
 import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.GenerasjonDto
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -34,38 +32,8 @@ internal class VurderVidereBehandlingAvklaresGosysoppgaveTest {
         private val VEDTAKPERIODE_ID_AG_2 = UUID.randomUUID()
     }
 
-    private val vedtaksperiodeObserver =
-        object : IVedtaksperiodeObserver {
-            val deaktiverteVarsler = mutableListOf<Varselkode>()
-            val opprettedeVarsler = mutableListOf<String>()
-
-            override fun varselOpprettet(
-                varselId: UUID,
-                vedtaksperiodeId: UUID,
-                generasjonId: UUID,
-                varselkode: String,
-                opprettet: LocalDateTime,
-            ) {
-                opprettedeVarsler.add(varselkode)
-            }
-
-            override fun varselDeaktivert(
-                varselId: UUID,
-                varselkode: String,
-                generasjonId: UUID,
-                vedtaksperiodeId: UUID,
-            ) {
-                deaktiverteVarsler.add(Varselkode.valueOf(varselkode))
-            }
-
-            fun reset() {
-                deaktiverteVarsler.clear()
-                opprettedeVarsler.clear()
-            }
-        }
-
-    private val generasjonAg1 = generasjon(VEDTAKPERIODE_ID_AG_1).also { it.registrer(vedtaksperiodeObserver) }
-    private val generasjonAg2 = generasjon(VEDTAKPERIODE_ID_AG_2).also { it.registrer(vedtaksperiodeObserver) }
+    private val generasjonAg1 = generasjon(VEDTAKPERIODE_ID_AG_1)
+    private val generasjonAg2 = generasjon(VEDTAKPERIODE_ID_AG_2)
     private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(generasjonAg1, generasjonAg2), emptyList())
     private val dao = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
@@ -153,21 +121,30 @@ internal class VurderVidereBehandlingAvklaresGosysoppgaveTest {
     @Test
     fun `Lagrer ikke varsel ved ingen åpne oppgaver og deaktiverer eventuelt eksisterende varsel`() {
         generasjonAg1.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1), UUID.randomUUID())
-        assertEquals(1, vedtaksperiodeObserver.opprettedeVarsler.size)
-        vedtaksperiodeObserver.reset()
+        generasjonAg1.inspektør {
+            assertEquals(1, varsler.size)
+        }
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
         assertTrue(command().resume(context))
         verify(exactly = 1) { dao.persisterÅpneGosysOppgaver(any()) }
-        assertEquals(0, vedtaksperiodeObserver.opprettedeVarsler.size)
-        assertTrue(vedtaksperiodeObserver.deaktiverteVarsler.contains(SB_EX_1))
+        generasjonAg1.inspektør {
+            assertEquals(1, varsler.size)
+            assertEquals("SB_EX_1", varsler.first().varselkode)
+            assertEquals(VarselStatusDto.INAKTIV, varsler.first().status)
+        }
         verify(exactly = 1) { oppgaveService.fjernGosysEgenskap(any()) }
     }
 
     @Test
     fun `Deaktiverer ikke varsel dersom oppgave er tildelt`() {
+        generasjonAg1.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1), UUID.randomUUID())
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
         assertTrue(command(harTildeltOppgave = true).resume(context))
-        assertFalse(vedtaksperiodeObserver.deaktiverteVarsler.contains(SB_EX_1))
+        generasjonAg1.inspektør {
+            assertEquals(1, varsler.size)
+            assertEquals("SB_EX_1", varsler.first().varselkode)
+            assertEquals(VarselStatusDto.AKTIV, varsler.first().status)
+        }
     }
 
     @Test
@@ -183,8 +160,10 @@ internal class VurderVidereBehandlingAvklaresGosysoppgaveTest {
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, null, true))
         assertTrue(command().resume(context))
         verify(exactly = 1) { dao.persisterÅpneGosysOppgaver(any()) }
-        assertEquals(1, vedtaksperiodeObserver.opprettedeVarsler.size)
-        assertEquals(SB_EX_3.name, vedtaksperiodeObserver.opprettedeVarsler[0])
+        generasjonAg1.inspektør {
+            assertEquals(1, varsler.size)
+            assertEquals("SB_EX_3", varsler.first().varselkode)
+        }
     }
 
     @Test
@@ -207,8 +186,10 @@ internal class VurderVidereBehandlingAvklaresGosysoppgaveTest {
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
         assertTrue(command(harTildeltOppgave).resume(context))
         verify(exactly = 1) { dao.persisterÅpneGosysOppgaver(any()) }
-        assertEquals(1, vedtaksperiodeObserver.opprettedeVarsler.size)
-        assertEquals(SB_EX_1.name, vedtaksperiodeObserver.opprettedeVarsler[0])
+        generasjonAg1.inspektør {
+            assertEquals(1, varsler.size)
+            assertEquals("SB_EX_1", varsler.first().varselkode)
+        }
     }
 
     private fun generasjon(vedtaksperiodeId: UUID = UUID.randomUUID()) =
@@ -219,4 +200,9 @@ internal class VurderVidereBehandlingAvklaresGosysoppgaveTest {
             tom = 31.januar,
             skjæringstidspunkt = 1.januar,
         )
+
+}
+
+internal fun Generasjon.inspektør(block: GenerasjonDto.() -> Unit) {
+    this.toDto().block()
 }
