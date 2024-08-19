@@ -38,7 +38,7 @@ internal class SaksbehandlerløsningRiverTest {
                 id = ID
             )
         )
-        verify(exactly = 1) { mediator.håndter(FNR, any<Saksbehandlerløsning>(), any()) }
+        verify(exactly = 1) { mediator.mottaMelding(any<Saksbehandlerløsning>(), any()) }
     }
 
     @Test
@@ -56,8 +56,7 @@ internal class SaksbehandlerløsningRiverTest {
             )
         )
         verify(exactly = 1) {
-            mediator.håndter(
-                FNR,
+            mediator.mottaMelding(
                 withArg<Saksbehandlerløsning> {
                     assertEquals("saksbehandler@nav.no", it.saksbehandler.epostadresse)
                     assertEquals("saksbehandlerident", it.saksbehandler.ident)

@@ -1,7 +1,9 @@
 package no.nav.helse.modell.vedtaksperiode.vedtak
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.mediator.meldinger.PersonmeldingOld
+import no.nav.helse.mediator.Kommandofabrikk
+import no.nav.helse.mediator.meldinger.Personmelding
+import no.nav.helse.modell.person.Person
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
@@ -29,7 +31,7 @@ internal class Saksbehandlerløsning private constructor(
     val saksbehandler: Saksbehandler,
     val beslutter: Saksbehandler?,
     private val json: String,
-) : PersonmeldingOld {
+) : Personmelding {
     internal constructor(packet: JsonMessage) : this(
         id = UUID.fromString(packet["@id"].asText()),
         behandlingId = UUID.fromString(packet["behandlingId"].asText()),
@@ -97,6 +99,10 @@ internal class Saksbehandlerløsning private constructor(
         val ident: String,
         val epostadresse: String,
     )
+
+    override fun behandle(person: Person, kommandofabrikk: Kommandofabrikk) {
+        kommandofabrikk.iverksettSaksbehandlerløsning(this, person)
+    }
 
     override fun fødselsnummer() = fødselsnummer
 

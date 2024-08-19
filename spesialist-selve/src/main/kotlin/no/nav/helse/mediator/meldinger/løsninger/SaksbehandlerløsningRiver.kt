@@ -10,7 +10,6 @@ import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 internal class SaksbehandlerløsningRiver(
     private val mediator: MeldingMediator,
@@ -39,9 +38,6 @@ internal class SaksbehandlerløsningRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        if (UUID.fromString(packet["@id"].asText()) == UUID.fromString("7af5fede-749d-4718-ac91-444996600236")) return
-        if (UUID.fromString(packet["@id"].asText()) == UUID.fromString("3bca726c-0430-49a8-a7c3-1f3e9aa0454a")) return
-        val fødselsnummer = packet["fødselsnummer"].asText()
-        mediator.håndter(fødselsnummer, Saksbehandlerløsning(packet), context)
+        mediator.mottaMelding(Saksbehandlerløsning(packet), context)
     }
 }

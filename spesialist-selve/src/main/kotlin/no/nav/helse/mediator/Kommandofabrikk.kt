@@ -51,7 +51,6 @@ import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.utbetaling.UtbetalingEndretCommand
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
-import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovCommand
@@ -92,7 +91,6 @@ internal class Kommandofabrikk(
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource),
     private val snapshotDao: SnapshotDao = SnapshotDao(dataSource),
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
-    private val generasjonDao: GenerasjonDao = GenerasjonDao(dataSource),
     private val snapshotClient: ISnapshotClient,
     oppgaveService: () -> OppgaveService,
     private val totrinnsvurderingDao: TotrinnsvurderingDao = TotrinnsvurderingDao(dataSource),
@@ -371,33 +369,32 @@ internal class Kommandofabrikk(
             totrinnsvurderingMediator = totrinnsvurderingMediator,
         )
 
-    fun utbetalingsgodkjenning(hendelse: Saksbehandlerløsning): UtbetalingsgodkjenningCommand {
-        val oppgaveId = hendelse.oppgaveId
-        val fødselsnummer = hendelse.fødselsnummer()
+    private fun utbetalingsgodkjenning(melding: Saksbehandlerløsning, person: Person): UtbetalingsgodkjenningCommand {
+        val oppgaveId = melding.oppgaveId
+        val fødselsnummer = melding.fødselsnummer()
         val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(oppgaveId)
-        val spleisBehandlingId = generasjonDao.finnGjeldendeGenerasjon(vedtaksperiodeId)?.spleisBehandlingId
-        val skjæringstidspunkt = generasjonRepository.skjæringstidspunktFor(vedtaksperiodeId)
-        val sykefraværstilfelle = sykefraværstilfelle(fødselsnummer, skjæringstidspunkt)
+        val spleisBehandlingId = person.vedtaksperiode(vedtaksperiodeId)?.gjeldendeBehandlingId
+        val sykefraværstilfelle = person.sykefraværstilfelle(vedtaksperiodeId)
         val utbetaling = utbetalingDao.utbetalingFor(oppgaveId)
         return UtbetalingsgodkjenningCommand(
-            id = hendelse.id,
-            behandlingId = hendelse.behandlingId,
+            id = melding.id,
+            behandlingId = melding.behandlingId,
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             spleisBehandlingId = spleisBehandlingId,
             utbetaling = utbetaling,
             sykefraværstilfelle = sykefraværstilfelle,
-            godkjent = hendelse.godkjent,
-            godkjenttidspunkt = hendelse.godkjenttidspunkt,
-            ident = hendelse.ident,
-            epostadresse = hendelse.epostadresse,
-            årsak = hendelse.årsak,
-            begrunnelser = hendelse.begrunnelser,
-            kommentar = hendelse.kommentar,
-            saksbehandleroverstyringer = hendelse.saksbehandleroverstyringer,
-            godkjenningsbehovhendelseId = hendelse.godkjenningsbehovhendelseId,
-            saksbehandler = hendelse.saksbehandler,
-            beslutter = hendelse.beslutter,
+            godkjent = melding.godkjent,
+            godkjenttidspunkt = melding.godkjenttidspunkt,
+            ident = melding.ident,
+            epostadresse = melding.epostadresse,
+            årsak = melding.årsak,
+            begrunnelser = melding.begrunnelser,
+            kommentar = melding.kommentar,
+            saksbehandleroverstyringer = melding.saksbehandleroverstyringer,
+            godkjenningsbehovhendelseId = melding.godkjenningsbehovhendelseId,
+            saksbehandler = melding.saksbehandler,
+            beslutter = melding.beslutter,
             meldingDao = meldingDao,
             godkjenningMediator = godkjenningMediator,
         )
@@ -517,6 +514,10 @@ internal class Kommandofabrikk(
     internal fun iverksettTilbakedateringBehandlet(melding: TilbakedateringBehandlet, person: Person) {
         val oppgaveDataForAutomatisering = finnOppgavedata(melding.fødselsnummer()) ?: return
         iverksett(tilbakedateringGodkjent(melding, person, oppgaveDataForAutomatisering), melding.id)
+    }
+
+    internal fun iverksettSaksbehandlerløsning(melding: Saksbehandlerløsning, person: Person) {
+        iverksett(utbetalingsgodkjenning(melding, person), melding.id)
     }
 
     private fun nyContext(meldingId: UUID) =

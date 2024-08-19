@@ -65,7 +65,6 @@ import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovCommand
-import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
 import no.nav.helse.objectMapper
@@ -504,13 +503,6 @@ internal class MeldingMediator(
         try {
             when (melding) {
                 is SøknadSendt -> iverksett(kommandofabrikk.søknadSendt(melding), melding.id, commandContext)
-
-
-                is Saksbehandlerløsning -> iverksett(
-                    kommandofabrikk.utbetalingsgodkjenning(melding),
-                    melding.id,
-                    commandContext
-                )
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")
             }
             utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, messageContext)
