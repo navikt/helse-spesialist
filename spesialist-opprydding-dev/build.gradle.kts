@@ -19,7 +19,12 @@ dependencies {
 }
 
 tasks {
+    val copyDeps by registering(Sync::class) {
+        from(configurations.runtimeClasspath)
+        into("build/libs")
+    }
     named<Jar>("jar") {
+        dependsOn(copyDeps)
         archiveBaseName.set("app")
 
         manifest {
@@ -29,12 +34,5 @@ tasks {
                     it.name
                 }
         }
-    }
-    val copyDeps by registering(Sync::class) {
-        from(configurations.runtimeClasspath)
-        into("build/libs")
-    }
-    named("assemble") {
-        dependsOn(copyDeps)
     }
 }

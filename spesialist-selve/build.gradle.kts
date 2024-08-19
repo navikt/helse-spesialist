@@ -20,19 +20,6 @@ dependencies {
 }
 
 tasks {
-
-    named<Jar>("jar") {
-        archiveBaseName.set("app")
-
-        manifest {
-            attributes["Main-Class"] = "no.nav.helse.MainKt"
-            attributes["Class-Path"] =
-                configurations.runtimeClasspath.get().joinToString(separator = " ") {
-                    it.name
-                }
-        }
-    }
-
     val copyDeps by registering(Sync::class) {
         from(configurations.runtimeClasspath)
         exclude("spesialist-*")
@@ -43,7 +30,17 @@ tasks {
         include("spesialist-*")
         into("build/libs")
     }
-    named("assemble") {
+
+    named<Jar>("jar") {
         dependsOn(copyDeps, copyLibs)
+        archiveBaseName.set("app")
+
+        manifest {
+            attributes["Main-Class"] = "no.nav.helse.MainKt"
+            attributes["Class-Path"] =
+                configurations.runtimeClasspath.get().joinToString(separator = " ") {
+                    it.name
+                }
+        }
     }
 }
