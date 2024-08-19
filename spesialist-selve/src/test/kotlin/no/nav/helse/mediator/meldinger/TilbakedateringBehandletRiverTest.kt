@@ -25,7 +25,7 @@ internal class TilbakedateringBehandletRiverTest {
     fun `Leser tilbakedatering behandlet`() {
         mocks()
         testRapid.sendTestMessage(event())
-        verify(exactly = 1) { mediator.håndter(any<TilbakedateringBehandlet>(), any()) }
+        verify(exactly = 1) { mediator.mottaMelding(any<TilbakedateringBehandlet>(), any()) }
     }
 
     private fun mocks(

@@ -47,16 +47,13 @@ import no.nav.helse.mediator.meldinger.løsninger.SaksbehandlerløsningRiver
 import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.mediator.meldinger.påminnelser.KommandokjedePåminnelseRiver
-import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.MeldingDuplikatkontrollDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.dokument.DokumentDao
-import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.person.AdressebeskyttelseEndretRiver
 import no.nav.helse.modell.person.OppdaterPersonsnapshot
 import no.nav.helse.modell.person.PersonDao
@@ -91,7 +88,6 @@ internal interface SpesialistRiver : River.PacketListener {
 internal class MeldingMediator(
     private val dataSource: DataSource,
     private val rapidsConnection: RapidsConnection,
-    private val oppgaveDao: OppgaveDao = OppgaveDao(dataSource),
     private val vedtakDao: VedtakDao = VedtakDao(dataSource),
     private val personDao: PersonDao = PersonDao(dataSource),
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
@@ -286,56 +282,6 @@ internal class MeldingMediator(
 
     internal fun håndter(avviksvurdering: AvviksvurderingDto) {
         kommandofabrikk.avviksvurdering(avviksvurdering)
-    }
-
-    private fun finnOppgavedata(fødselsnummer: String): OppgaveDataForAutomatisering? {
-        return oppgaveDao.finnOppgaveId(fødselsnummer)?.let { oppgaveId ->
-            sikkerlogg.info("Fant en oppgave for {}: {}", fødselsnummer, oppgaveId)
-            val oppgaveDataForAutomatisering = oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)
-
-            if (oppgaveDataForAutomatisering == null) {
-                sikkerlogg.info("Fant ikke oppgavedata for {} og {}", fødselsnummer, oppgaveId)
-                return null
-            } else {
-                sikkerlogg.info(
-                    "Har aktiv saksbehandleroppgave og oppgavedata for fnr $fødselsnummer og vedtaksperiodeId ${oppgaveDataForAutomatisering.vedtaksperiodeId}",
-                )
-                return oppgaveDataForAutomatisering
-            }
-        } ?: kotlin.run {
-            sikkerlogg.info("Ingen åpne oppgaver i Speil for {}", fødselsnummer)
-            null
-        }
-    }
-
-    private fun tilbakedateringBehandlet(
-        fødselsnummer: String,
-        tilbakedateringBehandlet: TilbakedateringBehandlet,
-        commandContext: CommandContext,
-    ) {
-        personRepository.brukPersonHvisFinnes(fødselsnummer) {
-            behandleTilbakedateringBehandlet(tilbakedateringBehandlet.perioder)
-        }
-        val oppgaveDataForAutomatisering =
-            finnOppgavedata(fødselsnummer)
-                ?: return commandContext.avbryt(commandContextDao, tilbakedateringBehandlet.id)
-
-        if (!oppgaveDataForAutomatisering.periodeOverlapperMed(tilbakedateringBehandlet.perioder)) {
-            sikkerlogg.info(
-                "Ingen av periodene i sykmeldingen er innenfor vedtaksperiodens fom og tom, for tilbakedateringen {} og {}",
-                fødselsnummer,
-                oppgaveDataForAutomatisering.oppgaveId,
-            )
-            return
-        }
-        tilbakedateringBehandlet.oppgavedataForAutomatisering(oppgaveDataForAutomatisering)
-        personRepository.brukPersonHvisFinnes(fødselsnummer) {
-            iverksett(
-                command = kommandofabrikk.tilbakedateringGodkjent(fødselsnummer, tilbakedateringBehandlet, this),
-                hendelseId = tilbakedateringBehandlet.id,
-                commandContext = commandContext,
-            )
-        }
     }
 
     fun stansAutomatiskBehandling(
@@ -557,12 +503,6 @@ internal class MeldingMediator(
         val hendelsenavn = melding::class.simpleName ?: "ukjent hendelse"
         try {
             when (melding) {
-                is TilbakedateringBehandlet -> tilbakedateringBehandlet(
-                    melding.fødselsnummer(),
-                    melding,
-                    commandContext
-                )
-
                 is SøknadSendt -> iverksett(kommandofabrikk.søknadSendt(melding), melding.id, commandContext)
 
 

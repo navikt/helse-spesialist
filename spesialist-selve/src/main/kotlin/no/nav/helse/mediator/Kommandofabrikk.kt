@@ -224,12 +224,11 @@ internal class Kommandofabrikk(
         )
     }
 
-    fun tilbakedateringGodkjent(
-        fødselsnummer: String,
+    private fun tilbakedateringGodkjent(
         melding: TilbakedateringBehandlet,
         person: Person,
+        oppgaveDataForAutomatisering: OppgaveDataForAutomatisering
     ): TilbakedateringGodkjentCommand {
-        val oppgaveDataForAutomatisering = melding.oppgavedataForAutomatisering
         val vedtaksperiodeId = oppgaveDataForAutomatisering.vedtaksperiodeId
         val sykefraværstilfelle = person.sykefraværstilfelle(vedtaksperiodeId)
         val utbetaling = utbetalingDao.hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
@@ -239,7 +238,7 @@ internal class Kommandofabrikk(
             }
 
         return TilbakedateringGodkjentCommand(
-            fødselsnummer = fødselsnummer,
+            fødselsnummer = melding.fødselsnummer(),
             sykefraværstilfelle = sykefraværstilfelle,
             utbetaling = utbetaling,
             automatisering = automatisering,
@@ -248,6 +247,7 @@ internal class Kommandofabrikk(
             godkjenningMediator = godkjenningMediator,
             spleisBehandlingId = vedtaksperiode.gjeldendeBehandlingId,
             organisasjonsnummer = vedtaksperiode.organisasjonsnummer(),
+            søknadsperioder = melding.perioder
         )
     }
 
@@ -512,6 +512,11 @@ internal class Kommandofabrikk(
     internal fun iverksettGosysOppgaveEndret(melding: GosysOppgaveEndret, person: Person) {
         val oppgaveDataForAutomatisering = finnOppgavedata(melding.fødselsnummer()) ?: return
         iverksett(gosysOppgaveEndret(melding, person, oppgaveDataForAutomatisering), melding.id)
+    }
+
+    internal fun iverksettTilbakedateringBehandlet(melding: TilbakedateringBehandlet, person: Person) {
+        val oppgaveDataForAutomatisering = finnOppgavedata(melding.fødselsnummer()) ?: return
+        iverksett(tilbakedateringGodkjent(melding, person, oppgaveDataForAutomatisering), melding.id)
     }
 
     private fun nyContext(meldingId: UUID) =

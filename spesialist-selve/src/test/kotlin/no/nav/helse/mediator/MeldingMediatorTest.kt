@@ -6,7 +6,6 @@ import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.AvviksvurderingDao
-import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.varsel.Varselkode
@@ -22,7 +21,6 @@ import java.util.UUID
 internal class MeldingMediatorTest : AbstractDatabaseTest() {
     private val testRapid = TestRapid()
 
-    private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val avviksvurderingDao = mockk<AvviksvurderingDao>()
     private val generasjonDao = mockk<GenerasjonDao>()
     private val avslagDao = mockk<AvslagDao>()
@@ -33,7 +31,6 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
         MeldingMediator(
             dataSource = dataSource,
             rapidsConnection = testRapid,
-            oppgaveDao = oppgaveDao,
             kommandofabrikk = kommandofabrikk,
             avviksvurderingDao = avviksvurderingDao,
             stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,

@@ -49,6 +49,6 @@ internal class TilbakedateringBehandletRiver(
             StructuredArguments.keyValue("hendelse", packet.toJson()),
         )
 
-        mediator.håndter(TilbakedateringBehandlet(packet), context)
+        mediator.mottaMelding(TilbakedateringBehandlet(packet), context)
     }
 }

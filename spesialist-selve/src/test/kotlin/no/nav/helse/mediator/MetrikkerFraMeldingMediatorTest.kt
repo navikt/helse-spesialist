@@ -24,7 +24,6 @@ internal class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
         MeldingMediator(
             dataSource = dataSource,
             rapidsConnection = testRapid,
-            oppgaveDao = mockk(relaxed = true),
             kommandofabrikk = kommandofabrikk,
             avviksvurderingDao = mockk(),
             stansAutomatiskBehandlingMediator = mockk(relaxed = true),
