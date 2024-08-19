@@ -118,6 +118,7 @@ internal class Saksbehandlingsmelder(
                     "utbetalingId" to event.utbetalingId,
                     "vedtaksperiodeId" to event.vedtaksperiodeId,
                     "arbeidsgiverFagsystemId" to event.arbeidsgiverFagsystemId,
+                    "personFagsystemId" to event.personFagsystemId,
                 ).apply {
                     compute("kommentar") { _, _ -> event.kommentar }
                     compute("arsaker") { _, _ ->

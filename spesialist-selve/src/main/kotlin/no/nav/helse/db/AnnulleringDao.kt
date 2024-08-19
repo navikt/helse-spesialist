@@ -20,17 +20,15 @@ class AnnulleringDao(
             }
         asSQL(
             """
-            INSERT INTO annullert_av_saksbehandler (annullert_tidspunkt, saksbehandler_ref, årsaker, begrunnelse_ref, vedtaksperiode_id, utbetaling_id, arbeidsgiver_fagsystem_id, person_fagsystem_id) 
+            INSERT INTO annullert_av_saksbehandler (annullert_tidspunkt, saksbehandler_ref, årsaker, begrunnelse_ref, arbeidsgiver_fagsystem_id, person_fagsystem_id) 
             VALUES (now(), :saksbehandler, '{${
                 annulleringDto.årsaker?.map { it.arsak }?.somDbArray()
-            }}', :begrunnelseRef, :vedtaksperiodeId, :utbetalingId, :arbeidsgiverFagsystemId, :personFagsystemId)
+            }}', :begrunnelseRef, :arbeidsgiverFagsystemId, :personFagsystemId)
             """.trimIndent(),
             mapOf(
                 "saksbehandler" to saksbehandler.oid(),
                 "årsaker" to annulleringDto.årsaker,
                 "begrunnelseRef" to begrunnelseId,
-                "vedtaksperiodeId" to annulleringDto.vedtaksperiodeId,
-                "utbetalingId" to annulleringDto.utbetalingId,
                 "arbeidsgiverFagsystemId" to annulleringDto.arbeidsgiverFagsystemId,
                 "personFagsystemId" to annulleringDto.personFagsystemId,
             ),
@@ -57,7 +55,7 @@ class AnnulleringDao(
     ): Annullering? =
         asSQL(
             """
-            select aas.id, aas.annullert_tidspunkt, aas.arbeidsgiver_fagsystem_id, aas.person_fagsystem_id, aas.utbetaling_id, s.ident, aas.årsaker, b.tekst from annullert_av_saksbehandler aas
+            select aas.id, aas.annullert_tidspunkt, aas.arbeidsgiver_fagsystem_id, aas.person_fagsystem_id, s.ident, aas.årsaker, b.tekst from annullert_av_saksbehandler aas
             inner join saksbehandler s on s.oid = aas.saksbehandler_ref
             left join begrunnelse b on b.id = aas.begrunnelse_ref
             where arbeidsgiver_fagsystem_id = :arbeidsgiverFagsystemId or person_fagsystem_id = :personFagsystemId;
@@ -69,7 +67,6 @@ class AnnulleringDao(
         ).single {
             Annullering(
                 saksbehandlerIdent = it.string("ident"),
-                utbetalingId = it.uuidOrNull("utbetaling_id"),
                 arbeidsgiverFagsystemId = it.stringOrNull("arbeidsgiver_fagsystem_id"),
                 personFagsystemId = it.stringOrNull("person_fagsystem_id"),
                 tidspunkt = it.localDateTime("annullert_tidspunkt"),

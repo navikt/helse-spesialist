@@ -25,7 +25,8 @@ class AnnulleringDaoTest : DatabaseIntegrationTest() {
             saksbehandler(),
         )
         val annullering = annulleringDao.finnAnnullering(arbeidsgiverFagsystemId, personFagsystemId)
-        assertEquals(UTBETALING_ID, annullering?.utbetalingId)
+        assertEquals(arbeidsgiverFagsystemId, annullering?.arbeidsgiverFagsystemId)
+        assertEquals(personFagsystemId, annullering?.personFagsystemId)
         assertEquals(SAKSBEHANDLER_IDENT, annullering?.saksbehandlerIdent)
         assertNotNull(annullering?.begrunnelse)
     }
@@ -40,7 +41,8 @@ class AnnulleringDaoTest : DatabaseIntegrationTest() {
             saksbehandler(),
         )
         val annullering = annulleringDao.finnAnnullering(arbeidsgiverFagsystemId, personFagsystemId)
-        assertEquals(UTBETALING_ID, annullering?.utbetalingId)
+        assertEquals(arbeidsgiverFagsystemId, annullering?.arbeidsgiverFagsystemId)
+        assertEquals(personFagsystemId, annullering?.personFagsystemId)
         assertEquals(SAKSBEHANDLER_IDENT, annullering?.saksbehandlerIdent)
         assertNull(annullering?.begrunnelse)
     }
