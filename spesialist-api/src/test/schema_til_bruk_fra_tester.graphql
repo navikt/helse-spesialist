@@ -50,13 +50,13 @@ type Alder {
 }
 
 type Annullering {
-    arbeidsgiverFagsystemId: String!
+    arbeidsgiverFagsystemId: String
     arsaker: [String!]!
     begrunnelse: String
-    personFagsystemId: String!
+    personFagsystemId: String
     saksbehandlerIdent: String!
     tidspunkt: LocalDateTime!
-    utbetalingId: UUID!
+    utbetalingId: UUID
 }
 
 type Antall {
