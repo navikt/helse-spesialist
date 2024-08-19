@@ -53,7 +53,6 @@ import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.MeldingDuplikatkontrollDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.dokument.DokumentDao
-import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
@@ -309,24 +308,6 @@ internal class MeldingMediator(
         }
     }
 
-    private fun gosysOppgaveEndret(
-        fødselsnummer: String,
-        oppgaveEndret: GosysOppgaveEndret,
-        commandContext: CommandContext,
-    ) {
-        val oppgavedata =
-            finnOppgavedata(fødselsnummer)
-                ?: return commandContext.avbryt(commandContextDao, oppgaveEndret.id)
-        oppgaveEndret.oppgavedataForAutomatisering(oppgavedata)
-        personRepository.brukPersonHvisFinnes(fødselsnummer) {
-            iverksett(
-                kommandofabrikk.gosysOppgaveEndret(fødselsnummer, oppgaveEndret, this),
-                oppgaveEndret.id,
-                commandContext
-            )
-        }
-    }
-
     private fun tilbakedateringBehandlet(
         fødselsnummer: String,
         tilbakedateringBehandlet: TilbakedateringBehandlet,
@@ -576,7 +557,6 @@ internal class MeldingMediator(
         val hendelsenavn = melding::class.simpleName ?: "ukjent hendelse"
         try {
             when (melding) {
-                is GosysOppgaveEndret -> gosysOppgaveEndret(melding.fødselsnummer(), melding, commandContext)
                 is TilbakedateringBehandlet -> tilbakedateringBehandlet(
                     melding.fødselsnummer(),
                     melding,

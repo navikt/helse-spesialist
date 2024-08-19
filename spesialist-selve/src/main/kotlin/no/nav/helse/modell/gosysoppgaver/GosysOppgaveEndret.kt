@@ -2,7 +2,8 @@ package no.nav.helse.modell.gosysoppgaver
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.meldinger.PersonmeldingOld
+import no.nav.helse.mediator.Kommandofabrikk
+import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
@@ -11,6 +12,7 @@ import no.nav.helse.modell.automatisering.SettTidligereAutomatiseringInaktivComm
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.oppgave.SjekkAtOppgaveFortsattErÅpenCommand
+import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
@@ -21,7 +23,7 @@ internal class GosysOppgaveEndret private constructor(
     override val id: UUID,
     private val fødselsnummer: String,
     private val json: String,
-) : PersonmeldingOld {
+) : Personmelding {
     internal constructor(packet: JsonMessage) : this(
         id = UUID.fromString(packet["@id"].asText()),
         fødselsnummer = packet["fødselsnummer"].asText(),
@@ -34,11 +36,8 @@ internal class GosysOppgaveEndret private constructor(
         json = jsonNode.toString(),
     )
 
-    internal lateinit var oppgavedataForAutomatisering: OppgaveDataForAutomatisering
-        private set
-
-    internal fun oppgavedataForAutomatisering(oppgavedataForAutomatisering: OppgaveDataForAutomatisering) {
-        this.oppgavedataForAutomatisering = oppgavedataForAutomatisering
+    override fun behandle(person: Person, kommandofabrikk: Kommandofabrikk) {
+        kommandofabrikk.iverksettGosysOppgaveEndret(this, person)
     }
 
     override fun fødselsnummer() = fødselsnummer

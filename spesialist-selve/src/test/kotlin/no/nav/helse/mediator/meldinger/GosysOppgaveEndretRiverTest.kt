@@ -18,7 +18,7 @@ internal class GosysOppgaveEndretRiverTest {
     @Test
     fun `Leser GosysOppgaveEndret`() {
         testRapid.sendTestMessage(event())
-        verify(exactly = 1) { mediator.håndter(any<GosysOppgaveEndret>(), any()) }
+        verify(exactly = 1) { mediator.mottaMelding(any<GosysOppgaveEndret>(), any()) }
     }
 
     @Language("JSON")

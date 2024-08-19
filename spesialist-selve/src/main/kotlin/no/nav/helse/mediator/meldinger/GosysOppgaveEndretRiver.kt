@@ -49,6 +49,6 @@ internal class GosysOppgaveEndretRiver(
         }
         sikkerlogg.info("gosys_oppgave_endret for fnr {}", fødselsnummer)
 
-        mediator.håndter(GosysOppgaveEndret(packet), context)
+        mediator.mottaMelding(GosysOppgaveEndret(packet), context)
     }
 }

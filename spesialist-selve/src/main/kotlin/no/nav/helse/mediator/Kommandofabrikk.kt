@@ -21,6 +21,7 @@ import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommand
+import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
@@ -118,6 +119,7 @@ internal class Kommandofabrikk(
 ) {
     private companion object {
         private val logg = LoggerFactory.getLogger(this::class.java)
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
     private val sykefraværstilfelleDao = SykefraværstilfelleDao(dataSource)
@@ -190,13 +192,11 @@ internal class Kommandofabrikk(
             oppgaveService = oppgaveService,
         )
 
-    fun gosysOppgaveEndret(
-        fødselsnummer: String,
-        hendelse: GosysOppgaveEndret,
+    private fun gosysOppgaveEndret(
+        melding: GosysOppgaveEndret,
         person: Person,
+        oppgaveDataForAutomatisering: OppgaveDataForAutomatisering
     ): GosysOppgaveEndretCommand {
-        val oppgaveDataForAutomatisering = hendelse.oppgavedataForAutomatisering
-
         val utbetaling = utbetalingDao.hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
         val harTildeltOppgave = tildelingDao.tildelingForOppgave(oppgaveDataForAutomatisering.oppgaveId) != null
         val vedtaksperiodeId = oppgaveDataForAutomatisering.vedtaksperiodeId
@@ -206,8 +206,8 @@ internal class Kommandofabrikk(
             }
 
         return GosysOppgaveEndretCommand(
-            id = hendelse.id,
-            fødselsnummer = fødselsnummer,
+            id = melding.id,
+            fødselsnummer = melding.fødselsnummer(),
             aktørId = person.aktørId(),
             utbetaling = utbetaling,
             sykefraværstilfelle = person.sykefraværstilfelle(oppgaveDataForAutomatisering.vedtaksperiodeId),
@@ -249,6 +249,26 @@ internal class Kommandofabrikk(
             spleisBehandlingId = vedtaksperiode.gjeldendeBehandlingId,
             organisasjonsnummer = vedtaksperiode.organisasjonsnummer(),
         )
+    }
+
+    private fun finnOppgavedata(fødselsnummer: String): OppgaveDataForAutomatisering? {
+        return oppgaveDao.finnOppgaveId(fødselsnummer)?.let { oppgaveId ->
+            sikkerlogg.info("Fant en oppgave for {}: {}", fødselsnummer, oppgaveId)
+            val oppgaveDataForAutomatisering = oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)
+
+            if (oppgaveDataForAutomatisering == null) {
+                sikkerlogg.info("Fant ikke oppgavedata for {} og {}", fødselsnummer, oppgaveId)
+                return null
+            } else {
+                sikkerlogg.info(
+                    "Har aktiv saksbehandleroppgave og oppgavedata for fnr $fødselsnummer og vedtaksperiodeId ${oppgaveDataForAutomatisering.vedtaksperiodeId}",
+                )
+                return oppgaveDataForAutomatisering
+            }
+        } ?: kotlin.run {
+            sikkerlogg.info("Ingen åpne oppgaver i Speil for {}", fødselsnummer)
+            null
+        }
     }
 
     private fun vedtaksperiodeReberegnet(hendelse: VedtaksperiodeReberegnet): VedtaksperiodeReberegnetCommand =
@@ -487,6 +507,11 @@ internal class Kommandofabrikk(
 
     internal fun iverksettAdressebeskyttelseEndret(melding: AdressebeskyttelseEndret) {
         iverksett(adressebeskyttelseEndret(melding), melding.id)
+    }
+
+    internal fun iverksettGosysOppgaveEndret(melding: GosysOppgaveEndret, person: Person) {
+        val oppgaveDataForAutomatisering = finnOppgavedata(melding.fødselsnummer()) ?: return
+        iverksett(gosysOppgaveEndret(melding, person, oppgaveDataForAutomatisering), melding.id)
     }
 
     private fun nyContext(meldingId: UUID) =
