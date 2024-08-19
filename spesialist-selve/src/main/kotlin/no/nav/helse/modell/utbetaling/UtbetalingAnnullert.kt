@@ -1,12 +1,10 @@
 package no.nav.helse.modell.utbetaling
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.db.AnnulleringDao
 import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.kommando.Command
-import no.nav.helse.modell.kommando.LagreAnnulleringCommand
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 import no.nav.helse.modell.person.Person
@@ -18,25 +16,16 @@ import java.util.UUID
 internal class UtbetalingAnnullert private constructor(
     override val id: UUID,
     private val fødselsnummer: String,
-    val utbetalingId: UUID,
-    val arbeidsgiverFagsystemId: String,
-    val saksbehandlerEpost: String,
     private val json: String,
 ) : Personmelding {
     internal constructor(packet: JsonMessage) : this(
         id = UUID.fromString(packet["@id"].asText()),
         fødselsnummer = packet["fødselsnummer"].asText(),
-        utbetalingId = UUID.fromString(packet["utbetalingId"].asText()),
-        arbeidsgiverFagsystemId = packet["arbeidsgiverFagsystemId"].asText(),
-        saksbehandlerEpost = packet["epost"].asText(),
         json = packet.toJson(),
     )
     internal constructor(jsonNode: JsonNode) : this(
         id = UUID.fromString(jsonNode["@id"].asText()),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
-        utbetalingId = UUID.fromString(jsonNode["utbetalingId"].asText()),
-        arbeidsgiverFagsystemId = jsonNode["arbeidsgiverFagsystemId"].asText(),
-        saksbehandlerEpost = jsonNode["epost"].asText(),
         json = jsonNode.toString(),
     )
 
@@ -54,13 +43,9 @@ internal class UtbetalingAnnullert private constructor(
 
 internal class UtbetalingAnnullertCommand(
     fødselsnummer: String,
-    utbetalingId: UUID,
-    arbeidsgiverFagsystemId: String,
-    utbetalingDao: UtbetalingDao,
     personDao: PersonDao,
     snapshotDao: SnapshotDao,
     snapshotClient: ISnapshotClient,
-    annulleringDao: AnnulleringDao,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -69,12 +54,6 @@ internal class UtbetalingAnnullertCommand(
                 snapshotDao = snapshotDao,
                 fødselsnummer = fødselsnummer,
                 personDao = personDao,
-            ),
-            LagreAnnulleringCommand(
-                utbetalingDao = utbetalingDao,
-                annulleringDao = annulleringDao,
-                utbetalingId = utbetalingId,
-                arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
             ),
         )
 }

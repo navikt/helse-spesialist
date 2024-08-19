@@ -10,19 +10,6 @@ import javax.sql.DataSource
 class AnnulleringDao(
     dataSource: DataSource,
 ) : HelseDao(dataSource) {
-    internal fun oppdaterAnnullering(
-        arbeidsgiverFagsystemId: String,
-        utbetalingId: UUID,
-    ) = asSQL(
-        """
-        UPDATE annullert_av_saksbehandler SET utbetaling_id = :utbetalingId WHERE arbeidsgiver_fagsystem_id = :arbeidsgiverFagsystemId
-        """.trimIndent(),
-        mapOf(
-            "utbetalingId" to utbetalingId,
-            "arbeidsgiverFagsystemId" to arbeidsgiverFagsystemId,
-        ),
-    ).update()
-
     internal fun lagreAnnullering(
         annulleringDto: AnnulleringDto,
         saksbehandler: Saksbehandler,
@@ -63,16 +50,6 @@ class AnnulleringDao(
             "saksbehandler_ref" to saksbehandlerOid,
         ),
     ).updateAndReturnGeneratedKey()
-
-    internal fun finnAnnulleringId(arbeidsgiverFagsystemId: String) =
-        asSQL(
-            """
-            select id from annullert_av_saksbehandler where arbeidsgiver_fagsystem_id = :arbeidsgiverFagsystemId limit 1;
-            """.trimIndent(),
-            mapOf(
-                "arbeidsgiverFagsystemId" to arbeidsgiverFagsystemId,
-            ),
-        ).single { it.long("id") }
 
     fun finnAnnullering(
         arbeidsgiverFagsystemId: String,

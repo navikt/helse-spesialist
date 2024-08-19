@@ -1,6 +1,5 @@
 package no.nav.helse.mediator
 
-import no.nav.helse.db.AnnulleringDao
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TotrinnsvurderingDao
@@ -106,7 +105,6 @@ internal class Kommandofabrikk(
     private val opptegnelseDao: OpptegnelseDao = OpptegnelseDao(dataSource),
     private val generasjonRepository: GenerasjonRepository = GenerasjonRepository(dataSource),
     private val vergemålDao: VergemålDao = VergemålDao(dataSource),
-    private val annulleringDao: AnnulleringDao = AnnulleringDao(dataSource),
 ) {
     private companion object {
         private val logg = LoggerFactory.getLogger(this::class.java)
@@ -151,7 +149,7 @@ internal class Kommandofabrikk(
     private fun gosysOppgaveEndret(
         melding: GosysOppgaveEndret,
         person: Person,
-        oppgaveDataForAutomatisering: OppgaveDataForAutomatisering
+        oppgaveDataForAutomatisering: OppgaveDataForAutomatisering,
     ): GosysOppgaveEndretCommand {
         val utbetaling = utbetalingDao.hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
         val harTildeltOppgave = tildelingDao.tildelingForOppgave(oppgaveDataForAutomatisering.oppgaveId) != null
@@ -183,7 +181,7 @@ internal class Kommandofabrikk(
     private fun tilbakedateringGodkjent(
         melding: TilbakedateringBehandlet,
         person: Person,
-        oppgaveDataForAutomatisering: OppgaveDataForAutomatisering
+        oppgaveDataForAutomatisering: OppgaveDataForAutomatisering,
     ): TilbakedateringGodkjentCommand {
         val vedtaksperiodeId = oppgaveDataForAutomatisering.vedtaksperiodeId
         val sykefraværstilfelle = person.sykefraværstilfelle(vedtaksperiodeId)
@@ -203,7 +201,7 @@ internal class Kommandofabrikk(
             godkjenningMediator = godkjenningMediator,
             spleisBehandlingId = vedtaksperiode.gjeldendeBehandlingId,
             organisasjonsnummer = vedtaksperiode.organisasjonsnummer(),
-            søknadsperioder = melding.perioder
+            søknadsperioder = melding.perioder,
         )
     }
 
@@ -280,13 +278,9 @@ internal class Kommandofabrikk(
     private fun utbetalingAnnullert(hendelse: UtbetalingAnnullert): UtbetalingAnnullertCommand =
         UtbetalingAnnullertCommand(
             fødselsnummer = hendelse.fødselsnummer(),
-            utbetalingId = hendelse.utbetalingId,
-            arbeidsgiverFagsystemId = hendelse.arbeidsgiverFagsystemId,
-            utbetalingDao = utbetalingDao,
             personDao = personDao,
             snapshotDao = snapshotDao,
             snapshotClient = snapshotClient,
-            annulleringDao = annulleringDao,
         )
 
     private fun utbetalingEndret(hendelse: UtbetalingEndret): UtbetalingEndretCommand =
@@ -327,7 +321,10 @@ internal class Kommandofabrikk(
             totrinnsvurderingMediator = totrinnsvurderingMediator,
         )
 
-    private fun utbetalingsgodkjenning(melding: Saksbehandlerløsning, person: Person): UtbetalingsgodkjenningCommand {
+    private fun utbetalingsgodkjenning(
+        melding: Saksbehandlerløsning,
+        person: Person,
+    ): UtbetalingsgodkjenningCommand {
         val oppgaveId = melding.oppgaveId
         val fødselsnummer = melding.fødselsnummer()
         val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(oppgaveId)
@@ -361,7 +358,7 @@ internal class Kommandofabrikk(
     private fun godkjenningsbehov(
         hendelse: Godkjenningsbehov,
         person: Person,
-        tags: List<String>
+        tags: List<String>,
     ): GodkjenningsbehovCommand {
         val utbetaling = utbetalingDao.hentUtbetaling(hendelse.utbetalingId)
         val førsteKjenteDagFinner = { generasjonRepository.førsteKjenteDag(hendelse.fødselsnummer()) }
@@ -443,7 +440,7 @@ internal class Kommandofabrikk(
     internal fun iverksettGodkjenningsbehov(
         melding: Godkjenningsbehov,
         person: Person,
-        tags: List<String>
+        tags: List<String>,
     ) {
         iverksett(godkjenningsbehov(melding, person, tags), melding.id)
     }
@@ -464,17 +461,26 @@ internal class Kommandofabrikk(
         iverksett(adressebeskyttelseEndret(melding), melding.id)
     }
 
-    internal fun iverksettGosysOppgaveEndret(melding: GosysOppgaveEndret, person: Person) {
+    internal fun iverksettGosysOppgaveEndret(
+        melding: GosysOppgaveEndret,
+        person: Person,
+    ) {
         val oppgaveDataForAutomatisering = finnOppgavedata(melding.fødselsnummer()) ?: return
         iverksett(gosysOppgaveEndret(melding, person, oppgaveDataForAutomatisering), melding.id)
     }
 
-    internal fun iverksettTilbakedateringBehandlet(melding: TilbakedateringBehandlet, person: Person) {
+    internal fun iverksettTilbakedateringBehandlet(
+        melding: TilbakedateringBehandlet,
+        person: Person,
+    ) {
         val oppgaveDataForAutomatisering = finnOppgavedata(melding.fødselsnummer()) ?: return
         iverksett(tilbakedateringGodkjent(melding, person, oppgaveDataForAutomatisering), melding.id)
     }
 
-    internal fun iverksettSaksbehandlerløsning(melding: Saksbehandlerløsning, person: Person) {
+    internal fun iverksettSaksbehandlerløsning(
+        melding: Saksbehandlerløsning,
+        person: Person,
+    ) {
         iverksett(utbetalingsgodkjenning(melding, person), melding.id)
     }
 
