@@ -2,7 +2,6 @@ package no.nav.helse.modell.vedtaksperiode
 
 import kotliquery.TransactionalSession
 import kotliquery.sessionOf
-import no.nav.helse.mediator.builders.GenerasjonBuilder
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.person.vedtaksperiode.IVedtaksperiodeObserver
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
@@ -129,20 +128,6 @@ internal class GenerasjonRepository(private val dataSource: DataSource) : IVedta
         appendLine("          tom: ${hentet.tom} - ${skalLagres.tom}")
         appendLine("     tilstand: ${hentet.tilstand} - ${skalLagres.tilstand}")
         appendLine("  skj.tidspkt: ${hentet.skjæringstidspunkt} - ${skalLagres.skjæringstidspunkt}")
-    }
-
-    internal fun byggGenerasjon(
-        vedtaksperiodeId: UUID,
-        generasjonBuilder: GenerasjonBuilder,
-    ) {
-        dao.byggSisteFor(vedtaksperiodeId, generasjonBuilder)
-    }
-
-    internal fun finnVedtaksperiodeIderFor(
-        fødselsnummer: String,
-        skjæringstidspunkt: LocalDate,
-    ): Set<UUID> {
-        return dao.finnVedtaksperiodeIderFor(fødselsnummer, skjæringstidspunkt)
     }
 
     internal fun skjæringstidspunktFor(vedtaksperiodeId: UUID): LocalDate {

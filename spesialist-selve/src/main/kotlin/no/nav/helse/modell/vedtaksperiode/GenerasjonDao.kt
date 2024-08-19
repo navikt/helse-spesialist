@@ -5,7 +5,6 @@ import kotliquery.Row
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.mediator.builders.GenerasjonBuilder
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
@@ -16,30 +15,6 @@ import java.util.UUID
 import javax.sql.DataSource
 
 class GenerasjonDao(private val dataSource: DataSource) {
-    internal fun byggSisteFor(
-        vedtaksperiodeId: UUID,
-        generasjonBuilder: GenerasjonBuilder,
-    ) {
-        @Language("PostgreSQL")
-        val query = """
-            SELECT DISTINCT ON (vedtaksperiode_id) id, vedtaksperiode_id, unik_id, utbetaling_id, spleis_behandling_id, skjæringstidspunkt, fom, tom, tilstand, tags
-            FROM selve_vedtaksperiode_generasjon
-            WHERE vedtaksperiode_id = ? ORDER BY vedtaksperiode_id, id DESC;
-            """
-        sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(query, vedtaksperiodeId).map { row ->
-                    generasjonBuilder.generasjonId(row.uuid("unik_id"))
-                    row.uuidOrNull("utbetaling_id")?.let(generasjonBuilder::utbetalingId)
-                    row.uuidOrNull("spleis_behandling_id")?.let(generasjonBuilder::spleisBehandlingId)
-                    generasjonBuilder.skjæringstidspunkt(row.localDate("skjæringstidspunkt"))
-                    generasjonBuilder.tilstand(mapToTilstand(row.string("tilstand")))
-                    generasjonBuilder.tags(row.array<String>("tags").toList())
-                    generasjonBuilder.periode(row.localDate("fom"), row.localDate("tom"))
-                }.asSingle,
-            )
-        }
-    }
 
     internal fun TransactionalSession.finnGenerasjoner(vedtaksperiodeId: UUID): List<GenerasjonDto> {
         @Language("PostgreSQL")

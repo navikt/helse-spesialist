@@ -5,11 +5,9 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.februar
 import no.nav.helse.januar
-import no.nav.helse.mediator.builders.GenerasjonBuilder
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import no.nav.helse.modell.varsel.VarselDao
-import no.nav.helse.modell.varsel.VarselRepository
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -26,65 +24,6 @@ import java.util.UUID
 
 internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
     private val varselDao = VarselDao(dataSource)
-    private val varselRepository = VarselRepository(dataSource)
-    private val generasjonRepository = GenerasjonRepository(dataSource)
-
-    @Test
-    fun `bygg generasjon`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
-        generasjonDao.opprettFor(
-            generasjonId,
-            vedtaksperiodeId,
-            UUID.randomUUID(),
-            1.januar,
-            Periode(1.januar, 31.januar),
-            Generasjon.VidereBehandlingAvklares,
-            null
-        )
-        val builder = GenerasjonBuilder(vedtaksperiodeId)
-        generasjonDao.byggSisteFor(vedtaksperiodeId, builder)
-        builder.varsler(emptyList())
-        val generasjon = builder.build(generasjonRepository, varselRepository)
-        val forventetGenerasjon = Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
-        assertEquals(
-            forventetGenerasjon,
-            generasjon,
-        )
-    }
-
-    @Test
-    fun `bygg kun siste generasjon`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId1 = UUID.randomUUID()
-        val generasjonId2 = UUID.randomUUID()
-        generasjonDao.opprettFor(
-            generasjonId1,
-            vedtaksperiodeId,
-            UUID.randomUUID(),
-            1.januar,
-            Periode(1.januar, 31.januar),
-            Generasjon.VidereBehandlingAvklares,
-            null,
-        )
-        generasjonDao.oppdaterTilstandFor(generasjonId1, Generasjon.VedtakFattet.navn(), UUID.randomUUID())
-        generasjonDao.opprettFor(
-            generasjonId2,
-            vedtaksperiodeId,
-            UUID.randomUUID(),
-            1.januar,
-            Periode(1.januar, 31.januar),
-            Generasjon.VidereBehandlingAvklares,
-            null,
-        )
-        val builder = GenerasjonBuilder(vedtaksperiodeId)
-        generasjonDao.byggSisteFor(vedtaksperiodeId, builder)
-        builder.varsler(emptyList())
-        val generasjon = builder.build(generasjonRepository, varselRepository)
-        val forventetGenerasjon = Generasjon(generasjonId2, vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
-
-        assertEquals(forventetGenerasjon, generasjon)
-    }
 
     @Test
     fun `lagre generasjon`() {
