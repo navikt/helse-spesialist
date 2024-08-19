@@ -112,7 +112,11 @@ class Person private constructor(
             skjæringstidspunkt = skjæringstidspunkt,
             gjeldendeGenerasjoner = gjeldendeGenerasjoner,
             skjønnsfastatteSykepengegrunnlag = skjønnsfastsatteSykepengegrunnlag.relevanteFor(skjæringstidspunkt),
-        )
+        ).also {
+            observers.forEach { observer ->
+                it.registrer(observer)
+            }
+        }
     }
 
     internal fun nyeVarsler(nyeVarsler: NyeVarsler) {

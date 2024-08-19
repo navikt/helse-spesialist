@@ -2,16 +2,17 @@ package no.nav.helse.mediator
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import java.time.LocalDateTime
-import java.util.UUID
-import no.nav.helse.mediator.meldinger.VedtaksperiodemeldingOld
+import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.person.Person
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class UtgåendeMeldingerMediatorTest {
     private companion object {
@@ -74,7 +75,7 @@ internal class UtgåendeMeldingerMediatorTest {
         assertDoesNotThrow { LocalDateTime.parse(testRapid.inspektør.field(0, "@opprettet").asText()) }
     }
 
-    private inner class Testmelding(override val id: UUID) : VedtaksperiodemeldingOld {
+    private inner class Testmelding(override val id: UUID) : Vedtaksperiodemelding {
 
         override fun fødselsnummer(): String {
             return FNR
@@ -83,6 +84,8 @@ internal class UtgåendeMeldingerMediatorTest {
         override fun vedtaksperiodeId(): UUID {
             return vedtaksperiodeId
         }
+
+        override fun behandle(person: Person, kommandofabrikk: Kommandofabrikk) {}
 
         @Language("JSON")
         override fun toJson(): String {

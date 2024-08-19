@@ -3,9 +3,7 @@ package no.nav.helse.mediator
 import no.nav.helse.db.AnnulleringDao
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.db.SykefraværstilfelleDao
 import no.nav.helse.db.TotrinnsvurderingDao
-import no.nav.helse.mediator.builders.GenerasjonBuilder
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
 import no.nav.helse.mediator.meldinger.Personmelding
@@ -42,15 +40,12 @@ import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.SøknadSendtCommand
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
-import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
 import no.nav.helse.modell.utbetaling.UtbetalingAnnullertCommand
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.utbetaling.UtbetalingEndretCommand
-import no.nav.helse.modell.varsel.VarselRepository
-import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovCommand
@@ -72,7 +67,6 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -112,7 +106,6 @@ internal class Kommandofabrikk(
     private val opptegnelseDao: OpptegnelseDao = OpptegnelseDao(dataSource),
     private val generasjonRepository: GenerasjonRepository = GenerasjonRepository(dataSource),
     private val vergemålDao: VergemålDao = VergemålDao(dataSource),
-    private val varselRepository: VarselRepository = VarselRepository(dataSource),
     private val annulleringDao: AnnulleringDao = AnnulleringDao(dataSource),
 ) {
     private companion object {
@@ -120,7 +113,6 @@ internal class Kommandofabrikk(
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    private val sykefraværstilfelleDao = SykefraværstilfelleDao(dataSource)
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
     private val metrikkDao = MetrikkDao(dataSource)
     private val oppgaveService: OppgaveService by lazy { oppgaveService() }
@@ -142,40 +134,6 @@ internal class Kommandofabrikk(
     internal fun nullstilleEksisterendeContext() {
         this.commandContext = null
     }
-
-    internal fun sykefraværstilfelle(
-        fødselsnummer: String,
-        skjæringstidspunkt: LocalDate,
-    ): Sykefraværstilfelle {
-        val gjeldendeGenerasjoner = generasjonerFor(fødselsnummer, skjæringstidspunkt)
-        val skjønnsfastsatteSykepengegrunnlag =
-            sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(
-                fødselsnummer,
-                skjæringstidspunkt,
-            )
-        return Sykefraværstilfelle(
-            fødselsnummer,
-            skjæringstidspunkt,
-            gjeldendeGenerasjoner,
-            skjønnsfastsatteSykepengegrunnlag,
-        )
-    }
-
-    private fun generasjonerFor(
-        fødselsnummer: String,
-        skjæringstidspunkt: LocalDate,
-    ): List<Generasjon> =
-        gjeldendeGenerasjoner {
-            generasjonRepository.finnVedtaksperiodeIderFor(fødselsnummer, skjæringstidspunkt)
-        }
-
-    private fun gjeldendeGenerasjoner(iderGetter: () -> Set<UUID>): List<Generasjon> =
-        iderGetter().map {
-            gjeldendeGenerasjon(it)
-        }
-
-    private fun gjeldendeGenerasjon(vedtaksperiodeId: UUID): Generasjon =
-        GenerasjonBuilder(vedtaksperiodeId = vedtaksperiodeId).build(generasjonRepository, varselRepository)
 
     internal fun avviksvurdering(avviksvurdering: AvviksvurderingDto) {
         avviksvurderingDao.lagre(avviksvurdering)

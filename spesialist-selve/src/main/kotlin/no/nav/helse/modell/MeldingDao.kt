@@ -6,8 +6,10 @@ import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.PersonmeldingOld
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
+import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetUtenVedtakMessage
 import no.nav.helse.modell.MeldingDao.Meldingtype.ADRESSEBESKYTTELSE_ENDRET
+import no.nav.helse.modell.MeldingDao.Meldingtype.AVSLUTTET_MED_VEDTAK
 import no.nav.helse.modell.MeldingDao.Meldingtype.AVSLUTTET_UTEN_VEDTAK
 import no.nav.helse.modell.MeldingDao.Meldingtype.BEHANDLING_OPPRETTET
 import no.nav.helse.modell.MeldingDao.Meldingtype.ENDRET_EGEN_ANSATT_STATUS
@@ -268,6 +270,7 @@ internal class MeldingDao(private val dataSource: DataSource) {
             VEDTAKSPERIODE_NY_UTBETALING -> VedtaksperiodeNyUtbetaling(jsonNode)
             BEHANDLING_OPPRETTET -> BehandlingOpprettet(jsonNode)
             AVSLUTTET_UTEN_VEDTAK -> AvsluttetUtenVedtakMessage(jsonNode)
+            else -> throw IllegalArgumentException("ukjent meldingtype: $meldingtype")
         }
     }
 
@@ -292,6 +295,7 @@ internal class MeldingDao(private val dataSource: DataSource) {
             is TilbakedateringBehandlet -> GODKJENT_TILBAKEDATERT_SYKMELDING
             is BehandlingOpprettet -> BEHANDLING_OPPRETTET
             is AvsluttetUtenVedtakMessage -> AVSLUTTET_UTEN_VEDTAK
+            is AvsluttetMedVedtakMessage -> AVSLUTTET_MED_VEDTAK
             else -> throw IllegalArgumentException("ukjent meldingtype: ${melding::class.simpleName}")
         }
 
@@ -315,5 +319,6 @@ internal class MeldingDao(private val dataSource: DataSource) {
         VEDTAKSPERIODE_NY_UTBETALING,
         GODKJENT_TILBAKEDATERT_SYKMELDING,
         AVSLUTTET_UTEN_VEDTAK,
+        AVSLUTTET_MED_VEDTAK
     }
 }

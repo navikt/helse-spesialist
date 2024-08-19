@@ -1,17 +1,20 @@
 package no.nav.helse.modell.kommando
 
+import no.nav.helse.mediator.Kommandofabrikk
+import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
+import no.nav.helse.modell.person.Person
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.VedtaksperiodemeldingOld
 
 internal class TestMelding(
     override val id: UUID,
     private val vedtaksperiodeId: UUID,
     private val fnr: String,
     private val json: String = "{}"
-) : VedtaksperiodemeldingOld {
+) : Vedtaksperiodemelding {
     override fun fødselsnummer(): String = fnr
 
     override fun vedtaksperiodeId(): UUID = vedtaksperiodeId
+    override fun behandle(person: Person, kommandofabrikk: Kommandofabrikk) {}
 
     override fun toJson() = json
 }

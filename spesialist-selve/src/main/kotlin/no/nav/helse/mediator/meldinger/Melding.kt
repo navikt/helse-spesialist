@@ -25,7 +25,3 @@ internal interface PersonmeldingOld : Melding {
 internal interface Vedtaksperiodemelding : Personmelding {
     fun vedtaksperiodeId(): UUID
 }
-
-internal interface VedtaksperiodemeldingOld : PersonmeldingOld {
-    fun vedtaksperiodeId(): UUID
-}

@@ -4,8 +4,10 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.AvviksvurderingDao
+import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.mediator.meldinger.VedtaksperiodemeldingOld
+import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
+import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.vedtak.Avslag
 import no.nav.helse.modell.vedtak.Faktatype
@@ -27,7 +29,7 @@ internal class AvsluttetMedVedtakMessage(
     private val avviksvurderingDao: AvviksvurderingDao,
     private val generasjonDao: GenerasjonDao,
     private val avslagDao: AvslagDao,
-) : VedtaksperiodemeldingOld {
+) : Vedtaksperiodemelding {
     private val fødselsnummer = packet["fødselsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
     private val fom = packet["fom"].asLocalDate()
@@ -56,6 +58,11 @@ internal class AvsluttetMedVedtakMessage(
 
     override fun vedtaksperiodeId(): UUID = vedtaksperiodeId
 
+    override fun behandle(person: Person, kommandofabrikk: Kommandofabrikk) {
+        val sykefraværstilfelle = person.sykefraværstilfelle(vedtaksperiodeId)
+        sendInnTil(sykefraværstilfelle)
+    }
+
     override val id: UUID = packet["@id"].asUUID()
 
     override fun toJson(): String = packet.toJson()
@@ -81,7 +88,7 @@ internal class AvsluttetMedVedtakMessage(
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
         )
 
-    internal fun sendInnTil(sykefraværstilfelle: Sykefraværstilfelle) {
+    private fun sendInnTil(sykefraværstilfelle: Sykefraværstilfelle) {
         val tags: List<String> = generasjonDao.finnTagsFor(spleisBehandlingId) ?: emptyList()
         if (tags.isEmpty()) {
             sikkerLogg.error(
