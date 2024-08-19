@@ -261,8 +261,10 @@ internal class SaksbehandlerMediator(
         }
     }
 
-    override fun hentAnnullering(arbeidsgiverFagsystemId: String): no.nav.helse.spesialist.api.graphql.schema.Annullering? =
-        annulleringDao.finnAnnullering(arbeidsgiverFagsystemId)
+    override fun hentAnnullering(
+        arbeidsgiverFagsystemId: String,
+        personFagsystemId: String,
+    ): no.nav.helse.spesialist.api.graphql.schema.Annullering? = annulleringDao.finnAnnullering(arbeidsgiverFagsystemId, personFagsystemId)
 
     override fun håndter(
         godkjenning: GodkjenningDto,

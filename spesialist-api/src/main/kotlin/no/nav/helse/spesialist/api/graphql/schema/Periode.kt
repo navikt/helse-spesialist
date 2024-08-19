@@ -597,7 +597,15 @@ data class BeregnetPeriode(
 
     fun avslag(): List<Avslag> = saksbehandlerhåndterer.hentAvslag(periode.vedtaksperiodeId, periode.utbetaling.id).toList()
 
-    fun annullering(): Annullering? = saksbehandlerhåndterer.hentAnnullering(periode.utbetaling.arbeidsgiverFagsystemId)
+    fun annullering(): Annullering? =
+        if (erSisteGenerasjon) {
+            saksbehandlerhåndterer.hentAnnullering(
+                periode.utbetaling.arbeidsgiverFagsystemId,
+                periode.utbetaling.personFagsystemId,
+            )
+        } else {
+            null
+        }
 }
 
 private fun GraphQLOppdrag.tilSimulering(): Simulering =

@@ -74,16 +74,20 @@ class AnnulleringDao(
             ),
         ).single { it.long("id") }
 
-    fun finnAnnullering(arbeidsgiverFagsystemId: String): Annullering? =
+    fun finnAnnullering(
+        arbeidsgiverFagsystemId: String,
+        personFagsystemId: String,
+    ): Annullering? =
         asSQL(
             """
             select aas.id, aas.annullert_tidspunkt, aas.arbeidsgiver_fagsystem_id, aas.person_fagsystem_id, aas.utbetaling_id, s.ident, aas.årsaker, b.tekst from annullert_av_saksbehandler aas
             inner join saksbehandler s on s.oid = aas.saksbehandler_ref
             left join begrunnelse b on b.id = aas.begrunnelse_ref
-            where arbeidsgiver_fagsystem_id = :arbeidsgiverFagsystemId;
+            where arbeidsgiver_fagsystem_id = :arbeidsgiverFagsystemId or person_fagsystem_id = :personFagsystemId;
             """.trimIndent(),
             mapOf(
                 "arbeidsgiverFagsystemId" to arbeidsgiverFagsystemId,
+                "personFagsystemId" to personFagsystemId,
             ),
         ).single {
             Annullering(

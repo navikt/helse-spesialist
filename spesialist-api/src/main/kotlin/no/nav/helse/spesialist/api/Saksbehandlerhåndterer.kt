@@ -45,5 +45,8 @@ interface Saksbehandlerhåndterer {
         avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag,
     )
 
-    fun hentAnnullering(arbeidsgiverFagsystemId: String): Annullering?
+    fun hentAnnullering(
+        arbeidsgiverFagsystemId: String,
+        personFagsystemId: String,
+    ): Annullering?
 }

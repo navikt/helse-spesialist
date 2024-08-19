@@ -14,15 +14,22 @@ import java.util.UUID
 class AnnulleringDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `kan finne annullering med begrunnelse`() {
-        val fagsystemId = "EN-FAGSYSTEMID1"
+        val arbeidsgiverFagsystemId = "EN-ARBEIDSGIVER-FAGSYSTEMID1"
+        val personFagsystemId = "EN-PERSON-FAGSYSTEMID1"
         nyPerson()
         utbetalingsopplegg(1000, 0)
         opprettSaksbehandler()
-        annulleringDao.lagreAnnullering(annulleringDto(arbeidsgiverFagsystemId = fagsystemId), saksbehandler())
-        annulleringDao.finnAnnulleringId(fagsystemId)?.let { annulleringId ->
+        annulleringDao.lagreAnnullering(
+            annulleringDto(
+                arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
+                personFagsystemId = personFagsystemId,
+            ),
+            saksbehandler(),
+        )
+        annulleringDao.finnAnnulleringId(arbeidsgiverFagsystemId)?.let { annulleringId ->
             utbetalingDao.leggTilAnnullertAvSaksbehandler(UTBETALING_ID, annulleringId)
         }
-        val annullering = annulleringDao.finnAnnullering(fagsystemId)
+        val annullering = annulleringDao.finnAnnullering(arbeidsgiverFagsystemId, personFagsystemId)
         assertEquals(UTBETALING_ID, annullering?.utbetalingId)
         assertEquals(SAKSBEHANDLER_IDENT, annullering?.saksbehandlerIdent)
         assertNotNull(annullering?.begrunnelse)
@@ -30,15 +37,19 @@ class AnnulleringDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `kan finne annullering uten begrunnelse`() {
-        val fagsystemId = "EN-FAGSYSTEMID2"
+        val arbeidsgiverFagsystemId = "EN-ARBEIDSGIVER-FAGSYSTEMID2"
+        val personFagsystemId = "EN-PERSON-FAGSYSTEMID2"
         nyPerson()
         utbetalingsopplegg(1000, 0)
         opprettSaksbehandler()
-        annulleringDao.lagreAnnullering(annulleringDto(begrunnelse = null, arbeidsgiverFagsystemId = fagsystemId), saksbehandler())
-        annulleringDao.finnAnnulleringId(fagsystemId)?.let { annulleringId ->
+        annulleringDao.lagreAnnullering(
+            annulleringDto(begrunnelse = null, arbeidsgiverFagsystemId = arbeidsgiverFagsystemId, personFagsystemId = personFagsystemId),
+            saksbehandler(),
+        )
+        annulleringDao.finnAnnulleringId(arbeidsgiverFagsystemId)?.let { annulleringId ->
             utbetalingDao.leggTilAnnullertAvSaksbehandler(UTBETALING_ID, annulleringId)
         }
-        val annullering = annulleringDao.finnAnnullering(fagsystemId)
+        val annullering = annulleringDao.finnAnnullering(arbeidsgiverFagsystemId, personFagsystemId)
         assertEquals(UTBETALING_ID, annullering?.utbetalingId)
         assertEquals(SAKSBEHANDLER_IDENT, annullering?.saksbehandlerIdent)
         assertNull(annullering?.begrunnelse)
@@ -47,8 +58,8 @@ class AnnulleringDaoTest : DatabaseIntegrationTest() {
     private fun annulleringDto(
         begrunnelse: String? = "annulleringsbegrunnelse",
         utbetalingId: UUID = UTBETALING_ID,
-        arbeidsgiverFagsystemId: String = "EN-FAGSYSTEMID",
-        personFagsystemId: String = "EN-FAGSYSTEMID",
+        arbeidsgiverFagsystemId: String = "EN-ARBEIDSGIVER-FAGSYSTEMID",
+        personFagsystemId: String = "EN-PERSON-FAGSYSTEMID",
     ) = AnnulleringDto(
         aktørId = AKTØR,
         fødselsnummer = FNR,
