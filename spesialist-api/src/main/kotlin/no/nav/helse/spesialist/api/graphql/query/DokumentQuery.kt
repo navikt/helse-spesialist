@@ -360,6 +360,7 @@ class DokumentQuery(
             "FRITEKST" -> Svartype.FRITEKST
             "IKKE_RELEVANT" -> Svartype.IKKE_RELEVANT
             "BEKREFTELSESPUNKTER" -> Svartype.BEKREFTELSESPUNKTER
+            "OPPSUMMERING" -> Svartype.OPPSUMMERING
             "PROSENT" -> Svartype.PROSENT
             "RADIO_GRUPPE" -> Svartype.RADIO_GRUPPE
             "RADIO_GRUPPE_TIMER_PROSENT" -> Svartype.RADIO_GRUPPE_TIMER_PROSENT
