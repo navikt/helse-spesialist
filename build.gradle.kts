@@ -12,7 +12,7 @@ val postgresqlVersion = "42.7.3"
 
 plugins {
     kotlin("jvm") version "1.9.23"
-    id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
 }
 
 val githubUser: String by project
@@ -121,17 +121,21 @@ subprojects {
 }
 
 tasks {
-    register<Copy>("copyPreCommitHook") {
-        description = "Kopierer pre-commit hook fra scripts til .git/hooks"
-        outputs.upToDateWhen { false }
-        from("$rootDir/scripts/pre-commit")
-        into("$rootDir/.git/hooks")
-    }
-
     jar {
         enabled = false
     }
     build {
-        dependsOn("copyPreCommitHook")
+        doLast {
+            val erLokaltBygg = !System.getenv().containsKey("GITHUB_ACTION")
+            val manglerPreCommitHook = !File(".git/hooks/pre-commit").isFile
+            if (erLokaltBygg && manglerPreCommitHook) {
+                println("""
+                    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ¯\_(⊙︿⊙)_/¯ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    !            Hei du! Det ser ut til at du mangler en pre-commit-hook :/         !
+                    ! Du kan installere den ved å kjøre './gradlew addKtlintFormatGitPreCommitHook' !
+                    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                """.trimIndent())
+            }
+        }
     }
 }
