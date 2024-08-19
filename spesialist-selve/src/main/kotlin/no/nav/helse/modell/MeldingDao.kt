@@ -4,30 +4,11 @@ import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
-import no.nav.helse.mediator.meldinger.PersonmeldingOld
+import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetUtenVedtakMessage
-import no.nav.helse.modell.MeldingDao.Meldingtype.ADRESSEBESKYTTELSE_ENDRET
-import no.nav.helse.modell.MeldingDao.Meldingtype.AVSLUTTET_MED_VEDTAK
-import no.nav.helse.modell.MeldingDao.Meldingtype.AVSLUTTET_UTEN_VEDTAK
-import no.nav.helse.modell.MeldingDao.Meldingtype.BEHANDLING_OPPRETTET
-import no.nav.helse.modell.MeldingDao.Meldingtype.ENDRET_EGEN_ANSATT_STATUS
-import no.nav.helse.modell.MeldingDao.Meldingtype.GODKJENNING
-import no.nav.helse.modell.MeldingDao.Meldingtype.GODKJENT_TILBAKEDATERT_SYKMELDING
-import no.nav.helse.modell.MeldingDao.Meldingtype.GOSYS_OPPGAVE_ENDRET
-import no.nav.helse.modell.MeldingDao.Meldingtype.NYE_VARSLER
-import no.nav.helse.modell.MeldingDao.Meldingtype.OPPDATER_PERSONSNAPSHOT
-import no.nav.helse.modell.MeldingDao.Meldingtype.OVERSTYRING_IGANGSATT
-import no.nav.helse.modell.MeldingDao.Meldingtype.SAKSBEHANDLERLØSNING
-import no.nav.helse.modell.MeldingDao.Meldingtype.SØKNAD_SENDT
-import no.nav.helse.modell.MeldingDao.Meldingtype.UTBETALING_ANNULLERT
-import no.nav.helse.modell.MeldingDao.Meldingtype.UTBETALING_ENDRET
-import no.nav.helse.modell.MeldingDao.Meldingtype.VEDTAKSPERIODE_ENDRET
-import no.nav.helse.modell.MeldingDao.Meldingtype.VEDTAKSPERIODE_FORKASTET
-import no.nav.helse.modell.MeldingDao.Meldingtype.VEDTAKSPERIODE_NY_UTBETALING
-import no.nav.helse.modell.MeldingDao.Meldingtype.VEDTAKSPERIODE_REBEREGNET
-import no.nav.helse.modell.MeldingDao.Meldingtype.VEDTAK_FATTET
+import no.nav.helse.modell.MeldingDao.Meldingtype.*
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
@@ -54,7 +35,7 @@ import java.util.UUID
 import javax.sql.DataSource
 
 internal class MeldingDao(private val dataSource: DataSource) {
-    internal fun lagre(melding: PersonmeldingOld) {
+    internal fun lagre(melding: Personmelding) {
         sessionOf(dataSource).use { session ->
             session.transaction { transactionalSession ->
                 transactionalSession.run {
@@ -203,7 +184,7 @@ internal class MeldingDao(private val dataSource: DataSource) {
         )
     }
 
-    private fun TransactionalSession.lagre(melding: PersonmeldingOld) {
+    private fun TransactionalSession.lagre(melding: Personmelding) {
         @Language("PostgreSQL")
         val query = """
             INSERT INTO hendelse(id, fodselsnummer, data, type)
@@ -248,7 +229,7 @@ internal class MeldingDao(private val dataSource: DataSource) {
     private fun fraMeldingtype(
         meldingtype: Meldingtype,
         json: String,
-    ): PersonmeldingOld {
+    ): Personmelding {
         val jsonNode = objectMapper.readTree(json)
         return when (meldingtype) {
             ADRESSEBESKYTTELSE_ENDRET -> AdressebeskyttelseEndret(jsonNode)
@@ -274,7 +255,7 @@ internal class MeldingDao(private val dataSource: DataSource) {
         }
     }
 
-    private fun tilMeldingtype(melding: PersonmeldingOld) =
+    private fun tilMeldingtype(melding: Personmelding) =
         when (melding) {
             is AdressebeskyttelseEndret -> ADRESSEBESKYTTELSE_ENDRET
             is VedtaksperiodeEndret -> VEDTAKSPERIODE_ENDRET

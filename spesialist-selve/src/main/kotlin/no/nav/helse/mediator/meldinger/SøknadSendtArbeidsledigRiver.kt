@@ -48,6 +48,6 @@ internal class SøknadSendtArbeidsledigRiver(
             keyValue("hendelseId", UUID.fromString(packet["@id"].asText())),
             keyValue("hendelse", packet.toJson()),
         )
-        mediator.håndter(SøknadSendt.søknadSendtArbeidsledig(packet), context)
+        mediator.mottaSøknadSendt(SøknadSendt.søknadSendtArbeidsledig(packet), context)
     }
 }

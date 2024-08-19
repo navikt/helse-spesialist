@@ -1,6 +1,6 @@
 package no.nav.helse.mediator
 
-import no.nav.helse.mediator.meldinger.PersonmeldingOld
+import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import org.slf4j.LoggerFactory
@@ -34,7 +34,7 @@ internal class UtgåendeMeldingerMediator : CommandContextObserver {
     }
 
     internal fun publiserOppsamledeMeldinger(
-        hendelse: PersonmeldingOld,
+        hendelse: Personmelding,
         messageContext: MessageContext,
     ) {
         publiserHendelser(hendelse, messageContext)
@@ -45,7 +45,7 @@ internal class UtgåendeMeldingerMediator : CommandContextObserver {
     }
 
     private fun publiserHendelser(
-        hendelse: PersonmeldingOld,
+        hendelse: Personmelding,
         messageContext: MessageContext,
     ) {
         utgåendeHendelser.forEach { utgåendeHendelse ->
@@ -56,7 +56,7 @@ internal class UtgåendeMeldingerMediator : CommandContextObserver {
     }
 
     private fun publiserBehov(
-        hendelse: PersonmeldingOld,
+        hendelse: Personmelding,
         messageContext: MessageContext,
     ) {
         if (utgåendeBehov.isEmpty()) return
@@ -66,7 +66,7 @@ internal class UtgåendeMeldingerMediator : CommandContextObserver {
         messageContext.publish(hendelse.fødselsnummer(), packet)
     }
 
-    private fun behovPacket(hendelse: PersonmeldingOld) =
+    private fun behovPacket(hendelse: Personmelding) =
         JsonMessage.newNeed(
             utgåendeBehov.keys.toList(),
             mutableMapOf<String, Any>(

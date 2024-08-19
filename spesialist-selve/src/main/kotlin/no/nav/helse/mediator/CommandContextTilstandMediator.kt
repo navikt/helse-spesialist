@@ -1,6 +1,6 @@
 package no.nav.helse.mediator
 
-import no.nav.helse.mediator.meldinger.PersonmeldingOld
+import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.rapids_rivers.MessageContext
 import org.slf4j.LoggerFactory
 
@@ -16,7 +16,7 @@ internal class CommandContextTilstandMediator : CommandContextObserver {
     }
 
     internal fun publiserTilstandsendringer(
-        hendelse: PersonmeldingOld,
+        hendelse: Personmelding,
         messageContext: MessageContext,
     ) {
         publiserTilstandEndringer(hendelse, messageContext)
@@ -24,7 +24,7 @@ internal class CommandContextTilstandMediator : CommandContextObserver {
     }
 
     private fun publiserTilstandEndringer(
-        hendelse: PersonmeldingOld,
+        hendelse: Personmelding,
         messageContext: MessageContext,
     ) {
         utgåendeTilstandEndringer.forEach { utgåendeTilstandEndringer ->

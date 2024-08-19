@@ -484,6 +484,10 @@ internal class Kommandofabrikk(
         iverksett(utbetalingsgodkjenning(melding, person), melding.id)
     }
 
+    internal fun iverksettSøknadSendt(melding: SøknadSendt) {
+        iverksett(søknadSendt(melding), melding.id)
+    }
+
     private fun nyContext(meldingId: UUID) =
         CommandContext(UUID.randomUUID()).apply {
             opprett(commandContextDao, meldingId)

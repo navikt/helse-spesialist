@@ -49,6 +49,6 @@ internal class SøknadSendtRiver(
             keyValue("hendelseId", UUID.fromString(packet["@id"].asText())),
             keyValue("hendelse", packet.toJson()),
         )
-        mediator.håndter(SøknadSendt.søknadSendt(packet), context)
+        mediator.mottaSøknadSendt(SøknadSendt.søknadSendt(packet), context)
     }
 }

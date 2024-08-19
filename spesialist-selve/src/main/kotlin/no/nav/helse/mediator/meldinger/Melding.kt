@@ -10,15 +10,11 @@ internal interface Melding {
     fun toJson(): String
 }
 
-internal interface Personmelding : PersonmeldingOld {
+internal interface Personmelding : Melding {
     fun behandle(
         person: Person,
         kommandofabrikk: Kommandofabrikk,
     )
-}
-
-@Deprecated("Dette skal erstattes av ny løype for å behandle meldinger")
-internal interface PersonmeldingOld : Melding {
     fun fødselsnummer(): String
 }
 
