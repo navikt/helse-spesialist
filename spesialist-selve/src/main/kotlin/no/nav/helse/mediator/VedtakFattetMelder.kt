@@ -2,7 +2,6 @@ package no.nav.helse.mediator
 
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.person.PersonObserver
-import no.nav.helse.modell.person.vedtaksperiode.IVedtaksperiodeObserver
 import no.nav.helse.modell.vedtak.Avslagstype
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Infotrygd
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis
@@ -13,7 +12,7 @@ import org.slf4j.LoggerFactory
 
 internal class VedtakFattetMelder(
     private val messageContext: MessageContext,
-) : PersonObserver, IVedtaksperiodeObserver {
+) : PersonObserver {
     private val sykepengevedtak = mutableListOf<Sykepengevedtak>()
 
     private companion object {

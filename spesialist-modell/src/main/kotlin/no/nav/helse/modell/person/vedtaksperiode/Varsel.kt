@@ -37,13 +37,7 @@ class Varsel(
             }
     }
 
-    private val observers = mutableSetOf<IVedtaksperiodeObserver>()
-
     fun vedtaksperiodeId() = vedtaksperiodeId
-
-    fun registrer(vararg observer: IVedtaksperiodeObserver) {
-        observers.addAll(observer)
-    }
 
     fun toDto(): VarselDto = VarselDto(id, varselkode, opprettet, vedtaksperiodeId, status.toDto())
 
@@ -51,20 +45,14 @@ class Varsel(
 
     fun erVarselOmAvvik(): Boolean = this.varselkode == "RV_IV_2"
 
-    fun opprett(generasjonId: UUID) {
-        observers.forEach { it.varselOpprettet(id, vedtaksperiodeId, generasjonId, varselkode, opprettet) }
-    }
-
-    fun reaktiver(generasjonId: UUID) {
+    fun reaktiver() {
         if (status != INAKTIV) return
         this.status = AKTIV
-        observers.forEach { it.varselReaktivert(id, varselkode, generasjonId, vedtaksperiodeId) }
     }
 
-    fun deaktiver(generasjonId: UUID) {
+    fun deaktiver() {
         if (status != AKTIV) return
         this.status = INAKTIV
-        observers.forEach { it.varselDeaktivert(id, varselkode, generasjonId, vedtaksperiodeId) }
     }
 
     fun erGosysvarsel() = varselkode == "SB_EX_1"
@@ -92,10 +80,9 @@ class Varsel(
 
     fun erRelevantFor(vedtaksperiodeId: UUID): Boolean = this.vedtaksperiodeId == vedtaksperiodeId
 
-    fun godkjennSpesialsakvarsel(generasjonId: UUID) {
+    fun godkjennSpesialsakvarsel() {
         if (status == GODKJENT) return
         status = GODKJENT
-        observers.forEach { it.varselGodkjent(id, varselkode, generasjonId, vedtaksperiodeId, "Automatisk godkjent - spesialsak") }
     }
 
     companion object {
@@ -117,8 +104,8 @@ class Varsel(
 
         fun List<Varsel>.inneholderSvartelistedeVarsler(): Boolean = any { it.varselkode in neiVarsler }
 
-        fun List<Varsel>.automatiskGodkjennSpesialsakvarsler(generasjonId: UUID) {
-            forEach { it.godkjennSpesialsakvarsel(generasjonId) }
+        fun List<Varsel>.automatiskGodkjennSpesialsakvarsler() {
+            forEach { it.godkjennSpesialsakvarsel() }
         }
 
         private val neiVarsler =

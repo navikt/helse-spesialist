@@ -3,14 +3,13 @@ package no.nav.helse.modell.vedtaksperiode
 import kotliquery.TransactionalSession
 import kotliquery.sessionOf
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.person.vedtaksperiode.IVedtaksperiodeObserver
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 
-internal class GenerasjonRepository(private val dataSource: DataSource) : IVedtaksperiodeObserver {
+internal class GenerasjonRepository(private val dataSource: DataSource) {
     private val dao = GenerasjonDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
     private var hentedeGenerasjoner: List<GenerasjonDto> = emptyList()
@@ -133,16 +132,6 @@ internal class GenerasjonRepository(private val dataSource: DataSource) : IVedta
     internal fun skjæringstidspunktFor(vedtaksperiodeId: UUID): LocalDate {
         return dao.finnSkjæringstidspunktFor(vedtaksperiodeId)
             ?: throw IllegalStateException("Forventer å finne skjæringstidspunkt for vedtaksperiodeId=$vedtaksperiodeId")
-    }
-
-    override fun tilstandEndret(
-        generasjonId: UUID,
-        vedtaksperiodeId: UUID,
-        gammel: String,
-        ny: String,
-        hendelseId: UUID,
-    ) {
-        dao.oppdaterTilstandFor(generasjonId, ny, hendelseId)
     }
 
     internal fun førsteKjenteDag(fødselsnummer: String) = dao.førsteKjenteDag(fødselsnummer)

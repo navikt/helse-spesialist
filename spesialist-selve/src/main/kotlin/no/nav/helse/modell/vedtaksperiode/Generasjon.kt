@@ -103,7 +103,7 @@ internal class Generasjon private constructor(
 
     internal fun erSpesialsakSomKanAutomatiseres() = !varsler.inneholderSvartelistedeVarsler()
 
-    internal fun automatiskGodkjennSpesialsakvarsler() = varsler.automatiskGodkjennSpesialsakvarsler(this.id)
+    internal fun automatiskGodkjennSpesialsakvarsler() = varsler.automatiskGodkjennSpesialsakvarsler()
 
     internal fun håndterNyUtbetaling(
         hendelseId: UUID,
@@ -129,17 +129,17 @@ internal class Generasjon private constructor(
             nyttVarsel(varsel, hendelseId)
         }
         if (eksisterendeVarsel.erAktiv()) return
-        eksisterendeVarsel.reaktiver(id)
+        eksisterendeVarsel.reaktiver()
     }
 
     internal fun håndterDeaktivertVarsel(varsel: Varsel) {
         val funnetVarsel = varsler.finnEksisterendeVarsel(varsel) ?: return
-        funnetVarsel.deaktiver(id)
+        funnetVarsel.deaktiver()
     }
 
     internal fun deaktiverVarsel(varselkode: String) {
         val funnetVarsel = varsler.finnEksisterendeVarsel(varselkode) ?: return
-        funnetVarsel.deaktiver(id)
+        funnetVarsel.deaktiver()
     }
 
     internal fun oppdaterBehandlingsinformasjon(
@@ -241,7 +241,6 @@ internal class Generasjon private constructor(
         hendelseId: UUID,
     ) {
         varsler.add(varsel)
-        varsel.opprett(id)
         tilstand.nyttVarsel(this, varsel, hendelseId)
     }
 
