@@ -3,8 +3,9 @@ package no.nav.helse.modell.vedtaksperiode
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.GodkjenningMediator
+import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.mediator.meldinger.VedtaksperiodemeldingOld
+import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.CommandContextDao
@@ -22,6 +23,7 @@ import no.nav.helse.modell.gosysoppgaver.VurderÅpenGosysoppgave
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.AvbrytContextCommand
 import no.nav.helse.modell.kommando.Command
+import no.nav.helse.modell.kommando.ForberedBehandlingAvGodkjenningsbehov
 import no.nav.helse.modell.kommando.KlargjørArbeidsgiverCommand
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterPersonCommand
@@ -33,14 +35,14 @@ import no.nav.helse.modell.kommando.OpprettSaksbehandleroppgave
 import no.nav.helse.modell.kommando.PersisterInntektCommand
 import no.nav.helse.modell.kommando.PersisterPeriodehistorikkCommand
 import no.nav.helse.modell.kommando.PersisterVedtaksperiodetypeCommand
-import no.nav.helse.modell.kommando.VurderBehovForBehandlingAvGodkjenningsbehov
+import no.nav.helse.modell.kommando.VurderVidereBehandlingAvGodkjenningsbehov
 import no.nav.helse.modell.kommando.VurderBehovForTotrinnskontroll
 import no.nav.helse.modell.overstyring.OverstyringDao
+import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.risiko.VurderVurderingsmomenter
-import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.UtbetalingDao
@@ -88,12 +90,16 @@ internal class Godkjenningsbehov private constructor(
     val orgnummereMedRelevanteArbeidsforhold: List<String>,
     val skjæringstidspunkt: LocalDate,
     private val json: String,
-) : VedtaksperiodemeldingOld {
+) : Vedtaksperiodemelding {
     override fun fødselsnummer() = fødselsnummer
 
     override fun vedtaksperiodeId() = vedtaksperiodeId
 
     override fun toJson() = json
+
+    override fun behandle(person: Person, kommandofabrikk: Kommandofabrikk) {
+        kommandofabrikk.iverksettGodkjenningsbehov(this, person, tags)
+    }
 
     internal constructor(packet: JsonMessage) : this(
         id = packet["@id"].asUUID(),
@@ -198,7 +204,6 @@ internal class GodkjenningsbehovCommand(
     utbetalingId: UUID,
     utbetaling: Utbetaling,
     utbetalingtype: Utbetalingtype,
-    sykefraværstilfelle: Sykefraværstilfelle,
     skjæringstidspunkt: LocalDate,
     kanAvvises: Boolean,
     førsteKjenteDagFinner: () -> LocalDate,
@@ -226,10 +231,22 @@ internal class GodkjenningsbehovCommand(
     totrinnsvurderingMediator: TotrinnsvurderingMediator,
     json: String,
     spleisVedtaksperioder: List<SpleisVedtaksperiode>,
+    tags: List<String>,
+    person: Person
 ) : MacroCommand() {
+    private val sykefraværstilfelle = person.sykefraværstilfelle(vedtaksperiodeId)
     override val commands: List<Command> =
         listOf(
-            VurderBehovForBehandlingAvGodkjenningsbehov(
+            ForberedBehandlingAvGodkjenningsbehov(
+                person = person,
+                spleisBehandlingId = spleisBehandlingId,
+                spleisVedtaksperioder = spleisVedtaksperioder,
+                vedtaksperiodeId = vedtaksperiodeId,
+                utbetalingId = utbetalingId,
+                skjæringstidspunkt = skjæringstidspunkt,
+                tags = tags
+            ),
+            VurderVidereBehandlingAvGodkjenningsbehov(
                 meldingId = id,
                 utbetalingId = utbetalingId,
                 vedtaksperiodeId = vedtaksperiodeId,

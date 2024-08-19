@@ -1,6 +1,5 @@
 package no.nav.helse.mediator.meldinger
 
-import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -12,12 +11,10 @@ import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 internal class GodkjenningsbehovRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    private val logg = LoggerFactory.getLogger(this::class.java)
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
     override fun validations() =
@@ -62,24 +59,5 @@ internal class GodkjenningsbehovRiver(
     override fun onPacket(
         packet: JsonMessage,
         context: MessageContext,
-    ) {
-        val hendelseId = UUID.fromString(packet["@id"].asText())
-
-        if (hendelseId == UUID.fromString("390911c8-d94d-4b53-8854-e0f6b813edd4")) {
-            return
-        }
-        logg.info(
-            "Mottok godkjenningsbehov med {}",
-            StructuredArguments.keyValue("hendelseId", hendelseId),
-        )
-        sikkerLogg.info(
-            "Mottok godkjenningsbehov med {}, {}",
-            StructuredArguments.keyValue("hendelseId", hendelseId),
-            StructuredArguments.keyValue("hendelse", packet.toJson()),
-        )
-        mediator.godkjenningsbehov(
-            Godkjenningsbehov(packet),
-            context = context,
-        )
-    }
+    ) = mediator.mottaMelding(Godkjenningsbehov(packet), context)
 }

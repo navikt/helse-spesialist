@@ -383,7 +383,11 @@ internal class Kommandofabrikk(
         )
     }
 
-    fun godkjenningsbehov(hendelse: Godkjenningsbehov): GodkjenningsbehovCommand {
+    private fun godkjenningsbehov(
+        hendelse: Godkjenningsbehov,
+        person: Person,
+        tags: List<String>
+    ): GodkjenningsbehovCommand {
         val utbetaling = utbetalingDao.hentUtbetaling(hendelse.utbetalingId)
         val førsteKjenteDagFinner = { generasjonRepository.førsteKjenteDag(hendelse.fødselsnummer()) }
         return GodkjenningsbehovCommand(
@@ -403,7 +407,6 @@ internal class Kommandofabrikk(
             utbetalingId = hendelse.utbetalingId,
             utbetaling = utbetaling,
             utbetalingtype = hendelse.utbetalingtype,
-            sykefraværstilfelle = sykefraværstilfelle(hendelse.fødselsnummer(), hendelse.skjæringstidspunkt),
             skjæringstidspunkt = hendelse.skjæringstidspunkt,
             kanAvvises = hendelse.kanAvvises,
             førsteKjenteDagFinner = førsteKjenteDagFinner,
@@ -430,6 +433,8 @@ internal class Kommandofabrikk(
             godkjenningMediator = godkjenningMediator,
             totrinnsvurderingMediator = totrinnsvurderingMediator,
             json = hendelse.toJson(),
+            person = person,
+            tags = tags,
         )
     }
 
@@ -458,6 +463,14 @@ internal class Kommandofabrikk(
 
     internal fun iverksettVedtaksperiodeNyUtbetaling(melding: VedtaksperiodeNyUtbetaling) {
         iverksett(vedtaksperiodeNyUtbetaling(melding), melding.id)
+    }
+
+    internal fun iverksettGodkjenningsbehov(
+        melding: Godkjenningsbehov,
+        person: Person,
+        tags: List<String>
+    ) {
+        iverksett(godkjenningsbehov(melding, person, tags), melding.id)
     }
 
     internal fun iverksettOverstyringIgangsatt(melding: OverstyringIgangsatt) {

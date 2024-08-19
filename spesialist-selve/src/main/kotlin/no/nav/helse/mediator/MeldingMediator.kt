@@ -68,8 +68,6 @@ import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
-import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovCommand
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
@@ -104,7 +102,6 @@ internal class MeldingMediator(
     private val dokumentDao: DokumentDao = DokumentDao(dataSource),
     avviksvurderingDao: AvviksvurderingDao,
     private val varselRepository: VarselRepository = VarselRepository(dataSource),
-    private val generasjonRepository: GenerasjonRepository = GenerasjonRepository(dataSource),
     private val metrikkDao: MetrikkDao = MetrikkDao(dataSource),
     private val stansAutomatiskBehandlingMediator: StansAutomatiskBehandlingMediator,
     generasjonDao: GenerasjonDao,
@@ -290,28 +287,6 @@ internal class MeldingMediator(
 
     internal fun håndter(avviksvurdering: AvviksvurderingDto) {
         kommandofabrikk.avviksvurdering(avviksvurdering)
-    }
-
-    fun godkjenningsbehov(
-        godkjenningsbehov: Godkjenningsbehov,
-        context: MessageContext,
-    ) {
-        personRepository.brukPersonHvisFinnes(godkjenningsbehov.fødselsnummer()) {
-            mottaSpleisVedtaksperioder(godkjenningsbehov.spleisVedtaksperioder)
-            flyttEventuelleAvviksvarsler(godkjenningsbehov.vedtaksperiodeId(), godkjenningsbehov.skjæringstidspunkt)
-        }
-
-        generasjonRepository.brukVedtaksperiode(
-            godkjenningsbehov.fødselsnummer(),
-            godkjenningsbehov.vedtaksperiodeId()
-        ) { vedtaksperiode ->
-            vedtaksperiode.mottaBehandlingsinformasjon(
-                godkjenningsbehov.tags,
-                godkjenningsbehov.spleisBehandlingId,
-                godkjenningsbehov.utbetalingId,
-            )
-        }
-        håndter(godkjenningsbehov, context)
     }
 
     private fun finnOppgavedata(fødselsnummer: String): OppgaveDataForAutomatisering? {
@@ -609,18 +584,13 @@ internal class MeldingMediator(
                 )
 
                 is SøknadSendt -> iverksett(kommandofabrikk.søknadSendt(melding), melding.id, commandContext)
-                is Godkjenningsbehov -> iverksett(
-                    kommandofabrikk.godkjenningsbehov(melding),
-                    melding.id,
-                    commandContext
-                )
+
 
                 is Saksbehandlerløsning -> iverksett(
                     kommandofabrikk.utbetalingsgodkjenning(melding),
                     melding.id,
                     commandContext
                 )
-
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")
             }
             utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, messageContext)

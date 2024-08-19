@@ -64,6 +64,10 @@ class Person private constructor(
         vedtaksperioder.forEach { it.nyttGodkjenningsbehov(perioder) }
     }
 
+    fun oppdaterPeriodeTilGodkjenning(vedtaksperiodeId: UUID, tags: List<String>, spleisBehandlingId: UUID, utbetalingId: UUID) {
+        vedtaksperiode(vedtaksperiodeId)?.mottaBehandlingsinformasjon(tags, spleisBehandlingId, utbetalingId)
+    }
+
     internal fun vedtakFattet(vedtakFattet: VedtakFattet) {
         vedtaksperiode(vedtakFattet.vedtaksperiodeId())
             ?.vedtakFattet(vedtakFattet.id, vedtakFattet.spleisBehandlingId())

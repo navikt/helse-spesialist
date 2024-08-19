@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 
-internal class VurderBehovForBehandlingAvGodkjenningsbehov(
+internal class VurderVidereBehandlingAvGodkjenningsbehov(
     private val meldingId: UUID,
     private val utbetalingId: UUID,
     private val vedtaksperiodeId: UUID,

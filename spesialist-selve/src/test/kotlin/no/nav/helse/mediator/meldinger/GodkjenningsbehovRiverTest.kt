@@ -5,6 +5,7 @@ import io.mockk.verify
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -58,8 +59,8 @@ internal class GodkjenningsbehovRiverTest {
                 utbetalingtype = Utbetalingtype.UTBETALING
             )
         )
-        verify(exactly = 1) { mediator.godkjenningsbehov(
-            godkjenningsbehov = withArg {
+        verify(exactly = 1) { mediator.mottaMelding(
+            melding = withArg<Godkjenningsbehov> {
                 assertEquals(HENDELSE, it.id)
                 assertEquals(FNR, it.fødselsnummer())
                 assertEquals(AKTØR, it.aktørId)
@@ -75,7 +76,7 @@ internal class GodkjenningsbehovRiverTest {
                 assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, it.periodetype)
                 assertEquals(Utbetalingtype.UTBETALING, it.utbetalingtype)
             },
-            context = any()
+            messageContext = any()
         ) }
     }
 
@@ -99,9 +100,9 @@ internal class GodkjenningsbehovRiverTest {
             )
         )
         verify(exactly = 0) {
-            mediator.godkjenningsbehov(
-                godkjenningsbehov = any(),
-                context = any(),
+            mediator.mottaMelding(
+                melding = any(),
+                messageContext = any(),
             )
         }
     }

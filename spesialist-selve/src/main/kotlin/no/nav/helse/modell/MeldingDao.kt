@@ -5,7 +5,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.PersonmeldingOld
-import no.nav.helse.mediator.meldinger.VedtaksperiodemeldingOld
+import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetUtenVedtakMessage
 import no.nav.helse.modell.MeldingDao.Meldingtype.ADRESSEBESKYTTELSE_ENDRET
 import no.nav.helse.modell.MeldingDao.Meldingtype.AVSLUTTET_UTEN_VEDTAK
@@ -57,7 +57,7 @@ internal class MeldingDao(private val dataSource: DataSource) {
             session.transaction { transactionalSession ->
                 transactionalSession.run {
                     lagre(melding)
-                    if (melding is VedtaksperiodemeldingOld) {
+                    if (melding is Vedtaksperiodemelding) {
                         opprettKobling(melding.vedtaksperiodeId(), melding.id)
                     }
                 }
