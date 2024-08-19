@@ -171,7 +171,6 @@ internal class Kommandofabrikk(
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             oppgaveDao = oppgaveDao,
             oppgaveService = oppgaveService,
-            generasjonRepository = generasjonRepository,
             godkjenningMediator = godkjenningMediator,
             spleisBehandlingId = vedtaksperiode.gjeldendeBehandlingId,
             organisasjonsnummer = vedtaksperiode.organisasjonsnummer(),
@@ -372,7 +371,6 @@ internal class Kommandofabrikk(
             spleisBehandlingId = hendelse.spleisBehandlingId,
             avviksvurderingId = hendelse.avviksvurderingId,
             vilkårsgrunnlagId = hendelse.vilkårsgrunnlagId,
-            spleisVedtaksperioder = hendelse.spleisVedtaksperioder,
             periodetype = hendelse.periodetype,
             inntektskilde = hendelse.inntektskilde,
             førstegangsbehandling = hendelse.førstegangsbehandling,
@@ -401,12 +399,12 @@ internal class Kommandofabrikk(
             avviksvurderingDao = avviksvurderingDao,
             snapshotClient = snapshotClient,
             oppgaveService = oppgaveService,
-            generasjonRepository = generasjonRepository,
             godkjenningMediator = godkjenningMediator,
             totrinnsvurderingMediator = totrinnsvurderingMediator,
             json = hendelse.toJson(),
-            person = person,
+            spleisVedtaksperioder = hendelse.spleisVedtaksperioder,
             tags = tags,
+            person = person,
         )
     }
 

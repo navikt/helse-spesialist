@@ -1,7 +1,6 @@
 package no.nav.helse.modell.gosysoppgaver
 
 import io.mockk.clearMocks
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.januar
@@ -14,7 +13,6 @@ import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDto
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -24,7 +22,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class VurderVidereBehandlingAvklaresGosysoppgaveTest {
+internal class VurderÅpenGosysoppgaveTest {
     private companion object {
         private const val FNR = "12345678911"
         private const val AKTØR_ID = "1234567891112"
@@ -34,18 +32,17 @@ internal class VurderVidereBehandlingAvklaresGosysoppgaveTest {
 
     private val generasjonAg1 = generasjon(VEDTAKPERIODE_ID_AG_1)
     private val generasjonAg2 = generasjon(VEDTAKPERIODE_ID_AG_2)
-    private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(generasjonAg1, generasjonAg2), emptyList())
+    private val skjæringstidspunkt = LocalDate.now().minusDays(17)
+    private val sykefraværstilfelle = Sykefraværstilfelle(FNR, skjæringstidspunkt, listOf(generasjonAg1, generasjonAg2), emptyList())
     private val dao = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
 
     private fun command(
         harTildeltOppgave: Boolean = false,
-        skjæringstidspunkt: LocalDate = LocalDate.now(),
     ) = VurderÅpenGosysoppgave(
         UUID.randomUUID(),
         AKTØR_ID,
         dao,
-        mockk<GenerasjonRepository> { every { skjæringstidspunktFor(VEDTAKPERIODE_ID_AG_1) } returns skjæringstidspunkt },
         VEDTAKPERIODE_ID_AG_1,
         sykefraværstilfelle,
         harTildeltOppgave = harTildeltOppgave,
@@ -78,31 +75,9 @@ internal class VurderVidereBehandlingAvklaresGosysoppgaveTest {
 
     @Test
     fun `Ber om åpne oppgaver i gosys`() {
-        val skjæringstidspunkt = LocalDate.now().minusDays(17)
-        assertFalse(command(skjæringstidspunkt = skjæringstidspunkt).execute(context))
+        assertFalse(command().execute(context))
         assertEquals(listOf("ÅpneOppgaver"), observer.behov.keys.toList())
         assertEquals(skjæringstidspunkt.minusYears(1), observer.behov["ÅpneOppgaver"]!!["ikkeEldreEnn"])
-    }
-
-    @Test
-    fun `Baserer ikkeEldreEnn på dagens dato hvis det ikke fins noen generasjon`() {
-        assertFalse(
-            VurderÅpenGosysoppgave(
-                UUID.randomUUID(),
-                AKTØR_ID,
-                dao,
-                mockk<GenerasjonRepository> {
-                    every { skjæringstidspunktFor(VEDTAKPERIODE_ID_AG_1) } throws
-                        IllegalStateException("testfeil")
-                },
-                VEDTAKPERIODE_ID_AG_1,
-                sykefraværstilfelle,
-                harTildeltOppgave = false,
-                oppgaveService = oppgaveService,
-            ).execute(context),
-        )
-        assertEquals(listOf("ÅpneOppgaver"), observer.behov.keys.toList())
-        assertEquals(LocalDate.now().minusYears(1), observer.behov["ÅpneOppgaver"]!!["ikkeEldreEnn"])
     }
 
     @Test

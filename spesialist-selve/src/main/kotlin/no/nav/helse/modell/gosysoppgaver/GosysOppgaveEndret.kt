@@ -15,7 +15,6 @@ import no.nav.helse.modell.oppgave.SjekkAtOppgaveFortsattErÅpenCommand
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.util.UUID
 
@@ -36,7 +35,10 @@ internal class GosysOppgaveEndret private constructor(
         json = jsonNode.toString(),
     )
 
-    override fun behandle(person: Person, kommandofabrikk: Kommandofabrikk) {
+    override fun behandle(
+        person: Person,
+        kommandofabrikk: Kommandofabrikk,
+    ) {
         kommandofabrikk.iverksettGosysOppgaveEndret(this, person)
     }
 
@@ -57,7 +59,6 @@ internal class GosysOppgaveEndretCommand(
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     oppgaveDao: OppgaveDao,
     oppgaveService: OppgaveService,
-    generasjonRepository: GenerasjonRepository,
     godkjenningMediator: GodkjenningMediator,
     spleisBehandlingId: UUID?,
     organisasjonsnummer: String,
@@ -68,7 +69,6 @@ internal class GosysOppgaveEndretCommand(
                 hendelseId = id,
                 aktørId = aktørId,
                 åpneGosysOppgaverDao = åpneGosysOppgaverDao,
-                generasjonRepository = generasjonRepository,
                 vedtaksperiodeId = oppgavedataForAutomatisering.vedtaksperiodeId,
                 sykefraværstilfelle = sykefraværstilfelle,
                 harTildeltOppgave = harTildeltOppgave,
