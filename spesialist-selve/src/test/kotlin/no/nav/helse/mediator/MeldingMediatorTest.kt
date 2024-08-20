@@ -4,12 +4,10 @@ import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
-import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.varsel.Varselkode
-import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -22,8 +20,6 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
     private val testRapid = TestRapid()
 
     private val avviksvurderingDao = mockk<AvviksvurderingDao>()
-    private val generasjonDao = mockk<GenerasjonDao>()
-    private val avslagDao = mockk<AvslagDao>()
     private val kommandofabrikk = mockk<Kommandofabrikk>(relaxed = true)
     private val stansAutomatiskBehandlingMediator = mockk<StansAutomatiskBehandlingMediator>(relaxed = true)
 
@@ -34,8 +30,6 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
             kommandofabrikk = kommandofabrikk,
             avviksvurderingDao = avviksvurderingDao,
             stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
-            generasjonDao = generasjonDao,
-            avslagDao = avslagDao,
         )
 
     @BeforeEach

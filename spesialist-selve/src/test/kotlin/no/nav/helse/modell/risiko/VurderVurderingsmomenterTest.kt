@@ -43,7 +43,7 @@ internal class VurderVurderingsmomenterTest {
 
     private val generasjon = Generasjon(UUID.randomUUID(), testperson.vedtaksperiodeId1, 1.januar, 31.januar, 1.januar)
     private val sykefraværstilfelle =
-        Sykefraværstilfelle(testperson.fødselsnummer, 1.januar, listOf(generasjon), emptyList())
+        Sykefraværstilfelle(testperson.fødselsnummer, 1.januar, listOf(generasjon))
 
     private lateinit var context: CommandContext
 

@@ -27,8 +27,6 @@ internal class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
             kommandofabrikk = kommandofabrikk,
             avviksvurderingDao = mockk(),
             stansAutomatiskBehandlingMediator = mockk(relaxed = true),
-            generasjonDao = mockk(),
-            avslagDao = mockk(),
             personRepository = mockk(relaxed = true),
         )
     }

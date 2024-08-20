@@ -370,7 +370,7 @@ internal class AutomatiseringTest {
                 hendelseId,
                 utbetaling,
                 periodetype,
-                sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, generasjoner, emptyList()),
+                sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, generasjoner),
                 orgnummer,
                 onAutomatiserbar,
             )

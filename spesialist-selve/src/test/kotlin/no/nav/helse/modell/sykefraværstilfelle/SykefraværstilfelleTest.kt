@@ -78,6 +78,5 @@ internal class SykefraværstilfelleTest {
         fødselsnummer,
         skjæringstidspunkt,
         gjeldendeGenerasjoner,
-        emptyList(),
     )
 }

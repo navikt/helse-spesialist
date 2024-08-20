@@ -155,7 +155,7 @@ internal class Kommandofabrikk(
         val harTildeltOppgave = tildelingDao.tildelingForOppgave(oppgaveDataForAutomatisering.oppgaveId) != null
         val vedtaksperiodeId = oppgaveDataForAutomatisering.vedtaksperiodeId
         val vedtaksperiode =
-            checkNotNull(person.vedtaksperiode(vedtaksperiodeId)) {
+            checkNotNull(person.vedtaksperiodeOrNull(vedtaksperiodeId)) {
                 "Forventer ikke at denne funksjonen kalles når det ikke finnes en vedtaksperiode med vedtaksperiodeId=$vedtaksperiodeId"
             }
 
@@ -186,7 +186,7 @@ internal class Kommandofabrikk(
         val sykefraværstilfelle = person.sykefraværstilfelle(vedtaksperiodeId)
         val utbetaling = utbetalingDao.hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
         val vedtaksperiode =
-            checkNotNull(person.vedtaksperiode(vedtaksperiodeId)) {
+            checkNotNull(person.vedtaksperiodeOrNull(vedtaksperiodeId)) {
                 "Forventer ikke at denne funksjonen kalles når det ikke finnes en vedtaksperiode med vedtaksperiodeId=$vedtaksperiodeId"
             }
 
@@ -327,7 +327,7 @@ internal class Kommandofabrikk(
         val oppgaveId = melding.oppgaveId
         val fødselsnummer = melding.fødselsnummer()
         val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(oppgaveId)
-        val spleisBehandlingId = person.vedtaksperiode(vedtaksperiodeId)?.gjeldendeBehandlingId
+        val spleisBehandlingId = person.vedtaksperiodeOrNull(vedtaksperiodeId)?.gjeldendeBehandlingId
         val sykefraværstilfelle = person.sykefraværstilfelle(vedtaksperiodeId)
         val utbetaling = utbetalingDao.utbetalingFor(oppgaveId)
         return UtbetalingsgodkjenningCommand(

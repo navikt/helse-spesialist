@@ -4,7 +4,6 @@ import SøknadSendtArbeidsledigRiver
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.MetrikkRiver
 import no.nav.helse.bootstrap.Environment
-import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.meldinger.AvsluttetMedVedtakRiver
 import no.nav.helse.mediator.meldinger.AvsluttetUtenVedtakRiver
@@ -60,7 +59,6 @@ import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMe
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
-import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
 import no.nav.helse.objectMapper
@@ -91,8 +89,6 @@ internal class MeldingMediator(
     avviksvurderingDao: AvviksvurderingDao,
     private val varselRepository: VarselRepository = VarselRepository(dataSource),
     private val stansAutomatiskBehandlingMediator: StansAutomatiskBehandlingMediator,
-    generasjonDao: GenerasjonDao,
-    avslagDao: AvslagDao,
     private val personRepository: PersonRepository = PersonRepository(dataSource),
 ) : Personhåndterer {
     private companion object {
@@ -132,11 +128,13 @@ internal class MeldingMediator(
         val fødselsnummer = jsonNode["fødselsnummer"]?.asText() ?: return true
         if (fødselsnummer.toDoubleOrNull() == null) return true
         val harPerson = personDao.findPersonByFødselsnummer(fødselsnummer) != null
-        if (!harPerson) sikkerlogg.warn(
-            "Ignorerer melding med event_name: {}, for fødselsnummer: {}",
-            eventName,
-            fødselsnummer
-        )
+        if (!harPerson) {
+            sikkerlogg.warn(
+                "Ignorerer melding med event_name: {}, for fødselsnummer: {}",
+                eventName,
+                fødselsnummer,
+            )
+        }
         return harPerson
     }
 
@@ -179,7 +177,7 @@ internal class MeldingMediator(
                 VarseldefinisjonRiver(this),
                 VedtaksperiodeNyUtbetalingRiver(this),
                 MetrikkRiver(),
-                AvsluttetMedVedtakRiver(this, avviksvurderingDao, generasjonDao, avslagDao),
+                AvsluttetMedVedtakRiver(this, avviksvurderingDao),
                 AvsluttetUtenVedtakRiver(this),
                 MidnattRiver(this),
                 BehandlingOpprettetRiver(this),
@@ -357,13 +355,16 @@ internal class MeldingMediator(
         sikkerlogg.error("alvorlig feil: ${err.message}\n\t$message", err, err.printStackTrace())
     }
 
-    internal fun mottaSøknadSendt(melding: SøknadSendt, messageContext: MessageContext) {
+    internal fun mottaSøknadSendt(
+        melding: SøknadSendt,
+        messageContext: MessageContext,
+    ) {
         val meldingnavn = requireNotNull(melding::class.simpleName)
         withMDC(
             mutableMapOf(
                 "meldingId" to melding.id.toString(),
                 "meldingnavn" to meldingnavn,
-            )
+            ),
         ) {
             logg.info("Melding SøknadSendt mottatt")
             sikkerlogg.info("Melding SøknadSendt mottatt:\n${melding.toJson()}")

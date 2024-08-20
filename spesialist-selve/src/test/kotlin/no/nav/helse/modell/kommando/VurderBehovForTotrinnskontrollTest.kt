@@ -42,7 +42,6 @@ internal class VurderBehovForTotrinnskontrollTest {
                 Generasjon(UUID.randomUUID(), VEDTAKSPERIODE_ID_1, 1.januar, 31.januar, 1.januar),
                 Generasjon(UUID.randomUUID(), VEDTAKSPERIODE_ID_2, 1.februar, 28.februar, 1.januar),
             ),
-            emptyList(),
         )
     private val command =
         VurderBehovForTotrinnskontroll(

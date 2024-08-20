@@ -2,8 +2,6 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import com.fasterxml.jackson.module.kotlin.convertValue
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.AvviksvurderingTestdata
 import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.TestRapidHelpers.hendelser
@@ -17,6 +15,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.UUID
 
 internal class FattVedtakE2ETest: AbstractE2ETest() {
 
@@ -67,6 +67,11 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterSkjønnsfastsattSykepengegrunnlag()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
+            harOppdatertMetadata = true,
+            harRisikovurdering = true,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID())
+        )
         håndterSaksbehandlerløsning()
 
         håndterAvsluttetMedVedtak(fastsattType = "EtterSkjønn")
@@ -85,6 +90,11 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterSkjønnsfastsattSykepengegrunnlag()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
+            harOppdatertMetadata = true,
+            harRisikovurdering = true,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID())
+        )
         håndterSaksbehandlerløsning()
 
         håndterAvsluttetMedVedtak(fastsattType = "IInfotrygd")

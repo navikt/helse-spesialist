@@ -5,9 +5,6 @@ import com.fasterxml.jackson.databind.node.JsonNodeType
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
 import io.mockk.mockk
-import java.time.LocalDateTime
-import java.util.UUID
-import java.util.UUID.randomUUID
 import no.nav.helse.januar
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.GodkjenningMediator
@@ -25,6 +22,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.UUID
+import java.util.UUID.randomUUID
 
 internal class SaksbehandlerløsningTest {
 
@@ -61,8 +61,7 @@ internal class SaksbehandlerløsningTest {
             sykefraværstilfelle = Sykefraværstilfelle(
                 fødselsnummer = FNR,
                 skjæringstidspunkt = 1.januar,
-                gjeldendeGenerasjoner = listOf(Generasjon(randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)),
-                skjønnsfastatteSykepengegrunnlag = emptyList()
+                gjeldendeGenerasjoner = listOf(Generasjon(randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar))
             ),
             godkjent = godkjent,
             godkjenttidspunkt = GODKJENTTIDSPUNKT,

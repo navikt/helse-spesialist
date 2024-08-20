@@ -1,5 +1,4 @@
 import no.nav.helse.SpeilTilgangsgrupper
-import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
@@ -52,7 +51,6 @@ internal class TestMediator(
     private val overstyringDao = OverstyringDao(dataSource)
     private val meldingDao = MeldingDao(dataSource)
     private val generasjonDao = GenerasjonDao(dataSource)
-    private val avslagDao = AvslagDao(dataSource)
     private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
@@ -147,8 +145,6 @@ internal class TestMediator(
             kommandofabrikk = kommandofabrikk,
             avviksvurderingDao = avviksvurderingDao,
             stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
-            generasjonDao = generasjonDao,
-            avslagDao = avslagDao,
         )
     }
 

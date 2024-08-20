@@ -1,12 +1,6 @@
 package no.nav.helse.modell.sykefraværstilfelle
 
-import no.nav.helse.modell.person.PersonObserver
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
-import no.nav.helse.modell.vedtak.Avslag
-import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
-import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag.Companion.sortert
-import no.nav.helse.modell.vedtak.Sykepengevedtak
-import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.deaktiver
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.erTilbakedatert
@@ -18,7 +12,6 @@ import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.harÅpenGosysOppg
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterGodkjent
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterNyttVarsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverSkjønnsfastsettelse
-import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetMedVedtak
 import java.time.LocalDate
 import java.util.UUID
 
@@ -26,17 +19,10 @@ internal class Sykefraværstilfelle(
     private val fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
     private val gjeldendeGenerasjoner: List<Generasjon>,
-    skjønnsfastatteSykepengegrunnlag: List<SkjønnsfastsattSykepengegrunnlag>,
-    private val avslag: Avslag? = null,
 ) {
     init {
         check(gjeldendeGenerasjoner.isNotEmpty()) { "Kan ikke opprette et sykefraværstilfelle uten generasjoner" }
     }
-
-    private val skjønnsfastatteSykepengegrunnlag = skjønnsfastatteSykepengegrunnlag.sortert()
-    private val observers = mutableListOf<PersonObserver>()
-
-    private fun fattVedtak(vedtak: Sykepengevedtak) = observers.forEach { it.vedtakFattet(vedtak) }
 
     internal fun skjæringstidspunkt() = skjæringstidspunkt
 
@@ -82,24 +68,6 @@ internal class Sykefraværstilfelle(
         generasjon.automatiskGodkjennSpesialsakvarsler()
     }
 
-    internal fun håndter(
-        avsluttetMedVedtak: AvsluttetMedVedtak,
-        tags: List<String>,
-        avslag: Avslag?,
-    ) {
-        val vedtakBuilder = SykepengevedtakBuilder()
-        val skjønnsfastsattSykepengegrunnlag = skjønnsfastatteSykepengegrunnlag.lastOrNull()
-        skjønnsfastsattSykepengegrunnlag?.also {
-            vedtakBuilder.skjønnsfastsattSykepengegrunnlag(it)
-        }
-        avslag?.also { vedtakBuilder.avslag(it) }
-        if (tags.isNotEmpty()) {
-            vedtakBuilder.tags(tags)
-        }
-        avsluttetMedVedtak.byggVedtak(vedtakBuilder)
-        fattVedtak(vedtakBuilder.build())
-    }
-
     internal fun deaktiver(varsel: Varsel) {
         gjeldendeGenerasjoner.deaktiver(varsel)
     }
@@ -120,8 +88,4 @@ internal class Sykefraværstilfelle(
     internal fun erTilbakedatert(vedtaksperiodeId: UUID): Boolean = gjeldendeGenerasjoner.erTilbakedatert(vedtaksperiodeId)
 
     internal fun harKunÅpenGosysOppgave(vedtaksperiodeId: UUID): Boolean = gjeldendeGenerasjoner.harÅpenGosysOppgave(vedtaksperiodeId)
-
-    internal fun registrer(observer: PersonObserver) {
-        observers.add(observer)
-    }
 }

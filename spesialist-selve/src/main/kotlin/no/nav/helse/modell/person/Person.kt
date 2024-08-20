@@ -6,6 +6,7 @@ import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag.Companion.relevanteFor
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
+import no.nav.helse.modell.vedtak.Sykepengevedtak
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.flyttEventueltAvviksvarselTil
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
@@ -13,9 +14,11 @@ import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.modell.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
+import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.finnGenerasjon
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.relevanteFor
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
+import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetMedVedtak
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
@@ -69,16 +72,37 @@ class Person private constructor(
         spleisBehandlingId: UUID,
         utbetalingId: UUID,
     ) {
-        vedtaksperiode(vedtaksperiodeId)?.mottaBehandlingsinformasjon(tags, spleisBehandlingId, utbetalingId)
+        vedtaksperiodeOrNull(vedtaksperiodeId)?.mottaBehandlingsinformasjon(tags, spleisBehandlingId, utbetalingId)
     }
 
     internal fun vedtakFattet(vedtakFattet: VedtakFattet) {
-        vedtaksperiode(vedtakFattet.vedtaksperiodeId())
+        vedtaksperiodeOrNull(vedtakFattet.vedtaksperiodeId())
             ?.vedtakFattet(vedtakFattet.id, vedtakFattet.spleisBehandlingId())
     }
 
+    internal fun fattVedtak(avsluttetMedVedtak: AvsluttetMedVedtak) {
+        val vedtakBuilder = SykepengevedtakBuilder()
+        val vedtaksperiode = vedtaksperiode(avsluttetMedVedtak.spleisBehandlingId)
+        val generasjon = vedtaksperiode.finnGenerasjon(avsluttetMedVedtak.spleisBehandlingId)
+
+        val skjønnsfastsattSykepengegrunnlag =
+            skjønnsfastsatteSykepengegrunnlag
+                .relevanteFor(generasjon.skjæringstidspunkt())
+                .lastOrNull()
+
+        skjønnsfastsattSykepengegrunnlag?.also {
+            vedtakBuilder.skjønnsfastsattSykepengegrunnlag(it)
+        }
+        vedtaksperiode.byggVedtak(vedtakBuilder)
+        generasjon.byggVedtak(vedtakBuilder)
+        avsluttetMedVedtak.byggVedtak(vedtakBuilder)
+        byggVedtak(vedtakBuilder)
+
+        fattVedtak(vedtakBuilder.build())
+    }
+
     internal fun avsluttetUtenVedtak(avsluttetUtenVedtak: AvsluttetUtenVedtak) {
-        vedtaksperiode(avsluttetUtenVedtak.vedtaksperiodeId())
+        vedtaksperiodeOrNull(avsluttetUtenVedtak.vedtaksperiodeId())
             ?.avsluttetUtenVedtak(this, avsluttetUtenVedtak)
     }
 
@@ -101,26 +125,26 @@ class Person private constructor(
             ?: vedtaksperioder.add(Vedtaksperiode.nyVedtaksperiode(spleisBehandling))
     }
 
-    internal fun vedtaksperiode(vedtaksperiodeId: UUID): Vedtaksperiode? {
+    internal fun vedtaksperiodeOrNull(vedtaksperiodeId: UUID): Vedtaksperiode? {
         return vedtaksperioder.find { it.vedtaksperiodeId() == vedtaksperiodeId }
             ?: logg.warn("Vedtaksperiode med id={} finnes ikke", vedtaksperiodeId).let { return null }
     }
 
+    internal fun vedtaksperiode(spleisBehandlingId: UUID): Vedtaksperiode {
+        return vedtaksperioder.finnGenerasjon(spleisBehandlingId)
+            ?: throw IllegalStateException("Generasjon med spleisBehandlingId=$spleisBehandlingId finnes ikke")
+    }
+
     internal fun sykefraværstilfelle(vedtaksperiodeId: UUID): Sykefraværstilfelle {
         val skjæringstidspunkt =
-            vedtaksperiode(vedtaksperiodeId)?.gjeldendeSkjæringstidspunkt
+            vedtaksperiodeOrNull(vedtaksperiodeId)?.gjeldendeSkjæringstidspunkt
                 ?: throw IllegalStateException("Forventer å finne vedtaksperiode med id=$vedtaksperiodeId")
         val gjeldendeGenerasjoner = vedtaksperioder.relevanteFor(skjæringstidspunkt)
         return Sykefraværstilfelle(
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
             gjeldendeGenerasjoner = gjeldendeGenerasjoner,
-            skjønnsfastatteSykepengegrunnlag = skjønnsfastsatteSykepengegrunnlag.relevanteFor(skjæringstidspunkt),
-        ).also {
-            observers.forEach { observer ->
-                it.registrer(observer)
-            }
-        }
+        )
     }
 
     internal fun nyeVarsler(nyeVarsler: NyeVarsler) {
@@ -137,9 +161,16 @@ class Person private constructor(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
     ) {
-        vedtaksperiode(vedtaksperiodeId)
+        vedtaksperiodeOrNull(vedtaksperiodeId)
             ?.nyUtbetaling(utbetalingId)
     }
+
+    private fun byggVedtak(vedtakBuilder: SykepengevedtakBuilder) {
+        vedtakBuilder.fødselsnummer(fødselsnummer)
+        vedtakBuilder.aktørId(aktørId)
+    }
+
+    private fun fattVedtak(vedtak: Sykepengevedtak) = observers.forEach { it.vedtakFattet(vedtak) }
 
     companion object {
         private val logg = LoggerFactory.getLogger(this::class.java)
@@ -157,25 +188,27 @@ class Person private constructor(
                 vedtaksperioder =
                     vedtaksperioder.map {
                         Vedtaksperiode.gjenopprett(
-                            it.organisasjonsnummer,
-                            it.vedtaksperiodeId,
-                            it.forkastet,
-                            it.generasjoner,
+                            organisasjonsnummer = it.organisasjonsnummer,
+                            vedtaksperiodeId = it.vedtaksperiodeId,
+                            forkastet = it.forkastet,
+                            generasjoner = it.generasjoner,
                         )
                     },
                 avviksvurderinger = avviksvurderinger.map { Avviksvurdering.gjenopprett(it) },
                 skjønnsfastsatteSykepengegrunnlag =
-                    skjønnsfastsattSykepengegrunnlag.map {
-                        SkjønnsfastsattSykepengegrunnlag.gjenopprett(
-                            it.type,
-                            it.årsak,
-                            it.skjæringstidspunkt,
-                            it.begrunnelseFraMal,
-                            it.begrunnelseFraFritekst,
-                            it.begrunnelseFraKonklusjon,
-                            it.opprettet,
-                        )
-                    },
+                    skjønnsfastsattSykepengegrunnlag
+                        .sortedBy { it.opprettet }
+                        .map {
+                            SkjønnsfastsattSykepengegrunnlag.gjenopprett(
+                                type = it.type,
+                                årsak = it.årsak,
+                                skjæringstidspunkt = it.skjæringstidspunkt,
+                                begrunnelseFraMal = it.begrunnelseFraMal,
+                                begrunnelseFraFritekst = it.begrunnelseFraFritekst,
+                                begrunnelseFraKonklusjon = it.begrunnelseFraKonklusjon,
+                                opprettet = it.opprettet,
+                            )
+                        },
             )
         }
     }

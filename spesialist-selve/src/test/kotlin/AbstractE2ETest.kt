@@ -178,6 +178,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             fom = fom,
             tom = tom,
             skjæringstidspunkt = skjæringstidspunkt,
+            vedtaksperiodeId = vedtaksperiodeId,
+            spleisBehandlingId = behandlinger[vedtaksperiodeId]?.last()
+                ?: throw IllegalArgumentException("Det finnes ingen behandlinger for vedtaksperiodeId=$vedtaksperiodeId")
         )
         håndterVedtakFattet()
     }
@@ -982,7 +985,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
-        spleisBehandlingId: UUID = UUID.randomUUID(),
+        spleisBehandlingId: UUID = behandlinger.getValue(vedtaksperiodeId).last(),
         fastsattType: String = "EtterHovedregel",
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,

@@ -119,7 +119,7 @@ internal class GodkjenningMediatorTest {
             beslutter = beslutter,
             godkjenttidspunkt = LocalDateTime.now(),
             saksbehandleroverstyringer = emptyList(),
-            sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, listOf(generasjon()), emptyList()),
+            sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, listOf(generasjon())),
             spleisBehandlingId = null,
         )
         assertOpptegnelseIkkeOpprettet()
@@ -141,7 +141,7 @@ internal class GodkjenningMediatorTest {
             beslutter = beslutter,
             godkjenttidspunkt = LocalDateTime.now(),
             saksbehandleroverstyringer = emptyList(),
-            sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, listOf(generasjon()), emptyList()),
+            sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, listOf(generasjon())),
             spleisBehandlingId = spleisBehandlingId,
         )
         val hendelser = hendelserInspektør.hendelser("vedtaksperiode_godkjent")
@@ -165,7 +165,7 @@ internal class GodkjenningMediatorTest {
             beslutter = beslutter,
             godkjenttidspunkt = LocalDateTime.now(),
             saksbehandleroverstyringer = emptyList(),
-            sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, listOf(generasjon()), emptyList()),
+            sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, listOf(generasjon())),
             spleisBehandlingId = null,
         )
         val hendelser = hendelserInspektør.hendelser("vedtaksperiode_godkjent")
@@ -189,7 +189,7 @@ internal class GodkjenningMediatorTest {
             beslutter = beslutter,
             godkjenttidspunkt = LocalDateTime.now(),
             saksbehandleroverstyringer = emptyList(),
-            sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, listOf(generasjon()), emptyList()),
+            sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, listOf(generasjon())),
             spleisBehandlingId = null,
         )
         val hendelser = hendelserInspektør.hendelser("vedtaksperiode_godkjent")
@@ -217,7 +217,7 @@ internal class GodkjenningMediatorTest {
             beslutter = null,
             godkjenttidspunkt = LocalDateTime.now(),
             saksbehandleroverstyringer = emptyList(),
-            sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, listOf(generasjon()), emptyList()),
+            sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, listOf(generasjon())),
             spleisBehandlingId = null,
         )
         val hendelser = hendelserInspektør.hendelser("vedtaksperiode_godkjent")
@@ -405,7 +405,7 @@ internal class GodkjenningMediatorTest {
             beslutter = beslutter,
             godkjenttidspunkt = LocalDateTime.now(),
             saksbehandleroverstyringer = emptyList(),
-            sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, generasjoner, emptyList()),
+            sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, generasjoner),
             spleisBehandlingId = null,
         )
 

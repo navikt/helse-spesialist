@@ -2,17 +2,13 @@ package no.nav.helse.mediator.meldinger.hendelser
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.treeToValue
-import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.person.Person
-import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
-import no.nav.helse.modell.vedtak.Avslag
 import no.nav.helse.modell.vedtak.Faktatype
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
-import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetMedVedtak
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering.Companion.finnRiktigAvviksvurdering
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering.Companion.gjenopprett
@@ -20,25 +16,17 @@ import no.nav.helse.modell.vilkårsprøving.InnrapportertInntektDto
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.util.UUID
 
 internal class AvsluttetMedVedtakMessage(
     private val packet: JsonMessage,
     private val avviksvurderingDao: AvviksvurderingDao,
-    private val generasjonDao: GenerasjonDao,
-    private val avslagDao: AvslagDao,
 ) : Vedtaksperiodemelding {
     private val fødselsnummer = packet["fødselsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
-    private val fom = packet["fom"].asLocalDate()
-    private val tom = packet["tom"].asLocalDate()
     private val vedtakFattetTidspunkt = packet["vedtakFattetTidspunkt"].asLocalDateTime()
     private val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
     private val spleisBehandlingId = UUID.fromString(packet["behandlingId"].asText())
-    private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
-    private val utbetalingId = packet["utbetalingId"].asUUID()
     private val skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate()
     private val hendelser = packet["hendelser"].map { it.asUUID() }
     private val sykepengegrunnlag = packet["sykepengegrunnlag"].asDouble()
@@ -50,17 +38,16 @@ internal class AvsluttetMedVedtakMessage(
     private val begrensning = packet["begrensning"].asText()
     private val inntekt = packet["inntekt"].asDouble()
     private val sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(packet, faktatype(packet))
-    private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
-
-    internal fun skjæringstidspunkt() = skjæringstidspunkt
 
     override fun fødselsnummer(): String = fødselsnummer
 
     override fun vedtaksperiodeId(): UUID = vedtaksperiodeId
 
-    override fun behandle(person: Person, kommandofabrikk: Kommandofabrikk) {
-        val sykefraværstilfelle = person.sykefraværstilfelle(vedtaksperiodeId)
-        sendInnTil(sykefraværstilfelle)
+    override fun behandle(
+        person: Person,
+        kommandofabrikk: Kommandofabrikk,
+    ) {
+        person.fattVedtak(avsluttetMedVedtak)
     }
 
     override val id: UUID = packet["@id"].asUUID()
@@ -69,13 +56,7 @@ internal class AvsluttetMedVedtakMessage(
 
     private val avsluttetMedVedtak get() =
         AvsluttetMedVedtak(
-            fødselsnummer = fødselsnummer,
-            aktørId = aktørId,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
             spleisBehandlingId = spleisBehandlingId,
-            utbetalingId = utbetalingId,
-            skjæringstidspunkt = skjæringstidspunkt,
             hendelser = hendelser,
             sykepengegrunnlag = sykepengegrunnlag,
             grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag,
@@ -83,25 +64,8 @@ internal class AvsluttetMedVedtakMessage(
             begrensning = begrensning,
             inntekt = inntekt,
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
-            fom = fom,
-            tom = tom,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
         )
-
-    private fun sendInnTil(sykefraværstilfelle: Sykefraværstilfelle) {
-        val tags: List<String> = generasjonDao.finnTagsFor(spleisBehandlingId) ?: emptyList()
-        if (tags.isEmpty()) {
-            sikkerLogg.error(
-                "Ingen tags funnet for spleisBehandlingId: $spleisBehandlingId på vedtaksperiodeId: $vedtaksperiodeId, json: ${toJson()}",
-            )
-        }
-
-        val generasjonsId = generasjonDao.finnSisteGenerasjonIdFor(vedtaksperiodeId)
-        if (generasjonsId == null) sikkerLogg.error("Finner ikke generasjonsId for vedtaksperiodeId: $vedtaksperiodeId, json: ${toJson()}")
-        val avslag: Avslag? = if (generasjonsId != null) avslagDao.finnAvslag(vedtaksperiodeId, generasjonsId) else null
-
-        sykefraværstilfelle.håndter(avsluttetMedVedtak, tags, avslag)
-    }
 
     private fun faktatype(packet: JsonMessage): Faktatype {
         return when (val fastsattString = packet["sykepengegrunnlagsfakta.fastsatt"].asText()) {

@@ -53,7 +53,6 @@ internal class VurderAutomatiskInnvilgelseTest {
                 fødselsnummer = fødselsnummer,
                 skjæringstidspunkt = 1.januar,
                 gjeldendeGenerasjoner = listOf(generasjon),
-                skjønnsfastatteSykepengegrunnlag = emptyList(),
             ),
             orgnummer,
         )

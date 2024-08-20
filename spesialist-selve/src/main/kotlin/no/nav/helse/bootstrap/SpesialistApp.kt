@@ -5,7 +5,6 @@ import io.ktor.server.routing.routing
 import no.nav.helse.DataSourceBuilder
 import no.nav.helse.Gruppekontroll
 import no.nav.helse.Tilgangsgrupper
-import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.ReservasjonDao
@@ -120,7 +119,6 @@ internal class SpesialistApp(
     private val meldingDao = MeldingDao(dataSource)
     private val dokumentDao = DokumentDao(dataSource)
     private val generasjonDao = GenerasjonDao(dataSource)
-    private val avslagDao = AvslagDao(dataSource)
     private val påVentApiDao = PåVentApiDao(dataSource)
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
     private val automatiseringDao = AutomatiseringDao(dataSource)
@@ -287,8 +285,6 @@ internal class SpesialistApp(
                 kommandofabrikk = kommandofabrikk,
                 avviksvurderingDao = avviksvurderingDao,
                 stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
-                generasjonDao = generasjonDao,
-                avslagDao = avslagDao,
             )
         saksbehandlerMediator =
             SaksbehandlerMediator(

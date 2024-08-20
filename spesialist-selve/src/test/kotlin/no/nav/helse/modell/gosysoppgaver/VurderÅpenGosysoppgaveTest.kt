@@ -33,7 +33,11 @@ internal class VurderÅpenGosysoppgaveTest {
     private val generasjonAg1 = generasjon(VEDTAKPERIODE_ID_AG_1)
     private val generasjonAg2 = generasjon(VEDTAKPERIODE_ID_AG_2)
     private val skjæringstidspunkt = LocalDate.now().minusDays(17)
-    private val sykefraværstilfelle = Sykefraværstilfelle(FNR, skjæringstidspunkt, listOf(generasjonAg1, generasjonAg2), emptyList())
+    private val sykefraværstilfelle = Sykefraværstilfelle(
+        FNR,
+        skjæringstidspunkt,
+        listOf(generasjonAg1, generasjonAg2)
+    )
     private val dao = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
 

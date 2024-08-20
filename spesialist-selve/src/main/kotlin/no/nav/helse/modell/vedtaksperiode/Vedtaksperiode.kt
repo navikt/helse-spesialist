@@ -26,7 +26,7 @@ internal class Vedtaksperiode private constructor(
     private val gjeldendeGenerasjon get() = generasjoner.last()
     private val fom get() = gjeldendeGenerasjon.fom()
     private val tom get() = gjeldendeGenerasjon.tom()
-    private val gjeldendeUtbetalingId get() = gjeldendeGenerasjon.utbetalingId()
+    private val gjeldendeUtbetalingId get() = gjeldendeGenerasjon.utbetalingId
     internal val gjeldendeSkjæringstidspunkt get() = gjeldendeGenerasjon.skjæringstidspunkt()
     internal val gjeldendeBehandlingId get() = gjeldendeGenerasjon.spleisBehandlingId()
 
@@ -146,6 +146,15 @@ internal class Vedtaksperiode private constructor(
         gjeldendeGenerasjon.håndterNyUtbetaling(utbetalingId)
     }
 
+    internal fun finnGenerasjon(spleisBehandlingId: UUID): Generasjon {
+        return generasjoner.find { it.spleisBehandlingId() == spleisBehandlingId }
+            ?: throw IllegalArgumentException("Forventer at generasjon med spleisBehandlingId=$spleisBehandlingId finnes")
+    }
+
+    internal fun byggVedtak(vedtakBuilder: SykepengevedtakBuilder) {
+        vedtakBuilder.organisasjonsnummer(organisasjonsnummer)
+    }
+
     private fun finnes(spleisBehandling: SpleisBehandling): Boolean {
         return generasjoner.finnGenerasjonForSpleisBehandling(spleisBehandling.spleisBehandlingId) != null
     }
@@ -184,6 +193,12 @@ internal class Vedtaksperiode private constructor(
                 forkastet = forkastet,
                 generasjoner = generasjoner.map { it.tilGenerasjon() },
             )
+        }
+
+        internal fun List<Vedtaksperiode>.finnGenerasjon(spleisBehandlingId: UUID): Vedtaksperiode? {
+            return find { vedtaksperiode ->
+                vedtaksperiode.generasjoner.any { it.spleisBehandlingId() == spleisBehandlingId }
+            }
         }
 
         internal fun List<Vedtaksperiode>.relevanteFor(skjæringstidspunkt: LocalDate) =

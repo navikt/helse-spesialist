@@ -23,7 +23,7 @@ import java.util.UUID
 internal class Generasjon private constructor(
     private val id: UUID,
     private val vedtaksperiodeId: UUID,
-    private var utbetalingId: UUID?,
+    utbetalingId: UUID?,
     private var spleisBehandlingId: UUID?,
     private var skjæringstidspunkt: LocalDate,
     private var periode: Periode,
@@ -55,13 +55,14 @@ internal class Generasjon private constructor(
 
     private val varsler: MutableList<Varsel> = varsler.toMutableList()
 
+    internal var utbetalingId: UUID? = utbetalingId
+        private set
+
     internal fun spleisBehandlingId() = spleisBehandlingId
 
     internal fun skjæringstidspunkt() = skjæringstidspunkt
 
     internal fun unikId() = id
-
-    internal fun utbetalingId() = utbetalingId
 
     internal fun hasterÅBehandle() = varsler.inneholderVarselOmNegativtBeløp()
 
@@ -168,6 +169,31 @@ internal class Generasjon private constructor(
     ) {
         if (spleisBehandlingId == null) spleisBehandlingId = avsluttetUtenVedtak.spleisBehandlingId()
         tilstand.avsluttetUtenVedtak(this, sykepengevedtakBuilder)
+    }
+
+    internal fun byggVedtak(vedtakBuilder: SykepengevedtakBuilder) {
+        if (tags.isEmpty()) {
+            sikkerlogg.error(
+                "Ingen tags funnet for spleisBehandlingId: $spleisBehandlingId på vedtaksperiodeId: $vedtaksperiodeId",
+            )
+        }
+
+        vedtakBuilder.tags(tags)
+        vedtakBuilder.vedtaksperiodeId(vedtaksperiodeId)
+        vedtakBuilder.spleisBehandlingId(behandlingId())
+        vedtakBuilder.utbetalingId(utbetalingId())
+        vedtakBuilder.skjæringstidspunkt(skjæringstidspunkt)
+        vedtakBuilder.fom(fom())
+        vedtakBuilder.tom(tom())
+        avslag?.also { vedtakBuilder.avslag(it) }
+    }
+
+    private fun behandlingId(): UUID {
+        return spleisBehandlingId ?: throw IllegalStateException("Forventer at spleisBehandlingId er satt")
+    }
+
+    private fun utbetalingId(): UUID {
+        return utbetalingId ?: throw IllegalStateException("Forventer at utbetalingId er satt")
     }
 
     private fun nyTilstand(ny: Tilstand) {

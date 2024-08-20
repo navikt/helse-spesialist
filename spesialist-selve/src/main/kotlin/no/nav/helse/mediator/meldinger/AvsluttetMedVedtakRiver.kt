@@ -1,11 +1,9 @@
 package no.nav.helse.mediator.meldinger
 
-import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
-import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -16,8 +14,6 @@ import org.slf4j.LoggerFactory
 internal class AvsluttetMedVedtakRiver(
     private val mediator: MeldingMediator,
     private val avviksvurderingDao: AvviksvurderingDao,
-    private val generasjonDao: GenerasjonDao,
-    private val avslagDao: AvslagDao,
 ) : SpesialistRiver {
     override fun validations() =
         River.PacketValidation {
@@ -71,7 +67,7 @@ internal class AvsluttetMedVedtakRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        mediator.mottaMelding(AvsluttetMedVedtakMessage(packet, avviksvurderingDao, generasjonDao, avslagDao), context)
+        mediator.mottaMelding(AvsluttetMedVedtakMessage(packet, avviksvurderingDao), context)
     }
 
     private companion object {

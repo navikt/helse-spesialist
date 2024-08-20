@@ -3,8 +3,6 @@ package no.nav.helse.modell.kommando
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.GodkjenningMediator
@@ -19,6 +17,8 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class UtbetalingsgodkjenningCommandTest {
     private companion object {
@@ -70,7 +70,9 @@ internal class UtbetalingsgodkjenningCommandTest {
             spleisBehandlingId = null,
             utbetaling = utbetaling,
             sykefraværstilfelle = Sykefraværstilfelle(
-                fødselsnummer, 1.januar, listOf(Generasjon(UUID.randomUUID(), UUID.randomUUID(), 1.januar, 31.januar, 1.januar)), emptyList()
+                fødselsnummer,
+                1.januar,
+                listOf(Generasjon(UUID.randomUUID(), UUID.randomUUID(), 1.januar, 31.januar, 1.januar))
             ),
             godkjent = GODKJENT,
             godkjenttidspunkt = TIDSPUNKT,
