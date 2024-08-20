@@ -18,7 +18,7 @@ class VedtaksperiodeTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val annenVedtaksperiodeId = UUID.randomUUID()
         val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
-        vedtaksperiode.vedtakFattet(UUID.randomUUID(), UUID.randomUUID())
+        vedtaksperiode.vedtakFattet(UUID.randomUUID())
 
         vedtaksperiode.nySpleisBehandling(nySpleisBehandling(annenVedtaksperiodeId))
 
@@ -62,7 +62,7 @@ class VedtaksperiodeTest {
         val spleisBehandlingId = UUID.randomUUID()
         val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId, spleisBehandlingId)
         vedtaksperiode.nyUtbetaling(UUID.randomUUID())
-        vedtaksperiode.vedtakFattet(UUID.randomUUID(), spleisBehandlingId)
+        vedtaksperiode.vedtakFattet(spleisBehandlingId)
         vedtaksperiode.nySpleisBehandling(nySpleisBehandling(vedtaksperiodeId))
         val generasjoner = vedtaksperiode.toDto().generasjoner
         val nyGjeldendeGenerasjon = generasjoner.last()
@@ -129,7 +129,7 @@ class VedtaksperiodeTest {
         val spleisBehandlingId = UUID.randomUUID()
         val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId, spleisBehandlingId)
         vedtaksperiode.nyUtbetaling(UUID.randomUUID())
-        vedtaksperiode.vedtakFattet(UUID.randomUUID(), spleisBehandlingId)
+        vedtaksperiode.vedtakFattet(spleisBehandlingId)
         vedtaksperiode.nyttGodkjenningsbehov(
             listOf(SpleisVedtaksperiode(vedtaksperiodeId, UUID.randomUUID(), 1.januar, 31.januar, 1.januar)),
         )
@@ -143,7 +143,7 @@ class VedtaksperiodeTest {
         val spleisBehandlingId = UUID.randomUUID()
         val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId, spleisBehandlingId)
         vedtaksperiode.nyUtbetaling(UUID.randomUUID())
-        vedtaksperiode.vedtakFattet(UUID.randomUUID(), UUID.randomUUID())
+        vedtaksperiode.vedtakFattet(UUID.randomUUID())
         vedtaksperiode.nyttGodkjenningsbehov(
             listOf(SpleisVedtaksperiode(vedtaksperiodeId, spleisBehandlingId, 1.januar, 31.januar, 1.januar)),
         )

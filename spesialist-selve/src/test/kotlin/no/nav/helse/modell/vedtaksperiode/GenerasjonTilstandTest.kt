@@ -60,7 +60,7 @@ internal class GenerasjonTilstandTest {
         generasjon.assertTilstand(TilstandDto.VidereBehandlingAvklares)
         generasjon.håndterNyUtbetaling(UUID.randomUUID())
         generasjon.assertTilstand(TilstandDto.KlarTilBehandling)
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
+        generasjon.håndterVedtakFattet()
         generasjon.assertTilstand(TilstandDto.VedtakFattet)
     }
 
@@ -74,10 +74,10 @@ internal class GenerasjonTilstandTest {
         generasjon.håndterNyUtbetaling(utbetalingId)
 
         generasjon.assertTilstand(TilstandDto.KlarTilBehandling)
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
+        generasjon.håndterVedtakFattet()
         generasjon.assertTilstand(TilstandDto.VedtakFattet)
 
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
+        generasjon.håndterVedtakFattet()
         generasjon.assertTilstand(TilstandDto.VedtakFattet)
     }
 
@@ -91,7 +91,7 @@ internal class GenerasjonTilstandTest {
         generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
         generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
 
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
+        generasjon.håndterVedtakFattet()
         generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
     }
 
@@ -138,7 +138,7 @@ internal class GenerasjonTilstandTest {
         generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
         generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtakMedVarsler)
 
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
+        generasjon.håndterVedtakFattet()
         generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtakMedVarsler)
     }
 

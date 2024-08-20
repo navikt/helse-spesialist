@@ -192,7 +192,7 @@ internal class GenerasjonTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
         val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId)
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
+        generasjon.håndterVedtakFattet()
         val varsel = Varsel(UUID.randomUUID(), "RV_IM_1", LocalDateTime.now(), vedtaksperiodeId)
         generasjon.håndterNyttVarsel(varsel, UUID.randomUUID())
         generasjon.assertVarsler(1, VarselStatusDto.AKTIV, "RV_IM_1")
@@ -212,7 +212,7 @@ internal class GenerasjonTest {
         val gammelUtbetalingId = UUID.randomUUID()
         val nyUtbetalingId = UUID.randomUUID()
         generasjon.håndterNyUtbetaling(gammelUtbetalingId)
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
+        generasjon.håndterVedtakFattet()
         generasjon.håndterNyUtbetaling(nyUtbetalingId)
 
         assertEquals(gammelUtbetalingId, generasjon.toDto().utbetalingId)
@@ -226,7 +226,7 @@ internal class GenerasjonTest {
         val generasjon = generasjon()
         generasjon.håndterNyUtbetaling(utbetalingId)
 
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
+        generasjon.håndterVedtakFattet()
         generasjon.håndterNyUtbetaling(nyUtbetalingId)
         generasjon.assertUtbetalingId(utbetalingId)
     }
@@ -246,7 +246,7 @@ internal class GenerasjonTest {
         val generasjon = generasjon()
         val utbetalingId = UUID.randomUUID()
         generasjon.håndterNyUtbetaling(utbetalingId)
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
+        generasjon.håndterVedtakFattet()
         generasjon.håndterForkastetUtbetaling(utbetalingId)
         generasjon.assertUtbetalingId(utbetalingId)
     }
@@ -396,11 +396,11 @@ internal class GenerasjonTest {
         val utbetalingId = UUID.randomUUID()
         generasjon1.håndterNyUtbetaling(utbetalingId)
         generasjon1.oppdaterBehandlingsinformasjon(emptyList(), spleisBehandlingId, utbetalingId)
-        generasjon1.håndterVedtakFattet(UUID.randomUUID())
+        generasjon1.håndterVedtakFattet()
         val generasjon2 = generasjon(generasjonId, vedtaksperiodeId)
         generasjon2.håndterNyUtbetaling(utbetalingId)
         generasjon2.oppdaterBehandlingsinformasjon(emptyList(), spleisBehandlingId, utbetalingId)
-        generasjon2.håndterVedtakFattet(UUID.randomUUID())
+        generasjon2.håndterVedtakFattet()
         assertEquals(generasjon1, generasjon2)
         assertEquals(generasjon1.hashCode(), generasjon2.hashCode())
     }

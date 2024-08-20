@@ -47,6 +47,6 @@ internal class VedtakFattet private constructor(
         person: Person,
         kommandofabrikk: Kommandofabrikk,
     ) {
-        person.vedtakFattet(this)
+        person.vedtakFattet(vedtaksperiodeId = vedtaksperiodeId, spleisBehandlingId = spleisBehandlingId)
     }
 }

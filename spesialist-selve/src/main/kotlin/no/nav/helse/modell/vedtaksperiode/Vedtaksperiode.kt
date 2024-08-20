@@ -74,14 +74,11 @@ internal class Vedtaksperiode private constructor(
         generasjoner.addLast(generasjon)
     }
 
-    internal fun vedtakFattet(
-        meldingId: UUID,
-        spleisBehandlingId: UUID,
-    ) {
+    internal fun vedtakFattet(spleisBehandlingId: UUID) {
         if (forkastet) return
         // Finn den generasjonen som ble avsluttet, det kan ha blitt opprettet nye generasjoner etter at vedtak_fattet
         // ble sendt ut
-        generasjoner.finnGenerasjonForSpleisBehandling(spleisBehandlingId)?.håndterVedtakFattet(meldingId) ?: logg.error(
+        generasjoner.finnGenerasjonForSpleisBehandling(spleisBehandlingId)?.håndterVedtakFattet() ?: logg.error(
             "Fant ikke generasjon for {} som kan håndtere vedtak_fattet",
             kv("spleisBehandlingId", spleisBehandlingId),
         )

@@ -18,7 +18,6 @@ import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.finnGenerasjo
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.relevanteFor
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetMedVedtak
-import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
 import org.slf4j.LoggerFactory
@@ -74,9 +73,12 @@ class Person private constructor(
         vedtaksperiodeOrNull(vedtaksperiodeId)?.mottaBehandlingsinformasjon(tags, spleisBehandlingId, utbetalingId)
     }
 
-    internal fun vedtakFattet(vedtakFattet: VedtakFattet) {
-        vedtaksperiodeOrNull(vedtakFattet.vedtaksperiodeId())
-            ?.vedtakFattet(vedtakFattet.id, vedtakFattet.spleisBehandlingId())
+    internal fun vedtakFattet(
+        vedtaksperiodeId: UUID,
+        spleisBehandlingId: UUID,
+    ) {
+        vedtaksperiodeOrNull(vedtaksperiodeId)
+            ?.vedtakFattet(spleisBehandlingId)
     }
 
     internal fun fattVedtak(avsluttetMedVedtak: AvsluttetMedVedtak) {

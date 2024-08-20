@@ -159,8 +159,8 @@ internal class Generasjon private constructor(
         tilstand.håndterGodkjenning(this, ident, hendelseId)
     }
 
-    internal fun håndterVedtakFattet(hendelseId: UUID) {
-        tilstand.vedtakFattet(this, hendelseId)
+    internal fun håndterVedtakFattet() {
+        tilstand.vedtakFattet(this)
     }
 
     internal fun avsluttetUtenVedtak(
@@ -312,10 +312,7 @@ internal class Generasjon private constructor(
             sykepengevedtakBuilder: SykepengevedtakBuilder,
         ): Unit = throw IllegalStateException("Forventer ikke avsluttet_uten_vedtak i tilstand=${this::class.simpleName}")
 
-        fun vedtakFattet(
-            generasjon: Generasjon,
-            hendelseId: UUID,
-        ) {
+        fun vedtakFattet(generasjon: Generasjon) {
             sikkerlogg.info("Forventet ikke vedtak_fattet i {}", kv("tilstand", this::class.simpleName))
         }
 
@@ -419,10 +416,7 @@ internal class Generasjon private constructor(
     internal data object KlarTilBehandling : Tilstand {
         override fun navn(): String = "KlarTilBehandling"
 
-        override fun vedtakFattet(
-            generasjon: Generasjon,
-            hendelseId: UUID,
-        ) {
+        override fun vedtakFattet(generasjon: Generasjon) {
             checkNotNull(generasjon.utbetalingId) { "Mottatt vedtak_fattet i tilstand=${navn()}, men mangler utbetalingId" }
             generasjon.nyTilstand(VedtakFattet)
         }
