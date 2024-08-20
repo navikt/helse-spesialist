@@ -36,6 +36,6 @@ internal class NyeVarsler private constructor(
         person: Person,
         kommandofabrikk: Kommandofabrikk,
     ) {
-        person.nyeVarsler(this)
+        person.nyeVarsler(varsler)
     }
 }

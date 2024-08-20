@@ -1,5 +1,6 @@
 package no.nav.helse.modell.person
 
+import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
@@ -9,7 +10,6 @@ import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.modell.vedtak.Sykepengevedtak
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.flyttEventueltAvviksvarselTil
-import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.modell.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.vedtaksperiode.SpleisVedtaksperiode
@@ -148,8 +148,8 @@ class Person private constructor(
         )
     }
 
-    internal fun nyeVarsler(nyeVarsler: NyeVarsler) {
-        vedtaksperioder.forEach { it.nyeVarsler(nyeVarsler.varsler) }
+    internal fun nyeVarsler(varsler: List<Varsel>) {
+        vedtaksperioder.forEach { it.nyeVarsler(varsler) }
     }
 
     internal fun utbetalingForkastet(utbetalingEndret: UtbetalingEndret) {
