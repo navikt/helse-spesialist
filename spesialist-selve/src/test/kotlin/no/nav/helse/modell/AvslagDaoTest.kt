@@ -3,7 +3,6 @@ package no.nav.helse.modell
 import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import java.util.UUID
 import no.nav.helse.db.AvslagDao
 import no.nav.helse.spesialist.api.graphql.mutation.Avslag
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagsdata
@@ -14,6 +13,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class AvslagDaoTest : DatabaseIntegrationTest() {
 
@@ -31,6 +31,27 @@ internal class AvslagDaoTest : DatabaseIntegrationTest() {
         val generasjonId = finnGenerasjonId(vedtaksperiodeId)
 
         val lagretAvslag = nyDao.finnAvslag(vedtaksperiodeId, generasjonId)
+        assertNotNull(lagretAvslag)
+    }
+
+    @Test
+    fun `lagrer og finner avslag i transaksjon`() {
+        val oid = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
+        nySaksbehandler(oid)
+        val avslag = Avslag(handling = Avslagshandling.OPPRETT, data = Avslagsdata(Avslagstype.AVSLAG, "En individuell begrunelse"))
+        nyDao.lagreAvslag(OPPGAVE_ID, avslag.data!!, oid)
+
+        val generasjonId = finnGenerasjonId(vedtaksperiodeId)
+
+        val lagretAvslag = with(nyDao) {
+            sessionOf(dataSource).use { session ->
+                session.transaction {
+                    it.finnAvslag(vedtaksperiodeId, generasjonId)
+                }
+            }
+        }
         assertNotNull(lagretAvslag)
     }
 

@@ -1,12 +1,14 @@
 package no.nav.helse.db
 
+import kotliquery.TransactionalSession
 import no.nav.helse.HelseDao
 import no.nav.helse.modell.vedtak.Avslag
+import no.nav.helse.modell.vedtak.AvslagDto
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagsdata
 import java.util.UUID
 import javax.sql.DataSource
 
-class AvslagDao(private val dataSource: DataSource) : HelseDao(dataSource) {
+class AvslagDao(dataSource: DataSource) : HelseDao(dataSource) {
     private fun lagreBegrunnelse(
         avslagsdata: Avslagsdata,
         saksbehandlerOid: UUID,
@@ -95,6 +97,34 @@ class AvslagDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 mapOf("begrunnelseRef" to begrunnelseRef),
             ).single { avslag ->
                 Avslag(enumValueOf(avslag.string("type")), avslag.string("tekst"))
+            }
+        }
+    }
+
+    internal fun TransactionalSession.finnAvslag(
+        vedtaksperiodeId: UUID,
+        generasjonId: Long,
+    ) = asSQL(
+        """
+        SELECT begrunnelse_ref FROM avslag 
+        WHERE vedtaksperiode_id = :vedtaksperiodeId 
+        AND generasjon_ref = :generasjonId 
+        AND invalidert = false 
+        ORDER BY opprettet DESC LIMIT 1
+        """.trimIndent(),
+        mapOf(
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            "generasjonId" to generasjonId,
+        ),
+    ).single(this) {
+        it.longOrNull("begrunnelse_ref")?.let { begrunnelseRef ->
+            asSQL(
+                """
+                SELECT type, tekst FROM begrunnelse WHERE id = :begrunnelseRef
+                """.trimIndent(),
+                mapOf("begrunnelseRef" to begrunnelseRef),
+            ).single { avslag ->
+                AvslagDto(enumValueOf(avslag.string("type")), avslag.string("tekst"))
             }
         }
     }

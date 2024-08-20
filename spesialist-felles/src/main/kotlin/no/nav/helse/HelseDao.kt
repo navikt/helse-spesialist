@@ -22,6 +22,11 @@ abstract class HelseDao(private val dataSource: DataSource) {
     fun <T> Query.single(mapping: (Row) -> T?) =
         sessionOf(dataSource, strict = true).use { session -> session.run(this.map { mapping(it) }.asSingle) }
 
+    fun <T> Query.single(
+        session: TransactionalSession,
+        mapping: (Row) -> T?,
+    ) = session.run(this.map { mapping(it) }.asSingle)
+
     fun <T> Query.list(mapping: (Row) -> T?) = sessionOf(dataSource).use { session -> session.run(this.map { mapping(it) }.asList) }
 
     fun <T> Query.list(

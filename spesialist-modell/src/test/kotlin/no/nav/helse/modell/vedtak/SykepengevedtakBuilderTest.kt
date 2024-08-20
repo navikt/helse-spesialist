@@ -216,7 +216,7 @@ class SykepengevedtakBuilderTest {
                 utbetalingId = utbetalingId,
                 skjønnsfastsettingopplysninger = null,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                avslag = AvslagDto(Avslagstype.DELVIS_AVSLAG, "En individuell begrunnelse for avslag"),
+                avslag = AvslagDto(AvslagstypeDto.DELVIS_AVSLAG, "En individuell begrunnelse for avslag"),
             ),
             utkast,
         )
@@ -292,7 +292,7 @@ class SykepengevedtakBuilderTest {
                     Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
                 ),
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                avslag = AvslagDto(Avslagstype.AVSLAG, "En individuell begrunnelse for avslag"),
+                avslag = AvslagDto(AvslagstypeDto.AVSLAG, "En individuell begrunnelse for avslag"),
             ),
             utkast,
         )

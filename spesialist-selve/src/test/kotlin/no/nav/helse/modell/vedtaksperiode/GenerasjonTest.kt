@@ -531,6 +531,7 @@ internal class GenerasjonTest {
                 TilstandDto.KlarTilBehandling,
                 tags,
                 listOf(varsel.toDto()),
+                null
             ),
             dto,
         )

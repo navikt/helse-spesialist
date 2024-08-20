@@ -108,7 +108,14 @@ class SykepengevedtakBuilder {
         type: Avslagstype,
         begrunnelse: String,
     ) = apply {
-        this.avslag = AvslagDto(type, begrunnelse)
+        this.avslag =
+            AvslagDto(
+                when (type) {
+                    Avslagstype.AVSLAG -> AvslagstypeDto.AVSLAG
+                    Avslagstype.DELVIS_AVSLAG -> AvslagstypeDto.DELVIS_AVSLAG
+                },
+                begrunnelse,
+            )
     }
 
     fun build(): Sykepengevedtak {

@@ -5,6 +5,9 @@ import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
+import no.nav.helse.modell.vedtak.Avslag
+import no.nav.helse.modell.vedtak.Avslagstype
+import no.nav.helse.modell.vedtak.AvslagstypeDto
 import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForSpleisBehandling
@@ -205,6 +208,17 @@ internal class Vedtaksperiode private constructor(
                         TilstandDto.KlarTilBehandling -> Generasjon.KlarTilBehandling
                     },
                 tags = tags.toList(),
+                avslag =
+                    avslag?.let {
+                        Avslag(
+                            type =
+                                when (it.type) {
+                                    AvslagstypeDto.AVSLAG -> Avslagstype.AVSLAG
+                                    AvslagstypeDto.DELVIS_AVSLAG -> Avslagstype.DELVIS_AVSLAG
+                                },
+                            begrunnelse = it.begrunnelse,
+                        )
+                    },
                 varsler =
                     varsler.map { varselDto ->
                         Varsel(

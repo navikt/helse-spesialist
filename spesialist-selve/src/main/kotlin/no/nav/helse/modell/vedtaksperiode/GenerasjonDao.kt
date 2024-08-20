@@ -4,6 +4,7 @@ import kotliquery.Query
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.db.AvslagDao
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import org.intellij.lang.annotations.Language
@@ -13,6 +14,8 @@ import java.util.UUID
 import javax.sql.DataSource
 
 class GenerasjonDao(private val dataSource: DataSource) {
+    private val avslagDao = AvslagDao(dataSource)
+
     internal fun TransactionalSession.finnGenerasjoner(vedtaksperiodeId: UUID): List<GenerasjonDto> {
         @Language("PostgreSQL")
         val query = """
@@ -37,6 +40,10 @@ class GenerasjonDao(private val dataSource: DataSource) {
                     tilstand = enumValueOf(row.string("tilstand")),
                     tags = row.array<String>("tags").toList(),
                     varsler = finnVarsler(generasjonRef),
+                    avslag =
+                        with(avslagDao) {
+                            this@finnGenerasjoner.finnAvslag(vedtaksperiodeId, generasjonRef)
+                        },
                 )
             }.asList,
         )
@@ -163,6 +170,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
                     tilstand = enumValueOf(row.string("tilstand")),
                     tags = row.array<String>("tags").toList(),
                     varsler = finnVarsler(generasjonRef),
+                    avslag = with(avslagDao) { this@finnGenerasjon.finnAvslag(vedtaksperiodeId, generasjonRef) },
                 )
             }.asSingle,
         )
@@ -202,12 +210,6 @@ class GenerasjonDao(private val dataSource: DataSource) {
                 )
             }.asList,
         )
-    }
-
-    internal fun finnSkjæringstidspunktFor(vedtaksperiodeId: UUID): LocalDate? {
-        return sessionOf(dataSource).use { session ->
-            session.run(finnSiste(vedtaksperiodeId).map { it.localDate("skjæringstidspunkt") }.asSingle)
-        }
     }
 
     internal fun finnSisteGenerasjonIdFor(vedtaksperiodeId: UUID): Long? {

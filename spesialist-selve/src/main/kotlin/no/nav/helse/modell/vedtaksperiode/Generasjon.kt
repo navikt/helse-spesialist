@@ -13,6 +13,7 @@ import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVars
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmNegativtBeløp
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmTilbakedatering
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmÅpenGosysOppgave
+import no.nav.helse.modell.vedtak.Avslag
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -28,6 +29,7 @@ internal class Generasjon private constructor(
     private var periode: Periode,
     private var tilstand: Tilstand,
     private var tags: List<String>,
+    private val avslag: Avslag?,
     varsler: Set<Varsel>,
 ) {
     internal constructor(
@@ -39,15 +41,16 @@ internal class Generasjon private constructor(
         spleisBehandlingId: UUID? = null,
         utbetalingId: UUID? = null,
     ) : this(
-        id,
-        vedtaksperiodeId,
-        utbetalingId,
-        spleisBehandlingId,
-        skjæringstidspunkt,
-        Periode(fom, tom),
-        VidereBehandlingAvklares,
-        emptyList(),
-        emptySet(),
+        id = id,
+        vedtaksperiodeId = vedtaksperiodeId,
+        utbetalingId = utbetalingId,
+        spleisBehandlingId = spleisBehandlingId,
+        skjæringstidspunkt = skjæringstidspunkt,
+        periode = Periode(fom, tom),
+        tilstand = VidereBehandlingAvklares,
+        tags = emptyList(),
+        avslag = null,
+        varsler = emptySet(),
     )
 
     private val varsler: MutableList<Varsel> = varsler.toMutableList()
@@ -77,6 +80,7 @@ internal class Generasjon private constructor(
             tom = periode.tom(),
             tilstand = tilstand.toDto(),
             tags = tags,
+            avslag = avslag?.toDto(),
             varsler = varsler.map(Varsel::toDto),
         )
 
@@ -549,6 +553,7 @@ internal class Generasjon private constructor(
             tilstand: Tilstand,
             tags: List<String>,
             varsler: Set<Varsel>,
+            avslag: Avslag?,
         ) = Generasjon(
             id = id,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -559,6 +564,7 @@ internal class Generasjon private constructor(
             tilstand = tilstand,
             tags = tags,
             varsler = varsler,
+            avslag = avslag,
         )
 
         internal fun List<Generasjon>.håndterNyttVarsel(

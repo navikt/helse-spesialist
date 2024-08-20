@@ -2,7 +2,7 @@ package no.nav.helse.mediator
 
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.person.PersonObserver
-import no.nav.helse.modell.vedtak.Avslagstype
+import no.nav.helse.modell.vedtak.AvslagstypeDto
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Infotrygd
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis
 import no.nav.helse.modell.vedtak.Sykepengevedtak
@@ -166,8 +166,8 @@ internal class VedtakFattetMelder(
                             mapOf(
                                 "type" to
                                     when (sykepengevedtak.avslag!!.type) {
-                                        Avslagstype.AVSLAG -> "Avslag"
-                                        Avslagstype.DELVIS_AVSLAG -> "DelvisInnvilgelse"
+                                        AvslagstypeDto.AVSLAG -> "Avslag"
+                                        AvslagstypeDto.DELVIS_AVSLAG -> "DelvisInnvilgelse"
                                     },
                                 "begrunnelse" to sykepengevedtak.avslag!!.begrunnelse,
                                 "perioder" to

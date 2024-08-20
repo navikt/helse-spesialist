@@ -1,40 +1,21 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import kotliquery.TransactionalSession
-import kotliquery.sessionOf
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 
-internal class GenerasjonRepository(private val dataSource: DataSource) {
-    private val dao = GenerasjonDao(dataSource)
+internal class GenerasjonRepository(dataSource: DataSource) {
+    private val generasjonDao = GenerasjonDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
     private var hentedeGenerasjoner: List<GenerasjonDto> = emptyList()
 
     private val sikkerLogger = LoggerFactory.getLogger("tjenestekall")
 
-    internal fun brukVedtaksperiode(
-        fødselsnummer: String,
-        vedtaksperiodeId: UUID,
-        block: (vedtaksperiode: Vedtaksperiode) -> Unit,
-    ) {
-        sessionOf(dataSource).use { session ->
-            session.transaction { tx ->
-                val vedtaksperiode =
-                    tx.finnVedtaksperiode(vedtaksperiodeId).let {
-                        Vedtaksperiode.gjenopprett(it.organisasjonsnummer, it.vedtaksperiodeId, it.forkastet, it.generasjoner)
-                    }
-                block(vedtaksperiode)
-                tx.lagreVedtaksperiode(fødselsnummer, vedtaksperiode.toDto())
-            }
-        }
-    }
-
     internal fun TransactionalSession.finnVedtaksperioder(fødselsnummer: String): List<VedtaksperiodeDto> {
-        return with(dao) {
+        return with(generasjonDao) {
             finnVedtaksperiodeIderFor(fødselsnummer).map { finnVedtaksperiode(it) }
         }
     }
@@ -55,7 +36,7 @@ internal class GenerasjonRepository(private val dataSource: DataSource) {
     }
 
     private fun TransactionalSession.finnGenerasjoner(vedtaksperiodeId: UUID): List<GenerasjonDto> {
-        return with(dao) {
+        return with(generasjonDao) {
             finnGenerasjoner(vedtaksperiodeId).also { hentedeGenerasjoner = it }
         }
     }
@@ -67,7 +48,7 @@ internal class GenerasjonRepository(private val dataSource: DataSource) {
         with(vedtakDao) {
             lagreVedtaksperiode(fødselsnummer, vedtaksperiode)
         }
-        with(dao) {
+        with(generasjonDao) {
             loggDiffMellomHentetOgSkalLagres(vedtaksperiode)
             hentedeGenerasjoner = emptyList()
             vedtaksperiode.generasjoner.forEach { generasjonDto ->
@@ -129,10 +110,5 @@ internal class GenerasjonRepository(private val dataSource: DataSource) {
         appendLine("  skj.tidspkt: ${hentet.skjæringstidspunkt} - ${skalLagres.skjæringstidspunkt}")
     }
 
-    internal fun skjæringstidspunktFor(vedtaksperiodeId: UUID): LocalDate {
-        return dao.finnSkjæringstidspunktFor(vedtaksperiodeId)
-            ?: throw IllegalStateException("Forventer å finne skjæringstidspunkt for vedtaksperiodeId=$vedtaksperiodeId")
-    }
-
-    internal fun førsteKjenteDag(fødselsnummer: String) = dao.førsteKjenteDag(fødselsnummer)
+    internal fun førsteKjenteDag(fødselsnummer: String) = generasjonDao.førsteKjenteDag(fødselsnummer)
 }

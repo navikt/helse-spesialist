@@ -4,7 +4,7 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.januar
 import no.nav.helse.modell.vedtak.AvslagDto
-import no.nav.helse.modell.vedtak.Avslagstype
+import no.nav.helse.modell.vedtak.AvslagstypeDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingopplysningerDto
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingstype
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingsårsak
@@ -278,7 +278,7 @@ internal class VedtakFattetMelderTest {
                     ),
                 skjønnsfastsettingopplysninger = null,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                avslag = AvslagDto(Avslagstype.DELVIS_AVSLAG, "En individuell begrunnelse"),
+                avslag = AvslagDto(AvslagstypeDto.DELVIS_AVSLAG, "En individuell begrunnelse"),
         )
         vedtakFattetMelder.vedtakFattet(spleis)
         vedtakFattetMelder.publiserUtgåendeMeldinger()
@@ -505,7 +505,7 @@ internal class VedtakFattetMelderTest {
                     ),
                 tags = setOf("IngenNyArbeidsgiverperiode"),
             avslag = AvslagDto(
-                Avslagstype.AVSLAG,
+                AvslagstypeDto.AVSLAG,
                 "En individuell begrunnelse"
             ),
         )

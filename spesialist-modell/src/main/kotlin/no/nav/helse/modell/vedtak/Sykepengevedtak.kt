@@ -171,6 +171,11 @@ data class SkjønnsfastsettingopplysningerDto(
 )
 
 data class AvslagDto(
-    val type: Avslagstype,
+    val type: AvslagstypeDto,
     val begrunnelse: String,
 )
+
+enum class AvslagstypeDto {
+    AVSLAG,
+    DELVIS_AVSLAG,
+}
