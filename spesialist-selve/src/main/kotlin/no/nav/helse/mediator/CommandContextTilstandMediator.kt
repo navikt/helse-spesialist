@@ -5,14 +5,20 @@ import no.nav.helse.rapids_rivers.MessageContext
 import org.slf4j.LoggerFactory
 
 internal interface CommandContextObserver : UtgåendeMeldingerObserver {
-    fun tilstandEndring(hendelse: String) {}
+    fun tilstandEndret(
+        nyTilstand: String,
+        hendelse: String,
+    ) {}
 }
 
 internal class CommandContextTilstandMediator : CommandContextObserver {
-    private val utgåendeTilstandEndringer = mutableListOf<String>()
+    private val utgåendeTilstandEndringer = mutableListOf<Pair<String, String>>()
 
-    override fun tilstandEndring(hendelse: String) {
-        utgåendeTilstandEndringer.add(hendelse)
+    override fun tilstandEndret(
+        nyTilstand: String,
+        hendelse: String,
+    ) {
+        utgåendeTilstandEndringer.add(nyTilstand to hendelse)
     }
 
     internal fun publiserTilstandsendringer(
@@ -27,10 +33,12 @@ internal class CommandContextTilstandMediator : CommandContextObserver {
         hendelse: Personmelding,
         messageContext: MessageContext,
     ) {
-        utgåendeTilstandEndringer.forEach { utgåendeTilstandEndringer ->
-            logg.info("Publiserer CommandContext tilstandendring i forbindelse med ${hendelse.javaClass.simpleName}")
+        utgåendeTilstandEndringer.forEach { (nyTilstand, utgåendeTilstandEndringer) ->
+            logg.info(
+                "Publiserer CommandContext tilstandendring i forbindelse med ${hendelse.javaClass.simpleName}, ny tilstand: $nyTilstand",
+            )
             sikkerlogg.info(
-                "Publiserer CommandContext tilstandendring i forbindelse med ${hendelse.javaClass.simpleName}\n{}",
+                "Publiserer CommandContext tilstandendring i forbindelse med ${hendelse.javaClass.simpleName}, ny tilstand: $nyTilstand\n{}",
                 utgåendeTilstandEndringer,
             )
             messageContext.publish(hendelse.fødselsnummer(), utgåendeTilstandEndringer)

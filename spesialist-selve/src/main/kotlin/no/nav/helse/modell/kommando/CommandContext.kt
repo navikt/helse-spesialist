@@ -40,8 +40,11 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
         observers.forEach { it.hendelse(melding) }
     }
 
-    private fun publiserTilstandEndring(melding: String) {
-        observers.forEach { it.tilstandEndring(melding) }
+    private fun publiserTilstandsendring(
+        nyTilstand: String,
+        melding: String,
+    ) {
+        observers.forEach { it.tilstandEndret(nyTilstand, melding) }
     }
 
     internal fun add(data: Any) {
@@ -70,14 +73,6 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
         commandContextDao.opprett(hendelseId, id)
     }
 
-    internal fun avbryt(
-        commandContextDao: CommandContextDao,
-        meldingId: UUID,
-    ) {
-        commandContextDao.avbrutt(meldingId, id)
-        publiserAvbrutt(id, meldingId)
-    }
-
     internal fun avbrytAlleForPeriode(
         commandContextDao: CommandContextDao,
         vedtaksperiodeId: UUID,
@@ -92,7 +87,8 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
         contextId: UUID,
         meldingId: UUID,
     ) {
-        publiserTilstandEndring(
+        publiserTilstandsendring(
+            "AVBRUTT",
             JsonMessage.newMessage(
                 "kommandokjede_avbrutt",
                 mutableMapOf(
@@ -124,7 +120,8 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
         utfør(command).also {
             if (ferdigstilt || it) {
                 commandContextDao.ferdig(hendelseId, id).also {
-                    publiserTilstandEndring(
+                    publiserTilstandsendring(
+                        "FERDIGSTILT",
                         JsonMessage.newMessage(
                             "kommandokjede_ferdigstilt",
                             mutableMapOf(
@@ -137,7 +134,8 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
                 }
             } else {
                 commandContextDao.suspendert(hendelseId, id, newHash, sti).also {
-                    publiserTilstandEndring(
+                    publiserTilstandsendring(
+                        "SUSPENDERT",
                         JsonMessage.newMessage(
                             "kommandokjede_suspendert",
                             mutableMapOf(
@@ -154,7 +152,8 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
     } catch (rootErr: Exception) {
         try {
             commandContextDao.feil(hendelseId, id).also {
-                publiserTilstandEndring(
+                publiserTilstandsendring(
+                    "FEILET",
                     JsonMessage.newMessage(
                         "kommandokjede_feilet",
                         mutableMapOf(

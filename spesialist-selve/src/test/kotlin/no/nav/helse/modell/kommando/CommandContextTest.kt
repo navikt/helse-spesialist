@@ -44,7 +44,7 @@ internal class CommandContextTest {
                 this.hendelser.add(hendelse)
             }
 
-            override fun tilstandEndring(hendelse: String) {
+            override fun tilstandEndret(nyTilstand: String, hendelse: String) {
                 this.utgåendeTilstandEndringer.add(hendelse)
             }
         }
