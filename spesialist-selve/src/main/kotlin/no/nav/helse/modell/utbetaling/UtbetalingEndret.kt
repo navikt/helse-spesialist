@@ -68,15 +68,13 @@ internal class UtbetalingEndret private constructor(
         person: Person,
         kommandofabrikk: Kommandofabrikk,
     ) {
-        if (gjeldendeStatus == FORKASTET) person.utbetalingForkastet(this)
+        if (gjeldendeStatus == FORKASTET) person.utbetalingForkastet(utbetalingId)
         kommandofabrikk.iverksettUtbetalingEndret(this)
     }
 
     override fun fødselsnummer(): String = fødselsnummer
 
     override fun toJson(): String = json
-
-    fun erRelevantFor(gjeldendeUtbetalingId: UUID) = utbetalingId == gjeldendeUtbetalingId
 
     private companion object {
         private fun tilOppdrag(

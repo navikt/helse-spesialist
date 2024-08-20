@@ -4,7 +4,6 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
-import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.vedtak.Avslag
 import no.nav.helse.modell.vedtak.Avslagstype
 import no.nav.helse.modell.vedtak.AvslagstypeDto
@@ -63,10 +62,10 @@ internal class Vedtaksperiode private constructor(
         nyGenerasjon(gjeldendeGenerasjon.nySpleisBehandling(spleisBehandling))
     }
 
-    internal fun utbetalingForkastet(utbetalingEndret: UtbetalingEndret) {
+    internal fun utbetalingForkastet(forkastetUtbetalingId: UUID) {
         if (forkastet) return
         val utbetalingId = gjeldendeUtbetalingId
-        if (utbetalingId == null || !utbetalingEndret.erRelevantFor(utbetalingId)) return
+        if (utbetalingId == null || gjeldendeUtbetalingId != forkastetUtbetalingId) return
         gjeldendeGenerasjon.håndterForkastetUtbetaling(utbetalingId)
     }
 

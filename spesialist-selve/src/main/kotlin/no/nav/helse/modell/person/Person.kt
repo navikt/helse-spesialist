@@ -2,7 +2,6 @@ package no.nav.helse.modell.person
 
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
-import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag.Companion.relevanteFor
@@ -152,9 +151,9 @@ class Person private constructor(
         vedtaksperioder.forEach { it.nyeVarsler(varsler) }
     }
 
-    internal fun utbetalingForkastet(utbetalingEndret: UtbetalingEndret) {
+    internal fun utbetalingForkastet(utbetalingId: UUID) {
         vedtaksperioder.forEach {
-            it.utbetalingForkastet(utbetalingEndret)
+            it.utbetalingForkastet(utbetalingId)
         }
     }
 
