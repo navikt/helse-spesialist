@@ -133,8 +133,8 @@ internal class CommandContextDaoTest : DatabaseIntegrationTest() {
         HENDELSE2 = testhendelse(UUID.randomUUID(), vedtaksperiodeId = VEDTAKSPERIODE_ID2)
         opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode(VEDTAKSPERIODE_ID1)
-        opprettVedtaksperiode(VEDTAKSPERIODE_ID2)
+        opprettVedtaksperiode(vedtaksperiodeId = VEDTAKSPERIODE_ID1)
+        opprettVedtaksperiode(vedtaksperiodeId = VEDTAKSPERIODE_ID2)
         vedtakDao.opprettKobling(VEDTAKSPERIODE_ID1, HENDELSE1.id)
         vedtakDao.opprettKobling(VEDTAKSPERIODE_ID2, HENDELSE2.id)
     }

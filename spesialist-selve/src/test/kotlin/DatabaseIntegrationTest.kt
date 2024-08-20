@@ -31,18 +31,18 @@ import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.TestMelding
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.person.PersonRepository
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
-import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
+import no.nav.helse.modell.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
@@ -64,7 +64,6 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUberegnetPeriode
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.fail
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Random
@@ -166,6 +165,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(dataSource)
     internal val notatDao = NotatDao(dataSource)
     internal val annulleringDao = AnnulleringDao(dataSource)
+    internal val personRepository = PersonRepository(dataSource)
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,
@@ -220,18 +220,19 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         organisasjonsnummer: String = ORGNUMMER,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         utbetalingId: UUID = UTBETALING_ID,
-        generasjonId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
         oppgaveEgenskaper: List<EgenskapForDatabase> = listOf(EGENSKAP),
     ) {
         opprettPerson(fødselsnummer = fødselsnummer, aktørId = aktørId)
         opprettArbeidsgiver(organisasjonsnummer = organisasjonsnummer)
-        opprettGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
         opprettVedtaksperiode(
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             periodetype = periodetype,
             inntektskilde = inntektskilde,
+            utbetalingId = utbetalingId,
         )
         opprettOppgave(
             contextId = contextId,
@@ -324,39 +325,34 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected fun opprettGenerasjon(
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
-        generasjonId: UUID = UUID.randomUUID(),
-        utbetalingId: UUID? = null,
+        spleisBehandlingId: UUID = UUID.randomUUID(),
     ) {
-        generasjonDao.finnSisteGenerasjonFor(vedtaksperiodeId)?.also {
-            generasjonDao.oppdaterTilstandFor(generasjonId = it, ny = Generasjon.VedtakFattet.navn(), endretAv = UUID.randomUUID())
+        personRepository.brukPersonHvisFinnes(FNR) {
+            this.nySpleisBehandling(SpleisBehandling(ORGNUMMER, vedtaksperiodeId, spleisBehandlingId, 1.januar, 31.januar))
         }
-        generasjonDao.opprettFor(
-            generasjonId,
-            vedtaksperiodeId,
-            UUID.randomUUID(),
-            1.januar,
-            Periode(1.januar, 31.januar),
-            Generasjon.VidereBehandlingAvklares,
-            utbetalingId,
-        )
     }
 
     protected fun opprettVedtaksperiode(
+        fødselsnummer: String = FNR,
+        organisasjonsnummer: String = ORGNUMMER,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         fom: LocalDate = FOM,
         tom: LocalDate = TOM,
         periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
         inntektskilde: Inntektskilde = EN_ARBEIDSGIVER,
+        utbetalingId: UUID? = UTBETALING_ID,
         forkastet: Boolean = false,
-    ): Long {
-        return vedtakDao.opprett(vedtaksperiodeId, fom, tom, personId, arbeidsgiverId)
-            .let { vedtakDao.finnVedtakId(vedtaksperiodeId) }
-            ?.also {
-                vedtakId = it
-                opprettVedtakstype(vedtaksperiodeId, periodetype, inntektskilde)
-                if (forkastet) vedtakDao.markerForkastet(vedtaksperiodeId, UUID.randomUUID())
-            }
-            ?: fail { "Kunne ikke opprette vedtak" }
+        spleisBehandlingId: UUID = UUID.randomUUID(),
+    ) {
+        personRepository.brukPersonHvisFinnes(fødselsnummer) {
+            this.nySpleisBehandling(SpleisBehandling(organisasjonsnummer, vedtaksperiodeId, spleisBehandlingId, fom, tom))
+            if (utbetalingId != null) this.nyUtbetalingForVedtaksperiode(vedtaksperiodeId, utbetalingId)
+        }
+        vedtakDao.finnVedtakId(vedtaksperiodeId)?.also {
+            vedtakId = it
+        }
+        opprettVedtakstype(vedtaksperiodeId, periodetype, inntektskilde)
+        if (forkastet) vedtakDao.markerForkastet(vedtaksperiodeId, UUID.randomUUID())
     }
 
     protected fun opprettOppgave(
@@ -556,7 +552,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         id: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         kode: String = "EN_KODE",
-        generasjonId: UUID,
         definisjonRef: Long? = null,
         status: String,
         endretTidspunkt: LocalDateTime? = LocalDateTime.now(),
@@ -564,7 +559,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         @Language("PostgreSQL")
         val query = """
             INSERT INTO selve_varsel(unik_id, kode, vedtaksperiode_id, generasjon_ref, definisjon_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt) 
-            VALUES (?, ?, ?, (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?), ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, (SELECT id FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? LIMIT 1), ?, ?, ?, ?, ?)
         """
         session.run(
             queryOf(
@@ -572,7 +567,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                 id,
                 kode,
                 vedtaksperiodeId,
-                generasjonId,
+                vedtaksperiodeId,
                 definisjonRef,
                 LocalDateTime.now(),
                 status,
@@ -622,29 +617,29 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ).execute()
 
     protected fun assertGodkjenteVarsler(
-        generasjonId: UUID,
+        vedtaksperiodeId: UUID,
         forventetAntall: Int,
     ) {
         @Language("PostgreSQL")
         val query =
-            "SELECT COUNT(1) FROM selve_varsel sv WHERE sv.generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?) AND status = 'GODKJENT'"
+            "SELECT COUNT(1) FROM selve_varsel sv WHERE sv.generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ?) AND status = 'GODKJENT'"
         val antall =
             sessionOf(dataSource).use { session ->
-                session.run(queryOf(query, generasjonId).map { it.int(1) }.asSingle)
+                session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
             }
         Assertions.assertEquals(forventetAntall, antall)
     }
 
     protected fun assertAvvisteVarsler(
-        generasjonId: UUID,
+        vedtaksperiodeId: UUID,
         forventetAntall: Int,
     ) {
         @Language("PostgreSQL")
         val query =
-            "SELECT COUNT(1) FROM selve_varsel sv WHERE sv.generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?) AND status = 'AVVIST'"
+            "SELECT COUNT(1) FROM selve_varsel sv WHERE sv.generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ?) AND status = 'AVVIST'"
         val antall =
             sessionOf(dataSource).use { session ->
-                session.run(queryOf(query, generasjonId).map { it.int(1) }.asSingle)
+                session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
             }
         Assertions.assertEquals(forventetAntall, antall)
     }

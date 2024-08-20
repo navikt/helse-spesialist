@@ -284,7 +284,12 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val arbeidsgiver = lagOrganisasjonsnummer()
         val vedtaksperiodeId = UUID.randomUUID()
         val saksbehandlerOid = UUID.randomUUID()
-        nyPerson(fødselsnummer = fnr, aktørId = aktørId, vedtaksperiodeId = vedtaksperiodeId, organisasjonsnummer = arbeidsgiver)
+        nyPerson(
+            fødselsnummer = fnr,
+            aktørId = aktørId,
+            organisasjonsnummer = arbeidsgiver,
+            vedtaksperiodeId = vedtaksperiodeId
+        )
         tildelOppgave(saksbehandlerOid = saksbehandlerOid)
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID())
         assertEquals(1, oppgaver.size)
@@ -337,8 +342,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         tildelOppgave(saksbehandlerOid = saksbehandlerOid)
         ferdigstillOppgave(OPPGAVE_ID, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
@@ -346,8 +351,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         tildelOppgave(saksbehandlerOid = saksbehandlerOid)
         ferdigstillOppgave(OPPGAVE_ID, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
@@ -355,8 +360,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         tildelOppgave(saksbehandlerOid = saksbehandlerOid)
         avventerSystem(OPPGAVE_ID, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
@@ -364,8 +369,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         tildelOppgave(saksbehandlerOid = annenSaksbehandlerOid)
         ferdigstillOppgave(OPPGAVE_ID, ferdigstiltAvOid = annenSaksbehandlerOid, ferdigstiltAv = "ANNEN_SAKSBEHANDLER")
@@ -381,7 +386,12 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val beslutterOid = UUID.randomUUID()
         val annenSaksbehandlerOid = UUID.randomUUID()
 
-        nyPerson(fødselsnummer = FNR, aktørId = AKTØR, vedtaksperiodeId = VEDTAKSPERIODE, organisasjonsnummer = ORGNUMMER)
+        nyPerson(
+            fødselsnummer = FNR,
+            aktørId = AKTØR,
+            organisasjonsnummer = ORGNUMMER,
+            vedtaksperiodeId = VEDTAKSPERIODE
+        )
         utbetalingsopplegg(1000, 0)
         opprettSaksbehandler(saksbehandlerOID = saksbehandlerOid)
         opprettSaksbehandler(beslutterOid, navn = "NAVN TIL BESLUTTER")
@@ -405,20 +415,20 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID())
         assertEquals(3, oppgaver.size)
@@ -429,22 +439,22 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
             oppgaveEgenskaper = listOf(SØKNAD, RISK_QA, FORTROLIG_ADRESSE),
         )
         val oppgaveId2 = OPPGAVE_ID
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
             oppgaveEgenskaper = listOf(RISK_QA, SØKNAD),
         )
         val oppgaveId3 = OPPGAVE_ID
@@ -467,21 +477,21 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
             oppgaveEgenskaper = listOf(SØKNAD),
         )
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
             oppgaveEgenskaper = listOf(RISK_QA),
         )
         val oppgaver =
@@ -502,22 +512,22 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId1 = OPPGAVE_ID
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId2 = OPPGAVE_ID
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), 1, 2)
         assertEquals(2, oppgaver.size)
@@ -530,8 +540,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId1 = OPPGAVE_ID
         ferdigstillOppgave(oppgaveId1, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
@@ -539,8 +549,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId2 = OPPGAVE_ID
         ferdigstillOppgave(oppgaveId2, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
@@ -548,8 +558,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId3 = OPPGAVE_ID
         ferdigstillOppgave(oppgaveId3, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
@@ -564,22 +574,22 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId1 = OPPGAVE_ID
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId2 = OPPGAVE_ID
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId3 = OPPGAVE_ID
         avventerSystem(oppgaveId3, ferdigstiltAv = "navn", ferdigstiltAvOid = UUID.randomUUID())
@@ -593,22 +603,22 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId1 = OPPGAVE_ID
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId2 = OPPGAVE_ID
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId3 = OPPGAVE_ID
         val oppgaver =
@@ -629,22 +639,22 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId1 = OPPGAVE_ID
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId2 = OPPGAVE_ID
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId3 = OPPGAVE_ID
         val oppgaver =
@@ -665,22 +675,22 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId1 = OPPGAVE_ID
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId2 = OPPGAVE_ID
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId3 = OPPGAVE_ID
         val oppgaver =
@@ -701,22 +711,22 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId1 = OPPGAVE_ID
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId2 = OPPGAVE_ID
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId3 = OPPGAVE_ID
         val oppgaver =
@@ -737,23 +747,23 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId1 = OPPGAVE_ID
         tildelOppgave(oppgaveId1, UUID.randomUUID(), "A")
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId2 = OPPGAVE_ID
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId3 = OPPGAVE_ID
         tildelOppgave(oppgaveId3, UUID.randomUUID(), "B")
@@ -775,23 +785,23 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId1 = OPPGAVE_ID
         tildelOppgave(oppgaveId1, UUID.randomUUID(), "A")
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId2 = OPPGAVE_ID
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId3 = OPPGAVE_ID
         tildelOppgave(oppgaveId3, UUID.randomUUID(), "B")
@@ -813,23 +823,23 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId1 = OPPGAVE_ID
         tildelOppgave(oppgaveId1, UUID.randomUUID(), "A")
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId2 = OPPGAVE_ID
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId3 = OPPGAVE_ID
         val saksbehandlerOid2 = UUID.randomUUID()
@@ -837,8 +847,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId4 = OPPGAVE_ID
         tildelOppgave(oppgaveId4, saksbehandlerOid2, "B")
@@ -861,15 +871,15 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId1 = OPPGAVE_ID
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
             oppgaveEgenskaper =
                 listOf(
                     BESLUTTER,
@@ -878,8 +888,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
             oppgaveEgenskaper =
                 listOf(
                     RISK_QA,
@@ -900,15 +910,15 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId1 = OPPGAVE_ID
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
             oppgaveEgenskaper =
                 listOf(
                     BESLUTTER,
@@ -917,8 +927,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
             oppgaveEgenskaper =
                 listOf(
                     RISK_QA,
@@ -928,8 +938,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
             oppgaveEgenskaper =
                 listOf(
                     UTLAND,
@@ -950,22 +960,22 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId1 = OPPGAVE_ID
         tildelOppgave(oppgaveId1, saksbehandlerOid = UUID.randomUUID())
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
 
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), tildelt = true)
@@ -979,23 +989,23 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId1 = OPPGAVE_ID
         tildelOppgave(oppgaveId1, saksbehandlerOid = UUID.randomUUID())
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId2 = OPPGAVE_ID
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId3 = OPPGAVE_ID
 
@@ -1010,23 +1020,23 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId1 = OPPGAVE_ID
         tildelOppgave(oppgaveId1, saksbehandlerOid = UUID.randomUUID())
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId2 = OPPGAVE_ID
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId3 = OPPGAVE_ID
 
@@ -1041,22 +1051,22 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId1 = OPPGAVE_ID
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId2 = OPPGAVE_ID
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
             oppgaveEgenskaper =
                 listOf(
                     RISK_QA,
@@ -1076,16 +1086,16 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId1 = OPPGAVE_ID
         tildelOppgave(oppgaveId1, saksbehandlerOid = saksbehandlerOid)
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
             oppgaveEgenskaper = listOf(PÅ_VENT),
         )
         val oppgaveId2 = OPPGAVE_ID
@@ -1093,8 +1103,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId3 = OPPGAVE_ID
 
@@ -1134,8 +1144,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = vedtaksperiodeId,
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = vedtaksperiodeId,
             oppgaveEgenskaper =
                 listOf(
                     BESLUTTER,
@@ -1154,8 +1164,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = vedtaksperiodeId,
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = vedtaksperiodeId,
             oppgaveEgenskaper =
                 listOf(
                     STRENGT_FORTROLIG_ADRESSE,
@@ -1176,8 +1186,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
             oppgaveEgenskaper =
                 listOf(
                     SØKNAD,
@@ -1192,8 +1202,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
             oppgaveEgenskaper =
                 listOf(
                     REVURDERING,
@@ -1203,8 +1213,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
             oppgaveEgenskaper =
                 listOf(
                     SØKNAD,
@@ -1214,8 +1224,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
             oppgaveEgenskaper =
                 listOf(
                     UTBETALING_TIL_SYKMELDT,
@@ -1281,8 +1291,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
             oppgaveEgenskaper =
                 listOf(
                     SØKNAD,
@@ -1296,8 +1306,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
             oppgaveEgenskaper =
                 listOf(
                     SØKNAD,
@@ -1442,10 +1452,14 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
         val fnr2 = lagFødselsnummer()
         val aktørId2 = lagAktørId()
+        val organisasjonsnummer2 = lagOrganisasjonsnummer()
         val vedtaksperiodeId2 = UUID.randomUUID()
         opprettPerson(fødselsnummer = fnr2, aktørId2)
-        opprettArbeidsgiver(lagOrganisasjonsnummer(), "en annen bedrift")
-        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId2)
+        opprettArbeidsgiver(organisasjonsnummer2, "en annen bedrift")
+        opprettVedtaksperiode(
+            fødselsnummer = fnr2,
+            organisasjonsnummer = organisasjonsnummer2,
+            vedtaksperiodeId = vedtaksperiodeId2)
         opprettOppgave(vedtaksperiodeId = vedtaksperiodeId2, utbetalingId = UUID.randomUUID())
         val oppgaveId2 = oppgaveId
 
@@ -1467,8 +1481,14 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val vedtaksperiodeId2 = UUID.randomUUID()
         val utbetalingId2 = UUID.randomUUID()
         opprettPerson(fødselsnummer = fnr2, aktørId2)
-        opprettArbeidsgiver(lagOrganisasjonsnummer(), "en annen bedrift")
-        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId2)
+        val organisasjonsnummer2 = lagOrganisasjonsnummer()
+        opprettArbeidsgiver(organisasjonsnummer2, "en annen bedrift")
+        opprettVedtaksperiode(
+            fødselsnummer = fnr2,
+            vedtaksperiodeId = vedtaksperiodeId2,
+            organisasjonsnummer = organisasjonsnummer2,
+            utbetalingId = utbetalingId2
+        )
         opprettOppgave(
             vedtaksperiodeId = vedtaksperiodeId2,
             egenskaper = listOf(SØKNAD, PÅ_VENT),
@@ -1491,8 +1511,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId1 = OPPGAVE_ID
         tildelOppgave(oppgaveId = oppgaveId1, saksbehandlerOid = saksbehandlerOid)
@@ -1500,8 +1520,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId2 = OPPGAVE_ID
         tildelOppgave(oppgaveId = oppgaveId2, saksbehandlerOid = saksbehandlerOid)
@@ -1509,8 +1529,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId3 = OPPGAVE_ID
         tildelOppgave(oppgaveId = oppgaveId3, saksbehandlerOid = saksbehandlerOid, egenskaper = listOf(SØKNAD, PÅ_VENT))
@@ -1518,8 +1538,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId4 = OPPGAVE_ID
         tildelOppgave(oppgaveId = oppgaveId4, saksbehandlerOid = UUID.randomUUID(), egenskaper = listOf(SØKNAD, PÅ_VENT))
@@ -1539,8 +1559,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
-            vedtaksperiodeId = vedtaksperiodeId1,
             organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = vedtaksperiodeId1,
         )
 
         val antallOppgaver = oppgaveDao.finnAntallOppgaver(saksbehandlerOid)

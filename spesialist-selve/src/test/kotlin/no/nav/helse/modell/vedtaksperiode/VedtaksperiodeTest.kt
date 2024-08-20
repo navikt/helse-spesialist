@@ -61,7 +61,7 @@ class VedtaksperiodeTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val spleisBehandlingId = UUID.randomUUID()
         val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId, spleisBehandlingId)
-        vedtaksperiode.nyUtbetaling(UUID.randomUUID(), UUID.randomUUID())
+        vedtaksperiode.nyUtbetaling(UUID.randomUUID())
         vedtaksperiode.vedtakFattet(UUID.randomUUID(), spleisBehandlingId)
         vedtaksperiode.nySpleisBehandling(nySpleisBehandling(vedtaksperiodeId))
         val generasjoner = vedtaksperiode.toDto().generasjoner
@@ -98,7 +98,7 @@ class VedtaksperiodeTest {
     fun `oppdater gjeldende generasjon dersom gjeldende generasjon er klar til behandling ved godkjenningsbehov`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
-        vedtaksperiode.nyUtbetaling(UUID.randomUUID(), UUID.randomUUID())
+        vedtaksperiode.nyUtbetaling(UUID.randomUUID())
         vedtaksperiode.nyttGodkjenningsbehov(
             listOf(SpleisVedtaksperiode(vedtaksperiodeId, UUID.randomUUID(), 1.februar, 28.februar, 1.februar)),
         )
@@ -128,7 +128,7 @@ class VedtaksperiodeTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val spleisBehandlingId = UUID.randomUUID()
         val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId, spleisBehandlingId)
-        vedtaksperiode.nyUtbetaling(UUID.randomUUID(), UUID.randomUUID())
+        vedtaksperiode.nyUtbetaling(UUID.randomUUID())
         vedtaksperiode.vedtakFattet(UUID.randomUUID(), spleisBehandlingId)
         vedtaksperiode.nyttGodkjenningsbehov(
             listOf(SpleisVedtaksperiode(vedtaksperiodeId, UUID.randomUUID(), 1.januar, 31.januar, 1.januar)),
@@ -142,7 +142,7 @@ class VedtaksperiodeTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val spleisBehandlingId = UUID.randomUUID()
         val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId, spleisBehandlingId)
-        vedtaksperiode.nyUtbetaling(UUID.randomUUID(), UUID.randomUUID())
+        vedtaksperiode.nyUtbetaling(UUID.randomUUID())
         vedtaksperiode.vedtakFattet(UUID.randomUUID(), UUID.randomUUID())
         vedtaksperiode.nyttGodkjenningsbehov(
             listOf(SpleisVedtaksperiode(vedtaksperiodeId, spleisBehandlingId, 1.januar, 31.januar, 1.januar)),

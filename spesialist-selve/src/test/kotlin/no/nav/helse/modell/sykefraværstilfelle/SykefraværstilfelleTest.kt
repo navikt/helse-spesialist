@@ -33,8 +33,8 @@ internal class SykefraværstilfelleTest {
         val gjeldendeGenerasjon1 = generasjon(UUID.randomUUID())
         val gjeldendeGenerasjon2 = generasjon(UUID.randomUUID())
         val utbetalingId = UUID.randomUUID()
-        gjeldendeGenerasjon1.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
-        gjeldendeGenerasjon2.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
+        gjeldendeGenerasjon1.håndterNyUtbetaling(utbetalingId)
+        gjeldendeGenerasjon2.håndterNyUtbetaling(utbetalingId)
         assertFalse(listOf(gjeldendeGenerasjon1, gjeldendeGenerasjon2).forhindrerAutomatisering(28.februar))
     }
 

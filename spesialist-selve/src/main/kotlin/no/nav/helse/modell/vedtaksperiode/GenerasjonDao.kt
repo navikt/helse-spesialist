@@ -1,11 +1,9 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import kotliquery.Query
-import kotliquery.Row
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import org.intellij.lang.annotations.Language
@@ -15,7 +13,6 @@ import java.util.UUID
 import javax.sql.DataSource
 
 class GenerasjonDao(private val dataSource: DataSource) {
-
     internal fun TransactionalSession.finnGenerasjoner(vedtaksperiodeId: UUID): List<GenerasjonDto> {
         @Language("PostgreSQL")
         val query = """
@@ -57,18 +54,6 @@ class GenerasjonDao(private val dataSource: DataSource) {
                 )
             }
         return tags
-    }
-
-    internal fun lagre(generasjonDto: GenerasjonDto) {
-        sessionOf(dataSource).use { session ->
-            session.transaction { tx ->
-                tx.lagre(generasjonDto)
-                generasjonDto.varsler.forEach { varselDto ->
-                    tx.lagre(varselDto, generasjonDto.vedtaksperiodeId, generasjonDto.id)
-                }
-                tx.slettVarsler(generasjonDto.id, generasjonDto.varsler.map { it.id })
-            }
-        }
     }
 
     internal fun TransactionalSession.lagreGenerasjon(generasjonDto: GenerasjonDto) {
@@ -225,19 +210,11 @@ class GenerasjonDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun finnSisteGenerasjonFor(vedtaksperiodeId: UUID): UUID? {
-        return sessionOf(dataSource).use { session ->
-            session.run(finnSiste(vedtaksperiodeId).map { it.uuid("unik_id") }.asSingle)
-        }
-    }
-
     internal fun finnSisteGenerasjonIdFor(vedtaksperiodeId: UUID): Long? {
         return sessionOf(dataSource).use { session ->
             session.run(finnSiste(vedtaksperiodeId).map { it.long("id") }.asSingle)
         }
     }
-
-    internal fun harGenerasjonFor(vedtaksperiodeId: UUID): Boolean = finnSisteGenerasjonFor(vedtaksperiodeId) != null
 
     private fun finnSiste(vedtaksperiodeId: UUID): Query {
         @Language("PostgreSQL")
@@ -247,23 +224,6 @@ class GenerasjonDao(private val dataSource: DataSource) {
             WHERE vedtaksperiode_id = ? ORDER BY id DESC;
             """
         return queryOf(query, vedtaksperiodeId)
-    }
-
-    internal fun finnVedtaksperiodeIderFor(
-        fødselsnummer: String,
-        skjæringstidspunkt: LocalDate,
-    ): Set<UUID> {
-        @Language("PostgreSQL")
-        val query = """
-            SELECT svg.vedtaksperiode_id FROM selve_vedtaksperiode_generasjon svg 
-            INNER JOIN vedtak v on svg.vedtaksperiode_id = v.vedtaksperiode_id
-            INNER JOIN person p on p.id = v.person_ref
-            WHERE fodselsnummer = ? AND svg.skjæringstidspunkt = ? AND forkastet = false
-            """
-
-        return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, fødselsnummer.toLong(), skjæringstidspunkt).map { it.uuid("vedtaksperiode_id") }.asList).toSet()
-        }
     }
 
     internal fun TransactionalSession.finnVedtaksperiodeIderFor(fødselsnummer: String): Set<UUID> {
@@ -276,129 +236,6 @@ class GenerasjonDao(private val dataSource: DataSource) {
             """
 
         return run(queryOf(query, fødselsnummer.toLong()).map { it.uuid("vedtaksperiode_id") }.asList).toSet()
-    }
-
-    internal fun opprettFor(
-        id: UUID,
-        vedtaksperiodeId: UUID,
-        hendelseId: UUID,
-        skjæringstidspunkt: LocalDate,
-        periode: Periode,
-        tilstand: Generasjon.Tilstand,
-        utbetalingId: UUID?,
-    ): Generasjon {
-        @Language("PostgreSQL")
-        val query = """
-            INSERT INTO selve_vedtaksperiode_generasjon (unik_id, vedtaksperiode_id, utbetaling_id, opprettet_av_hendelse, skjæringstidspunkt, fom, tom, tilstand) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?::generasjon_tilstand)
-            RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, spleis_behandling_id, skjæringstidspunkt, fom, tom, tilstand, tags
-        """
-
-        @Language("PostgreSQL")
-        val søknadMottattQuery = """
-            INSERT INTO opprinnelig_soknadsdato 
-            SELECT :vedtaksperiodeId, opprettet_tidspunkt
-            FROM selve_vedtaksperiode_generasjon
-            WHERE vedtaksperiode_id = :vedtaksperiodeId
-            ON CONFLICT DO NOTHING;
-        """
-
-        return sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                val generasjon =
-                    requireNotNull(
-                        transactionalSession.run(
-                            queryOf(
-                                query,
-                                id,
-                                vedtaksperiodeId,
-                                utbetalingId,
-                                hendelseId,
-                                skjæringstidspunkt,
-                                periode.fom(),
-                                periode.tom(),
-                                tilstand.navn(),
-                            ).map(::toGenerasjon).asSingle,
-                        ),
-                    ) { "Kunne ikke opprette ny generasjon" }
-                transactionalSession.run(
-                    queryOf(
-                        søknadMottattQuery,
-                        mapOf(
-                            "vedtaksperiodeId" to vedtaksperiodeId,
-                            "soknadMottatt" to LocalDateTime.now(),
-                        ),
-                    ).asUpdate,
-                )
-                generasjon
-            }
-        }
-    }
-
-    private fun toGenerasjon(row: Row): Generasjon {
-        return Generasjon.fraLagring(
-            row.uuid("unik_id"),
-            row.uuid("vedtaksperiode_id"),
-            row.uuidOrNull("utbetaling_id"),
-            row.uuidOrNull("spleis_behandling_id"),
-            row.localDate("skjæringstidspunkt"),
-            row.localDate("fom"),
-            row.localDate("tom"),
-            mapToTilstand(row.string("tilstand")),
-            row.array<String>("tags").toList(),
-            varslerFor(row.long("id")).toSet(),
-        )
-    }
-
-    private fun mapToTilstand(tilstand: String): Generasjon.Tilstand {
-        val tilstandKlasser = Generasjon.Tilstand::class.sealedSubclasses
-        val tilstander = tilstandKlasser.mapNotNull { it.objectInstance }.associateBy { it.navn() }
-        return tilstander.getValue(tilstand)
-    }
-
-    private fun varslerFor(generasjonRef: Long): List<Varsel> {
-        @Language("PostgreSQL")
-        val query =
-            "SELECT unik_id, vedtaksperiode_id, kode, opprettet, status FROM selve_varsel WHERE generasjon_ref = ?"
-        return sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(query, generasjonRef).map {
-                    Varsel(
-                        it.uuid("unik_id"),
-                        it.string("kode"),
-                        it.localDateTime("opprettet"),
-                        it.uuid("vedtaksperiode_id"),
-                        enumValueOf(it.string("status")),
-                    )
-                }.asList,
-            )
-        }
-    }
-
-    internal fun oppdaterTilstandFor(
-        generasjonId: UUID,
-        ny: String,
-        endretAv: UUID,
-    ) {
-        @Language("PostgreSQL")
-        val query = """
-                UPDATE selve_vedtaksperiode_generasjon 
-                SET tilstand = :tilstand::generasjon_tilstand, tilstand_endret_tidspunkt = :endret_tidspunkt, tilstand_endret_av_hendelse = :endret_av_hendelse 
-                WHERE unik_id = :generasjon_id
-            """
-        sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(
-                    query,
-                    mapOf(
-                        "tilstand" to ny,
-                        "endret_tidspunkt" to LocalDateTime.now(),
-                        "endret_av_hendelse" to endretAv,
-                        "generasjon_id" to generasjonId,
-                    ),
-                ).asUpdate,
-            )
-        }
     }
 
     internal fun førsteGenerasjonVedtakFattetTidspunkt(vedtaksperiodeId: UUID): LocalDateTime? {

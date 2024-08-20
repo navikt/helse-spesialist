@@ -16,7 +16,6 @@ import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.relevanteFor
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
-import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
@@ -64,7 +63,12 @@ class Person private constructor(
         vedtaksperioder.forEach { it.nyttGodkjenningsbehov(perioder) }
     }
 
-    fun oppdaterPeriodeTilGodkjenning(vedtaksperiodeId: UUID, tags: List<String>, spleisBehandlingId: UUID, utbetalingId: UUID) {
+    fun oppdaterPeriodeTilGodkjenning(
+        vedtaksperiodeId: UUID,
+        tags: List<String>,
+        spleisBehandlingId: UUID,
+        utbetalingId: UUID,
+    ) {
         vedtaksperiode(vedtaksperiodeId)?.mottaBehandlingsinformasjon(tags, spleisBehandlingId, utbetalingId)
     }
 
@@ -129,9 +133,12 @@ class Person private constructor(
         }
     }
 
-    internal fun nyUtbetalingForVedtaksperiode(vedtaksperiodeNyUtbetaling: VedtaksperiodeNyUtbetaling) {
-        vedtaksperiode(vedtaksperiodeNyUtbetaling.vedtaksperiodeId())
-            ?.nyUtbetaling(vedtaksperiodeNyUtbetaling.id, vedtaksperiodeNyUtbetaling.utbetalingId)
+    internal fun nyUtbetalingForVedtaksperiode(
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+    ) {
+        vedtaksperiode(vedtaksperiodeId)
+            ?.nyUtbetaling(utbetalingId)
     }
 
     companion object {

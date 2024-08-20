@@ -18,7 +18,7 @@ internal class GenerasjonTilstandTest {
         val generasjon = generasjon(generasjonId, UUID.randomUUID())
 
         val utbetalingId = UUID.randomUUID()
-        generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
+        generasjon.håndterNyUtbetaling(utbetalingId)
         generasjon.assertTilstand(TilstandDto.KlarTilBehandling)
         generasjon.håndterForkastetUtbetaling(utbetalingId)
         generasjon.assertTilstand(TilstandDto.VidereBehandlingAvklares)
@@ -49,7 +49,7 @@ internal class GenerasjonTilstandTest {
         val generasjonId = UUID.randomUUID()
         val generasjon = generasjon(generasjonId, UUID.randomUUID())
         generasjon.assertTilstand(TilstandDto.VidereBehandlingAvklares)
-        generasjon.håndterNyUtbetaling(UUID.randomUUID(), UUID.randomUUID())
+        generasjon.håndterNyUtbetaling(UUID.randomUUID())
         generasjon.assertTilstand(TilstandDto.KlarTilBehandling)
     }
 
@@ -58,7 +58,7 @@ internal class GenerasjonTilstandTest {
         val generasjonId = UUID.randomUUID()
         val generasjon = generasjon(generasjonId, UUID.randomUUID())
         generasjon.assertTilstand(TilstandDto.VidereBehandlingAvklares)
-        generasjon.håndterNyUtbetaling(UUID.randomUUID(), UUID.randomUUID())
+        generasjon.håndterNyUtbetaling(UUID.randomUUID())
         generasjon.assertTilstand(TilstandDto.KlarTilBehandling)
         generasjon.håndterVedtakFattet(UUID.randomUUID())
         generasjon.assertTilstand(TilstandDto.VedtakFattet)
@@ -71,7 +71,7 @@ internal class GenerasjonTilstandTest {
         val generasjon = generasjon(generasjonId, vedtaksperiodeId)
 
         val utbetalingId = UUID.randomUUID()
-        generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
+        generasjon.håndterNyUtbetaling(utbetalingId)
 
         generasjon.assertTilstand(TilstandDto.KlarTilBehandling)
         generasjon.håndterVedtakFattet(UUID.randomUUID())

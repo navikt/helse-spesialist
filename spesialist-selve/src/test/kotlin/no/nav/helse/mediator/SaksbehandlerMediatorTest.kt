@@ -113,64 +113,57 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     @Test
     fun `håndter godkjenning`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId)
+        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
         val definisjonRef = opprettVarseldefinisjon()
         nyttVarsel(
             vedtaksperiodeId = vedtaksperiodeId,
-            generasjonId = generasjonId,
-            status = "VURDERT",
             definisjonRef = definisjonRef,
+            status = "VURDERT",
         )
         nyttVarsel(
-            kode = "EN_ANNEN_KODE",
             vedtaksperiodeId = vedtaksperiodeId,
-            generasjonId = generasjonId,
-            status = "VURDERT",
+            kode = "EN_ANNEN_KODE",
             definisjonRef = definisjonRef,
+            status = "VURDERT",
         )
         assertDoesNotThrow {
             mediator.håndter(godkjenning(oppgaveId, true), UUID.randomUUID(), saksbehandler)
         }
-        assertGodkjenteVarsler(generasjonId, 2)
+        assertGodkjenteVarsler(vedtaksperiodeId, 2)
     }
 
     @Test
     fun `håndter godkjenning når periode har aktivt varsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
-        nyPerson(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
+        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
 
         val definisjonRef = opprettVarseldefinisjon()
         nyttVarsel(
             vedtaksperiodeId = vedtaksperiodeId,
-            generasjonId = generasjonId,
-            status = "AKTIV",
             definisjonRef = definisjonRef,
+            status = "AKTIV",
         )
         assertThrows<ManglerVurderingAvVarsler> {
             mediator.håndter(godkjenning(oppgaveId, true), UUID.randomUUID(), saksbehandler)
         }
-        assertGodkjenteVarsler(generasjonId, 0)
+        assertGodkjenteVarsler(vedtaksperiodeId, 0)
     }
 
     @Test
     fun `håndter godkjenning når periode ikke har noen varsler`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId)
+        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
 
         assertDoesNotThrow {
             mediator.håndter(godkjenning(OPPGAVE_ID, true), UUID.randomUUID(), saksbehandler)
         }
-        assertGodkjenteVarsler(generasjonId, 0)
+        assertGodkjenteVarsler(vedtaksperiodeId, 0)
     }
 
     @Test
     fun `invalider eksisterende oppgave ved overstyring`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId)
+        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
         mediator.håndter(
             TidslinjeOverstyring(VEDTAKSPERIODE, ORGANISASJONSNUMMER, FNR, AKTØR, "", dager = emptyList()),
             saksbehandler,
@@ -181,32 +174,28 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     @Test
     fun `håndter godkjenning når godkjenning er avvist`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId)
+        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
 
         val definisjonRef = opprettVarseldefinisjon()
         nyttVarsel(
             vedtaksperiodeId = vedtaksperiodeId,
-            generasjonId = generasjonId,
-            status = "AKTIV",
             definisjonRef = definisjonRef,
+            status = "AKTIV",
         )
         mediator.håndter(godkjenning(oppgaveId, false), UUID.randomUUID(), saksbehandler)
-        assertGodkjenteVarsler(generasjonId, 0)
-        assertAvvisteVarsler(generasjonId, 1)
+        assertGodkjenteVarsler(vedtaksperiodeId, 0)
+        assertAvvisteVarsler(vedtaksperiodeId, 1)
     }
 
     @Test
     fun `håndter totrinnsvurdering`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId)
+        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
         val definisjonRef = opprettVarseldefinisjon()
         nyttVarsel(
             vedtaksperiodeId = vedtaksperiodeId,
-            generasjonId = generasjonId,
-            status = "VURDERT",
             definisjonRef = definisjonRef,
+            status = "VURDERT",
         )
         assertDoesNotThrow {
             mediator.håndterTotrinnsvurdering(oppgaveId)
@@ -216,14 +205,12 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     @Test
     fun `håndter totrinnsvurdering når periode har aktivt varsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId)
+        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
         val definisjonRef = opprettVarseldefinisjon()
         nyttVarsel(
             vedtaksperiodeId = vedtaksperiodeId,
-            generasjonId = generasjonId,
-            status = "AKTIV",
             definisjonRef = definisjonRef,
+            status = "AKTIV",
         )
         assertThrows<ManglerVurderingAvVarsler> {
             mediator.håndterTotrinnsvurdering(oppgaveId)
@@ -242,8 +229,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     @Test
     fun `håndterer godkjenning med avslag`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId)
+        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
 
         assertDoesNotThrow {
             mediator.håndter(
@@ -265,8 +251,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     @Test
     fun `håndterer på vent`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId)
+        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
         påVentDao.lagrePåVent(oppgaveId, saksbehandler.oid, LocalDate.now(), "")
         assertDoesNotThrow {
             mediator.håndter(godkjenning(oppgaveId, true), UUID.randomUUID(), saksbehandler)
@@ -277,18 +262,16 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     @Test
     fun `sender ut varsel_endret ved godkjenning av varsler`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
         val varselId = UUID.randomUUID()
         val behandlingId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId)
+        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
         val definisjonRef = opprettVarseldefinisjon(tittel = "EN_TITTEL")
         nyttVarsel(
             id = varselId,
             vedtaksperiodeId = vedtaksperiodeId,
-            generasjonId = generasjonId,
             kode = "EN_KODE",
-            status = "VURDERT",
             definisjonRef = definisjonRef,
+            status = "VURDERT",
         )
         mediator.håndter(godkjenning(oppgaveId, true), behandlingId, saksbehandler)
 
@@ -307,18 +290,16 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     @Test
     fun `sender ut varsel_endret ved avvisning av varsler`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
         val varselId = UUID.randomUUID()
         val behandlingId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId)
+        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
         val definisjonRef = opprettVarseldefinisjon(tittel = "EN_TITTEL")
         nyttVarsel(
             id = varselId,
             vedtaksperiodeId = vedtaksperiodeId,
-            generasjonId = generasjonId,
             kode = "EN_KODE",
-            status = "AKTIV",
             definisjonRef = definisjonRef,
+            status = "AKTIV",
         )
         mediator.håndter(godkjenning(oppgaveId, false), behandlingId, saksbehandler)
 
@@ -537,7 +518,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
     @Test
     fun `håndterer overstyring av arbeidsforhold`() {
-        nyPerson(fødselsnummer = FØDSELSNUMMER, organisasjonsnummer = ORGANISASJONSNUMMER, aktørId = AKTØR_ID)
+        nyPerson(fødselsnummer = FØDSELSNUMMER, aktørId = AKTØR_ID, organisasjonsnummer = ORGANISASJONSNUMMER)
         val overstyring =
             ArbeidsforholdOverstyringHandling(
                 fodselsnummer = FØDSELSNUMMER,
@@ -577,7 +558,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
     @Test
     fun `håndterer overstyring av inntekt og refusjon`() {
-        nyPerson(fødselsnummer = FØDSELSNUMMER, organisasjonsnummer = ORGANISASJONSNUMMER, aktørId = AKTØR_ID)
+        nyPerson(fødselsnummer = FØDSELSNUMMER, aktørId = AKTØR_ID, organisasjonsnummer = ORGANISASJONSNUMMER)
         val overstyring =
             InntektOgRefusjonOverstyring(
                 fodselsnummer = FØDSELSNUMMER,
@@ -663,7 +644,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
     @Test
     fun `håndterer skjønnsfastsetting av sykepengegrunnlag`() {
-        nyPerson(fødselsnummer = FØDSELSNUMMER, organisasjonsnummer = ORGANISASJONSNUMMER, aktørId = AKTØR_ID)
+        nyPerson(fødselsnummer = FØDSELSNUMMER, aktørId = AKTØR_ID, organisasjonsnummer = ORGANISASJONSNUMMER)
         val skjønnsfastsetting =
             Skjonnsfastsettelse(
                 fodselsnummer = FØDSELSNUMMER,

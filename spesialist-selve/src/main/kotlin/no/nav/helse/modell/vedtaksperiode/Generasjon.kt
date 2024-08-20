@@ -105,11 +105,8 @@ internal class Generasjon private constructor(
 
     internal fun automatiskGodkjennSpesialsakvarsler() = varsler.automatiskGodkjennSpesialsakvarsler()
 
-    internal fun håndterNyUtbetaling(
-        hendelseId: UUID,
-        utbetalingId: UUID,
-    ) {
-        tilstand.nyUtbetaling(this, hendelseId, utbetalingId)
+    internal fun håndterNyUtbetaling(utbetalingId: UUID) {
+        tilstand.nyUtbetaling(this, utbetalingId)
     }
 
     internal fun håndterForkastetUtbetaling(utbetalingId: UUID) {
@@ -300,7 +297,6 @@ internal class Generasjon private constructor(
 
         fun nyUtbetaling(
             generasjon: Generasjon,
-            hendelseId: UUID,
             utbetalingId: UUID,
         ) {
             sikkerlogg.error(
@@ -359,7 +355,6 @@ internal class Generasjon private constructor(
 
         override fun nyUtbetaling(
             generasjon: Generasjon,
-            hendelseId: UUID,
             utbetalingId: UUID,
         ) {
             generasjon.nyUtbetaling(utbetalingId)

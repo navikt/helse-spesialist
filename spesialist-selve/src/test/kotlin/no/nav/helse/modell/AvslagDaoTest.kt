@@ -22,25 +22,25 @@ internal class AvslagDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `lagrer og finner avslag`() {
         val oid = UUID.randomUUID()
-        val generasjonUnikId = UUID.randomUUID()
-        nyPerson(generasjonId = generasjonUnikId)
+        val vedtaksperiodeId = UUID.randomUUID()
+        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
         nySaksbehandler(oid)
         val avslag = Avslag(handling = Avslagshandling.OPPRETT, data = Avslagsdata(Avslagstype.AVSLAG, "En individuell begrunelse"))
         nyDao.lagreAvslag(OPPGAVE_ID, avslag.data!!, oid)
 
-        val generasjonId = finnGenereasjonId(generasjonUnikId)
+        val generasjonId = finnGenerasjonId(vedtaksperiodeId)
 
-        val lagretAvslag = nyDao.finnAvslag(VEDTAKSPERIODE, generasjonId)
+        val lagretAvslag = nyDao.finnAvslag(vedtaksperiodeId, generasjonId)
         assertNotNull(lagretAvslag)
     }
 
     @Test
     fun `invaliderer avslag`() {
         val oid = UUID.randomUUID()
-        val generasjonUnikId = UUID.randomUUID()
-        nyPerson(generasjonId = generasjonUnikId)
+        val vedtaksperiodeId = UUID.randomUUID()
+        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
         nySaksbehandler(oid)
-        val generasjonId = finnGenereasjonId(generasjonUnikId)
+        val generasjonId = finnGenerasjonId(vedtaksperiodeId)
         val avslag = Avslag(handling = Avslagshandling.OPPRETT, data = Avslagsdata(Avslagstype.AVSLAG, "En individuell begrunelse"))
         nyDao.lagreAvslag(OPPGAVE_ID, avslag.data!!, oid)
         nyDao.invaliderAvslag(OPPGAVE_ID)
@@ -49,10 +49,9 @@ internal class AvslagDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `finner alle Avslag for periode`() {
+    fun `finner alle avslag for periode`() {
         val oid = UUID.randomUUID()
-        val generasjonUnikId = UUID.randomUUID()
-        nyPerson(generasjonId = generasjonUnikId)
+        nyPerson()
         nySaksbehandler(oid)
         val avslag = Avslag(handling = Avslagshandling.OPPRETT, data = Avslagsdata(Avslagstype.AVSLAG, "En individuell begrunelse"))
         val avslag2 = Avslag(handling = Avslagshandling.OPPRETT, data = Avslagsdata(Avslagstype.DELVIS_AVSLAG, "En individuell begrunelse delvis avslag retter skrivefeil"))
@@ -78,11 +77,11 @@ internal class AvslagDaoTest : DatabaseIntegrationTest() {
         saksbehandlerDao.opprettSaksbehandler(oid, "Navn Navnesen", "navn@navnesen.no", "Z999999")
     }
 
-    private fun finnGenereasjonId(unikId: UUID): Long =
+    private fun finnGenerasjonId(vedtaksperiodeId: UUID): Long =
         requireNotNull(
             sessionOf(dataSource).use { session ->
                 session.run(
-                    queryOf("SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?", unikId)
+                    queryOf("SELECT id FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ?", vedtaksperiodeId)
                         .map { it.long("id") }.asSingle
                 )
             }

@@ -138,12 +138,9 @@ internal class Vedtaksperiode private constructor(
         gjeldendeGenerasjon.oppdaterBehandlingsinformasjon(tags, spleisBehandlingId, utbetalingId)
     }
 
-    internal fun nyUtbetaling(
-        meldingId: UUID,
-        utbetalingId: UUID,
-    ) {
+    internal fun nyUtbetaling(utbetalingId: UUID) {
         if (forkastet) return
-        gjeldendeGenerasjon.håndterNyUtbetaling(meldingId, utbetalingId)
+        gjeldendeGenerasjon.håndterNyUtbetaling(utbetalingId)
     }
 
     private fun finnes(spleisBehandling: SpleisBehandling): Boolean {

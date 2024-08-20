@@ -41,7 +41,7 @@ internal class VedtaksperiodeNyUtbetaling private constructor(
         person: Person,
         kommandofabrikk: Kommandofabrikk,
     ) {
-        person.nyUtbetalingForVedtaksperiode(this)
+        person.nyUtbetalingForVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
         kommandofabrikk.iverksettVedtaksperiodeNyUtbetaling(this)
     }
 
