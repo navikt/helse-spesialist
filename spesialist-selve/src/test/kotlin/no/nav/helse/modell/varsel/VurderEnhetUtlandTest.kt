@@ -34,7 +34,7 @@ internal class VurderEnhetUtlandTest {
         val slot = slot<Varsel>()
         every { personDao.finnEnhetId(fødselsnummer) } returns "0393"
         assertTrue(hentCommand().execute(context))
-        verify(exactly = 1) { sykefraværstilfelle.håndter(capture(slot), hendelseId) }
+        verify(exactly = 1) { sykefraværstilfelle.håndter(capture(slot)) }
         assertEquals("SB_EX_5", slot.captured.toDto().varselkode)
     }
 
@@ -43,7 +43,7 @@ internal class VurderEnhetUtlandTest {
         val slot = slot<Varsel>()
         every { personDao.finnEnhetId(fødselsnummer) } returns "0393"
         assertTrue(hentCommand().execute(context))
-        verify(exactly = 1) { sykefraværstilfelle.håndter(capture(slot), hendelseId) }
+        verify(exactly = 1) { sykefraværstilfelle.håndter(capture(slot)) }
         assertEquals("SB_EX_5", slot.captured.toDto().varselkode)
     }
 
@@ -52,13 +52,11 @@ internal class VurderEnhetUtlandTest {
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             personDao = personDao,
-            hendelseId = hendelseId,
             sykefraværstilfelle = sykefraværstilfelle,
         )
 
     private companion object {
         private const val fødselsnummer = "12345678910"
         private val vedtaksperiodeId = UUID.randomUUID()
-        private val hendelseId = UUID.randomUUID()
     }
 }

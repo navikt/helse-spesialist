@@ -178,7 +178,6 @@ internal class VurderVurderingsmomenterTest {
         organisasjonsnummer: String = testperson.orgnummer,
         førstegangsbehandling: Boolean = true,
     ) = VurderVurderingsmomenter(
-        hendelseId = UUID.randomUUID(),
         vedtaksperiodeId = vedtaksperiodeId,
         risikovurderingDao = risikovurderingDao,
         organisasjonsnummer = organisasjonsnummer,

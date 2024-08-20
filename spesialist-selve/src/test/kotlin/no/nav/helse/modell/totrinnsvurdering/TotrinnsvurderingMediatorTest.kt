@@ -16,7 +16,7 @@ class TotrinnsvurderingMediatorTest {
     private val notatRepository = mockk<NotatRepository>(relaxed = true)
 
     val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
-    val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
+    private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
     private val totrinnsvurderingMediator =
         TotrinnsvurderingMediator(
             totrinnsvurderingDao,

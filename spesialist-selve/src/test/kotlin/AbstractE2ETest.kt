@@ -26,16 +26,13 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemå
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.saksbehandler.OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiverEvent
 import no.nav.helse.modell.saksbehandler.OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiverEvent.OverstyrtRefusjonselementEvent
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.SENDT
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALING_FEILET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
-import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Periode
@@ -124,7 +121,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         opprettSaksbehandler()
     }
 
-    protected fun resetTestRapid() = testRapid.reset()
+    private fun resetTestRapid() = testRapid.reset()
 
     // Tanken er at denne ikke skal eksponeres ut av AbstractE2ETest, for å unngå at enkelttester implementer egen kode
     // som bør være felles
@@ -602,30 +599,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 gjeldendeStatus = gjeldendeStatus,
                 opprettet = opprettet,
             )
-    }
-
-    protected fun håndterUtbetalingFeilet(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR,
-        utbetalingtype: String = Utbetalingtype.ANNULLERING.toString(),
-        arbeidsgiverbeløp: Int = 20000,
-        personbeløp: Int = 0,
-        utbetalingId: UUID = testperson.utbetalingId1,
-    ) {
-        nyUtbetalingId(utbetalingId)
-        håndterUtbetalingEndret(
-            aktørId,
-            fødselsnummer,
-            organisasjonsnummer,
-            utbetalingtype,
-            arbeidsgiverbeløp,
-            personbeløp,
-            gjeldendeStatus = UTBETALING_FEILET,
-            utbetalingId = this.utbetalingId,
-        )
-        assertIngenEtterspurteBehov()
-        assertIngenUtgåendeMeldinger()
     }
 
     protected fun håndterUtbetalingForkastet(
@@ -1452,14 +1425,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         ) { "Person med fødselsnummer=$fødselsnummer og aktørId=$aktørId finnes ikke i databasen" }
     }
 
-    protected fun assertHarPersoninfo(fødselsnummer: String) =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = "SELECT info_ref FROM person WHERE fodselsnummer = ?"
-            session.run(queryOf(query, fødselsnummer.toLong()).map { it }.asSingle)
-                ?: fail("Fant ikke personinfo for $fødselsnummer")
-        }
-
     protected fun assertPersonEksistererIkke(
         fødselsnummer: String,
         aktørId: String,
@@ -1625,7 +1590,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         }
     }
 
-    protected fun forkastedeVedtak(vedtaksperiodeId: UUID): Int {
+    private fun forkastedeVedtak(vedtaksperiodeId: UUID): Int {
         return sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query = "SELECT COUNT(*) FROM vedtak WHERE vedtaksperiode_id = ? AND forkastet = TRUE"
@@ -1634,19 +1599,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             )
         }
     }
-
-    private fun List<OverstyringArbeidsgiver>.byggOverstyrArbeidsgiverEvent() =
-        this.map {
-            OverstyrtArbeidsgiverEvent(
-                organisasjonsnummer = it.organisasjonsnummer,
-                månedligInntekt = it.manedligInntekt,
-                fraMånedligInntekt = it.fraManedligInntekt,
-                refusjonsopplysninger = it.refusjonsopplysninger?.byggRefusjonselementEvent(),
-                fraRefusjonsopplysninger = it.fraRefusjonsopplysninger?.byggRefusjonselementEvent(),
-                begrunnelse = it.begrunnelse,
-                forklaring = it.forklaring,
-            )
-        }
 
     private fun List<OverstyringRefusjonselement>.byggRefusjonselementEvent() =
         this.map {

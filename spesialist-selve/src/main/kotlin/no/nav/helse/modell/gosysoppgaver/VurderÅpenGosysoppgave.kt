@@ -11,7 +11,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class VurderÅpenGosysoppgave(
-    private val hendelseId: UUID,
     private val aktørId: String,
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     private val vedtaksperiodeId: UUID,
@@ -39,7 +38,7 @@ internal class VurderÅpenGosysoppgave(
         }
 
         løsning.lagre(åpneGosysOppgaverDao)
-        løsning.evaluer(vedtaksperiodeId, sykefraværstilfelle, hendelseId, harTildeltOppgave, oppgaveService)
+        løsning.evaluer(vedtaksperiodeId, sykefraværstilfelle, harTildeltOppgave, oppgaveService)
         return true
     }
 

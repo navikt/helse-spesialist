@@ -11,7 +11,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class UtbetalingsgodkjenningCommand(
-    private val id: UUID,
     private val behandlingId: UUID,
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
@@ -42,7 +41,6 @@ internal class UtbetalingsgodkjenningCommand(
         if (godkjent) {
             godkjenningMediator.saksbehandlerUtbetaling(
                 behandlingId = behandlingId,
-                hendelseId = id,
                 context = context,
                 behov = behov,
                 vedtaksperiodeId = vedtaksperiodeId,

@@ -31,7 +31,6 @@ internal class GodkjenningMediator(
 ) {
     internal fun saksbehandlerUtbetaling(
         behandlingId: UUID,
-        hendelseId: UUID,
         context: CommandContext,
         behov: UtbetalingsgodkjenningMessage,
         vedtaksperiodeId: UUID,
@@ -52,7 +51,7 @@ internal class GodkjenningMediator(
             godkjenttidspunkt = godkjenttidspunkt,
             saksbehandleroverstyringer = saksbehandleroverstyringer,
         )
-        sykefraværstilfelle.håndterGodkjent(saksbehandlerIdent, vedtaksperiodeId, hendelseId)
+        sykefraværstilfelle.håndterGodkjent(vedtaksperiodeId)
 
         context.publiser(behov.toJson())
         context.publiser(

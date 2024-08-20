@@ -299,7 +299,6 @@ internal class GodkjenningsbehovCommand(
                 egenAnsattDao = egenAnsattDao,
             ),
             VurderVergemålOgFullmakt(
-                hendelseId = id,
                 fødselsnummer = fødselsnummer,
                 vergemålDao = vergemålDao,
                 vedtaksperiodeId = vedtaksperiodeId,
@@ -309,11 +308,9 @@ internal class GodkjenningsbehovCommand(
                 fødselsnummer = fødselsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
                 personDao = personDao,
-                hendelseId = id,
                 sykefraværstilfelle = sykefraværstilfelle,
             ),
             VurderÅpenGosysoppgave(
-                hendelseId = id,
                 aktørId = aktørId,
                 åpneGosysOppgaverDao = åpneGosysOppgaverDao,
                 vedtaksperiodeId = vedtaksperiodeId,
@@ -322,7 +319,6 @@ internal class GodkjenningsbehovCommand(
                 oppgaveService = oppgaveService,
             ),
             VurderVurderingsmomenter(
-                hendelseId = id,
                 vedtaksperiodeId = vedtaksperiodeId,
                 risikovurderingDao = risikovurderingDao,
                 organisasjonsnummer = organisasjonsnummer,

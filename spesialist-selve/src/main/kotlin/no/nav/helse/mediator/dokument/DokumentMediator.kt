@@ -45,7 +45,7 @@ class DokumentMediator(
         }
     }
 
-    private suspend fun hentDokument(
+    private fun hentDokument(
         fødselsnummer: String,
         dokumentId: UUID,
         retries: Int,

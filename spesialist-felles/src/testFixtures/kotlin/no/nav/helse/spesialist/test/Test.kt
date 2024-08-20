@@ -74,7 +74,7 @@ class TestPerson {
     val vedtaksperiodeId1 = vedtaksperiode1.vedtaksperiodeId
     val vedtaksperiodeId2 = vedtaksperiode2.vedtaksperiodeId
     val utbetalingId1 = vedtaksperiode1.utbetalingId
-    val utbetalingId2 = vedtaksperiode2.utbetalingId
+    private val utbetalingId2 = vedtaksperiode2.utbetalingId
 
     override fun toString(): String {
         return "Testdatasett(fødselsnummer='$fødselsnummer', aktørId='$aktørId', orgnummer='$orgnummer', orgnummer2='$orgnummer2', vedtaksperiodeId1=$vedtaksperiodeId1, vedtaksperiodeId2=$vedtaksperiodeId2, utbetalingId1=$utbetalingId1, utbetalingId2=$utbetalingId2)"

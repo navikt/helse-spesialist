@@ -578,28 +578,6 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         )
     }
 
-    fun sendAutomatiseringStoppetAvVeileder(
-        aktørId: String,
-        fødselsnummer: String,
-        stoppet: Boolean = false,
-    ): UUID = newUUID.also { id ->
-        val behov = testRapid.inspektør.siste("behov")
-        assertEquals("AutomatiseringStoppetAvVeileder", behov["@behov"].map { it.asText() }.single())
-        val contextId = UUID.fromString(behov["contextId"].asText())
-        val hendelseId = UUID.fromString(behov["hendelseId"].asText())
-
-        testRapid.sendTestMessage(
-            Testmeldingfabrikk.lagAutomatiseringStoppetAvVeilederløsning(
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                stoppet = stoppet,
-                id = id,
-                hendelseId = hendelseId,
-                contextId = contextId,
-            )
-        )
-    }
-
     fun sendSaksbehandlerløsning(
         fødselsnummer: String,
         oppgaveId: Long,

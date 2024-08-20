@@ -338,7 +338,7 @@ internal class MeldingMediator(
                 val type =
                     when (val eventName = jsonNode["@event_name"]?.asText()) {
                         null -> "ukjent"
-                        "behov" -> "behov: " + jsonNode["@behov"].map { it.asText() }.joinToString()
+                        "behov" -> "behov: " + jsonNode["@behov"].joinToString { it.asText() }
                         else -> eventName
                     }
                 logg.info("Markerer melding id=$id, type=$type som behandlet i duplikatkontroll")

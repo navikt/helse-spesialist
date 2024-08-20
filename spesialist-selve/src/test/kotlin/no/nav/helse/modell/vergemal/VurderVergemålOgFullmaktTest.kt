@@ -29,7 +29,6 @@ class VurderVergemålOgFullmaktTest {
 
     private val command =
         VurderVergemålOgFullmakt(
-            hendelseId = UUID.randomUUID(),
             fødselsnummer = FNR,
             vergemålDao = vergemålDao,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,

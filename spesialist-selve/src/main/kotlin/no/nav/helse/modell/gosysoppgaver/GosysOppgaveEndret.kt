@@ -48,7 +48,6 @@ internal class GosysOppgaveEndret private constructor(
 }
 
 internal class GosysOppgaveEndretCommand(
-    id: UUID,
     fødselsnummer: String,
     aktørId: String,
     utbetaling: Utbetaling,
@@ -66,7 +65,6 @@ internal class GosysOppgaveEndretCommand(
     override val commands: List<Command> =
         listOf(
             VurderÅpenGosysoppgave(
-                hendelseId = id,
                 aktørId = aktørId,
                 åpneGosysOppgaverDao = åpneGosysOppgaverDao,
                 vedtaksperiodeId = oppgavedataForAutomatisering.vedtaksperiodeId,

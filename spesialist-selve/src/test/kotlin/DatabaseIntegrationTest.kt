@@ -103,7 +103,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val ADRESSEBESKYTTELSE = Adressebeskyttelse.Ugradert
     protected val ENHET = "0301"
 
-    protected val FOM: LocalDate = LocalDate.of(2018, 1, 1)
+    private val FOM: LocalDate = LocalDate.of(2018, 1, 1)
 
     protected val TOM: LocalDate = LocalDate.of(2018, 1, 31)
 
@@ -121,12 +121,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                 .registerModule(JavaTimeModule())
     }
 
-    internal var personId: Long = -1
-        private set
-    internal var arbeidsgiverId: Long = -1
-        private set
-    internal var snapshotId: Int = -1
-        private set
+    private var personId: Long = -1
     internal var vedtakId: Long = -1
         private set
     internal var oppgaveId: Long = -1
@@ -165,7 +160,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(dataSource)
     internal val notatDao = NotatDao(dataSource)
     internal val annulleringDao = AnnulleringDao(dataSource)
-    internal val personRepository = PersonRepository(dataSource)
+    private val personRepository = PersonRepository(dataSource)
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,
@@ -313,14 +308,14 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         navn: String = ORGNAVN,
         bransjer: List<String> = BRANSJER,
     ): Long {
-        return arbeidsgiverDao.insertArbeidsgiver(organisasjonsnummer, navn, bransjer)!!.also { arbeidsgiverId = it }
+        return arbeidsgiverDao.insertArbeidsgiver(organisasjonsnummer, navn, bransjer)!!
     }
 
     protected fun opprettSnapshot(
         person: GraphQLPerson = snapshot(fødselsnummer = FNR, aktørId = AKTØR).data!!.person!!,
         fødselsnummer: String = FNR,
     ) {
-        snapshotId = snapshotDao.lagre(fødselsnummer, person)
+        snapshotDao.lagre(fødselsnummer, person)
     }
 
     protected fun opprettGenerasjon(

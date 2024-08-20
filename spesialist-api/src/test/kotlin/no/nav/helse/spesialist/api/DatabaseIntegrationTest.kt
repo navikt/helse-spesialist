@@ -15,7 +15,6 @@ import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.notat.NotatDao
-import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
@@ -72,7 +71,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import kotlin.properties.Delegates
 
 internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     private val NAVN = Navn(lagFornavn(), lagFornavn(), lagEtternavn())
@@ -111,11 +109,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val egenAnsattApiDao = mockk<EgenAnsattApiDao>(relaxed = true)
     protected val snapshotClient = mockk<SnapshotClient>(relaxed = true)
 
-    protected var sisteOppgaveId by Delegates.notNull<Long>()
-    protected var sisteCommandContextId by Delegates.notNull<UUID>()
-
     protected val snapshotService = SnapshotService(snapshotApiDao, snapshotClient)
-    protected val notatRepository = mockk<NotatRepository>(relaxed = true)
     protected val oppgavehåndterer = mockk<Oppgavehåndterer>(relaxed = true)
     protected val totrinnsvurderinghåndterer = mockk<Totrinnsvurderinghåndterer>(relaxed = true)
 
@@ -374,15 +368,6 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
     }
 
-    protected fun vedtakId(vedtaksperiodeId: UUID = PERIODE.id) =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val statement = "SELECT id FROM vedtak WHERE vedtaksperiode_id = ?"
-            requireNotNull(session.run(queryOf(statement, vedtaksperiodeId).map { it.long("id") }.asSingle)) {
-                "Finner ikke vedtak i db for vedtaksperiodeId=$vedtaksperiodeId"
-            }
-        }
-
     protected fun opprettPerson(
         fødselsnummer: String = FØDSELSNUMMER,
         aktørId: String = AKTØRID,
@@ -560,21 +545,6 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             requireNotNull(session.run(queryOf(statement).asUpdateAndReturnGeneratedKey))
         }
 
-    private fun opprettSnapshot() =
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            @Language("PostgreSQL")
-            val statement = "INSERT INTO snapshot(data, versjon) VALUES(?::json, ?)"
-            requireNotNull(
-                session.run(
-                    queryOf(
-                        statement,
-                        objectMapper.writeValueAsString(snapshot()),
-                        1,
-                    ).asUpdateAndReturnGeneratedKey,
-                ),
-            )
-        }
-
     private fun opprettOppgave(
         status: Oppgavestatus = Oppgavestatus.AvventerSaksbehandler,
         vedtakRef: Long,
@@ -600,10 +570,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                     ).asUpdateAndReturnGeneratedKey,
                 )
             },
-        ).also {
-            sisteOppgaveId = it
-            sisteCommandContextId = commandContextId
-        }
+        )
     }
 
     private fun opprettHendelse(
@@ -869,20 +836,6 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         @Language("PostgreSQL")
         val query =
             "SELECT COUNT(1) FROM selve_varsel sv WHERE sv.generasjon_ref = ? AND status = 'GODKJENT'"
-        val antall =
-            sessionOf(dataSource).use { session ->
-                session.run(queryOf(query, generasjonRef).map { it.int(1) }.asSingle)
-            }
-        assertEquals(forventetAntall, antall)
-    }
-
-    protected fun assertAvvisteVarsler(
-        generasjonRef: Long,
-        forventetAntall: Int,
-    ) {
-        @Language("PostgreSQL")
-        val query =
-            "SELECT COUNT(1) FROM selve_varsel sv WHERE sv.generasjon_ref = ? AND status = 'AVVIST'"
         val antall =
             sessionOf(dataSource).use { session ->
                 session.run(queryOf(query, generasjonRef).map { it.int(1) }.asSingle)

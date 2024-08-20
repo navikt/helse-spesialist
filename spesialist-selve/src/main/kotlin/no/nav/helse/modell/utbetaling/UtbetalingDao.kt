@@ -177,32 +177,6 @@ class UtbetalingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         }
     }
 
-    fun leggTilAnnullertAvSaksbehandler(
-        utbetalingId: UUID,
-        annullertAvSaksbehandlerRef: Long,
-    ) {
-        val utbetalingIdRef = finnUtbetalingIdRef(utbetalingId)
-
-        @Language("PostgreSQL")
-        val query = """
-            UPDATE utbetaling
-                SET annullert_av_saksbehandler_ref = :annullertAvSaksbehandlerRef
-            WHERE utbetaling_id_ref = :utbetalingIdRef
-        """
-
-        sessionOf(dataSource).use {
-            it.run(
-                queryOf(
-                    query,
-                    mapOf(
-                        "annullertAvSaksbehandlerRef" to annullertAvSaksbehandlerRef,
-                        "utbetalingIdRef" to utbetalingIdRef,
-                    ),
-                ).asExecute,
-            )
-        }
-    }
-
     internal fun opprettKobling(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,

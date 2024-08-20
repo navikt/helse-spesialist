@@ -28,7 +28,7 @@ internal class UtbetalingsgodkjenningCommandTest {
         private val TIDSPUNKT = LocalDateTime.now()
         private val GODKJENNINGSBEHOV_ID = UUID.randomUUID()
         private val vedtaksperiodeId = UUID.randomUUID()
-        private val fødselsnummer = "1234"
+        private const val fødselsnummer = "1234"
         private val utbetaling = Utbetaling(UUID.randomUUID(), 1000, 1000, Utbetalingtype.UTBETALING)
     }
 
@@ -63,7 +63,6 @@ internal class UtbetalingsgodkjenningCommandTest {
         commandContext = CommandContext(UUID.randomUUID())
         commandContext.nyObserver(observer)
         command = UtbetalingsgodkjenningCommand(
-            id = UUID.randomUUID(),
             behandlingId = UUID.randomUUID(),
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -83,9 +82,9 @@ internal class UtbetalingsgodkjenningCommandTest {
             kommentar = null,
             saksbehandleroverstyringer = emptyList(),
             godkjenningsbehovhendelseId = GODKJENNINGSBEHOV_ID,
-            meldingDao = meldingDao,
             saksbehandler = saksbehandler,
             beslutter = beslutter,
+            meldingDao = meldingDao,
             godkjenningMediator = GodkjenningMediator(
                 mockk(relaxed = true),
                 mockk(relaxed = true),

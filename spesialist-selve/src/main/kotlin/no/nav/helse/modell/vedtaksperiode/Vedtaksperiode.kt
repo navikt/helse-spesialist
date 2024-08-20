@@ -125,7 +125,7 @@ internal class Vedtaksperiode private constructor(
     internal fun nyeVarsler(nyeVarsler: List<Varsel>) {
         val varsler = nyeVarsler.filter { it.erRelevantFor(vedtaksperiodeId) }
         if (forkastet || varsler.isEmpty()) return
-        varsler.forEach { gjeldendeGenerasjon.håndterNyttVarsel(it, UUID.randomUUID()) }
+        varsler.forEach { gjeldendeGenerasjon.håndterNyttVarsel(it) }
     }
 
     internal fun mottaBehandlingsinformasjon(

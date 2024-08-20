@@ -5,7 +5,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandl
 import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
 
-internal abstract class AbstractOverstyringApiTest() : AbstractGraphQLApiTest() {
+internal abstract class AbstractOverstyringApiTest : AbstractGraphQLApiTest() {
     fun overstyrTidslinje(overstyring: TidslinjeOverstyring): JsonNode =
         runQuery(
             """

@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 internal class VurderVergemålOgFullmakt(
-    private val hendelseId: UUID,
     private val fødselsnummer: String,
     private val vergemålDao: VergemålDao,
     private val vedtaksperiodeId: UUID,
@@ -31,7 +30,7 @@ internal class VurderVergemålOgFullmakt(
 
         if (løsning.harVergemål()) {
             logg.info("Legger til varsel om vergemål på vedtaksperiode $vedtaksperiodeId")
-            sykefraværstilfelle.håndter(SB_EX_4.nyttVarsel(vedtaksperiodeId), hendelseId)
+            sykefraværstilfelle.håndter(SB_EX_4.nyttVarsel(vedtaksperiodeId))
             return true
         }
 
@@ -39,8 +38,6 @@ internal class VurderVergemålOgFullmakt(
     }
 
     private fun Vergemålløsning.harVergemål() = vergemål.harVergemål
-
-    private fun Vergemålløsning.harFullmakt() = vergemål.harFullmakter || vergemål.harFremtidsfullmakter
 
     private companion object {
         private val logg = LoggerFactory.getLogger(VurderVergemålOgFullmakt::class.java)

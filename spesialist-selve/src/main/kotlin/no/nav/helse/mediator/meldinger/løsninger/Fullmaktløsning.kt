@@ -45,16 +45,18 @@ internal class Fullmaktløsning(
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())
 
             val nå = LocalDate.now()
-            val harFullmakt = packet["@løsning"].filter { fullmaktNode ->
-                val fullmakt = fullmaktNode.path("fullmakt")
-                fullmakt.size() > 0 &&
+            val harFullmakt =
+                packet["@løsning"].any { fullmaktNode ->
+                    val fullmakt = fullmaktNode.path("fullmakt")
+                    fullmakt.size() > 0 &&
                         fullmakt["gyldigFraOgMed"].asLocalDate().isSameOrBefore(nå) &&
                         fullmakt["gyldigTilOgMed"].asLocalDate().isSameOrAfter(nå)
-            }.isNotEmpty()
+                }
 
-            val fullmaktløsning = Fullmaktløsning(
-                harFullmakt = harFullmakt,
-            )
+            val fullmaktløsning =
+                Fullmaktløsning(
+                    harFullmakt = harFullmakt,
+                )
 
             meldingMediator.løsning(
                 hendelseId = hendelseId,
@@ -68,4 +70,5 @@ internal class Fullmaktløsning(
 }
 
 fun LocalDate.isSameOrBefore(other: LocalDate) = this.isEqual(other) || this.isBefore(other)
+
 fun LocalDate.isSameOrAfter(other: LocalDate) = this.isEqual(other) || this.isAfter(other)

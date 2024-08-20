@@ -52,7 +52,6 @@ internal class SaksbehandlerløsningTest {
     private fun saksbehandlerløsning(godkjent: Boolean, saksbehandlerløsning: List<UUID> = emptyList(), arbeidsgiverbeløp: Int = 0, personbeløp: Int = 0): UtbetalingsgodkjenningCommand {
         val vedtaksperiodeId = randomUUID()
         return UtbetalingsgodkjenningCommand(
-            id = randomUUID(),
             behandlingId = randomUUID(),
             fødselsnummer = FNR,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -72,9 +71,9 @@ internal class SaksbehandlerløsningTest {
             kommentar = null,
             saksbehandleroverstyringer = saksbehandlerløsning,
             godkjenningsbehovhendelseId = GODKJENNINGSBEHOV_ID,
-            meldingDao = meldingDao,
             saksbehandler = saksbehandler,
             beslutter = beslutter,
+            meldingDao = meldingDao,
             godkjenningMediator = GodkjenningMediator(mockk(relaxed = true), mockk(), mockk(), mockk(), mockk(), mockk(relaxed = true))
         )
     }

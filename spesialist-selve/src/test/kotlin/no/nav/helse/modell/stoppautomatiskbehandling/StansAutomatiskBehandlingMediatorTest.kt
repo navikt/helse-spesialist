@@ -46,7 +46,7 @@ class StansAutomatiskBehandlingMediatorTest {
     private companion object {
         private const val FNR = "12345678910"
         private val VEDTAKSPERIODEID = randomUUID()
-        private val ORGNR = "123456789"
+        private const val ORGNR = "123456789"
     }
 
     private val mediator =

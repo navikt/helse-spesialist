@@ -119,16 +119,13 @@ internal class Generasjon private constructor(
         tilstand.invaliderUtbetaling(this, utbetalingId)
     }
 
-    internal fun håndterNyttVarsel(
-        varsel: Varsel,
-        hendelseId: UUID,
-    ) {
+    internal fun håndterNyttVarsel(varsel: Varsel) {
         if (!varsel.erRelevantFor(vedtaksperiodeId)) return
-        val eksisterendeVarsel = varsler.finnEksisterendeVarsel(varsel) ?: return nyttVarsel(varsel, hendelseId)
+        val eksisterendeVarsel = varsler.finnEksisterendeVarsel(varsel) ?: return nyttVarsel(varsel)
         if (varsel.erVarselOmAvvik() && varsler.inneholderVarselOmAvvik()) {
             varsler.remove(eksisterendeVarsel)
             logg.info("Slettet eksisterende varsel ({}) for generasjon med id {}", varsel.toString(), id)
-            nyttVarsel(varsel, hendelseId)
+            nyttVarsel(varsel)
         }
         if (eksisterendeVarsel.erAktiv()) return
         eksisterendeVarsel.reaktiver()
@@ -152,11 +149,8 @@ internal class Generasjon private constructor(
         tilstand.oppdaterBehandlingsinformasjon(this, tags, spleisBehandlingId, utbetalingId)
     }
 
-    internal fun håndterGodkjentAvSaksbehandler(
-        ident: String,
-        hendelseId: UUID,
-    ) {
-        tilstand.håndterGodkjenning(this, ident, hendelseId)
+    internal fun håndterGodkjentAvSaksbehandler() {
+        tilstand.håndterGodkjenning(this)
     }
 
     internal fun håndterVedtakFattet() {
@@ -263,12 +257,9 @@ internal class Generasjon private constructor(
         }
     }
 
-    private fun nyttVarsel(
-        varsel: Varsel,
-        hendelseId: UUID,
-    ) {
+    private fun nyttVarsel(varsel: Varsel) {
         varsler.add(varsel)
-        tilstand.nyttVarsel(this, varsel, hendelseId)
+        tilstand.nyttVarsel(this)
     }
 
     private fun harMedlemskapsvarsel(): Boolean {
@@ -357,17 +348,9 @@ internal class Generasjon private constructor(
             )
         }
 
-        fun nyttVarsel(
-            generasjon: Generasjon,
-            varsel: Varsel,
-            hendelseId: UUID,
-        ) {}
+        fun nyttVarsel(generasjon: Generasjon) {}
 
-        fun håndterGodkjenning(
-            generasjon: Generasjon,
-            ident: String,
-            hendelseId: UUID,
-        ) {}
+        fun håndterGodkjenning(generasjon: Generasjon) {}
 
         fun oppdaterBehandlingsinformasjon(
             generasjon: Generasjon,
@@ -465,11 +448,7 @@ internal class Generasjon private constructor(
     internal data object AvsluttetUtenVedtak : Tilstand {
         override fun navn(): String = "AvsluttetUtenVedtak"
 
-        override fun nyttVarsel(
-            generasjon: Generasjon,
-            varsel: Varsel,
-            hendelseId: UUID,
-        ) {
+        override fun nyttVarsel(generasjon: Generasjon) {
             sikkerlogg.warn("Mottar nytt varsel i tilstand ${navn()}")
             generasjon.nyTilstand(AvsluttetUtenVedtakMedVarsler)
         }
@@ -495,11 +474,7 @@ internal class Generasjon private constructor(
     internal data object AvsluttetUtenVedtakMedVarsler : Tilstand {
         override fun navn(): String = "AvsluttetUtenVedtakMedVarsler"
 
-        override fun håndterGodkjenning(
-            generasjon: Generasjon,
-            ident: String,
-            hendelseId: UUID,
-        ) {
+        override fun håndterGodkjenning(generasjon: Generasjon) {
             generasjon.nyTilstand(AvsluttetUtenVedtak)
         }
 
@@ -587,12 +562,9 @@ internal class Generasjon private constructor(
             avslag = avslag,
         )
 
-        internal fun List<Generasjon>.håndterNyttVarsel(
-            varsler: List<Varsel>,
-            hendelseId: UUID,
-        ) {
+        internal fun List<Generasjon>.håndterNyttVarsel(varsler: List<Varsel>) {
             forEach { generasjon ->
-                varsler.forEach { generasjon.håndterNyttVarsel(it, hendelseId) }
+                varsler.forEach { generasjon.håndterNyttVarsel(it) }
             }
         }
 
@@ -658,13 +630,9 @@ internal class Generasjon private constructor(
             generasjonForPeriodeTilGodkjenning.varsler.add(varsel)
         }
 
-        internal fun List<Generasjon>.håndterGodkjent(
-            saksbehandlerIdent: String,
-            vedtaksperiodeId: UUID,
-            hendelseId: UUID,
-        ) {
+        internal fun List<Generasjon>.håndterGodkjent(vedtaksperiodeId: UUID) {
             overlapperMedEllerTidligereEnn(vedtaksperiodeId).forEach {
-                it.håndterGodkjentAvSaksbehandler(saksbehandlerIdent, hendelseId)
+                it.håndterGodkjentAvSaksbehandler()
             }
         }
 

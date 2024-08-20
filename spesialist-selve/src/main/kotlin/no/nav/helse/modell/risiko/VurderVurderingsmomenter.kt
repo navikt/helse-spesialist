@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 internal class VurderVurderingsmomenter(
-    private val hendelseId: UUID,
     private val vedtaksperiodeId: UUID,
     private val risikovurderingDao: RisikovurderingDao,
     private val organisasjonsnummer: String,
@@ -49,10 +48,10 @@ internal class VurderVurderingsmomenter(
 
     private fun Risikovurderingløsning.leggTilVarsler() {
         if (harArbeidsuførhetFunn()) {
-            sykefraværstilfelle.håndter(varselkode().nyttVarsel(vedtaksperiodeId), hendelseId)
+            sykefraværstilfelle.håndter(varselkode().nyttVarsel(vedtaksperiodeId))
         }
         if (harFaresignalerFunn()) {
-            sykefraværstilfelle.håndter(SB_RV_1.nyttVarsel(vedtaksperiodeId), hendelseId)
+            sykefraværstilfelle.håndter(SB_RV_1.nyttVarsel(vedtaksperiodeId))
         }
     }
 

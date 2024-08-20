@@ -160,7 +160,6 @@ internal class Kommandofabrikk(
             }
 
         return GosysOppgaveEndretCommand(
-            id = melding.id,
             fødselsnummer = melding.fødselsnummer(),
             aktørId = person.aktørId(),
             utbetaling = utbetaling,
@@ -331,7 +330,6 @@ internal class Kommandofabrikk(
         val sykefraværstilfelle = person.sykefraværstilfelle(vedtaksperiodeId)
         val utbetaling = utbetalingDao.utbetalingFor(oppgaveId)
         return UtbetalingsgodkjenningCommand(
-            id = melding.id,
             behandlingId = melding.behandlingId,
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,

@@ -72,7 +72,6 @@ internal class VurderBehovForTotrinnskontrollTest {
     fun `Oppretter totrinssvurdering dersom vedtaksperioden har varsel for lovvalg og medlemskap, og ikke har hatt oppgave som har vært ferdigstilt før`() {
         sykefraværstilfelle.håndter(
             Varsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), VEDTAKSPERIODE_ID_2),
-            UUID.randomUUID(),
         )
         every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
@@ -87,7 +86,6 @@ internal class VurderBehovForTotrinnskontrollTest {
     ) {
         sykefraværstilfelle.håndter(
             Varsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), VEDTAKSPERIODE_ID_1, status),
-            UUID.randomUUID(),
         )
         every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 

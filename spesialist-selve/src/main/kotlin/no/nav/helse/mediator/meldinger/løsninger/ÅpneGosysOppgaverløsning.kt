@@ -37,21 +37,19 @@ internal class ÅpneGosysOppgaverløsning(
     internal fun evaluer(
         vedtaksperiodeId: UUID,
         sykefraværstilfelle: Sykefraværstilfelle,
-        hendelseId: UUID,
         harTildeltOppgave: Boolean,
         oppgaveService: OppgaveService,
     ) {
-        varslerForOppslagFeilet(vedtaksperiodeId, sykefraværstilfelle, hendelseId)
-        varslerForÅpneGosysOppgaver(vedtaksperiodeId, sykefraværstilfelle, hendelseId, harTildeltOppgave, oppgaveService)
+        varslerForOppslagFeilet(vedtaksperiodeId, sykefraværstilfelle)
+        varslerForÅpneGosysOppgaver(vedtaksperiodeId, sykefraværstilfelle, harTildeltOppgave, oppgaveService)
     }
 
     private fun varslerForOppslagFeilet(
         vedtaksperiodeId: UUID,
         sykefraværstilfelle: Sykefraværstilfelle,
-        hendelseId: UUID,
     ) {
         if (oppslagFeilet) {
-            sykefraværstilfelle.håndter(SB_EX_3.nyttVarsel(vedtaksperiodeId), hendelseId)
+            sykefraværstilfelle.håndter(SB_EX_3.nyttVarsel(vedtaksperiodeId))
         } else {
             sykefraværstilfelle.deaktiver(SB_EX_3.nyttVarsel(vedtaksperiodeId))
         }
@@ -60,7 +58,6 @@ internal class ÅpneGosysOppgaverløsning(
     private fun varslerForÅpneGosysOppgaver(
         vedtaksperiodeId: UUID,
         sykefraværstilfelle: Sykefraværstilfelle,
-        hendelseId: UUID,
         harTildeltOppgave: Boolean,
         oppgaveService: OppgaveService,
     ) {
@@ -68,7 +65,7 @@ internal class ÅpneGosysOppgaverløsning(
 
         when {
             antall > 0 -> {
-                sykefraværstilfelle.håndter(SB_EX_1.nyttVarsel(vedtaksperiodeId), hendelseId)
+                sykefraværstilfelle.håndter(SB_EX_1.nyttVarsel(vedtaksperiodeId))
                 if (sykefraværstilfelle.harKunGosysvarsel(vedtaksperiodeId)) {
                     oppgaveService.leggTilGosysEgenskap(vedtaksperiodeId)
                 }

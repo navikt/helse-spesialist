@@ -62,8 +62,6 @@ class SkjønnsfastsattSykepengegrunnlag(
     }
 
     companion object {
-        fun List<SkjønnsfastsattSykepengegrunnlag>.sortert() = sortedBy { it.opprettet }
-
         fun List<SkjønnsfastsattSykepengegrunnlag>.relevanteFor(skjæringstidspunkt: LocalDate) =
             filter { it.skjæringstidspunkt == skjæringstidspunkt }
 

@@ -49,11 +49,8 @@ internal class Sykefraværstilfelle(
         return gjeldendeGenerasjoner.harKunGosysvarsel(generasjonForPeriode)
     }
 
-    internal fun håndter(
-        varsel: Varsel,
-        hendelseId: UUID,
-    ) {
-        gjeldendeGenerasjoner.håndterNyttVarsel(listOf(varsel), hendelseId)
+    internal fun håndter(varsel: Varsel) {
+        gjeldendeGenerasjoner.håndterNyttVarsel(listOf(varsel))
     }
 
     internal fun spesialsakSomKanAutomatiseres(vedtaksperiodeId: UUID): Boolean {
@@ -72,12 +69,8 @@ internal class Sykefraværstilfelle(
         gjeldendeGenerasjoner.deaktiver(varsel)
     }
 
-    internal fun håndterGodkjent(
-        saksbehandlerIdent: String,
-        vedtaksperiodeId: UUID,
-        hendelseId: UUID,
-    ) {
-        gjeldendeGenerasjoner.håndterGodkjent(saksbehandlerIdent, vedtaksperiodeId, hendelseId)
+    internal fun håndterGodkjent(vedtaksperiodeId: UUID) {
+        gjeldendeGenerasjoner.håndterGodkjent(vedtaksperiodeId)
     }
 
     internal fun harMedlemskapsvarsel(vedtaksperiodeId: UUID): Boolean = gjeldendeGenerasjoner.harMedlemskapsvarsel(vedtaksperiodeId)

@@ -25,12 +25,12 @@ internal class VedtakFattetMelderTest {
     private val vedtakFattetMelder = VedtakFattetMelder(testRapid)
 
     private companion object {
-        private val fødselsnummer = "12345678910"
+        private const val FØDSELSNUMMER = "12345678910"
         private val vedtaksperiodeId = UUID.randomUUID()
         private val spleisBehandlingId = UUID.randomUUID()
         private val utbetalingId = UUID.randomUUID()
-        private val organisasjonsnummer = "123456789"
-        private val aktørId = "1234567891011"
+        private const val ORGANISASJONSNUMMER = "123456789"
+        private const val AKTØRID = "1234567891011"
         private val fom = 1.januar
         private val tom = 31.januar
         private val skjæringstidspunkt = 1.januar
@@ -42,11 +42,11 @@ internal class VedtakFattetMelderTest {
     fun auuVedtak() {
         val auuVedtak =
             Sykepengevedtak.AuuVedtak(
-                fødselsnummer = fødselsnummer,
-                aktørId = aktørId,
+                fødselsnummer = FØDSELSNUMMER,
+                aktørId = AKTØRID,
                 vedtaksperiodeId = vedtaksperiodeId,
                 spleisBehandlingId = spleisBehandlingId,
-                organisasjonsnummer = organisasjonsnummer,
+                organisasjonsnummer = ORGANISASJONSNUMMER,
                 fom = fom,
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -68,10 +68,10 @@ internal class VedtakFattetMelderTest {
         val event = eventer.first()
 
         assertEquals("vedtak_fattet", event["@event_name"].asText())
-        assertEquals(fødselsnummer, event["fødselsnummer"].asText())
-        assertEquals(aktørId, event["aktørId"].asText())
+        assertEquals(FØDSELSNUMMER, event["fødselsnummer"].asText())
+        assertEquals(AKTØRID, event["aktørId"].asText())
         assertEquals(vedtaksperiodeId.toString(), event["vedtaksperiodeId"].asText())
-        assertEquals(organisasjonsnummer, event["organisasjonsnummer"].asText())
+        assertEquals(ORGANISASJONSNUMMER, event["organisasjonsnummer"].asText())
         assertEquals(fom, event["fom"].asLocalDate())
         assertEquals(tom, event["tom"].asLocalDate())
         assertEquals(skjæringstidspunkt, event["skjæringstidspunkt"].asLocalDate())
@@ -94,10 +94,10 @@ internal class VedtakFattetMelderTest {
     fun `vanlig vedtak sykepengegrunnlag fastsatt i infotrygd`() {
         val infotrygd =
             Sykepengevedtak.Vedtak(
-                fødselsnummer = fødselsnummer,
-                aktørId = aktørId,
+                fødselsnummer = FØDSELSNUMMER,
+                aktørId = AKTØRID,
                 vedtaksperiodeId = vedtaksperiodeId,
-                organisasjonsnummer = organisasjonsnummer,
+                organisasjonsnummer = ORGANISASJONSNUMMER,
                 spleisBehandlingId = spleisBehandlingId,
                 fom = fom,
                 tom = tom,
@@ -105,7 +105,7 @@ internal class VedtakFattetMelderTest {
                 hendelser = hendelser,
                 sykepengegrunnlag = 10000.0,
                 grunnlagForSykepengegrunnlag = 10000.0,
-                grunnlagForSykepengegrunnlagPerArbeidsgiver = mapOf(organisasjonsnummer to 10000.0),
+                grunnlagForSykepengegrunnlagPerArbeidsgiver = mapOf(ORGANISASJONSNUMMER to 10000.0),
                 begrensning = "VURDERT_I_INFOTRYGD",
                 inntekt = 10000.0,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
@@ -127,10 +127,10 @@ internal class VedtakFattetMelderTest {
         val event = eventer.first()
 
         assertEquals("vedtak_fattet", event["@event_name"].asText())
-        assertEquals(fødselsnummer, event["fødselsnummer"].asText())
-        assertEquals(aktørId, event["aktørId"].asText())
+        assertEquals(FØDSELSNUMMER, event["fødselsnummer"].asText())
+        assertEquals(AKTØRID, event["aktørId"].asText())
         assertEquals(vedtaksperiodeId.toString(), event["vedtaksperiodeId"].asText())
-        assertEquals(organisasjonsnummer, event["organisasjonsnummer"].asText())
+        assertEquals(ORGANISASJONSNUMMER, event["organisasjonsnummer"].asText())
         assertEquals(fom, event["fom"].asLocalDate())
         assertEquals(tom, event["tom"].asLocalDate())
         assertEquals(skjæringstidspunkt, event["skjæringstidspunkt"].asLocalDate())
@@ -138,7 +138,7 @@ internal class VedtakFattetMelderTest {
         assertEquals(10000.0, event["sykepengegrunnlag"].asDouble())
         assertEquals(10000.0, event["grunnlagForSykepengegrunnlag"].asDouble())
         assertEquals(
-            mapOf(organisasjonsnummer to 10000.0),
+            mapOf(ORGANISASJONSNUMMER to 10000.0),
             objectMapper.convertValue(event["grunnlagForSykepengegrunnlagPerArbeidsgiver"]),
         )
         assertEquals("VURDERT_I_INFOTRYGD", event["begrensning"].asText())
@@ -156,10 +156,10 @@ internal class VedtakFattetMelderTest {
     fun `vanlig vedtak sykepengegrunnlag fastsatt etter hovedregel`() {
         val infotrygd =
             Sykepengevedtak.Vedtak(
-                fødselsnummer = fødselsnummer,
-                aktørId = aktørId,
+                fødselsnummer = FØDSELSNUMMER,
+                aktørId = AKTØRID,
                 vedtaksperiodeId = vedtaksperiodeId,
-                organisasjonsnummer = organisasjonsnummer,
+                organisasjonsnummer = ORGANISASJONSNUMMER,
                 spleisBehandlingId = spleisBehandlingId,
                 fom = fom,
                 tom = tom,
@@ -167,7 +167,7 @@ internal class VedtakFattetMelderTest {
                 hendelser = hendelser,
                 sykepengegrunnlag = 10000.0,
                 grunnlagForSykepengegrunnlag = 10000.0,
-                grunnlagForSykepengegrunnlagPerArbeidsgiver = mapOf(organisasjonsnummer to 10000.0),
+                grunnlagForSykepengegrunnlagPerArbeidsgiver = mapOf(ORGANISASJONSNUMMER to 10000.0),
                 begrensning = "ER_IKKE_6G_BEGRENSET",
                 inntekt = 10000.0,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
@@ -182,7 +182,7 @@ internal class VedtakFattetMelderTest {
                         arbeidsgivere =
                             listOf(
                                 Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
-                                    organisasjonsnummer = organisasjonsnummer,
+                                    organisasjonsnummer = ORGANISASJONSNUMMER,
                                     omregnetÅrsinntekt = 10000.0,
                                     innrapportertÅrsinntekt = 10000.0,
                                 ),
@@ -201,10 +201,10 @@ internal class VedtakFattetMelderTest {
         val event = eventer.first()
 
         assertEquals("vedtak_fattet", event["@event_name"].asText())
-        assertEquals(fødselsnummer, event["fødselsnummer"].asText())
-        assertEquals(aktørId, event["aktørId"].asText())
+        assertEquals(FØDSELSNUMMER, event["fødselsnummer"].asText())
+        assertEquals(AKTØRID, event["aktørId"].asText())
         assertEquals(vedtaksperiodeId.toString(), event["vedtaksperiodeId"].asText())
-        assertEquals(organisasjonsnummer, event["organisasjonsnummer"].asText())
+        assertEquals(ORGANISASJONSNUMMER, event["organisasjonsnummer"].asText())
         assertEquals(fom, event["fom"].asLocalDate())
         assertEquals(tom, event["tom"].asLocalDate())
         assertEquals(skjæringstidspunkt, event["skjæringstidspunkt"].asLocalDate())
@@ -212,7 +212,7 @@ internal class VedtakFattetMelderTest {
         assertEquals(10000.0, event["sykepengegrunnlag"].asDouble())
         assertEquals(10000.0, event["grunnlagForSykepengegrunnlag"].asDouble())
         assertEquals(
-            mapOf(organisasjonsnummer to 10000.0),
+            mapOf(ORGANISASJONSNUMMER to 10000.0),
             objectMapper.convertValue(event["grunnlagForSykepengegrunnlagPerArbeidsgiver"]),
         )
         assertEquals("ER_IKKE_6G_BEGRENSET", event["begrensning"].asText())
@@ -228,7 +228,7 @@ internal class VedtakFattetMelderTest {
         assertEquals(
             listOf(
                 mapOf(
-                    "arbeidsgiver" to organisasjonsnummer,
+                    "arbeidsgiver" to ORGANISASJONSNUMMER,
                     "omregnetÅrsinntekt" to 10000.0,
                     "innrapportertÅrsinntekt" to 10000.0,
                 ),
@@ -244,10 +244,10 @@ internal class VedtakFattetMelderTest {
     fun `vanlig vedtak sykepengegrunnlag fastsatt etter hovedregel med delvis avslag`() {
         val spleis =
             Sykepengevedtak.Vedtak(
-                fødselsnummer = fødselsnummer,
-                aktørId = aktørId,
+                fødselsnummer = FØDSELSNUMMER,
+                aktørId = AKTØRID,
                 vedtaksperiodeId = vedtaksperiodeId,
-                organisasjonsnummer = organisasjonsnummer,
+                organisasjonsnummer = ORGANISASJONSNUMMER,
                 spleisBehandlingId = spleisBehandlingId,
                 fom = fom,
                 tom = tom,
@@ -255,7 +255,7 @@ internal class VedtakFattetMelderTest {
                 hendelser = hendelser,
                 sykepengegrunnlag = 10000.0,
                 grunnlagForSykepengegrunnlag = 10000.0,
-                grunnlagForSykepengegrunnlagPerArbeidsgiver = mapOf(organisasjonsnummer to 10000.0),
+                grunnlagForSykepengegrunnlagPerArbeidsgiver = mapOf(ORGANISASJONSNUMMER to 10000.0),
                 begrensning = "ER_IKKE_6G_BEGRENSET",
                 inntekt = 10000.0,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
@@ -270,7 +270,7 @@ internal class VedtakFattetMelderTest {
                         arbeidsgivere =
                             listOf(
                                 Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
-                                    organisasjonsnummer = organisasjonsnummer,
+                                    organisasjonsnummer = ORGANISASJONSNUMMER,
                                     omregnetÅrsinntekt = 10000.0,
                                     innrapportertÅrsinntekt = 10000.0,
                                 ),
@@ -289,10 +289,10 @@ internal class VedtakFattetMelderTest {
         val event = eventer.first()
 
         assertEquals("vedtak_fattet", event["@event_name"].asText())
-        assertEquals(fødselsnummer, event["fødselsnummer"].asText())
-        assertEquals(aktørId, event["aktørId"].asText())
+        assertEquals(FØDSELSNUMMER, event["fødselsnummer"].asText())
+        assertEquals(AKTØRID, event["aktørId"].asText())
         assertEquals(vedtaksperiodeId.toString(), event["vedtaksperiodeId"].asText())
-        assertEquals(organisasjonsnummer, event["organisasjonsnummer"].asText())
+        assertEquals(ORGANISASJONSNUMMER, event["organisasjonsnummer"].asText())
         assertEquals(fom, event["fom"].asLocalDate())
         assertEquals(tom, event["tom"].asLocalDate())
         assertEquals(skjæringstidspunkt, event["skjæringstidspunkt"].asLocalDate())
@@ -300,7 +300,7 @@ internal class VedtakFattetMelderTest {
         assertEquals(10000.0, event["sykepengegrunnlag"].asDouble())
         assertEquals(10000.0, event["grunnlagForSykepengegrunnlag"].asDouble())
         assertEquals(
-            mapOf(organisasjonsnummer to 10000.0),
+            mapOf(ORGANISASJONSNUMMER to 10000.0),
             objectMapper.convertValue(event["grunnlagForSykepengegrunnlagPerArbeidsgiver"]),
         )
         assertEquals("ER_IKKE_6G_BEGRENSET", event["begrensning"].asText())
@@ -316,7 +316,7 @@ internal class VedtakFattetMelderTest {
         assertEquals(
             listOf(
                 mapOf(
-                    "arbeidsgiver" to organisasjonsnummer,
+                    "arbeidsgiver" to ORGANISASJONSNUMMER,
                     "omregnetÅrsinntekt" to 10000.0,
                     "innrapportertÅrsinntekt" to 10000.0,
                 ),
@@ -339,10 +339,10 @@ internal class VedtakFattetMelderTest {
     fun `vanlig vedtak sykepengegrunnlag fastsatt etter skjønn`() {
         val infotrygd =
             Sykepengevedtak.Vedtak(
-                fødselsnummer = fødselsnummer,
-                aktørId = aktørId,
+                fødselsnummer = FØDSELSNUMMER,
+                aktørId = AKTØRID,
                 vedtaksperiodeId = vedtaksperiodeId,
-                organisasjonsnummer = organisasjonsnummer,
+                organisasjonsnummer = ORGANISASJONSNUMMER,
                 spleisBehandlingId = spleisBehandlingId,
                 fom = fom,
                 tom = tom,
@@ -350,7 +350,7 @@ internal class VedtakFattetMelderTest {
                 hendelser = hendelser,
                 sykepengegrunnlag = 10000.0,
                 grunnlagForSykepengegrunnlag = 10000.0,
-                grunnlagForSykepengegrunnlagPerArbeidsgiver = mapOf(organisasjonsnummer to 10000.0),
+                grunnlagForSykepengegrunnlagPerArbeidsgiver = mapOf(ORGANISASJONSNUMMER to 10000.0),
                 begrensning = "ER_IKKE_6G_BEGRENSET",
                 inntekt = 10000.0,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
@@ -365,7 +365,7 @@ internal class VedtakFattetMelderTest {
                         arbeidsgivere =
                             listOf(
                                 Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
-                                    organisasjonsnummer = organisasjonsnummer,
+                                    organisasjonsnummer = ORGANISASJONSNUMMER,
                                     omregnetÅrsinntekt = 10000.0,
                                     skjønnsfastsatt = 13000.0,
                                     innrapportertÅrsinntekt = 13000.0,
@@ -393,10 +393,10 @@ internal class VedtakFattetMelderTest {
         val event = eventer.first()
 
         assertEquals("vedtak_fattet", event["@event_name"].asText())
-        assertEquals(fødselsnummer, event["fødselsnummer"].asText())
-        assertEquals(aktørId, event["aktørId"].asText())
+        assertEquals(FØDSELSNUMMER, event["fødselsnummer"].asText())
+        assertEquals(AKTØRID, event["aktørId"].asText())
         assertEquals(vedtaksperiodeId.toString(), event["vedtaksperiodeId"].asText())
-        assertEquals(organisasjonsnummer, event["organisasjonsnummer"].asText())
+        assertEquals(ORGANISASJONSNUMMER, event["organisasjonsnummer"].asText())
         assertEquals(fom, event["fom"].asLocalDate())
         assertEquals(tom, event["tom"].asLocalDate())
         assertEquals(skjæringstidspunkt, event["skjæringstidspunkt"].asLocalDate())
@@ -404,7 +404,7 @@ internal class VedtakFattetMelderTest {
         assertEquals(10000.0, event["sykepengegrunnlag"].asDouble())
         assertEquals(10000.0, event["grunnlagForSykepengegrunnlag"].asDouble())
         assertEquals(
-            mapOf(organisasjonsnummer to 10000.0),
+            mapOf(ORGANISASJONSNUMMER to 10000.0),
             objectMapper.convertValue(event["grunnlagForSykepengegrunnlagPerArbeidsgiver"]),
         )
         assertEquals("ER_IKKE_6G_BEGRENSET", event["begrensning"].asText())
@@ -420,7 +420,7 @@ internal class VedtakFattetMelderTest {
         assertEquals(
             listOf(
                 mapOf(
-                    "arbeidsgiver" to organisasjonsnummer,
+                    "arbeidsgiver" to ORGANISASJONSNUMMER,
                     "omregnetÅrsinntekt" to 10000.0,
                     "innrapportertÅrsinntekt" to 13000.0,
                     "skjønnsfastsatt" to 13000.0,
@@ -461,10 +461,10 @@ internal class VedtakFattetMelderTest {
     fun `vanlig vedtak sykepengegrunnlag fastsatt etter skjønn med avslag`() {
         val infotrygd =
             Sykepengevedtak.Vedtak(
-                fødselsnummer = fødselsnummer,
-                aktørId = aktørId,
+                fødselsnummer = FØDSELSNUMMER,
+                aktørId = AKTØRID,
                 vedtaksperiodeId = vedtaksperiodeId,
-                organisasjonsnummer = organisasjonsnummer,
+                organisasjonsnummer = ORGANISASJONSNUMMER,
                 spleisBehandlingId = spleisBehandlingId,
                 fom = fom,
                 tom = tom,
@@ -472,7 +472,7 @@ internal class VedtakFattetMelderTest {
                 hendelser = hendelser,
                 sykepengegrunnlag = 10000.0,
                 grunnlagForSykepengegrunnlag = 10000.0,
-                grunnlagForSykepengegrunnlagPerArbeidsgiver = mapOf(organisasjonsnummer to 10000.0),
+                grunnlagForSykepengegrunnlagPerArbeidsgiver = mapOf(ORGANISASJONSNUMMER to 10000.0),
                 begrensning = "ER_IKKE_6G_BEGRENSET",
                 inntekt = 10000.0,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
@@ -487,7 +487,7 @@ internal class VedtakFattetMelderTest {
                         arbeidsgivere =
                             listOf(
                                 Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
-                                    organisasjonsnummer = organisasjonsnummer,
+                                    organisasjonsnummer = ORGANISASJONSNUMMER,
                                     omregnetÅrsinntekt = 10000.0,
                                     skjønnsfastsatt = 13000.0,
                                     innrapportertÅrsinntekt = 13000.0,
@@ -518,10 +518,10 @@ internal class VedtakFattetMelderTest {
         val event = eventer.first()
 
         assertEquals("vedtak_fattet", event["@event_name"].asText())
-        assertEquals(fødselsnummer, event["fødselsnummer"].asText())
-        assertEquals(aktørId, event["aktørId"].asText())
+        assertEquals(FØDSELSNUMMER, event["fødselsnummer"].asText())
+        assertEquals(AKTØRID, event["aktørId"].asText())
         assertEquals(vedtaksperiodeId.toString(), event["vedtaksperiodeId"].asText())
-        assertEquals(organisasjonsnummer, event["organisasjonsnummer"].asText())
+        assertEquals(ORGANISASJONSNUMMER, event["organisasjonsnummer"].asText())
         assertEquals(fom, event["fom"].asLocalDate())
         assertEquals(tom, event["tom"].asLocalDate())
         assertEquals(skjæringstidspunkt, event["skjæringstidspunkt"].asLocalDate())
@@ -529,7 +529,7 @@ internal class VedtakFattetMelderTest {
         assertEquals(10000.0, event["sykepengegrunnlag"].asDouble())
         assertEquals(10000.0, event["grunnlagForSykepengegrunnlag"].asDouble())
         assertEquals(
-            mapOf(organisasjonsnummer to 10000.0),
+            mapOf(ORGANISASJONSNUMMER to 10000.0),
             objectMapper.convertValue(event["grunnlagForSykepengegrunnlagPerArbeidsgiver"]),
         )
         assertEquals("ER_IKKE_6G_BEGRENSET", event["begrensning"].asText())
@@ -545,7 +545,7 @@ internal class VedtakFattetMelderTest {
         assertEquals(
             listOf(
                 mapOf(
-                    "arbeidsgiver" to organisasjonsnummer,
+                    "arbeidsgiver" to ORGANISASJONSNUMMER,
                     "omregnetÅrsinntekt" to 10000.0,
                     "innrapportertÅrsinntekt" to 13000.0,
                     "skjønnsfastsatt" to 13000.0,

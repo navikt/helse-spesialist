@@ -38,7 +38,7 @@ internal class GenerasjonTilstandTest {
     fun `Går fra VidereBehandlingAvklares til AvsluttetUtenVedtakMedVarsler ved avsluttet uten vedtak og har varsler`() {
         val generasjonId = UUID.randomUUID()
         val generasjon = generasjon(generasjonId, UUID.randomUUID())
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID()), UUID.randomUUID())
+        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID()))
         generasjon.assertTilstand(TilstandDto.VidereBehandlingAvklares)
         generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(UUID.randomUUID(), emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
         generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
@@ -104,7 +104,7 @@ internal class GenerasjonTilstandTest {
         generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
         generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
 
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
+        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
         generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtakMedVarsler)
         generasjon.assertAntallVarsler(1)
     }
@@ -118,11 +118,11 @@ internal class GenerasjonTilstandTest {
         generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
         generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
 
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
+        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
         generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtakMedVarsler)
         generasjon.assertAntallVarsler(1)
 
-        generasjon.håndterGodkjentAvSaksbehandler("123456", UUID.randomUUID())
+        generasjon.håndterGodkjentAvSaksbehandler()
         generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
     }
 
@@ -135,7 +135,7 @@ internal class GenerasjonTilstandTest {
         generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
         generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
 
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
+        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
         generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtakMedVarsler)
 
         generasjon.håndterVedtakFattet()

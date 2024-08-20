@@ -44,7 +44,7 @@ internal class GenerasjonTest {
     fun `generasjon har aktive varsler`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
+        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
         assertTrue(generasjon.forhindrerAutomatisering())
     }
 
@@ -52,7 +52,7 @@ internal class GenerasjonTest {
     fun `generasjon har kun gosysvarsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
+        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
         assertTrue(generasjon.harKunGosysvarsel())
     }
 
@@ -67,8 +67,8 @@ internal class GenerasjonTest {
     fun `generasjon har flere varsler og dermed ikke kun gosysvarsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_2", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
+        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
+        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_2", LocalDateTime.now(), vedtaksperiodeId))
         assertFalse(generasjon.harKunGosysvarsel())
     }
 
@@ -85,11 +85,9 @@ internal class GenerasjonTest {
         val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
         generasjon.håndterNyttVarsel(
             Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId, VURDERT),
-            UUID.randomUUID(),
         )
         generasjon.håndterNyttVarsel(
             Varsel(UUID.randomUUID(), "SB_EX_2", LocalDateTime.now(), vedtaksperiodeId, VURDERT),
-            UUID.randomUUID(),
         )
         assertTrue(generasjon.forhindrerAutomatisering())
     }
@@ -99,7 +97,7 @@ internal class GenerasjonTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
         val varsel = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId)
-        generasjon.håndterNyttVarsel(varsel, UUID.randomUUID())
+        generasjon.håndterNyttVarsel(varsel)
         generasjon.håndterDeaktivertVarsel(varsel)
         generasjon.assertVarsler(0, VarselStatusDto.AKTIV, SB_EX_1)
         generasjon.assertVarsler(1, VarselStatusDto.INAKTIV, SB_EX_1)
@@ -110,7 +108,7 @@ internal class GenerasjonTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
         val varsel = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId)
-        generasjon.håndterNyttVarsel(varsel, UUID.randomUUID())
+        generasjon.håndterNyttVarsel(varsel)
         generasjon.deaktiverVarsel("SB_EX_1")
         generasjon.assertVarsler(0, VarselStatusDto.AKTIV, SB_EX_1)
         generasjon.assertVarsler(1, VarselStatusDto.INAKTIV, SB_EX_1)
@@ -121,8 +119,8 @@ internal class GenerasjonTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val varselId = UUID.randomUUID()
         val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "RV_IV_2", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
-        generasjon.håndterNyttVarsel(Varsel(varselId, "RV_IV_2", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
+        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "RV_IV_2", LocalDateTime.now(), vedtaksperiodeId))
+        generasjon.håndterNyttVarsel(Varsel(varselId, "RV_IV_2", LocalDateTime.now(), vedtaksperiodeId))
         generasjon.assertVarsler(1, VarselStatusDto.AKTIV, "RV_IV_2")
     }
 
@@ -130,8 +128,8 @@ internal class GenerasjonTest {
     fun `Lagrer kun én utgave av et aktivt varsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
+        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
+        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
 
         generasjon.assertVarsler(1, VarselStatusDto.AKTIV, SB_EX_1)
     }
@@ -141,11 +139,11 @@ internal class GenerasjonTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
         val varsel = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId)
-        generasjon.håndterNyttVarsel(varsel, UUID.randomUUID())
+        generasjon.håndterNyttVarsel(varsel)
         generasjon.håndterDeaktivertVarsel(varsel)
         generasjon.assertVarsler(1, VarselStatusDto.INAKTIV, SB_EX_1)
 
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
+        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
 
         generasjon.assertVarsler(0, VarselStatusDto.INAKTIV, SB_EX_1)
         generasjon.assertVarsler(1, VarselStatusDto.AKTIV, SB_EX_1)
@@ -156,11 +154,11 @@ internal class GenerasjonTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
         val varsel = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId)
-        generasjon.håndterNyttVarsel(varsel, UUID.randomUUID())
+        generasjon.håndterNyttVarsel(varsel)
         generasjon.assertVarsler(1, VarselStatusDto.AKTIV, SB_EX_1)
         generasjon.håndterDeaktivertVarsel(varsel)
         generasjon.assertVarsler(1, VarselStatusDto.INAKTIV, SB_EX_1)
-        generasjon.håndterNyttVarsel(varsel, UUID.randomUUID())
+        generasjon.håndterNyttVarsel(varsel)
         generasjon.assertVarsler(1, VarselStatusDto.AKTIV, SB_EX_1)
         generasjon.håndterDeaktivertVarsel(varsel)
 
@@ -194,7 +192,7 @@ internal class GenerasjonTest {
         val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId)
         generasjon.håndterVedtakFattet()
         val varsel = Varsel(UUID.randomUUID(), "RV_IM_1", LocalDateTime.now(), vedtaksperiodeId)
-        generasjon.håndterNyttVarsel(varsel, UUID.randomUUID())
+        generasjon.håndterNyttVarsel(varsel)
         generasjon.assertVarsler(1, VarselStatusDto.AKTIV, "RV_IM_1")
     }
 
@@ -202,7 +200,7 @@ internal class GenerasjonTest {
     fun `Skal kunne opprette varsel på generasjon`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), SB_EX_1.name, LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
+        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), SB_EX_1.name, LocalDateTime.now(), vedtaksperiodeId))
         generasjon.assertVarsler(1, VarselStatusDto.AKTIV, SB_EX_1)
     }
 
@@ -325,7 +323,7 @@ internal class GenerasjonTest {
         val generasjon = generasjonMedVarsel(1.februar, 28.februar, vedtaksperiodeId, "SB_EX_1")
         assertTrue(listOf(generasjon).harÅpenGosysOppgave(vedtaksperiodeId))
 
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
+        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), vedtaksperiodeId))
         assertFalse(listOf(generasjon).harÅpenGosysOppgave(vedtaksperiodeId))
     }
 
@@ -516,7 +514,7 @@ internal class GenerasjonTest {
         val varselId = UUID.randomUUID()
         val opprettet = LocalDateTime.now()
         val varsel = Varsel(varselId, "SB_EX_1", opprettet, vedtaksperiodeId, AKTIV)
-        generasjon.håndterNyttVarsel(varsel, UUID.randomUUID())
+        generasjon.håndterNyttVarsel(varsel)
         val dto = generasjon.toDto()
 
         assertEquals(
@@ -552,7 +550,7 @@ internal class GenerasjonTest {
         varselkode: String = "SB_EX_1",
     ): Generasjon =
         generasjon(vedtaksperiodeId = vedtaksperiodeId, fom = fom, tom = tom).also {
-            it.håndterNyttVarsel(Varsel(UUID.randomUUID(), varselkode, LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
+            it.håndterNyttVarsel(Varsel(UUID.randomUUID(), varselkode, LocalDateTime.now(), vedtaksperiodeId))
         }
 
     private fun generasjon(

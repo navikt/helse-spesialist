@@ -44,7 +44,6 @@ internal class VurderÅpenGosysoppgaveTest {
     private fun command(
         harTildeltOppgave: Boolean = false,
     ) = VurderÅpenGosysoppgave(
-        UUID.randomUUID(),
         AKTØR_ID,
         dao,
         VEDTAKPERIODE_ID_AG_1,
@@ -99,7 +98,7 @@ internal class VurderÅpenGosysoppgaveTest {
 
     @Test
     fun `Lagrer ikke varsel ved ingen åpne oppgaver og deaktiverer eventuelt eksisterende varsel`() {
-        generasjonAg1.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1), UUID.randomUUID())
+        generasjonAg1.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1))
         generasjonAg1.inspektør {
             assertEquals(1, varsler.size)
         }
@@ -116,7 +115,7 @@ internal class VurderÅpenGosysoppgaveTest {
 
     @Test
     fun `Deaktiverer ikke varsel dersom oppgave er tildelt`() {
-        generasjonAg1.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1), UUID.randomUUID())
+        generasjonAg1.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1))
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
         assertTrue(command(harTildeltOppgave = true).resume(context))
         generasjonAg1.inspektør {
@@ -147,7 +146,7 @@ internal class VurderÅpenGosysoppgaveTest {
 
     @Test
     fun `Legger ikke til egenskap for gosys dersom det er andre varsler på perioden`() {
-        generasjonAg1.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_4", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1), UUID.randomUUID())
+        generasjonAg1.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_4", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1))
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
         command().resume(context)
         verify(exactly = 0) { oppgaveService.leggTilGosysEgenskap(any()) }
@@ -155,7 +154,7 @@ internal class VurderÅpenGosysoppgaveTest {
 
     @Test
     fun `Legger ikke til egenskap for gosys dersom det er andre varsler på andre overlappende perioder`() {
-        generasjonAg2.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_4", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_2), UUID.randomUUID())
+        generasjonAg2.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_4", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_2))
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
         command().resume(context)
         verify(exactly = 0) { oppgaveService.leggTilGosysEgenskap(any()) }

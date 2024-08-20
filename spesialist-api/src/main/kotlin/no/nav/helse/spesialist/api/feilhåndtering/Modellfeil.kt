@@ -25,28 +25,6 @@ abstract class Modellfeil protected constructor() : RuntimeException() {
     override val message: String get() = feilkode
 }
 
-class OppgaveAlleredeTildelt(val tildeling: TildelingApiDto) : Modellfeil() {
-    override val eksternKontekst: Map<String, Any> =
-        mapOf(
-            "tildeling" to tildeling,
-        )
-    override val httpkode = HttpStatusCode.Conflict
-    override val feilkode: String = "oppgave_er_allerede_tildelt"
-
-    override fun logger() {
-        logg.info(
-            "Returnerer {} for {}",
-            keyValue("httpkode", "${httpkode.value}"),
-            keyValue("feilkode", feilkode),
-        )
-        sikkerLogg.info(
-            "Returnerer {} for {}, tildelingsinfo=$eksternKontekst",
-            keyValue("httpkode", "${httpkode.value}"),
-            keyValue("feilkode", feilkode),
-        )
-    }
-}
-
 class OppgaveIkkeTildelt(private val oppgaveId: Long) : Modellfeil() {
     override val eksternKontekst: Map<String, Any> = mapOf("oppgaveId" to oppgaveId.toString())
     override val httpkode = HttpStatusCode.FailedDependency

@@ -51,7 +51,6 @@ internal class SykefraværstilfelleTest {
         val gjeldendeGenerasjon2 = generasjon(vedtaksperiodeId2)
         gjeldendeGenerasjon2.håndterNyttVarsel(
             Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId2),
-            UUID.randomUUID(),
         )
         assertTrue(listOf(gjeldendeGenerasjon1, gjeldendeGenerasjon2).forhindrerAutomatisering(28.februar))
     }
