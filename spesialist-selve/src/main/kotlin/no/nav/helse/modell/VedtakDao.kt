@@ -185,23 +185,6 @@ internal class VedtakDao(private val dataSource: DataSource) {
             session.run(queryOf(query, utbetalingId).map { it.boolean("automatisert") }.asSingle)
         } ?: false
 
-    internal fun markerForkastet(
-        vedtaksperiodeId: UUID,
-        hendelseId: UUID,
-    ) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val query = "UPDATE vedtak SET forkastet = true, forkastet_av_hendelse = :hendelseId, forkastet_tidspunkt = now() WHERE vedtaksperiode_id = :vedtaksperiodeId"
-        session.run(
-            queryOf(
-                query,
-                mapOf(
-                    "hendelseId" to hendelseId,
-                    "vedtaksperiodeId" to vedtaksperiodeId,
-                ),
-            ).asUpdate,
-        )
-    }
-
     internal fun finnOrgnummer(vedtaksperiodeId: UUID) =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")

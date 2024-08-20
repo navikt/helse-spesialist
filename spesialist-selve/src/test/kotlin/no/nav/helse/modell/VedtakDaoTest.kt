@@ -175,13 +175,6 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `kan markere vedtaksperiode som forkastet`() {
-        nyPerson()
-        vedtakDao.markerForkastet(VEDTAKSPERIODE, HENDELSE_ID)
-        assertForkastet(VEDTAKSPERIODE, HENDELSE_ID)
-    }
-
-    @Test
     fun `Finner orgnummer med vedtaksperiodeId`() {
         nyPerson()
         assertEquals(ORGNUMMER, vedtakDao.finnOrgnummer(VEDTAKSPERIODE))
@@ -207,31 +200,6 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         assertTrue(vedtakDao.erSpesialsak(VEDTAKSPERIODE))
         vedtakDao.spesialsakFerdigbehandlet(VEDTAKSPERIODE)
         assertFalse(vedtakDao.erSpesialsak(VEDTAKSPERIODE))
-    }
-
-    private fun assertForkastet(
-        vedtaksperiodeId: UUID,
-        forventetHendelseId: UUID,
-    ) {
-        @Language("PostgreSQL")
-        val query =
-            "SELECT forkastet, forkastet_av_hendelse, forkastet_tidspunkt FROM vedtak WHERE vedtaksperiode_id = ?"
-        val respons =
-            sessionOf(dataSource).use { session ->
-                session.run(
-                    queryOf(query, vedtaksperiodeId).map {
-                        Triple(
-                            it.boolean("forkastet"),
-                            it.uuidOrNull("forkastet_av_hendelse"),
-                            it.localDateTimeOrNull("forkastet_tidspunkt"),
-                        )
-                    }.asSingle,
-                )
-            }
-        assertNotNull(respons)
-        assertEquals(true, respons?.first)
-        assertEquals(forventetHendelseId, respons?.second)
-        assertNotNull(respons?.third)
     }
 
     private fun finnKobling(hendelseId: UUID) =

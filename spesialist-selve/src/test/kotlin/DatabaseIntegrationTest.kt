@@ -347,12 +347,12 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         personRepository.brukPersonHvisFinnes(fødselsnummer) {
             this.nySpleisBehandling(SpleisBehandling(organisasjonsnummer, vedtaksperiodeId, spleisBehandlingId, fom, tom))
             if (utbetalingId != null) this.nyUtbetalingForVedtaksperiode(vedtaksperiodeId, utbetalingId)
+            vedtakDao.finnVedtakId(vedtaksperiodeId)?.also {
+                vedtakId = it
+            }
+            opprettVedtakstype(vedtaksperiodeId, periodetype, inntektskilde)
+            if (forkastet) this.vedtaksperiodeForkastet(vedtaksperiodeId)
         }
-        vedtakDao.finnVedtakId(vedtaksperiodeId)?.also {
-            vedtakId = it
-        }
-        opprettVedtakstype(vedtaksperiodeId, periodetype, inntektskilde)
-        if (forkastet) vedtakDao.markerForkastet(vedtaksperiodeId, UUID.randomUUID())
     }
 
     protected fun opprettOppgave(
