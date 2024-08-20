@@ -7,7 +7,6 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
 import org.intellij.lang.annotations.Language
-import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -77,32 +76,6 @@ internal class VedtakDao(private val dataSource: DataSource) {
             ON CONFLICT DO NOTHING;
             """.trimIndent()
         run(queryOf(query, mapOf("vedtaksperiode_id" to vedtaksperiodeId)).asUpdate)
-    }
-
-    internal fun opprett(
-        vedtaksperiodeId: UUID,
-        fom: LocalDate,
-        tom: LocalDate,
-        personRef: Long,
-        arbeidsgiverRef: Long,
-    ) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val query = """
-            INSERT INTO vedtak(vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, forkastet)
-            VALUES (:vedtaksperiode_id, :fom, :tom, :person_ref, :arbeidsgiver_ref, false);
-        """
-        session.run(
-            queryOf(
-                query,
-                mapOf(
-                    "vedtaksperiode_id" to vedtaksperiodeId,
-                    "fom" to fom,
-                    "tom" to tom,
-                    "person_ref" to personRef,
-                    "arbeidsgiver_ref" to arbeidsgiverRef,
-                ),
-            ).asUpdate,
-        )
     }
 
     internal fun opprettKobling(

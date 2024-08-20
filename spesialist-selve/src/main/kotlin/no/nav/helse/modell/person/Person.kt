@@ -17,7 +17,6 @@ import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.finnGenerasjon
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.relevanteFor
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
-import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetMedVedtak
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
@@ -106,8 +105,8 @@ class Person private constructor(
             ?.avsluttetUtenVedtak(this, avsluttetUtenVedtak)
     }
 
-    internal fun vedtaksperiodeForkastet(vedtaksperiodeForkastet: VedtaksperiodeForkastet) {
-        vedtaksperioder.find { it.vedtaksperiodeId() == vedtaksperiodeForkastet.vedtaksperiodeId() }
+    internal fun vedtaksperiodeForkastet(vedtaksperiodeId: UUID) {
+        vedtaksperioder.find { it.vedtaksperiodeId() == vedtaksperiodeId }
             ?.vedtaksperiodeForkastet()
     }
 

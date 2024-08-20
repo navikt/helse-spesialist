@@ -16,22 +16,9 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
-import java.sql.SQLException
-import java.time.LocalDate
 import java.util.UUID
 
 internal class VedtakDaoTest : DatabaseIntegrationTest() {
-    @Test
-    fun `lagre vedtak`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettSnapshot()
-        opprettSnapshot()
-        vedtakDao.opprett(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId)
-        assertEquals(1, vedtak().size)
-        vedtak().first().assertEquals(VEDTAKSPERIODE, personId, arbeidsgiverId, false)
-    }
 
     @Test
     fun `lagre og finn vedtaksperiode`() {
@@ -131,26 +118,6 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         assertEquals(VEDTAKSPERIODE, vedtaksperiode?.vedtaksperiodeId)
         assertEquals(ORGNUMMER, vedtaksperiode?.organisasjonsnummer)
         assertEquals(true, vedtaksperiode?.forkastet)
-    }
-
-    @Test
-    fun `opprette duplikat vedtak`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettSnapshot()
-        opprettSnapshot()
-        vedtakDao.opprett(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId)
-        val nyFom = LocalDate.now().minusMonths(1)
-        val nyTom = LocalDate.now()
-        assertThrows<SQLException> {
-            vedtakDao.opprett(
-                VEDTAKSPERIODE,
-                nyFom,
-                nyTom,
-                personId,
-                arbeidsgiverId,
-            )
-        }
     }
 
     @Test
@@ -275,52 +242,11 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
             )
         }
 
-    private fun vedtak(fødselsnummer: String = FNR) =
-        sessionOf(dataSource).use {
-            @Language("PostgreSQL")
-            val query =
-                """
-                SELECT vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, forkastet
-                FROM vedtak
-                JOIN person p on vedtak.person_ref = p.id
-                WHERE fodselsnummer = :foedselsnummer
-                """.trimIndent()
-            it.run(
-                queryOf(query, mapOf("foedselsnummer" to fødselsnummer.toLong())).map { row ->
-                    Vedtak(
-                        vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                        personRef = row.long("person_ref"),
-                        arbeidsgiverRef = row.long("arbeidsgiver_ref"),
-                        forkastet = row.boolean("forkastet"),
-                    )
-                }.asList,
-            )
-        }
-
     private fun opprettSpesialsak(vedtaksperiodeId: UUID) {
         @Language("PostgreSQL")
         val query = """INSERT INTO spesialsak(vedtaksperiode_id) VALUES(?)"""
         sessionOf(dataSource).use {
             it.run(queryOf(query, vedtaksperiodeId).asExecute)
-        }
-    }
-
-    private class Vedtak(
-        private val vedtaksperiodeId: UUID,
-        private val personRef: Long,
-        private val arbeidsgiverRef: Long,
-        private val forkastet: Boolean,
-    ) {
-        fun assertEquals(
-            forventetVedtaksperiodeId: UUID,
-            forventetPersonRef: Long,
-            forventetArbeidsgiverRef: Long,
-            forventetForkastet: Boolean,
-        ) {
-            assertEquals(forventetVedtaksperiodeId, vedtaksperiodeId)
-            assertEquals(forventetPersonRef, personRef)
-            assertEquals(forventetArbeidsgiverRef, arbeidsgiverRef)
-            assertEquals(forventetForkastet, forkastet)
         }
     }
 }

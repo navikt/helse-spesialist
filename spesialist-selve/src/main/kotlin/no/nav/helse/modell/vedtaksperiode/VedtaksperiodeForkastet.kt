@@ -47,7 +47,7 @@ internal class VedtaksperiodeForkastet private constructor(
         person: Person,
         kommandofabrikk: Kommandofabrikk,
     ) {
-        person.vedtaksperiodeForkastet(this)
+        person.vedtaksperiodeForkastet(vedtaksperiodeId)
         kommandofabrikk.iverksettVedtaksperiodeForkastet(this)
     }
 
