@@ -1,4 +1,4 @@
-val graphQLKotlinVersion = "7.0.2"
+val graphQLKotlinVersion = "7.1.4"
 val testcontainersVersion = "1.19.7"
 val mockOAuth2ServerVersion = "2.1.2"
 
