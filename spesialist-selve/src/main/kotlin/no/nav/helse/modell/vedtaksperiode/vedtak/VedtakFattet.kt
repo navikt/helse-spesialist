@@ -1,7 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode.vedtak
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.mediator.Kommandofabrikk
+import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.VedtakDao
@@ -45,7 +45,7 @@ internal class VedtakFattet private constructor(
 
     override fun behandle(
         person: Person,
-        kommandofabrikk: Kommandofabrikk,
+        kommandostarter: Kommandostarter,
     ) {
         person.vedtakFattet(vedtaksperiodeId = vedtaksperiodeId, spleisBehandlingId = spleisBehandlingId)
     }

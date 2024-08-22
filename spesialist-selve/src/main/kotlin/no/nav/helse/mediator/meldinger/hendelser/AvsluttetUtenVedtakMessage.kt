@@ -1,7 +1,7 @@
 package no.nav.helse.mediator.meldinger.hendelser
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.mediator.Kommandofabrikk
+import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.person.Person
@@ -50,7 +50,7 @@ internal class AvsluttetUtenVedtakMessage private constructor(
 
     override fun behandle(
         person: Person,
-        kommandofabrikk: Kommandofabrikk,
+        kommandostarter: Kommandostarter,
     ) {
         person.avsluttetUtenVedtak(avsluttetUtenVedtak)
     }

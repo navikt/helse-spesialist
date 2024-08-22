@@ -2,7 +2,7 @@ package no.nav.helse.modell.utbetaling
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.mediator.Kommandofabrikk
+import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -12,7 +12,6 @@ import no.nav.helse.modell.kommando.ReserverPersonHvisTildeltCommand
 import no.nav.helse.modell.oppgave.OppdaterOppgavestatusCommand
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -49,6 +48,7 @@ internal class UtbetalingEndret private constructor(
         personOppdrag = tilOppdrag(packet["personOppdrag"], packet["fødselsnummer"].asText()),
         json = packet.toJson(),
     )
+
     internal constructor(jsonNode: JsonNode) : this(
         id = UUID.fromString(jsonNode["@id"].asText()),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
@@ -66,10 +66,10 @@ internal class UtbetalingEndret private constructor(
 
     override fun behandle(
         person: Person,
-        kommandofabrikk: Kommandofabrikk,
+        kommandostarter: Kommandostarter,
     ) {
-        if (gjeldendeStatus == FORKASTET) person.utbetalingForkastet(utbetalingId)
-        kommandofabrikk.iverksettUtbetalingEndret(this)
+        if (gjeldendeStatus == Utbetalingsstatus.FORKASTET) person.utbetalingForkastet(utbetalingId)
+        this.kommandostarter { utbetalingEndret(this@UtbetalingEndret) }
     }
 
     override fun fødselsnummer(): String = fødselsnummer

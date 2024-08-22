@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
-import no.nav.helse.mediator.Kommandofabrikk
+import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.modell.person.Person
 import java.util.UUID
 
@@ -13,8 +13,9 @@ internal interface Melding {
 internal interface Personmelding : Melding {
     fun behandle(
         person: Person,
-        kommandofabrikk: Kommandofabrikk,
+        kommandostarter: Kommandostarter,
     )
+
     fun fødselsnummer(): String
 }
 

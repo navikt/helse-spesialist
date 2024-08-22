@@ -2,7 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.Kommandofabrikk
+import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.kommando.AvvisVedStrengtFortroligAdressebeskyttelseCommand
@@ -37,9 +37,9 @@ internal class AdressebeskyttelseEndret private constructor(
 
     override fun behandle(
         person: Person,
-        kommandofabrikk: Kommandofabrikk,
+        kommandostarter: Kommandostarter,
     ) {
-        kommandofabrikk.iverksettAdressebeskyttelseEndret(this)
+        kommandostarter { adressebeskyttelseEndret(this@AdressebeskyttelseEndret) }
     }
 }
 

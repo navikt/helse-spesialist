@@ -1,7 +1,7 @@
 package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.mediator.Kommandofabrikk
+import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.kommando.Command
@@ -36,9 +36,9 @@ internal class OppdaterPersonsnapshot private constructor(
 
     override fun behandle(
         person: Person,
-        kommandofabrikk: Kommandofabrikk,
+        kommandostarter: Kommandostarter,
     ) {
-        kommandofabrikk.iverksettOppdaterPersonsnapshot(this)
+        kommandostarter { oppdaterPersonsnapshot(this@OppdaterPersonsnapshot) }
     }
 
     override fun fødselsnummer(): String = fødselsnummer

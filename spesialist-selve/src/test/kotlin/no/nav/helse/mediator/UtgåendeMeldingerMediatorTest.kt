@@ -85,7 +85,7 @@ internal class UtgåendeMeldingerMediatorTest {
             return vedtaksperiodeId
         }
 
-        override fun behandle(person: Person, kommandofabrikk: Kommandofabrikk) {}
+        override fun behandle(person: Person, kommandostarter: Kommandostarter) {}
 
         @Language("JSON")
         override fun toJson(): String {

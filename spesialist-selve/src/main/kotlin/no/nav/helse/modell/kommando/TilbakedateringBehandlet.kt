@@ -2,7 +2,7 @@ package no.nav.helse.modell.kommando
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.Kommandofabrikk
+import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
@@ -42,9 +42,15 @@ internal class TilbakedateringBehandlet private constructor(
         json = jsonNode.toString(),
     )
 
-    override fun behandle(person: Person, kommandofabrikk: Kommandofabrikk) {
+    override fun behandle(
+        person: Person,
+        kommandostarter: Kommandostarter,
+    ) {
         person.behandleTilbakedateringBehandlet(perioder)
-        kommandofabrikk.iverksettTilbakedateringBehandlet(this, person)
+        kommandostarter {
+            val oppgaveDataForAutomatisering = finnOppgavedata(fødselsnummer) ?: return@kommandostarter null
+            tilbakedateringGodkjent(this@TilbakedateringBehandlet, person, oppgaveDataForAutomatisering)
+        }
     }
 
     override fun fødselsnummer() = fødselsnummer
@@ -62,7 +68,7 @@ internal class TilbakedateringGodkjentCommand(
     godkjenningMediator: GodkjenningMediator,
     spleisBehandlingId: UUID?,
     organisasjonsnummer: String,
-    søknadsperioder: List<Periode>
+    søknadsperioder: List<Periode>,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(

@@ -2,7 +2,7 @@ package no.nav.helse.modell.gosysoppgaver
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.Kommandofabrikk
+import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -37,9 +37,12 @@ internal class GosysOppgaveEndret private constructor(
 
     override fun behandle(
         person: Person,
-        kommandofabrikk: Kommandofabrikk,
+        kommandostarter: Kommandostarter,
     ) {
-        kommandofabrikk.iverksettGosysOppgaveEndret(this, person)
+        kommandostarter {
+            val oppgaveDataForAutomatisering = finnOppgavedata(fødselsnummer) ?: return@kommandostarter null
+            gosysOppgaveEndret(this@GosysOppgaveEndret, person, oppgaveDataForAutomatisering)
+        }
     }
 
     override fun fødselsnummer() = fødselsnummer

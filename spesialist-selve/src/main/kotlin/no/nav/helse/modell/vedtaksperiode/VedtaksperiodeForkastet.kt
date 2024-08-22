@@ -2,7 +2,7 @@ package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.mediator.Kommandofabrikk
+import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -45,10 +45,10 @@ internal class VedtaksperiodeForkastet private constructor(
 
     override fun behandle(
         person: Person,
-        kommandofabrikk: Kommandofabrikk,
+        kommandostarter: Kommandostarter,
     ) {
         person.vedtaksperiodeForkastet(vedtaksperiodeId)
-        kommandofabrikk.iverksettVedtaksperiodeForkastet(this)
+        kommandostarter { vedtaksperiodeForkastet(this@VedtaksperiodeForkastet) }
     }
 
     override fun toJson() = json

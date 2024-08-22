@@ -1,7 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.mediator.Kommandofabrikk
+import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.person.Person
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -32,9 +32,9 @@ internal class VedtaksperiodeEndret(
 
     override fun behandle(
         person: Person,
-        kommandofabrikk: Kommandofabrikk,
+        kommandostarter: Kommandostarter,
     ) {
-        kommandofabrikk.iverksettOppdaterSnapshot(this)
+        kommandostarter { oppdaterSnapshotCommand(this@VedtaksperiodeEndret) }
     }
 
     override fun toJson() = json

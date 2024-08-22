@@ -3,7 +3,7 @@ package no.nav.helse.modell.vedtaksperiode
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.Kommandofabrikk
+import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.oppgave.OppgaveDao
@@ -99,9 +99,9 @@ internal class Godkjenningsbehov private constructor(
 
     override fun behandle(
         person: Person,
-        kommandofabrikk: Kommandofabrikk,
+        kommandostarter: Kommandostarter,
     ) {
-        kommandofabrikk.iverksettGodkjenningsbehov(this, person, tags)
+        kommandostarter { godkjenningsbehov(this@Godkjenningsbehov, person, tags) }
     }
 
     internal constructor(packet: JsonMessage) : this(

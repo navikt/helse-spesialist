@@ -1,7 +1,7 @@
 package no.nav.helse.modell.overstyring
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.mediator.Kommandofabrikk
+import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.person.Person
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -31,9 +31,9 @@ internal class OverstyringIgangsatt private constructor(
 
     override fun behandle(
         person: Person,
-        kommandofabrikk: Kommandofabrikk,
+        kommandostarter: Kommandostarter,
     ) {
-        kommandofabrikk.iverksettOverstyringIgangsatt(this)
+        kommandostarter { overstyringIgangsatt(this@OverstyringIgangsatt) }
     }
 
     override fun fødselsnummer() = fødselsnummer

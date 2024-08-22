@@ -413,15 +413,29 @@ internal class MeldingMediator(
         ) {
             logg.info("Melding $meldingnavn gjenopptatt")
             sikkerlogg.info("Melding $meldingnavn gjenopptatt:\n${melding.toJson()}")
-            kommandofabrikk.settEksisterendeContext(commandContext)
-            behandleMelding(melding, messageContext)
-            kommandofabrikk.nullstilleEksisterendeContext()
+            behandleMelding(melding, messageContext, commandContext)
         }
     }
 
+    private fun nyContext(meldingId: UUID) =
+        CommandContext(UUID.randomUUID()).apply {
+            opprett(commandContextDao, meldingId)
+        }
+
+    // Denne kalles når vi behandler en melding som starter en kommandokjede, eller den er i hvert fall ikke inne i
+    // bildet når vi gjenopptar kommandokjeder
     private fun behandleMelding(
         melding: Personmelding,
         messageContext: MessageContext,
+    ) {
+        behandleMelding(melding, messageContext, nyContext(melding.id))
+    }
+
+    // Denne kalles både ved oppstart av en kommandokjede og ved gjenopptak etter svar på behov
+    private fun behandleMelding(
+        melding: Personmelding,
+        messageContext: MessageContext,
+        commandContext: CommandContext,
     ) {
         val meldingnavn = requireNotNull(melding::class.simpleName)
         val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
@@ -434,7 +448,7 @@ internal class MeldingMediator(
                 logg.info("Personen finnes i databasen, behandler melding $meldingnavn")
                 sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")
 
-                melding.behandle(this, kommandofabrikk)
+                melding.behandle(this, kommandofabrikk.lagKommandostarter(commandContext))
             }
             if (melding is VedtakFattet) melding.doFinally(vedtakDao) // Midlertidig frem til spesialsak ikke er en ting lenger
             vedtakFattetMelder.publiserUtgåendeMeldinger()

@@ -31,7 +31,6 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.EndretEgenAnsattStatusCommand
-import no.nav.helse.modell.person.OppdaterPersonsnapshot
 import no.nav.helse.modell.person.OppdaterPersonsnapshotCommand
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.PersonDao
@@ -68,6 +67,8 @@ import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
 import java.util.UUID
 import javax.sql.DataSource
+
+internal typealias Kommandostarter = Personmelding.(Kommandofabrikk.() -> Command?) -> Unit
 
 internal class Kommandofabrikk(
     dataSource: DataSource,
@@ -114,7 +115,6 @@ internal class Kommandofabrikk(
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
     private val metrikkDao = MetrikkDao(dataSource)
     private val oppgaveService: OppgaveService by lazy { oppgaveService() }
-    private var commandContext: CommandContext? = null
     private val observers: MutableList<CommandContextObserver> = mutableListOf()
 
     internal fun nyObserver(vararg observers: CommandContextObserver) {
@@ -125,27 +125,11 @@ internal class Kommandofabrikk(
         this.observers.removeAll(observers.toSet())
     }
 
-    internal fun settEksisterendeContext(commandContext: CommandContext) {
-        if (this.commandContext != null) {
-            logg.info(
-                """
-                Å nei, commandContext HAR allerede en verdi! Det skyldes sannsynligvis at samme pod behandler to kall eller meldinger samtidig, eller at noe ikke har ryddet opp etter seg. Vi jobber forhåpentligvis med problemet.
-                Forrige commandContext: ${this.commandContext?.id()}, ny: ${commandContext.id()}
-                """.trimIndent(),
-            )
-        }
-        this.commandContext = commandContext
-    }
-
-    internal fun nullstilleEksisterendeContext() {
-        this.commandContext = null
-    }
-
     internal fun avviksvurdering(avviksvurdering: AvviksvurderingDto) {
         avviksvurderingDao.lagre(avviksvurdering)
     }
 
-    private fun endretEgenAnsattStatus(melding: EndretEgenAnsattStatus): EndretEgenAnsattStatusCommand =
+    internal fun endretEgenAnsattStatus(melding: EndretEgenAnsattStatus): EndretEgenAnsattStatusCommand =
         EndretEgenAnsattStatusCommand(
             fødselsnummer = melding.fødselsnummer(),
             erEgenAnsatt = melding.erEgenAnsatt,
@@ -154,7 +138,7 @@ internal class Kommandofabrikk(
             oppgaveService = oppgaveService,
         )
 
-    private fun gosysOppgaveEndret(
+    internal fun gosysOppgaveEndret(
         melding: GosysOppgaveEndret,
         person: Person,
         oppgaveDataForAutomatisering: OppgaveDataForAutomatisering,
@@ -184,7 +168,7 @@ internal class Kommandofabrikk(
         )
     }
 
-    private fun tilbakedateringGodkjent(
+    internal fun tilbakedateringGodkjent(
         melding: TilbakedateringBehandlet,
         person: Person,
         oppgaveDataForAutomatisering: OppgaveDataForAutomatisering,
@@ -211,7 +195,7 @@ internal class Kommandofabrikk(
         )
     }
 
-    private fun finnOppgavedata(fødselsnummer: String): OppgaveDataForAutomatisering? {
+    internal fun finnOppgavedata(fødselsnummer: String): OppgaveDataForAutomatisering? {
         return oppgaveDao.finnOppgaveId(fødselsnummer)?.let { oppgaveId ->
             sikkerlogg.info("Fant en oppgave for {}: {}", fødselsnummer, oppgaveId)
             val oppgaveDataForAutomatisering = oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)
@@ -231,7 +215,7 @@ internal class Kommandofabrikk(
         }
     }
 
-    private fun vedtaksperiodeReberegnet(hendelse: VedtaksperiodeReberegnet): VedtaksperiodeReberegnetCommand =
+    internal fun vedtaksperiodeReberegnet(hendelse: VedtaksperiodeReberegnet): VedtaksperiodeReberegnetCommand =
         VedtaksperiodeReberegnetCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
@@ -245,7 +229,7 @@ internal class Kommandofabrikk(
             totrinnsvurderingMediator = totrinnsvurderingMediator,
         )
 
-    private fun vedtaksperiodeNyUtbetaling(hendelse: VedtaksperiodeNyUtbetaling): VedtaksperiodeNyUtbetalingCommand =
+    internal fun vedtaksperiodeNyUtbetaling(hendelse: VedtaksperiodeNyUtbetaling): VedtaksperiodeNyUtbetalingCommand =
         VedtaksperiodeNyUtbetalingCommand(
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
             utbetalingId = hendelse.utbetalingId,
@@ -261,10 +245,10 @@ internal class Kommandofabrikk(
             arbeidsgiverDao = arbeidsgiverDao,
         )
 
-    private fun adressebeskyttelseEndret(melding: AdressebeskyttelseEndret): AdressebeskyttelseEndretCommand =
+    internal fun adressebeskyttelseEndret(melding: AdressebeskyttelseEndret): AdressebeskyttelseEndretCommand =
         AdressebeskyttelseEndretCommand(melding.fødselsnummer(), personDao, oppgaveDao, godkjenningMediator)
 
-    private fun oppdaterPersonsnapshot(hendelse: Personmelding): OppdaterPersonsnapshotCommand =
+    internal fun oppdaterPersonsnapshot(hendelse: Personmelding): OppdaterPersonsnapshotCommand =
         OppdaterPersonsnapshotCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             førsteKjenteDagFinner = { generasjonRepository.førsteKjenteDag(hendelse.fødselsnummer()) },
@@ -274,14 +258,14 @@ internal class Kommandofabrikk(
             snapshotClient = snapshotClient,
         )
 
-    private fun overstyringIgangsatt(melding: OverstyringIgangsatt): OverstyringIgangsattCommand =
+    internal fun overstyringIgangsatt(melding: OverstyringIgangsatt): OverstyringIgangsattCommand =
         OverstyringIgangsattCommand(
             berørteVedtaksperiodeIder = melding.berørteVedtaksperiodeIder,
             kilde = melding.kilde,
             overstyringDao = overstyringDao,
         )
 
-    private fun utbetalingAnnullert(hendelse: UtbetalingAnnullert): UtbetalingAnnullertCommand =
+    internal fun utbetalingAnnullert(hendelse: UtbetalingAnnullert): UtbetalingAnnullertCommand =
         UtbetalingAnnullertCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             personDao = personDao,
@@ -289,7 +273,7 @@ internal class Kommandofabrikk(
             snapshotClient = snapshotClient,
         )
 
-    private fun utbetalingEndret(hendelse: UtbetalingEndret): UtbetalingEndretCommand =
+    internal fun utbetalingEndret(hendelse: UtbetalingEndret): UtbetalingEndretCommand =
         UtbetalingEndretCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             organisasjonsnummer = hendelse.organisasjonsnummer,
@@ -311,7 +295,7 @@ internal class Kommandofabrikk(
             json = hendelse.toJson(),
         )
 
-    private fun vedtaksperiodeForkastet(hendelse: VedtaksperiodeForkastet): VedtaksperiodeForkastetCommand =
+    internal fun vedtaksperiodeForkastet(hendelse: VedtaksperiodeForkastet): VedtaksperiodeForkastetCommand =
         VedtaksperiodeForkastetCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
@@ -327,7 +311,7 @@ internal class Kommandofabrikk(
             totrinnsvurderingMediator = totrinnsvurderingMediator,
         )
 
-    private fun utbetalingsgodkjenning(
+    internal fun utbetalingsgodkjenning(
         melding: Saksbehandlerløsning,
         person: Person,
     ): UtbetalingsgodkjenningCommand {
@@ -360,7 +344,7 @@ internal class Kommandofabrikk(
         )
     }
 
-    private fun godkjenningsbehov(
+    internal fun godkjenningsbehov(
         hendelse: Godkjenningsbehov,
         person: Person,
         tags: List<String>,
@@ -414,82 +398,12 @@ internal class Kommandofabrikk(
         )
     }
 
-    private fun oppdaterSnapshotCommand(personmelding: Personmelding): OppdaterSnapshotCommand =
+    internal fun oppdaterSnapshotCommand(personmelding: Personmelding): OppdaterSnapshotCommand =
         OppdaterSnapshotCommand(snapshotClient, snapshotDao, personmelding.fødselsnummer(), personDao)
 
-    internal fun iverksettOppdaterPersonsnapshot(melding: OppdaterPersonsnapshot) {
-        iverksett(oppdaterPersonsnapshot(melding), melding.id)
-    }
-
-    internal fun iverksettOppdaterSnapshot(melding: Personmelding) {
-        iverksett(oppdaterSnapshotCommand(melding), melding.id)
-    }
-
-    internal fun iverksettVedtaksperiodeForkastet(melding: VedtaksperiodeForkastet) {
-        iverksett(vedtaksperiodeForkastet(melding), melding.id)
-    }
-
-    internal fun iverksettUtbetalingEndret(melding: UtbetalingEndret) {
-        iverksett(utbetalingEndret(melding), melding.id)
-    }
-
-    internal fun iverksettUtbetalingAnnulert(melding: UtbetalingAnnullert) {
-        iverksett(utbetalingAnnullert(melding), melding.id)
-    }
-
-    internal fun iverksettVedtaksperiodeNyUtbetaling(melding: VedtaksperiodeNyUtbetaling) {
-        iverksett(vedtaksperiodeNyUtbetaling(melding), melding.id)
-    }
-
-    internal fun iverksettGodkjenningsbehov(
-        melding: Godkjenningsbehov,
-        person: Person,
-        tags: List<String>,
-    ) {
-        iverksett(godkjenningsbehov(melding, person, tags), melding.id)
-    }
-
-    internal fun iverksettOverstyringIgangsatt(melding: OverstyringIgangsatt) {
-        iverksett(overstyringIgangsatt(melding), melding.id)
-    }
-
-    internal fun iverksettVedtaksperiodeReberegnet(melding: VedtaksperiodeReberegnet) {
-        iverksett(vedtaksperiodeReberegnet(melding), melding.id)
-    }
-
-    internal fun iverksettEndretAnsattStatus(melding: EndretEgenAnsattStatus) {
-        iverksett(endretEgenAnsattStatus(melding), melding.id)
-    }
-
-    internal fun iverksettAdressebeskyttelseEndret(melding: AdressebeskyttelseEndret) {
-        iverksett(adressebeskyttelseEndret(melding), melding.id)
-    }
-
-    internal fun iverksettGosysOppgaveEndret(
-        melding: GosysOppgaveEndret,
-        person: Person,
-    ) {
-        val oppgaveDataForAutomatisering = finnOppgavedata(melding.fødselsnummer()) ?: return
-        iverksett(gosysOppgaveEndret(melding, person, oppgaveDataForAutomatisering), melding.id)
-    }
-
-    internal fun iverksettTilbakedateringBehandlet(
-        melding: TilbakedateringBehandlet,
-        person: Person,
-    ) {
-        val oppgaveDataForAutomatisering = finnOppgavedata(melding.fødselsnummer()) ?: return
-        iverksett(tilbakedateringGodkjent(melding, person, oppgaveDataForAutomatisering), melding.id)
-    }
-
-    internal fun iverksettSaksbehandlerløsning(
-        melding: Saksbehandlerløsning,
-        person: Person,
-    ) {
-        iverksett(utbetalingsgodkjenning(melding, person), melding.id)
-    }
-
+    // Kanskje prøve å få håndtering av søknad inn i samme flyt som andre kommandokjeder
     internal fun iverksettSøknadSendt(melding: SøknadSendt) {
-        iverksett(søknadSendt(melding), melding.id)
+        iverksett(søknadSendt(melding), melding.id, nyContext(melding.id))
     }
 
     private fun nyContext(meldingId: UUID) =
@@ -497,11 +411,20 @@ internal class Kommandofabrikk(
             opprett(commandContextDao, meldingId)
         }
 
+    internal fun lagKommandostarter(commandContext: CommandContext): Kommandostarter {
+        return { kommandooppretter ->
+            val melding = this
+            this@Kommandofabrikk.kommandooppretter()?.let { command ->
+                iverksett(command, melding.id, commandContext)
+            }
+        }
+    }
+
     private fun iverksett(
         command: Command,
         meldingId: UUID,
+        commandContext: CommandContext,
     ) {
-        val commandContext = this.commandContext ?: nyContext(meldingId)
         observers.forEach { commandContext.nyObserver(it) }
         val contextId = commandContext.id()
         withMDC(

@@ -1,7 +1,7 @@
 package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.mediator.Kommandofabrikk
+import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.kommando.Command
@@ -17,7 +17,7 @@ internal class SøknadSendt private constructor(
     val aktørId: String,
     val organisasjonsnummer: String,
     private val json: String,
-): Personmelding {
+) : Personmelding {
     internal constructor(jsonNode: JsonNode) : this(
         id = UUID.fromString(jsonNode["@id"].asText()),
         fødselsnummer = jsonNode["fnr"].asText(),
@@ -30,7 +30,10 @@ internal class SøknadSendt private constructor(
 
     override fun toJson() = json
 
-    override fun behandle(person: Person, kommandofabrikk: Kommandofabrikk) {
+    override fun behandle(
+        person: Person,
+        kommandostarter: Kommandostarter,
+    ) {
         // Ikke i bruk, SøknadSendt har egen sti inn da det muligens ikke finnes noen person enda
         // På sikt ønsker vi kanskje å opprette personen dersom den ikke finnes enda, og da kan denne tas i bruk
     }
