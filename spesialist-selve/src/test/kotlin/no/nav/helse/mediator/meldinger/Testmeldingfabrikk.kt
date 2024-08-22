@@ -102,16 +102,15 @@ internal object Testmeldingfabrikk {
             "@behov" to listOf("Fullmakt"),
             "contextId" to "${UUID.randomUUID()}",
             "hendelseId" to "${UUID.randomUUID()}",
-            "@løsning" to listOf(
-                mapOf(
-                    "fullmakt" to listOf(
-                        mapOf(
-                            "omraade" to listOf("SYK", "SYM"),
-                            "gyldigFraOgMed" to fom,
-                            "gyldigTilOgMed" to tom,
-                        )
+            "@løsning" to mapOf(
+                "fullmakt" to listOf(
+                    mapOf(
+                        "omraade" to listOf("SYK", "SYM"),
+                        "gyldigFraOgMed" to fom,
+                        "gyldigTilOgMed" to tom,
                     )
                 )
+
             )
         )
     )
@@ -126,10 +125,8 @@ internal object Testmeldingfabrikk {
             "@behov" to listOf("Fullmakt"),
             "contextId" to "${UUID.randomUUID()}",
             "hendelseId" to "${UUID.randomUUID()}",
-            "@løsning" to listOf(
-                mapOf(
-                    "fullmakt" to emptyList<Map<String, String>>()
-                )
+            "@løsning" to mapOf(
+                "fullmakt" to emptyList<Map<String, String>>()
             )
         )
     )

@@ -30,9 +30,12 @@ internal class Fullmaktløsning(
                 it.demandKey("fødselsnummer")
                 it.requireKey("@id")
                 it.require("@opprettet") { node -> node.asLocalDateTime() }
-                it.requireArray("@løsning") {
-                    requireArray("fullmakt") {
-                        interestedIn("gyldigFraOgMed", "gyldigTilOgMed")
+                it.require("@løsning") { node ->
+                    node["fullmakt"].map { fullmaktNode ->
+                        Fullmakt(
+                            gyldigFraOgMed = fullmaktNode["gyldigFraOgMed"].asLocalDate(),
+                            gyldigTilOgMed = fullmaktNode["gyldigTilOgMed"].asOptionalLocalDate(),
+                        )
                     }
                 }
             }
@@ -47,11 +50,9 @@ internal class Fullmaktløsning(
 
             val nå = LocalDate.now()
             val harFullmakt =
-                packet["@løsning"].any { fullmaktNode ->
-                    val fullmakt = fullmaktNode.path("fullmakt")
-                    fullmakt.size() > 0 &&
-                        fullmakt[0]["gyldigFraOgMed"].asLocalDate().isSameOrBefore(nå) &&
-                        fullmakt[0]["gyldigTilOgMed"].asOptionalLocalDate()?.isSameOrAfter(nå) ?: true
+                packet["@løsning"]["fullmakt"].any { fullmaktNode ->
+                    fullmaktNode["gyldigFraOgMed"].asLocalDate().isSameOrBefore(nå) &&
+                        fullmaktNode["gyldigTilOgMed"].asOptionalLocalDate()?.isSameOrAfter(nå) ?: true
                 }
 
             val fullmaktløsning =
@@ -69,6 +70,8 @@ internal class Fullmaktløsning(
         }
     }
 }
+
+data class Fullmakt(val gyldigFraOgMed: LocalDate, val gyldigTilOgMed: LocalDate?)
 
 fun LocalDate.isSameOrBefore(other: LocalDate) = this.isEqual(other) || this.isBefore(other)
 
