@@ -126,6 +126,12 @@ internal class Kommandofabrikk(
     }
 
     internal fun settEksisterendeContext(commandContext: CommandContext) {
+        if (this.commandContext != null) {
+            """
+                Å nei, commandContext HAR allerede en verdi! Det skyldes sannsynligvis at samme pod behandler to kall eller meldinger samtidig, eller at noe ikke har ryddet opp etter seg. Vi jobber forhåpentligvis med problemet.
+                Forrige commandContext: ${this.commandContext?.id()}, ny: ${commandContext.id()} 
+            """.trimIndent()
+        }
         this.commandContext = commandContext
     }
 
