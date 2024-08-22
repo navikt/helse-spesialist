@@ -4,12 +4,21 @@
 ## Beskrivelse
 Backend for saksbehandling av sykepengesøknader
 
-## Henvendelser
-Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.
-
 ## Komme i gang
 
 ### Gradleoppsett
+
+#### Ktlint
+
+Vi bruker [Ktlint](https://github.com/pinterest/ktlint) for linting av koden, for å sette dette opp må man kjøre følgende kommando:
+
+```shell
+./gradlew addKtlintFormatGitPreCommitHook
+```
+
+Det holder å kjøre kommandoen en gang, så er commithooken satt opp for fremtidige commits.
+
+#### Credentials
 For å kunne kjøre gradle må du legge til `githubUser` og `githubPassword` i `~/.gradle/gradle.properties` filen.
 
 ```properties
@@ -68,6 +77,9 @@ Hvis du nylig har gjort endringer i GraphQL-typer, -mutations, -queries eller -s
 En selvstendig app for å slette testpersoner, kjører kun i dev.
 
 Spleis-testdata fyrer av et kafka-event som spesialist-opprydding-dev lytter på og sletter testpersoner.
+
+## Henvendelser
+Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.
 
 ### For NAV-ansatte
 Interne henvendelser kan sendes via Slack i kanalen [#team-bømlo-værsågod](https://nav-it.slack.com/archives/C019637N90X).
