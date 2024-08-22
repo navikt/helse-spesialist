@@ -91,7 +91,7 @@ internal object Testmeldingfabrikk {
     fun lagFullmaktløsningMedFullmakt(
         fødselsnummer: String,
         fom: LocalDate,
-        tom: LocalDate
+        tom: LocalDate?
     ): String = nyHendelse(
         id = UUID.randomUUID(), "behov",
         mapOf(

@@ -24,7 +24,7 @@ class FullmaktRiverTest {
         testRapid.sendTestMessage(Testmeldingfabrikk.lagFullmaktløsningMedFullmakt(
             fnr,
             fom = now(),
-            tom = now()
+            tom = null
         ))
         verify(exactly = 1) { mediator.løsning(any(), any(), any(), capture(slot), any()) }
         assertTrue(slot.captured.harFullmakt)

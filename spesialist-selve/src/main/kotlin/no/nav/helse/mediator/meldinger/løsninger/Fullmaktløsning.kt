@@ -7,6 +7,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
+import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
@@ -50,7 +51,7 @@ internal class Fullmaktløsning(
                     val fullmakt = fullmaktNode.path("fullmakt")
                     fullmakt.size() > 0 &&
                         fullmakt["gyldigFraOgMed"].asLocalDate().isSameOrBefore(nå) &&
-                        fullmakt["gyldigTilOgMed"].asLocalDate().isSameOrAfter(nå)
+                        fullmakt["gyldigTilOgMed"].asOptionalLocalDate()?.isSameOrAfter(nå) ?: true
                 }
 
             val fullmaktløsning =
