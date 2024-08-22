@@ -31,7 +31,7 @@ internal class Fullmaktløsning(
                 it.requireKey("@id")
                 it.require("@opprettet") { node -> node.asLocalDateTime() }
                 it.requireArray("@løsning") {
-                    require("fullmakt") {
+                    requireArray("fullmakt") {
                         interestedIn("gyldigFraOgMed", "gyldigTilOgMed")
                     }
                 }
@@ -50,8 +50,8 @@ internal class Fullmaktløsning(
                 packet["@løsning"].any { fullmaktNode ->
                     val fullmakt = fullmaktNode.path("fullmakt")
                     fullmakt.size() > 0 &&
-                        fullmakt["gyldigFraOgMed"].asLocalDate().isSameOrBefore(nå) &&
-                        fullmakt["gyldigTilOgMed"].asOptionalLocalDate()?.isSameOrAfter(nå) ?: true
+                        fullmakt[0]["gyldigFraOgMed"].asLocalDate().isSameOrBefore(nå) &&
+                        fullmakt[0]["gyldigTilOgMed"].asOptionalLocalDate()?.isSameOrAfter(nå) ?: true
                 }
 
             val fullmaktløsning =

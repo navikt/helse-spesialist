@@ -81,10 +81,12 @@ internal object Testmeldingfabrikk {
             hendelse = mapOf(
                 "fødselsnummer" to fødselsnummer,
                 "sykmeldingId" to "${UUID.randomUUID()}",
-                "perioder" to perioder.map { mapOf(
-                    "fom" to it.fom(),
-                    "tom" to it.tom()
-                )}
+                "perioder" to perioder.map {
+                    mapOf(
+                        "fom" to it.fom(),
+                        "tom" to it.tom()
+                    )
+                }
             )
         )
 
@@ -102,10 +104,12 @@ internal object Testmeldingfabrikk {
             "hendelseId" to "${UUID.randomUUID()}",
             "@løsning" to listOf(
                 mapOf(
-                    "fullmakt" to mapOf(
-                        "omraade" to listOf("SYK", "SYM"),
-                        "gyldigFraOgMed" to fom,
-                        "gyldigTilOgMed" to tom,
+                    "fullmakt" to listOf(
+                        mapOf(
+                            "omraade" to listOf("SYK", "SYM"),
+                            "gyldigFraOgMed" to fom,
+                            "gyldigTilOgMed" to tom,
+                        )
                     )
                 )
             )
