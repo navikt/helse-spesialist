@@ -1,5 +1,7 @@
 package no.nav.helse.modell.vergemal
 
+import no.nav.helse.bootstrap.Environment
+import no.nav.helse.mediator.meldinger.løsninger.Fullmaktløsning
 import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
@@ -19,16 +21,27 @@ internal class VurderVergemålOgFullmakt(
     override fun resume(context: CommandContext) = behandle(context)
 
     private fun behandle(context: CommandContext): Boolean {
-        val løsning = context.get<Vergemålløsning>()
-        if (løsning == null) {
-            logg.info("Trenger informasjon om vergemål og fullmakter")
+        val vergemålløsning = context.get<Vergemålløsning>()
+        val fullmaktløsning = context.get<Fullmaktløsning>()
+        if (vergemålløsning == null) {
+            logg.info("Trenger informasjon om vergemål og fremtidsfullmakter")
             context.behov("Vergemål")
             return false
         }
+        if ((Environment().erDev || Environment().erLokal) && fullmaktløsning == null) {
+            logg.info("Trenger informasjon om fullmakter")
+            context.behov("Fullmakt")
+            return false
+        }
 
-        vergemålDao.lagre(fødselsnummer, løsning.vergemål)
+        vergemålDao.lagre(fødselsnummer,
+            Vergemål(
+                harVergemål = vergemålløsning.vergemål.harVergemål,
+                harFremtidsfullmakter = vergemålløsning.vergemål.harFremtidsfullmakter,
+                harFullmakter = fullmaktløsning?.harFullmakt ?: vergemålløsning.vergemål.harFullmakter
+            ))
 
-        if (løsning.harVergemål()) {
+        if (vergemålløsning.harVergemål()) {
             logg.info("Legger til varsel om vergemål på vedtaksperiode $vedtaksperiodeId")
             sykefraværstilfelle.håndter(SB_EX_4.nyttVarsel(vedtaksperiodeId))
             return true
