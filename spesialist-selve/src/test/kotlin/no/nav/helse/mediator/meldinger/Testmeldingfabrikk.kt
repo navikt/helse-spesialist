@@ -98,7 +98,6 @@ internal object Testmeldingfabrikk {
         id = UUID.randomUUID(), "behov",
         mapOf(
             "fødselsnummer" to fødselsnummer,
-            "@final" to true,
             "@behov" to listOf("Fullmakt"),
             "contextId" to "${UUID.randomUUID()}",
             "hendelseId" to "${UUID.randomUUID()}",
@@ -121,7 +120,6 @@ internal object Testmeldingfabrikk {
         id = UUID.randomUUID(), "behov",
         mapOf(
             "fødselsnummer" to fødselsnummer,
-            "@final" to true,
             "@behov" to listOf("Fullmakt"),
             "contextId" to "${UUID.randomUUID()}",
             "hendelseId" to "${UUID.randomUUID()}",
