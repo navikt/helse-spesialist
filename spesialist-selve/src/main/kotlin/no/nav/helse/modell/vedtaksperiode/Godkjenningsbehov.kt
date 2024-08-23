@@ -128,9 +128,7 @@ internal class Godkjenningsbehov private constructor(
                 )
             },
         spleisBehandlingId = UUID.fromString(packet["Godkjenning.behandlingId"].asText()),
-        tags =
-            packet["Godkjenning.tags"].takeUnless(JsonNode::isMissingOrNull)?.map { it.asText() }?.toList()
-                ?: emptyList<String>(),
+        tags = packet["Godkjenning.tags"].map { it.asText() },
         utbetalingId = UUID.fromString(packet["utbetalingId"].asText()),
         periodetype = Periodetype.valueOf(packet["Godkjenning.periodetype"].asText()),
         førstegangsbehandling = packet["Godkjenning.førstegangsbehandling"].asBoolean(),
@@ -167,14 +165,7 @@ internal class Godkjenningsbehov private constructor(
                 )
             },
         spleisBehandlingId = UUID.fromString(jsonNode.path("Godkjenning").path("behandlingId").asText()),
-        tags =
-            jsonNode
-                .path("Godkjenning")
-                .path("tags")
-                .takeUnless(JsonNode::isMissingOrNull)
-                ?.map {
-                    it.asText()
-                }?.toList() ?: emptyList<String>(),
+        tags = jsonNode.path("Godkjenning").path("tags").map { it.asText() },
         utbetalingId = UUID.fromString(jsonNode.path("utbetalingId").asText()),
         skjæringstidspunkt = LocalDate.parse(jsonNode.path("Godkjenning").path("skjæringstidspunkt").asText()),
         periodetype = Periodetype.valueOf(jsonNode.path("Godkjenning").path("periodetype").asText()),
