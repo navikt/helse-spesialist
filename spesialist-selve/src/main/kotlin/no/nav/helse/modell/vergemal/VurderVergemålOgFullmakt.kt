@@ -28,18 +28,20 @@ internal class VurderVergemålOgFullmakt(
             context.behov("Vergemål")
             return false
         }
-        if ((Environment().erDev || Environment().erLokal) && fullmaktløsning == null) {
+        if (Environment().erLokal && fullmaktløsning == null) {
             logg.info("Trenger informasjon om fullmakter")
             context.behov("Fullmakt")
             return false
         }
 
-        vergemålDao.lagre(fødselsnummer,
+        vergemålDao.lagre(
+            fødselsnummer,
             Vergemål(
                 harVergemål = vergemålløsning.vergemål.harVergemål,
                 harFremtidsfullmakter = vergemålløsning.vergemål.harFremtidsfullmakter,
-                harFullmakter = fullmaktløsning?.harFullmakt ?: vergemålløsning.vergemål.harFullmakter
-            ))
+                harFullmakter = fullmaktløsning?.harFullmakt ?: vergemålløsning.vergemål.harFullmakter,
+            ),
+        )
 
         if (vergemålløsning.harVergemål()) {
             logg.info("Legger til varsel om vergemål på vedtaksperiode $vedtaksperiodeId")
