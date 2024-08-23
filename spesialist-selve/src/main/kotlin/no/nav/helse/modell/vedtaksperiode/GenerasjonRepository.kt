@@ -10,7 +10,7 @@ import javax.sql.DataSource
 internal class GenerasjonRepository(dataSource: DataSource) {
     private val generasjonDao = GenerasjonDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
-    private var hentedeGenerasjoner: List<GenerasjonDto> = emptyList()
+    private val hentedeGenerasjoner: MutableMap<UUID, List<GenerasjonDto>> = mutableMapOf()
 
     private val sikkerLogger = LoggerFactory.getLogger("tjenestekall")
 
@@ -37,7 +37,7 @@ internal class GenerasjonRepository(dataSource: DataSource) {
 
     private fun TransactionalSession.finnGenerasjoner(vedtaksperiodeId: UUID): List<GenerasjonDto> {
         return with(generasjonDao) {
-            finnGenerasjoner(vedtaksperiodeId).also { hentedeGenerasjoner = it }
+            finnGenerasjoner(vedtaksperiodeId).also { hentedeGenerasjoner[vedtaksperiodeId] = it }
         }
     }
 
@@ -50,7 +50,7 @@ internal class GenerasjonRepository(dataSource: DataSource) {
         }
         with(generasjonDao) {
             loggDiffMellomHentetOgSkalLagres(vedtaksperiode)
-            hentedeGenerasjoner = emptyList()
+            hentedeGenerasjoner.remove(vedtaksperiode.vedtaksperiodeId)
             vedtaksperiode.generasjoner.forEach { generasjonDto ->
                 lagreGenerasjon(generasjonDto)
             }
@@ -61,7 +61,8 @@ internal class GenerasjonRepository(dataSource: DataSource) {
     }
 
     private fun loggDiffMellomHentetOgSkalLagres(vedtaksperiode: VedtaksperiodeDto) {
-        val antallHentet = hentedeGenerasjoner.size
+        val hentedeGenerasjonerForPeriode = hentedeGenerasjoner[vedtaksperiode.vedtaksperiodeId] ?: return
+        val antallHentet = hentedeGenerasjonerForPeriode.size
         if (antallHentet == 0) return
         val generasjonerForLagring = vedtaksperiode.generasjoner
         val antallNå = generasjonerForLagring.size
@@ -71,7 +72,7 @@ internal class GenerasjonRepository(dataSource: DataSource) {
             )
 
         if (antallHentet == antallNå) {
-            val nyesteHentet = hentedeGenerasjoner.last()
+            val nyesteHentet = hentedeGenerasjonerForPeriode.last()
             val nyesteSkalLagres = generasjonerForLagring.last()
             val nyesteErEendret = nyesteHentet != nyesteSkalLagres
             builder.appendLine("Ingen generasjoner ble lagt til. Nyeste versjon ble endret: $nyesteErEendret")
@@ -80,14 +81,14 @@ internal class GenerasjonRepository(dataSource: DataSource) {
             }
             builder.diffMellomToGenerasjoner(nyesteHentet, nyesteSkalLagres)
         }
-        val hentedeBortsettFraSiste = hentedeGenerasjoner.dropLast(1)
+        val hentedeBortsettFraSiste = hentedeGenerasjonerForPeriode.dropLast(1)
         if (hentedeBortsettFraSiste.isNotEmpty()) {
             val historiskeForLagring = generasjonerForLagring.take(hentedeBortsettFraSiste.size)
             val historiskeErUlike = hentedeBortsettFraSiste != historiskeForLagring
             if (historiskeErUlike) {
                 builder.appendLine("Historiske generasjoner ble endret")
                 builder.appendLine("         før - etter:")
-                hentedeGenerasjoner.zip(historiskeForLagring).forEach { (hentet, skalLagres) ->
+                hentedeGenerasjonerForPeriode.zip(historiskeForLagring).forEach { (hentet, skalLagres) ->
                     builder.diffMellomToGenerasjoner(hentet, skalLagres)
                 }
             } else {
