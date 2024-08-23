@@ -25,6 +25,7 @@ import no.nav.helse.spesialist.api.graphql.schema.AnnulleringData
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Lovhjemmel
+import no.nav.helse.spesialist.api.graphql.schema.MinimumSykdomsgrad
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringDag
@@ -710,6 +711,78 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             assertEquals(21000.0, it["årlig"].asDouble())
             assertEquals(25001.0, it["fraÅrlig"].asDouble())
         }
+    }
+
+    @Test
+    fun `håndterer vurdering ok av minimum sykdomsgrad`() {
+        nyPerson(fødselsnummer = FØDSELSNUMMER, organisasjonsnummer = ORGANISASJONSNUMMER, aktørId = AKTØR_ID)
+        val minimumSykdomsgrad =
+            MinimumSykdomsgrad(
+                fodselsnummer = FØDSELSNUMMER,
+                aktorId = AKTØR_ID,
+                fom = 1.januar,
+                tom = 31.januar,
+                vurdering = true,
+                begrunnelse = "en begrunnelse",
+                arbeidsgivere = listOf(MinimumSykdomsgrad.Arbeidsgiver(
+                    organisasjonsnummer = ORGANISASJONSNUMMER,
+                    berørtVedtaksperiodeId = PERIODE.id
+                )),
+                initierendeVedtaksperiodeId = PERIODE.id,
+            )
+
+        mediator.håndter(minimumSykdomsgrad, saksbehandler)
+
+        val hendelse = testRapid.inspektør.hendelser("minimum_sykdomsgrad_vurdert").first()
+
+        assertNotNull(hendelse["@id"].asText())
+        assertEquals(FØDSELSNUMMER, hendelse["fødselsnummer"].asText())
+        assertEquals(AKTØR_ID, hendelse["aktørId"].asText())
+        assertEquals(SAKSBEHANDLER_OID, hendelse["saksbehandlerOid"].asText().let { UUID.fromString(it) })
+        assertEquals(SAKSBEHANDLER_NAVN, hendelse["saksbehandlerNavn"].asText())
+        assertEquals(SAKSBEHANDLER_IDENT, hendelse["saksbehandlerIdent"].asText())
+        assertEquals(SAKSBEHANDLER_EPOST, hendelse["saksbehandlerEpost"].asText())
+        hendelse["perioderMedMinimumSykdomsgradVurdertOk"].first().let {
+            assertEquals(1.januar, it["fom"].asLocalDate())
+            assertEquals(31.januar, it["tom"].asLocalDate())
+        }
+        assertTrue(hendelse["perioderMedMinimumSykdomsgradVurdertIkkeOk"].isEmpty)
+    }
+
+    @Test
+    fun `håndterer vurdering ikke ok av minimum sykdomsgrad`() {
+        nyPerson(fødselsnummer = FØDSELSNUMMER, organisasjonsnummer = ORGANISASJONSNUMMER, aktørId = AKTØR_ID)
+        val minimumSykdomsgrad =
+            MinimumSykdomsgrad(
+                fodselsnummer = FØDSELSNUMMER,
+                aktorId = AKTØR_ID,
+                fom = 1.januar,
+                tom = 31.januar,
+                vurdering = false,
+                begrunnelse = "en begrunnelse",
+                arbeidsgivere = listOf(MinimumSykdomsgrad.Arbeidsgiver(
+                    organisasjonsnummer = ORGANISASJONSNUMMER,
+                    berørtVedtaksperiodeId = PERIODE.id
+                )),
+                initierendeVedtaksperiodeId = PERIODE.id,
+            )
+
+        mediator.håndter(minimumSykdomsgrad, saksbehandler)
+
+        val hendelse = testRapid.inspektør.hendelser("minimum_sykdomsgrad_vurdert").first()
+
+        assertNotNull(hendelse["@id"].asText())
+        assertEquals(FØDSELSNUMMER, hendelse["fødselsnummer"].asText())
+        assertEquals(AKTØR_ID, hendelse["aktørId"].asText())
+        assertEquals(SAKSBEHANDLER_OID, hendelse["saksbehandlerOid"].asText().let { UUID.fromString(it) })
+        assertEquals(SAKSBEHANDLER_NAVN, hendelse["saksbehandlerNavn"].asText())
+        assertEquals(SAKSBEHANDLER_IDENT, hendelse["saksbehandlerIdent"].asText())
+        assertEquals(SAKSBEHANDLER_EPOST, hendelse["saksbehandlerEpost"].asText())
+        hendelse["perioderMedMinimumSykdomsgradVurdertIkkeOk"].first().let {
+            assertEquals(1.januar, it["fom"].asLocalDate())
+            assertEquals(31.januar, it["tom"].asLocalDate())
+        }
+        assertTrue(hendelse["perioderMedMinimumSykdomsgradVurdertOk"].isEmpty)
     }
 
     @Test

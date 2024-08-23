@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.overstyring
 
 import no.nav.helse.modell.saksbehandler.AnnullertUtbetalingEvent
+import no.nav.helse.modell.saksbehandler.MinimumSykdomsgradVurdertEvent
 import no.nav.helse.modell.saksbehandler.OverstyrtArbeidsforholdEvent
 import no.nav.helse.modell.saksbehandler.OverstyrtInntektOgRefusjonEvent
 import no.nav.helse.modell.saksbehandler.OverstyrtTidslinjeEvent
@@ -87,6 +88,28 @@ internal class Saksbehandlingsmelder(
                     "fødselsnummer" to event.fødselsnummer,
                     "skjæringstidspunkt" to event.skjæringstidspunkt,
                     "arbeidsgivere" to event.arbeidsgivere,
+                    "saksbehandlerOid" to event.saksbehandlerOid,
+                    "saksbehandlerNavn" to event.saksbehandlerNavn,
+                    "saksbehandlerIdent" to event.saksbehandlerIdent,
+                    "saksbehandlerEpost" to event.saksbehandlerEpost,
+                ).toMap(),
+            )
+        rapidsConnection.publish(fødselsnummer, jsonMessage.toJson())
+    }
+
+    override fun minimumSykdomsgradVurdert(
+        fødselsnummer: String,
+        event: MinimumSykdomsgradVurdertEvent,
+    ) {
+        val jsonMessage =
+            JsonMessage.newMessage(
+                "minimum_sykdomsgrad_vurdert",
+                listOfNotNull(
+                    "@id" to event.id,
+                    "aktørId" to event.aktørId,
+                    "fødselsnummer" to event.fødselsnummer,
+                    "perioderMedMinimumSykdomsgradVurdertOk" to event.perioderMedMinimumSykdomsgradVurdertOk,
+                    "perioderMedMinimumSykdomsgradVurdertIkkeOk" to event.perioderMedMinimumSykdomsgradVurdertIkkeOk,
                     "saksbehandlerOid" to event.saksbehandlerOid,
                     "saksbehandlerNavn" to event.saksbehandlerNavn,
                     "saksbehandlerIdent" to event.saksbehandlerIdent,

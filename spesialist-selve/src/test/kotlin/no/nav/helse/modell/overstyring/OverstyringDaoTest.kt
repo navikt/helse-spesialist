@@ -3,6 +3,7 @@ package no.nav.helse.modell.overstyring
 import DatabaseIntegrationTest
 import no.nav.helse.db.ArbeidsforholdForDatabase
 import no.nav.helse.db.LovhjemmelForDatabase
+import no.nav.helse.db.MinimumSykdomsgradForDatabase
 import no.nav.helse.db.OverstyrtArbeidsforholdForDatabase
 import no.nav.helse.db.OverstyrtArbeidsgiverForDatabase
 import no.nav.helse.db.OverstyrtInntektOgRefusjonForDatabase
@@ -17,6 +18,7 @@ import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringInntektDto
+import no.nav.helse.spesialist.api.overstyring.OverstyringMinimumSykdomsgradDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunnlagDto
@@ -322,6 +324,45 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         assertEquals(SKJÆRINGSTIDSPUNKT, hentetSkjønnsfastsetting.skjæringstidspunkt)
         assertEquals(OPPRETTET, hentetSkjønnsfastsetting.timestamp)
         assertFalse(hentetSkjønnsfastsetting.ferdigstilt)
+    }
+
+    @Test
+    fun `Finner opprettede overstyringer av minimum sykdomsgrad`() {
+        opprettPerson()
+        overstyringDao.persisterMinimumSykdomsgrad(
+            MinimumSykdomsgradForDatabase(
+                id = EKSTERN_HENDELSE_ID,
+                aktørId = AKTØR,
+                fødselsnummer = FNR,
+                fom = 1.januar,
+                tom = 31.januar,
+                vurdering = true,
+                begrunnelse = "en begrunnelse",
+                opprettet = OPPRETTET,
+                initierendeVedtaksperiodeId = VEDTAKSPERIODE,
+                arbeidsgivere =
+                    listOf(
+                        MinimumSykdomsgradForDatabase.MinimumSykdomsgradArbeidsgiverForDatabase(
+                            organisasjonsnummer = ORGNUMMER,
+                            berørtVedtaksperiodeId = VEDTAKSPERIODE
+                        )
+                    ),
+            ),
+            OID,
+        )
+        val hentetMinimumSykdomsgrad = overstyringApiDao.finnOverstyringer(FNR).first()
+        check(hentetMinimumSykdomsgrad is OverstyringMinimumSykdomsgradDto)
+
+        assertEquals(FNR, hentetMinimumSykdomsgrad.fødselsnummer)
+        assertEquals(ORGNUMMER, hentetMinimumSykdomsgrad.organisasjonsnummer)
+        assertEquals(1.januar, hentetMinimumSykdomsgrad.fom)
+        assertEquals(31.januar, hentetMinimumSykdomsgrad.tom)
+        assertTrue(hentetMinimumSykdomsgrad.vurdering)
+        assertEquals("en begrunnelse", hentetMinimumSykdomsgrad.begrunnelse,)
+        assertEquals(SAKSBEHANDLER_NAVN, hentetMinimumSykdomsgrad.saksbehandlerNavn)
+        assertEquals(SAKSBEHANDLER_IDENT, hentetMinimumSykdomsgrad.saksbehandlerIdent)
+        assertEquals(OPPRETTET, hentetMinimumSykdomsgrad.timestamp)
+        assertFalse(hentetMinimumSykdomsgrad.ferdigstilt)
     }
 
     @Test

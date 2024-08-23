@@ -14,6 +14,7 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringInntektDto
+import no.nav.helse.spesialist.api.overstyring.OverstyringMinimumSykdomsgradDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunnlagDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
@@ -160,6 +161,7 @@ data class Person(
                                 is OverstyringArbeidsforholdDto -> overstyring.tilArbeidsforholdoverstyring()
                                 is OverstyringInntektDto -> overstyring.tilInntektoverstyring()
                                 is SkjønnsfastsettingSykepengegrunnlagDto -> overstyring.tilSykepengegrunnlagSkjønnsfastsetting()
+                                is OverstyringMinimumSykdomsgradDto -> overstyring.tilMinimumSykdomsgradOverstyring()
                             }
                         },
             )
@@ -282,6 +284,25 @@ private fun SkjønnsfastsettingSykepengegrunnlagDto.tilSykepengegrunnlagSkjønns
                 arlig = årlig,
                 fraArlig = fraÅrlig,
                 skjaeringstidspunkt = skjæringstidspunkt,
+            ),
+        ferdigstilt = ferdigstilt,
+    )
+
+private fun OverstyringMinimumSykdomsgradDto.tilMinimumSykdomsgradOverstyring() =
+    MinimumSykdomsgradOverstyring(
+        hendelseId = hendelseId,
+        timestamp = timestamp,
+        saksbehandler =
+            Saksbehandler(
+                navn = saksbehandlerNavn,
+                ident = saksbehandlerIdent,
+            ),
+        minimumSykdomsgrad =
+            MinimumSykdomsgradOverstyring.OverstyrtMinimumSykdomsgrad(
+                fom = fom,
+                tom = tom,
+                vurdering = vurdering,
+                begrunnelse = begrunnelse,
             ),
         ferdigstilt = ferdigstilt,
     )

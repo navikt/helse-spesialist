@@ -3,6 +3,7 @@ package no.nav.helse.modell.overstyring
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
+import no.nav.helse.db.MinimumSykdomsgradForDatabase
 import no.nav.helse.db.OverstyrtArbeidsforholdForDatabase
 import no.nav.helse.db.OverstyrtInntektOgRefusjonForDatabase
 import no.nav.helse.db.OverstyrtTidslinjeForDatabase
@@ -22,12 +23,14 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                     WHEN oa.id IS NOT NULL THEN 'Arbeidsforhold'
                     WHEN ot.id IS NOT NULL THEN 'Dager'
                     WHEN ss.id IS NOT NULL THEN 'Sykepengegrunnlag'
+                    WHEN oms.id IS NOT NULL THEN 'MinimumSykdomsgrad'
                 END as type
             FROM overstyring o
             LEFT JOIN overstyring_arbeidsforhold oa on o.id = oa.overstyring_ref
             LEFT JOIN overstyring_inntekt oi on o.id = oi.overstyring_ref
             LEFT JOIN overstyring_tidslinje ot on o.id = ot.overstyring_ref
             LEFT JOIN skjonnsfastsetting_sykepengegrunnlag ss on o.id = ss.overstyring_ref
+            LEFT JOIN overstyring_minimum_sykdomsgrad oms on o.id = oms.overstyring_ref
             WHERE o.vedtaksperiode_id IN (${vedtaksperiodeIder.joinToString { "?" }})
             AND o.ferdigstilt = false
         """,
@@ -42,12 +45,14 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                     WHEN oa.id IS NOT NULL THEN 'Arbeidsforhold'
                     WHEN ot.id IS NOT NULL THEN 'Dager'
                     WHEN ss.id IS NOT NULL THEN 'Sykepengegrunnlag'
+                    WHEN oms.id IS NOT NULL THEN 'MinimumSykdomsgrad'
                 END as type
             FROM overstyring o
             LEFT JOIN overstyring_arbeidsforhold oa on o.id = oa.overstyring_ref
             LEFT JOIN overstyring_inntekt oi on o.id = oi.overstyring_ref
             LEFT JOIN overstyring_tidslinje ot on o.id = ot.overstyring_ref
             LEFT JOIN skjonnsfastsetting_sykepengegrunnlag ss on o.id = ss.overstyring_ref
+            LEFT JOIN overstyring_minimum_sykdomsgrad oms on o.id = oms.overstyring_ref
             WHERE o.id IN (
                 SELECT overstyring_ref FROM overstyringer_for_vedtaksperioder
                 WHERE vedtaksperiode_id = :vedtaksperiode_id
@@ -410,6 +415,56 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                         ).asUpdate,
                     )
                 }
+            }
+        }
+    }
+
+    internal fun persisterMinimumSykdomsgrad(
+        minimumSykdomsgrad: MinimumSykdomsgradForDatabase,
+        saksbehandlerOid: UUID,
+    ) = asSQL(
+        """ INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt, vedtaksperiode_id)
+            SELECT gen_random_uuid(), :ekstern_hendelse_id, p.id, :saksbehandler_ref, :tidspunkt, :vedtaksperiode_id
+                FROM person p
+                WHERE p.fodselsnummer = :fodselsnummer
+            RETURNING id
+        """,
+        mapOf(
+            "ekstern_hendelse_id" to minimumSykdomsgrad.id,
+            "saksbehandler_ref" to saksbehandlerOid,
+            "tidspunkt" to minimumSykdomsgrad.opprettet,
+            "fodselsnummer" to minimumSykdomsgrad.fødselsnummer.toLong(),
+            "vedtaksperiode_id" to minimumSykdomsgrad.initierendeVedtaksperiodeId,
+        ),
+    ).single { it.long("id") }?.let { overstyringId ->
+        asSQL(
+            """
+            INSERT INTO overstyring_minimum_sykdomsgrad(overstyring_ref, fom, tom, vurdering, begrunnelse)
+            VALUES (:overstyringRef, :fom, :tom, :vurdering, :begrunnelse)
+            RETURNING id
+        """,
+            mapOf(
+                "overstyringRef" to overstyringId,
+                "fom" to minimumSykdomsgrad.fom,
+                "tom" to minimumSykdomsgrad.tom,
+                "vurdering" to minimumSykdomsgrad.vurdering,
+                "begrunnelse" to minimumSykdomsgrad.begrunnelse,
+            ),
+        ).single { it.long("id") }?.let { overstyringMinimumSykdomsgradId ->
+            minimumSykdomsgrad.arbeidsgivere.forEach { arbeidsgiver ->
+                asSQL(
+                    """
+                        INSERT INTO overstyring_minimum_sykdomsgrad_arbeidsgiver(berort_vedtaksperiode_id, arbeidsgiver_ref, overstyring_minimum_sykdomsgrad_ref)
+                        SELECT :berortVedtaksperiodeId, ag.id, :overstyringMinimumSykdomsgradRef
+                        FROM arbeidsgiver ag
+                        WHERE ag.orgnummer = :organisasjonsnummer
+                    """,
+                    mapOf(
+                        "berortVedtaksperiodeId" to arbeidsgiver.berørtVedtaksperiodeId,
+                        "overstyringMinimumSykdomsgradRef" to overstyringMinimumSykdomsgradId,
+                        "organisasjonsnummer" to arbeidsgiver.organisasjonsnummer.toLong(),
+                    ),
+                ).update()
             }
         }
     }

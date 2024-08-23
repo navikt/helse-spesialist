@@ -79,6 +79,20 @@ data class OverstyringInntektDto(
     )
 }
 
+data class OverstyringMinimumSykdomsgradDto(
+    override val hendelseId: UUID,
+    override val fødselsnummer: String,
+    override val organisasjonsnummer: String,
+    val timestamp: LocalDateTime,
+    override val saksbehandlerNavn: String,
+    override val saksbehandlerIdent: String?,
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val vurdering: Boolean,
+    val begrunnelse: String,
+    val ferdigstilt: Boolean,
+) : OverstyringDto
+
 enum class Skjonnsfastsettingstype {
     OMREGNET_ARSINNTEKT,
     RAPPORTERT_ARSINNTEKT,

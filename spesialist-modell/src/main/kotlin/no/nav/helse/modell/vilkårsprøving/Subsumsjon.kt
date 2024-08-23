@@ -76,6 +76,7 @@ class Subsumsjon(
     enum class Utfall {
         VILKAR_BEREGNET,
         VILKAR_OPPFYLT,
+        VILKAR_IKKE_OPPFYLT,
         VILKAR_UAVKLART,
     }
 }

@@ -86,6 +86,21 @@ data class Inntektoverstyring(
     )
 }
 
+data class MinimumSykdomsgradOverstyring(
+    override val hendelseId: UUID,
+    override val timestamp: LocalDateTime,
+    override val saksbehandler: Saksbehandler,
+    override val ferdigstilt: Boolean,
+    val minimumSykdomsgrad: OverstyrtMinimumSykdomsgrad,
+) : Overstyring {
+    data class OverstyrtMinimumSykdomsgrad(
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val vurdering: Boolean,
+        val begrunnelse: String,
+    )
+}
+
 data class Sykepengegrunnlagskjonnsfastsetting(
     override val hendelseId: UUID,
     override val timestamp: LocalDateTime,

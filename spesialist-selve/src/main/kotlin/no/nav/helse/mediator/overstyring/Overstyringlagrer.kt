@@ -2,6 +2,7 @@ package no.nav.helse.mediator.overstyring
 
 import no.nav.helse.db.ArbeidsforholdForDatabase
 import no.nav.helse.db.LovhjemmelForDatabase
+import no.nav.helse.db.MinimumSykdomsgradForDatabase
 import no.nav.helse.db.OverstyrtArbeidsforholdForDatabase
 import no.nav.helse.db.OverstyrtArbeidsgiverForDatabase
 import no.nav.helse.db.OverstyrtInntektOgRefusjonForDatabase
@@ -12,12 +13,14 @@ import no.nav.helse.db.SkjønnsfastsattArbeidsgiverForDatabase
 import no.nav.helse.db.SkjønnsfastsattSykepengegrunnlagForDatabase
 import no.nav.helse.db.SkjønnsfastsettingstypeForDatabase
 import no.nav.helse.modell.overstyring.OverstyringDao
+import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtInntektOgRefusjon
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
+import no.nav.helse.modell.saksbehandler.handlinger.dto.MinimumSykdomsgradDto
 import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtArbeidsforholdDto
 import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtInntektOgRefusjonDto
 import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtTidslinjeDto
@@ -37,6 +40,7 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
             is OverstyrtInntektOgRefusjon -> lagreOverstyrtInntektOgRefusjon(overstyring, saksbehandlerOid)
             is OverstyrtArbeidsforhold -> lagreOverstyrtArbeidsforhold(overstyring, saksbehandlerOid)
             is SkjønnsfastsattSykepengegrunnlag -> lagreSkjønnsfastsattSykepengegrunnlag(overstyring, saksbehandlerOid)
+            is MinimumSykdomsgrad -> lagreMinimumSykdomsgrad(overstyring, saksbehandlerOid)
         }
     }
 
@@ -66,6 +70,13 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
         saksbehandlerOid: UUID,
     ) {
         overstyringDao.persisterSkjønnsfastsettingSykepengegrunnlag(overstyring.toDto().tilDatabase(), saksbehandlerOid)
+    }
+
+    private fun lagreMinimumSykdomsgrad(
+        overstyring: MinimumSykdomsgrad,
+        saksbehandlerOid: UUID,
+    ) {
+        overstyringDao.persisterMinimumSykdomsgrad(overstyring.toDto().tilDatabase(), saksbehandlerOid)
     }
 
     private fun OverstyrtTidslinjeDto.tilDatabase() =
@@ -155,6 +166,26 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
                         initierendeVedtaksperiodeId = it.initierendeVedtaksperiodeId,
                     )
                 },
+        )
+
+    private fun MinimumSykdomsgradDto.tilDatabase() =
+        MinimumSykdomsgradForDatabase(
+            id = id,
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            fom = fom,
+            tom = tom,
+            vurdering = vurdering,
+            begrunnelse = begrunnelse,
+            arbeidsgivere =
+                arbeidsgivere.map {
+                    MinimumSykdomsgradForDatabase.MinimumSykdomsgradArbeidsgiverForDatabase(
+                        organisasjonsnummer = it.organisasjonsnummer,
+                        berørtVedtaksperiodeId = it.berørtVedtaksperiodeId,
+                    )
+                },
+            opprettet = LocalDateTime.now(),
+            initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,
         )
 
     private fun LovhjemmelDto.tilDatabase() = LovhjemmelForDatabase(paragraf = paragraf, ledd = ledd, bokstav = bokstav)

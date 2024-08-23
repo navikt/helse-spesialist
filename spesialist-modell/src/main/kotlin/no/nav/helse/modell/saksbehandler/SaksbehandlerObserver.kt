@@ -1,6 +1,7 @@
 package no.nav.helse.modell.saksbehandler
 
 import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringArsak
+import no.nav.helse.modell.saksbehandler.handlinger.Vurdering
 import no.nav.helse.modell.vilkårsprøving.SubsumsjonEvent
 import java.time.LocalDate
 import java.util.UUID
@@ -24,6 +25,11 @@ interface SaksbehandlerObserver {
     fun sykepengegrunnlagSkjønnsfastsatt(
         fødselsnummer: String,
         event: SkjønnsfastsattSykepengegrunnlagEvent,
+    ) {}
+
+    fun minimumSykdomsgradVurdert(
+        fødselsnummer: String,
+        event: MinimumSykdomsgradVurdertEvent,
     ) {}
 
     fun utbetalingAnnullert(
@@ -123,6 +129,18 @@ data class SkjønnsfastsattSykepengegrunnlagEvent(
         val initierendeVedtaksperiodeId: String?,
     )
 }
+
+data class MinimumSykdomsgradVurdertEvent(
+    val id: UUID,
+    val fødselsnummer: String,
+    val aktørId: String,
+    val saksbehandlerOid: UUID,
+    val saksbehandlerNavn: String,
+    val saksbehandlerIdent: String,
+    val saksbehandlerEpost: String,
+    val perioderMedMinimumSykdomsgradVurdertOk: List<Vurdering>,
+    val perioderMedMinimumSykdomsgradVurdertIkkeOk: List<Vurdering>,
+)
 
 data class AnnullertUtbetalingEvent(
     val fødselsnummer: String,

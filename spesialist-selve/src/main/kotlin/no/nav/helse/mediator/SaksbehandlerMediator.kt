@@ -25,6 +25,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringArsak
 import no.nav.helse.modell.saksbehandler.handlinger.Arbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.Handling
+import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
@@ -53,6 +54,7 @@ import no.nav.helse.spesialist.api.graphql.schema.AnnulleringData
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.Avslag
 import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
+import no.nav.helse.spesialist.api.graphql.schema.MinimumSykdomsgrad
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse
@@ -388,6 +390,7 @@ internal class SaksbehandlerMediator(
             is InntektOgRefusjonOverstyring -> this.tilModellversjon()
             is TidslinjeOverstyring -> this.tilModellversjon()
             is Skjonnsfastsettelse -> this.tilModellversjon()
+            is MinimumSykdomsgrad -> this.tilModellversjon()
             is AnnulleringData -> this.tilModellversjon()
             is TildelOppgave -> this.tilModellversjon()
             is AvmeldOppgave -> this.tilModellversjon()
@@ -449,6 +452,25 @@ internal class SaksbehandlerMediator(
                     )
                 },
         )
+
+    private fun MinimumSykdomsgrad.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad {
+        return no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad(
+            aktørId = aktorId,
+            fødselsnummer = fodselsnummer,
+            fom = fom,
+            tom = tom,
+            vurdering = vurdering,
+            begrunnelse = begrunnelse,
+            arbeidsgivere =
+                arbeidsgivere.map {
+                    MinimumSykdomsgradArbeidsgiver(
+                        organisasjonsnummer = it.organisasjonsnummer,
+                        berørtVedtaksperiodeId = it.berørtVedtaksperiodeId,
+                    )
+                },
+            initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,
+        )
+    }
 
     private fun InntektOgRefusjonOverstyring.tilModellversjon(): OverstyrtInntektOgRefusjon =
         OverstyrtInntektOgRefusjon(

@@ -5,4 +5,5 @@ enum class OverstyringType {
     Inntekt,
     Arbeidsforhold,
     Sykepengegrunnlag,
+    MinimumSykdomsgrad,
 }

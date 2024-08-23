@@ -17,7 +17,8 @@ class OverstyringApiDao(
                 it.finnTidslinjeoverstyringer(fødselsnummer) +
                     it.finnInntektsoverstyringer(fødselsnummer) +
                     it.finnSkjønnsfastsatteSykepengegrunnlag(fødselsnummer) +
-                    it.finnArbeidsforholdoverstyringer(fødselsnummer)
+                    it.finnArbeidsforholdoverstyringer(fødselsnummer) +
+                    it.finnMinimumSykdomsgradsoverstyringer(fødselsnummer)
             }
         }
 
@@ -150,6 +151,39 @@ class OverstyringApiDao(
                         begrunnelseMal = overstyringRow.string("mal"),
                         begrunnelseFritekst = overstyringRow.string("fritekst"),
                         begrunnelseKonklusjon = overstyringRow.string("konklusjon"),
+                    )
+                }.asList,
+        )
+    }
+
+    private fun TransactionalSession.finnMinimumSykdomsgradsoverstyringer(fødselsnummer: String): List<OverstyringMinimumSykdomsgradDto> {
+        @Language("PostgreSQL")
+        val finnOverstyringMinimumSykdomsgradQuery = """
+                SELECT o.id, o.tidspunkt, o.person_ref, o.hendelse_ref, o.saksbehandler_ref, o.ekstern_hendelse_id, 
+                o.ferdigstilt, oms.fom, oms.tom, oms.vurdering, oms.begrunnelse, omsa.berort_vedtaksperiode_id, 
+                p.fodselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring o
+                    INNER JOIN overstyring_minimum_sykdomsgrad oms ON o.id = oms.overstyring_ref
+                    INNER JOIN overstyring_minimum_sykdomsgrad_arbeidsgiver omsa ON omsa.overstyring_minimum_sykdomsgrad_ref = oms.id
+                    INNER JOIN person p ON p.id = o.person_ref
+                    INNER JOIN arbeidsgiver a ON a.id = omsa.arbeidsgiver_ref
+                    INNER JOIN saksbehandler s ON s.oid = o.saksbehandler_ref
+                WHERE p.fodselsnummer = ?
+            """
+        return this.run(
+            queryOf(finnOverstyringMinimumSykdomsgradQuery, fødselsnummer.toLong())
+                .map { overstyringRow ->
+                    OverstyringMinimumSykdomsgradDto(
+                        hendelseId = overstyringRow.uuid("hendelse_ref"),
+                        fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
+                        organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
+                        timestamp = overstyringRow.localDateTime("tidspunkt"),
+                        saksbehandlerNavn = overstyringRow.string("navn"),
+                        saksbehandlerIdent = overstyringRow.stringOrNull("ident"),
+                        ferdigstilt = overstyringRow.boolean("ferdigstilt"),
+                        fom = overstyringRow.localDate("fom"),
+                        tom = overstyringRow.localDate("tom"),
+                        vurdering = overstyringRow.boolean("vurdering"),
+                        begrunnelse = overstyringRow.string("begrunnelse"),
                     )
                 }.asList,
         )

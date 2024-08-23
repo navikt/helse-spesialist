@@ -2,6 +2,7 @@ package no.nav.helse.modell.saksbehandler
 
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.saksbehandler.handlinger.Annullering
+import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad
 import no.nav.helse.modell.saksbehandler.handlinger.OpphevStans
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtInntektOgRefusjon
@@ -58,6 +59,13 @@ class Saksbehandler(
         val subsumsjonEvent = hendelse.byggSubsumsjon(this.epostadresse).byggEvent()
         observers.forEach { it.nySubsumsjon(subsumsjonEvent.fødselsnummer, subsumsjonEvent) }
         observers.forEach { it.sykepengegrunnlagSkjønnsfastsatt(event.fødselsnummer, event) }
+    }
+
+    internal fun håndter(hendelse: MinimumSykdomsgrad) {
+        val event = hendelse.byggEvent(oid, navn, epostadresse, ident)
+        val subsumsjonEvent = hendelse.byggSubsumsjon(this.epostadresse).byggEvent()
+        observers.forEach { it.nySubsumsjon(subsumsjonEvent.fødselsnummer, subsumsjonEvent) }
+        observers.forEach { it.minimumSykdomsgradVurdert(event.fødselsnummer, event) }
     }
 
     internal fun håndter(hendelse: Annullering) {
