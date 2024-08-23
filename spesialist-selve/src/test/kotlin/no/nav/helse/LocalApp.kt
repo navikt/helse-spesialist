@@ -40,7 +40,7 @@ fun main() {
                     "NAVident" to "X123456",
                 ),
         ).serialize()
-    println(token)
+    println("OAuth2-token: $token")
     val azureConfig =
         AzureConfig(
             clientId = clientId,

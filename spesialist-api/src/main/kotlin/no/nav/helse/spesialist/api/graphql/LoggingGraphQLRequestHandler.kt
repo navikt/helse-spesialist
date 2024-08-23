@@ -19,6 +19,9 @@ class LoggingGraphQLRequestHandler(graphQL: GraphQL) : GraphQLRequestHandler(gra
             graphQLRequest.operationName.also { operationName ->
                 if (operationName != null) {
                     sikkerLogg.trace("GraphQL-kall mottatt, operationName: $operationName")
+                    if (graphQLRequest.query.startsWith("mutation") || operationName.contains(Regex("/mutation/i"))) {
+                        sikkerLogg.debug("Behandler GraphQL-kall: {}", graphQLRequest)
+                    }
                 } else if (!graphQLRequest.query.contains("query IntrospectionQuery")) {
                     sikkerLogg.warn("GraphQL-kall uten navngitt query, bør fikses i kallende kode. Requesten:\n${graphQLRequest.query}")
                 }
