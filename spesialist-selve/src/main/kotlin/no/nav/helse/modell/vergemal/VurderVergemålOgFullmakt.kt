@@ -24,10 +24,11 @@ internal class VurderVergemålOgFullmakt(
         val vergemålløsning = context.get<Vergemålløsning>()
         val fullmaktløsning = context.get<Fullmaktløsning>()
 
-        if (vergemålløsning == null || (Environment().erLokal && fullmaktløsning == null)) {
+        val brukNyFullmaktsløsning = Environment().erLokal || Environment().erDev
+        if (vergemålløsning == null || (brukNyFullmaktsløsning && fullmaktløsning == null)) {
             logg.info("Trenger informasjon om vergemål, fremtidsfullmakter og fullmakt")
             context.behov("Vergemål")
-            if (Environment().erLokal) {
+            if (brukNyFullmaktsløsning) {
                 context.behov("Fullmakt")
             }
             return false
