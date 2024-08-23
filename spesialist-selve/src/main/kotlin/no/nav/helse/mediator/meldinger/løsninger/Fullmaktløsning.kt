@@ -23,6 +23,7 @@ internal class Fullmaktløsning(
         override fun validations() =
             River.PacketValidation {
                 it.demandValue("@event_name", "behov")
+                it.demandValue("@final", true)
                 it.demandAll("@behov", listOf("Fullmakt"))
                 it.demandKey("contextId")
                 it.demandKey("hendelseId")
