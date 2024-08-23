@@ -465,7 +465,7 @@ internal class SaksbehandlerMediator(
                 arbeidsgivere.map {
                     MinimumSykdomsgradArbeidsgiver(
                         organisasjonsnummer = it.organisasjonsnummer,
-                        berørtVedtaksperiodeId = it.berørtVedtaksperiodeId,
+                        berørtVedtaksperiodeId = it.berortVedtaksperiodeId,
                     )
                 },
             initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,

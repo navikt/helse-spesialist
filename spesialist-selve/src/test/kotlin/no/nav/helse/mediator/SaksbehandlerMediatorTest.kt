@@ -726,7 +726,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
                 begrunnelse = "en begrunnelse",
                 arbeidsgivere = listOf(MinimumSykdomsgrad.Arbeidsgiver(
                     organisasjonsnummer = ORGANISASJONSNUMMER,
-                    berørtVedtaksperiodeId = PERIODE.id
+                    berortVedtaksperiodeId = PERIODE.id
                 )),
                 initierendeVedtaksperiodeId = PERIODE.id,
             )
@@ -762,7 +762,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
                 begrunnelse = "en begrunnelse",
                 arbeidsgivere = listOf(MinimumSykdomsgrad.Arbeidsgiver(
                     organisasjonsnummer = ORGANISASJONSNUMMER,
-                    berørtVedtaksperiodeId = PERIODE.id
+                    berortVedtaksperiodeId = PERIODE.id
                 )),
                 initierendeVedtaksperiodeId = PERIODE.id,
             )

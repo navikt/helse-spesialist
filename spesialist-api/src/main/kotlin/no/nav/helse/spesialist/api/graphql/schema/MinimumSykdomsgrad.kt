@@ -16,6 +16,6 @@ data class MinimumSykdomsgrad(
 ) : HandlingFraApi {
     data class Arbeidsgiver(
         val organisasjonsnummer: String,
-        val berørtVedtaksperiodeId: UUID,
+        val berortVedtaksperiodeId: UUID,
     )
 }

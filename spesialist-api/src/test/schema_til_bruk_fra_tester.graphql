@@ -355,6 +355,7 @@ type Mutation {
     leggPaVent(begrunnelse: String, frist: LocalDate!, notatTekst: String!, oppgaveId: String!, tildeling: Boolean!): PaVent
     leggTilKommentar(notatId: Int!, saksbehandlerident: String!, tekst: String!): Kommentar
     leggTilNotat(saksbehandlerOid: String!, tekst: String!, type: NotatType!, vedtaksperiodeId: String!): Notat
+    minimumSykdomsgrad(minimumSykdomsgrad: MinimumSykdomsgradInput!): Boolean!
     oppdaterPerson(fodselsnummer: String!): Boolean!
     opphevStans(begrunnelse: String!, fodselsnummer: String!): Boolean!
     opprettAbonnement(personidentifikator: String!): Boolean!
@@ -1256,6 +1257,11 @@ input ArbeidsforholdOverstyringHandlingInput {
     vedtaksperiodeId: UUID!
 }
 
+input ArbeidsgiverInput {
+    berortVedtaksperiodeId: UUID!
+    organisasjonsnummer: String!
+}
+
 input AvslagInput {
     data: AvslagsdataInput
     handling: Avslagshandling!
@@ -1289,6 +1295,17 @@ input LovhjemmelInput {
     lovverk: String!
     lovverksversjon: String!
     paragraf: String!
+}
+
+input MinimumSykdomsgradInput {
+    aktorId: String!
+    arbeidsgivere: [ArbeidsgiverInput!]!
+    begrunnelse: String!
+    fodselsnummer: String!
+    fom: LocalDate!
+    initierendeVedtaksperiodeId: UUID!
+    tom: LocalDate!
+    vurdering: Boolean!
 }
 
 input OppgaveegenskapInput {
