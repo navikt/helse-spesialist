@@ -103,7 +103,7 @@ internal object Testmeldingfabrikk {
             "contextId" to "${UUID.randomUUID()}",
             "hendelseId" to "${UUID.randomUUID()}",
             "@løsning" to mapOf(
-                "fullmakt" to listOf(
+                "Fullmakt" to listOf(
                     mapOf(
                         "omraade" to listOf("SYK", "SYM"),
                         "gyldigFraOgMed" to fom,
@@ -126,7 +126,7 @@ internal object Testmeldingfabrikk {
             "contextId" to "${UUID.randomUUID()}",
             "hendelseId" to "${UUID.randomUUID()}",
             "@løsning" to mapOf(
-                "fullmakt" to emptyList<Map<String, String>>()
+                "Fullmakt" to emptyList<Map<String, String>>()
             )
         )
     )
