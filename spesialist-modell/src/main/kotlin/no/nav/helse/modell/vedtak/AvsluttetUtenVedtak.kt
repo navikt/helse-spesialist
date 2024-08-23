@@ -22,6 +22,5 @@ class AvsluttetUtenVedtak(
         vedtakBuilder.grunnlagForSykepengegrunnlagPerArbeidsgiver(emptyMap())
         vedtakBuilder.begrensning("VET_IKKE")
         vedtakBuilder.inntekt(0.0)
-        vedtakBuilder.tags(emptyList())
     }
 }
