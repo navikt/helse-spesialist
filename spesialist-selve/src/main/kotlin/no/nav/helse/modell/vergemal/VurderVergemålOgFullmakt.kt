@@ -23,14 +23,13 @@ internal class VurderVergemålOgFullmakt(
     private fun behandle(context: CommandContext): Boolean {
         val vergemålløsning = context.get<Vergemålløsning>()
         val fullmaktløsning = context.get<Fullmaktløsning>()
-        if (vergemålløsning == null) {
-            logg.info("Trenger informasjon om vergemål og fremtidsfullmakter")
+
+        if (vergemålløsning == null || (Environment().erLokal && fullmaktløsning == null)) {
+            logg.info("Trenger informasjon om vergemål, fremtidsfullmakter og fullmakt")
             context.behov("Vergemål")
-            return false
-        }
-        if (Environment().erLokal && fullmaktløsning == null) {
-            logg.info("Trenger informasjon om fullmakter")
-            context.behov("Fullmakt")
+            if (Environment().erLokal) {
+                context.behov("Fullmakt")
+            }
             return false
         }
 
