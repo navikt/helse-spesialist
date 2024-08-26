@@ -2,7 +2,7 @@ package no.nav.helse.modell.kommando
 
 import no.nav.helse.modell.CommandContextDao
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 internal class AvbrytContextCommand(
     private val vedtaksperiodeId: UUID,

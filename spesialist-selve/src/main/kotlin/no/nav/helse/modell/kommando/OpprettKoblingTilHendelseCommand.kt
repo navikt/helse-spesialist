@@ -1,19 +1,22 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.modell.VedtakDao
-import java.util.*
+import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 
 internal class OpprettKoblingTilHendelseCommand(
-    private val hendelseId: UUID,
-    private val vedtaksperiodeId: UUID,
+    commandData: GodkjenningsbehovData,
     private val vedtakDao: VedtakDao,
 ) : Command {
+    private val meldingId = commandData.id
+
+    private val vedtaksperiodeId = commandData.vedtaksperiodeId
+
     override fun execute(context: CommandContext): Boolean {
-        vedtakDao.opprettKobling(vedtaksperiodeId, hendelseId)
+        vedtakDao.opprettKobling(vedtaksperiodeId, meldingId)
         return true
     }
 
     override fun undo(context: CommandContext) {
-        vedtakDao.fjernKobling(vedtaksperiodeId, hendelseId)
+        vedtakDao.fjernKobling(vedtaksperiodeId, meldingId)
     }
 }

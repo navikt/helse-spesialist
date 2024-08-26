@@ -1,16 +1,15 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.AvviksvurderingDao
-import java.util.UUID
+import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 
 internal class OpprettKoblingTilAvviksvurdering(
-    private val avviksvurderingId: UUID?,
-    private val vilkårsgrunnlagId: UUID,
-    private val avviksvurderingDao: AvviksvurderingDao
-): Command {
+    private val commandData: GodkjenningsbehovData,
+    private val avviksvurderingDao: AvviksvurderingDao,
+) : Command {
     override fun execute(context: CommandContext): Boolean {
-        if (avviksvurderingId != null) {
-            avviksvurderingDao.opprettKobling(avviksvurderingId, vilkårsgrunnlagId)
+        if (commandData.avviksvurderingId != null) {
+            avviksvurderingDao.opprettKobling(commandData.avviksvurderingId, commandData.vilkårsgrunnlagId)
         }
         return true
     }

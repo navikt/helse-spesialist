@@ -3,7 +3,7 @@ package no.nav.helse.modell.kommando
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import java.util.*
+import java.util.UUID
 
 internal class PersisterVedtaksperiodetypeCommand(
     private val vedtaksperiodeId: UUID,

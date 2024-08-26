@@ -6,7 +6,7 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.UUID
 
 internal class PersisterVedtaksperiodetypeCommandTest {
 

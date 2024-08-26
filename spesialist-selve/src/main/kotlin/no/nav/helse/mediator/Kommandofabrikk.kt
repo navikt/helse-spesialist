@@ -45,8 +45,8 @@ import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.utbetaling.UtbetalingEndretCommand
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
-import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovCommand
+import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastetCommand
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
@@ -345,30 +345,14 @@ internal class Kommandofabrikk(
     }
 
     internal fun godkjenningsbehov(
-        hendelse: Godkjenningsbehov,
+        godkjenningsbehovData: GodkjenningsbehovData,
         person: Person,
-        tags: List<String>,
     ): GodkjenningsbehovCommand {
-        val utbetaling = utbetalingDao.hentUtbetaling(hendelse.utbetalingId)
-        val førsteKjenteDagFinner = { generasjonRepository.førsteKjenteDag(hendelse.fødselsnummer()) }
+        val utbetaling = utbetalingDao.hentUtbetaling(godkjenningsbehovData.utbetalingId)
+        val førsteKjenteDagFinner = { generasjonRepository.førsteKjenteDag(godkjenningsbehovData.fødselsnummer) }
         return GodkjenningsbehovCommand(
-            id = hendelse.id,
-            fødselsnummer = hendelse.fødselsnummer(),
-            aktørId = hendelse.aktørId,
-            organisasjonsnummer = hendelse.organisasjonsnummer,
-            orgnummereMedRelevanteArbeidsforhold = hendelse.orgnummereMedRelevanteArbeidsforhold,
-            vedtaksperiodeId = hendelse.vedtaksperiodeId(),
-            spleisBehandlingId = hendelse.spleisBehandlingId,
-            avviksvurderingId = hendelse.avviksvurderingId,
-            vilkårsgrunnlagId = hendelse.vilkårsgrunnlagId,
-            periodetype = hendelse.periodetype,
-            inntektskilde = hendelse.inntektskilde,
-            førstegangsbehandling = hendelse.førstegangsbehandling,
-            utbetalingId = hendelse.utbetalingId,
+            commandData = godkjenningsbehovData,
             utbetaling = utbetaling,
-            utbetalingtype = hendelse.utbetalingtype,
-            skjæringstidspunkt = hendelse.skjæringstidspunkt,
-            kanAvvises = hendelse.kanAvvises,
             førsteKjenteDagFinner = førsteKjenteDagFinner,
             automatisering = automatisering,
             vedtakDao = vedtakDao,
@@ -391,9 +375,6 @@ internal class Kommandofabrikk(
             oppgaveService = oppgaveService,
             godkjenningMediator = godkjenningMediator,
             totrinnsvurderingMediator = totrinnsvurderingMediator,
-            json = hendelse.toJson(),
-            spleisVedtaksperioder = hendelse.spleisVedtaksperioder,
-            tags = tags,
             person = person,
         )
     }
