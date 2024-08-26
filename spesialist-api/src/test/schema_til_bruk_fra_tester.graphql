@@ -461,6 +461,7 @@ type OverstyrtInntekt {
 type OverstyrtMinimumSykdomsgrad {
     begrunnelse: String!
     fom: LocalDate!
+    initierendeVedtaksperiodeId: UUID!
     tom: LocalDate!
     vurdering: Boolean!
 }

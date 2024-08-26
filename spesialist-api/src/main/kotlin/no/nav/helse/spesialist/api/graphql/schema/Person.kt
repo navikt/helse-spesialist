@@ -303,6 +303,7 @@ private fun OverstyringMinimumSykdomsgradDto.tilMinimumSykdomsgradOverstyring() 
                 tom = tom,
                 vurdering = vurdering,
                 begrunnelse = begrunnelse,
+                initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,
             ),
         ferdigstilt = ferdigstilt,
     )

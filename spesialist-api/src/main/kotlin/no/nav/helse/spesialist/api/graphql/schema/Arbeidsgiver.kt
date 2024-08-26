@@ -98,6 +98,7 @@ data class MinimumSykdomsgradOverstyring(
         val tom: LocalDate,
         val vurdering: Boolean,
         val begrunnelse: String,
+        val initierendeVedtaksperiodeId: UUID,
     )
 }
 

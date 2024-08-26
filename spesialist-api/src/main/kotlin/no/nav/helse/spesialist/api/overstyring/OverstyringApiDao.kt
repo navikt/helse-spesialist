@@ -160,7 +160,7 @@ class OverstyringApiDao(
         @Language("PostgreSQL")
         val finnOverstyringMinimumSykdomsgradQuery = """
                 SELECT o.id, o.tidspunkt, o.person_ref, o.hendelse_ref, o.saksbehandler_ref, o.ekstern_hendelse_id, 
-                o.ferdigstilt, oms.fom, oms.tom, oms.vurdering, oms.begrunnelse, omsa.berort_vedtaksperiode_id, 
+                o.ferdigstilt, o.vedtaksperiode_id, oms.fom, oms.tom, oms.vurdering, oms.begrunnelse, omsa.berort_vedtaksperiode_id, 
                 p.fodselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring o
                     INNER JOIN overstyring_minimum_sykdomsgrad oms ON o.id = oms.overstyring_ref
                     INNER JOIN overstyring_minimum_sykdomsgrad_arbeidsgiver omsa ON omsa.overstyring_minimum_sykdomsgrad_ref = oms.id
@@ -184,6 +184,7 @@ class OverstyringApiDao(
                         tom = overstyringRow.localDate("tom"),
                         vurdering = overstyringRow.boolean("vurdering"),
                         begrunnelse = overstyringRow.string("begrunnelse"),
+                        initierendeVedtaksperiodeId = overstyringRow.uuid("vedtaksperiode_id"),
                     )
                 }.asList,
         )

@@ -90,6 +90,7 @@ data class OverstyringMinimumSykdomsgradDto(
     val tom: LocalDate,
     val vurdering: Boolean,
     val begrunnelse: String,
+    val initierendeVedtaksperiodeId: UUID,
     val ferdigstilt: Boolean,
 ) : OverstyringDto
 
