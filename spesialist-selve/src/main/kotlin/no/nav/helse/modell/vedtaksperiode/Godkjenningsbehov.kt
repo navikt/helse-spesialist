@@ -240,6 +240,11 @@ internal class GodkjenningsbehovCommand(
                 skjæringstidspunkt = skjæringstidspunkt,
                 tags = tags,
             ),
+            OpprettKoblingTilAvviksvurdering(
+                avviksvurderingId = avviksvurderingId,
+                vilkårsgrunnlagId = vilkårsgrunnlagId,
+                avviksvurderingDao = avviksvurderingDao,
+            ),
             VurderVidereBehandlingAvGodkjenningsbehov(
                 meldingId = id,
                 utbetalingId = utbetalingId,
@@ -247,11 +252,6 @@ internal class GodkjenningsbehovCommand(
                 utbetalingDao = utbetalingDao,
                 oppgaveDao = oppgaveDao,
                 vedtakDao = vedtakDao,
-            ),
-            OpprettKoblingTilAvviksvurdering(
-                avviksvurderingId = avviksvurderingId,
-                vilkårsgrunnlagId = vilkårsgrunnlagId,
-                avviksvurderingDao = avviksvurderingDao,
             ),
             OpprettKoblingTilHendelseCommand(
                 hendelseId = id,
