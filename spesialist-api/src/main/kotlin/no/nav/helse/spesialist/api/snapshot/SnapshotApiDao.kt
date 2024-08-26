@@ -36,7 +36,9 @@ class SnapshotApiDao(private val dataSource: DataSource) {
                             fodselsdato = row.localDateOrNull("fodselsdato"),
                             kjonn = row.stringOrNull("kjonn")?.let(Kjonn::valueOf) ?: Kjonn.Ukjent,
                             adressebeskyttelse = row.string("adressebeskyttelse").let(Adressebeskyttelse::valueOf),
-                            reservasjon = null,
+                            unntattFraAutomatisering = null, // denne settes i query
+                            reservasjon = null, // denne settes i query
+                            fullmakt = null, // denne settes i query
                         )
                     val snapshot = objectMapper.readValue<GraphQLPerson>(row.string("data"))
                     personinfo to snapshot
