@@ -115,15 +115,6 @@ internal class Kommandofabrikk(
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
     private val metrikkDao = MetrikkDao(dataSource)
     private val oppgaveService: OppgaveService by lazy { oppgaveService() }
-    private val observers: MutableList<CommandContextObserver> = mutableListOf()
-
-    internal fun nyObserver(vararg observers: CommandContextObserver) {
-        this.observers.addAll(observers)
-    }
-
-    internal fun avregistrerObserver(vararg observers: CommandContextObserver) {
-        this.observers.removeAll(observers.toSet())
-    }
 
     internal fun avviksvurdering(avviksvurdering: AvviksvurderingDto) {
         avviksvurderingDao.lagre(avviksvurdering)
@@ -383,8 +374,11 @@ internal class Kommandofabrikk(
         OppdaterSnapshotCommand(snapshotClient, snapshotDao, personmelding.fødselsnummer(), personDao)
 
     // Kanskje prøve å få håndtering av søknad inn i samme flyt som andre kommandokjeder
-    internal fun iverksettSøknadSendt(melding: SøknadSendt) {
-        iverksett(søknadSendt(melding), melding.id, nyContext(melding.id))
+    internal fun iverksettSøknadSendt(
+        melding: SøknadSendt,
+        commandContextObservers: CommandContextObserver,
+    ) {
+        iverksett(søknadSendt(melding), melding.id, nyContext(melding.id), setOf(commandContextObservers))
     }
 
     private fun nyContext(meldingId: UUID) =
@@ -392,11 +386,14 @@ internal class Kommandofabrikk(
             opprett(commandContextDao, meldingId)
         }
 
-    internal fun lagKommandostarter(commandContext: CommandContext): Kommandostarter {
+    internal fun lagKommandostarter(
+        commandContext: CommandContext,
+        commandContextObservers: Set<CommandContextObserver>,
+    ): Kommandostarter {
         return { kommandooppretter ->
             val melding = this
             this@Kommandofabrikk.kommandooppretter()?.let { command ->
-                iverksett(command, melding.id, commandContext)
+                iverksett(command, melding.id, commandContext, commandContextObservers)
             }
         }
     }
@@ -405,8 +402,9 @@ internal class Kommandofabrikk(
         command: Command,
         meldingId: UUID,
         commandContext: CommandContext,
+        commandContextObservers: Collection<CommandContextObserver>,
     ) {
-        observers.forEach { commandContext.nyObserver(it) }
+        commandContextObservers.forEach { commandContext.nyObserver(it) }
         val contextId = commandContext.id()
         withMDC(
             mapOf("contextId" to contextId.toString()),
@@ -426,7 +424,7 @@ internal class Kommandofabrikk(
                 command.undo(commandContext)
                 throw err
             } finally {
-                observers.forEach { commandContext.avregistrerObserver(it) }
+                commandContextObservers.forEach { commandContext.avregistrerObserver(it) }
             }
         }
     }

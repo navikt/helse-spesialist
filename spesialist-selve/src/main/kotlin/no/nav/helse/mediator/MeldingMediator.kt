@@ -370,10 +370,8 @@ internal class MeldingMediator(
             sikkerlogg.info("Melding SøknadSendt mottatt:\n${melding.toJson()}")
             meldingDao.lagre(melding)
             val commandContextTilstandMediator = CommandContextTilstandMediator()
-            kommandofabrikk.nyObserver(commandContextTilstandMediator)
-            kommandofabrikk.iverksettSøknadSendt(melding)
+            kommandofabrikk.iverksettSøknadSendt(melding, commandContextTilstandMediator)
             commandContextTilstandMediator.publiserTilstandsendringer(melding, messageContext)
-            kommandofabrikk.avregistrerObserver(commandContextTilstandMediator)
             logg.info("Melding SøknadSendt lest")
             sikkerlogg.info("Melding SøknadSendt lest")
         }
@@ -442,13 +440,17 @@ internal class MeldingMediator(
         val commandContextTilstandMediator = CommandContextTilstandMediator()
         val vedtakFattetMelder = VedtakFattetMelder(messageContext)
         try {
-            kommandofabrikk.nyObserver(utgåendeMeldingerMediator, commandContextTilstandMediator)
             personRepository.brukPersonHvisFinnes(melding.fødselsnummer()) {
                 this.nyObserver(vedtakFattetMelder)
                 logg.info("Personen finnes i databasen, behandler melding $meldingnavn")
                 sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")
 
-                melding.behandle(this, kommandofabrikk.lagKommandostarter(commandContext))
+                val kommandostarter =
+                    kommandofabrikk.lagKommandostarter(
+                        commandContext,
+                        setOf(utgåendeMeldingerMediator, commandContextTilstandMediator),
+                    )
+                melding.behandle(this, kommandostarter)
             }
             if (melding is VedtakFattet) melding.doFinally(vedtakDao) // Midlertidig frem til spesialsak ikke er en ting lenger
             vedtakFattetMelder.publiserUtgåendeMeldinger()
@@ -457,7 +459,6 @@ internal class MeldingMediator(
             logg.error("Feil ved behandling av melding $meldingnavn", e.message, e)
             throw e
         } finally {
-            kommandofabrikk.avregistrerObserver(utgåendeMeldingerMediator, commandContextTilstandMediator)
             commandContextTilstandMediator.publiserTilstandsendringer(melding, messageContext)
             logg.info("Melding $meldingnavn lest")
             sikkerlogg.info("Melding $meldingnavn lest")
