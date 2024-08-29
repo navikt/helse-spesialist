@@ -116,15 +116,17 @@ internal object Testmeldingfabrikk {
     )
 
     fun lagFullmaktløsningUtenFullmakter(
-        fødselsnummer: String
+        fødselsnummer: String,
+        hendelseId: UUID = UUID.randomUUID(),
+        contextId: UUID = UUID.randomUUID(),
     ): String = nyHendelse(
         id = UUID.randomUUID(), "behov",
         mapOf(
             "fødselsnummer" to fødselsnummer,
             "@final" to true,
             "@behov" to listOf("Fullmakt"),
-            "contextId" to "${UUID.randomUUID()}",
-            "hendelseId" to "${UUID.randomUUID()}",
+            "contextId" to "$contextId",
+            "hendelseId" to "$hendelseId",
             "@løsning" to mapOf(
                 "Fullmakt" to emptyList<Map<String, String>>()
             )
@@ -370,6 +372,29 @@ internal object Testmeldingfabrikk {
             "@løsning" to mapOf(
                 "Arbeidsgiverinformasjon" to organisasjoner.map(ArbeidsgiverinformasjonJson::toBody),
                 "HentPersoninfoV2" to personer
+            )
+        )
+    )
+
+
+    fun lagVergemålOgFullmaktKomposittLøsning(
+        aktørId: String,
+        fødselsnummer: String,
+        vergemål: VergemålJson,
+        id: UUID = UUID.randomUUID(),
+        hendelseId: UUID = UUID.randomUUID(),
+        contextId: UUID = UUID.randomUUID(),
+    ) = nyHendelse(
+        id, "behov", mapOf(
+            "@final" to true,
+            "@behov" to listOf("Vergemål", "Fullmakt"),
+            "hendelseId" to "$hendelseId",
+            "contextId" to "$contextId",
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId,
+            "@løsning" to mapOf(
+                "Vergemål" to vergemål.toBody(),
+                "Fullmakt" to emptyList<Map<String, String>>()
             )
         )
     )
@@ -800,28 +825,6 @@ internal object Testmeldingfabrikk {
             "hendelseId" to hendelseId,
             "@løsning" to mapOf(
                 "EgenAnsatt" to erEgenAnsatt
-            )
-        )
-    )
-
-    fun lagVergemålløsning(
-        aktørId: String,
-        fødselsnummer: String,
-        vergemål: VergemålJson,
-        id: UUID = UUID.randomUUID(),
-        hendelseId: UUID = UUID.randomUUID(),
-        contextId: UUID = UUID.randomUUID(),
-    ): String = nyHendelse(
-        id,
-        "behov", mapOf(
-            "aktørId" to aktørId,
-            "fødselsnummer" to fødselsnummer,
-            "@final" to true,
-            "@behov" to listOf("Vergemål"),
-            "contextId" to contextId,
-            "hendelseId" to hendelseId,
-            "@løsning" to mapOf(
-                "Vergemål" to vergemål.toBody()
             )
         )
     )

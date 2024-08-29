@@ -117,7 +117,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
     }
 
     private fun sendFramTilOppgave() {
-        håndterVergemålløsning()
+        håndterVergemålOgFullmaktløsning()
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
     }

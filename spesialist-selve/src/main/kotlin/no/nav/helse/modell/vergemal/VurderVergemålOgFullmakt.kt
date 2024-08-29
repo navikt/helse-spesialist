@@ -1,6 +1,5 @@
 package no.nav.helse.modell.vergemal
 
-import no.nav.helse.bootstrap.Environment
 import no.nav.helse.mediator.meldinger.løsninger.Fullmaktløsning
 import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
 import no.nav.helse.modell.kommando.Command
@@ -24,13 +23,10 @@ internal class VurderVergemålOgFullmakt(
         val vergemålløsning = context.get<Vergemålløsning>()
         val fullmaktløsning = context.get<Fullmaktløsning>()
 
-        val brukNyFullmaktsløsning = Environment().erLokal || Environment().erDev
-        if (vergemålløsning == null || (brukNyFullmaktsløsning && fullmaktløsning == null)) {
+        if (vergemålløsning == null || fullmaktløsning == null) {
             logg.info("Trenger informasjon om vergemål, fremtidsfullmakter og fullmakt")
             context.behov("Vergemål")
-            if (brukNyFullmaktsløsning) {
-                context.behov("Fullmakt")
-            }
+            context.behov("Fullmakt")
             return false
         }
 
@@ -39,7 +35,7 @@ internal class VurderVergemålOgFullmakt(
             Vergemål(
                 harVergemål = vergemålløsning.vergemål.harVergemål,
                 harFremtidsfullmakter = vergemålløsning.vergemål.harFremtidsfullmakter,
-                harFullmakter = fullmaktløsning?.harFullmakt ?: vergemålløsning.vergemål.harFullmakter,
+                harFullmakter = fullmaktløsning.harFullmakt,
             ),
         )
 

@@ -215,7 +215,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilVergemål()
-        håndterVergemålløsning(vergemål = listOf(VergemålJson.Vergemål(voksen)))
+        håndterVergemålOgFullmaktløsning(vergemål = listOf(VergemålJson.Vergemål(voksen)))
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
         assertGodkjenningsbehovBesvart(godkjent = false, automatiskBehandlet = true, "Vergemål")
@@ -226,7 +226,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilVergemål()
-        håndterVergemålløsning()
+        håndterVergemålOgFullmaktløsning()
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
         assertGodkjenningsbehovBesvart(godkjent = true, automatiskBehandlet = true)
@@ -237,7 +237,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilVergemål()
-        håndterVergemålløsning(
+        håndterVergemålOgFullmaktløsning(
             fullmakter =
                 listOf(
                     VergemålJson.Fullmakt(
@@ -259,7 +259,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovTilOgMedUtbetalingsfilter()
         håndterEgenansattløsning(erEgenAnsatt = true)
-        håndterVergemålløsning(vergemål = listOf(VergemålJson.Vergemål(voksen)))
+        håndterVergemålOgFullmaktløsning(vergemål = listOf(VergemålJson.Vergemål(voksen)))
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
         assertKommandokjedetilstander(
@@ -305,7 +305,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
                 ),
         )
 
-        håndterVergemålløsning(vergemål = listOf(VergemålJson.Vergemål(type = mindreaarig)))
+        håndterVergemålOgFullmaktløsning(vergemål = listOf(VergemålJson.Vergemål(type = mindreaarig)))
         håndterÅpneOppgaverløsning()
         håndterInntektløsning()
 

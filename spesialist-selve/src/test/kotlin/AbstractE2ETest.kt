@@ -1,4 +1,3 @@
-
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.clearMocks
@@ -246,7 +245,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             avviksvurderingTestdata = avviksvurderingTestdata,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata,
         )
-        håndterVergemålløsning(fullmakter = fullmakter)
+        håndterVergemålOgFullmaktløsning(fullmakter = fullmakter)
     }
 
     protected fun spesialistBehandlerGodkjenningsbehovTilOgMedUtbetalingsfilter(
@@ -718,7 +717,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             !godkjenningsbehovTestdata.orgnummereMedRelevanteArbeidsforhold.all {
                 it in alleArbeidsforhold
             } -> assertEtterspurteBehov("Arbeidsgiverinformasjon")
-            else -> assertEtterspurteBehov("Vergemål")
+            else -> assertEtterspurteBehov("Vergemål", "Fullmakt")
         }
     }
 
@@ -830,16 +829,22 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         sisteMeldingId = meldingssender.sendEgenAnsattløsning(aktørId, fødselsnummer, erEgenAnsatt)
     }
 
-    protected fun håndterVergemålløsning(
+    protected fun håndterVergemålOgFullmaktløsning(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         vergemål: List<Vergemål> = emptyList(),
         fremtidsfullmakter: List<Vergemål> = emptyList(),
         fullmakter: List<Fullmakt> = emptyList(),
     ) {
-        assertEtterspurteBehov("Vergemål")
+        assertEtterspurteBehov("Vergemål", "Fullmakt")
         sisteMeldingId =
-            meldingssender.sendVergemålløsning(aktørId, fødselsnummer, vergemål, fremtidsfullmakter, fullmakter)
+            meldingssender.sendVergemålOgFullmaktløsning(
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                vergemål = vergemål,
+                fremtidsfullmakter = fremtidsfullmakter,
+                fullmakter = fullmakter
+            )
     }
 
     protected fun håndterInntektløsning(

@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.januar
 import no.nav.helse.mediator.CommandContextObserver
+import no.nav.helse.mediator.meldinger.løsninger.Fullmaktløsning
 import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
 import no.nav.helse.modell.gosysoppgaver.inspektør
 import no.nav.helse.modell.kommando.CommandContext
@@ -70,7 +71,7 @@ class VurderVergemålOgFullmaktTest {
     @Test
     fun `Ber om informasjon om vergemål hvis den mangler`() {
         assertFalse(command.execute(context))
-        assertEquals(listOf("Vergemål"), observer.behov)
+        assertEquals(listOf("Vergemål", "Fullmakt"), observer.behov)
     }
 
     @Test
@@ -82,6 +83,7 @@ class VurderVergemålOgFullmaktTest {
     @Test
     fun `lagrer svar på vergemål ved løsning ingen vergemål`() {
         context.add(Vergemålløsning(ingenVergemål))
+        context.add(Fullmaktløsning(ingenVergemål.harFullmakter))
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, ingenVergemål) }
         assertEquals(0, observer.hendelser.size)
@@ -93,6 +95,7 @@ class VurderVergemålOgFullmaktTest {
     @Test
     fun `lagrer svar på vergemål ved løsning har vergemål`() {
         context.add(Vergemålløsning(harVergemål))
+        context.add(Fullmaktløsning(harVergemål.harFullmakter))
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harVergemål) }
         assertEquals(0, observer.hendelser.size)
@@ -101,6 +104,7 @@ class VurderVergemålOgFullmaktTest {
     @Test
     fun `lagrer svar på vergemål ved løsning har fullmakt`() {
         context.add(Vergemålløsning(harFullmakt))
+        context.add(Fullmaktløsning(harFullmakt.harFullmakter))
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harFullmakt) }
         assertEquals(0, observer.hendelser.size)
@@ -109,6 +113,7 @@ class VurderVergemålOgFullmaktTest {
     @Test
     fun `lagrer svar på vergemål ved løsning har fremtidsfullmakt`() {
         context.add(Vergemålløsning(harFremtidsfullmakt))
+        context.add(Fullmaktløsning(harFremtidsfullmakt.harFullmakter))
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harFremtidsfullmakt) }
         assertEquals(0, observer.hendelser.size)
@@ -117,6 +122,7 @@ class VurderVergemålOgFullmaktTest {
     @Test
     fun `legger til varsel ved vergemål`() {
         context.add(Vergemålløsning(harAlt))
+        context.add(Fullmaktløsning(harAlt.harFullmakter))
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harAlt) }
         assertEquals(0, observer.hendelser.size)
