@@ -37,12 +37,6 @@ class VurderVergemålOgFullmaktTest {
         )
     private lateinit var context: CommandContext
 
-    private val ingenVergemål = Vergemål(harVergemål = false, harFremtidsfullmakter = false, harFullmakter = false)
-    private val harVergemål = Vergemål(harVergemål = true, harFremtidsfullmakter = false, harFullmakter = false)
-    private val harFullmakt = Vergemål(harVergemål = false, harFremtidsfullmakter = true, harFullmakter = false)
-    private val harFremtidsfullmakt = Vergemål(harVergemål = false, harFremtidsfullmakter = false, harFullmakter = true)
-    private val harAlt = Vergemål(harVergemål = true, harFremtidsfullmakter = true, harFullmakter = true)
-
     private val observer =
         object : CommandContextObserver {
             val behov = mutableListOf<String>()
@@ -77,15 +71,16 @@ class VurderVergemålOgFullmaktTest {
     @Test
     fun `gjør ingen behandling om vi mangler løsning ved resume`() {
         assertFalse(command.resume(context))
-        verify(exactly = 0) { vergemålDao.lagre(any(), any()) }
+        verify(exactly = 0) { vergemålDao.lagre(any(), any(), any()) }
     }
 
     @Test
     fun `lagrer svar på vergemål ved løsning ingen vergemål`() {
+        val ingenVergemål = VergemålOgFremtidsfullmakt(harVergemål = false, harFremtidsfullmakter = false)
         context.add(Vergemålløsning(ingenVergemål))
-        context.add(Fullmaktløsning(ingenVergemål.harFullmakter))
+        context.add(Fullmaktløsning(false))
         assertTrue(command.resume(context))
-        verify(exactly = 1) { vergemålDao.lagre(FNR, ingenVergemål) }
+        verify(exactly = 1) { vergemålDao.lagre(FNR, ingenVergemål, false) }
         assertEquals(0, observer.hendelser.size)
         generasjon.inspektør {
             assertEquals(0, varsler.size)
@@ -94,37 +89,41 @@ class VurderVergemålOgFullmaktTest {
 
     @Test
     fun `lagrer svar på vergemål ved løsning har vergemål`() {
+        val harVergemål = VergemålOgFremtidsfullmakt(harVergemål = true, harFremtidsfullmakter = false)
         context.add(Vergemålløsning(harVergemål))
-        context.add(Fullmaktløsning(harVergemål.harFullmakter))
+        context.add(Fullmaktløsning(false))
         assertTrue(command.resume(context))
-        verify(exactly = 1) { vergemålDao.lagre(FNR, harVergemål) }
-        assertEquals(0, observer.hendelser.size)
-    }
-
-    @Test
-    fun `lagrer svar på vergemål ved løsning har fullmakt`() {
-        context.add(Vergemålløsning(harFullmakt))
-        context.add(Fullmaktløsning(harFullmakt.harFullmakter))
-        assertTrue(command.resume(context))
-        verify(exactly = 1) { vergemålDao.lagre(FNR, harFullmakt) }
+        verify(exactly = 1) { vergemålDao.lagre(FNR, harVergemål, false) }
         assertEquals(0, observer.hendelser.size)
     }
 
     @Test
     fun `lagrer svar på vergemål ved løsning har fremtidsfullmakt`() {
-        context.add(Vergemålløsning(harFremtidsfullmakt))
-        context.add(Fullmaktløsning(harFremtidsfullmakt.harFullmakter))
+        val harFullmakt = VergemålOgFremtidsfullmakt(harVergemål = false, harFremtidsfullmakter = true)
+        context.add(Vergemålløsning(harFullmakt))
+        context.add(Fullmaktløsning(false))
         assertTrue(command.resume(context))
-        verify(exactly = 1) { vergemålDao.lagre(FNR, harFremtidsfullmakt) }
+        verify(exactly = 1) { vergemålDao.lagre(FNR, harFullmakt, false) }
+        assertEquals(0, observer.hendelser.size)
+    }
+
+    @Test
+    fun `lagrer svar på vergemål ved løsning har fullmakt`() {
+        val harFremtidsfullmakt = VergemålOgFremtidsfullmakt(harVergemål = false, harFremtidsfullmakter = false)
+        context.add(Vergemålløsning(harFremtidsfullmakt))
+        context.add(Fullmaktløsning(true))
+        assertTrue(command.resume(context))
+        verify(exactly = 1) { vergemålDao.lagre(FNR, harFremtidsfullmakt, true) }
         assertEquals(0, observer.hendelser.size)
     }
 
     @Test
     fun `legger til varsel ved vergemål`() {
+        val harAlt = VergemålOgFremtidsfullmakt(harVergemål = true, harFremtidsfullmakter = true)
         context.add(Vergemålløsning(harAlt))
-        context.add(Fullmaktløsning(harAlt.harFullmakter))
+        context.add(Fullmaktløsning(false))
         assertTrue(command.resume(context))
-        verify(exactly = 1) { vergemålDao.lagre(FNR, harAlt) }
+        verify(exactly = 1) { vergemålDao.lagre(FNR, harAlt, false) }
         assertEquals(0, observer.hendelser.size)
         generasjon.inspektør {
             assertEquals(1, varsler.size)

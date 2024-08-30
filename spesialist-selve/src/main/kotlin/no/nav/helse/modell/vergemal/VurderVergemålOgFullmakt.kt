@@ -31,12 +31,13 @@ internal class VurderVergemålOgFullmakt(
         }
 
         vergemålDao.lagre(
-            fødselsnummer,
-            Vergemål(
-                harVergemål = vergemålløsning.vergemål.harVergemål,
-                harFremtidsfullmakter = vergemålløsning.vergemål.harFremtidsfullmakter,
-                harFullmakter = fullmaktløsning.harFullmakt,
-            ),
+            fødselsnummer = fødselsnummer,
+            vergemålOgFremtidsfullmakt =
+                VergemålOgFremtidsfullmakt(
+                    harVergemål = vergemålløsning.vergemålOgFremtidsfullmakt.harVergemål,
+                    harFremtidsfullmakter = vergemålløsning.vergemålOgFremtidsfullmakt.harFremtidsfullmakter,
+                ),
+            fullmakt = fullmaktløsning.harFullmakt,
         )
 
         if (vergemålløsning.harVergemål()) {
@@ -48,7 +49,7 @@ internal class VurderVergemålOgFullmakt(
         return true
     }
 
-    private fun Vergemålløsning.harVergemål() = vergemål.harVergemål
+    private fun Vergemålløsning.harVergemål() = vergemålOgFremtidsfullmakt.harVergemål
 
     private companion object {
         private val logg = LoggerFactory.getLogger(VurderVergemålOgFullmakt::class.java)

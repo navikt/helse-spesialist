@@ -2,7 +2,7 @@ package no.nav.helse.mediator.meldinger.løsninger
 
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
-import no.nav.helse.modell.vergemal.Vergemål
+import no.nav.helse.modell.vergemal.VergemålOgFremtidsfullmakt
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.River
@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 internal class Vergemålløsning(
-    val vergemål: Vergemål,
+    val vergemålOgFremtidsfullmakt: VergemålOgFremtidsfullmakt,
 ) {
     internal class VergemålRiver(
         private val meldingMediator: MeldingMediator,
@@ -23,8 +23,8 @@ internal class Vergemålløsning(
                 it.demandValue("@event_name", "behov")
                 it.demandValue("@final", true)
                 it.demandAll("@behov", listOf("Vergemål"))
-                it.demandKey("contextId")
                 it.demandKey("hendelseId")
+                it.demandKey("contextId")
                 it.demandKey("fødselsnummer")
                 it.requireKey("@id")
                 it.require("@opprettet") { node -> node.asLocalDateTime() }
@@ -42,18 +42,16 @@ internal class Vergemålløsning(
             val vergemålNode = packet["@løsning.Vergemål"]
             val harVergemål = !vergemålNode["vergemål"].isEmpty
             val harFremtidsfullmakter = !vergemålNode["fremtidsfullmakter"].isEmpty
-            val harFullmakter = !vergemålNode["fullmakter"].isEmpty
 
-            val vergemål =
-                Vergemål(
+            val vergemålOgFremtidsfullmakt =
+                VergemålOgFremtidsfullmakt(
                     harVergemål = harVergemål,
                     harFremtidsfullmakter = harFremtidsfullmakter,
-                    harFullmakter = harFullmakter,
                 )
 
             val vergemålLøsning =
                 Vergemålløsning(
-                    vergemål = vergemål,
+                    vergemålOgFremtidsfullmakt = vergemålOgFremtidsfullmakt,
                 )
 
             meldingMediator.løsning(

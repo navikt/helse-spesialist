@@ -6,16 +6,16 @@ import org.intellij.lang.annotations.Language
 import java.time.LocalDateTime
 import javax.sql.DataSource
 
-data class Vergemål(
+data class VergemålOgFremtidsfullmakt(
     val harVergemål: Boolean,
     val harFremtidsfullmakter: Boolean,
-    val harFullmakter: Boolean,
 )
 
 class VergemålDao(val dataSource: DataSource) {
     fun lagre(
         fødselsnummer: String,
-        vergemål: Vergemål,
+        vergemålOgFremtidsfullmakt: VergemålOgFremtidsfullmakt,
+        fullmakt: Boolean,
     ) {
         @Language("PostgreSQL")
         val statement = """
@@ -42,9 +42,9 @@ class VergemålDao(val dataSource: DataSource) {
                     statement,
                     mapOf(
                         "fodselsnummer" to fødselsnummer.toLong(),
-                        "har_vergemal" to vergemål.harVergemål,
-                        "har_fremtidsfullmakter" to vergemål.harFremtidsfullmakter,
-                        "har_fullmakter" to vergemål.harFullmakter,
+                        "har_vergemal" to vergemålOgFremtidsfullmakt.harVergemål,
+                        "har_fremtidsfullmakter" to vergemålOgFremtidsfullmakt.harFremtidsfullmakter,
+                        "har_fullmakter" to fullmakt,
                         "oppdatert" to LocalDateTime.now(),
                     ),
                 ).asExecute,
@@ -55,7 +55,7 @@ class VergemålDao(val dataSource: DataSource) {
     fun harVergemål(fødselsnummer: String): Boolean? {
         @Language("PostgreSQL")
         val query = """
-            SELECT har_vergemal, har_fremtidsfullmakter, har_fullmakter
+            SELECT har_vergemal
                 FROM vergemal v
                     INNER JOIN person p on p.id = v.person_ref
                 WHERE p.fodselsnummer = :fodselsnummer
@@ -68,13 +68,7 @@ class VergemålDao(val dataSource: DataSource) {
                         "fodselsnummer" to fødselsnummer.toLong(),
                     ),
                 )
-                    .map {
-                        Vergemål(
-                            it.boolean("har_vergemal"),
-                            it.boolean("har_fremtidsfullmakter"),
-                            it.boolean("har_fullmakter"),
-                        ).harVergemål
-                    }
+                    .map { it.boolean("har_vergemal") }
                     .asSingle,
             )
         }
@@ -83,7 +77,7 @@ class VergemålDao(val dataSource: DataSource) {
     fun harFullmakt(fødselsnummer: String): Boolean? {
         @Language("PostgreSQL")
         val query = """
-            SELECT har_vergemal, har_fremtidsfullmakter, har_fullmakter
+            SELECT har_fremtidsfullmakter, har_fullmakter
                 FROM vergemal v
                     INNER JOIN person p on p.id = v.person_ref
                 WHERE p.fodselsnummer = :fodselsnummer
@@ -97,15 +91,8 @@ class VergemålDao(val dataSource: DataSource) {
                     ),
                 )
                     .map { row ->
-                        Vergemål(
-                            row.boolean("har_vergemal"),
-                            row.boolean("har_fremtidsfullmakter"),
-                            row.boolean("har_fullmakter"),
-                        ).let {
-                            it.harFullmakter || it.harFremtidsfullmakter
-                        }
-                    }
-                    .asSingle,
+                        row.boolean("har_fremtidsfullmakter") || row.boolean("har_fullmakter")
+                    }.asSingle,
             )
         }
     }
