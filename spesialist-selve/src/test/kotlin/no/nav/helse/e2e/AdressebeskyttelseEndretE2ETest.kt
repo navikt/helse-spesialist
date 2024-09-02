@@ -3,6 +3,7 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse.Fortrolig
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse.StrengtFortrolig
+import no.nav.helse.spesialist.api.person.Adressebeskyttelse.StrengtFortroligUtland
 import org.junit.jupiter.api.Test
 
 internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
@@ -57,6 +58,18 @@ internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
         assertSisteEtterspurteBehov("HentPersoninfoV2")
 
         håndterPersoninfoløsning(adressebeskyttelse = StrengtFortrolig)
+        assertUtgåendeMelding("vedtaksperiode_avvist")
+    }
+
+    @Test
+    fun `Behandler ny adressebeskyttelse strengt fortrolig utland og avviser`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
+        håndterAdressebeskyttelseEndret()
+        assertSisteEtterspurteBehov("HentPersoninfoV2")
+
+        håndterPersoninfoløsning(adressebeskyttelse = StrengtFortroligUtland)
         assertUtgåendeMelding("vedtaksperiode_avvist")
     }
 
