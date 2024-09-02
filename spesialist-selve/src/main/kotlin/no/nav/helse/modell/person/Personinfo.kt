@@ -20,9 +20,6 @@ internal class HentPersoninfoløsning(
     private val kjønn: Kjønn,
     private val adressebeskyttelse: Adressebeskyttelse,
 ) {
-    internal fun lagre(personDao: PersonDao): Long =
-        personDao.insertPersoninfo(fornavn, mellomnavn, etternavn, fødselsdato, kjønn, adressebeskyttelse)
-
     internal fun lagre(dao: ArbeidsgiverDao) {
         dao.upsertNavn(ident, "$fornavn $etternavn")
         dao.upsertBransjer(ident, listOf(BRANSJE_PRIVATPERSON))

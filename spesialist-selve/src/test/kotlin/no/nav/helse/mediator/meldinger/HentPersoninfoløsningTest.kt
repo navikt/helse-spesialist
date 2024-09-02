@@ -23,13 +23,6 @@ internal class HentPersoninfoløsningTest {
     private val personDao = mockk<PersonDao>(relaxed = true)
 
     @Test
-    fun `lagre personinfo`() {
-        val info = HentPersoninfoløsning(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE)
-        info.lagre(personDao)
-        verify(exactly = 1) { personDao.insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE) }
-    }
-
-    @Test
     fun `oppdater personinfo`() {
         val info = HentPersoninfoløsning(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE)
         info.oppdater(personDao, FNR)
