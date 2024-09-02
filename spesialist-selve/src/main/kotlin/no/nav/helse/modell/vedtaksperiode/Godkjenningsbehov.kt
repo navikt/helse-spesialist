@@ -299,7 +299,6 @@ internal class GodkjenningsbehovCommand(
                 fødselsnummer = commandData.fødselsnummer,
                 organisasjonsnummer = commandData.organisasjonsnummer,
                 orgnummereMedRelevanteArbeidsforhold = commandData.orgnummereMedRelevanteArbeidsforhold,
-                førstegangsbehandling = commandData.førstegangsbehandling,
                 førsteKjenteDagFinner = førsteKjenteDagFinner,
                 personDao = personDao,
                 arbeidsgiverDao = arbeidsgiverDao,
@@ -410,7 +409,6 @@ private class ForberedVisningCommand(
     fødselsnummer: String,
     organisasjonsnummer: String,
     orgnummereMedRelevanteArbeidsforhold: List<String>,
-    førstegangsbehandling: Boolean,
     førsteKjenteDagFinner: () -> LocalDate,
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,
@@ -433,7 +431,6 @@ private class ForberedVisningCommand(
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
                 arbeidsforholdDao = arbeidsforholdDao,
-                førstegangsbehandling = førstegangsbehandling,
             ),
             OppdaterSnapshotCommand(
                 snapshotClient = snapshotClient,

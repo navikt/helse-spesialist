@@ -8,7 +8,6 @@ internal class KlargjørArbeidsforholdCommand(
     fødselsnummer: String,
     organisasjonsnummer: String,
     arbeidsforholdDao: ArbeidsforholdDao,
-    førstegangsbehandling: Boolean,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -21,7 +20,6 @@ internal class KlargjørArbeidsforholdCommand(
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
                 arbeidsforholdDao = arbeidsforholdDao,
-                førstegangsbehandling = førstegangsbehandling,
             ),
         )
 }

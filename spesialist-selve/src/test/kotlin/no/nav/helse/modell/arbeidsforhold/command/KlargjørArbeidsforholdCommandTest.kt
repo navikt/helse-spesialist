@@ -34,8 +34,7 @@ internal class KlargjørArbeidsforholdCommandTest {
     private val command = KlargjørArbeidsforholdCommand(
         fødselsnummer = FØDSELSNUMMER,
         organisasjonsnummer = ORGANISASJONSNUMMER,
-        arbeidsforholdDao = arbeidsforholdDao,
-        førstegangsbehandling = false
+        arbeidsforholdDao = arbeidsforholdDao
     )
 
     private val observer = object : CommandContextObserver {
@@ -137,8 +136,7 @@ internal class KlargjørArbeidsforholdCommandTest {
         val førstegangsCommand = KlargjørArbeidsforholdCommand(
             fødselsnummer = FØDSELSNUMMER,
             organisasjonsnummer = ORGANISASJONSNUMMER,
-            arbeidsforholdDao = arbeidsforholdDao,
-            førstegangsbehandling = true
+            arbeidsforholdDao = arbeidsforholdDao
         )
         arbeidsforholdFinnes(LocalDate.now().minusDays(1))
         assertFalse(førstegangsCommand.execute(context))
@@ -164,8 +162,7 @@ internal class KlargjørArbeidsforholdCommandTest {
         val førstegangsCommand = KlargjørArbeidsforholdCommand(
             fødselsnummer = FØDSELSNUMMER,
             organisasjonsnummer = ORGANISASJONSNUMMER,
-            arbeidsforholdDao = arbeidsforholdDao,
-            førstegangsbehandling = true
+            arbeidsforholdDao = arbeidsforholdDao
         )
         arbeidsforholdFinnes()
         assertTrue(førstegangsCommand.execute(context))

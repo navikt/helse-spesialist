@@ -138,7 +138,7 @@ class ArbeidsforholdDao(private val dataSource: DataSource) {
                     "organisasjonsnummer" to organisasjonsnummer.toLong(),
                 ),
             )
-                .map { row -> row.sqlDate("oppdatert").toLocalDate() }
+                .map { row -> row.localDate("oppdatert") }
                 .asSingle,
         )
     }
