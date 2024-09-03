@@ -107,7 +107,6 @@ internal class GodkjenningMediatorTest {
     @Test
     fun `saksbehandler utbetaling skal ikke opprette opptegnelse`() {
         mediator.saksbehandlerUtbetaling(
-            behandlingId = UUID.randomUUID(),
             context = context,
             behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
             vedtaksperiodeId = UUID.randomUUID(),
@@ -128,7 +127,6 @@ internal class GodkjenningMediatorTest {
     fun `saksbehandler utbetaling med spleisBehandlingId`() {
         val spleisBehandlingId = UUID.randomUUID()
         mediator.saksbehandlerUtbetaling(
-            behandlingId = UUID.randomUUID(),
             context = context,
             behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
             vedtaksperiodeId = UUID.randomUUID(),
@@ -151,7 +149,6 @@ internal class GodkjenningMediatorTest {
     @Test
     fun `saksbehandler utbetaling uten spleisBehandlingId`() {
         mediator.saksbehandlerUtbetaling(
-            behandlingId = UUID.randomUUID(),
             context = context,
             behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
             vedtaksperiodeId = UUID.randomUUID(),
@@ -174,7 +171,6 @@ internal class GodkjenningMediatorTest {
     @Test
     fun `legg saksbehandler og beslutter på vedtaksperiode_godkjent`() {
         mediator.saksbehandlerUtbetaling(
-            behandlingId = UUID.randomUUID(),
             context = context,
             behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
             vedtaksperiodeId = UUID.randomUUID(),
@@ -201,7 +197,6 @@ internal class GodkjenningMediatorTest {
     @Test
     fun `ikke legg beslutter på vedtaksperiode_godkjent dersom den ikke er satt på meldingen inn`() {
         mediator.saksbehandlerUtbetaling(
-            behandlingId = UUID.randomUUID(),
             context = context,
             behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
             vedtaksperiodeId = UUID.randomUUID(),
@@ -225,7 +220,6 @@ internal class GodkjenningMediatorTest {
     @Test
     fun `legg på saksbehandler men ikke beslutter på vedtaksperiode_avvist`() {
         mediator.saksbehandlerAvvisning(
-            behandlingId = UUID.randomUUID(),
             context = context,
             behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
             vedtaksperiodeId = UUID.randomUUID(),
@@ -286,7 +280,6 @@ internal class GodkjenningMediatorTest {
     @Test
     fun `saksbehandler avvisning skal ikke opprette opptegnelse`() {
         mediator.saksbehandlerAvvisning(
-            behandlingId = UUID.randomUUID(),
             context = context,
             behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
             vedtaksperiodeId = UUID.randomUUID(),
@@ -308,7 +301,6 @@ internal class GodkjenningMediatorTest {
     fun `saksbehandler avvisning med spleisBehandlingId`() {
         val spleisBehandlingId = UUID.randomUUID()
         mediator.saksbehandlerAvvisning(
-            behandlingId = UUID.randomUUID(),
             context = context,
             behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
             vedtaksperiodeId = UUID.randomUUID(),
@@ -331,7 +323,6 @@ internal class GodkjenningMediatorTest {
     @Test
     fun `saksbehandler avvisning uten spleisBehandlingId`() {
         mediator.saksbehandlerAvvisning(
-            behandlingId = UUID.randomUUID(),
             context = context,
             behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
             vedtaksperiodeId = UUID.randomUUID(),
@@ -388,7 +379,6 @@ internal class GodkjenningMediatorTest {
 
     private fun godkjenning(generasjoner: List<Generasjon>) =
         mediator.saksbehandlerUtbetaling(
-            behandlingId = UUID.randomUUID(),
             context = context,
             behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
             vedtaksperiodeId = UUID.randomUUID(),

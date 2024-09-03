@@ -5,16 +5,6 @@ import java.util.UUID
 import javax.sql.DataSource
 
 class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
-    fun lagreBehandlingsreferanse(
-        oppgaveId: Long,
-        behandlingId: UUID,
-    ) {
-        asSQL(
-            "INSERT INTO oppgave_behandling_kobling(oppgave_id, behandling_id) VALUES (:oppgaveId, :behandlingId)",
-            mapOf("oppgaveId" to oppgaveId, "behandlingId" to behandlingId),
-        ).update()
-    }
-
     fun finnOppgaveId(vedtaksperiodeId: UUID) =
         asSQL(
             """ SELECT id FROM oppgave

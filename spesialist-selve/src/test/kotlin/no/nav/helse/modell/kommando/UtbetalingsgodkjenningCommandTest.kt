@@ -63,7 +63,6 @@ internal class UtbetalingsgodkjenningCommandTest {
         commandContext = CommandContext(UUID.randomUUID())
         commandContext.nyObserver(observer)
         command = UtbetalingsgodkjenningCommand(
-            behandlingId = UUID.randomUUID(),
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             spleisBehandlingId = null,

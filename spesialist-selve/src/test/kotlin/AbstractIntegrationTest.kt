@@ -82,7 +82,6 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
         assertNotNull(løsning.path("fødselsnummer").asText())
         assertNotNull(løsning.get("oppgaveId").asLong())
         assertNotNull(løsning.get("hendelseId").asText())
-        assertNotNull(løsning.get("behandlingId").asText())
         assertNotNull(løsning.get("saksbehandlerident").asText())
         assertNotNull(løsning.path("saksbehandleroid").asText())
         assertNotNull(løsning.path("saksbehandlerepost").asText())

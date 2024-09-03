@@ -16,7 +16,6 @@ import java.util.UUID
 
 internal class Saksbehandlerløsning private constructor(
     override val id: UUID,
-    val behandlingId: UUID,
     val oppgaveId: Long,
     val godkjenningsbehovhendelseId: UUID,
     private val fødselsnummer: String,
@@ -34,7 +33,6 @@ internal class Saksbehandlerløsning private constructor(
 ) : Personmelding {
     internal constructor(packet: JsonMessage) : this(
         id = UUID.fromString(packet["@id"].asText()),
-        behandlingId = UUID.fromString(packet["behandlingId"].asText()),
         oppgaveId = packet["oppgaveId"].asLong(),
         godkjenningsbehovhendelseId = UUID.fromString(packet["hendelseId"].asText()),
         fødselsnummer = packet["fødselsnummer"].asText(),
@@ -65,7 +63,6 @@ internal class Saksbehandlerløsning private constructor(
     )
     internal constructor(jsonNode: JsonNode) : this(
         id = UUID.fromString(jsonNode["@id"].asText()),
-        behandlingId = UUID.fromString(jsonNode["behandlingId"].asText()),
         oppgaveId = jsonNode["oppgaveId"].asLong(),
         godkjenningsbehovhendelseId = UUID.fromString(jsonNode["hendelseId"].asText()),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),

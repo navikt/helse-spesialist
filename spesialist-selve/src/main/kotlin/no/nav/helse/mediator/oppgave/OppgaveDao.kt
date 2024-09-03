@@ -294,6 +294,16 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             mapOf("oppgaveId" to oppgaveId),
         ).single { it.uuid("utbetaling_id") }
 
+    fun finnSpleisBehandlingId(oppgaveId: Long) =
+        requireNotNull(
+            asSQL(
+                """ SELECT spleis_behandling_id FROM oppgave o
+                 INNER JOIN selve_vedtaksperiode_generasjon svg ON svg.unik_id = o.generasjon_ref
+                WHERE o.id = :oppgaveId; """,
+                mapOf("oppgaveId" to oppgaveId),
+            ).single { it.uuid("spleis_behandling_id") },
+        )
+
     fun finnIdForAktivOppgave(vedtaksperiodeId: UUID) =
         asSQL(
             """

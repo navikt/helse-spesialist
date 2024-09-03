@@ -46,11 +46,11 @@ class VedtakMutation(
 
             when (val vedtak = kanFatteVedtak(oppgavereferanse.toLong(), saksbehandler, tilganger)) {
                 is VedtakResultat.Success -> {
-                    val behandlingId = UUID.randomUUID()
+                    val behandlingId = vedtak.spleisBehandlingId
                     val godkjenning = GodkjenningDto(oppgavereferanse.toLong(), true, saksbehandler.ident, null, null, null, avslag)
 
                     saksbehandlerhåndterer.håndter(godkjenning, behandlingId, saksbehandler)
-                    godkjenninghåndterer.håndter(godkjenning, saksbehandler.epost, saksbehandler.oid, behandlingId)
+                    godkjenninghåndterer.håndter(godkjenning, saksbehandler.epost, saksbehandler.oid)
 
                     newResult<Boolean>().data(true).build()
                 }
@@ -83,7 +83,7 @@ class VedtakMutation(
 
             when (val vedtak = kanFatteVedtak(oppgavereferanse.toLong(), saksbehandler, tilganger)) {
                 is VedtakResultat.Success -> {
-                    val behandlingId = UUID.randomUUID()
+                    val behandlingId = vedtak.spleisBehandlingId
                     val godkjenning =
                         GodkjenningDto(
                             oppgavereferanse.toLong(),
@@ -95,7 +95,7 @@ class VedtakMutation(
                         )
 
                     saksbehandlerhåndterer.håndter(godkjenning, behandlingId, saksbehandler)
-                    godkjenninghåndterer.håndter(godkjenning, saksbehandler.epost, saksbehandler.oid, behandlingId)
+                    godkjenninghåndterer.håndter(godkjenning, saksbehandler.epost, saksbehandler.oid)
 
                     newResult<Boolean>().data(true).build()
                 }
@@ -119,6 +119,7 @@ class VedtakMutation(
         tilganger: SaksbehandlerTilganger,
     ): VedtakResultat {
         val erÅpenOppgave = oppgavehåndterer.venterPåSaksbehandler(oppgavereferanse)
+        val spleisBehandlingId = oppgavehåndterer.spleisBehandlingId(oppgavereferanse)
         if (!erÅpenOppgave) {
             return VedtakResultat.Error(
                 VedtakError.IkkeÅpenOppgave(
@@ -145,11 +146,11 @@ class VedtakMutation(
             totrinnsvurderinghåndterer.settBeslutter(oppgavereferanse, saksbehandler.oid)
         }
 
-        return VedtakResultat.Success
+        return VedtakResultat.Success(spleisBehandlingId = spleisBehandlingId)
     }
 
     sealed class VedtakResultat {
-        data object Success : VedtakResultat()
+        data class Success(val spleisBehandlingId: UUID) : VedtakResultat()
 
         data class Error(val error: VedtakError) : VedtakResultat()
     }

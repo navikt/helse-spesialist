@@ -81,6 +81,16 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `finn SpleisBehandlingId`() {
+        val spleisBehandlingId = UUID.randomUUID()
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode(spleisBehandlingId = spleisBehandlingId)
+        opprettOppgave(contextId = CONTEXT_ID)
+        assertEquals(spleisBehandlingId, oppgaveDao.finnSpleisBehandlingId(oppgaveId))
+    }
+
+    @Test
     fun `skal ikke lagre ny oppgave dersom det allerede er en eksisterende oppgave på samme person med gitt status`() {
         opprettPerson()
         opprettArbeidsgiver()

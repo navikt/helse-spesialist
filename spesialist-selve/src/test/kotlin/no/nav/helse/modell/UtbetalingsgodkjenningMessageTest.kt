@@ -13,7 +13,6 @@ import no.nav.helse.rapids_rivers.isMissingOrNull
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -44,20 +43,22 @@ internal class UtbetalingsgodkjenningMessageTest {
 
     @Test
     fun `manuelt godkjent`() {
-        val behandlingId = UUID.randomUUID()
-        utbetalingMessage.godkjennManuelt(behandlingId = behandlingId, IDENT, EPOST, GODKJENTTIDSPUNKT, emptyList())
-        assertGodkjent(false, IDENT, EPOST, GODKJENTTIDSPUNKT, behandlingId)
+        utbetalingMessage.godkjennManuelt(IDENT, EPOST, GODKJENTTIDSPUNKT, emptyList())
+        assertGodkjent(false, IDENT, EPOST, GODKJENTTIDSPUNKT)
     }
 
     @Test
     fun `manuelt avvist`() {
-        val behandlingId = UUID.randomUUID()
-        utbetalingMessage.avvisManuelt(behandlingId = behandlingId, IDENT, EPOST, GODKJENTTIDSPUNKT, null, null, null, emptyList())
-        assertIkkeGodkjent(false, IDENT, EPOST, GODKJENTTIDSPUNKT, behandlingId)
+        utbetalingMessage.avvisManuelt(IDENT, EPOST, GODKJENTTIDSPUNKT, null, null, null, emptyList())
+        assertIkkeGodkjent(false, IDENT, EPOST, GODKJENTTIDSPUNKT)
     }
 
-    private fun assertGodkjent(automatisk: Boolean, ident: String, epost: String, godkjenttidspunkt: LocalDateTime? = null, behandlingId: UUID? = null) {
-        assertBehandlingId(behandlingId)
+    private fun assertGodkjent(
+        automatisk: Boolean,
+        ident: String,
+        epost: String,
+        godkjenttidspunkt: LocalDateTime? = null
+    ) {
         assertMessage { løsning ->
             assertTrue(løsning.path("godkjent").booleanValue())
             assertLøsning(automatisk, ident, epost, godkjenttidspunkt)
@@ -68,21 +69,12 @@ internal class UtbetalingsgodkjenningMessageTest {
         automatisk: Boolean,
         ident: String,
         epost: String,
-        godkjenttidspunkt: LocalDateTime? = null,
-        behandlingId: UUID? = null
+        godkjenttidspunkt: LocalDateTime? = null
     ) {
-        assertBehandlingId(behandlingId)
         assertMessage { løsning ->
             assertFalse(løsning.path("godkjent").booleanValue())
             assertLøsning(automatisk, ident, epost, godkjenttidspunkt)
         }
-    }
-
-    private fun assertBehandlingId(behandlingId: UUID?) {
-        val message = objectMapper.readTree(utbetalingMessage.toJson())
-        val faktiskBehandlingId = message["behandlingId"].textValue()
-        if (behandlingId != null) assertEquals(behandlingId.toString(), faktiskBehandlingId)
-        else assertNotNull(faktiskBehandlingId)
     }
 
     private fun assertLøsning(automatisk: Boolean, ident: String, epost: String, godkjenttidspunkt: LocalDateTime? = null) {

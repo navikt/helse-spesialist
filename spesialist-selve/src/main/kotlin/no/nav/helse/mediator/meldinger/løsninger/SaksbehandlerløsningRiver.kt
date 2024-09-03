@@ -19,7 +19,7 @@ internal class SaksbehandlerløsningRiver(
     override fun validations() =
         River.PacketValidation {
             it.demandValue("@event_name", "saksbehandler_løsning")
-            it.requireKey("@id", "fødselsnummer", "oppgaveId", "hendelseId", "behandlingId")
+            it.requireKey("@id", "fødselsnummer", "oppgaveId", "hendelseId")
             it.requireKey("godkjent", "saksbehandlerident", "saksbehandleroid", "saksbehandlerepost")
             it.require("godkjenttidspunkt", JsonNode::asLocalDateTime)
             it.requireKey("saksbehandler", "saksbehandler.ident", "saksbehandler.epostadresse")

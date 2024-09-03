@@ -8,6 +8,5 @@ interface Godkjenninghåndterer {
         godkjenningDTO: GodkjenningDto,
         epost: String,
         oid: UUID,
-        behandlingId: UUID,
     )
 }

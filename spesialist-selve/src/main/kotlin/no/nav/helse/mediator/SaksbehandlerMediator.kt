@@ -293,7 +293,6 @@ internal class SaksbehandlerMediator(
         }
 
         påVentDao.slettPåVent(godkjenning.oppgavereferanse)
-        oppgaveApiDao.lagreBehandlingsreferanse(godkjenning.oppgavereferanse, behandlingId)
         godkjenning.avslag?.let {
             if (it.handling == Avslagshandling.INVALIDER) {
                 avslagDao.invaliderAvslag(godkjenning.oppgavereferanse)

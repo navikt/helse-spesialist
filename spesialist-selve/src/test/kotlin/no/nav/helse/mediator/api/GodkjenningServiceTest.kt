@@ -34,7 +34,7 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
 
-        godkjenningService.håndter(godkjenningDto(), "epost@nav.no", saksbehandler, UUID.randomUUID())
+        godkjenningService.håndter(godkjenningDto(), "epost@nav.no", saksbehandler)
         assertSaksbehandlerløsning(godkjent = true, automatiskBehandlet = false, totrinnsvurdering = false)
     }
 
@@ -48,7 +48,7 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
 
         settTotrinnsvurdering(opprinneligSaksbehandler = opprinneligSaksbehandler, beslutter = beslutter)
 
-        godkjenningService.håndter(godkjenningDto(), "epost@nav.no", beslutter, UUID.randomUUID())
+        godkjenningService.håndter(godkjenningDto(), "epost@nav.no", beslutter)
         assertSaksbehandlerløsning(godkjent = true, automatiskBehandlet = false, totrinnsvurdering = true)
     }
 
@@ -62,7 +62,7 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
 
         settTotrinnsvurdering(opprinneligSaksbehandler = opprinneligSaksbehandler, beslutter = beslutterOid)
 
-        godkjenningService.håndter(godkjenningDto(), "epost@nav.no", beslutterOid, UUID.randomUUID())
+        godkjenningService.håndter(godkjenningDto(), "epost@nav.no", beslutterOid)
 
         assertReservertTil(opprinneligSaksbehandler)
     }
@@ -78,7 +78,7 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
         settTotrinnsvurdering(opprinneligSaksbehandler, beslutter)
 
         val enTredjeSaksbehandler = enSaksbehandler()
-        godkjenningService.håndter(godkjenningDto(), "epost@nav.no", enTredjeSaksbehandler, UUID.randomUUID())
+        godkjenningService.håndter(godkjenningDto(), "epost@nav.no", enTredjeSaksbehandler)
 
         assertReservertTil(opprinneligSaksbehandler)
     }
@@ -90,7 +90,7 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
 
-        godkjenningService.håndter(godkjenningDto(), "epost@nav.no", opprinneligSaksbehandler, UUID.randomUUID())
+        godkjenningService.håndter(godkjenningDto(), "epost@nav.no", opprinneligSaksbehandler)
 
         assertReservertTil(opprinneligSaksbehandler)
     }
@@ -106,7 +106,7 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
 
         settTotrinnsvurdering(opprinneligSaksbehandler, beslutter)
 
-        godkjenningService.håndter(godkjenningDto(), "epost@nav.no", beslutter, UUID.randomUUID())
+        godkjenningService.håndter(godkjenningDto(), "epost@nav.no", beslutter)
 
         val utbetalingId = oppgaveDao.finnUtbetalingId(1.oppgave(VEDTAKSPERIODE_ID)) ?: fail("Fant ikke utbetalingId")
         assertPeriodehistorikk(utbetalingId)
@@ -120,7 +120,7 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         opprettInitiellTotrinnsvurdering()
-        godkjenningService.håndter(godkjenningDtoAvvisning(), "epost@nav.no", opprinneligSaksbehandler, UUID.randomUUID())
+        godkjenningService.håndter(godkjenningDtoAvvisning(), "epost@nav.no", opprinneligSaksbehandler)
 
         assertSaksbehandlerløsning(godkjent = false, automatiskBehandlet = false, totrinnsvurdering = false)
     }
@@ -134,7 +134,7 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         settTotrinnsvurdering(opprinneligSaksbehandler, beslutter)
-        godkjenningService.håndter(godkjenningDtoAvvisning(), "epost@nav.no", opprinneligSaksbehandler, UUID.randomUUID())
+        godkjenningService.håndter(godkjenningDtoAvvisning(), "epost@nav.no", opprinneligSaksbehandler)
 
         assertSaksbehandlerløsning(godkjent = false, automatiskBehandlet = false, totrinnsvurdering = false)
     }

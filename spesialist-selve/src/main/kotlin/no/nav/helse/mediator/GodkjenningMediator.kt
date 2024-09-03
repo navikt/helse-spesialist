@@ -30,7 +30,6 @@ internal class GodkjenningMediator(
     val generasjonDao: GenerasjonDao,
 ) {
     internal fun saksbehandlerUtbetaling(
-        behandlingId: UUID,
         context: CommandContext,
         behov: UtbetalingsgodkjenningMessage,
         vedtaksperiodeId: UUID,
@@ -45,7 +44,6 @@ internal class GodkjenningMediator(
         spleisBehandlingId: UUID?,
     ) {
         behov.godkjennManuelt(
-            behandlingId = behandlingId,
             saksbehandlerIdent = saksbehandlerIdent,
             saksbehandlerEpost = saksbehandlerEpost,
             godkjenttidspunkt = godkjenttidspunkt,
@@ -67,7 +65,6 @@ internal class GodkjenningMediator(
     }
 
     internal fun saksbehandlerAvvisning(
-        behandlingId: UUID,
         context: CommandContext,
         behov: UtbetalingsgodkjenningMessage,
         vedtaksperiodeId: UUID,
@@ -83,7 +80,6 @@ internal class GodkjenningMediator(
         spleisBehandlingId: UUID?,
     ) {
         behov.avvisManuelt(
-            behandlingId = behandlingId,
             saksbehandlerIdent = saksbehandlerIdent,
             saksbehandlerEpost = saksbehandlerEpost,
             godkjenttidspunkt = godkjenttidspunkt,

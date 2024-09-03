@@ -201,6 +201,8 @@ internal class OppgaveService(
 
     override fun venterPåSaksbehandler(oppgaveId: Long): Boolean = oppgaveDao.venterPåSaksbehandler(oppgaveId)
 
+    override fun spleisBehandlingId(oppgaveId: Long): UUID = oppgaveDao.finnSpleisBehandlingId(oppgaveId)
+
     override fun oppgaver(
         saksbehandlerFraApi: SaksbehandlerFraApi,
         offset: Int,

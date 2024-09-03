@@ -27,6 +27,8 @@ interface Oppgavehåndterer {
 
     fun venterPåSaksbehandler(oppgaveId: Long): Boolean
 
+    fun spleisBehandlingId(oppgaveId: Long): UUID
+
     fun oppgaver(
         saksbehandlerFraApi: SaksbehandlerFraApi,
         offset: Int,

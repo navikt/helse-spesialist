@@ -52,7 +52,6 @@ internal class SaksbehandlerløsningTest {
     private fun saksbehandlerløsning(godkjent: Boolean, saksbehandlerløsning: List<UUID> = emptyList(), arbeidsgiverbeløp: Int = 0, personbeløp: Int = 0): UtbetalingsgodkjenningCommand {
         val vedtaksperiodeId = randomUUID()
         return UtbetalingsgodkjenningCommand(
-            behandlingId = randomUUID(),
             fødselsnummer = FNR,
             vedtaksperiodeId = vedtaksperiodeId,
             spleisBehandlingId = null,

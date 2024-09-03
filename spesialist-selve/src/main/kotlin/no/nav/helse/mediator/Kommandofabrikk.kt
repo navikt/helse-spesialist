@@ -313,7 +313,6 @@ internal class Kommandofabrikk(
         val sykefraværstilfelle = person.sykefraværstilfelle(vedtaksperiodeId)
         val utbetaling = utbetalingDao.utbetalingFor(oppgaveId)
         return UtbetalingsgodkjenningCommand(
-            behandlingId = melding.behandlingId,
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             spleisBehandlingId = spleisBehandlingId,

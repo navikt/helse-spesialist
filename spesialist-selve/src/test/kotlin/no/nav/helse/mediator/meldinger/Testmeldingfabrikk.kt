@@ -744,7 +744,6 @@ internal object Testmeldingfabrikk {
                 "fødselsnummer" to fødselsnummer,
                 "hendelseId" to hendelseId,
                 "contextId" to contextId,
-                "behandlingId" to UUID.randomUUID(),
                 "oppgaveId" to oppgaveId,
                 "godkjent" to godkjent,
                 "godkjenttidspunkt" to godkjenttidspunkt,
