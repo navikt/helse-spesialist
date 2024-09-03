@@ -130,6 +130,18 @@ data class Person(
             )
         }
 
+    @Suppress("unused")
+    fun tilleggsinfoForInntektskilder(): List<TilleggsinfoForInntektskilde> {
+        return snapshot.vilkarsgrunnlag.flatMap {
+            it.inntekter.map { inntekt -> inntekt.arbeidsgiver }
+        }.toSet().map { orgnr ->
+            TilleggsinfoForInntektskilde(
+                orgnummer = orgnr,
+                navn = arbeidsgiverApiDao.finnNavn(orgnr) ?: "Ikke tilgjengelig",
+            )
+        }
+    }
+
     fun arbeidsgivere(): List<Arbeidsgiver> {
         val overstyringer = overstyringApiDao.finnOverstyringer(snapshot.fodselsnummer)
 
