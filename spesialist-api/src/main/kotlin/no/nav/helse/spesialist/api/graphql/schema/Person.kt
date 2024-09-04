@@ -132,8 +132,13 @@ data class Person(
 
     @Suppress("unused")
     fun tilleggsinfoForInntektskilder(): List<TilleggsinfoForInntektskilde> {
-        return snapshot.vilkarsgrunnlag.flatMap {
-            it.inntekter.map { inntekt -> inntekt.arbeidsgiver }
+        return snapshot.vilkarsgrunnlag.flatMap { vilkårsgrunnlag ->
+            val avviksvurdering = avviksvurderinghenter.hentAvviksvurdering(vilkårsgrunnlag.id)
+            (
+                avviksvurdering?.sammenligningsgrunnlag?.innrapporterteInntekter?.map { innrapportertInntekt ->
+                    innrapportertInntekt.arbeidsgiverreferanse
+                } ?: emptyList()
+            ) + vilkårsgrunnlag.inntekter.map { inntekt -> inntekt.arbeidsgiver }
         }.toSet().map { orgnr ->
             TilleggsinfoForInntektskilde(
                 orgnummer = orgnr,
