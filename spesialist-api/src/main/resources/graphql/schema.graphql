@@ -69,6 +69,7 @@ type GraphQLArbeidsgiver {
   generasjoner: [GraphQLGenerasjon!]!
   ghostPerioder: [GraphQLGhostPeriode!]!
   id: UUID!
+  nyeInntektsforholdPerioder: [GraphQLNyttInntektsforholdPeriode!]!
   organisasjonsnummer: String!
 }
 
@@ -154,6 +155,14 @@ type GraphQLInntektsmelding implements GraphQLHendelse {
   id: String!
   mottattDato: LocalDateTime!
   type: GraphQLHendelsetype!
+}
+
+type GraphQLNyttInntektsforholdPeriode {
+  fom: LocalDate!
+  id: UUID!
+  organisasjonsnummer: String!
+  tom: LocalDate!
+  vilkarsgrunnlagId: UUID!
 }
 
 type GraphQLOmregnetArsinntekt {

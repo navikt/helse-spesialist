@@ -512,6 +512,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                                 GraphQLArbeidsgiver(
                                     organisasjonsnummer = "987654321",
                                     ghostPerioder = emptyList(),
+                                    nyeInntektsforholdPerioder = emptyList(),
                                     generasjoner =
                                         listOf(
                                             GraphQLGenerasjon(

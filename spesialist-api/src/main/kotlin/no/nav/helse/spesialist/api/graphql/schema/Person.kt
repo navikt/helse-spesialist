@@ -25,6 +25,7 @@ import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGhostPeriode
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLNyttInntektsforholdPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -156,6 +157,7 @@ data class Person(
                 navn = arbeidsgiverApiDao.finnNavn(arbeidsgiver.organisasjonsnummer) ?: "Ikke tilgjengelig",
                 bransjer = arbeidsgiverApiDao.finnBransjer(arbeidsgiver.organisasjonsnummer),
                 ghostPerioder = arbeidsgiver.ghostPerioder.tilGhostPerioder(arbeidsgiver.organisasjonsnummer),
+                nyeInntektsforholdPerioder = arbeidsgiver.nyeInntektsforholdPerioder.tilNyeInntektsforholdPerioder(),
                 fødselsnummer = snapshot.fodselsnummer,
                 generasjoner = arbeidsgiver.generasjoner,
                 oppgavehåndterer = oppgavehåndterer,
@@ -202,6 +204,17 @@ data class Person(
                 vilkarsgrunnlagId = it.vilkarsgrunnlagId,
                 deaktivert = it.deaktivert,
                 organisasjonsnummer = organisasjonsnummer,
+            )
+        }
+
+    private fun List<GraphQLNyttInntektsforholdPeriode>.tilNyeInntektsforholdPerioder(): List<NyttInntektsforholdPeriode> =
+        map {
+            NyttInntektsforholdPeriode(
+                id = it.id,
+                fom = it.fom,
+                tom = it.tom,
+                vilkarsgrunnlagId = it.vilkarsgrunnlagId,
+                organisasjonsnummer = it.organisasjonsnummer,
             )
         }
 }

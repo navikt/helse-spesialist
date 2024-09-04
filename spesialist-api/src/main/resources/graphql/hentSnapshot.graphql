@@ -82,6 +82,13 @@ query HentSnapshot($fnr: String!) {
                 vilkarsgrunnlagId
                 deaktivert
             }
+            nyeInntektsforholdPerioder {
+                id
+                fom
+                tom
+                organisasjonsnummer
+                vilkarsgrunnlagId
+            }
             generasjoner {
                 id
                 perioder {

@@ -743,6 +743,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         GraphQLArbeidsgiver(
             organisasjonsnummer = ORGANISASJONSNUMMER,
             ghostPerioder = emptyList(),
+            nyeInntektsforholdPerioder = emptyList(),
             generasjoner = generasjoner,
         )
 

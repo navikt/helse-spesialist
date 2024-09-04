@@ -97,6 +97,7 @@ type Arbeidsgiver {
     ghostPerioder: [GhostPeriode!]!
     inntekterFraAordningen: [ArbeidsgiverInntekterFraAOrdningen!]!
     navn: String!
+    nyeInntektsforholdPerioder: [NyttInntektsforholdPeriode!]!
     organisasjonsnummer: String!
     overstyringer: [Overstyring!]!
 }
@@ -392,6 +393,14 @@ type Notater {
     notater: [Notat!]!
 }
 
+type NyttInntektsforholdPeriode {
+    fom: LocalDate!
+    id: UUID!
+    organisasjonsnummer: String!
+    tom: LocalDate!
+    vilkarsgrunnlagId: UUID
+}
+
 type OmregnetArsinntekt {
     belop: Float!
     inntektFraAOrdningen: [InntektFraAOrdningen!]
@@ -495,7 +504,7 @@ type Person {
     infotrygdutbetalinger: [Infotrygdutbetaling!]
     personinfo: Personinfo!
     tildeling: Tildeling
-    tilleggsinfoForInntektskilder: [TilleggsinfoForInntektskilde!]
+    tilleggsinfoForInntektskilder: [TilleggsinfoForInntektskilde!]!
     versjon: Int!
     vilkarsgrunnlag: [Vilkarsgrunnlag!]!
 }

@@ -59,6 +59,7 @@ object Testdata {
                                 GraphQLArbeidsgiver(
                                     organisasjonsnummer = organisasjonsnummer,
                                     ghostPerioder = emptyList(),
+                                    nyeInntektsforholdPerioder = emptyList(),
                                     generasjoner =
                                         listOf(
                                             GraphQLGenerasjon(

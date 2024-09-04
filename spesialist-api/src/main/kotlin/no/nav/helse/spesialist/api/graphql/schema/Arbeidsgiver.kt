@@ -144,11 +144,20 @@ data class GhostPeriode(
     val id = UUID.nameUUIDFromBytes(fom.toString().toByteArray() + organisasjonsnummer.toByteArray()).toString()
 }
 
+data class NyttInntektsforholdPeriode(
+    val id: UUID,
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val vilkarsgrunnlagId: UUID?,
+    val organisasjonsnummer: String,
+)
+
 data class Arbeidsgiver(
     val organisasjonsnummer: String,
     val navn: String,
     val bransjer: List<String>,
     val ghostPerioder: List<GhostPeriode>,
+    val nyeInntektsforholdPerioder: List<NyttInntektsforholdPeriode>,
     private val fødselsnummer: String,
     private val generasjoner: List<GraphQLGenerasjon>,
     private val oppgavehåndterer: Oppgavehåndterer,
