@@ -161,6 +161,7 @@ type GraphQLNyttInntektsforholdPeriode {
   fom: LocalDate!
   id: UUID!
   organisasjonsnummer: String!
+  skjaeringstidspunkt: LocalDate!
   tom: LocalDate!
   vilkarsgrunnlagId: UUID!
 }

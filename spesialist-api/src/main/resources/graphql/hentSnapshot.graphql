@@ -88,6 +88,7 @@ query HentSnapshot($fnr: String!) {
                 tom
                 organisasjonsnummer
                 vilkarsgrunnlagId
+                skjaeringstidspunkt
             }
             generasjoner {
                 id

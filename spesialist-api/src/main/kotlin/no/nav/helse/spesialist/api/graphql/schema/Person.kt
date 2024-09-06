@@ -215,6 +215,7 @@ data class Person(
                 tom = it.tom,
                 vilkarsgrunnlagId = it.vilkarsgrunnlagId,
                 organisasjonsnummer = it.organisasjonsnummer,
+                skjaeringstidspunkt = it.skjaeringstidspunkt,
             )
         }
 }
