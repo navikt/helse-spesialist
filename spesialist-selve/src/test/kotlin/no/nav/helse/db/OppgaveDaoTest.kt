@@ -761,7 +761,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             vedtaksperiodeId = UUID.randomUUID(),
         )
         val oppgaveId1 = OPPGAVE_ID
-        tildelOppgave(oppgaveId1, UUID.randomUUID(), "A")
+        tildelOppgave(oppgaveId1, UUID.randomUUID(), "Å")
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
@@ -787,7 +787,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                     ),
             )
         assertEquals(3, oppgaver.size)
-        assertEquals(listOf(oppgaveId1, oppgaveId3, oppgaveId2), oppgaver.map { it.id })
+        assertEquals(listOf(oppgaveId3, oppgaveId1, oppgaveId2), oppgaver.map { it.id })
     }
 
     @Test

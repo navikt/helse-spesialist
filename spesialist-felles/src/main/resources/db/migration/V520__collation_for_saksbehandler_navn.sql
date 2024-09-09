@@ -1,0 +1,1 @@
+ALTER TABLE saksbehandler ALTER COLUMN navn TYPE TEXT COLLATE "nb-NO-x-icu"
