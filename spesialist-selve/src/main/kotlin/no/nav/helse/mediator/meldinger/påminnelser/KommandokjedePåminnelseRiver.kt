@@ -36,8 +36,8 @@ internal class KommandokjedePåminnelseRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val meldingId = UUID.fromString(packet["@id"].asText())
-        if (meldingId == UUID.fromString("4dd83d27-3423-4055-ae9a-4bf6b24b3fae")) {
+        val meldingId = UUID.fromString(packet["meldingId"].asText())
+        if (meldingId == UUID.fromString("3aed7ed6-47b6-4cc3-a059-b814533b6e0c")) {
             return
         }
         logg.info(
