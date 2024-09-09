@@ -30,6 +30,7 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
             kommandofabrikk = kommandofabrikk,
             avviksvurderingDao = avviksvurderingDao,
             stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
+            poisonPills = emptyMap(),
         )
 
     @BeforeEach

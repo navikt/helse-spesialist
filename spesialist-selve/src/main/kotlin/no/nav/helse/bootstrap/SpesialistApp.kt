@@ -101,7 +101,9 @@ internal class SpesialistApp(
     private val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val tildelingApiDao = TildelingDao(dataSource)
-    private val tildelingDao = no.nav.helse.db.TildelingDao(dataSource)
+    private val tildelingDao =
+        no.nav.helse.db
+            .TildelingDao(dataSource)
     private val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
     private val overstyringApiDao = OverstyringApiDao(dataSource)
     private val reservasjonDao = ReservasjonDao(dataSource)
@@ -164,9 +166,8 @@ internal class SpesialistApp(
 
     private val avviksvurderinghenter =
         object : Avviksvurderinghenter {
-            override fun hentAvviksvurdering(vilkårsgrunnlagId: UUID): Avviksvurdering? {
-                return avviksvurderingDao.finnAvviksvurdering(vilkårsgrunnlagId)
-            }
+            override fun hentAvviksvurdering(vilkårsgrunnlagId: UUID): Avviksvurdering? =
+                avviksvurderingDao.finnAvviksvurdering(vilkårsgrunnlagId)
         }
 
     private val plukkTilManuell: PlukkTilManuell<String> = (
@@ -285,6 +286,7 @@ internal class SpesialistApp(
                 kommandofabrikk = kommandofabrikk,
                 avviksvurderingDao = avviksvurderingDao,
                 stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
+                poisonPills = emptyMap(),
             )
         saksbehandlerMediator =
             SaksbehandlerMediator(

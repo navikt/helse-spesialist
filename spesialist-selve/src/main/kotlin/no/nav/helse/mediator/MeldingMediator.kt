@@ -90,6 +90,7 @@ internal class MeldingMediator(
     private val varselRepository: VarselRepository = VarselRepository(dataSource),
     private val stansAutomatiskBehandlingMediator: StansAutomatiskBehandlingMediator,
     private val personRepository: PersonRepository = PersonRepository(dataSource),
+    private val poisonPills: Map<String, String>,
 ) : Personhåndterer {
     private companion object {
         private val env = Environment()
@@ -100,6 +101,7 @@ internal class MeldingMediator(
     private fun skalBehandleMelding(melding: String): Boolean {
         val jsonNode = objectMapper.readTree(melding)
         if (erDuplikat(jsonNode)) return false
+        if (poisonPills.erPoisonPill(jsonNode)) return false
         if (env.erProd) return true
         return skalBehandleMeldingIDev(jsonNode)
     }
@@ -270,9 +272,7 @@ internal class MeldingMediator(
         kilde: String,
     ) = stansAutomatiskBehandlingMediator.håndter(fødselsnummer, status, årsaker, opprettet, originalMelding, kilde)
 
-    fun slettGamleDokumenter(): Int {
-        return dokumentDao.slettGamleDokumenter()
-    }
+    fun slettGamleDokumenter(): Int = dokumentDao.slettGamleDokumenter()
 
     private fun nullstillTilstand() {
         løsninger = null
@@ -519,12 +519,13 @@ internal class MeldingMediator(
     override fun oppdaterSnapshot(fnr: String) {
         val json =
             objectMapper.readTree(
-                JsonMessage.newMessage(
-                    "oppdater_personsnapshot",
-                    mapOf(
-                        "fødselsnummer" to fnr,
-                    ),
-                ).toJson(),
+                JsonMessage
+                    .newMessage(
+                        "oppdater_personsnapshot",
+                        mapOf(
+                            "fødselsnummer" to fnr,
+                        ),
+                    ).toJson(),
             )
 
         mottaMelding(OppdaterPersonsnapshot(json), rapidsConnection)

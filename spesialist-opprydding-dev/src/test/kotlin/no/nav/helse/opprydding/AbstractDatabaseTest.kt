@@ -14,29 +14,31 @@ import javax.sql.DataSource
 import kotlin.random.Random
 
 internal abstract class AbstractDatabaseTest {
-
     protected val personRepository = PersonRepository(dataSource)
 
     protected companion object {
         const val FØDSELSNUMMER = "12345678910"
 
-        private val postgres = PostgreSQLContainer<Nothing>("postgres:14").apply {
-            withReuse(true)
-            withLabel("app-navn", "spesialist-opprydding")
-            start()
+        private val postgres =
+            PostgreSQLContainer<Nothing>("postgres:14").apply {
+                withReuse(true)
+                withLabel("app-navn", "spesialist-opprydding")
+                start()
 
-            println("Database: jdbc:postgresql://localhost:$firstMappedPort/test startet opp, credentials: test og test")
-        }
+                println("Database: jdbc:postgresql://localhost:$firstMappedPort/test startet opp, credentials: test og test")
+            }
 
         val dataSource =
-            HikariDataSource(HikariConfig().apply {
-                jdbcUrl = postgres.jdbcUrl
-                username = postgres.username
-                password = postgres.password
-                maximumPoolSize = 5
-                connectionTimeout = 500
-                initializationFailTimeout = 5000
-            })
+            HikariDataSource(
+                HikariConfig().apply {
+                    jdbcUrl = postgres.jdbcUrl
+                    username = postgres.username
+                    password = postgres.password
+                    maximumPoolSize = 5
+                    connectionTimeout = 500
+                    initializationFailTimeout = 5000
+                },
+            )
 
         private fun createTruncateFunction(dataSource: DataSource) {
             sessionOf(dataSource).use {
@@ -62,12 +64,12 @@ internal abstract class AbstractDatabaseTest {
         }
 
         init {
-            Flyway.configure()
+            Flyway
+                .configure()
                 .dataSource(dataSource)
                 .placeholders(
-                    mapOf("spesialist_oid" to UUID.randomUUID().toString())
-                )
-                .ignoreMigrationPatterns("*:missing")
+                    mapOf("spesialist_oid" to UUID.randomUUID().toString()),
+                ).ignoreMigrationPatterns("*:missing")
                 .locations("classpath:db/migration")
                 .load()
                 .migrate()
@@ -76,7 +78,10 @@ internal abstract class AbstractDatabaseTest {
         }
     }
 
-    protected fun opprettPerson(fødselsnummer: String, sequenceNumber: Int = 1) {
+    protected fun opprettPerson(
+        fødselsnummer: String,
+        sequenceNumber: Int = 1,
+    ) {
         Flyway
             .configure()
             .dataSource(dataSource)
@@ -93,14 +98,16 @@ internal abstract class AbstractDatabaseTest {
                     "organisasjonsnummer" to Random.nextInt(100000000, 999999999).toString(),
                     "utbetaling_id" to UUID.randomUUID().toString(),
                     "avviksvurdering_unik_id" to UUID.randomUUID().toString(),
-                )
-            )
-            .locations("classpath:db/testperson")
+                ),
+            ).locations("classpath:db/testperson")
             .load()
             .migrate()
     }
 
-    protected fun assertTabellinnhold(comparison: Comparison, numRows: Int) {
+    protected fun assertTabellinnhold(
+        comparison: Comparison,
+        numRows: Int,
+    ) {
         val tabeller = finnTabeller().toMutableList()
         tabeller.removeAll(
             listOf(
@@ -126,36 +133,36 @@ internal abstract class AbstractDatabaseTest {
                 "sammenligningsgrunnlag_spinnvillgate",
                 "passert_filter_for_skjonnsfastsettelse",
                 "melding_duplikatkontroll",
-            )
+                "poison_pill",
+            ),
         )
         tabeller.forEach { tabellnavn ->
-            val expectedRowCount = when (tabellnavn) {
-                in listOf("oppdrag", "utbetalingslinje") -> numRows * 2
-                in listOf("begrunnelse") -> numRows * 4
-                else -> numRows
-            }
+            val expectedRowCount =
+                when (tabellnavn) {
+                    in listOf("oppdrag", "utbetalingslinje") -> numRows * 2
+                    in listOf("begrunnelse") -> numRows * 4
+                    else -> numRows
+                }
             val rowCount = finnRowCount(tabellnavn)
             assertTrue(
-                comparison.compare(rowCount, expectedRowCount)
+                comparison.compare(rowCount, expectedRowCount),
             ) { "Table '$tabellnavn' has $rowCount row(s), expected it to be ${comparison.label} $expectedRowCount" }
         }
     }
 
-    protected fun finnTabeller(): List<String> {
-        return sessionOf(dataSource).use { session ->
+    protected fun finnTabeller(): List<String> =
+        sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"
             session.run(queryOf(query).map { it.string("table_name") }.asList)
         }
-    }
 
-    private fun finnRowCount(tabellnavn: String): Int {
-        return sessionOf(dataSource).use { session ->
+    private fun finnRowCount(tabellnavn: String): Int =
+        sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query = "SELECT COUNT(1) FROM $tabellnavn"
             session.run(queryOf(query).map { it.int(1) }.asSingle) ?: 0
         }
-    }
 
     @BeforeEach
     fun resetDatabase() {
@@ -165,7 +172,10 @@ internal abstract class AbstractDatabaseTest {
     }
 }
 
-enum class Comparison(val label: String, val compare: (Int, Int) -> Boolean) {
+enum class Comparison(
+    val label: String,
+    val compare: (Int, Int) -> Boolean,
+) {
     EXACTLY("exactly", { a, b -> a == b }),
-    AT_LEAST("at least", { a, b -> a >= b })
+    AT_LEAST("at least", { a, b -> a >= b }),
 }

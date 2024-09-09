@@ -145,6 +145,7 @@ internal class TestMediator(
             kommandofabrikk = kommandofabrikk,
             avviksvurderingDao = avviksvurderingDao,
             stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
+            poisonPills = emptyMap(),
         )
     }
 
