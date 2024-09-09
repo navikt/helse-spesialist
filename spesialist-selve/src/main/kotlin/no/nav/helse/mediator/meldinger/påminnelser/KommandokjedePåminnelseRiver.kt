@@ -37,6 +37,9 @@ internal class KommandokjedePåminnelseRiver(
         context: MessageContext,
     ) {
         val meldingId = UUID.fromString(packet["@id"].asText())
+        if (meldingId == UUID.fromString("4dd83d27-3423-4055-ae9a-4bf6b24b3fae")) {
+            return
+        }
         logg.info(
             "Mottok kommandokjede_påminnelse med {}",
             StructuredArguments.keyValue("meldingId", meldingId),
