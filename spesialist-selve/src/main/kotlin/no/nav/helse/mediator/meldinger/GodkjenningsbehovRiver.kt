@@ -11,6 +11,7 @@ import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 internal class GodkjenningsbehovRiver(
     private val mediator: MeldingMediator,
@@ -60,5 +61,10 @@ internal class GodkjenningsbehovRiver(
     override fun onPacket(
         packet: JsonMessage,
         context: MessageContext,
-    ) = mediator.mottaMelding(Godkjenningsbehov(packet), context)
+    ) {
+        if (UUID.fromString(packet["@id"].asText()) == UUID.fromString("3aed7ed6-47b6-4cc3-a059-b814533b6e0c")) {
+            return
+        }
+        mediator.mottaMelding(Godkjenningsbehov(packet), context)
+    }
 }
