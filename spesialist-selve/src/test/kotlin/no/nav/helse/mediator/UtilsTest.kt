@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 class UtilsTest {
     @Test
     fun `Er poison pill`() {
-        val poisonPills = mapOf("key1" to "redpill", "key2" to "bluepill")
+        val poisonPills = mapOf("key1" to setOf("redpill"), "key2" to setOf("bluepill"))
         val jsonNode = objectMapper.createObjectNode()
         jsonNode.put("key2", "bluepill")
         assertTrue(poisonPills.erPoisonPill(jsonNode))
@@ -16,7 +16,7 @@ class UtilsTest {
 
     @Test
     fun `Er ikke poison pill hvis noden ikke inneholder riktig feltnavn`() {
-        val poisonPills = mapOf("key1" to "redpill")
+        val poisonPills = mapOf("key1" to setOf("redpill"))
         val jsonNode = objectMapper.createObjectNode()
         jsonNode.put("key2", "bluepill")
         assertFalse(poisonPills.erPoisonPill(jsonNode))
@@ -24,7 +24,7 @@ class UtilsTest {
 
     @Test
     fun `Er ikke poison pill`() {
-        val poisonPills = mapOf("key" to "redpill")
+        val poisonPills = mapOf("key" to setOf("redpill"))
         val jsonNode = objectMapper.createObjectNode()
         jsonNode.put("key", "bluepill")
         assertFalse(poisonPills.erPoisonPill(jsonNode))
@@ -32,7 +32,7 @@ class UtilsTest {
 
     @Test
     fun `Er ikke poison pill når det ikke finnes poison pills`() {
-        val poisonPills = emptyMap<String, String>()
+        val poisonPills = emptyMap<String, Set<String>>()
         val jsonNode = objectMapper.createObjectNode()
         jsonNode.put("key", "bluepill")
         assertFalse(poisonPills.erPoisonPill(jsonNode))

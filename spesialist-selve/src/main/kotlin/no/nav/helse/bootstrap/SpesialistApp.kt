@@ -7,6 +7,7 @@ import no.nav.helse.Gruppekontroll
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.BehandlingsstatistikkDao
+import no.nav.helse.db.PoisonPillDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
@@ -286,7 +287,7 @@ internal class SpesialistApp(
                 kommandofabrikk = kommandofabrikk,
                 avviksvurderingDao = avviksvurderingDao,
                 stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
-                poisonPills = emptyMap(),
+                poisonPills = PoisonPillDao(dataSource).poisonPills(),
             )
         saksbehandlerMediator =
             SaksbehandlerMediator(

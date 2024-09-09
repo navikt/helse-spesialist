@@ -90,7 +90,7 @@ internal class MeldingMediator(
     private val varselRepository: VarselRepository = VarselRepository(dataSource),
     private val stansAutomatiskBehandlingMediator: StansAutomatiskBehandlingMediator,
     private val personRepository: PersonRepository = PersonRepository(dataSource),
-    private val poisonPills: Map<String, String>,
+    private val poisonPills: Map<String, Set<String>>,
 ) : Personhåndterer {
     private companion object {
         private val env = Environment()

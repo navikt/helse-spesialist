@@ -5,10 +5,10 @@ import java.util.UUID
 
 internal fun JsonNode.asUUID() = UUID.fromString(asText())
 
-internal fun Map<String, String>.erPoisonPill(melding: JsonNode): Boolean {
-    this.forEach { (key, value) ->
+internal fun Map<String, Set<String>>.erPoisonPill(melding: JsonNode): Boolean {
+    this.forEach { (key, values) ->
         val funnetVerdi = melding[key]?.asText() ?: return@forEach
-        if (funnetVerdi == value) return true
+        if (values.contains(funnetVerdi)) return true
     }
     return false
 }
