@@ -1,6 +1,13 @@
 package no.nav.helse.modell.kommando
 
+import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.mediator.CommandContextObserver
+import no.nav.helse.modell.InntektskildeDto
+import no.nav.helse.modell.Inntektskildetype
+import no.nav.helse.modell.InntektskildetypeDto
+import no.nav.helse.modell.KomplettInntektskilde
+import no.nav.helse.modell.KomplettInntektskildeDto
+import no.nav.helse.modell.NyInntektskilde
 import no.nav.helse.modell.arbeidsgiver.Arbeidsgiverinformasjonløsning
 import no.nav.helse.modell.person.HentPersoninfoløsning
 import no.nav.helse.modell.person.HentPersoninfoløsninger
