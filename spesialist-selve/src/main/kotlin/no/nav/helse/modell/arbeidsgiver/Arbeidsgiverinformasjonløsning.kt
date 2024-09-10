@@ -7,6 +7,8 @@ internal class Arbeidsgiverinformasjonløsning(private val arbeidsgivere: List<A
         }
     }
 
+    internal fun relevantLøsning(organisasjonsnummer: String) = arbeidsgivere.find { it.orgnummer == organisasjonsnummer }
+
     internal fun oppdater(arbeidsgiverDao: ArbeidsgiverDao) {
         arbeidsgivere.forEach {
             arbeidsgiverDao.upsertNavn(it.orgnummer, it.navn)

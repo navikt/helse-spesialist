@@ -9,10 +9,12 @@ internal class HentPersoninfoløsninger(private val løsninger: List<HentPersoni
     internal fun opprett(dao: ArbeidsgiverDao) {
         løsninger.forEach { it.lagre(dao) }
     }
+
+    internal fun relevantLøsning(ident: String) = løsninger.find { it.ident == ident }
 }
 
 internal class HentPersoninfoløsning(
-    private val ident: String,
+    val ident: String,
     private val fornavn: String,
     private val mellomnavn: String?,
     private val etternavn: String,
@@ -24,6 +26,8 @@ internal class HentPersoninfoløsning(
         dao.upsertNavn(ident, "$fornavn $etternavn")
         dao.upsertBransjer(ident, listOf(BRANSJE_PRIVATPERSON))
     }
+
+    internal fun navn() = listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ")
 
     internal fun oppdater(
         personDao: PersonDao,
