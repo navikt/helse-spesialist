@@ -7,7 +7,7 @@ import no.nav.helse.modell.KomplettInntektskilde
 import no.nav.helse.modell.arbeidsgiver.Arbeidsgiverinformasjonløsning
 import no.nav.helse.modell.person.HentPersoninfoløsninger
 
-internal class OpprettEllerOppdaterArbeidsgivere(
+internal class OpprettEllerOppdaterInntektskilder(
     inntektskilder: List<Inntektskilde>,
     private val inntektskilderRepository: InntektskilderRepository,
 ) : Command {
@@ -50,7 +50,7 @@ internal class OpprettEllerOppdaterArbeidsgivere(
             this
                 .filterIsInstance<KomplettInntektskilde>()
                 .map { it.toDto() }
-        inntektskilderRepository.lagre(inntektskilderSomSkalLagres)
+        inntektskilderRepository.lagreInntektskilder(inntektskilderSomSkalLagres)
     }
 
     private fun List<Inntektskilde>.supplerMedLøsninger(context: CommandContext): List<Inntektskilde> {

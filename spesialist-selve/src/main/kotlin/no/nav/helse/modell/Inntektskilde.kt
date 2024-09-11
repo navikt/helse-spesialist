@@ -11,6 +11,10 @@ internal enum class Inntektskildetype {
 }
 
 internal sealed class Inntektskilde {
+    private companion object {
+        private const val BRANSJE_PRIVATPERSON = "Privatperson"
+    }
+
     fun mottaLøsninger(
         arbeidsgiverinformasjonløsning: Arbeidsgiverinformasjonløsning?,
         personinfoløsninger: HentPersoninfoløsninger?,
@@ -47,7 +51,7 @@ internal sealed class Inntektskilde {
             organisasjonsnummer = ident,
             type = type,
             navn = navn(),
-            bransjer = emptyList(),
+            bransjer = listOf(BRANSJE_PRIVATPERSON),
             sistOppdatert = LocalDate.now(),
         )
     }

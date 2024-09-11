@@ -107,6 +107,20 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
         }
     }
 
+    fun TransactionalSession.upsertNavn(
+        orgnummer: String,
+        navn: String,
+    ) = this.finnArbeidsgiverNavnRef(orgnummer)
+        ?.also { this.oppdaterArbeidsgivernavn(it, navn) }
+        ?: this.opprettArbeidsgivernavn(orgnummer, navn)
+
+    fun TransactionalSession.upsertBransjer(
+        orgnummer: String,
+        bransjer: List<String>,
+    ) = this.finnArbeidsgiverbransjerRef(orgnummer)
+        ?.also { this.oppdaterArbeidsgiverbransjer(it, bransjer) }
+        ?: this.opprettArbeidsgiverbransjer(orgnummer, bransjer)
+
     private fun TransactionalSession.finnArbeidsgiverNavnRef(orgnummer: String): Long? {
         @Language("PostgreSQL")
         val query = "SELECT navn_ref FROM arbeidsgiver WHERE orgnummer=?"

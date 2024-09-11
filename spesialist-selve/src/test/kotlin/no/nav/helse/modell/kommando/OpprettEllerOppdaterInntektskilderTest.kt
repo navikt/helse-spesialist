@@ -24,11 +24,14 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
 
-class OpprettEllerOppdaterArbeidsgivereTest {
+class OpprettEllerOppdaterInntektskilderTest {
     private val repository = object : InntektskilderRepository {
         val inntektskilderSomHarBlittLagret = mutableListOf<InntektskildeDto>()
-        override fun lagre(inntektskilder: List<InntektskildeDto>) {
+        override fun lagreInntektskilder(inntektskilder: List<KomplettInntektskildeDto>) {
             inntektskilderSomHarBlittLagret.addAll(inntektskilder)
+        }
+        override fun finnInntektskilder(fødselsnummer: String, andreOrganisasjonsnumre: List<String>): List<InntektskildeDto> {
+            return emptyList()
         }
     }
 
@@ -47,7 +50,7 @@ class OpprettEllerOppdaterArbeidsgivereTest {
     @Test
     fun `suspenderer og ber om behov ved ny ORDINÆR inntektskilde`() {
         val organisasjonsnummer = lagOrganisasjonsnummer()
-        val command = OpprettEllerOppdaterArbeidsgivere(
+        val command = OpprettEllerOppdaterInntektskilder(
             inntektskilder = listOf(nyInntektskilde(organisasjonsnummer)),
             inntektskilderRepository = repository,
         )
@@ -61,7 +64,7 @@ class OpprettEllerOppdaterArbeidsgivereTest {
     @Test
     fun `suspenderer og ber om behov ved ny ENK inntektskilde`() {
         val organisasjonsnummer = lagFødselsnummer()
-        val command = OpprettEllerOppdaterArbeidsgivere(
+        val command = OpprettEllerOppdaterInntektskilder(
             inntektskilder = listOf(nyInntektskilde(organisasjonsnummer, Inntektskildetype.ENKELTPERSONFORETAK)),
             inntektskilderRepository = repository,
         )
@@ -75,7 +78,7 @@ class OpprettEllerOppdaterArbeidsgivereTest {
     @Test
     fun `suspenderer og ber om behov ved komplett, men utdatert ORDINÆR inntektskilde`() {
         val organisasjonsnummer = lagOrganisasjonsnummer()
-        val command = OpprettEllerOppdaterArbeidsgivere(
+        val command = OpprettEllerOppdaterInntektskilder(
             inntektskilder = listOf(utdatertInntektskilde(organisasjonsnummer)),
             inntektskilderRepository = repository,
         )
@@ -89,7 +92,7 @@ class OpprettEllerOppdaterArbeidsgivereTest {
     @Test
     fun `suspenderer og ber om behov ved komplett, men utdatert ENK inntektskilde`() {
         val organisasjonsnummer = lagFødselsnummer()
-        val command = OpprettEllerOppdaterArbeidsgivere(
+        val command = OpprettEllerOppdaterInntektskilder(
             inntektskilder = listOf(utdatertInntektskilde(organisasjonsnummer, Inntektskildetype.ENKELTPERSONFORETAK)),
             inntektskilderRepository = repository,
         )
@@ -103,7 +106,7 @@ class OpprettEllerOppdaterArbeidsgivereTest {
     @Test
     fun `suspenderer ikke og ber ikke om behov ved komplett, oppdatert ORDINÆR inntektskilde`() {
         val organisasjonsnummer = lagOrganisasjonsnummer()
-        val command = OpprettEllerOppdaterArbeidsgivere(
+        val command = OpprettEllerOppdaterInntektskilder(
             inntektskilder = listOf(oppdatertInntektskilde(organisasjonsnummer)),
             inntektskilderRepository = repository,
         )
@@ -116,7 +119,7 @@ class OpprettEllerOppdaterArbeidsgivereTest {
     @Test
     fun `suspenderer ikke og ber ikke om behov ved komplett, oppdatert ENK inntektskilde`() {
         val organisasjonsnummer = lagFødselsnummer()
-        val command = OpprettEllerOppdaterArbeidsgivere(
+        val command = OpprettEllerOppdaterInntektskilder(
             inntektskilder = listOf(oppdatertInntektskilde(organisasjonsnummer, Inntektskildetype.ENKELTPERSONFORETAK)),
             inntektskilderRepository = repository,
         )
@@ -131,7 +134,7 @@ class OpprettEllerOppdaterArbeidsgivereTest {
         val organisasjonsnummer1 = lagOrganisasjonsnummer()
         val organisasjonsnummer2 = lagOrganisasjonsnummer()
         val organisasjonsnummer3 = lagOrganisasjonsnummer()
-        val command = OpprettEllerOppdaterArbeidsgivere(
+        val command = OpprettEllerOppdaterInntektskilder(
             inntektskilder = listOf(
                 oppdatertInntektskilde(organisasjonsnummer1),
                 utdatertInntektskilde(organisasjonsnummer2),
@@ -151,7 +154,7 @@ class OpprettEllerOppdaterArbeidsgivereTest {
         val organisasjonsnummer1 = lagFødselsnummer()
         val organisasjonsnummer2 = lagFødselsnummer()
         val organisasjonsnummer3 = lagFødselsnummer()
-        val command = OpprettEllerOppdaterArbeidsgivere(
+        val command = OpprettEllerOppdaterInntektskilder(
             inntektskilder = listOf(
                 oppdatertInntektskilde(organisasjonsnummer1, Inntektskildetype.ENKELTPERSONFORETAK),
                 utdatertInntektskilde(organisasjonsnummer2, Inntektskildetype.ENKELTPERSONFORETAK),
@@ -170,7 +173,7 @@ class OpprettEllerOppdaterArbeidsgivereTest {
     fun `suspenderer og ber om behov ved både ORDINÆR og ENK inntektskilder`() {
         val organisasjonsnummer1 = lagOrganisasjonsnummer()
         val organisasjonsnummer2 = lagFødselsnummer()
-        val command = OpprettEllerOppdaterArbeidsgivere(
+        val command = OpprettEllerOppdaterInntektskilder(
             inntektskilder = listOf(
                 utdatertInntektskilde(organisasjonsnummer1, Inntektskildetype.ORDINÆR),
                 utdatertInntektskilde(organisasjonsnummer2, Inntektskildetype.ENKELTPERSONFORETAK),
@@ -191,7 +194,7 @@ class OpprettEllerOppdaterArbeidsgivereTest {
         val organisasjonsnummer = lagOrganisasjonsnummer()
         val arbeidsgivernavn = lagOrganisasjonsnavn()
         val bransjer = listOf("Uteliv")
-        val command = OpprettEllerOppdaterArbeidsgivere(
+        val command = OpprettEllerOppdaterInntektskilder(
             inntektskilder = listOf(
                 utdatertInntektskilde(organisasjonsnummer, Inntektskildetype.ORDINÆR),
             ),
@@ -217,7 +220,7 @@ class OpprettEllerOppdaterArbeidsgivereTest {
         val organisasjonsnummer = lagFødselsnummer()
         val fornavn = lagFornavn()
         val etternavn = lagEtternavn()
-        val command = OpprettEllerOppdaterArbeidsgivere(
+        val command = OpprettEllerOppdaterInntektskilder(
             inntektskilder = listOf(
                 utdatertInntektskilde(organisasjonsnummer, Inntektskildetype.ENKELTPERSONFORETAK),
             ),
@@ -234,7 +237,7 @@ class OpprettEllerOppdaterArbeidsgivereTest {
             forventetOrganisasjonsnummer = organisasjonsnummer,
             forventetType = InntektskildetypeDto.ENKELTPERSONFORETAK,
             forventetNavn = "$fornavn $etternavn",
-            forventetBransjer = emptyList(),
+            forventetBransjer = listOf("Privatperson"),
         )
     }
 
@@ -248,7 +251,7 @@ class OpprettEllerOppdaterArbeidsgivereTest {
         val fornavn = lagFornavn()
         val etternavn = lagEtternavn()
 
-        val command = OpprettEllerOppdaterArbeidsgivere(
+        val command = OpprettEllerOppdaterInntektskilder(
             inntektskilder = listOf(
                 utdatertInntektskilde(organisasjonsnummer1, Inntektskildetype.ORDINÆR),
                 utdatertInntektskilde(organisasjonsnummer2, Inntektskildetype.ENKELTPERSONFORETAK),
@@ -272,7 +275,7 @@ class OpprettEllerOppdaterArbeidsgivereTest {
             forventetOrganisasjonsnummer = organisasjonsnummer2,
             forventetType = InntektskildetypeDto.ENKELTPERSONFORETAK,
             forventetNavn = "$fornavn $etternavn",
-            forventetBransjer = emptyList(),
+            forventetBransjer = listOf("Privatperson"),
         )
     }
 
@@ -284,7 +287,7 @@ class OpprettEllerOppdaterArbeidsgivereTest {
 
         val organisasjonsnummer2 = lagFødselsnummer()
 
-        val command = OpprettEllerOppdaterArbeidsgivere(
+        val command = OpprettEllerOppdaterInntektskilder(
             inntektskilder = listOf(
                 utdatertInntektskilde(organisasjonsnummer1, Inntektskildetype.ORDINÆR),
                 utdatertInntektskilde(organisasjonsnummer2, Inntektskildetype.ENKELTPERSONFORETAK),
