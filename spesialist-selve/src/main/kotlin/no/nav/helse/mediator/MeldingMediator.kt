@@ -51,7 +51,6 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.AdressebeskyttelseEndretRiver
-import no.nav.helse.modell.person.OppdaterPersonsnapshot
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.PersonRepository
 import no.nav.helse.modell.person.SøknadSendt
@@ -517,17 +516,10 @@ internal class MeldingMediator(
     }
 
     override fun oppdaterSnapshot(fnr: String) {
-        val json =
-            objectMapper.readTree(
-                JsonMessage
-                    .newMessage(
-                        "oppdater_personsnapshot",
-                        mapOf(
-                            "fødselsnummer" to fnr,
-                        ),
-                    ).toJson(),
-            )
-
-        mottaMelding(OppdaterPersonsnapshot(json), rapidsConnection)
+        val event =
+            JsonMessage
+                .newMessage("oppdater_personsnapshot", mapOf("fødselsnummer" to fnr))
+                .toJson()
+        rapidsConnection.publish(fnr, event)
     }
 }
