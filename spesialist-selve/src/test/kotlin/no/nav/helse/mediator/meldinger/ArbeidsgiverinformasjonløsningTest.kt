@@ -5,7 +5,6 @@ import io.mockk.verify
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsgiverRiver
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.arbeidsgiver.Arbeidsgiverinformasjonløsning
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
@@ -15,14 +14,11 @@ import java.util.UUID
 internal class ArbeidsgiverinformasjonløsningTest {
     private companion object {
         private const val ORGNR = "123456789"
-        private const val NAVN = "Bedrift AS"
-        private val BRANSJER = listOf("Spaghettikoding")
         private const val FØDSELSNUMMER = "12345678910"
         private const val AKTØRID = "123456789"
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
     }
 
-    private val dao = mockk<ArbeidsgiverDao>(relaxed = true)
     private val mediator = mockk<MeldingMediator>(relaxed = true)
     private val rapid = TestRapid().medRivers(ArbeidsgiverRiver(mediator))
 
@@ -42,38 +38,5 @@ internal class ArbeidsgiverinformasjonløsningTest {
             )
         )
         verify(exactly = 1) { mediator.løsning(any(), any(), any(), any<Arbeidsgiverinformasjonløsning>(), any()) }
-    }
-
-    @Test
-    fun `oppretter løsning`() {
-        val arbeidsgiver = Arbeidsgiverinformasjonløsning(
-            listOf(
-                Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(ORGNR, NAVN, BRANSJER)
-            )
-        )
-        arbeidsgiver.opprett(dao)
-        verify(exactly = 1) { dao.insertArbeidsgiver(ORGNR, NAVN, BRANSJER) }
-    }
-
-    @Test
-    fun `oppdatere navn`() {
-        val arbeidsgiver = Arbeidsgiverinformasjonløsning(
-            listOf(
-                Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(ORGNR, NAVN, BRANSJER)
-            )
-        )
-        arbeidsgiver.oppdater(dao)
-        verify(exactly = 1) { dao.upsertNavn(ORGNR, NAVN) }
-    }
-
-    @Test
-    fun `oppdatere bransje`() {
-        val arbeidsgiver = Arbeidsgiverinformasjonløsning(
-            listOf(
-                Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(ORGNR, NAVN, BRANSJER)
-            )
-        )
-        arbeidsgiver.oppdater(dao)
-        verify(exactly = 1) { dao.upsertBransjer(ORGNR, BRANSJER) }
     }
 }

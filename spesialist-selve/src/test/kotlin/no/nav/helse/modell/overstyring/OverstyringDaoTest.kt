@@ -2,6 +2,7 @@ package no.nav.helse.modell.overstyring
 
 import DatabaseIntegrationTest
 import no.nav.helse.db.ArbeidsforholdForDatabase
+import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.LovhjemmelForDatabase
 import no.nav.helse.db.MinimumSykdomsgradForDatabase
 import no.nav.helse.db.OverstyrtArbeidsforholdForDatabase
@@ -14,6 +15,8 @@ import no.nav.helse.db.SkjønnsfastsattArbeidsgiverForDatabase
 import no.nav.helse.db.SkjønnsfastsattSykepengegrunnlagForDatabase
 import no.nav.helse.db.SkjønnsfastsettingstypeForDatabase
 import no.nav.helse.januar
+import no.nav.helse.modell.InntektskildetypeDto.ORDINÆR
+import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
@@ -31,6 +34,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class OverstyringDaoTest : DatabaseIntegrationTest() {
+    private val inntektskilderDao = InntektskilderDao(dataSource)
     private val PERSON_FORNAVN = "Per"
     private val PERSON_ETTERNAVN = "Son"
     private val PERSON_FØDSELSDATO = LocalDate.of(1998, 4, 20)
@@ -63,7 +67,11 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
 
     private fun opprettPerson() {
         saksbehandlerDao.opprettSaksbehandler(OID, SAKSBEHANDLER_NAVN, EPOST, SAKSBEHANDLER_IDENT)
-        arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ARBEIDSGIVER_NAVN, BRANSJER)
+        inntektskilderDao.lagreInntektskilder(
+            listOf(
+                KomplettInntektskildeDto(ORGNUMMER, ORDINÆR, ARBEIDSGIVER_NAVN, BRANSJER, LocalDate.now())
+            )
+        )
         val navn_ref =
             personDao.insertPersoninfo(
                 PERSON_FORNAVN,

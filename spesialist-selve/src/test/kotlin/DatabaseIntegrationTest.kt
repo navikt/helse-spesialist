@@ -11,6 +11,7 @@ import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.db.AnnulleringDao
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.EgenskapForDatabase
+import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
@@ -18,12 +19,13 @@ import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.januar
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.CommandContextDao
+import no.nav.helse.modell.InntektskildetypeDto
+import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.MeldingDuplikatkontrollDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
@@ -132,7 +134,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val oppgaveApiDao = OppgaveApiDao(dataSource)
     internal val periodehistorikkDao = PeriodehistorikkDao(dataSource)
     internal val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
-    internal val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     internal val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     internal val snapshotDao = SnapshotDao(dataSource)
     internal val vedtakDao = VedtakDao(dataSource)
@@ -161,6 +162,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val notatDao = NotatDao(dataSource)
     internal val annulleringDao = AnnulleringDao(dataSource)
     private val personRepository = PersonRepository(dataSource)
+    private val inntektskilderDao = InntektskilderDao(dataSource)
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,
@@ -307,8 +309,18 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         organisasjonsnummer: String = ORGNUMMER,
         navn: String = ORGNAVN,
         bransjer: List<String> = BRANSJER,
-    ): Long {
-        return arbeidsgiverDao.insertArbeidsgiver(organisasjonsnummer, navn, bransjer)!!
+    ) {
+        inntektskilderDao.lagreInntektskilder(
+            listOf(
+                KomplettInntektskildeDto(
+                    organisasjonsnummer = organisasjonsnummer,
+                    type = InntektskildetypeDto.ORDINÆR,
+                    navn = navn,
+                    bransjer = bransjer,
+                    sistOppdatert = LocalDate.now()
+                )
+            )
+        )
     }
 
     protected fun opprettSnapshot(

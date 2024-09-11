@@ -5,7 +5,6 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.objectMapper
 import org.intellij.lang.annotations.Language
-import java.time.LocalDateTime
 import javax.sql.DataSource
 
 class ArbeidsgiverDao(private val dataSource: DataSource) {
@@ -18,45 +17,6 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
             )
         }
 
-    fun insertArbeidsgiver(
-        orgnummer: String,
-        navn: String,
-        bransjer: List<String>,
-    ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-        val navnRef =
-            requireNotNull(
-                session.run(
-                    queryOf(
-                        "INSERT INTO arbeidsgiver_navn(navn, navn_oppdatert) VALUES(?, ?);",
-                        navn,
-                        LocalDateTime.now(),
-                    ).asUpdateAndReturnGeneratedKey,
-                ),
-            )
-        val bransjerRef =
-            requireNotNull(
-                session.run(
-                    queryOf(
-                        "INSERT INTO arbeidsgiver_bransjer(bransjer, oppdatert) VALUES(:bransjer, :oppdatert);",
-                        mapOf(
-                            "bransjer" to objectMapper.writeValueAsString(bransjer),
-                            "oppdatert" to LocalDateTime.now(),
-                        ),
-                    ).asUpdateAndReturnGeneratedKey,
-                ),
-            )
-        session.run(
-            queryOf(
-                "INSERT INTO arbeidsgiver(orgnummer, navn_ref, bransjer_ref) VALUES(:orgnummer, :navnRef, :bransjerRef);",
-                mapOf(
-                    "orgnummer" to orgnummer.toLong(),
-                    "navnRef" to navnRef,
-                    "bransjerRef" to bransjerRef,
-                ),
-            ).asUpdateAndReturnGeneratedKey,
-        )
-    }
-
     fun insertArbeidsgiver(orgnummer: String) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             session.run(
@@ -68,44 +28,6 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
                 ).asUpdateAndReturnGeneratedKey,
             )
         }
-
-    fun findNavnSistOppdatert(orgnummer: String) =
-        sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(
-                    "SELECT navn_oppdatert FROM arbeidsgiver_navn WHERE id=(SELECT navn_ref FROM arbeidsgiver WHERE orgnummer=?);",
-                    orgnummer.toLong(),
-                ).map {
-                    it.localDate("navn_oppdatert")
-                }.asSingle,
-            )
-        }
-
-    fun findBransjerSistOppdatert(orgnummer: String) =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val statement =
-                "SELECT oppdatert FROM arbeidsgiver_bransjer WHERE id=(SELECT bransjer_ref FROM arbeidsgiver WHERE orgnummer=:orgnummer);"
-            session.run(
-                queryOf(
-                    statement,
-                    mapOf("orgnummer" to orgnummer.toLong()),
-                ).map {
-                    it.localDate("oppdatert")
-                }.asSingle,
-            )
-        }
-
-    fun upsertNavn(
-        orgnummer: String,
-        navn: String,
-    ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-        session.transaction { transaction ->
-            transaction.finnArbeidsgiverNavnRef(orgnummer)
-                ?.also { transaction.oppdaterArbeidsgivernavn(it, navn) }
-                ?: transaction.opprettArbeidsgivernavn(orgnummer, navn)
-        }
-    }
 
     fun TransactionalSession.upsertNavn(
         orgnummer: String,
@@ -158,17 +80,6 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
         val query = "INSERT INTO arbeidsgiver (orgnummer, navn_ref) VALUES(:orgnummer, :arbeidsgivernavnRef) ON CONFLICT(orgnummer) DO UPDATE SET navn_ref=:arbeidsgivernavnRef"
 
         run(queryOf(query, mapOf("arbeidsgivernavnRef" to arbeidsgivernavnRef, "orgnummer" to orgnummer.toLong())).asUpdate)
-    }
-
-    fun upsertBransjer(
-        orgnummer: String,
-        bransjer: List<String>,
-    ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-        session.transaction { transaction ->
-            transaction.finnArbeidsgiverbransjerRef(orgnummer)
-                ?.also { transaction.oppdaterArbeidsgiverbransjer(it, bransjer) }
-                ?: transaction.opprettArbeidsgiverbransjer(orgnummer, bransjer)
-        }
     }
 
     private fun TransactionalSession.finnArbeidsgiverbransjerRef(orgnummer: String): Long? {

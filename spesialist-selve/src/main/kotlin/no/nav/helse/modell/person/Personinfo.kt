@@ -1,15 +1,10 @@
 package no.nav.helse.modell.person
 
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
 
 internal class HentPersoninfoløsninger(private val løsninger: List<HentPersoninfoløsning>) {
-    internal fun opprett(dao: ArbeidsgiverDao) {
-        løsninger.forEach { it.lagre(dao) }
-    }
-
     internal fun relevantLøsning(ident: String) = løsninger.find { it.ident == ident }
 }
 
@@ -22,11 +17,6 @@ internal class HentPersoninfoløsning(
     private val kjønn: Kjønn,
     private val adressebeskyttelse: Adressebeskyttelse,
 ) {
-    internal fun lagre(dao: ArbeidsgiverDao) {
-        dao.upsertNavn(ident, "$fornavn $etternavn")
-        dao.upsertBransjer(ident, listOf(BRANSJE_PRIVATPERSON))
-    }
-
     internal fun navn() = listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ")
 
     internal fun oppdater(
@@ -41,8 +31,4 @@ internal class HentPersoninfoløsning(
         kjønn = kjønn,
         adressebeskyttelse = adressebeskyttelse,
     )
-
-    private companion object {
-        private const val BRANSJE_PRIVATPERSON = "Privatperson"
-    }
 }
