@@ -1,6 +1,7 @@
 package no.nav.helse.mediator
 
 import no.nav.helse.db.AvviksvurderingDao
+import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
@@ -70,7 +71,7 @@ import javax.sql.DataSource
 internal typealias Kommandostarter = Personmelding.(Kommandofabrikk.() -> Command?) -> Unit
 
 internal class Kommandofabrikk(
-    dataSource: DataSource,
+    private val dataSource: DataSource,
     private val meldingDao: MeldingDao = MeldingDao(dataSource),
     private val personDao: PersonDao = PersonDao(dataSource),
     private val arbeidsgiverDao: ArbeidsgiverDao = ArbeidsgiverDao(dataSource),
@@ -345,7 +346,7 @@ internal class Kommandofabrikk(
             vedtakDao = vedtakDao,
             commandContextDao = commandContextDao,
             personDao = personDao,
-            arbeidsgiverDao = arbeidsgiverDao,
+            inntektskilderRepository = InntektskilderDao(dataSource),
             arbeidsforholdDao = arbeidsforholdDao,
             egenAnsattDao = egenAnsattDao,
             utbetalingDao = utbetalingDao,

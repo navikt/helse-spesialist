@@ -2,6 +2,7 @@ package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.AvviksvurderingDao
+import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
@@ -9,11 +10,11 @@ import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.CommandContextDao
+import no.nav.helse.modell.InntektskildeDto.Companion.gjenopprett
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.command.KlargjørArbeidsforholdCommand
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.VurderAutomatiskAvvisning
 import no.nav.helse.modell.automatisering.VurderAutomatiskInnvilgelse
@@ -24,10 +25,10 @@ import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.AvbrytContextCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.ForberedBehandlingAvGodkjenningsbehov
-import no.nav.helse.modell.kommando.KlargjørArbeidsgiverCommand
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterPersonCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
+import no.nav.helse.modell.kommando.OpprettEllerOppdaterInntektskilder
 import no.nav.helse.modell.kommando.OpprettKoblingTilAvviksvurdering
 import no.nav.helse.modell.kommando.OpprettKoblingTilHendelseCommand
 import no.nav.helse.modell.kommando.OpprettKoblingTilUtbetalingCommand
@@ -216,7 +217,7 @@ internal class GodkjenningsbehovCommand(
     vedtakDao: VedtakDao,
     commandContextDao: CommandContextDao,
     personDao: PersonDao,
-    arbeidsgiverDao: ArbeidsgiverDao,
+    inntektskilderRepository: InntektskilderRepository,
     arbeidsforholdDao: ArbeidsforholdDao,
     egenAnsattDao: EgenAnsattDao,
     utbetalingDao: UtbetalingDao,
@@ -236,6 +237,11 @@ internal class GodkjenningsbehovCommand(
     person: Person,
 ) : MacroCommand() {
     private val sykefraværstilfelle = person.sykefraværstilfelle(behovData.vedtaksperiodeId)
+    private val inntektskilder =
+        inntektskilderRepository.finnInntektskilder(
+            fødselsnummer = behovData.fødselsnummer,
+            andreOrganisasjonsnumre = behovData.orgnummereMedRelevanteArbeidsforhold + behovData.organisasjonsnummer,
+        ).gjenopprett()
     override val commands: List<Command> =
         listOf(
             ForberedBehandlingAvGodkjenningsbehov(
@@ -274,10 +280,10 @@ internal class GodkjenningsbehovCommand(
             ForberedVisningCommand(
                 fødselsnummer = behovData.fødselsnummer,
                 organisasjonsnummer = behovData.organisasjonsnummer,
-                orgnummereMedRelevanteArbeidsforhold = behovData.orgnummereMedRelevanteArbeidsforhold,
                 førsteKjenteDagFinner = førsteKjenteDagFinner,
+                inntektskilderRepository = inntektskilderRepository,
+                inntektskilder = inntektskilder,
                 personDao = personDao,
-                arbeidsgiverDao = arbeidsgiverDao,
                 arbeidsforholdDao = arbeidsforholdDao,
                 snapshotDao = snapshotDao,
                 snapshotClient = snapshotClient,
@@ -374,10 +380,10 @@ internal class GodkjenningsbehovCommand(
 private class ForberedVisningCommand(
     fødselsnummer: String,
     organisasjonsnummer: String,
-    orgnummereMedRelevanteArbeidsforhold: List<String>,
     førsteKjenteDagFinner: () -> LocalDate,
     personDao: PersonDao,
-    arbeidsgiverDao: ArbeidsgiverDao,
+    inntektskilder: List<no.nav.helse.modell.Inntektskilde>,
+    inntektskilderRepository: InntektskilderRepository,
     arbeidsforholdDao: ArbeidsforholdDao,
     snapshotDao: SnapshotDao,
     snapshotClient: ISnapshotClient,
@@ -389,9 +395,9 @@ private class ForberedVisningCommand(
                 førsteKjenteDagFinner = førsteKjenteDagFinner,
                 personDao = personDao,
             ),
-            KlargjørArbeidsgiverCommand(
-                orgnummere = orgnummereMedRelevanteArbeidsforhold + organisasjonsnummer,
-                arbeidsgiverDao = arbeidsgiverDao,
+            OpprettEllerOppdaterInntektskilder(
+                inntektskilder = inntektskilder,
+                inntektskilderRepository = inntektskilderRepository,
             ),
             KlargjørArbeidsforholdCommand(
                 fødselsnummer = fødselsnummer,

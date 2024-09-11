@@ -281,12 +281,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             håndterPersoninfoløsning()
             håndterEnhetløsning(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId, enhet = enhet)
             håndterInfotrygdutbetalingerløsning(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
-            if (godkjenningsbehovTestdata.orgnummereMedRelevanteArbeidsforhold.isNotEmpty()) {
-                håndterArbeidsgiverinformasjonløsning(
-                    vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
-                )
-            }
-            håndterArbeidsgiverinformasjonløsning(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
+            håndterArbeidsgiverinformasjonløsning(
+                vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
+            )
             håndterArbeidsforholdløsning(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
         }
         verify { snapshotClient.hentSnapshot(godkjenningsbehovTestdata.fødselsnummer) }

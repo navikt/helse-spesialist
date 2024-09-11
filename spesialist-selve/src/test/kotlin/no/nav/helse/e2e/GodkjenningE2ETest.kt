@@ -152,7 +152,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
         assertInnholdIBehov("Arbeidsgiverinformasjon") { behovNode ->
             val arbeidsgivere = behovNode["Arbeidsgiverinformasjon"]["organisasjonsnummer"].map { it.asText() }
-            assertEquals(andreArbeidsgivere, arbeidsgivere)
+            assertEquals((andreArbeidsgivere + testperson.orgnummer).toSet(), arbeidsgivere.toSet())
         }
     }
 
@@ -178,7 +178,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
         assertInnholdIBehov("Arbeidsgiverinformasjon") { behovNode ->
             val arbeidsgivere = behovNode["Arbeidsgiverinformasjon"]["organisasjonsnummer"].map { it.asText() }
-            assertEquals(listOf(arbeidsgiver2), arbeidsgivere)
+            assertEquals(setOf(arbeidsgiver2, testperson.orgnummer), arbeidsgivere.toSet())
         }
     }
 
@@ -195,9 +195,8 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         håndterPersoninfoløsning()
         håndterEnhetløsning()
         håndterInfotrygdutbetalingerløsning()
-        håndterArbeidsgiverinformasjonløsning() // henter først for ukjente arbeidsgivere (dvs. arbeidsgivere som ikke finnes i db)
-        håndterArbeidsgiverinformasjonløsning() // henter deretter for arbeidsgiver som finnes i db - TODO: burde endres slik at vi henter for alle arbeidsgivere som mangler metadata samtidig
-        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT)
+        håndterArbeidsgiverinformasjonløsning()
+        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT)
         assertSisteEtterspurteBehov("Arbeidsforhold")
     }
 
