@@ -16,17 +16,16 @@ import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
-import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommand
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.kommando.LøsGodkjenningsbehov
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 import no.nav.helse.modell.kommando.OverstyringIgangsattCommand
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.kommando.TilbakedateringGodkjentCommand
-import no.nav.helse.modell.kommando.UtbetalingsgodkjenningCommand
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
@@ -130,21 +129,14 @@ internal class Kommandofabrikk(
         )
 
     internal fun gosysOppgaveEndret(
-        melding: GosysOppgaveEndret,
         person: Person,
         oppgaveDataForAutomatisering: OppgaveDataForAutomatisering,
     ): GosysOppgaveEndretCommand {
         val utbetaling = utbetalingDao.hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
         val harTildeltOppgave = tildelingDao.tildelingForOppgave(oppgaveDataForAutomatisering.oppgaveId) != null
-        val vedtaksperiodeId = oppgaveDataForAutomatisering.vedtaksperiodeId
-        val vedtaksperiode =
-            checkNotNull(person.vedtaksperiodeOrNull(vedtaksperiodeId)) {
-                "Forventer ikke at denne funksjonen kalles når det ikke finnes en vedtaksperiode med vedtaksperiodeId=$vedtaksperiodeId"
-            }
+        val godkjenningsbehovData = meldingDao.finnGodkjenningsbehov(oppgaveDataForAutomatisering.hendelseId).data()
 
         return GosysOppgaveEndretCommand(
-            fødselsnummer = melding.fødselsnummer(),
-            aktørId = person.aktørId(),
             utbetaling = utbetaling,
             sykefraværstilfelle = person.sykefraværstilfelle(oppgaveDataForAutomatisering.vedtaksperiodeId),
             harTildeltOppgave = harTildeltOppgave,
@@ -154,8 +146,7 @@ internal class Kommandofabrikk(
             oppgaveDao = oppgaveDao,
             oppgaveService = oppgaveService,
             godkjenningMediator = godkjenningMediator,
-            spleisBehandlingId = vedtaksperiode.gjeldendeBehandlingId,
-            organisasjonsnummer = vedtaksperiode.organisasjonsnummer(),
+            godkjenningsbehov = godkjenningsbehovData,
         )
     }
 
@@ -164,25 +155,19 @@ internal class Kommandofabrikk(
         person: Person,
         oppgaveDataForAutomatisering: OppgaveDataForAutomatisering,
     ): TilbakedateringGodkjentCommand {
-        val vedtaksperiodeId = oppgaveDataForAutomatisering.vedtaksperiodeId
-        val sykefraværstilfelle = person.sykefraværstilfelle(vedtaksperiodeId)
-        val utbetaling = utbetalingDao.hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
-        val vedtaksperiode =
-            checkNotNull(person.vedtaksperiodeOrNull(vedtaksperiodeId)) {
-                "Forventer ikke at denne funksjonen kalles når det ikke finnes en vedtaksperiode med vedtaksperiodeId=$vedtaksperiodeId"
-            }
+        val godkjenningsbehovData = meldingDao.finnGodkjenningsbehov(oppgaveDataForAutomatisering.hendelseId).data()
+        val sykefraværstilfelle = person.sykefraværstilfelle(godkjenningsbehovData.vedtaksperiodeId)
+        val utbetaling = utbetalingDao.hentUtbetaling(godkjenningsbehovData.utbetalingId)
 
         return TilbakedateringGodkjentCommand(
-            fødselsnummer = melding.fødselsnummer(),
             sykefraværstilfelle = sykefraværstilfelle,
             utbetaling = utbetaling,
             automatisering = automatisering,
             oppgaveDataForAutomatisering = oppgaveDataForAutomatisering,
             oppgaveService = oppgaveService,
             godkjenningMediator = godkjenningMediator,
-            spleisBehandlingId = vedtaksperiode.gjeldendeBehandlingId,
-            organisasjonsnummer = vedtaksperiode.organisasjonsnummer(),
             søknadsperioder = melding.perioder,
+            godkjenningsbehov = godkjenningsbehovData,
         )
     }
 
@@ -236,8 +221,24 @@ internal class Kommandofabrikk(
             arbeidsgiverDao = arbeidsgiverDao,
         )
 
-    internal fun adressebeskyttelseEndret(melding: AdressebeskyttelseEndret): AdressebeskyttelseEndretCommand =
-        AdressebeskyttelseEndretCommand(melding.fødselsnummer(), personDao, oppgaveDao, godkjenningMediator)
+    internal fun adressebeskyttelseEndret(
+        melding: AdressebeskyttelseEndret,
+        oppgaveDataForAutomatisering: OppgaveDataForAutomatisering?,
+    ): AdressebeskyttelseEndretCommand {
+        val godkjenningsbehovData =
+            oppgaveDataForAutomatisering?.let {
+                meldingDao.finnGodkjenningsbehov(it.hendelseId)
+            }?.data()
+        val utbetaling = godkjenningsbehovData?.let { utbetalingDao.hentUtbetaling(it.utbetalingId) }
+        return AdressebeskyttelseEndretCommand(
+            melding.fødselsnummer(),
+            personDao,
+            oppgaveDao,
+            godkjenningMediator,
+            godkjenningsbehovData,
+            utbetaling,
+        )
+    }
 
     internal fun oppdaterPersonsnapshot(hendelse: Personmelding): OppdaterPersonsnapshotCommand =
         OppdaterPersonsnapshotCommand(
@@ -302,20 +303,17 @@ internal class Kommandofabrikk(
             totrinnsvurderingMediator = totrinnsvurderingMediator,
         )
 
-    internal fun utbetalingsgodkjenning(
+    internal fun løsGodkjenningsbehov(
         melding: Saksbehandlerløsning,
         person: Person,
-    ): UtbetalingsgodkjenningCommand {
+    ): LøsGodkjenningsbehov {
+        val godkjenningsbehov = meldingDao.finnGodkjenningsbehov(melding.godkjenningsbehovhendelseId)
         val oppgaveId = melding.oppgaveId
-        val fødselsnummer = melding.fødselsnummer()
-        val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(oppgaveId)
-        val spleisBehandlingId = person.vedtaksperiodeOrNull(vedtaksperiodeId)?.gjeldendeBehandlingId
-        val sykefraværstilfelle = person.sykefraværstilfelle(vedtaksperiodeId)
-        val utbetaling = utbetalingDao.utbetalingFor(oppgaveId)
-        return UtbetalingsgodkjenningCommand(
-            fødselsnummer = fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            spleisBehandlingId = spleisBehandlingId,
+        val sykefraværstilfelle = person.sykefraværstilfelle(godkjenningsbehov.vedtaksperiodeId())
+        val utbetaling =
+            utbetalingDao.utbetalingFor(oppgaveId)
+                ?: throw IllegalStateException("Forventer å finne utbetaling for oppgave med id=$oppgaveId")
+        return LøsGodkjenningsbehov(
             utbetaling = utbetaling,
             sykefraværstilfelle = sykefraværstilfelle,
             godkjent = melding.godkjent,
@@ -326,11 +324,10 @@ internal class Kommandofabrikk(
             begrunnelser = melding.begrunnelser,
             kommentar = melding.kommentar,
             saksbehandleroverstyringer = melding.saksbehandleroverstyringer,
-            godkjenningsbehovhendelseId = melding.godkjenningsbehovhendelseId,
             saksbehandler = melding.saksbehandler,
             beslutter = melding.beslutter,
-            meldingDao = meldingDao,
             godkjenningMediator = godkjenningMediator,
+            godkjenningsbehovData = godkjenningsbehov.data(),
         )
     }
 
@@ -341,7 +338,7 @@ internal class Kommandofabrikk(
         val utbetaling = utbetalingDao.hentUtbetaling(godkjenningsbehovData.utbetalingId)
         val førsteKjenteDagFinner = { generasjonRepository.førsteKjenteDag(godkjenningsbehovData.fødselsnummer) }
         return GodkjenningsbehovCommand(
-            commandData = godkjenningsbehovData,
+            behovData = godkjenningsbehovData,
             utbetaling = utbetaling,
             førsteKjenteDagFinner = førsteKjenteDagFinner,
             automatisering = automatisering,

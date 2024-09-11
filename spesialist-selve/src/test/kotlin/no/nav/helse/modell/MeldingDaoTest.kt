@@ -68,15 +68,6 @@ internal class MeldingDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `finner utbetalingsgodkjenningsbehov`() {
-        val json = """{"foo": "bar"}"""
-        godkjenningsbehov(HENDELSE_ID, FNR, json)
-        val actual = meldingDao.finnUtbetalingsgodkjenningbehovJson(HENDELSE_ID)
-        val expected = objectMapper.readTree(json)
-        assertEquals(expected.path("foo"), objectMapper.readTree(actual).path("foo"))
-    }
-
-    @Test
     fun `lagrer hendelser inkludert kobling til vedtak`() {
         opprettPerson()
         opprettArbeidsgiver()

@@ -11,6 +11,8 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterPersoninfoCommand
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.utbetaling.Utbetaling
+import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.util.UUID
 
@@ -39,7 +41,7 @@ internal class AdressebeskyttelseEndret private constructor(
         person: Person,
         kommandostarter: Kommandostarter,
     ) {
-        kommandostarter { adressebeskyttelseEndret(this@AdressebeskyttelseEndret) }
+        kommandostarter { adressebeskyttelseEndret(this@AdressebeskyttelseEndret, finnOppgavedata(fødselsnummer)) }
     }
 }
 
@@ -48,15 +50,24 @@ internal class AdressebeskyttelseEndretCommand(
     personDao: PersonDao,
     oppgaveDao: OppgaveDao,
     godkjenningMediator: GodkjenningMediator,
+    godkjenningsbehov: GodkjenningsbehovData?,
+    utbetaling: Utbetaling?,
 ) : MacroCommand() {
     override val commands: List<Command> =
-        listOf(
+        mutableListOf<Command>(
             OppdaterPersoninfoCommand(fødselsnummer, personDao, force = true),
-            AvvisVedStrengtFortroligAdressebeskyttelseCommand(
-                fødselsnummer = fødselsnummer,
-                personDao = personDao,
-                oppgaveDao = oppgaveDao,
-                godkjenningMediator = godkjenningMediator,
-            ),
-        )
+        ).apply {
+            if (godkjenningsbehov != null) {
+                check(utbetaling != null) { "Forventer å finne utbetaling for godkjenningsbehov med id=${godkjenningsbehov.id}" }
+                add(
+                    AvvisVedStrengtFortroligAdressebeskyttelseCommand(
+                        personDao = personDao,
+                        oppgaveDao = oppgaveDao,
+                        godkjenningMediator = godkjenningMediator,
+                        godkjenningsbehov = godkjenningsbehov,
+                        utbetaling = utbetaling,
+                    ),
+                )
+            }
+        }
 }

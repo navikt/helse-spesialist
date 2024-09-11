@@ -8,22 +8,22 @@ import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
 import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.utbetaling.Utbetaling
+import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vergemal.VergemålDao
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 internal class VurderAutomatiskAvvisning(
-    private val fødselsnummer: String,
-    private val vedtaksperiodeId: UUID,
-    private val spleisBehandlingId: UUID?,
     private val personDao: PersonDao,
     private val vergemålDao: VergemålDao,
     private val godkjenningMediator: GodkjenningMediator,
-    private val hendelseId: UUID,
     private val utbetaling: Utbetaling,
-    private val kanAvvises: Boolean,
+    private val godkjenningsbehov: GodkjenningsbehovData,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
+        val fødselsnummer = godkjenningsbehov.fødselsnummer
+        val vedtaksperiodeId = godkjenningsbehov.vedtaksperiodeId
+        val kanAvvises = godkjenningsbehov.kanAvvises
+
         val tilhørerEnhetUtland = HentEnhetløsning.erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
         val avvisGrunnetEnhetUtland = tilhørerEnhetUtland && kanAvvises
         val underVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
@@ -45,11 +45,9 @@ internal class VurderAutomatiskAvvisning(
 
         godkjenningMediator.automatiskAvvisning(
             publiserer = context::publiser,
-            vedtaksperiodeId = vedtaksperiodeId,
             begrunnelser = avvisningsårsaker.toList(),
             utbetaling = utbetaling,
-            hendelseId = hendelseId,
-            spleisBehandlingId = spleisBehandlingId,
+            godkjenningsbehov = godkjenningsbehov,
         )
         logg.info("Automatisk avvisning av vedtaksperiode $vedtaksperiodeId pga:$avvisningsårsaker")
         return ferdigstill(context)

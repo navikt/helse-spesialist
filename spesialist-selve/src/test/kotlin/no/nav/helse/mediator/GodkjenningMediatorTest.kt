@@ -2,11 +2,9 @@ package no.nav.helse.mediator
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.clearMocks
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.januar
-import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.gosysoppgaver.inspektør
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
@@ -14,13 +12,20 @@ import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
+import no.nav.helse.spesialist.test.lagAktørId
+import no.nav.helse.spesialist.test.lagFødselsnummer
+import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -43,19 +48,7 @@ internal class GodkjenningMediatorTest {
                 detaljer: Map<String, Any>,
             ) {}
         }
-    private val mediator =
-        GodkjenningMediator(
-            vedtakDao = mockk(relaxed = true),
-            opptegnelseDao = opptegnelseDao,
-            oppgaveDao = mockk(relaxed = true),
-            utbetalingDao = mockk(relaxed = true),
-            meldingDao =
-                mockk(relaxed = true) {
-                    every { finnUtbetalingsgodkjenningbehovJson(any()) } returns "{}"
-                    every { finnFødselsnummer(any()) } returns fnr
-                },
-            generasjonDao = mockk(relaxed = true),
-        )
+    private val mediator = GodkjenningMediator(opptegnelseDao)
 
     private val saksbehandler =
         Saksbehandlerløsning.Saksbehandler(
@@ -82,11 +75,9 @@ internal class GodkjenningMediatorTest {
     fun `automatisk avvisning skal opprette opptegnelse`() {
         mediator.automatiskAvvisning(
             publiserer = context::publiser,
-            vedtaksperiodeId = UUID.randomUUID(),
             begrunnelser = listOf("foo"),
             utbetaling = utbetaling,
-            hendelseId = UUID.randomUUID(),
-            spleisBehandlingId = null,
+            godkjenningsbehov = godkjenningsbehov(fødselsnummer = fnr),
         )
         assertFerdigbehandletGodkjenningsbehovOpptegnelseOpprettet()
     }
@@ -95,11 +86,8 @@ internal class GodkjenningMediatorTest {
     fun `automatisk utbetaling skal opprette opptegnelse`() {
         mediator.automatiskUtbetaling(
             context = context,
-            behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
-            vedtaksperiodeId = UUID.randomUUID(),
-            fødselsnummer = fnr,
-            hendelseId = UUID.randomUUID(),
-            spleisBehandlingId = null,
+            behov = godkjenningsbehov(fødselsnummer = fnr),
+            utbetaling = utbetaling
         )
         assertFerdigbehandletGodkjenningsbehovOpptegnelseOpprettet()
     }
@@ -108,9 +96,7 @@ internal class GodkjenningMediatorTest {
     fun `saksbehandler utbetaling skal ikke opprette opptegnelse`() {
         mediator.saksbehandlerUtbetaling(
             context = context,
-            behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
-            vedtaksperiodeId = UUID.randomUUID(),
-            fødselsnummer = fnr,
+            behov = godkjenningsbehov(fødselsnummer = fnr),
             saksbehandlerIdent = "1",
             saksbehandlerEpost = "2@nav.no",
             saksbehandler = saksbehandler,
@@ -118,7 +104,7 @@ internal class GodkjenningMediatorTest {
             godkjenttidspunkt = LocalDateTime.now(),
             saksbehandleroverstyringer = emptyList(),
             sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, listOf(generasjon())),
-            spleisBehandlingId = null,
+            utbetaling = utbetaling,
         )
         assertOpptegnelseIkkeOpprettet()
     }
@@ -128,9 +114,7 @@ internal class GodkjenningMediatorTest {
         val spleisBehandlingId = UUID.randomUUID()
         mediator.saksbehandlerUtbetaling(
             context = context,
-            behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
-            vedtaksperiodeId = UUID.randomUUID(),
-            fødselsnummer = fnr,
+            behov = godkjenningsbehov(fødselsnummer = fnr, spleisBehandlingId = spleisBehandlingId),
             saksbehandlerIdent = "1",
             saksbehandlerEpost = "2@nav.no",
             saksbehandler = saksbehandler,
@@ -138,43 +122,19 @@ internal class GodkjenningMediatorTest {
             godkjenttidspunkt = LocalDateTime.now(),
             saksbehandleroverstyringer = emptyList(),
             sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, listOf(generasjon())),
-            spleisBehandlingId = spleisBehandlingId,
+            utbetaling = utbetaling,
         )
         val hendelser = hendelserInspektør.hendelser("vedtaksperiode_godkjent")
         assertEquals(1, hendelser.size)
         val vedtaksperiodeGodkjent = hendelser.single()
-        assertEquals(spleisBehandlingId, vedtaksperiodeGodkjent["behandlingId"]?.asUUID())
-    }
-
-    @Test
-    fun `saksbehandler utbetaling uten spleisBehandlingId`() {
-        mediator.saksbehandlerUtbetaling(
-            context = context,
-            behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
-            vedtaksperiodeId = UUID.randomUUID(),
-            fødselsnummer = fnr,
-            saksbehandlerIdent = "1",
-            saksbehandlerEpost = "2@nav.no",
-            saksbehandler = saksbehandler,
-            beslutter = beslutter,
-            godkjenttidspunkt = LocalDateTime.now(),
-            saksbehandleroverstyringer = emptyList(),
-            sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, listOf(generasjon())),
-            spleisBehandlingId = null,
-        )
-        val hendelser = hendelserInspektør.hendelser("vedtaksperiode_godkjent")
-        assertEquals(1, hendelser.size)
-        val vedtaksperiodeGodkjent = hendelser.single()
-        assertEquals(null, vedtaksperiodeGodkjent["behandlingId"]?.asUUID())
+        assertEquals(spleisBehandlingId, vedtaksperiodeGodkjent["behandlingId"].asUUID())
     }
 
     @Test
     fun `legg saksbehandler og beslutter på vedtaksperiode_godkjent`() {
         mediator.saksbehandlerUtbetaling(
             context = context,
-            behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
-            vedtaksperiodeId = UUID.randomUUID(),
-            fødselsnummer = fnr,
+            behov = godkjenningsbehov(fødselsnummer = fnr),
             saksbehandlerIdent = "1",
             saksbehandlerEpost = "2@nav.no",
             saksbehandler = saksbehandler,
@@ -182,7 +142,7 @@ internal class GodkjenningMediatorTest {
             godkjenttidspunkt = LocalDateTime.now(),
             saksbehandleroverstyringer = emptyList(),
             sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, listOf(generasjon())),
-            spleisBehandlingId = null,
+            utbetaling = utbetaling,
         )
         val hendelser = hendelserInspektør.hendelser("vedtaksperiode_godkjent")
         assertEquals(1, hendelser.size)
@@ -198,9 +158,7 @@ internal class GodkjenningMediatorTest {
     fun `ikke legg beslutter på vedtaksperiode_godkjent dersom den ikke er satt på meldingen inn`() {
         mediator.saksbehandlerUtbetaling(
             context = context,
-            behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
-            vedtaksperiodeId = UUID.randomUUID(),
-            fødselsnummer = fnr,
+            behov = godkjenningsbehov(fødselsnummer = fnr),
             saksbehandlerIdent = "1",
             saksbehandlerEpost = "2@nav.no",
             saksbehandler = saksbehandler,
@@ -208,7 +166,7 @@ internal class GodkjenningMediatorTest {
             godkjenttidspunkt = LocalDateTime.now(),
             saksbehandleroverstyringer = emptyList(),
             sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, listOf(generasjon())),
-            spleisBehandlingId = null,
+            utbetaling = utbetaling,
         )
         val hendelser = hendelserInspektør.hendelser("vedtaksperiode_godkjent")
         val vedtaksperiodeGodkjent = hendelser.single()
@@ -221,9 +179,7 @@ internal class GodkjenningMediatorTest {
     fun `legg på saksbehandler men ikke beslutter på vedtaksperiode_avvist`() {
         mediator.saksbehandlerAvvisning(
             context = context,
-            behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
-            vedtaksperiodeId = UUID.randomUUID(),
-            fødselsnummer = fnr,
+            behov = godkjenningsbehov(fødselsnummer = fnr),
             saksbehandlerIdent = "1",
             saksbehandlerEpost = "2@nav.no",
             saksbehandler = saksbehandler,
@@ -232,7 +188,7 @@ internal class GodkjenningMediatorTest {
             begrunnelser = emptyList(),
             kommentar = null,
             saksbehandleroverstyringer = emptyList(),
-            spleisBehandlingId = null,
+            utbetaling = utbetaling,
         )
         val hendelser = hendelserInspektør.hendelser("vedtaksperiode_avvist")
         val vedtaksperiodeAvvist = hendelser.single()
@@ -247,11 +203,8 @@ internal class GodkjenningMediatorTest {
     fun `legg på tbd-saksbehandler på vedtaksperiode_godkjent ved automatisk utbetaling`() {
         mediator.automatiskUtbetaling(
             context = context,
-            behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
-            vedtaksperiodeId = UUID.randomUUID(),
-            fødselsnummer = fnr,
-            hendelseId = UUID.randomUUID(),
-            spleisBehandlingId = null,
+            behov = godkjenningsbehov(fødselsnummer = fnr),
+            utbetaling = utbetaling,
         )
         val hendelser = hendelserInspektør.hendelser("vedtaksperiode_godkjent")
         val vedtaksperiodeGodkjent = hendelser.single()
@@ -264,11 +217,9 @@ internal class GodkjenningMediatorTest {
     fun `legg på tbd-saksbehandler på vedtaksperiode_avvist ved automatisk avvisning`() {
         mediator.automatiskAvvisning(
             publiserer = context::publiser,
-            vedtaksperiodeId = UUID.randomUUID(),
             begrunnelser = emptyList(),
             utbetaling = utbetaling,
-            hendelseId = UUID.randomUUID(),
-            spleisBehandlingId = null,
+            godkjenningsbehov = godkjenningsbehov(fødselsnummer = fnr)
         )
         val hendelser = hendelserInspektør.hendelser("vedtaksperiode_avvist")
         val vedtaksperiodeGodkjent = hendelser.single()
@@ -281,9 +232,7 @@ internal class GodkjenningMediatorTest {
     fun `saksbehandler avvisning skal ikke opprette opptegnelse`() {
         mediator.saksbehandlerAvvisning(
             context = context,
-            behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
-            vedtaksperiodeId = UUID.randomUUID(),
-            fødselsnummer = fnr,
+            behov = godkjenningsbehov(fødselsnummer = fnr),
             saksbehandlerIdent = "1",
             saksbehandlerEpost = "2@nav.no",
             saksbehandler = saksbehandler,
@@ -292,7 +241,7 @@ internal class GodkjenningMediatorTest {
             begrunnelser = null,
             kommentar = null,
             saksbehandleroverstyringer = emptyList(),
-            spleisBehandlingId = null,
+            utbetaling = utbetaling,
         )
         assertOpptegnelseIkkeOpprettet()
     }
@@ -302,9 +251,7 @@ internal class GodkjenningMediatorTest {
         val spleisBehandlingId = UUID.randomUUID()
         mediator.saksbehandlerAvvisning(
             context = context,
-            behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
-            vedtaksperiodeId = UUID.randomUUID(),
-            fødselsnummer = fnr,
+            behov = godkjenningsbehov(fødselsnummer = fnr, spleisBehandlingId = spleisBehandlingId),
             saksbehandlerIdent = "1",
             saksbehandlerEpost = "2@nav.no",
             saksbehandler = saksbehandler,
@@ -313,33 +260,11 @@ internal class GodkjenningMediatorTest {
             begrunnelser = null,
             kommentar = null,
             saksbehandleroverstyringer = emptyList(),
-            spleisBehandlingId = spleisBehandlingId,
+            utbetaling = utbetaling,
         )
         val hendelser = hendelserInspektør.hendelser("vedtaksperiode_avvist")
         val vedtaksperiodeAvvist = hendelser.single()
-        assertEquals(spleisBehandlingId, vedtaksperiodeAvvist["behandlingId"]?.asUUID())
-    }
-
-    @Test
-    fun `saksbehandler avvisning uten spleisBehandlingId`() {
-        mediator.saksbehandlerAvvisning(
-            context = context,
-            behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
-            vedtaksperiodeId = UUID.randomUUID(),
-            fødselsnummer = fnr,
-            saksbehandlerIdent = "1",
-            saksbehandlerEpost = "2@nav.no",
-            saksbehandler = saksbehandler,
-            godkjenttidspunkt = LocalDateTime.now(),
-            årsak = null,
-            begrunnelser = null,
-            kommentar = null,
-            saksbehandleroverstyringer = emptyList(),
-            spleisBehandlingId = null,
-        )
-        val hendelser = hendelserInspektør.hendelser("vedtaksperiode_avvist")
-        val vedtaksperiodeAvvist = hendelser.single()
-        assertEquals(null, vedtaksperiodeAvvist["behandlingId"]?.asUUID())
+        assertEquals(spleisBehandlingId, vedtaksperiodeAvvist["behandlingId"].asUUID())
     }
 
     @Test
@@ -380,9 +305,7 @@ internal class GodkjenningMediatorTest {
     private fun godkjenning(generasjoner: List<Generasjon>) =
         mediator.saksbehandlerUtbetaling(
             context = context,
-            behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
-            vedtaksperiodeId = UUID.randomUUID(),
-            fødselsnummer = fnr,
+            behov = godkjenningsbehov(fødselsnummer = fnr),
             saksbehandlerIdent = "Z000000",
             saksbehandlerEpost = "saksbehandler@nav.no",
             saksbehandler = saksbehandler,
@@ -390,7 +313,7 @@ internal class GodkjenningMediatorTest {
             godkjenttidspunkt = LocalDateTime.now(),
             saksbehandleroverstyringer = emptyList(),
             sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, generasjoner),
-            spleisBehandlingId = null,
+            utbetaling = utbetaling,
         )
 
     private fun assertFerdigbehandletGodkjenningsbehovOpptegnelseOpprettet() =
@@ -406,4 +329,49 @@ internal class GodkjenningMediatorTest {
     private companion object {
         const val fnr = "12341231221"
     }
+
+    private fun godkjenningsbehov(
+        id: UUID = UUID.randomUUID(),
+        aktørId: String = lagAktørId(),
+        fødselsnummer: String = lagFødselsnummer(),
+        organisasjonsnummer: String = lagOrganisasjonsnummer(),
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        utbetalingId: UUID = UUID.randomUUID(),
+        spleisBehandlingId: UUID = UUID.randomUUID(),
+        avviksvurderingId: UUID = UUID.randomUUID(),
+        vilkårsgrunnlagId: UUID = UUID.randomUUID(),
+        fom: LocalDate = 1.januar,
+        tom: LocalDate = 31.januar,
+        skjæringstidspunkt: LocalDate = fom,
+        tags: Set<String> = emptySet(),
+        periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+        førstegangsbehandling: Boolean = periodetype == Periodetype.FØRSTEGANGSBEHANDLING,
+        utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
+        kanAvvises: Boolean = true,
+        inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+        andreInntektskilder: List<String> = emptyList(),
+        json: String = "{}"
+        ) = GodkjenningsbehovData(
+            id = id,
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            spleisVedtaksperioder = emptyList(),
+            utbetalingId = utbetalingId,
+            spleisBehandlingId = spleisBehandlingId,
+            avviksvurderingId = avviksvurderingId,
+            vilkårsgrunnlagId = vilkårsgrunnlagId,
+            tags = tags.toList(),
+            periodeFom = fom,
+            periodeTom = tom,
+            periodetype = periodetype,
+            førstegangsbehandling = førstegangsbehandling,
+            utbetalingtype = utbetalingtype,
+            kanAvvises = kanAvvises,
+            inntektskilde = inntektskilde,
+            orgnummereMedRelevanteArbeidsforhold = andreInntektskilder,
+            skjæringstidspunkt = skjæringstidspunkt,
+            json = json,
+    )
 }

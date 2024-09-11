@@ -11,12 +11,18 @@ import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.test.lagAktørId
+import no.nav.helse.spesialist.test.lagFødselsnummer
+import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.util.UUID
 
 internal class VurderAutomatiskInnvilgelseTest {
@@ -26,35 +32,24 @@ internal class VurderAutomatiskInnvilgelseTest {
         private const val fødselsnummer = "12345678910"
         private const val orgnummer = "123456789"
         private val hendelseId = UUID.randomUUID()
-        private val periodeType = Periodetype.FORLENGELSE
+        private val periodetype = Periodetype.FORLENGELSE
     }
 
     private val automatisering = mockk<Automatisering>(relaxed = true)
     private val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
     private val command =
         VurderAutomatiskInnvilgelse(
-            fødselsnummer,
-            vedtaksperiodeId,
-            null,
-            hendelseId,
             automatisering,
-            """{ "@event_name": "behov" }""",
             GodkjenningMediator(
-                vedtakDao = mockk(relaxed = true),
                 opptegnelseDao = mockk(relaxed = true),
-                oppgaveDao = mockk(relaxed = true),
-                utbetalingDao = mockk(relaxed = true),
-                meldingDao = mockk(relaxed = true),
-                generasjonDao = mockk(relaxed = true),
             ),
-            Utbetaling(utbetalingId, 1000, 1000, Utbetalingtype.UTBETALING),
-            periodeType,
-            Sykefraværstilfelle(
+            utbetaling = Utbetaling(utbetalingId, 0, 0, Utbetalingtype.UTBETALING),
+            sykefraværstilfelle = Sykefraværstilfelle(
                 fødselsnummer = fødselsnummer,
                 skjæringstidspunkt = 1.januar,
                 gjeldendeGenerasjoner = listOf(generasjon),
             ),
-            orgnummer,
+            godkjenningsbehov = godkjenningsbehov(id = hendelseId, organisasjonsnummer = orgnummer, periodetype = periodetype, json = """{ "@event_name": "behov" }"""),
         )
 
     private lateinit var context: CommandContext
@@ -112,4 +107,49 @@ internal class VurderAutomatiskInnvilgelseTest {
             assertTrue(automatiskBehandling)
         }
     }
+
+    private fun godkjenningsbehov(
+        id: UUID = UUID.randomUUID(),
+        aktørId: String = lagAktørId(),
+        fødselsnummer: String = lagFødselsnummer(),
+        organisasjonsnummer: String = lagOrganisasjonsnummer(),
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        utbetalingId: UUID = UUID.randomUUID(),
+        spleisBehandlingId: UUID = UUID.randomUUID(),
+        avviksvurderingId: UUID = UUID.randomUUID(),
+        vilkårsgrunnlagId: UUID = UUID.randomUUID(),
+        fom: LocalDate = 1.januar,
+        tom: LocalDate = 31.januar,
+        skjæringstidspunkt: LocalDate = fom,
+        tags: Set<String> = emptySet(),
+        periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+        førstegangsbehandling: Boolean = periodetype == Periodetype.FØRSTEGANGSBEHANDLING,
+        utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
+        kanAvvises: Boolean = true,
+        inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+        andreInntektskilder: List<String> = emptyList(),
+        json: String = "{}"
+    ) = GodkjenningsbehovData(
+        id = id,
+        fødselsnummer = fødselsnummer,
+        aktørId = aktørId,
+        organisasjonsnummer = organisasjonsnummer,
+        vedtaksperiodeId = vedtaksperiodeId,
+        spleisVedtaksperioder = emptyList(),
+        utbetalingId = utbetalingId,
+        spleisBehandlingId = spleisBehandlingId,
+        avviksvurderingId = avviksvurderingId,
+        vilkårsgrunnlagId = vilkårsgrunnlagId,
+        tags = tags.toList(),
+        periodeFom = fom,
+        periodeTom = tom,
+        periodetype = periodetype,
+        førstegangsbehandling = førstegangsbehandling,
+        utbetalingtype = utbetalingtype,
+        kanAvvises = kanAvvises,
+        inntektskilde = inntektskilde,
+        orgnummereMedRelevanteArbeidsforhold = andreInntektskilder,
+        skjæringstidspunkt = skjæringstidspunkt,
+        json = json,
+    )
 }

@@ -4,6 +4,7 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.januar
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
@@ -12,11 +13,17 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
+import no.nav.helse.spesialist.test.lagAktørId
+import no.nav.helse.spesialist.test.lagFødselsnummer
+import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.util.UUID
 
 internal class VurderAutomatiskAvvisningTest {
@@ -105,19 +112,16 @@ internal class VurderAutomatiskAvvisningTest {
         verify(exactly = 1) {
             godkjenningMediator.automatiskAvvisning(
                 publiserer = any(),
-                vedtaksperiodeId = any(),
                 begrunnelser = listOf(forventetÅrsak),
                 utbetaling = any(),
-                hendelseId = any(),
-                spleisBehandlingId = any(),
+                godkjenningsbehov = any()
             )
         }
     }
 
     private fun assertIkkeAvvisning(command: VurderAutomatiskAvvisning) {
         assertTrue(command.execute(context))
-        verify(exactly = 0) { godkjenningMediator.automatiskAvvisning(any(), any(), any()) }
-        verify(exactly = 0) { godkjenningMediator.automatiskAvvisning(any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { godkjenningMediator.automatiskAvvisning(any(), any(), any(), any()) }
     }
 
     private fun lagCommand(
@@ -125,21 +129,64 @@ internal class VurderAutomatiskAvvisningTest {
         kanAvvises: Boolean = true,
         fødselsnummer: String = "12345678910",
     ) = VurderAutomatiskAvvisning(
-        fødselsnummer = fødselsnummer,
-        vedtaksperiodeId = vedtaksperiodeId,
-        spleisBehandlingId = null,
         personDao = personDao,
         vergemålDao = vergemålDao,
         godkjenningMediator = godkjenningMediator,
-        hendelseId = hendelseId,
         utbetaling = Utbetaling(utbetalingId, 1000, 1000, utbetalingstype),
+        godkjenningsbehov = godkjenningsbehov(
+            kanAvvises = kanAvvises,
+            fødselsnummer = fødselsnummer
+        )
+    )
+
+    private fun godkjenningsbehov(
+        id: UUID = UUID.randomUUID(),
+        aktørId: String = lagAktørId(),
+        fødselsnummer: String = lagFødselsnummer(),
+        organisasjonsnummer: String = lagOrganisasjonsnummer(),
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        utbetalingId: UUID = UUID.randomUUID(),
+        spleisBehandlingId: UUID = UUID.randomUUID(),
+        avviksvurderingId: UUID = UUID.randomUUID(),
+        vilkårsgrunnlagId: UUID = UUID.randomUUID(),
+        fom: LocalDate = 1.januar,
+        tom: LocalDate = 31.januar,
+        skjæringstidspunkt: LocalDate = fom,
+        tags: Set<String> = emptySet(),
+        periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+        førstegangsbehandling: Boolean = periodetype == Periodetype.FØRSTEGANGSBEHANDLING,
+        utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
+        kanAvvises: Boolean = true,
+        inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+        andreInntektskilder: List<String> = emptyList(),
+        json: String = "{}"
+    ) = GodkjenningsbehovData(
+        id = id,
+        fødselsnummer = fødselsnummer,
+        aktørId = aktørId,
+        organisasjonsnummer = organisasjonsnummer,
+        vedtaksperiodeId = vedtaksperiodeId,
+        spleisVedtaksperioder = emptyList(),
+        utbetalingId = utbetalingId,
+        spleisBehandlingId = spleisBehandlingId,
+        avviksvurderingId = avviksvurderingId,
+        vilkårsgrunnlagId = vilkårsgrunnlagId,
+        tags = tags.toList(),
+        periodeFom = fom,
+        periodeTom = tom,
+        periodetype = periodetype,
+        førstegangsbehandling = førstegangsbehandling,
+        utbetalingtype = utbetalingtype,
         kanAvvises = kanAvvises,
+        inntektskilde = inntektskilde,
+        orgnummereMedRelevanteArbeidsforhold = andreInntektskilder,
+        skjæringstidspunkt = skjæringstidspunkt,
+        json = json,
     )
 
     private companion object {
         private const val fødselsnummer = "12345678910"
         private val vedtaksperiodeId = UUID.randomUUID()
-        private val hendelseId = UUID.randomUUID()
         private val utbetalingId = UUID.randomUUID()
     }
 }

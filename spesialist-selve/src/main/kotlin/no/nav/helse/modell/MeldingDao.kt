@@ -167,21 +167,12 @@ internal class MeldingDao(private val dataSource: DataSource) {
         val orgnummer: String,
     )
 
-    internal fun finnUtbetalingsgodkjenningbehovJson(meldingId: UUID): String {
-        return finnJson(meldingId, GODKJENNING)
-    }
-
-    private fun finnJson(
-        meldingId: UUID,
-        meldingtype: Meldingtype,
-    ): String {
-        return requireNotNull(
-            sessionOf(dataSource).use { session ->
-                @Language("PostgreSQL")
-                val statement = """SELECT data FROM hendelse WHERE id = ? AND type = ?"""
-                session.run(queryOf(statement, meldingId, meldingtype.name).map { it.string("data") }.asSingle)
-            },
-        )
+    internal fun finnGodkjenningsbehov(meldingId: UUID): Godkjenningsbehov {
+        val melding =
+            finn(meldingId)
+                ?: throw IllegalArgumentException("Forventer å finne godkjenningsbehov for meldingId=$meldingId")
+        check(melding is Godkjenningsbehov) { "Forventer at melding funnet med meldingId=$meldingId er et godkjenningsbehov" }
+        return melding
     }
 
     private fun TransactionalSession.lagre(melding: Personmelding) {
@@ -300,6 +291,6 @@ internal class MeldingDao(private val dataSource: DataSource) {
         VEDTAKSPERIODE_NY_UTBETALING,
         GODKJENT_TILBAKEDATERT_SYKMELDING,
         AVSLUTTET_UTEN_VEDTAK,
-        AVSLUTTET_MED_VEDTAK
+        AVSLUTTET_MED_VEDTAK,
     }
 }

@@ -68,30 +68,6 @@ data class SpleisVedtaksperiode(
     internal fun erRelevant(vedtaksperiodeId: UUID): Boolean = this.vedtaksperiodeId == vedtaksperiodeId
 }
 
-data class GodkjenningsbehovData(
-    val id: UUID,
-    val fødselsnummer: String,
-    val aktørId: String,
-    val organisasjonsnummer: String,
-    val vedtaksperiodeId: UUID,
-    val spleisVedtaksperioder: List<SpleisVedtaksperiode>,
-    val utbetalingId: UUID,
-    val spleisBehandlingId: UUID,
-    val avviksvurderingId: UUID?,
-    val vilkårsgrunnlagId: UUID,
-    val tags: List<String>,
-    val periodeFom: LocalDate,
-    val periodeTom: LocalDate,
-    val periodetype: Periodetype,
-    val førstegangsbehandling: Boolean,
-    val utbetalingtype: Utbetalingtype,
-    val kanAvvises: Boolean,
-    val inntektskilde: Inntektskilde,
-    val orgnummereMedRelevanteArbeidsforhold: List<String>,
-    val skjæringstidspunkt: LocalDate,
-    val json: String, // vi tenker at denne burde være private
-)
-
 internal class Godkjenningsbehov private constructor(
     override val id: UUID,
     private val fødselsnummer: String,
@@ -125,10 +101,10 @@ internal class Godkjenningsbehov private constructor(
         person: Person,
         kommandostarter: Kommandostarter,
     ) {
-        kommandostarter { godkjenningsbehov(commandData(), person) }
+        kommandostarter { godkjenningsbehov(data(), person) }
     }
 
-    private fun commandData(): GodkjenningsbehovData =
+    internal fun data(): GodkjenningsbehovData =
         GodkjenningsbehovData(
             id = id,
             fødselsnummer = fødselsnummer,
@@ -233,7 +209,7 @@ internal class Godkjenningsbehov private constructor(
 }
 
 internal class GodkjenningsbehovCommand(
-    commandData: GodkjenningsbehovData,
+    behovData: GodkjenningsbehovData,
     utbetaling: Utbetaling,
     førsteKjenteDagFinner: () -> LocalDate,
     automatisering: Automatisering,
@@ -259,46 +235,46 @@ internal class GodkjenningsbehovCommand(
     totrinnsvurderingMediator: TotrinnsvurderingMediator,
     person: Person,
 ) : MacroCommand() {
-    private val sykefraværstilfelle = person.sykefraværstilfelle(commandData.vedtaksperiodeId)
+    private val sykefraværstilfelle = person.sykefraværstilfelle(behovData.vedtaksperiodeId)
     override val commands: List<Command> =
         listOf(
             ForberedBehandlingAvGodkjenningsbehov(
-                commandData = commandData,
+                commandData = behovData,
                 person = person,
             ),
             OpprettKoblingTilAvviksvurdering(
-                commandData = commandData,
+                commandData = behovData,
                 avviksvurderingDao = avviksvurderingDao,
             ),
             VurderVidereBehandlingAvGodkjenningsbehov(
-                commandData = commandData,
+                commandData = behovData,
                 utbetalingDao = utbetalingDao,
                 oppgaveDao = oppgaveDao,
                 vedtakDao = vedtakDao,
             ),
             OpprettKoblingTilHendelseCommand(
-                commandData = commandData,
+                commandData = behovData,
                 vedtakDao = vedtakDao,
             ),
             AvbrytContextCommand(
-                vedtaksperiodeId = commandData.vedtaksperiodeId,
+                vedtaksperiodeId = behovData.vedtaksperiodeId,
                 commandContextDao = commandContextDao,
             ),
             PersisterVedtaksperiodetypeCommand(
-                vedtaksperiodeId = commandData.vedtaksperiodeId,
-                vedtaksperiodetype = commandData.periodetype,
-                inntektskilde = commandData.inntektskilde,
+                vedtaksperiodeId = behovData.vedtaksperiodeId,
+                vedtaksperiodetype = behovData.periodetype,
+                inntektskilde = behovData.inntektskilde,
                 vedtakDao = vedtakDao,
             ),
             OpprettKoblingTilUtbetalingCommand(
-                vedtaksperiodeId = commandData.vedtaksperiodeId,
-                utbetalingId = commandData.utbetalingId,
+                vedtaksperiodeId = behovData.vedtaksperiodeId,
+                utbetalingId = behovData.utbetalingId,
                 utbetalingDao = utbetalingDao,
             ),
             ForberedVisningCommand(
-                fødselsnummer = commandData.fødselsnummer,
-                organisasjonsnummer = commandData.organisasjonsnummer,
-                orgnummereMedRelevanteArbeidsforhold = commandData.orgnummereMedRelevanteArbeidsforhold,
+                fødselsnummer = behovData.fødselsnummer,
+                organisasjonsnummer = behovData.organisasjonsnummer,
+                orgnummereMedRelevanteArbeidsforhold = behovData.orgnummereMedRelevanteArbeidsforhold,
                 førsteKjenteDagFinner = førsteKjenteDagFinner,
                 personDao = personDao,
                 arbeidsgiverDao = arbeidsgiverDao,
@@ -307,99 +283,89 @@ internal class GodkjenningsbehovCommand(
                 snapshotClient = snapshotClient,
             ),
             KontrollerEgenAnsattstatus(
-                fødselsnummer = commandData.fødselsnummer,
+                fødselsnummer = behovData.fødselsnummer,
                 egenAnsattDao = egenAnsattDao,
             ),
             VurderVergemålOgFullmakt(
-                fødselsnummer = commandData.fødselsnummer,
+                fødselsnummer = behovData.fødselsnummer,
                 vergemålDao = vergemålDao,
-                vedtaksperiodeId = commandData.vedtaksperiodeId,
+                vedtaksperiodeId = behovData.vedtaksperiodeId,
                 sykefraværstilfelle = sykefraværstilfelle,
             ),
             VurderEnhetUtland(
-                fødselsnummer = commandData.fødselsnummer,
-                vedtaksperiodeId = commandData.vedtaksperiodeId,
+                fødselsnummer = behovData.fødselsnummer,
+                vedtaksperiodeId = behovData.vedtaksperiodeId,
                 personDao = personDao,
                 sykefraværstilfelle = sykefraværstilfelle,
             ),
             VurderÅpenGosysoppgave(
-                aktørId = commandData.aktørId,
+                aktørId = behovData.aktørId,
                 åpneGosysOppgaverDao = åpneGosysOppgaverDao,
-                vedtaksperiodeId = commandData.vedtaksperiodeId,
+                vedtaksperiodeId = behovData.vedtaksperiodeId,
                 sykefraværstilfelle = sykefraværstilfelle,
                 harTildeltOppgave = false,
                 oppgaveService = oppgaveService,
             ),
             VurderVurderingsmomenter(
-                vedtaksperiodeId = commandData.vedtaksperiodeId,
+                vedtaksperiodeId = behovData.vedtaksperiodeId,
                 risikovurderingDao = risikovurderingDao,
-                organisasjonsnummer = commandData.organisasjonsnummer,
-                førstegangsbehandling = commandData.førstegangsbehandling,
+                organisasjonsnummer = behovData.organisasjonsnummer,
+                førstegangsbehandling = behovData.førstegangsbehandling,
                 sykefraværstilfelle = sykefraværstilfelle,
                 utbetaling = utbetaling,
             ),
             VurderAutomatiskAvvisning(
-                fødselsnummer = commandData.fødselsnummer,
-                vedtaksperiodeId = commandData.vedtaksperiodeId,
-                spleisBehandlingId = commandData.spleisBehandlingId,
                 personDao = personDao,
                 vergemålDao = vergemålDao,
                 godkjenningMediator = godkjenningMediator,
-                hendelseId = commandData.id,
                 utbetaling = utbetaling,
-                kanAvvises = commandData.kanAvvises,
+                godkjenningsbehov = behovData,
             ),
             VurderAutomatiskInnvilgelse(
-                fødselsnummer = commandData.fødselsnummer,
-                vedtaksperiodeId = commandData.vedtaksperiodeId,
-                hendelseId = commandData.id,
                 automatisering = automatisering,
-                godkjenningsbehovJson = commandData.json,
                 godkjenningMediator = godkjenningMediator,
                 utbetaling = utbetaling,
-                periodetype = commandData.periodetype,
                 sykefraværstilfelle = sykefraværstilfelle,
-                spleisBehandlingId = commandData.spleisBehandlingId,
-                organisasjonsnummer = commandData.organisasjonsnummer,
+                godkjenningsbehov = behovData,
             ),
             OpprettSaksbehandleroppgave(
-                fødselsnummer = commandData.fødselsnummer,
-                vedtaksperiodeId = commandData.vedtaksperiodeId,
+                fødselsnummer = behovData.fødselsnummer,
+                vedtaksperiodeId = behovData.vedtaksperiodeId,
                 oppgaveService = oppgaveService,
                 automatisering = automatisering,
-                hendelseId = commandData.id,
+                hendelseId = behovData.id,
                 personDao = personDao,
                 risikovurderingDao = risikovurderingDao,
                 egenAnsattDao = egenAnsattDao,
-                utbetalingId = commandData.utbetalingId,
-                utbetalingtype = commandData.utbetalingtype,
+                utbetalingId = behovData.utbetalingId,
+                utbetalingtype = behovData.utbetalingtype,
                 sykefraværstilfelle = sykefraværstilfelle,
                 utbetaling = utbetaling,
                 vergemålDao = vergemålDao,
-                inntektskilde = commandData.inntektskilde,
-                periodetype = commandData.periodetype,
-                kanAvvises = commandData.kanAvvises,
+                inntektskilde = behovData.inntektskilde,
+                periodetype = behovData.periodetype,
+                kanAvvises = behovData.kanAvvises,
                 vedtakDao = vedtakDao,
                 påVentDao = påVentDao,
             ),
             VurderBehovForTotrinnskontroll(
-                fødselsnummer = commandData.fødselsnummer,
-                vedtaksperiodeId = commandData.vedtaksperiodeId,
+                fødselsnummer = behovData.fødselsnummer,
+                vedtaksperiodeId = behovData.vedtaksperiodeId,
                 oppgaveService = oppgaveService,
                 overstyringDao = overstyringDao,
                 totrinnsvurderingMediator = totrinnsvurderingMediator,
                 sykefraværstilfelle = sykefraværstilfelle,
-                spleisVedtaksperioder = commandData.spleisVedtaksperioder,
+                spleisVedtaksperioder = behovData.spleisVedtaksperioder,
             ),
             PersisterPeriodehistorikkCommand(
-                vedtaksperiodeId = commandData.vedtaksperiodeId,
-                utbetalingId = commandData.utbetalingId,
+                vedtaksperiodeId = behovData.vedtaksperiodeId,
+                utbetalingId = behovData.utbetalingId,
                 periodehistorikkDao = periodehistorikkDao,
                 utbetalingDao = utbetalingDao,
             ),
             PersisterInntektCommand(
-                fødselsnummer = commandData.fødselsnummer,
-                skjæringstidspunkt = commandData.skjæringstidspunkt,
+                fødselsnummer = behovData.fødselsnummer,
+                skjæringstidspunkt = behovData.skjæringstidspunkt,
                 personDao = personDao,
             ),
         )

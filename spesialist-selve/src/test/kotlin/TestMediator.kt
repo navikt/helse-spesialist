@@ -66,15 +66,7 @@ internal class TestMediator(
             NotatRepository(NotatDao(dataSource)),
         ) { Subsumsjonsmelder("versjonAvKode", testRapid) }
 
-    private val godkjenningMediator =
-        GodkjenningMediator(
-            vedtakDao,
-            opptegnelseDao,
-            oppgaveDao,
-            utbetalingDao,
-            meldingDao,
-            generasjonDao,
-        )
+    private val godkjenningMediator = GodkjenningMediator(opptegnelseDao)
     private val tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
     private val oppgaveService =
         OppgaveService(

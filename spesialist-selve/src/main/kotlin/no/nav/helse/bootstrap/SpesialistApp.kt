@@ -136,15 +136,7 @@ internal class SpesialistApp(
     private lateinit var subsumsjonsmelder: Subsumsjonsmelder
 
     private val behandlingsstatistikkService = BehandlingsstatistikkService(behandlingsstatistikkDao = behandlingsstatistikkDao)
-    private val godkjenningMediator =
-        GodkjenningMediator(
-            vedtakDao = vedtakDao,
-            opptegnelseDao = opptegnelseDao,
-            oppgaveDao = oppgaveDao,
-            utbetalingDao = utbetalingDao,
-            meldingDao = meldingDao,
-            generasjonDao = generasjonDao,
-        )
+    private val godkjenningMediator = GodkjenningMediator(opptegnelseDao)
     private val notatRepository = NotatRepository(notatDao = notatDao)
     private val stansAutomatiskBehandlingMediator =
         StansAutomatiskBehandlingMediator(

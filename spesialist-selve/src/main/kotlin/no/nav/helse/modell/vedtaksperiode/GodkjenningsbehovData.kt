@@ -1,17 +1,41 @@
-package no.nav.helse.modell
+package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.helse.mediator.meldinger.utgående.VedtaksperiodeAvvist
 import no.nav.helse.mediator.meldinger.utgående.VedtaksperiodeGodkjent
 import no.nav.helse.modell.utbetaling.Utbetaling
+import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class UtbetalingsgodkjenningMessage(json: String, private val utbetaling: Utbetaling?) {
+data class GodkjenningsbehovData(
+    val id: UUID,
+    val fødselsnummer: String,
+    val aktørId: String,
+    val organisasjonsnummer: String,
+    val vedtaksperiodeId: UUID,
+    val spleisVedtaksperioder: List<SpleisVedtaksperiode>,
+    val utbetalingId: UUID,
+    val spleisBehandlingId: UUID,
+    val avviksvurderingId: UUID?,
+    val vilkårsgrunnlagId: UUID,
+    val tags: List<String>,
+    val periodeFom: LocalDate,
+    val periodeTom: LocalDate,
+    val periodetype: Periodetype,
+    val førstegangsbehandling: Boolean,
+    val utbetalingtype: Utbetalingtype,
+    val kanAvvises: Boolean,
+    val inntektskilde: Inntektskilde,
+    val orgnummereMedRelevanteArbeidsforhold: List<String>,
+    val skjæringstidspunkt: LocalDate,
+    private val json: String,
+) {
     private val behov = JsonMessage(json, MessageProblems(json))
     private lateinit var løsning: Map<String, Any>
 
@@ -20,16 +44,63 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
         private const val AUTOMATISK_BEHANDLET_EPOSTADRESSE = "tbd@nav.no"
     }
 
-    internal fun godkjennAutomatisk() {
-        løsAutomatisk(true)
+    internal fun godkjennAutomatisk(utbetaling: Utbetaling) {
+        løsAutomatisk(true, utbetaling)
     }
 
-    internal fun avvisAutomatisk(begrunnelser: List<String>?) {
-        løsAutomatisk(false, "Automatisk avvist", begrunnelser)
+    internal fun avvisAutomatisk(
+        utbetaling: Utbetaling,
+        begrunnelser: List<String>?,
+    ) {
+        løsAutomatisk(false, utbetaling, "Automatisk avvist", begrunnelser)
+    }
+
+    internal fun godkjennManuelt(
+        saksbehandlerIdent: String,
+        saksbehandlerEpost: String,
+        godkjenttidspunkt: LocalDateTime,
+        saksbehandleroverstyringer: List<UUID>,
+        utbetaling: Utbetaling,
+    ) {
+        løsManuelt(
+            godkjent = true,
+            saksbehandlerIdent = saksbehandlerIdent,
+            saksbehandlerEpost = saksbehandlerEpost,
+            godkjenttidspunkt = godkjenttidspunkt,
+            årsak = null,
+            begrunnelser = null,
+            kommentar = null,
+            saksbehandleroverstyringer = saksbehandleroverstyringer,
+            utbetaling = utbetaling,
+        )
+    }
+
+    internal fun avvisManuelt(
+        saksbehandlerIdent: String,
+        saksbehandlerEpost: String,
+        godkjenttidspunkt: LocalDateTime,
+        årsak: String?,
+        begrunnelser: List<String>?,
+        kommentar: String?,
+        saksbehandleroverstyringer: List<UUID>,
+        utbetaling: Utbetaling,
+    ) {
+        løsManuelt(
+            godkjent = false,
+            saksbehandlerIdent = saksbehandlerIdent,
+            saksbehandlerEpost = saksbehandlerEpost,
+            godkjenttidspunkt = godkjenttidspunkt,
+            årsak = årsak,
+            begrunnelser = begrunnelser,
+            kommentar = kommentar,
+            saksbehandleroverstyringer = saksbehandleroverstyringer,
+            utbetaling = utbetaling,
+        )
     }
 
     private fun løsAutomatisk(
         godkjent: Boolean,
+        utbetaling: Utbetaling,
         årsak: String? = null,
         begrunnelser: List<String>? = null,
     ) {
@@ -43,45 +114,7 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
             begrunnelser = begrunnelser,
             kommentar = null,
             saksbehandleroverstyringer = emptyList(),
-        )
-    }
-
-    internal fun godkjennManuelt(
-        saksbehandlerIdent: String,
-        saksbehandlerEpost: String,
-        godkjenttidspunkt: LocalDateTime,
-        saksbehandleroverstyringer: List<UUID>,
-    ) {
-        løsManuelt(
-            godkjent = true,
-            saksbehandlerIdent = saksbehandlerIdent,
-            saksbehandlerEpost = saksbehandlerEpost,
-            godkjenttidspunkt = godkjenttidspunkt,
-            årsak = null,
-            begrunnelser = null,
-            kommentar = null,
-            saksbehandleroverstyringer = saksbehandleroverstyringer,
-        )
-    }
-
-    internal fun avvisManuelt(
-        saksbehandlerIdent: String,
-        saksbehandlerEpost: String,
-        godkjenttidspunkt: LocalDateTime,
-        årsak: String?,
-        begrunnelser: List<String>?,
-        kommentar: String?,
-        saksbehandleroverstyringer: List<UUID>,
-    ) {
-        løsManuelt(
-            godkjent = false,
-            saksbehandlerIdent = saksbehandlerIdent,
-            saksbehandlerEpost = saksbehandlerEpost,
-            godkjenttidspunkt = godkjenttidspunkt,
-            årsak = årsak,
-            begrunnelser = begrunnelser,
-            kommentar = kommentar,
-            saksbehandleroverstyringer = saksbehandleroverstyringer,
+            utbetaling = utbetaling,
         )
     }
 
@@ -94,6 +127,7 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
         begrunnelser: List<String>?,
         kommentar: String?,
         saksbehandleroverstyringer: List<UUID>,
+        utbetaling: Utbetaling,
     ) {
         løs(
             automatisk = false,
@@ -105,6 +139,7 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
             begrunnelser = begrunnelser,
             kommentar = kommentar,
             saksbehandleroverstyringer = saksbehandleroverstyringer,
+            utbetaling = utbetaling,
         )
     }
 
@@ -118,6 +153,7 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
         begrunnelser: List<String>?,
         kommentar: String?,
         saksbehandleroverstyringer: List<UUID>,
+        utbetaling: Utbetaling,
     ) {
         løsning =
             mapOf(
@@ -133,83 +169,62 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
                         "kommentar" to kommentar,
                         "saksbehandleroverstyringer" to saksbehandleroverstyringer,
                     ).apply {
-                        compute("refusjontype") { _, _ -> utbetaling?.refusjonstype()?.name }
+                        compute("refusjontype") { _, _ -> utbetaling.refusjonstype().name }
                     }.toMap(),
             )
-        // <midlertidig forklaring="@behovId brukes for å gruppere behov/løsning. Ble innført 28. mars 2022. Må likevel fikse godkjenningsbehov som ble opprettet før 28. mars">
-        behov.interestedIn("@behovId", "@id")
-        if (behov["@behovId"].asText().isBlank()) behov["@behovId"] = behov["@id"].asText() // migrerer gamle behov på nytt format
-        // </midlertidig>
         behov["@løsning"] = løsning
         behov["@id"] = UUID.randomUUID()
         behov["@opprettet"] = LocalDateTime.now()
     }
 
     internal fun lagVedtaksperiodeGodkjentManuelt(
-        vedtaksperiodeId: UUID,
-        spleisBehandlingId: UUID?,
-        fødselsnummer: String,
         saksbehandler: Saksbehandlerløsning.Saksbehandler,
         beslutter: Saksbehandlerløsning.Saksbehandler?,
-        vedtakDao: VedtakDao,
     ) = VedtaksperiodeGodkjent.manueltBehandlet(
-        vedtaksperiodeId = vedtaksperiodeId,
-        spleisBehandlingId = spleisBehandlingId,
-        fødselsnummer = fødselsnummer,
-        periodetype = vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId),
+        vedtaksperiodeId = this.vedtaksperiodeId,
+        spleisBehandlingId = this.spleisBehandlingId,
+        fødselsnummer = this.fødselsnummer,
+        periodetype = periodetype,
         saksbehandler = saksbehandler,
         beslutter = beslutter,
     )
 
-    internal fun lagVedtaksperiodeGodkjentAutomatisk(
-        vedtaksperiodeId: UUID,
-        spleisBehandlingId: UUID?,
-        fødselsnummer: String,
-        vedtakDao: VedtakDao,
-    ) = VedtaksperiodeGodkjent.automatiskBehandlet(
-        vedtaksperiodeId = vedtaksperiodeId,
-        spleisBehandlingId = spleisBehandlingId,
-        fødselsnummer = fødselsnummer,
-        periodetype = vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId),
-        saksbehandler =
-            Saksbehandlerløsning.Saksbehandler(
-                ident = AUTOMATISK_BEHANDLET_IDENT,
-                epostadresse = AUTOMATISK_BEHANDLET_EPOSTADRESSE,
-            ),
-    )
+    internal fun lagVedtaksperiodeGodkjentAutomatisk() =
+        VedtaksperiodeGodkjent.automatiskBehandlet(
+            vedtaksperiodeId = this.vedtaksperiodeId,
+            spleisBehandlingId = this.spleisBehandlingId,
+            fødselsnummer = this.fødselsnummer,
+            periodetype = periodetype,
+            saksbehandler =
+                Saksbehandlerløsning.Saksbehandler(
+                    ident = AUTOMATISK_BEHANDLET_IDENT,
+                    epostadresse = AUTOMATISK_BEHANDLET_EPOSTADRESSE,
+                ),
+        )
 
-    internal fun lagVedtaksperiodeAvvistManuelt(
-        vedtaksperiodeId: UUID,
-        spleisBehandlingId: UUID?,
-        fødselsnummer: String,
-        saksbehandler: Saksbehandlerløsning.Saksbehandler,
-        vedtakDao: VedtakDao,
-    ) = VedtaksperiodeAvvist.manueltAvvist(
-        vedtaksperiodeId = vedtaksperiodeId,
-        spleisBehandlingId = spleisBehandlingId,
-        fødselsnummer = fødselsnummer,
-        periodetype = vedtakDao.finnVedtakId(vedtaksperiodeId)?.let { vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId) },
-        saksbehandler = saksbehandler,
-        løsning = objectMapper.convertValue(løsning),
-    )
+    internal fun lagVedtaksperiodeAvvistManuelt(saksbehandler: Saksbehandlerløsning.Saksbehandler) =
+        VedtaksperiodeAvvist.manueltAvvist(
+            vedtaksperiodeId = this.vedtaksperiodeId,
+            spleisBehandlingId = this.spleisBehandlingId,
+            fødselsnummer = this.fødselsnummer,
+            periodetype = periodetype,
+            saksbehandler = saksbehandler,
+            løsning = objectMapper.convertValue(løsning),
+        )
 
-    internal fun lagVedtaksperiodeAvvistAutomatisk(
-        vedtaksperiodeId: UUID,
-        spleisBehandlingId: UUID?,
-        fødselsnummer: String,
-        vedtakDao: VedtakDao,
-    ) = VedtaksperiodeAvvist.automatiskAvvist(
-        vedtaksperiodeId = vedtaksperiodeId,
-        spleisBehandlingId = spleisBehandlingId,
-        fødselsnummer = fødselsnummer,
-        periodetype = vedtakDao.finnVedtakId(vedtaksperiodeId)?.let { vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId) },
-        saksbehandler =
-            Saksbehandlerløsning.Saksbehandler(
-                ident = AUTOMATISK_BEHANDLET_IDENT,
-                epostadresse = AUTOMATISK_BEHANDLET_EPOSTADRESSE,
-            ),
-        løsning = objectMapper.convertValue(løsning),
-    )
+    internal fun lagVedtaksperiodeAvvistAutomatisk() =
+        VedtaksperiodeAvvist.automatiskAvvist(
+            vedtaksperiodeId = this.vedtaksperiodeId,
+            spleisBehandlingId = this.spleisBehandlingId,
+            fødselsnummer = this.fødselsnummer,
+            periodetype = periodetype,
+            saksbehandler =
+                Saksbehandlerløsning.Saksbehandler(
+                    ident = AUTOMATISK_BEHANDLET_IDENT,
+                    epostadresse = AUTOMATISK_BEHANDLET_EPOSTADRESSE,
+                ),
+            løsning = objectMapper.convertValue(løsning),
+        )
 
     internal fun toJson() = behov.toJson()
 }

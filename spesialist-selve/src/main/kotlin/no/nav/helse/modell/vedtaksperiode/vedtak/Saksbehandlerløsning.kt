@@ -101,7 +101,7 @@ internal class Saksbehandlerløsning private constructor(
         person: Person,
         kommandostarter: Kommandostarter,
     ) {
-        kommandostarter { utbetalingsgodkjenning(this@Saksbehandlerløsning, person) }
+        kommandostarter { løsGodkjenningsbehov(this@Saksbehandlerløsning, person) }
     }
 
     override fun fødselsnummer() = fødselsnummer

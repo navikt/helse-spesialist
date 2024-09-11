@@ -15,6 +15,7 @@ import no.nav.helse.modell.oppgave.SjekkAtOppgaveFortsattErÅpenCommand
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
+import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.util.UUID
 
@@ -41,7 +42,7 @@ internal class GosysOppgaveEndret private constructor(
     ) {
         kommandostarter {
             val oppgaveDataForAutomatisering = finnOppgavedata(fødselsnummer) ?: return@kommandostarter null
-            gosysOppgaveEndret(this@GosysOppgaveEndret, person, oppgaveDataForAutomatisering)
+            gosysOppgaveEndret(person, oppgaveDataForAutomatisering)
         }
     }
 
@@ -51,8 +52,6 @@ internal class GosysOppgaveEndret private constructor(
 }
 
 internal class GosysOppgaveEndretCommand(
-    fødselsnummer: String,
-    aktørId: String,
     utbetaling: Utbetaling,
     sykefraværstilfelle: Sykefraværstilfelle,
     harTildeltOppgave: Boolean,
@@ -62,38 +61,31 @@ internal class GosysOppgaveEndretCommand(
     oppgaveDao: OppgaveDao,
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
-    spleisBehandlingId: UUID?,
-    organisasjonsnummer: String,
+    godkjenningsbehov: GodkjenningsbehovData,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
             VurderÅpenGosysoppgave(
-                aktørId = aktørId,
+                aktørId = godkjenningsbehov.aktørId,
                 åpneGosysOppgaverDao = åpneGosysOppgaverDao,
                 vedtaksperiodeId = oppgavedataForAutomatisering.vedtaksperiodeId,
                 sykefraværstilfelle = sykefraværstilfelle,
                 harTildeltOppgave = harTildeltOppgave,
                 oppgaveService = oppgaveService,
             ),
-            SjekkAtOppgaveFortsattErÅpenCommand(fødselsnummer = fødselsnummer, oppgaveDao = oppgaveDao),
+            SjekkAtOppgaveFortsattErÅpenCommand(fødselsnummer = godkjenningsbehov.fødselsnummer, oppgaveDao = oppgaveDao),
             SettTidligereAutomatiseringInaktivCommand(
                 vedtaksperiodeId = oppgavedataForAutomatisering.vedtaksperiodeId,
                 hendelseId = oppgavedataForAutomatisering.hendelseId,
                 automatisering = automatisering,
             ),
             AutomatiseringForEksisterendeOppgaveCommand(
-                fødselsnummer = fødselsnummer,
-                vedtaksperiodeId = oppgavedataForAutomatisering.vedtaksperiodeId,
-                hendelseId = oppgavedataForAutomatisering.hendelseId,
                 automatisering = automatisering,
-                godkjenningsbehovJson = oppgavedataForAutomatisering.godkjenningsbehovJson,
                 godkjenningMediator = godkjenningMediator,
                 oppgaveService = oppgaveService,
                 utbetaling = utbetaling,
-                periodetype = oppgavedataForAutomatisering.periodetype,
                 sykefraværstilfelle = sykefraværstilfelle,
-                spleisBehandlingId = spleisBehandlingId,
-                organisasjonsnummer = organisasjonsnummer,
+                godkjenningsbehov = godkjenningsbehov,
             ),
         )
 }

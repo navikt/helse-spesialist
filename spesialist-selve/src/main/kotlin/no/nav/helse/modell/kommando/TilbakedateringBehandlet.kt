@@ -12,6 +12,7 @@ import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
+import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -59,41 +60,33 @@ internal class TilbakedateringBehandlet private constructor(
 }
 
 internal class TilbakedateringGodkjentCommand(
-    fødselsnummer: String,
     sykefraværstilfelle: Sykefraværstilfelle,
     utbetaling: Utbetaling,
     automatisering: Automatisering,
     oppgaveDataForAutomatisering: OppgaveDataForAutomatisering,
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
-    spleisBehandlingId: UUID?,
-    organisasjonsnummer: String,
     søknadsperioder: List<Periode>,
+    godkjenningsbehov: GodkjenningsbehovData,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
             VurderOmSøknadsperiodenOverlapperMedOppgave(oppgaveDataForAutomatisering, søknadsperioder),
             ikkesuspenderendeCommand("fjernTilbakedatertEgenskap") {
-                oppgaveService.fjernTilbakedatert(oppgaveDataForAutomatisering.vedtaksperiodeId)
+                oppgaveService.fjernTilbakedatert(godkjenningsbehov.vedtaksperiodeId)
             },
             SettTidligereAutomatiseringInaktivCommand(
-                vedtaksperiodeId = oppgaveDataForAutomatisering.vedtaksperiodeId,
-                hendelseId = oppgaveDataForAutomatisering.hendelseId,
+                vedtaksperiodeId = godkjenningsbehov.vedtaksperiodeId,
+                hendelseId = godkjenningsbehov.id,
                 automatisering = automatisering,
             ),
             AutomatiseringForEksisterendeOppgaveCommand(
-                fødselsnummer = fødselsnummer,
-                vedtaksperiodeId = oppgaveDataForAutomatisering.vedtaksperiodeId,
-                hendelseId = oppgaveDataForAutomatisering.hendelseId,
                 automatisering = automatisering,
-                godkjenningsbehovJson = oppgaveDataForAutomatisering.godkjenningsbehovJson,
                 godkjenningMediator = godkjenningMediator,
                 oppgaveService = oppgaveService,
                 utbetaling = utbetaling,
-                periodetype = oppgaveDataForAutomatisering.periodetype,
                 sykefraværstilfelle = sykefraværstilfelle,
-                spleisBehandlingId = spleisBehandlingId,
-                organisasjonsnummer = organisasjonsnummer,
+                godkjenningsbehov = godkjenningsbehov,
             ),
         )
 }

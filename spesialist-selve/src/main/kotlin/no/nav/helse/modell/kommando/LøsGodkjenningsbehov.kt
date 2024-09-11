@@ -1,20 +1,16 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.modell.MeldingDao
-import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
+import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class UtbetalingsgodkjenningCommand(
-    private val fødselsnummer: String,
-    private val vedtaksperiodeId: UUID,
-    private val spleisBehandlingId: UUID?,
-    private val utbetaling: Utbetaling?,
+internal class LøsGodkjenningsbehov(
+    private val utbetaling: Utbetaling,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val godkjent: Boolean,
     private val godkjenttidspunkt: LocalDateTime,
@@ -24,25 +20,21 @@ internal class UtbetalingsgodkjenningCommand(
     private val begrunnelser: List<String>?,
     private val kommentar: String?,
     private val saksbehandleroverstyringer: List<UUID>,
-    private val godkjenningsbehovhendelseId: UUID,
     private val saksbehandler: Saksbehandlerløsning.Saksbehandler,
     private val beslutter: Saksbehandlerløsning.Saksbehandler?,
-    private val meldingDao: MeldingDao,
     private val godkjenningMediator: GodkjenningMediator,
+    private val godkjenningsbehovData: GodkjenningsbehovData,
 ) : Command {
     private companion object {
-        private val log = LoggerFactory.getLogger(UtbetalingsgodkjenningCommand::class.java)
+        private val logg = LoggerFactory.getLogger(LøsGodkjenningsbehov::class.java)
     }
 
     override fun execute(context: CommandContext): Boolean {
-        val behovJson = meldingDao.finnUtbetalingsgodkjenningbehovJson(godkjenningsbehovhendelseId)
-        val behov = UtbetalingsgodkjenningMessage(behovJson, utbetaling)
         if (godkjent) {
             godkjenningMediator.saksbehandlerUtbetaling(
                 context = context,
-                behov = behov,
-                vedtaksperiodeId = vedtaksperiodeId,
-                fødselsnummer = fødselsnummer,
+                behov = godkjenningsbehovData,
+                utbetaling = utbetaling,
                 saksbehandlerIdent = ident,
                 saksbehandlerEpost = epostadresse,
                 saksbehandler = saksbehandler,
@@ -50,14 +42,12 @@ internal class UtbetalingsgodkjenningCommand(
                 godkjenttidspunkt = godkjenttidspunkt,
                 saksbehandleroverstyringer = saksbehandleroverstyringer,
                 sykefraværstilfelle = sykefraværstilfelle,
-                spleisBehandlingId = spleisBehandlingId,
             )
         } else {
             godkjenningMediator.saksbehandlerAvvisning(
                 context = context,
-                behov = behov,
-                vedtaksperiodeId = vedtaksperiodeId,
-                fødselsnummer = fødselsnummer,
+                behov = godkjenningsbehovData,
+                utbetaling = utbetaling,
                 saksbehandlerIdent = ident,
                 saksbehandlerEpost = epostadresse,
                 saksbehandler = saksbehandler,
@@ -66,10 +56,9 @@ internal class UtbetalingsgodkjenningCommand(
                 begrunnelser = begrunnelser,
                 kommentar = kommentar,
                 saksbehandleroverstyringer = saksbehandleroverstyringer,
-                spleisBehandlingId = spleisBehandlingId,
             )
         }
-        log.info("sender svar på godkjenningsbehov")
+        logg.info("sender svar på godkjenningsbehov")
         return true
     }
 }
