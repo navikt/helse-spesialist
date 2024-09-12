@@ -33,7 +33,6 @@ class KRRClient(
                 .build()
                 .name("responstid_hent_reservasjonsstatus")
                 .help("Responstid for kall til digdir-krr-proxy")
-                .labelNames("success")
                 .register()
         private val statusEtterKallReservasjonsstatus: Counter =
             Counter
