@@ -190,8 +190,9 @@ internal class Godkjenningsbehov private constructor(
                 )
             },
         spleisBehandlingId =
-            jsonNode.path("Godkjenning")?.path("behandlingId")?.asText()
-                ?.let { UUID.fromString(it) }
+            jsonNode.path("Godkjenning")?.path("behandlingId")
+                ?.takeUnless { it.isMissingOrNull() }
+                ?.let { UUID.fromString(it.asText()) }
                 ?: behandlingIdFinner(UUID.fromString(jsonNode.path("vedtaksperiodeId").asText())),
         tags = jsonNode.path("Godkjenning").path("tags").map { it.asText() },
         utbetalingId = UUID.fromString(jsonNode.path("utbetalingId").asText()),
