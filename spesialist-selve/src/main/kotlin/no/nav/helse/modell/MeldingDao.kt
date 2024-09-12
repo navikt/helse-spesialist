@@ -19,6 +19,7 @@ import no.nav.helse.modell.person.toFødselsnummer
 import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.vedtaksperiode.BehandlingOpprettet
+import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
@@ -224,7 +225,7 @@ internal class MeldingDao(private val dataSource: DataSource) {
         val jsonNode = objectMapper.readTree(json)
         return when (meldingtype) {
             ADRESSEBESKYTTELSE_ENDRET -> AdressebeskyttelseEndret(jsonNode)
-            GODKJENNING -> Godkjenningsbehov(jsonNode)
+            GODKJENNING -> Godkjenningsbehov(jsonNode, GenerasjonDao(dataSource)::finnGjeldendeBehandlingId)
             OPPDATER_PERSONSNAPSHOT -> OppdaterPersonsnapshot(jsonNode)
             GOSYS_OPPGAVE_ENDRET -> GosysOppgaveEndret(jsonNode)
             VEDTAKSPERIODE_ENDRET -> VedtaksperiodeEndret(jsonNode)

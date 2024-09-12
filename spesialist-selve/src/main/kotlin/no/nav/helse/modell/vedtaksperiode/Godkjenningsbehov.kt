@@ -167,7 +167,7 @@ internal class Godkjenningsbehov private constructor(
         json = packet.toJson(),
     )
 
-    internal constructor(jsonNode: JsonNode) : this(
+    internal constructor(jsonNode: JsonNode, behandlingIdFinner: (vedtaksperiodeId: UUID) -> UUID) : this(
         id = UUID.fromString(jsonNode.path("@id").asText()),
         fødselsnummer = jsonNode.path("fødselsnummer").asText(),
         aktørId = jsonNode.path("aktørId").asText(),
@@ -178,7 +178,10 @@ internal class Godkjenningsbehov private constructor(
         avviksvurderingId =
             jsonNode.path("avviksvurderingId").takeUnless { it.isMissingOrNull() }
                 ?.let { UUID.fromString(it.asText()) },
-        vilkårsgrunnlagId = UUID.fromString(jsonNode.path("Godkjenning").path("vilkårsgrunnlagId").asText()),
+        vilkårsgrunnlagId =
+            jsonNode.path("Godkjenning")?.path("vilkårsgrunnlagId")?.asText()
+                ?.let { UUID.fromString(it) }
+                ?: behandlingIdFinner(UUID.fromString(jsonNode.path("vedtaksperiodeId").asText())),
         spleisVedtaksperioder =
             jsonNode.path("Godkjenning").path("perioderMedSammeSkjæringstidspunkt").map { periodeNode ->
                 SpleisVedtaksperiode(

@@ -133,33 +133,14 @@ class GenerasjonDao(private val dataSource: DataSource) {
         this.run(queryOf(query, generasjonId, *varselIder.toTypedArray()).asExecute)
     }
 
-    internal fun finnGjeldendeGenerasjon(vedtaksperiodeId: UUID): GenerasjonDto? {
+    internal fun finnGjeldendeBehandlingId(vedtaksperiodeId: UUID): UUID {
         return sessionOf(dataSource).use { session ->
-            session.transaction { tx ->
-                tx.finnGenerasjon(vedtaksperiodeId)
-            }
-        }
-    }
-
-    private fun TransactionalSession.finnGenerasjon(vedtaksperiodeId: UUID): GenerasjonDto? {
-        return run(
-            finnSiste(vedtaksperiodeId).map { row ->
-                val generasjonRef = row.long("id")
-                GenerasjonDto(
-                    id = row.uuid("unik_id"),
-                    vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                    utbetalingId = row.uuidOrNull("utbetaling_id"),
-                    spleisBehandlingId = row.uuidOrNull("spleis_behandling_id"),
-                    skjæringstidspunkt = row.localDate("skjæringstidspunkt"),
-                    fom = row.localDate("fom"),
-                    tom = row.localDate("tom"),
-                    tilstand = enumValueOf(row.string("tilstand")),
-                    tags = row.array<String>("tags").toList(),
-                    varsler = finnVarsler(generasjonRef),
-                    avslag = with(avslagDao) { this@finnGenerasjon.finnAvslag(vedtaksperiodeId, generasjonRef) },
-                )
-            }.asSingle,
-        )
+            session.run(
+                finnSiste(vedtaksperiodeId).map { row ->
+                    UUID.fromString(row.string("spleis_behandling_id"))
+                }.asSingle,
+            )
+        } ?: throw IllegalStateException("Forventer å finne spleis behandling id for vedtaksperiodeId=$vedtaksperiodeId")
     }
 
     private fun TransactionalSession.finnVarsler(generasjonRef: Long): List<VarselDto> {
