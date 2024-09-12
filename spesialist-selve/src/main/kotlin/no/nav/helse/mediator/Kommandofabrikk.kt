@@ -218,7 +218,7 @@ internal class Kommandofabrikk(
             fødselsnummer = hendelse.fødselsnummer(),
             aktørId = hendelse.aktørId,
             organisasjonsnummer = hendelse.organisasjonsnummer,
-            personDao = personDao,
+            personRepository = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
         )
 

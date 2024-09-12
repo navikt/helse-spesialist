@@ -288,12 +288,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
     }
 
-    protected fun opprettMinimalPerson(
-        fødselsnummer: String = FNR,
-        aktørId: String = AKTØR,
-    ): Long {
-        return personDao.insertPerson(fødselsnummer, aktørId)
-    }
 
     protected fun opprettSaksbehandler(
         saksbehandlerOID: UUID = SAKSBEHANDLER_OID,

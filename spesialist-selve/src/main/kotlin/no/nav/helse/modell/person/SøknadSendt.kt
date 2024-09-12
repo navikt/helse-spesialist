@@ -8,6 +8,7 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OpprettMinimalArbeidsgiverCommand
 import no.nav.helse.modell.kommando.OpprettMinimalPersonCommand
+import no.nav.helse.modell.kommando.PersonRepository
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.util.UUID
 
@@ -63,12 +64,12 @@ internal class SøknadSendtCommand(
     fødselsnummer: String,
     aktørId: String,
     organisasjonsnummer: String,
-    personDao: PersonDao,
+    personRepository: PersonRepository,
     arbeidsgiverDao: ArbeidsgiverDao,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
-            OpprettMinimalPersonCommand(fødselsnummer, aktørId, personDao),
+            OpprettMinimalPersonCommand(fødselsnummer, aktørId, personRepository),
             OpprettMinimalArbeidsgiverCommand(organisasjonsnummer, arbeidsgiverDao),
         )
 }

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
+import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.typer.Kjønn
 import org.intellij.lang.annotations.Language
@@ -73,7 +74,7 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `oppretter minimal person`() {
-        opprettMinimalPerson()
+        personDao.lagreMinimalPerson(MinimalPersonDto(FNR, AKTØR))
         assertNotNull(personDao.findPersonByFødselsnummer(FNR))
         assertNull(personDao.findEnhetSistOppdatert(FNR))
         assertNull(personDao.findITUtbetalingsperioderSistOppdatert(FNR))

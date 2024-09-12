@@ -1,38 +1,35 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.modell.person.PersonDao
 import org.slf4j.LoggerFactory
+
+data class MinimalPersonDto(
+    val fødselsnummer: String,
+    val aktørId: String,
+)
+
+internal interface PersonRepository {
+    fun finnMinimalPerson(fødselsnummer: String): MinimalPersonDto?
+
+    fun lagreMinimalPerson(minimalPerson: MinimalPersonDto)
+}
 
 internal class OpprettMinimalPersonCommand(
     private val fødselsnummer: String,
     private val aktørId: String,
-    private val personDao: PersonDao,
+    private val personRepository: PersonRepository,
 ) : Command {
     private companion object {
         private val logg = LoggerFactory.getLogger(OpprettMinimalPersonCommand::class.java)
-        private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
     }
 
     override fun execute(context: CommandContext): Boolean {
-        if (personDao.findPersonByFødselsnummer(fødselsnummer) != null) return ignorer("Person finnes fra før")
-        return behandle()
-    }
-
-    override fun resume(context: CommandContext): Boolean {
-        return behandle()
+        if (personRepository.finnMinimalPerson(fødselsnummer) != null) return ignorer("Person finnes fra før")
+        personRepository.lagreMinimalPerson(MinimalPersonDto(fødselsnummer, aktørId))
+        return true
     }
 
     private fun ignorer(logmsg: String): Boolean {
         logg.info(logmsg)
-        return true
-    }
-
-    private fun behandle(): Boolean {
-        sikkerLog.info("Oppretter minimal person for fødselsnummer: $fødselsnummer og aktørId: $aktørId")
-        personDao.insertPerson(
-            fødselsnummer = fødselsnummer,
-            aktørId = aktørId,
-        )
         return true
     }
 }

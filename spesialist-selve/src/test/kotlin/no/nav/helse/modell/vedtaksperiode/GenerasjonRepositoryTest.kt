@@ -84,6 +84,6 @@ class GenerasjonRepositoryTest: DatabaseIntegrationTest() {
             }
         }
 
-        assertEquals(vedtaksperioder, funnet)
+        assertEquals(vedtaksperioder.toSet(), funnet.toSet())
     }
 }

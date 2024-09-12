@@ -39,7 +39,7 @@ internal class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
                 fødselsnummer,
                 "aktørId",
                 "organisasjonsnummer",
-                personDao = mockk(relaxed = true),
+                personRepository = mockk(relaxed = true),
                 arbeidsgiverDao = mockk(relaxed = true),
             )
 

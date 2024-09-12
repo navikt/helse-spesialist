@@ -1,64 +1,56 @@
 package no.nav.helse.modell.kommando
 
-import io.mockk.clearMocks
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
-import java.util.UUID
-import no.nav.helse.mediator.CommandContextObserver
-import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.spesialist.test.lagAktørId
+import no.nav.helse.spesialist.test.lagFødselsnummer
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class OpprettMinimalPersonCommandTest {
-    private companion object {
-        private const val FNR = "12345678911"
-        private const val AKTØR = "4321098765432"
-    }
 
-    private val personDao = mockk<PersonDao>(relaxed = true)
-    private val command = OpprettMinimalPersonCommand(FNR, AKTØR, personDao)
     private lateinit var context: CommandContext
-
-    private val observer = object : CommandContextObserver {
-        val behov = mutableListOf<String>()
-        override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {
-            this.behov.add(behov)
-        }
-
-        override fun hendelse(hendelse: String) {}
-    }
+    private val lagredePersoner = mutableListOf<MinimalPersonDto>()
 
     @BeforeEach
     fun setup() {
+        lagredePersoner.clear()
         context = CommandContext(UUID.randomUUID())
-        context.nyObserver(observer)
-        clearMocks(personDao)
     }
 
     @Test
     fun `oppretter ikke person når person finnes fra før`() {
-        personFinnes()
+        val fødselsnummer = lagFødselsnummer()
+        val aktørId = lagAktørId()
+        val command = lagCommand(fødselsnummer, aktørId, MinimalPersonDto(fødselsnummer, aktørId))
+
         assertTrue(command.execute(context))
-        verify(exactly = 0) { personDao.insertPerson(FNR, AKTØR) }
+        assertEquals(0, lagredePersoner.size)
     }
 
     @Test
     fun `oppretter person`() {
-        personFinnesIkke()
+        val fødselsnummer = lagFødselsnummer()
+        val aktørId = lagAktørId()
+        val command = lagCommand(fødselsnummer, aktørId, null)
+
         assertTrue(command.execute(context))
-        assertTrue(observer.behov.isEmpty())
-
-        verify(exactly = 1) { personDao.insertPerson(FNR, AKTØR) }
-        personFinnes()
+        assertEquals(1, lagredePersoner.size)
+        assertEquals(MinimalPersonDto(fødselsnummer, aktørId), lagredePersoner.single())
     }
 
-    private fun personFinnes() {
-        every { personDao.findPersonByFødselsnummer(FNR) } returns 1
-    }
-    private fun personFinnesIkke() {
-        every { personDao.findPersonByFødselsnummer(FNR) } returns null
-    }
+    private fun lagCommand(fødselsnummer: String = lagFødselsnummer(), aktørId: String = lagAktørId(), minimalPersonDto: MinimalPersonDto?) : OpprettMinimalPersonCommand {
+        val repository = object : PersonRepository{
+            override fun finnMinimalPerson(fødselsnummer: String): MinimalPersonDto? {
+                return minimalPersonDto
+            }
 
+            override fun lagreMinimalPerson(minimalPerson: MinimalPersonDto) {
+                lagredePersoner.add(minimalPerson)
+            }
+
+        }
+        return OpprettMinimalPersonCommand(fødselsnummer, aktørId, repository)
+    }
 }
