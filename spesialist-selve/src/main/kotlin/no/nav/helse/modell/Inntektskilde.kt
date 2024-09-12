@@ -11,8 +11,9 @@ internal enum class Inntektskildetype {
 }
 
 internal sealed class Inntektskilde {
-    private companion object {
+    internal companion object {
         private const val BRANSJE_PRIVATPERSON = "Privatperson"
+        internal val BEST_ETTER_DATO = LocalDate.now().minusDays(14)
     }
 
     fun mottaLøsninger(
@@ -79,7 +80,9 @@ internal class KomplettInntektskilde(
     val bransjer: List<String>,
     private val sistOppdatert: LocalDate,
 ) : Inntektskilde() {
-    fun erUtdatert() = sistOppdatert < LocalDate.now().minusDays(1)
+    fun erUtdatert() = sistOppdatert eldreEnn BEST_ETTER_DATO
+
+    private infix fun LocalDate.eldreEnn(other: LocalDate) = this < other
 
     fun toDto() =
         KomplettInntektskildeDto(

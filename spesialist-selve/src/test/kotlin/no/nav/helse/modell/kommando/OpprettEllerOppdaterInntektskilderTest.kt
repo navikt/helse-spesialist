@@ -2,6 +2,7 @@ package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.mediator.CommandContextObserver
+import no.nav.helse.modell.Inntektskilde.Companion.BEST_ETTER_DATO
 import no.nav.helse.modell.InntektskildeDto
 import no.nav.helse.modell.Inntektskildetype
 import no.nav.helse.modell.InntektskildetypeDto
@@ -325,7 +326,7 @@ class OpprettEllerOppdaterInntektskilderTest {
     private fun utdatertInntektskilde(
         organisasjonsnummer: String = lagOrganisasjonsnummer(),
         inntektskilde: Inntektskildetype = Inntektskildetype.ORDINÆR
-    ) = KomplettInntektskilde(organisasjonsnummer, inntektskilde, "et navn", listOf("en bransje"), LocalDate.now().minusDays(2))
+    ) = KomplettInntektskilde(organisasjonsnummer, inntektskilde, "et navn", listOf("en bransje"), BEST_ETTER_DATO.minusDays(1))
 
     private fun oppdatertInntektskilde(
         organisasjonsnummer: String = lagOrganisasjonsnummer(),
