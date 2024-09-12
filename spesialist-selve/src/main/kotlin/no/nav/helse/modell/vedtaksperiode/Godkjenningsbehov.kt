@@ -178,10 +178,7 @@ internal class Godkjenningsbehov private constructor(
         avviksvurderingId =
             jsonNode.path("avviksvurderingId").takeUnless { it.isMissingOrNull() }
                 ?.let { UUID.fromString(it.asText()) },
-        vilkårsgrunnlagId =
-            jsonNode.path("Godkjenning")?.path("vilkårsgrunnlagId")?.asText()
-                ?.let { UUID.fromString(it) }
-                ?: behandlingIdFinner(UUID.fromString(jsonNode.path("vedtaksperiodeId").asText())),
+        vilkårsgrunnlagId = UUID.fromString(jsonNode.path("Godkjenning").path("vilkårsgrunnlagId").asText()),
         spleisVedtaksperioder =
             jsonNode.path("Godkjenning").path("perioderMedSammeSkjæringstidspunkt").map { periodeNode ->
                 SpleisVedtaksperiode(
@@ -192,7 +189,10 @@ internal class Godkjenningsbehov private constructor(
                     skjæringstidspunkt = jsonNode.path("Godkjenning").path("skjæringstidspunkt").asLocalDate(),
                 )
             },
-        spleisBehandlingId = UUID.fromString(jsonNode.path("Godkjenning").path("behandlingId").asText()),
+        spleisBehandlingId =
+            jsonNode.path("Godkjenning").path("behandlingId").asText()
+                ?.let { UUID.fromString(it) }
+                ?: behandlingIdFinner(UUID.fromString(jsonNode.path("vedtaksperiodeId").asText())),
         tags = jsonNode.path("Godkjenning").path("tags").map { it.asText() },
         utbetalingId = UUID.fromString(jsonNode.path("utbetalingId").asText()),
         skjæringstidspunkt = LocalDate.parse(jsonNode.path("Godkjenning").path("skjæringstidspunkt").asText()),
