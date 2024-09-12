@@ -6,6 +6,7 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
+import io.prometheus.client.Counter
 import io.prometheus.client.Histogram
 import no.nav.helse.spesialist.api.client.AccessTokenClient
 import no.nav.helse.spesialist.api.graphql.schema.Reservasjon
@@ -32,6 +33,14 @@ class KRRClient(
                 .build()
                 .name("responstid_hent_reservasjonsstatus")
                 .help("Responstid for kall til digdir-krr-proxy")
+                .labelNames("success")
+                .register()
+        private val statusEtterKallReservasjonsstatus: Counter =
+            Counter
+                .build()
+                .name("status_kall_hent_reservasjonsstatus")
+                .help("Status på kall til digdir-krr-proxy, success eller failure")
+                .labelNames("status")
                 .register()
     }
 
@@ -41,16 +50,20 @@ class KRRClient(
             val accessToken = accessTokenClient.hentAccessToken(scope)
             val callId = UUID.randomUUID().toString()
 
-            return httpClient
-                .get("$apiUrl/rest/v1/person") {
-                    header("Authorization", "Bearer $accessToken")
-                    header("Nav-Personident", fnr)
-                    header("Nav-Call-Id", callId)
-                    accept(ContentType.Application.Json)
-                }.body()
+            val reservasjon =
+                httpClient
+                    .get("$apiUrl/rest/v1/person") {
+                        header("Authorization", "Bearer $accessToken")
+                        header("Nav-Personident", fnr)
+                        header("Nav-Call-Id", callId)
+                        accept(ContentType.Application.Json)
+                    }.body<Reservasjon>()
+            statusEtterKallReservasjonsstatus.labels("success").inc()
+            return reservasjon
         } catch (e: Exception) {
-            logg.error("Feil under kall til Kontakt- og reservasjonsregisteret")
-            sikkerLogg.error("Feil under kall til Kontakt- og reservasjonsregisteret", e)
+            statusEtterKallReservasjonsstatus.labels("failure").inc()
+            logg.warn("Feil under kall til Kontakt- og reservasjonsregisteret")
+            sikkerLogg.warn("Feil under kall til Kontakt- og reservasjonsregisteret", e)
         } finally {
             timer.observeDuration()
         }
