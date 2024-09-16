@@ -5,6 +5,8 @@ import com.expediagroup.graphql.client.serializer.GraphQLClientSerializer
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
 import io.ktor.server.application.call
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
@@ -20,6 +22,7 @@ import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
 import no.nav.helse.spleis.graphql.HentSnapshot
 import no.nav.security.mock.oauth2.MockOAuth2Server
+import org.flywaydb.core.Flyway
 import org.testcontainers.containers.PostgreSQLContainer
 import java.util.UUID
 
@@ -147,4 +150,22 @@ private val database =
                 "DATABASE_USERNAME" to "test",
                 "DATABASE_PASSWORD" to "test",
             )
+
+        protected val dataSource =
+            HikariDataSource(HikariConfig().apply {
+                jdbcUrl = postgres.jdbcUrl
+                username = postgres.username
+                password = postgres.password
+                maximumPoolSize = 100
+                connectionTimeout = 500
+                initializationFailTimeout = 5000
+            })
+
+        init {
+            Flyway.configure()
+                .dataSource(dataSource)
+                .placeholders(mapOf("spesialist_oid" to UUID.randomUUID().toString()))
+                .load()
+                .migrate()
+        }
     }

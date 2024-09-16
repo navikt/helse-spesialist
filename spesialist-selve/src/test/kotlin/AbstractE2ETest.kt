@@ -1121,6 +1121,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     refusjonsopplysninger = null,
                     fraRefusjonsopplysninger = null,
                     begrunnelse = "en begrunnelse",
+                    fom = null,
+                    tom = null,
                 ),
             ),
     ) {

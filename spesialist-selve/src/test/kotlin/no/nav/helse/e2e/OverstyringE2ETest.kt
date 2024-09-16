@@ -124,6 +124,8 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                         refusjonsopplysninger = null,
                         fraRefusjonsopplysninger = null,
                         begrunnelse = "begrunnelse",
+                        fom = null,
+                        tom = null,
                     ),
                 ),
             skjæringstidspunkt = 1.januar,

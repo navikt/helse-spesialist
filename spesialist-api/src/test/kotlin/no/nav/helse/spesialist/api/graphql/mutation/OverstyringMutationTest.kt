@@ -110,6 +110,8 @@ internal class OverstyringMutationTest : AbstractOverstyringApiTest() {
                             "En begrunnelse",
                             "En forklaring",
                             null,
+                            null,
+                            null,
                         ),
                     ),
                     vedtaksperiodeId = UUID.randomUUID(),

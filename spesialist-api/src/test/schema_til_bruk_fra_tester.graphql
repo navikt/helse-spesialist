@@ -1348,6 +1348,7 @@ input OverstyringArbeidsforholdInput {
 
 input OverstyringArbeidsgiverInput {
     begrunnelse: String!
+    fom: LocalDate
     forklaring: String!
     fraManedligInntekt: Float!
     fraRefusjonsopplysninger: [OverstyringRefusjonselementInput!]
@@ -1355,6 +1356,7 @@ input OverstyringArbeidsgiverInput {
     manedligInntekt: Float!
     organisasjonsnummer: String!
     refusjonsopplysninger: [OverstyringRefusjonselementInput!]
+    tom: LocalDate
 }
 
 input OverstyringDagInput {

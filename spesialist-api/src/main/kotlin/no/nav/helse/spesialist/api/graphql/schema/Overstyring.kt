@@ -46,6 +46,8 @@ data class OverstyringArbeidsgiver(
     val begrunnelse: String,
     val forklaring: String,
     val lovhjemmel: Lovhjemmel?,
+    val fom: LocalDate?,
+    val tom: LocalDate?,
 ) {
     data class OverstyringRefusjonselement(
         val fom: LocalDate,
