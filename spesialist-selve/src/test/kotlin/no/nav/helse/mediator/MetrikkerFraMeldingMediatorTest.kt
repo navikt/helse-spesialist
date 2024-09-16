@@ -40,7 +40,7 @@ internal class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
                 "aktørId",
                 "organisasjonsnummer",
                 personRepository = mockk(relaxed = true),
-                arbeidsgiverDao = mockk(relaxed = true),
+                inntektskilderRepository = mockk(relaxed = true),
             )
 
         meldingssender.sendSøknadSendt("aktørId", fødselsnummer, "organisasjonsnummer")

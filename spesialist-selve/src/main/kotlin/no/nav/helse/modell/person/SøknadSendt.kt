@@ -1,9 +1,9 @@
 package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OpprettMinimalArbeidsgiverCommand
@@ -65,11 +65,11 @@ internal class SøknadSendtCommand(
     aktørId: String,
     organisasjonsnummer: String,
     personRepository: PersonRepository,
-    arbeidsgiverDao: ArbeidsgiverDao,
+    inntektskilderRepository: InntektskilderRepository,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
             OpprettMinimalPersonCommand(fødselsnummer, aktørId, personRepository),
-            OpprettMinimalArbeidsgiverCommand(organisasjonsnummer, arbeidsgiverDao),
+            OpprettMinimalArbeidsgiverCommand(organisasjonsnummer, inntektskilderRepository),
         )
 }

@@ -1,10 +1,11 @@
 package no.nav.helse.db
 
 import no.nav.helse.modell.InntektskildeDto
-import no.nav.helse.modell.KomplettInntektskildeDto
 
 internal interface InntektskilderRepository {
-    fun lagreInntektskilder(inntektskilder: List<KomplettInntektskildeDto>)
+    fun lagreInntektskilder(inntektskilder: List<InntektskildeDto>)
+
+    fun finnInntektskildeMedOrgnummer(orgnummer: String): Long?
 
     fun finnInntektskilder(
         fødselsnummer: String,

@@ -28,12 +28,13 @@ import java.util.UUID
 class OpprettEllerOppdaterInntektskilderTest {
     private val repository = object : InntektskilderRepository {
         val inntektskilderSomHarBlittLagret = mutableListOf<InntektskildeDto>()
-        override fun lagreInntektskilder(inntektskilder: List<KomplettInntektskildeDto>) {
+        override fun lagreInntektskilder(inntektskilder: List<InntektskildeDto>) {
             inntektskilderSomHarBlittLagret.addAll(inntektskilder)
         }
-        override fun finnInntektskilder(fødselsnummer: String, andreOrganisasjonsnumre: List<String>): List<InntektskildeDto> {
-            return emptyList()
-        }
+        override fun finnInntektskilder(fødselsnummer: String, andreOrganisasjonsnumre: List<String>) =
+            emptyList<InntektskildeDto>()
+
+        override fun finnInntektskildeMedOrgnummer(orgnummer: String) = null
     }
 
     private val contextObserver = object : CommandContextObserver {

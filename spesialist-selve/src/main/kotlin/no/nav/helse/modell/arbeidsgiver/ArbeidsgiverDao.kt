@@ -17,17 +17,12 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
             )
         }
 
-    fun insertArbeidsgiver(orgnummer: String) =
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            session.run(
-                queryOf(
-                    "INSERT INTO arbeidsgiver(orgnummer) VALUES(:orgnummer);",
-                    mapOf(
-                        "orgnummer" to orgnummer.toLong(),
-                    ),
-                ).asUpdateAndReturnGeneratedKey,
-            )
-        }
+    fun TransactionalSession.insertMinimalArbeidsgiver(orgnummer: String) {
+        @Language("PostgreSQL")
+        val query = "INSERT INTO arbeidsgiver(orgnummer) VALUES(:orgnummer)"
+
+        run(queryOf(query, mapOf("orgnummer" to orgnummer.toLong())).asUpdate)
+    }
 
     fun TransactionalSession.upsertNavn(
         orgnummer: String,

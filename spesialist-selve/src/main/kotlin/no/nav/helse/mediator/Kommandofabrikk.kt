@@ -2,6 +2,7 @@ package no.nav.helse.mediator
 
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.InntektskilderDao
+import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
@@ -14,7 +15,6 @@ import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommand
@@ -74,7 +74,7 @@ internal class Kommandofabrikk(
     private val dataSource: DataSource,
     private val meldingDao: MeldingDao = MeldingDao(dataSource),
     private val personDao: PersonDao = PersonDao(dataSource),
-    private val arbeidsgiverDao: ArbeidsgiverDao = ArbeidsgiverDao(dataSource),
+    private val inntektskilderRepository: InntektskilderRepository = InntektskilderDao(dataSource),
     private val vedtakDao: VedtakDao = VedtakDao(dataSource),
     private val oppgaveDao: OppgaveDao = OppgaveDao(dataSource),
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
@@ -219,7 +219,7 @@ internal class Kommandofabrikk(
             aktørId = hendelse.aktørId,
             organisasjonsnummer = hendelse.organisasjonsnummer,
             personRepository = personDao,
-            arbeidsgiverDao = arbeidsgiverDao,
+            inntektskilderRepository = inntektskilderRepository,
         )
 
     internal fun adressebeskyttelseEndret(

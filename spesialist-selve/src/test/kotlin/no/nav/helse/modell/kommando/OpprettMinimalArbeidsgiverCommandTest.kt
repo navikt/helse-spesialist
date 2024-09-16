@@ -1,51 +1,59 @@
 package no.nav.helse.modell.kommando
 
-import io.mockk.clearMocks
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
-import java.util.UUID
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.db.InntektskilderRepository
+import no.nav.helse.modell.InntektskildeDto
+import no.nav.helse.modell.InntektskildetypeDto
+import no.nav.helse.modell.NyInntektskildeDto
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class OpprettMinimalArbeidsgiverCommandTest {
     private companion object {
         private const val ORGNR = "123456789"
     }
 
-    private val dao = mockk<ArbeidsgiverDao>(relaxed = true)
-
     private lateinit var context: CommandContext
-    private val command = OpprettMinimalArbeidsgiverCommand(ORGNR, dao)
+    private val lagredeInntektskilder = mutableListOf<InntektskildeDto>()
 
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
-        clearMocks(dao)
+        lagredeInntektskilder.clear()
     }
 
     @Test
     fun `opprett arbeidsgiver`() {
-        arbeidsgiverFinnesIkke()
+        val command = lagCommand(null)
         assertTrue(command.execute(context))
-        verify(exactly = 1) { dao.insertArbeidsgiver(ORGNR) }
+        assertEquals(1, lagredeInntektskilder.size)
+        assertEquals(
+            NyInntektskildeDto(organisasjonsnummer = ORGNR, type = InntektskildetypeDto.ORDINÆR),
+            lagredeInntektskilder.single()
+        )
     }
 
 
     @Test
     fun `oppretter ikke arbeidsgiver når den finnes`() {
-        arbeidsgiverFinnes()
+        val command = lagCommand(1)
         assertTrue(command.execute(context))
-        verify(exactly = 0) { dao.insertArbeidsgiver(any()) }
+        assertEquals(0, lagredeInntektskilder.size)
     }
 
-    private fun arbeidsgiverFinnes(orgnr: String = ORGNR) {
-        every { dao.findArbeidsgiverByOrgnummer(orgnr) } returns 1
-    }
+    private fun lagCommand(ekisterendeId: Long?) : OpprettMinimalArbeidsgiverCommand {
+        val repository = object : InntektskilderRepository  {
+            override fun lagreInntektskilder(inntektskilder: List<InntektskildeDto>) {
+                lagredeInntektskilder.addAll(inntektskilder)
+            }
 
-    private fun arbeidsgiverFinnesIkke(orgnr: String = ORGNR) {
-        every { dao.findArbeidsgiverByOrgnummer(orgnr) } returns null
+            override fun finnInntektskildeMedOrgnummer(orgnummer: String) = ekisterendeId
+
+            override fun finnInntektskilder(fødselsnummer: String, andreOrganisasjonsnumre: List<String>) =
+                emptyList<InntektskildeDto>()
+        }
+        return OpprettMinimalArbeidsgiverCommand(ORGNR, repository)
     }
 }

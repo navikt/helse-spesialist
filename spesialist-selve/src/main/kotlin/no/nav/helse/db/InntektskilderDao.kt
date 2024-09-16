@@ -13,17 +13,28 @@ internal class InntektskilderDao(private val dataSource: DataSource) : Inntektsk
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
     private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
 
-    override fun lagreInntektskilder(inntektskilder: List<KomplettInntektskildeDto>) {
+    override fun lagreInntektskilder(inntektskilder: List<InntektskildeDto>) {
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             session.transaction { tx ->
                 inntektskilder.forEach { inntekt ->
                     with(arbeidsgiverDao) {
-                        tx.upsertNavn(inntekt.organisasjonsnummer, inntekt.navn)
-                        tx.upsertBransjer(inntekt.organisasjonsnummer, inntekt.bransjer)
+                        when (inntekt) {
+                            is KomplettInntektskildeDto -> {
+                                tx.upsertNavn(inntekt.organisasjonsnummer, inntekt.navn)
+                                tx.upsertBransjer(inntekt.organisasjonsnummer, inntekt.bransjer)
+                            }
+                            else -> {
+                                tx.insertMinimalArbeidsgiver(inntekt.organisasjonsnummer)
+                            }
+                        }
                     }
                 }
             }
         }
+    }
+
+    override fun finnInntektskildeMedOrgnummer(orgnummer: String): Long? {
+        return arbeidsgiverDao.findArbeidsgiverByOrgnummer(orgnummer)
     }
 
     override fun finnInntektskilder(
