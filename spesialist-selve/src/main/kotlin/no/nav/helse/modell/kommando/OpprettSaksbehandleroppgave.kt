@@ -39,30 +39,24 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 internal class OpprettSaksbehandleroppgave(
-    private val fødselsnummer: String,
-    private val vedtaksperiodeId: UUID,
+    private val behovData: GodkjenningsbehovData,
     private val oppgaveService: OppgaveService,
     private val automatisering: Automatisering,
-    private val hendelseId: UUID,
     private val personDao: PersonDao,
     private val risikovurderingDao: RisikovurderingDao,
     private val egenAnsattDao: EgenAnsattDao,
-    private val utbetalingId: UUID,
     private val utbetalingtype: Utbetalingtype,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val utbetaling: Utbetaling,
     private val vergemålDao: VergemålDao,
-    private val inntektskilde: Inntektskilde,
-    private val periodetype: Periodetype,
-    private val kanAvvises: Boolean,
     private val vedtakDao: VedtakDao,
     private val påVentDao: PåVentDao,
 ) : Command {
@@ -73,6 +67,14 @@ internal class OpprettSaksbehandleroppgave(
 
     override fun execute(context: CommandContext): Boolean {
         val egenskaper = mutableListOf<Egenskap>()
+        val fødselsnummer = behovData.fødselsnummer
+        val vedtaksperiodeId = behovData.vedtaksperiodeId
+        val hendelseId = behovData.id
+        val utbetalingId = utbetaling.utbetalingId
+        val periodetype = behovData.periodetype
+        val inntektskilde = behovData.inntektskilde
+        val kanAvvises = behovData.kanAvvises
+
         if (egenAnsattDao.erEgenAnsatt(fødselsnummer) == true) egenskaper.add(EGEN_ANSATT)
 
         val adressebeskyttelse = personDao.findAdressebeskyttelse(fødselsnummer)

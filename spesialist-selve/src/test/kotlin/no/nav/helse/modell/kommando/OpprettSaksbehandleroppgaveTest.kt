@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.helse.januar
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.automatisering.Automatisering
@@ -37,6 +38,7 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
@@ -45,7 +47,9 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.OVERGANG_FRA_IT
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
+import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -60,7 +64,6 @@ internal class OpprettSaksbehandleroppgaveTest {
     private val VEDTAKSPERIODE_ID = UUID.randomUUID()
     private val UTBETALING_ID = UUID.randomUUID()
     private val FNR = lagFødselsnummer()
-    private val hendelseId = UUID.randomUUID()
 
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
     private val automatisering = mockk<Automatisering>(relaxed = true)
@@ -401,23 +404,39 @@ internal class OpprettSaksbehandleroppgaveTest {
         periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
         kanAvvises: Boolean = true,
     ) = OpprettSaksbehandleroppgave(
-        fødselsnummer = FNR,
-        vedtaksperiodeId = VEDTAKSPERIODE_ID,
         oppgaveService = oppgaveService,
         automatisering = automatisering,
-        hendelseId = hendelseId,
         personDao = personDao,
         risikovurderingDao = risikovurderingDao,
         egenAnsattDao = egenAnsattDao,
-        utbetalingId = UTBETALING_ID,
         utbetalingtype = utbetalingstype,
         sykefraværstilfelle = sykefraværstilfelle,
         utbetaling = utbetaling,
         vergemålDao = vergemålDao,
-        inntektskilde = inntektskilde,
-        periodetype = periodetype,
-        kanAvvises = kanAvvises,
         vedtakDao = vedtakDao,
         påVentDao = påVentDao,
+        behovData = GodkjenningsbehovData(
+            id = UUID.randomUUID(),
+            fødselsnummer = FNR,
+            aktørId = lagAktørId(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            spleisVedtaksperioder = emptyList(),
+            utbetalingId = UTBETALING_ID,
+            spleisBehandlingId = UUID.randomUUID(),
+            avviksvurderingId = UUID.randomUUID(),
+            vilkårsgrunnlagId = UUID.randomUUID(),
+            tags = emptyList(),
+            periodeFom = 1.januar,
+            periodeTom = 31.januar,
+            periodetype = periodetype,
+            førstegangsbehandling = true,
+            utbetalingtype = utbetalingstype,
+            kanAvvises = kanAvvises,
+            inntektskilde = inntektskilde,
+            orgnummereMedRelevanteArbeidsforhold = emptyList(),
+            skjæringstidspunkt = 1.januar,
+            json = "{}"
+        )
     )
 }
