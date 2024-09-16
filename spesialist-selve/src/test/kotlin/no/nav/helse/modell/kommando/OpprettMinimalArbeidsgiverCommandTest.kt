@@ -26,7 +26,7 @@ internal class OpprettMinimalArbeidsgiverCommandTest {
 
     @Test
     fun `opprett arbeidsgiver`() {
-        val command = lagCommand(null)
+        val command = lagCommand(false)
         assertTrue(command.execute(context))
         assertEquals(1, lagredeInntektskilder.size)
         assertEquals(
@@ -38,18 +38,18 @@ internal class OpprettMinimalArbeidsgiverCommandTest {
 
     @Test
     fun `oppretter ikke arbeidsgiver når den finnes`() {
-        val command = lagCommand(1)
+        val command = lagCommand(true)
         assertTrue(command.execute(context))
         assertEquals(0, lagredeInntektskilder.size)
     }
 
-    private fun lagCommand(ekisterendeId: Long?) : OpprettMinimalArbeidsgiverCommand {
+    private fun lagCommand(orgnummerEksisterer: Boolean) : OpprettMinimalArbeidsgiverCommand {
         val repository = object : InntektskilderRepository  {
             override fun lagreInntektskilder(inntektskilder: List<InntektskildeDto>) {
                 lagredeInntektskilder.addAll(inntektskilder)
             }
 
-            override fun finnInntektskildeMedOrgnummer(orgnummer: String) = ekisterendeId
+            override fun inntektskildeEksisterer(orgnummer: String) = orgnummerEksisterer
 
             override fun finnInntektskilder(fødselsnummer: String, andreOrganisasjonsnumre: List<String>) =
                 emptyList<InntektskildeDto>()

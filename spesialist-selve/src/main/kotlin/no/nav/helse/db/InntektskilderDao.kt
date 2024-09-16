@@ -33,8 +33,8 @@ internal class InntektskilderDao(private val dataSource: DataSource) : Inntektsk
         }
     }
 
-    override fun finnInntektskildeMedOrgnummer(orgnummer: String): Long? {
-        return arbeidsgiverDao.findArbeidsgiverByOrgnummer(orgnummer)
+    override fun inntektskildeEksisterer(orgnummer: String): Boolean {
+        return arbeidsgiverDao.findArbeidsgiverByOrgnummer(orgnummer) != null
     }
 
     override fun finnInntektskilder(

@@ -5,7 +5,7 @@ import no.nav.helse.modell.InntektskildeDto
 internal interface InntektskilderRepository {
     fun lagreInntektskilder(inntektskilder: List<InntektskildeDto>)
 
-    fun finnInntektskildeMedOrgnummer(orgnummer: String): Long?
+    fun inntektskildeEksisterer(orgnummer: String): Boolean
 
     fun finnInntektskilder(
         fødselsnummer: String,

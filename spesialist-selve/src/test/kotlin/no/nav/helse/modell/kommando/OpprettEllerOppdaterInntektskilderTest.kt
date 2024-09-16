@@ -34,7 +34,7 @@ class OpprettEllerOppdaterInntektskilderTest {
         override fun finnInntektskilder(fødselsnummer: String, andreOrganisasjonsnumre: List<String>) =
             emptyList<InntektskildeDto>()
 
-        override fun finnInntektskildeMedOrgnummer(orgnummer: String) = null
+        override fun inntektskildeEksisterer(orgnummer: String) = false
     }
 
     private val contextObserver = object : CommandContextObserver {

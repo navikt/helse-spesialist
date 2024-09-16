@@ -15,7 +15,7 @@ internal class OpprettMinimalArbeidsgiverCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        if (inntektskildeFinnes()) {
+        if (inntektskilderRepository.inntektskildeEksisterer(organisasjonsnummer)) {
             log.info("Inntekstkilde finnes fra før, lager ikke ny")
         } else {
             sikkerLog.info("Oppretter minimal arbeidsgiver for organisasjonsnummer: $organisasjonsnummer")
@@ -27,6 +27,4 @@ internal class OpprettMinimalArbeidsgiverCommand(
         }
         return true
     }
-
-    private fun inntektskildeFinnes() = inntektskilderRepository.finnInntektskildeMedOrgnummer(organisasjonsnummer) != null
 }
