@@ -37,8 +37,6 @@ class Varsel(
             }
     }
 
-    fun vedtaksperiodeId() = vedtaksperiodeId
-
     fun toDto(): VarselDto = VarselDto(id, varselkode, opprettet, vedtaksperiodeId, status.toDto())
 
     fun erAktiv(): Boolean = this.status == AKTIV
