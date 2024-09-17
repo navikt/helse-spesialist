@@ -365,18 +365,6 @@ internal class GenerasjonTest {
     }
 
     @Test
-    fun `kan motta avsluttet_uten_vedtak i IngenUtbetalingMåVurderes`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = generasjonMedVarsel(vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
-        assertEquals(TilstandDto.AvsluttetUtenVedtakMedVarsler, generasjon.toDto().tilstand)
-        assertDoesNotThrow {
-            generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
-        }
-        assertEquals(TilstandDto.AvsluttetUtenVedtakMedVarsler, generasjon.toDto().tilstand)
-    }
-
-    @Test
     fun `referential equals`() {
         val generasjon = generasjon(UUID.randomUUID(), UUID.randomUUID())
         assertEquals(generasjon, generasjon)

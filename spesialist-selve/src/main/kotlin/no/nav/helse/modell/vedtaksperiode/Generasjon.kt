@@ -446,14 +446,6 @@ internal class Generasjon private constructor(
             generasjon.nyTilstand(AvsluttetUtenVedtakMedVarsler)
         }
 
-        override fun avsluttetUtenVedtak(
-            generasjon: Generasjon,
-            sykepengevedtakBuilder: SykepengevedtakBuilder,
-        ) {
-            sikkerlogg.warn("Spesialist mottar avsluttet_uten_vedtak når den allerede er i tilstand ${navn()}")
-            generasjon.supplerAvsluttetUtenVedtak(sykepengevedtakBuilder)
-        }
-
         override fun spleisVedtaksperiode(
             vedtaksperiode: Vedtaksperiode,
             generasjon: Generasjon,
@@ -469,14 +461,6 @@ internal class Generasjon private constructor(
 
         override fun håndterGodkjenning(generasjon: Generasjon) {
             generasjon.nyTilstand(AvsluttetUtenVedtak)
-        }
-
-        override fun avsluttetUtenVedtak(
-            generasjon: Generasjon,
-            sykepengevedtakBuilder: SykepengevedtakBuilder,
-        ) {
-            sikkerlogg.warn("Spesialist mottar avsluttet_uten_vedtak når den allerede er i tilstand AvsluttetUtenVedtakMedVarsler")
-            generasjon.supplerAvsluttetUtenVedtak(sykepengevedtakBuilder)
         }
 
         override fun spleisVedtaksperiode(
