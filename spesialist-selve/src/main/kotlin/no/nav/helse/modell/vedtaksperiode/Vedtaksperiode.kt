@@ -22,12 +22,11 @@ internal class Vedtaksperiode private constructor(
     generasjoner: List<Generasjon>,
 ) {
     private val generasjoner = generasjoner.toMutableList()
-    private val gjeldendeGenerasjon get() = generasjoner.last()
+    internal val gjeldendeGenerasjon get() = generasjoner.last()
     private val fom get() = gjeldendeGenerasjon.fom()
     private val tom get() = gjeldendeGenerasjon.tom()
     private val gjeldendeUtbetalingId get() = gjeldendeGenerasjon.utbetalingId
     internal val gjeldendeSkjæringstidspunkt get() = gjeldendeGenerasjon.skjæringstidspunkt()
-    internal val gjeldendeBehandlingId get() = gjeldendeGenerasjon.spleisBehandlingId()
 
     fun vedtaksperiodeId() = vedtaksperiodeId
 

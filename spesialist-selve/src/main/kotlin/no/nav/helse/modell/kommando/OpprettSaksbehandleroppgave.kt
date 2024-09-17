@@ -36,9 +36,9 @@ import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
-import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -48,13 +48,13 @@ import org.slf4j.LoggerFactory
 
 internal class OpprettSaksbehandleroppgave(
     private val behovData: GodkjenningsbehovData,
+    private val generasjon: Generasjon,
     private val oppgaveService: OppgaveService,
     private val automatisering: Automatisering,
     private val personDao: PersonDao,
     private val risikovurderingDao: RisikovurderingDao,
     private val egenAnsattDao: EgenAnsattDao,
     private val utbetalingtype: Utbetalingtype,
-    private val sykefraværstilfelle: Sykefraværstilfelle,
     private val utbetaling: Utbetaling,
     private val vergemålDao: VergemålDao,
     private val vedtakDao: VedtakDao,
@@ -124,15 +124,15 @@ internal class OpprettSaksbehandleroppgave(
             egenskaper.add(PÅ_VENT)
         }
 
-        if (sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId)) egenskaper.add(SKJØNNSFASTSETTELSE)
+        if (generasjon.kreverSkjønnsfastsettelse()) egenskaper.add(SKJØNNSFASTSETTELSE)
 
-        if (sykefraværstilfelle.erTilbakedatert(vedtaksperiodeId)) egenskaper.add(TILBAKEDATERT)
+        if (generasjon.erTilbakedatert()) egenskaper.add(TILBAKEDATERT)
 
-        if (sykefraværstilfelle.harKunÅpenGosysOppgave(vedtaksperiodeId)) egenskaper.add(GOSYS)
+        if (generasjon.harKunGosysvarsel()) egenskaper.add(GOSYS)
 
-        if (sykefraværstilfelle.harMedlemskapsvarsel(vedtaksperiodeId)) egenskaper.add(MEDLEMSKAP)
+        if (generasjon.harMedlemskapsvarsel()) egenskaper.add(MEDLEMSKAP)
 
-        if (sykefraværstilfelle.haster(vedtaksperiodeId) && utbetaling.harEndringIUtbetalingTilSykmeldt()) egenskaper.add(HASTER)
+        if (generasjon.hasterÅBehandle() && utbetaling.harEndringIUtbetalingTilSykmeldt()) egenskaper.add(HASTER)
 
         oppgaveService.nyOppgave(fødselsnummer, context.id()) { reservertId ->
             val oppgave = Oppgave.nyOppgave(reservertId, vedtaksperiodeId, utbetalingId, hendelseId, kanAvvises, egenskaper)

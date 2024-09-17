@@ -98,8 +98,6 @@ class Varsel(
 
         fun List<Varsel>.inneholderVarselOmTilbakedatering(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_SØ_3" }
 
-        fun List<Varsel>.inneholderVarselOmÅpenGosysOppgave(): Boolean = any { it.status == AKTIV && it.varselkode == "SB_EX_1" }
-
         fun List<Varsel>.inneholderSvartelistedeVarsler(): Boolean = any { it.varselkode in neiVarsler }
 
         fun List<Varsel>.automatiskGodkjennSpesialsakvarsler() {

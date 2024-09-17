@@ -12,7 +12,6 @@ import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderSvar
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmAvvik
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmNegativtBeløp
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmTilbakedatering
-import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmÅpenGosysOppgave
 import no.nav.helse.modell.vedtak.Avslag
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import org.slf4j.Logger
@@ -91,7 +90,7 @@ internal class Generasjon private constructor(
 
     internal fun forhindrerAutomatisering(): Boolean = varsler.forhindrerAutomatisering()
 
-    internal fun harKunGosysvarsel() = varsler.size == 1 && varsler.single().erGosysvarsel()
+    internal fun harKunGosysvarsel() = varsler.size == 1 && varsler.single().erGosysvarsel() && varsler.single().erAktiv()
 
     internal fun håndter(
         vedtaksperiode: Vedtaksperiode,
@@ -262,28 +261,22 @@ internal class Generasjon private constructor(
         tilstand.nyttVarsel(this)
     }
 
-    private fun harMedlemskapsvarsel(): Boolean {
+    internal fun harMedlemskapsvarsel(): Boolean {
         val inneholderMedlemskapsvarsel = varsler.inneholderMedlemskapsvarsel()
         logg.info("$this harMedlemskapsvarsel: $inneholderMedlemskapsvarsel")
         return inneholderMedlemskapsvarsel
     }
 
-    private fun kreverSkjønnsfastsettelse(): Boolean {
+    internal fun kreverSkjønnsfastsettelse(): Boolean {
         val inneholderAvviksvarsel = varsler.inneholderAktivtVarselOmAvvik()
         logg.info("$this harAvviksvarsel: $inneholderAvviksvarsel")
         return inneholderAvviksvarsel
     }
 
-    private fun erTilbakedatert(): Boolean {
+    internal fun erTilbakedatert(): Boolean {
         val inneholderTilbakedateringsvarsel = varsler.inneholderVarselOmTilbakedatering()
         logg.info("$this harTilbakedateringsvarsel: $inneholderTilbakedateringsvarsel")
         return inneholderTilbakedateringsvarsel
-    }
-
-    private fun harKunÅpenGosysOppgave(): Boolean {
-        val inneholderKunÅpenGosysOppgaveVarsel = varsler.inneholderVarselOmÅpenGosysOppgave() && varsler.size == 1
-        logg.info("$this harKunÅpenGosysOppgavevarsel: $inneholderKunÅpenGosysOppgaveVarsel")
-        return inneholderKunÅpenGosysOppgaveVarsel
     }
 
     internal sealed interface Tilstand {
@@ -590,21 +583,6 @@ internal class Generasjon private constructor(
         internal fun List<Generasjon>.harMedlemskapsvarsel(vedtaksperiodeId: UUID): Boolean =
             overlapperMedEllerTidligereEnn(vedtaksperiodeId).any {
                 it.harMedlemskapsvarsel()
-            }
-
-        internal fun List<Generasjon>.kreverSkjønnsfastsettelse(vedtaksperiodeId: UUID): Boolean =
-            overlapperMedEllerTidligereEnn(vedtaksperiodeId).any {
-                it.kreverSkjønnsfastsettelse()
-            }
-
-        internal fun List<Generasjon>.erTilbakedatert(vedtaksperiodeId: UUID): Boolean =
-            overlapperMedEllerTidligereEnn(vedtaksperiodeId).any {
-                it.erTilbakedatert()
-            }
-
-        internal fun List<Generasjon>.harÅpenGosysOppgave(vedtaksperiodeId: UUID): Boolean =
-            overlapperMedEllerTidligereEnn(vedtaksperiodeId).any {
-                it.harKunÅpenGosysOppgave()
             }
 
         internal fun List<Generasjon>.deaktiver(varsel: Varsel) {

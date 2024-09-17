@@ -16,8 +16,6 @@ import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonFor
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForVedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnSisteGenerasjonUtenSpleisBehandlingId
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.harMedlemskapsvarsel
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.harÅpenGosysOppgave
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverSkjønnsfastsettelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -314,17 +312,17 @@ internal class GenerasjonTest {
     fun `har kun åpen oppgave i gosys`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjonMedVarsel(1.februar, 28.februar, vedtaksperiodeId, "SB_EX_1")
-        assertTrue(listOf(generasjon).harÅpenGosysOppgave(vedtaksperiodeId))
+        assertTrue(generasjon.harKunGosysvarsel())
     }
 
     @Test
     fun `flere varsler enn kun åpen oppgave i gosys`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjonMedVarsel(1.februar, 28.februar, vedtaksperiodeId, "SB_EX_1")
-        assertTrue(listOf(generasjon).harÅpenGosysOppgave(vedtaksperiodeId))
+        assertTrue(generasjon.harKunGosysvarsel())
 
         generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), vedtaksperiodeId))
-        assertFalse(listOf(generasjon).harÅpenGosysOppgave(vedtaksperiodeId))
+        assertFalse(generasjon.harKunGosysvarsel())
     }
 
     @Test
@@ -343,8 +341,8 @@ internal class GenerasjonTest {
     @Test
     fun `krever skjønnsfastsettelse hvis generasjon har varsel om avvik`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon1 = listOf(generasjonMedVarsel(vedtaksperiodeId = vedtaksperiodeId, varselkode = "RV_IV_2"))
-        assertTrue(generasjon1.kreverSkjønnsfastsettelse(vedtaksperiodeId = vedtaksperiodeId))
+        val generasjon1 = generasjonMedVarsel(vedtaksperiodeId = vedtaksperiodeId, varselkode = "RV_IV_2")
+        assertTrue(generasjon1.kreverSkjønnsfastsettelse())
     }
 
     @Test

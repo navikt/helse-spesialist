@@ -342,7 +342,7 @@ internal class GodkjenningsbehovCommand(
                 risikovurderingDao = risikovurderingDao,
                 egenAnsattDao = egenAnsattDao,
                 utbetalingtype = behovData.utbetalingtype,
-                sykefraværstilfelle = sykefraværstilfelle,
+                generasjon = person.vedtaksperiode(behovData.spleisBehandlingId).gjeldendeGenerasjon,
                 utbetaling = utbetaling,
                 vergemålDao = vergemålDao,
                 vedtakDao = vedtakDao,
