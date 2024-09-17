@@ -124,20 +124,6 @@ class VedtaksperiodeTest {
     }
 
     @Test
-    fun `ny generasjon dersom gjeldende generasjon er avsluttet med vedtak og godkjenningsbehovet inneholder ny behandling for perioden`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val spleisBehandlingId = UUID.randomUUID()
-        val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId, spleisBehandlingId)
-        vedtaksperiode.nyUtbetaling(UUID.randomUUID())
-        vedtaksperiode.vedtakFattet(spleisBehandlingId)
-        vedtaksperiode.nyttGodkjenningsbehov(
-            listOf(SpleisVedtaksperiode(vedtaksperiodeId, UUID.randomUUID(), 1.januar, 31.januar, 1.januar)),
-        )
-        val dto = vedtaksperiode.toDto()
-        assertEquals(2, dto.generasjoner.size)
-    }
-
-    @Test
     fun `ikke ny generasjon dersom gjeldende generasjon er avsluttet med vedtak og godkjenningsbehovet inneholder behandling for perioden som er siste gjeldende i Spesialist`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val spleisBehandlingId = UUID.randomUUID()
@@ -152,19 +138,6 @@ class VedtaksperiodeTest {
     }
 
     @Test
-    fun `ny generasjon dersom gjeldende generasjon er avsluttet uten vedtak og godkjenningsbehovet inneholder ny behandling for perioden`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val spleisBehandlingId = UUID.randomUUID()
-        val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId, spleisBehandlingId)
-        vedtaksperiode.avsluttetUtenVedtak(mockk(relaxed = true), AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), spleisBehandlingId))
-        vedtaksperiode.nyttGodkjenningsbehov(
-            listOf(SpleisVedtaksperiode(vedtaksperiodeId, UUID.randomUUID(), 1.januar, 31.januar, 1.januar)),
-        )
-        val dto = vedtaksperiode.toDto()
-        assertEquals(2, dto.generasjoner.size)
-    }
-
-    @Test
     fun `ikke ny generasjon dersom gjeldende generasjon er avsluttet uten vedtak og godkjenningsbehovet inneholder behandling for perioden som er siste gjeldende i Spesialist`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val spleisBehandlingId = UUID.randomUUID()
@@ -175,25 +148,6 @@ class VedtaksperiodeTest {
         )
         val dto = vedtaksperiode.toDto()
         assertEquals(1, dto.generasjoner.size)
-    }
-
-    @Test
-    fun `ny generasjon dersom gjeldende generasjon er avsluttet uten vedtak med varsler og godkjenningsbehovet inneholder ny behandling for perioden`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val spleisBehandlingId = UUID.randomUUID()
-        val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId, spleisBehandlingId)
-        vedtaksperiode.nyeVarsler(listOf(Varsel(UUID.randomUUID(), "RV_IM_1", LocalDateTime.now(), vedtaksperiodeId)))
-        vedtaksperiode.avsluttetUtenVedtak(mockk(relaxed = true), AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), spleisBehandlingId))
-        val dtoFørNyttGodkjenningsbehov = vedtaksperiode.toDto()
-        assertEquals(TilstandDto.AvsluttetUtenVedtakMedVarsler, dtoFørNyttGodkjenningsbehov.generasjoner.first().tilstand)
-
-        vedtaksperiode.nyttGodkjenningsbehov(
-            listOf(SpleisVedtaksperiode(vedtaksperiodeId, UUID.randomUUID(), 1.januar, 31.januar, 1.januar)),
-        )
-        val dtoEtterNyttGodkjenningsbehov = vedtaksperiode.toDto()
-        assertEquals(2, dtoEtterNyttGodkjenningsbehov.generasjoner.size)
-        assertEquals(TilstandDto.AvsluttetUtenVedtak, dtoEtterNyttGodkjenningsbehov.generasjoner[0].tilstand)
-        assertEquals(TilstandDto.VidereBehandlingAvklares, dtoEtterNyttGodkjenningsbehov.generasjoner[1].tilstand)
     }
 
     @Test

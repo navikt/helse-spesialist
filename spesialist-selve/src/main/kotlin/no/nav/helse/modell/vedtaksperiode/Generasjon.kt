@@ -206,12 +206,6 @@ internal class Generasjon private constructor(
         this.utbetalingId = utbetalingId
     }
 
-    private fun nyBehandling(spleisBehandlingId: UUID): Generasjon {
-        val nyGenerasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, fom(), tom(), skjæringstidspunkt, spleisBehandlingId)
-        flyttAktiveVarslerTil(nyGenerasjon)
-        return nyGenerasjon
-    }
-
     private fun nyBehandling(spleisBehandling: SpleisBehandling): Generasjon {
         val nyGenerasjon =
             Generasjon(
@@ -224,22 +218,6 @@ internal class Generasjon private constructor(
             )
         flyttAktiveVarslerTil(nyGenerasjon)
         return nyGenerasjon
-    }
-
-    private fun nyGenerasjonFraGodkjenningsbehov(
-        tilstand: Tilstand,
-        vedtaksperiode: Vedtaksperiode,
-        spleisVedtaksperiode: SpleisVedtaksperiode,
-    ) {
-        sikkerlogg.warn(
-            "Oppretter ny generasjon fra godkjenningsbehov fordi gjeldende generasjon er i tilstand=${tilstand.navn()}",
-            kv("vedtaksperiodeId", vedtaksperiodeId),
-            kv("spleisBehandlingId", spleisBehandlingId),
-            kv("utbetalingId", utbetalingId),
-        )
-        val nyGenerasjon = this.nyBehandling(spleisVedtaksperiode.spleisBehandlingId)
-        nyGenerasjon.spleisVedtaksperiode(spleisVedtaksperiode)
-        vedtaksperiode.nyGenerasjon(nyGenerasjon)
     }
 
     private fun flyttAktiveVarslerTil(generasjon: Generasjon) {
@@ -304,7 +282,7 @@ internal class Generasjon private constructor(
             vedtaksperiode: Vedtaksperiode,
             generasjon: Generasjon,
             spleisVedtaksperiode: SpleisVedtaksperiode,
-        )
+        ) {}
 
         fun nyUtbetaling(
             generasjon: Generasjon,
@@ -427,15 +405,6 @@ internal class Generasjon private constructor(
 
     internal data object VedtakFattet : Tilstand {
         override fun navn(): String = "VedtakFattet"
-
-        override fun spleisVedtaksperiode(
-            vedtaksperiode: Vedtaksperiode,
-            generasjon: Generasjon,
-            spleisVedtaksperiode: SpleisVedtaksperiode,
-        ) {
-            if (generasjon.spleisBehandlingId == null || generasjon.spleisBehandlingId == spleisVedtaksperiode.spleisBehandlingId) return
-            generasjon.nyGenerasjonFraGodkjenningsbehov(this, vedtaksperiode, spleisVedtaksperiode)
-        }
     }
 
     internal data object AvsluttetUtenVedtak : Tilstand {
@@ -446,14 +415,7 @@ internal class Generasjon private constructor(
             generasjon.nyTilstand(AvsluttetUtenVedtakMedVarsler)
         }
 
-        override fun spleisVedtaksperiode(
-            vedtaksperiode: Vedtaksperiode,
-            generasjon: Generasjon,
-            spleisVedtaksperiode: SpleisVedtaksperiode,
-        ) {
-            if (generasjon.spleisBehandlingId == null || generasjon.spleisBehandlingId == spleisVedtaksperiode.spleisBehandlingId) return
-            generasjon.nyGenerasjonFraGodkjenningsbehov(this, vedtaksperiode, spleisVedtaksperiode)
-        }
+        override fun vedtakFattet(generasjon: Generasjon) {}
     }
 
     internal data object AvsluttetUtenVedtakMedVarsler : Tilstand {
@@ -463,15 +425,7 @@ internal class Generasjon private constructor(
             generasjon.nyTilstand(AvsluttetUtenVedtak)
         }
 
-        override fun spleisVedtaksperiode(
-            vedtaksperiode: Vedtaksperiode,
-            generasjon: Generasjon,
-            spleisVedtaksperiode: SpleisVedtaksperiode,
-        ) {
-            if (generasjon.spleisBehandlingId == null || generasjon.spleisBehandlingId == spleisVedtaksperiode.spleisBehandlingId) return
-            generasjon.nyGenerasjonFraGodkjenningsbehov(this, vedtaksperiode, spleisVedtaksperiode)
-            generasjon.nyTilstand(AvsluttetUtenVedtak)
-        }
+        override fun vedtakFattet(generasjon: Generasjon) {}
     }
 
     override fun toString(): String = "generasjonId=$id, vedtaksperiodeId=$vedtaksperiodeId"
