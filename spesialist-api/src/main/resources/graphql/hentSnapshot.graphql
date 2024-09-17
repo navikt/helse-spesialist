@@ -55,6 +55,8 @@ fragment grunnlag on GraphQLVilkarsgrunnlag {
             manedsbelop
         }
         deaktivert
+        fom
+        tom
     }
     arbeidsgiverrefusjoner {
         arbeidsgiver

@@ -86,6 +86,8 @@ internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Av
                             },
                         skjonnsmessigFastsatt = inntektFraSpleis?.skjonnsmessigFastsatt?.tilOmregnetÅrsinntekt(),
                         deaktivert = inntektFraSpleis?.deaktivert,
+                        fom = inntektFraSpleis?.fom,
+                        tom = inntektFraSpleis?.tom,
                     )
                 }
 

@@ -685,6 +685,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                                     manedsbelop = 55_000.0,
                                     kilde = GraphQLInntektskilde.INNTEKTSMELDING,
                                 ),
+                            fom = 1.januar(2020),
+                            tom = null
                         ),
                         GraphQLArbeidsgiverinntekt(
                             arbeidsgiver = "987656789",
@@ -694,6 +696,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                                     manedsbelop = 55_000.0,
                                     kilde = GraphQLInntektskilde.INNTEKTSMELDING,
                                 ),
+                            fom = 1.januar(2020),
+                            tom = null
                         ),
                     ),
                 omregnetArsinntekt = 1_000_000.0,

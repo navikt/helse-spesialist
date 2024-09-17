@@ -76,9 +76,11 @@ type GraphQLArbeidsgiver {
 type GraphQLArbeidsgiverinntekt {
   arbeidsgiver: String!
   deaktivert: Boolean
+  fom: LocalDate!
   omregnetArsinntekt: GraphQLOmregnetArsinntekt!
   skjonnsmessigFastsatt: GraphQLSkjonnsmessigFastsatt
   skjonnsmessigFastsattAarlig: Float
+  tom: LocalDate
 }
 
 type GraphQLArbeidsgiverrefusjon {

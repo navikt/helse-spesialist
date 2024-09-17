@@ -4,6 +4,7 @@ import no.nav.helse.spleis.graphql.enums.GraphQLInntektskilde
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntekterFraAOrdningen
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLOmregnetArsinntekt
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSkjonnsmessigFastsatt
+import java.time.LocalDate
 import java.time.YearMonth
 
 data class Arbeidsgiverinntekt(
@@ -12,6 +13,8 @@ data class Arbeidsgiverinntekt(
     val sammenligningsgrunnlag: Sammenligningsgrunnlag?,
     val skjonnsmessigFastsatt: OmregnetArsinntekt?,
     val deaktivert: Boolean? = null,
+    val fom: LocalDate? = null,
+    val tom: LocalDate? = null,
 )
 
 data class Sammenligningsgrunnlag(

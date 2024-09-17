@@ -110,9 +110,11 @@ type ArbeidsgiverInntekterFraAOrdningen {
 type Arbeidsgiverinntekt {
     arbeidsgiver: String!
     deaktivert: Boolean
+    fom: LocalDate
     omregnetArsinntekt: OmregnetArsinntekt
     sammenligningsgrunnlag: Sammenligningsgrunnlag
     skjonnsmessigFastsatt: OmregnetArsinntekt
+    tom: LocalDate
 }
 
 type Arbeidsgiverrefusjon {
