@@ -55,6 +55,11 @@ internal class SykefraværstilfelleTest {
         assertTrue(listOf(gjeldendeGenerasjon1, gjeldendeGenerasjon2).forhindrerAutomatisering(28.februar))
     }
 
+    @Test
+    fun `thrower hvis generasjon ikke finnes`() {
+        assertThrows<IllegalArgumentException> { sykefraværstilfelle().haster(UUID.randomUUID()) }
+    }
+
     private fun generasjon(vedtaksperiodeId: UUID = UUID.randomUUID()) =
         Generasjon(
             id = UUID.randomUUID(),

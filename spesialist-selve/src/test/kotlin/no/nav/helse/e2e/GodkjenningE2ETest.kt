@@ -5,6 +5,8 @@ import AbstractE2ETest.Kommandokjedetilstand.AVBRUTT
 import AbstractE2ETest.Kommandokjedetilstand.FERDIG
 import AbstractE2ETest.Kommandokjedetilstand.NY
 import AbstractE2ETest.Kommandokjedetilstand.SUSPENDERT
+import kotliquery.queryOf
+import kotliquery.sessionOf
 import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson
@@ -14,6 +16,7 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSystem
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.test.lagFødselsnummer
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -112,6 +115,26 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(kanGodkjennesAutomatisk = true)
         håndterGodkjenningsbehovUtenValidering()
         assertIngenEtterspurteBehov()
+    }
+
+    @Test
+    fun `oppdaterer behandlingsinformasjon ved påminnet godkjenningsbehov`() {
+        val spleisBehandlingId1 = UUID.randomUUID()
+        val tags1 = listOf("tag 1", "tag 2")
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
+            kanGodkjennesAutomatisk = true,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(tags = tags1, spleisBehandlingId = spleisBehandlingId1),
+        )
+        assertBehandlingsinformasjon(VEDTAKSPERIODE_ID, tags1, spleisBehandlingId1)
+
+        val spleisBehandlingId2 = UUID.randomUUID()
+        val tags2 = listOf("tag 2", "tag 3")
+        håndterGodkjenningsbehovUtenValidering(
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(tags = tags2, spleisBehandlingId = spleisBehandlingId2),
+        )
+        assertBehandlingsinformasjon(VEDTAKSPERIODE_ID, tags2, spleisBehandlingId2)
     }
 
     @Test
@@ -257,7 +280,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `avviser ikke godkjenningsbehov når kanAvvises-flagget er false`() {
-        val spleisBehandlingId = UUID.randomUUID()
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistInnvilgerAutomatisk(11.januar, 31.januar)
@@ -265,7 +287,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val revurdertUtbetaling = UUID.randomUUID()
         val kanAvvises = false
 
-        spleisOppretterNyBehandling(spleisBehandlingId = spleisBehandlingId)
+        spleisOppretterNyBehandling()
         håndterVedtaksperiodeNyUtbetaling(utbetalingId = revurdertUtbetaling)
         håndterGodkjenningsbehov(
             harOppdatertMetainfo = true,
@@ -279,7 +301,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
                     fødselsnummer = FØDSELSNUMMER,
                     aktørId = AKTØR,
                     organisasjonsnummer = ORGNR,
-                    spleisBehandlingId = spleisBehandlingId
                 ),
         )
 
@@ -350,5 +371,26 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertVarsler(vedtaksperiodeId1, 0)
         assertVarsel(vedtaksperiodeId2, "RV_IV_2")
         assertVarsler(vedtaksperiodeId2, 1)
+    }
+
+    private fun assertBehandlingsinformasjon(
+        vedtaksperiodeId: UUID,
+        forventedeTags: List<String>,
+        forventetSpleisBehandlingId: UUID,
+    ) {
+        @Language("PostgreSQL")
+        val query =
+            "SELECT tags, spleis_behandling_id FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = :vedtaksperiodeId;"
+
+        val (tags, spleisBehandlingId) =
+            sessionOf(dataSource).use { session ->
+                session.run(
+                    queryOf(query, mapOf("vedtaksperiodeId" to vedtaksperiodeId))
+                        .map { it.array<String>("tags").toList() to it.uuid("spleis_behandling_id") }.asSingle,
+                )
+            }!!
+
+        assertEquals(forventedeTags, tags)
+        assertEquals(forventetSpleisBehandlingId, spleisBehandlingId)
     }
 }

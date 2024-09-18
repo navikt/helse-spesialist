@@ -342,7 +342,7 @@ internal class GodkjenningsbehovCommand(
                 risikovurderingDao = risikovurderingDao,
                 egenAnsattDao = egenAnsattDao,
                 utbetalingtype = behovData.utbetalingtype,
-                generasjon = { person.vedtaksperiode(behovData.spleisBehandlingId).gjeldendeGenerasjon },
+                sykefraværstilfelle = sykefraværstilfelle,
                 utbetaling = utbetaling,
                 vergemålDao = vergemålDao,
                 vedtakDao = vedtakDao,
@@ -354,7 +354,7 @@ internal class GodkjenningsbehovCommand(
                 oppgaveService = oppgaveService,
                 overstyringDao = overstyringDao,
                 totrinnsvurderingMediator = totrinnsvurderingMediator,
-                generasjon = { person.vedtaksperiode(behovData.spleisBehandlingId).gjeldendeGenerasjon },
+                sykefraværstilfelle = sykefraværstilfelle,
                 spleisVedtaksperioder = behovData.spleisVedtaksperioder,
             ),
             PersisterPeriodehistorikkCommand(

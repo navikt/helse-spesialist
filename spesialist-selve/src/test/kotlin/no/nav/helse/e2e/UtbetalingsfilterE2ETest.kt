@@ -4,15 +4,13 @@ import AbstractE2ETest
 import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import org.junit.jupiter.api.Test
-import java.util.UUID
 
 internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Går gjennom begge filtreringer`() {
-        val spleisBehandlingId = UUID.randomUUID()
         vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling(spleisBehandlingId = spleisBehandlingId)
+        spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovTilOgMedUtbetalingsfilter(
             godkjenningsbehovTestdata = GodkjenningsbehovTestdata(
                 periodetype = FORLENGELSE,
@@ -21,7 +19,6 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
                 organisasjonsnummer = ORGNR,
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
                 utbetalingId = UTBETALING_ID,
-                spleisBehandlingId = spleisBehandlingId,
             )
         )
         assertVedtaksperiodeEksisterer(VEDTAKSPERIODE_ID)
@@ -31,9 +28,8 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
 
     @Test
     fun `går gjennom uten personutbetaling`() {
-        val spleisBehandlingId = UUID.randomUUID()
         vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling(spleisBehandlingId = spleisBehandlingId)
+        spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovTilOgMedUtbetalingsfilter(
             godkjenningsbehovTestdata = GodkjenningsbehovTestdata(
                 fødselsnummer = FØDSELSNUMMER,
@@ -41,7 +37,6 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
                 organisasjonsnummer = ORGNR,
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
                 utbetalingId = UTBETALING_ID,
-                spleisBehandlingId = spleisBehandlingId,
             )
         )
         assertVedtaksperiodeEksisterer(VEDTAKSPERIODE_ID)
