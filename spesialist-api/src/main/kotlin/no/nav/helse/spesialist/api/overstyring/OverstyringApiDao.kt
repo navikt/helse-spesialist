@@ -105,6 +105,8 @@ class OverstyringApiDao(
                             overstyringRow
                                 .stringOrNull("fra_refusjonsopplysninger")
                                 ?.let { objectMapper.readValue<List<OverstyringInntektDto.Refusjonselement>>(it) },
+                        fom = overstyringRow.localDateOrNull("fom"),
+                        tom = overstyringRow.localDateOrNull("tom"),
                         ferdigstilt = overstyringRow.boolean("ferdigstilt"),
                     )
                 }.asList,

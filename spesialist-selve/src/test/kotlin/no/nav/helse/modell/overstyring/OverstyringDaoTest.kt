@@ -28,6 +28,7 @@ import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunn
 import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -256,6 +257,8 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                             begrunnelse = BEGRUNNELSE,
                             forklaring = FORKLARING,
                             lovhjemmel = null,
+                            fom = 1.januar,
+                            tom = null
                         ),
                     ),
             ),
@@ -279,6 +282,8 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         assertEquals(1.januar, refusjonsopplysning?.fom)
         assertEquals(31.januar, refusjonsopplysning?.tom)
         assertEquals(1000.0, refusjonsopplysning?.beløp)
+        assertEquals(1.januar, hentetOverstyring.fom)
+        assertNull(hentetOverstyring.tom)
     }
 
     @Test
@@ -395,6 +400,8 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                             begrunnelse = BEGRUNNELSE,
                             forklaring = FORKLARING,
                             lovhjemmel = null,
+                            fom = 1.januar,
+                            tom = null,
                         ),
                     ),
             ),

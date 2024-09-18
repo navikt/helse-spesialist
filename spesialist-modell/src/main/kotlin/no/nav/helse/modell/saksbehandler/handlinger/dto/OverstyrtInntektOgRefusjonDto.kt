@@ -22,6 +22,8 @@ data class OverstyrtArbeidsgiverDto(
     val begrunnelse: String,
     val forklaring: String,
     val lovhjemmel: LovhjemmelDto?,
+    val fom: LocalDate?,
+    val tom: LocalDate?,
 )
 
 data class RefusjonselementDto(

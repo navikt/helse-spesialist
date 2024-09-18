@@ -43,6 +43,8 @@ data class OverstyrtArbeidsgiverForDatabase(
     val begrunnelse: String,
     val forklaring: String,
     val lovhjemmel: LovhjemmelForDatabase?,
+    val fom: LocalDate?,
+    val tom: LocalDate?,
 )
 
 data class RefusjonselementForDatabase(

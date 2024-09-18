@@ -229,8 +229,8 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
             @Language("PostgreSQL")
             val opprettOverstyringInntektOgRefusjonQuery =
                 """
-                INSERT INTO overstyring_inntekt(forklaring, manedlig_inntekt, fra_manedlig_inntekt, skjaeringstidspunkt, overstyring_ref, refusjonsopplysninger, fra_refusjonsopplysninger, begrunnelse, arbeidsgiver_ref, subsumsjon)
-                SELECT :forklaring, :manedlig_inntekt, :fra_manedlig_inntekt, :skjaeringstidspunkt, :overstyring_ref, :refusjonsopplysninger::json, :fra_refusjonsopplysninger::json, :begrunnelse, ag.id, :subsumsjon::json
+                INSERT INTO overstyring_inntekt(forklaring, manedlig_inntekt, fra_manedlig_inntekt, skjaeringstidspunkt, overstyring_ref, refusjonsopplysninger, fra_refusjonsopplysninger, begrunnelse, arbeidsgiver_ref, subsumsjon, fom, tom)
+                SELECT :forklaring, :manedlig_inntekt, :fra_manedlig_inntekt, :skjaeringstidspunkt, :overstyring_ref, :refusjonsopplysninger::json, :fra_refusjonsopplysninger::json, :begrunnelse, ag.id, :subsumsjon::json, :fom, :tom
                 FROM arbeidsgiver ag
                 WHERE ag.orgnummer = :orgnr
                 """.trimIndent()
@@ -279,6 +279,8 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                                             arbeidsgiver.lovhjemmel,
                                         )
                                     },
+                                "fom" to arbeidsgiver.fom,
+                                "tom" to arbeidsgiver.tom,
                             ),
                         ).asUpdate,
                     )

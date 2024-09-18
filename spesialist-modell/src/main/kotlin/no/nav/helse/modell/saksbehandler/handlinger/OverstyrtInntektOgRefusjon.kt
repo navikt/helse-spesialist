@@ -62,6 +62,8 @@ class OverstyrtArbeidsgiver(
     private val begrunnelse: String,
     private val forklaring: String,
     private val lovhjemmel: Lovhjemmel?,
+    private val fom: LocalDate?,
+    private val tom: LocalDate?,
 ) {
     fun byggEvent() =
         OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiverEvent(
@@ -72,6 +74,8 @@ class OverstyrtArbeidsgiver(
             fraRefusjonsopplysninger = fraRefusjonsopplysninger?.map(Refusjonselement::byggEvent),
             begrunnelse = begrunnelse,
             forklaring = forklaring,
+            fom = fom,
+            tom = tom,
         )
 
     fun toDto() =
@@ -84,6 +88,8 @@ class OverstyrtArbeidsgiver(
             begrunnelse = begrunnelse,
             forklaring = forklaring,
             lovhjemmel = lovhjemmel?.toDto(),
+            fom = fom,
+            tom = tom,
         )
 }
 

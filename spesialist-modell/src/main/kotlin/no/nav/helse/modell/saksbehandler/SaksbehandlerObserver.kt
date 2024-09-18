@@ -62,6 +62,8 @@ data class OverstyrtInntektOgRefusjonEvent(
         val fraRefusjonsopplysninger: List<OverstyrtRefusjonselementEvent>?,
         val begrunnelse: String,
         val forklaring: String,
+        val fom: LocalDate?,
+        val tom: LocalDate?,
     ) {
         data class OverstyrtRefusjonselementEvent(
             val fom: LocalDate,

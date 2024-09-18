@@ -90,8 +90,8 @@ INSERT INTO overstyring_tidslinje(id, overstyring_ref, arbeidsgiver_ref, begrunn
 VALUES (${sequence_number}, ${sequence_number}, ${sequence_number},'BEGRUNNELSE');
 INSERT INTO overstyring_dag(id, dato, dagtype, grad, overstyring_tidslinje_ref)
 VALUES (${sequence_number}, '2018-01-01', 'TESTDAGTYPE', 100, ${sequence_number});
-INSERT INTO overstyring_inntekt(id, overstyring_ref, manedlig_inntekt, skjaeringstidspunkt, forklaring, begrunnelse, arbeidsgiver_ref)
-VALUES (${sequence_number}, ${sequence_number}, 1000, '2018-01-01', 'FORKLARING', 'BEGRUNNELSE', ${sequence_number});
+INSERT INTO overstyring_inntekt(id, overstyring_ref, manedlig_inntekt, skjaeringstidspunkt, forklaring, begrunnelse, arbeidsgiver_ref, fom, tom)
+VALUES (${sequence_number}, ${sequence_number}, 1000, '2018-01-01', 'FORKLARING', 'BEGRUNNELSE', ${sequence_number}, '2018-01-01', null);
 INSERT INTO overstyring_arbeidsforhold(id, overstyring_ref, forklaring, deaktivert, skjaeringstidspunkt, begrunnelse, arbeidsgiver_ref)
 VALUES (${sequence_number}, ${sequence_number}, 'FORKLARING', false, '2018-01-01', 'BEGRUNNELSE', ${sequence_number});
 INSERT INTO overstyring_minimum_sykdomsgrad(id, overstyring_ref, fom, tom, vurdering, begrunnelse)

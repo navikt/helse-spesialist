@@ -70,6 +70,8 @@ data class OverstyringInntektDto(
     val skjæringstidspunkt: LocalDate,
     val refusjonsopplysninger: List<Refusjonselement>?,
     val fraRefusjonsopplysninger: List<Refusjonselement>?,
+    val fom: LocalDate?,
+    val tom: LocalDate?,
     val ferdigstilt: Boolean,
 ) : OverstyringDto {
     data class Refusjonselement(

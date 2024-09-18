@@ -120,6 +120,8 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
                         begrunnelse = it.begrunnelse,
                         forklaring = it.forklaring,
                         lovhjemmel = it.lovhjemmel?.tilDatabase(),
+                        fom = it.fom,
+                        tom = it.tom,
                     )
                 },
         )

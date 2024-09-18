@@ -1,0 +1,1 @@
+ALTER TABLE overstyring_inntekt ADD COLUMN fom DATE, ADD COLUMN tom DATE;

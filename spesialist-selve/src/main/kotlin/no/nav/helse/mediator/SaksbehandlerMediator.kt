@@ -495,6 +495,8 @@ internal class SaksbehandlerMediator(
                             overstyrArbeidsgiver.lovhjemmel?.let {
                                 Lovhjemmel(it.paragraf, it.ledd, it.bokstav, it.lovverk, it.lovverksversjon)
                             },
+                        fom = overstyrArbeidsgiver.fom,
+                        tom = overstyrArbeidsgiver.tom,
                     )
                 },
         )
