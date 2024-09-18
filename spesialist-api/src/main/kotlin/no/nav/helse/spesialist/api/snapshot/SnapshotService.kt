@@ -8,26 +8,28 @@ import org.slf4j.LoggerFactory
 class SnapshotService(private val snapshotDao: SnapshotApiDao, private val snapshotClient: ISnapshotClient) {
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
-    private fun oppdaterSnapshot(fødselsnummer: String) {
-        if (snapshotDao.utdatert(fødselsnummer)) {
-            sikkerLogg.debug("snapshot for $fødselsnummer er utdatert, henter nytt")
-            snapshotClient.hentSnapshot(fødselsnummer).data?.person?.let {
-                snapshotDao.lagre(fødselsnummer, it)
-            }
-        }
-    }
-
     fun hentSnapshot(fødselsnummer: String): Pair<Personinfo, GraphQLPerson>? {
         oppdaterSnapshot(fødselsnummer)
         val snapshot =
             try {
                 snapshotDao.hentSnapshotMedMetadata(fødselsnummer)
             } catch (e: Exception) {
-                snapshotClient.hentSnapshot(fødselsnummer).data?.person?.let {
-                    snapshotDao.lagre(fødselsnummer, it)
-                }
+                hentOgLagre(fødselsnummer)
                 snapshotDao.hentSnapshotMedMetadata(fødselsnummer)
             }
         return snapshot
+    }
+
+    private fun oppdaterSnapshot(fødselsnummer: String) {
+        if (snapshotDao.utdatert(fødselsnummer)) {
+            sikkerLogg.debug("snapshot for $fødselsnummer er utdatert, henter nytt")
+            hentOgLagre(fødselsnummer)
+        }
+    }
+
+    private fun hentOgLagre(fødselsnummer: String) {
+        snapshotClient.hentSnapshot(fødselsnummer).data?.person?.let {
+            snapshotDao.lagre(fødselsnummer, it)
+        }
     }
 }
