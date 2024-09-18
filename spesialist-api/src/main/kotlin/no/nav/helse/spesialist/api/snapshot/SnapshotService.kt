@@ -14,6 +14,7 @@ class SnapshotService(private val snapshotDao: SnapshotApiDao, private val snaps
             try {
                 snapshotDao.hentSnapshotMedMetadata(fødselsnummer)
             } catch (e: Exception) {
+                sikkerLogg.warn("feil under henting av snapshot fra databasen, prøver en gang til", e)
                 hentOgLagre(fødselsnummer)
                 snapshotDao.hentSnapshotMedMetadata(fødselsnummer)
             }
