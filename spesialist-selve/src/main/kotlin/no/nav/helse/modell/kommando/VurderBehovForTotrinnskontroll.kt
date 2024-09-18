@@ -16,13 +16,15 @@ internal class VurderBehovForTotrinnskontroll(
     private val oppgaveService: OppgaveService,
     private val overstyringDao: OverstyringDao,
     private val totrinnsvurderingMediator: TotrinnsvurderingMediator,
-    private val generasjon: Generasjon,
+    generasjon: () -> Generasjon,
     private val spleisVedtaksperioder: List<SpleisVedtaksperiode>,
 ) : Command {
     private companion object {
         private val logg = LoggerFactory.getLogger(VurderBehovForTotrinnskontroll::class.java)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
+
+    private val generasjon by lazy { generasjon() }
 
     override fun execute(context: CommandContext): Boolean {
         val kreverTotrinnsvurdering = generasjon.harMedlemskapsvarsel()

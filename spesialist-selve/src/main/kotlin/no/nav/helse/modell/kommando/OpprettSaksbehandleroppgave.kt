@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory
 
 internal class OpprettSaksbehandleroppgave(
     private val behovData: GodkjenningsbehovData,
-    private val generasjon: Generasjon,
+    generasjon: () -> Generasjon,
     private val oppgaveService: OppgaveService,
     private val automatisering: Automatisering,
     private val personDao: PersonDao,
@@ -64,6 +64,8 @@ internal class OpprettSaksbehandleroppgave(
         private val logg = LoggerFactory.getLogger(OpprettSaksbehandleroppgave::class.java)
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
+
+    private val generasjon by lazy { generasjon() }
 
     override fun execute(context: CommandContext): Boolean {
         val egenskaper = mutableListOf<Egenskap>()

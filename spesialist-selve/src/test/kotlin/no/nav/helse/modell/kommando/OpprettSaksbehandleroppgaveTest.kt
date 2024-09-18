@@ -415,18 +415,20 @@ internal class OpprettSaksbehandleroppgaveTest {
             vergemålDao = vergemålDao,
             vedtakDao = vedtakDao,
             påVentDao = påVentDao,
-            generasjon = Generasjon(
-                id = UUID.randomUUID(),
-                vedtaksperiodeId = VEDTAKSPERIODE_ID,
-                fom = 1.januar,
-                tom = 31.januar,
-                skjæringstidspunkt = 1.januar,
-                spleisBehandlingId = spleisBehandlingId,
-                utbetalingId = UTBETALING_ID,
-            ).apply {
-                if (tilbakedatert) håndterNyttVarsel(Varsel(UUID.randomUUID(), "RV_SØ_3", LocalDateTime.now(), VEDTAKSPERIODE_ID))
-                if (hasterÅBehandle) håndterNyttVarsel(Varsel(UUID.randomUUID(), "RV_UT_23", LocalDateTime.now(), VEDTAKSPERIODE_ID))
-                if (skjønnsfastsettelse) håndterNyttVarsel(Varsel(UUID.randomUUID(), "RV_IV_2", LocalDateTime.now(), VEDTAKSPERIODE_ID))
+            generasjon = {
+                Generasjon(
+                    id = UUID.randomUUID(),
+                    vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                    fom = 1.januar,
+                    tom = 31.januar,
+                    skjæringstidspunkt = 1.januar,
+                    spleisBehandlingId = spleisBehandlingId,
+                    utbetalingId = UTBETALING_ID,
+                ).apply {
+                    if (tilbakedatert) håndterNyttVarsel(Varsel(UUID.randomUUID(), "RV_SØ_3", LocalDateTime.now(), VEDTAKSPERIODE_ID))
+                    if (hasterÅBehandle) håndterNyttVarsel(Varsel(UUID.randomUUID(), "RV_UT_23", LocalDateTime.now(), VEDTAKSPERIODE_ID))
+                    if (skjønnsfastsettelse) håndterNyttVarsel(Varsel(UUID.randomUUID(), "RV_IV_2", LocalDateTime.now(), VEDTAKSPERIODE_ID))
+                }
             },
             behovData = GodkjenningsbehovData(
                 id = UUID.randomUUID(),

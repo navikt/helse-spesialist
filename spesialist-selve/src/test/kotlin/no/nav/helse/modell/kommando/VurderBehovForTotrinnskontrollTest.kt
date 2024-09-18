@@ -50,17 +50,19 @@ internal class VurderBehovForTotrinnskontrollTest {
             oppgaveService = oppgaveService,
             overstyringDao = overstyringDao,
             totrinnsvurderingMediator = totrinnsvurderingMediator,
-            generasjon = Generasjon(
-                id = UUID.randomUUID(),
-                vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
-                fom = 1.januar,
-                tom = 31.januar,
-                skjæringstidspunkt = 1.januar,
-                spleisBehandlingId = UUID.randomUUID(),
-                utbetalingId = UUID.randomUUID(),
-            ).apply {
-                if (medlemskap) {
-                    håndterNyttVarsel(Varsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), VEDTAKSPERIODE_ID_2))
+            generasjon = {
+                Generasjon(
+                    id = UUID.randomUUID(),
+                    vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
+                    fom = 1.januar,
+                    tom = 31.januar,
+                    skjæringstidspunkt = 1.januar,
+                    spleisBehandlingId = UUID.randomUUID(),
+                    utbetalingId = UUID.randomUUID(),
+                ).apply {
+                    if (medlemskap) {
+                        håndterNyttVarsel(Varsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), VEDTAKSPERIODE_ID_2))
+                    }
                 }
             },
             spleisVedtaksperioder = listOf(SpleisVedtaksperiode(VEDTAKSPERIODE_ID_1, UUID.randomUUID(), 1.januar, 31.januar, 1.januar), SpleisVedtaksperiode(VEDTAKSPERIODE_ID_2, UUID.randomUUID(), 1.februar, 28.februar, 1.januar)),
