@@ -354,7 +354,7 @@ internal class GodkjenningsbehovCommand(
                 oppgaveService = oppgaveService,
                 overstyringDao = overstyringDao,
                 totrinnsvurderingMediator = totrinnsvurderingMediator,
-                sykefraværstilfelle = sykefraværstilfelle,
+                generasjon = person.vedtaksperiode(behovData.spleisBehandlingId).gjeldendeGenerasjon,
                 spleisVedtaksperioder = behovData.spleisVedtaksperioder,
             ),
             PersisterPeriodehistorikkCommand(

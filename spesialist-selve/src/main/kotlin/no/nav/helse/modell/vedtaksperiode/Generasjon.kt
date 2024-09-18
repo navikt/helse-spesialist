@@ -518,11 +518,6 @@ internal class Generasjon private constructor(
                 }.filter { it.varsler.isNotEmpty() }
                 .all { it.harKunGosysvarsel() }
 
-        internal fun List<Generasjon>.harMedlemskapsvarsel(vedtaksperiodeId: UUID): Boolean =
-            overlapperMedEllerTidligereEnn(vedtaksperiodeId).any {
-                it.harMedlemskapsvarsel()
-            }
-
         internal fun List<Generasjon>.deaktiver(varsel: Varsel) {
             find { varsel.erRelevantFor(it.vedtaksperiodeId) }?.håndterDeaktivertVarsel(varsel)
         }

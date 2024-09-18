@@ -3,8 +3,8 @@ package no.nav.helse.modell.kommando
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.overstyring.OverstyringDao
-import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
+import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.slf4j.LoggerFactory
@@ -16,7 +16,7 @@ internal class VurderBehovForTotrinnskontroll(
     private val oppgaveService: OppgaveService,
     private val overstyringDao: OverstyringDao,
     private val totrinnsvurderingMediator: TotrinnsvurderingMediator,
-    private val sykefraværstilfelle: Sykefraværstilfelle,
+    private val generasjon: Generasjon,
     private val spleisVedtaksperioder: List<SpleisVedtaksperiode>,
 ) : Command {
     private companion object {
@@ -25,17 +25,18 @@ internal class VurderBehovForTotrinnskontroll(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        val kreverTotrinnsvurdering = sykefraværstilfelle.harMedlemskapsvarsel(vedtaksperiodeId)
+        val kreverTotrinnsvurdering = generasjon.harMedlemskapsvarsel()
         val vedtaksperiodeHarFerdigstiltOppgave = oppgaveService.harFerdigstiltOppgave(vedtaksperiodeId)
         val overstyringer = finnOverstyringerMedType()
         val overstyringerFunnetMedNyttOppslag = finnOverstyringer(overstyringer)
         if (overstyringer.isEmpty() && overstyringerFunnetMedNyttOppslag.isNotEmpty()) {
-            sikkerlogg.info("Fant overstyring(-er) kun ved nytt oppslag. Skulle perioden gått til totrinns?",
+            sikkerlogg.info(
+                "Fant overstyring(-er) kun ved nytt oppslag. Skulle perioden gått til totrinns?",
                 kv("fødselsnummer", fødselsnummer),
                 kv("kreverTotrinnsvurdering", kreverTotrinnsvurdering),
                 kv("vedtaksperiodeHarFerdigstiltOppgave", vedtaksperiodeHarFerdigstiltOppgave),
                 kv("vedtaksperiodeId", vedtaksperiodeId),
-                kv("berørteVedtaksperioder", spleisVedtaksperioder.map { it.vedtaksperiodeId })
+                kv("berørteVedtaksperioder", spleisVedtaksperioder.map { it.vedtaksperiodeId }),
             )
         }
 

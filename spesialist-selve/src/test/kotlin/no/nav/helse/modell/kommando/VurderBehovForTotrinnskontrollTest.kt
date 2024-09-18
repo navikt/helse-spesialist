@@ -43,14 +43,26 @@ internal class VurderBehovForTotrinnskontrollTest {
                 Generasjon(UUID.randomUUID(), VEDTAKSPERIODE_ID_2, 1.februar, 28.februar, 1.januar),
             ),
         )
-    private val command =
+    private fun command(medlemskap: Boolean = false) =
         VurderBehovForTotrinnskontroll(
             fødselsnummer = FØDSELSNUMMER,
             vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
             oppgaveService = oppgaveService,
             overstyringDao = overstyringDao,
             totrinnsvurderingMediator = totrinnsvurderingMediator,
-            sykefraværstilfelle = sykefraværstilfelle,
+            generasjon = Generasjon(
+                id = UUID.randomUUID(),
+                vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
+                fom = 1.januar,
+                tom = 31.januar,
+                skjæringstidspunkt = 1.januar,
+                spleisBehandlingId = UUID.randomUUID(),
+                utbetalingId = UUID.randomUUID(),
+            ).apply {
+                if (medlemskap) {
+                    håndterNyttVarsel(Varsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), VEDTAKSPERIODE_ID_2))
+                }
+            },
             spleisVedtaksperioder = listOf(SpleisVedtaksperiode(VEDTAKSPERIODE_ID_1, UUID.randomUUID(), 1.januar, 31.januar, 1.januar), SpleisVedtaksperiode(VEDTAKSPERIODE_ID_2, UUID.randomUUID(), 1.februar, 28.februar, 1.januar)),
         )
 
@@ -63,7 +75,7 @@ internal class VurderBehovForTotrinnskontrollTest {
     fun `Oppretter totrinnsvurdering dersom vedtaksperioden finnes i overstyringer_for_vedtaksperioder`() {
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
 
-        assertTrue(command.execute(context))
+        assertTrue(command().execute(context))
 
         verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
     }
@@ -75,7 +87,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         )
         every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
-        assertTrue(command.execute(context))
+        assertTrue(command(true).execute(context))
         verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
     }
 
@@ -89,7 +101,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         )
         every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
-        assertTrue(command.execute(context))
+        assertTrue(command().execute(context))
         verify(exactly = 0) { totrinnsvurderingMediator.opprett(any()) }
     }
 
@@ -109,7 +121,7 @@ internal class VurderBehovForTotrinnskontrollTest {
                 oppdatert = null,
             )
 
-        assertTrue(command.execute(context))
+        assertTrue(command().execute(context))
 
         verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
         verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehander, FØDSELSNUMMER) }
@@ -132,7 +144,7 @@ internal class VurderBehovForTotrinnskontrollTest {
                 oppdatert = null,
             )
 
-        assertTrue(command.execute(context))
+        assertTrue(command().execute(context))
 
         verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
         verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehander, FØDSELSNUMMER) }
@@ -141,7 +153,7 @@ internal class VurderBehovForTotrinnskontrollTest {
 
     @Test
     fun `Oppretter ikke totrinnsvurdering om det ikke er overstyring eller varsel for lovvalg og medlemskap`() {
-        assertTrue(command.execute(context))
+        assertTrue(command().execute(context))
 
         verify(exactly = 0) { totrinnsvurderingMediator.opprett(any()) }
     }
@@ -150,7 +162,7 @@ internal class VurderBehovForTotrinnskontrollTest {
     fun `Oppretter trengerTotrinnsvurdering dersom oppgaven har blitt overstyrt`() {
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
 
-        assertTrue(command.execute(context))
+        assertTrue(command().execute(context))
         verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
     }
 
@@ -158,7 +170,7 @@ internal class VurderBehovForTotrinnskontrollTest {
     fun `Oppretter trengerTotrinnsvurdering dersom oppgaven har fått avklart skjønnsfastsatt sykepengegrunnlag`() {
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Sykepengegrunnlag)
 
-        assertTrue(command.execute(context))
+        assertTrue(command().execute(context))
         verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
     }
 }

@@ -6,7 +6,6 @@ import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.deaktiver
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForVedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.harKunGosysvarsel
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.harMedlemskapsvarsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterGodkjent
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterNyttVarsel
 import java.time.LocalDate
@@ -60,6 +59,4 @@ internal class Sykefraværstilfelle(
     internal fun håndterGodkjent(vedtaksperiodeId: UUID) {
         gjeldendeGenerasjoner.håndterGodkjent(vedtaksperiodeId)
     }
-
-    internal fun harMedlemskapsvarsel(vedtaksperiodeId: UUID): Boolean = gjeldendeGenerasjoner.harMedlemskapsvarsel(vedtaksperiodeId)
 }

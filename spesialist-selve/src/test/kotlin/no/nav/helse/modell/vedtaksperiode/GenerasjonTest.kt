@@ -15,7 +15,6 @@ import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForSpleisBehandling
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForVedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnSisteGenerasjonUtenSpleisBehandlingId
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.harMedlemskapsvarsel
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -23,7 +22,6 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -297,15 +295,7 @@ internal class GenerasjonTest {
     fun `har generasjon medlemskapsvarsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon1 = generasjonMedVarsel(1.februar, 28.februar, vedtaksperiodeId, "RV_MV_1")
-        assertTrue(listOf(generasjon1).harMedlemskapsvarsel(vedtaksperiodeId))
-    }
-
-    @Test
-    fun `har minst en generasjon medlemskapsvarsel`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon1 = generasjonMedVarsel(1.februar, 28.februar, vedtaksperiodeId, "RV_MV_1")
-        val generasjon2 = generasjon(fom = 1.januar, tom = 31.januar, skjæringstidspunkt = 1.januar)
-        assertTrue(listOf(generasjon1, generasjon2).harMedlemskapsvarsel(vedtaksperiodeId))
+        assertTrue(generasjon1.harMedlemskapsvarsel())
     }
 
     @Test
@@ -329,7 +319,7 @@ internal class GenerasjonTest {
     fun `generasjon mangler medlemskapsvarsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon1 = generasjon(vedtaksperiodeId)
-        assertFalse(listOf(generasjon1).harMedlemskapsvarsel(vedtaksperiodeId))
+        assertFalse(generasjon1.harMedlemskapsvarsel())
     }
 
     @Test
