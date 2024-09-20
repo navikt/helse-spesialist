@@ -4,6 +4,9 @@ import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
 import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.gjenopprett
+import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
+import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -84,5 +87,29 @@ class Totrinnsvurdering(
         result = 31 * result + opprettet.hashCode()
         result = 31 * result + (oppdatert?.hashCode() ?: 0)
         return result
+    }
+
+    companion object {
+        fun TotrinnsvurderingDto.gjenopprett(tilgangskontroll: Tilgangskontroll): Totrinnsvurdering =
+            Totrinnsvurdering(
+                vedtaksperiodeId = vedtaksperiodeId,
+                erRetur = erRetur,
+                saksbehandler = saksbehandler?.gjenopprett(tilgangskontroll),
+                beslutter = beslutter?.gjenopprett(tilgangskontroll),
+                utbetalingId = utbetalingId,
+                opprettet = opprettet,
+                oppdatert = oppdatert,
+            )
+
+        fun Totrinnsvurdering.toDto(): TotrinnsvurderingDto =
+            TotrinnsvurderingDto(
+                vedtaksperiodeId = vedtaksperiodeId,
+                erRetur = erRetur,
+                saksbehandler = saksbehandler?.toDto(),
+                beslutter = beslutter?.toDto(),
+                utbetalingId = utbetalingId,
+                opprettet = opprettet,
+                oppdatert = oppdatert,
+            )
     }
 }

@@ -12,8 +12,15 @@ import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
 import no.nav.helse.modell.oppgave.Egenskap.RETUR
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.TILBAKEDATERT
+import no.nav.helse.modell.oppgave.EgenskapDto.Companion.gjenopprett
+import no.nav.helse.modell.oppgave.EgenskapDto.Companion.toDto
 import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.gjenopprett
+import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
+import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
+import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering.Companion.gjenopprett
+import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering.Companion.toDto
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -372,5 +379,47 @@ class Oppgave private constructor(
                 it.egenskaper.addAll(egenskaper)
             }
         }
+
+        fun Oppgave.toDto() =
+            OppgaveDto(
+                id = id,
+                tilstand =
+                    when (tilstand) {
+                        AvventerSaksbehandler -> OppgaveDto.TilstandDto.AvventerSaksbehandler
+                        AvventerSystem -> OppgaveDto.TilstandDto.AvventerSystem
+                        Ferdigstilt -> OppgaveDto.TilstandDto.Ferdigstilt
+                        Invalidert -> OppgaveDto.TilstandDto.Invalidert
+                    },
+                vedtaksperiodeId = vedtaksperiodeId,
+                utbetalingId = utbetalingId,
+                hendelseId = hendelseId,
+                kanAvvises = kanAvvises,
+                totrinnsvurdering = totrinnsvurdering?.toDto(),
+                egenskaper = egenskaper.map { it.toDto() },
+                tildeltTil = tildeltTil?.toDto(),
+                ferdigstiltAvOid = ferdigstiltAvOid,
+                ferdigstiltAvIdent = ferdigstiltAvIdent,
+            )
+
+        fun OppgaveDto.gjenopprett(tilgangskontroll: Tilgangskontroll) =
+            Oppgave(
+                id = id,
+                tilstand =
+                    when (tilstand) {
+                        OppgaveDto.TilstandDto.AvventerSaksbehandler -> AvventerSaksbehandler
+                        OppgaveDto.TilstandDto.AvventerSystem -> AvventerSystem
+                        OppgaveDto.TilstandDto.Ferdigstilt -> Ferdigstilt
+                        OppgaveDto.TilstandDto.Invalidert -> Invalidert
+                    },
+                vedtaksperiodeId = vedtaksperiodeId,
+                utbetalingId = utbetalingId,
+                hendelseId = hendelseId,
+                kanAvvises = kanAvvises,
+                totrinnsvurdering = totrinnsvurdering?.gjenopprett(tilgangskontroll),
+                ferdigstiltAvOid = ferdigstiltAvOid,
+                ferdigstiltAvIdent = ferdigstiltAvIdent,
+                tildelt = tildeltTil?.gjenopprett(tilgangskontroll),
+                egenskaper = egenskaper.map { it.gjenopprett() },
+            )
     }
 }

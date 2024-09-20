@@ -1,17 +1,20 @@
 package no.nav.helse.modell.totrinnsvurdering
 
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
 import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.TilgangskontrollForTestHarIkkeTilgang
+import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering.Companion.gjenopprett
+import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering.Companion.toDto
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTest.TotrinnsvurderingInspektør.Companion.inspektør
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDateTime
+import java.util.UUID
 import kotlin.properties.Delegates
 
 internal class TotrinnsvurderingTest {
@@ -116,6 +119,28 @@ internal class TotrinnsvurderingTest {
         assertThrows<OppgaveKreverVurderingAvToSaksbehandlere> {
             totrinnsvurdering.sendIRetur(1L, behandlendeSaksbehandler)
         }
+    }
+
+    @Test
+    fun `fra og til dto`() {
+        val totrinnsvurderingDto = TotrinnsvurderingDto(
+            vedtaksperiodeId = UUID.randomUUID(),
+            erRetur = false,
+            saksbehandler = nySaksbehandler().toDto(),
+            beslutter = nySaksbehandler().toDto(),
+            utbetalingId = UUID.randomUUID(),
+            opprettet = LocalDateTime.now(),
+            oppdatert = LocalDateTime.now(),
+        )
+
+        val toDto = totrinnsvurderingDto.gjenopprett(TilgangskontrollForTestHarIkkeTilgang).toDto()
+        assertEquals(totrinnsvurderingDto.vedtaksperiodeId, toDto.vedtaksperiodeId)
+        assertEquals(totrinnsvurderingDto.erRetur, toDto.erRetur)
+        assertEquals(totrinnsvurderingDto.saksbehandler, toDto.saksbehandler)
+        assertEquals(totrinnsvurderingDto.beslutter, toDto.beslutter)
+        assertEquals(totrinnsvurderingDto.utbetalingId, toDto.utbetalingId)
+        assertEquals(totrinnsvurderingDto.opprettet.withNano(0), toDto.opprettet.withNano(0))
+        assertEquals(totrinnsvurderingDto.oppdatert?.withNano(0), toDto.oppdatert?.withNano(0))
     }
 
     private fun nySaksbehandler(

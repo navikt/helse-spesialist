@@ -96,4 +96,11 @@ class Saksbehandler(
         result = 31 * result + ident.hashCode()
         return result
     }
+
+    companion object {
+        fun SaksbehandlerDto.gjenopprett(tilgangskontroll: Tilgangskontroll): Saksbehandler =
+            Saksbehandler(epostadresse, oid, navn, ident, tilgangskontroll)
+
+        fun Saksbehandler.toDto(): SaksbehandlerDto = SaksbehandlerDto(epostadresse = epostadresse, oid = oid, navn = navn, ident = ident)
+    }
 }
