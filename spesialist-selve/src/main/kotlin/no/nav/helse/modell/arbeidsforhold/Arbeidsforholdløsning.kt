@@ -1,8 +1,10 @@
 package no.nav.helse.modell.arbeidsforhold
 
+import no.nav.helse.db.ArbeidsforholdRepository
+import no.nav.helse.modell.KomplettArbeidsforholdDto
 import java.time.LocalDate
 
-internal class Arbeidsforholdløsning(
+class Arbeidsforholdløsning(
     private val løsninger: List<Løsning>,
 ) {
     data class Løsning(
@@ -12,30 +14,25 @@ internal class Arbeidsforholdløsning(
         val stillingsprosent: Int,
     )
 
-    internal fun opprett(
-        arbeidsforholdDao: ArbeidsforholdDao,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-    ) = løsninger.forEach {
-        arbeidsforholdDao.insertArbeidsforhold(
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            startdato = it.startdato,
-            sluttdato = it.sluttdato,
-            stillingstittel = it.stillingstittel,
-            stillingsprosent = it.stillingsprosent,
-        )
-    }
-
-    internal fun oppdater(
-        personDao: ArbeidsforholdDao,
+    internal fun upsert(
+        arbeidsforholdRepository: ArbeidsforholdRepository,
         fødselsnummer: String,
         organisasjonsnummer: String,
     ) {
-        personDao.oppdaterArbeidsforhold(
+        arbeidsforholdRepository.upsertArbeidsforhold(
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
-            arbeidsforhold = løsninger,
+            arbeidsforhold =
+                løsninger.map {
+                    KomplettArbeidsforholdDto(
+                        fødselsnummer = fødselsnummer,
+                        organisasjonsnummer = organisasjonsnummer,
+                        startdato = it.startdato,
+                        sluttdato = it.sluttdato,
+                        stillingstittel = it.stillingstittel,
+                        stillingsprosent = it.stillingsprosent,
+                    )
+                },
         )
     }
 }

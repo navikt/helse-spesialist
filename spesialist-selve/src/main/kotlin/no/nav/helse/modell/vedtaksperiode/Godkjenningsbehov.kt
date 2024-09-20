@@ -14,7 +14,6 @@ import no.nav.helse.modell.InntektskildeDto.Companion.gjenopprett
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
-import no.nav.helse.modell.arbeidsforhold.command.KlargjørArbeidsforholdCommand
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.VurderAutomatiskAvvisning
 import no.nav.helse.modell.automatisering.VurderAutomatiskInnvilgelse
@@ -28,6 +27,7 @@ import no.nav.helse.modell.kommando.ForberedBehandlingAvGodkjenningsbehov
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterPersonCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
+import no.nav.helse.modell.kommando.OpprettEllerOppdaterArbeidsforhold
 import no.nav.helse.modell.kommando.OpprettEllerOppdaterInntektskilder
 import no.nav.helse.modell.kommando.OpprettKoblingTilAvviksvurdering
 import no.nav.helse.modell.kommando.OpprettKoblingTilHendelseCommand
@@ -393,10 +393,10 @@ private class ForberedVisningCommand(
                 inntektskilder = inntektskilder,
                 inntektskilderRepository = inntektskilderRepository,
             ),
-            KlargjørArbeidsforholdCommand(
+            OpprettEllerOppdaterArbeidsforhold(
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
-                arbeidsforholdDao = arbeidsforholdDao,
+                arbeidsforholdRepository = arbeidsforholdDao,
             ),
             OppdaterSnapshotCommand(
                 snapshotClient = snapshotClient,

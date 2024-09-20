@@ -1,70 +1,40 @@
 package no.nav.helse.modell.arbeidsforhold
 
 import kotliquery.Session
+import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.db.ArbeidsforholdRepository
+import no.nav.helse.modell.KomplettArbeidsforholdDto
 import org.intellij.lang.annotations.Language
-import java.time.LocalDate
 import javax.sql.DataSource
 
-class ArbeidsforholdDao(private val dataSource: DataSource) {
-    internal fun insertArbeidsforhold(
+class ArbeidsforholdDao(private val dataSource: DataSource) : ArbeidsforholdRepository {
+    override fun upsertArbeidsforhold(
         fødselsnummer: String,
         organisasjonsnummer: String,
-        startdato: LocalDate,
-        sluttdato: LocalDate?,
-        stillingstittel: String,
-        stillingsprosent: Int,
-    ): Long =
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            session.insertArbeidsforhold(fødselsnummer, organisasjonsnummer, startdato, sluttdato, stillingstittel, stillingsprosent)
+        arbeidsforhold: List<KomplettArbeidsforholdDto>,
+    ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+        session.transaction { transaction ->
+            slettArbeidsforhold(transaction, fødselsnummer, organisasjonsnummer)
+            arbeidsforhold.forEach { komplettArbeidsforhold ->
+                transaction.insertArbeidsforhold(komplettArbeidsforhold)
+            }
         }
-
-    private fun Session.insertArbeidsforhold(
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        startdato: LocalDate,
-        sluttdato: LocalDate?,
-        stillingstittel: String,
-        stillingsprosent: Int,
-    ): Long {
-        @Language("PostgreSQL")
-        val query = """
-            INSERT INTO arbeidsforhold(person_ref, arbeidsgiver_ref, startdato, sluttdato, stillingstittel, stillingsprosent)
-            VALUES(
-                (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer),
-                (SELECT id FROM arbeidsgiver WHERE orgnummer = :organisasjonsnummer),
-                :startdato, :sluttdato, :stillingstittel, :stillingsprosent
-            );
-        """
-        return requireNotNull(
-            run(
-                queryOf(
-                    query,
-                    mapOf(
-                        "fodselsnummer" to fødselsnummer.toLong(),
-                        "organisasjonsnummer" to organisasjonsnummer.toLong(),
-                        "startdato" to startdato,
-                        "sluttdato" to sluttdato,
-                        "stillingstittel" to stillingstittel,
-                        "stillingsprosent" to stillingsprosent,
-                    ),
-                ).asUpdateAndReturnGeneratedKey,
-            ),
-        )
     }
 
-    fun findArbeidsforhold(
+    override fun findArbeidsforhold(
         fødselsnummer: String,
         organisasjonsnummer: String,
-    ): List<ArbeidsforholdDto> =
+    ): List<KomplettArbeidsforholdDto> =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query = """
-                SELECT * FROM arbeidsforhold
-                WHERE arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE orgnummer = :organisasjonsnummer)
-                    AND person_ref = (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer)
-            """
+            SELECT startdato, sluttdato, stillingstittel, stillingsprosent
+            FROM arbeidsforhold
+            WHERE person_ref = (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer)
+              AND arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE orgnummer = :organisasjonsnummer);
+        """
             session.run(
                 queryOf(
                     query,
@@ -73,9 +43,9 @@ class ArbeidsforholdDao(private val dataSource: DataSource) {
                         "organisasjonsnummer" to organisasjonsnummer.toLong(),
                     ),
                 ).map { row ->
-                    ArbeidsforholdDto(
-                        personId = row.long("person_ref"),
-                        arbeidsgiverId = row.long("arbeidsgiver_ref"),
+                    KomplettArbeidsforholdDto(
+                        fødselsnummer = fødselsnummer,
+                        organisasjonsnummer = organisasjonsnummer,
                         startdato = row.localDate("startdato"),
                         sluttdato = row.localDateOrNull("sluttdato"),
                         stillingsprosent = row.int("stillingsprosent"),
@@ -85,61 +55,50 @@ class ArbeidsforholdDao(private val dataSource: DataSource) {
             )
         }
 
-    internal fun oppdaterArbeidsforhold(
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        arbeidsforhold: List<Arbeidsforholdløsning.Løsning>,
-    ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-        session.transaction { transaction ->
-            @Language("PostgreSQL")
-            val deleteQuery = """
-                DELETE FROM arbeidsforhold
-                WHERE person_ref = (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer)
-                    AND arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE orgnummer = :organisasjonsnummer);
-            """
-            transaction.run(
-                queryOf(
-                    deleteQuery,
-                    mapOf(
-                        "fodselsnummer" to fødselsnummer.toLong(),
-                        "organisasjonsnummer" to organisasjonsnummer.toLong(),
-                    ),
-                ).asUpdate,
-            )
-            arbeidsforhold.forEach {
-                transaction.insertArbeidsforhold(
-                    fødselsnummer,
-                    organisasjonsnummer,
-                    it.startdato,
-                    it.sluttdato,
-                    it.stillingstittel,
-                    it.stillingsprosent,
-                )
-            }
-        }
-    }
-
-    internal fun findArbeidsforholdSistOppdatert(
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-    ) = sessionOf(dataSource).use { session ->
+    private fun Session.insertArbeidsforhold(arbeidsforholdDto: KomplettArbeidsforholdDto) {
         @Language("PostgreSQL")
         val query = """
-            SELECT oppdatert
-            FROM arbeidsforhold
-            WHERE person_ref = (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer)
-              AND arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE orgnummer = :organisasjonsnummer);
+            INSERT INTO arbeidsforhold(person_ref, arbeidsgiver_ref, startdato, sluttdato, stillingstittel, stillingsprosent)
+            VALUES(
+                (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer),
+                (SELECT id FROM arbeidsgiver WHERE orgnummer = :organisasjonsnummer),
+                :startdato, :sluttdato, :stillingstittel, :stillingsprosent
+            );
         """
-        session.run(
+        run(
             queryOf(
                 query,
+                mapOf(
+                    "fodselsnummer" to arbeidsforholdDto.fødselsnummer.toLong(),
+                    "organisasjonsnummer" to arbeidsforholdDto.organisasjonsnummer.toLong(),
+                    "startdato" to arbeidsforholdDto.startdato,
+                    "sluttdato" to arbeidsforholdDto.sluttdato,
+                    "stillingstittel" to arbeidsforholdDto.stillingstittel,
+                    "stillingsprosent" to arbeidsforholdDto.stillingsprosent,
+                ),
+            ).asUpdate,
+        )
+    }
+
+    private fun slettArbeidsforhold(
+        transaction: TransactionalSession,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+    ) {
+        @Language("PostgreSQL")
+        val deleteQuery = """
+            DELETE FROM arbeidsforhold
+            WHERE person_ref = (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer)
+            AND arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE orgnummer = :organisasjonsnummer);
+        """
+        transaction.run(
+            queryOf(
+                deleteQuery,
                 mapOf(
                     "fodselsnummer" to fødselsnummer.toLong(),
                     "organisasjonsnummer" to organisasjonsnummer.toLong(),
                 ),
-            )
-                .map { row -> row.localDate("oppdatert") }
-                .asSingle,
+            ).asUpdate,
         )
     }
 }

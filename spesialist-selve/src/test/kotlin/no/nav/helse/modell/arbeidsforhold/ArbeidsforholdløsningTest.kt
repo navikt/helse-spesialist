@@ -6,6 +6,7 @@ import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsforholdRiver
+import no.nav.helse.modell.KomplettArbeidsforholdDto
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -81,15 +82,19 @@ internal class ArbeidsforholdløsningTest {
                 )
             )
         )
-        arbeidsforhold.opprett(dao, FØDSELSNUMMER, ORGNR)
+        arbeidsforhold.upsert(dao, FØDSELSNUMMER, ORGNR)
         verify(exactly = 1) {
-            dao.insertArbeidsforhold(
-                fødselsnummer = FØDSELSNUMMER,
-                organisasjonsnummer = ORGNR,
-                startdato = STARTDATO,
-                sluttdato = SLUTTDATO,
-                stillingstittel = STILLINGSTITTEL,
-                stillingsprosent = STILLINGSPROSENT
+            dao.upsertArbeidsforhold(FØDSELSNUMMER, ORGNR,
+                listOf(
+                    KomplettArbeidsforholdDto(
+                        fødselsnummer = FØDSELSNUMMER,
+                        organisasjonsnummer = ORGNR,
+                        startdato = STARTDATO,
+                        sluttdato = SLUTTDATO,
+                        stillingstittel = STILLINGSTITTEL,
+                        stillingsprosent = STILLINGSPROSENT
+                    )
+                )
             )
         }
     }
@@ -105,12 +110,21 @@ internal class ArbeidsforholdløsningTest {
             )
         )
         val arbeidsforholdløsning = Arbeidsforholdløsning(arbeidsforhold)
-        arbeidsforholdløsning.oppdater(dao, FØDSELSNUMMER, ORGNR)
+        arbeidsforholdløsning.upsert(dao, FØDSELSNUMMER, ORGNR)
         verify(exactly = 1) {
-            dao.oppdaterArbeidsforhold(
+            dao.upsertArbeidsforhold(
                 fødselsnummer = FØDSELSNUMMER,
                 organisasjonsnummer = ORGNR,
-                arbeidsforhold = arbeidsforhold
+                arbeidsforhold = arbeidsforhold.map {
+                    KomplettArbeidsforholdDto(
+                        fødselsnummer = FØDSELSNUMMER,
+                        organisasjonsnummer = ORGNR,
+                        startdato = it.startdato,
+                        sluttdato = it.sluttdato,
+                        stillingstittel = it.stillingstittel,
+                        stillingsprosent = it.stillingsprosent
+                    )
+                }
             )
         }
     }
