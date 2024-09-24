@@ -18,7 +18,7 @@ spec:
     limits:
       memory: 2048Mi
     requests:
-      cpu: 400m
+      cpu: 100m
       memory: 512Mi
   replicas:
     disableAutoScaling: true
