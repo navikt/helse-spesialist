@@ -5,6 +5,7 @@ import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.EgenskapDto
 import no.nav.helse.spesialist.api.graphql.schema.AntallArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
@@ -243,36 +244,38 @@ internal object OppgaveMapper {
             Egenskap.MEDLEMSKAP -> EgenskapForDatabase.MEDLEMSKAP
         }
 
-    internal fun Egenskap.tilKafkaversjon(): String {
+    // Eksplisitt mapping i stedet for toString sørger for at vi ikke utilsiktet knekker et api hvis vi gjør endringer
+    // i navn på enumene
+    internal fun EgenskapDto.mapTilString(): String {
         return when (this) {
-            Egenskap.SØKNAD -> "SØKNAD"
-            Egenskap.STIKKPRØVE -> "STIKKPRØVE"
-            Egenskap.RISK_QA -> "RISK_QA"
-            Egenskap.REVURDERING -> "REVURDERING"
-            Egenskap.FORTROLIG_ADRESSE -> "FORTROLIG_ADRESSE"
-            Egenskap.STRENGT_FORTROLIG_ADRESSE -> "STRENGT_FORTROLIG_ADRESSE"
-            Egenskap.UTBETALING_TIL_SYKMELDT -> "UTBETALING_TIL_SYKMELDT"
-            Egenskap.DELVIS_REFUSJON -> "DELVIS_REFUSJON"
-            Egenskap.UTBETALING_TIL_ARBEIDSGIVER -> "UTBETALING_TIL_ARBEIDSGIVER"
-            Egenskap.INGEN_UTBETALING -> "INGEN_UTBETALING"
-            Egenskap.EGEN_ANSATT -> "EGEN_ANSATT"
-            Egenskap.EN_ARBEIDSGIVER -> "EN_ARBEIDSGIVER"
-            Egenskap.FLERE_ARBEIDSGIVERE -> "FLERE_ARBEIDSGIVERE"
-            Egenskap.UTLAND -> "UTLAND"
-            Egenskap.HASTER -> "HASTER"
-            Egenskap.BESLUTTER -> "BESLUTTER"
-            Egenskap.RETUR -> "RETUR"
-            Egenskap.VERGEMÅL -> "VERGEMÅL"
-            Egenskap.SPESIALSAK -> "SPESIALSAK"
-            Egenskap.FORLENGELSE -> "FORLENGELSE"
-            Egenskap.FORSTEGANGSBEHANDLING -> "FORSTEGANGSBEHANDLING"
-            Egenskap.INFOTRYGDFORLENGELSE -> "INFOTRYGDFORLENGELSE"
-            Egenskap.OVERGANG_FRA_IT -> "OVERGANG_FRA_IT"
-            Egenskap.SKJØNNSFASTSETTELSE -> "SKJØNNSFASTSETTELSE"
-            Egenskap.PÅ_VENT -> "PÅ_VENT"
-            Egenskap.TILBAKEDATERT -> "TILBAKEDATERT"
-            Egenskap.GOSYS -> "GOSYS"
-            Egenskap.MEDLEMSKAP -> "MEDLEMSKAP"
+            EgenskapDto.SØKNAD -> "SØKNAD"
+            EgenskapDto.STIKKPRØVE -> "STIKKPRØVE"
+            EgenskapDto.RISK_QA -> "RISK_QA"
+            EgenskapDto.REVURDERING -> "REVURDERING"
+            EgenskapDto.FORTROLIG_ADRESSE -> "FORTROLIG_ADRESSE"
+            EgenskapDto.STRENGT_FORTROLIG_ADRESSE -> "STRENGT_FORTROLIG_ADRESSE"
+            EgenskapDto.UTBETALING_TIL_SYKMELDT -> "UTBETALING_TIL_SYKMELDT"
+            EgenskapDto.DELVIS_REFUSJON -> "DELVIS_REFUSJON"
+            EgenskapDto.UTBETALING_TIL_ARBEIDSGIVER -> "UTBETALING_TIL_ARBEIDSGIVER"
+            EgenskapDto.INGEN_UTBETALING -> "INGEN_UTBETALING"
+            EgenskapDto.EGEN_ANSATT -> "EGEN_ANSATT"
+            EgenskapDto.EN_ARBEIDSGIVER -> "EN_ARBEIDSGIVER"
+            EgenskapDto.FLERE_ARBEIDSGIVERE -> "FLERE_ARBEIDSGIVERE"
+            EgenskapDto.UTLAND -> "UTLAND"
+            EgenskapDto.HASTER -> "HASTER"
+            EgenskapDto.BESLUTTER -> "BESLUTTER"
+            EgenskapDto.RETUR -> "RETUR"
+            EgenskapDto.VERGEMÅL -> "VERGEMÅL"
+            EgenskapDto.SPESIALSAK -> "SPESIALSAK"
+            EgenskapDto.FORLENGELSE -> "FORLENGELSE"
+            EgenskapDto.FORSTEGANGSBEHANDLING -> "FORSTEGANGSBEHANDLING"
+            EgenskapDto.INFOTRYGDFORLENGELSE -> "INFOTRYGDFORLENGELSE"
+            EgenskapDto.OVERGANG_FRA_IT -> "OVERGANG_FRA_IT"
+            EgenskapDto.SKJØNNSFASTSETTELSE -> "SKJØNNSFASTSETTELSE"
+            EgenskapDto.PÅ_VENT -> "PÅ_VENT"
+            EgenskapDto.TILBAKEDATERT -> "TILBAKEDATERT"
+            EgenskapDto.GOSYS -> "GOSYS"
+            EgenskapDto.MEDLEMSKAP -> "MEDLEMSKAP"
         }
     }
 

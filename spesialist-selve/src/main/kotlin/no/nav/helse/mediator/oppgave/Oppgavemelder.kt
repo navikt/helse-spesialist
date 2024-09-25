@@ -1,18 +1,15 @@
 package no.nav.helse.mediator.oppgave
 
-import no.nav.helse.mediator.oppgave.OppgaveMapper.tilKafkaversjon
+import no.nav.helse.mediator.oppgave.OppgaveMapper.mapTilString
 import no.nav.helse.modell.MeldingDao
-import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
+import no.nav.helse.modell.oppgave.OppgaveDto
 import no.nav.helse.modell.oppgave.OppgaveObserver
-import no.nav.helse.modell.oppgave.OppgaveVisitor
-import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
+import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
-import java.time.LocalDateTime
 import java.util.UUID
-import kotlin.properties.Delegates
 
 internal class Oppgavemelder(
     private val meldingDao: MeldingDao,
@@ -53,23 +50,16 @@ internal class Oppgavemelder(
     }
 }
 
-private class OppgaveForKafkaBygger : OppgaveVisitor {
-    private var beslutter: Map<String, Any>? = null
-    private var saksbehandler: Map<String, Any>? = null
-    private lateinit var hendelseId: UUID
-    private var oppgaveId by Delegates.notNull<Long>()
-    private lateinit var tilstand: String
-    private lateinit var egenskaper: List<String>
-
+private class OppgaveForKafkaBygger {
     fun bygg(oppgave: Oppgave): Oppgavemelding {
-        oppgave.accept(this)
+        val dto = oppgave.toDto()
         return Oppgavemelding(
-            hendelseId = hendelseId,
-            oppgaveId = oppgaveId,
-            tilstand = tilstand,
-            beslutter = beslutter,
-            saksbehandler = saksbehandler,
-            egenskaper = egenskaper,
+            hendelseId = dto.hendelseId,
+            oppgaveId = dto.id,
+            tilstand = mapTilstand(dto.tilstand),
+            beslutter = dto.totrinnsvurdering?.beslutter?.toMap(),
+            saksbehandler = dto.tildeltTil?.toMap(),
+            egenskaper = dto.egenskaper.map { it.mapTilString() },
         )
     }
 
@@ -82,50 +72,18 @@ private class OppgaveForKafkaBygger : OppgaveVisitor {
         val egenskaper: List<String>,
     )
 
-    override fun visitOppgave(
-        id: Long,
-        tilstand: Oppgave.Tilstand,
-        vedtaksperiodeId: UUID,
-        utbetalingId: UUID,
-        hendelseId: UUID,
-        ferdigstiltAvOid: UUID?,
-        ferdigstiltAvIdent: String?,
-        egenskaper: List<Egenskap>,
-        tildelt: Saksbehandler?,
-        kanAvvises: Boolean,
-        totrinnsvurdering: Totrinnsvurdering?,
-    ) {
-        this.hendelseId = hendelseId
-        this.oppgaveId = id
-        this.tilstand = mapTilstand(tilstand)
-        this.saksbehandler = tildelt?.toMap()
-        this.egenskaper = egenskaper.map { it.tilKafkaversjon() }
-    }
-
-    override fun visitTotrinnsvurdering(
-        vedtaksperiodeId: UUID,
-        erRetur: Boolean,
-        saksbehandler: Saksbehandler?,
-        beslutter: Saksbehandler?,
-        utbetalingId: UUID?,
-        opprettet: LocalDateTime,
-        oppdatert: LocalDateTime?,
-    ) {
-        this.beslutter = beslutter?.toMap()
-    }
-
-    private fun Saksbehandler.toMap() =
+    private fun SaksbehandlerDto.toMap() =
         mapOf(
-            "epostadresse" to this.epostadresse(),
-            "oid" to this.oid(),
+            "epostadresse" to this.epostadresse,
+            "oid" to this.oid,
         )
 
-    private fun mapTilstand(tilstand: Oppgave.Tilstand): String {
+    private fun mapTilstand(tilstand: OppgaveDto.TilstandDto): String {
         return when (tilstand) {
-            Oppgave.AvventerSaksbehandler -> "AvventerSaksbehandler"
-            Oppgave.AvventerSystem -> "AvventerSystem"
-            Oppgave.Ferdigstilt -> "Ferdigstilt"
-            Oppgave.Invalidert -> "Invalidert"
+            OppgaveDto.TilstandDto.AvventerSaksbehandler -> "AvventerSaksbehandler"
+            OppgaveDto.TilstandDto.AvventerSystem -> "AvventerSystem"
+            OppgaveDto.TilstandDto.Ferdigstilt -> "Ferdigstilt"
+            OppgaveDto.TilstandDto.Invalidert -> "Invalidert"
         }
     }
 }
