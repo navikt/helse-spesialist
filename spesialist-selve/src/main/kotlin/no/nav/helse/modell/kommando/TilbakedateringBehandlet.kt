@@ -6,7 +6,7 @@ import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
-import no.nav.helse.modell.automatisering.AutomatiseringForEksisterendeOppgaveCommand
+import no.nav.helse.modell.automatisering.ForsøkÅAutomatisereEksisterendeOppgave
 import no.nav.helse.modell.automatisering.SettTidligereAutomatiseringInaktivCommand
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.person.Person
@@ -80,7 +80,7 @@ internal class TilbakedateringGodkjentCommand(
                 hendelseId = godkjenningsbehov.id,
                 automatisering = automatisering,
             ),
-            AutomatiseringForEksisterendeOppgaveCommand(
+            ForsøkÅAutomatisereEksisterendeOppgave(
                 automatisering = automatisering,
                 godkjenningMediator = godkjenningMediator,
                 oppgaveService = oppgaveService,

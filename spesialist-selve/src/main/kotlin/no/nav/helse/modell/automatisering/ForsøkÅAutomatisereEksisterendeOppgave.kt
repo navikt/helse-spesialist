@@ -9,7 +9,7 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import org.slf4j.LoggerFactory
 
-internal class AutomatiseringForEksisterendeOppgaveCommand(
+internal class ForsøkÅAutomatisereEksisterendeOppgave(
     private val automatisering: Automatisering,
     private val godkjenningMediator: GodkjenningMediator,
     private val oppgaveService: OppgaveService,
@@ -18,7 +18,7 @@ internal class AutomatiseringForEksisterendeOppgaveCommand(
     private val godkjenningsbehov: GodkjenningsbehovData,
 ) : Command {
     private companion object {
-        private val logg = LoggerFactory.getLogger(AutomatiseringForEksisterendeOppgaveCommand::class.java)
+        private val logg = LoggerFactory.getLogger(ForsøkÅAutomatisereEksisterendeOppgave::class.java)
     }
 
     override fun execute(context: CommandContext): Boolean {

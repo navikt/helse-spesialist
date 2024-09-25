@@ -7,7 +7,7 @@ import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
-import no.nav.helse.modell.automatisering.AutomatiseringForEksisterendeOppgaveCommand
+import no.nav.helse.modell.automatisering.ForsøkÅAutomatisereEksisterendeOppgave
 import no.nav.helse.modell.automatisering.SettTidligereAutomatiseringInaktivCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
@@ -79,7 +79,7 @@ internal class GosysOppgaveEndretCommand(
                 hendelseId = oppgavedataForAutomatisering.hendelseId,
                 automatisering = automatisering,
             ),
-            AutomatiseringForEksisterendeOppgaveCommand(
+            ForsøkÅAutomatisereEksisterendeOppgave(
                 automatisering = automatisering,
                 godkjenningMediator = godkjenningMediator,
                 oppgaveService = oppgaveService,
