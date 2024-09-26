@@ -32,6 +32,7 @@ import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveInspector.Companion.oppgaveinspektør
 import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
@@ -163,7 +164,7 @@ internal class OppgaveServiceTest {
         }
 
         oppgaveinspektør(oppgave) {
-            assertEquals(saksbehandler, tildeltTil)
+            assertEquals(saksbehandler.toDto(), tildeltTil)
         }
         verify(exactly = 1) { tildelingDao.tildel(any(), SAKSBEHANDLEROID) }
         assertAntallOpptegnelser(1)

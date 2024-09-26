@@ -12,24 +12,17 @@ import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Egenskap.DELVIS_REFUSJON
-import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
 import no.nav.helse.modell.oppgave.Egenskap.EN_ARBEIDSGIVER
-import no.nav.helse.modell.oppgave.Egenskap.FLERE_ARBEIDSGIVERE
 import no.nav.helse.modell.oppgave.Egenskap.FORSTEGANGSBEHANDLING
 import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
-import no.nav.helse.modell.oppgave.Egenskap.HASTER
 import no.nav.helse.modell.oppgave.Egenskap.INGEN_UTBETALING
 import no.nav.helse.modell.oppgave.Egenskap.REVURDERING
 import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
-import no.nav.helse.modell.oppgave.Egenskap.SKJØNNSFASTSETTELSE
-import no.nav.helse.modell.oppgave.Egenskap.SPESIALSAK
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
-import no.nav.helse.modell.oppgave.Egenskap.TILBAKEDATERT
-import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
-import no.nav.helse.modell.oppgave.Egenskap.UTLAND
+import no.nav.helse.modell.oppgave.EgenskapDto
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveInspector.Companion.oppgaveinspektør
 import no.nav.helse.modell.person.PersonDao
@@ -202,7 +195,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
-            assertTrue(egenskaper.contains(UTBETALING_TIL_ARBEIDSGIVER))
+            assertTrue(egenskaper.contains(EgenskapDto.UTBETALING_TIL_ARBEIDSGIVER))
         }
     }
 
@@ -215,7 +208,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
-            assertTrue(egenskaper.contains(INGEN_UTBETALING))
+            assertTrue(egenskaper.contains(EgenskapDto.INGEN_UTBETALING))
         }
     }
 
@@ -229,7 +222,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
-            assertFalse(egenskaper.contains(HASTER))
+            assertFalse(egenskaper.contains(EgenskapDto.HASTER))
         }
     }
 
@@ -242,7 +235,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
-            assertTrue(egenskaper.contains(SKJØNNSFASTSETTELSE))
+            assertTrue(egenskaper.contains(EgenskapDto.SKJØNNSFASTSETTELSE))
         }
     }
 
@@ -255,7 +248,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
-            assertTrue(egenskaper.contains(TILBAKEDATERT))
+            assertTrue(egenskaper.contains(EgenskapDto.TILBAKEDATERT))
         }
     }
 
@@ -269,7 +262,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
-            assertTrue(egenskaper.contains(HASTER))
+            assertTrue(egenskaper.contains(EgenskapDto.HASTER))
         }
     }
 
@@ -282,7 +275,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
-            assertTrue(egenskaper.contains(EGEN_ANSATT))
+            assertTrue(egenskaper.contains(EgenskapDto.EGEN_ANSATT))
         }
     }
 
@@ -295,7 +288,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
-            assertTrue(egenskaper.contains(SPESIALSAK))
+            assertTrue(egenskaper.contains(EgenskapDto.SPESIALSAK))
         }
     }
 
@@ -308,7 +301,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
-            assertTrue(egenskaper.contains(UTLAND))
+            assertTrue(egenskaper.contains(EgenskapDto.UTLAND))
         }
     }
 
@@ -320,7 +313,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
-            assertTrue(egenskaper.contains(FLERE_ARBEIDSGIVERE))
+            assertTrue(egenskaper.contains(EgenskapDto.FLERE_ARBEIDSGIVERE))
         }
     }
 
@@ -332,7 +325,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
-            assertTrue(egenskaper.contains(Egenskap.FORLENGELSE))
+            assertTrue(egenskaper.contains(EgenskapDto.FORLENGELSE))
         }
     }
 
@@ -344,7 +337,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
-            assertTrue(egenskaper.contains(Egenskap.INFOTRYGDFORLENGELSE))
+            assertTrue(egenskaper.contains(EgenskapDto.INFOTRYGDFORLENGELSE))
         }
     }
 
@@ -356,7 +349,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
-            assertTrue(egenskaper.contains(Egenskap.OVERGANG_FRA_IT))
+            assertTrue(egenskaper.contains(EgenskapDto.OVERGANG_FRA_IT))
         }
     }
 
@@ -369,7 +362,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
-            assertTrue(egenskaper.contains(Egenskap.PÅ_VENT))
+            assertTrue(egenskaper.contains(EgenskapDto.PÅ_VENT))
         }
     }
 

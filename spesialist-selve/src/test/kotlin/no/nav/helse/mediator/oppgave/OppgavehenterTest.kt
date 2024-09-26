@@ -1,23 +1,22 @@
 package no.nav.helse.mediator.oppgave
 
 import TilgangskontrollForTestHarIkkeTilgang
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.db.TotrinnsvurderingRepository
-import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
-import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.OppgaveVisitor
+import no.nav.helse.modell.oppgave.EgenskapDto
+import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
+import no.nav.helse.modell.oppgave.OppgaveDto
 import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
+import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import kotlin.properties.Delegates
+import java.time.LocalDateTime
+import java.util.UUID
 
 class OppgavehenterTest {
 
@@ -44,20 +43,16 @@ class OppgavehenterTest {
     @Test
     fun `konverter fra OppgaveFraDatabase til Oppgave`() {
         val oppgavehenter = Oppgavehenter(oppgaveRepository(), totrinnsvurderingRepository(), saksbehandlerRepository, TilgangskontrollForTestHarIkkeTilgang)
-        val oppgave = oppgavehenter.oppgave(OPPGAVE_ID)
-        oppgave.accept(inspektør)
-        inspektør.assertOppgave(
-            id = OPPGAVE_ID,
-            tilstand = Oppgave.AvventerSaksbehandler,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            utbetalingId = UTBETALING_ID,
-            ferdigstiltAvOid = SAKSBEHANDLER_OID,
-            ferdigstiltAvIdent = SAKSBEHANDLER_IDENT,
-            egenskaper = listOf(SØKNAD),
-            tildelt = saksbehandler(),
-            påVent = PÅ_VENT,
-            null
-        )
+        val oppgave = oppgavehenter.oppgave(OPPGAVE_ID).toDto()
+        assertEquals(OPPGAVE_ID, oppgave.id)
+        assertEquals(OppgaveDto.TilstandDto.AvventerSaksbehandler, oppgave.tilstand)
+        assertEquals(VEDTAKSPERIODE_ID, oppgave.vedtaksperiodeId)
+        assertEquals(UTBETALING_ID, oppgave.utbetalingId)
+        assertEquals(SAKSBEHANDLER_OID, oppgave.ferdigstiltAvOid)
+        assertEquals(SAKSBEHANDLER_IDENT, oppgave.ferdigstiltAvIdent)
+        assertEquals(null, oppgave.totrinnsvurdering)
+        assertTrue(oppgave.egenskaper.contains(EgenskapDto.SØKNAD))
+        assertEquals(PÅ_VENT, oppgave.egenskaper.contains(EgenskapDto.PÅ_VENT))
     }
 
     @Test
@@ -73,88 +68,23 @@ class OppgavehenterTest {
         )
 
         val oppgavehenter = Oppgavehenter(oppgaveRepository(), totrinnsvurderingRepository(totrinnsvurdering), saksbehandlerRepository, TilgangskontrollForTestHarIkkeTilgang)
-        val oppgave = oppgavehenter.oppgave(OPPGAVE_ID)
-        oppgave.accept(inspektør)
-        inspektør.assertOppgave(
-            id = OPPGAVE_ID,
-            tilstand = Oppgave.AvventerSaksbehandler,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            utbetalingId = UTBETALING_ID,
-            ferdigstiltAvOid = SAKSBEHANDLER_OID,
-            ferdigstiltAvIdent = SAKSBEHANDLER_IDENT,
-            egenskaper = listOf(SØKNAD),
-            tildelt = saksbehandler(),
-            påVent = PÅ_VENT,
-            totrinnsvurdering = Totrinnsvurdering(
-                vedtaksperiodeId = VEDTAKSPERIODE_ID,
-                erRetur = ER_RETUR,
-                saksbehandler = saksbehandler(),
-                beslutter = saksbehandler(oid = BESLUTTER_OID),
-                utbetalingId = UTBETALING_ID,
-                opprettet = TOTRINNSVURDERING_OPPRETTET,
-                oppdatert = TOTRINNSVURDERING_OPPDATERT
-            )
-        )
-    }
+        val oppgave = oppgavehenter.oppgave(OPPGAVE_ID).toDto()
+        assertEquals(OPPGAVE_ID, oppgave.id)
+        assertEquals(OppgaveDto.TilstandDto.AvventerSaksbehandler, oppgave.tilstand)
+        assertEquals(VEDTAKSPERIODE_ID, oppgave.vedtaksperiodeId)
+        assertEquals(UTBETALING_ID, oppgave.utbetalingId)
+        assertEquals(SAKSBEHANDLER_OID, oppgave.ferdigstiltAvOid)
+        assertEquals(SAKSBEHANDLER_IDENT, oppgave.ferdigstiltAvIdent)
+        assertTrue(oppgave.egenskaper.contains(EgenskapDto.SØKNAD))
+        assertEquals(PÅ_VENT, oppgave.egenskaper.contains(EgenskapDto.PÅ_VENT))
 
-    private val inspektør = object : OppgaveVisitor {
-        private var id by Delegates.notNull<Long>()
-        private lateinit var tilstand: Oppgave.Tilstand
-        private lateinit var vedtaksperiodeId: UUID
-        private lateinit var utbetalingId: UUID
-        private var ferdigstiltAvOid: UUID? = null
-        private var ferdigstiltAvIdent: String? = null
-        private lateinit var egenskaper: List<Egenskap>
-        private var tildelt: Saksbehandler? = null
-        private var totrinnsvurdering: Totrinnsvurdering? = null
-
-        override fun visitOppgave(
-            id: Long,
-            tilstand: Oppgave.Tilstand,
-            vedtaksperiodeId: UUID,
-            utbetalingId: UUID,
-            hendelseId: UUID,
-            ferdigstiltAvOid: UUID?,
-            ferdigstiltAvIdent: String?,
-            egenskaper: List<Egenskap>,
-            tildelt: Saksbehandler?,
-            kanAvvises: Boolean,
-            totrinnsvurdering: Totrinnsvurdering?
-        ) {
-            this.id = id
-            this.tilstand = tilstand
-            this.vedtaksperiodeId = vedtaksperiodeId
-            this.utbetalingId = utbetalingId
-            this.ferdigstiltAvOid = ferdigstiltAvOid
-            this.ferdigstiltAvIdent = ferdigstiltAvIdent
-            this.egenskaper = egenskaper
-            this.tildelt = tildelt
-            this.totrinnsvurdering = totrinnsvurdering
-        }
-
-        fun assertOppgave(
-            id: Long,
-            tilstand: Oppgave.Tilstand,
-            vedtaksperiodeId: UUID,
-            utbetalingId: UUID,
-            ferdigstiltAvOid: UUID?,
-            ferdigstiltAvIdent: String?,
-            egenskaper: List<Egenskap>,
-            tildelt: Saksbehandler?,
-            påVent: Boolean,
-            totrinnsvurdering: Totrinnsvurdering?
-        ) {
-            assertEquals(id, this.id)
-            assertEquals(tilstand, this.tilstand)
-            assertEquals(vedtaksperiodeId, this.vedtaksperiodeId)
-            assertEquals(utbetalingId, this.utbetalingId)
-            assertEquals(ferdigstiltAvOid, this.ferdigstiltAvOid)
-            assertEquals(ferdigstiltAvIdent, this.ferdigstiltAvIdent)
-            assertEquals(egenskaper, this.egenskaper)
-            assertEquals(tildelt, this.tildelt)
-            assertEquals(påVent, egenskaper.contains(Egenskap.PÅ_VENT))
-            assertEquals(totrinnsvurdering, this.totrinnsvurdering)
-        }
+        assertEquals(VEDTAKSPERIODE_ID, oppgave.totrinnsvurdering?.vedtaksperiodeId)
+        assertEquals(ER_RETUR, oppgave.totrinnsvurdering?.erRetur)
+        assertEquals(saksbehandler().toDto(), oppgave.totrinnsvurdering?.saksbehandler)
+        assertEquals(saksbehandler(oid = BESLUTTER_OID).toDto(), oppgave.totrinnsvurdering?.beslutter)
+        assertEquals(UTBETALING_ID, oppgave.totrinnsvurdering?.utbetalingId)
+        assertEquals(TOTRINNSVURDERING_OPPRETTET, oppgave.totrinnsvurdering?.opprettet)
+        assertEquals(TOTRINNSVURDERING_OPPDATERT, oppgave.totrinnsvurdering?.oppdatert)
     }
 
     private fun oppgaveRepository(oppgaveegenskaper: List<EgenskapForDatabase> = listOf(TYPE)) = object : OppgaveRepository {

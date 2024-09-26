@@ -41,7 +41,7 @@ internal class OppdaterOppgavestatusCommandTest {
 
         assertTrue(command.execute(context))
         oppgaveinspektør(oppgave) {
-            assertEquals(Oppgave.Ferdigstilt, this.tilstand)
+            assertEquals(OppgaveDto.TilstandDto.Ferdigstilt, this.tilstand)
         }
     }
 
@@ -53,7 +53,7 @@ internal class OppdaterOppgavestatusCommandTest {
 
         assertTrue(command.execute(context))
         oppgaveinspektør(oppgave) {
-            assertEquals(Oppgave.Ferdigstilt, this.tilstand)
+            assertEquals(OppgaveDto.TilstandDto.Ferdigstilt, this.tilstand)
         }
 
     }
@@ -66,7 +66,7 @@ internal class OppdaterOppgavestatusCommandTest {
 
         assertTrue(command.execute(context))
         oppgaveinspektør(oppgave) {
-            assertEquals(Oppgave.Ferdigstilt, this.tilstand)
+            assertEquals(OppgaveDto.TilstandDto.Ferdigstilt, this.tilstand)
         }
     }
 
@@ -77,7 +77,7 @@ internal class OppdaterOppgavestatusCommandTest {
 
         assertTrue(command.execute(context))
         oppgaveinspektør(oppgave) {
-            assertEquals(Oppgave.Invalidert, this.tilstand)
+            assertEquals(OppgaveDto.TilstandDto.Invalidert, this.tilstand)
         }
     }
 
@@ -89,7 +89,7 @@ internal class OppdaterOppgavestatusCommandTest {
 
         assertTrue(command.execute(context))
         oppgaveinspektør(oppgave) {
-            assertEquals(Oppgave.AvventerSystem, this.tilstand)
+            assertEquals(OppgaveDto.TilstandDto.AvventerSystem, this.tilstand)
         }
     }
 

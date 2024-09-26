@@ -59,23 +59,6 @@ class Oppgave private constructor(
         this.egenskaper.addAll(egenskaper)
     }
 
-    fun accept(visitor: OppgaveVisitor) {
-        visitor.visitOppgave(
-            id,
-            tilstand,
-            vedtaksperiodeId,
-            utbetalingId,
-            hendelseId,
-            ferdigstiltAvOid,
-            ferdigstiltAvIdent,
-            egenskaper.toList(),
-            tildeltTil,
-            kanAvvises,
-            totrinnsvurdering,
-        )
-        totrinnsvurdering?.accept(visitor)
-    }
-
     fun register(observer: OppgaveObserver) {
         observers.add(observer)
     }

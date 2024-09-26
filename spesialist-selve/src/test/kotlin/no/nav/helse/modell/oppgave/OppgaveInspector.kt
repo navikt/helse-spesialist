@@ -1,36 +1,17 @@
 package no.nav.helse.modell.oppgave
 
-import java.util.UUID
-import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
+import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
+import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 
-internal class OppgaveInspector private constructor() : OppgaveVisitor {
-    internal lateinit var tilstand: Oppgave.Tilstand
-    internal var tildeltTil: Saksbehandler? = null
-    internal val egenskaper = mutableListOf<Egenskap>()
-    override fun visitOppgave(
-        id: Long,
-        tilstand: Oppgave.Tilstand,
-        vedtaksperiodeId: UUID,
-        utbetalingId: UUID,
-        hendelseId: UUID,
-        ferdigstiltAvOid: UUID?,
-        ferdigstiltAvIdent: String?,
-        egenskaper: List<Egenskap>,
-        tildelt: Saksbehandler?,
-        kanAvvises: Boolean,
-        totrinnsvurdering: Totrinnsvurdering?
-    ) {
-        this.tilstand = tilstand
-        this.tildeltTil = tildelt
-        this.egenskaper.addAll(egenskaper)
-    }
+internal class OppgaveInspector private constructor(oppgaveDto: OppgaveDto) {
+    internal val tilstand = oppgaveDto.tilstand
+    internal val tildeltTil: SaksbehandlerDto? = oppgaveDto.tildeltTil
+    internal val egenskaper = oppgaveDto.egenskaper
 
     internal companion object {
         internal fun oppgaveinspektør(oppgave: Oppgave, block: OppgaveInspector.() -> Unit) {
-            val inspektør = OppgaveInspector()
-            oppgave.accept(inspektør)
-            block(inspektør)
+            val inspektør = OppgaveInspector(oppgave.toDto())
+            inspektør.block()
         }
     }
 }
