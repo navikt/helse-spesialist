@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class OpprettMinimalPersonCommandTest {
-
     private lateinit var context: CommandContext
     private val lagredePersoner = mutableListOf<MinimalPersonDto>()
 
@@ -40,17 +39,19 @@ internal class OpprettMinimalPersonCommandTest {
         assertEquals(MinimalPersonDto(fødselsnummer, aktørId), lagredePersoner.single())
     }
 
-    private fun lagCommand(fødselsnummer: String = lagFødselsnummer(), aktørId: String = lagAktørId(), minimalPersonDto: MinimalPersonDto?) : OpprettMinimalPersonCommand {
-        val repository = object : PersonRepository{
-            override fun finnMinimalPerson(fødselsnummer: String): MinimalPersonDto? {
-                return minimalPersonDto
-            }
+    private fun lagCommand(
+        fødselsnummer: String = lagFødselsnummer(),
+        aktørId: String = lagAktørId(),
+        minimalPersonDto: MinimalPersonDto?,
+    ): OpprettMinimalPersonCommand {
+        val repository =
+            object : PersonRepository {
+                override fun finnMinimalPerson(fødselsnummer: String): MinimalPersonDto? = minimalPersonDto
 
-            override fun lagreMinimalPerson(minimalPerson: MinimalPersonDto) {
-                lagredePersoner.add(minimalPerson)
+                override fun lagreMinimalPerson(minimalPerson: MinimalPersonDto) {
+                    lagredePersoner.add(minimalPerson)
+                }
             }
-
-        }
         return OpprettMinimalPersonCommand(fødselsnummer, aktørId, repository)
     }
 }

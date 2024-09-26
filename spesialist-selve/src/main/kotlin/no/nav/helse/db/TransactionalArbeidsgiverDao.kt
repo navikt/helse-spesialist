@@ -1,42 +1,42 @@
-package no.nav.helse.modell.arbeidsgiver
+package no.nav.helse.db
 
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.objectMapper
 import org.intellij.lang.annotations.Language
-import javax.sql.DataSource
 
-class ArbeidsgiverDao(private val dataSource: DataSource) {
+class TransactionalArbeidsgiverDao(
+    private val transactionalSession: TransactionalSession,
+) {
     fun findArbeidsgiverByOrgnummer(orgnummer: String) =
-        sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf("SELECT id FROM arbeidsgiver WHERE orgnummer=?;", orgnummer.toLong())
-                    .map { it.long("id") }
-                    .asSingle,
-            )
-        }
+        transactionalSession.run(
+            queryOf("SELECT id FROM arbeidsgiver WHERE orgnummer=?;", orgnummer.toLong())
+                .map { it.long("id") }
+                .asSingle,
+        )
 
-    fun TransactionalSession.insertMinimalArbeidsgiver(orgnummer: String) {
+    fun insertMinimalArbeidsgiver(orgnummer: String) {
         @Language("PostgreSQL")
         val query = "INSERT INTO arbeidsgiver(orgnummer) VALUES(:orgnummer)"
 
-        run(queryOf(query, mapOf("orgnummer" to orgnummer.toLong())).asUpdate)
+        transactionalSession.run(queryOf(query, mapOf("orgnummer" to orgnummer.toLong())).asUpdate)
     }
 
-    fun TransactionalSession.upsertNavn(
+    fun upsertNavn(
         orgnummer: String,
         navn: String,
-    ) = this.finnArbeidsgiverNavnRef(orgnummer)
-        ?.also { this.oppdaterArbeidsgivernavn(it, navn) }
-        ?: this.opprettArbeidsgivernavn(orgnummer, navn)
+    ) = transactionalSession
+        .finnArbeidsgiverNavnRef(orgnummer)
+        ?.also { transactionalSession.oppdaterArbeidsgivernavn(it, navn) }
+        ?: transactionalSession.opprettArbeidsgivernavn(orgnummer, navn)
 
-    fun TransactionalSession.upsertBransjer(
+    fun upsertBransjer(
         orgnummer: String,
         bransjer: List<String>,
-    ) = this.finnArbeidsgiverbransjerRef(orgnummer)
-        ?.also { this.oppdaterArbeidsgiverbransjer(it, bransjer) }
-        ?: this.opprettArbeidsgiverbransjer(orgnummer, bransjer)
+    ) = transactionalSession
+        .finnArbeidsgiverbransjerRef(orgnummer)
+        ?.also { transactionalSession.oppdaterArbeidsgiverbransjer(it, bransjer) }
+        ?: transactionalSession.opprettArbeidsgiverbransjer(orgnummer, bransjer)
 
     private fun TransactionalSession.finnArbeidsgiverNavnRef(orgnummer: String): Long? {
         @Language("PostgreSQL")
@@ -72,9 +72,15 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
         orgnummer: String,
     ) {
         @Language("PostgreSQL")
-        val query = "INSERT INTO arbeidsgiver (orgnummer, navn_ref) VALUES(:orgnummer, :arbeidsgivernavnRef) ON CONFLICT(orgnummer) DO UPDATE SET navn_ref=:arbeidsgivernavnRef"
+        val query =
+            "INSERT INTO arbeidsgiver (orgnummer, navn_ref) VALUES(:orgnummer, :arbeidsgivernavnRef) ON CONFLICT(orgnummer) DO UPDATE SET navn_ref=:arbeidsgivernavnRef"
 
-        run(queryOf(query, mapOf("arbeidsgivernavnRef" to arbeidsgivernavnRef, "orgnummer" to orgnummer.toLong())).asUpdate)
+        run(
+            queryOf(
+                query,
+                mapOf("arbeidsgivernavnRef" to arbeidsgivernavnRef, "orgnummer" to orgnummer.toLong()),
+            ).asUpdate,
+        )
     }
 
     private fun TransactionalSession.finnArbeidsgiverbransjerRef(orgnummer: String): Long? {
@@ -91,7 +97,12 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val query = "UPDATE arbeidsgiver_bransjer SET bransjer=:bransjer, oppdatert=now() WHERE id=:bransjerRef"
 
-        run(queryOf(query, mapOf("bransjer" to objectMapper.writeValueAsString(bransjer), "bransjerRef" to bransjerRef)).asUpdate)
+        run(
+            queryOf(
+                query,
+                mapOf("bransjer" to objectMapper.writeValueAsString(bransjer), "bransjerRef" to bransjerRef),
+            ).asUpdate,
+        )
     }
 
     private fun TransactionalSession.opprettArbeidsgiverbransjer(
@@ -101,7 +112,8 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val query = "INSERT INTO arbeidsgiver_bransjer (bransjer, oppdatert) VALUES (?, now())"
 
-        val bransjerId = requireNotNull(run(queryOf(query, objectMapper.writeValueAsString(bransjer)).asUpdateAndReturnGeneratedKey))
+        val bransjerId =
+            requireNotNull(run(queryOf(query, objectMapper.writeValueAsString(bransjer)).asUpdateAndReturnGeneratedKey))
         upsertBransjerRef(bransjerId, orgnummer)
     }
 
@@ -111,7 +123,8 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
         orgnummer: String,
     ) {
         @Language("PostgreSQL")
-        val query = "INSERT INTO arbeidsgiver (orgnummer, bransjer_ref) VALUES(:orgnummer, :bransjerRef) ON CONFLICT(orgnummer) DO UPDATE SET bransjer_ref=:bransjerRef"
+        val query =
+            "INSERT INTO arbeidsgiver (orgnummer, bransjer_ref) VALUES(:orgnummer, :bransjerRef) ON CONFLICT(orgnummer) DO UPDATE SET bransjer_ref=:bransjerRef"
 
         run(queryOf(query, mapOf("bransjerRef" to bransjerRef, "orgnummer" to orgnummer.toLong())).asUpdate)
     }

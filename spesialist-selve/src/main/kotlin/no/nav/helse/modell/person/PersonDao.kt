@@ -6,8 +6,6 @@ import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
-import no.nav.helse.modell.kommando.MinimalPersonDto
-import no.nav.helse.modell.kommando.PersonRepository
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.typer.Kjønn
@@ -16,7 +14,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.sql.DataSource
 
-internal class PersonDao(private val dataSource: DataSource) : PersonRepository {
+internal class PersonDao(
+    private val dataSource: DataSource,
+) {
     internal fun findPersonByFødselsnummer(fødselsnummer: String): Long? =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
@@ -27,27 +27,6 @@ internal class PersonDao(private val dataSource: DataSource) : PersonRepository 
                     .asSingle,
             )
         }
-
-    internal fun TransactionalSession.finnPerson(fødselsnummer: String): PersonDto? {
-        @Language("PostgreSQL")
-        val query = "SELECT aktor_id, fodselsnummer FROM person WHERE fodselsnummer = :fodselsnummer"
-        return run(
-            queryOf(
-                query,
-                mapOf("fodselsnummer" to fødselsnummer.toLong()),
-            )
-                .map { row ->
-                    PersonDto(
-                        aktørId = row.long("aktor_id").toString(),
-                        fødselsnummer = row.long("fodselsnummer").toFødselsnummer(),
-                        vedtaksperioder = emptyList(),
-                        avviksvurderinger = emptyList(),
-                        skjønnsfastsatteSykepengegrunnlag = emptyList(),
-                    )
-                }
-                .asSingle,
-        )
-    }
 
     internal fun finnAktørId(fødselsnummer: String): String? =
         sessionOf(dataSource).use { session ->
@@ -118,7 +97,8 @@ internal class PersonDao(private val dataSource: DataSource) : PersonRepository 
         adressebeskyttelse: Adressebeskyttelse,
     ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         session.transaction { transaction ->
-            transaction.finnPersonInfoRef(fødselsnummer)
+            transaction
+                .finnPersonInfoRef(fødselsnummer)
                 ?.also {
                     transaction.updatePersonInfo(
                         it,
@@ -268,9 +248,10 @@ internal class PersonDao(private val dataSource: DataSource) : PersonRepository 
             @Language("PostgreSQL")
             val query = "SELECT enhet_ref_oppdatert FROM person WHERE fodselsnummer=?;"
             session.run(
-                queryOf(query, fødselsnummer.toLong()).map { row ->
-                    row.localDateOrNull("enhet_ref_oppdatert")
-                }.asSingle,
+                queryOf(query, fødselsnummer.toLong())
+                    .map { row ->
+                        row.localDateOrNull("enhet_ref_oppdatert")
+                    }.asSingle,
             )
         }
 
@@ -355,7 +336,8 @@ internal class PersonDao(private val dataSource: DataSource) : PersonRepository 
         utbetalinger: JsonNode,
     ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         session.transaction { transaction ->
-            transaction.finnInfotrygdutbetalingerRef(fødselsnummer)
+            transaction
+                .finnInfotrygdutbetalingerRef(fødselsnummer)
                 ?.also {
                     transaction.updateInfotrygdutbetalinger(it, fødselsnummer, utbetalinger)
                 }
@@ -476,9 +458,10 @@ internal class PersonDao(private val dataSource: DataSource) : PersonRepository 
             val statement = "SELECT enhet_ref FROM person where fodselsnummer = ?;"
             requireNotNull(
                 session.run(
-                    queryOf(statement, fødselsnummer.toLong()).map {
-                        it.int("enhet_ref").toEnhetnummer()
-                    }.asSingle,
+                    queryOf(statement, fødselsnummer.toLong())
+                        .map {
+                            it.int("enhet_ref").toEnhetnummer()
+                        }.asSingle,
                 ),
             )
         }
@@ -495,35 +478,6 @@ internal class PersonDao(private val dataSource: DataSource) : PersonRepository 
                 ).map { row -> row.long("fodselsnummer") }.asList,
             )
         }
-
-    override fun finnMinimalPerson(fødselsnummer: String): MinimalPersonDto? {
-        return sessionOf(dataSource).use { session ->
-            session.transaction { tx ->
-                tx.finnPerson(fødselsnummer)?.let {
-                    MinimalPersonDto(
-                        fødselsnummer = it.fødselsnummer,
-                        aktørId = it.aktørId,
-                    )
-                }
-            }
-        }
-    }
-
-    override fun lagreMinimalPerson(minimalPerson: MinimalPersonDto) {
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = """INSERT INTO person(fodselsnummer, aktor_id) VALUES(:fodselsnummer, :aktorId); """
-            session.run(
-                queryOf(
-                    query,
-                    mapOf(
-                        "fodselsnummer" to minimalPerson.fødselsnummer.toLong(),
-                        "aktorId" to minimalPerson.aktørId.toLong(),
-                    ),
-                ).asUpdate,
-            )
-        }
-    }
 }
 
 internal fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()

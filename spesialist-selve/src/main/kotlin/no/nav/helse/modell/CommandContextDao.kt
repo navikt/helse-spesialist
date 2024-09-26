@@ -4,9 +4,10 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.db.CommandContextRepository
+import no.nav.helse.db.TransactionalCommandContextDao
 import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.AVBRUTT
 import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.FEIL
-import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.FERDIG
 import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.NY
 import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.SUSPENDERT
 import no.nav.helse.modell.kommando.CommandContext
@@ -14,46 +15,57 @@ import org.intellij.lang.annotations.Language
 import java.util.UUID
 import javax.sql.DataSource
 
-internal class CommandContextDao(private val dataSource: DataSource) {
+internal class CommandContextDao(
+    private val dataSource: DataSource,
+) : CommandContextRepository {
     private companion object {
         private val mapper = jacksonObjectMapper()
     }
 
-    internal fun opprett(
+    override fun opprett(
         hendelseId: UUID,
         contextId: UUID,
     ) {
-        lagre(hendelseId, contextId, NY, null)
+        sessionOf(dataSource).use { session ->
+            session.transaction { transaction ->
+                TransactionalCommandContextDao(transaction).opprett(hendelseId, contextId)
+            }
+        }
     }
 
-    internal fun ferdig(
+    override fun ferdig(
         hendelseId: UUID,
         contextId: UUID,
     ) {
-        lagre(hendelseId, contextId, FERDIG, null)
+        sessionOf(dataSource).use { session ->
+            session.transaction { transaction ->
+                TransactionalCommandContextDao(transaction).ferdig(hendelseId, contextId)
+            }
+        }
     }
 
-    internal fun avbrutt(
+    override fun feil(
         hendelseId: UUID,
         contextId: UUID,
     ) {
-        lagre(hendelseId, contextId, AVBRUTT, null)
+        sessionOf(dataSource).use { session ->
+            session.transaction { transaction ->
+                TransactionalCommandContextDao(transaction).feil(hendelseId, contextId)
+            }
+        }
     }
 
-    internal fun feil(
-        hendelseId: UUID,
-        contextId: UUID,
-    ) {
-        lagre(hendelseId, contextId, FEIL, null)
-    }
-
-    internal fun suspendert(
+    override fun suspendert(
         hendelseId: UUID,
         contextId: UUID,
         hash: UUID,
         sti: List<Int>,
     ) {
-        lagre(hendelseId, contextId, SUSPENDERT, hash, sti)
+        sessionOf(dataSource).use { session ->
+            session.transaction { transaction ->
+                TransactionalCommandContextDao(transaction).suspendert(hendelseId, contextId, hash, sti)
+            }
+        }
     }
 
     fun avbryt(
@@ -91,46 +103,11 @@ internal class CommandContextDao(private val dataSource: DataSource) {
         }
     }
 
-    private fun lagre(
-        hendelseId: UUID,
-        contextId: UUID,
-        tilstand: CommandContextTilstand,
-        hash: UUID?,
-        sti: List<Int> = emptyList(),
-    ) {
-        sessionOf(dataSource).use {
-            @Language("PostgreSQL")
-            val query =
-                """
-                INSERT INTO command_context(context_id, hendelse_id, tilstand, data, hash)
-                VALUES (:contextId, :hendelseId, :tilstand, :data::json, :hash)
-                """.trimIndent()
-            it.run(
-                queryOf(
-                    query,
-                    mapOf(
-                        "contextId" to contextId,
-                        "hendelseId" to hendelseId,
-                        "tilstand" to tilstand.name,
-                        "data" to mapper.writeValueAsString(CommandContextDto(sti)),
-                        "hash" to hash,
-                    ),
-                ).asExecute,
-            )
-        }
-    }
-
-    internal fun tidsbrukForContext(contextId: UUID) =
+    override fun tidsbrukForContext(contextId: UUID): Int =
         sessionOf(dataSource).use { session ->
-            @Language("postgresql")
-            val query =
-                """
-                select extract(milliseconds from (max(opprettet) - min(opprettet))) as tid_brukt_ms
-                from command_context
-                where context_id = :contextId
-                """.trimIndent()
-            // Kan bruke !! fordi mappingen thrower hvis spørringen ikke fant noe
-            session.run(queryOf(query, mapOf("contextId" to contextId)).map { it.int("tid_brukt_ms") }.asSingle)!!
+            session.transaction { transaction ->
+                TransactionalCommandContextDao(transaction).tidsbrukForContext(contextId)
+            }
         }
 
     fun finnSuspendert(id: UUID) =
@@ -146,7 +123,8 @@ internal class CommandContextDao(private val dataSource: DataSource) {
     private fun finnSiste(id: UUID) =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
-            val query = """SELECT tilstand, data, hash FROM command_context WHERE context_id = ? ORDER BY id DESC LIMIT 1"""
+            val query =
+                """SELECT tilstand, data, hash FROM command_context WHERE context_id = ? ORDER BY id DESC LIMIT 1"""
             session.run(
                 queryOf(
                     query,
@@ -161,7 +139,9 @@ internal class CommandContextDao(private val dataSource: DataSource) {
             )
         }
 
-    private class CommandContextDto(val sti: List<Int>)
+    private class CommandContextDto(
+        val sti: List<Int>,
+    )
 
     private enum class CommandContextTilstand { NY, FERDIG, SUSPENDERT, FEIL, AVBRUTT }
 }

@@ -6,42 +6,31 @@ import no.nav.helse.modell.InntektskildeDto
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.NyInntektskildeDto
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import javax.naming.OperationNotSupportedException
 import javax.sql.DataSource
 
-internal class InntektskilderDao(private val dataSource: DataSource) : InntektskilderRepository, HelseDao(dataSource) {
+internal class InntektskilderDao(
+    private val dataSource: DataSource,
+) : HelseDao(dataSource),
+    InntektskilderRepository {
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
-    private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
 
     override fun lagreInntektskilder(inntektskilder: List<InntektskildeDto>) {
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             session.transaction { tx ->
-                inntektskilder.forEach { inntekt ->
-                    with(arbeidsgiverDao) {
-                        when (inntekt) {
-                            is KomplettInntektskildeDto -> {
-                                tx.upsertNavn(inntekt.organisasjonsnummer, inntekt.navn)
-                                tx.upsertBransjer(inntekt.organisasjonsnummer, inntekt.bransjer)
-                            }
-                            else -> {
-                                tx.insertMinimalArbeidsgiver(inntekt.organisasjonsnummer)
-                            }
-                        }
-                    }
-                }
+                TransactionalInntektskilderDao(tx).lagreInntektskilder(inntektskilder)
             }
         }
     }
 
-    override fun inntektskildeEksisterer(orgnummer: String): Boolean {
-        return arbeidsgiverDao.findArbeidsgiverByOrgnummer(orgnummer) != null
-    }
+    override fun inntektskildeEksisterer(orgnummer: String): Boolean = throw OperationNotSupportedException()
 
     override fun finnInntektskilder(
         fødselsnummer: String,
         andreOrganisasjonsnumre: List<String>,
     ): List<InntektskildeDto> {
-        val alleOrganisasjonsnumre = andreOrganisasjonsnumre + organisasjonsnumreFraSammenligningsgrunnlag(fødselsnummer).distinct()
+        val alleOrganisasjonsnumre =
+            andreOrganisasjonsnumre + organisasjonsnumreFraSammenligningsgrunnlag(fødselsnummer).distinct()
         val eksisterendeInntektskilder = eksisterendeInntektskilder(alleOrganisasjonsnumre)
         val nyeInntektskilder = andreOrganisasjonsnumre.organisasjonsnumreSomIkkeFinnesI(eksisterendeInntektskilder)
         return eksisterendeInntektskilder + nyeInntektskilder
@@ -68,7 +57,8 @@ internal class InntektskilderDao(private val dataSource: DataSource) : Inntektsk
                 type = inntektskildetype(organisasjonsnummer),
                 navn = it.string("navn"),
                 bransjer =
-                    it.stringOrNull("bransjer")
+                    it
+                        .stringOrNull("bransjer")
                         ?.removeSurrounding("[", "]")
                         ?.replace("\"", "")
                         ?.split(",")
@@ -78,17 +68,15 @@ internal class InntektskilderDao(private val dataSource: DataSource) : Inntektsk
         }
     }
 
-    private fun organisasjonsnumreFraSammenligningsgrunnlag(fødselsnummer: String): List<String> {
-        return avviksvurderingDao
+    private fun organisasjonsnumreFraSammenligningsgrunnlag(fødselsnummer: String): List<String> =
+        avviksvurderingDao
             .finnAvviksvurderinger(fødselsnummer)
             .flatMap { it.sammenligningsgrunnlag.innrapporterteInntekter }
             .map { it.arbeidsgiverreferanse }
-    }
 
-    private fun inntektskildetype(organisasjonsnummer: String): InntektskildetypeDto {
-        return when {
+    private fun inntektskildetype(organisasjonsnummer: String): InntektskildetypeDto =
+        when {
             organisasjonsnummer.length == 9 -> InntektskildetypeDto.ORDINÆR
             else -> InntektskildetypeDto.ENKELTPERSONFORETAK
         }
-    }
 }

@@ -34,7 +34,7 @@ internal class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
 
     @Test
     fun `Registrerer tidsbruk for command`() {
-        every { kommandofabrikk.søknadSendt(any()) } returns
+        every { kommandofabrikk.søknadSendt(any(), any()) } returns
             SøknadSendtCommand(
                 fødselsnummer,
                 "aktørId",

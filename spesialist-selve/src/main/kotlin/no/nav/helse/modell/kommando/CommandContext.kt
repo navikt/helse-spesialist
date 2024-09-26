@@ -1,6 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.UtgåendeMeldingerObserver
 import no.nav.helse.modell.CommandContextDao
@@ -8,7 +9,11 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList(), private val hash: UUID? = null) {
+internal class CommandContext(
+    private val id: UUID,
+    sti: List<Int> = emptyList(),
+    private val hash: UUID? = null,
+) {
     private val data = mutableListOf<Any>()
     private val sti: MutableList<Int> = sti.toMutableList()
     private var ferdigstilt = false
@@ -67,7 +72,7 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
     internal fun sti() = sti.toList()
 
     internal fun opprett(
-        commandContextDao: CommandContextDao,
+        commandContextDao: CommandContextRepository,
         hendelseId: UUID,
     ) {
         commandContextDao.opprett(hendelseId, id)
@@ -89,13 +94,14 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
     ) {
         publiserTilstandsendring(
             "AVBRUTT",
-            JsonMessage.newMessage(
-                "kommandokjede_avbrutt",
-                mutableMapOf(
-                    "commandContextId" to contextId,
-                    "meldingId" to meldingId,
-                ),
-            ).toJson(),
+            JsonMessage
+                .newMessage(
+                    "kommandokjede_avbrutt",
+                    mutableMapOf(
+                        "commandContextId" to contextId,
+                        "meldingId" to meldingId,
+                    ),
+                ).toJson(),
         )
     }
 
@@ -106,7 +112,7 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
     internal inline fun <reified T> get(): T? = data.filterIsInstance<T>().firstOrNull()
 
     internal fun utfør(
-        commandContextDao: CommandContextDao,
+        commandContextDao: CommandContextRepository,
         hendelseId: UUID,
         command: Command,
     ) = try {
@@ -122,29 +128,31 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
                 commandContextDao.ferdig(hendelseId, id).also {
                     publiserTilstandsendring(
                         "FERDIGSTILT",
-                        JsonMessage.newMessage(
-                            "kommandokjede_ferdigstilt",
-                            mutableMapOf(
-                                "commandContextId" to id,
-                                "meldingId" to hendelseId,
-                                "command" to command.name,
-                            ),
-                        ).toJson(),
+                        JsonMessage
+                            .newMessage(
+                                "kommandokjede_ferdigstilt",
+                                mutableMapOf(
+                                    "commandContextId" to id,
+                                    "meldingId" to hendelseId,
+                                    "command" to command.name,
+                                ),
+                            ).toJson(),
                     )
                 }
             } else {
                 commandContextDao.suspendert(hendelseId, id, newHash, sti).also {
                     publiserTilstandsendring(
                         "SUSPENDERT",
-                        JsonMessage.newMessage(
-                            "kommandokjede_suspendert",
-                            mutableMapOf(
-                                "commandContextId" to id,
-                                "meldingId" to hendelseId,
-                                "command" to command.name,
-                                "sti" to sti,
-                            ),
-                        ).toJson(),
+                        JsonMessage
+                            .newMessage(
+                                "kommandokjede_suspendert",
+                                mutableMapOf(
+                                    "commandContextId" to id,
+                                    "meldingId" to hendelseId,
+                                    "command" to command.name,
+                                    "sti" to sti,
+                                ),
+                            ).toJson(),
                     )
                 }
             }
@@ -154,15 +162,16 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
             commandContextDao.feil(hendelseId, id).also {
                 publiserTilstandsendring(
                     "FEILET",
-                    JsonMessage.newMessage(
-                        "kommandokjede_feilet",
-                        mutableMapOf(
-                            "commandContextId" to id,
-                            "meldingId" to hendelseId,
-                            "command" to command.name,
-                            "sti" to sti,
-                        ),
-                    ).toJson(),
+                    JsonMessage
+                        .newMessage(
+                            "kommandokjede_feilet",
+                            mutableMapOf(
+                                "commandContextId" to id,
+                                "meldingId" to hendelseId,
+                                "command" to command.name,
+                                "sti" to sti,
+                            ),
+                        ).toJson(),
                 )
             }
         } catch (nestedErr: Exception) {
@@ -181,7 +190,10 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
         private val logger = LoggerFactory.getLogger(CommandContext::class.java)
 
         internal fun Command.ferdigstill(context: CommandContext): Boolean {
-            logger.info("Kommando ${this.javaClass.simpleName} ferdigstilte {}", keyValue("context_id", "${context.id}"))
+            logger.info(
+                "Kommando ${this.javaClass.simpleName} ferdigstilte {}",
+                keyValue("context_id", "${context.id}"),
+            )
             context.ferdigstill()
             return true
         }

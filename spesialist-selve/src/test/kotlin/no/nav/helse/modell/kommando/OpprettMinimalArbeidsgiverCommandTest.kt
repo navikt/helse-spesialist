@@ -31,10 +31,9 @@ internal class OpprettMinimalArbeidsgiverCommandTest {
         assertEquals(1, lagredeInntektskilder.size)
         assertEquals(
             NyInntektskildeDto(organisasjonsnummer = ORGNR, type = InntektskildetypeDto.ORDINÆR),
-            lagredeInntektskilder.single()
+            lagredeInntektskilder.single(),
         )
     }
-
 
     @Test
     fun `oppretter ikke arbeidsgiver når den finnes`() {
@@ -43,17 +42,20 @@ internal class OpprettMinimalArbeidsgiverCommandTest {
         assertEquals(0, lagredeInntektskilder.size)
     }
 
-    private fun lagCommand(orgnummerEksisterer: Boolean) : OpprettMinimalArbeidsgiverCommand {
-        val repository = object : InntektskilderRepository  {
-            override fun lagreInntektskilder(inntektskilder: List<InntektskildeDto>) {
-                lagredeInntektskilder.addAll(inntektskilder)
+    private fun lagCommand(orgnummerEksisterer: Boolean): OpprettMinimalArbeidsgiverCommand {
+        val repository =
+            object : InntektskilderRepository {
+                override fun lagreInntektskilder(inntektskilder: List<InntektskildeDto>) {
+                    lagredeInntektskilder.addAll(inntektskilder)
+                }
+
+                override fun inntektskildeEksisterer(orgnummer: String) = orgnummerEksisterer
+
+                override fun finnInntektskilder(
+                    fødselsnummer: String,
+                    andreOrganisasjonsnumre: List<String>,
+                ) = emptyList<InntektskildeDto>()
             }
-
-            override fun inntektskildeEksisterer(orgnummer: String) = orgnummerEksisterer
-
-            override fun finnInntektskilder(fødselsnummer: String, andreOrganisasjonsnumre: List<String>) =
-                emptyList<InntektskildeDto>()
-        }
         return OpprettMinimalArbeidsgiverCommand(ORGNR, repository)
     }
 }

@@ -1,10 +1,15 @@
 package no.nav.helse.mediator
 
+import kotliquery.TransactionalSession
+import kotliquery.sessionOf
 import no.nav.helse.db.AvviksvurderingDao
+import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.InntektskilderDao
-import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TotrinnsvurderingDao
+import no.nav.helse.db.TransactionalCommandContextDao
+import no.nav.helse.db.TransactionalInntektskilderDao
+import no.nav.helse.db.TransactionalPersonDao
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
 import no.nav.helse.mediator.meldinger.Personmelding
@@ -74,7 +79,6 @@ internal class Kommandofabrikk(
     private val dataSource: DataSource,
     private val meldingDao: MeldingDao = MeldingDao(dataSource),
     private val personDao: PersonDao = PersonDao(dataSource),
-    private val inntektskilderRepository: InntektskilderRepository = InntektskilderDao(dataSource),
     private val vedtakDao: VedtakDao = VedtakDao(dataSource),
     private val oppgaveDao: OppgaveDao = OppgaveDao(dataSource),
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
@@ -213,13 +217,16 @@ internal class Kommandofabrikk(
             utbetalingDao = utbetalingDao,
         )
 
-    fun søknadSendt(hendelse: SøknadSendt): SøknadSendtCommand =
+    fun søknadSendt(
+        hendelse: SøknadSendt,
+        transactionalSession: TransactionalSession,
+    ): SøknadSendtCommand =
         SøknadSendtCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             aktørId = hendelse.aktørId,
             organisasjonsnummer = hendelse.organisasjonsnummer,
-            personRepository = personDao,
-            inntektskilderRepository = inntektskilderRepository,
+            personRepository = TransactionalPersonDao(transactionalSession),
+            inntektskilderRepository = TransactionalInntektskilderDao(transactionalSession),
         )
 
     internal fun adressebeskyttelseEndret(
@@ -227,9 +234,10 @@ internal class Kommandofabrikk(
         oppgaveDataForAutomatisering: OppgaveDataForAutomatisering?,
     ): AdressebeskyttelseEndretCommand {
         val godkjenningsbehovData =
-            oppgaveDataForAutomatisering?.let {
-                meldingDao.finnGodkjenningsbehov(it.hendelseId)
-            }?.data()
+            oppgaveDataForAutomatisering
+                ?.let {
+                    meldingDao.finnGodkjenningsbehov(it.hendelseId)
+                }?.data()
         val utbetaling = godkjenningsbehovData?.let { utbetalingDao.hentUtbetaling(it.utbetalingId) }
         return AdressebeskyttelseEndretCommand(
             melding.fødselsnummer(),
@@ -375,31 +383,44 @@ internal class Kommandofabrikk(
         melding: SøknadSendt,
         commandContextObservers: CommandContextObserver,
     ) {
-        iverksett(søknadSendt(melding), melding.id, nyContext(melding.id), setOf(commandContextObservers))
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            session.transaction { transactionalSession ->
+                val transactionalCommandContextDao = TransactionalCommandContextDao(transactionalSession)
+                iverksett(
+                    command = søknadSendt(melding, transactionalSession),
+                    meldingId = melding.id,
+                    commandContext = nyContext(melding.id, transactionalCommandContextDao),
+                    commandContextObservers = setOf(commandContextObservers),
+                    commandContextDao = transactionalCommandContextDao,
+                )
+            }
+        }
     }
 
-    private fun nyContext(meldingId: UUID) =
-        CommandContext(UUID.randomUUID()).apply {
-            opprett(commandContextDao, meldingId)
-        }
+    private fun nyContext(
+        meldingId: UUID,
+        transactionalCommandContextDao: CommandContextRepository,
+    ) = CommandContext(UUID.randomUUID()).apply {
+        opprett(transactionalCommandContextDao, meldingId)
+    }
 
     internal fun lagKommandostarter(
         commandContext: CommandContext,
         commandContextObservers: Set<CommandContextObserver>,
-    ): Kommandostarter {
-        return { kommandooppretter ->
+    ): Kommandostarter =
+        { kommandooppretter ->
             val melding = this
             this@Kommandofabrikk.kommandooppretter()?.let { command ->
-                iverksett(command, melding.id, commandContext, commandContextObservers)
+                iverksett(command, melding.id, commandContext, commandContextObservers, commandContextDao)
             }
         }
-    }
 
     private fun iverksett(
         command: Command,
         meldingId: UUID,
         commandContext: CommandContext,
         commandContextObservers: Collection<CommandContextObserver>,
+        commandContextDao: CommandContextRepository,
     ) {
         commandContextObservers.forEach { commandContext.nyObserver(it) }
         val contextId = commandContext.id()
