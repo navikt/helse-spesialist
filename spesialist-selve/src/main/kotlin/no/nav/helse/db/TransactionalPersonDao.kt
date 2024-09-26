@@ -3,7 +3,6 @@ package no.nav.helse.db
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import no.nav.helse.modell.kommando.MinimalPersonDto
-import no.nav.helse.modell.kommando.PersonRepository
 import no.nav.helse.modell.person.PersonDto
 import no.nav.helse.modell.person.toFødselsnummer
 import org.intellij.lang.annotations.Language

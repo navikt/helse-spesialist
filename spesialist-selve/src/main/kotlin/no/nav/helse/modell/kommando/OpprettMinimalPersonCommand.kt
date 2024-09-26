@@ -1,17 +1,12 @@
 package no.nav.helse.modell.kommando
 
+import no.nav.helse.db.PersonRepository
 import org.slf4j.LoggerFactory
 
 data class MinimalPersonDto(
     val fødselsnummer: String,
     val aktørId: String,
 )
-
-internal interface PersonRepository {
-    fun finnMinimalPerson(fødselsnummer: String): MinimalPersonDto?
-
-    fun lagreMinimalPerson(minimalPerson: MinimalPersonDto)
-}
 
 internal class OpprettMinimalPersonCommand(
     private val fødselsnummer: String,

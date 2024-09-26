@@ -2,13 +2,13 @@ package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.InntektskilderRepository
+import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OpprettMinimalArbeidsgiverCommand
 import no.nav.helse.modell.kommando.OpprettMinimalPersonCommand
-import no.nav.helse.modell.kommando.PersonRepository
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.util.UUID
 

@@ -1,5 +1,6 @@
 package no.nav.helse.modell.kommando
 
+import no.nav.helse.db.PersonRepository
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
