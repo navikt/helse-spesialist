@@ -472,14 +472,17 @@ data class BeregnetPeriode(
     fun notater(): List<Notat> = notater(notatDao, vedtaksperiodeId())
 
     fun periodehistorikk(): List<PeriodeHistorikkElement> =
-        periodehistorikkDao.finn(utbetaling().id).map {
-            PeriodeHistorikkElement(
-                type = it.type,
-                saksbehandler_ident = it.saksbehandler_ident,
-                timestamp = it.timestamp,
-                notat_id = it.notat_id,
-            )
-        }
+        periodehistorikkDao
+            .finn(utbetaling().id)
+            .filterNot { it.type == PeriodehistorikkType.LEGG_PA_VENT }
+            .map {
+                PeriodeHistorikkElement(
+                    type = it.type,
+                    saksbehandler_ident = it.saksbehandler_ident,
+                    timestamp = it.timestamp,
+                    notat_id = it.notat_id,
+                )
+            }
 
     fun beregningId(): UUID = periode.beregningId
 

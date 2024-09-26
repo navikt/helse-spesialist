@@ -32,6 +32,7 @@ import no.nav.helse.spesialist.api.graphql.schema.OverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse
 import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
 import no.nav.helse.spesialist.api.notat.NotatRepository
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernPåVent
@@ -367,6 +368,8 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             saksbehandler,
         )
         val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
+        val historikk = periodehistorikkDao.finn(UTBETALING_ID)
+        assertEquals(PeriodehistorikkType.LEGG_PA_VENT, historikk.first().type)
         assertTrue(melding["egenskaper"].map { it.asText() }.contains("PÅ_VENT"))
     }
 
@@ -380,6 +383,8 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         )
         mediator.håndter(FjernPåVent(oppgaveId), saksbehandler)
         val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
+        val historikk = periodehistorikkDao.finn(UTBETALING_ID)
+        assertEquals(PeriodehistorikkType.FJERN_FRA_PA_VENT, historikk.first().type)
         assertFalse(melding["egenskaper"].map { it.asText() }.contains("PÅ_VENT"))
     }
 
@@ -728,10 +733,13 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
                 tom = 31.januar,
                 vurdering = true,
                 begrunnelse = "en begrunnelse",
-                arbeidsgivere = listOf(MinimumSykdomsgrad.Arbeidsgiver(
-                    organisasjonsnummer = ORGANISASJONSNUMMER,
-                    berortVedtaksperiodeId = PERIODE.id
-                )),
+                arbeidsgivere =
+                    listOf(
+                        MinimumSykdomsgrad.Arbeidsgiver(
+                            organisasjonsnummer = ORGANISASJONSNUMMER,
+                            berortVedtaksperiodeId = PERIODE.id,
+                        ),
+                    ),
                 initierendeVedtaksperiodeId = PERIODE.id,
             )
 
@@ -764,10 +772,13 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
                 tom = 31.januar,
                 vurdering = false,
                 begrunnelse = "en begrunnelse",
-                arbeidsgivere = listOf(MinimumSykdomsgrad.Arbeidsgiver(
-                    organisasjonsnummer = ORGANISASJONSNUMMER,
-                    berortVedtaksperiodeId = PERIODE.id
-                )),
+                arbeidsgivere =
+                    listOf(
+                        MinimumSykdomsgrad.Arbeidsgiver(
+                            organisasjonsnummer = ORGANISASJONSNUMMER,
+                            berortVedtaksperiodeId = PERIODE.id,
+                        ),
+                    ),
                 initierendeVedtaksperiodeId = PERIODE.id,
             )
 

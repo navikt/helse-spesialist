@@ -66,7 +66,7 @@ import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType.FJERN_FRA_PA_VENT
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType.*
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernPåVent
@@ -179,13 +179,17 @@ internal class SaksbehandlerMediator(
     ) {
         try {
             when (handling) {
-                is no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent ->
-                    notatRepository.lagreForOppgaveId(
-                        handling.oppgaveId,
-                        handling.notatTekst,
-                        saksbehandler.oid(),
-                        NotatType.PaaVent,
-                    )
+                is no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent -> {
+                    val lagretNotatId =
+                        notatRepository.lagreForOppgaveId(
+                            handling.oppgaveId,
+                            handling.notatTekst,
+                            saksbehandler.oid(),
+                            NotatType.PaaVent,
+                        )?.toInt()
+                    periodehistorikkDao.lagre(LEGG_PA_VENT, saksbehandler.oid(), handling.oppgaveId, lagretNotatId)
+                }
+
                 is no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent ->
                     if (påVentDao.erPåVent(handling.oppgaveId)) {
                         periodehistorikkDao.lagre(FJERN_FRA_PA_VENT, saksbehandler.oid(), handling.oppgaveId)
