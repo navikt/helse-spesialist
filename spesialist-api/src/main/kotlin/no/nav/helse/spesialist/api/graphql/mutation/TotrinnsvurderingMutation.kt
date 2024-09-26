@@ -55,7 +55,7 @@ class TotrinnsvurderingMutation(
             try {
                 avslag?.let { saksbehandlerhåndterer.håndterAvslag(oppgavereferanse.toLong(), behandlendeSaksbehandler, it) }
                 oppgavehåndterer.sendTilBeslutter(oppgavereferanse.toLong(), behandlendeSaksbehandler)
-                saksbehandlerhåndterer.håndter(FjernPåVentUtenHistorikkinnslag(oppgavereferanse.toLong()), behandlendeSaksbehandler)
+                saksbehandlerhåndterer.påVent(FjernPåVentUtenHistorikkinnslag(oppgavereferanse.toLong()), behandlendeSaksbehandler)
             } catch (modellfeil: Modellfeil) {
                 return@withContext DataFetcherResult.newResult<Boolean>().error(
                     GraphqlErrorException.newErrorException()
@@ -97,7 +97,7 @@ class TotrinnsvurderingMutation(
             )
 
             oppgavehåndterer.sendIRetur(oppgavereferanse.toLong(), besluttendeSaksbehandler)
-            saksbehandlerhåndterer.håndter(FjernPåVentUtenHistorikkinnslag(oppgavereferanse.toLong()), besluttendeSaksbehandler)
+            saksbehandlerhåndterer.påVent(FjernPåVentUtenHistorikkinnslag(oppgavereferanse.toLong()), besluttendeSaksbehandler)
 
             totrinnsvurderinghåndterer.lagrePeriodehistorikk(
                 oppgaveId = oppgavereferanse.toLong(),

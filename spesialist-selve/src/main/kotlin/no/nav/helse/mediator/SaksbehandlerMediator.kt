@@ -140,6 +140,30 @@ internal class SaksbehandlerMediator(
         }
     }
 
+    override fun påVent(
+        handling: no.nav.helse.spesialist.api.saksbehandler.handlinger.PåVent,
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+    ) {
+        val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
+        val modellhandling = handling.tilModellversjon() as PåVent
+        SaksbehandlerLagrer(saksbehandlerDao).lagre(saksbehandler)
+        tell(modellhandling)
+        saksbehandler.register(Saksbehandlingsmelder(rapidsConnection))
+        saksbehandler.register(Subsumsjonsmelder(versjonAvKode, rapidsConnection))
+        val handlingId = UUID.randomUUID()
+
+        withMDC(
+            mapOf(
+                "saksbehandlerOid" to saksbehandler.oid().toString(),
+                "handlingId" to handlingId.toString(),
+            ),
+        ) {
+            sikkerlogg.info("Utfører handling ${modellhandling.loggnavn()} på vegne av saksbehandler $saksbehandler")
+            håndter(modellhandling, saksbehandler)
+            sikkerlogg.info("Handling ${modellhandling.loggnavn()} utført")
+        }
+    }
+
     private fun håndter(
         handling: Annullering,
         saksbehandler: Saksbehandler,

@@ -363,7 +363,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     fun `legg på vent`() {
         nyPerson()
         val oppgaveId = OPPGAVE_ID
-        mediator.håndter(
+        mediator.påVent(
             LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), true, "", "notat tekst"),
             saksbehandler,
         )
@@ -377,14 +377,14 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     fun `fjern på vent`() {
         nyPerson()
         val oppgaveId = OPPGAVE_ID
-        mediator.håndter(
+        mediator.påVent(
             LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), false, "", "notat tekst"),
             saksbehandler,
         )
-        mediator.håndter(FjernPåVent(oppgaveId), saksbehandler)
+        mediator.påVent(FjernPåVent(oppgaveId), saksbehandler)
         val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
         val historikk = periodehistorikkDao.finn(UTBETALING_ID)
-        assertEquals(PeriodehistorikkType.FJERN_FRA_PA_VENT, historikk.first().type)
+        assertTrue(historikk.map { it.type }.containsAll(listOf(PeriodehistorikkType.FJERN_FRA_PA_VENT, PeriodehistorikkType.LEGG_PA_VENT)))
         assertFalse(melding["egenskaper"].map { it.asText() }.contains("PÅ_VENT"))
     }
 

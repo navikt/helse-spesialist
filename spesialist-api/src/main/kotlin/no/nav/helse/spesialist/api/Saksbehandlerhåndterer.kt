@@ -5,12 +5,18 @@ import no.nav.helse.spesialist.api.graphql.schema.Avslag
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.PåVent
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import java.util.UUID
 
 interface Saksbehandlerhåndterer {
     fun <T : HandlingFraApi> håndter(
         handlingFraApi: T,
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+    )
+
+    fun påVent(
+        handling: PåVent,
         saksbehandlerFraApi: SaksbehandlerFraApi,
     )
 

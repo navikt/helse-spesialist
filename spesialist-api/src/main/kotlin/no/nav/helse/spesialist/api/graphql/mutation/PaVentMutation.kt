@@ -40,7 +40,7 @@ class PaVentMutation(
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         return withContext(Dispatchers.IO) {
             try {
-                saksbehandlerhåndterer.håndter(
+                saksbehandlerhåndterer.påVent(
                     LeggPåVent(oppgaveId.toLong(), saksbehandler.oid, frist, tildeling, begrunnelse, notatTekst),
                     saksbehandler,
                 )
@@ -69,7 +69,7 @@ class PaVentMutation(
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         return withContext(Dispatchers.IO) {
             try {
-                saksbehandlerhåndterer.håndter(FjernPåVent(oppgaveId.toLong()), saksbehandler)
+                saksbehandlerhåndterer.påVent(FjernPåVent(oppgaveId.toLong()), saksbehandler)
                 newResult<Boolean?>().data(true).build()
             } catch (e: OppgaveIkkeTildelt) {
                 newResult<Boolean>().data(false).build()

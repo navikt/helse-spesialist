@@ -11,6 +11,8 @@ data class TildelOppgave(val oppgaveId: Long) : HandlingFraApi
 
 data class AvmeldOppgave(val oppgaveId: Long) : HandlingFraApi
 
+interface PåVent : HandlingFraApi
+
 data class LeggPåVent(
     val oppgaveId: Long,
     val saksbehandlerOid: UUID,
@@ -18,12 +20,12 @@ data class LeggPåVent(
     val skalTildeles: Boolean,
     val begrunnelse: String?,
     val notatTekst: String,
-) : HandlingFraApi
+) : PåVent
 
 data class FjernPåVent(
     val oppgaveId: Long,
-) : HandlingFraApi
+) : PåVent
 
 data class FjernPåVentUtenHistorikkinnslag(
     val oppgaveId: Long,
-) : HandlingFraApi
+) : PåVent
