@@ -7,11 +7,13 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
 import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDto
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -63,9 +65,8 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
     fun `lagre oppgave uten tildeling medfører forsøk på å slette eksisterende tildeling`() {
         val oppgave = nyOppgave()
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
-        oppgave.accept(oppgavelagrer)
 
-        oppgavelagrer.lagre(oppgaveService, CONTEXT_ID)
+        oppgavelagrer.lagre(oppgaveService, oppgave.toDto(), CONTEXT_ID)
         verify(exactly = 1) {
             oppgaveService.opprett(
                 OPPGAVE_ID,
@@ -85,9 +86,8 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
     fun `oppdatere oppgave uten tildeling medfører forsøk på å slette eksisterende tildeling`() {
         val oppgave = nyOppgave()
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
-        oppgave.accept(oppgavelagrer)
 
-        oppgavelagrer.oppdater(oppgaveService)
+        oppgavelagrer.oppdater(oppgaveService, oppgave.toDto())
         verify(exactly = 1) { oppgaveService.oppdater(OPPGAVE_ID, "AvventerSaksbehandler", null, null, listOf(EgenskapForDatabase.SØKNAD)) }
         verify(exactly = 0) { nyTildelingDao.tildel(any(), any()) }
         verify(exactly = 1) { nyTildelingDao.avmeld(OPPGAVE_ID) }
@@ -97,9 +97,8 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
     fun `lagre oppgave uten tildeling eller totrinnsvurdering`() {
         val oppgave = nyOppgave(medTotrinnsvurdering = false)
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
-        oppgave.accept(oppgavelagrer)
 
-        oppgavelagrer.lagre(oppgaveService, CONTEXT_ID)
+        oppgavelagrer.lagre(oppgaveService, oppgave.toDto(), CONTEXT_ID)
         verify(exactly = 1) {
             oppgaveService.opprett(
                 OPPGAVE_ID,
@@ -119,9 +118,8 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
     fun `lagre oppgave uten tildeling`() {
         val oppgave = nyOppgave(medTotrinnsvurdering = true)
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
-        oppgave.accept(oppgavelagrer)
 
-        oppgavelagrer.lagre(oppgaveService, CONTEXT_ID)
+        oppgavelagrer.lagre(oppgaveService, oppgave.toDto(), CONTEXT_ID)
         verify(exactly = 1) {
             oppgaveService.opprett(
                 OPPGAVE_ID,
@@ -136,11 +134,11 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
         verify(exactly = 0) { nyTildelingDao.tildel(any(), any()) }
         verify(exactly = 1) {
             oppgaveService.lagreTotrinnsvurdering(
-                TotrinnsvurderingFraDatabase(
+                TotrinnsvurderingDto(
                     VEDTAKSPERIODE_ID,
                     false,
-                    SAKSBEHANDLER_OID,
-                    BESLUTTER_OID,
+                    saksbehandler.toDto(),
+                    beslutter.toDto(),
                     UTBETALING_ID,
                     TOTRINNSVURDERING_OPPRETTET,
                     TOTRINNSVURDERING_OPPDATERT,
@@ -154,9 +152,8 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
         val oppgave = nyOppgave(medTotrinnsvurdering = false)
         oppgave.forsøkTildelingVedReservasjon(saksbehandler)
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
-        oppgave.accept(oppgavelagrer)
 
-        oppgavelagrer.lagre(oppgaveService, CONTEXT_ID)
+        oppgavelagrer.lagre(oppgaveService, oppgave.toDto(), CONTEXT_ID)
         verify(exactly = 1) {
             oppgaveService.opprett(
                 OPPGAVE_ID,
@@ -177,9 +174,8 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
         val oppgave = nyOppgave(medTotrinnsvurdering = true)
         oppgave.forsøkTildelingVedReservasjon(saksbehandler)
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
-        oppgave.accept(oppgavelagrer)
 
-        oppgavelagrer.lagre(oppgaveService, CONTEXT_ID)
+        oppgavelagrer.lagre(oppgaveService, oppgave.toDto(), CONTEXT_ID)
         verify(exactly = 1) {
             oppgaveService.opprett(
                 OPPGAVE_ID,
@@ -194,11 +190,11 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
         verify(exactly = 1) { nyTildelingDao.tildel(OPPGAVE_ID, SAKSBEHANDLER_OID) }
         verify(exactly = 1) {
             oppgaveService.lagreTotrinnsvurdering(
-                TotrinnsvurderingFraDatabase(
+                TotrinnsvurderingDto(
                     VEDTAKSPERIODE_ID,
                     false,
-                    SAKSBEHANDLER_OID,
-                    BESLUTTER_OID,
+                    saksbehandler.toDto(),
+                    beslutter.toDto(),
                     UTBETALING_ID,
                     TOTRINNSVURDERING_OPPRETTET,
                     TOTRINNSVURDERING_OPPDATERT,
@@ -213,9 +209,8 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
         oppgave.ferdigstill()
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
-        oppgave.accept(oppgavelagrer)
 
-        oppgavelagrer.oppdater(oppgaveService)
+        oppgavelagrer.oppdater(oppgaveService, oppgave.toDto())
         verify(exactly = 1) {
             oppgaveService.oppdater(OPPGAVE_ID, "Ferdigstilt", SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID, listOf(EgenskapForDatabase.SØKNAD))
         }
@@ -229,20 +224,19 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
         oppgave.ferdigstill()
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
-        oppgave.accept(oppgavelagrer)
 
-        oppgavelagrer.oppdater(oppgaveService)
+        oppgavelagrer.oppdater(oppgaveService, oppgave.toDto())
         verify(exactly = 1) {
             oppgaveService.oppdater(OPPGAVE_ID, "Ferdigstilt", SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID, listOf(EgenskapForDatabase.SØKNAD))
         }
         verify(exactly = 0) { nyTildelingDao.tildel(any(), any()) }
         verify(exactly = 1) {
             oppgaveService.lagreTotrinnsvurdering(
-                TotrinnsvurderingFraDatabase(
+                TotrinnsvurderingDto(
                     VEDTAKSPERIODE_ID,
                     false,
-                    SAKSBEHANDLER_OID,
-                    BESLUTTER_OID,
+                    saksbehandler.toDto(),
+                    beslutter.toDto(),
                     UTBETALING_ID,
                     TOTRINNSVURDERING_OPPRETTET,
                     TOTRINNSVURDERING_OPPDATERT,
@@ -258,9 +252,8 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
         oppgave.ferdigstill()
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
-        oppgave.accept(oppgavelagrer)
 
-        oppgavelagrer.oppdater(oppgaveService)
+        oppgavelagrer.oppdater(oppgaveService, oppgave.toDto())
         verify(exactly = 1) {
             oppgaveService.oppdater(OPPGAVE_ID, "Ferdigstilt", SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID, listOf(EgenskapForDatabase.SØKNAD))
         }
@@ -274,19 +267,18 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
         oppgave.ferdigstill()
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
-        oppgave.accept(oppgavelagrer)
 
-        oppgavelagrer.oppdater(oppgaveService)
+        oppgavelagrer.oppdater(oppgaveService, oppgave.toDto())
         verify(exactly = 1) {
             oppgaveService.oppdater(OPPGAVE_ID, "Ferdigstilt", SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID, listOf(EgenskapForDatabase.SØKNAD))
         }
         verify(exactly = 1) {
             oppgaveService.lagreTotrinnsvurdering(
-                TotrinnsvurderingFraDatabase(
+                TotrinnsvurderingDto(
                     VEDTAKSPERIODE_ID,
                     false,
-                    SAKSBEHANDLER_OID,
-                    BESLUTTER_OID,
+                    saksbehandler.toDto(),
+                    beslutter.toDto(),
                     UTBETALING_ID,
                     TOTRINNSVURDERING_OPPRETTET,
                     TOTRINNSVURDERING_OPPDATERT,

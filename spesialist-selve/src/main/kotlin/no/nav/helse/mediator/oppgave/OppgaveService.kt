@@ -21,6 +21,7 @@ import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.Modellfeil
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent
@@ -29,6 +30,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import no.nav.helse.modell.saksbehandler.handlinger.PåVent
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDto
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
@@ -78,10 +80,7 @@ internal class OppgaveService(
         val oppgavemelder = Oppgavemelder(meldingDao, rapidsConnection)
         oppgave.register(oppgavemelder)
         tildelVedReservasjon(fødselsnummer, oppgave)
-        Oppgavelagrer(tildelingDao).apply {
-            oppgave.accept(this)
-            this.lagre(this@OppgaveService, contextId)
-        }
+        Oppgavelagrer(tildelingDao).lagre(this, oppgave.toDto(), contextId)
         oppgavemelder.oppgaveOpprettet(oppgave)
     }
 
@@ -98,10 +97,7 @@ internal class OppgaveService(
             ).oppgave(id)
         oppgave.register(Oppgavemelder(meldingDao, rapidsConnection))
         val returverdi = oppgaveBlock(oppgave)
-        Oppgavelagrer(tildelingDao).apply {
-            oppgave.accept(this)
-            oppdater(this@OppgaveService)
-        }
+        Oppgavelagrer(tildelingDao).oppdater(this@OppgaveService, oppgave.toDto())
         return returverdi
     }
 
@@ -115,7 +111,17 @@ internal class OppgaveService(
         }
     }
 
-    internal fun lagreTotrinnsvurdering(totrinnsvurderingFraDatabase: TotrinnsvurderingFraDatabase) {
+    internal fun lagreTotrinnsvurdering(totrinnsvurderingDto: TotrinnsvurderingDto) {
+        val totrinnsvurderingFraDatabase =
+            TotrinnsvurderingFraDatabase(
+                vedtaksperiodeId = totrinnsvurderingDto.vedtaksperiodeId,
+                erRetur = totrinnsvurderingDto.erRetur,
+                saksbehandler = totrinnsvurderingDto.saksbehandler?.oid,
+                beslutter = totrinnsvurderingDto.beslutter?.oid,
+                utbetalingId = totrinnsvurderingDto.utbetalingId,
+                opprettet = totrinnsvurderingDto.opprettet,
+                oppdatert = totrinnsvurderingDto.oppdatert,
+            )
         totrinnsvurderingRepository.oppdater(totrinnsvurderingFraDatabase)
     }
 

@@ -1,120 +1,63 @@
 package no.nav.helse.mediator.oppgave
 
-import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilDatabaseversjon
-import no.nav.helse.mediator.saksbehandler.SaksbehandlerMapper.tilDatabaseversjon
-import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.OppgaveVisitor
-import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import java.time.LocalDateTime
+import no.nav.helse.modell.oppgave.OppgaveDto
 import java.util.UUID
 
-class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
-    private lateinit var oppgaveForLagring: OppgaveFraDatabase
-    private var totrinnsvurderingForLagring: TotrinnsvurderingFraDatabase? = null
-
+class Oppgavelagrer(private val tildelingDao: TildelingDao) {
     internal fun lagre(
         oppgaveService: OppgaveService,
+        oppgaveDto: OppgaveDto,
         contextId: UUID,
     ) {
-        val oppgave = oppgaveForLagring
         oppgaveService.opprett(
-            id = oppgave.id,
+            id = oppgaveDto.id,
             contextId = contextId,
-            vedtaksperiodeId = oppgave.vedtaksperiodeId,
-            utbetalingId = oppgave.utbetalingId,
-            egenskaper = oppgave.egenskaper,
-            hendelseId = oppgave.hendelseId,
-            kanAvvises = oppgave.kanAvvises,
+            vedtaksperiodeId = oppgaveDto.vedtaksperiodeId,
+            utbetalingId = oppgaveDto.utbetalingId,
+            egenskaper = oppgaveDto.egenskaper.map { it.tilDatabaseversjon() },
+            hendelseId = oppgaveDto.hendelseId,
+            kanAvvises = oppgaveDto.kanAvvises,
         )
-        if (oppgave.tildelt != null) {
-            tildelingDao.tildel(oppgave.id, oppgave.tildelt.oid)
-        } else {
-            tildelingDao.avmeld(oppgave.id)
-        }
+        oppdaterTildeling(oppgaveDto)
 
-        val totrinnsvurdering = totrinnsvurderingForLagring
+        val totrinnsvurdering = oppgaveDto.totrinnsvurdering
         if (totrinnsvurdering != null) oppgaveService.lagreTotrinnsvurdering(totrinnsvurdering)
     }
 
-    internal fun oppdater(oppgaveService: OppgaveService) {
-        val oppgave = oppgaveForLagring
+    internal fun oppdater(
+        oppgaveService: OppgaveService,
+        oppgaveDto: OppgaveDto,
+    ) {
         oppgaveService.oppdater(
-            oppgaveId = oppgave.id,
-            status = oppgave.status,
-            ferdigstiltAvIdent = oppgave.ferdigstiltAvIdent,
-            ferdigstiltAvOid = oppgave.ferdigstiltAvOid,
-            egenskaper = oppgave.egenskaper,
+            oppgaveId = oppgaveDto.id,
+            status = status(oppgaveDto.tilstand),
+            ferdigstiltAvIdent = oppgaveDto.ferdigstiltAvIdent,
+            ferdigstiltAvOid = oppgaveDto.ferdigstiltAvOid,
+            egenskaper = oppgaveDto.egenskaper.map { it.tilDatabaseversjon() },
         )
-        if (oppgave.tildelt != null) {
-            tildelingDao.tildel(oppgave.id, oppgave.tildelt.oid)
-        } else {
-            tildelingDao.avmeld(oppgave.id)
-        }
+        oppdaterTildeling(oppgaveDto)
 
-        val totrinnsvurdering = totrinnsvurderingForLagring
+        val totrinnsvurdering = oppgaveDto.totrinnsvurdering
         if (totrinnsvurdering != null) oppgaveService.lagreTotrinnsvurdering(totrinnsvurdering)
     }
 
-    override fun visitOppgave(
-        id: Long,
-        tilstand: Oppgave.Tilstand,
-        vedtaksperiodeId: UUID,
-        utbetalingId: UUID,
-        hendelseId: UUID,
-        ferdigstiltAvOid: UUID?,
-        ferdigstiltAvIdent: String?,
-        egenskaper: List<Egenskap>,
-        tildelt: Saksbehandler?,
-        kanAvvises: Boolean,
-        totrinnsvurdering: Totrinnsvurdering?,
-    ) {
-        oppgaveForLagring =
-            OppgaveFraDatabase(
-                id = id,
-                egenskaper = egenskaper.map { it.tilDatabaseversjon() },
-                status = status(tilstand),
-                vedtaksperiodeId = vedtaksperiodeId,
-                utbetalingId = utbetalingId,
-                hendelseId = hendelseId,
-                kanAvvises = kanAvvises,
-                ferdigstiltAvIdent = ferdigstiltAvIdent,
-                ferdigstiltAvOid = ferdigstiltAvOid,
-                tildelt = tildelt?.tilDatabaseversjon(),
-            )
+    private fun oppdaterTildeling(oppgaveDto: OppgaveDto) {
+        val tildeltTil = oppgaveDto.tildeltTil
+        if (tildeltTil != null) {
+            tildelingDao.tildel(oppgaveDto.id, tildeltTil.oid)
+        } else {
+            tildelingDao.avmeld(oppgaveDto.id)
+        }
     }
 
-    override fun visitTotrinnsvurdering(
-        vedtaksperiodeId: UUID,
-        erRetur: Boolean,
-        saksbehandler: Saksbehandler?,
-        beslutter: Saksbehandler?,
-        utbetalingId: UUID?,
-        opprettet: LocalDateTime,
-        oppdatert: LocalDateTime?,
-    ) {
-        totrinnsvurderingForLagring =
-            TotrinnsvurderingFraDatabase(
-                vedtaksperiodeId = vedtaksperiodeId,
-                erRetur = erRetur,
-                saksbehandler = saksbehandler?.oid(),
-                beslutter = beslutter?.oid(),
-                utbetalingId = utbetalingId,
-                opprettet = opprettet,
-                oppdatert = oppdatert,
-            )
-    }
-
-    private fun status(tilstand: Oppgave.Tilstand): String {
+    private fun status(tilstand: OppgaveDto.TilstandDto): String {
         return when (tilstand) {
-            Oppgave.AvventerSaksbehandler -> "AvventerSaksbehandler"
-            Oppgave.AvventerSystem -> "AvventerSystem"
-            Oppgave.Ferdigstilt -> "Ferdigstilt"
-            Oppgave.Invalidert -> "Invalidert"
+            OppgaveDto.TilstandDto.AvventerSaksbehandler -> "AvventerSaksbehandler"
+            OppgaveDto.TilstandDto.AvventerSystem -> "AvventerSystem"
+            OppgaveDto.TilstandDto.Ferdigstilt -> "Ferdigstilt"
+            OppgaveDto.TilstandDto.Invalidert -> "Invalidert"
         }
     }
 }
