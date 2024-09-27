@@ -1,6 +1,7 @@
 package no.nav.helse.modell.utbetaling
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.SnapshotDao
@@ -8,7 +9,6 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 import no.nav.helse.modell.person.Person
-import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
 import java.util.UUID
@@ -43,7 +43,7 @@ internal class UtbetalingAnnullert private constructor(
 
 internal class UtbetalingAnnullertCommand(
     fødselsnummer: String,
-    personDao: PersonDao,
+    personRepository: PersonRepository,
     snapshotDao: SnapshotDao,
     snapshotClient: ISnapshotClient,
 ) : MacroCommand() {
@@ -53,7 +53,7 @@ internal class UtbetalingAnnullertCommand(
                 snapshotClient = snapshotClient,
                 snapshotDao = snapshotDao,
                 fødselsnummer = fødselsnummer,
-                personRepository = personDao,
+                personRepository = personRepository,
             ),
         )
 }

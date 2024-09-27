@@ -52,4 +52,8 @@ interface PersonRepository {
     fun finnPersonMedFødselsnummer(fødselsnummer: String): Long?
 
     fun finnPersoninfoRef(fødselsnummer: String): Long?
+
+    fun finnEnhetId(fødselsnummer: String): String
+
+    fun finnAdressebeskyttelse(fødselsnummer: String): Adressebeskyttelse?
 }

@@ -1,5 +1,6 @@
 package no.nav.helse.modell.kommando
 
+import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.automatisering.Automatisering
@@ -33,7 +34,6 @@ import no.nav.helse.modell.oppgave.Egenskap.UTLAND
 import no.nav.helse.modell.oppgave.Egenskap.VERGEMÅL
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.person.HentEnhetløsning
-import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
@@ -50,7 +50,7 @@ internal class OpprettSaksbehandleroppgave(
     private val behovData: GodkjenningsbehovData,
     private val oppgaveService: OppgaveService,
     private val automatisering: Automatisering,
-    private val personDao: PersonDao,
+    private val personRepository: PersonRepository,
     private val risikovurderingDao: RisikovurderingDao,
     private val egenAnsattDao: EgenAnsattDao,
     private val utbetalingtype: Utbetalingtype,
@@ -77,7 +77,7 @@ internal class OpprettSaksbehandleroppgave(
 
         if (egenAnsattDao.erEgenAnsatt(fødselsnummer) == true) egenskaper.add(EGEN_ANSATT)
 
-        val adressebeskyttelse = personDao.findAdressebeskyttelse(fødselsnummer)
+        val adressebeskyttelse = personRepository.finnAdressebeskyttelse(fødselsnummer)
         when (adressebeskyttelse) {
             Adressebeskyttelse.StrengtFortrolig,
             Adressebeskyttelse.StrengtFortroligUtland,
@@ -95,7 +95,7 @@ internal class OpprettSaksbehandleroppgave(
         if (automatisering.erStikkprøve(vedtaksperiodeId, hendelseId)) egenskaper.add(STIKKPRØVE)
         if (!egenskaper.contains(REVURDERING) && risikovurderingDao.kreverSupersaksbehandler(vedtaksperiodeId)) egenskaper.add(RISK_QA)
         if (vergemålDao.harVergemål(fødselsnummer) == true) egenskaper.add(VERGEMÅL)
-        if (HentEnhetløsning.erEnhetUtland(personDao.finnEnhetId(fødselsnummer))) egenskaper.add(UTLAND)
+        if (HentEnhetløsning.erEnhetUtland(personRepository.finnEnhetId(fødselsnummer))) egenskaper.add(UTLAND)
 
         when {
             utbetaling.delvisRefusjon() -> egenskaper.add(DELVIS_REFUSJON)

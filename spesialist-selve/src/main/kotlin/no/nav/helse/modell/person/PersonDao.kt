@@ -239,7 +239,7 @@ internal class PersonDao(
         run(queryOf(query, fødselsnummer.toLong()).asUpdate)
     }
 
-    internal fun findAdressebeskyttelse(fødselsnummer: String): Adressebeskyttelse? =
+    override fun finnAdressebeskyttelse(fødselsnummer: String): Adressebeskyttelse? =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val adressebeskyttelseQuery = """
@@ -463,7 +463,7 @@ internal class PersonDao(
         },
     )
 
-    internal fun finnEnhetId(fødselsnummer: String) =
+    override fun finnEnhetId(fødselsnummer: String) =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val statement = "SELECT enhet_ref FROM person where fodselsnummer = ?;"

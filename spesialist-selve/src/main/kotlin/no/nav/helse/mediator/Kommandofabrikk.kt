@@ -269,7 +269,7 @@ internal class Kommandofabrikk(
     internal fun utbetalingAnnullert(hendelse: UtbetalingAnnullert): UtbetalingAnnullertCommand =
         UtbetalingAnnullertCommand(
             fødselsnummer = hendelse.fødselsnummer(),
-            personDao = personDao,
+            personRepository = personDao,
             snapshotDao = snapshotDao,
             snapshotClient = snapshotClient,
         )
@@ -353,7 +353,7 @@ internal class Kommandofabrikk(
             automatisering = automatisering,
             vedtakDao = vedtakDao,
             commandContextDao = commandContextDao,
-            personDao = personDao,
+            personRepository = personDao,
             inntektskilderRepository = InntektskilderDao(dataSource),
             arbeidsforholdDao = arbeidsforholdDao,
             egenAnsattDao = egenAnsattDao,

@@ -45,30 +45,26 @@ internal class TransactionalInntektskilderDaoTest : DatabaseIntegrationTest() {
                     ),
                 )
 
-                val funnet = transaction.finnInntektskilder(listOf(organisasjonsnummer1, organisasjonsnummer2))
-                val første = funnet[0]
-                val andre = funnet[1]
-                assertEquals(2, funnet.size)
-                assertEquals(organisasjonsnummer1, første.orgnummer)
-                assertEquals(organisasjonsnummer2, andre.orgnummer)
+                val første = transaction.finnInntektskilde(organisasjonsnummer1)
+                val andre = transaction.finnInntektskilde(organisasjonsnummer2)
+                assertEquals(organisasjonsnummer1, første?.orgnummer)
+                assertEquals(organisasjonsnummer2, andre?.orgnummer)
             }
         }
     }
 
-    private fun TransactionalSession.finnInntektskilder(orgnummer: List<String>): List<ArbeidsgiverDto> {
-        val spørsmålstegn = orgnummer.joinToString { "?" }
-
+    private fun TransactionalSession.finnInntektskilde(orgnummer: String): ArbeidsgiverDto? {
         @Language("PostgreSQL")
-        val query = "select orgnummer, navn_ref, bransjer_ref from arbeidsgiver where orgnummer in ($spørsmålstegn)"
+        val query = "select orgnummer, navn_ref, bransjer_ref from arbeidsgiver where orgnummer = :orgnummer"
         return run(
-            queryOf(query, *orgnummer.map { it.toLong() }.toTypedArray())
+            queryOf(query, mapOf("orgnummer" to orgnummer.toLong()))
                 .map { row ->
                     ArbeidsgiverDto(
                         orgnummer = row.string("orgnummer"),
                         navnRef = row.long("navn_ref"),
                         bransjerRef = row.long("bransjer_ref"),
                     )
-                }.asList,
+                }.asSingle
         )
     }
 

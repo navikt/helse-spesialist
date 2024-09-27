@@ -133,7 +133,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter oppgave med egen oppgavetype for fortrolig adresse`() {
-        every { personDao.findAdressebeskyttelse(FNR) } returns Adressebeskyttelse.Fortrolig
+        every { personDao.finnAdressebeskyttelse(FNR) } returns Adressebeskyttelse.Fortrolig
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
@@ -144,7 +144,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter oppgave med egen oppgavetype for strengt fortrolig adresse`() {
-        every { personDao.findAdressebeskyttelse(FNR) } returns Adressebeskyttelse.StrengtFortrolig
+        every { personDao.finnAdressebeskyttelse(FNR) } returns Adressebeskyttelse.StrengtFortrolig
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
@@ -155,7 +155,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter oppgave med egen oppgavetype for strengt fortrolig adresse utland`() {
-        every { personDao.findAdressebeskyttelse(FNR) } returns Adressebeskyttelse.StrengtFortroligUtland
+        every { personDao.finnAdressebeskyttelse(FNR) } returns Adressebeskyttelse.StrengtFortroligUtland
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
@@ -399,7 +399,7 @@ internal class OpprettSaksbehandleroppgaveTest {
     ) = OpprettSaksbehandleroppgave(
         oppgaveService = oppgaveService,
         automatisering = automatisering,
-        personDao = personDao,
+        personRepository = personDao,
         risikovurderingDao = risikovurderingDao,
         egenAnsattDao = egenAnsattDao,
         utbetalingtype = utbetalingstype,

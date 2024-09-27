@@ -129,7 +129,7 @@ internal class VurderAutomatiskAvvisningTest {
         kanAvvises: Boolean = true,
         fødselsnummer: String = "12345678910",
     ) = VurderAutomatiskAvvisning(
-        personDao = personDao,
+        personRepository = personDao,
         vergemålDao = vergemålDao,
         godkjenningMediator = godkjenningMediator,
         utbetaling = Utbetaling(utbetalingId, 1000, 1000, utbetalingstype),

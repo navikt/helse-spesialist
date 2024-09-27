@@ -1398,7 +1398,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         adressebeskyttelse: Adressebeskyttelse?,
     ) {
-        assertEquals(adressebeskyttelse, PersonDao(dataSource).findAdressebeskyttelse(fødselsnummer))
+        assertEquals(adressebeskyttelse, PersonDao(dataSource).finnAdressebeskyttelse(fødselsnummer))
     }
 
     protected fun assertNyttSnapshot(block: () -> Unit) {

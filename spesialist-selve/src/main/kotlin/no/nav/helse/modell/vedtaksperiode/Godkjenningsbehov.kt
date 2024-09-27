@@ -41,7 +41,6 @@ import no.nav.helse.modell.kommando.VurderBehovForTotrinnskontroll
 import no.nav.helse.modell.kommando.VurderVidereBehandlingAvGodkjenningsbehov
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.Person
-import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.risiko.VurderVurderingsmomenter
@@ -217,7 +216,7 @@ internal class GodkjenningsbehovCommand(
     automatisering: Automatisering,
     vedtakDao: VedtakDao,
     commandContextDao: CommandContextDao,
-    personDao: PersonDao,
+    personRepository: PersonRepository,
     inntektskilderRepository: InntektskilderRepository,
     arbeidsforholdDao: ArbeidsforholdDao,
     egenAnsattDao: EgenAnsattDao,
@@ -284,7 +283,7 @@ internal class GodkjenningsbehovCommand(
                 førsteKjenteDagFinner = førsteKjenteDagFinner,
                 inntektskilderRepository = inntektskilderRepository,
                 inntektskilder = inntektskilder,
-                personRepository = personDao,
+                personRepository = personRepository,
                 arbeidsforholdDao = arbeidsforholdDao,
                 snapshotDao = snapshotDao,
                 snapshotClient = snapshotClient,
@@ -302,7 +301,7 @@ internal class GodkjenningsbehovCommand(
             VurderEnhetUtland(
                 fødselsnummer = behovData.fødselsnummer,
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
-                personDao = personDao,
+                personRepository = personRepository,
                 sykefraværstilfelle = sykefraværstilfelle,
             ),
             VurderÅpenGosysoppgave(
@@ -322,7 +321,7 @@ internal class GodkjenningsbehovCommand(
                 utbetaling = utbetaling,
             ),
             VurderAutomatiskAvvisning(
-                personDao = personDao,
+                personRepository = personRepository,
                 vergemålDao = vergemålDao,
                 godkjenningMediator = godkjenningMediator,
                 utbetaling = utbetaling,
@@ -339,7 +338,7 @@ internal class GodkjenningsbehovCommand(
                 behovData = behovData,
                 oppgaveService = oppgaveService,
                 automatisering = automatisering,
-                personDao = personDao,
+                personRepository = personRepository,
                 risikovurderingDao = risikovurderingDao,
                 egenAnsattDao = egenAnsattDao,
                 utbetalingtype = behovData.utbetalingtype,
@@ -367,7 +366,7 @@ internal class GodkjenningsbehovCommand(
             PersisterInntektCommand(
                 fødselsnummer = behovData.fødselsnummer,
                 skjæringstidspunkt = behovData.skjæringstidspunkt,
-                personRepository = personDao,
+                personRepository = personRepository,
             ),
         )
 }

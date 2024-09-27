@@ -1,19 +1,19 @@
 package no.nav.helse.modell.automatisering
 
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
 import no.nav.helse.modell.person.HentEnhetløsning
-import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vergemal.VergemålDao
 import org.slf4j.LoggerFactory
 
 internal class VurderAutomatiskAvvisning(
-    private val personDao: PersonDao,
+    private val personRepository: PersonRepository,
     private val vergemålDao: VergemålDao,
     private val godkjenningMediator: GodkjenningMediator,
     private val utbetaling: Utbetaling,
@@ -24,7 +24,7 @@ internal class VurderAutomatiskAvvisning(
         val vedtaksperiodeId = godkjenningsbehov.vedtaksperiodeId
         val kanAvvises = godkjenningsbehov.kanAvvises
 
-        val tilhørerEnhetUtland = HentEnhetløsning.erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
+        val tilhørerEnhetUtland = HentEnhetløsning.erEnhetUtland(personRepository.finnEnhetId(fødselsnummer))
         val avvisGrunnetEnhetUtland = tilhørerEnhetUtland && kanAvvises
         val underVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
         val avvisGrunnetVergemål = underVergemål && kanAvvises

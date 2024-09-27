@@ -57,7 +57,7 @@ internal class AutomatiseringTest {
     private val åpneGosysOppgaverDaoMock = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val personDaoMock = mockk<PersonDao>(relaxed = true) {
-        every { findAdressebeskyttelse(any()) } returns Adressebeskyttelse.Ugradert
+        every { finnAdressebeskyttelse(any()) } returns Adressebeskyttelse.Ugradert
     }
     private val automatiseringDaoMock = mockk<AutomatiseringDao>(relaxed = true)
     private val vergemålDaoMock = mockk<VergemålDao>(relaxed = true)
@@ -319,7 +319,7 @@ internal class AutomatiseringTest {
     fun `tar ikke stikkprøve når det er gradert adresse`() {
         stikkprøveFullRefusjonEnArbeidsgiver = true
         gårTilManuell()
-        every { personDaoMock.findAdressebeskyttelse(any()) } returns Adressebeskyttelse.Fortrolig
+        every { personDaoMock.finnAdressebeskyttelse(any()) } returns Adressebeskyttelse.Fortrolig
         gårAutomatisk()
     }
 

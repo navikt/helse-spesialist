@@ -65,6 +65,10 @@ internal class TransactionalPersonDao(
         throw OperationNotSupportedException()
     }
 
+    override fun finnEnhetId(fødselsnummer: String): String = throw OperationNotSupportedException()
+
+    override fun finnAdressebeskyttelse(fødselsnummer: String): Adressebeskyttelse? = throw OperationNotSupportedException()
+
     override fun finnPersonMedFødselsnummer(fødselsnummer: String): Long? = throw OperationNotSupportedException()
 
     override fun finnPersoninfoRef(fødselsnummer: String): Long? = throw OperationNotSupportedException()

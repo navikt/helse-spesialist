@@ -107,7 +107,7 @@ internal class Automatisering(
             }
         }
 
-        if (egenAnsattDao.erEgenAnsatt(fødselsnummer) != true && personDao.findAdressebeskyttelse(fødselsnummer) == Adressebeskyttelse.Ugradert) {
+        if (egenAnsattDao.erEgenAnsatt(fødselsnummer) != true && personDao.finnAdressebeskyttelse(fødselsnummer) == Adressebeskyttelse.Ugradert) {
             avgjørStikkprøve(erUTS, flereArbeidsgivere, erFørstegangsbehandling)?.let {
                 tilStikkprøve(it, utfallslogger, vedtaksperiodeId, hendelseId, utbetaling.utbetalingId)
                 return@utfør

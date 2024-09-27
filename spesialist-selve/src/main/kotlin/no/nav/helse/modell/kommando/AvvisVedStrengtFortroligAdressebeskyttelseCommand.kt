@@ -17,7 +17,7 @@ internal class AvvisVedStrengtFortroligAdressebeskyttelseCommand(
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
         val adressebeskyttelse =
-            checkNotNull(personDao.findAdressebeskyttelse(godkjenningsbehov.fødselsnummer)) {
+            checkNotNull(personDao.finnAdressebeskyttelse(godkjenningsbehov.fødselsnummer)) {
                 "Forventer at det fins adressebeskyttelse i databasen når denne kommandoen kjører"
             }
         if (adressebeskyttelse !in setOf(StrengtFortrolig, StrengtFortroligUtland)) {

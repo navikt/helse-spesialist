@@ -51,7 +51,7 @@ internal class VurderEnhetUtlandTest {
         VurderEnhetUtland(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
-            personDao = personDao,
+            personRepository = personDao,
             sykefraværstilfelle = sykefraværstilfelle,
         )
 
