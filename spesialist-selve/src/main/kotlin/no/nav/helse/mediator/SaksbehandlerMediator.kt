@@ -163,7 +163,6 @@ internal class SaksbehandlerMediator(
                 is no.nav.helse.modell.saksbehandler.handlinger.FjernPåVentUtenHistorikkinnslag ->
                     fjernFraPåVentUtenHistorikkinnslag(
                         modellhandling,
-                        saksbehandler,
                     )
             }
             sikkerlogg.info(
@@ -218,7 +217,7 @@ internal class SaksbehandlerMediator(
                     NotatType.PaaVent,
                 )?.toInt()
             periodehistorikkDao.lagre(LEGG_PA_VENT, saksbehandler.oid(), handling.oppgaveId, lagretNotatId)
-            oppgaveService.håndter(handling, saksbehandler)
+            oppgaveService.leggPåVent(handling, saksbehandler)
             PåVentRepository(påVentDao).leggPåVent(saksbehandler.oid(), handling)
         } catch (e: Modellfeil) {
             throw e.tilApiversjon()
@@ -235,7 +234,7 @@ internal class SaksbehandlerMediator(
         }
         try {
             periodehistorikkDao.lagre(FJERN_FRA_PA_VENT, saksbehandler.oid(), handling.oppgaveId)
-            oppgaveService.håndter(handling, saksbehandler)
+            oppgaveService.fjernFraPåVent(handling.oppgaveId)
             PåVentRepository(påVentDao).fjernFraPåVent(handling.oppgaveId)
         } catch (e: Modellfeil) {
             throw e.tilApiversjon()
@@ -244,14 +243,13 @@ internal class SaksbehandlerMediator(
 
     private fun fjernFraPåVentUtenHistorikkinnslag(
         handling: no.nav.helse.modell.saksbehandler.handlinger.FjernPåVentUtenHistorikkinnslag,
-        saksbehandler: Saksbehandler,
     ) {
         if (!påVentDao.erPåVent(handling.oppgaveId)) {
             sikkerlogg.info("Oppgave ${handling.oppgaveId} er ikke på vent")
             return
         }
         try {
-            oppgaveService.håndter(handling, saksbehandler)
+            oppgaveService.fjernFraPåVent(handling.oppgaveId)
             PåVentRepository(påVentDao).fjernFraPåVent(handling.oppgaveId)
         } catch (e: Modellfeil) {
             throw e.tilApiversjon()

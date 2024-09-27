@@ -520,7 +520,7 @@ internal class OppgaveTest {
     fun `fjern på vent`() {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.leggPåVent(false, saksbehandlerUtenTilgang)
-        oppgave.fjernPåVent()
+        oppgave.fjernFraPåVent()
 
         inspektør(oppgave) {
             assertEquals(false, påVent)
@@ -551,7 +551,7 @@ internal class OppgaveTest {
         oppgave.register(observer)
         oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang)
         oppgave.leggPåVent(true, saksbehandlerUtenTilgang)
-        oppgave.fjernPåVent()
+        oppgave.fjernFraPåVent()
 
         assertEquals(3, observer.oppgaverEndret.size)
         assertEquals(oppgave, observer.oppgaverEndret[0])
@@ -568,27 +568,29 @@ internal class OppgaveTest {
     fun `fra og til dto`(tilstand: OppgaveDto.TilstandDto) {
         val vedtaksperiodeId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
-        val saksbehandlerDto = OppgaveDto(
-            id = nextLong(),
-            tilstand = tilstand,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-            hendelseId = UUID.randomUUID(),
-            kanAvvises = true,
-            egenskaper = EgenskapDto.entries,
-            totrinnsvurdering = TotrinnsvurderingDto(
+        val saksbehandlerDto =
+            OppgaveDto(
+                id = nextLong(),
+                tilstand = tilstand,
                 vedtaksperiodeId = vedtaksperiodeId,
-                erRetur = true,
-                saksbehandler = saksbehandler().toDto(),
-                beslutter = saksbehandler().toDto(),
                 utbetalingId = utbetalingId,
-                opprettet = LocalDateTime.now(),
-                oppdatert = LocalDateTime.now(),
-            ),
-            ferdigstiltAvOid = UUID.randomUUID(),
-            ferdigstiltAvIdent = "IDENT",
-            tildeltTil = saksbehandler().toDto()
-        )
+                hendelseId = UUID.randomUUID(),
+                kanAvvises = true,
+                egenskaper = EgenskapDto.entries,
+                totrinnsvurdering =
+                    TotrinnsvurderingDto(
+                        vedtaksperiodeId = vedtaksperiodeId,
+                        erRetur = true,
+                        saksbehandler = saksbehandler().toDto(),
+                        beslutter = saksbehandler().toDto(),
+                        utbetalingId = utbetalingId,
+                        opprettet = LocalDateTime.now(),
+                        oppdatert = LocalDateTime.now(),
+                    ),
+                ferdigstiltAvOid = UUID.randomUUID(),
+                ferdigstiltAvIdent = "IDENT",
+                tildeltTil = saksbehandler().toDto(),
+            )
 
         assertEquals(saksbehandlerDto, saksbehandlerDto.gjenopprett(TilgangskontrollForTestHarIkkeTilgang).toDto())
     }

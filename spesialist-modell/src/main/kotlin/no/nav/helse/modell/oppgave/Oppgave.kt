@@ -169,7 +169,7 @@ class Oppgave private constructor(
         oppgaveEndret()
     }
 
-    fun fjernPåVent() {
+    fun fjernFraPåVent() {
         egenskaper.remove(PÅ_VENT)
         oppgaveEndret()
     }

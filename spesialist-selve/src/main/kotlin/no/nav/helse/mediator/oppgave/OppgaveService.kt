@@ -24,12 +24,9 @@ import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
-import no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent
-import no.nav.helse.modell.saksbehandler.handlinger.FjernPåVentUtenHistorikkinnslag
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
-import no.nav.helse.modell.saksbehandler.handlinger.PåVent
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDto
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
@@ -143,15 +140,18 @@ internal class OppgaveService(
         }
     }
 
-    internal fun håndter(
-        handling: PåVent,
+    internal fun leggPåVent(
+        handling: LeggPåVent,
         saksbehandler: Saksbehandler,
     ) {
         oppgave(handling.oppgaveId) {
-            when (handling) {
-                is LeggPåVent -> this.leggPåVent(handling.skalTildeles, saksbehandler)
-                is FjernPåVent, is FjernPåVentUtenHistorikkinnslag -> this.fjernPåVent()
-            }
+            this.leggPåVent(handling.skalTildeles, saksbehandler)
+        }
+    }
+
+    internal fun fjernFraPåVent(oppgaveId: Long) {
+        oppgave(oppgaveId) {
+            this.fjernFraPåVent()
         }
     }
 
