@@ -131,7 +131,7 @@ internal class SaksbehandlerMediator(
             when (modellhandling) {
                 is Overstyring -> håndter(modellhandling, saksbehandler)
                 is Oppgavehandling -> håndter(modellhandling, saksbehandler)
-                is PåVent -> håndter(modellhandling, saksbehandler)
+                is PåVent -> error("dette burde ikke skje")
                 is Personhandling -> håndter(modellhandling, saksbehandler)
                 is Annullering -> håndter(modellhandling, saksbehandler)
                 else -> modellhandling.utførAv(saksbehandler)
@@ -159,7 +159,15 @@ internal class SaksbehandlerMediator(
             ),
         ) {
             sikkerlogg.info("Utfører handling ${modellhandling.loggnavn()} på vegne av saksbehandler $saksbehandler")
-            håndter(modellhandling, saksbehandler)
+            when (modellhandling) {
+                is no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent -> leggPåVent(modellhandling, saksbehandler)
+                is no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent -> fjernPåVent(modellhandling, saksbehandler)
+                is no.nav.helse.modell.saksbehandler.handlinger.FjernPåVentUtenHistorikkinnslag ->
+                    fjernPåVentUtenHistorikkinnslag(
+                        modellhandling,
+                        saksbehandler,
+                    )
+            }
             sikkerlogg.info("Handling ${modellhandling.loggnavn()} utført")
         }
     }
@@ -197,29 +205,19 @@ internal class SaksbehandlerMediator(
         throw e.tilApiversjon()
     }
 
-    private fun håndter(
-        handling: PåVent,
+    private fun leggPåVent(
+        handling: no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent,
         saksbehandler: Saksbehandler,
     ) {
         try {
-            when (handling) {
-                is no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent -> {
-                    val lagretNotatId =
-                        notatRepository.lagreForOppgaveId(
-                            handling.oppgaveId,
-                            handling.notatTekst,
-                            saksbehandler.oid(),
-                            NotatType.PaaVent,
-                        )?.toInt()
-                    periodehistorikkDao.lagre(LEGG_PA_VENT, saksbehandler.oid(), handling.oppgaveId, lagretNotatId)
-                }
-
-                is no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent ->
-                    if (påVentDao.erPåVent(handling.oppgaveId)) {
-                        periodehistorikkDao.lagre(FJERN_FRA_PA_VENT, saksbehandler.oid(), handling.oppgaveId)
-                    }
-                is no.nav.helse.modell.saksbehandler.handlinger.FjernPåVentUtenHistorikkinnslag -> Unit
-            }
+            val lagretNotatId =
+                notatRepository.lagreForOppgaveId(
+                    handling.oppgaveId,
+                    handling.notatTekst,
+                    saksbehandler.oid(),
+                    NotatType.PaaVent,
+                )?.toInt()
+            periodehistorikkDao.lagre(LEGG_PA_VENT, saksbehandler.oid(), handling.oppgaveId, lagretNotatId)
             oppgaveService.håndter(handling, saksbehandler)
             PåVentRepository(påVentDao).apply {
                 this.lagre(
@@ -230,6 +228,52 @@ internal class SaksbehandlerMediator(
             sikkerlogg.info(
                 "Utfører handling ${handling.loggnavn()} på oppgave ${handling.oppgaveId} på vegne av saksbehandler $saksbehandler",
             )
+        } catch (e: Modellfeil) {
+            throw e.tilApiversjon()
+        }
+    }
+
+    private fun fjernPåVent(
+        handling: no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent,
+        saksbehandler: Saksbehandler,
+    ) {
+        if (!påVentDao.erPåVent(handling.oppgaveId)) {
+            sikkerlogg.info("Oppgave ${handling.oppgaveId} er ikke på vent")
+            return
+        }
+        try {
+            periodehistorikkDao.lagre(FJERN_FRA_PA_VENT, saksbehandler.oid(), handling.oppgaveId)
+            oppgaveService.håndter(handling, saksbehandler)
+            PåVentRepository(påVentDao).apply {
+                this.lagre(
+                    påVent = handling,
+                    saksbehandlerOid = saksbehandler.oid(),
+                )
+            }
+            sikkerlogg.info(
+                "Utfører handling ${handling.loggnavn()} på oppgave ${handling.oppgaveId} på vegne av saksbehandler $saksbehandler",
+            )
+        } catch (e: Modellfeil) {
+            throw e.tilApiversjon()
+        }
+    }
+
+    private fun fjernPåVentUtenHistorikkinnslag(
+        handling: no.nav.helse.modell.saksbehandler.handlinger.FjernPåVentUtenHistorikkinnslag,
+        saksbehandler: Saksbehandler,
+    ) {
+        if (!påVentDao.erPåVent(handling.oppgaveId)) {
+            sikkerlogg.info("Oppgave ${handling.oppgaveId} er ikke på vent")
+            return
+        }
+        try {
+            oppgaveService.håndter(handling, saksbehandler)
+            PåVentRepository(påVentDao).apply {
+                this.lagre(
+                    påVent = handling,
+                    saksbehandlerOid = saksbehandler.oid(),
+                )
+            }
         } catch (e: Modellfeil) {
             throw e.tilApiversjon()
         }
