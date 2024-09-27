@@ -29,6 +29,6 @@ internal class HentEnhetløsningTest {
     fun `oppdatere enhet`() {
         val enhet = HentEnhetløsning(ENHET_SVALBARD)
         enhet.oppdater(personDao, FNR)
-        verify(exactly = 1) { personDao.updateEnhet(FNR, ENHET_SVALBARD.toInt()) }
+        verify(exactly = 1) { personDao.oppdaterEnhet(FNR, ENHET_SVALBARD.toInt()) }
     }
 }

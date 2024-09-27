@@ -1,11 +1,16 @@
 package no.nav.helse.db
 
+import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.modell.person.PersonDto
 import no.nav.helse.modell.person.toFødselsnummer
+import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import no.nav.helse.spesialist.typer.Kjønn
 import org.intellij.lang.annotations.Language
+import java.time.LocalDate
+import javax.naming.OperationNotSupportedException
 
 internal class TransactionalPersonDao(
     private val transactionalSession: TransactionalSession,
@@ -17,6 +22,34 @@ internal class TransactionalPersonDao(
                 aktørId = it.aktørId,
             )
         }
+
+    override fun finnEnhetSistOppdatert(fødselsnummer: String): LocalDate = throw OperationNotSupportedException()
+
+    override fun oppdaterEnhet(
+        fødselsnummer: String,
+        enhetNr: Int,
+    ): Int = throw OperationNotSupportedException()
+
+    override fun finnITUtbetalingsperioderSistOppdatert(fødselsnummer: String): LocalDate = throw OperationNotSupportedException()
+
+    override fun upsertInfotrygdutbetalinger(
+        fødselsnummer: String,
+        utbetalinger: JsonNode,
+    ): Long = throw OperationNotSupportedException()
+
+    override fun upsertPersoninfo(
+        fødselsnummer: String,
+        fornavn: String,
+        mellomnavn: String?,
+        etternavn: String,
+        fødselsdato: LocalDate,
+        kjønn: Kjønn,
+        adressebeskyttelse: Adressebeskyttelse,
+    ) {
+        throw OperationNotSupportedException()
+    }
+
+    override fun finnPersoninfoSistOppdatert(fødselsnummer: String): LocalDate = throw OperationNotSupportedException()
 
     override fun lagreMinimalPerson(minimalPerson: MinimalPersonDto) {
         @Language("PostgreSQL")

@@ -1,5 +1,7 @@
 package no.nav.helse.modell.person
 
+import no.nav.helse.db.PersonRepository
+
 internal class HentEnhetløsning(private val enhetNr: String) {
     internal companion object {
         private val UTLANDSENHETER = setOf("0393", "2101")
@@ -22,7 +24,7 @@ internal class HentEnhetløsning(private val enhetNr: String) {
     )
 
     fun oppdater(
-        personDao: PersonDao,
+        personRepository: PersonRepository,
         fødselsnummer: String,
-    ) = personDao.updateEnhet(fødselsnummer, enhetNr.toInt())
+    ) = personRepository.oppdaterEnhet(fødselsnummer, enhetNr.toInt())
 }

@@ -72,7 +72,7 @@ internal class OppdaterPersoninfoCommandTest {
     fun `oppdaterer ingenting når informasjonen er ny nok`() {
         val context = CommandContext(UUID.randomUUID())
         val command = OppdaterPersoninfoCommand(FNR, personDao, force = false)
-        every { personDao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
+        every { personDao.finnPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
         assertTrue(command.execute(context))
         verify(exactly = 0) { personDao.upsertPersoninfo(any(), any(), any(), any(), any(), any(), any()) }
     }
@@ -83,7 +83,7 @@ internal class OppdaterPersoninfoCommandTest {
         val command = OppdaterPersoninfoCommand(FNR, personDao, force = true)
         val løsning = spyk(HentPersoninfoløsning(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE))
         context.add(løsning)
-        every { personDao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
+        every { personDao.finnPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
         assertTrue(command.execute(context))
         verify(exactly = 1) { løsning.oppdater(personDao, FNR) }
         verify(exactly = 1) { personDao.upsertPersoninfo(any(), any(), any(), any(), any(), any(), any()) }
@@ -91,8 +91,8 @@ internal class OppdaterPersoninfoCommandTest {
 
 
     private fun utdatertPersoninfo() {
-        every { personDao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
-        every { personDao.findEnhetSistOppdatert(FNR) } returns LocalDate.now()
-        every { personDao.findITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now()
+        every { personDao.finnPersoninfoSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
+        every { personDao.finnEnhetSistOppdatert(FNR) } returns LocalDate.now()
+        every { personDao.finnITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now()
     }
 }

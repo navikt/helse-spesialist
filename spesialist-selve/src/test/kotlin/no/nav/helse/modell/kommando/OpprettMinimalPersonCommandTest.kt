@@ -1,6 +1,6 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.PersonRepositoryMock
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -45,14 +45,13 @@ internal class OpprettMinimalPersonCommandTest {
         aktørId: String = lagAktørId(),
         minimalPersonDto: MinimalPersonDto?,
     ): OpprettMinimalPersonCommand {
-        val repository =
-            object : PersonRepository {
-                override fun finnMinimalPerson(fødselsnummer: String): MinimalPersonDto? = minimalPersonDto
+        val repository = object : PersonRepositoryMock() {
+            override fun finnMinimalPerson(fødselsnummer: String): MinimalPersonDto? = minimalPersonDto
 
-                override fun lagreMinimalPerson(minimalPerson: MinimalPersonDto) {
-                    lagredePersoner.add(minimalPerson)
-                }
+            override fun lagreMinimalPerson(minimalPerson: MinimalPersonDto) {
+                lagredePersoner.add(minimalPerson)
             }
+        }
         return OpprettMinimalPersonCommand(fødselsnummer, aktørId, repository)
     }
 }

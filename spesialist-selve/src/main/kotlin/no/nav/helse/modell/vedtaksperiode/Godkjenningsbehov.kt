@@ -387,7 +387,7 @@ private class ForberedVisningCommand(
             OppdaterPersonCommand(
                 fødselsnummer = fødselsnummer,
                 førsteKjenteDagFinner = førsteKjenteDagFinner,
-                personDao = personDao,
+                personRepository = personDao,
             ),
             OpprettEllerOppdaterInntektskilder(
                 inntektskilder = inntektskilder,

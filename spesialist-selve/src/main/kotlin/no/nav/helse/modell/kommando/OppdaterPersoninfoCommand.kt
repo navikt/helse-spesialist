@@ -1,13 +1,13 @@
 package no.nav.helse.modell.kommando
 
+import no.nav.helse.db.PersonRepository
 import no.nav.helse.modell.person.HentPersoninfoløsning
-import no.nav.helse.modell.person.PersonDao
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 internal class OppdaterPersoninfoCommand(
     private val fødselsnummer: String,
-    private val personDao: PersonDao,
+    private val personRepository: PersonRepository,
     private val force: Boolean,
 ) : Command {
     private companion object {
@@ -16,12 +16,12 @@ internal class OppdaterPersoninfoCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        if (erOppdatert(personDao, fødselsnummer) && !force) return ignorer()
-        return behandle(context, personDao, fødselsnummer)
+        if (erOppdatert(personRepository, fødselsnummer) && !force) return ignorer()
+        return behandle(context, personRepository, fødselsnummer)
     }
 
     override fun resume(context: CommandContext): Boolean {
-        return behandle(context, personDao, fødselsnummer)
+        return behandle(context, personRepository, fødselsnummer)
     }
 
     private fun ignorer(): Boolean {
@@ -30,21 +30,21 @@ internal class OppdaterPersoninfoCommand(
     }
 
     private fun erOppdatert(
-        personDao: PersonDao,
+        personRepository: PersonRepository,
         fødselsnummer: String,
     ): Boolean {
-        val sistOppdatert = personDao.findPersoninfoSistOppdatert(fødselsnummer)
+        val sistOppdatert = personRepository.finnPersoninfoSistOppdatert(fødselsnummer)
         return sistOppdatert != null && sistOppdatert > LocalDate.now().minusDays(14)
     }
 
     private fun behandle(
         context: CommandContext,
-        personDao: PersonDao,
+        personRepository: PersonRepository,
         fødselsnummer: String,
     ): Boolean {
         val personinfo = context.get<HentPersoninfoløsning>() ?: return trengerMerInformasjon(context)
         log.info("oppdaterer personinfo")
-        personinfo.oppdater(personDao, fødselsnummer)
+        personinfo.oppdater(personRepository, fødselsnummer)
         return true
     }
 

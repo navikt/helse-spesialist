@@ -50,9 +50,9 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
         val (_, personinfoId, enhetId, infotrygdutbetalingerId) = opprettPerson()
         assertNotNull(personDao.findPersonByFødselsnummer(FNR))
         assertEquals(1, infotrygdUtbetalinger().size)
-        assertEquals(LocalDate.now(), personDao.findEnhetSistOppdatert(FNR))
-        assertEquals(LocalDate.now(), personDao.findITUtbetalingsperioderSistOppdatert(FNR))
-        assertEquals(LocalDate.now(), personDao.findPersoninfoSistOppdatert(FNR))
+        assertEquals(LocalDate.now(), personDao.finnEnhetSistOppdatert(FNR))
+        assertEquals(LocalDate.now(), personDao.finnITUtbetalingsperioderSistOppdatert(FNR))
+        assertEquals(LocalDate.now(), personDao.finnPersoninfoSistOppdatert(FNR))
         assertEquals(1, person().size)
         person().first().assertEquals(FNR, AKTØR, personinfoId, enhetId, infotrygdutbetalingerId)
     }
@@ -99,7 +99,7 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
     fun `oppdaterer enhet`() {
         opprettPerson()
         val nyEnhet = "2100".toInt()
-        personDao.updateEnhet(FNR, nyEnhet)
+        personDao.oppdaterEnhet(FNR, nyEnhet)
         person().first().assertEnhet(nyEnhet)
     }
 

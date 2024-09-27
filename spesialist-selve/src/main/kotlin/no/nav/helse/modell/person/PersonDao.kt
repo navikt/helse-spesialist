@@ -5,18 +5,27 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
+import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.typer.Kjønn
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import java.time.LocalDateTime
+import javax.naming.OperationNotSupportedException
 import javax.sql.DataSource
 
 internal class PersonDao(
     private val dataSource: DataSource,
-) {
+) : PersonRepository {
+    override fun finnMinimalPerson(fødselsnummer: String): MinimalPersonDto = throw OperationNotSupportedException()
+
+    override fun lagreMinimalPerson(minimalPerson: MinimalPersonDto) {
+        throw OperationNotSupportedException()
+    }
+
     internal fun findPersonByFødselsnummer(fødselsnummer: String): Long? =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
@@ -35,7 +44,7 @@ internal class PersonDao(
             session.run(queryOf(query, fødselsnummer.toLong()).map { it.string("aktor_id") }.asSingle)
         }
 
-    internal fun findPersoninfoSistOppdatert(fødselsnummer: String) =
+    override fun finnPersoninfoSistOppdatert(fødselsnummer: String) =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query = "SELECT personinfo_oppdatert FROM person WHERE fodselsnummer=?;"
@@ -87,7 +96,7 @@ internal class PersonDao(
         )
     }
 
-    fun upsertPersoninfo(
+    override fun upsertPersoninfo(
         fødselsnummer: String,
         fornavn: String,
         mellomnavn: String?,
@@ -95,13 +104,24 @@ internal class PersonDao(
         fødselsdato: LocalDate,
         kjønn: Kjønn,
         adressebeskyttelse: Adressebeskyttelse,
-    ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-        session.transaction { transaction ->
-            transaction
-                .finnPersonInfoRef(fødselsnummer)
-                ?.also {
-                    transaction.updatePersonInfo(
-                        it,
+    ) {
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            session.transaction { transaction ->
+                transaction
+                    .finnPersonInfoRef(fødselsnummer)
+                    ?.also {
+                        transaction.updatePersonInfo(
+                            it,
+                            fornavn,
+                            mellomnavn,
+                            etternavn,
+                            fødselsdato,
+                            kjønn,
+                            adressebeskyttelse,
+                            fødselsnummer,
+                        )
+                    }
+                    ?: transaction.insertPersoninfo(
                         fornavn,
                         mellomnavn,
                         etternavn,
@@ -110,16 +130,7 @@ internal class PersonDao(
                         adressebeskyttelse,
                         fødselsnummer,
                     )
-                }
-                ?: transaction.insertPersoninfo(
-                    fornavn,
-                    mellomnavn,
-                    etternavn,
-                    fødselsdato,
-                    kjønn,
-                    adressebeskyttelse,
-                    fødselsnummer,
-                )
+            }
         }
     }
 
@@ -243,7 +254,7 @@ internal class PersonDao(
             )
         }
 
-    internal fun findEnhetSistOppdatert(fødselsnummer: String) =
+    override fun finnEnhetSistOppdatert(fødselsnummer: String) =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query = "SELECT enhet_ref_oppdatert FROM person WHERE fodselsnummer=?;"
@@ -255,7 +266,7 @@ internal class PersonDao(
             )
         }
 
-    internal fun updateEnhet(
+    override fun oppdaterEnhet(
         fødselsnummer: String,
         enhetNr: Int,
     ) = sessionOf(dataSource).use { session ->
@@ -273,7 +284,7 @@ internal class PersonDao(
         )
     }
 
-    internal fun findITUtbetalingsperioderSistOppdatert(fødselsnummer: String) =
+    override fun finnITUtbetalingsperioderSistOppdatert(fødselsnummer: String) =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query = "SELECT infotrygdutbetalinger_oppdatert FROM person WHERE fodselsnummer=?;"
@@ -331,7 +342,7 @@ internal class PersonDao(
         }
     }
 
-    fun upsertInfotrygdutbetalinger(
+    override fun upsertInfotrygdutbetalinger(
         fødselsnummer: String,
         utbetalinger: JsonNode,
     ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
