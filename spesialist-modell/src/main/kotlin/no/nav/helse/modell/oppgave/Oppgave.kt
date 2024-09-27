@@ -160,12 +160,10 @@ class Oppgave private constructor(
         saksbehandler: Saksbehandler,
     ) {
         if (this.tildeltTil != saksbehandler && skalTildeles) {
-            sikkerlogg.info("$saksbehandler tildeler seg oppgave med {} i forbindelse med på vent.", kv("oppgaveId", id))
-            this.tildeltTil = saksbehandler
+            tildel(saksbehandler)
         }
         if (this.tildeltTil != null && !skalTildeles) {
-            sikkerlogg.info("$saksbehandler avmelder seg oppgave med {} i forbindelse med på vent.", kv("oppgaveId", id))
-            this.tildeltTil = null
+            avmeld(saksbehandler)
         }
         egenskaper.add(PÅ_VENT)
         oppgaveEndret()
