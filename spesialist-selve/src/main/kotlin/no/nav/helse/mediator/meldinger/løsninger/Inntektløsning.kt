@@ -1,9 +1,9 @@
 package no.nav.helse.mediator.meldinger.løsninger
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
-import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -18,10 +18,10 @@ internal class Inntektløsning(
     private val inntekter: List<Inntekter>,
 ) {
     internal fun lagre(
-        personDao: PersonDao,
+        personRepository: PersonRepository,
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate,
-    ): Long? = personDao.insertInntekter(fødselsnummer, skjæringstidspunkt, inntekter)
+    ): Long? = personRepository.lagreInntekter(fødselsnummer, skjæringstidspunkt, inntekter)
 
     internal class InntektRiver(
         private val mediator: MeldingMediator,

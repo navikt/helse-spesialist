@@ -33,6 +33,6 @@ internal class PersisterInntektløsningTest {
     fun `lagre inntekt`() {
         val inntektløsning = Inntektløsning(INNTEKTER)
         inntektløsning.lagre(personDao, FØDSELSNUMMER, SKJÆRINGSTIDSPUNKT)
-        verify(exactly = 1) { personDao.insertInntekter(FØDSELSNUMMER, SKJÆRINGSTIDSPUNKT, INNTEKTER) }
+        verify(exactly = 1) { personDao.lagreInntekter(FØDSELSNUMMER, SKJÆRINGSTIDSPUNKT, INNTEKTER) }
     }
 }

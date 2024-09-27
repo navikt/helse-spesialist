@@ -3,6 +3,7 @@ package no.nav.helse.db
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
+import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.modell.person.PersonDto
 import no.nav.helse.modell.person.toFødselsnummer
@@ -48,6 +49,25 @@ internal class TransactionalPersonDao(
     ) {
         throw OperationNotSupportedException()
     }
+
+    override fun finnInntekter(
+        fødselsnummer: String,
+        skjæringstidspunkt: LocalDate,
+    ): List<Inntekter>? {
+        throw OperationNotSupportedException()
+    }
+
+    override fun lagreInntekter(
+        fødselsnummer: String,
+        skjæringstidspunkt: LocalDate,
+        inntekter: List<Inntekter>,
+    ): Long? {
+        throw OperationNotSupportedException()
+    }
+
+    override fun finnPersonMedFødselsnummer(fødselsnummer: String): Long? = throw OperationNotSupportedException()
+
+    override fun finnPersoninfoRef(fødselsnummer: String): Long? = throw OperationNotSupportedException()
 
     override fun finnPersoninfoSistOppdatert(fødselsnummer: String): LocalDate = throw OperationNotSupportedException()
 

@@ -1,6 +1,10 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.db.PersonRepositoryMock
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.runs
+import no.nav.helse.db.PersonRepository
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -12,6 +16,7 @@ import java.util.UUID
 internal class OpprettMinimalPersonCommandTest {
     private lateinit var context: CommandContext
     private val lagredePersoner = mutableListOf<MinimalPersonDto>()
+    private val personRepository = mockk<PersonRepository>(relaxed = true)
 
     @BeforeEach
     fun setup() {
@@ -21,37 +26,27 @@ internal class OpprettMinimalPersonCommandTest {
 
     @Test
     fun `oppretter ikke person når person finnes fra før`() {
-        val fødselsnummer = lagFødselsnummer()
         val aktørId = lagAktørId()
-        val command = lagCommand(fødselsnummer, aktørId, MinimalPersonDto(fødselsnummer, aktørId))
+        val fødselsnummer = lagFødselsnummer()
+        val command = OpprettMinimalPersonCommand(fødselsnummer, aktørId, personRepository)
 
+        every { personRepository.lagreMinimalPerson(capture(lagredePersoner)) } just runs
+        every { personRepository.finnMinimalPerson(any()) } returns null
+        every { personRepository.finnMinimalPerson(fødselsnummer) } returns MinimalPersonDto(fødselsnummer, aktørId)
         assertTrue(command.execute(context))
         assertEquals(0, lagredePersoner.size)
     }
 
     @Test
     fun `oppretter person`() {
+        every { personRepository.lagreMinimalPerson(capture(lagredePersoner)) } just runs
+        every { personRepository.finnMinimalPerson(any()) } returns null
         val fødselsnummer = lagFødselsnummer()
         val aktørId = lagAktørId()
-        val command = lagCommand(fødselsnummer, aktørId, null)
+        val command = OpprettMinimalPersonCommand(fødselsnummer, aktørId, personRepository)
 
         assertTrue(command.execute(context))
         assertEquals(1, lagredePersoner.size)
         assertEquals(MinimalPersonDto(fødselsnummer, aktørId), lagredePersoner.single())
-    }
-
-    private fun lagCommand(
-        fødselsnummer: String = lagFødselsnummer(),
-        aktørId: String = lagAktørId(),
-        minimalPersonDto: MinimalPersonDto?,
-    ): OpprettMinimalPersonCommand {
-        val repository = object : PersonRepositoryMock() {
-            override fun finnMinimalPerson(fødselsnummer: String): MinimalPersonDto? = minimalPersonDto
-
-            override fun lagreMinimalPerson(minimalPerson: MinimalPersonDto) {
-                lagredePersoner.add(minimalPerson)
-            }
-        }
-        return OpprettMinimalPersonCommand(fødselsnummer, aktørId, repository)
     }
 }

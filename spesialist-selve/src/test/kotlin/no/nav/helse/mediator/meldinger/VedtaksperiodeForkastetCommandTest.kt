@@ -34,7 +34,7 @@ internal class VedtaksperiodeForkastetCommandTest {
             fødselsnummer = FNR,
             vedtaksperiodeId = VEDTAKSPERIODE,
             id = HENDELSE,
-            personDao = personDao,
+            personRepository = personDao,
             commandContextDao = commandContextDao,
             snapshotDao = snapshotDao,
             snapshotClient = graphQLClient,
@@ -50,7 +50,7 @@ internal class VedtaksperiodeForkastetCommandTest {
         val snapshot = snapshot(fødselsnummer = FNR)
         every { graphQLClient.hentSnapshot(FNR) } returns snapshot
         every { snapshotDao.lagre(FNR, snapshot.data!!.person!!) } returns 1
-        every { personDao.findPersonByFødselsnummer(FNR) } returns 1
+        every { personDao.finnPersonMedFødselsnummer(FNR) } returns 1
         assertTrue(vedtaksperiodeForkastetCommand.execute(context))
         verify(exactly = 1) { commandContextDao.avbryt(VEDTAKSPERIODE, CONTEXT) }
         verify(exactly = 1) { snapshotDao.lagre(FNR, snapshot.data!!.person!!) }

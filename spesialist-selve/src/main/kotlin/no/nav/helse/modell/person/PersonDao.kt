@@ -26,7 +26,7 @@ internal class PersonDao(
         throw OperationNotSupportedException()
     }
 
-    internal fun findPersonByFødselsnummer(fødselsnummer: String): Long? =
+    override fun finnPersonMedFødselsnummer(fødselsnummer: String): Long? =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query = "SELECT id FROM person WHERE fodselsnummer=?;"
@@ -55,7 +55,7 @@ internal class PersonDao(
             )
         }
 
-    internal fun findPersoninfoRef(fødselsnummer: String) =
+    override fun finnPersoninfoRef(fødselsnummer: String) =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query = "SELECT info_ref FROM person WHERE fodselsnummer=?;"
@@ -295,7 +295,7 @@ internal class PersonDao(
             )
         }
 
-    internal fun findInntekter(
+    override fun finnInntekter(
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate,
     ) = sessionOf(dataSource).use { session ->
@@ -316,7 +316,7 @@ internal class PersonDao(
         )
     }
 
-    internal fun insertInntekter(
+    override fun lagreInntekter(
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate,
         inntekter: List<Inntekter>,

@@ -42,7 +42,7 @@ internal class PersisterInntektCommandTest {
 
     @Test
     fun `Sender behov om inntekt ikke er lagret fra før`() {
-        every { personDao.findInntekter(any(), any()) } returns null
+        every { personDao.finnInntekter(any(), any()) } returns null
 
         val command = PersisterInntektCommand(FNR, LocalDate.now(), personDao)
 
@@ -52,7 +52,7 @@ internal class PersisterInntektCommandTest {
 
     @Test
     fun `Fullfører dersom inntekt er lagret fra før`() {
-        every { personDao.findInntekter(any(), any()) } returns inntekter()
+        every { personDao.finnInntekter(any(), any()) } returns inntekter()
 
         val command = PersisterInntektCommand(FNR, LocalDate.now(), personDao)
 
@@ -64,7 +64,7 @@ internal class PersisterInntektCommandTest {
     fun `Lagrer inntekter dersom det ikke finnes på skjæringstidspunkt for person`() {
         val skjæringtidspunkt = LocalDate.now()
 
-        every { personDao.findInntekter(FNR, skjæringtidspunkt) } returns null
+        every { personDao.finnInntekter(FNR, skjæringtidspunkt) } returns null
 
         val command = PersisterInntektCommand(FNR, skjæringtidspunkt, personDao)
 
@@ -73,7 +73,7 @@ internal class PersisterInntektCommandTest {
 
         context.add(løsning())
         assertTrue(command.resume(context))
-        verify(exactly = 1) { personDao.insertInntekter(FNR, skjæringtidspunkt, inntekter()) }
+        verify(exactly = 1) { personDao.lagreInntekter(FNR, skjæringtidspunkt, inntekter()) }
     }
 
     private fun løsning(inntekter: List<Inntekter> = inntekter()) = Inntektløsning(inntekter)

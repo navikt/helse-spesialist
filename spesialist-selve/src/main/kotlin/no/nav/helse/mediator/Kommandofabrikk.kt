@@ -253,7 +253,7 @@ internal class Kommandofabrikk(
         OppdaterPersonsnapshotCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             førsteKjenteDagFinner = { generasjonRepository.førsteKjenteDag(hendelse.fødselsnummer()) },
-            personDao = personDao,
+            personRepository = personDao,
             snapshotDao = snapshotDao,
             opptegnelseDao = opptegnelseDao,
             snapshotClient = snapshotClient,
@@ -301,7 +301,7 @@ internal class Kommandofabrikk(
             fødselsnummer = hendelse.fødselsnummer(),
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
             id = hendelse.id,
-            personDao = personDao,
+            personRepository = personDao,
             commandContextDao = commandContextDao,
             snapshotDao = snapshotDao,
             snapshotClient = snapshotClient,

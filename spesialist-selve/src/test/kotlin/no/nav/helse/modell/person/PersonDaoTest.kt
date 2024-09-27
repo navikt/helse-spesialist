@@ -48,7 +48,7 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `oppretter person`() {
         val (_, personinfoId, enhetId, infotrygdutbetalingerId) = opprettPerson()
-        assertNotNull(personDao.findPersonByFødselsnummer(FNR))
+        assertNotNull(personDao.finnPersonMedFødselsnummer(FNR))
         assertEquals(1, infotrygdUtbetalinger().size)
         assertEquals(LocalDate.now(), personDao.finnEnhetSistOppdatert(FNR))
         assertEquals(LocalDate.now(), personDao.finnITUtbetalingsperioderSistOppdatert(FNR))
@@ -122,7 +122,7 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
     fun `Lagrer inntekt`() {
         opprettPerson()
         val sekvensnummer =
-            personDao.insertInntekter(
+            personDao.lagreInntekter(
                 fødselsnummer = FNR,
                 skjæringstidspunkt = LocalDate.parse("2022-11-11"),
                 inntekter =
@@ -151,17 +151,17 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Finner riktig inntekt`() {
         opprettPerson()
-        personDao.insertInntekter(
+        personDao.lagreInntekter(
             fødselsnummer = FNR,
             skjæringstidspunkt = LocalDate.parse("2022-11-11"),
             inntekter = listOf(Inntekter(YearMonth.parse("2022-11"), listOf(Inntekter.Inntekt(20000.0, ORGNUMMER)))),
         )
-        personDao.insertInntekter(
+        personDao.lagreInntekter(
             fødselsnummer = FNR,
             skjæringstidspunkt = LocalDate.parse("2022-03-03"),
             inntekter = listOf(Inntekter(YearMonth.parse("2022-03"), listOf(Inntekter.Inntekt(20000.0, ORGNUMMER)))),
         )
-        personDao.insertInntekter(
+        personDao.lagreInntekter(
             fødselsnummer = FNR,
             skjæringstidspunkt = LocalDate.parse("2020-01-01"),
             inntekter = listOf(Inntekter(YearMonth.parse("2021-01"), listOf(Inntekter.Inntekt(20000.0, ORGNUMMER)))),
@@ -169,15 +169,15 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
 
         assertEquals(
             YearMonth.parse("2022-11"),
-            personDao.findInntekter(FNR, LocalDate.parse("2022-11-11"))!!.first().årMåned,
+            personDao.finnInntekter(FNR, LocalDate.parse("2022-11-11"))!!.first().årMåned,
         )
         assertEquals(
             YearMonth.parse("2022-03"),
-            personDao.findInntekter(FNR, LocalDate.parse("2022-03-03"))!!.first().årMåned,
+            personDao.finnInntekter(FNR, LocalDate.parse("2022-03-03"))!!.first().årMåned,
         )
         assertEquals(
             YearMonth.parse("2021-01"),
-            personDao.findInntekter(FNR, LocalDate.parse("2020-01-01"))!!.first().årMåned,
+            personDao.finnInntekter(FNR, LocalDate.parse("2020-01-01"))!!.first().årMåned,
         )
     }
 

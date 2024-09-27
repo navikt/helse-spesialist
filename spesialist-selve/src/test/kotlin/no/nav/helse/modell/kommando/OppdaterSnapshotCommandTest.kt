@@ -40,7 +40,7 @@ internal class OppdaterSnapshotCommandTest {
         snapshotClient = snapshotClient,
         snapshotDao = snapshotDao,
         fødselsnummer = FNR,
-        personDao = personDao,
+        personRepository = personDao,
     )
 
     @BeforeEach
@@ -50,7 +50,7 @@ internal class OppdaterSnapshotCommandTest {
 
     @Test
     fun `ignorer meldinger for ukjente personer`() {
-        every { personDao.findPersonByFødselsnummer(any()) } returns null
+        every { personDao.finnPersonMedFødselsnummer(any()) } returns null
         assertTrue(command.execute(context))
         verify(exactly = 0) { snapshotClient.hentSnapshot(FNR) }
         verify(exactly = 0) { snapshotDao.lagre(FNR, any()) }
@@ -58,8 +58,8 @@ internal class OppdaterSnapshotCommandTest {
 
     @Test
     fun `lagrer snapshot`() {
-        every { personDao.findPersonByFødselsnummer(any()) } returns 1L
-        every { personDao.findPersoninfoRef(any()) } returns 1L
+        every { personDao.finnPersonMedFødselsnummer(any()) } returns 1L
+        every { personDao.finnPersoninfoRef(any()) } returns 1L
         every { snapshotClient.hentSnapshot(FNR) } returns object : GraphQLClientResponse<HentSnapshot.Result> {
             override val data = HentSnapshot.Result(person = PERSON)
         }

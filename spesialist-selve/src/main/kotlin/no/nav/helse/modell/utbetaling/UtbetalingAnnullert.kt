@@ -53,7 +53,7 @@ internal class UtbetalingAnnullertCommand(
                 snapshotClient = snapshotClient,
                 snapshotDao = snapshotDao,
                 fødselsnummer = fødselsnummer,
-                personDao = personDao,
+                personRepository = personDao,
             ),
         )
 }

@@ -1,6 +1,7 @@
 package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.SnapshotDao
@@ -49,7 +50,7 @@ internal class OppdaterPersonsnapshot private constructor(
 internal class OppdaterPersonsnapshotCommand(
     fødselsnummer: String,
     førsteKjenteDagFinner: () -> LocalDate,
-    personDao: PersonDao,
+    personRepository: PersonRepository,
     snapshotDao: SnapshotDao,
     opptegnelseDao: OpptegnelseDao,
     snapshotClient: ISnapshotClient,
@@ -60,9 +61,9 @@ internal class OppdaterPersonsnapshotCommand(
                 snapshotClient = snapshotClient,
                 snapshotDao = snapshotDao,
                 fødselsnummer = fødselsnummer,
-                personDao = personDao,
+                personRepository = personRepository,
             ),
-            OppdaterInfotrygdutbetalingerHardt(fødselsnummer, personDao, førsteKjenteDagFinner),
+            OppdaterInfotrygdutbetalingerHardt(fødselsnummer, personRepository, førsteKjenteDagFinner),
             ikkesuspenderendeCommand("opprettOpptegnelse") {
                 opptegnelseDao.opprettOpptegnelse(
                     fødselsnummer,

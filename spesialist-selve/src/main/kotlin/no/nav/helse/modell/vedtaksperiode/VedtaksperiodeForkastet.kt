@@ -1,6 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
@@ -13,7 +14,6 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 import no.nav.helse.modell.person.Person
-import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
@@ -58,7 +58,7 @@ internal class VedtaksperiodeForkastetCommand(
     val fødselsnummer: String,
     val vedtaksperiodeId: UUID,
     val id: UUID,
-    personDao: PersonDao,
+    personRepository: PersonRepository,
     commandContextDao: CommandContextDao,
     snapshotDao: SnapshotDao,
     snapshotClient: ISnapshotClient,
@@ -84,7 +84,7 @@ internal class VedtaksperiodeForkastetCommand(
                 snapshotClient = snapshotClient,
                 snapshotDao = snapshotDao,
                 fødselsnummer = fødselsnummer,
-                personDao = personDao,
+                personRepository = personRepository,
             ),
         )
 }

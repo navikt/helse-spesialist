@@ -128,7 +128,7 @@ internal class MeldingMediator(
         }
         val fødselsnummer = jsonNode["fødselsnummer"]?.asText() ?: return true
         if (fødselsnummer.toDoubleOrNull() == null) return true
-        val harPerson = personDao.findPersonByFødselsnummer(fødselsnummer) != null
+        val harPerson = personDao.finnPersonMedFødselsnummer(fødselsnummer) != null
         if (!harPerson) {
             sikkerlogg.warn(
                 "Ignorerer melding med event_name: {}, for fødselsnummer: {}",

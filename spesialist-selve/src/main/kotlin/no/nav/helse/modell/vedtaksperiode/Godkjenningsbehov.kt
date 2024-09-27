@@ -3,6 +3,7 @@ package no.nav.helse.modell.vedtaksperiode
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.InntektskilderRepository
+import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
@@ -283,7 +284,7 @@ internal class GodkjenningsbehovCommand(
                 førsteKjenteDagFinner = førsteKjenteDagFinner,
                 inntektskilderRepository = inntektskilderRepository,
                 inntektskilder = inntektskilder,
-                personDao = personDao,
+                personRepository = personDao,
                 arbeidsforholdDao = arbeidsforholdDao,
                 snapshotDao = snapshotDao,
                 snapshotClient = snapshotClient,
@@ -366,7 +367,7 @@ internal class GodkjenningsbehovCommand(
             PersisterInntektCommand(
                 fødselsnummer = behovData.fødselsnummer,
                 skjæringstidspunkt = behovData.skjæringstidspunkt,
-                personDao = personDao,
+                personRepository = personDao,
             ),
         )
 }
@@ -375,7 +376,7 @@ private class ForberedVisningCommand(
     fødselsnummer: String,
     organisasjonsnummer: String,
     førsteKjenteDagFinner: () -> LocalDate,
-    personDao: PersonDao,
+    personRepository: PersonRepository,
     inntektskilder: List<no.nav.helse.modell.Inntektskilde>,
     inntektskilderRepository: InntektskilderRepository,
     arbeidsforholdDao: ArbeidsforholdDao,
@@ -387,7 +388,7 @@ private class ForberedVisningCommand(
             OppdaterPersonCommand(
                 fødselsnummer = fødselsnummer,
                 førsteKjenteDagFinner = førsteKjenteDagFinner,
-                personRepository = personDao,
+                personRepository = personRepository,
             ),
             OpprettEllerOppdaterInntektskilder(
                 inntektskilder = inntektskilder,
@@ -402,7 +403,7 @@ private class ForberedVisningCommand(
                 snapshotClient = snapshotClient,
                 snapshotDao = snapshotDao,
                 fødselsnummer = fødselsnummer,
-                personDao = personDao,
+                personRepository = personRepository,
             ),
         )
 }

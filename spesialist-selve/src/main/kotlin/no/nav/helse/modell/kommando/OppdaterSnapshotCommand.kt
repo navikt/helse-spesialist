@@ -1,7 +1,7 @@
 package no.nav.helse.modell.kommando
 
+import no.nav.helse.db.PersonRepository
 import no.nav.helse.modell.SnapshotDao
-import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
 import org.slf4j.LoggerFactory
 
@@ -9,7 +9,7 @@ internal class OppdaterSnapshotCommand(
     private val snapshotClient: ISnapshotClient,
     private val snapshotDao: SnapshotDao,
     private val fødselsnummer: String,
-    private val personDao: PersonDao,
+    private val personRepository: PersonRepository,
 ) : Command {
     private companion object {
         private val logg = LoggerFactory.getLogger(OppdaterSnapshotCommand::class.java)
@@ -19,8 +19,8 @@ internal class OppdaterSnapshotCommand(
     override fun execute(context: CommandContext): Boolean {
         // findPersoninfoRef for å se om vi kun har minimal person
         return if (
-            personDao.findPersonByFødselsnummer(fødselsnummer) != null &&
-            personDao.findPersoninfoRef(fødselsnummer) != null
+            personRepository.finnPersonMedFødselsnummer(fødselsnummer) != null &&
+            personRepository.finnPersoninfoRef(fødselsnummer) != null
         ) {
             oppdaterSnapshot()
         } else {
