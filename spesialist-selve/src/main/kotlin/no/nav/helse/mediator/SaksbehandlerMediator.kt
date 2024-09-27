@@ -148,8 +148,6 @@ internal class SaksbehandlerMediator(
         val modellhandling = handling.tilModellversjon() as PåVent
         SaksbehandlerLagrer(saksbehandlerDao).lagre(saksbehandler)
         tell(modellhandling)
-        saksbehandler.register(Saksbehandlingsmelder(rapidsConnection))
-        saksbehandler.register(Subsumsjonsmelder(versjonAvKode, rapidsConnection))
         val handlingId = UUID.randomUUID()
 
         withMDC(
