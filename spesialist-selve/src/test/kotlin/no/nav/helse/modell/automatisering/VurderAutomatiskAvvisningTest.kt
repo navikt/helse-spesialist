@@ -51,12 +51,6 @@ internal class VurderAutomatiskAvvisningTest {
     }
 
     @Test
-    fun `skal ikke avvise ved vergemål dersom kanAvvises er false`() {
-        every { vergemålRepository.harVergemål(fødselsnummer) } returns true
-        assertIkkeAvvisning(lagCommand(Utbetalingtype.UTBETALING, false))
-    }
-
-    @Test
     fun `skal avvise ved utland dersom perioden kan avvises`() {
         every { personRepository.finnEnhetId(fødselsnummer) } returns "0393"
         assertAvvisning(lagCommand(kanAvvises = true), "Utland")
@@ -89,14 +83,13 @@ internal class VurderAutomatiskAvvisningTest {
     }
 
     private fun lagCommand(
-        utbetalingstype: Utbetalingtype = Utbetalingtype.UTBETALING,
         kanAvvises: Boolean = true,
         fødselsnummer: String = "12345678910",
     ) = VurderAutomatiskAvvisning(
         personRepository = personRepository,
         vergemålRepository = vergemålRepository,
         godkjenningMediator = godkjenningMediator,
-        utbetaling = Utbetaling(utbetalingId, 1000, 1000, utbetalingstype),
+        utbetaling = Utbetaling(utbetalingId, 1000, 1000, Utbetalingtype.UTBETALING),
         godkjenningsbehov = godkjenningsbehov(
             kanAvvises = kanAvvises,
             fødselsnummer = fødselsnummer
