@@ -355,7 +355,7 @@ internal class Kommandofabrikk(
             commandContextDao = commandContextDao,
             personRepository = personDao,
             inntektskilderRepository = InntektskilderDao(dataSource),
-            arbeidsforholdDao = arbeidsforholdDao,
+            arbeidsforholdRepository = arbeidsforholdDao,
             egenAnsattDao = egenAnsattDao,
             utbetalingRepository = utbetalingDao,
             vergemålDao = vergemålDao,

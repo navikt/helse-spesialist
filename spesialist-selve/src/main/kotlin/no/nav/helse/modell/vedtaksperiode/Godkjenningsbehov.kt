@@ -1,6 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.db.ArbeidsforholdRepository
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.db.OppgaveRepository
@@ -15,7 +16,6 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.InntektskildeDto.Companion.gjenopprett
 import no.nav.helse.modell.SnapshotDao
-import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.VurderAutomatiskAvvisning
 import no.nav.helse.modell.automatisering.VurderAutomatiskInnvilgelse
@@ -218,7 +218,7 @@ internal class GodkjenningsbehovCommand(
     commandContextDao: CommandContextDao,
     personRepository: PersonRepository,
     inntektskilderRepository: InntektskilderRepository,
-    arbeidsforholdDao: ArbeidsforholdDao,
+    arbeidsforholdRepository: ArbeidsforholdRepository,
     egenAnsattDao: EgenAnsattDao,
     utbetalingRepository: UtbetalingRepository,
     vergemålDao: VergemålDao,
@@ -284,7 +284,7 @@ internal class GodkjenningsbehovCommand(
                 inntektskilderRepository = inntektskilderRepository,
                 inntektskilder = inntektskilder,
                 personRepository = personRepository,
-                arbeidsforholdDao = arbeidsforholdDao,
+                arbeidsforholdRepository = arbeidsforholdRepository,
                 snapshotDao = snapshotDao,
                 snapshotClient = snapshotClient,
             ),
@@ -378,7 +378,7 @@ private class ForberedVisningCommand(
     personRepository: PersonRepository,
     inntektskilder: List<no.nav.helse.modell.Inntektskilde>,
     inntektskilderRepository: InntektskilderRepository,
-    arbeidsforholdDao: ArbeidsforholdDao,
+    arbeidsforholdRepository: ArbeidsforholdRepository,
     snapshotDao: SnapshotDao,
     snapshotClient: ISnapshotClient,
 ) : MacroCommand() {
@@ -396,7 +396,7 @@ private class ForberedVisningCommand(
             OpprettEllerOppdaterArbeidsforhold(
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
-                arbeidsforholdRepository = arbeidsforholdDao,
+                arbeidsforholdRepository = arbeidsforholdRepository,
             ),
             OppdaterSnapshotCommand(
                 snapshotClient = snapshotClient,
