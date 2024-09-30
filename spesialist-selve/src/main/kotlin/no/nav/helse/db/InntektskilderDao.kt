@@ -47,9 +47,9 @@ internal class InntektskilderDao(
                 SELECT orgnummer, navn, bransjer, an.navn_oppdatert FROM arbeidsgiver ag
                 INNER JOIN arbeidsgiver_navn an on an.id = ag.navn_ref
                 LEFT JOIN arbeidsgiver_bransjer ab on ab.id = ag.bransjer_ref
-                WHERE orgnummer::varchar IN (${organisasjonsnumre.joinToString { "?" }})
+                WHERE orgnummer IN (${organisasjonsnumre.joinToString { "?" }})
             """,
-            *organisasjonsnumre.toTypedArray(),
+            *organisasjonsnumre.map { it.toLong() }.toTypedArray(),
         ).list {
             val organisasjonsnummer = it.string("orgnummer")
             KomplettInntektskildeDto(
