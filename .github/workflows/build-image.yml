@@ -45,6 +45,8 @@ jobs:
 
       - uses: nais/docker-build-push@v0
         id: docker-build-push
+        env:
+          ACTIONS_RUNTIME_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           team: tbd
           tag: ${{ inputs.ref }}
