@@ -5,7 +5,24 @@ import java.util.UUID
 import javax.sql.DataSource
 
 class MetrikkDao(dataSource: DataSource) : HelseDao(dataSource) {
+    /**
+     Denne funksjonen antar at den kun kalles for en **ferdigbehandlet** kommandokjede for **godkjenningsbehov**.
+     */
     fun finnUtfallForGodkjenningsbehov(contextId: UUID): GodkjenningsbehovUtfall {
+        val antallSuspenderinger =
+            asSQL(
+                """
+                select count(*) from command_context
+                where context_id = :contextId
+                and tilstand = 'SUSPENDERT'
+                """.trimIndent(),
+                mapOf("contextId" to contextId),
+            ).single { row -> row.int(1) }!!
+
+        // Hvis kommandokjeden ikke ble suspendert anser vi at behandlingen av godkjenningsbehovet ble avbrutt.
+        // Ja, det er passe shaky 🫠
+        if (antallSuspenderinger == 0) return GodkjenningsbehovUtfall.Avbrutt
+
         val bleAutomatiskGodkjent =
             asSQL(
                 """
@@ -40,4 +57,5 @@ enum class GodkjenningsbehovUtfall {
     AutomatiskAvvist,
     AutomatiskGodkjent,
     ManuellOppgave,
+    Avbrutt,
 }

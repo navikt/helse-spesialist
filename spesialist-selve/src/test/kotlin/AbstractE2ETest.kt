@@ -1534,7 +1534,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         }
     }
 
-    private fun erFerdigstilt(godkjenningsbehovId: UUID): Boolean {
+    internal fun erFerdigstilt(godkjenningsbehovId: UUID): Boolean {
         @Language("PostgreSQL")
         val query = "SELECT tilstand FROM command_context WHERE hendelse_id = ? ORDER by id DESC LIMIT 1"
         return sessionOf(dataSource).use { session ->
