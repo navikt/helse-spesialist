@@ -66,7 +66,8 @@ import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType.*
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType.FJERN_FRA_PA_VENT
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType.LEGG_PA_VENT
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernPåVent
@@ -109,8 +110,8 @@ internal class SaksbehandlerMediator(
     private val avslagDao = AvslagDao(dataSource)
     private val annulleringDao = AnnulleringDao(dataSource)
 
-    override fun <T : HandlingFraApi> håndter(
-        handlingFraApi: T,
+    override fun håndter(
+        handlingFraApi: HandlingFraApi,
         saksbehandlerFraApi: SaksbehandlerFraApi,
     ) {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()

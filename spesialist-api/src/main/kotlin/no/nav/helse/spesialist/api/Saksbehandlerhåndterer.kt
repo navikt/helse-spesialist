@@ -10,8 +10,8 @@ import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import java.util.UUID
 
 interface Saksbehandlerhåndterer {
-    fun <T : HandlingFraApi> håndter(
-        handlingFraApi: T,
+    fun håndter(
+        handlingFraApi: HandlingFraApi,
         saksbehandlerFraApi: SaksbehandlerFraApi,
     )
 
