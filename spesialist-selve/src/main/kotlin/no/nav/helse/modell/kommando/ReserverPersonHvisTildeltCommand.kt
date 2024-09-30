@@ -1,7 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.OppgaveRepository
-import no.nav.helse.db.ReservasjonDao
+import no.nav.helse.db.ReservasjonRepository
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.Logger
@@ -10,7 +10,7 @@ import java.util.UUID
 
 internal class ReserverPersonHvisTildeltCommand(
     private val fødselsnummer: String,
-    private val reservasjonDao: ReservasjonDao,
+    private val reservasjonRepository: ReservasjonRepository,
     private val tildelingDao: TildelingDao,
     private val oppgaveRepository: OppgaveRepository,
     private val totrinnsvurderingMediator: TotrinnsvurderingMediator,
@@ -37,7 +37,7 @@ internal class ReserverPersonHvisTildeltCommand(
             }
 
         sikkerLogg.info("Oppretter reservasjon for $fødselsnummer til $saksbehandlerOid pga eksisterende tildeling")
-        reservasjonDao.reserverPerson(saksbehandlerOid, fødselsnummer)
+        reservasjonRepository.reserverPerson(saksbehandlerOid, fødselsnummer)
 
         return true
     }

@@ -4,8 +4,8 @@ import no.nav.helse.HelseDao
 import java.util.UUID
 import javax.sql.DataSource
 
-class ReservasjonDao(dataSource: DataSource) : HelseDao(dataSource) {
-    fun reserverPerson(
+class ReservasjonDao(dataSource: DataSource) : HelseDao(dataSource), ReservasjonRepository {
+    override fun reserverPerson(
         saksbehandlerOid: UUID,
         fødselsnummer: String,
     ) {

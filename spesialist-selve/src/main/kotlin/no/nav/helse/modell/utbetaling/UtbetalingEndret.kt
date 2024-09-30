@@ -2,7 +2,7 @@ package no.nav.helse.modell.utbetaling
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.OppgaveRepository
-import no.nav.helse.db.ReservasjonDao
+import no.nav.helse.db.ReservasjonRepository
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -108,7 +108,7 @@ internal class UtbetalingEndretCommand(
     personbeløp: Int,
     utbetalingDao: UtbetalingDao,
     opptegnelseDao: OpptegnelseDao,
-    reservasjonDao: ReservasjonDao,
+    reservasjonRepository: ReservasjonRepository,
     oppgaveRepository: OppgaveRepository,
     tildelingDao: TildelingDao,
     oppgaveService: OppgaveService,
@@ -134,7 +134,7 @@ internal class UtbetalingEndretCommand(
             ),
             ReserverPersonHvisTildeltCommand(
                 fødselsnummer = fødselsnummer,
-                reservasjonDao = reservasjonDao,
+                reservasjonRepository = reservasjonRepository,
                 tildelingDao = tildelingDao,
                 oppgaveRepository = oppgaveRepository,
                 totrinnsvurderingMediator = totrinnsvurderingMediator,

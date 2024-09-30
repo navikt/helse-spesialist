@@ -39,7 +39,7 @@ internal class VedtaksperiodeForkastetCommandTest {
             snapshotDao = snapshotDao,
             snapshotClient = graphQLClient,
             oppgaveService = oppgaveService,
-            reservasjonDao = mockk(relaxed = true),
+            reservasjonRepository = mockk(relaxed = true),
             tildelingDao = mockk(relaxed = true),
             oppgaveRepository = mockk(relaxed = true),
             totrinnsvurderingMediator = mockk(relaxed = true),
