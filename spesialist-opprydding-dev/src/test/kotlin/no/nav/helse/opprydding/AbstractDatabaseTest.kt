@@ -112,7 +112,6 @@ internal abstract class AbstractDatabaseTest {
         tabeller.removeAll(
             listOf(
                 "flyway_schema_history",
-                "flyway_schema_history_backup",
                 "enhet",
                 "global_snapshot_versjon",
                 "saksbehandler",
@@ -125,13 +124,10 @@ internal abstract class AbstractDatabaseTest {
                 "inntekt",
                 "temp_manglende_varsler",
                 "automatisering_korrigert_soknad",
-                "arkiv_tildeling_for_oppgaver_uten_utbetaling_id",
-                "arkiv_oppgave_uten_utbetaling_id",
                 "spesialsak",
                 "avviksvurdering_spinnvillgate",
                 "vilkarsgrunnlag_per_avviksvurdering_spinnvillgate",
                 "sammenligningsgrunnlag_spinnvillgate",
-                "passert_filter_for_skjonnsfastsettelse",
                 "melding_duplikatkontroll",
                 "poison_pill",
             ),
