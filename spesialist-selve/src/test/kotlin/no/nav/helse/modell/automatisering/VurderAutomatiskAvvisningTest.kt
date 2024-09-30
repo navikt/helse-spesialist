@@ -6,12 +6,10 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.PersonRepository
-import no.nav.helse.db.VedtakRepository
 import no.nav.helse.db.VergemålRepository
 import no.nav.helse.januar
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
@@ -31,10 +29,8 @@ internal class VurderAutomatiskAvvisningTest {
 
     private val vergemålRepository = mockk<VergemålRepository>(relaxed = true)
     private val personRepository = mockk<PersonRepository>(relaxed = true)
-    private val vedtakRepository = mockk<VedtakRepository>(relaxed = true)
     private val egenAnsattRepository = mockk<EgenAnsattRepository>(relaxed = true)
     private val godkjenningMediator = mockk<GodkjenningMediator>(relaxed = true)
-    private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
 
     @BeforeEach
     fun setup() {
@@ -64,38 +60,6 @@ internal class VurderAutomatiskAvvisningTest {
     fun `skal avvise ved utland dersom perioden kan avvises`() {
         every { personRepository.finnEnhetId(fødselsnummer) } returns "0393"
         assertAvvisning(lagCommand(kanAvvises = true), "Utland")
-    }
-
-    @Test
-    fun `skal ikke avvise uavhengig av skjønnsfastsettelse dersom kanAvvises-flagg er false`() {
-        every { sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId) } returns true
-        assertIkkeAvvisning(lagCommand(Utbetalingtype.UTBETALING, kanAvvises = false, fødselsnummer = "12345678910"))
-    }
-
-    @Test
-    fun `skal ikke avvise skjønnsfastsettelse dersom utbetaling ikke er revurdering og fødselsnummer starter på 31`() {
-        every { sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId) } returns true
-        assertIkkeAvvisning(lagCommand(Utbetalingtype.UTBETALING, fødselsnummer = "31345678910"))
-    }
-
-    @Test
-    fun `skal ikke avvise skjønnsfastsettelse dersom perioden ikke kan avvises og fødselsnummer ikke starter på 31`() {
-        every { sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId) } returns true
-        assertIkkeAvvisning(lagCommand(Utbetalingtype.REVURDERING, fødselsnummer = "12345678910"))
-    }
-
-    @Test
-    fun `kan ikke avvise skjønnsfastsettelse for flere arbeidsgivere hvis kanAvvises er false`() {
-        every { sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId) } returns true
-        every { vedtakRepository.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.FLERE_ARBEIDSGIVERE
-        assertIkkeAvvisning(lagCommand(Utbetalingtype.REVURDERING, kanAvvises = false, fødselsnummer = "12345678910"))
-    }
-
-    @Test
-    fun `skal ikke avvise skjønnsfastsettelse dersom det er en arbeidsgiver`() {
-        every { sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId) } returns true
-        every { vedtakRepository.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
-        assertIkkeAvvisning(lagCommand(Utbetalingtype.REVURDERING, fødselsnummer = "12345678910"))
     }
 
     @Test
@@ -186,7 +150,6 @@ internal class VurderAutomatiskAvvisningTest {
 
     private companion object {
         private const val fødselsnummer = "12345678910"
-        private val vedtaksperiodeId = UUID.randomUUID()
         private val utbetalingId = UUID.randomUUID()
     }
 }
