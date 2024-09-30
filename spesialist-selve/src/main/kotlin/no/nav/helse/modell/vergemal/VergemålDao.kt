@@ -2,6 +2,7 @@ package no.nav.helse.modell.vergemal
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.db.VergemålRepository
 import org.intellij.lang.annotations.Language
 import java.time.LocalDateTime
 import javax.sql.DataSource
@@ -11,8 +12,8 @@ data class VergemålOgFremtidsfullmakt(
     val harFremtidsfullmakter: Boolean,
 )
 
-class VergemålDao(val dataSource: DataSource) {
-    fun lagre(
+class VergemålDao(val dataSource: DataSource) : VergemålRepository {
+    override fun lagre(
         fødselsnummer: String,
         vergemålOgFremtidsfullmakt: VergemålOgFremtidsfullmakt,
         fullmakt: Boolean,
@@ -52,7 +53,7 @@ class VergemålDao(val dataSource: DataSource) {
         }
     }
 
-    fun harVergemål(fødselsnummer: String): Boolean? {
+    override fun harVergemål(fødselsnummer: String): Boolean? {
         @Language("PostgreSQL")
         val query = """
             SELECT har_vergemal

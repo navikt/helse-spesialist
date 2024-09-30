@@ -4,19 +4,19 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.db.EgenAnsattRepository
+import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.VedtakRepository
+import no.nav.helse.db.VergemålRepository
 import no.nav.helse.januar
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
@@ -29,40 +29,40 @@ import java.util.UUID
 internal class VurderAutomatiskAvvisningTest {
     private lateinit var context: CommandContext
 
-    private val vergemålDao = mockk<VergemålDao>(relaxed = true)
-    private val personDao = mockk<PersonDao>(relaxed = true)
-    private val vedtakDao = mockk<VedtakDao>(relaxed = true)
-    private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
+    private val vergemålRepository = mockk<VergemålRepository>(relaxed = true)
+    private val personRepository = mockk<PersonRepository>(relaxed = true)
+    private val vedtakRepository = mockk<VedtakRepository>(relaxed = true)
+    private val egenAnsattRepository = mockk<EgenAnsattRepository>(relaxed = true)
     private val godkjenningMediator = mockk<GodkjenningMediator>(relaxed = true)
     private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
 
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
-        clearMocks(vergemålDao, personDao, egenAnsattDao, godkjenningMediator)
+        clearMocks(vergemålRepository, personRepository, egenAnsattRepository, godkjenningMediator)
     }
 
     @Test
     fun `skal avvise ved vergemål dersom perioden kan avvises`() {
-        every { vergemålDao.harVergemål(fødselsnummer) } returns true
+        every { vergemålRepository.harVergemål(fødselsnummer) } returns true
         assertAvvisning(lagCommand(kanAvvises = true), "Vergemål")
     }
 
     @Test
     fun `skal ikke avvise ved vergemål dersom perioden ikke kan avvises`() {
-        every { vergemålDao.harVergemål(fødselsnummer) } returns true
+        every { vergemålRepository.harVergemål(fødselsnummer) } returns true
         assertIkkeAvvisning(lagCommand(kanAvvises = false))
     }
 
     @Test
     fun `skal ikke avvise ved vergemål dersom kanAvvises er false`() {
-        every { vergemålDao.harVergemål(fødselsnummer) } returns true
+        every { vergemålRepository.harVergemål(fødselsnummer) } returns true
         assertIkkeAvvisning(lagCommand(Utbetalingtype.UTBETALING, false))
     }
 
     @Test
     fun `skal avvise ved utland dersom perioden kan avvises`() {
-        every { personDao.finnEnhetId(fødselsnummer) } returns "0393"
+        every { personRepository.finnEnhetId(fødselsnummer) } returns "0393"
         assertAvvisning(lagCommand(kanAvvises = true), "Utland")
     }
 
@@ -87,20 +87,20 @@ internal class VurderAutomatiskAvvisningTest {
     @Test
     fun `kan ikke avvise skjønnsfastsettelse for flere arbeidsgivere hvis kanAvvises er false`() {
         every { sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId) } returns true
-        every { vedtakDao.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.FLERE_ARBEIDSGIVERE
+        every { vedtakRepository.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.FLERE_ARBEIDSGIVERE
         assertIkkeAvvisning(lagCommand(Utbetalingtype.REVURDERING, kanAvvises = false, fødselsnummer = "12345678910"))
     }
 
     @Test
     fun `skal ikke avvise skjønnsfastsettelse dersom det er en arbeidsgiver`() {
         every { sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId) } returns true
-        every { vedtakDao.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
+        every { vedtakRepository.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
         assertIkkeAvvisning(lagCommand(Utbetalingtype.REVURDERING, fødselsnummer = "12345678910"))
     }
 
     @Test
     fun `skal ikke avvise ved utland dersom perioden ikke kan avvises`() {
-        every { personDao.finnEnhetId(fødselsnummer) } returns "0393"
+        every { personRepository.finnEnhetId(fødselsnummer) } returns "0393"
         assertIkkeAvvisning(lagCommand(kanAvvises = false))
     }
 
@@ -129,8 +129,8 @@ internal class VurderAutomatiskAvvisningTest {
         kanAvvises: Boolean = true,
         fødselsnummer: String = "12345678910",
     ) = VurderAutomatiskAvvisning(
-        personRepository = personDao,
-        vergemålDao = vergemålDao,
+        personRepository = personRepository,
+        vergemålRepository = vergemålRepository,
         godkjenningMediator = godkjenningMediator,
         utbetaling = Utbetaling(utbetalingId, 1000, 1000, utbetalingstype),
         godkjenningsbehov = godkjenningsbehov(

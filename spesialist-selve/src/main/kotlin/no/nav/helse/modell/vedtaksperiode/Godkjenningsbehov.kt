@@ -9,6 +9,7 @@ import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.db.VedtakRepository
+import no.nav.helse.db.VergemålRepository
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
@@ -49,7 +50,6 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.VurderEnhetUtland
-import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -221,7 +221,7 @@ internal class GodkjenningsbehovCommand(
     arbeidsforholdRepository: ArbeidsforholdRepository,
     egenAnsattRepository: EgenAnsattRepository,
     utbetalingRepository: UtbetalingRepository,
-    vergemålDao: VergemålDao,
+    vergemålRepository: VergemålRepository,
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     risikovurderingDao: RisikovurderingDao,
     påVentDao: PåVentDao,
@@ -294,7 +294,7 @@ internal class GodkjenningsbehovCommand(
             ),
             VurderVergemålOgFullmakt(
                 fødselsnummer = behovData.fødselsnummer,
-                vergemålDao = vergemålDao,
+                vergemålRepository = vergemålRepository,
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
                 sykefraværstilfelle = sykefraværstilfelle,
             ),
@@ -322,7 +322,7 @@ internal class GodkjenningsbehovCommand(
             ),
             VurderAutomatiskAvvisning(
                 personRepository = personRepository,
-                vergemålDao = vergemålDao,
+                vergemålRepository = vergemålRepository,
                 godkjenningMediator = godkjenningMediator,
                 utbetaling = utbetaling,
                 godkjenningsbehov = behovData,
@@ -344,7 +344,7 @@ internal class GodkjenningsbehovCommand(
                 utbetalingtype = behovData.utbetalingtype,
                 sykefraværstilfelle = sykefraværstilfelle,
                 utbetaling = utbetaling,
-                vergemålDao = vergemålDao,
+                vergemålRepository = vergemålRepository,
                 vedtakRepository = vedtakRepository,
                 påVentDao = påVentDao,
             ),

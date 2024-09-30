@@ -5,11 +5,13 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.helse.db.EgenAnsattRepository
+import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.VedtakRepository
+import no.nav.helse.db.VergemålRepository
 import no.nav.helse.januar
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.automatisering.Automatisering
-import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Egenskap.DELVIS_REFUSJON
 import no.nav.helse.modell.oppgave.Egenskap.EN_ARBEIDSGIVER
@@ -25,7 +27,6 @@ import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.oppgave.EgenskapDto
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveInspector.Companion.oppgaveinspektør
-import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
@@ -38,7 +39,6 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.OVERGANG_FRA_IT
-import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
@@ -60,12 +60,12 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
     private val automatisering = mockk<Automatisering>(relaxed = true)
-    private val personDao = mockk<PersonDao>(relaxed = true)
+    private val personRepository = mockk<PersonRepository>(relaxed = true)
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
-    private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
-    private val vergemålDao = mockk<VergemålDao>(relaxed = true)
+    private val egenAnsattRepository = mockk<EgenAnsattRepository>(relaxed = true)
+    private val vergemålRepository = mockk<VergemålRepository>(relaxed = true)
     private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
-    private val vedtakDao = mockk<VedtakDao>(relaxed = true)
+    private val vedtakRepository = mockk<VedtakRepository>(relaxed = true)
     private val påVentDao = mockk<PåVentDao>(relaxed = true)
     private lateinit var context: CommandContext
     private lateinit var contextId: UUID
@@ -133,7 +133,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter oppgave med egen oppgavetype for fortrolig adresse`() {
-        every { personDao.finnAdressebeskyttelse(FNR) } returns Adressebeskyttelse.Fortrolig
+        every { personRepository.finnAdressebeskyttelse(FNR) } returns Adressebeskyttelse.Fortrolig
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
@@ -144,7 +144,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter oppgave med egen oppgavetype for strengt fortrolig adresse`() {
-        every { personDao.finnAdressebeskyttelse(FNR) } returns Adressebeskyttelse.StrengtFortrolig
+        every { personRepository.finnAdressebeskyttelse(FNR) } returns Adressebeskyttelse.StrengtFortrolig
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
@@ -155,7 +155,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter oppgave med egen oppgavetype for strengt fortrolig adresse utland`() {
-        every { personDao.finnAdressebeskyttelse(FNR) } returns Adressebeskyttelse.StrengtFortroligUtland
+        every { personRepository.finnAdressebeskyttelse(FNR) } returns Adressebeskyttelse.StrengtFortroligUtland
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
@@ -268,7 +268,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter oppgave med egen ansatt`() {
-        every { egenAnsattDao.erEgenAnsatt(FNR) } returns true
+        every { egenAnsattRepository.erEgenAnsatt(FNR) } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
@@ -281,7 +281,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter oppgave med egenskap spesialsak`() {
-        every { vedtakDao.erSpesialsak(VEDTAKSPERIODE_ID) } returns true
+        every { vedtakRepository.erSpesialsak(VEDTAKSPERIODE_ID) } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
@@ -294,7 +294,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter oppgave med egenskap UTLAND`() {
-        every { personDao.finnEnhetId(FNR) } returns "0393"
+        every { personRepository.finnEnhetId(FNR) } returns "0393"
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
@@ -399,14 +399,14 @@ internal class OpprettSaksbehandleroppgaveTest {
     ) = OpprettSaksbehandleroppgave(
         oppgaveService = oppgaveService,
         automatisering = automatisering,
-        personRepository = personDao,
+        personRepository = personRepository,
         risikovurderingDao = risikovurderingDao,
-        egenAnsattRepository = egenAnsattDao,
+        egenAnsattRepository = egenAnsattRepository,
         utbetalingtype = utbetalingstype,
         sykefraværstilfelle = sykefraværstilfelle,
         utbetaling = utbetaling,
-        vergemålDao = vergemålDao,
-        vedtakRepository = vedtakDao,
+        vergemålRepository = vergemålRepository,
+        vedtakRepository = vedtakRepository,
         påVentDao = påVentDao,
         behovData = GodkjenningsbehovData(
             id = UUID.randomUUID(),

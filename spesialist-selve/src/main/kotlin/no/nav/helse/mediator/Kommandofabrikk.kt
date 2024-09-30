@@ -358,7 +358,7 @@ internal class Kommandofabrikk(
             arbeidsforholdRepository = arbeidsforholdDao,
             egenAnsattRepository = egenAnsattDao,
             utbetalingRepository = utbetalingDao,
-            vergemålDao = vergemålDao,
+            vergemålRepository = vergemålDao,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             risikovurderingDao = risikovurderingDao,
             påVentDao = påVentDao,

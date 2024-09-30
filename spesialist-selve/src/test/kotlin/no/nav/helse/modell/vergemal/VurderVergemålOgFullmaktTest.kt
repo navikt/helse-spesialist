@@ -3,6 +3,7 @@ package no.nav.helse.modell.vergemal
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.db.VergemålRepository
 import no.nav.helse.januar
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.løsninger.Fullmaktløsning
@@ -24,14 +25,14 @@ class VurderVergemålOgFullmaktTest {
         private val VEDTAKSPERIODE_ID = UUID.fromString("1cd0d9cb-62e8-4f16-b634-f2b9dab550b6")
     }
 
-    private val vergemålDao = mockk<VergemålDao>(relaxed = true)
+    private val vergemålRepository = mockk<VergemålRepository>(relaxed = true)
     private val generasjon = Generasjon(UUID.randomUUID(), VEDTAKSPERIODE_ID, 1.januar, 31.januar, 1.januar)
     private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(generasjon))
 
     private val command =
         VurderVergemålOgFullmakt(
             fødselsnummer = FNR,
-            vergemålDao = vergemålDao,
+            vergemålRepository = vergemålRepository,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             sykefraværstilfelle = sykefraværstilfelle,
         )
@@ -59,7 +60,7 @@ class VurderVergemålOgFullmaktTest {
     fun setup() {
         context = CommandContext(UUID.randomUUID())
         context.nyObserver(observer)
-        clearMocks(vergemålDao)
+        clearMocks(vergemålRepository)
     }
 
     @Test
@@ -71,7 +72,7 @@ class VurderVergemålOgFullmaktTest {
     @Test
     fun `gjør ingen behandling om vi mangler løsning ved resume`() {
         assertFalse(command.resume(context))
-        verify(exactly = 0) { vergemålDao.lagre(any(), any(), any()) }
+        verify(exactly = 0) { vergemålRepository.lagre(any(), any(), any()) }
     }
 
     @Test
@@ -80,7 +81,7 @@ class VurderVergemålOgFullmaktTest {
         context.add(Vergemålløsning(ingenVergemål))
         context.add(Fullmaktløsning(false))
         assertTrue(command.resume(context))
-        verify(exactly = 1) { vergemålDao.lagre(FNR, ingenVergemål, false) }
+        verify(exactly = 1) { vergemålRepository.lagre(FNR, ingenVergemål, false) }
         assertEquals(0, observer.hendelser.size)
         generasjon.inspektør {
             assertEquals(0, varsler.size)
@@ -93,7 +94,7 @@ class VurderVergemålOgFullmaktTest {
         context.add(Vergemålløsning(harVergemål))
         context.add(Fullmaktløsning(false))
         assertTrue(command.resume(context))
-        verify(exactly = 1) { vergemålDao.lagre(FNR, harVergemål, false) }
+        verify(exactly = 1) { vergemålRepository.lagre(FNR, harVergemål, false) }
         assertEquals(0, observer.hendelser.size)
     }
 
@@ -103,7 +104,7 @@ class VurderVergemålOgFullmaktTest {
         context.add(Vergemålløsning(harFullmakt))
         context.add(Fullmaktløsning(false))
         assertTrue(command.resume(context))
-        verify(exactly = 1) { vergemålDao.lagre(FNR, harFullmakt, false) }
+        verify(exactly = 1) { vergemålRepository.lagre(FNR, harFullmakt, false) }
         assertEquals(0, observer.hendelser.size)
     }
 
@@ -113,7 +114,7 @@ class VurderVergemålOgFullmaktTest {
         context.add(Vergemålløsning(harFremtidsfullmakt))
         context.add(Fullmaktløsning(true))
         assertTrue(command.resume(context))
-        verify(exactly = 1) { vergemålDao.lagre(FNR, harFremtidsfullmakt, true) }
+        verify(exactly = 1) { vergemålRepository.lagre(FNR, harFremtidsfullmakt, true) }
         assertEquals(0, observer.hendelser.size)
     }
 
@@ -123,7 +124,7 @@ class VurderVergemålOgFullmaktTest {
         context.add(Vergemålløsning(harAlt))
         context.add(Fullmaktløsning(false))
         assertTrue(command.resume(context))
-        verify(exactly = 1) { vergemålDao.lagre(FNR, harAlt, false) }
+        verify(exactly = 1) { vergemålRepository.lagre(FNR, harAlt, false) }
         assertEquals(0, observer.hendelser.size)
         generasjon.inspektør {
             assertEquals(1, varsler.size)

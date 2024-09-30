@@ -1,5 +1,6 @@
 package no.nav.helse.modell.vergemal
 
+import no.nav.helse.db.VergemålRepository
 import no.nav.helse.mediator.meldinger.løsninger.Fullmaktløsning
 import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
 import no.nav.helse.modell.kommando.Command
@@ -11,7 +12,7 @@ import java.util.UUID
 
 internal class VurderVergemålOgFullmakt(
     private val fødselsnummer: String,
-    private val vergemålDao: VergemålDao,
+    private val vergemålRepository: VergemålRepository,
     private val vedtaksperiodeId: UUID,
     private val sykefraværstilfelle: Sykefraværstilfelle,
 ) : Command {
@@ -30,7 +31,7 @@ internal class VurderVergemålOgFullmakt(
             return false
         }
 
-        vergemålDao.lagre(
+        vergemålRepository.lagre(
             fødselsnummer = fødselsnummer,
             vergemålOgFremtidsfullmakt =
                 VergemålOgFremtidsfullmakt(

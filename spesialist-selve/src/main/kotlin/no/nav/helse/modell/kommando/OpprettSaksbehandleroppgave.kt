@@ -3,6 +3,7 @@ package no.nav.helse.modell.kommando
 import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.VedtakRepository
+import no.nav.helse.db.VergemålRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.oppgave.Egenskap
@@ -42,7 +43,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.slf4j.LoggerFactory
 
@@ -56,7 +56,7 @@ internal class OpprettSaksbehandleroppgave(
     private val utbetalingtype: Utbetalingtype,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val utbetaling: Utbetaling,
-    private val vergemålDao: VergemålDao,
+    private val vergemålRepository: VergemålRepository,
     private val vedtakRepository: VedtakRepository,
     private val påVentDao: PåVentDao,
 ) : Command {
@@ -94,7 +94,7 @@ internal class OpprettSaksbehandleroppgave(
 
         if (automatisering.erStikkprøve(vedtaksperiodeId, hendelseId)) egenskaper.add(STIKKPRØVE)
         if (!egenskaper.contains(REVURDERING) && risikovurderingDao.kreverSupersaksbehandler(vedtaksperiodeId)) egenskaper.add(RISK_QA)
-        if (vergemålDao.harVergemål(fødselsnummer) == true) egenskaper.add(VERGEMÅL)
+        if (vergemålRepository.harVergemål(fødselsnummer) == true) egenskaper.add(VERGEMÅL)
         if (HentEnhetløsning.erEnhetUtland(personRepository.finnEnhetId(fødselsnummer))) egenskaper.add(UTLAND)
 
         when {
