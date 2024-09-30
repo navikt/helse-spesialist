@@ -3,12 +3,12 @@ package no.nav.helse.modell.vedtaksperiode
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.InntektskilderRepository
+import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
-import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.InntektskildeDto.Companion.gjenopprett
@@ -228,7 +228,7 @@ internal class GodkjenningsbehovCommand(
     overstyringDao: OverstyringDao,
     periodehistorikkDao: PeriodehistorikkDao,
     snapshotDao: SnapshotDao,
-    oppgaveDao: OppgaveDao,
+    oppgaveRepository: OppgaveRepository,
     avviksvurderingDao: AvviksvurderingDao,
     snapshotClient: ISnapshotClient,
     oppgaveService: OppgaveService,
@@ -255,7 +255,7 @@ internal class GodkjenningsbehovCommand(
             VurderVidereBehandlingAvGodkjenningsbehov(
                 commandData = behovData,
                 utbetalingDao = utbetalingDao,
-                oppgaveDao = oppgaveDao,
+                oppgaveRepository = oppgaveRepository,
                 vedtakDao = vedtakDao,
             ),
             OpprettKoblingTilHendelseCommand(

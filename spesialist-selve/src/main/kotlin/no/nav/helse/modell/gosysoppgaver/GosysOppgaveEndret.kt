@@ -1,10 +1,10 @@
 package no.nav.helse.modell.gosysoppgaver
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
-import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.ForsøkÅAutomatisereEksisterendeOppgave
@@ -58,7 +58,7 @@ internal class GosysOppgaveEndretCommand(
     oppgavedataForAutomatisering: OppgaveDataForAutomatisering,
     automatisering: Automatisering,
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
-    oppgaveDao: OppgaveDao,
+    oppgaveRepository: OppgaveRepository,
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
     godkjenningsbehov: GodkjenningsbehovData,
@@ -73,7 +73,10 @@ internal class GosysOppgaveEndretCommand(
                 harTildeltOppgave = harTildeltOppgave,
                 oppgaveService = oppgaveService,
             ),
-            SjekkAtOppgaveFortsattErÅpenCommand(fødselsnummer = godkjenningsbehov.fødselsnummer, oppgaveDao = oppgaveDao),
+            SjekkAtOppgaveFortsattErÅpenCommand(
+                fødselsnummer = godkjenningsbehov.fødselsnummer,
+                oppgaveRepository = oppgaveRepository,
+            ),
             SettTidligereAutomatiseringInaktivCommand(
                 vedtaksperiodeId = oppgavedataForAutomatisering.vedtaksperiodeId,
                 hendelseId = oppgavedataForAutomatisering.hendelseId,

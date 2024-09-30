@@ -41,7 +41,7 @@ internal class VedtaksperiodeForkastetCommandTest {
             oppgaveService = oppgaveService,
             reservasjonDao = mockk(relaxed = true),
             tildelingDao = mockk(relaxed = true),
-            oppgaveDao = mockk(relaxed = true),
+            oppgaveRepository = mockk(relaxed = true),
             totrinnsvurderingMediator = mockk(relaxed = true),
         )
 

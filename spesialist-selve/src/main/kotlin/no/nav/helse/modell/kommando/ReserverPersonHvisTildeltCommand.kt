@@ -1,7 +1,7 @@
 package no.nav.helse.modell.kommando
 
+import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.Logger
@@ -12,7 +12,7 @@ internal class ReserverPersonHvisTildeltCommand(
     private val fødselsnummer: String,
     private val reservasjonDao: ReservasjonDao,
     private val tildelingDao: TildelingDao,
-    private val oppgaveDao: OppgaveDao,
+    private val oppgaveRepository: OppgaveRepository,
     private val totrinnsvurderingMediator: TotrinnsvurderingMediator,
 ) : Command {
     private companion object {
@@ -23,7 +23,7 @@ internal class ReserverPersonHvisTildeltCommand(
         val tildeltSaksbehandler = tildelingDao.tildelingForPerson(fødselsnummer) ?: return true
         val vedtaksperiodeId =
             try {
-                oppgaveDao.finnVedtaksperiodeId(fødselsnummer)
+                oppgaveRepository.finnVedtaksperiodeId(fødselsnummer)
             } catch (e: Exception) {
                 sikkerLogg.warn("En feil skjedde, reserverer ikke $fødselsnummer", e)
                 return true

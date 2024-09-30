@@ -1,11 +1,11 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
-import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
@@ -65,20 +65,20 @@ internal class VedtaksperiodeForkastetCommand(
     oppgaveService: OppgaveService,
     reservasjonDao: ReservasjonDao,
     tildelingDao: TildelingDao,
-    oppgaveDao: OppgaveDao,
+    oppgaveRepository: OppgaveRepository,
     totrinnsvurderingMediator: TotrinnsvurderingMediator,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
             AvbrytCommand(
-                fødselsnummer,
-                vedtaksperiodeId,
-                commandContextDao,
-                oppgaveService,
-                reservasjonDao,
-                tildelingDao,
-                oppgaveDao,
-                totrinnsvurderingMediator,
+                fødselsnummer = fødselsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                commandContextDao = commandContextDao,
+                oppgaveService = oppgaveService,
+                reservasjonDao = reservasjonDao,
+                tildelingDao = tildelingDao,
+                oppgaveRepository = oppgaveRepository,
+                totrinnsvurderingMediator = totrinnsvurderingMediator,
             ),
             OppdaterSnapshotCommand(
                 snapshotClient = snapshotClient,

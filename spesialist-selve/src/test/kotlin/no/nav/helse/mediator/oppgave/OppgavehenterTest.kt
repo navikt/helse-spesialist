@@ -3,6 +3,7 @@ package no.nav.helse.mediator.oppgave
 import TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveFraDatabase
+import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
+import javax.naming.OperationNotSupportedException
 
 class OppgavehenterTest {
 
@@ -104,6 +106,16 @@ class OppgavehenterTest {
         }
 
         override fun finnHendelseId(id: Long): UUID = UUID.randomUUID()
+
+        override fun finnOppgaveId(fødselsnummer: String): Long = throw OperationNotSupportedException()
+
+        override fun finnVedtaksperiodeId(fødselsnummer: String): UUID = throw OperationNotSupportedException()
+
+        override fun harGyldigOppgave(utbetalingId: UUID): Boolean = throw OperationNotSupportedException()
+
+        override fun invaliderOppgaveFor(fødselsnummer: String) {
+            throw OperationNotSupportedException()
+        }
     }
 
     private fun totrinnsvurderingRepository(

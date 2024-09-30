@@ -1,11 +1,11 @@
 package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.kommando.AvvisVedStrengtFortroligAdressebeskyttelseCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
@@ -48,7 +48,7 @@ internal class AdressebeskyttelseEndret private constructor(
 internal class AdressebeskyttelseEndretCommand(
     fødselsnummer: String,
     personRepository: PersonRepository,
-    oppgaveDao: OppgaveDao,
+    oppgaveRepository: OppgaveRepository,
     godkjenningMediator: GodkjenningMediator,
     godkjenningsbehov: GodkjenningsbehovData?,
     utbetaling: Utbetaling?,
@@ -62,7 +62,7 @@ internal class AdressebeskyttelseEndretCommand(
                 add(
                     AvvisVedStrengtFortroligAdressebeskyttelseCommand(
                         personRepository = personRepository,
-                        oppgaveDao = oppgaveDao,
+                        oppgaveRepository = oppgaveRepository,
                         godkjenningMediator = godkjenningMediator,
                         godkjenningsbehov = godkjenningsbehov,
                         utbetaling = utbetaling,

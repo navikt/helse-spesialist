@@ -148,7 +148,7 @@ internal class Kommandofabrikk(
             oppgavedataForAutomatisering = oppgaveDataForAutomatisering,
             automatisering = automatisering,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
-            oppgaveDao = oppgaveDao,
+            oppgaveRepository = oppgaveDao,
             oppgaveService = oppgaveService,
             godkjenningMediator = godkjenningMediator,
             godkjenningsbehov = godkjenningsbehovData,
@@ -206,7 +206,7 @@ internal class Kommandofabrikk(
             oppgaveService = oppgaveService,
             reservasjonDao = reservasjonDao,
             tildelingDao = tildelingDao,
-            oppgaveDao = oppgaveDao,
+            oppgaveRepository = oppgaveDao,
             totrinnsvurderingMediator = totrinnsvurderingMediator,
         )
 
@@ -242,7 +242,7 @@ internal class Kommandofabrikk(
         return AdressebeskyttelseEndretCommand(
             fødselsnummer = melding.fødselsnummer(),
             personRepository = personDao,
-            oppgaveDao = oppgaveDao,
+            oppgaveRepository = oppgaveDao,
             godkjenningMediator = godkjenningMediator,
             godkjenningsbehov = godkjenningsbehovData,
             utbetaling = utbetaling,
@@ -289,7 +289,7 @@ internal class Kommandofabrikk(
             utbetalingDao = utbetalingDao,
             opptegnelseDao = opptegnelseDao,
             reservasjonDao = reservasjonDao,
-            oppgaveDao = oppgaveDao,
+            oppgaveRepository = oppgaveDao,
             tildelingDao = tildelingDao,
             oppgaveService = oppgaveService,
             totrinnsvurderingMediator = totrinnsvurderingMediator,
@@ -308,7 +308,7 @@ internal class Kommandofabrikk(
             oppgaveService = oppgaveService,
             reservasjonDao = reservasjonDao,
             tildelingDao = tildelingDao,
-            oppgaveDao = oppgaveDao,
+            oppgaveRepository = oppgaveDao,
             totrinnsvurderingMediator = totrinnsvurderingMediator,
         )
 
@@ -365,7 +365,7 @@ internal class Kommandofabrikk(
             overstyringDao = overstyringDao,
             periodehistorikkDao = periodehistorikkDao,
             snapshotDao = snapshotDao,
-            oppgaveDao = oppgaveDao,
+            oppgaveRepository = oppgaveDao,
             avviksvurderingDao = avviksvurderingDao,
             snapshotClient = snapshotClient,
             oppgaveService = oppgaveService,

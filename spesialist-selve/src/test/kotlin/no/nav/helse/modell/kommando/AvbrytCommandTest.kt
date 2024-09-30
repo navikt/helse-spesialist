@@ -12,21 +12,21 @@ internal class AvbrytCommandTest {
     private companion object {
         private val VEDTAKSPERIODE = UUID.randomUUID()
         private val CONTEXT = UUID.randomUUID()
-        private fun lagAvbrytCommand(fødselsnummer: String, vedtaksperiodeId: UUID, commandContextDao: CommandContextDao) = AvbrytCommand(
-            fødselsnummer = fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
+        private fun lagAvbrytCommand(commandContextDao: CommandContextDao) = AvbrytCommand(
+            fødselsnummer = "fnr",
+            vedtaksperiodeId = VEDTAKSPERIODE,
             commandContextDao = commandContextDao,
             oppgaveService = mockk<OppgaveService>(relaxed = true),
             reservasjonDao = mockk(relaxed = true),
             tildelingDao = mockk(relaxed = true),
-            oppgaveDao = mockk(relaxed = true),
+            oppgaveRepository = mockk(relaxed = true),
             totrinnsvurderingMediator = mockk(relaxed = true)
         )
     }
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
     private val context = CommandContext(CONTEXT)
 
-    private val command = lagAvbrytCommand("fnr", VEDTAKSPERIODE, commandContextDao)
+    private val command = lagAvbrytCommand(commandContextDao)
 
     @Test
     fun `avbryter command context`() {

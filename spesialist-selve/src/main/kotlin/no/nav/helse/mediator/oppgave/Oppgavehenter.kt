@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.oppgave
 
+import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TotrinnsvurderingRepository

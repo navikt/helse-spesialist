@@ -1,8 +1,8 @@
 package no.nav.helse.modell.kommando
 
+import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse.StrengtFortrolig
@@ -10,7 +10,7 @@ import no.nav.helse.spesialist.api.person.Adressebeskyttelse.StrengtFortroligUtl
 
 internal class AvvisVedStrengtFortroligAdressebeskyttelseCommand(
     private val personRepository: PersonRepository,
-    private val oppgaveDao: OppgaveDao,
+    private val oppgaveRepository: OppgaveRepository,
     private val godkjenningMediator: GodkjenningMediator,
     private val godkjenningsbehov: GodkjenningsbehovData,
     private val utbetaling: Utbetaling,
@@ -32,7 +32,7 @@ internal class AvvisVedStrengtFortroligAdressebeskyttelseCommand(
             utbetaling = utbetaling,
             godkjenningsbehov = godkjenningsbehov,
         )
-        oppgaveDao.invaliderOppgaveFor(godkjenningsbehov.fødselsnummer)
+        oppgaveRepository.invaliderOppgaveFor(godkjenningsbehov.fødselsnummer)
         return true
     }
 }

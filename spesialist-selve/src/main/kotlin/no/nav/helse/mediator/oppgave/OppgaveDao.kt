@@ -6,6 +6,7 @@ import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
+import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
@@ -18,12 +19,6 @@ import no.nav.helse.spesialist.api.graphql.schema.Mottaker
 import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
-
-interface OppgaveRepository {
-    fun finnOppgave(id: Long): OppgaveFraDatabase?
-
-    fun finnHendelseId(id: Long): UUID
-}
 
 class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveRepository {
     fun reserverNesteId(): Long {
@@ -330,21 +325,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             mapOf("fodselsnummer" to fødselsnummer.toLong()),
         ).single { it.long("oppgaveId") }!!
 
-    fun finnGodkjenningsbehov(fødselsnummer: String) =
-        asSQL(
-            """ SELECT c.hendelse_id as hendelse_id
-            FROM oppgave o
-                     JOIN vedtak v ON v.id = o.vedtak_ref
-                     JOIN person p ON v.person_ref = p.id
-                     JOIN command_context c ON o.command_context_id = c.context_id
-            WHERE p.fodselsnummer = :fodselsnummer
-            AND status = 'AvventerSaksbehandler'::oppgavestatus
-            GROUP BY c.hendelse_id;
-        """,
-            mapOf("fodselsnummer" to fødselsnummer.toLong()),
-        ).single { it.uuid("hendelse_id") }!!
-
-    fun finnVedtaksperiodeId(fødselsnummer: String) =
+    override fun finnVedtaksperiodeId(fødselsnummer: String) =
         asSQL(
             """ SELECT v.vedtaksperiode_id as vedtaksperiode_id
             FROM oppgave o
@@ -356,7 +337,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             mapOf("fodselsnummer" to fødselsnummer.toLong()),
         ).single { it.uuid("vedtaksperiode_id") }!!
 
-    fun finnOppgaveId(fødselsnummer: String) =
+    override fun finnOppgaveId(fødselsnummer: String) =
         asSQL(
             """ SELECT o.id as oppgaveId
             FROM oppgave o
@@ -541,7 +522,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 .single { row -> row.uuid("hendelse_id") },
         )
 
-    fun harGyldigOppgave(utbetalingId: UUID) =
+    override fun harGyldigOppgave(utbetalingId: UUID) =
         requireNotNull(
             asSQL(
                 """ SELECT COUNT(1) AS oppgave_count FROM oppgave
@@ -612,7 +593,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             )
         }
 
-    fun invaliderOppgaveFor(fødselsnummer: String) =
+    override fun invaliderOppgaveFor(fødselsnummer: String) {
         asSQL(
             """
             UPDATE oppgave o
@@ -626,6 +607,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         """,
             mapOf("fodselsnummer" to fødselsnummer.toLong()),
         ).update()
+    }
 
     private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
 }
