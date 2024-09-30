@@ -4,6 +4,8 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.AnnulleringDao
 import no.nav.helse.db.AvslagDao
+import no.nav.helse.db.Periodehistorikk
+import no.nav.helse.db.PeriodehistorikkRepository
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -19,8 +21,11 @@ import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
 import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.overstyring.OverstyringDao
+import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
+import no.nav.helse.modell.periodehistorikk.NotatDto
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
 import no.nav.helse.modell.saksbehandler.handlinger.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringArsak
 import no.nav.helse.modell.saksbehandler.handlinger.Arbeidsforhold
@@ -55,19 +60,13 @@ import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandl
 import no.nav.helse.spesialist.api.graphql.schema.Avslag
 import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.MinimumSykdomsgrad
-import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.ANNET
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.OMREGNET_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.RAPPORTERT_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
-import no.nav.helse.spesialist.api.notat.NotatDao
-import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType.FJERN_FRA_PA_VENT
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType.LEGG_PA_VENT
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernPåVent
@@ -105,8 +104,8 @@ internal class SaksbehandlerMediator(
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
     private val påVentDao = PåVentDao(dataSource)
-    private val notatRepository: NotatRepository = NotatRepository(notatDao = NotatDao(dataSource))
-    private val periodehistorikkDao = PeriodehistorikkDao(dataSource)
+    private val periodehistorikkRepository: PeriodehistorikkRepository =
+        Periodehistorikk(dataSource)
     private val avslagDao = AvslagDao(dataSource)
     private val annulleringDao = AnnulleringDao(dataSource)
 
@@ -210,14 +209,12 @@ internal class SaksbehandlerMediator(
         saksbehandler: Saksbehandler,
     ) {
         try {
-            val lagretNotatId =
-                notatRepository.lagreForOppgaveId(
-                    handling.oppgaveId,
-                    handling.notatTekst,
-                    saksbehandler.oid(),
-                    NotatType.PaaVent,
-                )?.toInt()
-            periodehistorikkDao.lagre(LEGG_PA_VENT, saksbehandler.oid(), handling.oppgaveId, lagretNotatId)
+            val innslag =
+                HistorikkinnslagDto.lagtPåVentInnslag(
+                    notat = NotatDto(oppgaveId = handling.oppgaveId, tekst = handling.notatTekst),
+                    saksbehandler = saksbehandler.toDto(),
+                )
+            periodehistorikkRepository.lagre(innslag, handling.oppgaveId)
             oppgaveService.leggPåVent(handling, saksbehandler)
             PåVentRepository(påVentDao).leggPåVent(saksbehandler.oid(), handling)
         } catch (e: Modellfeil) {
@@ -234,7 +231,8 @@ internal class SaksbehandlerMediator(
             return
         }
         try {
-            periodehistorikkDao.lagre(FJERN_FRA_PA_VENT, saksbehandler.oid(), handling.oppgaveId)
+            val innslag = HistorikkinnslagDto.fjernetFraPåVentInnslag(saksbehandler.toDto())
+            periodehistorikkRepository.lagre(innslag, handling.oppgaveId)
             oppgaveService.fjernFraPåVent(handling.oppgaveId)
             PåVentRepository(påVentDao).fjernFraPåVent(handling.oppgaveId)
         } catch (e: Modellfeil) {
