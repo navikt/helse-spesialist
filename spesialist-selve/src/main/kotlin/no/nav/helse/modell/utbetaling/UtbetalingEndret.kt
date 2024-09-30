@@ -3,6 +3,7 @@ package no.nav.helse.modell.utbetaling
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.ReservasjonRepository
+import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -106,7 +107,7 @@ internal class UtbetalingEndretCommand(
     personOppdrag: LagreOppdragCommand.Oppdrag,
     arbeidsgiverbeløp: Int,
     personbeløp: Int,
-    utbetalingDao: UtbetalingDao,
+    utbetalingRepository: UtbetalingRepository,
     opptegnelseDao: OpptegnelseDao,
     reservasjonRepository: ReservasjonRepository,
     oppgaveRepository: OppgaveRepository,
@@ -129,7 +130,7 @@ internal class UtbetalingEndretCommand(
                 arbeidsgiverbeløp = arbeidsgiverbeløp,
                 personbeløp = personbeløp,
                 json = json,
-                utbetalingDao = utbetalingDao,
+                utbetalingRepository = utbetalingRepository,
                 opptegnelseDao = opptegnelseDao,
             ),
             ReserverPersonHvisTildeltCommand(

@@ -1,5 +1,6 @@
 package no.nav.helse.modell.utbetaling
 
+import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.ANNULLERT
@@ -27,7 +28,7 @@ internal class LagreOppdragCommand(
     private val arbeidsgiverbeløp: Int,
     private val personbeløp: Int,
     private val json: String,
-    private val utbetalingDao: UtbetalingDao,
+    private val utbetalingRepository: UtbetalingRepository,
     private val opptegnelseDao: OpptegnelseDao,
 ) : Command {
     private companion object {
@@ -39,16 +40,16 @@ internal class LagreOppdragCommand(
         private val mottaker: String,
         private val linjer: List<Utbetalingslinje>,
     ) {
-        internal fun lagre(utbetalingDao: UtbetalingDao) =
-            utbetalingDao.nyttOppdrag(fagsystemId, mottaker)?.also {
-                lagreLinjer(utbetalingDao, it)
+        internal fun lagre(utbetalingRepository: UtbetalingRepository) =
+            utbetalingRepository.nyttOppdrag(fagsystemId, mottaker)?.also {
+                lagreLinjer(utbetalingRepository, it)
             }
 
         private fun lagreLinjer(
-            utbetalingDao: UtbetalingDao,
+            utbetalingRepository: UtbetalingRepository,
             oppdragId: Long,
         ) {
-            linjer.forEach { it.lagre(utbetalingDao, oppdragId) }
+            linjer.forEach { it.lagre(utbetalingRepository, oppdragId) }
         }
 
         internal class Utbetalingslinje(
@@ -57,10 +58,10 @@ internal class LagreOppdragCommand(
             private val totalbeløp: Int?,
         ) {
             internal fun lagre(
-                utbetalingDao: UtbetalingDao,
+                utbetalingRepository: UtbetalingRepository,
                 oppdragId: Long,
             ) {
-                utbetalingDao.nyLinje(oppdragId, fom, tom, totalbeløp)
+                utbetalingRepository.nyLinje(oppdragId, fom, tom, totalbeløp)
             }
         }
     }
@@ -74,14 +75,14 @@ internal class LagreOppdragCommand(
 
     private fun lagre() {
         val utbetalingIdRef =
-            utbetalingDao.finnUtbetalingIdRef(utbetalingId)
+            utbetalingRepository.finnUtbetalingIdRef(utbetalingId)
                 ?: run {
                     val arbeidsgiverFagsystemIdRef =
-                        requireNotNull(arbeidsgiverOppdrag.lagre(utbetalingDao)) { "Forventet arbeidsgiver fagsystemId ref" }
+                        requireNotNull(arbeidsgiverOppdrag.lagre(utbetalingRepository)) { "Forventet arbeidsgiver fagsystemId ref" }
                     val personFagsystemIdRef =
-                        requireNotNull(personOppdrag.lagre(utbetalingDao)) { "Forventet person fagsystemId ref" }
+                        requireNotNull(personOppdrag.lagre(utbetalingRepository)) { "Forventet person fagsystemId ref" }
 
-                    utbetalingDao.opprettUtbetalingId(
+                    utbetalingRepository.opprettUtbetalingId(
                         utbetalingId,
                         fødselsnummer,
                         orgnummer,
@@ -94,7 +95,7 @@ internal class LagreOppdragCommand(
                     )
                 }
 
-        utbetalingDao.nyUtbetalingStatus(utbetalingIdRef, status, opprettet, json)
+        utbetalingRepository.nyUtbetalingStatus(utbetalingIdRef, status, opprettet, json)
     }
 
     private fun lagOpptegnelse() {

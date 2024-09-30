@@ -1,6 +1,6 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import org.slf4j.LoggerFactory
@@ -10,14 +10,14 @@ internal class PersisterPeriodehistorikkCommand(
     private val vedtaksperiodeId: UUID,
     private val utbetalingId: UUID,
     private val periodehistorikkDao: PeriodehistorikkDao,
-    private val utbetalingDao: UtbetalingDao,
+    private val utbetalingRepository: UtbetalingRepository,
 ) : Command {
     private companion object {
         private val logg = LoggerFactory.getLogger(PersisterPeriodehistorikkCommand::class.java)
     }
 
     override fun execute(context: CommandContext): Boolean {
-        val alleUtbetalingerForVedtaksperiode = utbetalingDao.utbetalingerForVedtaksperiode(vedtaksperiodeId)
+        val alleUtbetalingerForVedtaksperiode = utbetalingRepository.utbetalingerForVedtaksperiode(vedtaksperiodeId)
 
         if (alleUtbetalingerForVedtaksperiode.size < 2) return true
 

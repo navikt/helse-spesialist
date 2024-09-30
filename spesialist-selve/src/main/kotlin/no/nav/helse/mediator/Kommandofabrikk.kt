@@ -200,7 +200,7 @@ internal class Kommandofabrikk(
         VedtaksperiodeReberegnetCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
-            utbetalingDao = utbetalingDao,
+            utbetalingRepository = utbetalingDao,
             periodehistorikkDao = periodehistorikkDao,
             commandContextDao = commandContextDao,
             oppgaveService = oppgaveService,
@@ -214,7 +214,7 @@ internal class Kommandofabrikk(
         VedtaksperiodeNyUtbetalingCommand(
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
             utbetalingId = hendelse.utbetalingId,
-            utbetalingDao = utbetalingDao,
+            utbetalingRepository = utbetalingDao,
         )
 
     fun søknadSendt(
@@ -286,7 +286,7 @@ internal class Kommandofabrikk(
             personOppdrag = hendelse.personOppdrag,
             arbeidsgiverbeløp = hendelse.arbeidsgiverbeløp,
             personbeløp = hendelse.personbeløp,
-            utbetalingDao = utbetalingDao,
+            utbetalingRepository = utbetalingDao,
             opptegnelseDao = opptegnelseDao,
             reservasjonRepository = reservasjonDao,
             oppgaveRepository = oppgaveDao,
@@ -357,7 +357,7 @@ internal class Kommandofabrikk(
             inntektskilderRepository = InntektskilderDao(dataSource),
             arbeidsforholdDao = arbeidsforholdDao,
             egenAnsattDao = egenAnsattDao,
-            utbetalingDao = utbetalingDao,
+            utbetalingRepository = utbetalingDao,
             vergemålDao = vergemålDao,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             risikovurderingDao = risikovurderingDao,

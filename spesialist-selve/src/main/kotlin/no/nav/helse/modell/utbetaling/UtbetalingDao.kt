@@ -3,13 +3,14 @@ package no.nav.helse.modell.utbetaling
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
+import no.nav.helse.db.UtbetalingRepository
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-class UtbetalingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
+class UtbetalingDao(private val dataSource: DataSource) : HelseDao(dataSource), UtbetalingRepository {
     fun erUtbetaltFør(aktørId: String): Boolean {
         @Language("PostgreSQL")
         val statement = """
@@ -23,7 +24,7 @@ class UtbetalingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         }
     }
 
-    internal fun finnUtbetalingIdRef(utbetalingId: UUID): Long? {
+    override fun finnUtbetalingIdRef(utbetalingId: UUID): Long? {
         @Language("PostgreSQL")
         val statement = "SELECT id FROM utbetaling_id WHERE utbetaling_id = ? LIMIT 1;"
         return sessionOf(dataSource).use {
@@ -35,7 +36,7 @@ class UtbetalingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         }
     }
 
-    fun nyUtbetalingStatus(
+    override fun nyUtbetalingStatus(
         utbetalingIdRef: Long,
         status: Utbetalingsstatus,
         opprettet: LocalDateTime,
@@ -61,7 +62,7 @@ class UtbetalingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         }
     }
 
-    internal fun erUtbetalingForkastet(utbetalingId: UUID): Boolean {
+    override fun erUtbetalingForkastet(utbetalingId: UUID): Boolean {
         @Language("PostgreSQL")
         val query =
             """
@@ -78,7 +79,7 @@ class UtbetalingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         } ?: false
     }
 
-    internal fun opprettUtbetalingId(
+    override fun opprettUtbetalingId(
         utbetalingId: UUID,
         fødselsnummer: String,
         orgnummer: String,
@@ -128,7 +129,7 @@ class UtbetalingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         }
     }
 
-    internal fun nyttOppdrag(
+    override fun nyttOppdrag(
         fagsystemId: String,
         mottaker: String,
     ): Long? {
@@ -151,7 +152,7 @@ class UtbetalingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         }
     }
 
-    internal fun nyLinje(
+    override fun nyLinje(
         oppdragId: Long,
         fom: LocalDate,
         tom: LocalDate,
@@ -177,25 +178,29 @@ class UtbetalingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         }
     }
 
-    internal fun opprettKobling(
+    override fun opprettKobling(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
-    ) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val statement = """
+    ) {
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val statement = """
             INSERT INTO vedtaksperiode_utbetaling_id(vedtaksperiode_id, utbetaling_id) VALUES (?, ?)
             ON CONFLICT DO NOTHING
         """
-        session.run(queryOf(statement, vedtaksperiodeId, utbetalingId).asUpdate)
+            session.run(queryOf(statement, vedtaksperiodeId, utbetalingId).asUpdate)
+        }
     }
 
-    internal fun fjernKobling(
+    override fun fjernKobling(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
-    ) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val statement = "DELETE FROM vedtaksperiode_utbetaling_id WHERE utbetaling_id = ? AND vedtaksperiode_id = ?"
-        session.run(queryOf(statement, utbetalingId, vedtaksperiodeId).asUpdate)
+    ) {
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val statement = "DELETE FROM vedtaksperiode_utbetaling_id WHERE utbetaling_id = ? AND vedtaksperiode_id = ?"
+            session.run(queryOf(statement, utbetalingId, vedtaksperiodeId).asUpdate)
+        }
     }
 
     data class TidligereUtbetalingerForVedtaksperiodeDto(
@@ -243,7 +248,7 @@ class UtbetalingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         }
     }
 
-    internal fun utbetalingerForVedtaksperiode(vedtaksperiodeId: UUID): List<TidligereUtbetalingerForVedtaksperiodeDto> {
+    override fun utbetalingerForVedtaksperiode(vedtaksperiodeId: UUID): List<TidligereUtbetalingerForVedtaksperiodeDto> {
         @Language("PostgreSQL")
         val statement = """
             SELECT vui.utbetaling_id, u.id, u.status

@@ -5,6 +5,7 @@ import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
@@ -46,7 +47,6 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.risiko.VurderVurderingsmomenter
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.utbetaling.Utbetaling
-import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.VurderEnhetUtland
 import no.nav.helse.modell.vergemal.VergemålDao
@@ -220,7 +220,7 @@ internal class GodkjenningsbehovCommand(
     inntektskilderRepository: InntektskilderRepository,
     arbeidsforholdDao: ArbeidsforholdDao,
     egenAnsattDao: EgenAnsattDao,
-    utbetalingDao: UtbetalingDao,
+    utbetalingRepository: UtbetalingRepository,
     vergemålDao: VergemålDao,
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     risikovurderingDao: RisikovurderingDao,
@@ -254,7 +254,7 @@ internal class GodkjenningsbehovCommand(
             ),
             VurderVidereBehandlingAvGodkjenningsbehov(
                 commandData = behovData,
-                utbetalingDao = utbetalingDao,
+                utbetalingRepository = utbetalingRepository,
                 oppgaveRepository = oppgaveRepository,
                 vedtakDao = vedtakDao,
             ),
@@ -275,7 +275,7 @@ internal class GodkjenningsbehovCommand(
             OpprettKoblingTilUtbetalingCommand(
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
                 utbetalingId = behovData.utbetalingId,
-                utbetalingDao = utbetalingDao,
+                utbetalingRepository = utbetalingRepository,
             ),
             ForberedVisningCommand(
                 fødselsnummer = behovData.fødselsnummer,
@@ -361,7 +361,7 @@ internal class GodkjenningsbehovCommand(
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
                 utbetalingId = behovData.utbetalingId,
                 periodehistorikkDao = periodehistorikkDao,
-                utbetalingDao = utbetalingDao,
+                utbetalingRepository = utbetalingRepository,
             ),
             PersisterInntektCommand(
                 fødselsnummer = behovData.fødselsnummer,

@@ -3,6 +3,7 @@ package no.nav.helse.modell.vedtaksperiode
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.ReservasjonRepository
+import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -14,7 +15,6 @@ import no.nav.helse.modell.kommando.ReserverPersonHvisTildeltCommand
 import no.nav.helse.modell.kommando.VedtaksperiodeReberegnetPeriodehistorikk
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
-import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
@@ -57,7 +57,7 @@ internal class VedtaksperiodeReberegnet private constructor(
 internal class VedtaksperiodeReberegnetCommand(
     vedtaksperiodeId: UUID,
     fødselsnummer: String,
-    utbetalingDao: UtbetalingDao,
+    utbetalingRepository: UtbetalingRepository,
     periodehistorikkDao: PeriodehistorikkDao,
     commandContextDao: CommandContextDao,
     oppgaveService: OppgaveService,
@@ -70,7 +70,7 @@ internal class VedtaksperiodeReberegnetCommand(
         listOf(
             VedtaksperiodeReberegnetPeriodehistorikk(
                 vedtaksperiodeId = vedtaksperiodeId,
-                utbetalingDao = utbetalingDao,
+                utbetalingRepository = utbetalingRepository,
                 periodehistorikkDao = periodehistorikkDao,
             ),
             ReserverPersonHvisTildeltCommand(

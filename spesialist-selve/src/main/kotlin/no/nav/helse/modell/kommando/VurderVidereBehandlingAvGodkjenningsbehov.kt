@@ -1,15 +1,15 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.OppgaveRepository
+import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
-import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import org.slf4j.LoggerFactory
 
 internal class VurderVidereBehandlingAvGodkjenningsbehov(
     private val commandData: GodkjenningsbehovData,
-    private val utbetalingDao: UtbetalingDao,
+    private val utbetalingRepository: UtbetalingRepository,
     private val oppgaveRepository: OppgaveRepository,
     private val vedtakDao: VedtakDao,
 ) : Command {
@@ -20,7 +20,7 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
     override fun execute(context: CommandContext): Boolean {
         val utbetalingId = commandData.utbetalingId
         val meldingId = commandData.id
-        if (utbetalingDao.erUtbetalingForkastet(utbetalingId)) {
+        if (utbetalingRepository.erUtbetalingForkastet(utbetalingId)) {
             sikkerlogg.info("Ignorerer godkjenningsbehov med id=$meldingId for utbetalingId=$utbetalingId fordi utbetalingen er forkastet")
             return ferdigstill(context)
         }
