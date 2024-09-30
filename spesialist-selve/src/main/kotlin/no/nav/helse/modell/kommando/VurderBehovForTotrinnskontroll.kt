@@ -30,12 +30,13 @@ internal class VurderBehovForTotrinnskontroll(
         val overstyringer = finnOverstyringerMedType()
         val overstyringerFunnetMedNyttOppslag = finnOverstyringer(overstyringer)
         if (overstyringer.isEmpty() && overstyringerFunnetMedNyttOppslag.isNotEmpty()) {
-            sikkerlogg.info("Fant overstyring(-er) kun ved nytt oppslag. Skulle perioden gått til totrinns?",
+            sikkerlogg.info(
+                "Fant overstyring(-er) kun ved nytt oppslag. Skulle perioden gått til totrinns?",
                 kv("fødselsnummer", fødselsnummer),
                 kv("kreverTotrinnsvurdering", kreverTotrinnsvurdering),
                 kv("vedtaksperiodeHarFerdigstiltOppgave", vedtaksperiodeHarFerdigstiltOppgave),
                 kv("vedtaksperiodeId", vedtaksperiodeId),
-                kv("berørteVedtaksperioder", spleisVedtaksperioder.map { it.vedtaksperiodeId })
+                kv("berørteVedtaksperioder", spleisVedtaksperioder.map { it.vedtaksperiodeId }),
             )
         }
 

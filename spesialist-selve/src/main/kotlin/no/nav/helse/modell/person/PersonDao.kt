@@ -476,19 +476,6 @@ internal class PersonDao(
                 ),
             )
         }
-
-    internal fun findPersonerSomHarPassertFilter() =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = """
-                SELECT fodselsnummer FROM passert_filter_for_skjonnsfastsettelse;
-            """
-            session.run(
-                queryOf(
-                    query,
-                ).map { row -> row.long("fodselsnummer") }.asList,
-            )
-        }
 }
 
 internal fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
