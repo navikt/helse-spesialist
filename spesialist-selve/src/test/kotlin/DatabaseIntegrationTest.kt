@@ -15,6 +15,7 @@ import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
+import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.januar
 import no.nav.helse.mediator.oppgave.OppgaveDao
@@ -54,7 +55,6 @@ import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
-import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.spleis.graphql.HentSnapshot
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype

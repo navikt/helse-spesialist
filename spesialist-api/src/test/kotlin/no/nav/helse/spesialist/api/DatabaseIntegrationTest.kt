@@ -27,7 +27,7 @@ import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
-import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.tildeling.TildelingApiDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
@@ -99,7 +99,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource)
     protected val påVentApiDao = PåVentApiDao(dataSource)
     protected val personApiDao = PersonApiDao(dataSource)
-    protected val tildelingDao = TildelingDao(dataSource)
+    protected val tildelingApiDao = TildelingApiDao(dataSource)
     protected val overstyringApiDao = OverstyringApiDao(dataSource)
     protected val oppgaveApiDao = OppgaveApiDao(dataSource)
     protected val periodehistorikkDao = PeriodehistorikkDao(dataSource)

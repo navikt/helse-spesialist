@@ -32,7 +32,7 @@ import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
-import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.tildeling.TildelingApiDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vergemål.VergemålApiDao
@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory
 class PersonQuery(
     personApiDao: PersonApiDao,
     egenAnsattApiDao: EgenAnsattApiDao,
-    private val tildelingDao: TildelingDao,
+    private val tildelingApiDao: TildelingApiDao,
     private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
     private val overstyringApiDao: OverstyringApiDao,
     private val risikovurderingApiDao: RisikovurderingApiDao,
@@ -138,10 +138,10 @@ class PersonQuery(
                         personinfo.copy(
                             reservasjon = reservasjon.await(),
                             unntattFraAutomatisering = unntattFraAutomatiskGodkjenning,
-                            fullmakt = vergemålApiDao.harFullmakt(fødselsnummer)
+                            fullmakt = vergemålApiDao.harFullmakt(fødselsnummer),
                         ),
                     personApiDao = personApiDao,
-                    tildelingDao = tildelingDao,
+                    tildelingApiDao = tildelingApiDao,
                     arbeidsgiverApiDao = arbeidsgiverApiDao,
                     overstyringApiDao = overstyringApiDao,
                     risikovurderingApiDao = risikovurderingApiDao,

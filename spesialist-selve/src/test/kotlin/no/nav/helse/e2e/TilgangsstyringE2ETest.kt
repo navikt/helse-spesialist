@@ -24,7 +24,7 @@ import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
-import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.tildeling.TildelingApiDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vergemål.VergemålApiDao
@@ -159,7 +159,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
         PersonQuery(
             personApiDao = PersonApiDao(dataSource),
             egenAnsattApiDao = EgenAnsattApiDao(dataSource),
-            tildelingDao = TildelingDao(dataSource),
+            tildelingApiDao = TildelingApiDao(dataSource),
             arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource),
             overstyringApiDao = OverstyringApiDao(dataSource),
             risikovurderingApiDao = RisikovurderingApiDao(dataSource),

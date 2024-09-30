@@ -1,24 +1,21 @@
 package no.nav.helse.modell.tildeling
 
 import DatabaseIntegrationTest
-import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.db.TildelingDao
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class TildelingDaoTest : DatabaseIntegrationTest() {
-
-    private val nyDao = TildelingDao(dataSource)
 
     @Test
     fun tildel() {
         val oid = UUID.randomUUID()
         nyPerson()
         nySaksbehandler(oid)
-        nyDao.tildel(OPPGAVE_ID, oid)
+        tildelingDao.tildel(OPPGAVE_ID, oid)
         assertTildeling(OPPGAVE_ID, oid)
     }
 
@@ -29,8 +26,8 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         nyPerson()
         nySaksbehandler(oid)
         nySaksbehandler(annenOid)
-        nyDao.tildel(OPPGAVE_ID, oid)
-        nyDao.tildel(OPPGAVE_ID, annenOid)
+        tildelingDao.tildel(OPPGAVE_ID, oid)
+        tildelingDao.tildel(OPPGAVE_ID, annenOid)
         assertTildeling(OPPGAVE_ID, annenOid)
     }
 
@@ -39,8 +36,8 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         val oid = UUID.randomUUID()
         nyPerson()
         nySaksbehandler(oid)
-        nyDao.tildel(OPPGAVE_ID, oid)
-        nyDao.avmeld(OPPGAVE_ID)
+        tildelingDao.tildel(OPPGAVE_ID, oid)
+        tildelingDao.avmeld(OPPGAVE_ID)
         assertTildeling(OPPGAVE_ID, null)
     }
 
@@ -50,6 +47,17 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         tildelTilSaksbehandler()
         val tildeling = tildelingDao.tildelingForPerson(FNR)
         assertEquals("navn@navnesen.no", tildeling?.epost)
+    }
+
+    @Test
+    fun `finn tildeling for oppgave`() {
+        val oid = UUID.randomUUID()
+        nyPerson()
+        tildelTilSaksbehandler(oid = oid)
+        val tildeling = tildelingDao.tildelingForOppgave(this.oppgaveId)!!
+        assertEquals(oid, tildeling.oid)
+        assertEquals("navn@navnesen.no", tildeling.epost)
+        assertEquals("Navn Navnesen", tildeling.navn)
     }
 
     @Test
@@ -70,24 +78,13 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         assertNull(saksbehandlerepost)
     }
 
-    @Test
-    fun `finn tildeling for oppgave`() {
-        val oid = UUID.randomUUID()
-        nyPerson()
-        tildelTilSaksbehandler(oid = oid)
-        val tildeling = tildelingDao.tildelingForOppgave(this.oppgaveId)!!
-        assertEquals(oid, tildeling.oid)
-        assertEquals("navn@navnesen.no", tildeling.epost)
-        assertEquals("Navn Navnesen", tildeling.navn)
-    }
-
     private fun nySaksbehandler(oid: UUID = UUID.randomUUID()) {
         saksbehandlerDao.opprettSaksbehandler(oid, "Navn Navnesen", "navn@navnesen.no", "Z999999")
     }
 
     private fun tildelTilSaksbehandler(oppgaveId: Long = this.oppgaveId, oid: UUID = SAKSBEHANDLER_OID) {
         nySaksbehandler(oid)
-        nyDao.tildel(oppgaveId, oid)
+        tildelingDao.tildel(oppgaveId, oid)
     }
 
     private fun assertTildeling(oppgaveId: Long, saksbehandleroid: UUID?) {

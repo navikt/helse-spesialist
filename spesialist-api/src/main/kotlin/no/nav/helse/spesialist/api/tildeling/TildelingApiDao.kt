@@ -1,15 +1,11 @@
 package no.nav.helse.spesialist.api.tildeling
 
 import kotliquery.Row
-import kotliquery.Session
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.HelseDao
-import org.intellij.lang.annotations.Language
 import java.util.UUID
 import javax.sql.DataSource
 
-class TildelingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
+class TildelingApiDao(dataSource: DataSource) : HelseDao(dataSource) {
     fun tildelingForPerson(fødselsnummer: String) =
         asSQL(
             """ 
@@ -30,17 +26,4 @@ class TildelingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             oid = UUID.fromString(it.string("oid")),
             navn = it.string("navn"),
         )
-
-    fun tildelingForOppgave(oppgaveId: Long): TildelingApiDto? = sessionOf(dataSource).use { it.tildelingForOppgave(oppgaveId) }
-
-    // ikke HelseDaoifiser denne før vi er klare for å håndtere flere queries per transaksjon
-    private fun Session.tildelingForOppgave(oppgaveId: Long): TildelingApiDto? {
-        @Language("PostgreSQL")
-        val query = """
-            SELECT s.oid, s.epost, s.navn FROM tildeling t
-                INNER JOIN saksbehandler s on s.oid = t.saksbehandler_ref
-            WHERE t.oppgave_id_ref = :oppgaveId
-            """
-        return run(queryOf(query, mapOf("oppgaveId" to oppgaveId)).map(::tildelingDto).asSingle)
-    }
 }

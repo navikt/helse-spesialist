@@ -3,6 +3,7 @@ package no.nav.helse.modell.vedtaksperiode
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.ReservasjonRepository
+import no.nav.helse.db.TildelingRepository
 import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
@@ -17,7 +18,6 @@ import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
-import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import java.util.UUID
 
 internal class VedtaksperiodeReberegnet private constructor(
@@ -62,7 +62,7 @@ internal class VedtaksperiodeReberegnetCommand(
     commandContextDao: CommandContextDao,
     oppgaveService: OppgaveService,
     reservasjonRepository: ReservasjonRepository,
-    tildelingDao: TildelingDao,
+    tildelingRepository: TildelingRepository,
     oppgaveRepository: OppgaveRepository,
     totrinnsvurderingMediator: TotrinnsvurderingMediator,
 ) : MacroCommand() {
@@ -76,7 +76,7 @@ internal class VedtaksperiodeReberegnetCommand(
             ReserverPersonHvisTildeltCommand(
                 fødselsnummer = fødselsnummer,
                 reservasjonRepository = reservasjonRepository,
-                tildelingDao = tildelingDao,
+                tildelingRepository = tildelingRepository,
                 oppgaveRepository = oppgaveRepository,
                 totrinnsvurderingMediator = totrinnsvurderingMediator,
             ),
@@ -86,7 +86,7 @@ internal class VedtaksperiodeReberegnetCommand(
                 commandContextDao = commandContextDao,
                 oppgaveService = oppgaveService,
                 reservasjonRepository = reservasjonRepository,
-                tildelingDao = tildelingDao,
+                tildelingRepository = tildelingRepository,
                 oppgaveRepository = oppgaveRepository,
                 totrinnsvurderingMediator = totrinnsvurderingMediator,
             ),

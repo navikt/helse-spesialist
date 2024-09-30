@@ -6,6 +6,7 @@ import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.ReservasjonDao
+import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.db.TransactionalCommandContextDao
 import no.nav.helse.db.TransactionalInntektskilderDao
@@ -68,7 +69,6 @@ import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
-import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
 import java.util.UUID
 import javax.sql.DataSource
@@ -205,7 +205,7 @@ internal class Kommandofabrikk(
             commandContextDao = commandContextDao,
             oppgaveService = oppgaveService,
             reservasjonRepository = reservasjonDao,
-            tildelingDao = tildelingDao,
+            tildelingRepository = tildelingDao,
             oppgaveRepository = oppgaveDao,
             totrinnsvurderingMediator = totrinnsvurderingMediator,
         )
@@ -290,7 +290,7 @@ internal class Kommandofabrikk(
             opptegnelseDao = opptegnelseDao,
             reservasjonRepository = reservasjonDao,
             oppgaveRepository = oppgaveDao,
-            tildelingDao = tildelingDao,
+            tildelingRepository = tildelingDao,
             oppgaveService = oppgaveService,
             totrinnsvurderingMediator = totrinnsvurderingMediator,
             json = hendelse.toJson(),
@@ -307,7 +307,7 @@ internal class Kommandofabrikk(
             snapshotClient = snapshotClient,
             oppgaveService = oppgaveService,
             reservasjonRepository = reservasjonDao,
-            tildelingDao = tildelingDao,
+            tildelingRepository = tildelingDao,
             oppgaveRepository = oppgaveDao,
             totrinnsvurderingMediator = totrinnsvurderingMediator,
         )

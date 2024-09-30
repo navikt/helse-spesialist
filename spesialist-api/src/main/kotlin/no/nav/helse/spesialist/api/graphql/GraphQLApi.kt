@@ -37,7 +37,7 @@ import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
-import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.tildeling.TildelingApiDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vergemål.VergemålApiDao
@@ -49,7 +49,7 @@ import java.util.UUID
 fun Application.graphQLApi(
     personApiDao: PersonApiDao,
     egenAnsattApiDao: EgenAnsattApiDao,
-    tildelingDao: TildelingDao,
+    tildelingApiDao: TildelingApiDao,
     arbeidsgiverApiDao: ArbeidsgiverApiDao,
     overstyringApiDao: OverstyringApiDao,
     risikovurderingApiDao: RisikovurderingApiDao,
@@ -84,7 +84,7 @@ fun Application.graphQLApi(
         SchemaBuilder(
             personApiDao = personApiDao,
             egenAnsattApiDao = egenAnsattApiDao,
-            tildelingDao = tildelingDao,
+            tildelingApiDao = tildelingApiDao,
             arbeidsgiverApiDao = arbeidsgiverApiDao,
             overstyringApiDao = overstyringApiDao,
             risikovurderingApiDao = risikovurderingApiDao,

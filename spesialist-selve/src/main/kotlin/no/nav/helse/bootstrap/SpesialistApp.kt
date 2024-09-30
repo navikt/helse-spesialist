@@ -11,6 +11,7 @@ import no.nav.helse.db.PoisonPillDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
+import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.BehandlingsstatistikkService
 import no.nav.helse.mediator.GodkjenningMediator
@@ -61,7 +62,7 @@ import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
-import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.tildeling.TildelingApiDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vergemål.VergemålApiDao
@@ -101,10 +102,8 @@ internal class SpesialistApp(
     private val risikovurderingDao = RisikovurderingDao(dataSource)
     private val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
-    private val tildelingApiDao = TildelingDao(dataSource)
-    private val tildelingDao =
-        no.nav.helse.db
-            .TildelingDao(dataSource)
+    private val tildelingApiDao = TildelingApiDao(dataSource)
+    private val tildelingDao = TildelingDao(dataSource)
     private val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
     private val overstyringApiDao = OverstyringApiDao(dataSource)
     private val reservasjonDao = ReservasjonDao(dataSource)
@@ -224,7 +223,7 @@ internal class SpesialistApp(
             graphQLApi(
                 personApiDao = personApiDao,
                 egenAnsattApiDao = egenAnsattApiDao,
-                tildelingDao = tildelingApiDao,
+                tildelingApiDao = tildelingApiDao,
                 arbeidsgiverApiDao = arbeidsgiverApiDao,
                 overstyringApiDao = overstyringApiDao,
                 risikovurderingApiDao = risikovurderingApiDao,

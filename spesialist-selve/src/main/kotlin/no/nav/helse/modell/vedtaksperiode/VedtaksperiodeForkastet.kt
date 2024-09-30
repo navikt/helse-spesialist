@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.ReservasjonRepository
+import no.nav.helse.db.TildelingRepository
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -17,7 +18,6 @@ import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
-import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import java.util.UUID
 
 internal class VedtaksperiodeForkastet private constructor(
@@ -64,7 +64,7 @@ internal class VedtaksperiodeForkastetCommand(
     snapshotClient: ISnapshotClient,
     oppgaveService: OppgaveService,
     reservasjonRepository: ReservasjonRepository,
-    tildelingDao: TildelingDao,
+    tildelingRepository: TildelingRepository,
     oppgaveRepository: OppgaveRepository,
     totrinnsvurderingMediator: TotrinnsvurderingMediator,
 ) : MacroCommand() {
@@ -76,7 +76,7 @@ internal class VedtaksperiodeForkastetCommand(
                 commandContextDao = commandContextDao,
                 oppgaveService = oppgaveService,
                 reservasjonRepository = reservasjonRepository,
-                tildelingDao = tildelingDao,
+                tildelingRepository = tildelingRepository,
                 oppgaveRepository = oppgaveRepository,
                 totrinnsvurderingMediator = totrinnsvurderingMediator,
             ),

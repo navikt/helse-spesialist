@@ -21,7 +21,7 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
-import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.tildeling.TildelingApiDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGhostPeriode
@@ -95,7 +95,7 @@ data class Person(
     private val snapshot: GraphQLPerson,
     private val personinfo: Personinfo,
     private val personApiDao: PersonApiDao,
-    private val tildelingDao: TildelingDao,
+    private val tildelingApiDao: TildelingApiDao,
     private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
     private val overstyringApiDao: OverstyringApiDao,
     private val risikovurderingApiDao: RisikovurderingApiDao,
@@ -123,7 +123,7 @@ data class Person(
     fun enhet(): Enhet = personApiDao.finnEnhet(snapshot.fodselsnummer).let { Enhet(it.id, it.navn) }
 
     fun tildeling(): Tildeling? =
-        tildelingDao.tildelingForPerson(snapshot.fodselsnummer)?.let {
+        tildelingApiDao.tildelingForPerson(snapshot.fodselsnummer)?.let {
             Tildeling(
                 navn = it.navn,
                 epost = it.epost,
