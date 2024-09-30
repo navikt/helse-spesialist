@@ -1,8 +1,8 @@
 package no.nav.helse.mediator.meldinger.løsninger
 
+import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
-import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.River
@@ -16,8 +16,8 @@ internal class EgenAnsattløsning(
     private val fødselsnummer: String,
     private val erEgenAnsatt: Boolean,
 ) {
-    internal fun lagre(egenAnsattDao: EgenAnsattDao) {
-        egenAnsattDao.lagre(fødselsnummer, erEgenAnsatt, opprettet)
+    internal fun lagre(egenAnsattRepository: EgenAnsattRepository) {
+        egenAnsattRepository.lagre(fødselsnummer, erEgenAnsatt, opprettet)
     }
 
     internal class EgenAnsattRiver(

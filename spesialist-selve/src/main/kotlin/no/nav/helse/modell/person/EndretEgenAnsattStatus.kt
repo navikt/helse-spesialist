@@ -1,10 +1,10 @@
 package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
@@ -51,13 +51,13 @@ internal class EndretEgenAnsattStatusCommand(
     private val fødselsnummer: String,
     erEgenAnsatt: Boolean,
     opprettet: LocalDateTime,
-    egenAnsattDao: EgenAnsattDao,
+    egenAnsattRepository: EgenAnsattRepository,
     oppgaveService: OppgaveService,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
             ikkesuspenderendeCommand("lagreEgenAnsattStatus") {
-                egenAnsattDao.lagre(fødselsnummer, erEgenAnsatt, opprettet)
+                egenAnsattRepository.lagre(fødselsnummer, erEgenAnsatt, opprettet)
             },
             ikkesuspenderendeCommand("endretEgenAnsattStatus") {
                 oppgaveService.endretEgenAnsattStatus(erEgenAnsatt, fødselsnummer)

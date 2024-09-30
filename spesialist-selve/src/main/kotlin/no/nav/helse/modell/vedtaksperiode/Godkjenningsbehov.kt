@@ -3,6 +3,7 @@ package no.nav.helse.modell.vedtaksperiode
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.ArbeidsforholdRepository
 import no.nav.helse.db.AvviksvurderingDao
+import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.PersonRepository
@@ -19,7 +20,6 @@ import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.VurderAutomatiskAvvisning
 import no.nav.helse.modell.automatisering.VurderAutomatiskInnvilgelse
-import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.egenansatt.KontrollerEgenAnsattstatus
 import no.nav.helse.modell.gosysoppgaver.VurderÅpenGosysoppgave
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
@@ -219,7 +219,7 @@ internal class GodkjenningsbehovCommand(
     personRepository: PersonRepository,
     inntektskilderRepository: InntektskilderRepository,
     arbeidsforholdRepository: ArbeidsforholdRepository,
-    egenAnsattDao: EgenAnsattDao,
+    egenAnsattRepository: EgenAnsattRepository,
     utbetalingRepository: UtbetalingRepository,
     vergemålDao: VergemålDao,
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
@@ -290,7 +290,7 @@ internal class GodkjenningsbehovCommand(
             ),
             KontrollerEgenAnsattstatus(
                 fødselsnummer = behovData.fødselsnummer,
-                egenAnsattDao = egenAnsattDao,
+                egenAnsattRepository = egenAnsattRepository,
             ),
             VurderVergemålOgFullmakt(
                 fødselsnummer = behovData.fødselsnummer,
@@ -340,7 +340,7 @@ internal class GodkjenningsbehovCommand(
                 automatisering = automatisering,
                 personRepository = personRepository,
                 risikovurderingDao = risikovurderingDao,
-                egenAnsattDao = egenAnsattDao,
+                egenAnsattRepository = egenAnsattRepository,
                 utbetalingtype = behovData.utbetalingtype,
                 sykefraværstilfelle = sykefraværstilfelle,
                 utbetaling = utbetaling,

@@ -129,7 +129,7 @@ internal class Kommandofabrikk(
             fødselsnummer = melding.fødselsnummer(),
             erEgenAnsatt = melding.erEgenAnsatt,
             opprettet = melding.opprettet,
-            egenAnsattDao = egenAnsattDao,
+            egenAnsattRepository = egenAnsattDao,
             oppgaveService = oppgaveService,
         )
 
@@ -356,7 +356,7 @@ internal class Kommandofabrikk(
             personRepository = personDao,
             inntektskilderRepository = InntektskilderDao(dataSource),
             arbeidsforholdRepository = arbeidsforholdDao,
-            egenAnsattDao = egenAnsattDao,
+            egenAnsattRepository = egenAnsattDao,
             utbetalingRepository = utbetalingDao,
             vergemålDao = vergemålDao,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,

@@ -1,10 +1,10 @@
 package no.nav.helse.modell.kommando
 
+import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.VedtakRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
-import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Egenskap.DELVIS_REFUSJON
 import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
@@ -52,7 +52,7 @@ internal class OpprettSaksbehandleroppgave(
     private val automatisering: Automatisering,
     private val personRepository: PersonRepository,
     private val risikovurderingDao: RisikovurderingDao,
-    private val egenAnsattDao: EgenAnsattDao,
+    private val egenAnsattRepository: EgenAnsattRepository,
     private val utbetalingtype: Utbetalingtype,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val utbetaling: Utbetaling,
@@ -75,7 +75,7 @@ internal class OpprettSaksbehandleroppgave(
         val inntektskilde = behovData.inntektskilde
         val kanAvvises = behovData.kanAvvises
 
-        if (egenAnsattDao.erEgenAnsatt(fødselsnummer) == true) egenskaper.add(EGEN_ANSATT)
+        if (egenAnsattRepository.erEgenAnsatt(fødselsnummer) == true) egenskaper.add(EGEN_ANSATT)
 
         val adressebeskyttelse = personRepository.finnAdressebeskyttelse(fødselsnummer)
         when (adressebeskyttelse) {

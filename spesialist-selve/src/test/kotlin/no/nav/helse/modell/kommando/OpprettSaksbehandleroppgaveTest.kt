@@ -401,7 +401,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         automatisering = automatisering,
         personRepository = personDao,
         risikovurderingDao = risikovurderingDao,
-        egenAnsattDao = egenAnsattDao,
+        egenAnsattRepository = egenAnsattDao,
         utbetalingtype = utbetalingstype,
         sykefraværstilfelle = sykefraværstilfelle,
         utbetaling = utbetaling,

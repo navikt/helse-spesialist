@@ -2,12 +2,13 @@ package no.nav.helse.modell.egenansatt
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.db.EgenAnsattRepository
 import org.intellij.lang.annotations.Language
 import java.time.LocalDateTime
 import javax.sql.DataSource
 
-class EgenAnsattDao(private val dataSource: DataSource) {
-    internal fun lagre(
+class EgenAnsattDao(private val dataSource: DataSource) : EgenAnsattRepository {
+    override fun lagre(
         fødselsnummer: String,
         erEgenAnsatt: Boolean,
         opprettet: LocalDateTime,
@@ -36,7 +37,7 @@ class EgenAnsattDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun erEgenAnsatt(fødselsnummer: String): Boolean? {
+    override fun erEgenAnsatt(fødselsnummer: String): Boolean? {
         @Language("PostgreSQL")
         val query = """
             SELECT er_egen_ansatt
