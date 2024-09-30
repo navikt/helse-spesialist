@@ -6,6 +6,7 @@ import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.UtbetalingRepository
+import no.nav.helse.db.VedtakRepository
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
@@ -14,7 +15,6 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.InntektskildeDto.Companion.gjenopprett
 import no.nav.helse.modell.SnapshotDao
-import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.VurderAutomatiskAvvisning
@@ -214,7 +214,7 @@ internal class GodkjenningsbehovCommand(
     utbetaling: Utbetaling,
     førsteKjenteDagFinner: () -> LocalDate,
     automatisering: Automatisering,
-    vedtakDao: VedtakDao,
+    vedtakRepository: VedtakRepository,
     commandContextDao: CommandContextDao,
     personRepository: PersonRepository,
     inntektskilderRepository: InntektskilderRepository,
@@ -256,11 +256,11 @@ internal class GodkjenningsbehovCommand(
                 commandData = behovData,
                 utbetalingRepository = utbetalingRepository,
                 oppgaveRepository = oppgaveRepository,
-                vedtakDao = vedtakDao,
+                vedtakRepository = vedtakRepository,
             ),
             OpprettKoblingTilHendelseCommand(
                 commandData = behovData,
-                vedtakDao = vedtakDao,
+                vedtakRepository = vedtakRepository,
             ),
             AvbrytContextCommand(
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
@@ -270,7 +270,7 @@ internal class GodkjenningsbehovCommand(
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
                 vedtaksperiodetype = behovData.periodetype,
                 inntektskilde = behovData.inntektskilde,
-                vedtakDao = vedtakDao,
+                vedtakRepository = vedtakRepository,
             ),
             OpprettKoblingTilUtbetalingCommand(
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
@@ -345,7 +345,7 @@ internal class GodkjenningsbehovCommand(
                 sykefraværstilfelle = sykefraværstilfelle,
                 utbetaling = utbetaling,
                 vergemålDao = vergemålDao,
-                vedtakDao = vedtakDao,
+                vedtakRepository = vedtakRepository,
                 påVentDao = påVentDao,
             ),
             VurderBehovForTotrinnskontroll(

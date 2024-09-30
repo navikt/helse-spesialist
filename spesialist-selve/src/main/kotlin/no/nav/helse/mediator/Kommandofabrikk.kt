@@ -351,7 +351,7 @@ internal class Kommandofabrikk(
             utbetaling = utbetaling,
             førsteKjenteDagFinner = førsteKjenteDagFinner,
             automatisering = automatisering,
-            vedtakDao = vedtakDao,
+            vedtakRepository = vedtakDao,
             commandContextDao = commandContextDao,
             personRepository = personDao,
             inntektskilderRepository = InntektskilderDao(dataSource),

@@ -1,8 +1,8 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.VedtakRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.oppgave.Egenskap
@@ -57,7 +57,7 @@ internal class OpprettSaksbehandleroppgave(
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val utbetaling: Utbetaling,
     private val vergemålDao: VergemålDao,
-    private val vedtakDao: VedtakDao,
+    private val vedtakRepository: VedtakRepository,
     private val påVentDao: PåVentDao,
 ) : Command {
     private companion object {
@@ -116,7 +116,7 @@ internal class OpprettSaksbehandleroppgave(
             Periodetype.OVERGANG_FRA_IT -> egenskaper.add(OVERGANG_FRA_IT)
         }
 
-        if (vedtakDao.erSpesialsak(vedtaksperiodeId)) {
+        if (vedtakRepository.erSpesialsak(vedtaksperiodeId)) {
             egenskaper.add(SPESIALSAK)
         }
 

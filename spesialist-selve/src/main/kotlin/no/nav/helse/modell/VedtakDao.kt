@@ -3,6 +3,7 @@ package no.nav.helse.modell
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.db.VedtakRepository
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
@@ -10,7 +11,7 @@ import org.intellij.lang.annotations.Language
 import java.util.UUID
 import javax.sql.DataSource
 
-internal class VedtakDao(private val dataSource: DataSource) {
+internal class VedtakDao(private val dataSource: DataSource) : VedtakRepository {
     internal fun TransactionalSession.finnVedtaksperiode(vedtaksperiodeId: UUID): VedtaksperiodeDto? {
         @Language("PostgreSQL")
         val query =
@@ -78,25 +79,29 @@ internal class VedtakDao(private val dataSource: DataSource) {
         run(queryOf(query, mapOf("vedtaksperiode_id" to vedtaksperiodeId)).asUpdate)
     }
 
-    internal fun opprettKobling(
+    override fun opprettKobling(
         vedtaksperiodeId: UUID,
         hendelseId: UUID,
-    ) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val statement = """
+    ) {
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val statement = """
             INSERT INTO vedtaksperiode_hendelse(vedtaksperiode_id, hendelse_ref) VALUES (?, ?)
             ON CONFLICT DO NOTHING
         """
-        session.run(queryOf(statement, vedtaksperiodeId, hendelseId).asUpdate)
+            session.run(queryOf(statement, vedtaksperiodeId, hendelseId).asUpdate)
+        }
     }
 
-    internal fun fjernKobling(
+    override fun fjernKobling(
         vedtaksperiodeId: UUID,
         hendelseId: UUID,
-    ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-        @Language("PostgreSQL")
-        val statement = "DELETE FROM vedtaksperiode_hendelse WHERE hendelse_ref = ? AND vedtaksperiode_id = ?"
-        session.run(queryOf(statement, hendelseId, vedtaksperiodeId).asUpdate)
+    ) {
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            @Language("PostgreSQL")
+            val statement = "DELETE FROM vedtaksperiode_hendelse WHERE hendelse_ref = ? AND vedtaksperiode_id = ?"
+            session.run(queryOf(statement, hendelseId, vedtaksperiodeId).asUpdate)
+        }
     }
 
     internal fun finnVedtakId(vedtaksperiodeId: UUID) =
@@ -106,7 +111,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
             session.run(queryOf(statement, vedtaksperiodeId).map { it.long("id") }.asSingle)
         }
 
-    internal fun erSpesialsak(vedtaksperiodeId: UUID) =
+    override fun erSpesialsak(vedtaksperiodeId: UUID) =
         sessionOf(dataSource).use {
             @Language("PostgreSQL")
             val query = """SELECT true FROM spesialsak WHERE vedtaksperiode_id = :vedtaksperiode_id AND ferdigbehandlet = false"""
@@ -120,7 +125,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
             it.run(queryOf(query, mapOf("vedtaksperiode_id" to vedtaksperiodeId)).asUpdate)
         }
 
-    internal fun leggTilVedtaksperiodetype(
+    override fun leggTilVedtaksperiodetype(
         vedtaksperiodeId: UUID,
         type: Periodetype,
         inntektskilde: Inntektskilde,
@@ -172,7 +177,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
             )
         }
 
-    internal fun erAutomatiskGodkjent(utbetalingId: UUID) =
+    override fun erAutomatiskGodkjent(utbetalingId: UUID) =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query = """

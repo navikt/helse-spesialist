@@ -406,7 +406,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         sykefraværstilfelle = sykefraværstilfelle,
         utbetaling = utbetaling,
         vergemålDao = vergemålDao,
-        vedtakDao = vedtakDao,
+        vedtakRepository = vedtakDao,
         påVentDao = påVentDao,
         behovData = GodkjenningsbehovData(
             id = UUID.randomUUID(),
