@@ -240,12 +240,12 @@ internal class Kommandofabrikk(
                 }?.data()
         val utbetaling = godkjenningsbehovData?.let { utbetalingDao.hentUtbetaling(it.utbetalingId) }
         return AdressebeskyttelseEndretCommand(
-            melding.fødselsnummer(),
-            personDao,
-            oppgaveDao,
-            godkjenningMediator,
-            godkjenningsbehovData,
-            utbetaling,
+            fødselsnummer = melding.fødselsnummer(),
+            personRepository = personDao,
+            oppgaveDao = oppgaveDao,
+            godkjenningMediator = godkjenningMediator,
+            godkjenningsbehov = godkjenningsbehovData,
+            utbetaling = utbetaling,
         )
     }
 
