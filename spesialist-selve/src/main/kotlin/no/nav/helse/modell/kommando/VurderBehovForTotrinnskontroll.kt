@@ -1,8 +1,8 @@
 package no.nav.helse.modell.kommando
 
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.helse.db.OverstyringRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.vedtaksperiode.SpleisVedtaksperiode
@@ -14,7 +14,7 @@ internal class VurderBehovForTotrinnskontroll(
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
     private val oppgaveService: OppgaveService,
-    private val overstyringDao: OverstyringDao,
+    private val overstyringRepository: OverstyringRepository,
     private val totrinnsvurderingMediator: TotrinnsvurderingMediator,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val spleisVedtaksperioder: List<SpleisVedtaksperiode>,
@@ -61,7 +61,7 @@ internal class VurderBehovForTotrinnskontroll(
 
     private fun finnOverstyringer(overstyringer: List<OverstyringType>): List<OverstyringType> {
         val spleisVedtaksperiodeIder = spleisVedtaksperioder.map { it.vedtaksperiodeId }
-        val vedtaksperiodeOverstyringtyper = overstyringDao.finnOverstyringerMedTypeForVedtaksperioder(spleisVedtaksperiodeIder)
+        val vedtaksperiodeOverstyringtyper = overstyringRepository.finnOverstyringerMedTypeForVedtaksperioder(spleisVedtaksperiodeIder)
 
         if (overstyringer.isEmpty() && vedtaksperiodeOverstyringtyper.isEmpty()) return vedtaksperiodeOverstyringtyper
 
@@ -75,7 +75,7 @@ internal class VurderBehovForTotrinnskontroll(
 
     // Overstyringer og Revurderinger
     private fun finnOverstyringerMedType(): List<OverstyringType> {
-        val vedtaksperiodeOverstyringtyper = overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId)
+        val vedtaksperiodeOverstyringtyper = overstyringRepository.finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId)
         if (vedtaksperiodeOverstyringtyper.isNotEmpty()) {
             logg.info(
                 "Vedtaksperioden: $vedtaksperiodeId har blitt overstyrt eller revurdert med typer: $vedtaksperiodeOverstyringtyper",

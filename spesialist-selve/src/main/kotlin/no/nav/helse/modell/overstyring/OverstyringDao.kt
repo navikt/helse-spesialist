@@ -4,6 +4,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
 import no.nav.helse.db.MinimumSykdomsgradForDatabase
+import no.nav.helse.db.OverstyringRepository
 import no.nav.helse.db.OverstyrtArbeidsforholdForDatabase
 import no.nav.helse.db.OverstyrtInntektOgRefusjonForDatabase
 import no.nav.helse.db.OverstyrtTidslinjeForDatabase
@@ -14,9 +15,9 @@ import org.intellij.lang.annotations.Language
 import java.util.UUID
 import javax.sql.DataSource
 
-class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) {
-    fun finnOverstyringerMedTypeForVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<OverstyringType> =
-        asSQL(
+class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource), OverstyringRepository {
+    override fun finnOverstyringerMedTypeForVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<OverstyringType> {
+        return asSQL(
             """ SELECT DISTINCT o.id,
                 CASE
                     WHEN oi.id IS NOT NULL THEN 'Inntekt'
@@ -36,9 +37,10 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
         """,
             *vedtaksperiodeIder.toTypedArray(),
         ).list { OverstyringType.valueOf(it.string("type")) }
+    }
 
-    fun finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId: UUID): List<OverstyringType> =
-        asSQL(
+    override fun finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId: UUID): List<OverstyringType> {
+        return asSQL(
             """ SELECT DISTINCT o.id,
                 CASE
                     WHEN oi.id IS NOT NULL THEN 'Inntekt'
@@ -61,6 +63,7 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
         """,
             mapOf("vedtaksperiode_id" to vedtaksperiodeId),
         ).list { OverstyringType.valueOf(it.string("type")) }
+    }
 
     fun finnAktiveOverstyringer(vedtaksperiodeId: UUID): List<EksternHendelseId> =
         asSQL(
@@ -87,7 +90,7 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
             mapOf("vedtaksperiode_id" to vedtaksperiodeId),
         ).update()
 
-    fun kobleOverstyringOgVedtaksperiode(
+    override fun kobleOverstyringOgVedtaksperiode(
         vedtaksperiodeIder: List<UUID>,
         overstyringHendelseId: UUID,
     ) {
@@ -130,7 +133,7 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
             mapOf("vedtaksperiode_id" to vedtaksperiodeId),
         ).single { row -> row.boolean(1) } ?: false
 
-    fun finnesEksternHendelseId(eksternHendelseId: UUID): Boolean =
+    override fun finnesEksternHendelseId(eksternHendelseId: UUID): Boolean =
         asSQL(
             """ SELECT 1 from overstyring 
             WHERE ekstern_hendelse_id = :eksternHendelseId

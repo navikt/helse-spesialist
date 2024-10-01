@@ -263,7 +263,7 @@ internal class Kommandofabrikk(
         OverstyringIgangsattCommand(
             berørteVedtaksperiodeIder = melding.berørteVedtaksperiodeIder,
             kilde = melding.kilde,
-            overstyringDao = overstyringDao,
+            overstyringRepository = overstyringDao,
         )
 
     internal fun utbetalingAnnullert(hendelse: UtbetalingAnnullert): UtbetalingAnnullertCommand =
@@ -362,7 +362,7 @@ internal class Kommandofabrikk(
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             risikovurderingRepository = risikovurderingDao,
             påVentRepository = påVentDao,
-            overstyringDao = overstyringDao,
+            overstyringRepository = overstyringDao,
             periodehistorikkDao = periodehistorikkDao,
             snapshotDao = snapshotDao,
             oppgaveRepository = oppgaveDao,

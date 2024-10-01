@@ -6,6 +6,7 @@ import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.db.OppgaveRepository
+import no.nav.helse.db.OverstyringRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.PåVentRepository
 import no.nav.helse.db.RisikovurderingRepository
@@ -43,7 +44,6 @@ import no.nav.helse.modell.kommando.PersisterPeriodehistorikkCommand
 import no.nav.helse.modell.kommando.PersisterVedtaksperiodetypeCommand
 import no.nav.helse.modell.kommando.VurderBehovForTotrinnskontroll
 import no.nav.helse.modell.kommando.VurderVidereBehandlingAvGodkjenningsbehov
-import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.risiko.VurderVurderingsmomenter
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
@@ -225,7 +225,7 @@ internal class GodkjenningsbehovCommand(
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     risikovurderingRepository: RisikovurderingRepository,
     påVentRepository: PåVentRepository,
-    overstyringDao: OverstyringDao,
+    overstyringRepository: OverstyringRepository,
     periodehistorikkDao: PeriodehistorikkDao,
     snapshotDao: SnapshotDao,
     oppgaveRepository: OppgaveRepository,
@@ -352,7 +352,7 @@ internal class GodkjenningsbehovCommand(
                 fødselsnummer = behovData.fødselsnummer,
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
                 oppgaveService = oppgaveService,
-                overstyringDao = overstyringDao,
+                overstyringRepository = overstyringRepository,
                 totrinnsvurderingMediator = totrinnsvurderingMediator,
                 sykefraværstilfelle = sykefraværstilfelle,
                 spleisVedtaksperioder = behovData.spleisVedtaksperioder,

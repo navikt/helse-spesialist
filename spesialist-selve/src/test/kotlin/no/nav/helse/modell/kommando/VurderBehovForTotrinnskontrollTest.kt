@@ -3,10 +3,10 @@ package no.nav.helse.modell.kommando
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.db.OverstyringRepository
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
@@ -31,7 +31,7 @@ internal class VurderBehovForTotrinnskontrollTest {
 
     private val totrinnsvurderingMediator = mockk<TotrinnsvurderingMediator>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
-    private val overstyringDao = mockk<OverstyringDao>(relaxed = true)
+    private val overstyringRepository = mockk<OverstyringRepository>(relaxed = true)
     private lateinit var context: CommandContext
 
     val sykefraværstilfelle =
@@ -48,7 +48,7 @@ internal class VurderBehovForTotrinnskontrollTest {
             fødselsnummer = FØDSELSNUMMER,
             vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
             oppgaveService = oppgaveService,
-            overstyringDao = overstyringDao,
+            overstyringRepository = overstyringRepository,
             totrinnsvurderingMediator = totrinnsvurderingMediator,
             sykefraværstilfelle = sykefraværstilfelle,
             spleisVedtaksperioder = listOf(SpleisVedtaksperiode(VEDTAKSPERIODE_ID_1, UUID.randomUUID(), 1.januar, 31.januar, 1.januar), SpleisVedtaksperiode(VEDTAKSPERIODE_ID_2, UUID.randomUUID(), 1.februar, 28.februar, 1.januar)),
@@ -61,7 +61,7 @@ internal class VurderBehovForTotrinnskontrollTest {
 
     @Test
     fun `Oppretter totrinnsvurdering dersom vedtaksperioden finnes i overstyringer_for_vedtaksperioder`() {
-        every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
+        every { overstyringRepository.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
 
         assertTrue(command.execute(context))
 
@@ -97,7 +97,7 @@ internal class VurderBehovForTotrinnskontrollTest {
     fun `Hvis totrinnsvurdering har saksbehander skal oppgaven reserveres`() {
         val saksbehander = UUID.randomUUID()
 
-        every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
+        every { overstyringRepository.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
         every { totrinnsvurderingMediator.opprett(any()) } returns
             TotrinnsvurderingOld(
                 vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
@@ -120,7 +120,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         val saksbehander = UUID.randomUUID()
         val beslutter = UUID.randomUUID()
 
-        every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
+        every { overstyringRepository.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
         every { totrinnsvurderingMediator.opprett(any()) } returns
             TotrinnsvurderingOld(
                 vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
@@ -148,7 +148,7 @@ internal class VurderBehovForTotrinnskontrollTest {
 
     @Test
     fun `Oppretter trengerTotrinnsvurdering dersom oppgaven har blitt overstyrt`() {
-        every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
+        every { overstyringRepository.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
 
         assertTrue(command.execute(context))
         verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
@@ -156,7 +156,7 @@ internal class VurderBehovForTotrinnskontrollTest {
 
     @Test
     fun `Oppretter trengerTotrinnsvurdering dersom oppgaven har fått avklart skjønnsfastsatt sykepengegrunnlag`() {
-        every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Sykepengegrunnlag)
+        every { overstyringRepository.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Sykepengegrunnlag)
 
         assertTrue(command.execute(context))
         verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
