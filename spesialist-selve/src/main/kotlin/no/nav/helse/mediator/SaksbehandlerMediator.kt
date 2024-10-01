@@ -145,7 +145,7 @@ internal class SaksbehandlerMediator(
         saksbehandlerFraApi: SaksbehandlerFraApi,
     ) {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
-        val modellhandling = handling.tilModellversjon() as PåVent
+        val modellhandling = handling.tilModellversjon()
         SaksbehandlerLagrer(saksbehandlerDao).lagre(saksbehandler)
         tell(modellhandling)
         val handlingId = UUID.randomUUID()
@@ -441,11 +441,15 @@ internal class SaksbehandlerMediator(
             is AnnulleringData -> this.tilModellversjon()
             is TildelOppgave -> this.tilModellversjon()
             is AvmeldOppgave -> this.tilModellversjon()
+            is OpphevStans -> this.tilModellversjon()
+            else -> throw IllegalStateException("Støtter ikke handling ${this::class.simpleName}")
+        }
+
+    private fun no.nav.helse.spesialist.api.saksbehandler.handlinger.PåVent.tilModellversjon(): PåVent =
+        when (this) {
             is LeggPåVent -> this.tilModellversjon()
             is FjernPåVent -> this.tilModellversjon()
             is FjernPåVentUtenHistorikkinnslag -> this.tilModellversjon()
-            is OpphevStans -> this.tilModellversjon()
-            else -> throw IllegalStateException("Støtter ikke handling ${this::class.simpleName}")
         }
 
     private fun ArbeidsforholdOverstyringHandling.tilModellversjon(): OverstyrtArbeidsforhold =

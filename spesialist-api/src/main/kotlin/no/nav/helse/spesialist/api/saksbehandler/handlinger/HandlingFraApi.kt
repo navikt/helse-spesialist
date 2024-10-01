@@ -11,7 +11,7 @@ data class TildelOppgave(val oppgaveId: Long) : HandlingFraApi
 
 data class AvmeldOppgave(val oppgaveId: Long) : HandlingFraApi
 
-interface PåVent : HandlingFraApi
+sealed interface PåVent
 
 data class LeggPåVent(
     val oppgaveId: Long,
