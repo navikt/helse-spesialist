@@ -17,7 +17,7 @@ import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering as ApiAvviksvurdering
 
-class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
+class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSource), AvviksvurderingRepository {
     internal fun lagre(avviksvurdering: AvviksvurderingDto) {
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
@@ -161,7 +161,7 @@ class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSour
             )
         }
 
-    fun opprettKobling(
+    override fun opprettKobling(
         avviksvurderingId: UUID,
         vilkårsgrunnlagId: UUID,
     ) {

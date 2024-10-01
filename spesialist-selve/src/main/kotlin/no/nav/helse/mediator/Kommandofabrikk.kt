@@ -366,7 +366,7 @@ internal class Kommandofabrikk(
             periodehistorikkDao = periodehistorikkDao,
             snapshotRepository = snapshotDao,
             oppgaveRepository = oppgaveDao,
-            avviksvurderingDao = avviksvurderingDao,
+            avviksvurderingRepository = avviksvurderingDao,
             snapshotClient = snapshotClient,
             oppgaveService = oppgaveService,
             godkjenningMediator = godkjenningMediator,

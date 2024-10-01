@@ -2,7 +2,7 @@ package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.ArbeidsforholdRepository
-import no.nav.helse.db.AvviksvurderingDao
+import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.db.OppgaveRepository
@@ -229,7 +229,7 @@ internal class GodkjenningsbehovCommand(
     periodehistorikkDao: PeriodehistorikkDao,
     snapshotRepository: SnapshotRepository,
     oppgaveRepository: OppgaveRepository,
-    avviksvurderingDao: AvviksvurderingDao,
+    avviksvurderingRepository: AvviksvurderingRepository,
     snapshotClient: ISnapshotClient,
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
@@ -250,7 +250,7 @@ internal class GodkjenningsbehovCommand(
             ),
             OpprettKoblingTilAvviksvurdering(
                 commandData = behovData,
-                avviksvurderingDao = avviksvurderingDao,
+                avviksvurderingRepository = avviksvurderingRepository,
             ),
             VurderVidereBehandlingAvGodkjenningsbehov(
                 commandData = behovData,
