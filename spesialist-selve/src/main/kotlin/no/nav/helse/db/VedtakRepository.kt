@@ -24,4 +24,6 @@ interface VedtakRepository {
         vedtaksperiodeId: UUID,
         hendelseId: UUID,
     )
+
+    fun finnInntektskilde(vedtaksperiodeId: UUID): Inntektskilde?
 }

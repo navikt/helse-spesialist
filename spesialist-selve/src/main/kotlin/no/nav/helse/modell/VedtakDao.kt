@@ -165,7 +165,7 @@ internal class VedtakDao(private val dataSource: DataSource) : VedtakRepository 
             ) { "Forventet å finne saksbehandleroppgavetype for vedtaksperiodeId $vedtaksperiodeId" }
         }
 
-    internal fun finnInntektskilde(vedtaksperiodeId: UUID): Inntektskilde? =
+    override fun finnInntektskilde(vedtaksperiodeId: UUID): Inntektskilde? =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val statement =
