@@ -26,4 +26,9 @@ internal interface CommandContextRepository {
     )
 
     fun tidsbrukForContext(contextId: UUID): Int
+
+    fun avbryt(
+        vedtaksperiodeId: UUID,
+        contextId: UUID,
+    ): List<Pair<UUID, UUID>>
 }

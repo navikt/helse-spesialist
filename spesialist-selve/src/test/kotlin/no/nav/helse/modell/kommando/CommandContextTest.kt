@@ -3,8 +3,8 @@ package no.nav.helse.modell.kommando
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.mediator.CommandContextObserver
-import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.kommando.CommandContext.Companion.convertToUUID
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -24,7 +24,7 @@ internal class CommandContextTest {
         private val CONTEXT = UUID.randomUUID()
     }
 
-    private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
+    private val commandContextRepository = mockk<CommandContextRepository>(relaxed = true)
 
     private val observer =
         object : CommandContextObserver {
@@ -63,11 +63,11 @@ internal class CommandContextTest {
     @Test
     fun `executer kommando uten tilstand`() {
         TestCommand().apply {
-            assertTrue(context.utfør(commandContextDao, this.id, this))
+            assertTrue(context.utfør(commandContextRepository, this.id, this))
             assertTrue(executed)
             assertFalse(resumed)
-            verify(exactly = 1) { commandContextDao.ferdig(this@apply.id, CONTEXT) }
-            verify(exactly = 0) { commandContextDao.suspendert(any(), any(), hash().convertToUUID(), any()) }
+            verify(exactly = 1) { commandContextRepository.ferdig(this@apply.id, CONTEXT) }
+            verify(exactly = 0) { commandContextRepository.suspendert(any(), any(), hash().convertToUUID(), any()) }
         }
     }
 
@@ -75,20 +75,20 @@ internal class CommandContextTest {
     fun `resumer kommando med tilstand`() {
         context = CommandContext(CONTEXT, listOf(1))
         TestCommand().apply {
-            assertTrue(context.utfør(commandContextDao, this.id, this))
+            assertTrue(context.utfør(commandContextRepository, this.id, this))
             assertFalse(executed)
             assertTrue(resumed)
-            verify(exactly = 1) { commandContextDao.ferdig(this@apply.id, CONTEXT) }
-            verify(exactly = 0) { commandContextDao.suspendert(any(), any(), hash().convertToUUID(), any()) }
+            verify(exactly = 1) { commandContextRepository.ferdig(this@apply.id, CONTEXT) }
+            verify(exactly = 0) { commandContextRepository.suspendert(any(), any(), hash().convertToUUID(), any()) }
         }
     }
 
     @Test
     fun `suspenderer ved execute`() {
         TestCommand(executeAction = { false }).apply {
-            assertFalse(context.utfør(commandContextDao, this.id, this))
-            verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
-            verify(exactly = 1) { commandContextDao.suspendert(this@apply.id, CONTEXT, hash().convertToUUID(), any()) }
+            assertFalse(context.utfør(commandContextRepository, this.id, this))
+            verify(exactly = 0) { commandContextRepository.ferdig(any(), any()) }
+            verify(exactly = 1) { commandContextRepository.suspendert(this@apply.id, CONTEXT, hash().convertToUUID(), any()) }
         }
     }
 
@@ -97,18 +97,18 @@ internal class CommandContextTest {
         val sti = listOf(1)
         context = CommandContext(CONTEXT, sti)
         TestCommand(resumeAction = { false }).apply {
-            assertFalse(context.utfør(commandContextDao, this.id, this))
-            verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
-            verify(exactly = 1) { commandContextDao.suspendert(this@apply.id, CONTEXT, hash().convertToUUID(), sti) }
+            assertFalse(context.utfør(commandContextRepository, this.id, this))
+            verify(exactly = 0) { commandContextRepository.ferdig(any(), any()) }
+            verify(exactly = 1) { commandContextRepository.suspendert(this@apply.id, CONTEXT, hash().convertToUUID(), sti) }
         }
     }
 
     @Test
     fun `feil ved execute`() {
         TestCommand(executeAction = { throw Exception() }).apply {
-            assertThrows<Exception> { context.utfør(commandContextDao, this.id, this) }
-            verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
-            verify(exactly = 1) { commandContextDao.feil(this@apply.id, CONTEXT) }
+            assertThrows<Exception> { context.utfør(commandContextRepository, this.id, this) }
+            verify(exactly = 0) { commandContextRepository.ferdig(any(), any()) }
+            verify(exactly = 1) { commandContextRepository.feil(this@apply.id, CONTEXT) }
         }
     }
 
@@ -117,24 +117,24 @@ internal class CommandContextTest {
         val sti = listOf(1)
         context = CommandContext(CONTEXT, sti)
         TestCommand(resumeAction = { throw Exception() }).apply {
-            assertThrows<Exception> { context.utfør(commandContextDao, this.id, this) }
-            verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
-            verify(exactly = 1) { commandContextDao.feil(this@apply.id, CONTEXT) }
+            assertThrows<Exception> { context.utfør(commandContextRepository, this.id, this) }
+            verify(exactly = 0) { commandContextRepository.ferdig(any(), any()) }
+            verify(exactly = 1) { commandContextRepository.feil(this@apply.id, CONTEXT) }
         }
     }
 
     @Test
     fun ferdigstiller() {
         TestCommand(executeAction = { this.ferdigstill(context) }).apply {
-            context.utfør(commandContextDao, this.id, this)
-            verify(exactly = 1) { commandContextDao.ferdig(any(), any()) }
+            context.utfør(commandContextRepository, this.id, this)
+            verify(exactly = 1) { commandContextRepository.ferdig(any(), any()) }
         }
     }
 
     @Test
     fun `lager kommandokjede_ferdigstilt hendelse når kommandokjeden ferdigstilles`() {
         TestCommand(executeAction = { this.ferdigstill(context) }).apply {
-            context.utfør(commandContextDao, this.id, this)
+            context.utfør(commandContextRepository, this.id, this)
         }
         val result = observer.utgåendeTilstandEndringer
         assertTrue(result.isNotEmpty())
@@ -146,7 +146,7 @@ internal class CommandContextTest {
         TestCommand(executeAction = {
             false
         }).apply {
-            context.utfør(commandContextDao, this.id, this)
+            context.utfør(commandContextRepository, this.id, this)
         }
         val result = observer.utgåendeTilstandEndringer
         assertTrue(result.isNotEmpty())
@@ -155,13 +155,13 @@ internal class CommandContextTest {
 
     @Test
     fun `lager kommandokjede_avbrutt hendelse når kommandokjeden avbrytes`() {
-        every { commandContextDao.avbryt(any(), any()) } returns listOf(Pair(context.id(), HENDELSE))
+        every { commandContextRepository.avbryt(any(), any()) } returns listOf(Pair(context.id(), HENDELSE))
         TestCommand(executeAction = {
             false
         }).apply {
-            context.utfør(commandContextDao, this.id, this)
+            context.utfør(commandContextRepository, this.id, this)
         }
-        context.avbrytAlleForPeriode(commandContextDao, UUID.randomUUID())
+        context.avbrytAlleForPeriode(commandContextRepository, UUID.randomUUID())
         val result = observer.utgåendeTilstandEndringer
         assertTrue(result.isNotEmpty())
         assertTrue(result.last().contains("kommandokjede_avbrutt"))
@@ -169,9 +169,9 @@ internal class CommandContextTest {
 
     @Test
     fun `lager kommandokjede_feilet hendelse når kommandokjeden feiler`() {
-        every { commandContextDao.avbryt(any(), any()) } returns listOf(Pair(context.id(), HENDELSE))
+        every { commandContextRepository.avbryt(any(), any()) } returns listOf(Pair(context.id(), HENDELSE))
         TestCommand(executeAction = { throw Exception() }).apply {
-            assertThrows<Exception> { context.utfør(commandContextDao, this.id, this) }
+            assertThrows<Exception> { context.utfør(commandContextRepository, this.id, this) }
         }
         val result = observer.utgåendeTilstandEndringer
         assertTrue(result.isNotEmpty())
@@ -185,8 +185,8 @@ internal class CommandContextTest {
             this.ferdigstill(context)
             false
         }).apply {
-            context.utfør(commandContextDao, this.id, this)
-            verify(exactly = 1) { commandContextDao.ferdig(any(), any()) }
+            context.utfør(commandContextRepository, this.id, this)
+            verify(exactly = 1) { commandContextRepository.ferdig(any(), any()) }
         }
     }
 

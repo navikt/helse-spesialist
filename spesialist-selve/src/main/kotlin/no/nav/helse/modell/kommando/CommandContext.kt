@@ -4,7 +4,6 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.UtgåendeMeldingerObserver
-import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -79,10 +78,10 @@ internal class CommandContext(
     }
 
     internal fun avbrytAlleForPeriode(
-        commandContextDao: CommandContextDao,
+        commandContextRepository: CommandContextRepository,
         vedtaksperiodeId: UUID,
     ) {
-        val avbrutteKommandokjeder = commandContextDao.avbryt(vedtaksperiodeId, id)
+        val avbrutteKommandokjeder = commandContextRepository.avbryt(vedtaksperiodeId, id)
         avbrutteKommandokjeder.forEach {
             publiserAvbrutt(it.first, it.second)
         }

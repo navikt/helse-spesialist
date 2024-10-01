@@ -9,6 +9,7 @@ import no.nav.helse.db.TransactionalCommandContextDao.CommandContextTilstand.NY
 import no.nav.helse.db.TransactionalCommandContextDao.CommandContextTilstand.SUSPENDERT
 import org.intellij.lang.annotations.Language
 import java.util.UUID
+import javax.naming.OperationNotSupportedException
 
 internal class TransactionalCommandContextDao(
     private val transactionalSession: TransactionalSession,
@@ -45,6 +46,13 @@ internal class TransactionalCommandContextDao(
         sti: List<Int>,
     ) {
         lagre(hendelseId, contextId, SUSPENDERT, hash, sti)
+    }
+
+    override fun avbryt(
+        vedtaksperiodeId: UUID,
+        contextId: UUID,
+    ): List<Pair<UUID, UUID>> {
+        throw OperationNotSupportedException()
     }
 
     override fun tidsbrukForContext(contextId: UUID): Int {

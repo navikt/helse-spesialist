@@ -3,6 +3,7 @@ package no.nav.helse.modell.vedtaksperiode
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.ArbeidsforholdRepository
 import no.nav.helse.db.AvviksvurderingRepository
+import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.db.OppgaveRepository
@@ -20,7 +21,6 @@ import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.InntektskildeDto.Companion.gjenopprett
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.VurderAutomatiskAvvisning
@@ -215,7 +215,7 @@ internal class GodkjenningsbehovCommand(
     førsteKjenteDagFinner: () -> LocalDate,
     automatisering: Automatisering,
     vedtakRepository: VedtakRepository,
-    commandContextDao: CommandContextDao,
+    commandContextRepository: CommandContextRepository,
     personRepository: PersonRepository,
     inntektskilderRepository: InntektskilderRepository,
     arbeidsforholdRepository: ArbeidsforholdRepository,
@@ -264,7 +264,7 @@ internal class GodkjenningsbehovCommand(
             ),
             AvbrytContextCommand(
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
-                commandContextDao = commandContextDao,
+                commandContextRepository = commandContextRepository,
             ),
             PersisterVedtaksperiodetypeCommand(
                 vedtaksperiodeId = behovData.vedtaksperiodeId,

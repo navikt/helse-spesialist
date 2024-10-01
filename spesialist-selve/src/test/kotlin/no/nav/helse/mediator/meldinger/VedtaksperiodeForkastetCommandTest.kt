@@ -6,11 +6,11 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
 import no.nav.helse.Testdata.snapshot
+import no.nav.helse.db.CommandContextRepository
+import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.SnapshotRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastetCommand
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -25,8 +25,8 @@ internal class VedtaksperiodeForkastetCommandTest {
         private const val FNR = "fnr"
     }
 
-    private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
-    private val personDao = mockk<PersonDao>(relaxed = true)
+    private val commandContextRepository = mockk<CommandContextRepository>(relaxed = true)
+    private val personRepository = mockk<PersonRepository>(relaxed = true)
     private val snapshotRepository = mockk<SnapshotRepository>(relaxed = true)
     private val graphQLClient = mockk<SnapshotClient>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
@@ -36,8 +36,8 @@ internal class VedtaksperiodeForkastetCommandTest {
             fødselsnummer = FNR,
             vedtaksperiodeId = VEDTAKSPERIODE,
             id = HENDELSE,
-            personRepository = personDao,
-            commandContextDao = commandContextDao,
+            personRepository = personRepository,
+            commandContextRepository = commandContextRepository,
             snapshotRepository = snapshotRepository,
             snapshotClient = graphQLClient,
             oppgaveService = oppgaveService,
@@ -52,9 +52,9 @@ internal class VedtaksperiodeForkastetCommandTest {
         val snapshot = snapshot(fødselsnummer = FNR)
         every { graphQLClient.hentSnapshot(FNR) } returns snapshot
         every { snapshotRepository.lagre(FNR, snapshot.data!!.person!!) } just runs
-        every { personDao.finnPersonMedFødselsnummer(FNR) } returns 1
+        every { personRepository.finnPersonMedFødselsnummer(FNR) } returns 1
         assertTrue(vedtaksperiodeForkastetCommand.execute(context))
-        verify(exactly = 1) { commandContextDao.avbryt(VEDTAKSPERIODE, CONTEXT) }
+        verify(exactly = 1) { commandContextRepository.avbryt(VEDTAKSPERIODE, CONTEXT) }
         verify(exactly = 1) { snapshotRepository.lagre(FNR, snapshot.data!!.person!!) }
     }
 }

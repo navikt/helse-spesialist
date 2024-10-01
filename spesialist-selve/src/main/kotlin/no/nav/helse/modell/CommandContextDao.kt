@@ -15,9 +15,7 @@ import org.intellij.lang.annotations.Language
 import java.util.UUID
 import javax.sql.DataSource
 
-internal class CommandContextDao(
-    private val dataSource: DataSource,
-) : CommandContextRepository {
+internal class CommandContextDao(private val dataSource: DataSource) : CommandContextRepository {
     private companion object {
         private val mapper = jacksonObjectMapper()
     }
@@ -68,7 +66,7 @@ internal class CommandContextDao(
         }
     }
 
-    fun avbryt(
+    override fun avbryt(
         vedtaksperiodeId: UUID,
         contextId: UUID,
     ): List<Pair<UUID, UUID>> {
