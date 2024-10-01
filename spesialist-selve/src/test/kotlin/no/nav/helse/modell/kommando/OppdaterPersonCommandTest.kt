@@ -4,28 +4,28 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import java.time.LocalDate
-import java.util.UUID
+import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerløsning
 import no.nav.helse.modell.person.HentPersoninfoløsning
-import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.UUID
 
 internal class OppdaterPersonCommandTest {
     private companion object {
         private const val FNR = "12345678911"
     }
 
-    private val personDao = mockk<PersonDao>(relaxed = true)
+    private val personRepository = mockk<PersonRepository>(relaxed = true)
 
-    private val command = OppdaterPersonCommand(FNR, { LocalDate.now() }, personDao)
+    private val command = OppdaterPersonCommand(FNR, { LocalDate.now() }, personRepository)
     private lateinit var context: CommandContext
 
     private val observer = object : CommandContextObserver {
@@ -41,18 +41,18 @@ internal class OppdaterPersonCommandTest {
     fun setup() {
         context = CommandContext(UUID.randomUUID())
         context.nyObserver(observer)
-        clearMocks(personDao)
+        clearMocks(personRepository)
     }
 
     @Test
     fun `oppdaterer ingenting når informasjonen er ny nok`() {
-        every { personDao.finnPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
-        every { personDao.finnEnhetSistOppdatert(FNR) } returns LocalDate.now()
-        every { personDao.finnITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now()
+        every { personRepository.finnPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
+        every { personRepository.finnEnhetSistOppdatert(FNR) } returns LocalDate.now()
+        every { personRepository.finnITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now()
         assertTrue(command.execute(context))
-        verify(exactly = 0) { personDao.oppdaterEnhet(any(), any()) }
-        verify(exactly = 0) { personDao.upsertPersoninfo(any(), any(), any(), any(), any(), any(), any()) }
-        verify(exactly = 0) { personDao.upsertInfotrygdutbetalinger(any(), any()) }
+        verify(exactly = 0) { personRepository.oppdaterEnhet(any(), any()) }
+        verify(exactly = 0) { personRepository.upsertPersoninfo(any(), any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { personRepository.upsertInfotrygdutbetalinger(any(), any()) }
     }
 
     @Test
@@ -70,7 +70,7 @@ internal class OppdaterPersonCommandTest {
         val løsning = mockk<HentEnhetløsning>(relaxed = true)
         context.add(løsning)
         assertTrue(command.execute(context))
-        verify(exactly = 1) { løsning.oppdater(personDao, FNR) }
+        verify(exactly = 1) { løsning.oppdater(personRepository, FNR) }
     }
 
     @Test
@@ -88,7 +88,7 @@ internal class OppdaterPersonCommandTest {
         val løsning = mockk<HentInfotrygdutbetalingerløsning>(relaxed = true)
         context.add(løsning)
         assertTrue(command.execute(context))
-        verify(exactly = 1) { løsning.oppdater(personDao, FNR) }
+        verify(exactly = 1) { løsning.oppdater(personRepository, FNR) }
     }
 
     @Test
@@ -101,26 +101,26 @@ internal class OppdaterPersonCommandTest {
         context.add(enhet)
         context.add(utbetalinger)
         assertTrue(command.execute(context))
-        verify(exactly = 1) { personinfo.oppdater(personDao, FNR) }
-        verify(exactly = 1) { enhet.oppdater(personDao, FNR) }
-        verify(exactly = 1) { utbetalinger.oppdater(personDao, FNR) }
+        verify(exactly = 1) { personinfo.oppdater(personRepository, FNR) }
+        verify(exactly = 1) { enhet.oppdater(personRepository, FNR) }
+        verify(exactly = 1) { utbetalinger.oppdater(personRepository, FNR) }
     }
 
     private fun utdatertEnhet() {
-        every { personDao.finnPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
-        every { personDao.finnEnhetSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
-        every { personDao.finnITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now()
+        every { personRepository.finnPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
+        every { personRepository.finnEnhetSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
+        every { personRepository.finnITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now()
     }
 
     private fun utdatertUtbetalinger() {
-        every { personDao.finnPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
-        every { personDao.finnEnhetSistOppdatert(FNR) } returns LocalDate.now()
-        every { personDao.finnITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
+        every { personRepository.finnPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
+        every { personRepository.finnEnhetSistOppdatert(FNR) } returns LocalDate.now()
+        every { personRepository.finnITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
     }
 
     private fun altUtdatert() {
-        every { personDao.finnPersoninfoSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
-        every { personDao.finnEnhetSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
-        every { personDao.finnITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
+        every { personRepository.finnPersoninfoSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
+        every { personRepository.finnEnhetSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
+        every { personRepository.finnITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
     }
 }

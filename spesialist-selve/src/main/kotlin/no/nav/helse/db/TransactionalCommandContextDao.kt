@@ -51,9 +51,7 @@ internal class TransactionalCommandContextDao(
     override fun avbryt(
         vedtaksperiodeId: UUID,
         contextId: UUID,
-    ): List<Pair<UUID, UUID>> {
-        throw OperationNotSupportedException()
-    }
+    ): List<Pair<UUID, UUID>> = throw OperationNotSupportedException()
 
     override fun tidsbrukForContext(contextId: UUID): Int {
         @Language("postgresql")
