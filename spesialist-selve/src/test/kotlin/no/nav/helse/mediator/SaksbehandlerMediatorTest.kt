@@ -35,9 +35,8 @@ import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernPåVent
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OpphevStans
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.PåVentRequest
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import no.nav.helse.spesialist.test.lagAktørId
@@ -364,7 +363,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         nyPerson()
         val oppgaveId = OPPGAVE_ID
         mediator.påVent(
-            LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), true, "", "notat tekst"),
+            PåVentRequest.LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), true, "", "notat tekst"),
             saksbehandler,
         )
         val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
@@ -378,10 +377,10 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         nyPerson()
         val oppgaveId = OPPGAVE_ID
         mediator.påVent(
-            LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), false, "", "notat tekst"),
+            PåVentRequest.LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), false, "", "notat tekst"),
             saksbehandler,
         )
-        mediator.påVent(FjernPåVent(oppgaveId), saksbehandler)
+        mediator.påVent(PåVentRequest.FjernPåVent(oppgaveId), saksbehandler)
         val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
         val historikk = periodehistorikkDao.finn(UTBETALING_ID)
         assertTrue(historikk.map { it.type }.containsAll(listOf(PeriodehistorikkType.FJERN_FRA_PA_VENT, PeriodehistorikkType.LEGG_PA_VENT)))

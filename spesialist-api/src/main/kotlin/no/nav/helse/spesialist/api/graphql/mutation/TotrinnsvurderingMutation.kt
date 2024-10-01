@@ -16,7 +16,7 @@ import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernPåVentUtenHistorikkinnslag
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.PåVentRequest
 import org.slf4j.LoggerFactory
 
 class TotrinnsvurderingMutation(
@@ -55,7 +55,10 @@ class TotrinnsvurderingMutation(
             try {
                 avslag?.let { saksbehandlerhåndterer.håndterAvslag(oppgavereferanse.toLong(), behandlendeSaksbehandler, it) }
                 oppgavehåndterer.sendTilBeslutter(oppgavereferanse.toLong(), behandlendeSaksbehandler)
-                saksbehandlerhåndterer.påVent(FjernPåVentUtenHistorikkinnslag(oppgavereferanse.toLong()), behandlendeSaksbehandler)
+                saksbehandlerhåndterer.påVent(
+                    PåVentRequest.FjernPåVentUtenHistorikkinnslag(oppgavereferanse.toLong()),
+                    behandlendeSaksbehandler,
+                )
             } catch (modellfeil: Modellfeil) {
                 return@withContext DataFetcherResult.newResult<Boolean>().error(
                     GraphqlErrorException.newErrorException()
@@ -97,7 +100,10 @@ class TotrinnsvurderingMutation(
             )
 
             oppgavehåndterer.sendIRetur(oppgavereferanse.toLong(), besluttendeSaksbehandler)
-            saksbehandlerhåndterer.påVent(FjernPåVentUtenHistorikkinnslag(oppgavereferanse.toLong()), besluttendeSaksbehandler)
+            saksbehandlerhåndterer.påVent(
+                PåVentRequest.FjernPåVentUtenHistorikkinnslag(oppgavereferanse.toLong()),
+                besluttendeSaksbehandler,
+            )
 
             totrinnsvurderinghåndterer.lagrePeriodehistorikk(
                 oppgaveId = oppgavereferanse.toLong(),

@@ -15,8 +15,7 @@ import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.PaVent
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernPåVent
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.LeggPåVent
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.PåVentRequest
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -41,7 +40,7 @@ class PaVentMutation(
         return withContext(Dispatchers.IO) {
             try {
                 saksbehandlerhåndterer.påVent(
-                    LeggPåVent(oppgaveId.toLong(), saksbehandler.oid, frist, tildeling, begrunnelse, notatTekst),
+                    PåVentRequest.LeggPåVent(oppgaveId.toLong(), saksbehandler.oid, frist, tildeling, begrunnelse, notatTekst),
                     saksbehandler,
                 )
                 newResult<PaVent?>().data(
@@ -69,7 +68,7 @@ class PaVentMutation(
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         return withContext(Dispatchers.IO) {
             try {
-                saksbehandlerhåndterer.påVent(FjernPåVent(oppgaveId.toLong()), saksbehandler)
+                saksbehandlerhåndterer.påVent(PåVentRequest.FjernPåVent(oppgaveId.toLong()), saksbehandler)
                 newResult<Boolean?>().data(true).build()
             } catch (e: OppgaveIkkeTildelt) {
                 newResult<Boolean>().data(false).build()
