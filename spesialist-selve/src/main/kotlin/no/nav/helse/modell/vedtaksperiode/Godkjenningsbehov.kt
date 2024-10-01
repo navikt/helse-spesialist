@@ -7,6 +7,7 @@ import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.PåVentRepository
 import no.nav.helse.db.RisikovurderingRepository
 import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.db.VedtakRepository
@@ -44,7 +45,6 @@ import no.nav.helse.modell.kommando.VurderBehovForTotrinnskontroll
 import no.nav.helse.modell.kommando.VurderVidereBehandlingAvGodkjenningsbehov
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.Person
-import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.VurderVurderingsmomenter
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.utbetaling.Utbetaling
@@ -224,7 +224,7 @@ internal class GodkjenningsbehovCommand(
     vergemålRepository: VergemålRepository,
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     risikovurderingRepository: RisikovurderingRepository,
-    påVentDao: PåVentDao,
+    påVentRepository: PåVentRepository,
     overstyringDao: OverstyringDao,
     periodehistorikkDao: PeriodehistorikkDao,
     snapshotDao: SnapshotDao,
@@ -346,7 +346,7 @@ internal class GodkjenningsbehovCommand(
                 utbetaling = utbetaling,
                 vergemålRepository = vergemålRepository,
                 vedtakRepository = vedtakRepository,
-                påVentDao = påVentDao,
+                påVentRepository = påVentRepository,
             ),
             VurderBehovForTotrinnskontroll(
                 fødselsnummer = behovData.fødselsnummer,

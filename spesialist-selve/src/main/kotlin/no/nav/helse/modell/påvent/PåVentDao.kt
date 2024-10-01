@@ -1,11 +1,12 @@
 package no.nav.helse.modell.påvent
 
 import no.nav.helse.HelseDao
+import no.nav.helse.db.PåVentRepository
 import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 
-class PåVentDao(dataSource: DataSource) : HelseDao(dataSource) {
+class PåVentDao(dataSource: DataSource) : HelseDao(dataSource), PåVentRepository {
     fun lagrePåVent(
         oppgaveId: Long,
         saksbehandlerOid: UUID,
@@ -55,7 +56,7 @@ class PåVentDao(dataSource: DataSource) : HelseDao(dataSource) {
             ).update()
         }
 
-    fun erPåVent(vedtaksperiodeId: UUID) =
+    override fun erPåVent(vedtaksperiodeId: UUID) =
         asSQL(
             """
             SELECT 1 FROM pa_vent WHERE vedtaksperiode_id = :vedtaksperiodeId

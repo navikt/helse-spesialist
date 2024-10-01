@@ -361,7 +361,7 @@ internal class Kommandofabrikk(
             vergemålRepository = vergemålDao,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             risikovurderingRepository = risikovurderingDao,
-            påVentDao = påVentDao,
+            påVentRepository = påVentDao,
             overstyringDao = overstyringDao,
             periodehistorikkDao = periodehistorikkDao,
             snapshotDao = snapshotDao,

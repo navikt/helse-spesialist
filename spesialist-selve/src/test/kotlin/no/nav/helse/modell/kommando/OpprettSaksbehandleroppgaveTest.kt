@@ -7,6 +7,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.PåVentRepository
 import no.nav.helse.db.RisikovurderingRepository
 import no.nav.helse.db.VedtakRepository
 import no.nav.helse.db.VergemålRepository
@@ -28,7 +29,6 @@ import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.oppgave.EgenskapDto
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveInspector.Companion.oppgaveinspektør
-import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -66,7 +66,7 @@ internal class OpprettSaksbehandleroppgaveTest {
     private val vergemålRepository = mockk<VergemålRepository>(relaxed = true)
     private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
     private val vedtakRepository = mockk<VedtakRepository>(relaxed = true)
-    private val påVentDao = mockk<PåVentDao>(relaxed = true)
+    private val påVentRepository = mockk<PåVentRepository>(relaxed = true)
     private lateinit var context: CommandContext
     private lateinit var contextId: UUID
     private lateinit var utbetalingstype: Utbetalingtype
@@ -355,7 +355,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter oppgave med egenskap PÅ_VENT`() {
-        every { påVentDao.erPåVent(VEDTAKSPERIODE_ID) } returns true
+        every { påVentRepository.erPåVent(VEDTAKSPERIODE_ID) } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(opprettSaksbehandlerOppgaveCommand(periodetype = OVERGANG_FRA_IT).execute(context))
         verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
@@ -407,7 +407,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         utbetaling = utbetaling,
         vergemålRepository = vergemålRepository,
         vedtakRepository = vedtakRepository,
-        påVentDao = påVentDao,
+        påVentRepository = påVentRepository,
         behovData = GodkjenningsbehovData(
             id = UUID.randomUUID(),
             fødselsnummer = FNR,

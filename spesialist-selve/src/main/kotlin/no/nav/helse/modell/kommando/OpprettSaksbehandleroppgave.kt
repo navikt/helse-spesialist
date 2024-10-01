@@ -2,6 +2,7 @@ package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.PåVentRepository
 import no.nav.helse.db.RisikovurderingRepository
 import no.nav.helse.db.VedtakRepository
 import no.nav.helse.db.VergemålRepository
@@ -36,7 +37,6 @@ import no.nav.helse.modell.oppgave.Egenskap.UTLAND
 import no.nav.helse.modell.oppgave.Egenskap.VERGEMÅL
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.person.HentEnhetløsning
-import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -58,7 +58,7 @@ internal class OpprettSaksbehandleroppgave(
     private val utbetaling: Utbetaling,
     private val vergemålRepository: VergemålRepository,
     private val vedtakRepository: VedtakRepository,
-    private val påVentDao: PåVentDao,
+    private val påVentRepository: PåVentRepository,
 ) : Command {
     private companion object {
         private val logg = LoggerFactory.getLogger(OpprettSaksbehandleroppgave::class.java)
@@ -124,7 +124,7 @@ internal class OpprettSaksbehandleroppgave(
             egenskaper.add(SPESIALSAK)
         }
 
-        if (påVentDao.erPåVent(vedtaksperiodeId)) {
+        if (påVentRepository.erPåVent(vedtaksperiodeId)) {
             egenskaper.add(PÅ_VENT)
         }
 
