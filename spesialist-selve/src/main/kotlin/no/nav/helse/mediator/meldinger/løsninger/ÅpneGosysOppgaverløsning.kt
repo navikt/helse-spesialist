@@ -1,9 +1,9 @@
 package no.nav.helse.mediator.meldinger.løsninger
 
+import no.nav.helse.db.ÅpneGosysOppgaverRepository
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
@@ -23,8 +23,8 @@ internal class ÅpneGosysOppgaverløsning(
     private val antall: Int?,
     private val oppslagFeilet: Boolean,
 ) {
-    internal fun lagre(åpneGosysOppgaverDao: ÅpneGosysOppgaverDao) {
-        åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(
+    internal fun lagre(åpneGosysOppgaverRepository: ÅpneGosysOppgaverRepository) {
+        åpneGosysOppgaverRepository.persisterÅpneGosysOppgaver(
             ÅpneGosysOppgaverDto(
                 fødselsnummer = fødselsnummer,
                 antall = antall,

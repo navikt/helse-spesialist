@@ -2,11 +2,12 @@ package no.nav.helse.modell.gosysoppgaver
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.db.ÅpneGosysOppgaverRepository
 import org.intellij.lang.annotations.Language
 import javax.sql.DataSource
 
-internal class ÅpneGosysOppgaverDao(val dataSource: DataSource) {
-    internal fun persisterÅpneGosysOppgaver(åpneGosysOppgaver: ÅpneGosysOppgaverDto) {
+internal class ÅpneGosysOppgaverDao(val dataSource: DataSource) : ÅpneGosysOppgaverRepository {
+    override fun persisterÅpneGosysOppgaver(åpneGosysOppgaver: ÅpneGosysOppgaverDto) {
         @Language("PostgreSQL")
         val query = """
                 INSERT INTO gosysoppgaver (person_ref, antall, oppslag_feilet, opprettet)

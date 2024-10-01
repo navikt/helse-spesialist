@@ -2,6 +2,7 @@ package no.nav.helse.modell.gosysoppgaver
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.OppgaveRepository
+import no.nav.helse.db.ÅpneGosysOppgaverRepository
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
@@ -57,7 +58,7 @@ internal class GosysOppgaveEndretCommand(
     harTildeltOppgave: Boolean,
     oppgavedataForAutomatisering: OppgaveDataForAutomatisering,
     automatisering: Automatisering,
-    åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
+    åpneGosysOppgaverRepository: ÅpneGosysOppgaverRepository,
     oppgaveRepository: OppgaveRepository,
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
@@ -67,7 +68,7 @@ internal class GosysOppgaveEndretCommand(
         listOf(
             VurderÅpenGosysoppgave(
                 aktørId = godkjenningsbehov.aktørId,
-                åpneGosysOppgaverDao = åpneGosysOppgaverDao,
+                åpneGosysOppgaverRepository = åpneGosysOppgaverRepository,
                 vedtaksperiodeId = oppgavedataForAutomatisering.vedtaksperiodeId,
                 sykefraværstilfelle = sykefraværstilfelle,
                 harTildeltOppgave = harTildeltOppgave,
