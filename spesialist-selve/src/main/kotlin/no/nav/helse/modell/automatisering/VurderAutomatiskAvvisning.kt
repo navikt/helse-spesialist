@@ -22,24 +22,19 @@ internal class VurderAutomatiskAvvisning(
     override fun execute(context: CommandContext): Boolean {
         val fødselsnummer = godkjenningsbehov.fødselsnummer
         val vedtaksperiodeId = godkjenningsbehov.vedtaksperiodeId
-        val kanAvvises = godkjenningsbehov.kanAvvises
 
         val tilhørerEnhetUtland = HentEnhetløsning.erEnhetUtland(personRepository.finnEnhetId(fødselsnummer))
-        val avvisGrunnetEnhetUtland = tilhørerEnhetUtland && kanAvvises
         val underVergemål = vergemålRepository.harVergemål(fødselsnummer) ?: false
-        val avvisGrunnetVergemål = underVergemål && kanAvvises
 
-        val avvisningsårsaker = mutableListOf<String>()
-        if (tilhørerEnhetUtland) avvisningsårsaker.add("Utland")
-        if (underVergemål) avvisningsårsaker.add("Vergemål")
-        if (!avvisGrunnetEnhetUtland && !avvisGrunnetVergemål) {
-            if (avvisningsårsaker.size > 0) {
-                logg.info(
-                    "Avviser ikke {} som har $avvisningsårsaker, fordi: {}",
-                    kv("vedtaksperiodeId", vedtaksperiodeId),
-                    kv("kanAvvises", kanAvvises),
-                )
-            }
+        if (!(tilhørerEnhetUtland || underVergemål)) return true
+
+        val avvisningsårsaker = årsaker(tilhørerEnhetUtland, underVergemål)
+        if (!godkjenningsbehov.kanAvvises) {
+            logg.info(
+                "Avviser ikke {} som har $avvisningsårsaker, fordi: {}",
+                kv("vedtaksperiodeId", vedtaksperiodeId),
+                kv("kanAvvises", false),
+            )
             return true
         }
 
@@ -51,6 +46,14 @@ internal class VurderAutomatiskAvvisning(
         )
         logg.info("Automatisk avvisning av vedtaksperiode $vedtaksperiodeId pga:$avvisningsårsaker")
         return ferdigstill(context)
+    }
+
+    private fun årsaker(
+        tilhørerEnhetUtland: Boolean,
+        underVergemål: Boolean,
+    ) = mutableListOf<String>().apply {
+        if (tilhørerEnhetUtland) add("Utland")
+        if (underVergemål) add("Vergemål")
     }
 
     private companion object {
