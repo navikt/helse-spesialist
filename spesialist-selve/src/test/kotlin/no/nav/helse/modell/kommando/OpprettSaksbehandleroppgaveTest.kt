@@ -7,6 +7,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.RisikovurderingRepository
 import no.nav.helse.db.VedtakRepository
 import no.nav.helse.db.VergemålRepository
 import no.nav.helse.januar
@@ -28,7 +29,6 @@ import no.nav.helse.modell.oppgave.EgenskapDto
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveInspector.Companion.oppgaveinspektør
 import no.nav.helse.modell.påvent.PåVentDao
-import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -61,7 +61,7 @@ internal class OpprettSaksbehandleroppgaveTest {
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
     private val automatisering = mockk<Automatisering>(relaxed = true)
     private val personRepository = mockk<PersonRepository>(relaxed = true)
-    private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
+    private val risikovurderingRepository = mockk<RisikovurderingRepository>(relaxed = true)
     private val egenAnsattRepository = mockk<EgenAnsattRepository>(relaxed = true)
     private val vergemålRepository = mockk<VergemålRepository>(relaxed = true)
     private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
@@ -111,7 +111,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter risk QA`() {
-        every { risikovurderingDao.kreverSupersaksbehandler(VEDTAKSPERIODE_ID) } returns true
+        every { risikovurderingRepository.kreverSupersaksbehandler(VEDTAKSPERIODE_ID) } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
@@ -368,7 +368,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `legger ikke til egenskap RISK_QA hvis oppgaven har egenskap REVURDERING`() {
-        every { risikovurderingDao.kreverSupersaksbehandler(VEDTAKSPERIODE_ID) } returns true
+        every { risikovurderingRepository.kreverSupersaksbehandler(VEDTAKSPERIODE_ID) } returns true
         utbetalingstype = Utbetalingtype.REVURDERING
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
@@ -400,7 +400,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         oppgaveService = oppgaveService,
         automatisering = automatisering,
         personRepository = personRepository,
-        risikovurderingDao = risikovurderingDao,
+        risikovurderingRepository = risikovurderingRepository,
         egenAnsattRepository = egenAnsattRepository,
         utbetalingtype = utbetalingstype,
         sykefraværstilfelle = sykefraværstilfelle,

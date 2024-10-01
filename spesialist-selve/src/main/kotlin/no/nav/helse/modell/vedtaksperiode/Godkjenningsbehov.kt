@@ -7,6 +7,7 @@ import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.RisikovurderingRepository
 import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.db.VedtakRepository
 import no.nav.helse.db.VergemålRepository
@@ -44,7 +45,6 @@ import no.nav.helse.modell.kommando.VurderVidereBehandlingAvGodkjenningsbehov
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.påvent.PåVentDao
-import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.risiko.VurderVurderingsmomenter
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.utbetaling.Utbetaling
@@ -223,7 +223,7 @@ internal class GodkjenningsbehovCommand(
     utbetalingRepository: UtbetalingRepository,
     vergemålRepository: VergemålRepository,
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
-    risikovurderingDao: RisikovurderingDao,
+    risikovurderingRepository: RisikovurderingRepository,
     påVentDao: PåVentDao,
     overstyringDao: OverstyringDao,
     periodehistorikkDao: PeriodehistorikkDao,
@@ -314,7 +314,7 @@ internal class GodkjenningsbehovCommand(
             ),
             VurderVurderingsmomenter(
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
-                risikovurderingDao = risikovurderingDao,
+                risikovurderingRepository = risikovurderingRepository,
                 organisasjonsnummer = behovData.organisasjonsnummer,
                 førstegangsbehandling = behovData.førstegangsbehandling,
                 sykefraværstilfelle = sykefraværstilfelle,
@@ -339,7 +339,7 @@ internal class GodkjenningsbehovCommand(
                 oppgaveService = oppgaveService,
                 automatisering = automatisering,
                 personRepository = personRepository,
-                risikovurderingDao = risikovurderingDao,
+                risikovurderingRepository = risikovurderingRepository,
                 egenAnsattRepository = egenAnsattRepository,
                 utbetalingtype = behovData.utbetalingtype,
                 sykefraværstilfelle = sykefraværstilfelle,

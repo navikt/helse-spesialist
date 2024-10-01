@@ -360,7 +360,7 @@ internal class Kommandofabrikk(
             utbetalingRepository = utbetalingDao,
             vergemålRepository = vergemålDao,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
-            risikovurderingDao = risikovurderingDao,
+            risikovurderingRepository = risikovurderingDao,
             påVentDao = påVentDao,
             overstyringDao = overstyringDao,
             periodehistorikkDao = periodehistorikkDao,

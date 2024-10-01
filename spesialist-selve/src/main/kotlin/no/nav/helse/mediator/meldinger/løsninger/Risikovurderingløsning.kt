@@ -1,9 +1,9 @@
 package no.nav.helse.mediator.meldinger.løsninger
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.db.RisikovurderingRepository
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
-import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_2
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_3
@@ -25,9 +25,9 @@ internal class Risikovurderingløsning(
         private val logg = LoggerFactory.getLogger(Risikovurderingløsning::class.java)
     }
 
-    internal fun lagre(risikovurderingDao: RisikovurderingDao) {
+    internal fun lagre(risikovurderingRepository: RisikovurderingRepository) {
         logg.info("Mottok risikovurdering for vedtaksperiode $vedtaksperiodeId")
-        risikovurderingDao.lagre(
+        risikovurderingRepository.lagre(
             vedtaksperiodeId = vedtaksperiodeId,
             opprettet = opprettet,
             kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,

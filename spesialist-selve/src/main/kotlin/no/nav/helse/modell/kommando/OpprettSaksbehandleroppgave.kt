@@ -2,6 +2,7 @@ package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.RisikovurderingRepository
 import no.nav.helse.db.VedtakRepository
 import no.nav.helse.db.VergemålRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -36,7 +37,6 @@ import no.nav.helse.modell.oppgave.Egenskap.VERGEMÅL
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.påvent.PåVentDao
-import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -51,7 +51,7 @@ internal class OpprettSaksbehandleroppgave(
     private val oppgaveService: OppgaveService,
     private val automatisering: Automatisering,
     private val personRepository: PersonRepository,
-    private val risikovurderingDao: RisikovurderingDao,
+    private val risikovurderingRepository: RisikovurderingRepository,
     private val egenAnsattRepository: EgenAnsattRepository,
     private val utbetalingtype: Utbetalingtype,
     private val sykefraværstilfelle: Sykefraværstilfelle,
@@ -93,7 +93,11 @@ internal class OpprettSaksbehandleroppgave(
         }
 
         if (automatisering.erStikkprøve(vedtaksperiodeId, hendelseId)) egenskaper.add(STIKKPRØVE)
-        if (!egenskaper.contains(REVURDERING) && risikovurderingDao.kreverSupersaksbehandler(vedtaksperiodeId)) egenskaper.add(RISK_QA)
+        if (!egenskaper.contains(REVURDERING) && risikovurderingRepository.kreverSupersaksbehandler(vedtaksperiodeId)) {
+            egenskaper.add(
+                RISK_QA,
+            )
+        }
         if (vergemålRepository.harVergemål(fødselsnummer) == true) egenskaper.add(VERGEMÅL)
         if (HentEnhetløsning.erEnhetUtland(personRepository.finnEnhetId(fødselsnummer))) egenskaper.add(UTLAND)
 

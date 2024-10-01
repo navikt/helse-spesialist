@@ -1,5 +1,6 @@
 package no.nav.helse.modell.risiko
 
+import no.nav.helse.db.RisikovurderingRepository
 import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
@@ -11,7 +12,7 @@ import java.util.UUID
 
 internal class VurderVurderingsmomenter(
     private val vedtaksperiodeId: UUID,
-    private val risikovurderingDao: RisikovurderingDao,
+    private val risikovurderingRepository: RisikovurderingRepository,
     private val organisasjonsnummer: String,
     private val førstegangsbehandling: Boolean,
     private val sykefraværstilfelle: Sykefraværstilfelle,
@@ -39,12 +40,12 @@ internal class VurderVurderingsmomenter(
             return false
         }
 
-        løsning.lagre(risikovurderingDao)
+        løsning.lagre(risikovurderingRepository)
         løsning.leggTilVarsler()
         return true
     }
 
-    private fun risikovurderingAlleredeGjort() = risikovurderingDao.hentRisikovurdering(vedtaksperiodeId) != null
+    private fun risikovurderingAlleredeGjort() = risikovurderingRepository.hentRisikovurdering(vedtaksperiodeId) != null
 
     private fun Risikovurderingløsning.leggTilVarsler() {
         if (harArbeidsuførhetFunn()) {
