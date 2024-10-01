@@ -9,7 +9,7 @@ class PåVentApiDao(dataSource: DataSource) : HelseDao(dataSource) {
     fun hentAktivPåVent(vedtaksperiodeId: UUID) =
         asSQL(
             """
-            SELECT frist, begrunnelse, saksbehandler_ref FROM pa_vent WHERE vedtaksperiode_id = :vedtaksperiodeId
+            SELECT frist, saksbehandler_ref FROM pa_vent WHERE vedtaksperiode_id = :vedtaksperiodeId
             """.trimIndent(),
             mapOf(
                 "vedtaksperiodeId" to vedtaksperiodeId,
@@ -17,7 +17,6 @@ class PåVentApiDao(dataSource: DataSource) : HelseDao(dataSource) {
         ).single {
             PaVent(
                 frist = it.localDate("frist"),
-                begrunnelse = it.stringOrNull("begrunnelse"),
                 oid = it.uuid("saksbehandler_ref"),
             )
         }

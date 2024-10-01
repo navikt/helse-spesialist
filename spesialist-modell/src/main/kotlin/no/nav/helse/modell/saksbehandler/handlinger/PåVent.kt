@@ -9,7 +9,6 @@ class LeggPåVent(
     oppgaveId: Long,
     val frist: LocalDate,
     val skalTildeles: Boolean,
-    val begrunnelse: String?,
     val notatTekst: String,
 ) : PåVent(oppgaveId) {
     override fun loggnavn(): String = "lagt_på_vent"

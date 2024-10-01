@@ -32,20 +32,18 @@ class PaVentMutation(
         notatTekst: String,
         frist: LocalDate,
         tildeling: Boolean,
-        begrunnelse: String?,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<PaVent?> {
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         return withContext(Dispatchers.IO) {
             try {
                 saksbehandlerhåndterer.påVent(
-                    PåVentRequest.LeggPåVent(oppgaveId.toLong(), saksbehandler.oid, frist, tildeling, begrunnelse, notatTekst),
+                    PåVentRequest.LeggPåVent(oppgaveId.toLong(), saksbehandler.oid, frist, tildeling, notatTekst),
                     saksbehandler,
                 )
                 newResult<PaVent?>().data(
                     PaVent(
                         frist = frist,
-                        begrunnelse = begrunnelse,
                         oid = saksbehandler.oid,
                     ),
                 ).build()

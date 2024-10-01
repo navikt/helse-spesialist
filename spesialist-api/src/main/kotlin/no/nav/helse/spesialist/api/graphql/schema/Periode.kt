@@ -593,7 +593,6 @@ data class BeregnetPeriode(
         påVentApiDao.hentAktivPåVent(vedtaksperiodeId())?.let {
             PaVent(
                 frist = it.frist,
-                begrunnelse = it.begrunnelse,
                 oid = it.oid,
             )
         }

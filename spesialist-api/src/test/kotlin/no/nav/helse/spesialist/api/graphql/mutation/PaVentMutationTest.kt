@@ -20,7 +20,6 @@ internal class PaVentMutationTest : AbstractGraphQLApiTest() {
                             frist: "2024-01-01",
                             oppgaveId: "1",
                             tildeling: true,
-                            begrunnelse: null
                         ) {
                             oid
                         }

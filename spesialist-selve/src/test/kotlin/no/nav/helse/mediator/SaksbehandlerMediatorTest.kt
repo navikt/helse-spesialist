@@ -253,7 +253,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     fun `håndterer på vent`() {
         val vedtaksperiodeId = UUID.randomUUID()
         nyPerson(vedtaksperiodeId = vedtaksperiodeId)
-        påVentDao.lagrePåVent(oppgaveId, saksbehandler.oid, LocalDate.now(), "")
+        påVentDao.lagrePåVent(oppgaveId, saksbehandler.oid, LocalDate.now())
         assertDoesNotThrow {
             mediator.håndter(godkjenning(oppgaveId, true), UUID.randomUUID(), saksbehandler)
         }
@@ -363,7 +363,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         nyPerson()
         val oppgaveId = OPPGAVE_ID
         mediator.påVent(
-            PåVentRequest.LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), true, "", "notat tekst"),
+            PåVentRequest.LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), true, "notat tekst"),
             saksbehandler,
         )
         val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
@@ -377,7 +377,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         nyPerson()
         val oppgaveId = OPPGAVE_ID
         mediator.påVent(
-            PåVentRequest.LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), false, "", "notat tekst"),
+            PåVentRequest.LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), false, "notat tekst"),
             saksbehandler,
         )
         mediator.påVent(PåVentRequest.FjernPåVent(oppgaveId), saksbehandler)

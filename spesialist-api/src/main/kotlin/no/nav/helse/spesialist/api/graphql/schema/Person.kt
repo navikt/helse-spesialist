@@ -70,7 +70,6 @@ data class Tildeling(
 
 data class PaVent(
     val frist: LocalDate?,
-    val begrunnelse: String?,
     val oid: UUID,
 )
 

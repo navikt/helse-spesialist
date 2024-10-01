@@ -595,8 +595,7 @@ internal class SaksbehandlerMediator(
             kommentar = this.kommentar,
         )
 
-    private fun PåVentRequest.LeggPåVent.tilModellversjon(): LeggPåVent =
-        LeggPåVent(oppgaveId, frist, skalTildeles, begrunnelse, notatTekst)
+    private fun PåVentRequest.LeggPåVent.tilModellversjon(): LeggPåVent = LeggPåVent(oppgaveId, frist, skalTildeles, notatTekst)
 
     private fun PåVentRequest.FjernPåVent.tilModellversjon(): FjernPåVent = FjernPåVent(oppgaveId)
 

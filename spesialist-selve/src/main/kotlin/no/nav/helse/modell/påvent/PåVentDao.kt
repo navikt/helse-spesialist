@@ -11,7 +11,6 @@ class PåVentDao(dataSource: DataSource) : HelseDao(dataSource), PåVentReposito
         oppgaveId: Long,
         saksbehandlerOid: UUID,
         frist: LocalDate?,
-        begrunnelse: String?,
     ) = asSQL(
         """
         SELECT v.vedtaksperiode_id
@@ -25,13 +24,12 @@ class PåVentDao(dataSource: DataSource) : HelseDao(dataSource), PåVentReposito
     ).single { it.uuid("vedtaksperiode_id") }.let { vedtaksperiodeId ->
         asSQL(
             """
-            INSERT INTO pa_vent (vedtaksperiode_id, saksbehandler_ref, frist, begrunnelse) VALUES (:vedtaksperiodeId, :saksbehandlerRef, :frist, :begrunnelse)
+            INSERT INTO pa_vent (vedtaksperiode_id, saksbehandler_ref, frist) VALUES (:vedtaksperiodeId, :saksbehandlerRef, :frist)
             """.trimIndent(),
             mapOf(
                 "vedtaksperiodeId" to vedtaksperiodeId,
                 "saksbehandlerRef" to saksbehandlerOid,
                 "frist" to frist,
-                "begrunnelse" to begrunnelse,
             ),
         ).update()
     }

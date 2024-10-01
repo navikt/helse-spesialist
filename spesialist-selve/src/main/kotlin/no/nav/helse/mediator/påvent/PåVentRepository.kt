@@ -11,7 +11,7 @@ class PåVentRepository(
         saksbehandlerOid: UUID,
         påVent: LeggPåVent,
     ) {
-        dao.lagrePåVent(påVent.oppgaveId, saksbehandlerOid, påVent.frist, påVent.begrunnelse)
+        dao.lagrePåVent(påVent.oppgaveId, saksbehandlerOid, påVent.frist)
     }
 
     internal fun fjernFraPåVent(oppgaveId: Long) {

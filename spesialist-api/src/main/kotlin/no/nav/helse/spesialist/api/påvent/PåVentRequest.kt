@@ -9,7 +9,6 @@ sealed interface PåVentRequest {
         val saksbehandlerOid: UUID,
         val frist: LocalDate,
         val skalTildeles: Boolean,
-        val begrunnelse: String?,
         val notatTekst: String,
     ) : PåVentRequest
 

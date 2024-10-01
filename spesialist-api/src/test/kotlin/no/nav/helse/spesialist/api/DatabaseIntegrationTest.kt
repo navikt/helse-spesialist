@@ -401,18 +401,16 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun opprettPåVent(
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         frist: LocalDate = LocalDate.now().plusDays(21),
-        begrunnelse: String = "En begrunnelse",
         saksbehandlerOid: UUID = SAKSBEHANDLER.oid,
     ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         @Language("PostgreSQL")
         val statement =
-            "INSERT INTO pa_vent(vedtaksperiode_id, frist, begrunnelse, saksbehandler_ref) VALUES(?, ?, ?, ?)"
+            "INSERT INTO pa_vent(vedtaksperiode_id, frist, saksbehandler_ref) VALUES(?, ?, ?)"
         session.run(
             queryOf(
                 statement,
                 vedtaksperiodeId,
                 frist,
-                begrunnelse,
                 saksbehandlerOid,
             ).asUpdate,
         )
@@ -686,7 +684,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                                     kilde = GraphQLInntektskilde.INNTEKTSMELDING,
                                 ),
                             fom = 1.januar(2020),
-                            tom = null
+                            tom = null,
                         ),
                         GraphQLArbeidsgiverinntekt(
                             arbeidsgiver = "987656789",
@@ -697,7 +695,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                                     kilde = GraphQLInntektskilde.INNTEKTSMELDING,
                                 ),
                             fom = 1.januar(2020),
-                            tom = null
+                            tom = null,
                         ),
                     ),
                 omregnetArsinntekt = 1_000_000.0,

@@ -1,0 +1,1 @@
+ALTER TABLE pa_vent DROP COLUMN begrunnelse;
