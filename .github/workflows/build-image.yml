@@ -45,8 +45,10 @@ jobs:
 
       - uses: nais/docker-build-push@v0
         id: docker-build-push
+        # Lagt til env-vars for å bøte på hyppig byggfeil av typen "Fatal error	image scan error: scan error: scan failed:..."
         env:
           ACTIONS_RUNTIME_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TRIVY_JAVA_DB_REPOSITORY: "public.ecr.aws/aquasecurity/trivy-java-db:1"
         with:
           team: tbd
           tag: ${{ inputs.ref }}
