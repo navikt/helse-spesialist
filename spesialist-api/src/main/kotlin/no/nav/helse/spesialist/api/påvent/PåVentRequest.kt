@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.saksbehandler.handlinger
+package no.nav.helse.spesialist.api.påvent
 
 import java.time.LocalDate
 import java.util.UUID

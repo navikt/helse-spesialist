@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.graphql.mutation
+package no.nav.helse.spesialist.api.påvent
 
 import com.expediagroup.graphql.server.operations.Mutation
 import graphql.GraphQLError
@@ -15,7 +15,6 @@ import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.PaVent
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.PåVentRequest
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate

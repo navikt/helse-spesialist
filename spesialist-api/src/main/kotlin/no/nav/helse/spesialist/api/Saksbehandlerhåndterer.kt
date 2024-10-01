@@ -3,9 +3,9 @@ package no.nav.helse.spesialist.api
 import no.nav.helse.spesialist.api.graphql.schema.Annullering
 import no.nav.helse.spesialist.api.graphql.schema.Avslag
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
+import no.nav.helse.spesialist.api.påvent.PåVentRequest
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.PåVentRequest
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import java.util.UUID
 
