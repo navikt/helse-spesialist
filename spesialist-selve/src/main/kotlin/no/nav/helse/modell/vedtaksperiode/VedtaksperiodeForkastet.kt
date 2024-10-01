@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.ReservasjonRepository
+import no.nav.helse.db.SnapshotRepository
 import no.nav.helse.db.TildelingRepository
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.CommandContextDao
-import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.kommando.AvbrytCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
@@ -60,7 +60,7 @@ internal class VedtaksperiodeForkastetCommand(
     val id: UUID,
     personRepository: PersonRepository,
     commandContextDao: CommandContextDao,
-    snapshotDao: SnapshotDao,
+    snapshotRepository: SnapshotRepository,
     snapshotClient: ISnapshotClient,
     oppgaveService: OppgaveService,
     reservasjonRepository: ReservasjonRepository,
@@ -82,7 +82,7 @@ internal class VedtaksperiodeForkastetCommand(
             ),
             OppdaterSnapshotCommand(
                 snapshotClient = snapshotClient,
-                snapshotDao = snapshotDao,
+                snapshotRepository = snapshotRepository,
                 fødselsnummer = fødselsnummer,
                 personRepository = personRepository,
             ),

@@ -254,7 +254,7 @@ internal class Kommandofabrikk(
             fødselsnummer = hendelse.fødselsnummer(),
             førsteKjenteDagFinner = { generasjonRepository.førsteKjenteDag(hendelse.fødselsnummer()) },
             personRepository = personDao,
-            snapshotDao = snapshotDao,
+            snapshotRepository = snapshotDao,
             opptegnelseDao = opptegnelseDao,
             snapshotClient = snapshotClient,
         )
@@ -270,7 +270,7 @@ internal class Kommandofabrikk(
         UtbetalingAnnullertCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             personRepository = personDao,
-            snapshotDao = snapshotDao,
+            snapshotRepository = snapshotDao,
             snapshotClient = snapshotClient,
         )
 
@@ -303,7 +303,7 @@ internal class Kommandofabrikk(
             id = hendelse.id,
             personRepository = personDao,
             commandContextDao = commandContextDao,
-            snapshotDao = snapshotDao,
+            snapshotRepository = snapshotDao,
             snapshotClient = snapshotClient,
             oppgaveService = oppgaveService,
             reservasjonRepository = reservasjonDao,
@@ -364,7 +364,7 @@ internal class Kommandofabrikk(
             påVentRepository = påVentDao,
             overstyringRepository = overstyringDao,
             periodehistorikkDao = periodehistorikkDao,
-            snapshotDao = snapshotDao,
+            snapshotRepository = snapshotDao,
             oppgaveRepository = oppgaveDao,
             avviksvurderingDao = avviksvurderingDao,
             snapshotClient = snapshotClient,

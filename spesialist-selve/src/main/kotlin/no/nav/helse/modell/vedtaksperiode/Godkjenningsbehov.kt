@@ -10,6 +10,7 @@ import no.nav.helse.db.OverstyringRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.PåVentRepository
 import no.nav.helse.db.RisikovurderingRepository
+import no.nav.helse.db.SnapshotRepository
 import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.db.VedtakRepository
 import no.nav.helse.db.VergemålRepository
@@ -20,7 +21,6 @@ import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.InntektskildeDto.Companion.gjenopprett
-import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.VurderAutomatiskAvvisning
 import no.nav.helse.modell.automatisering.VurderAutomatiskInnvilgelse
@@ -227,7 +227,7 @@ internal class GodkjenningsbehovCommand(
     påVentRepository: PåVentRepository,
     overstyringRepository: OverstyringRepository,
     periodehistorikkDao: PeriodehistorikkDao,
-    snapshotDao: SnapshotDao,
+    snapshotRepository: SnapshotRepository,
     oppgaveRepository: OppgaveRepository,
     avviksvurderingDao: AvviksvurderingDao,
     snapshotClient: ISnapshotClient,
@@ -285,7 +285,7 @@ internal class GodkjenningsbehovCommand(
                 inntektskilder = inntektskilder,
                 personRepository = personRepository,
                 arbeidsforholdRepository = arbeidsforholdRepository,
-                snapshotDao = snapshotDao,
+                snapshotRepository = snapshotRepository,
                 snapshotClient = snapshotClient,
             ),
             KontrollerEgenAnsattstatus(
@@ -379,7 +379,7 @@ private class ForberedVisningCommand(
     inntektskilder: List<no.nav.helse.modell.Inntektskilde>,
     inntektskilderRepository: InntektskilderRepository,
     arbeidsforholdRepository: ArbeidsforholdRepository,
-    snapshotDao: SnapshotDao,
+    snapshotRepository: SnapshotRepository,
     snapshotClient: ISnapshotClient,
 ) : MacroCommand() {
     override val commands: List<Command> =
@@ -400,7 +400,7 @@ private class ForberedVisningCommand(
             ),
             OppdaterSnapshotCommand(
                 snapshotClient = snapshotClient,
-                snapshotDao = snapshotDao,
+                snapshotRepository = snapshotRepository,
                 fødselsnummer = fødselsnummer,
                 personRepository = personRepository,
             ),

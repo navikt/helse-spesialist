@@ -1,13 +1,13 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.PersonRepository
-import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.db.SnapshotRepository
 import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
 import org.slf4j.LoggerFactory
 
 internal class OppdaterSnapshotCommand(
     private val snapshotClient: ISnapshotClient,
-    private val snapshotDao: SnapshotDao,
+    private val snapshotRepository: SnapshotRepository,
     private val fødselsnummer: String,
     private val personRepository: PersonRepository,
 ) : Command {
@@ -32,7 +32,7 @@ internal class OppdaterSnapshotCommand(
         logg.info("Oppdaterer snapshot")
         sikkerlogg.info("Oppdaterer snapshot fødselsnummer=$fødselsnummer")
         return snapshotClient.hentSnapshot(fnr = fødselsnummer).data?.person?.let { person ->
-            snapshotDao.lagre(fødselsnummer = fødselsnummer, snapshot = person)
+            snapshotRepository.lagre(fødselsnummer = fødselsnummer, snapshot = person)
             true
         } ?: run {
             logg.warn("Kunne ikke hente snapshot - dette betyr at kommandokjeden stopper opp")

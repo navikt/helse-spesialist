@@ -2,9 +2,9 @@ package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.SnapshotRepository
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
-import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterInfotrygdutbetalingerHardt
@@ -51,7 +51,7 @@ internal class OppdaterPersonsnapshotCommand(
     fødselsnummer: String,
     førsteKjenteDagFinner: () -> LocalDate,
     personRepository: PersonRepository,
-    snapshotDao: SnapshotDao,
+    snapshotRepository: SnapshotRepository,
     opptegnelseDao: OpptegnelseDao,
     snapshotClient: ISnapshotClient,
 ) : MacroCommand() {
@@ -59,7 +59,7 @@ internal class OppdaterPersonsnapshotCommand(
         listOf(
             OppdaterSnapshotCommand(
                 snapshotClient = snapshotClient,
-                snapshotDao = snapshotDao,
+                snapshotRepository = snapshotRepository,
                 fødselsnummer = fødselsnummer,
                 personRepository = personRepository,
             ),

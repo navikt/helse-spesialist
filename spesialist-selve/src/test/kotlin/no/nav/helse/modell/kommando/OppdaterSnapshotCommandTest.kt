@@ -5,8 +5,7 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import java.util.UUID
-import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.db.SnapshotRepository
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spleis.graphql.HentSnapshot
@@ -14,6 +13,7 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class OppdaterSnapshotCommandTest {
 
@@ -32,20 +32,20 @@ internal class OppdaterSnapshotCommandTest {
     }
 
     private val personDao = mockk<PersonDao>(relaxed = false)
-    private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
+    private val snapshotRepository = mockk<SnapshotRepository>(relaxed = true)
     private val snapshotClient = mockk<SnapshotClient>(relaxed = true)
     private val context = CommandContext(UUID.randomUUID())
 
     private val command = OppdaterSnapshotCommand(
         snapshotClient = snapshotClient,
-        snapshotDao = snapshotDao,
+        snapshotRepository = snapshotRepository,
         fødselsnummer = FNR,
         personRepository = personDao,
     )
 
     @BeforeEach
     fun setup() {
-        clearMocks(personDao, snapshotDao, snapshotClient)
+        clearMocks(personDao, snapshotRepository, snapshotClient)
     }
 
     @Test
@@ -53,7 +53,7 @@ internal class OppdaterSnapshotCommandTest {
         every { personDao.finnPersonMedFødselsnummer(any()) } returns null
         assertTrue(command.execute(context))
         verify(exactly = 0) { snapshotClient.hentSnapshot(FNR) }
-        verify(exactly = 0) { snapshotDao.lagre(FNR, any()) }
+        verify(exactly = 0) { snapshotRepository.lagre(FNR, any()) }
     }
 
     @Test
@@ -65,6 +65,6 @@ internal class OppdaterSnapshotCommandTest {
         }
         assertTrue(command.execute(context))
         verify(exactly = 1) { snapshotClient.hentSnapshot(FNR) }
-        verify(exactly = 1) { snapshotDao.lagre(FNR, PERSON) }
+        verify(exactly = 1) { snapshotRepository.lagre(FNR, PERSON) }
     }
 }

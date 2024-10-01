@@ -2,9 +2,9 @@ package no.nav.helse.modell.utbetaling
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.SnapshotRepository
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
-import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
@@ -44,14 +44,14 @@ internal class UtbetalingAnnullert private constructor(
 internal class UtbetalingAnnullertCommand(
     fødselsnummer: String,
     personRepository: PersonRepository,
-    snapshotDao: SnapshotDao,
+    snapshotRepository: SnapshotRepository,
     snapshotClient: ISnapshotClient,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
             OppdaterSnapshotCommand(
                 snapshotClient = snapshotClient,
-                snapshotDao = snapshotDao,
+                snapshotRepository = snapshotRepository,
                 fødselsnummer = fødselsnummer,
                 personRepository = personRepository,
             ),
