@@ -1,6 +1,7 @@
 package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.SnapshotRepository
 import no.nav.helse.mediator.Kommandostarter
@@ -11,7 +12,6 @@ import no.nav.helse.modell.kommando.OppdaterInfotrygdutbetalingerHardt
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
 import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.abonnement.PersonOppdatertPayload
 import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
@@ -52,7 +52,7 @@ internal class OppdaterPersonsnapshotCommand(
     førsteKjenteDagFinner: () -> LocalDate,
     personRepository: PersonRepository,
     snapshotRepository: SnapshotRepository,
-    opptegnelseDao: OpptegnelseDao,
+    opptegnelseRepository: OpptegnelseRepository,
     snapshotClient: ISnapshotClient,
 ) : MacroCommand() {
     override val commands: List<Command> =
@@ -65,7 +65,7 @@ internal class OppdaterPersonsnapshotCommand(
             ),
             OppdaterInfotrygdutbetalingerHardt(fødselsnummer, personRepository, førsteKjenteDagFinner),
             ikkesuspenderendeCommand("opprettOpptegnelse") {
-                opptegnelseDao.opprettOpptegnelse(
+                opptegnelseRepository.opprettOpptegnelse(
                     fødselsnummer,
                     PersonOppdatertPayload,
                     OpptegnelseType.PERSONDATA_OPPDATERT,

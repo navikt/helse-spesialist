@@ -5,6 +5,7 @@ import kotliquery.sessionOf
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.InntektskilderDao
+import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
@@ -64,7 +65,6 @@ import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
 import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
@@ -255,7 +255,7 @@ internal class Kommandofabrikk(
             førsteKjenteDagFinner = { generasjonRepository.førsteKjenteDag(hendelse.fødselsnummer()) },
             personRepository = personDao,
             snapshotRepository = snapshotDao,
-            opptegnelseDao = opptegnelseDao,
+            opptegnelseRepository = opptegnelseDao,
             snapshotClient = snapshotClient,
         )
 
@@ -287,7 +287,7 @@ internal class Kommandofabrikk(
             arbeidsgiverbeløp = hendelse.arbeidsgiverbeløp,
             personbeløp = hendelse.personbeløp,
             utbetalingRepository = utbetalingDao,
-            opptegnelseDao = opptegnelseDao,
+            opptegnelseRepository = opptegnelseDao,
             reservasjonRepository = reservasjonDao,
             oppgaveRepository = oppgaveDao,
             tildelingRepository = tildelingDao,

@@ -2,6 +2,7 @@ package no.nav.helse.modell.utbetaling
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.OppgaveRepository
+import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.db.ReservasjonRepository
 import no.nav.helse.db.TildelingRepository
 import no.nav.helse.db.UtbetalingRepository
@@ -17,7 +18,6 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -108,7 +108,7 @@ internal class UtbetalingEndretCommand(
     arbeidsgiverbeløp: Int,
     personbeløp: Int,
     utbetalingRepository: UtbetalingRepository,
-    opptegnelseDao: OpptegnelseDao,
+    opptegnelseRepository: OpptegnelseRepository,
     reservasjonRepository: ReservasjonRepository,
     oppgaveRepository: OppgaveRepository,
     tildelingRepository: TildelingRepository,
@@ -131,7 +131,7 @@ internal class UtbetalingEndretCommand(
                 personbeløp = personbeløp,
                 json = json,
                 utbetalingRepository = utbetalingRepository,
-                opptegnelseDao = opptegnelseDao,
+                opptegnelseRepository = opptegnelseRepository,
             ),
             ReserverPersonHvisTildeltCommand(
                 fødselsnummer = fødselsnummer,
