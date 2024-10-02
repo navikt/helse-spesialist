@@ -11,7 +11,7 @@ val mockkVersion = "1.13.10"
 val postgresqlVersion = "42.7.3"
 
 plugins {
-    kotlin("jvm") version "1.9.23"
+    kotlin("jvm") version "2.0.20"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
 }
 
@@ -129,12 +129,14 @@ tasks {
             val erLokaltBygg = !System.getenv().containsKey("GITHUB_ACTION")
             val manglerPreCommitHook = !File(".git/hooks/pre-commit").isFile
             if (erLokaltBygg && manglerPreCommitHook) {
-                println("""
+                println(
+                    """
                     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ¯\_(⊙︿⊙)_/¯ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     !            Hei du! Det ser ut til at du mangler en pre-commit-hook :/         !
                     ! Du kan installere den ved å kjøre './gradlew addKtlintFormatGitPreCommitHook' !
                     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                """.trimIndent())
+                    """.trimIndent(),
+                )
             }
         }
     }
