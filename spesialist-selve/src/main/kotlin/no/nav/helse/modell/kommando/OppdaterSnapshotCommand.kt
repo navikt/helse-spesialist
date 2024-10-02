@@ -19,7 +19,7 @@ internal class OppdaterSnapshotCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        if (env.erDev) {
+        if (env.erDev || env.erProd) {
             sikkerlogg.info("Tester å aldri hente snapshot som følge av meldinger fra rapiden :zap: :earth:")
             return true
         }

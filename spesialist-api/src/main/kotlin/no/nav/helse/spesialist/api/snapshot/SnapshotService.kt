@@ -8,15 +8,11 @@ import org.slf4j.LoggerFactory
 class SnapshotService(private val snapshotDao: SnapshotApiDao, private val snapshotClient: ISnapshotClient) {
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
-    fun hentSnapshotAlltid(fødselsnummer: String): Pair<Personinfo, GraphQLPerson>? {
-        hentOgLagre(fødselsnummer)
-        // TODO: Bruk retry mot spleis-api
-        sikkerLogg.info("Henter snapshot i hentSnapshotAlltid for person med fødselsnummer=$fødselsnummer")
-        return snapshotDao.hentSnapshotMedMetadata(fødselsnummer)
-    }
-
     fun hentSnapshot(fødselsnummer: String): Pair<Personinfo, GraphQLPerson>? {
-        oppdaterSnapshot(fødselsnummer)
+        // TODO: trenger ikke lagre snapshot fra spleis-api lenger, kan legge på metadata fra Spesialist
+        // on the fly og returnere komplett snapshot (Pair<Personinfo, GraphQLPerson>) her
+        hentOgLagre(fødselsnummer)
+        sikkerLogg.info("Henter snapshot for person med fødselsnummer=$fødselsnummer")
         val snapshot =
             try {
                 snapshotDao.hentSnapshotMedMetadata(fødselsnummer)
@@ -26,13 +22,6 @@ class SnapshotService(private val snapshotDao: SnapshotApiDao, private val snaps
                 snapshotDao.hentSnapshotMedMetadata(fødselsnummer)
             }
         return snapshot
-    }
-
-    private fun oppdaterSnapshot(fødselsnummer: String) {
-        if (snapshotDao.utdatert(fødselsnummer)) {
-            sikkerLogg.debug("snapshot for $fødselsnummer er utdatert, henter nytt")
-            hentOgLagre(fødselsnummer)
-        }
     }
 
     private fun hentOgLagre(fødselsnummer: String) {
