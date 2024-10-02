@@ -9,6 +9,7 @@ import no.nav.helse.db.OverstyrtArbeidsforholdForDatabase
 import no.nav.helse.db.OverstyrtInntektOgRefusjonForDatabase
 import no.nav.helse.db.OverstyrtTidslinjeForDatabase
 import no.nav.helse.db.SkjønnsfastsattSykepengegrunnlagForDatabase
+import no.nav.helse.db.TransactionalOverstyringDao
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.intellij.lang.annotations.Language
@@ -94,30 +95,12 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource),
         vedtaksperiodeIder: List<UUID>,
         overstyringHendelseId: UUID,
     ) {
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-
-            @Language("PostgreSQL")
-            val kobleOverstyringOgVedtaksperiodeQuery =
-                """
-                INSERT INTO overstyringer_for_vedtaksperioder(vedtaksperiode_id, overstyring_ref)
-                SELECT :vedtaksperiode_id, o.id
-                FROM overstyring o
-                WHERE o.ekstern_hendelse_id = :overstyring_hendelse_id
-                ON CONFLICT DO NOTHING
-                """.trimIndent()
-
+        sessionOf(dataSource).use { session ->
             session.transaction { transactionalSession ->
-                vedtaksperiodeIder.forEach { vedtaksperiodeId ->
-                    transactionalSession.run(
-                        queryOf(
-                            kobleOverstyringOgVedtaksperiodeQuery,
-                            mapOf(
-                                "vedtaksperiode_id" to vedtaksperiodeId,
-                                "overstyring_hendelse_id" to overstyringHendelseId,
-                            ),
-                        ).asUpdate,
-                    )
-                }
+                TransactionalOverstyringDao(transactionalSession).kobleOverstyringOgVedtaksperiode(
+                    vedtaksperiodeIder,
+                    overstyringHendelseId,
+                )
             }
         }
     }
@@ -133,13 +116,13 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource),
             mapOf("vedtaksperiode_id" to vedtaksperiodeId),
         ).single { row -> row.boolean(1) } ?: false
 
-    override fun finnesEksternHendelseId(eksternHendelseId: UUID): Boolean =
-        asSQL(
-            """ SELECT 1 from overstyring 
-            WHERE ekstern_hendelse_id = :eksternHendelseId
-        """,
-            mapOf("eksternHendelseId" to eksternHendelseId),
-        ).single { row -> row.boolean(1) } ?: false
+    override fun finnesEksternHendelseId(eksternHendelseId: UUID): Boolean {
+        return sessionOf(dataSource).use { session ->
+            session.transaction { transactionalSession ->
+                TransactionalOverstyringDao(transactionalSession).finnesEksternHendelseId(eksternHendelseId)
+            }
+        }
+    }
 
     internal fun persisterOverstyringTidslinje(
         overstyrtTidslinje: OverstyrtTidslinjeForDatabase,

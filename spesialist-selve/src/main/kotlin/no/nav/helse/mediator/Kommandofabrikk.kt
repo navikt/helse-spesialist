@@ -411,7 +411,13 @@ internal class Kommandofabrikk(
         { kommandooppretter ->
             val melding = this
             this@Kommandofabrikk.kommandooppretter()?.let { command ->
-                iverksett(command, melding.id, commandContext, commandContextObservers, commandContextDao)
+                iverksett(
+                    command = command,
+                    meldingId = melding.id,
+                    commandContext = commandContext,
+                    commandContextObservers = commandContextObservers,
+                    commandContextDao = commandContextDao,
+                )
             }
         }
 
