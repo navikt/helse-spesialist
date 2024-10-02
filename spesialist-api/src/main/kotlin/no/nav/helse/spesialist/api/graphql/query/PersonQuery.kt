@@ -123,7 +123,11 @@ class PersonQuery(
 
         val snapshot =
             try {
-                snapshotService.hentSnapshot(fødselsnummer)
+                if (this.env.erProd) {
+                    snapshotService.hentSnapshot(fødselsnummer)
+                } else {
+                    snapshotService.hentSnapshotAlltid(fødselsnummer)
+                }
             } catch (e: Exception) {
                 sikkerLogg.error("feilet under henting av snapshot for {}", keyValue("fnr", fødselsnummer), e)
                 auditLog(env.graphQlContext, fødselsnummer, null, getSnapshotValidationError().message)

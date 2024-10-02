@@ -8,6 +8,13 @@ import org.slf4j.LoggerFactory
 class SnapshotService(private val snapshotDao: SnapshotApiDao, private val snapshotClient: ISnapshotClient) {
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
+    fun hentSnapshotAlltid(fødselsnummer: String): Pair<Personinfo, GraphQLPerson>? {
+        hentOgLagre(fødselsnummer)
+        // TODO: Bruk retry mot spleis-api
+        sikkerLogg.info("Henter snapshot i hentSnapshotAlltid for person med fødselsnummer=$fødselsnummer")
+        return snapshotDao.hentSnapshotMedMetadata(fødselsnummer)
+    }
+
     fun hentSnapshot(fødselsnummer: String): Pair<Personinfo, GraphQLPerson>? {
         oppdaterSnapshot(fødselsnummer)
         val snapshot =
