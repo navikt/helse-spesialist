@@ -13,7 +13,7 @@ class Annullering(
     private val arbeidsgiverFagsystemId: String,
     private val personFagsystemId: String,
     private val begrunnelser: List<String> = emptyList(),
-    private val arsaker: List<AnnulleringArsak>? = emptyList(),
+    private val arsaker: List<AnnulleringArsak>,
     private val kommentar: String?,
 ) : Handling {
     override fun utførAv(saksbehandler: Saksbehandler) {
@@ -67,7 +67,7 @@ data class AnnulleringDto(
     val utbetalingId: UUID,
     val arbeidsgiverFagsystemId: String,
     val personFagsystemId: String,
-    val årsaker: List<AnnulleringArsak>? = emptyList(),
+    val årsaker: List<AnnulleringArsak>,
     val kommentar: String?,
 )
 

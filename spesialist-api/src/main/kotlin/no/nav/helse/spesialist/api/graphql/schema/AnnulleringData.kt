@@ -12,7 +12,7 @@ data class AnnulleringData(
     val arbeidsgiverFagsystemId: String,
     val personFagsystemId: String,
     val begrunnelser: List<String>,
-    val arsaker: List<AnnulleringArsak>?,
+    val arsaker: List<AnnulleringArsak>,
     val kommentar: String?,
 ) : HandlingFraApi
 

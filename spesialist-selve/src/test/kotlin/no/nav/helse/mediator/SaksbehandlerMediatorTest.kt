@@ -412,7 +412,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
     @Test
     fun `håndterer annullering uten kommentar, begrunnelser eller årsak`() {
-        mediator.håndter(annullering(emptyList(), null, null), saksbehandler)
+        mediator.håndter(annullering(emptyList(), null, emptyList()), saksbehandler)
 
         val melding = testRapid.inspektør.message(0)
 
@@ -427,7 +427,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         assertEquals(UTBETALING_ID, melding["utbetalingId"].asUUID())
         assertEquals(null, melding["kommentar"]?.asText())
         assertEquals(0, melding["begrunnelser"].map { it.asText() }.size)
-        assertEquals(null, melding["arsaker"]?.asText())
+        assertEquals("", melding["arsaker"].asText())
     }
 
     @Test
@@ -871,7 +871,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private fun annullering(
         begrunnelser: List<String> = listOf("EN_BEGRUNNELSE"),
         kommentar: String? = "EN_KOMMENTAR",
-        arsaker: List<AnnulleringArsak>? = listOf(AnnulleringArsak(_key = "key01", arsak = "Ferie")),
+        arsaker: List<AnnulleringArsak> = listOf(AnnulleringArsak(_key = "key01", arsak = "Ferie"), AnnulleringArsak(_key = "key02", arsak = "Perm")),
     ) = AnnulleringData(
         aktorId = AKTØR_ID,
         fodselsnummer = FØDSELSNUMMER,

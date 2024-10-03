@@ -21,13 +21,11 @@ class AnnulleringDao(
         asSQL(
             """
             INSERT INTO annullert_av_saksbehandler (annullert_tidspunkt, saksbehandler_ref, årsaker, begrunnelse_ref, arbeidsgiver_fagsystem_id, person_fagsystem_id) 
-            VALUES (now(), :saksbehandler, '{${
-                annulleringDto.årsaker?.map { it.arsak }?.somDbArray()
-            }}', :begrunnelseRef, :arbeidsgiverFagsystemId, :personFagsystemId)
+            VALUES (now(), :saksbehandler, (:arsaker)::char[], :begrunnelseRef, :arbeidsgiverFagsystemId, :personFagsystemId)
             """.trimIndent(),
             mapOf(
                 "saksbehandler" to saksbehandler.oid(),
-                "årsaker" to annulleringDto.årsaker,
+                "arsaker" to annulleringDto.årsaker.map { it.arsak }.somDbArray(),
                 "begrunnelseRef" to begrunnelseId,
                 "arbeidsgiverFagsystemId" to annulleringDto.arbeidsgiverFagsystemId,
                 "personFagsystemId" to annulleringDto.personFagsystemId,

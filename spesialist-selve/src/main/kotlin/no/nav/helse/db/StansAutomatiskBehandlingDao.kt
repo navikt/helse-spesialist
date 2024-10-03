@@ -17,7 +17,7 @@ class StansAutomatiskBehandlingDao(dataSource: DataSource) : HelseDao(dataSource
         """
         insert into stans_automatisering (fødselsnummer, status, årsaker, opprettet, kilde, original_melding) 
         values (:fnr, :status, '{${
-            årsaker.map(StoppknappÅrsak::name).somDbArray()
+            årsaker.map(StoppknappÅrsak::name).somDbArrayInnhold()
         }}', :opprettet, :kilde, cast(:originalMelding as json))
         """.trimIndent(),
         mapOf(
@@ -62,4 +62,6 @@ class StansAutomatiskBehandlingDao(dataSource: DataSource) : HelseDao(dataSource
         }
 }
 
-fun <T> Iterable<T>.somDbArray() = joinToString { " $it " }
+fun <T> Iterable<T>.somDbArrayInnhold() = joinToString { " $it " }
+
+fun <T> Iterable<T>.somDbArray() = joinToString(prefix = "{", postfix = "}")

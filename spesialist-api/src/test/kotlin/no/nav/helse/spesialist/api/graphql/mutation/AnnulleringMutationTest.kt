@@ -21,7 +21,8 @@ internal class AnnulleringMutationTest : AbstractGraphQLApiTest() {
                     personFagsystemId: "EN-FAGSYSTEMID",
                     vedtaksperiodeId: "${UUID.randomUUID()}",
                     kommentar: "En kommentar", 
-                    begrunnelser: ["Det første", "Det andre"]
+                    begrunnelser: ["Det første", "Det andre"],
+                    arsaker: [{_key: "en key", arsak: "Ferie"}]
                 })
             }
         """,
@@ -44,7 +45,8 @@ internal class AnnulleringMutationTest : AbstractGraphQLApiTest() {
                     arbeidsgiverFagsystemId: "EN-FAGSYSTEMID",
                     personFagsystemId: "EN-FAGSYSTEMID",
                     vedtaksperiodeId: "${UUID.randomUUID()}",
-                    begrunnelser: []
+                    begrunnelser: [],
+                    arsaker: []
                 })
             }
         """,
