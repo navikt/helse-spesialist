@@ -425,7 +425,6 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource), Opp
 
             val (arbeidsgiverBeløp, personBeløp) = finnArbeidsgiverbeløpOgPersonbeløp(vedtaksperiodeId, utbetalingId)
             val mottaker = finnMottaker(arbeidsgiverBeløp > 0, personBeløp > 0)
-            val egenskaperForDatabase = egenskaper.joinToString { """ "${it.name}" """ }
 
             asSQL(
                 """
@@ -445,7 +444,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource), Opp
                         :commandContextId, 
                         :utbetalingId,
                         CAST(:mottaker as mottakertype), 
-                        '{$egenskaperForDatabase}', 
+                        CAST(:egenskaper as varchar[]), 
                         :kanAvvises
                     WHERE
                         NOT EXISTS(
@@ -465,6 +464,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource), Opp
                     "commandContextId" to commandContextId,
                     "utbetalingId" to utbetalingId,
                     "mottaker" to mottaker?.name,
+                    "egenskaper" to egenskaper.joinToString(prefix = "{", postfix = "}"),
                     "kanAvvises" to kanAvvises,
                     "personRef" to personRef,
                 ),
@@ -495,17 +495,17 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource), Opp
         oid: UUID? = null,
         egenskaper: List<EgenskapForDatabase>,
     ): Int {
-        val egenskaperForDatabase = egenskaper.joinToString { """ "${it.name}" """ }
         return asSQL(
             """
                 UPDATE oppgave
-                SET ferdigstilt_av = :ferdigstiltAv, ferdigstilt_av_oid = :oid, status = :oppgavestatus::oppgavestatus, egenskaper = '{$egenskaperForDatabase}'
+                SET ferdigstilt_av = :ferdigstiltAv, ferdigstilt_av_oid = :oid, status = :oppgavestatus::oppgavestatus, egenskaper = :egenskaper::varchar[]
                 WHERE id=:oppgaveId; 
             """,
             mapOf(
                 "ferdigstiltAv" to ferdigstiltAv,
                 "oid" to oid,
                 "oppgavestatus" to oppgavestatus,
+                "egenskaper" to egenskaper.joinToString(prefix = "{", postfix = "}"),
                 "oppgaveId" to oppgaveId,
             ),
         ).update()
