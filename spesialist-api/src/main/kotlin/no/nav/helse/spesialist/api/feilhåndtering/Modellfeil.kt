@@ -90,6 +90,16 @@ class IkkeTilgang(private val oid: UUID, private val oppgaveId: Long) : Modellfe
     }
 }
 
+class AlleredeAnnullert(private val vedtaksperiodeId: UUID) : Modellfeil() {
+    override val eksternKontekst: Map<String, Any> = emptyMap()
+    override val feilkode: String = "allerede_annullert"
+    override val httpkode: HttpStatusCode = HttpStatusCode.Conflict
+
+    override fun logger() {
+        logg.info("Vedtaksperiode {} er allerede annullert", kv("vedtaksperiodeId", vedtaksperiodeId))
+    }
+}
+
 class OppgaveAlleredeSendtBeslutter(private val oppgaveId: Long) : Modellfeil() {
     override val eksternKontekst: Map<String, Any> = emptyMap()
     override val feilkode: String = "oppgave_allerede_sendt_beslutter"

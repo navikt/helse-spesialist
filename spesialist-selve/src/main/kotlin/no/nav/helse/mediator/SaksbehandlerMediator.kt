@@ -15,6 +15,7 @@ import no.nav.helse.mediator.overstyring.Saksbehandlingsmelder
 import no.nav.helse.mediator.påvent.PåVentRepository
 import no.nav.helse.mediator.saksbehandler.SaksbehandlerLagrer
 import no.nav.helse.mediator.saksbehandler.SaksbehandlerMapper.tilApiversjon
+import no.nav.helse.modell.AlleredeAnnullert
 import no.nav.helse.modell.ManglerTilgang
 import no.nav.helse.modell.Modellfeil
 import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
@@ -177,6 +178,7 @@ internal class SaksbehandlerMediator(
         saksbehandler: Saksbehandler,
     ) {
         try {
+            if (annulleringDao.finnAnnullering(handling.toDto()) != null) throw AlleredeAnnullert(handling)
             annulleringDao.lagreAnnullering(handling.toDto(), saksbehandler)
             handling.utførAv(saksbehandler)
         } catch (e: Modellfeil) {
@@ -424,6 +426,8 @@ internal class SaksbehandlerMediator(
                     )
 
                 is ManglerTilgang -> IkkeTilgang(oid, oppgaveId)
+
+                is AlleredeAnnullert -> no.nav.helse.spesialist.api.feilhåndtering.AlleredeAnnullert(handling.toDto().vedtaksperiodeId)
             }
     }
 

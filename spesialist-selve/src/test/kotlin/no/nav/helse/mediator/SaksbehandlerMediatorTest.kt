@@ -54,6 +54,7 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.util.UUID
+import kotlin.random.Random
 
 internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private val tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
@@ -427,6 +428,15 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         assertEquals(null, melding["kommentar"]?.asText())
         assertEquals(0, melding["begrunnelser"].map { it.asText() }.size)
         assertEquals(null, melding["arsaker"]?.asText())
+    }
+
+    @Test
+    fun `godtar ikke å annullere samme utbetaling mer enn 1 gang`() {
+        val annullering = annullering(emptyList(), null)
+        mediator.håndter(annullering, saksbehandler)
+        assertThrows<no.nav.helse.spesialist.api.feilhåndtering.AlleredeAnnullert> {
+            mediator.håndter(annullering, saksbehandler)
+        }
     }
 
     // Eksperimentering med DSL for å lage testdata
@@ -868,8 +878,8 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         organisasjonsnummer = ORGANISASJONSNUMMER,
         vedtaksperiodeId = VEDTAKSPERIODE,
         utbetalingId = UTBETALING_ID,
-        arbeidsgiverFagsystemId = "EN-FAGSYSTEMID",
-        personFagsystemId = "EN-FAGSYSTEMID",
+        arbeidsgiverFagsystemId = "EN-FAGSYSTEMID${Random.nextInt(1000)}",
+        personFagsystemId = "EN-FAGSYSTEMID${Random.nextInt(1000)}",
         begrunnelser = begrunnelser,
         arsaker = arsaker,
         kommentar = kommentar,

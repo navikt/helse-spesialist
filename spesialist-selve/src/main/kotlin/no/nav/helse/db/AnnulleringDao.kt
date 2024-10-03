@@ -74,4 +74,8 @@ class AnnulleringDao(
                 begrunnelse = it.stringOrNull("tekst"),
             )
         }
+
+    fun finnAnnullering(annulleringDto: AnnulleringDto): Annullering? {
+        return finnAnnullering(annulleringDto.arbeidsgiverFagsystemId, annulleringDto.personFagsystemId)
+    }
 }
