@@ -3,6 +3,7 @@ package no.nav.helse.modell.utbetaling
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
+import no.nav.helse.db.TransactionalUtbetalingDao
 import no.nav.helse.db.UtbetalingRepository
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
@@ -183,12 +184,9 @@ class UtbetalingDao(private val dataSource: DataSource) : HelseDao(dataSource), 
         utbetalingId: UUID,
     ) {
         sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val statement = """
-            INSERT INTO vedtaksperiode_utbetaling_id(vedtaksperiode_id, utbetaling_id) VALUES (?, ?)
-            ON CONFLICT DO NOTHING
-        """
-            session.run(queryOf(statement, vedtaksperiodeId, utbetalingId).asUpdate)
+            session.transaction { transactionalSession ->
+                TransactionalUtbetalingDao(transactionalSession).opprettKobling(vedtaksperiodeId, utbetalingId)
+            }
         }
     }
 
@@ -197,9 +195,9 @@ class UtbetalingDao(private val dataSource: DataSource) : HelseDao(dataSource), 
         utbetalingId: UUID,
     ) {
         sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val statement = "DELETE FROM vedtaksperiode_utbetaling_id WHERE utbetaling_id = ? AND vedtaksperiode_id = ?"
-            session.run(queryOf(statement, utbetalingId, vedtaksperiodeId).asUpdate)
+            session.transaction { transactionalSession ->
+                TransactionalUtbetalingDao(transactionalSession).fjernKobling(vedtaksperiodeId, utbetalingId)
+            }
         }
     }
 

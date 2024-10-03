@@ -13,6 +13,7 @@ import no.nav.helse.db.TransactionalCommandContextDao
 import no.nav.helse.db.TransactionalInntektskilderDao
 import no.nav.helse.db.TransactionalOverstyringDao
 import no.nav.helse.db.TransactionalPersonDao
+import no.nav.helse.db.TransactionalUtbetalingDao
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
 import no.nav.helse.mediator.meldinger.Personmelding
@@ -211,11 +212,14 @@ internal class Kommandofabrikk(
             totrinnsvurderingMediator = totrinnsvurderingMediator,
         )
 
-    internal fun vedtaksperiodeNyUtbetaling(hendelse: VedtaksperiodeNyUtbetaling): VedtaksperiodeNyUtbetalingCommand =
+    internal fun vedtaksperiodeNyUtbetaling(
+        hendelse: VedtaksperiodeNyUtbetaling,
+        transactionalSession: TransactionalSession,
+    ): VedtaksperiodeNyUtbetalingCommand =
         VedtaksperiodeNyUtbetalingCommand(
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
             utbetalingId = hendelse.utbetalingId,
-            utbetalingRepository = utbetalingDao,
+            utbetalingRepository = TransactionalUtbetalingDao(transactionalSession),
         )
 
     fun søknadSendt(

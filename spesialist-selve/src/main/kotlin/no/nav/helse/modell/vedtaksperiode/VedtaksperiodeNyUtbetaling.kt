@@ -1,6 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
+import kotliquery.TransactionalSession
 import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
@@ -10,6 +11,7 @@ import no.nav.helse.modell.kommando.OpprettKoblingTilUtbetalingCommand
 import no.nav.helse.modell.person.Person
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.util.UUID
+import javax.naming.OperationNotSupportedException
 
 internal class VedtaksperiodeNyUtbetaling private constructor(
     override val id: UUID,
@@ -25,6 +27,7 @@ internal class VedtaksperiodeNyUtbetaling private constructor(
         utbetalingId = UUID.fromString(packet["utbetalingId"].asText()),
         json = packet.toJson(),
     )
+
     internal constructor(jsonNode: JsonNode) : this(
         id = UUID.fromString(jsonNode["@id"].asText()),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
@@ -37,12 +40,20 @@ internal class VedtaksperiodeNyUtbetaling private constructor(
 
     override fun vedtaksperiodeId(): UUID = vedtaksperiodeId
 
+    override fun skalKjøresTransaksjonelt(): Boolean = true
+
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
+    ): Unit = throw OperationNotSupportedException()
+
+    override fun transaksjonellBehandle(
+        person: Person,
+        kommandostarter: Kommandostarter,
+        transactionalSession: TransactionalSession,
     ) {
         person.nyUtbetalingForVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
-        kommandostarter { vedtaksperiodeNyUtbetaling(this@VedtaksperiodeNyUtbetaling) }
+        kommandostarter { vedtaksperiodeNyUtbetaling(this@VedtaksperiodeNyUtbetaling, transactionalSession) }
     }
 
     override fun toJson(): String = json
