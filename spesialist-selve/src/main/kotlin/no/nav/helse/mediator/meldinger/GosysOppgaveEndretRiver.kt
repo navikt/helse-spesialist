@@ -1,6 +1,5 @@
 package no.nav.helse.mediator.meldinger
 
-import no.nav.helse.bootstrap.Environment
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
@@ -9,20 +8,10 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
-import java.io.File
 
 internal class GosysOppgaveEndretRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    private val env = Environment()
-
-    private val ignorerliste: Set<String> by lazy {
-        if (env.erProd) {
-            File("/var/run/configmaps/ignorere-oppgave-endret.csv").readText().split(",").toSet()
-        } else {
-            emptySet()
-        }
-    }
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
     override fun validations() =
@@ -42,11 +31,6 @@ internal class GosysOppgaveEndretRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val fødselsnummer = packet["fødselsnummer"].asText()
-        if (ignorerliste.contains(fødselsnummer)) {
-            sikkerlogg.warn("Ignorerer gosys_oppgave_endret for person $fødselsnummer")
-            return
-        }
         mediator.mottaMelding(GosysOppgaveEndret(packet), context)
     }
 }
