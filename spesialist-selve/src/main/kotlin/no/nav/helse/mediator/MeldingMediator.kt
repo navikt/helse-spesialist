@@ -526,7 +526,7 @@ internal class MeldingMediator(
     override fun oppdaterSnapshot(fnr: String) {
         val event =
             JsonMessage
-                .newMessage("oppdater_personsnapshot", mapOf("fødselsnummer" to fnr))
+                .newMessage("oppdater_persondata", mapOf("fødselsnummer" to fnr))
                 .toJson()
         rapidsConnection.publish(fnr, event)
     }

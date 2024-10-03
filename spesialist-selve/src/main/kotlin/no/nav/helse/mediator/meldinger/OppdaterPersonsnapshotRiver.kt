@@ -19,7 +19,7 @@ internal class OppdaterPersonsnapshotRiver(
 
     override fun validations() =
         River.PacketValidation {
-            it.demandValue("@event_name", "oppdater_personsnapshot")
+            it.demandValue("@event_name", "oppdater_persondata")
             it.requireKey("@id", "fødselsnummer")
         }
 
@@ -27,7 +27,7 @@ internal class OppdaterPersonsnapshotRiver(
         problems: MessageProblems,
         context: MessageContext,
     ) {
-        sikkerlogg.error("Forstod ikke oppdater_personsnapshot:\n${problems.toExtendedReport()}")
+        sikkerlogg.error("Forstod ikke oppdater_persondata:\n${problems.toExtendedReport()}")
     }
 
     override fun onPacket(
@@ -37,7 +37,7 @@ internal class OppdaterPersonsnapshotRiver(
         val id = UUID.fromString(packet["@id"].asText())
         val fødselsnummer = packet["fødselsnummer"].asText()
         sikkerlogg.info(
-            "Mottok forespørsel om å oppdatere personsnapshot på {}, {}",
+            "Mottok forespørsel om å oppdatere persondata på {}, {}",
             StructuredArguments.keyValue("fødselsnummer", fødselsnummer),
             StructuredArguments.keyValue("eventId", id),
         )
