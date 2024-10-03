@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.januar
 import no.nav.helse.modell.gosysoppgaver.inspektør
 import no.nav.helse.modell.kommando.CommandContext
@@ -17,7 +18,6 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.objectMapper
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer

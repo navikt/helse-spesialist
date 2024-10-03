@@ -1,6 +1,7 @@
 import no.nav.helse.SpeilTilgangsgrupper
 import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.TestRapidHelpers.siste
+import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.TildelingDao
@@ -12,7 +13,6 @@ import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.rapids_rivers.asLocalDateTime
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao

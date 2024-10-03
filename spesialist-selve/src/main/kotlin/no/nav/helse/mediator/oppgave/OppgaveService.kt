@@ -4,6 +4,7 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgavesorteringForDatabase
+import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.SorteringsnøkkelForDatabase
@@ -30,7 +31,6 @@ import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDto
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.BehandledeOppgaver

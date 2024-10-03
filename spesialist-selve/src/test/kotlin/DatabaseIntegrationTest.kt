@@ -12,6 +12,7 @@ import no.nav.helse.db.AnnulleringDao
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.InntektskilderDao
+import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
@@ -48,7 +49,6 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.abonnement.AbonnementDao
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao

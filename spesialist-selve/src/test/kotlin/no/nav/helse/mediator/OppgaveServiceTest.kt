@@ -13,6 +13,7 @@ import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
+import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.Reservasjon
 import no.nav.helse.db.ReservasjonDao
@@ -34,7 +35,6 @@ import no.nav.helse.modell.oppgave.OppgaveInspector.Companion.oppgaveinspektør
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.graphql.schema.AntallArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.Egenskap.PA_VENT

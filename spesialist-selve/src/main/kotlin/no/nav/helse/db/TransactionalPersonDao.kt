@@ -47,7 +47,29 @@ internal class TransactionalPersonDao(
         kjønn: Kjønn,
         adressebeskyttelse: Adressebeskyttelse,
     ) {
-        throw OperationNotSupportedException()
+        transactionalSession
+            .finnPersonInfoRef(fødselsnummer)
+            ?.also {
+                transactionalSession.updatePersonInfo(
+                    it,
+                    fornavn,
+                    mellomnavn,
+                    etternavn,
+                    fødselsdato,
+                    kjønn,
+                    adressebeskyttelse,
+                    fødselsnummer,
+                )
+            }
+            ?: transactionalSession.insertPersoninfo(
+                fornavn,
+                mellomnavn,
+                etternavn,
+                fødselsdato,
+                kjønn,
+                adressebeskyttelse,
+                fødselsnummer,
+            )
     }
 
     override fun finnInntekter(
@@ -67,13 +89,32 @@ internal class TransactionalPersonDao(
 
     override fun finnEnhetId(fødselsnummer: String): String = throw OperationNotSupportedException()
 
-    override fun finnAdressebeskyttelse(fødselsnummer: String): Adressebeskyttelse? = throw OperationNotSupportedException()
+    override fun finnAdressebeskyttelse(fødselsnummer: String): Adressebeskyttelse? {
+        @Language("PostgreSQL")
+        val adressebeskyttelseQuery = """
+            SELECT adressebeskyttelse FROM person_info
+            WHERE id=(SELECT info_ref FROM person WHERE fodselsnummer=?);
+        """
+        return transactionalSession.run(
+            queryOf(adressebeskyttelseQuery, fødselsnummer.toLong())
+                .map { row -> Adressebeskyttelse.valueOf(row.string("adressebeskyttelse")) }
+                .asSingle,
+        )
+    }
 
     override fun finnPersonMedFødselsnummer(fødselsnummer: String): Long? = throw OperationNotSupportedException()
 
     override fun finnPersoninfoRef(fødselsnummer: String): Long? = throw OperationNotSupportedException()
 
-    override fun finnPersoninfoSistOppdatert(fødselsnummer: String): LocalDate = throw OperationNotSupportedException()
+    override fun finnPersoninfoSistOppdatert(fødselsnummer: String): LocalDate? {
+        @Language("PostgreSQL")
+        val query = "SELECT personinfo_oppdatert FROM person WHERE fodselsnummer=?;"
+        return transactionalSession.run(
+            queryOf(query, fødselsnummer.toLong())
+                .map { row -> row.localDateOrNull("personinfo_oppdatert") }
+                .asSingle,
+        )
+    }
 
     override fun lagreMinimalPerson(minimalPerson: MinimalPersonDto) {
         @Language("PostgreSQL")
@@ -106,5 +147,103 @@ internal class TransactionalPersonDao(
                 )
             }.asSingle,
         )
+    }
+
+    private fun TransactionalSession.finnPersonInfoRef(fødselsnummer: String): Long? {
+        @Language("PostgreSQL")
+        val query = "SELECT info_ref FROM person WHERE fodselsnummer=?"
+
+        return run(queryOf(query, fødselsnummer.toLong()).map { it.longOrNull("info_ref") }.asSingle)
+    }
+
+    private fun TransactionalSession.updatePersonInfo(
+        id: Long,
+        fornavn: String,
+        mellomnavn: String?,
+        etternavn: String,
+        fødselsdato: LocalDate,
+        kjønn: Kjønn,
+        adressebeskyttelse: Adressebeskyttelse,
+        fødselsnummer: String,
+    ) {
+        @Language("PostgreSQL")
+        val query =
+            """
+            UPDATE person_info 
+            SET fornavn=:fornavn, 
+                mellomnavn=:mellomnavn, 
+                etternavn=:etternavn, 
+                fodselsdato=:fodselsdato, 
+                kjonn=CAST(:kjonn as person_kjonn), 
+                adressebeskyttelse=:adressebeskyttelse 
+            WHERE id=:id
+            """.trimIndent()
+
+        run(
+            queryOf(
+                query,
+                mapOf(
+                    "fornavn" to fornavn,
+                    "mellomnavn" to mellomnavn,
+                    "etternavn" to etternavn,
+                    "fodselsdato" to fødselsdato,
+                    "kjonn" to kjønn.name,
+                    "adressebeskyttelse" to adressebeskyttelse.name,
+                    "id" to id,
+                ),
+            ).asUpdate,
+        )
+        updatePersoninfoOppdatert(fødselsnummer)
+    }
+
+    private fun TransactionalSession.updatePersoninfoOppdatert(fødselsnummer: String) {
+        @Language("PostgreSQL")
+        val query = "UPDATE person SET personinfo_oppdatert=now() WHERE fodselsnummer=?"
+
+        run(queryOf(query, fødselsnummer.toLong()).asUpdate)
+    }
+
+    private fun TransactionalSession.insertPersoninfo(
+        fornavn: String,
+        mellomnavn: String?,
+        etternavn: String,
+        fødselsdato: LocalDate,
+        kjønn: Kjønn,
+        adressebeskyttelse: Adressebeskyttelse,
+        fødselsnummer: String,
+    ) {
+        @Language("PostgreSQL")
+        val query = """
+            INSERT INTO person_info(fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse)
+            VALUES(:fornavn, :mellomnavn, :etternavn, :fodselsdato, CAST(:kjonn as person_kjonn), :adressebeskyttelse);
+        """
+
+        val personinfoId =
+            requireNotNull(
+                run(
+                    queryOf(
+                        query,
+                        mapOf(
+                            "fornavn" to fornavn,
+                            "mellomnavn" to mellomnavn,
+                            "etternavn" to etternavn,
+                            "fodselsdato" to fødselsdato,
+                            "kjonn" to kjønn.name,
+                            "adressebeskyttelse" to adressebeskyttelse.name,
+                        ),
+                    ).asUpdateAndReturnGeneratedKey,
+                ),
+            )
+        updatePersoninfoRef(personinfoId, fødselsnummer)
+    }
+
+    private fun TransactionalSession.updatePersoninfoRef(
+        id: Long,
+        fødselsnummer: String,
+    ) {
+        @Language("PostgreSQL")
+        val query = "UPDATE person SET info_ref=:id, personinfo_oppdatert=now() WHERE fodselsnummer=:fodselsnummer"
+
+        run(queryOf(query, mapOf("id" to id, "fodselsnummer" to fødselsnummer.toLong())).asUpdate)
     }
 }

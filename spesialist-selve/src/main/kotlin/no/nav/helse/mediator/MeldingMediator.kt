@@ -443,7 +443,7 @@ internal class MeldingMediator(
                 sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")
                 var kommandostarter: Kommandostarter
                 if (melding.skalKjøresTransaksjonelt()) {
-                    sessionOf(dataSource).use { session ->
+                    sessionOf(dataSource, returnGeneratedKey = true).use { session ->
                         session.transaction { transactionalSession ->
                             kommandostarter =
                                 kommandofabrikk.lagTransaksjonellKommandostarter(

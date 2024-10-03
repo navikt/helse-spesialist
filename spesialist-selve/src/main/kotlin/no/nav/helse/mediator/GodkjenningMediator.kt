@@ -3,6 +3,7 @@ package no.nav.helse.mediator
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.automatiseringsteller
 import no.nav.helse.automatiskAvvistÅrsakerTeller
+import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
@@ -10,13 +11,12 @@ import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.spesialist.api.abonnement.AutomatiskBehandlingPayload
 import no.nav.helse.spesialist.api.abonnement.AutomatiskBehandlingUtfall
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class GodkjenningMediator(private val opptegnelseDao: OpptegnelseDao) {
+internal class GodkjenningMediator(private val opptegnelseRepository: OpptegnelseRepository) {
     internal fun saksbehandlerUtbetaling(
         context: CommandContext,
         behov: GodkjenningsbehovData,
@@ -82,7 +82,7 @@ internal class GodkjenningMediator(private val opptegnelseDao: OpptegnelseDao) {
         behov.godkjennAutomatisk(utbetaling)
         context.publiser(behov.toJson())
         context.publiser(behov.lagVedtaksperiodeGodkjentAutomatisk().toJson())
-        opptegnelseDao.opprettOpptegnelse(
+        opptegnelseRepository.opprettOpptegnelse(
             fødselsnummer = behov.fødselsnummer,
             payload = AutomatiskBehandlingPayload(behov.id, AutomatiskBehandlingUtfall.UTBETALT),
             type = OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV,
@@ -108,7 +108,7 @@ internal class GodkjenningMediator(private val opptegnelseDao: OpptegnelseDao) {
         publiserer.publiser(
             godkjenningsbehov.lagVedtaksperiodeAvvistAutomatisk().toJson(),
         )
-        opptegnelseDao.opprettOpptegnelse(
+        opptegnelseRepository.opprettOpptegnelse(
             fødselsnummer = godkjenningsbehov.fødselsnummer,
             payload = AutomatiskBehandlingPayload(godkjenningsbehov.id, AutomatiskBehandlingUtfall.AVVIST),
             type = OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV,

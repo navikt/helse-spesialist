@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.oppgave
 
+import kotliquery.sessionOf
 import no.nav.helse.HelseDao
 import no.nav.helse.db.AntallOppgaverFraDatabase
 import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
@@ -11,6 +12,7 @@ import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.SorteringsnøkkelForDatabase
+import no.nav.helse.db.TransactionalOppgaveDao
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.objectMapper
@@ -20,7 +22,7 @@ import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 
-class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveRepository {
+class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource), OppgaveRepository {
     fun reserverNesteId(): Long {
         return asSQL(
             """
@@ -594,19 +596,11 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         }
 
     override fun invaliderOppgaveFor(fødselsnummer: String) {
-        asSQL(
-            """
-            UPDATE oppgave o
-            SET status = 'Invalidert'
-            FROM oppgave o2
-            JOIN vedtak v on v.id = o2.vedtak_ref
-            JOIN person p on v.person_ref = p.id
-            WHERE p.fodselsnummer = :fodselsnummer
-            and o.id = o2.id
-            AND o.status = 'AvventerSaksbehandler'::oppgavestatus; 
-        """,
-            mapOf("fodselsnummer" to fødselsnummer.toLong()),
-        ).update()
+        sessionOf(dataSource).use { session ->
+            session.transaction { transaction ->
+                TransactionalOppgaveDao(transaction).invaliderOppgaveFor(fødselsnummer)
+            }
+        }
     }
 
     private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()

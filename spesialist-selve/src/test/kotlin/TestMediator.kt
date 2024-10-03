@@ -1,5 +1,6 @@
 import no.nav.helse.SpeilTilgangsgrupper
 import no.nav.helse.db.AvviksvurderingDao
+import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
@@ -27,7 +28,6 @@ import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao

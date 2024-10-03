@@ -7,6 +7,7 @@ import no.nav.helse.Gruppekontroll
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.BehandlingsstatistikkDao
+import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PoisonPillDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
@@ -44,7 +45,6 @@ import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.AzureConfig
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering
 import no.nav.helse.spesialist.api.azureAdAppAuthentication

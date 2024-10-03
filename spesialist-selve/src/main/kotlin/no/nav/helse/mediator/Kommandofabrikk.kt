@@ -11,6 +11,8 @@ import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.db.TransactionalCommandContextDao
 import no.nav.helse.db.TransactionalInntektskilderDao
+import no.nav.helse.db.TransactionalOppgaveDao
+import no.nav.helse.db.TransactionalOpptegnelseDao
 import no.nav.helse.db.TransactionalOverstyringDao
 import no.nav.helse.db.TransactionalPersonDao
 import no.nav.helse.db.TransactionalUtbetalingDao
@@ -237,6 +239,7 @@ internal class Kommandofabrikk(
     internal fun adressebeskyttelseEndret(
         melding: AdressebeskyttelseEndret,
         oppgaveDataForAutomatisering: OppgaveDataForAutomatisering?,
+        transactionalSession: TransactionalSession,
     ): AdressebeskyttelseEndretCommand {
         val godkjenningsbehovData =
             oppgaveDataForAutomatisering
@@ -246,9 +249,9 @@ internal class Kommandofabrikk(
         val utbetaling = godkjenningsbehovData?.let { utbetalingDao.hentUtbetaling(it.utbetalingId) }
         return AdressebeskyttelseEndretCommand(
             fødselsnummer = melding.fødselsnummer(),
-            personRepository = personDao,
-            oppgaveRepository = oppgaveDao,
-            godkjenningMediator = godkjenningMediator,
+            personRepository = TransactionalPersonDao(transactionalSession),
+            oppgaveRepository = TransactionalOppgaveDao(transactionalSession),
+            godkjenningMediator = GodkjenningMediator(TransactionalOpptegnelseDao(transactionalSession)),
             godkjenningsbehov = godkjenningsbehovData,
             utbetaling = utbetaling,
         )

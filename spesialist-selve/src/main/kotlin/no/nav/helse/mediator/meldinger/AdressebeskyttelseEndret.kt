@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
+import kotliquery.TransactionalSession
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.GodkjenningMediator
@@ -15,6 +16,7 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.util.UUID
+import javax.naming.OperationNotSupportedException
 
 internal class AdressebeskyttelseEndret private constructor(
     override val id: UUID,
@@ -41,7 +43,23 @@ internal class AdressebeskyttelseEndret private constructor(
         person: Person,
         kommandostarter: Kommandostarter,
     ) {
-        kommandostarter { adressebeskyttelseEndret(this@AdressebeskyttelseEndret, finnOppgavedata(fødselsnummer)) }
+        throw OperationNotSupportedException()
+    }
+
+    override fun skalKjøresTransaksjonelt(): Boolean = true
+
+    override fun transaksjonellBehandle(
+        person: Person,
+        kommandostarter: Kommandostarter,
+        transactionalSession: TransactionalSession,
+    ) {
+        kommandostarter {
+            adressebeskyttelseEndret(
+                this@AdressebeskyttelseEndret,
+                finnOppgavedata(fødselsnummer),
+                transactionalSession,
+            )
+        }
     }
 }
 

@@ -4,6 +4,7 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.AnnulleringDao
 import no.nav.helse.db.AvslagDao
+import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.Periodehistorikk
 import no.nav.helse.db.PeriodehistorikkRepository
 import no.nav.helse.db.ReservasjonDao
@@ -53,7 +54,6 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.withMDC
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.abonnement.AbonnementDao
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.feilhåndtering.IkkeTilgang
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
