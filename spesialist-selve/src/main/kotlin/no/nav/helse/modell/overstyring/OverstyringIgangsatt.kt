@@ -1,11 +1,13 @@
 package no.nav.helse.modell.overstyring
 
 import com.fasterxml.jackson.databind.JsonNode
+import kotliquery.TransactionalSession
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.person.Person
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.util.UUID
+import javax.naming.OperationNotSupportedException
 
 internal class OverstyringIgangsatt private constructor(
     override val id: UUID,
@@ -29,11 +31,19 @@ internal class OverstyringIgangsatt private constructor(
         json = jsonNode.toString(),
     )
 
+    override fun skalKjøresTransaksjonelt(): Boolean = true
+
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
+    ): Unit = throw OperationNotSupportedException()
+
+    override fun transaksjonellBehandle(
+        person: Person,
+        kommandostarter: Kommandostarter,
+        transactionalSession: TransactionalSession,
     ) {
-        kommandostarter { overstyringIgangsatt(this@OverstyringIgangsatt) }
+        kommandostarter { overstyringIgangsatt(this@OverstyringIgangsatt, transactionalSession) }
     }
 
     override fun fødselsnummer() = fødselsnummer

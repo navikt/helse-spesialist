@@ -11,6 +11,7 @@ import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.db.TransactionalCommandContextDao
 import no.nav.helse.db.TransactionalInntektskilderDao
+import no.nav.helse.db.TransactionalOverstyringDao
 import no.nav.helse.db.TransactionalPersonDao
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
@@ -259,11 +260,14 @@ internal class Kommandofabrikk(
             snapshotClient = snapshotClient,
         )
 
-    internal fun overstyringIgangsatt(melding: OverstyringIgangsatt): OverstyringIgangsattCommand =
+    internal fun overstyringIgangsatt(
+        melding: OverstyringIgangsatt,
+        transactionalSession: TransactionalSession,
+    ): OverstyringIgangsattCommand =
         OverstyringIgangsattCommand(
             berørteVedtaksperiodeIder = melding.berørteVedtaksperiodeIder,
             kilde = melding.kilde,
-            overstyringRepository = overstyringDao,
+            overstyringRepository = TransactionalOverstyringDao(transactionalSession),
         )
 
     internal fun utbetalingAnnullert(hendelse: UtbetalingAnnullert): UtbetalingAnnullertCommand =
