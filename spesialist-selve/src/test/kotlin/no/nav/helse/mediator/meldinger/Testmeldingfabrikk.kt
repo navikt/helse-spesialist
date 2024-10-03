@@ -715,7 +715,7 @@ internal object Testmeldingfabrikk {
     )
 
     fun lagOppdaterPersondata(aktørId: String, fødselsnummer: String, id: UUID) = nyHendelse(
-        id, "oppdater_personsnapshot", mapOf(
+        id, "oppdater_persondata", mapOf(
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId
         )
