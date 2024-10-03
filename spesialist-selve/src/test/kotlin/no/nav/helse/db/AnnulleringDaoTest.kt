@@ -8,27 +8,31 @@ import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class AnnulleringDaoTest : DatabaseIntegrationTest() {
     @Test
-    fun `kan finne annullering med begrunnelse`() {
+    fun `kan finne annullering med begrunnelse og årsaker`() {
         val arbeidsgiverFagsystemId = "EN-ARBEIDSGIVER-FAGSYSTEMID1"
         val personFagsystemId = "EN-PERSON-FAGSYSTEMID1"
         opprettSaksbehandler()
+        val årsaker = setOf("en årsak", "to årsak")
         annulleringDao.lagreAnnullering(
             annulleringDto(
                 arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
                 personFagsystemId = personFagsystemId,
+                årsaker = årsaker,
             ),
             saksbehandler(),
         )
-        val annullering = annulleringDao.finnAnnullering(arbeidsgiverFagsystemId, personFagsystemId)
-        assertEquals(arbeidsgiverFagsystemId, annullering?.arbeidsgiverFagsystemId)
-        assertEquals(personFagsystemId, annullering?.personFagsystemId)
-        assertEquals(SAKSBEHANDLER_IDENT, annullering?.saksbehandlerIdent)
-        assertNotNull(annullering?.begrunnelse)
+        val annullering = annulleringDao.finnAnnullering(arbeidsgiverFagsystemId, personFagsystemId) ?: fail()
+        assertEquals(arbeidsgiverFagsystemId, annullering.arbeidsgiverFagsystemId)
+        assertEquals(personFagsystemId, annullering.personFagsystemId)
+        assertEquals(SAKSBEHANDLER_IDENT, annullering.saksbehandlerIdent)
+        assertNotNull(annullering.begrunnelse)
+        assertEquals(årsaker, annullering.arsaker.toSet())
     }
 
     @Test
@@ -37,7 +41,12 @@ class AnnulleringDaoTest : DatabaseIntegrationTest() {
         val personFagsystemId = "EN-PERSON-FAGSYSTEMID2"
         opprettSaksbehandler()
         annulleringDao.lagreAnnullering(
-            annulleringDto(begrunnelse = null, arbeidsgiverFagsystemId = arbeidsgiverFagsystemId, personFagsystemId = personFagsystemId),
+            annulleringDto(
+                begrunnelse = null,
+                arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
+                personFagsystemId = personFagsystemId,
+                årsaker = emptySet() // Vi burde kanskje egentlig ha validering på at årsaker må ha innhold.. 🤔
+            ),
             saksbehandler(),
         )
         val annullering = annulleringDao.finnAnnullering(arbeidsgiverFagsystemId, personFagsystemId)
@@ -52,6 +61,7 @@ class AnnulleringDaoTest : DatabaseIntegrationTest() {
         utbetalingId: UUID = UTBETALING_ID,
         arbeidsgiverFagsystemId: String = "EN-ARBEIDSGIVER-FAGSYSTEMID",
         personFagsystemId: String = "EN-PERSON-FAGSYSTEMID",
+        årsaker: Collection<String>,
     ) = AnnulleringDto(
         aktørId = AKTØR,
         fødselsnummer = FNR,
@@ -60,7 +70,7 @@ class AnnulleringDaoTest : DatabaseIntegrationTest() {
         utbetalingId = utbetalingId,
         arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
         personFagsystemId = personFagsystemId,
-        årsaker = listOf(AnnulleringArsak("key1", "en årsak"), AnnulleringArsak("key2", "to årsak")),
+        årsaker = årsaker.mapIndexed { i, årsak -> AnnulleringArsak("key$i", årsak) },
         kommentar = begrunnelse,
     )
 
