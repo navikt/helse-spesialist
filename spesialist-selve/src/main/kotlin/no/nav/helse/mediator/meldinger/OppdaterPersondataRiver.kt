@@ -1,6 +1,5 @@
 package no.nav.helse.mediator.meldinger
 
-import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
 import no.nav.helse.modell.person.OppdaterPersondata
@@ -10,9 +9,8 @@ import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
-internal class OppdaterPersonsnapshotRiver(
+internal class OppdaterPersondataRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
     private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
@@ -34,13 +32,6 @@ internal class OppdaterPersonsnapshotRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val id = UUID.fromString(packet["@id"].asText())
-        val fødselsnummer = packet["fødselsnummer"].asText()
-        sikkerlogg.info(
-            "Mottok forespørsel om å oppdatere persondata på {}, {}",
-            StructuredArguments.keyValue("fødselsnummer", fødselsnummer),
-            StructuredArguments.keyValue("eventId", id),
-        )
         mediator.mottaMelding(OppdaterPersondata(packet), context)
     }
 }

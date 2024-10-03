@@ -1,6 +1,5 @@
 package no.nav.helse.mediator.meldinger
 
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
@@ -10,12 +9,10 @@ import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 internal class OverstyringIgangsattRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    private val log = LoggerFactory.getLogger(this::class.java)
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
     override fun validations() =
@@ -40,24 +37,6 @@ internal class OverstyringIgangsattRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        if (packet["berørtePerioder"].isEmpty) {
-            sikkerLogg.info(
-                "Overstyring med {} har ingen berørte perioder.",
-                keyValue("kilde", UUID.fromString(packet["kilde"].asText())),
-            )
-            return
-        }
-
-        log.info(
-            "Mottok overstyring igangsatt {}, {}, {}",
-            keyValue(
-                "berørteVedtaksperiodeIder",
-                packet["berørtePerioder"]
-                    .map { UUID.fromString(it["vedtaksperiodeId"].asText()) },
-            ),
-            keyValue("eventId", UUID.fromString(packet["@id"].asText())),
-            keyValue("kilde", UUID.fromString(packet["kilde"].asText())),
-        )
         mediator.mottaMelding(OverstyringIgangsatt(packet), context)
     }
 }

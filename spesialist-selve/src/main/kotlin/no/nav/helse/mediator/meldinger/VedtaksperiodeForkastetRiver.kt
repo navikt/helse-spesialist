@@ -1,7 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
-import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
@@ -16,7 +15,6 @@ import java.util.UUID
 internal class VedtaksperiodeForkastetRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    private val log = LoggerFactory.getLogger(this::class.java)
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
     private companion object {
@@ -42,11 +40,6 @@ internal class VedtaksperiodeForkastetRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        log.info(
-            "Mottok vedtaksperiode forkastet {}, {}",
-            StructuredArguments.keyValue("vedtaksperiodeId", UUID.fromString(packet["vedtaksperiodeId"].asText())),
-            StructuredArguments.keyValue("eventId", UUID.fromString(packet["@id"].asText())),
-        )
         mediator.mottaMelding(VedtaksperiodeForkastet(packet), context)
     }
 }

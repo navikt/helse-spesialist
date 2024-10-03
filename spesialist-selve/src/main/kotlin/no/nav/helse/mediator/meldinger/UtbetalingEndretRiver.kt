@@ -1,7 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
@@ -15,7 +14,6 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 internal class UtbetalingEndretRiver(
     private val mediator: MeldingMediator,
@@ -61,26 +59,6 @@ internal class UtbetalingEndretRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val utbetalingId = UUID.fromString(packet["utbetalingId"].asText())
-        if (ignorer(packet)) return
-        val fødselsnummer = packet["fødselsnummer"].asText()
-        val gjeldendeStatus = packet["gjeldendeStatus"].asText()
-
-        sikkerLogg.info(
-            "Mottok utbetaling_endret for {}, {} med status {}",
-            keyValue("fødselsnummer", fødselsnummer),
-            keyValue("utbetalingId", utbetalingId),
-            keyValue("gjeldendeStatus", gjeldendeStatus),
-        )
         mediator.mottaMelding(UtbetalingEndret(packet), context)
     }
-
-    private fun ignorer(packet: JsonMessage) =
-        packet["arbeidsgiverOppdrag.fagsystemId"].asText() in
-            setOf(
-                "2YG7TGWMJJHNPPY5JP5CHUIFII",
-                "PJV6BYWUEVFCZIDNXG4MYR6ICM",
-                "GUEFZE3CIJHHJNYIIOWG3XJUW4",
-                "FT574IJ4AZCXRHXNMSEWJV7JBM",
-            )
 }

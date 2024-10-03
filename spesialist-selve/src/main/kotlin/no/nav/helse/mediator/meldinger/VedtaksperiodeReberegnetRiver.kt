@@ -6,13 +6,10 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.River
-import org.slf4j.LoggerFactory
 
 internal class VedtaksperiodeReberegnetRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    private val log = LoggerFactory.getLogger(this::class.java)
-
     override fun validations() =
         River.PacketValidation {
             it.demandValue("@event_name", "vedtaksperiode_endret")
@@ -29,7 +26,6 @@ internal class VedtaksperiodeReberegnetRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        log.info("Håndterer reberegning av vedtaksperiode: ${packet["vedtaksperiodeId"].asText()}")
         mediator.mottaMelding(VedtaksperiodeReberegnet(packet), context)
     }
 }

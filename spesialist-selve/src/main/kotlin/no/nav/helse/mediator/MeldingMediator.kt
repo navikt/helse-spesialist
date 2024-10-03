@@ -17,7 +17,7 @@ import no.nav.helse.mediator.meldinger.GodkjenningsbehovRiver
 import no.nav.helse.mediator.meldinger.GosysOppgaveEndretRiver
 import no.nav.helse.mediator.meldinger.MidnattRiver
 import no.nav.helse.mediator.meldinger.NyeVarslerRiver
-import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshotRiver
+import no.nav.helse.mediator.meldinger.OppdaterPersondataRiver
 import no.nav.helse.mediator.meldinger.OverstyringIgangsattRiver
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.StansAutomatiskBehandlingRiver
@@ -164,7 +164,7 @@ internal class MeldingMediator(
                 ÅpneGosysOppgaverløsning.ÅpneGosysOppgaverRiver(this),
                 Risikovurderingløsning.V2River(this),
                 Inntektløsning.InntektRiver(this),
-                OppdaterPersonsnapshotRiver(this),
+                OppdaterPersondataRiver(this),
                 UtbetalingEndretRiver(this),
                 VedtaksperiodeReberegnetRiver(this),
                 GosysOppgaveEndretRiver(this),

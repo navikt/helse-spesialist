@@ -47,8 +47,6 @@ internal class GosysOppgaveEndretRiver(
             sikkerlogg.warn("Ignorerer gosys_oppgave_endret for person $fødselsnummer")
             return
         }
-        sikkerlogg.info("gosys_oppgave_endret for fnr {}", fødselsnummer)
-
         mediator.mottaMelding(GosysOppgaveEndret(packet), context)
     }
 }
