@@ -58,13 +58,11 @@ class GenerasjonDao(private val dataSource: DataSource) {
     }
 
     private fun TransactionalSession.lagre(generasjonDto: GenerasjonDto) {
-        val tags = generasjonDto.tags.joinToString { """ $it """ }
-
         @Language("PostgreSQL")
         val query =
             """
             INSERT INTO selve_vedtaksperiode_generasjon (unik_id, vedtaksperiode_id, utbetaling_id, spleis_behandling_id, opprettet_tidspunkt, opprettet_av_hendelse, tilstand_endret_tidspunkt, tilstand_endret_av_hendelse, fom, tom, skjæringstidspunkt, tilstand, tags) 
-            VALUES (:unik_id, :vedtaksperiode_id, :utbetaling_id, :spleis_behandling_id, now(), gen_random_uuid(), now(), gen_random_uuid(), :fom, :tom, :skjaeringstidspunkt, :tilstand::generasjon_tilstand, '{$tags}')
+            VALUES (:unik_id, :vedtaksperiode_id, :utbetaling_id, :spleis_behandling_id, now(), gen_random_uuid(), now(), gen_random_uuid(), :fom, :tom, :skjaeringstidspunkt, :tilstand::generasjon_tilstand, :tags::varchar[])
             ON CONFLICT (unik_id) DO UPDATE SET utbetaling_id = excluded.utbetaling_id, spleis_behandling_id = excluded.spleis_behandling_id, fom = excluded.fom, tom = excluded.tom, skjæringstidspunkt = excluded.skjæringstidspunkt, tilstand = excluded.tilstand, tags = excluded.tags
             """.trimIndent()
         this.run(
@@ -79,6 +77,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
                     "tom" to generasjonDto.tom,
                     "skjaeringstidspunkt" to generasjonDto.skjæringstidspunkt,
                     "tilstand" to generasjonDto.tilstand.name,
+                    "tags" to generasjonDto.tags.joinToString(prefix = "{", postfix = "}"),
                 ),
             ).asUpdate,
         )
