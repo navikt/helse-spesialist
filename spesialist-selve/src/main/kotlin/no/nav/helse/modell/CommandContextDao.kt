@@ -15,10 +15,19 @@ import org.intellij.lang.annotations.Language
 import java.util.UUID
 import javax.sql.DataSource
 
-internal class CommandContextDao(private val dataSource: DataSource) : CommandContextRepository {
+internal class CommandContextDao(
+    private val dataSource: DataSource,
+) : CommandContextRepository {
     private companion object {
         private val mapper = jacksonObjectMapper()
     }
+
+    override fun nyContext(meldingId: UUID): CommandContext =
+        sessionOf(dataSource).use { session ->
+            session.transaction { transaction ->
+                TransactionalCommandContextDao(transaction).nyContext(meldingId)
+            }
+        }
 
     override fun opprett(
         hendelseId: UUID,

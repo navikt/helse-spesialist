@@ -2,9 +2,12 @@ package no.nav.helse.mediator
 
 import SøknadSendtArbeidsledigRiver
 import com.fasterxml.jackson.databind.JsonNode
+import kotliquery.sessionOf
 import no.nav.helse.MetrikkRiver
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.AvviksvurderingDao
+import no.nav.helse.db.CommandContextRepository
+import no.nav.helse.db.TransactionalCommandContextDao
 import no.nav.helse.mediator.meldinger.AvsluttetMedVedtakRiver
 import no.nav.helse.mediator.meldinger.AvsluttetUtenVedtakRiver
 import no.nav.helse.mediator.meldinger.AvvikVurdertRiver
@@ -410,14 +413,9 @@ internal class MeldingMediator(
         ) {
             logg.info("Melding $meldingnavn gjenopptatt")
             sikkerlogg.info("Melding $meldingnavn gjenopptatt:\n${melding.toJson()}")
-            behandleMelding(melding, messageContext, commandContext)
+            behandleMelding(melding, messageContext) { commandContext }
         }
     }
-
-    private fun nyContext(meldingId: UUID) =
-        CommandContext(UUID.randomUUID()).apply {
-            opprett(commandContextDao, meldingId)
-        }
 
     // Denne kalles når vi behandler en melding som starter en kommandokjede, eller den er i hvert fall ikke inne i
     // bildet når vi gjenopptar kommandokjeder
@@ -425,14 +423,14 @@ internal class MeldingMediator(
         melding: Personmelding,
         messageContext: MessageContext,
     ) {
-        behandleMelding(melding, messageContext, nyContext(melding.id))
+        behandleMelding(melding, messageContext) { it.nyContext(melding.id) }
     }
 
     // Denne kalles både ved oppstart av en kommandokjede og ved gjenopptak etter svar på behov
     private fun behandleMelding(
         melding: Personmelding,
         messageContext: MessageContext,
-        commandContext: CommandContext,
+        commandContext: (CommandContextRepository) -> CommandContext,
     ) {
         val meldingnavn = requireNotNull(melding::class.simpleName)
         val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
@@ -443,13 +441,27 @@ internal class MeldingMediator(
                 this.nyObserver(vedtakFattetMelder)
                 logg.info("Personen finnes i databasen, behandler melding $meldingnavn")
                 sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")
-
-                val kommandostarter =
-                    kommandofabrikk.lagKommandostarter(
-                        commandContext,
-                        setOf(utgåendeMeldingerMediator, commandContextTilstandMediator),
-                    )
-                melding.behandle(this, kommandostarter)
+                var kommandostarter: Kommandostarter
+                if (melding.skalKjøresTransaksjonelt()) {
+                    sessionOf(dataSource).use { session ->
+                        session.transaction { transactionalSession ->
+                            kommandostarter =
+                                kommandofabrikk.lagTransaksjonellKommandostarter(
+                                    setOf(utgåendeMeldingerMediator, commandContextTilstandMediator),
+                                    commandContext(TransactionalCommandContextDao(transactionalSession)),
+                                    transactionalSession,
+                                )
+                            melding.transaksjonellBehandle(this, kommandostarter, transactionalSession)
+                        }
+                    }
+                } else {
+                    kommandostarter =
+                        kommandofabrikk.lagKommandostarter(
+                            commandContext(commandContextDao),
+                            setOf(utgåendeMeldingerMediator, commandContextTilstandMediator),
+                        )
+                    melding.behandle(this, kommandostarter)
+                }
             }
             if (melding is VedtakFattet) melding.doFinally(vedtakDao) // Midlertidig frem til spesialsak ikke er en ting lenger
             vedtakFattetMelder.publiserUtgåendeMeldinger()

@@ -7,6 +7,7 @@ import no.nav.helse.db.TransactionalCommandContextDao.CommandContextTilstand.FEI
 import no.nav.helse.db.TransactionalCommandContextDao.CommandContextTilstand.FERDIG
 import no.nav.helse.db.TransactionalCommandContextDao.CommandContextTilstand.NY
 import no.nav.helse.db.TransactionalCommandContextDao.CommandContextTilstand.SUSPENDERT
+import no.nav.helse.modell.kommando.CommandContext
 import org.intellij.lang.annotations.Language
 import java.util.UUID
 import javax.naming.OperationNotSupportedException
@@ -16,6 +17,13 @@ internal class TransactionalCommandContextDao(
 ) : CommandContextRepository {
     private companion object {
         private val mapper = jacksonObjectMapper()
+    }
+
+    override fun nyContext(meldingId: UUID): CommandContext {
+        val contextId = UUID.randomUUID()
+        return CommandContext(contextId).apply {
+            opprett(meldingId, contextId)
+        }
     }
 
     override fun opprett(

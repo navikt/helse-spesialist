@@ -1,8 +1,11 @@
 package no.nav.helse.db
 
+import no.nav.helse.modell.kommando.CommandContext
 import java.util.UUID
 
 internal interface CommandContextRepository {
+    fun nyContext(meldingId: UUID): CommandContext
+
     fun opprett(
         hendelseId: UUID,
         contextId: UUID,

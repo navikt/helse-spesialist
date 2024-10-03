@@ -421,6 +421,25 @@ internal class Kommandofabrikk(
             }
         }
 
+    internal fun lagTransaksjonellKommandostarter(
+        commandContextObservers: Set<CommandContextObserver>,
+        commandContext: CommandContext,
+        transactionalSession: TransactionalSession,
+    ): Kommandostarter =
+        { kommandooppretter ->
+            val transactionalCommandContextDao = TransactionalCommandContextDao(transactionalSession)
+            val melding = this
+            this@Kommandofabrikk.kommandooppretter()?.let { command ->
+                iverksett(
+                    command = command,
+                    meldingId = melding.id,
+                    commandContext = commandContext,
+                    commandContextObservers = commandContextObservers,
+                    commandContextDao = transactionalCommandContextDao,
+                )
+            }
+        }
+
     private fun iverksett(
         command: Command,
         meldingId: UUID,
