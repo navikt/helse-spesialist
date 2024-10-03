@@ -68,8 +68,8 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterSkjønnsfastsattSykepengegrunnlag()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
-            harOppdatertMetadata = true,
             harRisikovurdering = true,
+            harOppdatertMetadata = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID())
         )
         håndterSaksbehandlerløsning()
@@ -91,8 +91,8 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterSkjønnsfastsattSykepengegrunnlag()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
-            harOppdatertMetadata = true,
             harRisikovurdering = true,
+            harOppdatertMetadata = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID())
         )
         håndterSaksbehandlerløsning()

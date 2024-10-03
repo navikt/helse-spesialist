@@ -3,7 +3,7 @@ package no.nav.helse.mediator.meldinger
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
-import no.nav.helse.modell.person.OppdaterPersonsnapshot
+import no.nav.helse.modell.person.OppdaterPersondata
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -41,6 +41,6 @@ internal class OppdaterPersonsnapshotRiver(
             StructuredArguments.keyValue("fødselsnummer", fødselsnummer),
             StructuredArguments.keyValue("eventId", id),
         )
-        mediator.mottaMelding(OppdaterPersonsnapshot(packet), context)
+        mediator.mottaMelding(OppdaterPersondata(packet), context)
     }
 }

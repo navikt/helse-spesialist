@@ -71,11 +71,11 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         spleisOppretterNyBehandling(vedtaksperiodeId = VEDTAKSPERIODE_ID)
         opprettSpesialsak(vedtaksperiodeId = VEDTAKSPERIODE_ID)
         spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver(
+            regelverksvarsler = listOf("RV_IM_1"),
             fullmakter =
                 listOf(
                     Testmeldingfabrikk.VergemålJson.Fullmakt(listOf(Testmeldingfabrikk.VergemålJson.Område.Syk), 1.januar, 31.januar),
                 ),
-            regelverksvarsler = listOf("RV_IM_1"),
             arbeidsgiverbeløp = 0,
             personbeløp = 0,
         )

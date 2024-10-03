@@ -56,7 +56,6 @@ internal class BehandlingOpprettet private constructor(
         kommandostarter: Kommandostarter,
     ) {
         person.nySpleisBehandling(SpleisBehandling(organisasjonsnummer, vedtaksperiodeId, spleisBehandlingId, fom, tom))
-        kommandostarter { oppdaterSnapshotCommand(this@BehandlingOpprettet) }
     }
 
     override fun fødselsnummer(): String = fødselsnummer

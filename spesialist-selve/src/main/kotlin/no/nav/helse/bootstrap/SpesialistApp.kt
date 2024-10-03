@@ -210,7 +210,6 @@ internal class SpesialistApp(
     private val kommandofabrikk =
         Kommandofabrikk(
             dataSource = dataSource,
-            snapshotClient = snapshotClient,
             oppgaveService = { oppgaveService },
             godkjenningMediator = godkjenningMediator,
             automatisering = automatisering,

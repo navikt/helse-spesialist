@@ -23,11 +23,9 @@ import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.StansAutomatiskBehandlingRiver
 import no.nav.helse.mediator.meldinger.SøknadSendtRiver
 import no.nav.helse.mediator.meldinger.TilbakedateringBehandletRiver
-import no.nav.helse.mediator.meldinger.UtbetalingAnnullertRiver
 import no.nav.helse.mediator.meldinger.UtbetalingEndretRiver
 import no.nav.helse.mediator.meldinger.VarseldefinisjonRiver
 import no.nav.helse.mediator.meldinger.VedtakFattetRiver
-import no.nav.helse.mediator.meldinger.VedtaksperiodeEndretRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeNyUtbetalingRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnetRiver
@@ -158,7 +156,6 @@ internal class MeldingMediator(
                 ArbeidsgiverRiver(this),
                 ArbeidsforholdRiver(this),
                 VedtaksperiodeForkastetRiver(this),
-                VedtaksperiodeEndretRiver(this),
                 AdressebeskyttelseEndretRiver(this),
                 OverstyringIgangsattRiver(this),
                 EgenAnsattløsning.EgenAnsattRiver(this),
@@ -167,7 +164,6 @@ internal class MeldingMediator(
                 ÅpneGosysOppgaverløsning.ÅpneGosysOppgaverRiver(this),
                 Risikovurderingløsning.V2River(this),
                 Inntektløsning.InntektRiver(this),
-                UtbetalingAnnullertRiver(this),
                 OppdaterPersonsnapshotRiver(this),
                 UtbetalingEndretRiver(this),
                 VedtaksperiodeReberegnetRiver(this),

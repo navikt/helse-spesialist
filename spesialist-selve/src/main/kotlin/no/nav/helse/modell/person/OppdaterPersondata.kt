@@ -1,19 +1,21 @@
-package no.nav.helse.modell.utbetaling
+package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.db.PersonRepository
-import no.nav.helse.db.SnapshotRepository
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
-import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
-import no.nav.helse.modell.person.Person
+import no.nav.helse.modell.kommando.OppdaterInfotrygdutbetalingerHardt
+import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
 import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
+import no.nav.helse.spesialist.api.abonnement.PersonOppdatertPayload
+import java.time.LocalDate
 import java.util.UUID
 
-internal class UtbetalingAnnullert private constructor(
+internal class OppdaterPersondata private constructor(
     override val id: UUID,
     private val fødselsnummer: String,
     private val json: String,
@@ -23,6 +25,7 @@ internal class UtbetalingAnnullert private constructor(
         fødselsnummer = packet["fødselsnummer"].asText(),
         json = packet.toJson(),
     )
+
     internal constructor(jsonNode: JsonNode) : this(
         id = UUID.fromString(jsonNode["@id"].asText()),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
@@ -33,7 +36,7 @@ internal class UtbetalingAnnullert private constructor(
         person: Person,
         kommandostarter: Kommandostarter,
     ) {
-        kommandostarter { utbetalingAnnullert(this@UtbetalingAnnullert) }
+        kommandostarter { oppdaterPersondata(this@OppdaterPersondata) }
     }
 
     override fun fødselsnummer(): String = fødselsnummer
@@ -41,19 +44,21 @@ internal class UtbetalingAnnullert private constructor(
     override fun toJson(): String = json
 }
 
-internal class UtbetalingAnnullertCommand(
+internal class OppdaterPersondataCommand(
     fødselsnummer: String,
+    førsteKjenteDagFinner: () -> LocalDate,
     personRepository: PersonRepository,
-    snapshotRepository: SnapshotRepository,
-    snapshotClient: ISnapshotClient,
+    opptegnelseRepository: OpptegnelseRepository,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
-            OppdaterSnapshotCommand(
-                snapshotClient = snapshotClient,
-                snapshotRepository = snapshotRepository,
-                fødselsnummer = fødselsnummer,
-                personRepository = personRepository,
-            ),
+            OppdaterInfotrygdutbetalingerHardt(fødselsnummer, personRepository, førsteKjenteDagFinner),
+            ikkesuspenderendeCommand("opprettOpptegnelse") {
+                opptegnelseRepository.opprettOpptegnelse(
+                    fødselsnummer,
+                    PersonOppdatertPayload,
+                    OpptegnelseType.PERSONDATA_OPPDATERT,
+                )
+            },
         )
 }

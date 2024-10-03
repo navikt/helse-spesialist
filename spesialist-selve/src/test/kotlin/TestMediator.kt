@@ -33,14 +33,12 @@ import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
-import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.testEnv
 import java.util.UUID
 import javax.sql.DataSource
 
 internal class TestMediator(
     testRapid: TestRapid,
-    snapshotClient: SnapshotClient,
     dataSource: DataSource,
 ) {
     private val vedtakDao = VedtakDao(dataSource)
@@ -124,7 +122,6 @@ internal class TestMediator(
     private val kommandofabrikk =
         Kommandofabrikk(
             dataSource = dataSource,
-            snapshotClient = snapshotClient,
             oppgaveService = { oppgaveService },
             godkjenningMediator = godkjenningMediator,
             automatisering = automatisering,

@@ -23,7 +23,6 @@ import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.MeldingDao
-import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.automatisering.Automatisering
@@ -34,7 +33,6 @@ import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.LøsGodkjenningsbehov
-import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 import no.nav.helse.modell.kommando.OverstyringIgangsattCommand
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.kommando.TilbakedateringGodkjentCommand
@@ -42,7 +40,7 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.EndretEgenAnsattStatusCommand
-import no.nav.helse.modell.person.OppdaterPersonsnapshotCommand
+import no.nav.helse.modell.person.OppdaterPersondataCommand
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.SøknadSendt
@@ -50,8 +48,6 @@ import no.nav.helse.modell.person.SøknadSendtCommand
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
-import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
-import no.nav.helse.modell.utbetaling.UtbetalingAnnullertCommand
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.utbetaling.UtbetalingEndretCommand
@@ -72,7 +68,6 @@ import no.nav.helse.registrerTidsbrukForHendelse
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
-import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
 import org.slf4j.LoggerFactory
 import java.util.UUID
 import javax.sql.DataSource
@@ -91,9 +86,7 @@ internal class Kommandofabrikk(
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
     private val risikovurderingDao: RisikovurderingDao = RisikovurderingDao(dataSource),
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource),
-    private val snapshotDao: SnapshotDao = SnapshotDao(dataSource),
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
-    private val snapshotClient: ISnapshotClient,
     oppgaveService: () -> OppgaveService,
     private val totrinnsvurderingDao: TotrinnsvurderingDao = TotrinnsvurderingDao(dataSource),
     private val notatDao: NotatDao = NotatDao(dataSource),
@@ -257,14 +250,12 @@ internal class Kommandofabrikk(
         )
     }
 
-    internal fun oppdaterPersonsnapshot(hendelse: Personmelding): OppdaterPersonsnapshotCommand =
-        OppdaterPersonsnapshotCommand(
+    internal fun oppdaterPersondata(hendelse: Personmelding): OppdaterPersondataCommand =
+        OppdaterPersondataCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             førsteKjenteDagFinner = { generasjonRepository.førsteKjenteDag(hendelse.fødselsnummer()) },
             personRepository = personDao,
-            snapshotRepository = snapshotDao,
             opptegnelseRepository = opptegnelseDao,
-            snapshotClient = snapshotClient,
         )
 
     internal fun overstyringIgangsatt(
@@ -275,14 +266,6 @@ internal class Kommandofabrikk(
             berørteVedtaksperiodeIder = melding.berørteVedtaksperiodeIder,
             kilde = melding.kilde,
             overstyringRepository = TransactionalOverstyringDao(transactionalSession),
-        )
-
-    internal fun utbetalingAnnullert(hendelse: UtbetalingAnnullert): UtbetalingAnnullertCommand =
-        UtbetalingAnnullertCommand(
-            fødselsnummer = hendelse.fødselsnummer(),
-            personRepository = personDao,
-            snapshotRepository = snapshotDao,
-            snapshotClient = snapshotClient,
         )
 
     internal fun utbetalingEndret(hendelse: UtbetalingEndret): UtbetalingEndretCommand =
@@ -312,10 +295,7 @@ internal class Kommandofabrikk(
             fødselsnummer = hendelse.fødselsnummer(),
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
             id = hendelse.id,
-            personRepository = personDao,
             commandContextRepository = commandContextDao,
-            snapshotRepository = snapshotDao,
-            snapshotClient = snapshotClient,
             oppgaveService = oppgaveService,
             reservasjonRepository = reservasjonDao,
             tildelingRepository = tildelingDao,
@@ -375,19 +355,14 @@ internal class Kommandofabrikk(
             påVentRepository = påVentDao,
             overstyringRepository = overstyringDao,
             periodehistorikkDao = periodehistorikkDao,
-            snapshotRepository = snapshotDao,
             oppgaveRepository = oppgaveDao,
             avviksvurderingRepository = avviksvurderingDao,
-            snapshotClient = snapshotClient,
             oppgaveService = oppgaveService,
             godkjenningMediator = godkjenningMediator,
             totrinnsvurderingMediator = totrinnsvurderingMediator,
             person = person,
         )
     }
-
-    internal fun oppdaterSnapshotCommand(personmelding: Personmelding): OppdaterSnapshotCommand =
-        OppdaterSnapshotCommand(snapshotClient, snapshotDao, personmelding.fødselsnummer(), personDao)
 
     // Kanskje prøve å få håndtering av søknad inn i samme flyt som andre kommandokjeder
     internal fun iverksettSøknadSendt(

@@ -6,7 +6,6 @@ import graphql.schema.DataFetchingEnvironment
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.Testdata.snapshot
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
@@ -76,6 +75,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
         assertKanIkkeHentePerson("Person med fødselsnummer $FØDSELSNUMMER er ikke klar for visning ennå")
         sendFramTilOppgave()
         assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
+        mockSnapshot()
         assertKanHentePerson()
     }
 
@@ -91,6 +91,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
         sendFramTilOppgave()
         assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
 
+        mockSnapshot()
         assertKanHentePerson()
 
         håndterEndretSkjermetinfo(FØDSELSNUMMER, true)
@@ -139,7 +140,6 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
     }
 
     private fun settOppDefaultDataOgTilganger() {
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot(fødselsnummer = FØDSELSNUMMER)
         every { dataFetchingEnvironment.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER) } returns SaksbehandlerFraApi(
             UUID.randomUUID(), "epost", "navn", "A123456", emptyList()
         )

@@ -11,7 +11,6 @@ import no.nav.helse.db.OverstyringRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.PåVentRepository
 import no.nav.helse.db.RisikovurderingRepository
-import no.nav.helse.db.SnapshotRepository
 import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.db.VedtakRepository
 import no.nav.helse.db.VergemålRepository
@@ -32,7 +31,6 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.ForberedBehandlingAvGodkjenningsbehov
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterPersonCommand
-import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 import no.nav.helse.modell.kommando.OpprettEllerOppdaterArbeidsforhold
 import no.nav.helse.modell.kommando.OpprettEllerOppdaterInntektskilder
 import no.nav.helse.modell.kommando.OpprettKoblingTilAvviksvurdering
@@ -55,7 +53,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
-import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
 import java.time.LocalDate
 import java.util.UUID
 
@@ -227,10 +224,8 @@ internal class GodkjenningsbehovCommand(
     påVentRepository: PåVentRepository,
     overstyringRepository: OverstyringRepository,
     periodehistorikkDao: PeriodehistorikkDao,
-    snapshotRepository: SnapshotRepository,
     oppgaveRepository: OppgaveRepository,
     avviksvurderingRepository: AvviksvurderingRepository,
-    snapshotClient: ISnapshotClient,
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
     totrinnsvurderingMediator: TotrinnsvurderingMediator,
@@ -281,12 +276,10 @@ internal class GodkjenningsbehovCommand(
                 fødselsnummer = behovData.fødselsnummer,
                 organisasjonsnummer = behovData.organisasjonsnummer,
                 førsteKjenteDagFinner = førsteKjenteDagFinner,
-                inntektskilderRepository = inntektskilderRepository,
-                inntektskilder = inntektskilder,
                 personRepository = personRepository,
+                inntektskilder = inntektskilder,
+                inntektskilderRepository = inntektskilderRepository,
                 arbeidsforholdRepository = arbeidsforholdRepository,
-                snapshotRepository = snapshotRepository,
-                snapshotClient = snapshotClient,
             ),
             KontrollerEgenAnsattstatus(
                 fødselsnummer = behovData.fødselsnummer,
@@ -379,8 +372,6 @@ private class ForberedVisningCommand(
     inntektskilder: List<no.nav.helse.modell.Inntektskilde>,
     inntektskilderRepository: InntektskilderRepository,
     arbeidsforholdRepository: ArbeidsforholdRepository,
-    snapshotRepository: SnapshotRepository,
-    snapshotClient: ISnapshotClient,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -397,12 +388,6 @@ private class ForberedVisningCommand(
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
                 arbeidsforholdRepository = arbeidsforholdRepository,
-            ),
-            OppdaterSnapshotCommand(
-                snapshotClient = snapshotClient,
-                snapshotRepository = snapshotRepository,
-                fødselsnummer = fødselsnummer,
-                personRepository = personRepository,
             ),
         )
 }

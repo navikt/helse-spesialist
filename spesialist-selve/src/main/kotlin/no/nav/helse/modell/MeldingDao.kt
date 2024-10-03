@@ -13,15 +13,13 @@ import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
-import no.nav.helse.modell.person.OppdaterPersonsnapshot
+import no.nav.helse.modell.person.OppdaterPersondata
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.toFødselsnummer
-import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.vedtaksperiode.BehandlingOpprettet
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
-import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
@@ -225,11 +223,9 @@ internal class MeldingDao(private val dataSource: DataSource) {
         return when (meldingtype) {
             ADRESSEBESKYTTELSE_ENDRET -> AdressebeskyttelseEndret(jsonNode)
             GODKJENNING -> Godkjenningsbehov(jsonNode)
-            OPPDATER_PERSONSNAPSHOT -> OppdaterPersonsnapshot(jsonNode)
+            OPPDATER_PERSONSNAPSHOT -> OppdaterPersondata(jsonNode)
             GOSYS_OPPGAVE_ENDRET -> GosysOppgaveEndret(jsonNode)
-            VEDTAKSPERIODE_ENDRET -> VedtaksperiodeEndret(jsonNode)
             VEDTAKSPERIODE_FORKASTET -> VedtaksperiodeForkastet(jsonNode)
-            UTBETALING_ANNULLERT -> UtbetalingAnnullert(jsonNode)
             GODKJENT_TILBAKEDATERT_SYKMELDING -> TilbakedateringBehandlet(jsonNode)
             OVERSTYRING_IGANGSATT -> OverstyringIgangsatt(jsonNode)
             SAKSBEHANDLERLØSNING -> Saksbehandlerløsning(jsonNode)
@@ -249,13 +245,11 @@ internal class MeldingDao(private val dataSource: DataSource) {
     private fun tilMeldingtype(melding: Personmelding) =
         when (melding) {
             is AdressebeskyttelseEndret -> ADRESSEBESKYTTELSE_ENDRET
-            is VedtaksperiodeEndret -> VEDTAKSPERIODE_ENDRET
             is VedtaksperiodeForkastet -> VEDTAKSPERIODE_FORKASTET
             is Godkjenningsbehov -> GODKJENNING
             is OverstyringIgangsatt -> OVERSTYRING_IGANGSATT
             is Saksbehandlerløsning -> SAKSBEHANDLERLØSNING
-            is UtbetalingAnnullert -> UTBETALING_ANNULLERT
-            is OppdaterPersonsnapshot -> OPPDATER_PERSONSNAPSHOT
+            is OppdaterPersondata -> OPPDATER_PERSONSNAPSHOT
             is UtbetalingEndret -> UTBETALING_ENDRET
             is VedtaksperiodeReberegnet -> VEDTAKSPERIODE_REBEREGNET
             is GosysOppgaveEndret -> GOSYS_OPPGAVE_ENDRET
@@ -273,11 +267,9 @@ internal class MeldingDao(private val dataSource: DataSource) {
 
     private enum class Meldingtype {
         ADRESSEBESKYTTELSE_ENDRET,
-        VEDTAKSPERIODE_ENDRET,
         VEDTAKSPERIODE_FORKASTET,
         GODKJENNING,
         SAKSBEHANDLERLØSNING,
-        UTBETALING_ANNULLERT,
         OPPDATER_PERSONSNAPSHOT,
         UTBETALING_ENDRET,
         VEDTAKSPERIODE_REBEREGNET,

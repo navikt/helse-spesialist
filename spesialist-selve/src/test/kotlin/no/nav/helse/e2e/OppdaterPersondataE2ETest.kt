@@ -4,26 +4,23 @@ import AbstractE2ETest
 import java.time.LocalDate
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.Testdata.snapshot
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
+internal class OppdaterPersondataE2ETest : AbstractE2ETest() {
 
     @Test
-    fun `Oppdaterer også Infotrygd-utbetalinger`() {
+    fun `Oppdaterer Infotrygd-utbetalinger`() {
         val v1 = VEDTAKSPERIODE_ID
-        val snapshot = snapshot(2, fødselsnummer = FØDSELSNUMMER, aktørId = AKTØR, organisasjonsnummer = ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID)
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
-            snapshotversjon = 1,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(vedtaksperiodeId = v1)
         )
         håndterSaksbehandlerløsning(vedtaksperiodeId = v1)
         håndterVedtakFattet(vedtaksperiodeId = v1)
 
-        håndterOppdaterPersonsnapshot(snapshotSomSkalHentes = snapshot)
+        håndterOppdaterPersondata()
 
         assertInfotrygdutbetalingerOppdatert(FØDSELSNUMMER)
         settInfotrygdutbetalingerUtdatert(FØDSELSNUMMER)

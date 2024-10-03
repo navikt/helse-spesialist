@@ -714,7 +714,7 @@ internal object Testmeldingfabrikk {
         )
     )
 
-    fun lagOppdaterPersonsnapshot(aktørId: String, fødselsnummer: String, id: UUID) = nyHendelse(
+    fun lagOppdaterPersondata(aktørId: String, fødselsnummer: String, id: UUID) = nyHendelse(
         id, "oppdater_personsnapshot", mapOf(
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId
@@ -886,33 +886,6 @@ internal object Testmeldingfabrikk {
                         "kanGodkjennesAutomatisk" to kanGodkjennesAutomatisk,
                         "funn" to funn.tilJson(),
                         "kontrollertOk" to emptyList<JsonNode>(),
-                    )
-                )
-            )
-        )
-
-    fun lagAutomatiseringStoppetAvVeilederløsning(
-        aktørId: String,
-        fødselsnummer: String,
-        stoppet: Boolean = false,
-        årsaker: Set<String> = emptySet(),
-        id: UUID = UUID.randomUUID(),
-        hendelseId: UUID = UUID.randomUUID(),
-        contextId: UUID = UUID.randomUUID(),
-    ): String =
-        nyHendelse(
-            id,
-            "behov", mapOf(
-                "aktørId" to aktørId,
-                "fødselsnummer" to fødselsnummer,
-                "@final" to true,
-                "@behov" to listOf("AutomatiseringStoppetAvVeileder"),
-                "contextId" to contextId,
-                "hendelseId" to hendelseId,
-                "@løsning" to mapOf(
-                    "AutomatiseringStoppetAvVeileder" to mapOf(
-                        "automatiseringStoppet" to stoppet,
-                        "årsaker" to årsaker,
                     )
                 )
             )

@@ -686,13 +686,13 @@ internal class Meldingssender(private val testRapid: TestRapid) {
             )
         }
 
-    fun sendOppdaterPersonsnapshot(
+    fun sendOppdaterPersondata(
         aktørId: String,
         fødselsnummer: String,
     ): UUID =
         newUUID.also { id ->
             testRapid.sendTestMessage(
-                Testmeldingfabrikk.lagOppdaterPersonsnapshot(aktørId, fødselsnummer, id)
+                Testmeldingfabrikk.lagOppdaterPersondata(aktørId, fødselsnummer, id)
             )
         }
 

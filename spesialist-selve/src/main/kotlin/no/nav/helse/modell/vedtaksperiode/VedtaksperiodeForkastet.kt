@@ -3,9 +3,7 @@ package no.nav.helse.modell.vedtaksperiode
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.OppgaveRepository
-import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.ReservasjonRepository
-import no.nav.helse.db.SnapshotRepository
 import no.nav.helse.db.TildelingRepository
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
@@ -13,11 +11,9 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.AvbrytCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
-import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
 import java.util.UUID
 
 internal class VedtaksperiodeForkastet private constructor(
@@ -58,10 +54,7 @@ internal class VedtaksperiodeForkastetCommand(
     val fødselsnummer: String,
     val vedtaksperiodeId: UUID,
     val id: UUID,
-    personRepository: PersonRepository,
     commandContextRepository: CommandContextRepository,
-    snapshotRepository: SnapshotRepository,
-    snapshotClient: ISnapshotClient,
     oppgaveService: OppgaveService,
     reservasjonRepository: ReservasjonRepository,
     tildelingRepository: TildelingRepository,
@@ -79,12 +72,6 @@ internal class VedtaksperiodeForkastetCommand(
                 tildelingRepository = tildelingRepository,
                 oppgaveRepository = oppgaveRepository,
                 totrinnsvurderingMediator = totrinnsvurderingMediator,
-            ),
-            OppdaterSnapshotCommand(
-                snapshotClient = snapshotClient,
-                snapshotRepository = snapshotRepository,
-                fødselsnummer = fødselsnummer,
-                personRepository = personRepository,
             ),
         )
 }

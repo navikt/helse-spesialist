@@ -1,9 +1,6 @@
-import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import com.fasterxml.jackson.databind.JsonNode
-import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
@@ -53,7 +50,6 @@ import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.test.TestPerson
-import no.nav.helse.spleis.graphql.HentSnapshot
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -98,7 +94,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val meldingssender = Meldingssender(testRapid)
     protected lateinit var sisteMeldingId: UUID
     protected lateinit var sisteGodkjenningsbehovId: UUID
-    private val testMediator = TestMediator(testRapid, snapshotClient, dataSource)
+    private val testMediator = TestMediator(testRapid, dataSource)
     protected val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()
     protected val SAKSBEHANDLER_EPOST = "augunn.saksbehandler@nav.no"
     protected val SAKSBEHANDLER_IDENT = "S199999"
@@ -204,7 +200,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected fun spesialistBehandlerGodkjenningsbehovFremTilVergemål(
         regelverksvarsler: List<String> = emptyList(),
         harOppdatertMetadata: Boolean = false,
-        snapshotversjon: Int = 1,
         enhet: String = enhetsnummerOslo,
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
@@ -214,7 +209,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         spesialistBehandlerGodkjenningsbehovTilOgMedUtbetalingsfilter(
             regelverksvarsler,
             harOppdatertMetadata = harOppdatertMetadata,
-            snapshotversjon = snapshotversjon,
             enhet = enhet,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
@@ -228,7 +222,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         regelverksvarsler: List<String> = emptyList(),
         fullmakter: List<Fullmakt> = emptyList(),
         harOppdatertMetadata: Boolean = false,
-        snapshotversjon: Int = 1,
         enhet: String = enhetsnummerOslo,
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
@@ -238,7 +231,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         spesialistBehandlerGodkjenningsbehovFremTilVergemål(
             regelverksvarsler,
             harOppdatertMetadata,
-            snapshotversjon,
             enhet,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
@@ -251,24 +243,12 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected fun spesialistBehandlerGodkjenningsbehovTilOgMedUtbetalingsfilter(
         regelverksvarsler: List<String> = emptyList(),
         harOppdatertMetadata: Boolean = false,
-        snapshotversjon: Int = 1,
         enhet: String = enhetsnummerOslo,
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
         avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
         godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns
-            snapshot(
-                versjon = snapshotversjon,
-                fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
-                aktørId = godkjenningsbehovTestdata.aktørId,
-                organisasjonsnummer = godkjenningsbehovTestdata.organisasjonsnummer,
-                vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
-                utbetalingId = godkjenningsbehovTestdata.utbetalingId,
-                arbeidsgiverbeløp = arbeidsgiverbeløp,
-                personbeløp = personbeløp,
-            )
         if (regelverksvarsler.isNotEmpty()) håndterAktivitetsloggNyAktivitet(varselkoder = regelverksvarsler)
         håndterGodkjenningsbehov(
             harOppdatertMetainfo = harOppdatertMetadata,
@@ -286,7 +266,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             )
             håndterArbeidsforholdløsning(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
         }
-        verify { snapshotClient.hentSnapshot(godkjenningsbehovTestdata.fødselsnummer) }
     }
 
     private fun spinnvillAvviksvurderer(
@@ -307,7 +286,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         harRisikovurdering: Boolean = false,
         harOppdatertMetadata: Boolean = false,
         kanGodkjennesAutomatisk: Boolean = false,
-        snapshotversjon: Int = 1,
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
         avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
@@ -318,7 +296,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             regelverksvarsler = regelverksvarsler,
             fullmakter = fullmakter,
             harOppdatertMetadata = harOppdatertMetadata,
-            snapshotversjon = snapshotversjon,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
             avviksvurderingTestdata = avviksvurderingTestdata,
@@ -339,7 +316,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         regelverksvarsler: List<String> = emptyList(),
         fullmakter: List<Fullmakt> = emptyList(),
         harOppdatertMetadata: Boolean = false,
-        snapshotversjon: Int = 1,
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
         avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
@@ -349,7 +325,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             regelverksvarsler,
             fullmakter,
             harOppdatertMetadata = harOppdatertMetadata,
-            snapshotversjon = snapshotversjon,
             enhet = enhet,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
@@ -1027,13 +1002,11 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         sisteMeldingId = meldingssender.sendAdressebeskyttelseEndret(aktørId, fødselsnummer)
     }
 
-    protected fun håndterOppdaterPersonsnapshot(
+    protected fun håndterOppdaterPersondata(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
-        snapshotSomSkalHentes: GraphQLClientResponse<HentSnapshot.Result>,
     ) {
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshotSomSkalHentes
-        sisteMeldingId = meldingssender.sendOppdaterPersonsnapshot(aktørId, fødselsnummer)
+        sisteMeldingId = meldingssender.sendOppdaterPersondata(aktørId, fødselsnummer)
         assertEtterspurteBehov("HentInfotrygdutbetalinger")
     }
 
@@ -1401,12 +1374,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertEquals(adressebeskyttelse, PersonDao(dataSource).finnAdressebeskyttelse(fødselsnummer))
     }
 
-    protected fun assertNyttSnapshot(block: () -> Unit) {
-        clearMocks(snapshotClient, answers = false, verificationMarks = false)
-        block()
-        verify(exactly = 1) { snapshotClient.hentSnapshot(FØDSELSNUMMER) }
-    }
-
     protected fun assertVedtaksperiodeEksisterer(vedtaksperiodeId: UUID) {
         assertEquals(1, vedtak(vedtaksperiodeId))
     }
@@ -1480,11 +1447,11 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private fun assertEtterspurteBehov(vararg behov: String) {
         val etterspurteBehov = testRapid.inspektør.behov(sisteMeldingId)
         val forårsaketAvId = inspektør.siste("behov")["@forårsaket_av"]["id"].asText()
-        assertEquals(forårsaketAvId, sisteMeldingId.toString())
         assertEquals(behov.toList(), etterspurteBehov) {
             val ikkeEtterspurt = behov.toSet() - etterspurteBehov.toSet()
             "Forventet at følgende behov skulle være etterspurt: $ikkeEtterspurt\nFaktisk etterspurte behov: $etterspurteBehov\n"
         }
+        assertEquals(forårsaketAvId, sisteMeldingId.toString())
     }
 
     protected fun assertIngenEtterspurteBehov() {
@@ -1637,6 +1604,20 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 ).asUpdate,
             )
         }
+    }
+
+    protected fun mockSnapshot(fødselsnummer: String = FØDSELSNUMMER) {
+        every { snapshotClient.hentSnapshot(fødselsnummer) } returns
+                snapshot(
+                    versjon = 1,
+                    fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
+                    aktørId = godkjenningsbehovTestdata.aktørId,
+                    organisasjonsnummer = godkjenningsbehovTestdata.organisasjonsnummer,
+                    vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
+                    utbetalingId = godkjenningsbehovTestdata.utbetalingId,
+                    arbeidsgiverbeløp = 0,
+                    personbeløp = 0,
+                )
     }
 
     protected enum class Kommandokjedetilstand {

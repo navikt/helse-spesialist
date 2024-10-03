@@ -215,6 +215,8 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         )
         assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
 
+        mockSnapshot()
+
         val snapshot: Person = runBlocking { personQuery.person(FØDSELSNUMMER, null, dataFetchingEnvironment).data!! }
 
         assertNotNull(snapshot)
