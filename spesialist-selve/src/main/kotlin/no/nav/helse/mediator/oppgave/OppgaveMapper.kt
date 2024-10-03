@@ -247,6 +247,41 @@ internal object OppgaveMapper {
         }
     }
 
+    // Eksplisitt mapping i stedet for toString sørger for at vi ikke utilsiktet knekker et api hvis vi gjør endringer
+    // i navn på enumene
+    internal fun EgenskapForDatabase.toDto(): EgenskapDto {
+        return when (this) {
+            EgenskapForDatabase.SØKNAD -> EgenskapDto.SØKNAD
+            EgenskapForDatabase.STIKKPRØVE -> EgenskapDto.STIKKPRØVE
+            EgenskapForDatabase.RISK_QA -> EgenskapDto.RISK_QA
+            EgenskapForDatabase.REVURDERING -> EgenskapDto.REVURDERING
+            EgenskapForDatabase.FORTROLIG_ADRESSE -> EgenskapDto.FORTROLIG_ADRESSE
+            EgenskapForDatabase.STRENGT_FORTROLIG_ADRESSE -> EgenskapDto.STRENGT_FORTROLIG_ADRESSE
+            EgenskapForDatabase.UTBETALING_TIL_SYKMELDT -> EgenskapDto.UTBETALING_TIL_SYKMELDT
+            EgenskapForDatabase.DELVIS_REFUSJON -> EgenskapDto.DELVIS_REFUSJON
+            EgenskapForDatabase.UTBETALING_TIL_ARBEIDSGIVER -> EgenskapDto.UTBETALING_TIL_ARBEIDSGIVER
+            EgenskapForDatabase.INGEN_UTBETALING -> EgenskapDto.INGEN_UTBETALING
+            EgenskapForDatabase.EGEN_ANSATT -> EgenskapDto.EGEN_ANSATT
+            EgenskapForDatabase.EN_ARBEIDSGIVER -> EgenskapDto.EN_ARBEIDSGIVER
+            EgenskapForDatabase.FLERE_ARBEIDSGIVERE -> EgenskapDto.FLERE_ARBEIDSGIVERE
+            EgenskapForDatabase.UTLAND -> EgenskapDto.UTLAND
+            EgenskapForDatabase.HASTER -> EgenskapDto.HASTER
+            EgenskapForDatabase.BESLUTTER -> EgenskapDto.BESLUTTER
+            EgenskapForDatabase.RETUR -> EgenskapDto.RETUR
+            EgenskapForDatabase.VERGEMÅL -> EgenskapDto.VERGEMÅL
+            EgenskapForDatabase.SPESIALSAK -> EgenskapDto.SPESIALSAK
+            EgenskapForDatabase.FORLENGELSE -> EgenskapDto.FORLENGELSE
+            EgenskapForDatabase.FORSTEGANGSBEHANDLING -> EgenskapDto.FORSTEGANGSBEHANDLING
+            EgenskapForDatabase.INFOTRYGDFORLENGELSE -> EgenskapDto.INFOTRYGDFORLENGELSE
+            EgenskapForDatabase.OVERGANG_FRA_IT -> EgenskapDto.OVERGANG_FRA_IT
+            EgenskapForDatabase.SKJØNNSFASTSETTELSE -> EgenskapDto.SKJØNNSFASTSETTELSE
+            EgenskapForDatabase.PÅ_VENT -> EgenskapDto.PÅ_VENT
+            EgenskapForDatabase.TILBAKEDATERT -> EgenskapDto.TILBAKEDATERT
+            EgenskapForDatabase.GOSYS -> EgenskapDto.GOSYS
+            EgenskapForDatabase.MEDLEMSKAP -> EgenskapDto.MEDLEMSKAP
+        }
+    }
+
     private fun Oppgaveegenskap.tilDatabaseversjon() =
         when (this.egenskap) {
             EgenskapForApi.RISK_QA -> EgenskapForDatabase.RISK_QA

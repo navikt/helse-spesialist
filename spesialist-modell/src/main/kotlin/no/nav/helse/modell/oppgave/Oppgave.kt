@@ -32,32 +32,12 @@ class Oppgave private constructor(
     private val hendelseId: UUID,
     private val kanAvvises: Boolean,
     private val totrinnsvurdering: Totrinnsvurdering?,
+    private var ferdigstiltAvIdent: String? = null,
+    private var ferdigstiltAvOid: UUID? = null,
+    private val egenskaper: MutableSet<Egenskap> = mutableSetOf(),
+    private var tildeltTil: Saksbehandler? = null,
 ) {
-    private var ferdigstiltAvIdent: String? = null
-    private var ferdigstiltAvOid: UUID? = null
-    private val egenskaper = mutableSetOf<Egenskap>()
-    private var tildeltTil: Saksbehandler? = null
-
     private val observers = mutableListOf<OppgaveObserver>()
-
-    constructor(
-        id: Long,
-        tilstand: Tilstand,
-        vedtaksperiodeId: UUID,
-        utbetalingId: UUID,
-        hendelseId: UUID,
-        kanAvvises: Boolean,
-        ferdigstiltAvIdent: String? = null,
-        ferdigstiltAvOid: UUID? = null,
-        tildelt: Saksbehandler? = null,
-        totrinnsvurdering: Totrinnsvurdering? = null,
-        egenskaper: List<Egenskap>,
-    ) : this(id, tilstand, vedtaksperiodeId, utbetalingId, hendelseId, kanAvvises, totrinnsvurdering) {
-        this.ferdigstiltAvIdent = ferdigstiltAvIdent
-        this.ferdigstiltAvOid = ferdigstiltAvOid
-        this.tildeltTil = tildelt
-        this.egenskaper.addAll(egenskaper)
-    }
 
     fun register(observer: OppgaveObserver) {
         observers.add(observer)
@@ -399,8 +379,8 @@ class Oppgave private constructor(
                 totrinnsvurdering = totrinnsvurdering?.gjenopprett(tilgangskontroll),
                 ferdigstiltAvOid = ferdigstiltAvOid,
                 ferdigstiltAvIdent = ferdigstiltAvIdent,
-                tildelt = tildeltTil?.gjenopprett(tilgangskontroll),
-                egenskaper = egenskaper.map { it.gjenopprett() },
+                tildeltTil = tildeltTil?.gjenopprett(tilgangskontroll),
+                egenskaper = egenskaper.map { it.gjenopprett() }.toMutableSet(),
             )
     }
 }
