@@ -15,15 +15,15 @@ internal class SaksbehandlerDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `lagre saksbehandler`() {
         dao.opprettEllerOppdater(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
-        assertSaksbehandler(1, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
+        assertSaksbehandler(skalFinnesIDatabasen = true, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
     }
 
     @Test
     fun `oppdater saksbehandler`() {
         dao.opprettEllerOppdater(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
         dao.opprettEllerOppdater(SAKSBEHANDLER_OID, "ANNET_NAVN", "ANNEN_EPOST", "ANNEN_IDENT")
-        assertSaksbehandler(1, SAKSBEHANDLER_OID, "ANNET_NAVN", "ANNEN_EPOST", "ANNEN_IDENT")
-        assertSaksbehandler(0, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
+        assertSaksbehandler(skalFinnesIDatabasen = true, SAKSBEHANDLER_OID, "ANNET_NAVN", "ANNEN_EPOST", "ANNEN_IDENT")
+        assertSaksbehandler(skalFinnesIDatabasen = false, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
     }
 
     @Test
@@ -42,15 +42,15 @@ internal class SaksbehandlerDaoTest : DatabaseIntegrationTest() {
         assertSisteTidspunkt(tidspunkt, SAKSBEHANDLER_OID)
     }
 
-    private fun assertSaksbehandler(forventetAntall: Int, oid: UUID, navn: String, epost: String, ident: String) {
-        val funnet = query(
+    private fun assertSaksbehandler(skalFinnesIDatabasen: Boolean, oid: UUID, navn: String, epost: String, ident: String) {
+        val erLagret = query(
             """
-            SELECT COUNT(1) FROM saksbehandler
+            SELECT 1 FROM saksbehandler
             WHERE oid = :oid AND navn = :navn AND epost = :epost AND ident = :ident
             """.trimIndent(), "oid" to oid, "navn" to navn, "epost" to epost, "ident" to ident
-        ).single { it.int(1) }
+        ).single { true } ?: false
 
-        assertEquals(forventetAntall, funnet)
+        assertEquals(skalFinnesIDatabasen, erLagret)
     }
 
     private fun assertSisteTidspunkt(forventetSisteTidspunkt: LocalDateTime?, oid: UUID) {
