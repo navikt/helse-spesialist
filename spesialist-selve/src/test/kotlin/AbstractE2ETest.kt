@@ -124,9 +124,21 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     private fun opprettSaksbehandler() {
         sessionOf(dataSource).use {
-            @Language("PostgreSQL")
-            val query = """INSERT INTO saksbehandler(oid, navn, epost) VALUES (?, ?, ?) ON CONFLICT (oid) DO NOTHING """
-            it.run(queryOf(query, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST).asExecute)
+            @Language("PostgreSQL") val query = """
+                INSERT INTO saksbehandler
+                VALUES (:oid, :navn, :epost, :ident)
+                ON CONFLICT (oid) DO NOTHING
+            """.trimIndent()
+            it.run(
+                queryOf(
+                    query, mapOf(
+                        "oid" to SAKSBEHANDLER_OID,
+                        "navn" to SAKSBEHANDLER_NAVN,
+                        "epost" to SAKSBEHANDLER_EPOST,
+                        "ident" to SAKSBEHANDLER_IDENT,
+                    )
+                ).asUpdate
+            )
         }
     }
 
