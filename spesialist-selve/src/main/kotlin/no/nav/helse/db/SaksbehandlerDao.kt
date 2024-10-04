@@ -21,6 +21,8 @@ class SaksbehandlerDao(dataSource: DataSource) : HelseDao(dataSource), Saksbehan
         VALUES (:oid, :navn, :epost, :ident)
         ON CONFLICT (oid)
             DO UPDATE SET navn = :navn, epost = :epost, ident = :ident
+            WHERE (saksbehandler.navn, saksbehandler.epost, saksbehandler.ident)
+                IS DISTINCT FROM (excluded.navn, excluded.epost, excluded.ident)
         """.trimIndent(),
         mapOf("oid" to oid, "navn" to navn, "epost" to epost, "ident" to ident),
     ).update()
