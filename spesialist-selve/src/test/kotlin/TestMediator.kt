@@ -69,10 +69,10 @@ internal class TestMediator(
     private val oppgaveService =
         OppgaveService(
             meldingDao = meldingDao,
-            oppgaveDao = OppgaveDao(dataSource),
+            oppgaveRepository = OppgaveDao(dataSource),
             tildelingDao = tildelingDao,
             reservasjonDao = ReservasjonDao(dataSource),
-            opptegnelseDao = opptegnelseDao,
+            opptegnelseRepository = opptegnelseDao,
             totrinnsvurderingRepository = totrinnsvurderingDao,
             saksbehandlerRepository = saksbehandlerDao,
             rapidsConnection = testRapid,

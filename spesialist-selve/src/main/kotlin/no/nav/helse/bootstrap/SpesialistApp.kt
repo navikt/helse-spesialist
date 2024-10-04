@@ -260,10 +260,10 @@ internal class SpesialistApp(
         oppgaveService =
             OppgaveService(
                 meldingDao = meldingDao,
-                oppgaveDao = oppgaveDao,
+                oppgaveRepository = oppgaveDao,
                 tildelingDao = tildelingDao,
                 reservasjonDao = reservasjonDao,
-                opptegnelseDao = opptegnelseDao,
+                opptegnelseRepository = opptegnelseDao,
                 totrinnsvurderingRepository = totrinnsvurderingDao,
                 saksbehandlerRepository = saksbehandlerDao,
                 rapidsConnection = rapidsConnection,

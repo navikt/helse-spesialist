@@ -1,13 +1,18 @@
 package no.nav.helse.mediator.oppgave
 
 import TilgangskontrollForTestHarIkkeTilgang
+import no.nav.helse.db.AntallOppgaverFraDatabase
+import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveFraDatabase
+import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.db.OppgaveRepository
+import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.db.TotrinnsvurderingRepository
+import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.EgenskapDto
 import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
 import no.nav.helse.modell.oppgave.OppgaveDto
@@ -116,6 +121,59 @@ class OppgavehenterTest {
         override fun invaliderOppgaveFor(fødselsnummer: String) {
             throw OperationNotSupportedException()
         }
+
+        override fun finnOppgaveId(utbetalingId: UUID): Long = throw OperationNotSupportedException()
+
+        override fun reserverNesteId(): Long = throw OperationNotSupportedException()
+
+        override fun venterPåSaksbehandler(oppgaveId: Long): Boolean = throw OperationNotSupportedException()
+
+        override fun finnSpleisBehandlingId(oppgaveId: Long): UUID = throw OperationNotSupportedException()
+
+        override fun finnOppgaverForVisning(
+            ekskluderEgenskaper: List<String>,
+            saksbehandlerOid: UUID,
+            offset: Int,
+            limit: Int,
+            sortering: List<OppgavesorteringForDatabase>,
+            egneSakerPåVent: Boolean,
+            egneSaker: Boolean,
+            tildelt: Boolean?,
+            grupperteFiltrerteEgenskaper: Map<Egenskap.Kategori, List<EgenskapForDatabase>>?
+        ): List<OppgaveFraDatabaseForVisning> = throw OperationNotSupportedException()
+
+        override fun finnAntallOppgaver(saksbehandlerOid: UUID): AntallOppgaverFraDatabase = throw OperationNotSupportedException()
+
+        override fun finnBehandledeOppgaver(
+            behandletAvOid: UUID,
+            offset: Int,
+            limit: Int
+        ): List<BehandletOppgaveFraDatabaseForVisning> = throw OperationNotSupportedException()
+
+        override fun finnEgenskaper(vedtaksperiodeId: UUID, utbetalingId: UUID): Set<EgenskapForDatabase>? = throw OperationNotSupportedException()
+
+        override fun finnIdForAktivOppgave(vedtaksperiodeId: UUID): Long? = throw OperationNotSupportedException()
+
+        override fun opprettOppgave(
+            id: Long,
+            commandContextId: UUID,
+            egenskaper: List<EgenskapForDatabase>,
+            vedtaksperiodeId: UUID,
+            utbetalingId: UUID,
+            kanAvvises: Boolean
+        ): Long = throw OperationNotSupportedException()
+
+        override fun finnFødselsnummer(oppgaveId: Long): String = throw OperationNotSupportedException()
+
+        override fun updateOppgave(
+            oppgaveId: Long,
+            oppgavestatus: String,
+            ferdigstiltAv: String?,
+            oid: UUID?,
+            egenskaper: List<EgenskapForDatabase>
+        ): Int = throw OperationNotSupportedException()
+
+        override fun harFerdigstiltOppgave(vedtaksperiodeId: UUID): Boolean = throw OperationNotSupportedException()
     }
 
     private fun totrinnsvurderingRepository(

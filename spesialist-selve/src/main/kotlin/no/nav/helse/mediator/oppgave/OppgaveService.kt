@@ -3,8 +3,9 @@ package no.nav.helse.mediator.oppgave
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.EgenskapForDatabase
+import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.OppgavesorteringForDatabase
-import no.nav.helse.db.OpptegnelseDao
+import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.SorteringsnøkkelForDatabase
@@ -54,10 +55,10 @@ interface Oppgavefinner {
 
 internal class OppgaveService(
     private val meldingDao: MeldingDao,
-    private val oppgaveDao: OppgaveDao,
+    private val oppgaveRepository: OppgaveRepository,
     private val tildelingDao: TildelingDao,
     private val reservasjonDao: ReservasjonDao,
-    private val opptegnelseDao: OpptegnelseDao,
+    private val opptegnelseRepository: OpptegnelseRepository,
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
     private val saksbehandlerRepository: SaksbehandlerRepository,
     private val rapidsConnection: RapidsConnection,
@@ -72,7 +73,7 @@ internal class OppgaveService(
         contextId: UUID,
         opprettOppgaveBlock: (reservertId: Long) -> Oppgave,
     ) {
-        val nesteId = oppgaveDao.reserverNesteId()
+        val nesteId = oppgaveRepository.reserverNesteId()
         val oppgave = opprettOppgaveBlock(nesteId)
         val oppgavemelder = Oppgavemelder(meldingDao, rapidsConnection)
         oppgave.register(oppgavemelder)
@@ -87,7 +88,7 @@ internal class OppgaveService(
     ): T {
         val oppgave =
             Oppgavehenter(
-                oppgaveDao,
+                oppgaveRepository,
                 totrinnsvurderingRepository,
                 saksbehandlerRepository,
                 tilgangskontroll,
@@ -102,7 +103,7 @@ internal class OppgaveService(
         utbetalingId: UUID,
         oppgaveBlock: Oppgave?.() -> Unit,
     ) {
-        val oppgaveId = oppgaveDao.finnOppgaveId(utbetalingId)
+        val oppgaveId = oppgaveRepository.finnOppgaveId(utbetalingId)
         oppgaveId?.let {
             oppgave(it, oppgaveBlock)
         }
@@ -133,7 +134,7 @@ internal class OppgaveService(
     }
 
     internal fun håndter(handling: Overstyring) {
-        oppgaveDao.finnOppgaveId(handling.gjelderFødselsnummer())?.let {
+        oppgaveRepository.finnOppgaveId(handling.gjelderFødselsnummer())?.let {
             oppgave(it) {
                 this.avbryt()
             }
@@ -188,7 +189,7 @@ internal class OppgaveService(
         fødselsnummer: String,
     ) {
         val oppgaveId =
-            oppgaveDao.finnOppgaveId(fødselsnummer) ?: run {
+            oppgaveRepository.finnOppgaveId(fødselsnummer) ?: run {
                 sikkerlogg.info("Ingen aktiv oppgave for {}", kv("fødselsnummer", fødselsnummer))
                 return
             }
@@ -205,9 +206,9 @@ internal class OppgaveService(
         }
     }
 
-    override fun venterPåSaksbehandler(oppgaveId: Long): Boolean = oppgaveDao.venterPåSaksbehandler(oppgaveId)
+    override fun venterPåSaksbehandler(oppgaveId: Long): Boolean = oppgaveRepository.venterPåSaksbehandler(oppgaveId)
 
-    override fun spleisBehandlingId(oppgaveId: Long): UUID = oppgaveDao.finnSpleisBehandlingId(oppgaveId)
+    override fun spleisBehandlingId(oppgaveId: Long): UUID = oppgaveRepository.finnSpleisBehandlingId(oppgaveId)
 
     override fun oppgaver(
         saksbehandlerFraApi: SaksbehandlerFraApi,
@@ -243,7 +244,7 @@ internal class OppgaveService(
                 .toMap()
 
         val oppgaver =
-            oppgaveDao
+            oppgaveRepository
                 .finnOppgaverForVisning(
                     ekskluderEgenskaper = egenskaperSomSkalEkskluderes,
                     saksbehandlerOid = saksbehandler.oid(),
@@ -263,7 +264,7 @@ internal class OppgaveService(
 
     override fun antallOppgaver(saksbehandlerFraApi: SaksbehandlerFraApi): AntallOppgaver {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
-        val antallOppgaver = oppgaveDao.finnAntallOppgaver(saksbehandlerOid = saksbehandler.oid())
+        val antallOppgaver = oppgaveRepository.finnAntallOppgaver(saksbehandlerOid = saksbehandler.oid())
         return antallOppgaver.tilApiversjon()
     }
 
@@ -274,7 +275,7 @@ internal class OppgaveService(
     ): BehandledeOppgaver {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         val behandledeOppgaver =
-            oppgaveDao.finnBehandledeOppgaver(
+            oppgaveRepository.finnBehandledeOppgaver(
                 behandletAvOid = saksbehandler.oid(),
                 offset = offset,
                 limit = limit,
@@ -290,7 +291,7 @@ internal class OppgaveService(
         utbetalingId: UUID,
     ): List<Oppgaveegenskap> {
         val egenskaper =
-            oppgaveDao.finnEgenskaper(
+            oppgaveRepository.finnEgenskaper(
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingId = utbetalingId,
             )
@@ -299,7 +300,7 @@ internal class OppgaveService(
     }
 
     fun avbrytOppgaveFor(vedtaksperiodeId: UUID) {
-        oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)?.also {
+        oppgaveRepository.finnIdForAktivOppgave(vedtaksperiodeId)?.also {
             oppgave(it) {
                 this.avbryt()
             }
@@ -307,7 +308,7 @@ internal class OppgaveService(
     }
 
     fun fjernTilbakedatert(vedtaksperiodeId: UUID) {
-        oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)?.also { oppgaveId ->
+        oppgaveRepository.finnIdForAktivOppgave(vedtaksperiodeId)?.also { oppgaveId ->
             oppgave(oppgaveId) {
                 logg.info("Fjerner egenskap TILBAKEDATERT på {}", kv("oppgaveId", oppgaveId))
                 fjernTilbakedatert()
@@ -316,7 +317,7 @@ internal class OppgaveService(
     }
 
     fun fjernGosysEgenskap(vedtaksperiodeId: UUID) {
-        oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)?.also { oppgaveId ->
+        oppgaveRepository.finnIdForAktivOppgave(vedtaksperiodeId)?.also { oppgaveId ->
             oppgave(oppgaveId) {
                 logg.info("Fjerner egenskap GOSYS på {}", kv("oppgaveId", oppgaveId))
                 fjernGosys()
@@ -325,7 +326,7 @@ internal class OppgaveService(
     }
 
     fun leggTilGosysEgenskap(vedtaksperiodeId: UUID) {
-        oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)?.also { oppgaveId ->
+        oppgaveRepository.finnIdForAktivOppgave(vedtaksperiodeId)?.also { oppgaveId ->
             oppgave(oppgaveId) {
                 logg.info("Legger til egenskap GOSYS på {}", kv("oppgaveId", oppgaveId))
                 leggTilGosys()
@@ -342,9 +343,9 @@ internal class OppgaveService(
         hendelseId: UUID,
         kanAvvises: Boolean,
     ) {
-        oppgaveDao.opprettOppgave(id, contextId, egenskaper, vedtaksperiodeId, utbetalingId, kanAvvises)
-        opptegnelseDao.opprettOpptegnelse(
-            oppgaveDao.finnFødselsnummer(id),
+        oppgaveRepository.opprettOppgave(id, contextId, egenskaper, vedtaksperiodeId, utbetalingId, kanAvvises)
+        opptegnelseRepository.opprettOpptegnelse(
+            oppgaveRepository.finnFødselsnummer(id),
             GodkjenningsbehovPayload(hendelseId),
             OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE,
         )
@@ -357,7 +358,7 @@ internal class OppgaveService(
         ferdigstiltAvOid: UUID?,
         egenskaper: List<EgenskapForDatabase>,
     ) {
-        oppgaveDao.updateOppgave(oppgaveId, status, ferdigstiltAvIdent, ferdigstiltAvOid, egenskaper)
+        oppgaveRepository.updateOppgave(oppgaveId, status, ferdigstiltAvIdent, ferdigstiltAvOid, egenskaper)
     }
 
     fun reserverOppgave(
@@ -391,7 +392,7 @@ internal class OppgaveService(
         oppgave.forsøkTildelingVedReservasjon(saksbehandler)
     }
 
-    fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) = oppgaveDao.harFerdigstiltOppgave(vedtaksperiodeId)
+    fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) = oppgaveRepository.harFerdigstiltOppgave(vedtaksperiodeId)
 
     private fun SaksbehandlerFraApi.tilSaksbehandler() =
         Saksbehandler(

@@ -13,7 +13,7 @@ import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
-import no.nav.helse.db.OpptegnelseDao
+import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.Reservasjon
 import no.nav.helse.db.ReservasjonDao
@@ -90,7 +90,7 @@ internal class OppgaveServiceTest {
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
-    private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
+    private val opptegnelseRepository = mockk<OpptegnelseRepository>(relaxed = true)
     private val totrinnsvurderingDao = mockk<TotrinnsvurderingDao>(relaxed = true)
     private val saksbehandlerDao = mockk<SaksbehandlerDao>()
     private val testRapid = TestRapid()
@@ -98,10 +98,10 @@ internal class OppgaveServiceTest {
     private val mediator =
         OppgaveService(
             meldingDao = meldingDao,
-            oppgaveDao = oppgaveDao,
+            oppgaveRepository = oppgaveDao,
             tildelingDao = tildelingDao,
             reservasjonDao = reservasjonDao,
-            opptegnelseDao = opptegnelseDao,
+            opptegnelseRepository = opptegnelseRepository,
             totrinnsvurderingRepository = totrinnsvurderingDao,
             saksbehandlerRepository = saksbehandlerDao,
             rapidsConnection = testRapid,
@@ -125,7 +125,7 @@ internal class OppgaveServiceTest {
 
     @BeforeEach
     fun setup() {
-        clearMocks(oppgaveDao, vedtakDao, tildelingDao, opptegnelseDao)
+        clearMocks(oppgaveDao, vedtakDao, tildelingDao, opptegnelseRepository)
         testRapid.reset()
     }
 
@@ -227,7 +227,7 @@ internal class OppgaveServiceTest {
         assertEquals(1, testRapid.inspektør.size)
         assertAntallOpptegnelser(1)
         testRapid.reset()
-        clearMocks(opptegnelseDao)
+        clearMocks(opptegnelseRepository)
         assertEquals(0, testRapid.inspektør.size)
         assertOpptegnelseIkkeOpprettet()
     }
@@ -507,7 +507,7 @@ internal class OppgaveServiceTest {
 
     private fun assertAntallOpptegnelser(antallOpptegnelser: Int) =
         verify(exactly = antallOpptegnelser) {
-            opptegnelseDao.opprettOpptegnelse(
+            opptegnelseRepository.opprettOpptegnelse(
                 eq(TESTHENDELSE.fødselsnummer()),
                 any(),
                 eq(OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE),
