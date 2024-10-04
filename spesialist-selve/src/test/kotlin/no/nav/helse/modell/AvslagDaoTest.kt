@@ -95,7 +95,7 @@ internal class AvslagDaoTest : DatabaseIntegrationTest() {
 
 
     private fun nySaksbehandler(oid: UUID = UUID.randomUUID()) {
-        saksbehandlerDao.opprettSaksbehandler(oid, "Navn Navnesen", "navn@navnesen.no", "Z999999")
+        saksbehandlerDao.opprettEllerOppdater(oid, "Navn Navnesen", "navn@navnesen.no", "Z999999")
     }
 
     private fun finnGenerasjonId(vedtaksperiodeId: UUID): Long =

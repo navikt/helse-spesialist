@@ -10,20 +10,31 @@ interface SaksbehandlerRepository {
 }
 
 class SaksbehandlerDao(dataSource: DataSource) : HelseDao(dataSource), SaksbehandlerRepository {
-    fun opprettSaksbehandler(
+    fun opprettEllerOppdater(
         oid: UUID,
         navn: String,
         epost: String,
         ident: String,
+    ) = asSQL(
+        """ 
+        INSERT INTO saksbehandler (oid, navn, epost, ident)
+        VALUES (:oid, :navn, :epost, :ident)
+        ON CONFLICT (oid)
+            DO UPDATE SET navn = :navn, epost = :epost, ident = :ident
+        """.trimIndent(),
+        mapOf("oid" to oid, "navn" to navn, "epost" to epost, "ident" to ident),
+    ).update()
+
+    fun oppdaterSistObservert(
+        oid: UUID,
         sisteHandlingUtført: LocalDateTime = LocalDateTime.now(),
     ) = asSQL(
         """ 
-        INSERT INTO saksbehandler (oid, navn, epost, ident, siste_handling_utført_tidspunkt)
-        VALUES (:oid, :navn, :epost, :ident, :siste_handling_utfort_tidspunkt)
-        ON CONFLICT (oid)
-            DO UPDATE SET navn = :navn, epost = :epost, ident = :ident, siste_handling_utført_tidspunkt = :siste_handling_utfort_tidspunkt
+        UPDATE saksbehandler
+        SET siste_handling_utført_tidspunkt = :siste_handling_utfort_tidspunkt
+        WHERE oid = :oid
         """.trimIndent(),
-        mapOf("oid" to oid, "navn" to navn, "epost" to epost, "ident" to ident, "siste_handling_utfort_tidspunkt" to sisteHandlingUtført),
+        mapOf("oid" to oid, "siste_handling_utfort_tidspunkt" to sisteHandlingUtført),
     ).update()
 
     override fun finnSaksbehandler(oid: UUID) =

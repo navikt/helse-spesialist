@@ -19,6 +19,7 @@ class SaksbehandlerLagrerTest {
     @Test
     fun `lagre saksbehandler`() {
         SaksbehandlerLagrer(dao).lagre(saksbehandler)
-        verify(exactly = 1) { dao.opprettSaksbehandler(OID, NAVN, EPOST, IDENT, any()) }
+        verify(exactly = 1) { dao.opprettEllerOppdater(OID, NAVN, EPOST, IDENT) }
+        verify(exactly = 1) { dao.oppdaterSistObservert(OID, any()) }
     }
  }

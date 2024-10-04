@@ -11,12 +11,13 @@ class SaksbehandlerLagrer(private val saksbehandlerDao: SaksbehandlerDao) : Saks
 
     internal fun lagre(saksbehandler: Saksbehandler) {
         saksbehandler.accept(this)
-        saksbehandlerDao.opprettSaksbehandler(
+        saksbehandlerDao.opprettEllerOppdater(
             oid = saksbehandlerFraDatabase.oid,
             navn = saksbehandlerFraDatabase.navn,
             epost = saksbehandlerFraDatabase.epostadresse,
             ident = saksbehandlerFraDatabase.ident,
         )
+        saksbehandlerDao.oppdaterSistObservert(saksbehandlerFraDatabase.oid)
     }
 
     override fun visitSaksbehandler(

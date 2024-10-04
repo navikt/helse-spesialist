@@ -37,7 +37,7 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
     fun `ny reservasjon forlenger ikke fristen`() {
         opprettData()
         val enAnnenSaksbehandler = UUID.randomUUID()
-        saksbehandlerDao.opprettSaksbehandler(
+        saksbehandlerDao.opprettEllerOppdater(
             enAnnenSaksbehandler,
             "Siri Siksbehindler",
             "siri.siksbehindler@nav.no",
@@ -72,7 +72,7 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
             "4321098765432", personinfoRef, "0301".toInt(), utbetalingerRef
         )
 
-        saksbehandlerDao.opprettSaksbehandler(
+        saksbehandlerDao.opprettEllerOppdater(
             SAKSBEHANDLER_OID,
             "Sara Saksbehandler",
             "sara.saksbehandler@nav.no",

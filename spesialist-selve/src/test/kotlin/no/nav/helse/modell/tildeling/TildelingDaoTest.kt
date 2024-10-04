@@ -79,7 +79,7 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
     }
 
     private fun nySaksbehandler(oid: UUID = UUID.randomUUID()) {
-        saksbehandlerDao.opprettSaksbehandler(oid, "Navn Navnesen", "navn@navnesen.no", "Z999999")
+        saksbehandlerDao.opprettEllerOppdater(oid, "Navn Navnesen", "navn@navnesen.no", "Z999999")
     }
 
     private fun tildelTilSaksbehandler(oppgaveId: Long = this.oppgaveId, oid: UUID = SAKSBEHANDLER_OID) {

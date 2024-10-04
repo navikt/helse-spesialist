@@ -67,7 +67,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
     private val INNTEKT = 31000.0
 
     private fun opprettPerson() {
-        saksbehandlerDao.opprettSaksbehandler(OID, SAKSBEHANDLER_NAVN, EPOST, SAKSBEHANDLER_IDENT)
+        saksbehandlerDao.opprettEllerOppdater(OID, SAKSBEHANDLER_NAVN, EPOST, SAKSBEHANDLER_IDENT)
         inntektskilderDao.lagreInntektskilder(
             listOf(
                 KomplettInntektskildeDto(ORGNUMMER, ORDINÆR, ARBEIDSGIVER_NAVN, BRANSJER, LocalDate.now())

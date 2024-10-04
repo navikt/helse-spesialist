@@ -5,10 +5,10 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
-import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 internal class SaksbehandlerDaoTest: DatabaseIntegrationTest() {
@@ -16,24 +16,32 @@ internal class SaksbehandlerDaoTest: DatabaseIntegrationTest() {
 
     @Test
     fun `lagre saksbehandler`() {
-        dao.opprettSaksbehandler(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
+        dao.opprettEllerOppdater(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
         assertSaksbehandler(1, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
     }
 
     @Test
     fun `oppdater saksbehandler`() {
-        dao.opprettSaksbehandler(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
-        dao.opprettSaksbehandler(SAKSBEHANDLER_OID, "ANNET_NAVN", "ANNEN_EPOST", "ANNEN_IDENT")
+        dao.opprettEllerOppdater(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
+        dao.opprettEllerOppdater(SAKSBEHANDLER_OID, "ANNET_NAVN", "ANNEN_EPOST", "ANNEN_IDENT")
         assertSaksbehandler(1, SAKSBEHANDLER_OID, "ANNET_NAVN", "ANNEN_EPOST", "ANNEN_IDENT")
         assertSaksbehandler(0, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
     }
 
     @Test
-    fun `setter nytt timestamp hver gang det lagres`() {
-        dao.opprettSaksbehandler(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT, now().minusDays(9))
-        assertSisteTidspunkt(now().minusDays(9), SAKSBEHANDLER_OID)
-        dao.opprettSaksbehandler(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
-        assertSisteTidspunkt(now(), SAKSBEHANDLER_OID)
+    fun `setter ikke initielt timestamp`() {
+        dao.opprettEllerOppdater(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
+        assertSisteTidspunkt(null, SAKSBEHANDLER_OID)
+    }
+
+    @Test
+    fun `setter tidspunkt når spesialist behandler en handling fra saksbehandleren`() {
+        dao.opprettEllerOppdater(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
+
+        val tidspunkt = now()
+        dao.oppdaterSistObservert(SAKSBEHANDLER_OID, tidspunkt)
+
+        assertSisteTidspunkt(tidspunkt, SAKSBEHANDLER_OID)
     }
 
     private fun assertSaksbehandler(forventetAntall: Int, oid: UUID, navn: String, epost: String, ident: String) {
@@ -48,21 +56,17 @@ internal class SaksbehandlerDaoTest: DatabaseIntegrationTest() {
         assertEquals(forventetAntall, funnet)
     }
 
-    private fun assertSisteTidspunkt(forventetSisteTidspunkt: LocalDateTime, oid: UUID) {
+    private fun assertSisteTidspunkt(forventetSisteTidspunkt: LocalDateTime?, oid: UUID) {
         @Language("PostgreSQL")
         val query = """
            SELECT siste_handling_utført_tidspunkt FROM saksbehandler WHERE oid = :oid
         """
 
         val tidspunktFraDb = sessionOf(dataSource).use {
-            it.run(queryOf(query, mapOf("oid" to oid)).map { it.localDateTime(1) }.asSingle)
+            it.run(queryOf(query, mapOf("oid" to oid)).map { it.localDateTimeOrNull(1) }.asSingle)
         }
 
-        // Sjekk at det er på samme minuttet, for å unngå risikoen for at testen feiler pga. det ble nytt sekund mellom
-        // inserten og asserten.
-        assertEquals(
-            forventetSisteTidspunkt.truncatedTo(ChronoUnit.MINUTES),
-            tidspunktFraDb?.truncatedTo(ChronoUnit.MINUTES)
-        )
+        if (forventetSisteTidspunkt != null) assertEquals(forventetSisteTidspunkt, tidspunktFraDb)
+        else assertNull(tidspunktFraDb)
     }
 }
