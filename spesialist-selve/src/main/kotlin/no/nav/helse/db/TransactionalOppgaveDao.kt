@@ -115,19 +115,13 @@ class TransactionalOppgaveDao(private val transactionalSession: TransactionalSes
         grupperteFiltrerteEgenskaper: Map<Egenskap.Kategori, List<EgenskapForDatabase>>?,
     ): List<OppgaveFraDatabaseForVisning> {
         val orderBy = if (sortering.isNotEmpty()) sortering.joinToString { it.nøkkelTilKolonne() } else "opprettet DESC"
-        val egenskaperSomSkalEkskluderes = ekskluderEgenskaper.joinToString { """ '$it' """ }
-        val ukategoriserteEgenskaper =
-            grupperteFiltrerteEgenskaper?.get(Egenskap.Kategori.Ukategorisert)?.joinToString { """ '${it.name}' """ }
-        val oppgavetypeEgenskaper =
-            grupperteFiltrerteEgenskaper?.get(Egenskap.Kategori.Oppgavetype)?.joinToString { """ '${it.name}' """ }
-        val periodetypeEgenskaper =
-            grupperteFiltrerteEgenskaper?.get(Egenskap.Kategori.Periodetype)?.joinToString { """ '${it.name}' """ }
-        val mottakerEgenskaper =
-            grupperteFiltrerteEgenskaper?.get(Egenskap.Kategori.Mottaker)?.joinToString { """ '${it.name}' """ }
-        val antallArbeidsforholdEgenskaper =
-            grupperteFiltrerteEgenskaper?.get(Egenskap.Kategori.Inntektskilde)?.joinToString { """ '${it.name}' """ }
-        val statusEgenskaper =
-            grupperteFiltrerteEgenskaper?.get(Egenskap.Kategori.Status)?.joinToString { """ '${it.name}' """ }
+        val egenskaperSomSkalEkskluderes = ekskluderEgenskaper.joinToString { "'$it'" }
+        val ukategoriserteEgenskaper = grupperteFiltrerteEgenskaper?.tilSqlString(Egenskap.Kategori.Ukategorisert)
+        val oppgavetypeEgenskaper = grupperteFiltrerteEgenskaper?.tilSqlString(Egenskap.Kategori.Oppgavetype)
+        val periodetypeEgenskaper = grupperteFiltrerteEgenskaper?.tilSqlString(Egenskap.Kategori.Periodetype)
+        val mottakerEgenskaper = grupperteFiltrerteEgenskaper?.tilSqlString(Egenskap.Kategori.Mottaker)
+        val antallArbeidsforholdEgenskaper = grupperteFiltrerteEgenskaper?.tilSqlString(Egenskap.Kategori.Inntektskilde)
+        val statusEgenskaper = grupperteFiltrerteEgenskaper?.tilSqlString(Egenskap.Kategori.Status)
 
         @Language("PostgreSQL")
         val statement =
@@ -230,6 +224,9 @@ class TransactionalOppgaveDao(private val transactionalSession: TransactionalSes
                 .asList,
         )
     }
+
+    private fun Map<Egenskap.Kategori, List<EgenskapForDatabase>>.tilSqlString(kategori: Egenskap.Kategori) =
+        get(kategori)?.joinToString { "'${it.name}'" }
 
     override fun finnAntallOppgaver(saksbehandlerOid: UUID): AntallOppgaverFraDatabase {
         @Language("PostgreSQL")
