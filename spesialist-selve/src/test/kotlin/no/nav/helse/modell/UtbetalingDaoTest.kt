@@ -1,7 +1,6 @@
 package no.nav.helse.modell
 
 import DatabaseIntegrationTest
-import no.nav.helse.juli
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.ANNULLERT
@@ -201,8 +200,6 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
         val personFagsystemId = fagsystemId()
         val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
         val personOppdragId = lagPersonoppdrag(personFagsystemId)
-        lagLinje(arbeidsgiverOppdragId, 1.juli(), 10.juli(), 12000)
-        lagLinje(personOppdragId, 11.juli(), 31.juli(), 10000)
         val utbetaling = lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId)
 
         assertDoesNotThrow {

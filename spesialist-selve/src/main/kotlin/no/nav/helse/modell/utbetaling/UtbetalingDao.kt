@@ -6,7 +6,6 @@ import no.nav.helse.HelseDao
 import no.nav.helse.db.TransactionalUtbetalingDao
 import no.nav.helse.db.UtbetalingRepository
 import org.intellij.lang.annotations.Language
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
@@ -149,32 +148,6 @@ class UtbetalingDao(private val dataSource: DataSource) : HelseDao(dataSource), 
                         "mottaker" to mottaker,
                     ),
                 ).asUpdateAndReturnGeneratedKey,
-            )
-        }
-    }
-
-    override fun nyLinje(
-        oppdragId: Long,
-        fom: LocalDate,
-        tom: LocalDate,
-        totalbeløp: Int?,
-    ) {
-        @Language("PostgreSQL")
-        val statement = """
-            INSERT INTO utbetalingslinje(oppdrag_id, fom, tom, totalbeløp)
-            VALUES (:oppdragIdRef, :fom, :tom, :totalbelop)
-        """
-        return sessionOf(dataSource).use {
-            it.run(
-                queryOf(
-                    statement,
-                    mapOf(
-                        "oppdragIdRef" to oppdragId,
-                        "fom" to fom,
-                        "tom" to tom,
-                        "totalbelop" to totalbeløp,
-                    ),
-                ).asExecute,
             )
         }
     }

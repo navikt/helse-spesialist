@@ -6,7 +6,6 @@ import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import org.intellij.lang.annotations.Language
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.naming.OperationNotSupportedException
@@ -27,15 +26,6 @@ class TransactionalUtbetalingDao(private val transactionalSession: Transactional
         fagsystemId: String,
         mottaker: String,
     ): Long = throw OperationNotSupportedException()
-
-    override fun nyLinje(
-        oppdragId: Long,
-        fom: LocalDate,
-        tom: LocalDate,
-        totalbeløp: Int?,
-    ) {
-        throw OperationNotSupportedException()
-    }
 
     override fun opprettUtbetalingId(
         utbetalingId: UUID,

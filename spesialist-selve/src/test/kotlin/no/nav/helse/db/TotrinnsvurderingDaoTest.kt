@@ -1,11 +1,8 @@
 package no.nav.helse.db
 
 import DatabaseIntegrationTest
-import java.time.LocalDateTime
-import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.juli
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -14,6 +11,8 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
@@ -142,8 +141,6 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         val personFagsystemId = fagsystemId()
         val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
         val personOppdragId = lagPersonoppdrag(personFagsystemId)
-        lagLinje(arbeidsgiverOppdragId, 1.juli(), 10.juli(), 12000)
-        lagLinje(personOppdragId, 11.juli(), 31.juli(), 10000)
         val utbetaling_IdId = lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, UTBETALING_ID)
         opprettUtbetalingKobling(VEDTAKSPERIODE, UTBETALING_ID)
 
@@ -165,14 +162,10 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         val personFagsystemId = fagsystemId()
         val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
         val personOppdragId = lagPersonoppdrag(personFagsystemId)
-        lagLinje(arbeidsgiverOppdragId, 1.juli(), 10.juli(), 12000)
-        lagLinje(personOppdragId, 11.juli(), 31.juli(), 10000)
         lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, UTBETALING_ID)
         opprettUtbetalingKobling(VEDTAKSPERIODE, UTBETALING_ID)
 
         val utbetalingId2 = UUID.randomUUID()
-        lagLinje(arbeidsgiverOppdragId, 1.juli(), 10.juli(), 12000)
-        lagLinje(personOppdragId, 11.juli(), 31.juli(), 10000)
         val utbetalingIdRef2 = lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, utbetalingId2)
         opprettUtbetalingKobling(VEDTAKSPERIODE, utbetalingId2)
 
@@ -195,8 +188,6 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         val personFagsystemId = fagsystemId()
         val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
         val personOppdragId = lagPersonoppdrag(personFagsystemId)
-        lagLinje(arbeidsgiverOppdragId, 1.juli(), 10.juli(), 12000)
-        lagLinje(personOppdragId, 11.juli(), 31.juli(), 10000)
         val utbetaling_IdId = lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, UTBETALING_ID)
         opprettUtbetalingKobling(VEDTAKSPERIODE, UTBETALING_ID)
         opprettOppgave()

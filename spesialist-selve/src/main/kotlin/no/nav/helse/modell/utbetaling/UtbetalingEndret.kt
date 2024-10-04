@@ -17,7 +17,6 @@ import no.nav.helse.modell.oppgave.OppdaterOppgavestatusCommand
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import java.time.LocalDateTime
 import java.util.UUID
@@ -85,14 +84,6 @@ internal class UtbetalingEndret private constructor(
         ) = LagreOppdragCommand.Oppdrag(
             fagsystemId = jsonNode.path("fagsystemId").asText(),
             mottaker = jsonNode.path("mottaker").takeIf(JsonNode::isTextual)?.asText() ?: mottaker,
-            linjer =
-                jsonNode.path("linjer").map { linje ->
-                    LagreOppdragCommand.Oppdrag.Utbetalingslinje(
-                        fom = linje.path("fom").asLocalDate(),
-                        tom = linje.path("tom").asLocalDate(),
-                        totalbeløp = linje.path("totalbeløp").takeIf(JsonNode::isInt)?.asInt(),
-                    )
-                },
         )
     }
 }

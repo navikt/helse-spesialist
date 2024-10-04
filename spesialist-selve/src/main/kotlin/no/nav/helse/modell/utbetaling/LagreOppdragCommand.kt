@@ -12,7 +12,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.abonnement.UtbetalingPayload
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -38,32 +37,8 @@ internal class LagreOppdragCommand(
     internal class Oppdrag(
         private val fagsystemId: String,
         private val mottaker: String,
-        private val linjer: List<Utbetalingslinje>,
     ) {
-        internal fun lagre(utbetalingRepository: UtbetalingRepository) =
-            utbetalingRepository.nyttOppdrag(fagsystemId, mottaker)?.also {
-                lagreLinjer(utbetalingRepository, it)
-            }
-
-        private fun lagreLinjer(
-            utbetalingRepository: UtbetalingRepository,
-            oppdragId: Long,
-        ) {
-            linjer.forEach { it.lagre(utbetalingRepository, oppdragId) }
-        }
-
-        internal class Utbetalingslinje(
-            private val fom: LocalDate,
-            private val tom: LocalDate,
-            private val totalbeløp: Int?,
-        ) {
-            internal fun lagre(
-                utbetalingRepository: UtbetalingRepository,
-                oppdragId: Long,
-            ) {
-                utbetalingRepository.nyLinje(oppdragId, fom, tom, totalbeløp)
-            }
-        }
+        internal fun lagre(utbetalingRepository: UtbetalingRepository) = utbetalingRepository.nyttOppdrag(fagsystemId, mottaker)
     }
 
     override fun execute(context: CommandContext): Boolean {

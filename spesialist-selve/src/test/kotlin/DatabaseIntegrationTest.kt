@@ -478,20 +478,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             personbeløp = personbeløp,
         )
 
-    protected fun lagLinje(
-        oppdrag: Long,
-        fom: LocalDate,
-        tom: LocalDate,
-        totalbeløp: Int? = null,
-    ) {
-        utbetalingDao.nyLinje(
-            oppdragId = oppdrag,
-            fom = fom,
-            tom = tom,
-            totalbeløp = totalbeløp,
-        )
-    }
-
     protected fun fagsystemId() = (0..31).map { 'A' + Random().nextInt('Z' - 'A') }.joinToString("")
 
     protected data class Persondata(
