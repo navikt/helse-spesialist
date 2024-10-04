@@ -15,15 +15,15 @@ class SaksbehandlerDao(dataSource: DataSource) : HelseDao(dataSource), Saksbehan
         navn: String,
         epost: String,
         ident: String,
+        sisteHandlingUtført: LocalDateTime = LocalDateTime.now(),
     ) = asSQL(
         """ 
-            INSERT INTO saksbehandler(oid, navn, epost, ident, siste_handling_utført_tidspunkt) VALUES (:oid, :navn, :epost, :ident, :siste_handling_utfort_tidspunkt)
-            ON CONFLICT (oid)
-                DO UPDATE SET navn = :navn, epost = :epost, ident = :ident, siste_handling_utført_tidspunkt = :siste_handling_utfort_tidspunkt
-                WHERE (saksbehandler.navn, saksbehandler.epost, saksbehandler.ident) IS DISTINCT FROM
-                    (excluded.navn, excluded.epost, excluded.ident)
-            """,
-        mapOf("oid" to oid, "navn" to navn, "epost" to epost, "ident" to ident, "siste_handling_utfort_tidspunkt" to LocalDateTime.now()),
+        INSERT INTO saksbehandler (oid, navn, epost, ident, siste_handling_utført_tidspunkt)
+        VALUES (:oid, :navn, :epost, :ident, :siste_handling_utfort_tidspunkt)
+        ON CONFLICT (oid)
+            DO UPDATE SET navn = :navn, epost = :epost, ident = :ident, siste_handling_utført_tidspunkt = :siste_handling_utfort_tidspunkt
+        """.trimIndent(),
+        mapOf("oid" to oid, "navn" to navn, "epost" to epost, "ident" to ident, "siste_handling_utfort_tidspunkt" to sisteHandlingUtført),
     ).update()
 
     override fun finnSaksbehandler(oid: UUID) =

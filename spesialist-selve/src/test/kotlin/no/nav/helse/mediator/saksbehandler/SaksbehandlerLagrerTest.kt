@@ -3,10 +3,10 @@ package no.nav.helse.mediator.saksbehandler
 import TilgangskontrollForTestHarIkkeTilgang
 import io.mockk.mockk
 import io.mockk.verify
-import java.util.UUID
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 class SaksbehandlerLagrerTest {
     private val OID = UUID.randomUUID()
@@ -19,6 +19,6 @@ class SaksbehandlerLagrerTest {
     @Test
     fun `lagre saksbehandler`() {
         SaksbehandlerLagrer(dao).lagre(saksbehandler)
-        verify(exactly = 1) { dao.opprettSaksbehandler(OID, NAVN, EPOST, IDENT) }
+        verify(exactly = 1) { dao.opprettSaksbehandler(OID, NAVN, EPOST, IDENT, any()) }
     }
  }
