@@ -5,6 +5,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.db.AvviksvurderingDao
+import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.varsel.Varselkode
@@ -30,7 +31,7 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
             kommandofabrikk = kommandofabrikk,
             avviksvurderingDao = avviksvurderingDao,
             stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
-            poisonPills = emptyMap(),
+            poisonPills = PoisonPills(emptyMap()),
         )
 
     @BeforeEach

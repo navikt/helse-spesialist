@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.prometheus.client.CollectorRegistry
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.Meldingssender
+import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.modell.person.SøknadSendtCommand
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.test.lagFødselsnummer
@@ -28,7 +29,7 @@ internal class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
             avviksvurderingDao = mockk(),
             stansAutomatiskBehandlingMediator = mockk(relaxed = true),
             personRepository = mockk(relaxed = true),
-            poisonPills = emptyMap(),
+            poisonPills = PoisonPills(emptyMap()),
         )
     }
 

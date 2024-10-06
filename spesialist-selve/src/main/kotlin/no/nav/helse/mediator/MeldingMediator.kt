@@ -20,6 +20,7 @@ import no.nav.helse.mediator.meldinger.NyeVarslerRiver
 import no.nav.helse.mediator.meldinger.OppdaterPersondataRiver
 import no.nav.helse.mediator.meldinger.OverstyringIgangsattRiver
 import no.nav.helse.mediator.meldinger.Personmelding
+import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.mediator.meldinger.StansAutomatiskBehandlingRiver
 import no.nav.helse.mediator.meldinger.SøknadSendtRiver
 import no.nav.helse.mediator.meldinger.TilbakedateringBehandletRiver
@@ -90,7 +91,7 @@ internal class MeldingMediator(
     private val varselRepository: VarselRepository = VarselRepository(dataSource),
     private val stansAutomatiskBehandlingMediator: StansAutomatiskBehandlingMediator,
     private val personRepository: PersonRepository = PersonRepository(dataSource),
-    private val poisonPills: Map<String, Set<String>>,
+    private val poisonPills: PoisonPills,
 ) : Personhåndterer {
     private companion object {
         private val env = Environment()

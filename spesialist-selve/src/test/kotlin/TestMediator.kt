@@ -11,6 +11,7 @@ import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.Subsumsjonsmelder
+import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.MeldingDao
@@ -134,7 +135,7 @@ internal class TestMediator(
             kommandofabrikk = kommandofabrikk,
             avviksvurderingDao = avviksvurderingDao,
             stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
-            poisonPills = emptyMap(),
+            poisonPills = PoisonPills(emptyMap()),
         )
     }
 

@@ -1,10 +1,13 @@
 package no.nav.helse.db
 
+import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
+import no.nav.helse.objectMapper
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class PoisonPillDaoTest: AbstractDatabaseTest() {
@@ -13,19 +16,31 @@ class PoisonPillDaoTest: AbstractDatabaseTest() {
 
     @Test
     fun `kan finne poison pills`() {
-        lagPoisonPill("key1", "redpill")
-        lagPoisonPill("key1", "yellowpill")
-        lagPoisonPill("key2", "bluepill")
+        val poisonPill1 = "key1" to "redpill"
+        val poisonPill2 = "key1" to "yellowpill"
+        val poisonPill3 = "key2" to "bluepill"
+        val ikkePoisonPill1 = "key1" to "candyfloss"
+        val ikkePoisonPill2 = "key3" to "redpill"
+
+        insertPoisonPills(poisonPill1, poisonPill2, poisonPill3)
 
         val poisonPills = poisonPillDao.poisonPills()
-        assertEquals(2, poisonPills.size)
-        assertEquals(setOf("redpill", "yellowpill"), poisonPills["key1"])
-        assertEquals(setOf("bluepill"), poisonPills["key2"])
+        assertTrue(poisonPills.erPoisonPill(poisonPill1.somJsonNode()))
+        assertTrue(poisonPills.erPoisonPill(poisonPill2.somJsonNode()))
+        assertFalse(poisonPills.erPoisonPill(ikkePoisonPill1.somJsonNode()))
+        assertFalse(poisonPills.erPoisonPill(ikkePoisonPill2.somJsonNode()))
     }
 
-    private fun lagPoisonPill(feltnavn: String, identifikator: String) = sessionOf(dataSource).use { session ->
+    private fun Pair<String, String>.somJsonNode() = objectMapper.valueToTree<JsonNode>(mapOf(first to second))
+
+    private fun insertPoisonPills(vararg meldinger: Pair<String, String>) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
-        val query = """ INSERT INTO poison_pill(feltnavn, identifikator) VALUES (?, ?) """
-        session.run(queryOf(query, feltnavn, identifikator).asExecute)
+        val query = """ INSERT INTO poison_pill(feltnavn, identifikator) VALUES (:feltnavn, :identifikator) """
+        meldinger.forEach { (feltnavn, identifikator) ->
+            session.run(queryOf(query, mapOf(
+                "feltnavn" to feltnavn,
+                "identifikator" to identifikator,
+            )).asUpdate)
+        }
     }
 }
