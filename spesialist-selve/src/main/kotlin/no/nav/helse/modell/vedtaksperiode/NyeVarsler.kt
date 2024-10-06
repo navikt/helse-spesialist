@@ -2,11 +2,12 @@ package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.Kommandostarter
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
-import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.varsler
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import java.util.UUID
 
 internal class NyeVarsler private constructor(
@@ -37,5 +38,23 @@ internal class NyeVarsler private constructor(
         kommandostarter: Kommandostarter,
     ) {
         person.nyeVarsler(varsler)
+    }
+
+    companion object {
+        fun JsonNode.varsler(): List<Varsel> =
+            this.filter { it["nivå"].asText() == "VARSEL" && it["varselkode"]?.asText() != null }
+                .filter { it["kontekster"].any { kontekst -> kontekst["konteksttype"].asText() == "Vedtaksperiode" } }
+                .map { jsonNode ->
+                    val vedtaksperiodeId =
+                        jsonNode["kontekster"]
+                            .find { it["konteksttype"].asText() == "Vedtaksperiode" }!!["kontekstmap"]["vedtaksperiodeId"]
+                            .asUUID()
+                    Varsel(
+                        jsonNode["id"].asUUID(),
+                        jsonNode["varselkode"].asText(),
+                        jsonNode["tidsstempel"].asLocalDateTime(),
+                        vedtaksperiodeId,
+                    )
+                }
     }
 }

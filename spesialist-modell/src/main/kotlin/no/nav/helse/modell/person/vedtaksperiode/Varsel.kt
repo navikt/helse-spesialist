@@ -1,12 +1,10 @@
 package no.nav.helse.modell.person.vedtaksperiode
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AKTIV
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AVVIST
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.GODKJENT
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.INAKTIV
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.VURDERT
-import no.nav.helse.rapids_rivers.asLocalDateTime
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -117,25 +115,5 @@ class Varsel(
             )
 
         fun List<Varsel>.forhindrerAutomatisering() = any { it.status in listOf(VURDERT, AKTIV, AVVIST) }
-
-        fun JsonNode.varsler(): List<Varsel> =
-            this
-                .filter { it["nivå"].asText() == "VARSEL" && it["varselkode"]?.asText() != null }
-                .filter { it["kontekster"].any { kontekst -> kontekst["konteksttype"].asText() == "Vedtaksperiode" } }
-                .map { jsonNode ->
-                    val vedtaksperiodeId =
-                        UUID.fromString(
-                            jsonNode["kontekster"]
-                                .find { it["konteksttype"].asText() == "Vedtaksperiode" }!!["kontekstmap"]
-                                .get("vedtaksperiodeId")
-                                .asText(),
-                        )
-                    Varsel(
-                        UUID.fromString(jsonNode["id"].asText()),
-                        jsonNode["varselkode"].asText(),
-                        jsonNode["tidsstempel"].asLocalDateTime(),
-                        vedtaksperiodeId,
-                    )
-                }
     }
 }
