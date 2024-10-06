@@ -3,6 +3,7 @@ package no.nav.helse.mediator.meldinger.løsninger
 import no.nav.helse.db.ÅpneGosysOppgaverRepository
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
@@ -100,8 +101,8 @@ internal class ÅpneGosysOppgaverløsning(
         ) {
             sikkerLogg.info("Mottok melding ÅpneOppgaverMessage:\n{}", packet.toJson())
             val opprettet = packet["@opprettet"].asLocalDateTime()
-            val contextId = UUID.fromString(packet["contextId"].asText())
-            val hendelseId = UUID.fromString(packet["hendelseId"].asText())
+            val contextId = packet["contextId"].asUUID()
+            val hendelseId = packet["hendelseId"].asUUID()
             val fødselsnummer = packet["fødselsnummer"].asText()
 
             val antall = packet["@løsning.ÅpneOppgaver.antall"].takeUnless { it.isMissingOrNull() }?.asInt()
@@ -118,7 +119,7 @@ internal class ÅpneGosysOppgaverløsning(
             meldingMediator.løsning(
                 hendelseId = hendelseId,
                 contextId = contextId,
-                behovId = UUID.fromString(packet["@id"].asText()),
+                behovId = packet["@id"].asUUID(),
                 løsning = åpneGosysOppgaver,
                 context = context,
             )

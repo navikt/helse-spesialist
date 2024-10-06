@@ -3,13 +3,13 @@ package no.nav.helse.mediator.meldinger.løsninger
 import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
-import java.util.UUID
 
 internal class EgenAnsattløsning(
     private val opprettet: LocalDateTime,
@@ -44,8 +44,8 @@ internal class EgenAnsattløsning(
         ) {
             sikkerLogg.info("Mottok melding EgenAnsatt:\n{}", packet.toJson())
             val opprettet = packet["@opprettet"].asLocalDateTime()
-            val contextId = UUID.fromString(packet["contextId"].asText())
-            val hendelseId = UUID.fromString(packet["hendelseId"].asText())
+            val contextId = packet["contextId"].asUUID()
+            val hendelseId = packet["hendelseId"].asUUID()
             val fødselsnummer = packet["fødselsnummer"].asText()
 
             val erEgenAnsatt = packet["@løsning.EgenAnsatt"].asBoolean()
@@ -60,7 +60,7 @@ internal class EgenAnsattløsning(
             mediator.løsning(
                 hendelseId = hendelseId,
                 contextId = contextId,
-                behovId = UUID.fromString(packet["@id"].asText()),
+                behovId = packet["@id"].asUUID(),
                 løsning = egenAnsattløsning,
                 context = context,
             )

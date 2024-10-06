@@ -6,6 +6,7 @@ import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.ReservasjonRepository
 import no.nav.helse.db.TildelingRepository
 import no.nav.helse.mediator.Kommandostarter
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.AvbrytCommand
@@ -23,8 +24,8 @@ internal class VedtaksperiodeForkastet private constructor(
     private val json: String,
 ) : Vedtaksperiodemelding {
     internal constructor(packet: JsonMessage) : this(
-        UUID.fromString(packet["@id"].asText()),
-        UUID.fromString(packet["vedtaksperiodeId"].asText()),
+        packet["@id"].asUUID(),
+        packet["vedtaksperiodeId"].asUUID(),
         packet["fødselsnummer"].asText(),
         json = packet.toJson(),
     )

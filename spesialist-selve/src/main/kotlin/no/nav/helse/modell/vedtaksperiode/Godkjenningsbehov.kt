@@ -135,11 +135,11 @@ internal class Godkjenningsbehov private constructor(
         periodeFom = LocalDate.parse(packet["Godkjenning.periodeFom"].asText()),
         periodeTom = LocalDate.parse(packet["Godkjenning.periodeTom"].asText()),
         skjæringstidspunkt = LocalDate.parse(packet["Godkjenning.skjæringstidspunkt"].asText()),
-        vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
+        vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
         avviksvurderingId =
             packet["avviksvurderingId"].takeUnless { it.isMissingOrNull() }
                 ?.let { UUID.fromString(it.asText()) },
-        vilkårsgrunnlagId = UUID.fromString(packet["Godkjenning.vilkårsgrunnlagId"].asText()),
+        vilkårsgrunnlagId = packet["Godkjenning.vilkårsgrunnlagId"].asUUID(),
         spleisVedtaksperioder =
             packet["Godkjenning.perioderMedSammeSkjæringstidspunkt"].map { periodeNode ->
                 SpleisVedtaksperiode(
@@ -150,9 +150,9 @@ internal class Godkjenningsbehov private constructor(
                     skjæringstidspunkt = packet["Godkjenning.skjæringstidspunkt"].asLocalDate(),
                 )
             },
-        spleisBehandlingId = UUID.fromString(packet["Godkjenning.behandlingId"].asText()),
+        spleisBehandlingId = packet["Godkjenning.behandlingId"].asUUID(),
         tags = packet["Godkjenning.tags"].map { it.asText() },
-        utbetalingId = UUID.fromString(packet["utbetalingId"].asText()),
+        utbetalingId = packet["utbetalingId"].asUUID(),
         periodetype = Periodetype.valueOf(packet["Godkjenning.periodetype"].asText()),
         førstegangsbehandling = packet["Godkjenning.førstegangsbehandling"].asBoolean(),
         utbetalingtype = Utbetalingtype.valueOf(packet["Godkjenning.utbetalingtype"].asText()),

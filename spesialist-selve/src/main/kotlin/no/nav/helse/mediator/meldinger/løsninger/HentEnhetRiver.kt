@@ -2,13 +2,13 @@ package no.nav.helse.mediator.meldinger.løsninger
 
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 internal class HentEnhetRiver(
     private val mediator: MeldingMediator,
@@ -34,12 +34,12 @@ internal class HentEnhetRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val hendelseId = UUID.fromString(packet["hendelseId"].asText())
-        val contextId = UUID.fromString(packet["contextId"].asText())
+        val hendelseId = packet["hendelseId"].asUUID()
+        val contextId = packet["contextId"].asUUID()
         mediator.løsning(
             hendelseId,
             contextId,
-            UUID.fromString(packet["@id"].asText()),
+            packet["@id"].asUUID(),
             HentEnhetløsning(packet["@løsning.HentEnhet"].asText()),
             context,
         )

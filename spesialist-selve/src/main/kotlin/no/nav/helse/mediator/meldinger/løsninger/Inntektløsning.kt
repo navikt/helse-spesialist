@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -12,7 +13,6 @@ import no.nav.helse.rapids_rivers.asYearMonth
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.UUID
 
 internal class Inntektløsning(
     private val inntekter: List<Inntekter>,
@@ -57,8 +57,8 @@ internal class Inntektløsning(
             packet: JsonMessage,
             context: MessageContext,
         ) {
-            val hendelseId = UUID.fromString(packet["hendelseId"].asText())
-            val contextId = UUID.fromString(packet["contextId"].asText())
+            val hendelseId = packet["hendelseId"].asUUID()
+            val contextId = packet["contextId"].asUUID()
 
             val inntektsløsning =
                 Inntektløsning(
@@ -75,7 +75,7 @@ internal class Inntektløsning(
                     },
                 )
 
-            mediator.løsning(hendelseId, contextId, UUID.fromString(packet["@id"].asText()), inntektsløsning, context)
+            mediator.løsning(hendelseId, contextId, packet["@id"].asUUID(), inntektsløsning, context)
         }
     }
 }

@@ -3,6 +3,7 @@ package no.nav.helse.mediator.meldinger.løsninger
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.person.HentPersoninfoløsning
 import no.nav.helse.modell.person.HentPersoninfoløsninger
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -14,7 +15,6 @@ import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.typer.Kjønn
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 internal class PersoninfoRiver(
     private val mediator: MeldingMediator,
@@ -49,12 +49,12 @@ internal class PersoninfoRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val hendelseId = UUID.fromString(packet["hendelseId"].asText())
-        val contextId = UUID.fromString(packet["contextId"].asText())
+        val hendelseId = packet["hendelseId"].asUUID()
+        val contextId = packet["contextId"].asUUID()
         mediator.løsning(
             hendelseId,
             contextId,
-            UUID.fromString(packet["@id"].asText()),
+            packet["@id"].asUUID(),
             parsePersoninfo(packet["@løsning.HentPersoninfoV2"]),
             context,
         )
@@ -90,12 +90,12 @@ internal class FlerePersoninfoRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val hendelseId = UUID.fromString(packet["hendelseId"].asText())
-        val contextId = UUID.fromString(packet["contextId"].asText())
+        val hendelseId = packet["hendelseId"].asUUID()
+        val contextId = packet["contextId"].asUUID()
         mediator.løsning(
             hendelseId,
             contextId,
-            UUID.fromString(packet["@id"].asText()),
+            packet["@id"].asUUID(),
             HentPersoninfoløsninger(
                 packet["@løsning.HentPersoninfoV2"].map {
                     parsePersoninfo(

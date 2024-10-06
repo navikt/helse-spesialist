@@ -7,6 +7,7 @@ import no.nav.helse.db.ReservasjonRepository
 import no.nav.helse.db.TildelingRepository
 import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.mediator.Kommandostarter
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.Command
@@ -36,10 +37,10 @@ internal class UtbetalingEndret private constructor(
     private val json: String,
 ) : Personmelding {
     internal constructor(packet: JsonMessage) : this(
-        id = UUID.fromString(packet["@id"].asText()),
+        id = packet["@id"].asUUID(),
         fødselsnummer = packet["fødselsnummer"].asText(),
         organisasjonsnummer = packet["organisasjonsnummer"].asText(),
-        utbetalingId = UUID.fromString(packet["utbetalingId"].asText()),
+        utbetalingId = packet["utbetalingId"].asUUID(),
         type = packet["type"].asText(),
         gjeldendeStatus = Utbetalingsstatus.valueOf(packet["gjeldendeStatus"].asText()),
         opprettet = packet["@opprettet"].asLocalDateTime(),

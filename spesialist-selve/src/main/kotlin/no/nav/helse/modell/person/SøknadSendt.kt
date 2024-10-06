@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.Kommandostarter
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
@@ -42,7 +43,7 @@ internal class SøknadSendt private constructor(
     internal companion object {
         fun søknadSendt(packet: JsonMessage) =
             SøknadSendt(
-                id = UUID.fromString(packet["@id"].asText()),
+                id = packet["@id"].asUUID(),
                 fødselsnummer = packet["fnr"].asText(),
                 aktørId = packet["aktorId"].asText(),
                 organisasjonsnummer = packet["arbeidsgiver.orgnummer"].asText(),
@@ -51,7 +52,7 @@ internal class SøknadSendt private constructor(
 
         fun søknadSendtArbeidsledig(packet: JsonMessage) =
             SøknadSendt(
-                id = UUID.fromString(packet["@id"].asText()),
+                id = packet["@id"].asUUID(),
                 fødselsnummer = packet["fnr"].asText(),
                 aktørId = packet["aktorId"].asText(),
                 organisasjonsnummer = packet["tidligereArbeidsgiverOrgnummer"].asText(),

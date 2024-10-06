@@ -2,6 +2,7 @@ package no.nav.helse.mediator.meldinger.løsninger
 
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.River
@@ -10,7 +11,6 @@ import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
-import java.util.UUID
 
 internal class Fullmaktløsning(
     val harFullmakt: Boolean,
@@ -40,8 +40,8 @@ internal class Fullmaktløsning(
             context: MessageContext,
         ) {
             sikkerLogg.info("Mottok melding Fullmakt:\n{}", packet.toJson())
-            val contextId = UUID.fromString(packet["contextId"].asText())
-            val hendelseId = UUID.fromString(packet["hendelseId"].asText())
+            val contextId = packet["contextId"].asUUID()
+            val hendelseId = packet["hendelseId"].asUUID()
 
             val nå = LocalDate.now()
             val harFullmakt =
@@ -58,7 +58,7 @@ internal class Fullmaktløsning(
             meldingMediator.løsning(
                 hendelseId = hendelseId,
                 contextId = contextId,
-                behovId = UUID.fromString(packet["@id"].asText()),
+                behovId = packet["@id"].asUUID(),
                 løsning = fullmaktløsning,
                 context = context,
             )

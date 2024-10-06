@@ -2,13 +2,13 @@ package no.nav.helse.mediator.meldinger.løsninger
 
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.SpesialistRiver
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 internal class DokumentRiver(
     private val dokumentDao: DokumentDao,
@@ -38,7 +38,7 @@ internal class DokumentRiver(
         context: MessageContext,
     ) {
         val fødselsnummer = packet["fødselsnummer"].asText()
-        val dokumentId = UUID.fromString(packet["dokumentId"].asText())
+        val dokumentId = packet["dokumentId"].asUUID()
         val dokument = packet["@løsning.dokument"]
 
         sikkerLog.info(

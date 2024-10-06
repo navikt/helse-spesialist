@@ -2,6 +2,7 @@ package no.nav.helse.modell.vedtaksperiode.vedtak
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.Kommandostarter
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.person.Person
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -32,9 +33,9 @@ internal class Saksbehandlerløsning private constructor(
     private val json: String,
 ) : Personmelding {
     internal constructor(packet: JsonMessage) : this(
-        id = UUID.fromString(packet["@id"].asText()),
+        id = packet["@id"].asUUID(),
         oppgaveId = packet["oppgaveId"].asLong(),
-        godkjenningsbehovhendelseId = UUID.fromString(packet["hendelseId"].asText()),
+        godkjenningsbehovhendelseId = packet["hendelseId"].asUUID(),
         fødselsnummer = packet["fødselsnummer"].asText(),
         godkjent = packet["godkjent"].asBoolean(),
         ident = packet["saksbehandlerident"].asText(),

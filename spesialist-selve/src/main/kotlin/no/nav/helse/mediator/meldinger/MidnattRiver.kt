@@ -3,12 +3,12 @@ package no.nav.helse.mediator.meldinger
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 internal class MidnattRiver(
     private val mediator: MeldingMediator,
@@ -34,7 +34,7 @@ internal class MidnattRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val hendelseId = UUID.fromString(packet["@id"].asText())
+        val hendelseId = packet["@id"].asUUID()
         logg.info("Mottok melding midnatt , {}", kv("hendelseId", hendelseId))
 
         val antallSlettet = mediator.slettGamleDokumenter()

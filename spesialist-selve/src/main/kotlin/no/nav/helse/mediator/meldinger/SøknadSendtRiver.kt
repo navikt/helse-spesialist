@@ -3,6 +3,7 @@ package no.nav.helse.mediator.meldinger
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -10,7 +11,6 @@ import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 internal class SøknadSendtRiver(
     private val mediator: MeldingMediator,
@@ -42,11 +42,11 @@ internal class SøknadSendtRiver(
     ) {
         logg.info(
             "Mottok SøknadSendt med {}",
-            keyValue("hendelseId", UUID.fromString(packet["@id"].asText())),
+            keyValue("hendelseId", packet["@id"].asUUID()),
         )
         sikkerLogg.info(
             "Mottok SøknadSendt med {}, {}",
-            keyValue("hendelseId", UUID.fromString(packet["@id"].asText())),
+            keyValue("hendelseId", packet["@id"].asUUID()),
             keyValue("hendelse", packet.toJson()),
         )
         mediator.mottaSøknadSendt(SøknadSendt.søknadSendt(packet), context)

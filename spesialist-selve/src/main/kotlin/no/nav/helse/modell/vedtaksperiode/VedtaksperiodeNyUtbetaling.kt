@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.TransactionalSession
 import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.mediator.Kommandostarter
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
@@ -21,10 +22,10 @@ internal class VedtaksperiodeNyUtbetaling private constructor(
     private val json: String,
 ) : Vedtaksperiodemelding {
     internal constructor(packet: JsonMessage) : this(
-        id = UUID.fromString(packet["@id"].asText()),
+        id = packet["@id"].asUUID(),
         fødselsnummer = packet["fødselsnummer"].asText(),
-        vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
-        utbetalingId = UUID.fromString(packet["utbetalingId"].asText()),
+        vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
+        utbetalingId = packet["utbetalingId"].asUUID(),
         json = packet.toJson(),
     )
 

@@ -17,7 +17,7 @@ internal class NyeVarsler private constructor(
     private val json: String,
 ) : Personmelding {
     internal constructor(packet: JsonMessage) : this(
-        id = UUID.fromString(packet["@id"].asText()),
+        id = packet["@id"].asUUID(),
         fødselsnummer = packet["fødselsnummer"].asText(),
         varsler = packet["aktiviteter"].varsler(),
         json = packet.toJson(),

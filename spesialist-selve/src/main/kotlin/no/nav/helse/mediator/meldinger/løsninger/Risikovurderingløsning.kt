@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.RisikovurderingRepository
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_2
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_3
@@ -92,9 +93,9 @@ internal class Risikovurderingløsning(
         ) {
             sikkerLogg.info("Mottok melding RisikovurderingMessage:\n{}", packet.toJson())
             val opprettet = packet["@opprettet"].asLocalDateTime()
-            val vedtaksperiodeId = UUID.fromString(packet["Risikovurdering.vedtaksperiodeId"].asText())
-            val contextId = UUID.fromString(packet["contextId"].asText())
-            val hendelseId = UUID.fromString(packet["hendelseId"].asText())
+            val vedtaksperiodeId = packet["Risikovurdering.vedtaksperiodeId"].asUUID()
+            val contextId = packet["contextId"].asUUID()
+            val hendelseId = packet["hendelseId"].asUUID()
 
             val løsning = packet["@løsning.Risikovurdering"]
             val kanGodkjennesAutomatisk = løsning["kanGodkjennesAutomatisk"].asBoolean()
@@ -110,7 +111,7 @@ internal class Risikovurderingløsning(
             meldingMediator.løsning(
                 hendelseId = hendelseId,
                 contextId = contextId,
-                behovId = UUID.fromString(packet["@id"].asText()),
+                behovId = packet["@id"].asUUID(),
                 løsning = risikovurdering,
                 context = context,
             )

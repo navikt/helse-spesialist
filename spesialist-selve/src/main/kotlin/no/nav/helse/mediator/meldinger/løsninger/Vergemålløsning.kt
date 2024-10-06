@@ -2,13 +2,13 @@ package no.nav.helse.mediator.meldinger.løsninger
 
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.vergemal.VergemålOgFremtidsfullmakt
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 internal class Vergemålløsning(
     val vergemålOgFremtidsfullmakt: VergemålOgFremtidsfullmakt,
@@ -36,8 +36,8 @@ internal class Vergemålløsning(
             context: MessageContext,
         ) {
             sikkerLogg.info("Mottok melding Vergemål:\n{}", packet.toJson())
-            val contextId = UUID.fromString(packet["contextId"].asText())
-            val hendelseId = UUID.fromString(packet["hendelseId"].asText())
+            val contextId = packet["contextId"].asUUID()
+            val hendelseId = packet["hendelseId"].asUUID()
 
             val vergemålNode = packet["@løsning.Vergemål"]
             val harVergemål = !vergemålNode["vergemål"].isEmpty
@@ -57,7 +57,7 @@ internal class Vergemålløsning(
             meldingMediator.løsning(
                 hendelseId = hendelseId,
                 contextId = contextId,
-                behovId = UUID.fromString(packet["@id"].asText()),
+                behovId = packet["@id"].asUUID(),
                 løsning = vergemålLøsning,
                 context = context,
             )

@@ -3,6 +3,7 @@ package no.nav.helse.modell.overstyring
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.TransactionalSession
 import no.nav.helse.mediator.Kommandostarter
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.person.Person
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -17,9 +18,9 @@ internal class OverstyringIgangsatt private constructor(
     private val json: String,
 ) : Personmelding {
     internal constructor(packet: JsonMessage) : this(
-        id = UUID.fromString(packet["@id"].asText()),
+        id = packet["@id"].asUUID(),
         fødselsnummer = packet["fødselsnummer"].asText(),
-        kilde = UUID.fromString(packet["kilde"].asText()),
+        kilde = packet["kilde"].asUUID(),
         berørteVedtaksperiodeIder = packet["berørtePerioder"].map { UUID.fromString(it["vedtaksperiodeId"].asText()) },
         json = packet.toJson(),
     )

@@ -17,7 +17,7 @@ internal class VedtakFattet private constructor(
     private val spleisBehandlingId: UUID,
 ) : Vedtaksperiodemelding {
     internal constructor(packet: JsonMessage) : this(
-        id = UUID.fromString(packet["@id"].asText()),
+        id = packet["@id"].asUUID(),
         fødselsnummer = packet["fødselsnummer"].asText(),
         vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
         spleisBehandlingId = packet["behandlingId"].asUUID(),

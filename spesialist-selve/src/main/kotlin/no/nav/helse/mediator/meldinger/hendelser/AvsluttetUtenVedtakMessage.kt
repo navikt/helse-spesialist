@@ -29,8 +29,8 @@ internal class AvsluttetUtenVedtakMessage private constructor(
     internal constructor(packet: JsonMessage) : this(
         id = packet["@id"].asUUID(),
         fødselsnummer = packet["fødselsnummer"].asText(),
-        vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
-        spleisBehandlingId = UUID.fromString(packet["behandlingId"].asText()),
+        vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
+        spleisBehandlingId = packet["behandlingId"].asUUID(),
         hendelser = packet["hendelser"].map { it.asUUID() },
         json = packet.toJson(),
     )

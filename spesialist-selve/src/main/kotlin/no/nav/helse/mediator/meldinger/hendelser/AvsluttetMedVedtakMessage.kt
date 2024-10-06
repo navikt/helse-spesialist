@@ -25,8 +25,8 @@ internal class AvsluttetMedVedtakMessage(
     private val fødselsnummer = packet["fødselsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
     private val vedtakFattetTidspunkt = packet["vedtakFattetTidspunkt"].asLocalDateTime()
-    private val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
-    private val spleisBehandlingId = UUID.fromString(packet["behandlingId"].asText())
+    private val vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID()
+    private val spleisBehandlingId = packet["behandlingId"].asUUID()
     private val skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate()
     private val hendelser = packet["hendelser"].map { it.asUUID() }
     private val sykepengegrunnlag = packet["sykepengegrunnlag"].asDouble()
