@@ -6,7 +6,7 @@ import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.db.TildelingDao
+import no.nav.helse.db.TildelingRepository
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
@@ -53,18 +53,18 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
     private val CONTEXT_ID = UUID.randomUUID()
     override val HENDELSE_ID = UUID.randomUUID()
 
-    private val nyTildelingDao = mockk<TildelingDao>(relaxed = true)
+    private val tildelingRepository = mockk<TildelingRepository>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
 
     @BeforeEach
     fun beforeEach() {
-        clearMocks(nyTildelingDao, oppgaveService)
+        clearMocks(tildelingRepository, oppgaveService)
     }
 
     @Test
     fun `lagre oppgave uten tildeling medfører forsøk på å slette eksisterende tildeling`() {
         val oppgave = nyOppgave()
-        val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
+        val oppgavelagrer = Oppgavelagrer(tildelingRepository)
 
         oppgavelagrer.lagre(oppgaveService, oppgave.toDto(), CONTEXT_ID)
         verify(exactly = 1) {
@@ -78,25 +78,25 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
                 true,
             )
         }
-        verify(exactly = 0) { nyTildelingDao.tildel(any(), any()) }
-        verify(exactly = 1) { nyTildelingDao.avmeld(OPPGAVE_ID) }
+        verify(exactly = 0) { tildelingRepository.tildel(any(), any()) }
+        verify(exactly = 1) { tildelingRepository.avmeld(OPPGAVE_ID) }
     }
 
     @Test
     fun `oppdatere oppgave uten tildeling medfører forsøk på å slette eksisterende tildeling`() {
         val oppgave = nyOppgave()
-        val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
+        val oppgavelagrer = Oppgavelagrer(tildelingRepository)
 
         oppgavelagrer.oppdater(oppgaveService, oppgave.toDto())
         verify(exactly = 1) { oppgaveService.oppdater(OPPGAVE_ID, "AvventerSaksbehandler", null, null, listOf(EgenskapForDatabase.SØKNAD)) }
-        verify(exactly = 0) { nyTildelingDao.tildel(any(), any()) }
-        verify(exactly = 1) { nyTildelingDao.avmeld(OPPGAVE_ID) }
+        verify(exactly = 0) { tildelingRepository.tildel(any(), any()) }
+        verify(exactly = 1) { tildelingRepository.avmeld(OPPGAVE_ID) }
     }
 
     @Test
     fun `lagre oppgave uten tildeling eller totrinnsvurdering`() {
         val oppgave = nyOppgave(medTotrinnsvurdering = false)
-        val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
+        val oppgavelagrer = Oppgavelagrer(tildelingRepository)
 
         oppgavelagrer.lagre(oppgaveService, oppgave.toDto(), CONTEXT_ID)
         verify(exactly = 1) {
@@ -110,14 +110,14 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
                 true,
             )
         }
-        verify(exactly = 0) { nyTildelingDao.tildel(any(), any()) }
+        verify(exactly = 0) { tildelingRepository.tildel(any(), any()) }
         verify(exactly = 0) { oppgaveService.lagreTotrinnsvurdering(any()) }
     }
 
     @Test
     fun `lagre oppgave uten tildeling`() {
         val oppgave = nyOppgave(medTotrinnsvurdering = true)
-        val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
+        val oppgavelagrer = Oppgavelagrer(tildelingRepository)
 
         oppgavelagrer.lagre(oppgaveService, oppgave.toDto(), CONTEXT_ID)
         verify(exactly = 1) {
@@ -131,7 +131,7 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
                 true,
             )
         }
-        verify(exactly = 0) { nyTildelingDao.tildel(any(), any()) }
+        verify(exactly = 0) { tildelingRepository.tildel(any(), any()) }
         verify(exactly = 1) {
             oppgaveService.lagreTotrinnsvurdering(
                 TotrinnsvurderingDto(
@@ -151,7 +151,7 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
     fun `lagre oppgave uten totrinnsvurdering`() {
         val oppgave = nyOppgave(medTotrinnsvurdering = false)
         oppgave.forsøkTildelingVedReservasjon(saksbehandler)
-        val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
+        val oppgavelagrer = Oppgavelagrer(tildelingRepository)
 
         oppgavelagrer.lagre(oppgaveService, oppgave.toDto(), CONTEXT_ID)
         verify(exactly = 1) {
@@ -165,7 +165,7 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
                 true,
             )
         }
-        verify(exactly = 1) { nyTildelingDao.tildel(OPPGAVE_ID, SAKSBEHANDLER_OID) }
+        verify(exactly = 1) { tildelingRepository.tildel(OPPGAVE_ID, SAKSBEHANDLER_OID) }
         verify(exactly = 0) { oppgaveService.lagreTotrinnsvurdering(any()) }
     }
 
@@ -173,7 +173,7 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
     fun `lagre oppgave`() {
         val oppgave = nyOppgave(medTotrinnsvurdering = true)
         oppgave.forsøkTildelingVedReservasjon(saksbehandler)
-        val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
+        val oppgavelagrer = Oppgavelagrer(tildelingRepository)
 
         oppgavelagrer.lagre(oppgaveService, oppgave.toDto(), CONTEXT_ID)
         verify(exactly = 1) {
@@ -187,7 +187,7 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
                 true,
             )
         }
-        verify(exactly = 1) { nyTildelingDao.tildel(OPPGAVE_ID, SAKSBEHANDLER_OID) }
+        verify(exactly = 1) { tildelingRepository.tildel(OPPGAVE_ID, SAKSBEHANDLER_OID) }
         verify(exactly = 1) {
             oppgaveService.lagreTotrinnsvurdering(
                 TotrinnsvurderingDto(
@@ -208,13 +208,13 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
         val oppgave = nyOppgave(medTotrinnsvurdering = false)
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
         oppgave.ferdigstill()
-        val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
+        val oppgavelagrer = Oppgavelagrer(tildelingRepository)
 
         oppgavelagrer.oppdater(oppgaveService, oppgave.toDto())
         verify(exactly = 1) {
             oppgaveService.oppdater(OPPGAVE_ID, "Ferdigstilt", SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID, listOf(EgenskapForDatabase.SØKNAD))
         }
-        verify(exactly = 0) { nyTildelingDao.tildel(any(), any()) }
+        verify(exactly = 0) { tildelingRepository.tildel(any(), any()) }
         verify(exactly = 0) { oppgaveService.lagreTotrinnsvurdering(any()) }
     }
 
@@ -223,13 +223,13 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
         val oppgave = nyOppgave(medTotrinnsvurdering = true)
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
         oppgave.ferdigstill()
-        val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
+        val oppgavelagrer = Oppgavelagrer(tildelingRepository)
 
         oppgavelagrer.oppdater(oppgaveService, oppgave.toDto())
         verify(exactly = 1) {
             oppgaveService.oppdater(OPPGAVE_ID, "Ferdigstilt", SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID, listOf(EgenskapForDatabase.SØKNAD))
         }
-        verify(exactly = 0) { nyTildelingDao.tildel(any(), any()) }
+        verify(exactly = 0) { tildelingRepository.tildel(any(), any()) }
         verify(exactly = 1) {
             oppgaveService.lagreTotrinnsvurdering(
                 TotrinnsvurderingDto(
@@ -251,7 +251,7 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
         oppgave.forsøkTildelingVedReservasjon(saksbehandler)
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
         oppgave.ferdigstill()
-        val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
+        val oppgavelagrer = Oppgavelagrer(tildelingRepository)
 
         oppgavelagrer.oppdater(oppgaveService, oppgave.toDto())
         verify(exactly = 1) {
@@ -266,7 +266,7 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
         oppgave.forsøkTildelingVedReservasjon(saksbehandler)
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
         oppgave.ferdigstill()
-        val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
+        val oppgavelagrer = Oppgavelagrer(tildelingRepository)
 
         oppgavelagrer.oppdater(oppgaveService, oppgave.toDto())
         verify(exactly = 1) {

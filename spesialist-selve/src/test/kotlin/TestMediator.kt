@@ -71,7 +71,7 @@ internal class TestMediator(
         OppgaveService(
             meldingRepository = meldingDao,
             oppgaveRepository = OppgaveDao(dataSource),
-            tildelingDao = tildelingDao,
+            tildelingRepository = tildelingDao,
             reservasjonDao = ReservasjonDao(dataSource),
             opptegnelseRepository = opptegnelseDao,
             totrinnsvurderingRepository = totrinnsvurderingDao,

@@ -10,7 +10,7 @@ import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.SorteringsnøkkelForDatabase
-import no.nav.helse.db.TildelingDao
+import no.nav.helse.db.TildelingRepository
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.db.TotrinnsvurderingRepository
 import no.nav.helse.mediator.SaksbehandlerMediator.Companion.tilApiversjon
@@ -56,7 +56,7 @@ interface Oppgavefinner {
 internal class OppgaveService(
     private val meldingRepository: MeldingRepository,
     private val oppgaveRepository: OppgaveRepository,
-    private val tildelingDao: TildelingDao,
+    private val tildelingRepository: TildelingRepository,
     private val reservasjonDao: ReservasjonDao,
     private val opptegnelseRepository: OpptegnelseRepository,
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
@@ -78,7 +78,7 @@ internal class OppgaveService(
         val oppgavemelder = Oppgavemelder(meldingRepository, rapidsConnection)
         oppgave.register(oppgavemelder)
         tildelVedReservasjon(fødselsnummer, oppgave)
-        Oppgavelagrer(tildelingDao).lagre(this, oppgave.toDto(), contextId)
+        Oppgavelagrer(tildelingRepository).lagre(this, oppgave.toDto(), contextId)
         oppgavemelder.oppgaveOpprettet(oppgave)
     }
 
@@ -95,7 +95,7 @@ internal class OppgaveService(
             ).oppgave(id)
         oppgave.register(Oppgavemelder(meldingRepository, rapidsConnection))
         val returverdi = oppgaveBlock(oppgave)
-        Oppgavelagrer(tildelingDao).oppdater(this@OppgaveService, oppgave.toDto())
+        Oppgavelagrer(tildelingRepository).oppdater(this@OppgaveService, oppgave.toDto())
         return returverdi
     }
 

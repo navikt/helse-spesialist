@@ -36,7 +36,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     private val oppgaveService =
         OppgaveService(
             oppgaveRepository = OppgaveDao(dataSource),
-            tildelingDao = TildelingDao(dataSource),
+            tildelingRepository = TildelingDao(dataSource),
             reservasjonDao = reservasjonDao,
             opptegnelseRepository = OpptegnelseDao(dataSource),
             totrinnsvurderingRepository = totrinnsvurderingDao,

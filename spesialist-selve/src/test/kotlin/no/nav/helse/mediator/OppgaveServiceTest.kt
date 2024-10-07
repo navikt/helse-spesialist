@@ -11,6 +11,7 @@ import no.nav.helse.SpeilTilgangsgrupper
 import no.nav.helse.db.AntallOppgaverFraDatabase
 import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
+import no.nav.helse.db.MeldingRepository
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.db.OpptegnelseRepository
@@ -19,12 +20,11 @@ import no.nav.helse.db.Reservasjon
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SaksbehandlerFraDatabase
-import no.nav.helse.db.TildelingDao
+import no.nav.helse.db.TildelingRepository
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.idForGruppe
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.TestMelding
 import no.nav.helse.modell.oppgave.Egenskap
@@ -86,9 +86,9 @@ internal class OppgaveServiceTest {
     }
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
-    private val meldingDao = mockk<MeldingDao>(relaxed = true)
+    private val meldingRepository = mockk<MeldingRepository>(relaxed = true)
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
-    private val tildelingDao = mockk<TildelingDao>(relaxed = true)
+    private val tildelingRepository = mockk<TildelingRepository>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val opptegnelseRepository = mockk<OpptegnelseRepository>(relaxed = true)
     private val totrinnsvurderingDao = mockk<TotrinnsvurderingDao>(relaxed = true)
@@ -97,9 +97,9 @@ internal class OppgaveServiceTest {
 
     private val mediator =
         OppgaveService(
-            meldingRepository = meldingDao,
+            meldingRepository = meldingRepository,
             oppgaveRepository = oppgaveDao,
-            tildelingDao = tildelingDao,
+            tildelingRepository = tildelingRepository,
             reservasjonDao = reservasjonDao,
             opptegnelseRepository = opptegnelseRepository,
             totrinnsvurderingRepository = totrinnsvurderingDao,
@@ -125,7 +125,7 @@ internal class OppgaveServiceTest {
 
     @BeforeEach
     fun setup() {
-        clearMocks(oppgaveDao, vedtakDao, tildelingDao, opptegnelseRepository)
+        clearMocks(oppgaveDao, vedtakDao, tildelingRepository, opptegnelseRepository)
         testRapid.reset()
     }
 
@@ -166,7 +166,7 @@ internal class OppgaveServiceTest {
         oppgaveinspektør(oppgave) {
             assertEquals(saksbehandler.toDto(), tildeltTil)
         }
-        verify(exactly = 1) { tildelingDao.tildel(any(), SAKSBEHANDLEROID) }
+        verify(exactly = 1) { tildelingRepository.tildel(any(), SAKSBEHANDLEROID) }
         assertAntallOpptegnelser(1)
     }
 
@@ -178,7 +178,7 @@ internal class OppgaveServiceTest {
         mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
             stikkprøveoppgave(it)
         }
-        verify(exactly = 0) { tildelingDao.tildel(any(), any()) }
+        verify(exactly = 0) { tildelingRepository.tildel(any(), any()) }
         assertAntallOpptegnelser(1)
     }
 
