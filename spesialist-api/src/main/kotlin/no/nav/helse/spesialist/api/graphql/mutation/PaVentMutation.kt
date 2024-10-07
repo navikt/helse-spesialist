@@ -27,13 +27,13 @@ class PaVentMutation(
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
     }
 
-    // Gammel leggPaVent, skal fjernes når leggPaVentMedArsaker er tatt i bruk fra speil
     @Suppress("unused")
     suspend fun leggPaVent(
         oppgaveId: String,
         notatTekst: String,
         frist: LocalDate,
         tildeling: Boolean,
+        arsaker: List<PaVentRequest.PaVentArsak>? = emptyList(),
         env: DataFetchingEnvironment,
     ): DataFetcherResult<PaVent?> {
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
@@ -46,46 +46,7 @@ class PaVentMutation(
                         frist,
                         tildeling,
                         notatTekst,
-                        emptyList(),
-                    ),
-                    saksbehandler,
-                )
-                newResult<PaVent?>().data(
-                    PaVent(
-                        frist = frist,
-                        oid = saksbehandler.oid,
-                    ),
-                ).build()
-            } catch (e: OppgaveIkkeTildelt) {
-                newResult<PaVent?>().error(ikkeTildeltError(e)).build()
-            } catch (e: OppgaveTildeltNoenAndre) {
-                newResult<PaVent?>().error(tildeltNoenAndreError(e)).build()
-            } catch (e: RuntimeException) {
-                newResult<PaVent?>().error(getUpdateError(oppgaveId)).build()
-            }
-        }
-    }
-
-    @Suppress("unused")
-    suspend fun leggPaVentMedArsaker(
-        oppgaveId: String,
-        notatTekst: String,
-        frist: LocalDate,
-        tildeling: Boolean,
-        arsaker: List<PaVentRequest.PaVentArsak>,
-        env: DataFetchingEnvironment,
-    ): DataFetcherResult<PaVent?> {
-        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
-        return withContext(Dispatchers.IO) {
-            try {
-                saksbehandlerhåndterer.påVent(
-                    PaVentRequest.LeggPaVent(
-                        oppgaveId.toLong(),
-                        saksbehandler.oid,
-                        frist,
-                        tildeling,
-                        notatTekst,
-                        arsaker,
+                        arsaker ?: emptyList(),
                     ),
                     saksbehandler,
                 )

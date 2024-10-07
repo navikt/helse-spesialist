@@ -381,8 +381,7 @@ type Mutation {
     fjernPaVent(oppgaveId: String!): Boolean
     fjernTildeling(oppgaveId: String!): Boolean!
     innvilgVedtak(avslag: AvslagInput, oppgavereferanse: String!): Boolean!
-    leggPaVent(frist: LocalDate!, notatTekst: String!, oppgaveId: String!, tildeling: Boolean!): PaVent
-    leggPaVentMedArsaker(arsaker: [PaVentArsakInput!]!, frist: LocalDate!, notatTekst: String!, oppgaveId: String!, tildeling: Boolean!): PaVent
+    leggPaVent(arsaker: [PaVentArsakInput!], frist: LocalDate!, notatTekst: String!, oppgaveId: String!, tildeling: Boolean!): PaVent
     leggTilKommentar(notatId: Int!, saksbehandlerident: String!, tekst: String!): Kommentar
     leggTilNotat(saksbehandlerOid: String!, tekst: String!, type: NotatType!, vedtaksperiodeId: String!): Notat
     minimumSykdomsgrad(minimumSykdomsgrad: MinimumSykdomsgradInput!): Boolean!

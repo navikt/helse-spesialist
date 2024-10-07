@@ -37,8 +37,8 @@ internal class PaVentMutationTest : AbstractGraphQLApiTest() {
         val body =
             runQuery(
                 """
-                    mutation LeggPaVentMedArsaker {
-                        leggPaVentMedArsaker(
+                    mutation LeggPaVent {
+                        leggPaVent(
                             notatTekst: "Dette er et notat",
                             frist: "2024-01-01",
                             oppgaveId: "1",
@@ -50,7 +50,7 @@ internal class PaVentMutationTest : AbstractGraphQLApiTest() {
                     }
                 """,
             )
-        assertEquals(oid.toString(), body["data"]["leggPaVentMedArsaker"]["oid"].asText())
+        assertEquals(oid.toString(), body["data"]["leggPaVent"]["oid"].asText())
     }
 
     @Test
