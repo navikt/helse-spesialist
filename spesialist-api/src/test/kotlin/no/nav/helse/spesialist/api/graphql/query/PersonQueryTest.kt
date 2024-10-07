@@ -38,18 +38,13 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     @ResourceLock("auditlogg-lytter")
     fun `henter person`() {
         mockSnapshot()
-        val logglytter = opprettLogglytter()
+        val logglytter = Logglytter()
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
 
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
-        assertEquals(
-            1,
-            logglytter.list.filter {
-                it.message.contains("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery") && it.level == Level.INFO
-            }.size,
-        )
+        logglytter.assertBleLogget("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery", Level.INFO)
     }
 
     @Test
@@ -71,45 +66,31 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     @Test
     @ResourceLock("auditlogg-lytter")
     fun `får 404-feil når personen man søker etter ikke finnes`() {
-        val logglytter = opprettLogglytter()
+        val logglytter = Logglytter()
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
 
         assertEquals(404, body["errors"].first()["extensions"]["code"].asInt())
-        assertEquals(
-            1,
-            logglytter.list.filter {
-                it.message.contains(
-                    "suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery msg=Finner ikke data for person med identifikator $FØDSELSNUMMER",
-                ) && it.level == Level.WARN
-            }.size,
-        )
+        logglytter.assertBleLogget("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery msg=Finner ikke data for person med identifikator $FØDSELSNUMMER", Level.WARN)
     }
 
     @Test
     @ResourceLock("auditlogg-lytter")
     fun `får 404-feil når personen man søker etter på aktørId ikke finnes`() {
-        val logglytter = opprettLogglytter()
+        val logglytter = Logglytter()
         val body = runQuery("""{ person(aktorId: "$AKTØRID") { aktorId } }""")
 
         assertEquals(404, body["errors"].first()["extensions"]["code"].asInt())
-        assertEquals(
-            1,
-            logglytter.list.filter {
-                it.message.contains(
-                    "suid=${SAKSBEHANDLER.ident} duid=$AKTØRID operation=PersonQuery msg=Finner ikke data for person med identifikator $AKTØRID",
-                ) && it.level == Level.WARN
-            }.size,
-        )
+        logglytter.assertBleLogget("suid=${SAKSBEHANDLER.ident} duid=$AKTØRID operation=PersonQuery msg=Finner ikke data for person med identifikator $AKTØRID", Level.WARN)
     }
 
     @Test
     @ResourceLock("auditlogg-lytter")
     fun `får 400-feil når det mangler både fødselsnummer og aktørId`() {
-        val logglytter = opprettLogglytter()
+        val logglytter = Logglytter()
         val body = runQuery("""{ person(fnr: null, aktorId: null) { aktorId } }""")
 
         assertEquals(400, body["errors"].first()["extensions"]["code"].asInt())
-        assertTrue(logglytter.list.isEmpty()) // Det er ikke noen ID-er å audit-logge i dette tilfellet
+        logglytter.assertIngenLogging() // Det er ikke noen ID-er å audit-logge i dette tilfellet
     }
 
     @Test
@@ -118,20 +99,13 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val dNummer = "41017012345"
         opprettPerson(fødselsnummer = dNummer, aktørId = AKTØRID)
         opprettVedtaksperiode(opprettPerson(fødselsnummer = FØDSELSNUMMER, aktørId = AKTØRID), opprettArbeidsgiver())
-        val logglytter = opprettLogglytter()
+        val logglytter = Logglytter()
         val body = runQuery("""{ person(aktorId: "$AKTØRID") { fodselsnummer } }""")
 
         val extensions = body["errors"].first()["extensions"]
         assertEquals(500, extensions["code"].asInt())
         assertEquals(setOf(dNummer, FØDSELSNUMMER), extensions["fodselsnumre"].map(JsonNode::asText).toSet())
-        assertEquals(
-            1,
-            logglytter.list.filter {
-                it.message.contains(
-                    "suid=${SAKSBEHANDLER.ident} duid=$AKTØRID operation=PersonQuery msg=Mer enn ett fødselsnummer for personen",
-                ) && it.level == Level.WARN
-            }.size,
-        )
+        logglytter.assertBleLogget("suid=${SAKSBEHANDLER.ident} duid=$AKTØRID operation=PersonQuery msg=Mer enn ett fødselsnummer for personen", Level.WARN)
     }
 
     @Test
@@ -140,16 +114,11 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         mockSnapshot()
         opprettVedtaksperiode(opprettPerson(adressebeskyttelse = Adressebeskyttelse.Fortrolig), opprettArbeidsgiver())
 
-        val logglytter = opprettLogglytter()
+        val logglytter = Logglytter()
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""", kode7Saksbehandlergruppe)
 
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
-        assertEquals(
-            1,
-            logglytter.list.filter {
-                it.message.contains("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER") && it.level == Level.INFO
-            }.size,
-        )
+        logglytter.assertBleLogget("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER", Level.INFO)
     }
 
     @Test
@@ -157,18 +126,11 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     fun `får 403-feil ved oppslag av kode7-personer uten riktige tilganger`() {
         opprettVedtaksperiode(opprettPerson(adressebeskyttelse = Adressebeskyttelse.Fortrolig), opprettArbeidsgiver())
 
-        val logglytter = opprettLogglytter()
+        val logglytter = Logglytter()
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
 
         assertEquals(403, body["errors"].first()["extensions"]["code"].asInt())
-        assertEquals(
-            1,
-            logglytter.list.filter {
-                it.message.contains(
-                    "suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery flexString1=Deny",
-                ) && it.level == Level.WARN
-            }.size,
-        )
+        logglytter.assertBleLogget("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery flexString1=Deny", Level.WARN)
     }
 
     @Test
@@ -178,16 +140,11 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         every { egenAnsattApiDao.erEgenAnsatt(FØDSELSNUMMER) } returns true
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 
-        val logglytter = opprettLogglytter()
+        val logglytter = Logglytter()
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""", skjermedePersonerGruppeId)
 
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
-        assertEquals(
-            1,
-            logglytter.list.filter {
-                it.message.contains("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery") && it.level == Level.INFO
-            }.size,
-        )
+        logglytter.assertBleLogget("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery", Level.INFO)
     }
 
     @Test
@@ -196,18 +153,11 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         every { egenAnsattApiDao.erEgenAnsatt(FØDSELSNUMMER) } returns true
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 
-        val logglytter = opprettLogglytter()
+        val logglytter = Logglytter()
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
 
         assertEquals(403, body["errors"].first()["extensions"]["code"].asInt())
-        assertEquals(
-            1,
-            logglytter.list.filter {
-                it.message.contains(
-                    "suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery flexString1=Deny",
-                ) && it.level == Level.WARN
-            }.size,
-        )
+        logglytter.assertBleLogget("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery flexString1=Deny",Level.WARN)
     }
 
     @Test
@@ -216,18 +166,12 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } throws GraphQLException("Oops")
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 
-        val logglytter = opprettLogglytter()
+        val logglytter = Logglytter()
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
 
         assertEquals(501, body["errors"].first()["extensions"]["code"].asInt())
-        assertEquals(
-            1,
-            logglytter.list.filter {
-                it.message.contains(
-                    "suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery msg=Lagret snapshot stemmer ikke overens med forventet format. Dette kommer som regel av at noen har gjort endringer på formatet men glemt å bumpe versjonsnummeret.",
-                ) && it.level == Level.WARN
-            }.size,
-        )
+        logglytter.assertBleLogget(
+                    "suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery msg=Lagret snapshot stemmer ikke overens med forventet format. Dette kommer som regel av at noen har gjort endringer på formatet men glemt å bumpe versjonsnummeret.", Level.WARN)
     }
 
     @Test
@@ -546,9 +490,20 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
 
     private fun Periode.tilBeregnetPeriode(): GraphQLBeregnetPeriode = opprettBeregnetPeriode(fom, tom, id)
 
-    private fun opprettLogglytter() =
-        ListAppender<ILoggingEvent>().apply {
+    private class Logglytter {
+        private val appender = ListAppender<ILoggingEvent>().apply {
             (LoggerFactory.getLogger("auditLogger") as Logger).addAppender(this)
             start()
         }
+
+        fun assertBleLogget(melding: String, level: Level) =
+            assertTrue(appender.list.count { it.message.contains(melding) && it.level == level } == 1) {
+                "Forventet ett innslag med $level og melding=$melding, dette ble logget: ${appender.list}"
+            }
+
+        fun assertIngenLogging() =
+            assertTrue(appender.list.isEmpty()) {
+                "Forventet at det ikke skulle logges, dette ble logget: ${appender.list}"
+            }
+    }
 }
