@@ -3,19 +3,37 @@ package no.nav.helse.modell
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.db.MeldingRepository
+import no.nav.helse.db.TransactionalMeldingDao
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetUtenVedtakMessage
-import no.nav.helse.modell.MeldingDao.Meldingtype.*
+import no.nav.helse.modell.MeldingDao.Meldingtype.ADRESSEBESKYTTELSE_ENDRET
+import no.nav.helse.modell.MeldingDao.Meldingtype.AVSLUTTET_MED_VEDTAK
+import no.nav.helse.modell.MeldingDao.Meldingtype.AVSLUTTET_UTEN_VEDTAK
+import no.nav.helse.modell.MeldingDao.Meldingtype.BEHANDLING_OPPRETTET
+import no.nav.helse.modell.MeldingDao.Meldingtype.ENDRET_EGEN_ANSATT_STATUS
+import no.nav.helse.modell.MeldingDao.Meldingtype.GODKJENNING
+import no.nav.helse.modell.MeldingDao.Meldingtype.GODKJENT_TILBAKEDATERT_SYKMELDING
+import no.nav.helse.modell.MeldingDao.Meldingtype.GOSYS_OPPGAVE_ENDRET
+import no.nav.helse.modell.MeldingDao.Meldingtype.NYE_VARSLER
+import no.nav.helse.modell.MeldingDao.Meldingtype.OPPDATER_PERSONSNAPSHOT
+import no.nav.helse.modell.MeldingDao.Meldingtype.OVERSTYRING_IGANGSATT
+import no.nav.helse.modell.MeldingDao.Meldingtype.SAKSBEHANDLERLØSNING
+import no.nav.helse.modell.MeldingDao.Meldingtype.SØKNAD_SENDT
+import no.nav.helse.modell.MeldingDao.Meldingtype.UTBETALING_ENDRET
+import no.nav.helse.modell.MeldingDao.Meldingtype.VEDTAKSPERIODE_FORKASTET
+import no.nav.helse.modell.MeldingDao.Meldingtype.VEDTAKSPERIODE_NY_UTBETALING
+import no.nav.helse.modell.MeldingDao.Meldingtype.VEDTAKSPERIODE_REBEREGNET
+import no.nav.helse.modell.MeldingDao.Meldingtype.VEDTAK_FATTET
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.OppdaterPersondata
 import no.nav.helse.modell.person.SøknadSendt
-import no.nav.helse.modell.person.toFødselsnummer
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.vedtaksperiode.BehandlingOpprettet
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
@@ -32,7 +50,7 @@ import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 
-internal class MeldingDao(private val dataSource: DataSource) {
+internal class MeldingDao(private val dataSource: DataSource) : MeldingRepository {
     internal fun lagre(melding: Personmelding) {
         sessionOf(dataSource).use { session ->
             session.transaction { transactionalSession ->
@@ -46,17 +64,11 @@ internal class MeldingDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun finnFødselsnummer(meldingId: UUID): String {
-        return sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val statement = """SELECT fodselsnummer FROM hendelse WHERE id = ?"""
-            requireNotNull(
-                session.run(
-                    queryOf(statement, meldingId).map {
-                        it.long("fodselsnummer").toFødselsnummer()
-                    }.asSingle,
-                ),
-            )
+    override fun finnFødselsnummer(meldingId: UUID): String {
+        sessionOf(dataSource).use { session ->
+            session.transaction { transaction ->
+                return TransactionalMeldingDao(transaction).finnFødselsnummer(meldingId)
+            }
         }
     }
 

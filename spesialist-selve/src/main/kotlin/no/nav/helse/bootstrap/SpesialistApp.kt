@@ -259,7 +259,7 @@ internal class SpesialistApp(
         rapidsConnection.register(this)
         oppgaveService =
             OppgaveService(
-                meldingDao = meldingDao,
+                meldingRepository = meldingDao,
                 oppgaveRepository = oppgaveDao,
                 tildelingDao = tildelingDao,
                 reservasjonDao = reservasjonDao,

@@ -69,7 +69,7 @@ internal class TestMediator(
     private val tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
     private val oppgaveService =
         OppgaveService(
-            meldingDao = meldingDao,
+            meldingRepository = meldingDao,
             oppgaveRepository = OppgaveDao(dataSource),
             tildelingDao = tildelingDao,
             reservasjonDao = ReservasjonDao(dataSource),

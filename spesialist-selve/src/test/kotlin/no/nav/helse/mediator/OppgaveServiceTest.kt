@@ -97,7 +97,7 @@ internal class OppgaveServiceTest {
 
     private val mediator =
         OppgaveService(
-            meldingDao = meldingDao,
+            meldingRepository = meldingDao,
             oppgaveRepository = oppgaveDao,
             tildelingDao = tildelingDao,
             reservasjonDao = reservasjonDao,

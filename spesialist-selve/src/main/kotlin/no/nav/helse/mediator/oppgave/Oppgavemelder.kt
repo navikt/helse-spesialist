@@ -1,7 +1,7 @@
 package no.nav.helse.mediator.oppgave
 
+import no.nav.helse.db.MeldingRepository
 import no.nav.helse.mediator.oppgave.OppgaveMapper.mapTilString
-import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
 import no.nav.helse.modell.oppgave.OppgaveDto
@@ -12,7 +12,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import java.util.UUID
 
 internal class Oppgavemelder(
-    private val meldingDao: MeldingDao,
+    private val meldingRepository: MeldingRepository,
     private val rapidsConnection: RapidsConnection,
 ) : OppgaveObserver {
     internal fun oppgaveOpprettet(oppgave: Oppgave) {
@@ -31,7 +31,7 @@ internal class Oppgavemelder(
         eventName: String,
         oppgavemelding: OppgaveForKafkaBygger.Oppgavemelding,
     ): Pair<String, JsonMessage> {
-        val fødselsnummer: String = meldingDao.finnFødselsnummer(oppgavemelding.hendelseId)
+        val fødselsnummer: String = meldingRepository.finnFødselsnummer(oppgavemelding.hendelseId)
         return fødselsnummer to
             JsonMessage.newMessage(
                 eventName,

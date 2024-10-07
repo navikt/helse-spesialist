@@ -3,6 +3,7 @@ package no.nav.helse.mediator.oppgave
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.EgenskapForDatabase
+import no.nav.helse.db.MeldingRepository
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.OpptegnelseRepository
@@ -19,7 +20,6 @@ import no.nav.helse.mediator.oppgave.OppgaveMapper.tilBehandledeOppgaver
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilDatabaseversjon
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilEgenskaperForVisning
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilOppgaverTilBehandling
-import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.Modellfeil
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
@@ -54,7 +54,7 @@ interface Oppgavefinner {
 }
 
 internal class OppgaveService(
-    private val meldingDao: MeldingDao,
+    private val meldingRepository: MeldingRepository,
     private val oppgaveRepository: OppgaveRepository,
     private val tildelingDao: TildelingDao,
     private val reservasjonDao: ReservasjonDao,
@@ -75,7 +75,7 @@ internal class OppgaveService(
     ) {
         val nesteId = oppgaveRepository.reserverNesteId()
         val oppgave = opprettOppgaveBlock(nesteId)
-        val oppgavemelder = Oppgavemelder(meldingDao, rapidsConnection)
+        val oppgavemelder = Oppgavemelder(meldingRepository, rapidsConnection)
         oppgave.register(oppgavemelder)
         tildelVedReservasjon(fødselsnummer, oppgave)
         Oppgavelagrer(tildelingDao).lagre(this, oppgave.toDto(), contextId)
@@ -93,7 +93,7 @@ internal class OppgaveService(
                 saksbehandlerRepository,
                 tilgangskontroll,
             ).oppgave(id)
-        oppgave.register(Oppgavemelder(meldingDao, rapidsConnection))
+        oppgave.register(Oppgavemelder(meldingRepository, rapidsConnection))
         val returverdi = oppgaveBlock(oppgave)
         Oppgavelagrer(tildelingDao).oppdater(this@OppgaveService, oppgave.toDto())
         return returverdi

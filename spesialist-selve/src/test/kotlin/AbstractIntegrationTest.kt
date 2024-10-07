@@ -42,7 +42,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
             totrinnsvurderingRepository = totrinnsvurderingDao,
             saksbehandlerRepository = SaksbehandlerDao(dataSource),
             rapidsConnection = testRapid,
-            meldingDao = meldingDao,
+            meldingRepository = meldingDao,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = SpeilTilgangsgrupper(testEnv),
         )
