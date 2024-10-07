@@ -110,7 +110,10 @@ class PersonQuery(
 
         if (!personApiDao.spesialistHarPersonKlarForVisningISpeil(fødselsnummer)) {
             auditLog(env.graphQlContext, fødselsnummer, false, null)
-            return DataFetcherResult.newResult<Person?>().error(getPersonNotReadyError(fødselsnummer)).build()
+            return DataFetcherResult.newResult<Person?>()
+                .error(getPersonNotReadyError(fødselsnummer))
+                .extensions(mapOf("persondata_hentes" to true))
+                .build()
         }
 
         if (isForbidden(fødselsnummer, env)) {
