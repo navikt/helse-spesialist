@@ -13,7 +13,7 @@ class PeriodehistorikkDao(private val dataSource: DataSource) : HelseDao(dataSou
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val statement = """
-                SELECT ph.id, ph.type, ph.timestamp, ph.notat_id, s.ident 
+                SELECT ph.id, ph.type, ph.timestamp, ph.notat_id, ph.json, s.ident 
                 FROM periodehistorikk ph
                 LEFT JOIN saksbehandler s on ph.saksbehandler_oid = s.oid
                 WHERE ph.utbetaling_id = :utbetaling_id
@@ -29,11 +29,12 @@ class PeriodehistorikkDao(private val dataSource: DataSource) : HelseDao(dataSou
         saksbehandlerOid: UUID? = null,
         utbetalingId: UUID,
         notatId: Int? = null,
+        json: String = "{}",
     ) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val statement = """
-                INSERT INTO periodehistorikk (type, saksbehandler_oid, utbetaling_id, notat_id)
-                VALUES (:type, :saksbehandler_oid, :utbetaling_id, :notat_id)
+                INSERT INTO periodehistorikk (type, saksbehandler_oid, utbetaling_id, notat_id, json)
+                VALUES (:type, :saksbehandler_oid, :utbetaling_id, :notat_id, :json::json)
         """
         session.run(
             queryOf(
@@ -43,6 +44,7 @@ class PeriodehistorikkDao(private val dataSource: DataSource) : HelseDao(dataSou
                     "saksbehandler_oid" to saksbehandlerOid,
                     "utbetaling_id" to utbetalingId,
                     "notat_id" to notatId,
+                    "json" to json,
                 ),
             ).asUpdate,
         )
@@ -53,11 +55,12 @@ class PeriodehistorikkDao(private val dataSource: DataSource) : HelseDao(dataSou
         saksbehandlerOid: UUID? = null,
         oppgaveId: Long,
         notatId: Int? = null,
+        json: String = "{}",
     ) = asSQL(
         " SELECT utbetaling_id FROM oppgave WHERE id = :oppgaveId; ",
         mapOf("oppgaveId" to oppgaveId),
     ).single { it.uuid("utbetaling_id") }?.let {
-        lagre(historikkType, saksbehandlerOid, it, notatId)
+        lagre(historikkType, saksbehandlerOid, it, notatId, json)
     }
 
     fun migrer(
@@ -89,6 +92,7 @@ class PeriodehistorikkDao(private val dataSource: DataSource) : HelseDao(dataSou
                 timestamp = it.localDateTime("timestamp"),
                 saksbehandler_ident = it.stringOrNull("ident"),
                 notat_id = it.intOrNull("notat_id"),
+                json = it.string("json"),
             )
     }
 }

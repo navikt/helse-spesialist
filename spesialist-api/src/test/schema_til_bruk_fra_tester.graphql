@@ -13,6 +13,13 @@ interface Hendelse {
     type: Hendelsetype!
 }
 
+interface HistorikkInnslag {
+    notatId: Int
+    saksbehandlerIdent: String
+    timestamp: LocalDateTime!
+    type: PeriodehistorikkType!
+}
+
 interface Overstyring {
     ferdigstilt: Boolean!
     hendelseId: UUID!
@@ -182,6 +189,7 @@ type BeregnetPeriode implements Periode {
     gjenstaendeSykedager: Int
     handlinger: [Handling!]!
     hendelser: [Hendelse!]!
+    historikkinnslag: [HistorikkInnslag!]!
     id: UUID!
     inntektstype: Inntektstype!
     maksdato: LocalDate!
@@ -257,6 +265,13 @@ type Enhet {
 type Faresignal {
     beskrivelse: String!
     kategori: [String!]!
+}
+
+type FjernetFraPaVent implements HistorikkInnslag {
+    notatId: Int
+    saksbehandlerIdent: String
+    timestamp: LocalDateTime!
+    type: PeriodehistorikkType!
 }
 
 type Generasjon {
@@ -341,6 +356,15 @@ type Kommentar {
     tekst: String!
 }
 
+type LagtPaVent implements HistorikkInnslag {
+    arsaker: [String!]!
+    frist: LocalDate!
+    notatId: Int
+    saksbehandlerIdent: String
+    timestamp: LocalDateTime!
+    type: PeriodehistorikkType!
+}
+
 type MinimumSykdomsgradOverstyring implements Overstyring {
     ferdigstilt: Boolean!
     hendelseId: UUID!
@@ -358,6 +382,7 @@ type Mutation {
     fjernTildeling(oppgaveId: String!): Boolean!
     innvilgVedtak(avslag: AvslagInput, oppgavereferanse: String!): Boolean!
     leggPaVent(frist: LocalDate!, notatTekst: String!, oppgaveId: String!, tildeling: Boolean!): PaVent
+    leggPaVentMedArsaker(arsaker: [PaVentArsakInput!]!, frist: LocalDate!, notatTekst: String!, oppgaveId: String!, tildeling: Boolean!): PaVent
     leggTilKommentar(notatId: Int!, saksbehandlerident: String!, tekst: String!): Kommentar
     leggTilNotat(saksbehandlerOid: String!, tekst: String!, type: NotatType!, vedtaksperiodeId: String!): Notat
     minimumSykdomsgrad(minimumSykdomsgrad: MinimumSykdomsgradInput!): Boolean!
@@ -488,6 +513,13 @@ type PaVent {
 type PeriodeHistorikkElement {
     notat_id: Int
     saksbehandler_ident: String
+    timestamp: LocalDateTime!
+    type: PeriodehistorikkType!
+}
+
+type PeriodeHistorikkElementNy implements HistorikkInnslag {
+    notatId: Int
+    saksbehandlerIdent: String
     timestamp: LocalDateTime!
     type: PeriodehistorikkType!
 }
@@ -1374,6 +1406,11 @@ input OverstyringRefusjonselementInput {
     belop: Float!
     fom: LocalDate!
     tom: LocalDate
+}
+
+input PaVentArsakInput {
+    _key: String!
+    arsak: String!
 }
 
 input SkjonnsfastsettelseArbeidsgiverInput {

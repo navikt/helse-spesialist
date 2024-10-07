@@ -10,6 +10,7 @@ class LeggPåVent(
     val frist: LocalDate,
     val skalTildeles: Boolean,
     val notatTekst: String,
+    val årsaker: List<PåVentÅrsak>,
 ) : PåVent(oppgaveId) {
     override fun loggnavn(): String = "lagt_på_vent"
 
@@ -27,3 +28,8 @@ class FjernPåVentUtenHistorikkinnslag(oppgaveId: Long) : PåVent(oppgaveId) {
 
     override fun utførAv(saksbehandler: Saksbehandler) {}
 }
+
+data class PåVentÅrsak(
+    val key: String,
+    val årsak: String,
+)

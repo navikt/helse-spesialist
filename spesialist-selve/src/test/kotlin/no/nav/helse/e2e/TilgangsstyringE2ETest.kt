@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class TilgangsstyringE2ETest : AbstractE2ETest() {
-
     @Test
     fun `Gir 409 når bare søknad er mottatt`() {
         settOppDefaultDataOgTilganger()
@@ -140,9 +139,14 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
     }
 
     private fun settOppDefaultDataOgTilganger() {
-        every { dataFetchingEnvironment.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER) } returns SaksbehandlerFraApi(
-            UUID.randomUUID(), "epost", "navn", "A123456", emptyList()
-        )
+        every { dataFetchingEnvironment.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER) } returns
+            SaksbehandlerFraApi(
+                UUID.randomUUID(),
+                "epost",
+                "navn",
+                "A123456",
+                emptyList(),
+            )
         saksbehandlertilgangTilSkjermede(harTilgang = false)
     }
 

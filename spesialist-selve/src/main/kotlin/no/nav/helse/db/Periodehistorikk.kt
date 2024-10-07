@@ -27,25 +27,32 @@ class Periodehistorikk(
         historikkinnslag: HistorikkinnslagDto,
         oppgaveId: Long,
     ) {
-        val notatId =
-            when (historikkinnslag) {
-                is FjernetFraPåVent -> null
-                is LagtPåVent -> {
-                    val notat = historikkinnslag.notat
+        when (historikkinnslag) {
+            is FjernetFraPåVent ->
+                periodehistorikkDao.lagre(
+                    historikkType = historikkinnslag.type.tilPeriodehistorikkType(),
+                    saksbehandlerOid = historikkinnslag.saksbehandler.oid,
+                    oppgaveId = oppgaveId,
+                    notatId = null,
+                )
+            is LagtPåVent -> {
+                val notat = historikkinnslag.notat
+                val notatId =
                     notatDao.opprettNotatForOppgaveId(
                         oppgaveId = notat.oppgaveId,
                         tekst = notat.tekst,
                         saksbehandlerOid = historikkinnslag.saksbehandler.oid,
                         type = NotatType.PaaVent,
-                    )
-                }
-            }?.toInt()
-        periodehistorikkDao.lagre(
-            historikkType = historikkinnslag.type.tilPeriodehistorikkType(),
-            saksbehandlerOid = historikkinnslag.saksbehandler?.oid,
-            oppgaveId = oppgaveId,
-            notatId = notatId,
-        )
+                    )?.toInt()
+                periodehistorikkDao.lagre(
+                    historikkType = historikkinnslag.type.tilPeriodehistorikkType(),
+                    saksbehandlerOid = historikkinnslag.saksbehandler.oid,
+                    oppgaveId = oppgaveId,
+                    notatId = notatId,
+                    json = historikkinnslag.toJson(),
+                )
+            }
+        }
     }
 
     private fun Innslagstype.tilPeriodehistorikkType() =

@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.påvent
+package no.nav.helse.spesialist.api.graphql.mutation
 
 import com.expediagroup.graphql.server.operations.Mutation
 import graphql.GraphQLError
@@ -14,6 +14,7 @@ import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.PaVent
+import no.nav.helse.spesialist.api.graphql.schema.PaVentRequest
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -26,6 +27,7 @@ class PaVentMutation(
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
     }
 
+    // Gammel leggPaVent, skal fjernes når leggPaVentMedArsaker er tatt i bruk fra speil
     @Suppress("unused")
     suspend fun leggPaVent(
         oppgaveId: String,
@@ -38,7 +40,53 @@ class PaVentMutation(
         return withContext(Dispatchers.IO) {
             try {
                 saksbehandlerhåndterer.påVent(
-                    PåVentRequest.LeggPåVent(oppgaveId.toLong(), saksbehandler.oid, frist, tildeling, notatTekst),
+                    PaVentRequest.LeggPaVent(
+                        oppgaveId.toLong(),
+                        saksbehandler.oid,
+                        frist,
+                        tildeling,
+                        notatTekst,
+                        emptyList(),
+                    ),
+                    saksbehandler,
+                )
+                newResult<PaVent?>().data(
+                    PaVent(
+                        frist = frist,
+                        oid = saksbehandler.oid,
+                    ),
+                ).build()
+            } catch (e: OppgaveIkkeTildelt) {
+                newResult<PaVent?>().error(ikkeTildeltError(e)).build()
+            } catch (e: OppgaveTildeltNoenAndre) {
+                newResult<PaVent?>().error(tildeltNoenAndreError(e)).build()
+            } catch (e: RuntimeException) {
+                newResult<PaVent?>().error(getUpdateError(oppgaveId)).build()
+            }
+        }
+    }
+
+    @Suppress("unused")
+    suspend fun leggPaVentMedArsaker(
+        oppgaveId: String,
+        notatTekst: String,
+        frist: LocalDate,
+        tildeling: Boolean,
+        arsaker: List<PaVentRequest.PaVentArsak>,
+        env: DataFetchingEnvironment,
+    ): DataFetcherResult<PaVent?> {
+        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
+        return withContext(Dispatchers.IO) {
+            try {
+                saksbehandlerhåndterer.påVent(
+                    PaVentRequest.LeggPaVent(
+                        oppgaveId.toLong(),
+                        saksbehandler.oid,
+                        frist,
+                        tildeling,
+                        notatTekst,
+                        arsaker,
+                    ),
                     saksbehandler,
                 )
                 newResult<PaVent?>().data(
@@ -65,7 +113,7 @@ class PaVentMutation(
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         return withContext(Dispatchers.IO) {
             try {
-                saksbehandlerhåndterer.påVent(PåVentRequest.FjernPåVent(oppgaveId.toLong()), saksbehandler)
+                saksbehandlerhåndterer.påVent(PaVentRequest.FjernPaVent(oppgaveId.toLong()), saksbehandler)
                 newResult<Boolean?>().data(true).build()
             } catch (e: OppgaveIkkeTildelt) {
                 newResult<Boolean>().data(false).build()

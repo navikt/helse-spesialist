@@ -4,6 +4,7 @@ import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.utils.io.core.toByteArray
+import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.Toggle
@@ -195,12 +196,42 @@ enum class NotatType {
     OpphevStans,
 }
 
+sealed interface HistorikkInnslag {
+    val type: PeriodehistorikkType
+    val timestamp: LocalDateTime
+    val saksbehandlerIdent: String?
+    val notatId: Int?
+}
+
+data class LagtPaVent(
+    override val type: PeriodehistorikkType,
+    override val timestamp: LocalDateTime,
+    override val saksbehandlerIdent: String?,
+    override val notatId: Int?,
+    val arsaker: List<String>,
+    val frist: LocalDate,
+) : HistorikkInnslag
+
+data class FjernetFraPaVent(
+    override val type: PeriodehistorikkType,
+    override val timestamp: LocalDateTime,
+    override val saksbehandlerIdent: String?,
+    override val notatId: Int?,
+) : HistorikkInnslag
+
 data class PeriodeHistorikkElement(
     val type: PeriodehistorikkType,
     val timestamp: LocalDateTime,
     val saksbehandler_ident: String?,
     val notat_id: Int?,
 )
+
+data class PeriodeHistorikkElementNy(
+    override val type: PeriodehistorikkType,
+    override val timestamp: LocalDateTime,
+    override val saksbehandlerIdent: String?,
+    override val notatId: Int?,
+) : HistorikkInnslag
 
 data class Faresignal(
     val beskrivelse: String,
@@ -470,6 +501,34 @@ data class BeregnetPeriode(
     override fun hendelser(): List<Hendelse> = periode.hendelser.map { it.tilHendelse() }
 
     fun notater(): List<Notat> = notater(notatDao, vedtaksperiodeId())
+
+    private fun mapLagtPåVentJson(json: String): Pair<List<String>, LocalDate> {
+        val node = objectMapper.readTree(json)
+        val påVentÅrsaker = node["årsaker"].map { it["arsak"].asText() }
+        val frist = node["frist"].asLocalDate()
+        return påVentÅrsaker to frist
+    }
+
+    fun historikkinnslag(): List<HistorikkInnslag> =
+        periodehistorikkDao
+            .finn(utbetaling().id)
+            .filterNot { it.type == PeriodehistorikkType.LEGG_PA_VENT }
+            .map {
+                when (it.type) {
+                    PeriodehistorikkType.LEGG_PA_VENT -> {
+                        val (påVentÅrsaker, frist) = mapLagtPåVentJson(json = it.json)
+                        LagtPaVent(it.type, it.timestamp, it.saksbehandler_ident, it.notat_id, påVentÅrsaker, frist)
+                    }
+                    PeriodehistorikkType.FJERN_FRA_PA_VENT -> FjernetFraPaVent(it.type, it.timestamp, it.saksbehandler_ident, it.notat_id)
+                    else ->
+                        PeriodeHistorikkElementNy(
+                            type = it.type,
+                            saksbehandlerIdent = it.saksbehandler_ident,
+                            timestamp = it.timestamp,
+                            notatId = it.notat_id,
+                        )
+                }
+            }
 
     fun periodehistorikk(): List<PeriodeHistorikkElement> =
         periodehistorikkDao

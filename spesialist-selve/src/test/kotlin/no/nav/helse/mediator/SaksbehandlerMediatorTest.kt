@@ -29,11 +29,11 @@ import no.nav.helse.spesialist.api.graphql.schema.MinimumSykdomsgrad
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringDag
+import no.nav.helse.spesialist.api.graphql.schema.PaVentRequest
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse
 import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
 import no.nav.helse.spesialist.api.notat.NotatRepository
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
-import no.nav.helse.spesialist.api.påvent.PåVentRequest
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OpphevStans
@@ -364,7 +364,17 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         nyPerson()
         val oppgaveId = OPPGAVE_ID
         mediator.påVent(
-            PåVentRequest.LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), true, "notat tekst"),
+            PaVentRequest.LeggPaVent(
+                oppgaveId,
+                saksbehandler.oid,
+                LocalDate.now().plusDays(21),
+                true,
+                "notat tekst",
+                listOf(
+                    PaVentRequest.PaVentArsak("key", "arsak"),
+                    PaVentRequest.PaVentArsak("key2", "arsak2"),
+                ),
+            ),
             saksbehandler,
         )
         val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
@@ -378,10 +388,20 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         nyPerson()
         val oppgaveId = OPPGAVE_ID
         mediator.påVent(
-            PåVentRequest.LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), false, "notat tekst"),
+            PaVentRequest.LeggPaVent(
+                oppgaveId,
+                saksbehandler.oid,
+                LocalDate.now().plusDays(21),
+                false,
+                "notat tekst",
+                listOf(
+                    PaVentRequest.PaVentArsak("key", "arsak"),
+                    PaVentRequest.PaVentArsak("key2", "arsak2"),
+                ),
+            ),
             saksbehandler,
         )
-        mediator.påVent(PåVentRequest.FjernPåVent(oppgaveId), saksbehandler)
+        mediator.påVent(PaVentRequest.FjernPaVent(oppgaveId), saksbehandler)
         val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
         val historikk = periodehistorikkDao.finn(UTBETALING_ID)
         assertTrue(historikk.map { it.type }.containsAll(listOf(PeriodehistorikkType.FJERN_FRA_PA_VENT, PeriodehistorikkType.LEGG_PA_VENT)))

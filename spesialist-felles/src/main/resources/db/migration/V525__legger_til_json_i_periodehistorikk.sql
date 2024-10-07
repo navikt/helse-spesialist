@@ -1,0 +1,1 @@
+ALTER TABLE periodehistorikk ADD COLUMN json JSON NOT NULL DEFAULT '{}';

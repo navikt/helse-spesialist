@@ -10,6 +10,7 @@ data class PeriodehistorikkDto(
     val timestamp: LocalDateTime,
     val saksbehandler_ident: String?,
     val notat_id: Int?,
+    val json: String,
 )
 
 enum class PeriodehistorikkType {

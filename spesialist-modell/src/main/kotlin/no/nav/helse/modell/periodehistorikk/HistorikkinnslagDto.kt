@@ -1,23 +1,33 @@
 package no.nav.helse.modell.periodehistorikk
 
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
+import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 sealed interface HistorikkinnslagDto {
     val type: Innslagstype
     val notat: NotatDto?
     val saksbehandler: SaksbehandlerDto?
+    val tidspunkt: LocalDateTime
 
     companion object {
         fun lagtPåVentInnslag(
             notat: NotatDto,
             saksbehandler: SaksbehandlerDto,
+            årsaker: List<PåVentÅrsak>,
+            frist: LocalDate,
         ): LagtPåVent {
             return LagtPåVent(
                 type = Innslagstype.LAGT_PA_VENT,
                 notat = notat,
                 saksbehandler = saksbehandler,
+                årsak = årsaker,
                 tidspunkt = LocalDateTime.now(),
+                frist = frist,
             )
         }
 
@@ -25,6 +35,7 @@ sealed interface HistorikkinnslagDto {
             return FjernetFraPåVent(
                 type = Innslagstype.FJERNET_FRA_PA_VENT,
                 saksbehandler = saksbehandler,
+                tidspunkt = LocalDateTime.now(),
             )
         }
     }
@@ -39,12 +50,27 @@ data class LagtPåVent(
     override val type: Innslagstype,
     override val notat: NotatDto,
     override val saksbehandler: SaksbehandlerDto,
-    val tidspunkt: LocalDateTime,
-) : HistorikkinnslagDto
+    override val tidspunkt: LocalDateTime,
+    val årsak: List<PåVentÅrsak>,
+    val frist: LocalDate,
+) : HistorikkinnslagDto {
+    fun toJson(): String {
+        return mapOf(
+            "årsaker" to årsak.map { it },
+            "frist" to frist,
+        ).let { objectMapper.writeValueAsString(it) }
+    }
+}
+
+private val objectMapper =
+    jacksonObjectMapper()
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        .registerModule(JavaTimeModule())
 
 data class FjernetFraPåVent(
     override val type: Innslagstype,
     override val saksbehandler: SaksbehandlerDto,
+    override val tidspunkt: LocalDateTime,
 ) : HistorikkinnslagDto {
     override val notat: NotatDto? = null
 }

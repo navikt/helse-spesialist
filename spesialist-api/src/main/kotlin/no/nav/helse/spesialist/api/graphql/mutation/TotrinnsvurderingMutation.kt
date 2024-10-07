@@ -13,9 +13,9 @@ import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
+import no.nav.helse.spesialist.api.graphql.schema.PaVentRequest
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
-import no.nav.helse.spesialist.api.påvent.PåVentRequest
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.LoggerFactory
 
@@ -56,7 +56,7 @@ class TotrinnsvurderingMutation(
                 avslag?.let { saksbehandlerhåndterer.håndterAvslag(oppgavereferanse.toLong(), behandlendeSaksbehandler, it) }
                 oppgavehåndterer.sendTilBeslutter(oppgavereferanse.toLong(), behandlendeSaksbehandler)
                 saksbehandlerhåndterer.påVent(
-                    PåVentRequest.FjernPåVentUtenHistorikkinnslag(oppgavereferanse.toLong()),
+                    PaVentRequest.FjernPaVentUtenHistorikkinnslag(oppgavereferanse.toLong()),
                     behandlendeSaksbehandler,
                 )
             } catch (modellfeil: Modellfeil) {
@@ -101,7 +101,7 @@ class TotrinnsvurderingMutation(
 
             oppgavehåndterer.sendIRetur(oppgavereferanse.toLong(), besluttendeSaksbehandler)
             saksbehandlerhåndterer.påVent(
-                PåVentRequest.FjernPåVentUtenHistorikkinnslag(oppgavereferanse.toLong()),
+                PaVentRequest.FjernPaVentUtenHistorikkinnslag(oppgavereferanse.toLong()),
                 besluttendeSaksbehandler,
             )
 
