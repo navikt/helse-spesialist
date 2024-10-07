@@ -262,7 +262,7 @@ internal class SpesialistApp(
                 meldingRepository = meldingDao,
                 oppgaveRepository = oppgaveDao,
                 tildelingRepository = tildelingDao,
-                reservasjonDao = reservasjonDao,
+                reservasjonRepository = reservasjonDao,
                 opptegnelseRepository = opptegnelseDao,
                 totrinnsvurderingRepository = totrinnsvurderingDao,
                 saksbehandlerRepository = saksbehandlerDao,

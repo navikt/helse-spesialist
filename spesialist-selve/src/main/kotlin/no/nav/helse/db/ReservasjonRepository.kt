@@ -7,4 +7,6 @@ interface ReservasjonRepository {
         saksbehandlerOid: UUID,
         fødselsnummer: String,
     )
+
+    fun hentReservasjonFor(fødselsnummer: String): Reservasjon?
 }

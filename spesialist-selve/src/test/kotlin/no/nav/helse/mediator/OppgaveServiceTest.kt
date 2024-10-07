@@ -17,7 +17,7 @@ import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.Reservasjon
-import no.nav.helse.db.ReservasjonDao
+import no.nav.helse.db.ReservasjonRepository
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.TildelingRepository
@@ -89,7 +89,7 @@ internal class OppgaveServiceTest {
     private val meldingRepository = mockk<MeldingRepository>(relaxed = true)
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val tildelingRepository = mockk<TildelingRepository>(relaxed = true)
-    private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
+    private val reservasjonRepository = mockk<ReservasjonRepository>(relaxed = true)
     private val opptegnelseRepository = mockk<OpptegnelseRepository>(relaxed = true)
     private val totrinnsvurderingDao = mockk<TotrinnsvurderingDao>(relaxed = true)
     private val saksbehandlerDao = mockk<SaksbehandlerDao>()
@@ -100,7 +100,7 @@ internal class OppgaveServiceTest {
             meldingRepository = meldingRepository,
             oppgaveRepository = oppgaveDao,
             tildelingRepository = tildelingRepository,
-            reservasjonDao = reservasjonDao,
+            reservasjonRepository = reservasjonRepository,
             opptegnelseRepository = opptegnelseRepository,
             totrinnsvurderingRepository = totrinnsvurderingDao,
             saksbehandlerRepository = saksbehandlerDao,
@@ -134,7 +134,7 @@ internal class OppgaveServiceTest {
         every { oppgaveDao.reserverNesteId() } returns 0L
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
-        every { reservasjonDao.hentReservasjonFor(FNR) } returns null
+        every { reservasjonRepository.hentReservasjonFor(FNR) } returns null
         mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
             søknadsoppgave(it)
         }
@@ -156,7 +156,7 @@ internal class OppgaveServiceTest {
     @Test
     fun `lagrer oppgave og tildeler til saksbehandler som har reservert personen`() {
         every { oppgaveDao.reserverNesteId() } returns 0L
-        every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns Reservasjon(saksbehandlerFraDatabase)
+        every { reservasjonRepository.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns Reservasjon(saksbehandlerFraDatabase)
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
         lateinit var oppgave: Oppgave
         mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
@@ -173,7 +173,7 @@ internal class OppgaveServiceTest {
     @Test
     fun `tildeler ikke reservert personen når oppgave er stikkprøve`() {
         every { oppgaveDao.reserverNesteId() } returns 0L
-        every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns Reservasjon(saksbehandlerFraDatabase)
+        every { reservasjonRepository.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns Reservasjon(saksbehandlerFraDatabase)
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
         mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
             stikkprøveoppgave(it)
@@ -184,7 +184,7 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `kaller bare hentGrupper når personen er reservert`() {
-        every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns null
+        every { reservasjonRepository.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns null
         every { oppgaveDao.reserverNesteId() } returns 0L
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
         lateinit var oppgave: Oppgave
@@ -219,7 +219,7 @@ internal class OppgaveServiceTest {
         every { oppgaveDao.reserverNesteId() } returns 0L
         every { oppgaveDao.opprettOppgave(any(), any(), listOf(EGENSKAP_SØKNAD), any(), any(), any()) } returns 0L
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
-        every { reservasjonDao.hentReservasjonFor(FNR) } returns null
+        every { reservasjonRepository.hentReservasjonFor(FNR) } returns null
 
         mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
             søknadsoppgave(it)

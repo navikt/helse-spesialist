@@ -64,13 +64,12 @@ internal class MeldingDao(private val dataSource: DataSource) : MeldingRepositor
         }
     }
 
-    override fun finnFødselsnummer(meldingId: UUID): String {
+    override fun finnFødselsnummer(meldingId: UUID): String =
         sessionOf(dataSource).use { session ->
             session.transaction { transaction ->
-                return TransactionalMeldingDao(transaction).finnFødselsnummer(meldingId)
+                TransactionalMeldingDao(transaction).finnFødselsnummer(meldingId)
             }
         }
-    }
 
     internal fun finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId: UUID): Int {
         return sessionOf(dataSource).use { session ->
@@ -118,7 +117,12 @@ internal class MeldingDao(private val dataSource: DataSource) : MeldingRepositor
                 INSERT INTO automatisering_korrigert_soknad (vedtaksperiode_id, hendelse_ref)
                 VALUES (:vedtaksperiodeId, :hendelseId)
                 """
-            session.run(queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId, "hendelseId" to meldingId)).asExecute)
+            session.run(
+                queryOf(
+                    statement,
+                    mapOf("vedtaksperiodeId" to vedtaksperiodeId, "hendelseId" to meldingId),
+                ).asExecute,
+            )
         }
     }
 
@@ -141,8 +145,7 @@ internal class MeldingDao(private val dataSource: DataSource) : MeldingRepositor
                 queryOf(
                     statement,
                     mapOf("fodselsnummer" to fødselsnummer.toLong(), "vedtaksperiodeId" to vedtaksperiodeId.toString()),
-                ).map {
-                        row ->
+                ).map { row ->
                     row.stringOrNull("data")?.let {
                         val data = objectMapper.readTree(it)
                         if (data["årsak"].asText() != "KORRIGERT_SØKNAD") return@let null

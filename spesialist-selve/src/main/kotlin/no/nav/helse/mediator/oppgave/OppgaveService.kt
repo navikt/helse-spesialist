@@ -7,7 +7,7 @@ import no.nav.helse.db.MeldingRepository
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.OpptegnelseRepository
-import no.nav.helse.db.ReservasjonDao
+import no.nav.helse.db.ReservasjonRepository
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.TildelingRepository
@@ -57,7 +57,7 @@ internal class OppgaveService(
     private val meldingRepository: MeldingRepository,
     private val oppgaveRepository: OppgaveRepository,
     private val tildelingRepository: TildelingRepository,
-    private val reservasjonDao: ReservasjonDao,
+    private val reservasjonRepository: ReservasjonRepository,
     private val opptegnelseRepository: OpptegnelseRepository,
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
     private val saksbehandlerRepository: SaksbehandlerRepository,
@@ -366,7 +366,7 @@ internal class OppgaveService(
         fødselsnummer: String,
     ) {
         try {
-            reservasjonDao.reserverPerson(saksbehandleroid, fødselsnummer)
+            reservasjonRepository.reserverPerson(saksbehandleroid, fødselsnummer)
         } catch (e: SQLException) {
             logg.warn("Kunne ikke reservere person")
         }
@@ -377,7 +377,7 @@ internal class OppgaveService(
         oppgave: Oppgave,
     ) {
         val (saksbehandlerFraDatabase) =
-            reservasjonDao.hentReservasjonFor(fødselsnummer) ?: run {
+            reservasjonRepository.hentReservasjonFor(fødselsnummer) ?: run {
                 logg.info("Finner ingen reservasjon for $oppgave, blir ikke tildelt.")
                 return
             }
