@@ -69,43 +69,39 @@ class PersonQuery(
         aktorId: String? = null,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Person?> {
-        if (fnr == null) {
-            if (aktorId == null) {
-                return DataFetcherResult
-                    .newResult<Person?>()
-                    .error(getBadRequestError("Requesten mangler både fødselsnummer og aktørId"))
-                    .build()
-            }
-            if (aktorId.length != 13) {
-                return DataFetcherResult
-                    .newResult<Person?>()
-                    .error(getBadRequestError("Feil lengde på parameter aktorId: ${aktorId.length}"))
-                    .build()
-            }
-        }
-
         val fødselsnummer =
-            if (fnr != null && personApiDao.finnesPersonMedFødselsnummer(fnr)) {
-                fnr
-            } else {
-                aktorId?.let {
-                    try {
-                        personApiDao.finnFødselsnummer(it.toLong())
-                    } catch (e: Exception) {
+            when {
+                fnr != null -> {
+                    if (personApiDao.finnesPersonMedFødselsnummer(fnr)) {
+                        fnr
+                    } else {
+                        loggNotFoundForFødselsnummer(fnr, env)
+                        return getNotFoundError(fnr).tilGraphqlResult()
+                    }
+                }
+
+                else -> {
+                    if (aktorId == null) {
+                        return lagTomtResultat(getBadRequestError("Requesten mangler både fødselsnummer og aktørId"))
+                    } else if (aktorId.length != 13) {
+                        return lagTomtResultat(getBadRequestError("Feil lengde på parameter aktorId: ${aktorId.length}"))
+                    } else {
                         val fødselsnumre = personApiDao.finnFødselsnumre(aktorId.toLong()).toSet()
-                        auditLog(env.graphQlContext, aktorId, null, getFlereFødselsnumreError(fødselsnumre).message)
-                        return DataFetcherResult
-                            .newResult<Person?>()
-                            .error(getFlereFødselsnumreError(fødselsnumre))
-                            .build()
+                        when (fødselsnumre.size) {
+                            0 -> {
+                                loggNotFoundForAktørId(aktorId, env)
+                                return lagTomtResultat(getNotFoundError(aktorId))
+                            }
+
+                            1 -> fødselsnumre.first()
+                            else -> {
+                                auditLog(env.graphQlContext, aktorId, null, getFlereFødselsnumreError(fødselsnumre).message)
+                                return lagTomtResultat(getFlereFødselsnumreError(fødselsnumre))
+                            }
+                        }
                     }
                 }
             }
-        if (fødselsnummer == null) {
-            sikkerLogg.info("Svarer not found for parametere fnr=$fnr, aktorId=$aktorId.")
-            auditLog(env.graphQlContext, fnr ?: aktorId!!, null, getNotFoundError(fnr).message)
-            return DataFetcherResult.newResult<Person?>().error(getNotFoundError(fnr)).build()
-        }
         sikkerLogg.info("Personoppslag på fnr=$fødselsnummer")
 
         if (!personApiDao.spesialistHarPersonKlarForVisningISpeil(fødselsnummer)) {
@@ -118,7 +114,7 @@ class PersonQuery(
 
         if (isForbidden(fødselsnummer, env)) {
             auditLog(env.graphQlContext, fødselsnummer, false, null)
-            return DataFetcherResult.newResult<Person?>().error(getForbiddenError(fødselsnummer)).build()
+            return lagTomtResultat(getForbiddenError(fødselsnummer))
         }
 
         val reservasjon = finnReservasjonsstatus(fødselsnummer)
@@ -130,7 +126,7 @@ class PersonQuery(
             } catch (e: Exception) {
                 sikkerLogg.error("feilet under henting av snapshot for {}", keyValue("fnr", fødselsnummer), e)
                 auditLog(env.graphQlContext, fødselsnummer, null, getSnapshotValidationError().message)
-                return DataFetcherResult.newResult<Person?>().error(getSnapshotValidationError()).build()
+                return lagTomtResultat(getSnapshotValidationError())
             }
 
         val person =
@@ -163,12 +159,17 @@ class PersonQuery(
 
         return if (person == null) {
             auditLog(env.graphQlContext, fødselsnummer, true, getNotFoundError(fødselsnummer).message)
-            DataFetcherResult.newResult<Person?>().error(getNotFoundError(fødselsnummer)).build()
+            lagTomtResultat(getNotFoundError(fødselsnummer))
         } else {
             auditLog(env.graphQlContext, fødselsnummer, true, null)
             DataFetcherResult.newResult<Person?>().data(person).build()
         }
     }
+
+    private fun lagTomtResultat(error: GraphQLError): DataFetcherResult<Person?> =
+        DataFetcherResult.newResult<Person?>().error(error).build()
+
+    private fun GraphQLError.tilGraphqlResult(): DataFetcherResult<Person?> = DataFetcherResult.newResult<Person?>().error(this).build()
 
     private fun unntattFraAutomatiskGodkjenning(fødselsnummer: String) =
         stansAutomatiskBehandlinghåndterer.unntattFraAutomatiskGodkjenning(fødselsnummer)
@@ -181,6 +182,22 @@ class PersonQuery(
                 reservasjonClient.hentReservasjonsstatus(fødselsnummer)
             }
         }
+
+    private fun loggNotFoundForAktørId(
+        aktorId: String,
+        env: DataFetchingEnvironment,
+    ) {
+        sikkerLogg.info("Svarer not found for parametere aktorId=$aktorId.")
+        auditLog(env.graphQlContext, aktorId, null, getNotFoundError(aktorId).message)
+    }
+
+    private fun loggNotFoundForFødselsnummer(
+        fnr: String,
+        env: DataFetchingEnvironment,
+    ) {
+        sikkerLogg.info("Svarer not found for parametere fnr=$fnr.")
+        auditLog(env.graphQlContext, fnr, null, getNotFoundError(fnr).message)
+    }
 
     private fun getFlereFødselsnumreError(fødselsnumre: Set<String>): GraphQLError =
         GraphqlErrorException

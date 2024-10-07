@@ -39,7 +39,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
     fun `Gir 409 når bare søknad er mottatt`() {
         settOppDefaultDataOgTilganger()
 
-        assertKanIkkeHentePerson("Finner ikke data for person med fødselsnummer ")
+        assertKanIkkeHentePerson("Finner ikke data for person med identifikator ")
 
         vedtaksløsningenMottarNySøknad(AKTØR, FØDSELSNUMMER, ORGNR)
 

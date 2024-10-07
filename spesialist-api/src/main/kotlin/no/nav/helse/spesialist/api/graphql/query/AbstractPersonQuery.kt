@@ -35,9 +35,9 @@ abstract class AbstractPersonQuery(
             .extensions(mapOf("code" to 403, "field" to "person"))
             .build()
 
-    protected fun getNotFoundError(fnr: String? = null): GraphQLError =
+    protected fun getNotFoundError(identifikator: String? = null): GraphQLError =
         GraphqlErrorException.newErrorException()
-            .message("Finner ikke data for person med fødselsnummer $fnr")
+            .message("Finner ikke data for person med identifikator $identifikator")
             .extensions(mapOf("code" to 404, "field" to "person"))
             .build()
 

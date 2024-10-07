@@ -79,10 +79,37 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
             1,
             logglytter.list.filter {
                 it.message.contains(
-                    "suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery msg=Finner ikke data for person med fødselsnummer $FØDSELSNUMMER",
+                    "suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery msg=Finner ikke data for person med identifikator $FØDSELSNUMMER",
                 ) && it.level == Level.WARN
             }.size,
         )
+    }
+
+    @Test
+    @ResourceLock("auditlogg-lytter")
+    fun `får 404-feil når personen man søker etter på aktørId ikke finnes`() {
+        val logglytter = opprettLogglytter()
+        val body = runQuery("""{ person(aktorId: "$AKTØRID") { aktorId } }""")
+
+        assertEquals(404, body["errors"].first()["extensions"]["code"].asInt())
+        assertEquals(
+            1,
+            logglytter.list.filter {
+                it.message.contains(
+                    "suid=${SAKSBEHANDLER.ident} duid=$AKTØRID operation=PersonQuery msg=Finner ikke data for person med identifikator $AKTØRID",
+                ) && it.level == Level.WARN
+            }.size,
+        )
+    }
+
+    @Test
+    @ResourceLock("auditlogg-lytter")
+    fun `får 400-feil når det mangler både fødselsnummer og aktørId`() {
+        val logglytter = opprettLogglytter()
+        val body = runQuery("""{ person(fnr: null, aktorId: null) { aktorId } }""")
+
+        assertEquals(400, body["errors"].first()["extensions"]["code"].asInt())
+        assertTrue(logglytter.list.isEmpty()) // Det er ikke noen ID-er å audit-logge i dette tilfellet
     }
 
     @Test
