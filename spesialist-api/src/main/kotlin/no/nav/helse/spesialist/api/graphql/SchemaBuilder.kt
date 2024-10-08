@@ -39,6 +39,7 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
+import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
@@ -90,25 +91,28 @@ internal class SchemaBuilder(
                 listOf(
                     TopLevelObject(
                         PersonQuery(
-                            personApiDao = personApiDao,
-                            egenAnsattApiDao = egenAnsattApiDao,
-                            tildelingApiDao = tildelingApiDao,
-                            arbeidsgiverApiDao = arbeidsgiverApiDao,
-                            overstyringApiDao = overstyringApiDao,
-                            risikovurderingApiDao = risikovurderingApiDao,
-                            varselRepository = varselRepository,
-                            oppgaveApiDao = oppgaveApiDao,
-                            periodehistorikkDao = periodehistorikkDao,
-                            notatDao = notatDao,
-                            totrinnsvurderingApiDao = totrinnsvurderingApiDao,
-                            påVentApiDao = påVentApiDao,
-                            vergemålApiDao = vergemålApiDao,
-                            snapshotService = snapshotService,
-                            reservasjonClient = reservasjonClient,
-                            oppgavehåndterer = oppgavehåndterer,
-                            saksbehandlerhåndterer = saksbehandlerhåndterer,
-                            avviksvurderinghenter = avviksvurderinghenter,
-                            stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
+                            personoppslagService =
+                                PersonService(
+                                    personApiDao = personApiDao,
+                                    egenAnsattApiDao = egenAnsattApiDao,
+                                    tildelingApiDao = tildelingApiDao,
+                                    arbeidsgiverApiDao = arbeidsgiverApiDao,
+                                    overstyringApiDao = overstyringApiDao,
+                                    risikovurderingApiDao = risikovurderingApiDao,
+                                    varselRepository = varselRepository,
+                                    oppgaveApiDao = oppgaveApiDao,
+                                    periodehistorikkDao = periodehistorikkDao,
+                                    notatDao = notatDao,
+                                    totrinnsvurderingApiDao = totrinnsvurderingApiDao,
+                                    påVentApiDao = påVentApiDao,
+                                    vergemålApiDao = vergemålApiDao,
+                                    snapshotService = snapshotService,
+                                    reservasjonClient = reservasjonClient,
+                                    oppgavehåndterer = oppgavehåndterer,
+                                    saksbehandlerhåndterer = saksbehandlerhåndterer,
+                                    avviksvurderinghenter = avviksvurderinghenter,
+                                    stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
+                                ),
                         ),
                     ),
                     TopLevelObject(

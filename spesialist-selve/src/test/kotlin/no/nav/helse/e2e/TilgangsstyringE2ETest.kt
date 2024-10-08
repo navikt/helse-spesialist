@@ -18,6 +18,7 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
+import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
@@ -161,25 +162,27 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
 
     private val personQuery =
         PersonQuery(
-            personApiDao = PersonApiDao(dataSource),
-            egenAnsattApiDao = EgenAnsattApiDao(dataSource),
-            tildelingApiDao = TildelingApiDao(dataSource),
-            arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource),
-            overstyringApiDao = OverstyringApiDao(dataSource),
-            risikovurderingApiDao = RisikovurderingApiDao(dataSource),
-            varselRepository = ApiVarselRepository(dataSource),
-            oppgaveApiDao = OppgaveApiDao(dataSource),
-            periodehistorikkDao = PeriodehistorikkDao(dataSource),
-            notatDao = NotatDao(dataSource),
-            totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource),
-            påVentApiDao = PåVentApiDao(dataSource),
-            vergemålApiDao = VergemålApiDao(dataSource),
-            snapshotService = SnapshotService(SnapshotApiDao(dataSource), snapshotClient),
-            reservasjonClient = mockk(relaxed = true),
-            oppgavehåndterer = mockk(relaxed = true),
-            saksbehandlerhåndterer = mockk(relaxed = true),
-            avviksvurderinghenter = mockk(relaxed = true),
-            stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
+            personoppslagService = PersonService(
+                personApiDao = PersonApiDao(dataSource),
+                egenAnsattApiDao = EgenAnsattApiDao(dataSource),
+                tildelingApiDao = TildelingApiDao(dataSource),
+                arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource),
+                overstyringApiDao = OverstyringApiDao(dataSource),
+                risikovurderingApiDao = RisikovurderingApiDao(dataSource),
+                varselRepository = ApiVarselRepository(dataSource),
+                oppgaveApiDao = OppgaveApiDao(dataSource),
+                periodehistorikkDao = PeriodehistorikkDao(dataSource),
+                notatDao = NotatDao(dataSource),
+                totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource),
+                påVentApiDao = PåVentApiDao(dataSource),
+                vergemålApiDao = VergemålApiDao(dataSource),
+                snapshotService = SnapshotService(SnapshotApiDao(dataSource), snapshotClient),
+                reservasjonClient = mockk(relaxed = true),
+                oppgavehåndterer = mockk(relaxed = true),
+                saksbehandlerhåndterer = mockk(relaxed = true),
+                avviksvurderinghenter = mockk(relaxed = true),
+                stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
+            ),
         )
 
     companion object {

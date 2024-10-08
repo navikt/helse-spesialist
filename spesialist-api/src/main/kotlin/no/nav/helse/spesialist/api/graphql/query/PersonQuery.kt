@@ -5,45 +5,23 @@ import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.bootstrap.Environment
-import no.nav.helse.spesialist.api.Avviksvurderinghenter
-import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
-import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
-import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.auditLogTeller
-import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
+import no.nav.helse.spesialist.api.graphql.forbiddenError
+import no.nav.helse.spesialist.api.graphql.notFoundError
+import no.nav.helse.spesialist.api.graphql.personNotReadyError
 import no.nav.helse.spesialist.api.graphql.query.Inputvalidering.UgyldigInput
 import no.nav.helse.spesialist.api.graphql.schema.Person
-import no.nav.helse.spesialist.api.graphql.schema.Reservasjon
-import no.nav.helse.spesialist.api.notat.NotatDao
-import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
-import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
-import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
-import no.nav.helse.spesialist.api.person.PersonApiDao
-import no.nav.helse.spesialist.api.påvent.PåVentApiDao
-import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
-import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.api.snapshot.SnapshotService
-import no.nav.helse.spesialist.api.tildeling.TildelingApiDao
-import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
-import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
-import no.nav.helse.spesialist.api.vergemål.VergemålApiDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-private sealed class Inputvalidering {
-    class Ok(val fødselsnummer: String) : Inputvalidering()
+private sealed interface Inputvalidering {
+    class Ok(val fødselsnummer: String) : Inputvalidering
 
-    sealed class UgyldigInput(val graphqlError: GraphQLError) : Inputvalidering() {
+    sealed class UgyldigInput(val graphqlError: GraphQLError) : Inputvalidering {
         class UkjentFødselsnummer(val fødselsnummer: String, graphqlError: GraphQLError) : UgyldigInput(graphqlError)
 
         class UkjentAktørId(val aktørId: String, graphqlError: GraphQLError) : UgyldigInput(graphqlError)
@@ -56,30 +34,36 @@ private sealed class Inputvalidering {
     }
 }
 
+interface PersonoppslagService {
+    suspend fun hentPerson(
+        fødselsnummer: String,
+        tilganger: SaksbehandlerTilganger,
+    ): FetchPersonResult
+
+    fun finnesPersonMedFødselsnummer(fødselsnummer: String): Boolean
+
+    fun fødselsnumreKnyttetTil(aktørId: String): Set<String>
+}
+
+sealed interface FetchPersonResult {
+    class Ok(val person: Person) : FetchPersonResult
+
+    sealed interface Feil : FetchPersonResult {
+        data object IkkeKlarTilVisning : Feil
+
+        data object ManglerTilgang : Feil
+
+        data object IkkeFunnet : Feil
+
+        data object UgyldigSnapshot : Feil
+    }
+}
+
 class PersonQuery(
-    personApiDao: PersonApiDao,
-    egenAnsattApiDao: EgenAnsattApiDao,
-    private val tildelingApiDao: TildelingApiDao,
-    private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
-    private val overstyringApiDao: OverstyringApiDao,
-    private val risikovurderingApiDao: RisikovurderingApiDao,
-    private val varselRepository: ApiVarselRepository,
-    private val oppgaveApiDao: OppgaveApiDao,
-    private val periodehistorikkDao: PeriodehistorikkDao,
-    private val notatDao: NotatDao,
-    private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
-    private val påVentApiDao: PåVentApiDao,
-    private val vergemålApiDao: VergemålApiDao,
-    private val snapshotService: SnapshotService,
-    private val reservasjonClient: ReservasjonClient,
-    private val oppgavehåndterer: Oppgavehåndterer,
-    private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
-    private val avviksvurderinghenter: Avviksvurderinghenter,
-    private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
-) : AbstractPersonQuery(personApiDao, egenAnsattApiDao) {
+    private val personoppslagService: PersonoppslagService,
+) {
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
     private val auditLog = LoggerFactory.getLogger("auditLogger")
-    private val env = Environment()
 
     private companion object {
         private const val GYLDIG_AKTØRID_LENDGE = 13
@@ -100,66 +84,48 @@ class PersonQuery(
             }
         sikkerLogg.info("Personoppslag på fnr=$fødselsnummer")
 
-        if (!personApiDao.spesialistHarPersonKlarForVisningISpeil(fødselsnummer)) {
-            auditLog(env.graphQlContext, fødselsnummer, false, null)
-            return DataFetcherResult.newResult<Person?>()
-                .error(getPersonNotReadyError(fødselsnummer))
-                .extensions(mapOf("persondata_hentes" to true))
-                .build()
-        }
+        val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>(TILGANGER)
 
-        if (isForbidden(fødselsnummer, env)) {
-            auditLog(env.graphQlContext, fødselsnummer, false, null)
-            return lagTomtResultat(getForbiddenError(fødselsnummer))
-        }
-
-        val reservasjon = finnReservasjonsstatus(fødselsnummer)
-        val unntattFraAutomatiskGodkjenning = unntattFraAutomatiskGodkjenning(fødselsnummer)
-
-        val snapshot =
-            try {
-                snapshotService.hentSnapshot(fødselsnummer)
-            } catch (e: Exception) {
-                sikkerLogg.error("feilet under henting av snapshot for {}", keyValue("fnr", fødselsnummer), e)
-                auditLog(env.graphQlContext, fødselsnummer, null, getSnapshotValidationError().message)
-                return lagTomtResultat(getSnapshotValidationError())
+        return when (val result = personoppslagService.hentPerson(fødselsnummer, tilganger)) {
+            is FetchPersonResult.Feil -> {
+                result.auditlogg(env, fødselsnummer)
+                result.tilGraphqlError(fødselsnummer)
             }
+            is FetchPersonResult.Ok -> {
+                auditLog(env.graphQlContext, fødselsnummer, true, null)
+                DataFetcherResult.newResult<Person?>().data(result.person).build()
+            }
+        }
+    }
 
-        val person =
-            snapshot?.let { (personinfo, personSnapshot) ->
-                Person(
-                    snapshot = personSnapshot,
-                    personinfo =
-                        personinfo.copy(
-                            reservasjon = reservasjon.await(),
-                            unntattFraAutomatisering = unntattFraAutomatiskGodkjenning,
-                            fullmakt = vergemålApiDao.harFullmakt(fødselsnummer),
-                        ),
-                    personApiDao = personApiDao,
-                    tildelingApiDao = tildelingApiDao,
-                    arbeidsgiverApiDao = arbeidsgiverApiDao,
-                    overstyringApiDao = overstyringApiDao,
-                    risikovurderingApiDao = risikovurderingApiDao,
-                    varselRepository = varselRepository,
-                    oppgaveApiDao = oppgaveApiDao,
-                    periodehistorikkDao = periodehistorikkDao,
-                    notatDao = notatDao,
-                    totrinnsvurderingApiDao = totrinnsvurderingApiDao,
-                    påVentApiDao = påVentApiDao,
-                    avviksvurderinghenter = avviksvurderinghenter,
-                    tilganger = env.graphQlContext.get(TILGANGER),
-                    oppgavehåndterer = oppgavehåndterer,
-                    saksbehandlerhåndterer = saksbehandlerhåndterer,
+    private fun FetchPersonResult.Feil.auditlogg(
+        env: DataFetchingEnvironment,
+        fødselsnummer: String,
+    ) {
+        when (this) {
+            FetchPersonResult.Feil.IkkeFunnet -> auditLog(env.graphQlContext, fødselsnummer, true, notFoundError(fødselsnummer).message)
+            FetchPersonResult.Feil.IkkeKlarTilVisning -> auditLog(env.graphQlContext, fødselsnummer, false, null)
+            FetchPersonResult.Feil.ManglerTilgang -> auditLog(env.graphQlContext, fødselsnummer, false, null)
+            FetchPersonResult.Feil.UgyldigSnapshot ->
+                auditLog(
+                    env.graphQlContext,
+                    fødselsnummer,
+                    null,
+                    getSnapshotValidationError().message,
                 )
+        }
+    }
+
+    private fun FetchPersonResult.Feil.tilGraphqlError(fødselsnummer: String): DataFetcherResult<Person?> {
+        val graphqlError =
+            when (this) {
+                FetchPersonResult.Feil.IkkeFunnet -> notFoundError(fødselsnummer)
+                FetchPersonResult.Feil.IkkeKlarTilVisning -> personNotReadyError(fødselsnummer)
+                FetchPersonResult.Feil.ManglerTilgang -> forbiddenError(fødselsnummer)
+                FetchPersonResult.Feil.UgyldigSnapshot -> getSnapshotValidationError()
             }
 
-        return if (person == null) {
-            auditLog(env.graphQlContext, fødselsnummer, true, getNotFoundError(fødselsnummer).message)
-            lagTomtResultat(getNotFoundError(fødselsnummer))
-        } else {
-            auditLog(env.graphQlContext, fødselsnummer, true, null)
-            DataFetcherResult.newResult<Person?>().data(person).build()
-        }
+        return graphqlError.tilGraphqlResult()
     }
 
     private fun Set<String>.harFlereFødselsnumre() = this.size > 1
@@ -173,8 +139,8 @@ class PersonQuery(
         aktørId: String?,
     ): Inputvalidering {
         if (fødselsnummer != null) {
-            if (personApiDao.finnesPersonMedFødselsnummer(fødselsnummer)) return Inputvalidering.Ok(fødselsnummer)
-            return UgyldigInput.UkjentFødselsnummer(fødselsnummer, getNotFoundError(fødselsnummer))
+            if (personoppslagService.finnesPersonMedFødselsnummer(fødselsnummer)) return Inputvalidering.Ok(fødselsnummer)
+            return UgyldigInput.UkjentFødselsnummer(fødselsnummer, notFoundError(fødselsnummer))
         }
         if (aktørId == null) return UgyldigInput.ParametreMangler(getBadRequestError("Requesten mangler både fødselsnummer og aktorId"))
         if (ugyldigAktørId(aktørId)) {
@@ -183,37 +149,22 @@ class PersonQuery(
             )
         }
 
-        val fødselsnumre = personApiDao.finnFødselsnumre(aktørId.toLong()).toSet()
+        val fødselsnumre = personoppslagService.fødselsnumreKnyttetTil(aktørId)
 
-        if (fødselsnumre.harIngenFødselsnumre()) return UgyldigInput.UkjentAktørId(aktørId, getNotFoundError(aktørId))
+        if (fødselsnumre.harIngenFødselsnumre()) return UgyldigInput.UkjentAktørId(aktørId, notFoundError(aktørId))
         if (fødselsnumre.harFlereFødselsnumre()) return UgyldigInput.HarFlereFødselsnumre(aktørId, getFlereFødselsnumreError(fødselsnumre))
 
         return Inputvalidering.Ok(fødselsnumre.single())
     }
 
-    private fun lagTomtResultat(error: GraphQLError): DataFetcherResult<Person?> =
-        DataFetcherResult.newResult<Person?>().error(error).build()
-
     private fun GraphQLError.tilGraphqlResult(): DataFetcherResult<Person?> = DataFetcherResult.newResult<Person?>().error(this).build()
-
-    private fun unntattFraAutomatiskGodkjenning(fødselsnummer: String) =
-        stansAutomatiskBehandlinghåndterer.unntattFraAutomatiskGodkjenning(fødselsnummer)
-
-    private fun finnReservasjonsstatus(fødselsnummer: String) =
-        if (env.erDev) {
-            CompletableDeferred<Reservasjon?>().also { it.complete(null) }
-        } else {
-            CoroutineScope(Dispatchers.IO).async {
-                reservasjonClient.hentReservasjonsstatus(fødselsnummer)
-            }
-        }
 
     private fun loggNotFoundForAktørId(
         aktorId: String,
         env: DataFetchingEnvironment,
     ) {
         sikkerLogg.info("Svarer not found for parametere aktorId=$aktorId.")
-        auditLog(env.graphQlContext, aktorId, null, getNotFoundError(aktorId).message)
+        auditLog(env.graphQlContext, aktorId, null, notFoundError(aktorId).message)
     }
 
     private fun loggNotFoundForFødselsnummer(
@@ -221,7 +172,7 @@ class PersonQuery(
         env: DataFetchingEnvironment,
     ) {
         sikkerLogg.info("Svarer not found for parametere fnr=$fnr.")
-        auditLog(env.graphQlContext, fnr, null, getNotFoundError(fnr).message)
+        auditLog(env.graphQlContext, fnr, null, notFoundError(fnr).message)
     }
 
     private fun getFlereFødselsnumreError(fødselsnumre: Set<String>): GraphQLError =
