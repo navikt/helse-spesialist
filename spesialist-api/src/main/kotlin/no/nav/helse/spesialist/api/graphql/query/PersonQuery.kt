@@ -81,6 +81,10 @@ class PersonQuery(
     private val auditLog = LoggerFactory.getLogger("auditLogger")
     private val env = Environment()
 
+    private companion object {
+        private const val GYLDIG_AKTØRID_LENDGE = 13
+    }
+
     suspend fun person(
         fnr: String? = null,
         aktorId: String? = null,
@@ -162,6 +166,8 @@ class PersonQuery(
 
     private fun Set<String>.harIngenFødselsnumre() = this.isEmpty()
 
+    private fun ugyldigAktørId(aktørId: String) = aktørId.length != GYLDIG_AKTØRID_LENDGE
+
     private fun validerInput(
         fødselsnummer: String?,
         aktørId: String?,
@@ -171,7 +177,7 @@ class PersonQuery(
             return UgyldigInput.UkjentFødselsnummer(fødselsnummer, getNotFoundError(fødselsnummer))
         }
         if (aktørId == null) return UgyldigInput.ParametreMangler(getBadRequestError("Requesten mangler både fødselsnummer og aktorId"))
-        if (aktørId.length != 13) {
+        if (ugyldigAktørId(aktørId)) {
             return UgyldigInput.UgyldigAktørId(
                 getBadRequestError("Feil lengde på parameter aktorId: ${aktørId.length}"),
             )
