@@ -13,7 +13,7 @@ interface Hendelse {
     type: Hendelsetype!
 }
 
-interface HistorikkInnslag {
+interface Historikkinnslag {
     notatId: Int
     saksbehandlerIdent: String
     timestamp: LocalDateTime!
@@ -189,7 +189,7 @@ type BeregnetPeriode implements Periode {
     gjenstaendeSykedager: Int
     handlinger: [Handling!]!
     hendelser: [Hendelse!]!
-    historikkinnslag: [HistorikkInnslag!]!
+    historikkinnslag: [Historikkinnslag!]!
     id: UUID!
     inntektstype: Inntektstype!
     maksdato: LocalDate!
@@ -267,7 +267,7 @@ type Faresignal {
     kategori: [String!]!
 }
 
-type FjernetFraPaVent implements HistorikkInnslag {
+type FjernetFraPaVent implements Historikkinnslag {
     notatId: Int
     saksbehandlerIdent: String
     timestamp: LocalDateTime!
@@ -356,7 +356,7 @@ type Kommentar {
     tekst: String!
 }
 
-type LagtPaVent implements HistorikkInnslag {
+type LagtPaVent implements Historikkinnslag {
     arsaker: [String!]!
     frist: LocalDate!
     notatId: Int
@@ -516,7 +516,7 @@ type PeriodeHistorikkElement {
     type: PeriodehistorikkType!
 }
 
-type PeriodeHistorikkElementNy implements HistorikkInnslag {
+type PeriodeHistorikkElementNy implements Historikkinnslag {
     notatId: Int
     saksbehandlerIdent: String
     timestamp: LocalDateTime!

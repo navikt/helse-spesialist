@@ -196,7 +196,7 @@ enum class NotatType {
     OpphevStans,
 }
 
-sealed interface HistorikkInnslag {
+sealed interface Historikkinnslag {
     val type: PeriodehistorikkType
     val timestamp: LocalDateTime
     val saksbehandlerIdent: String?
@@ -210,14 +210,14 @@ data class LagtPaVent(
     override val notatId: Int?,
     val arsaker: List<String>,
     val frist: LocalDate,
-) : HistorikkInnslag
+) : Historikkinnslag
 
 data class FjernetFraPaVent(
     override val type: PeriodehistorikkType,
     override val timestamp: LocalDateTime,
     override val saksbehandlerIdent: String?,
     override val notatId: Int?,
-) : HistorikkInnslag
+) : Historikkinnslag
 
 data class PeriodeHistorikkElement(
     val type: PeriodehistorikkType,
@@ -231,7 +231,7 @@ data class PeriodeHistorikkElementNy(
     override val timestamp: LocalDateTime,
     override val saksbehandlerIdent: String?,
     override val notatId: Int?,
-) : HistorikkInnslag
+) : Historikkinnslag
 
 data class Faresignal(
     val beskrivelse: String,
@@ -509,10 +509,9 @@ data class BeregnetPeriode(
         return påVentÅrsaker to frist
     }
 
-    fun historikkinnslag(): List<HistorikkInnslag> =
+    fun historikkinnslag(): List<Historikkinnslag> =
         periodehistorikkDao
             .finn(utbetaling().id)
-            .filterNot { it.type == PeriodehistorikkType.LEGG_PA_VENT }
             .map {
                 when (it.type) {
                     PeriodehistorikkType.LEGG_PA_VENT -> {
