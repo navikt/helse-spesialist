@@ -380,17 +380,22 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
         @Language("PostgreSQL")
         val statement =
-            "INSERT INTO person(fodselsnummer, aktor_id, info_ref, enhet_ref, infotrygdutbetalinger_ref) VALUES(?, ?, ?, ?, ?)"
+            """
+            INSERT INTO person (fodselsnummer, aktor_id, info_ref, enhet_ref, infotrygdutbetalinger_ref)
+            VALUES (:foedselsnummer, :aktoerId, :personinfoId, :enhetId, :infotrygdutbetalingerId)
+            """.trimIndent()
         val personId =
             requireNotNull(
                 session.run(
                     queryOf(
                         statement,
-                        fødselsnummer.toLong(),
-                        aktørId.toLong(),
-                        personinfoid,
-                        bostedId,
-                        infotrygdutbetalingerid,
+                        mapOf(
+                            "foedselsnummer" to fødselsnummer.toLong(),
+                            "aktoerId" to aktørId.toLong(),
+                            "personinfoId" to personinfoid,
+                            "enhetId" to bostedId,
+                            "infotrygdutbetalingerId" to infotrygdutbetalingerid
+                        )
                     ).asUpdateAndReturnGeneratedKey,
                 ),
             )
