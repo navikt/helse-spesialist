@@ -50,6 +50,19 @@ class PersonApiDao(dataSource: DataSource) : HelseDao(dataSource) {
             mapOf("aktor_id" to aktørId),
         ).list { it.string("fodselsnummer").padStart(11, '0') }
 
+    fun harTilgangsdata(fødselsnummer: String) =
+        asSQL(
+            """
+            select 1
+            from person p
+            left join person_info pi on p.info_ref = pi.id
+            left join egen_ansatt ea on ea.person_ref = p.id
+            where p.fodselsnummer = :fodselsnummer
+                and (pi.id is not null and ea.er_egen_ansatt is not null)
+            """.trimIndent(),
+            mapOf("fodselsnummer" to fødselsnummer.toLong()),
+        ).single { true } ?: false
+
     // Alle peridoer som enten har ført til manuell oppgave eller blitt automatisk godkjent, vil ha et innslag i
     // automatisering-tabellen.
     fun spesialistHarPersonKlarForVisningISpeil(fødselsnummer: String) =

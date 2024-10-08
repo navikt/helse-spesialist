@@ -1,12 +1,13 @@
 package no.nav.helse.spesialist.api.person
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest
+import no.nav.helse.spesialist.api.person.Adressebeskyttelse.Ugradert
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.UUID
 
 internal class PersonApiDaoTest : DatabaseIntegrationTest() {
 
@@ -18,7 +19,7 @@ internal class PersonApiDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `person med ugradert adresse er ikke kode 7`() {
-        opprettPerson(adressebeskyttelse = Adressebeskyttelse.Ugradert)
+        opprettPerson(adressebeskyttelse = Ugradert)
         assertFalse(personApiDao.personHarAdressebeskyttelse(FØDSELSNUMMER, Adressebeskyttelse.Fortrolig))
     }
 
@@ -59,6 +60,31 @@ internal class PersonApiDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `kan svare på om en person er klar for visning`() {
+        val personId = opprettMinimalPerson()
+        assertFalse(harTilgangsdataForPersonen())
+
+        opprettEgenAnsatt(personId, false)
+        assertFalse(harTilgangsdataForPersonen())
+
+        oppdaterPersoninfo(Ugradert)
+        assertTrue(harTilgangsdataForPersonen())
+    }
+
+    // Denne testen komplementerer den ovenstående, for å vise at både personinfo og info om egen ansatt må finnes
+    @Test
+    fun `kan svare på om en person er klar for visning, med dataene mottatt i ikke-realistisk rekkefølge`() {
+        val personId = opprettMinimalPerson()
+        assertFalse(harTilgangsdataForPersonen())
+
+        oppdaterPersoninfo(Ugradert)
+        assertFalse(harTilgangsdataForPersonen())
+
+        opprettEgenAnsatt(personId, false)
+        assertTrue(harTilgangsdataForPersonen())
+    }
+
+    @Test
     fun `feiler ikke når det fins mer enn ett vedtak`() {
         val personId = opprettPerson()
         assertPersonenErIkkeKlar()
@@ -76,6 +102,7 @@ internal class PersonApiDaoTest : DatabaseIntegrationTest() {
     }
 
     private fun personenErKlar() = personApiDao.spesialistHarPersonKlarForVisningISpeil(FØDSELSNUMMER)
+    private fun harTilgangsdataForPersonen() = personApiDao.harTilgangsdata(FØDSELSNUMMER)
     private fun assertPersonenErIkkeKlar() = assertFalse(personenErKlar())
     private fun assertPersonenErKlar() = assertTrue(personenErKlar())
 }

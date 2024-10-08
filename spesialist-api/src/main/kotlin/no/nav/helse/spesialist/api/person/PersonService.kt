@@ -86,7 +86,9 @@ class PersonService(
         tilganger: SaksbehandlerTilganger,
     ): FetchPersonResult {
         if (!personApiDao.spesialistHarPersonKlarForVisningISpeil(fødselsnummer)) {
-            personhåndterer.oppdaterSnapshot(fødselsnummer, skalKlargjøresForVisning = true)
+            if (!personApiDao.harTilgangsdata(fødselsnummer)) {
+                personhåndterer.oppdaterSnapshot(fødselsnummer, skalKlargjøresForVisning = true)
+            }
             return FetchPersonResult.Feil.IkkeKlarTilVisning
         }
         if (manglerTilgang(egenAnsattApiDao, personApiDao, fødselsnummer, tilganger)) return FetchPersonResult.Feil.ManglerTilgang

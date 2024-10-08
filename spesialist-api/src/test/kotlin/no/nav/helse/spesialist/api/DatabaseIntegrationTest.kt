@@ -368,7 +368,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
     }
 
-    protected fun opprettPerson(
+    protected fun opprettPersonOld(
         fødselsnummer: String = FØDSELSNUMMER,
         aktørId: String = AKTØRID,
         adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
@@ -377,12 +377,33 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ): Long {
         val personinfoid = opprettPersoninfo(adressebeskyttelse)
         val infotrygdutbetalingerid = opprettInfotrygdutbetalinger()
-        val personId = opprettPerson(fødselsnummer, aktørId, personinfoid, bostedId, infotrygdutbetalingerid)
+        val personId = opprettHelPerson(fødselsnummer, aktørId, personinfoid, bostedId, infotrygdutbetalingerid)
         opprettEgenAnsatt(personId, erEgenAnsatt)
         return personId
     }
 
-    private fun opprettPerson(
+    protected fun opprettPerson(
+        fødselsnummer: String = FØDSELSNUMMER,
+        aktørId: String = AKTØRID,
+        adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
+        bostedId: Int = ENHET.id,
+        erEgenAnsatt: Boolean = false,
+    ): Long {
+        val personId = opprettMinimalPerson(fødselsnummer, aktørId)
+        val personinfoid = opprettPersoninfo(adressebeskyttelse)
+        val infotrygdutbetalingerid = opprettInfotrygdutbetalinger()
+        oppdaterPersonpekere(fødselsnummer, personinfoid, infotrygdutbetalingerid)
+        opprettEgenAnsatt(personId, erEgenAnsatt)
+        oppdaterEnhet(personId, bostedId)
+        return personId
+    }
+
+    protected fun opprettMinimalPerson(
+        fødselsnummer: String = FØDSELSNUMMER,
+        aktørId: String = AKTØRID,
+    ) = opprettHelPerson(fødselsnummer, aktørId, null, null, null)
+
+    private fun opprettHelPerson(
         fødselsnummer: String,
         aktørId: String,
         personinfoid: Long?,
@@ -433,6 +454,11 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
     }
 
+    protected fun oppdaterPersoninfo(adressebeskyttelse: Adressebeskyttelse) {
+        val personinfoId = opprettPersoninfo(adressebeskyttelse)
+        oppdaterPersonpekere(FØDSELSNUMMER, personinfoId)
+    }
+
     private fun opprettPersoninfo(adressebeskyttelse: Adressebeskyttelse) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             val (fornavn, mellomnavn, etternavn) = NAVN
@@ -455,7 +481,63 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             )
         }
 
-    private fun opprettEgenAnsatt(
+    private fun oppdaterPersonpekere(
+        fødselsnummer: String,
+        personinfoId: Long? = null,
+        infotrygdutbetalingerId: Long? = null,
+    ) {
+        @Language("PostgreSQL")
+        val query = """
+            update person
+            set info_ref=:personinfoId,
+                infotrygdutbetalinger_ref=:infotrygdutbetalingerRef,
+                personinfo_oppdatert = (
+                    CASE 
+                        when (:harPersoninfoId is not null) then now()
+                    END
+                ),
+                infotrygdutbetalinger_oppdatert = (
+                    CASE 
+                        when (:harInfotrygdutbetalingerRef is not null) then now()
+                    END
+                )
+            where fodselsnummer=:fodselsnummer
+        """.trimIndent()
+
+        sessionOf(dataSource).use {
+            it.run(
+                queryOf(
+                    query, mapOf(
+                        "personinfoId" to personinfoId,
+                        "harPersoninfoId" to (personinfoId != null),
+                        "infotrygdutbetalingerRef" to infotrygdutbetalingerId,
+                        "harInfotrygdutbetalingerRef" to (infotrygdutbetalingerId != null),
+                        "fodselsnummer" to fødselsnummer.toLong()
+                    )
+                ).asUpdate
+            )
+        }
+    }
+
+    private fun oppdaterEnhet(
+        personId: Long,
+        enhetNr: Int,
+    ) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val query =
+            "update person set enhet_ref = :enhetNr, enhet_ref_oppdatert = now() where id = :personId"
+        session.run(
+            queryOf(
+                query,
+                mapOf(
+                    "enhetNr" to enhetNr,
+                    "personId" to personId,
+                ),
+            ).asUpdate,
+        )
+    }
+
+    protected fun opprettEgenAnsatt(
         personId: Long,
         erEgenAnsatt: Boolean,
     ) = sessionOf(dataSource).use { session ->
