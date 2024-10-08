@@ -4,12 +4,14 @@ import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
+import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -46,6 +48,26 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
         val varseldefinisjon = Varseldefinisjon(id, "SB_EX_1", "En tittel", null, null, false, LocalDateTime.now())
         meldingMediator.håndter(varseldefinisjon)
         assertVarseldefinisjon(id)
+    }
+
+    @Test
+    fun `oppdater persondata`() {
+        val fødselsnummer = lagFødselsnummer()
+        meldingMediator.oppdaterSnapshot(fødselsnummer)
+        val sisteMelding = testRapid.inspektør.meldinger().last()
+        assertEquals("oppdater_persondata", sisteMelding["@event_name"].asText())
+        assertEquals(fødselsnummer, sisteMelding["fødselsnummer"].asText())
+        assertEquals(false, sisteMelding["skalKlargjøresForVisning"].asBoolean())
+    }
+
+    @Test
+    fun `oppdater persondata med klargjøring for visning`() {
+        val fødselsnummer = lagFødselsnummer()
+        meldingMediator.oppdaterSnapshot(fødselsnummer, true)
+        val sisteMelding = testRapid.inspektør.meldinger().last()
+        assertEquals("oppdater_persondata", sisteMelding["@event_name"].asText())
+        assertEquals(fødselsnummer, sisteMelding["fødselsnummer"].asText())
+        assertEquals(true, sisteMelding["skalKlargjøresForVisning"].asBoolean())
     }
 
     private fun assertVarseldefinisjon(id: UUID) {

@@ -111,6 +111,7 @@ internal class SchemaBuilder(
                                     oppgavehåndterer = oppgavehåndterer,
                                     saksbehandlerhåndterer = saksbehandlerhåndterer,
                                     avviksvurderinghenter = avviksvurderinghenter,
+                                    personhåndterer = personhåndterer,
                                     stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
                                 ),
                         ),

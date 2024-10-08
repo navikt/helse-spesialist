@@ -9,6 +9,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.januar
+import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
@@ -370,6 +371,9 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                 oppgavehåndterer = mockk(relaxed = true),
                 saksbehandlerhåndterer = mockk(relaxed = true),
                 avviksvurderinghenter = mockk(relaxed = true),
+                personhåndterer = object : Personhåndterer {
+                    override fun oppdaterSnapshot(fnr: String, skalKlargjøresForVisning: Boolean) {}
+                },
                 stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
             ),
         )

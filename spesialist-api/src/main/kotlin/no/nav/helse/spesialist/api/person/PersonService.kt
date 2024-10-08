@@ -7,6 +7,7 @@ import kotlinx.coroutines.async
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
+import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
@@ -62,6 +63,7 @@ class PersonService(
     private val oppgavehåndterer: Oppgavehåndterer,
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
     private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
+    private val personhåndterer: Personhåndterer,
     private val snapshotService: SnapshotService,
     private val reservasjonClient: ReservasjonClient,
 ) : PersonoppslagService {
@@ -83,7 +85,10 @@ class PersonService(
         fødselsnummer: String,
         tilganger: SaksbehandlerTilganger,
     ): FetchPersonResult {
-        if (!personApiDao.spesialistHarPersonKlarForVisningISpeil(fødselsnummer)) return FetchPersonResult.Feil.IkkeKlarTilVisning
+        if (!personApiDao.spesialistHarPersonKlarForVisningISpeil(fødselsnummer)) {
+            personhåndterer.oppdaterSnapshot(fødselsnummer, skalKlargjøresForVisning = true)
+            return FetchPersonResult.Feil.IkkeKlarTilVisning
+        }
         if (manglerTilgang(egenAnsattApiDao, personApiDao, fødselsnummer, tilganger)) return FetchPersonResult.Feil.ManglerTilgang
 
         val snapshot =

@@ -6,6 +6,7 @@ import graphql.schema.DataFetchingEnvironment
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
@@ -181,6 +182,9 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
                 oppgavehåndterer = mockk(relaxed = true),
                 saksbehandlerhåndterer = mockk(relaxed = true),
                 avviksvurderinghenter = mockk(relaxed = true),
+                personhåndterer = object : Personhåndterer {
+                    override fun oppdaterSnapshot(fnr: String, skalKlargjøresForVisning: Boolean) {}
+                },
                 stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
             ),
         )
