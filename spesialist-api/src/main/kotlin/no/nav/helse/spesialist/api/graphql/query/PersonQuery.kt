@@ -19,6 +19,7 @@ import no.nav.helse.spesialist.api.auditLogTeller
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
+import no.nav.helse.spesialist.api.graphql.query.Inputvalidering.UgyldigInput
 import no.nav.helse.spesialist.api.graphql.schema.Person
 import no.nav.helse.spesialist.api.graphql.schema.Reservasjon
 import no.nav.helse.spesialist.api.notat.NotatDao
@@ -38,6 +39,22 @@ import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vergemål.VergemålApiDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
+private sealed class Inputvalidering {
+    class Ok(val fødselsnummer: String) : Inputvalidering()
+
+    sealed class UgyldigInput(val graphqlError: GraphQLError) : Inputvalidering() {
+        class UkjentFødselsnummer(val fødselsnummer: String, graphqlError: GraphQLError) : UgyldigInput(graphqlError)
+
+        class UkjentAktørId(val aktørId: String, graphqlError: GraphQLError) : UgyldigInput(graphqlError)
+
+        class ParametreMangler(graphqlError: GraphQLError) : UgyldigInput(graphqlError)
+
+        class UgyldigAktørId(graphqlError: GraphQLError) : UgyldigInput(graphqlError)
+
+        class HarFlereFødselsnumre(val aktørId: String, graphqlError: GraphQLError) : UgyldigInput(graphqlError)
+    }
+}
 
 class PersonQuery(
     personApiDao: PersonApiDao,
@@ -70,36 +87,11 @@ class PersonQuery(
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Person?> {
         val fødselsnummer =
-            when {
-                fnr != null -> {
-                    if (personApiDao.finnesPersonMedFødselsnummer(fnr)) {
-                        fnr
-                    } else {
-                        loggNotFoundForFødselsnummer(fnr, env)
-                        return getNotFoundError(fnr).tilGraphqlResult()
-                    }
-                }
-
-                else -> {
-                    if (aktorId == null) {
-                        return lagTomtResultat(getBadRequestError("Requesten mangler både fødselsnummer og aktørId"))
-                    } else if (aktorId.length != 13) {
-                        return lagTomtResultat(getBadRequestError("Feil lengde på parameter aktorId: ${aktorId.length}"))
-                    } else {
-                        val fødselsnumre = personApiDao.finnFødselsnumre(aktorId.toLong()).toSet()
-                        when (fødselsnumre.size) {
-                            0 -> {
-                                loggNotFoundForAktørId(aktorId, env)
-                                return lagTomtResultat(getNotFoundError(aktorId))
-                            }
-
-                            1 -> fødselsnumre.first()
-                            else -> {
-                                auditLog(env.graphQlContext, aktorId, null, getFlereFødselsnumreError(fødselsnumre).message)
-                                return lagTomtResultat(getFlereFødselsnumreError(fødselsnumre))
-                            }
-                        }
-                    }
+            when (val validering = validerInput(fnr, aktorId)) {
+                is Inputvalidering.Ok -> validering.fødselsnummer
+                is UgyldigInput -> {
+                    validering.auditlogg(env)
+                    return validering.graphqlError.tilGraphqlResult()
                 }
             }
         sikkerLogg.info("Personoppslag på fnr=$fødselsnummer")
@@ -164,6 +156,33 @@ class PersonQuery(
             auditLog(env.graphQlContext, fødselsnummer, true, null)
             DataFetcherResult.newResult<Person?>().data(person).build()
         }
+    }
+
+    private fun Set<String>.harFlereFødselsnumre() = this.size > 1
+
+    private fun Set<String>.harIngenFødselsnumre() = this.isEmpty()
+
+    private fun validerInput(
+        fødselsnummer: String?,
+        aktørId: String?,
+    ): Inputvalidering {
+        if (fødselsnummer != null) {
+            if (personApiDao.finnesPersonMedFødselsnummer(fødselsnummer)) return Inputvalidering.Ok(fødselsnummer)
+            return UgyldigInput.UkjentFødselsnummer(fødselsnummer, getNotFoundError(fødselsnummer))
+        }
+        if (aktørId == null) return UgyldigInput.ParametreMangler(getBadRequestError("Requesten mangler både fødselsnummer og aktorId"))
+        if (aktørId.length != 13) {
+            return UgyldigInput.UgyldigAktørId(
+                getBadRequestError("Feil lengde på parameter aktorId: ${aktørId.length}"),
+            )
+        }
+
+        val fødselsnumre = personApiDao.finnFødselsnumre(aktørId.toLong()).toSet()
+
+        if (fødselsnumre.harIngenFødselsnumre()) return UgyldigInput.UkjentAktørId(aktørId, getNotFoundError(aktørId))
+        if (fødselsnumre.harFlereFødselsnumre()) return UgyldigInput.HarFlereFødselsnumre(aktørId, getFlereFødselsnumreError(fødselsnumre))
+
+        return Inputvalidering.Ok(fødselsnumre.single())
     }
 
     private fun lagTomtResultat(error: GraphQLError): DataFetcherResult<Person?> =
@@ -249,5 +268,15 @@ class PersonQuery(
         sikkerLogg.debug(
             "audit-logget, operationName: PersonQuery, harTilgang: $harTilgang, fantIkkePersonErrorMsg: $fantIkkePersonErrorMsg",
         )
+    }
+
+    private fun UgyldigInput.auditlogg(env: DataFetchingEnvironment) {
+        when (this) {
+            is UgyldigInput.UkjentFødselsnummer -> loggNotFoundForFødselsnummer(this.fødselsnummer, env)
+            is UgyldigInput.UkjentAktørId -> loggNotFoundForAktørId(aktørId, env)
+            is UgyldigInput.HarFlereFødselsnumre -> auditLog(env.graphQlContext, aktørId, null, graphqlError.message)
+            is UgyldigInput.ParametreMangler -> {}
+            is UgyldigInput.UgyldigAktørId -> {}
+        }
     }
 }
