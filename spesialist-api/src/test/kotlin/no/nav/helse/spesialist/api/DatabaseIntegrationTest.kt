@@ -374,10 +374,21 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
         bostedId: Int = ENHET.id,
         erEgenAnsatt: Boolean = false,
-    ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+    ): Long {
         val personinfoid = opprettPersoninfo(adressebeskyttelse)
         val infotrygdutbetalingerid = opprettInfotrygdutbetalinger()
+        val personId = opprettPerson(fødselsnummer, aktørId, personinfoid, bostedId, infotrygdutbetalingerid)
+        opprettEgenAnsatt(personId, erEgenAnsatt)
+        return personId
+    }
 
+    private fun opprettPerson(
+        fødselsnummer: String,
+        aktørId: String,
+        personinfoid: Long?,
+        bostedId: Int?,
+        infotrygdutbetalingerid: Long?
+    ): Long {
         @Language("PostgreSQL")
         val statement =
             """
@@ -386,21 +397,22 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             """.trimIndent()
         val personId =
             requireNotNull(
-                session.run(
-                    queryOf(
-                        statement,
-                        mapOf(
-                            "foedselsnummer" to fødselsnummer.toLong(),
-                            "aktoerId" to aktørId.toLong(),
-                            "personinfoId" to personinfoid,
-                            "enhetId" to bostedId,
-                            "infotrygdutbetalingerId" to infotrygdutbetalingerid
-                        )
-                    ).asUpdateAndReturnGeneratedKey,
-                ),
+                sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+                    session.run(
+                        queryOf(
+                            statement,
+                            mapOf(
+                                "foedselsnummer" to fødselsnummer.toLong(),
+                                "aktoerId" to aktørId.toLong(),
+                                "personinfoId" to personinfoid,
+                                "enhetId" to bostedId,
+                                "infotrygdutbetalingerId" to infotrygdutbetalingerid
+                            )
+                        ).asUpdateAndReturnGeneratedKey,
+                    )
+                }
             )
-        opprettEgenAnsatt(personId, erEgenAnsatt)
-        personId
+        return personId
     }
 
     protected fun opprettPåVent(
