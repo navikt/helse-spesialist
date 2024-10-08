@@ -9,7 +9,7 @@ sealed interface PaVentRequest {
         val saksbehandlerOid: UUID,
         val frist: LocalDate,
         val skalTildeles: Boolean,
-        val notatTekst: String,
+        val notatTekst: String?,
         val årsaker: List<PaVentArsak>,
     ) : PaVentRequest
 

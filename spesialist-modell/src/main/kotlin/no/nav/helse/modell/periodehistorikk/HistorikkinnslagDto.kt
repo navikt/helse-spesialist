@@ -16,12 +16,12 @@ sealed interface HistorikkinnslagDto {
 
     companion object {
         fun lagtPåVentInnslag(
-            notat: NotatDto,
+            notat: NotatDto?,
             saksbehandler: SaksbehandlerDto,
             årsaker: List<PåVentÅrsak>,
             frist: LocalDate,
-        ): LagtPåVent {
-            return LagtPåVent(
+        ): LagtPåVent =
+            LagtPåVent(
                 type = Innslagstype.LAGT_PA_VENT,
                 notat = notat,
                 saksbehandler = saksbehandler,
@@ -29,15 +29,13 @@ sealed interface HistorikkinnslagDto {
                 tidspunkt = LocalDateTime.now(),
                 frist = frist,
             )
-        }
 
-        fun fjernetFraPåVentInnslag(saksbehandler: SaksbehandlerDto): FjernetFraPåVent {
-            return FjernetFraPåVent(
+        fun fjernetFraPåVentInnslag(saksbehandler: SaksbehandlerDto): FjernetFraPåVent =
+            FjernetFraPåVent(
                 type = Innslagstype.FJERNET_FRA_PA_VENT,
                 saksbehandler = saksbehandler,
                 tidspunkt = LocalDateTime.now(),
             )
-        }
     }
 }
 
@@ -48,18 +46,17 @@ data class NotatDto(
 
 data class LagtPåVent(
     override val type: Innslagstype,
-    override val notat: NotatDto,
+    override val notat: NotatDto?,
     override val saksbehandler: SaksbehandlerDto,
     override val tidspunkt: LocalDateTime,
     val årsak: List<PåVentÅrsak>,
     val frist: LocalDate,
 ) : HistorikkinnslagDto {
-    fun toJson(): String {
-        return mapOf(
+    fun toJson(): String =
+        mapOf(
             "årsaker" to årsak.map { it },
             "frist" to frist,
         ).let { objectMapper.writeValueAsString(it) }
-    }
 }
 
 private val objectMapper =

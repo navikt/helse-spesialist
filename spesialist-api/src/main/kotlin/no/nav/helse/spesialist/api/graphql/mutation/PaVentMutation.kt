@@ -30,7 +30,7 @@ class PaVentMutation(
     @Suppress("unused")
     suspend fun leggPaVent(
         oppgaveId: String,
-        notatTekst: String,
+        notatTekst: String?,
         frist: LocalDate,
         tildeling: Boolean,
         arsaker: List<PaVentRequest.PaVentArsak>? = emptyList(),
@@ -50,12 +50,13 @@ class PaVentMutation(
                     ),
                     saksbehandler,
                 )
-                newResult<PaVent?>().data(
-                    PaVent(
-                        frist = frist,
-                        oid = saksbehandler.oid,
-                    ),
-                ).build()
+                newResult<PaVent?>()
+                    .data(
+                        PaVent(
+                            frist = frist,
+                            oid = saksbehandler.oid,
+                        ),
+                    ).build()
             } catch (e: OppgaveIkkeTildelt) {
                 newResult<PaVent?>().error(ikkeTildeltError(e)).build()
             } catch (e: OppgaveTildeltNoenAndre) {
@@ -93,17 +94,15 @@ class PaVentMutation(
             .build()
     }
 
-    private fun tildeltNoenAndreError(error: OppgaveTildeltNoenAndre): GraphQLError {
-        return newErrorException()
+    private fun tildeltNoenAndreError(error: OppgaveTildeltNoenAndre): GraphQLError =
+        newErrorException()
             .message("Oppgave tildelt noen andre")
             .extensions(mapOf("code" to error.httpkode, "tildeling" to error.tildeling))
             .build()
-    }
 
-    private fun ikkeTildeltError(error: OppgaveIkkeTildelt): GraphQLError {
-        return newErrorException()
+    private fun ikkeTildeltError(error: OppgaveIkkeTildelt): GraphQLError =
+        newErrorException()
             .message("Oppgave ikke tildelt")
             .extensions(mapOf("code" to error.httpkode))
             .build()
-    }
 }

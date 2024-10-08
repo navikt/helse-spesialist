@@ -215,7 +215,7 @@ internal class SaksbehandlerMediator(
         try {
             val innslag =
                 HistorikkinnslagDto.lagtPåVentInnslag(
-                    notat = NotatDto(oppgaveId = handling.oppgaveId, tekst = handling.notatTekst),
+                    notat = handling.notatTekst?.let { NotatDto(oppgaveId = handling.oppgaveId, tekst = handling.notatTekst!!) },
                     saksbehandler = saksbehandler.toDto(),
                     årsaker = handling.årsaker,
                     frist = handling.frist,
@@ -430,7 +430,9 @@ internal class SaksbehandlerMediator(
 
                 is ManglerTilgang -> IkkeTilgang(oid, oppgaveId)
 
-                is AlleredeAnnullert -> no.nav.helse.spesialist.api.feilhåndtering.AlleredeAnnullert(handling.toDto().vedtaksperiodeId)
+                is AlleredeAnnullert ->
+                    no.nav.helse.spesialist.api.feilhåndtering
+                        .AlleredeAnnullert(handling.toDto().vedtaksperiodeId)
             }
     }
 
@@ -510,8 +512,8 @@ internal class SaksbehandlerMediator(
                 },
         )
 
-    private fun MinimumSykdomsgrad.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad {
-        return no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad(
+    private fun MinimumSykdomsgrad.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad =
+        no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad(
             aktørId = aktorId,
             fødselsnummer = fodselsnummer,
             fom = fom,
@@ -527,7 +529,6 @@ internal class SaksbehandlerMediator(
                 },
             initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,
         )
-    }
 
     private fun InntektOgRefusjonOverstyring.tilModellversjon(): OverstyrtInntektOgRefusjon =
         OverstyrtInntektOgRefusjon(
@@ -603,7 +604,13 @@ internal class SaksbehandlerMediator(
         )
 
     private fun PaVentRequest.LeggPaVent.tilModellversjon(): LeggPåVent =
-        LeggPåVent(oppgaveId, frist, skalTildeles, notatTekst, årsaker.map { årsak -> PåVentÅrsak(key = årsak._key, årsak = årsak.arsak) })
+        LeggPåVent(
+            oppgaveId,
+            frist,
+            skalTildeles,
+            notatTekst,
+            årsaker.map { årsak -> PåVentÅrsak(key = årsak._key, årsak = årsak.arsak) },
+        )
 
     private fun PaVentRequest.FjernPaVent.tilModellversjon(): FjernPåVent = FjernPåVent(oppgaveId)
 

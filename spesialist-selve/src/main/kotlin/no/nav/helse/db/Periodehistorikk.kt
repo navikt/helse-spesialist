@@ -35,15 +35,18 @@ class Periodehistorikk(
                     oppgaveId = oppgaveId,
                     notatId = null,
                 )
+
             is LagtPåVent -> {
-                val notat = historikkinnslag.notat
                 val notatId =
-                    notatDao.opprettNotatForOppgaveId(
-                        oppgaveId = notat.oppgaveId,
-                        tekst = notat.tekst,
-                        saksbehandlerOid = historikkinnslag.saksbehandler.oid,
-                        type = NotatType.PaaVent,
-                    )?.toInt()
+                    historikkinnslag.notat?.let { notat ->
+                        notatDao
+                            .opprettNotatForOppgaveId(
+                                oppgaveId = notat.oppgaveId,
+                                tekst = notat.tekst,
+                                saksbehandlerOid = historikkinnslag.saksbehandler.oid,
+                                type = NotatType.PaaVent,
+                            )?.toInt()
+                    }
                 periodehistorikkDao.lagre(
                     historikkType = historikkinnslag.type.tilPeriodehistorikkType(),
                     saksbehandlerOid = historikkinnslag.saksbehandler.oid,
