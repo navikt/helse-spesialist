@@ -715,7 +715,14 @@ internal object Testmeldingfabrikk {
     )
 
     fun lagOppdaterPersondata(aktørId: String, fødselsnummer: String, id: UUID) = nyHendelse(
-        id, "oppdater_persondata", mapOf(
+        id, "oppdater_persondata", mutableMapOf(
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId
+        )
+    )
+
+    fun lagKlargjørPersonForVisning(aktørId: String, fødselsnummer: String, id: UUID) = nyHendelse(
+        id, "klargjør_person_for_visning", mutableMapOf(
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId
         )

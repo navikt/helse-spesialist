@@ -18,6 +18,7 @@ import no.nav.helse.modell.MeldingDao.Meldingtype.ENDRET_EGEN_ANSATT_STATUS
 import no.nav.helse.modell.MeldingDao.Meldingtype.GODKJENNING
 import no.nav.helse.modell.MeldingDao.Meldingtype.GODKJENT_TILBAKEDATERT_SYKMELDING
 import no.nav.helse.modell.MeldingDao.Meldingtype.GOSYS_OPPGAVE_ENDRET
+import no.nav.helse.modell.MeldingDao.Meldingtype.KLARGJØR_TILGANGSRELATERTE_DATA
 import no.nav.helse.modell.MeldingDao.Meldingtype.NYE_VARSLER
 import no.nav.helse.modell.MeldingDao.Meldingtype.OPPDATER_PERSONSNAPSHOT
 import no.nav.helse.modell.MeldingDao.Meldingtype.OVERSTYRING_IGANGSATT
@@ -32,6 +33,7 @@ import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
+import no.nav.helse.modell.person.KlargjørTilgangsrelaterteData
 import no.nav.helse.modell.person.OppdaterPersondata
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
@@ -253,6 +255,7 @@ internal class MeldingDao(private val dataSource: DataSource) : MeldingRepositor
             VEDTAKSPERIODE_NY_UTBETALING -> VedtaksperiodeNyUtbetaling(jsonNode)
             BEHANDLING_OPPRETTET -> BehandlingOpprettet(jsonNode)
             AVSLUTTET_UTEN_VEDTAK -> AvsluttetUtenVedtakMessage(jsonNode)
+            KLARGJØR_TILGANGSRELATERTE_DATA -> KlargjørTilgangsrelaterteData(jsonNode)
             else -> throw IllegalArgumentException("ukjent meldingtype: $meldingtype")
         }
     }
@@ -277,6 +280,7 @@ internal class MeldingDao(private val dataSource: DataSource) : MeldingRepositor
             is BehandlingOpprettet -> BEHANDLING_OPPRETTET
             is AvsluttetUtenVedtakMessage -> AVSLUTTET_UTEN_VEDTAK
             is AvsluttetMedVedtakMessage -> AVSLUTTET_MED_VEDTAK
+            is KlargjørTilgangsrelaterteData -> KLARGJØR_TILGANGSRELATERTE_DATA
             else -> throw IllegalArgumentException("ukjent meldingtype: ${melding::class.simpleName}")
         }
 
@@ -299,5 +303,6 @@ internal class MeldingDao(private val dataSource: DataSource) : MeldingRepositor
         GODKJENT_TILBAKEDATERT_SYKMELDING,
         AVSLUTTET_UTEN_VEDTAK,
         AVSLUTTET_MED_VEDTAK,
+        KLARGJØR_TILGANGSRELATERTE_DATA,
     }
 }

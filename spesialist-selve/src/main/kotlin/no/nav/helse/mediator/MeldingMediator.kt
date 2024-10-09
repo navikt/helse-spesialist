@@ -15,6 +15,7 @@ import no.nav.helse.mediator.meldinger.BehandlingOpprettetRiver
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfoRiver
 import no.nav.helse.mediator.meldinger.GodkjenningsbehovRiver
 import no.nav.helse.mediator.meldinger.GosysOppgaveEndretRiver
+import no.nav.helse.mediator.meldinger.KlargjørPersonForVisningRiver
 import no.nav.helse.mediator.meldinger.MidnattRiver
 import no.nav.helse.mediator.meldinger.NyeVarslerRiver
 import no.nav.helse.mediator.meldinger.OppdaterPersondataRiver
@@ -166,6 +167,7 @@ internal class MeldingMediator(
                 Risikovurderingløsning.V2River(this),
                 Inntektløsning.InntektRiver(this),
                 OppdaterPersondataRiver(this),
+                KlargjørPersonForVisningRiver(this),
                 UtbetalingEndretRiver(this),
                 VedtaksperiodeReberegnetRiver(this),
                 GosysOppgaveEndretRiver(this),
@@ -524,14 +526,19 @@ internal class MeldingMediator(
         }
     }
 
-    override fun oppdaterSnapshot(
-        fnr: String,
-        skalKlargjøresForVisning: Boolean,
-    ) {
+    override fun oppdaterSnapshot(fødselsnummer: String) {
         val event =
             JsonMessage
-                .newMessage("oppdater_persondata", mapOf("fødselsnummer" to fnr, "skalKlargjøresForVisning" to skalKlargjøresForVisning))
+                .newMessage("oppdater_persondata", mapOf("fødselsnummer" to fødselsnummer))
                 .toJson()
-        rapidsConnection.publish(fnr, event)
+        rapidsConnection.publish(fødselsnummer, event)
+    }
+
+    override fun klargjørPersonForVisning(fødselsnummer: String) {
+        val event =
+            JsonMessage
+                .newMessage("klargjør_person_for_visning", mapOf("fødselsnummer" to fødselsnummer))
+                .toJson()
+        rapidsConnection.publish(fødselsnummer, event)
     }
 }

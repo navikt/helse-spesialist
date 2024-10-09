@@ -1022,6 +1022,14 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertEtterspurteBehov("HentInfotrygdutbetalinger")
     }
 
+    protected fun håndterSkalKlargjøresForVisning(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+    ) {
+        sisteMeldingId = meldingssender.sendKlargjørPersonForVisning(aktørId, fødselsnummer)
+        assertEtterspurteBehov("HentPersoninfoV2")
+    }
+
     protected fun håndterSkjønnsfastsattSykepengegrunnlag(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,

@@ -87,7 +87,7 @@ class PersonService(
     ): FetchPersonResult {
         if (!personApiDao.spesialistHarPersonKlarForVisningISpeil(fødselsnummer)) {
             if (!personApiDao.harTilgangsdata(fødselsnummer)) {
-                personhåndterer.oppdaterSnapshot(fødselsnummer, skalKlargjøresForVisning = true)
+                personhåndterer.klargjørPersonForVisning(fødselsnummer)
             }
             return FetchPersonResult.Feil.IkkeKlarTilVisning
         }

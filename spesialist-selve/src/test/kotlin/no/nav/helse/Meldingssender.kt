@@ -688,11 +688,21 @@ internal class Meldingssender(private val testRapid: TestRapid) {
 
     fun sendOppdaterPersondata(
         aktørId: String,
-        fødselsnummer: String,
+        fødselsnummer: String
     ): UUID =
         newUUID.also { id ->
             testRapid.sendTestMessage(
                 Testmeldingfabrikk.lagOppdaterPersondata(aktørId, fødselsnummer, id)
+            )
+        }
+
+    fun sendKlargjørPersonForVisning(
+        aktørId: String,
+        fødselsnummer: String,
+    ): UUID =
+        newUUID.also { id ->
+            testRapid.sendTestMessage(
+                Testmeldingfabrikk.lagKlargjørPersonForVisning(aktørId, fødselsnummer, id)
             )
         }
 

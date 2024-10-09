@@ -57,17 +57,15 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
         val sisteMelding = testRapid.inspektør.meldinger().last()
         assertEquals("oppdater_persondata", sisteMelding["@event_name"].asText())
         assertEquals(fødselsnummer, sisteMelding["fødselsnummer"].asText())
-        assertEquals(false, sisteMelding["skalKlargjøresForVisning"].asBoolean())
     }
 
     @Test
-    fun `oppdater persondata med klargjøring for visning`() {
+    fun `klargjør person for visning`() {
         val fødselsnummer = lagFødselsnummer()
-        meldingMediator.oppdaterSnapshot(fødselsnummer, true)
+        meldingMediator.klargjørPersonForVisning(fødselsnummer)
         val sisteMelding = testRapid.inspektør.meldinger().last()
-        assertEquals("oppdater_persondata", sisteMelding["@event_name"].asText())
+        assertEquals("klargjør_person_for_visning", sisteMelding["@event_name"].asText())
         assertEquals(fødselsnummer, sisteMelding["fødselsnummer"].asText())
-        assertEquals(true, sisteMelding["skalKlargjøresForVisning"].asBoolean())
     }
 
     private fun assertVarseldefinisjon(id: UUID) {

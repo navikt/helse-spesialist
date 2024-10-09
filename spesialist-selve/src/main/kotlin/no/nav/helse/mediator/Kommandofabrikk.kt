@@ -45,6 +45,7 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.EndretEgenAnsattStatusCommand
+import no.nav.helse.modell.person.KlargjørTilgangsrelaterteDataCommand
 import no.nav.helse.modell.person.OppdaterPersondataCommand
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.PersonDao
@@ -278,6 +279,13 @@ internal class Kommandofabrikk(
             førsteKjenteDagFinner = { generasjonRepository.førsteKjenteDag(hendelse.fødselsnummer()) },
             personRepository = TransactionalPersonDao(transactionalSession),
             opptegnelseRepository = TransactionalOpptegnelseDao(transactionalSession),
+        )
+
+    internal fun klargjørTilgangsrelaterteData(hendelse: Personmelding): KlargjørTilgangsrelaterteDataCommand =
+        KlargjørTilgangsrelaterteDataCommand(
+            fødselsnummer = hendelse.fødselsnummer(),
+            personRepository = personDao,
+            egenAnsattRepository = egenAnsattDao,
         )
 
     internal fun overstyringIgangsatt(

@@ -183,7 +183,8 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
                 saksbehandlerhåndterer = mockk(relaxed = true),
                 avviksvurderinghenter = mockk(relaxed = true),
                 personhåndterer = object : Personhåndterer {
-                    override fun oppdaterSnapshot(fnr: String, skalKlargjøresForVisning: Boolean) {}
+                    override fun oppdaterSnapshot(fødselsnummer: String) {}
+                    override fun klargjørPersonForVisning(fødselsnummer: String) {}
                 },
                 stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
             ),
