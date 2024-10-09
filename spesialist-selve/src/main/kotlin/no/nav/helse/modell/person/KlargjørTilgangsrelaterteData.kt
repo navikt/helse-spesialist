@@ -2,6 +2,7 @@ package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.EgenAnsattRepository
+import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
@@ -10,7 +11,10 @@ import no.nav.helse.modell.egenansatt.KontrollerEgenAnsattstatus
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterPersoninfoCommand
+import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseType.PERSON_KLAR_TIL_BEHANDLING
+import no.nav.helse.spesialist.api.abonnement.PersonKlarTilVisning
 import java.util.UUID
 
 internal class KlargjørTilgangsrelaterteData private constructor(
@@ -46,11 +50,12 @@ internal class KlargjørTilgangsrelaterteDataCommand(
     fødselsnummer: String,
     personRepository: PersonRepository,
     egenAnsattRepository: EgenAnsattRepository,
+    opptegnelseRepository: OpptegnelseRepository,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
             OppdaterPersoninfoCommand(
-                fødselsnummer,
+                fødselsnummer = fødselsnummer,
                 personRepository = personRepository,
                 force = false,
             ),
@@ -58,5 +63,8 @@ internal class KlargjørTilgangsrelaterteDataCommand(
                 fødselsnummer = fødselsnummer,
                 egenAnsattRepository = egenAnsattRepository,
             ),
+            ikkesuspenderendeCommand("opprettOptegnelse") {
+                opptegnelseRepository.opprettOpptegnelse(fødselsnummer, payload = PersonKlarTilVisning, type = PERSON_KLAR_TIL_BEHANDLING)
+            },
         )
 }

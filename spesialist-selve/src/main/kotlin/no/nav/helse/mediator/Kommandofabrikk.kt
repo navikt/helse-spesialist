@@ -286,6 +286,7 @@ internal class Kommandofabrikk(
             fødselsnummer = hendelse.fødselsnummer(),
             personRepository = personDao,
             egenAnsattRepository = egenAnsattDao,
+            opptegnelseRepository = opptegnelseDao,
         )
 
     internal fun overstyringIgangsatt(

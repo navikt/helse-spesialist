@@ -41,3 +41,11 @@ data object PersonOppdatertPayload : OpptegnelsePayload() {
         { "oppdatert": "${LocalDateTime.now()}" }
         """.trimIndent()
 }
+
+data object PersonKlarTilVisning : OpptegnelsePayload() {
+    @Language("json")
+    override fun toJson() =
+        """
+        { "oppdatert": "${LocalDateTime.now()}" }
+        """.trimIndent()
+}
