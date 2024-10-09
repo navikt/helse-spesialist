@@ -7,6 +7,7 @@ import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.modell.person.PersonDto
 import no.nav.helse.modell.person.toFødselsnummer
+import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.typer.Kjønn
 import org.intellij.lang.annotations.Language
@@ -36,7 +37,14 @@ internal class TransactionalPersonDao(
     override fun upsertInfotrygdutbetalinger(
         fødselsnummer: String,
         utbetalinger: JsonNode,
-    ): Long = throw OperationNotSupportedException()
+    ): Long {
+        return transactionalSession
+            .finnInfotrygdutbetalingerRef(fødselsnummer)
+            ?.also {
+                transactionalSession.updateInfotrygdutbetalinger(it, fødselsnummer, utbetalinger)
+            }
+            ?: transactionalSession.insertInfotrygdubetalinger(utbetalinger, fødselsnummer)
+    }
 
     override fun upsertPersoninfo(
         fødselsnummer: String,
@@ -102,9 +110,9 @@ internal class TransactionalPersonDao(
         )
     }
 
-    override fun finnPersonMedFødselsnummer(fødselsnummer: String): Long? = throw OperationNotSupportedException()
+    override fun finnPersonMedFødselsnummer(fødselsnummer: String): Long = throw OperationNotSupportedException()
 
-    override fun finnPersoninfoRef(fødselsnummer: String): Long? = throw OperationNotSupportedException()
+    override fun finnPersoninfoRef(fødselsnummer: String): Long = throw OperationNotSupportedException()
 
     override fun finnPersoninfoSistOppdatert(fødselsnummer: String): LocalDate? {
         @Language("PostgreSQL")
@@ -146,6 +154,84 @@ internal class TransactionalPersonDao(
                     skjønnsfastsatteSykepengegrunnlag = emptyList(),
                 )
             }.asSingle,
+        )
+    }
+
+    private fun TransactionalSession.finnInfotrygdutbetalingerRef(fødselsnummer: String): Long? {
+        @Language("PostgreSQL")
+        val query = "SELECT infotrygdutbetalinger_ref FROM person WHERE fodselsnummer=?"
+
+        return run(queryOf(query, fødselsnummer.toLong()).map { it.longOrNull("infotrygdutbetalinger_ref") }.asSingle)
+    }
+
+    private fun TransactionalSession.updateInfotrygdutbetalinger(
+        infotrygdutbetalingerId: Long,
+        fødselsnummer: String,
+        utbetalinger: JsonNode,
+    ) {
+        @Language("PostgreSQL")
+        val query =
+            """
+            UPDATE infotrygdutbetalinger SET data=CAST(:utbetalinger as json)
+            WHERE id=:infotrygdutbetalingerId;
+            """.trimIndent()
+        run(
+            queryOf(
+                query,
+                mapOf(
+                    "utbetalinger" to objectMapper.writeValueAsString(utbetalinger),
+                    "infotrygdutbetalingerId" to infotrygdutbetalingerId,
+                ),
+            ).asUpdate,
+        )
+        updateInfotrygdutbetalingerOppdatert(fødselsnummer)
+    }
+
+    private fun TransactionalSession.updateInfotrygdutbetalingerOppdatert(fødselsnummer: String) {
+        @Language("PostgreSQL")
+        val query = "UPDATE person SET infotrygdutbetalinger_oppdatert=now() WHERE fodselsnummer=?"
+
+        run(queryOf(query, fødselsnummer.toLong()).asUpdate)
+    }
+
+    private fun TransactionalSession.insertInfotrygdubetalinger(
+        utbetalinger: JsonNode,
+        fødselsnummer: String,
+    ): Long {
+        @Language("PostgreSQL")
+        val query = "INSERT INTO infotrygdutbetalinger (data) VALUES (CAST(? as json))"
+
+        val infotrygdutbetalingerId =
+            requireNotNull(
+                run(
+                    queryOf(
+                        query,
+                        objectMapper.writeValueAsString(utbetalinger),
+                    ).asUpdateAndReturnGeneratedKey,
+                ),
+            )
+        updateInfotrygdutbetalingerRef(infotrygdutbetalingerId, fødselsnummer)
+        return infotrygdutbetalingerId
+    }
+
+    private fun TransactionalSession.updateInfotrygdutbetalingerRef(
+        infotrygdutbetalingerId: Long,
+        fødselsnummer: String,
+    ) {
+        @Language("PostgreSQL")
+        val query =
+            """
+            UPDATE person SET infotrygdutbetalinger_ref=:infotrygdutbetalingerId, infotrygdutbetalinger_oppdatert=now()
+            WHERE fodselsnummer=:fodselsnummer;
+            """.trimIndent()
+        run(
+            queryOf(
+                query,
+                mapOf(
+                    "infotrygdutbetalingerId" to infotrygdutbetalingerId,
+                    "fodselsnummer" to fødselsnummer.toLong(),
+                ),
+            ).asUpdate,
         )
     }
 

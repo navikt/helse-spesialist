@@ -269,12 +269,15 @@ internal class Kommandofabrikk(
         )
     }
 
-    internal fun oppdaterPersondata(hendelse: Personmelding): OppdaterPersondataCommand =
+    internal fun oppdaterPersondata(
+        hendelse: Personmelding,
+        transactionalSession: TransactionalSession,
+    ): OppdaterPersondataCommand =
         OppdaterPersondataCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             førsteKjenteDagFinner = { generasjonRepository.førsteKjenteDag(hendelse.fødselsnummer()) },
-            personRepository = personDao,
-            opptegnelseRepository = opptegnelseDao,
+            personRepository = TransactionalPersonDao(transactionalSession),
+            opptegnelseRepository = TransactionalOpptegnelseDao(transactionalSession),
         )
 
     internal fun overstyringIgangsatt(

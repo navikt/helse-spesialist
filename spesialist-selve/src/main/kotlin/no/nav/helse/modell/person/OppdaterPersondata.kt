@@ -1,6 +1,7 @@
 package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
+import kotliquery.TransactionalSession
 import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.Kommandostarter
@@ -15,6 +16,7 @@ import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.abonnement.PersonOppdatertPayload
 import java.time.LocalDate
 import java.util.UUID
+import javax.naming.OperationNotSupportedException
 
 internal class OppdaterPersondata private constructor(
     override val id: UUID,
@@ -37,7 +39,17 @@ internal class OppdaterPersondata private constructor(
         person: Person,
         kommandostarter: Kommandostarter,
     ) {
-        kommandostarter { oppdaterPersondata(this@OppdaterPersondata) }
+        throw OperationNotSupportedException()
+    }
+
+    override fun skalKjøresTransaksjonelt() = true
+
+    override fun transaksjonellBehandle(
+        person: Person,
+        kommandostarter: Kommandostarter,
+        transactionalSession: TransactionalSession,
+    ) {
+        kommandostarter { oppdaterPersondata(this@OppdaterPersondata, transactionalSession) }
     }
 
     override fun fødselsnummer(): String = fødselsnummer
