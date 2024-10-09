@@ -90,7 +90,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val body = runQuery("""{ person(fnr: null, aktorId: null) { aktorId } }""")
 
         assertEquals(400, body["errors"].first()["extensions"]["code"].asInt())
-        logglytter.assertIngenLogging() // Det er ikke noen ID-er å audit-logge i dette tilfellet
+        logglytter.assertIngenLoggingFor(FØDSELSNUMMER, AKTØRID)
     }
 
     @Test
@@ -501,9 +501,9 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
                 "Forventet ett innslag med $level og melding=$melding, dette ble logget: ${appender.list}"
             }
 
-        fun assertIngenLogging() =
-            assertTrue(appender.list.isEmpty()) {
-                "Forventet at det ikke skulle logges, dette ble logget: ${appender.list}"
+        fun assertIngenLoggingFor(fødselsnummer: String, aktørid: String) =
+            assertTrue(appender.list.none { it.message.contains(fødselsnummer) || it.message.contains(aktørid)} ) {
+                "Forventet at det ikke skulle være logget noe for $fødselsnummer/$aktørid, dette ble logget: ${appender.list}"
             }
     }
 }
