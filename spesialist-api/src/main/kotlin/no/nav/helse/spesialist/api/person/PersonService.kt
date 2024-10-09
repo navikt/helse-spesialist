@@ -85,10 +85,11 @@ class PersonService(
         fødselsnummer: String,
         tilganger: SaksbehandlerTilganger,
     ): FetchPersonResult {
-        if (!personApiDao.spesialistHarPersonKlarForVisningISpeil(fødselsnummer)) {
-            if (!personApiDao.harTilgangsdata(fødselsnummer)) {
-                personhåndterer.klargjørPersonForVisning(fødselsnummer)
-            }
+        if (env.erProd && !personApiDao.spesialistHarPersonKlarForVisningISpeil(fødselsnummer)) {
+            return FetchPersonResult.Feil.IkkeKlarTilVisning
+        }
+        if (!env.erProd && !personApiDao.harTilgangsdata(fødselsnummer)) {
+            personhåndterer.klargjørPersonForVisning(fødselsnummer)
             return FetchPersonResult.Feil.IkkeKlarTilVisning
         }
         if (manglerTilgang(egenAnsattApiDao, personApiDao, fødselsnummer, tilganger)) return FetchPersonResult.Feil.ManglerTilgang
