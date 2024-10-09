@@ -1,6 +1,7 @@
 package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
+import kotliquery.TransactionalSession
 import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
@@ -13,6 +14,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import java.time.LocalDateTime
 import java.util.UUID
+import javax.naming.OperationNotSupportedException
 
 internal class EndretEgenAnsattStatus private constructor(
     override val id: UUID,
@@ -36,11 +38,21 @@ internal class EndretEgenAnsattStatus private constructor(
         json = jsonNode.toString(),
     )
 
+    override fun skalKjøresTransaksjonelt() = true
+
+    override fun transaksjonellBehandle(
+        person: Person,
+        kommandostarter: Kommandostarter,
+        transactionalSession: TransactionalSession,
+    ) {
+        kommandostarter { endretEgenAnsattStatus(this@EndretEgenAnsattStatus, transactionalSession) }
+    }
+
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
     ) {
-        kommandostarter { endretEgenAnsattStatus(this@EndretEgenAnsattStatus) }
+        throw OperationNotSupportedException()
     }
 
     override fun fødselsnummer(): String = fødselsnummer

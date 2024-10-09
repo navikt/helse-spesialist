@@ -10,9 +10,65 @@ import java.util.UUID
 import javax.naming.OperationNotSupportedException
 
 class TransactionalOppgaveDao(private val transactionalSession: TransactionalSession) : OppgaveRepository {
-    override fun finnOppgave(id: Long): OppgaveFraDatabase = throw OperationNotSupportedException()
+    override fun finnOppgave(id: Long): OppgaveFraDatabase? {
+        @Language("PostgreSQL")
+        val statement =
+            """
+            SELECT o.egenskaper, o.status, v.vedtaksperiode_id, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id, s.navn, s.epost, s.ident, s.oid, o.kan_avvises
+            FROM oppgave o
+            INNER JOIN vedtak v on o.vedtak_ref = v.id
+            LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
+            LEFT JOIN saksbehandler s on s.oid = t.saksbehandler_ref
+            WHERE o.id = :oppgaveId
+            ORDER BY o.id DESC LIMIT 1            
+            """.trimIndent()
 
-    override fun finnOppgaveId(fødselsnummer: String): Long = throw OperationNotSupportedException()
+        return transactionalSession.run(
+            queryOf(statement, mapOf("oppgaveId" to id))
+                .map { row ->
+                    val egenskaper: List<EgenskapForDatabase> =
+                        row.array<String>("egenskaper").toList().map { enumValueOf(it) }
+                    OppgaveFraDatabase(
+                        id = id,
+                        egenskaper = egenskaper,
+                        status = row.string("status"),
+                        vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                        utbetalingId = row.uuid("utbetaling_id"),
+                        hendelseId = finnHendelseId(id),
+                        kanAvvises = row.boolean("kan_avvises"),
+                        ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
+                        ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString),
+                        tildelt =
+                            row.uuidOrNull("oid")?.let {
+                                SaksbehandlerFraDatabase(
+                                    epostadresse = row.string("epost"),
+                                    oid = it,
+                                    navn = row.string("navn"),
+                                    ident = row.string("ident"),
+                                )
+                            },
+                    )
+                }.asSingle,
+        )
+    }
+
+    override fun finnOppgaveId(fødselsnummer: String): Long? {
+        @Language("PostgreSQL")
+        val statement =
+            """
+            SELECT o.id as oppgaveId
+            FROM oppgave o
+            JOIN vedtak v ON v.id = o.vedtak_ref
+            JOIN person p ON v.person_ref = p.id
+            WHERE o.status = 'AvventerSaksbehandler'::oppgavestatus
+                AND p.fodselsnummer = :fodselsnummer;                
+            """.trimIndent()
+        return transactionalSession.run(
+            queryOf(statement, mapOf("fodselsnummer" to fødselsnummer.toLong()))
+                .map { it.long("oppgaveId") }
+                .asSingle,
+        )
+    }
 
     override fun finnOppgaveId(utbetalingId: UUID): Long? {
         @Language("PostgreSQL")
@@ -33,7 +89,23 @@ class TransactionalOppgaveDao(private val transactionalSession: TransactionalSes
 
     override fun harGyldigOppgave(utbetalingId: UUID): Boolean = throw OperationNotSupportedException()
 
-    override fun finnHendelseId(id: Long): UUID = throw OperationNotSupportedException()
+    override fun finnHendelseId(id: Long): UUID {
+        @Language("PostgreSQL")
+        val statement =
+            """
+            SELECT DISTINCT hendelse_id 
+            FROM command_context 
+            WHERE context_id = (SELECT command_context_id FROM oppgave WHERE id = :oppgaveId);            
+            """.trimIndent()
+
+        return requireNotNull(
+            transactionalSession.run(
+                queryOf(statement, mapOf("oppgaveId" to id))
+                    .map { it.uuid("hendelse_id") }
+                    .asSingle,
+            ),
+        )
+    }
 
     override fun invaliderOppgaveFor(fødselsnummer: String) {
         @Language("PostgreSQL")

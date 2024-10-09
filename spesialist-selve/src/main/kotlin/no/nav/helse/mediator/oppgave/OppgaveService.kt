@@ -68,6 +68,28 @@ internal class OppgaveService(
     private val logg = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
+    internal fun nyOppgaveService(
+        meldingRepository: MeldingRepository,
+        oppgaveRepository: OppgaveRepository,
+        tildelingRepository: TildelingRepository,
+        reservasjonRepository: ReservasjonRepository,
+        opptegnelseRepository: OpptegnelseRepository,
+        totrinnsvurderingRepository: TotrinnsvurderingRepository,
+        saksbehandlerRepository: SaksbehandlerRepository,
+    ): OppgaveService =
+        OppgaveService(
+            meldingRepository = meldingRepository,
+            oppgaveRepository = oppgaveRepository,
+            tildelingRepository = tildelingRepository,
+            reservasjonRepository = reservasjonRepository,
+            opptegnelseRepository = opptegnelseRepository,
+            totrinnsvurderingRepository = totrinnsvurderingRepository,
+            saksbehandlerRepository = saksbehandlerRepository,
+            rapidsConnection = rapidsConnection,
+            tilgangskontroll = tilgangskontroll,
+            tilgangsgrupper = tilgangsgrupper,
+        )
+
     internal fun nyOppgave(
         fødselsnummer: String,
         contextId: UUID,

@@ -9,7 +9,6 @@ import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.OppgavesorteringForDatabase
-import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.TransactionalOppgaveDao
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.oppgave.Egenskap
@@ -28,39 +27,10 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource), Opp
     }
 
     override fun finnOppgave(id: Long): OppgaveFraDatabase? {
-        return asSQL(
-            """ 
-            SELECT o.egenskaper, o.status, v.vedtaksperiode_id, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id, s.navn, s.epost, s.ident, s.oid, o.kan_avvises
-            FROM oppgave o
-            INNER JOIN vedtak v on o.vedtak_ref = v.id
-            LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
-            LEFT JOIN saksbehandler s on s.oid = t.saksbehandler_ref
-            WHERE o.id = :oppgaveId
-            ORDER BY o.id DESC LIMIT 1
-        """,
-            mapOf("oppgaveId" to id),
-        ).single { row ->
-            val egenskaper: List<EgenskapForDatabase> = row.array<String>("egenskaper").toList().map { enumValueOf(it) }
-            OppgaveFraDatabase(
-                id = id,
-                egenskaper = egenskaper,
-                status = row.string("status"),
-                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                utbetalingId = row.uuid("utbetaling_id"),
-                hendelseId = finnHendelseId(id),
-                kanAvvises = row.boolean("kan_avvises"),
-                ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
-                ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString),
-                tildelt =
-                    row.uuidOrNull("oid")?.let {
-                        SaksbehandlerFraDatabase(
-                            epostadresse = row.string("epost"),
-                            oid = it,
-                            navn = row.string("navn"),
-                            ident = row.string("ident"),
-                        )
-                    },
-            )
+        return sessionOf(dataSource).use { session ->
+            session.transaction { transaction ->
+                TransactionalOppgaveDao(transaction).finnOppgave(id)
+            }
         }
     }
 
@@ -167,16 +137,11 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource), Opp
         ).single { it.uuid("vedtaksperiode_id") }!!
 
     override fun finnOppgaveId(fødselsnummer: String) =
-        asSQL(
-            """ SELECT o.id as oppgaveId
-            FROM oppgave o
-                     JOIN vedtak v ON v.id = o.vedtak_ref
-                     JOIN person p ON v.person_ref = p.id
-            WHERE o.status = 'AvventerSaksbehandler'::oppgavestatus
-              AND p.fodselsnummer = :fodselsnummer;
-        """,
-            mapOf("fodselsnummer" to fødselsnummer.toLong()),
-        ).single { it.long("oppgaveId") }
+        sessionOf(dataSource).use { session ->
+            session.transaction { transaction ->
+                TransactionalOppgaveDao(transaction).finnOppgaveId(fødselsnummer)
+            }
+        }
 
     override fun finnOppgaveId(utbetalingId: UUID) =
         sessionOf(dataSource).use { session ->
@@ -230,17 +195,11 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource), Opp
     }
 
     override fun finnHendelseId(id: Long) =
-        requireNotNull(
-            asSQL(
-                """
-                SELECT DISTINCT hendelse_id 
-                FROM command_context 
-                WHERE context_id = (SELECT command_context_id FROM oppgave WHERE id = :oppgaveId);
-            """,
-                mapOf("oppgaveId" to id),
-            )
-                .single { row -> row.uuid("hendelse_id") },
-        )
+        sessionOf(dataSource).use { session ->
+            session.transaction { transaction ->
+                TransactionalOppgaveDao(transaction).finnHendelseId(id)
+            }
+        }
 
     override fun harGyldigOppgave(utbetalingId: UUID) =
         requireNotNull(

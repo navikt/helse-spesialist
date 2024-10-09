@@ -11,10 +11,15 @@ import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.db.TransactionalCommandContextDao
 import no.nav.helse.db.TransactionalInntektskilderDao
+import no.nav.helse.db.TransactionalMeldingDao
 import no.nav.helse.db.TransactionalOppgaveDao
 import no.nav.helse.db.TransactionalOpptegnelseDao
 import no.nav.helse.db.TransactionalOverstyringDao
 import no.nav.helse.db.TransactionalPersonDao
+import no.nav.helse.db.TransactionalReservasjonDao
+import no.nav.helse.db.TransactionalSaksbehandlerDao
+import no.nav.helse.db.TransactionalTildelingDao
+import no.nav.helse.db.TransactionalTotrinnsvurderingDao
 import no.nav.helse.db.TransactionalUtbetalingDao
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
@@ -121,13 +126,27 @@ internal class Kommandofabrikk(
         avviksvurderingDao.lagre(avviksvurdering)
     }
 
-    internal fun endretEgenAnsattStatus(melding: EndretEgenAnsattStatus): EndretEgenAnsattStatusCommand =
+    internal fun endretEgenAnsattStatus(
+        melding: EndretEgenAnsattStatus,
+        transactionalSession: TransactionalSession,
+    ): EndretEgenAnsattStatusCommand =
         EndretEgenAnsattStatusCommand(
             fødselsnummer = melding.fødselsnummer(),
             erEgenAnsatt = melding.erEgenAnsatt,
             opprettet = melding.opprettet,
             egenAnsattRepository = egenAnsattDao,
-            oppgaveService = oppgaveService,
+            oppgaveService = transaksjonellOppgaveService(transactionalSession),
+        )
+
+    private fun transaksjonellOppgaveService(transactionalSession: TransactionalSession): OppgaveService =
+        oppgaveService.nyOppgaveService(
+            meldingRepository = TransactionalMeldingDao(transactionalSession),
+            oppgaveRepository = TransactionalOppgaveDao(transactionalSession),
+            tildelingRepository = TransactionalTildelingDao(transactionalSession),
+            reservasjonRepository = TransactionalReservasjonDao(transactionalSession),
+            opptegnelseRepository = TransactionalOpptegnelseDao(transactionalSession),
+            totrinnsvurderingRepository = TransactionalTotrinnsvurderingDao(transactionalSession),
+            saksbehandlerRepository = TransactionalSaksbehandlerDao(transactionalSession),
         )
 
     internal fun gosysOppgaveEndret(
