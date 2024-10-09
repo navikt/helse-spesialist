@@ -10,6 +10,7 @@ import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.egenansatt.KontrollerEgenAnsattstatus
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
+import no.nav.helse.modell.kommando.OppdaterPersonCommand.OppdaterEnhetCommand
 import no.nav.helse.modell.kommando.OppdaterPersoninfoCommand
 import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -59,6 +60,7 @@ internal class KlargjørTilgangsrelaterteDataCommand(
                 personRepository = personRepository,
                 force = false,
             ),
+            OppdaterEnhetCommand(fødselsnummer, personRepository),
             KontrollerEgenAnsattstatus(
                 fødselsnummer = fødselsnummer,
                 egenAnsattRepository = egenAnsattRepository,

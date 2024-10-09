@@ -22,7 +22,7 @@ internal class OppdaterPersonCommand(
             OppdaterInfotrygdutbetalingerCommand(fødselsnummer, personRepository, førsteKjenteDagFinner),
         )
 
-    private abstract class OppdaterCommand(
+    internal abstract class OppdaterCommand protected constructor(
         private val fødselsnummer: String,
         private val personRepository: PersonRepository,
         private val behov: String,
@@ -60,7 +60,7 @@ internal class OppdaterPersonCommand(
         }
     }
 
-    private class OppdaterEnhetCommand(
+    internal class OppdaterEnhetCommand(
         fødselsnummer: String,
         personRepository: PersonRepository,
     ) : OppdaterCommand(fødselsnummer, personRepository, "HentEnhet") {
