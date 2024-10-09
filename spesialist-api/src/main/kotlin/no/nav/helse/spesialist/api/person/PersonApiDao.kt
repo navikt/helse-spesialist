@@ -38,6 +38,14 @@ class PersonApiDao(dataSource: DataSource) : HelseDao(dataSource) {
         mapOf("fodselsnummer" to fødselsnummer.toLong()),
     ).list { it }.isNotEmpty()
 
+    fun finnAktørId(fødselsnummer: String): String =
+        requireNotNull(
+            asSQL(
+                "SELECT aktor_id FROM person WHERE fodselsnummer = :fodselsnummer",
+                mapOf("fodselsnummer" to fødselsnummer.toLong()),
+            ).single { it.string("aktor_id") },
+        )
+
     fun finnFødselsnummer(aktørId: Long): String? =
         asSQL(
             " SELECT fodselsnummer FROM person WHERE aktor_id = :aktor_id; ",

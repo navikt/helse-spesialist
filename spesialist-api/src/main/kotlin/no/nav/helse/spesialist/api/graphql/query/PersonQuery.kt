@@ -49,7 +49,7 @@ sealed interface FetchPersonResult {
     class Ok(val person: Person) : FetchPersonResult
 
     sealed interface Feil : FetchPersonResult {
-        data object IkkeKlarTilVisning : Feil
+        class IkkeKlarTilVisning(val aktørId: String) : Feil
 
         data object ManglerTilgang : Feil
 
@@ -103,10 +103,10 @@ class PersonQuery(
         fødselsnummer: String,
     ) {
         when (this) {
-            FetchPersonResult.Feil.IkkeFunnet -> auditLog(env.graphQlContext, fødselsnummer, true, notFoundError(fødselsnummer).message)
-            FetchPersonResult.Feil.IkkeKlarTilVisning -> auditLog(env.graphQlContext, fødselsnummer, false, null)
-            FetchPersonResult.Feil.ManglerTilgang -> auditLog(env.graphQlContext, fødselsnummer, false, null)
-            FetchPersonResult.Feil.UgyldigSnapshot ->
+            is FetchPersonResult.Feil.IkkeFunnet -> auditLog(env.graphQlContext, fødselsnummer, true, notFoundError(fødselsnummer).message)
+            is FetchPersonResult.Feil.IkkeKlarTilVisning -> auditLog(env.graphQlContext, fødselsnummer, false, null)
+            is FetchPersonResult.Feil.ManglerTilgang -> auditLog(env.graphQlContext, fødselsnummer, false, null)
+            is FetchPersonResult.Feil.UgyldigSnapshot ->
                 auditLog(
                     env.graphQlContext,
                     fødselsnummer,
@@ -119,10 +119,10 @@ class PersonQuery(
     private fun FetchPersonResult.Feil.tilGraphqlError(fødselsnummer: String): DataFetcherResult<Person?> {
         val graphqlError =
             when (this) {
-                FetchPersonResult.Feil.IkkeFunnet -> notFoundError(fødselsnummer)
-                FetchPersonResult.Feil.IkkeKlarTilVisning -> personNotReadyError(fødselsnummer)
-                FetchPersonResult.Feil.ManglerTilgang -> forbiddenError(fødselsnummer)
-                FetchPersonResult.Feil.UgyldigSnapshot -> getSnapshotValidationError()
+                is FetchPersonResult.Feil.IkkeFunnet -> notFoundError(fødselsnummer)
+                is FetchPersonResult.Feil.IkkeKlarTilVisning -> personNotReadyError(fødselsnummer, aktørId)
+                is FetchPersonResult.Feil.ManglerTilgang -> forbiddenError(fødselsnummer)
+                is FetchPersonResult.Feil.UgyldigSnapshot -> getSnapshotValidationError()
             }
 
         return graphqlError.tilGraphqlResult()

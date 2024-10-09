@@ -15,8 +15,11 @@ internal fun notFoundError(identifikator: String? = null): GraphQLError =
         .extensions(mapOf("code" to 404, "field" to "person"))
         .build()
 
-internal fun personNotReadyError(fødselsnummer: String): GraphQLError =
+internal fun personNotReadyError(
+    fødselsnummer: String,
+    aktørId: String,
+): GraphQLError =
     GraphqlErrorException.newErrorException()
         .message("Person med fødselsnummer $fødselsnummer er ikke klar for visning ennå")
-        .extensions(mapOf("code" to 409, "field" to "person", "persondata_hentes" to true))
+        .extensions(mapOf("code" to 409, "field" to "person", "persondata_hentes_for" to aktørId))
         .build()
