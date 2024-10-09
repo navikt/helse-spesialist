@@ -88,7 +88,7 @@ class PersonService(
         if (env.erProd && !personApiDao.spesialistHarPersonKlarForVisningISpeil(fødselsnummer)) {
             return FetchPersonResult.Feil.IkkeKlarTilVisning
         }
-        if (!env.erProd && !personApiDao.harTilgangsdata(fødselsnummer)) {
+        if (!env.erProd && !personApiDao.harDataNødvendigForVisning(fødselsnummer)) {
             personhåndterer.klargjørPersonForVisning(fødselsnummer)
             return FetchPersonResult.Feil.IkkeKlarTilVisning
         }

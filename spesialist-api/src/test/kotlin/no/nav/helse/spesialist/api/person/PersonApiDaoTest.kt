@@ -62,26 +62,33 @@ internal class PersonApiDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `kan svare på om en person er klar for visning`() {
         val personId = opprettMinimalPerson()
-        assertFalse(harTilgangsdataForPersonen())
+        assertFalse(harDataNødvendigForVisning())
+
+        oppdaterEnhet(personId, 101)
+        assertFalse(harDataNødvendigForVisning())
 
         opprettEgenAnsatt(personId, false)
-        assertFalse(harTilgangsdataForPersonen())
+        assertFalse(harDataNødvendigForVisning())
 
         oppdaterPersoninfo(Ugradert)
-        assertTrue(harTilgangsdataForPersonen())
+        assertTrue(harDataNødvendigForVisning())
     }
 
     // Denne testen komplementerer den ovenstående, for å vise at både personinfo og info om egen ansatt må finnes
     @Test
     fun `kan svare på om en person er klar for visning, med dataene mottatt i ikke-realistisk rekkefølge`() {
         val personId = opprettMinimalPerson()
-        assertFalse(harTilgangsdataForPersonen())
+        assertFalse(harDataNødvendigForVisning())
 
         oppdaterPersoninfo(Ugradert)
-        assertFalse(harTilgangsdataForPersonen())
+        assertFalse(harDataNødvendigForVisning())
 
         opprettEgenAnsatt(personId, false)
-        assertTrue(harTilgangsdataForPersonen())
+        assertFalse(harDataNødvendigForVisning())
+
+        oppdaterEnhet(personId, 101)
+
+        assertTrue(harDataNødvendigForVisning())
     }
 
     @Test
@@ -102,7 +109,7 @@ internal class PersonApiDaoTest : DatabaseIntegrationTest() {
     }
 
     private fun personenErKlar() = personApiDao.spesialistHarPersonKlarForVisningISpeil(FØDSELSNUMMER)
-    private fun harTilgangsdataForPersonen() = personApiDao.harTilgangsdata(FØDSELSNUMMER)
+    private fun harDataNødvendigForVisning() = personApiDao.harDataNødvendigForVisning(FØDSELSNUMMER)
     private fun assertPersonenErIkkeKlar() = assertFalse(personenErKlar())
     private fun assertPersonenErKlar() = assertTrue(personenErKlar())
 }

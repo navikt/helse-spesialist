@@ -50,15 +50,16 @@ class PersonApiDao(dataSource: DataSource) : HelseDao(dataSource) {
             mapOf("aktor_id" to aktørId),
         ).list { it.string("fodselsnummer").padStart(11, '0') }
 
-    fun harTilgangsdata(fødselsnummer: String) =
+    fun harDataNødvendigForVisning(fødselsnummer: String) =
         asSQL(
             """
             select 1
             from person p
             left join person_info pi on p.info_ref = pi.id
             left join egen_ansatt ea on ea.person_ref = p.id
+            left join enhet e on p.enhet_ref = e.id
             where p.fodselsnummer = :fodselsnummer
-                and (pi.id is not null and ea.er_egen_ansatt is not null)
+                and (pi.id is not null and ea.er_egen_ansatt is not null and e.id is not null)
             """.trimIndent(),
             mapOf("fodselsnummer" to fødselsnummer.toLong()),
         ).single { true } ?: false

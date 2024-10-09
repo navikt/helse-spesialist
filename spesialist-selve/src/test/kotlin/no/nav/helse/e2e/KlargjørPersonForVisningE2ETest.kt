@@ -84,11 +84,11 @@ internal class KlargjørPersonForVisningE2ETest : AbstractE2ETest() {
 
     private fun assertHarTilgangsdata(fødselsnummer: String) {
         val dao = PersonApiDao(dataSource)
-        assertTrue(dao.harTilgangsdata(fødselsnummer))
+        assertTrue(dao.harDataNødvendigForVisning(fødselsnummer))
     }
 
     private fun assertKanVisePersonen(fødselsnummer: String) {
         val dao = PersonApiDao(dataSource)
-        assertTrue(dao.harTilgangsdata(fødselsnummer))
+        assertTrue(dao.harDataNødvendigForVisning(fødselsnummer))
     }
 }

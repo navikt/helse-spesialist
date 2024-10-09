@@ -519,7 +519,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         }
     }
 
-    private fun oppdaterEnhet(
+    protected fun oppdaterEnhet(
         personId: Long,
         enhetNr: Int,
     ) = sessionOf(dataSource).use { session ->
