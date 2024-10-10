@@ -68,5 +68,8 @@ internal class KlargjørTilgangsrelaterteDataCommand(
             ikkesuspenderendeCommand("opprettOptegnelse") {
                 opptegnelseRepository.opprettOpptegnelse(fødselsnummer, payload = PersonKlarTilVisning, type = PERSON_KLAR_TIL_BEHANDLING)
             },
+            ikkesuspenderendeCommand("ferdigstillKlargjøring") {
+                personRepository.personKlargjort(fødselsnummer)
+            },
         )
 }

@@ -25,6 +25,12 @@ internal class TransactionalPersonDao(
             )
         }
 
+    override fun personKlargjort(fødselsnummer: String) {
+        @Language("PostgreSQL")
+        val query = "DELETE FROM person_klargjores WHERE fødselsnummer = :fodselsnummer"
+        transactionalSession.run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer)).asUpdate)
+    }
+
     override fun finnEnhetSistOppdatert(fødselsnummer: String): LocalDate = throw OperationNotSupportedException()
 
     override fun oppdaterEnhet(

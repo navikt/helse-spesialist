@@ -90,7 +90,11 @@ class PersonService(
             return FetchPersonResult.Feil.IkkeKlarTilVisning(aktørId)
         }
         if (!env.erProd && !personApiDao.harDataNødvendigForVisning(fødselsnummer)) {
-            personhåndterer.klargjørPersonForVisning(fødselsnummer)
+            if (!personApiDao.klargjøringPågår(fødselsnummer)) {
+                personhåndterer.klargjørPersonForVisning(fødselsnummer)
+                personApiDao.personKlargjøres(fødselsnummer)
+            }
+
             return FetchPersonResult.Feil.IkkeKlarTilVisning(aktørId)
         }
         if (manglerTilgang(egenAnsattApiDao, personApiDao, fødselsnummer, tilganger)) return FetchPersonResult.Feil.ManglerTilgang

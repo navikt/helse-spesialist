@@ -18,6 +18,6 @@ internal class PersonRepositoryTest : AbstractDatabaseTest() {
 
     @Test
     fun `antall tabeller - du må antakelig rette opp i sletting i dev dersom du har lagt til eller fjernet tabeller`() {
-        assertEquals(76, finnTabeller().size)
+        assertEquals(77, finnTabeller().size)
     }
 }

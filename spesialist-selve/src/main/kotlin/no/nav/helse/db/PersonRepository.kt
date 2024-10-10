@@ -8,6 +8,8 @@ import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
 
 interface PersonRepository {
+    fun personKlargjort(fødselsnummer: String)
+
     fun finnMinimalPerson(fødselsnummer: String): MinimalPersonDto?
 
     fun lagreMinimalPerson(minimalPerson: MinimalPersonDto)

@@ -20,6 +20,7 @@ internal class PersonRepository(private val dataSource: DataSource) {
                         sikkerlogg.info("Fant ikke person med fødselsnummer $fødselsnummer, avbryter sletting")
                         return@transaction
                     }
+                it.slettPersonKlargjøres(fødselsnummer)
                 it.slettOverstyring(personId)
                 it.slettAvslag(personId)
                 it.slettReserverPerson(personId)
@@ -72,6 +73,12 @@ internal class PersonRepository(private val dataSource: DataSource) {
         run(queryOf(query1, personRef).asExecute)
 
         slettSammenligningsgrunnlag(sammenligningsgrunnlagRefs)
+    }
+
+    private fun TransactionalSession.slettPersonKlargjøres(fødselsnummer: String) {
+        @Language("PostgreSQL")
+        val query = "DELETE FROM person_klargjores WHERE fødselsnummer = :fodselsnummer"
+        run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer)).asUpdate)
     }
 
     private fun TransactionalSession.slettSammenligningsgrunnlag(sammenligningsgrunnlagRefs: List<Int>) {

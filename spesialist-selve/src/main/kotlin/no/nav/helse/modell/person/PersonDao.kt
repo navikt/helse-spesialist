@@ -27,6 +27,14 @@ internal class PersonDao(
         throw OperationNotSupportedException()
     }
 
+    override fun personKlargjort(fødselsnummer: String) {
+        sessionOf(dataSource).use { session ->
+            session.transaction { tx ->
+                TransactionalPersonDao(tx).personKlargjort(fødselsnummer)
+            }
+        }
+    }
+
     override fun finnPersonMedFødselsnummer(fødselsnummer: String): Long? =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")

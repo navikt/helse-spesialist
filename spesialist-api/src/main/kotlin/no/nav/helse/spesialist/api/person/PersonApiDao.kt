@@ -2,9 +2,24 @@ package no.nav.helse.spesialist.api.person
 
 import no.nav.helse.HelseDao
 import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
+import java.time.LocalDateTime
 import javax.sql.DataSource
 
 class PersonApiDao(dataSource: DataSource) : HelseDao(dataSource) {
+    fun personKlargjøres(fødselsnummer: String) {
+        asSQL(
+            "INSERT INTO person_klargjores(fødselsnummer, opprettet) VALUES(:fodselsnummer, :opprettet) ON CONFLICT DO NOTHING",
+            mapOf("fodselsnummer" to fødselsnummer, "opprettet" to LocalDateTime.now()),
+        ).update()
+    }
+
+    fun klargjøringPågår(fødselsnummer: String): Boolean {
+        return asSQL(
+            "SELECT true FROM person_klargjores WHERE fødselsnummer = :fodselsnummer",
+            mapOf("fodselsnummer" to fødselsnummer, "opprettet" to LocalDateTime.now()),
+        ).single { it.boolean(1) } ?: false
+    }
+
     fun finnEnhet(fødselsnummer: String) =
         requireNotNull(
             asSQL(
