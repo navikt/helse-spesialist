@@ -92,6 +92,13 @@ internal class PersonApiDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `kan markere at en person er under klargjøring`() {
+        assertFalse(personApiDao.klargjøringPågår(FØDSELSNUMMER))
+        personApiDao.personKlargjøres(FØDSELSNUMMER)
+        assertTrue(personApiDao.klargjøringPågår(FØDSELSNUMMER))
+    }
+
+    @Test
     fun `feiler ikke når det fins mer enn ett vedtak`() {
         val personId = opprettPerson()
         assertPersonenErIkkeKlar()
