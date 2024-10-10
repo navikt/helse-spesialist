@@ -38,7 +38,7 @@ internal class PersonRepository(private val dataSource: DataSource) {
                 it.slettHendelse(fødselsnummer)
                 it.slettInntekt(personId)
                 it.slettDokument(personId)
-                it.slettAvviksvurdering(personId)
+                it.slettAvviksvurdering(fødselsnummer)
                 it.slettPerson(personId)
 
                 sikkerlogg.info("Person med fødselsnummer $fødselsnummer ble slettet")
@@ -64,13 +64,13 @@ internal class PersonRepository(private val dataSource: DataSource) {
         slettInfotrygdutbetalinger(infotrygdutbetalingRef)
     }
 
-    private fun TransactionalSession.slettAvviksvurdering(personRef: Int) {
-        val sammenligningsgrunnlagRefs = finnSammenligningsgrunnlag(personRef)
+    private fun TransactionalSession.slettAvviksvurdering(fødselsnummer: String) {
+        val sammenligningsgrunnlagRefs = finnSammenligningsgrunnlag(fødselsnummer)
 
         @Language("PostgreSQL")
         val query1 =
-            "DELETE FROM avviksvurdering WHERE fødselsnummer::bigint = (SELECT fodselsnummer FROM person WHERE id = ?)"
-        run(queryOf(query1, personRef).asExecute)
+            "DELETE FROM avviksvurdering WHERE fødselsnummer = :fodselsnummer"
+        run(queryOf(query1, mapOf("fodselsnummer" to fødselsnummer)).asUpdate)
 
         slettSammenligningsgrunnlag(sammenligningsgrunnlagRefs)
     }
@@ -89,12 +89,12 @@ internal class PersonRepository(private val dataSource: DataSource) {
         run(queryOf(query2, *sammenligningsgrunnlagRefs.toTypedArray()).asExecute)
     }
 
-    private fun TransactionalSession.finnSammenligningsgrunnlag(personRef: Int): List<Int> {
+    private fun TransactionalSession.finnSammenligningsgrunnlag(fødselsnummer: String): List<Int> {
         @Language("PostgreSQL")
         val query =
-            "SELECT sammenligningsgrunnlag_ref FROM avviksvurdering WHERE fødselsnummer::bigint = (SELECT fodselsnummer FROM person WHERE id = ?)"
+            "SELECT sammenligningsgrunnlag_ref FROM avviksvurdering WHERE fødselsnummer = :fodselsnummer"
         return run(
-            queryOf(query, personRef).map {
+            queryOf(query, mapOf("fodselsnummer" to fødselsnummer)).map {
                 it.int("sammenligningsgrunnlag_ref")
             }.asList,
         )
@@ -261,7 +261,7 @@ internal class PersonRepository(private val dataSource: DataSource) {
         slettVarsler(personRef)
         slettAutomatisering(personRef)
         slettRisikovurdering(personRef)
-        slettUnntaFraAutomatisering(personRef)
+        slettUnntaFraAutomatisering(fødselsnummer)
         slettStansAutomatisering(fødselsnummer)
         slettAutomatiseringProblem(personRef)
         slettSaksbehandleroppgavetype(personRef)
@@ -384,10 +384,10 @@ internal class PersonRepository(private val dataSource: DataSource) {
         run(queryOf(query, personRef).asExecute)
     }
 
-    private fun TransactionalSession.slettUnntaFraAutomatisering(personRef: Int) {
+    private fun TransactionalSession.slettUnntaFraAutomatisering(fødselsnummer: String) {
         @Language("PostgreSQL")
-        val query = "DELETE FROM unnta_fra_automatisk_godkjenning WHERE fødselsnummer IN (SELECT fodselsnummer FROM person WHERE id = ?)"
-        run(queryOf(query, personRef).asExecute)
+        val query = "DELETE FROM unnta_fra_automatisk_godkjenning WHERE fødselsnummer = :fodselsnummer"
+        run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer.toLong())).asUpdate)
     }
 
     private fun TransactionalSession.slettStansAutomatisering(fødselsnummer: String) {
