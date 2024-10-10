@@ -198,7 +198,6 @@ type BeregnetPeriode implements Periode {
     oppgavereferanse: String @deprecated(reason: "Oppgavereferanse bør hentes fra periodens oppgave")
     opprettet: LocalDateTime!
     paVent: PaVent
-    periodehistorikk: [PeriodeHistorikkElement!]!
     periodetilstand: Periodetilstand!
     periodetype: Periodetype!
     periodevilkar: Periodevilkar!
@@ -507,13 +506,6 @@ type OverstyrtMinimumSykdomsgrad {
 type PaVent {
     frist: LocalDate
     oid: UUID!
-}
-
-type PeriodeHistorikkElement {
-    notat_id: Int
-    saksbehandler_ident: String
-    timestamp: LocalDateTime!
-    type: PeriodehistorikkType!
 }
 
 type PeriodeHistorikkElementNy implements Historikkinnslag {

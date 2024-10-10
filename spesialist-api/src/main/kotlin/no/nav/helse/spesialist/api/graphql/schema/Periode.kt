@@ -219,13 +219,6 @@ data class FjernetFraPaVent(
     override val notatId: Int?,
 ) : Historikkinnslag
 
-data class PeriodeHistorikkElement(
-    val type: PeriodehistorikkType,
-    val timestamp: LocalDateTime,
-    val saksbehandler_ident: String?,
-    val notat_id: Int?,
-)
-
 data class PeriodeHistorikkElementNy(
     override val type: PeriodehistorikkType,
     override val timestamp: LocalDateTime,
@@ -528,19 +521,6 @@ data class BeregnetPeriode(
                             notatId = it.notat_id,
                         )
                 }
-            }
-
-    fun periodehistorikk(): List<PeriodeHistorikkElement> =
-        periodehistorikkDao
-            .finn(utbetaling().id)
-            .filterNot { it.type == PeriodehistorikkType.LEGG_PA_VENT }
-            .map {
-                PeriodeHistorikkElement(
-                    type = it.type,
-                    saksbehandler_ident = it.saksbehandler_ident,
-                    timestamp = it.timestamp,
-                    notat_id = it.notat_id,
-                )
             }
 
     fun beregningId(): UUID = periode.beregningId
