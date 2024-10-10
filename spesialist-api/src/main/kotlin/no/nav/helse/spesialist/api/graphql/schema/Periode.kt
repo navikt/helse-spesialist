@@ -512,6 +512,7 @@ data class BeregnetPeriode(
     fun historikkinnslag(): List<Historikkinnslag> =
         periodehistorikkDao
             .finn(utbetaling().id)
+            .filterNot { it.type == PeriodehistorikkType.LEGG_PA_VENT }
             .map {
                 when (it.type) {
                     PeriodehistorikkType.LEGG_PA_VENT -> {
