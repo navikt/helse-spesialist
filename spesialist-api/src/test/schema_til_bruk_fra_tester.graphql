@@ -545,7 +545,7 @@ type Person {
 type Personinfo {
     adressebeskyttelse: Adressebeskyttelse!
     etternavn: String!
-    fodselsdato: LocalDate
+    fodselsdato: LocalDate!
     fornavn: String!
     fullmakt: Boolean
     kjonn: Kjonn!
@@ -1086,6 +1086,7 @@ enum Opptegnelsetype {
     FERDIGBEHANDLET_GODKJENNINGSBEHOV
     NY_SAKSBEHANDLEROPPGAVE
     PERSONDATA_OPPDATERT
+    PERSON_KLAR_TIL_BEHANDLING
     REVURDERING_AVVIST
     REVURDERING_FERDIGBEHANDLET
     UTBETALING_ANNULLERING_FEILET

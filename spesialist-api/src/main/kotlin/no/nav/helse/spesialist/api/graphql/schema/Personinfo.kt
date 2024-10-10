@@ -20,7 +20,7 @@ data class Personinfo(
     val fornavn: String,
     val mellomnavn: String?,
     val etternavn: String,
-    val fodselsdato: LocalDate?,
+    val fodselsdato: LocalDate,
     val kjonn: Kjonn,
     val adressebeskyttelse: Adressebeskyttelse,
     val fullmakt: Boolean? = null,
