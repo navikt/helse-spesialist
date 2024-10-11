@@ -86,16 +86,13 @@ class PersonService(
         tilganger: SaksbehandlerTilganger,
     ): FetchPersonResult {
         val aktørId = personApiDao.finnAktørId(fødselsnummer)
-        if (env.erProd && !personApiDao.spesialistHarPersonKlarForVisningISpeil(fødselsnummer)) {
-            return FetchPersonResult.Feil.IkkeKlarTilVisning(aktørId, false)
-        }
-        if (!env.erProd && !personApiDao.harDataNødvendigForVisning(fødselsnummer)) {
+        if (!personApiDao.harDataNødvendigForVisning(fødselsnummer)) {
             if (!personApiDao.klargjøringPågår(fødselsnummer)) {
                 personhåndterer.klargjørPersonForVisning(fødselsnummer)
                 personApiDao.personKlargjøres(fødselsnummer)
             }
 
-            return FetchPersonResult.Feil.IkkeKlarTilVisning(aktørId, true)
+            return FetchPersonResult.Feil.IkkeKlarTilVisning(aktørId)
         }
         if (manglerTilgang(egenAnsattApiDao, personApiDao, fødselsnummer, tilganger)) return FetchPersonResult.Feil.ManglerTilgang
 
