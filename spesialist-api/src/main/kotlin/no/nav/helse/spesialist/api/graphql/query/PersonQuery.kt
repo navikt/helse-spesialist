@@ -49,7 +49,7 @@ sealed interface FetchPersonResult {
     class Ok(val person: Person) : FetchPersonResult
 
     sealed interface Feil : FetchPersonResult {
-        class IkkeKlarTilVisning(val aktørId: String) : Feil
+        class IkkeKlarTilVisning(val aktørId: String, val personKlargjøres: Boolean) : Feil
 
         data object ManglerTilgang : Feil
 
@@ -120,7 +120,7 @@ class PersonQuery(
         val graphqlError =
             when (this) {
                 is FetchPersonResult.Feil.IkkeFunnet -> notFoundError(fødselsnummer)
-                is FetchPersonResult.Feil.IkkeKlarTilVisning -> personNotReadyError(fødselsnummer, aktørId)
+                is FetchPersonResult.Feil.IkkeKlarTilVisning -> personNotReadyError(fødselsnummer, aktørId, personKlargjøres)
                 is FetchPersonResult.Feil.ManglerTilgang -> forbiddenError(fødselsnummer)
                 is FetchPersonResult.Feil.UgyldigSnapshot -> getSnapshotValidationError()
             }
