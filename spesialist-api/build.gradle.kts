@@ -1,7 +1,7 @@
 import com.expediagroup.graphql.plugin.gradle.config.GraphQLScalar
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLIntrospectSchemaTask
 
-val testcontainersVersion = "1.19.7"
+val testcontainersVersion = "1.20.2"
 val graphQLKotlinVersion = "8.1.0"
 val ktorVersion = "2.3.12"
 

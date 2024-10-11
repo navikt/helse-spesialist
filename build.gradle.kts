@@ -61,10 +61,16 @@ allprojects {
         implementation("com.github.seratch:kotliquery:$kotliqueryVersion")
         implementation("io.ktor:ktor-client-cio:$ktorVersion")
         implementation("io.ktor:ktor-client-apache:$ktorVersion")
+
         constraints {
-            implementation("commons-codec:commons-codec") {
-                version { require("1.13") }
-                because("ktor-client-apache v2.3.7 -> httpclient -> commons-codec v1.11 har en sårbarhet")
+            implementation("io.netty:netty-all:4.1.108.final") {
+                because("sårbarhet i 4.1.107.final")
+            }
+            implementation("org.apache.commons:commons-compress:1.26.0") {
+                because("org.testcontainers:postgresql:1.19.7 -> 1.24.0 har en sårbarhet")
+            }
+            implementation("com.google.protobuf:protobuf-java:4.28.2") {
+                because("com.expediagroup:graphql-kotlin-server:8.1.0 -> 4.27.1 har en sårbarhet")
             }
         }
         implementation("io.ktor:ktor-client-jackson:$ktorVersion") {

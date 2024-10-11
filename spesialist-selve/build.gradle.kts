@@ -1,6 +1,6 @@
 val graphQLKotlinVersion = "8.1.0"
-val testcontainersVersion = "1.19.7"
-val mockOAuth2ServerVersion = "2.1.2"
+val testcontainersVersion = "1.20.2"
+val mockOAuth2ServerVersion = "2.1.9"
 
 plugins {
     kotlin("plugin.serialization") version "2.0.20"
