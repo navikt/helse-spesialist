@@ -1,10 +1,10 @@
-val graphQLKotlinVersion = "7.1.4"
+val graphQLKotlinVersion = "8.1.0"
 val testcontainersVersion = "1.19.7"
 val mockOAuth2ServerVersion = "2.1.2"
 
 plugins {
     kotlin("plugin.serialization") version "2.0.20"
-    id("com.expediagroup.graphql") version "7.1.4"
+    id("com.expediagroup.graphql") version "8.1.0"
 }
 
 dependencies {
