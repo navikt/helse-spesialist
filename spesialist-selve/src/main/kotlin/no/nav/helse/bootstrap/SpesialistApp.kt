@@ -50,11 +50,11 @@ import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.graphQLApi
-import no.nav.helse.spesialist.api.notat.NotatDao
-import no.nav.helse.spesialist.api.notat.NotatRepository
+import no.nav.helse.spesialist.api.notat.NotatApiDao
+import no.nav.helse.spesialist.api.notat.NotatApiRepository
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
@@ -97,7 +97,7 @@ internal class SpesialistApp(
     private val oppgaveDao = OppgaveDao(dataSource)
     private val utbetalingDao = UtbetalingDao(dataSource)
     private val oppgaveApiDao = OppgaveApiDao(dataSource)
-    private val periodehistorikkDao = PeriodehistorikkDao(dataSource)
+    private val periodehistorikkApiDao = PeriodehistorikkApiDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
     private val risikovurderingDao = RisikovurderingDao(dataSource)
     private val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
@@ -111,7 +111,7 @@ internal class SpesialistApp(
     private val egenAnsattApiDao = EgenAnsattApiDao(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
-    private val notatDao = NotatDao(dataSource)
+    private val notatApiDao = NotatApiDao(dataSource)
     private val totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource)
     private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
     private val snapshotApiDao = SnapshotApiDao(dataSource)
@@ -136,11 +136,11 @@ internal class SpesialistApp(
 
     private val behandlingsstatistikkService = BehandlingsstatistikkService(behandlingsstatistikkDao = behandlingsstatistikkDao)
     private val godkjenningMediator = GodkjenningMediator(opptegnelseDao)
-    private val notatRepository = NotatRepository(notatDao = notatDao)
+    private val notatRepository = NotatApiRepository(notatDao = notatApiDao)
     private val stansAutomatiskBehandlingMediator =
         StansAutomatiskBehandlingMediator(
             stansAutomatiskBehandlingDao,
-            periodehistorikkDao,
+            periodehistorikkApiDao,
             oppgaveDao,
             utbetalingDao,
             notatRepository,
@@ -149,7 +149,7 @@ internal class SpesialistApp(
         TotrinnsvurderingMediator(
             dao = totrinnsvurderingDao,
             oppgaveDao = oppgaveDao,
-            periodehistorikkDao = periodehistorikkDao,
+            periodehistorikkDao = periodehistorikkApiDao,
             notatRepository = notatRepository,
         )
 
@@ -228,8 +228,8 @@ internal class SpesialistApp(
                 risikovurderingApiDao = risikovurderingApiDao,
                 varselRepository = apiVarselRepository,
                 oppgaveApiDao = oppgaveApiDao,
-                periodehistorikkDao = periodehistorikkDao,
-                notatDao = notatDao,
+                periodehistorikkDao = periodehistorikkApiDao,
+                notatDao = notatApiDao,
                 totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                 påVentApiDao = påVentApiDao,
                 vergemålApiDao = vergemålApiDao,

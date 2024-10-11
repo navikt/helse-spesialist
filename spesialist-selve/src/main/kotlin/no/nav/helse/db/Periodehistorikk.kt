@@ -5,8 +5,8 @@ import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
 import no.nav.helse.modell.periodehistorikk.Innslagstype
 import no.nav.helse.modell.periodehistorikk.LagtPåVent
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
-import no.nav.helse.spesialist.api.notat.NotatDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.notat.NotatApiDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import javax.sql.DataSource
 
@@ -20,8 +20,8 @@ interface PeriodehistorikkRepository {
 class Periodehistorikk(
     dataSource: DataSource,
 ) : PeriodehistorikkRepository {
-    private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource)
-    private val notatDao: NotatDao = NotatDao(dataSource)
+    private val periodehistorikkDao: PeriodehistorikkApiDao = PeriodehistorikkApiDao(dataSource)
+    private val notatDao: NotatApiDao = NotatApiDao(dataSource)
 
     override fun lagre(
         historikkinnslag: HistorikkinnslagDto,

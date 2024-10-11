@@ -8,7 +8,7 @@ import org.intellij.lang.annotations.Language
 import java.util.UUID
 import javax.sql.DataSource
 
-class PeriodehistorikkDao(private val dataSource: DataSource) : HelseDao(dataSource) {
+class PeriodehistorikkApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     fun finn(utbetalingId: UUID) =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")

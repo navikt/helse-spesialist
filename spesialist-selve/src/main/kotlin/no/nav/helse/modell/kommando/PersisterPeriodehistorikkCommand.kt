@@ -2,14 +2,14 @@ package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
 internal class PersisterPeriodehistorikkCommand(
     private val vedtaksperiodeId: UUID,
     private val utbetalingId: UUID,
-    private val periodehistorikkDao: PeriodehistorikkDao,
+    private val periodehistorikkDao: PeriodehistorikkApiDao,
     private val utbetalingRepository: UtbetalingRepository,
 ) : Command {
     private companion object {

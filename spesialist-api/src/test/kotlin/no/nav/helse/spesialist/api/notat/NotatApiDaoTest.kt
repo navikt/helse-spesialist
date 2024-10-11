@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class NotatDaoTest: DatabaseIntegrationTest() {
+internal class NotatApiDaoTest: DatabaseIntegrationTest() {
 
     @Test
     fun `finner flere notater tilhørende samme vedtaksperiode`() {

@@ -50,10 +50,11 @@ import no.nav.helse.modell.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
-import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.notat.NotatApiDao
+import no.nav.helse.spesialist.api.notat.NotatApiRepository
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.spleis.graphql.HentSnapshot
@@ -132,7 +133,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val personDao = PersonDao(dataSource)
     internal val oppgaveDao = OppgaveDao(dataSource)
     internal val oppgaveApiDao = OppgaveApiDao(dataSource)
-    internal val periodehistorikkDao = PeriodehistorikkDao(dataSource)
+    internal val periodehistorikkDao = PeriodehistorikkApiDao(dataSource)
     internal val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
     internal val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     internal val snapshotDao = SnapshotDao(dataSource)
@@ -159,7 +160,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val dokumentDao = DokumentDao(dataSource)
     internal val påVentDao = PåVentDao(dataSource)
     internal val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(dataSource)
-    internal val notatDao = NotatDao(dataSource)
+    internal val notatApiDao = NotatApiDao(dataSource)
     internal val annulleringDao = AnnulleringDao(dataSource)
     private val personRepository = PersonRepository(dataSource)
     private val inntektskilderDao = InntektskilderDao(dataSource)

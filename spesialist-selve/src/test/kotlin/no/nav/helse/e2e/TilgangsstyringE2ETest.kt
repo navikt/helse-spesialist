@@ -13,10 +13,10 @@ import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
-import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.notat.NotatApiDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.person.PersonService
@@ -181,8 +181,8 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
                 risikovurderingApiDao = RisikovurderingApiDao(dataSource),
                 varselRepository = ApiVarselRepository(dataSource),
                 oppgaveApiDao = OppgaveApiDao(dataSource),
-                periodehistorikkDao = PeriodehistorikkDao(dataSource),
-                notatDao = NotatDao(dataSource),
+                periodehistorikkDao = PeriodehistorikkApiDao(dataSource),
+                notatDao = NotatApiDao(dataSource),
                 totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource),
                 påVentApiDao = PåVentApiDao(dataSource),
                 vergemålApiDao = VergemålApiDao(dataSource),

@@ -9,10 +9,10 @@ import no.nav.helse.spesialist.api.graphql.query.tilNotat
 import no.nav.helse.spesialist.api.graphql.schema.Kommentar
 import no.nav.helse.spesialist.api.graphql.schema.Notat
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
-import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.notat.NotatApiDao
 import java.util.UUID
 
-class NotatMutation(private val notatDao: NotatDao) : Mutation {
+class NotatMutation(private val notatDao: NotatApiDao) : Mutation {
     @Suppress("unused")
     fun feilregistrerNotat(id: Int): DataFetcherResult<Notat?> {
         val notatDto =

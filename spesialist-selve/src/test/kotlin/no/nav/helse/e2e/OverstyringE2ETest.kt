@@ -24,10 +24,10 @@ import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.Person
-import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.notat.NotatApiDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.påvent.PåVentApiDao
@@ -361,8 +361,8 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                 risikovurderingApiDao = RisikovurderingApiDao(dataSource),
                 varselRepository = ApiVarselRepository(dataSource),
                 oppgaveApiDao = OppgaveApiDao(dataSource),
-                periodehistorikkDao = PeriodehistorikkDao(dataSource),
-                notatDao = NotatDao(dataSource),
+                periodehistorikkDao = PeriodehistorikkApiDao(dataSource),
+                notatDao = NotatApiDao(dataSource),
                 totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource),
                 påVentApiDao = PåVentApiDao(dataSource),
                 vergemålApiDao = VergemålApiDao(dataSource),

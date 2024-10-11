@@ -5,18 +5,18 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.oppgave.OppgaveDao
-import no.nav.helse.spesialist.api.notat.NotatRepository
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.notat.NotatApiRepository
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class TotrinnsvurderingMediatorTest {
     private val totrinnsvurderingDao = mockk<TotrinnsvurderingDao>(relaxed = true)
-    private val notatRepository = mockk<NotatRepository>(relaxed = true)
+    private val notatRepository = mockk<NotatApiRepository>(relaxed = true)
 
     val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
-    private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
+    private val periodehistorikkDao = mockk<PeriodehistorikkApiDao>(relaxed = true)
     private val totrinnsvurderingMediator =
         TotrinnsvurderingMediator(
             totrinnsvurderingDao,

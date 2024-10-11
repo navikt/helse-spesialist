@@ -4,16 +4,16 @@ import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
-import no.nav.helse.spesialist.api.notat.NotatRepository
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.notat.NotatApiRepository
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import java.util.UUID
 
 class TotrinnsvurderingMediator(
     private val dao: TotrinnsvurderingDao,
     private val oppgaveDao: OppgaveDao,
-    private val periodehistorikkDao: PeriodehistorikkDao,
-    private val notatRepository: NotatRepository,
+    private val periodehistorikkDao: PeriodehistorikkApiDao,
+    private val notatRepository: NotatApiRepository,
 ) : Totrinnsvurderinghåndterer {
     fun opprett(vedtaksperiodeId: UUID): TotrinnsvurderingOld = dao.opprett(vedtaksperiodeId)
 

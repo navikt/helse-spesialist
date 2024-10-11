@@ -71,9 +71,9 @@ import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
 import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
-import no.nav.helse.spesialist.api.notat.NotatDao
-import no.nav.helse.spesialist.api.notat.NotatRepository
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.notat.NotatApiDao
+import no.nav.helse.spesialist.api.notat.NotatApiRepository
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import org.slf4j.LoggerFactory
 import java.util.UUID
 import javax.sql.DataSource
@@ -95,9 +95,9 @@ internal class Kommandofabrikk(
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     oppgaveService: () -> OppgaveService,
     private val totrinnsvurderingDao: TotrinnsvurderingDao = TotrinnsvurderingDao(dataSource),
-    private val notatDao: NotatDao = NotatDao(dataSource),
-    private val notatRepository: NotatRepository = NotatRepository(notatDao),
-    private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
+    private val notatDao: NotatApiDao = NotatApiDao(dataSource),
+    private val notatRepository: NotatApiRepository = NotatApiRepository(notatDao),
+    private val periodehistorikkDao: PeriodehistorikkApiDao = PeriodehistorikkApiDao(dataSource),
     private val påVentDao: PåVentDao = PåVentDao(dataSource),
     private val totrinnsvurderingMediator: TotrinnsvurderingMediator =
         TotrinnsvurderingMediator(

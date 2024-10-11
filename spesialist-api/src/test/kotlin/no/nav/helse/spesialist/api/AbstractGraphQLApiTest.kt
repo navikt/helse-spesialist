@@ -32,11 +32,11 @@ import no.nav.helse.spesialist.api.graphql.ContextFactory
 import no.nav.helse.spesialist.api.graphql.RequestParser
 import no.nav.helse.spesialist.api.graphql.SchemaBuilder
 import no.nav.helse.spesialist.api.graphql.queryHandler
-import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.notat.NotatApiDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
@@ -200,7 +200,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
         // En GraphQLServer med "singleton"-mocks, som derfor ikke er gjenbrukbar på tvers av tester som verifyer
         private val graphQLServer =
             run {
-                val notatDao = NotatDao(dataSource)
+                val notatDao = NotatApiDao(dataSource)
                 val schemaBuilder =
                     SchemaBuilder(
                         personApiDao = PersonApiDao(dataSource),
@@ -211,7 +211,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                         risikovurderingApiDao = RisikovurderingApiDao(dataSource),
                         varselRepository = ApiVarselRepository(dataSource),
                         oppgaveApiDao = OppgaveApiDao(dataSource),
-                        periodehistorikkDao = PeriodehistorikkDao(dataSource),
+                        periodehistorikkDao = PeriodehistorikkApiDao(dataSource),
                         påVentApiDao = PåVentApiDao(dataSource),
                         snapshotService = SnapshotService(SnapshotApiDao(dataSource), mockk<SnapshotClient>(relaxed = true)),
                         notatDao = notatDao,

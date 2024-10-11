@@ -18,7 +18,7 @@ import no.nav.helse.modell.kommando.VedtaksperiodeReberegnetPeriodehistorikk
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import java.util.UUID
 
 internal class VedtaksperiodeReberegnet private constructor(
@@ -59,7 +59,7 @@ internal class VedtaksperiodeReberegnetCommand(
     vedtaksperiodeId: UUID,
     fødselsnummer: String,
     utbetalingRepository: UtbetalingRepository,
-    periodehistorikkDao: PeriodehistorikkDao,
+    periodehistorikkDao: PeriodehistorikkApiDao,
     commandContextRepository: CommandContextRepository,
     oppgaveService: OppgaveService,
     reservasjonRepository: ReservasjonRepository,

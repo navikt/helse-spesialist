@@ -29,9 +29,9 @@ import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import no.nav.helse.spesialist.api.notat.NotatDao
-import no.nav.helse.spesialist.api.notat.NotatRepository
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.notat.NotatApiDao
+import no.nav.helse.spesialist.api.notat.NotatApiRepository
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.testEnv
@@ -45,7 +45,7 @@ internal class TestMediator(
     private val vedtakDao = VedtakDao(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
-    private val periodehistorikkDao = PeriodehistorikkDao(dataSource)
+    private val periodehistorikkDao = PeriodehistorikkApiDao(dataSource)
     private val utbetalingDao = UtbetalingDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
     private val meldingDao = MeldingDao(dataSource)
@@ -55,6 +55,7 @@ internal class TestMediator(
     private val tildelingDao = TildelingDao(dataSource)
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
     private val egenAnsattDao = EgenAnsattDao(dataSource)
+    private val notatDao = NotatApiDao(dataSource)
 
     private val stansAutomatiskBehandlingMediator =
         StansAutomatiskBehandlingMediator(
@@ -62,7 +63,7 @@ internal class TestMediator(
             periodehistorikkDao,
             oppgaveDao,
             utbetalingDao,
-            NotatRepository(NotatDao(dataSource)),
+            NotatApiRepository(notatDao),
         ) { Subsumsjonsmelder("versjonAvKode", testRapid) }
 
     private val godkjenningMediator = GodkjenningMediator(opptegnelseDao)

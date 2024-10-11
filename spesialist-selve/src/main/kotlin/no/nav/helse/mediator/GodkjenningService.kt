@@ -13,9 +13,9 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
-import no.nav.helse.spesialist.api.notat.NotatDao
-import no.nav.helse.spesialist.api.notat.NotatRepository
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.notat.NotatApiDao
+import no.nav.helse.spesialist.api.notat.NotatApiRepository
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType.TOTRINNSVURDERING_ATTESTERT
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.slf4j.LoggerFactory
@@ -32,15 +32,15 @@ internal class GodkjenningService(
     private val rapidsConnection: RapidsConnection,
     private val oppgaveService: OppgaveService,
     private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
-    private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
+    private val periodehistorikkDao: PeriodehistorikkApiDao = PeriodehistorikkApiDao(dataSource),
     private val saksbehandlerRepository: SaksbehandlerRepository,
     private val totrinnsvurderingMediator: TotrinnsvurderingMediator =
         TotrinnsvurderingMediator(
             TotrinnsvurderingDao(dataSource),
             oppgaveDao,
             periodehistorikkDao,
-            NotatRepository(
-                NotatDao(dataSource),
+            NotatApiRepository(
+                NotatApiDao(dataSource),
             ),
         ),
 ) : Godkjenninghåndterer {

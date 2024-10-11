@@ -13,9 +13,9 @@ import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.rapids_rivers.asLocalDateTime
-import no.nav.helse.spesialist.api.notat.NotatDao
-import no.nav.helse.spesialist.api.notat.NotatRepository
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.notat.NotatApiDao
+import no.nav.helse.spesialist.api.notat.NotatApiRepository
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.testEnv
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -28,7 +28,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     protected val testRapid = __ikke_bruk_denne
     protected val oppgaveDao = OppgaveDao(dataSource)
     private val reservasjonDao = ReservasjonDao(dataSource)
-    private val periodehistorikkDao = PeriodehistorikkDao(dataSource)
+    private val periodehistorikkDao = PeriodehistorikkApiDao(dataSource)
     private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
     private val meldingDao = MeldingDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
@@ -63,7 +63,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
                     totrinnsvurderingDao,
                     oppgaveDao,
                     periodehistorikkDao,
-                    NotatRepository(NotatDao(dataSource)),
+                    NotatApiRepository(NotatApiDao(dataSource)),
                 ),
         )
 

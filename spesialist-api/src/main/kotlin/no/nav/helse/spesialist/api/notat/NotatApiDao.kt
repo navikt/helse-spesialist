@@ -9,7 +9,7 @@ import org.intellij.lang.annotations.Language
 import java.util.UUID
 import javax.sql.DataSource
 
-class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource) {
+class NotatApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     fun opprettNotat(
         vedtaksperiodeId: UUID,
         tekst: String,

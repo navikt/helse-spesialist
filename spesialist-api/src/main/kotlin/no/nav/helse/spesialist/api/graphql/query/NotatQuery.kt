@@ -10,11 +10,11 @@ import no.nav.helse.spesialist.api.graphql.schema.Kommentar
 import no.nav.helse.spesialist.api.graphql.schema.Notat
 import no.nav.helse.spesialist.api.graphql.schema.Notater
 import no.nav.helse.spesialist.api.notat.KommentarDto
-import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.notat.NotatApiDao
 import no.nav.helse.spesialist.api.notat.NotatDto
 import java.util.UUID
 
-class NotatQuery(private val notatDao: NotatDao) : Query {
+class NotatQuery(private val notatDao: NotatApiDao) : Query {
     @Suppress("unused")
     suspend fun notater(forPerioder: List<String>): DataFetcherResult<List<Notater>> {
         if (forPerioder.isEmpty()) {

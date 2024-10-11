@@ -22,8 +22,8 @@ import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_UAVKLART
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
-import no.nav.helse.spesialist.api.notat.NotatRepository
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.notat.NotatApiRepository
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -36,10 +36,10 @@ import java.util.UUID.randomUUID
 
 class StansAutomatiskBehandlingMediatorTest {
     private val stansAutomatiskBehandlingDao = mockk<StansAutomatiskBehandlingDao>(relaxed = true)
-    private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
+    private val periodehistorikk = mockk<PeriodehistorikkApiDao>(relaxed = true)
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val utbetalingDao = mockk<UtbetalingDao>(relaxed = true)
-    private val notatRepository = mockk<NotatRepository>(relaxed = true)
+    private val notatDao = mockk<NotatApiRepository>(relaxed = true)
     private val testRapid = TestRapid()
     private val subsumsjonsmelder = Subsumsjonsmelder("versjonAvKode", testRapid)
 
@@ -52,10 +52,10 @@ class StansAutomatiskBehandlingMediatorTest {
     private val mediator =
         StansAutomatiskBehandlingMediator(
             stansAutomatiskBehandlingDao,
-            periodehistorikkDao,
+            periodehistorikk,
             oppgaveDao,
             utbetalingDao,
-            notatRepository,
+            notatDao,
         ) { subsumsjonsmelder }
 
     @BeforeEach
@@ -85,7 +85,7 @@ class StansAutomatiskBehandlingMediatorTest {
             )
         }
         verify(exactly = 1) {
-            periodehistorikkDao.lagre(
+            periodehistorikk.lagre(
                 historikkType = STANS_AUTOMATISK_BEHANDLING,
                 saksbehandlerOid = null,
                 utbetalingId = any(),
@@ -111,7 +111,7 @@ class StansAutomatiskBehandlingMediatorTest {
 
         verify(exactly = 1) { stansAutomatiskBehandlingDao.lagreFraSpeil(fødselsnummer = FNR) }
         verify(exactly = 1) {
-            notatRepository.lagreForOppgaveId(
+            notatDao.lagreForOppgaveId(
                 oppgaveId = any(),
                 tekst = "begrunnelse",
                 saksbehandler_oid = oid,

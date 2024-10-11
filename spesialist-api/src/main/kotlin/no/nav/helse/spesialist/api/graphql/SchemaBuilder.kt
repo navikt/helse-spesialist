@@ -33,11 +33,11 @@ import no.nav.helse.spesialist.api.graphql.query.NotatQuery
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQuery
 import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQuery
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
-import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.notat.NotatApiDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.påvent.PåVentApiDao
@@ -58,11 +58,11 @@ internal class SchemaBuilder(
     private val risikovurderingApiDao: RisikovurderingApiDao,
     private val varselRepository: ApiVarselRepository,
     private val oppgaveApiDao: OppgaveApiDao,
-    private val periodehistorikkDao: PeriodehistorikkDao,
+    private val periodehistorikkDao: PeriodehistorikkApiDao,
     private val påVentApiDao: PåVentApiDao,
     private val vergemålApiDao: VergemålApiDao,
     private val snapshotService: SnapshotService,
-    private val notatDao: NotatDao,
+    private val notatDao: NotatApiDao,
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val reservasjonClient: ReservasjonClient,
     private val avviksvurderinghenter: Avviksvurderinghenter,

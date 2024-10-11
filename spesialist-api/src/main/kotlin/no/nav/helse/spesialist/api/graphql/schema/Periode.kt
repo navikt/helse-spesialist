@@ -8,12 +8,12 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.Toggle
-import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.notat.NotatApiDao
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveForPeriodevisningDto
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
@@ -344,7 +344,7 @@ interface Periode {
 
     @GraphQLIgnore
     fun notater(
-        notatDao: NotatDao,
+        notatDao: NotatApiDao,
         vedtaksperiodeId: UUID,
     ): List<Notat> =
         notatDao.finnNotater(vedtaksperiodeId).map {
@@ -382,7 +382,7 @@ data class UberegnetPeriode(
     private val varselRepository: ApiVarselRepository,
     private val periode: GraphQLTidslinjeperiode,
     private val skalViseAktiveVarsler: Boolean,
-    private val notatDao: NotatDao,
+    private val notatDao: NotatApiDao,
     private val index: Int,
 ) : Periode {
     override fun behandlingId(): UUID = periode.behandlingId
@@ -441,8 +441,8 @@ data class BeregnetPeriode(
     private val risikovurderingApiDao: RisikovurderingApiDao,
     private val varselRepository: ApiVarselRepository,
     private val oppgaveApiDao: OppgaveApiDao,
-    private val periodehistorikkDao: PeriodehistorikkDao,
-    private val notatDao: NotatDao,
+    private val periodehistorikkDao: PeriodehistorikkApiDao,
+    private val notatDao: NotatApiDao,
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val påVentApiDao: PåVentApiDao,
     private val tilganger: SaksbehandlerTilganger,

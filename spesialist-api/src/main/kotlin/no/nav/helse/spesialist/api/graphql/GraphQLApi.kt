@@ -26,12 +26,12 @@ import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
-import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.notat.NotatApiDao
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
@@ -55,8 +55,8 @@ fun Application.graphQLApi(
     risikovurderingApiDao: RisikovurderingApiDao,
     varselRepository: ApiVarselRepository,
     oppgaveApiDao: OppgaveApiDao,
-    periodehistorikkDao: PeriodehistorikkDao,
-    notatDao: NotatDao,
+    periodehistorikkDao: PeriodehistorikkApiDao,
+    notatDao: NotatApiDao,
     totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     påVentApiDao: PåVentApiDao,
     vergemålApiDao: VergemålApiDao,

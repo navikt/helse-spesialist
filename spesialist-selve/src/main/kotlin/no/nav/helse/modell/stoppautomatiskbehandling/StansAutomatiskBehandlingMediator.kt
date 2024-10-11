@@ -20,8 +20,8 @@ import no.nav.helse.modell.vilkårsprøving.SubsumsjonEvent
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.graphql.schema.UnntattFraAutomatiskGodkjenning
-import no.nav.helse.spesialist.api.notat.NotatRepository
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.notat.NotatApiRepository
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -29,10 +29,10 @@ import java.util.UUID
 
 class StansAutomatiskBehandlingMediator(
     private val stansAutomatiskBehandlingDao: StansAutomatiskBehandlingDao,
-    private val periodehistorikkDao: PeriodehistorikkDao,
+    private val periodehistorikkDao: PeriodehistorikkApiDao,
     private val oppgaveDao: OppgaveDao,
     private val utbetalingDao: UtbetalingDao,
-    private val notatRepository: NotatRepository,
+    private val notatRepository: NotatApiRepository,
     private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
 ) : StansAutomatiskBehandlinghåndterer {
     private val logg = LoggerFactory.getLogger(this::class.java)

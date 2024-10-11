@@ -14,12 +14,12 @@ import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao.Inntekter
 import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
-import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.notat.NotatApiDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.påvent.PåVentApiDao
@@ -95,14 +95,14 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val apiVarselRepository = ApiVarselRepository(dataSource)
     protected val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     protected val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
-    protected val notatDao = NotatDao(dataSource)
+    protected val notatDao = NotatApiDao(dataSource)
     protected val totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource)
     protected val påVentApiDao = PåVentApiDao(dataSource)
     protected val personApiDao = PersonApiDao(dataSource)
     protected val tildelingApiDao = TildelingApiDao(dataSource)
     protected val overstyringApiDao = OverstyringApiDao(dataSource)
     protected val oppgaveApiDao = OppgaveApiDao(dataSource)
-    protected val periodehistorikkDao = PeriodehistorikkDao(dataSource)
+    protected val periodehistorikkDao = PeriodehistorikkApiDao(dataSource)
     protected val vergemålApiDao = VergemålApiDao(dataSource)
     private val snapshotApiDao = SnapshotApiDao(dataSource)
 
