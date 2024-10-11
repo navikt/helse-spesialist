@@ -58,6 +58,7 @@ enum class Periodetilstand {
     VenterPaEnAnnenPeriode,
     UtbetaltVenterPaEnAnnenPeriode,
     TilSkjonnsfastsettelse,
+    AvventerInntektsopplysninger,
     Ukjent,
 }
 
@@ -307,7 +308,7 @@ interface Periode {
                 Periodetilstand.UtbetaltVenterPaEnAnnenPeriode
             }
         }
-
+        GraphQLPeriodetilstand.AVVENTERINNTEKTSOPPLYSNINGER -> Periodetilstand.AvventerInntektsopplysninger
         GraphQLPeriodetilstand.TILSKJONNSFASTSETTELSE -> Periodetilstand.TilSkjonnsfastsettelse
         else -> Periodetilstand.Ukjent
     }

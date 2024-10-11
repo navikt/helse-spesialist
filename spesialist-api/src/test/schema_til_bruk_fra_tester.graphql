@@ -1103,6 +1103,7 @@ enum PeriodehistorikkType {
 enum Periodetilstand {
     AnnulleringFeilet
     Annullert
+    AvventerInntektsopplysninger
     ForberederGodkjenning
     IngenUtbetaling
     ManglerInformasjon
