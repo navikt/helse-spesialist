@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.graphql.query
 
+import com.expediagroup.graphql.server.operations.Query
 import graphql.GraphQLContext
 import graphql.GraphQLError
 import graphql.GraphqlErrorException
@@ -61,7 +62,7 @@ sealed interface FetchPersonResult {
 
 class PersonQuery(
     private val personoppslagService: PersonoppslagService,
-) {
+) : Query {
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
     private val auditLog = LoggerFactory.getLogger("auditLogger")
 
