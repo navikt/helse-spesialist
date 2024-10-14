@@ -1,63 +1,47 @@
 package no.nav.helse.db
 
+import kotliquery.sessionOf
 import no.nav.helse.HelseDao
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak
 import java.time.LocalDateTime
 import javax.sql.DataSource
 
-class StansAutomatiskBehandlingDao(dataSource: DataSource) : HelseDao(dataSource) {
-    fun lagreFraISyfo(
+class StansAutomatiskBehandlingDao(private val dataSource: DataSource) : HelseDao(dataSource), StansAutomatiskBehandlingRepository {
+    override fun lagreFraISyfo(
         fødselsnummer: String,
         status: String,
         årsaker: Set<StoppknappÅrsak>,
         opprettet: LocalDateTime,
         originalMelding: String?,
         kilde: String,
-    ) = asSQL(
-        """
-        insert into stans_automatisering (fødselsnummer, status, årsaker, opprettet, kilde, original_melding) 
-        values (:fnr, :status, :arsaker::varchar[], :opprettet, :kilde, cast(:originalMelding as json))
-        """.trimIndent(),
-        mapOf(
-            "fnr" to fødselsnummer,
-            "status" to status,
-            "arsaker" to årsaker.map(StoppknappÅrsak::name).somDbArray(),
-            "opprettet" to opprettet,
-            "kilde" to kilde,
-            "originalMelding" to originalMelding,
-        ),
-    ).update()
+    ) {
+        sessionOf(dataSource).use { session ->
+            session.transaction { transactionalSession ->
+                TransactionalStansAutomatiskBehandlingDao(transactionalSession).lagreFraISyfo(
+                    fødselsnummer,
+                    status,
+                    årsaker,
+                    opprettet,
+                    originalMelding,
+                    kilde,
+                )
+            }
+        }
+    }
 
-    fun lagreFraSpeil(fødselsnummer: String) =
-        asSQL(
-            """
-            insert into stans_automatisering (fødselsnummer, status, årsaker, opprettet, kilde, original_melding) 
-            values (:fnr, 'NORMAL', '{}', now(), 'SPEIL', cast(:originalMelding as json))
-            """.trimIndent(),
-            mapOf(
-                "fnr" to fødselsnummer,
-                "originalMelding" to null,
-            ),
-        ).update()
+    override fun lagreFraSpeil(fødselsnummer: String) {
+        sessionOf(dataSource).use { session ->
+            session.transaction { transactionalSession ->
+                TransactionalStansAutomatiskBehandlingDao(transactionalSession).lagreFraSpeil(fødselsnummer)
+            }
+        }
+    }
 
-    fun hentFor(fødselsnummer: String) =
-        asSQL(
-            """
-            select fødselsnummer, status, årsaker, opprettet, original_melding->>'uuid' as melding_id 
-            from stans_automatisering 
-            where fødselsnummer = :fnr
-            """.trimIndent(),
-            mapOf(
-                "fnr" to fødselsnummer,
-            ),
-        ).list { row ->
-            StansAutomatiskBehandlingFraDatabase(
-                fødselsnummer = row.string("fødselsnummer"),
-                status = row.string("status"),
-                årsaker = row.array<String>("årsaker").map { enumValueOf<StoppknappÅrsak>(it) }.toSet(),
-                opprettet = row.localDateTime("opprettet"),
-                meldingId = row.stringOrNull("melding_id"),
-            )
+    override fun hentFor(fødselsnummer: String) =
+        sessionOf(dataSource).use { session ->
+            session.transaction { transactionalSession ->
+                TransactionalStansAutomatiskBehandlingDao(transactionalSession).hentFor(fødselsnummer)
+            }
         }
 }
 

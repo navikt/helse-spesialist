@@ -1,9 +1,14 @@
 package no.nav.helse.db
 
+import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.oppgave.Egenskap
 import java.util.UUID
 
 interface OppgaveRepository {
+    fun finnOppgaveIdUansettStatus(fødselsnummer: String): Long
+
+    fun finnUtbetalingId(oppgaveId: Long): UUID?
+
     fun finnOppgave(id: Long): OppgaveFraDatabase?
 
     fun finnOppgaveId(fødselsnummer: String): Long?
@@ -23,6 +28,8 @@ interface OppgaveRepository {
     fun venterPåSaksbehandler(oppgaveId: Long): Boolean
 
     fun finnSpleisBehandlingId(oppgaveId: Long): UUID
+
+    fun oppgaveDataForAutomatisering(oppgaveId: Long): OppgaveDataForAutomatisering?
 
     fun finnOppgaverForVisning(
         ekskluderEgenskaper: List<String>,

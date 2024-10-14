@@ -12,8 +12,6 @@ import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.TransactionalOppgaveDao
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.objectMapper
-import no.nav.helse.rapids_rivers.asLocalDate
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -91,11 +89,12 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource), Opp
             }
         }
 
-    fun finnUtbetalingId(oppgaveId: Long) =
-        asSQL(
-            " SELECT utbetaling_id FROM oppgave WHERE id = :oppgaveId; ",
-            mapOf("oppgaveId" to oppgaveId),
-        ).single { it.uuid("utbetaling_id") }
+    override fun finnUtbetalingId(oppgaveId: Long) =
+        sessionOf(dataSource).use { session ->
+            session.transaction { transaction ->
+                TransactionalOppgaveDao(transaction).finnUtbetalingId(oppgaveId)
+            }
+        }
 
     override fun finnSpleisBehandlingId(oppgaveId: Long) =
         sessionOf(dataSource).use { session ->
@@ -111,18 +110,12 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource), Opp
             }
         }
 
-    fun finnOppgaveIdUansettStatus(fødselsnummer: String) =
-        asSQL(
-            """ SELECT o.id as oppgaveId
-            FROM oppgave o
-                     JOIN vedtak v ON v.id = o.vedtak_ref
-                     JOIN person p ON v.person_ref = p.id
-            WHERE p.fodselsnummer = :fodselsnummer
-            ORDER BY o.id DESC
-            LIMIT 1;
-        """,
-            mapOf("fodselsnummer" to fødselsnummer.toLong()),
-        ).single { it.long("oppgaveId") }!!
+    override fun finnOppgaveIdUansettStatus(fødselsnummer: String) =
+        sessionOf(dataSource).use { session ->
+            session.transaction { transaction ->
+                TransactionalOppgaveDao(transaction).finnOppgaveIdUansettStatus(fødselsnummer)
+            }
+        }
 
     override fun finnVedtaksperiodeId(fødselsnummer: String) =
         asSQL(
@@ -232,31 +225,13 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource), Opp
             }
         }
 
-    fun oppgaveDataForAutomatisering(oppgaveId: Long): OppgaveDataForAutomatisering? =
-        asSQL(
-            """ SELECT v.vedtaksperiode_id, v.fom, v.tom, o.utbetaling_id, h.id AS hendelseId, h.data AS godkjenningbehovJson, s.type as periodetype
-            FROM vedtak v
-            INNER JOIN oppgave o ON o.vedtak_ref = v.id
-            INNER JOIN hendelse h ON h.id = (SELECT hendelse_id FROM command_context WHERE context_id = o.command_context_id LIMIT 1)
-            INNER JOIN saksbehandleroppgavetype s ON s.vedtak_ref = v.id
-            WHERE o.id = :oppgaveId 
-        """,
-            mapOf("oppgaveId" to oppgaveId),
-        ).single {
-            val json = objectMapper.readTree(it.string("godkjenningbehovJson"))
-            val skjæringstidspunkt = json.path("Godkjenning").path("skjæringstidspunkt").asLocalDate()
-            OppgaveDataForAutomatisering(
-                oppgaveId = oppgaveId,
-                vedtaksperiodeId = it.uuid("vedtaksperiode_id"),
-                periodeFom = it.localDate("fom"),
-                periodeTom = it.localDate("tom"),
-                skjæringstidspunkt = skjæringstidspunkt,
-                utbetalingId = it.uuid("utbetaling_id"),
-                hendelseId = it.uuid("hendelseId"),
-                godkjenningsbehovJson = it.string("godkjenningbehovJson"),
-                periodetype = enumValueOf(it.string("periodetype")),
-            )
+    override fun oppgaveDataForAutomatisering(oppgaveId: Long): OppgaveDataForAutomatisering? {
+        return sessionOf(dataSource).use { session ->
+            session.transaction { transaction ->
+                TransactionalOppgaveDao(transaction).oppgaveDataForAutomatisering(oppgaveId)
+            }
         }
+    }
 
     override fun invaliderOppgaveFor(fødselsnummer: String) {
         sessionOf(dataSource).use { session ->

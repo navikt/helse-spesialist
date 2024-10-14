@@ -2,7 +2,10 @@ package no.nav.helse.db
 
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
+import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.objectMapper
+import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
@@ -10,6 +13,41 @@ import java.util.UUID
 import javax.naming.OperationNotSupportedException
 
 class TransactionalOppgaveDao(private val transactionalSession: TransactionalSession) : OppgaveRepository {
+    override fun finnUtbetalingId(oppgaveId: Long): UUID? {
+        @Language("PostgreSQL")
+        val statement =
+            """
+            SELECT utbetaling_id FROM oppgave WHERE id = :oppgaveId;
+            """.trimIndent()
+        return transactionalSession.run(
+            queryOf(statement, mapOf("oppgaveId" to oppgaveId)).map {
+                it.uuid("utbetaling_id")
+            }.asSingle,
+        )
+    }
+
+    override fun finnOppgaveIdUansettStatus(fødselsnummer: String): Long {
+        @Language("PostgreSQL")
+        val statement =
+            """
+            SELECT o.id as oppgaveId
+            FROM oppgave o
+                     JOIN vedtak v ON v.id = o.vedtak_ref
+                     JOIN person p ON v.person_ref = p.id
+            WHERE p.fodselsnummer = :fodselsnummer
+            ORDER BY o.id DESC
+            LIMIT 1;
+            """.trimIndent()
+        return checkNotNull(
+            transactionalSession.run(
+                queryOf(statement, mapOf("fodselsnummer" to fødselsnummer.toLong()))
+                    .map {
+                        it.long("oppgaveId")
+                    }.asSingle,
+            ),
+        )
+    }
+
     override fun finnOppgave(id: Long): OppgaveFraDatabase? {
         @Language("PostgreSQL")
         val statement =
@@ -172,6 +210,37 @@ class TransactionalOppgaveDao(private val transactionalSession: TransactionalSes
                     .map { it.uuid("spleis_behandling_id") }
                     .asSingle,
             ),
+        )
+    }
+
+    override fun oppgaveDataForAutomatisering(oppgaveId: Long): OppgaveDataForAutomatisering? {
+        @Language("PostgreSQL")
+        val statement =
+            """
+            SELECT v.vedtaksperiode_id, v.fom, v.tom, o.utbetaling_id, h.id AS hendelseId, h.data AS godkjenningbehovJson, s.type as periodetype
+            FROM vedtak v
+            INNER JOIN oppgave o ON o.vedtak_ref = v.id
+            INNER JOIN hendelse h ON h.id = (SELECT hendelse_id FROM command_context WHERE context_id = o.command_context_id LIMIT 1)
+            INNER JOIN saksbehandleroppgavetype s ON s.vedtak_ref = v.id
+            WHERE o.id = :oppgaveId 
+            """.trimIndent()
+        return transactionalSession.run(
+            queryOf(statement, mapOf("oppgaveId" to oppgaveId))
+                .map { row ->
+                    val json = objectMapper.readTree(row.string("godkjenningbehovJson"))
+                    val skjæringstidspunkt = json.path("Godkjenning").path("skjæringstidspunkt").asLocalDate()
+                    OppgaveDataForAutomatisering(
+                        oppgaveId = oppgaveId,
+                        vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                        periodeFom = row.localDate("fom"),
+                        periodeTom = row.localDate("tom"),
+                        skjæringstidspunkt = skjæringstidspunkt,
+                        utbetalingId = row.uuid("utbetaling_id"),
+                        hendelseId = row.uuid("hendelseId"),
+                        godkjenningsbehovJson = row.string("godkjenningbehovJson"),
+                        periodetype = enumValueOf(row.string("periodetype")),
+                    )
+                }.asSingle,
         )
     }
 

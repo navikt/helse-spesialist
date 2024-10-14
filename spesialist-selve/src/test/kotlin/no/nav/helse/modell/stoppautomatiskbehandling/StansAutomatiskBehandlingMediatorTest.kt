@@ -6,6 +6,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.TestRapidHelpers.hendelser
+import no.nav.helse.db.NotatRepository
+import no.nav.helse.db.Periodehistorikk
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
 import no.nav.helse.mediator.Subsumsjonsmelder
@@ -22,8 +24,6 @@ import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_UAVKLART
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
-import no.nav.helse.spesialist.api.notat.NotatApiRepository
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -36,10 +36,10 @@ import java.util.UUID.randomUUID
 
 class StansAutomatiskBehandlingMediatorTest {
     private val stansAutomatiskBehandlingDao = mockk<StansAutomatiskBehandlingDao>(relaxed = true)
-    private val periodehistorikk = mockk<PeriodehistorikkApiDao>(relaxed = true)
+    private val periodehistorikk = mockk<Periodehistorikk>(relaxed = true)
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val utbetalingDao = mockk<UtbetalingDao>(relaxed = true)
-    private val notatDao = mockk<NotatApiRepository>(relaxed = true)
+    private val notatDao = mockk<NotatRepository>(relaxed = true)
     private val testRapid = TestRapid()
     private val subsumsjonsmelder = Subsumsjonsmelder("versjonAvKode", testRapid)
 

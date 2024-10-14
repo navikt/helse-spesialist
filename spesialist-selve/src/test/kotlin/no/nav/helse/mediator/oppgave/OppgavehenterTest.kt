@@ -12,6 +12,7 @@ import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.db.TotrinnsvurderingRepository
+import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.EgenskapDto
 import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
@@ -109,6 +110,12 @@ class OppgavehenterTest {
                 tildelt = TILDELT_TIL,
             )
         }
+
+        override fun finnOppgaveIdUansettStatus(fødselsnummer: String): Long =  throw OperationNotSupportedException()
+
+        override fun finnUtbetalingId(oppgaveId: Long): UUID? =  throw OperationNotSupportedException()
+
+        override fun oppgaveDataForAutomatisering(oppgaveId: Long): OppgaveDataForAutomatisering? =  throw OperationNotSupportedException()
 
         override fun finnHendelseId(id: Long): UUID = UUID.randomUUID()
 

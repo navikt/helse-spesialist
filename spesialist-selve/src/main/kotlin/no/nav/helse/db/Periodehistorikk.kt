@@ -1,5 +1,6 @@
 package no.nav.helse.db
 
+import kotliquery.sessionOf
 import no.nav.helse.modell.periodehistorikk.FjernetFraPåVent
 import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
 import no.nav.helse.modell.periodehistorikk.Innslagstype
@@ -8,6 +9,7 @@ import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.notat.NotatApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
+import java.util.UUID
 import javax.sql.DataSource
 
 interface PeriodehistorikkRepository {
@@ -15,10 +17,18 @@ interface PeriodehistorikkRepository {
         historikkinnslag: HistorikkinnslagDto,
         oppgaveId: Long,
     )
+
+    fun lagre(
+        historikkType: PeriodehistorikkType,
+        saksbehandlerOid: UUID? = null,
+        utbetalingId: UUID,
+        notatId: Int? = null,
+        json: String = "{}",
+    )
 }
 
 class Periodehistorikk(
-    dataSource: DataSource,
+    private val dataSource: DataSource,
 ) : PeriodehistorikkRepository {
     private val periodehistorikkDao: PeriodehistorikkApiDao = PeriodehistorikkApiDao(dataSource)
     private val notatDao: NotatApiDao = NotatApiDao(dataSource)
@@ -53,6 +63,26 @@ class Periodehistorikk(
                     oppgaveId = oppgaveId,
                     notatId = notatId,
                     json = historikkinnslag.toJson(),
+                )
+            }
+        }
+    }
+
+    override fun lagre(
+        historikkType: PeriodehistorikkType,
+        saksbehandlerOid: UUID?,
+        utbetalingId: UUID,
+        notatId: Int?,
+        json: String,
+    ) {
+        sessionOf(dataSource).use { session ->
+            session.transaction { transaction ->
+                TransactionalPeriodehistorikkDao(transaction).lagre(
+                    historikkType,
+                    saksbehandlerOid,
+                    utbetalingId,
+                    notatId,
+                    json,
                 )
             }
         }

@@ -7,7 +7,9 @@ import no.nav.helse.Gruppekontroll
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.BehandlingsstatistikkDao
+import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OpptegnelseDao
+import no.nav.helse.db.Periodehistorikk
 import no.nav.helse.db.PoisonPillDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
@@ -98,6 +100,7 @@ internal class SpesialistApp(
     private val utbetalingDao = UtbetalingDao(dataSource)
     private val oppgaveApiDao = OppgaveApiDao(dataSource)
     private val periodehistorikkApiDao = PeriodehistorikkApiDao(dataSource)
+    private val periodehistorikk = Periodehistorikk(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
     private val risikovurderingDao = RisikovurderingDao(dataSource)
     private val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
@@ -112,6 +115,7 @@ internal class SpesialistApp(
     private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
     private val notatApiDao = NotatApiDao(dataSource)
+    private val notatDao = NotatDao(dataSource)
     private val totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource)
     private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
     private val snapshotApiDao = SnapshotApiDao(dataSource)
@@ -140,10 +144,10 @@ internal class SpesialistApp(
     private val stansAutomatiskBehandlingMediator =
         StansAutomatiskBehandlingMediator(
             stansAutomatiskBehandlingDao,
-            periodehistorikkApiDao,
+            periodehistorikk,
             oppgaveDao,
             utbetalingDao,
-            notatRepository,
+            notatDao,
         ) { subsumsjonsmelder }
     private val totrinnsvurderingMediator =
         TotrinnsvurderingMediator(

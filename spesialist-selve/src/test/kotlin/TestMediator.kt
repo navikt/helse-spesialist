@@ -1,6 +1,8 @@
 import no.nav.helse.SpeilTilgangsgrupper
 import no.nav.helse.db.AvviksvurderingDao
+import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OpptegnelseDao
+import no.nav.helse.db.Periodehistorikk
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
@@ -29,9 +31,6 @@ import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import no.nav.helse.spesialist.api.notat.NotatApiDao
-import no.nav.helse.spesialist.api.notat.NotatApiRepository
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.testEnv
@@ -45,7 +44,7 @@ internal class TestMediator(
     private val vedtakDao = VedtakDao(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
-    private val periodehistorikkDao = PeriodehistorikkApiDao(dataSource)
+    private val periodehistorikkDao = Periodehistorikk(dataSource)
     private val utbetalingDao = UtbetalingDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
     private val meldingDao = MeldingDao(dataSource)
@@ -55,7 +54,7 @@ internal class TestMediator(
     private val tildelingDao = TildelingDao(dataSource)
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
     private val egenAnsattDao = EgenAnsattDao(dataSource)
-    private val notatDao = NotatApiDao(dataSource)
+    private val notatDao = NotatDao(dataSource)
 
     private val stansAutomatiskBehandlingMediator =
         StansAutomatiskBehandlingMediator(
@@ -63,7 +62,7 @@ internal class TestMediator(
             periodehistorikkDao,
             oppgaveDao,
             utbetalingDao,
-            NotatApiRepository(notatDao),
+            notatDao,
         ) { Subsumsjonsmelder("versjonAvKode", testRapid) }
 
     private val godkjenningMediator = GodkjenningMediator(opptegnelseDao)

@@ -32,7 +32,6 @@ import no.nav.helse.spesialist.api.graphql.schema.OverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.PaVentRequest
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse
 import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
-import no.nav.helse.spesialist.api.notat.NotatApiRepository
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
@@ -66,10 +65,10 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private val stansAutomatiskBehandlingMediator =
         StansAutomatiskBehandlingMediator(
             stansAutomatiskBehandlingDao,
-            periodehistorikkDao,
+            periodehistorikk,
             oppgaveDao,
             utbetalingDao,
-            NotatApiRepository(notatApiDao),
+            notatDao,
         ) { Subsumsjonsmelder("versjonAvKode", testRapid) }
     private val oppgaveService =
         OppgaveService(

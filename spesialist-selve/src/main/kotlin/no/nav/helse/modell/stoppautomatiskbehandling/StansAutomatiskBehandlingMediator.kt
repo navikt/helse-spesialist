@@ -1,16 +1,19 @@
 package no.nav.helse.modell.stoppautomatiskbehandling
 
-import no.nav.helse.db.StansAutomatiskBehandlingDao
+import kotliquery.TransactionalSession
+import no.nav.helse.db.NotatRepository
+import no.nav.helse.db.OppgaveRepository
+import no.nav.helse.db.PeriodehistorikkRepository
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
+import no.nav.helse.db.StansAutomatiskBehandlingRepository
+import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.mediator.Subsumsjonsmelder
-import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.Personhandling
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.AKTIVITETSKRAV
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.BESTRIDELSE_SYKMELDING
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.MANGLENDE_MEDVIRKING
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.MEDISINSK_VILKAR
-import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.SporingStansAutomatiskBehandling
@@ -20,19 +23,18 @@ import no.nav.helse.modell.vilkårsprøving.SubsumsjonEvent
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.graphql.schema.UnntattFraAutomatiskGodkjenning
-import no.nav.helse.spesialist.api.notat.NotatApiRepository
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
+import javax.naming.OperationNotSupportedException
 
 class StansAutomatiskBehandlingMediator(
-    private val stansAutomatiskBehandlingDao: StansAutomatiskBehandlingDao,
-    private val periodehistorikkDao: PeriodehistorikkApiDao,
-    private val oppgaveDao: OppgaveDao,
-    private val utbetalingDao: UtbetalingDao,
-    private val notatRepository: NotatApiRepository,
+    private val stansAutomatiskBehandlingRepository: StansAutomatiskBehandlingRepository,
+    private val periodehistorikkRepository: PeriodehistorikkRepository,
+    private val oppgaveRepository: OppgaveRepository,
+    private val utbetalingRepository: UtbetalingRepository,
+    private val notatRepository: NotatRepository,
     private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
 ) : StansAutomatiskBehandlinghåndterer {
     private val logg = LoggerFactory.getLogger(this::class.java)
@@ -44,7 +46,7 @@ class StansAutomatiskBehandlingMediator(
         handling: Personhandling,
         saksbehandler: Saksbehandler,
     ) {
-        stansAutomatiskBehandlingDao.lagreFraSpeil(handling.gjelderFødselsnummer())
+        stansAutomatiskBehandlingRepository.lagreFraSpeil(handling.gjelderFødselsnummer())
         lagreNotat(handling.gjelderFødselsnummer(), handling.begrunnelse(), saksbehandler.oid())
     }
 
@@ -56,7 +58,7 @@ class StansAutomatiskBehandlingMediator(
         originalMelding: String,
         kilde: String,
     ) {
-        stansAutomatiskBehandlingDao.lagreFraISyfo(
+        stansAutomatiskBehandlingRepository.lagreFraISyfo(
             fødselsnummer = fødselsnummer,
             status = status,
             årsaker = årsaker,
@@ -68,7 +70,7 @@ class StansAutomatiskBehandlingMediator(
     }
 
     override fun unntattFraAutomatiskGodkjenning(fødselsnummer: String): UnntattFraAutomatiskGodkjenning =
-        stansAutomatiskBehandlingDao.hentFor(fødselsnummer).filtrerGjeldendeStopp().tilUnntattFraAutomatiskGodkjenning()
+        stansAutomatiskBehandlingRepository.hentFor(fødselsnummer).filtrerGjeldendeStopp().tilUnntattFraAutomatiskGodkjenning()
 
     override fun sjekkOmAutomatiseringErStanset(
         fødselsnummer: String,
@@ -76,19 +78,23 @@ class StansAutomatiskBehandlingMediator(
         organisasjonsnummer: String,
     ): Boolean {
         val stoppmeldinger =
-            stansAutomatiskBehandlingDao.hentFor(fødselsnummer).filtrerGjeldendeStopp().map {
+            stansAutomatiskBehandlingRepository.hentFor(fødselsnummer).filtrerGjeldendeStopp().map {
                 StoppknappmeldingForSubsumsjon(it.årsaker, it.meldingId!!)
             }
         sendSubsumsjonMeldinger(stoppmeldinger, fødselsnummer, vedtaksperiodeId, organisasjonsnummer)
         return stoppmeldinger.isNotEmpty()
     }
 
+    override fun nyStansAutomatiskBehandlinghåndterer(transactionalSession: TransactionalSession): StansAutomatiskBehandlinghåndterer {
+        throw OperationNotSupportedException()
+    }
+
     private fun lagrePeriodehistorikk(fødselsnummer: String) {
         val utbetalingId =
-            oppgaveDao.finnOppgaveId(fødselsnummer)?.let { oppgaveDao.finnUtbetalingId(it) }
-                ?: utbetalingDao.sisteUtbetalingIdFor(fødselsnummer)
+            oppgaveRepository.finnOppgaveId(fødselsnummer)?.let { oppgaveRepository.finnUtbetalingId(it) }
+                ?: utbetalingRepository.sisteUtbetalingIdFor(fødselsnummer)
         if (utbetalingId != null) {
-            periodehistorikkDao.lagre(STANS_AUTOMATISK_BEHANDLING, null, utbetalingId, null)
+            periodehistorikkRepository.lagre(STANS_AUTOMATISK_BEHANDLING, null, utbetalingId, null)
         } else {
             sikkerlogg.error("Fant ikke oppgave for $fødselsnummer. Fikk ikke lagret historikkinnslag om stans av automatisk behandling")
         }
@@ -105,7 +111,7 @@ class StansAutomatiskBehandlingMediator(
         sikkerlogg.error("Fant ikke oppgave for $fødselsnummer. Fikk ikke lagret notat om oppheving av stans")
     }
 
-    private fun String.finnOppgaveId() = oppgaveDao.finnOppgaveId(this) ?: oppgaveDao.finnOppgaveIdUansettStatus(this)
+    private fun String.finnOppgaveId() = oppgaveRepository.finnOppgaveId(this) ?: oppgaveRepository.finnOppgaveIdUansettStatus(this)
 
     private fun List<StansAutomatiskBehandlingFraDatabase>.filtrerGjeldendeStopp(): List<StansAutomatiskBehandlingFraDatabase> {
         val gjeldende = mutableListOf<StansAutomatiskBehandlingFraDatabase>()

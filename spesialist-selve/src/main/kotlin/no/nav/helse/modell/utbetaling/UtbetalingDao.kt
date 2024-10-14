@@ -180,24 +180,19 @@ class UtbetalingDao(private val dataSource: DataSource) : HelseDao(dataSource), 
         val utbetalingsstatus: Utbetalingsstatus,
     )
 
-    internal fun hentUtbetaling(utbetalingId: UUID): Utbetaling =
-        checkNotNull(utbetalingFor(utbetalingId)) { "Finner ikke utbetaling, utbetalingId=$utbetalingId" }
-
-    internal fun utbetalingFor(utbetalingId: UUID): Utbetaling? {
-        @Language("PostgreSQL")
-        val query =
-            "SELECT arbeidsgiverbeløp, personbeløp, type FROM utbetaling_id u WHERE u.utbetaling_id = :utbetaling_id"
+    override fun hentUtbetaling(utbetalingId: UUID): Utbetaling {
         return sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(query, mapOf("utbetaling_id" to utbetalingId)).map {
-                    Utbetaling(
-                        utbetalingId,
-                        it.int("arbeidsgiverbeløp"),
-                        it.int("personbeløp"),
-                        enumValueOf(it.string("type")),
-                    )
-                }.asSingle,
-            )
+            session.transaction { transactionalSession ->
+                TransactionalUtbetalingDao(transactionalSession).hentUtbetaling(utbetalingId)
+            }
+        }
+    }
+
+    override fun utbetalingFor(utbetalingId: UUID): Utbetaling? {
+        return sessionOf(dataSource).use { session ->
+            session.transaction { transactionalSession ->
+                TransactionalUtbetalingDao(transactionalSession).utbetalingFor(utbetalingId)
+            }
         }
     }
 
@@ -244,17 +239,11 @@ class UtbetalingDao(private val dataSource: DataSource) : HelseDao(dataSource), 
         }
     }
 
-    internal fun sisteUtbetalingIdFor(fødselsnummer: String) =
-        asSQL(
-            """
-            select ui.utbetaling_id from utbetaling_id ui 
-            join person p on ui.person_ref = p.id 
-            where p.fodselsnummer = :fnr
-            order by ui.id desc
-            limit 1;
-            """.trimIndent(),
-            mapOf(
-                "fnr" to fødselsnummer.toLong(),
-            ),
-        ).single { it.uuid("utbetaling_id") }
+    override fun sisteUtbetalingIdFor(fødselsnummer: String): UUID? {
+        return sessionOf(dataSource).use { session ->
+            session.transaction { transactionalSession ->
+                TransactionalUtbetalingDao(transactionalSession).sisteUtbetalingIdFor(fødselsnummer)
+            }
+        }
+    }
 }
