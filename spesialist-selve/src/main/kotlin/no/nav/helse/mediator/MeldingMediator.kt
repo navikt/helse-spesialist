@@ -55,7 +55,7 @@ import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.AdressebeskyttelseEndretRiver
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.person.PersonRepository
+import no.nav.helse.modell.person.PersonService
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak
@@ -91,7 +91,7 @@ internal class MeldingMediator(
     avviksvurderingDao: AvviksvurderingDao,
     private val varselRepository: VarselRepository = VarselRepository(dataSource),
     private val stansAutomatiskBehandlingMediator: StansAutomatiskBehandlingMediator,
-    private val personRepository: PersonRepository = PersonRepository(dataSource),
+    private val personService: PersonService = PersonService(dataSource),
     private val poisonPills: PoisonPills,
 ) : Personhåndterer {
     private companion object {
@@ -436,7 +436,7 @@ internal class MeldingMediator(
         val commandContextTilstandMediator = CommandContextTilstandMediator()
         val vedtakFattetMelder = VedtakFattetMelder(messageContext)
         try {
-            personRepository.brukPersonHvisFinnes(melding.fødselsnummer()) {
+            personService.brukPersonHvisFinnes(melding.fødselsnummer()) {
                 this.nyObserver(vedtakFattetMelder)
                 logg.info("Personen finnes i databasen, behandler melding $meldingnavn")
                 sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")

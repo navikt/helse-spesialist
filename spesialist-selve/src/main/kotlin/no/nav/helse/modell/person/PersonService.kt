@@ -8,7 +8,7 @@ import no.nav.helse.db.TransactionalPersonDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonService
 import javax.sql.DataSource
 
-internal class PersonRepository(
+internal class PersonService(
     private val dataSource: DataSource,
 ) {
     private val sykefraværstilfelleDao = SykefraværstilfelleDao(dataSource)

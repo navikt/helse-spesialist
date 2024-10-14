@@ -37,7 +37,7 @@ import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.TestMelding
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.person.PersonRepository
+import no.nav.helse.modell.person.PersonService
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
@@ -163,7 +163,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(dataSource)
     internal val notatDao = NotatDao(dataSource)
     internal val annulleringDao = AnnulleringDao(dataSource)
-    private val personRepository = PersonRepository(dataSource)
+    private val personService = PersonService(dataSource)
     private val inntektskilderDao = InntektskilderDao(dataSource)
 
     internal fun testhendelse(
@@ -330,7 +330,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         spleisBehandlingId: UUID = UUID.randomUUID(),
     ) {
-        personRepository.brukPersonHvisFinnes(FNR) {
+        personService.brukPersonHvisFinnes(FNR) {
             this.nySpleisBehandling(SpleisBehandling(ORGNUMMER, vedtaksperiodeId, spleisBehandlingId, 1.januar, 31.januar))
         }
     }
@@ -347,7 +347,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         forkastet: Boolean = false,
         spleisBehandlingId: UUID = UUID.randomUUID(),
     ) {
-        personRepository.brukPersonHvisFinnes(fødselsnummer) {
+        personService.brukPersonHvisFinnes(fødselsnummer) {
             this.nySpleisBehandling(SpleisBehandling(organisasjonsnummer, vedtaksperiodeId, spleisBehandlingId, fom, tom))
             if (utbetalingId != null) this.nyUtbetalingForVedtaksperiode(vedtaksperiodeId, utbetalingId)
             if (forkastet) this.vedtaksperiodeForkastet(vedtaksperiodeId)
