@@ -1,6 +1,8 @@
 package no.nav.helse.modell.kommando
 
 import com.fasterxml.jackson.databind.JsonNode
+import kotliquery.TransactionalSession
+import no.nav.helse.db.TransactionalOppgaveDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
@@ -18,6 +20,7 @@ import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import java.util.UUID
+import javax.naming.OperationNotSupportedException
 
 internal class TilbakedateringBehandlet private constructor(
     override val id: UUID,
@@ -44,15 +47,25 @@ internal class TilbakedateringBehandlet private constructor(
         json = jsonNode.toString(),
     )
 
+    override fun skalKjøresTransaksjonelt(): Boolean = true
+
+    override fun transaksjonellBehandle(
+        person: Person,
+        kommandostarter: Kommandostarter,
+        transactionalSession: TransactionalSession,
+    ) {
+        person.behandleTilbakedateringBehandlet(perioder)
+        kommandostarter {
+            val oppgaveDataForAutomatisering = finnOppgavedata(fødselsnummer, TransactionalOppgaveDao(transactionalSession)) ?: return@kommandostarter null
+            tilbakedateringGodkjent(this@TilbakedateringBehandlet, person, oppgaveDataForAutomatisering, transactionalSession)
+        }
+    }
+
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
     ) {
-        person.behandleTilbakedateringBehandlet(perioder)
-        kommandostarter {
-            val oppgaveDataForAutomatisering = finnOppgavedata(fødselsnummer) ?: return@kommandostarter null
-            tilbakedateringGodkjent(this@TilbakedateringBehandlet, person, oppgaveDataForAutomatisering)
-        }
+        throw OperationNotSupportedException()
     }
 
     override fun fødselsnummer() = fødselsnummer

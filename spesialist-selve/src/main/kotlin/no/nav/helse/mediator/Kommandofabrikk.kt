@@ -168,18 +168,22 @@ internal class Kommandofabrikk(
         melding: TilbakedateringBehandlet,
         person: Person,
         oppgaveDataForAutomatisering: OppgaveDataForAutomatisering,
+        transactionalSession: TransactionalSession,
     ): TilbakedateringGodkjentCommand {
-        val godkjenningsbehovData = meldingDao.finnGodkjenningsbehov(oppgaveDataForAutomatisering.hendelseId).data()
+        val godkjenningsbehovData =
+            TransactionalMeldingDao(
+                transactionalSession,
+            ).finnGodkjenningsbehov(oppgaveDataForAutomatisering.hendelseId).data()
         val sykefraværstilfelle = person.sykefraværstilfelle(godkjenningsbehovData.vedtaksperiodeId)
-        val utbetaling = utbetalingDao.hentUtbetaling(godkjenningsbehovData.utbetalingId)
+        val utbetaling = TransactionalUtbetalingDao(transactionalSession).hentUtbetaling(godkjenningsbehovData.utbetalingId)
 
         return TilbakedateringGodkjentCommand(
             sykefraværstilfelle = sykefraværstilfelle,
             utbetaling = utbetaling,
-            automatisering = automatisering,
+            automatisering = transaksjonellAutomatisering(transactionalSession),
             oppgaveDataForAutomatisering = oppgaveDataForAutomatisering,
-            oppgaveService = oppgaveService,
-            godkjenningMediator = godkjenningMediator,
+            oppgaveService = transaksjonellOppgaveService(transactionalSession),
+            godkjenningMediator = GodkjenningMediator(TransactionalOpptegnelseDao(transactionalSession)),
             søknadsperioder = melding.perioder,
             godkjenningsbehov = godkjenningsbehovData,
         )
