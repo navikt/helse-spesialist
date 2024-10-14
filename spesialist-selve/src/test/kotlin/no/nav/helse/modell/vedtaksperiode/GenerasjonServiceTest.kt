@@ -11,9 +11,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-class GenerasjonRepositoryTest: DatabaseIntegrationTest() {
+class GenerasjonServiceTest: DatabaseIntegrationTest() {
 
-    private val generasjonRepository = GenerasjonRepository(dataSource)
+    private val generasjonService = GenerasjonService(dataSource)
 
     @Test
     fun `lagrer og finner liste av vedtaksperioder`() {
@@ -70,7 +70,7 @@ class GenerasjonRepositoryTest: DatabaseIntegrationTest() {
 
         sessionOf(dataSource).use { session ->
             session.transaction { tx ->
-                with(generasjonRepository) {
+                with(generasjonService) {
                     tx.lagreVedtaksperioder(person1, vedtaksperioder)
                 }
             }
@@ -78,7 +78,7 @@ class GenerasjonRepositoryTest: DatabaseIntegrationTest() {
 
         val funnet = sessionOf(dataSource).use { session ->
             session.transaction { tx ->
-                with(generasjonRepository) {
+                with(generasjonService) {
                     tx.finnVedtaksperioder(person1)
                 }
             }

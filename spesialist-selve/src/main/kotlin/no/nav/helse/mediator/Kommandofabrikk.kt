@@ -56,7 +56,7 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.utbetaling.UtbetalingEndretCommand
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
+import no.nav.helse.modell.vedtaksperiode.GenerasjonService
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovCommand
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
@@ -110,7 +110,7 @@ internal class Kommandofabrikk(
     private val arbeidsforholdDao: ArbeidsforholdDao = ArbeidsforholdDao(dataSource),
     private val utbetalingDao: UtbetalingDao = UtbetalingDao(dataSource),
     private val opptegnelseDao: OpptegnelseDao = OpptegnelseDao(dataSource),
-    private val generasjonRepository: GenerasjonRepository = GenerasjonRepository(dataSource),
+    private val generasjonService: GenerasjonService = GenerasjonService(dataSource),
     private val vergemålDao: VergemålDao = VergemålDao(dataSource),
 ) {
     private companion object {
@@ -271,7 +271,7 @@ internal class Kommandofabrikk(
     ): OppdaterPersondataCommand =
         OppdaterPersondataCommand(
             fødselsnummer = hendelse.fødselsnummer(),
-            førsteKjenteDagFinner = { generasjonRepository.førsteKjenteDag(hendelse.fødselsnummer()) },
+            førsteKjenteDagFinner = { generasjonService.førsteKjenteDag(hendelse.fødselsnummer()) },
             personRepository = TransactionalPersonDao(transactionalSession),
             opptegnelseRepository = TransactionalOpptegnelseDao(transactionalSession),
         )
@@ -362,7 +362,7 @@ internal class Kommandofabrikk(
         person: Person,
     ): GodkjenningsbehovCommand {
         val utbetaling = utbetalingDao.hentUtbetaling(godkjenningsbehovData.utbetalingId)
-        val førsteKjenteDagFinner = { generasjonRepository.førsteKjenteDag(godkjenningsbehovData.fødselsnummer) }
+        val førsteKjenteDagFinner = { generasjonService.førsteKjenteDag(godkjenningsbehovData.fødselsnummer) }
         return GodkjenningsbehovCommand(
             behovData = godkjenningsbehovData,
             utbetaling = utbetaling,
