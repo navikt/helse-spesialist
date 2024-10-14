@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class PersonRepositoryTest : AbstractDatabaseTest() {
+internal class PersonServiceTest : AbstractDatabaseTest() {
     @Test
     fun `sletting av person`() {
         opprettPerson(FØDSELSNUMMER)
