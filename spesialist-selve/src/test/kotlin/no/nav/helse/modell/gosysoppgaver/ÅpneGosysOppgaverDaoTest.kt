@@ -2,11 +2,11 @@ package no.nav.helse.modell.gosysoppgaver
 
 import DatabaseIntegrationTest
 import graphql.Assert.assertNotNull
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 
 
 internal class ÅpneGosysOppgaverDaoTest : DatabaseIntegrationTest() {
@@ -22,11 +22,11 @@ internal class ÅpneGosysOppgaverDaoTest : DatabaseIntegrationTest() {
         åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(
             ÅpneGosysOppgaverDto(FNR, 1, false, LocalDateTime.now())
         )
-        val harÅpneOppgaver = åpneGosysOppgaverDao.harÅpneOppgaver(FNR)
+        val antallÅpneOppgaver = åpneGosysOppgaverDao.antallÅpneOppgaver(FNR)
 
-        assertNotNull(harÅpneOppgaver)
-        if (harÅpneOppgaver != null) {
-            assertEquals(1, harÅpneOppgaver)
+        assertNotNull(antallÅpneOppgaver)
+        if (antallÅpneOppgaver != null) {
+            assertEquals(1, antallÅpneOppgaver)
         }
     }
 
@@ -35,11 +35,11 @@ internal class ÅpneGosysOppgaverDaoTest : DatabaseIntegrationTest() {
         åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(
             ÅpneGosysOppgaverDto(FNR, 0, false, LocalDateTime.now())
         )
-        val harÅpneOppgaver = åpneGosysOppgaverDao.harÅpneOppgaver(FNR)
+        val antallÅpneOppgaver = åpneGosysOppgaverDao.antallÅpneOppgaver(FNR)
 
-        assertNotNull(harÅpneOppgaver)
-        if (harÅpneOppgaver != null) {
-            assertEquals(0, harÅpneOppgaver)
+        assertNotNull(antallÅpneOppgaver)
+        if (antallÅpneOppgaver != null) {
+            assertEquals(0, antallÅpneOppgaver)
         }
     }
 
@@ -48,17 +48,17 @@ internal class ÅpneGosysOppgaverDaoTest : DatabaseIntegrationTest() {
         åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(
             ÅpneGosysOppgaverDto(FNR, 0, false, LocalDateTime.now())
         )
-        val harÅpneOppgaver = åpneGosysOppgaverDao.harÅpneOppgaver(FNR)
+        val antallÅpneOppgaver = åpneGosysOppgaverDao.antallÅpneOppgaver(FNR)
 
-        assertNotNull(harÅpneOppgaver)
-        if (harÅpneOppgaver != null) {
-            assertEquals(0, harÅpneOppgaver)
+        assertNotNull(antallÅpneOppgaver)
+        if (antallÅpneOppgaver != null) {
+            assertEquals(0, antallÅpneOppgaver)
         }
 
         åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(
             ÅpneGosysOppgaverDto(FNR, 1, false, LocalDateTime.now())
         )
-        val erDigitalSvar2 = åpneGosysOppgaverDao.harÅpneOppgaver(FNR)
+        val erDigitalSvar2 = åpneGosysOppgaverDao.antallÅpneOppgaver(FNR)
 
         assertNotNull(erDigitalSvar2)
         if (erDigitalSvar2 != null) {
@@ -73,7 +73,7 @@ internal class ÅpneGosysOppgaverDaoTest : DatabaseIntegrationTest() {
             ÅpneGosysOppgaverDto(FNR, null, true, LocalDateTime.now())
         )
 
-        assertNull(åpneGosysOppgaverDao.harÅpneOppgaver(FNR))
+        assertNull(åpneGosysOppgaverDao.antallÅpneOppgaver(FNR))
     }
 
     @Test
@@ -82,6 +82,6 @@ internal class ÅpneGosysOppgaverDaoTest : DatabaseIntegrationTest() {
         åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(
             ÅpneGosysOppgaverDto("12345678910", 1, false, LocalDateTime.now())
         )
-        assertNull(åpneGosysOppgaverDao.harÅpneOppgaver(FNR))
+        assertNull(åpneGosysOppgaverDao.antallÅpneOppgaver(FNR))
     }
 }

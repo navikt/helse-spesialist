@@ -5,5 +5,5 @@ import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
 interface ÅpneGosysOppgaverRepository {
     fun persisterÅpneGosysOppgaver(åpneGosysOppgaver: ÅpneGosysOppgaverDto)
 
-    fun harÅpneOppgaver(fødselsnummer: String): Int?
+    fun antallÅpneOppgaver(fødselsnummer: String): Int?
 }

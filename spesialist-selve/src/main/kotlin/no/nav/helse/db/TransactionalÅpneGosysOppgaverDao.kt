@@ -27,7 +27,7 @@ class TransactionalÅpneGosysOppgaverDao(private val transactionalSession: Trans
         )
     }
 
-    override fun harÅpneOppgaver(fødselsnummer: String): Int? {
+    override fun antallÅpneOppgaver(fødselsnummer: String): Int? {
         @Language("PostgreSQL")
         val query =
             """

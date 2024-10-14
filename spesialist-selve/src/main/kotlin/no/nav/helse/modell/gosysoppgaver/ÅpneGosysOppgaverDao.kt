@@ -14,10 +14,10 @@ internal class ÅpneGosysOppgaverDao(val dataSource: DataSource) : ÅpneGosysOpp
         }
     }
 
-    override fun harÅpneOppgaver(fødselsnummer: String): Int? {
+    override fun antallÅpneOppgaver(fødselsnummer: String): Int? {
         return sessionOf(dataSource).use { session ->
             session.transaction { transactionalSession ->
-                TransactionalÅpneGosysOppgaverDao(transactionalSession).harÅpneOppgaver(fødselsnummer)
+                TransactionalÅpneGosysOppgaverDao(transactionalSession).antallÅpneOppgaver(fødselsnummer)
             }
         }
     }

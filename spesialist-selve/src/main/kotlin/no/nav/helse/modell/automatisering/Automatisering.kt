@@ -245,7 +245,7 @@ internal class Automatisering(
         val forhindrerAutomatisering = sykefraværstilfelle.forhindrerAutomatisering(vedtaksperiodeId)
         val harVergemål = vergemålRepository.harVergemål(fødselsnummer) ?: false
         val tilhørerUtlandsenhet = erEnhetUtland(personRepository.finnEnhetId(fødselsnummer))
-        val antallÅpneGosysoppgaver = åpneGosysOppgaverRepository.harÅpneOppgaver(fødselsnummer)
+        val antallÅpneGosysoppgaver = åpneGosysOppgaverRepository.antallÅpneOppgaver(fødselsnummer)
         val harPågåendeOverstyring = overstyringRepository.harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId)
         val harUtbetalingTilSykmeldt = utbetaling.harEndringIUtbetalingTilSykmeldt()
 

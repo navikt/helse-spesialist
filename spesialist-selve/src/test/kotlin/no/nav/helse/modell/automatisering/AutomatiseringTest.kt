@@ -106,7 +106,7 @@ internal class AutomatiseringTest {
         every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(true)
         every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns periodetype
         every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
-        every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 0
+        every { åpneGosysOppgaverDaoMock.antallÅpneOppgaver(any()) } returns 0
         every { overstyringDaoMock.harVedtaksperiodePågåendeOverstyring(any()) } returns false
         every { meldingDaoMock.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, vedtaksperiodeId) } returns
             MeldingDao.OverstyringIgangsattKorrigertSøknad(
@@ -141,7 +141,7 @@ internal class AutomatiseringTest {
         every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(false)
         every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns periodetype
         every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
-        every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 1
+        every { åpneGosysOppgaverDaoMock.antallÅpneOppgaver(any()) } returns 1
         every { vergemålDaoMock.harVergemål(fødselsnummer) } returns true
         val gjeldendeGenerasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
         gjeldendeGenerasjon.håndterNyttVarsel(
@@ -165,7 +165,7 @@ internal class AutomatiseringTest {
         every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(false)
         every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns periodetype
         every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
-        every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 1
+        every { åpneGosysOppgaverDaoMock.antallÅpneOppgaver(any()) } returns 1
         every { vergemålDaoMock.harVergemål(fødselsnummer) } returns true
         val gjeldendeGenerasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
         gjeldendeGenerasjon.håndterNyttVarsel(
@@ -230,13 +230,13 @@ internal class AutomatiseringTest {
 
     @Test
     fun `vedtaksperiode med åpne oppgaver er ikke automatiserbar`() {
-        every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 1
+        every { åpneGosysOppgaverDaoMock.antallÅpneOppgaver(any()) } returns 1
         gårTilManuell()
     }
 
     @Test
     fun `vedtaksperiode med _null_ åpne oppgaver er ikke automatiserbar`() {
-        every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns null
+        every { åpneGosysOppgaverDaoMock.antallÅpneOppgaver(any()) } returns null
         gårTilManuell()
     }
 
