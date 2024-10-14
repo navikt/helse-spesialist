@@ -5,6 +5,7 @@ import kotliquery.sessionOf
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.InntektskilderDao
+import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
@@ -16,11 +17,9 @@ import no.nav.helse.db.TransactionalOppgaveDao
 import no.nav.helse.db.TransactionalOpptegnelseDao
 import no.nav.helse.db.TransactionalOverstyringDao
 import no.nav.helse.db.TransactionalPersonDao
-import no.nav.helse.db.TransactionalReservasjonDao
-import no.nav.helse.db.TransactionalSaksbehandlerDao
 import no.nav.helse.db.TransactionalTildelingDao
-import no.nav.helse.db.TransactionalTotrinnsvurderingDao
 import no.nav.helse.db.TransactionalUtbetalingDao
+import no.nav.helse.db.TransactionalÅpneGosysOppgaverDao
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
 import no.nav.helse.mediator.meldinger.Personmelding
@@ -139,35 +138,28 @@ internal class Kommandofabrikk(
             oppgaveService = transaksjonellOppgaveService(transactionalSession),
         )
 
-    private fun transaksjonellOppgaveService(transactionalSession: TransactionalSession): OppgaveService =
-        oppgaveService.nyOppgaveService(
-            meldingRepository = TransactionalMeldingDao(transactionalSession),
-            oppgaveRepository = TransactionalOppgaveDao(transactionalSession),
-            tildelingRepository = TransactionalTildelingDao(transactionalSession),
-            reservasjonRepository = TransactionalReservasjonDao(transactionalSession),
-            opptegnelseRepository = TransactionalOpptegnelseDao(transactionalSession),
-            totrinnsvurderingRepository = TransactionalTotrinnsvurderingDao(transactionalSession),
-            saksbehandlerRepository = TransactionalSaksbehandlerDao(transactionalSession),
-        )
-
     internal fun gosysOppgaveEndret(
         person: Person,
         oppgaveDataForAutomatisering: OppgaveDataForAutomatisering,
+        transactionalSession: TransactionalSession,
     ): GosysOppgaveEndretCommand {
-        val utbetaling = utbetalingDao.hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
-        val harTildeltOppgave = tildelingDao.tildelingForOppgave(oppgaveDataForAutomatisering.oppgaveId) != null
-        val godkjenningsbehovData = meldingDao.finnGodkjenningsbehov(oppgaveDataForAutomatisering.hendelseId).data()
+        val utbetaling = TransactionalUtbetalingDao(transactionalSession).hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
+        val harTildeltOppgave = TransactionalTildelingDao(transactionalSession).tildelingForOppgave(oppgaveDataForAutomatisering.oppgaveId) != null
+        val godkjenningsbehovData =
+            TransactionalMeldingDao(
+                transactionalSession,
+            ).finnGodkjenningsbehov(oppgaveDataForAutomatisering.hendelseId).data()
 
         return GosysOppgaveEndretCommand(
             utbetaling = utbetaling,
             sykefraværstilfelle = person.sykefraværstilfelle(oppgaveDataForAutomatisering.vedtaksperiodeId),
             harTildeltOppgave = harTildeltOppgave,
             oppgavedataForAutomatisering = oppgaveDataForAutomatisering,
-            automatisering = automatisering,
-            åpneGosysOppgaverRepository = åpneGosysOppgaverDao,
-            oppgaveRepository = oppgaveDao,
-            oppgaveService = oppgaveService,
-            godkjenningMediator = godkjenningMediator,
+            automatisering = transaksjonellAutomatisering(transactionalSession),
+            åpneGosysOppgaverRepository = TransactionalÅpneGosysOppgaverDao(transactionalSession),
+            oppgaveRepository = TransactionalOppgaveDao(transactionalSession),
+            oppgaveService = transaksjonellOppgaveService(transactionalSession),
+            godkjenningMediator = GodkjenningMediator(TransactionalOpptegnelseDao(transactionalSession)),
             godkjenningsbehov = godkjenningsbehovData,
         )
     }
@@ -193,10 +185,13 @@ internal class Kommandofabrikk(
         )
     }
 
-    internal fun finnOppgavedata(fødselsnummer: String): OppgaveDataForAutomatisering? {
-        return oppgaveDao.finnOppgaveId(fødselsnummer)?.let { oppgaveId ->
+    internal fun finnOppgavedata(
+        fødselsnummer: String,
+        oppgaveRepository: OppgaveRepository = oppgaveDao,
+    ): OppgaveDataForAutomatisering? {
+        return oppgaveRepository.finnOppgaveId(fødselsnummer)?.let { oppgaveId ->
             sikkerlogg.info("Fant en oppgave for {}: {}", fødselsnummer, oppgaveId)
-            val oppgaveDataForAutomatisering = oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)
+            val oppgaveDataForAutomatisering = oppgaveRepository.oppgaveDataForAutomatisering(oppgaveId)
 
             if (oppgaveDataForAutomatisering == null) {
                 sikkerlogg.info("Fant ikke oppgavedata for {} og {}", fødselsnummer, oppgaveId)
@@ -456,6 +451,12 @@ internal class Kommandofabrikk(
                 )
             }
         }
+
+    private fun transaksjonellOppgaveService(transactionalSession: TransactionalSession): OppgaveService =
+        oppgaveService.nyOppgaveService(transactionalSession)
+
+    private fun transaksjonellAutomatisering(transactionalSession: TransactionalSession): Automatisering =
+        automatisering.nyAutomatisering(transactionalSession)
 
     private fun iverksett(
         command: Command,

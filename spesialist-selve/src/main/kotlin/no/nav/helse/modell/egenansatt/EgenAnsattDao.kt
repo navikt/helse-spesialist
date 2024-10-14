@@ -3,6 +3,7 @@ package no.nav.helse.modell.egenansatt
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.db.EgenAnsattRepository
+import no.nav.helse.db.TransactionalEgenAnsattDao
 import org.intellij.lang.annotations.Language
 import java.time.LocalDateTime
 import javax.sql.DataSource
@@ -37,25 +38,10 @@ class EgenAnsattDao(private val dataSource: DataSource) : EgenAnsattRepository {
         }
     }
 
-    override fun erEgenAnsatt(fødselsnummer: String): Boolean? {
-        @Language("PostgreSQL")
-        val query = """
-            SELECT er_egen_ansatt
-                FROM egen_ansatt ea
-                    INNER JOIN person p on p.id = ea.person_ref
-                WHERE p.fodselsnummer = :fodselsnummer
-            """
-        return sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(
-                    query,
-                    mapOf(
-                        "fodselsnummer" to fødselsnummer.toLong(),
-                    ),
-                )
-                    .map { it.boolean("er_egen_ansatt") }
-                    .asSingle,
-            )
+    override fun erEgenAnsatt(fødselsnummer: String): Boolean? =
+        sessionOf(dataSource).use { session ->
+            session.transaction { transactionalSession ->
+                TransactionalEgenAnsattDao(transactionalSession).erEgenAnsatt(fødselsnummer)
+            }
         }
-    }
 }

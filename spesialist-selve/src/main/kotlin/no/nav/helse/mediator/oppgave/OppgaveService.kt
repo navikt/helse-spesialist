@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.oppgave
 
+import kotliquery.TransactionalSession
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.EgenskapForDatabase
@@ -13,6 +14,13 @@ import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.TildelingRepository
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.db.TotrinnsvurderingRepository
+import no.nav.helse.db.TransactionalMeldingDao
+import no.nav.helse.db.TransactionalOppgaveDao
+import no.nav.helse.db.TransactionalOpptegnelseDao
+import no.nav.helse.db.TransactionalReservasjonDao
+import no.nav.helse.db.TransactionalSaksbehandlerDao
+import no.nav.helse.db.TransactionalTildelingDao
+import no.nav.helse.db.TransactionalTotrinnsvurderingDao
 import no.nav.helse.mediator.SaksbehandlerMediator.Companion.tilApiversjon
 import no.nav.helse.mediator.TilgangskontrollørForApi
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilApiversjon
@@ -68,23 +76,15 @@ internal class OppgaveService(
     private val logg = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-    internal fun nyOppgaveService(
-        meldingRepository: MeldingRepository,
-        oppgaveRepository: OppgaveRepository,
-        tildelingRepository: TildelingRepository,
-        reservasjonRepository: ReservasjonRepository,
-        opptegnelseRepository: OpptegnelseRepository,
-        totrinnsvurderingRepository: TotrinnsvurderingRepository,
-        saksbehandlerRepository: SaksbehandlerRepository,
-    ): OppgaveService =
+    internal fun nyOppgaveService(transactionalSession: TransactionalSession): OppgaveService =
         OppgaveService(
-            meldingRepository = meldingRepository,
-            oppgaveRepository = oppgaveRepository,
-            tildelingRepository = tildelingRepository,
-            reservasjonRepository = reservasjonRepository,
-            opptegnelseRepository = opptegnelseRepository,
-            totrinnsvurderingRepository = totrinnsvurderingRepository,
-            saksbehandlerRepository = saksbehandlerRepository,
+            meldingRepository = TransactionalMeldingDao(transactionalSession),
+            oppgaveRepository = TransactionalOppgaveDao(transactionalSession),
+            tildelingRepository = TransactionalTildelingDao(transactionalSession),
+            reservasjonRepository = TransactionalReservasjonDao(transactionalSession),
+            opptegnelseRepository = TransactionalOpptegnelseDao(transactionalSession),
+            totrinnsvurderingRepository = TransactionalTotrinnsvurderingDao(transactionalSession),
+            saksbehandlerRepository = TransactionalSaksbehandlerDao(transactionalSession),
             rapidsConnection = rapidsConnection,
             tilgangskontroll = tilgangskontroll,
             tilgangsgrupper = tilgangsgrupper,

@@ -26,4 +26,6 @@ interface VedtakRepository {
     )
 
     fun finnInntektskilde(vedtaksperiodeId: UUID): Inntektskilde?
+
+    fun finnOrgnummer(vedtaksperiodeId: UUID): String?
 }

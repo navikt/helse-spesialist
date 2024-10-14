@@ -197,18 +197,18 @@ internal class SpesialistApp(
 
     private val automatisering =
         Automatisering(
-            risikovurderingDao = risikovurderingDao,
+            risikovurderingRepository = risikovurderingDao,
             stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlingMediator,
-            automatiseringDao = automatiseringDao,
-            åpneGosysOppgaverDao = åpneGosysOppgaverDao,
-            vergemålDao = vergemålDao,
-            personDao = personDao,
-            vedtakDao = vedtakDao,
-            overstyringDao = overstyringDao,
+            automatiseringRepository = automatiseringDao,
+            åpneGosysOppgaverRepository = åpneGosysOppgaverDao,
+            vergemålRepository = vergemålDao,
+            personRepository = personDao,
+            vedtakRepository = vedtakDao,
+            overstyringRepository = overstyringDao,
             stikkprøver = stikkprøver,
-            meldingDao = meldingDao,
-            generasjonDao = generasjonDao,
-            egenAnsattDao = egenAnsattDao,
+            meldingRepository = meldingDao,
+            generasjonRepository = generasjonDao,
+            egenAnsattRepository = egenAnsattDao,
         )
 
     private val kommandofabrikk =

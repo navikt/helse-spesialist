@@ -57,4 +57,20 @@ class TransactionalOverstyringDao(
             )
         }
     }
+
+    override fun harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId: UUID): Boolean {
+        @Language("PostgreSQL")
+        val statement =
+            """
+            SELECT 1 FROM overstyringer_for_vedtaksperioder ofv
+            JOIN overstyring o ON o.id = ofv.overstyring_ref
+            WHERE ofv.vedtaksperiode_id = :vedtaksperiode_id
+            AND o.ferdigstilt = false
+            LIMIT 1
+            """.trimIndent()
+        return transactionalSession.run(
+            queryOf(statement, mapOf("vedtaksperiode_id" to vedtaksperiodeId))
+                .map { row -> row.boolean(1) }.asSingle,
+        ) ?: false
+    }
 }

@@ -6,6 +6,11 @@ import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.PeriodehistorikkRepository
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
 import no.nav.helse.db.StansAutomatiskBehandlingRepository
+import no.nav.helse.db.TransactionalNotatDao
+import no.nav.helse.db.TransactionalOppgaveDao
+import no.nav.helse.db.TransactionalPeriodehistorikkDao
+import no.nav.helse.db.TransactionalStansAutomatiskBehandlingDao
+import no.nav.helse.db.TransactionalUtbetalingDao
 import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.modell.saksbehandler.Saksbehandler
@@ -27,7 +32,6 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType.STANS_A
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
-import javax.naming.OperationNotSupportedException
 
 class StansAutomatiskBehandlingMediator(
     private val stansAutomatiskBehandlingRepository: StansAutomatiskBehandlingRepository,
@@ -86,7 +90,14 @@ class StansAutomatiskBehandlingMediator(
     }
 
     override fun nyStansAutomatiskBehandlinghåndterer(transactionalSession: TransactionalSession): StansAutomatiskBehandlinghåndterer {
-        throw OperationNotSupportedException()
+        return StansAutomatiskBehandlingMediator(
+            TransactionalStansAutomatiskBehandlingDao(transactionalSession),
+            TransactionalPeriodehistorikkDao(transactionalSession),
+            TransactionalOppgaveDao(transactionalSession),
+            TransactionalUtbetalingDao(transactionalSession),
+            TransactionalNotatDao(transactionalSession),
+            subsumsjonsmelderProvider,
+        )
     }
 
     private fun lagrePeriodehistorikk(fødselsnummer: String) {

@@ -91,14 +91,14 @@ internal class TestMediator(
         )
     private val automatisering =
         Automatisering(
-            risikovurderingDao = RisikovurderingDao(dataSource),
+            risikovurderingRepository = RisikovurderingDao(dataSource),
             stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlingMediator,
-            automatiseringDao = AutomatiseringDao(dataSource),
-            åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource),
-            vergemålDao = VergemålDao(dataSource),
-            personDao = PersonDao(dataSource),
-            vedtakDao = vedtakDao,
-            overstyringDao = OverstyringDao(dataSource),
+            automatiseringRepository = AutomatiseringDao(dataSource),
+            åpneGosysOppgaverRepository = ÅpneGosysOppgaverDao(dataSource),
+            vergemålRepository = VergemålDao(dataSource),
+            personRepository = PersonDao(dataSource),
+            vedtakRepository = vedtakDao,
+            overstyringRepository = OverstyringDao(dataSource),
             stikkprøver =
                 object : Stikkprøver {
                     override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
@@ -115,9 +115,9 @@ internal class TestMediator(
 
                     override fun fullRefusjonEnArbeidsgiver() = false
                 },
-            meldingDao = meldingDao,
-            generasjonDao = generasjonDao,
-            egenAnsattDao = egenAnsattDao,
+            meldingRepository = meldingDao,
+            generasjonRepository = generasjonDao,
+            egenAnsattRepository = egenAnsattDao,
         )
 
     private val kommandofabrikk =

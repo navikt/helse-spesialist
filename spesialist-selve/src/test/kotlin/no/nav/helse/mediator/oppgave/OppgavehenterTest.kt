@@ -113,9 +113,9 @@ class OppgavehenterTest {
 
         override fun finnOppgaveIdUansettStatus(fødselsnummer: String): Long =  throw OperationNotSupportedException()
 
-        override fun finnUtbetalingId(oppgaveId: Long): UUID? =  throw OperationNotSupportedException()
+        override fun finnUtbetalingId(oppgaveId: Long): UUID =  throw OperationNotSupportedException()
 
-        override fun oppgaveDataForAutomatisering(oppgaveId: Long): OppgaveDataForAutomatisering? =  throw OperationNotSupportedException()
+        override fun oppgaveDataForAutomatisering(oppgaveId: Long): OppgaveDataForAutomatisering =  throw OperationNotSupportedException()
 
         override fun finnHendelseId(id: Long): UUID = UUID.randomUUID()
 
@@ -157,9 +157,9 @@ class OppgavehenterTest {
             limit: Int
         ): List<BehandletOppgaveFraDatabaseForVisning> = throw OperationNotSupportedException()
 
-        override fun finnEgenskaper(vedtaksperiodeId: UUID, utbetalingId: UUID): Set<EgenskapForDatabase>? = throw OperationNotSupportedException()
+        override fun finnEgenskaper(vedtaksperiodeId: UUID, utbetalingId: UUID): Set<EgenskapForDatabase> = throw OperationNotSupportedException()
 
-        override fun finnIdForAktivOppgave(vedtaksperiodeId: UUID): Long? = throw OperationNotSupportedException()
+        override fun finnIdForAktivOppgave(vedtaksperiodeId: UUID): Long = throw OperationNotSupportedException()
 
         override fun opprettOppgave(
             id: Long,

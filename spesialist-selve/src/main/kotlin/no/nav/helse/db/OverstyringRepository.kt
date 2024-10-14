@@ -14,4 +14,6 @@ interface OverstyringRepository {
         vedtaksperiodeIder: List<UUID>,
         overstyringHendelseId: UUID,
     )
+
+    fun harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId: UUID): Boolean
 }

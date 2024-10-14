@@ -105,16 +105,12 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource),
         }
     }
 
-    fun harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId: UUID): Boolean =
-        asSQL(
-            """ SELECT 1 FROM overstyringer_for_vedtaksperioder ofv
-            JOIN overstyring o ON o.id = ofv.overstyring_ref
-            WHERE ofv.vedtaksperiode_id = :vedtaksperiode_id
-            AND o.ferdigstilt = false
-            LIMIT 1
-        """,
-            mapOf("vedtaksperiode_id" to vedtaksperiodeId),
-        ).single { row -> row.boolean(1) } ?: false
+    override fun harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId: UUID): Boolean =
+        sessionOf(dataSource).use { session ->
+            session.transaction { transactionalSession ->
+                TransactionalOverstyringDao(transactionalSession).harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId)
+            }
+        }
 
     override fun finnesEksternHendelseId(eksternHendelseId: UUID): Boolean {
         return sessionOf(dataSource).use { session ->

@@ -4,10 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.db.RisikovurderingRepository
+import no.nav.helse.db.TransactionalRisikovurderingDao
 import no.nav.helse.objectMapper
 import org.intellij.lang.annotations.Language
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 internal class RisikovurderingDao(val dataSource: DataSource) : RisikovurderingRepository {
@@ -39,11 +40,9 @@ internal class RisikovurderingDao(val dataSource: DataSource) : RisikovurderingR
 
     override fun hentRisikovurdering(vedtaksperiodeId: UUID) =
         sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val statement = "SELECT kan_godkjennes_automatisk FROM risikovurdering_2021 WHERE vedtaksperiode_id = ? ORDER BY id DESC LIMIT 1"
-            session.run(
-                queryOf(statement, vedtaksperiodeId).map { it.boolean("kan_godkjennes_automatisk") }.asSingle,
-            )?.let(Risikovurdering::restore)
+            session.transaction { transactionalSession ->
+                TransactionalRisikovurderingDao(transactionalSession).hentRisikovurdering(vedtaksperiodeId)
+            }
         }
 
     override fun kreverSupersaksbehandler(vedtaksperiodeId: UUID) =

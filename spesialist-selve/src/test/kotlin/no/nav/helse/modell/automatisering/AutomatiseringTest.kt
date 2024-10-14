@@ -86,18 +86,18 @@ internal class AutomatiseringTest {
 
     private val automatisering =
         Automatisering(
-            risikovurderingDao = risikovurderingDaoMock,
+            risikovurderingRepository = risikovurderingDaoMock,
             stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlingMediatorMock,
-            automatiseringDao = automatiseringDaoMock,
-            åpneGosysOppgaverDao = åpneGosysOppgaverDaoMock,
-            vergemålDao = vergemålDaoMock,
-            personDao = personDaoMock,
-            vedtakDao = vedtakDaoMock,
-            overstyringDao = overstyringDaoMock,
+            automatiseringRepository = automatiseringDaoMock,
+            åpneGosysOppgaverRepository = åpneGosysOppgaverDaoMock,
+            vergemålRepository = vergemålDaoMock,
+            personRepository = personDaoMock,
+            vedtakRepository = vedtakDaoMock,
+            overstyringRepository = overstyringDaoMock,
             stikkprøver = stikkprøver,
-            meldingDao = meldingDaoMock,
-            generasjonDao = generasjonDaoMock,
-            egenAnsattDao = egenAnsattDao,
+            meldingRepository = meldingDaoMock,
+            generasjonRepository = generasjonDaoMock,
+            egenAnsattRepository = egenAnsattDao,
         )
 
     @BeforeEach

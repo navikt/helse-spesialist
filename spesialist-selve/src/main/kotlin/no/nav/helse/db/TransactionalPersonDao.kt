@@ -101,7 +101,18 @@ internal class TransactionalPersonDao(
         throw OperationNotSupportedException()
     }
 
-    override fun finnEnhetId(fødselsnummer: String): String = throw OperationNotSupportedException()
+    override fun finnEnhetId(fødselsnummer: String): String {
+        @Language("PostgreSQL")
+        val statement = "SELECT enhet_ref FROM person where fodselsnummer = ?;"
+        return requireNotNull(
+            transactionalSession.run(
+                queryOf(statement, fødselsnummer.toLong())
+                    .map {
+                        it.int("enhet_ref").toEnhetnummer()
+                    }.asSingle,
+            ),
+        )
+    }
 
     override fun finnAdressebeskyttelse(fødselsnummer: String): Adressebeskyttelse? {
         @Language("PostgreSQL")
@@ -339,3 +350,5 @@ internal class TransactionalPersonDao(
         run(queryOf(query, mapOf("id" to id, "fodselsnummer" to fødselsnummer.toLong())).asUpdate)
     }
 }
+
+private fun Int.toEnhetnummer() = if (this < 1000) "0$this" else this.toString()

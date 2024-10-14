@@ -3,6 +3,7 @@ package no.nav.helse.modell
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.db.TransactionalVedtakDao
 import no.nav.helse.db.VedtakRepository
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -84,12 +85,9 @@ internal class VedtakDao(private val dataSource: DataSource) : VedtakRepository 
         hendelseId: UUID,
     ) {
         sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val statement = """
-            INSERT INTO vedtaksperiode_hendelse(vedtaksperiode_id, hendelse_ref) VALUES (?, ?)
-            ON CONFLICT DO NOTHING
-        """
-            session.run(queryOf(statement, vedtaksperiodeId, hendelseId).asUpdate)
+            session.transaction { transaction ->
+                TransactionalVedtakDao(transaction).opprettKobling(vedtaksperiodeId, hendelseId)
+            }
         }
     }
 
@@ -97,10 +95,10 @@ internal class VedtakDao(private val dataSource: DataSource) : VedtakRepository 
         vedtaksperiodeId: UUID,
         hendelseId: UUID,
     ) {
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            @Language("PostgreSQL")
-            val statement = "DELETE FROM vedtaksperiode_hendelse WHERE hendelse_ref = ? AND vedtaksperiode_id = ?"
-            session.run(queryOf(statement, hendelseId, vedtaksperiodeId).asUpdate)
+        sessionOf(dataSource).use { session ->
+            session.transaction { transaction ->
+                TransactionalVedtakDao(transaction).fjernKobling(vedtaksperiodeId, hendelseId)
+            }
         }
     }
 
@@ -112,10 +110,10 @@ internal class VedtakDao(private val dataSource: DataSource) : VedtakRepository 
         }
 
     override fun erSpesialsak(vedtaksperiodeId: UUID) =
-        sessionOf(dataSource).use {
-            @Language("PostgreSQL")
-            val query = """SELECT true FROM spesialsak WHERE vedtaksperiode_id = :vedtaksperiode_id AND ferdigbehandlet = false"""
-            it.run(queryOf(query, mapOf("vedtaksperiode_id" to vedtaksperiodeId)).map { it.boolean(1) }.asSingle) ?: false
+        sessionOf(dataSource).use { session ->
+            session.transaction { transaction ->
+                TransactionalVedtakDao(transaction).erSpesialsak(vedtaksperiodeId)
+            }
         }
 
     internal fun spesialsakFerdigbehandlet(vedtaksperiodeId: UUID) =
@@ -167,14 +165,9 @@ internal class VedtakDao(private val dataSource: DataSource) : VedtakRepository 
 
     override fun finnInntektskilde(vedtaksperiodeId: UUID): Inntektskilde? =
         sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val statement =
-                "SELECT inntektskilde FROM saksbehandleroppgavetype WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)"
-            session.run(
-                queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).map {
-                    enumValueOf<Inntektskilde>(it.string("inntektskilde"))
-                }.asSingle,
-            )
+            session.transaction { transactionalSession ->
+                TransactionalVedtakDao(transactionalSession).finnInntektskilde(vedtaksperiodeId)
+            }
         }
 
     override fun erAutomatiskGodkjent(utbetalingId: UUID) =
@@ -190,14 +183,10 @@ internal class VedtakDao(private val dataSource: DataSource) : VedtakRepository 
             session.run(queryOf(query, utbetalingId).map { it.boolean("automatisert") }.asSingle)
         } ?: false
 
-    internal fun finnOrgnummer(vedtaksperiodeId: UUID) =
+    override fun finnOrgnummer(vedtaksperiodeId: UUID) =
         sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = """
-            SELECT orgnummer FROM arbeidsgiver a
-            INNER JOIN vedtak v ON a.id = v.arbeidsgiver_ref
-            WHERE v.vedtaksperiode_id = :vedtaksperiodeId
-        """
-            session.run(queryOf(query, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).map { it.long("orgnummer").toString() }.asSingle)
+            session.transaction { transaction ->
+                TransactionalVedtakDao(transaction).finnOrgnummer(vedtaksperiodeId)
+            }
         }
 }

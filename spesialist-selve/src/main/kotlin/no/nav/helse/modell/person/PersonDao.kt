@@ -267,19 +267,10 @@ internal class PersonDao(
 
     override fun finnEnhetId(fødselsnummer: String) =
         sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val statement = "SELECT enhet_ref FROM person where fodselsnummer = ?;"
-            requireNotNull(
-                session.run(
-                    queryOf(statement, fødselsnummer.toLong())
-                        .map {
-                            it.int("enhet_ref").toEnhetnummer()
-                        }.asSingle,
-                ),
-            )
+            session.transaction { transaction ->
+                TransactionalPersonDao(transaction).finnEnhetId(fødselsnummer)
+            }
         }
 }
 
 internal fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
-
-private fun Int.toEnhetnummer() = if (this < 1000) "0$this" else this.toString()

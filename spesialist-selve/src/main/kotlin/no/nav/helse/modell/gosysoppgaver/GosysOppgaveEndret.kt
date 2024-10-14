@@ -1,7 +1,9 @@
 package no.nav.helse.modell.gosysoppgaver
 
 import com.fasterxml.jackson.databind.JsonNode
+import kotliquery.TransactionalSession
 import no.nav.helse.db.OppgaveRepository
+import no.nav.helse.db.TransactionalOppgaveDao
 import no.nav.helse.db.ÅpneGosysOppgaverRepository
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
@@ -20,6 +22,7 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.util.UUID
+import javax.naming.OperationNotSupportedException
 
 internal class GosysOppgaveEndret private constructor(
     override val id: UUID,
@@ -41,10 +44,22 @@ internal class GosysOppgaveEndret private constructor(
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
+    ) = throw OperationNotSupportedException()
+
+    override fun skalKjøresTransaksjonelt() = true
+
+    override fun transaksjonellBehandle(
+        person: Person,
+        kommandostarter: Kommandostarter,
+        transactionalSession: TransactionalSession,
     ) {
         kommandostarter {
-            val oppgaveDataForAutomatisering = finnOppgavedata(fødselsnummer) ?: return@kommandostarter null
-            gosysOppgaveEndret(person, oppgaveDataForAutomatisering)
+            val oppgaveDataForAutomatisering =
+                finnOppgavedata(
+                    fødselsnummer,
+                    TransactionalOppgaveDao(transactionalSession),
+                ) ?: return@kommandostarter null
+            gosysOppgaveEndret(person, oppgaveDataForAutomatisering, transactionalSession)
         }
     }
 
