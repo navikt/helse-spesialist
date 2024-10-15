@@ -11,6 +11,7 @@ import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.db.TransactionalCommandContextDao
+import no.nav.helse.db.TransactionalEgenAnsattDao
 import no.nav.helse.db.TransactionalInntektskilderDao
 import no.nav.helse.db.TransactionalMeldingDao
 import no.nav.helse.db.TransactionalOppgaveDao
@@ -280,12 +281,15 @@ internal class Kommandofabrikk(
             opptegnelseRepository = TransactionalOpptegnelseDao(transactionalSession),
         )
 
-    internal fun klargjørTilgangsrelaterteData(hendelse: Personmelding): KlargjørTilgangsrelaterteDataCommand =
+    internal fun klargjørTilgangsrelaterteData(
+        hendelse: Personmelding,
+        transactionalSession: TransactionalSession,
+    ): KlargjørTilgangsrelaterteDataCommand =
         KlargjørTilgangsrelaterteDataCommand(
             fødselsnummer = hendelse.fødselsnummer(),
-            personRepository = personDao,
-            egenAnsattRepository = egenAnsattDao,
-            opptegnelseRepository = opptegnelseDao,
+            personRepository = TransactionalPersonDao(transactionalSession),
+            egenAnsattRepository = TransactionalEgenAnsattDao(transactionalSession),
+            opptegnelseRepository = TransactionalOpptegnelseDao(transactionalSession),
         )
 
     internal fun overstyringIgangsatt(

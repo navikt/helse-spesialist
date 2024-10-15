@@ -141,32 +141,18 @@ internal class PersonDao(
 
     override fun finnEnhetSistOppdatert(fødselsnummer: String) =
         sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = "SELECT enhet_ref_oppdatert FROM person WHERE fodselsnummer=?;"
-            session.run(
-                queryOf(query, fødselsnummer.toLong())
-                    .map { row ->
-                        row.localDateOrNull("enhet_ref_oppdatert")
-                    }.asSingle,
-            )
+            session.transaction { transactionalSession ->
+                TransactionalPersonDao(transactionalSession).finnEnhetSistOppdatert(fødselsnummer)
+            }
         }
 
     override fun oppdaterEnhet(
         fødselsnummer: String,
         enhetNr: Int,
     ) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val query =
-            "UPDATE person SET enhet_ref=:enhetNr, enhet_ref_oppdatert=now() WHERE fodselsnummer=:fodselsnummer;"
-        session.run(
-            queryOf(
-                query,
-                mapOf(
-                    "enhetNr" to enhetNr,
-                    "fodselsnummer" to fødselsnummer.toLong(),
-                ),
-            ).asUpdate,
-        )
+        session.transaction { transactionalSession ->
+            TransactionalPersonDao(transactionalSession).oppdaterEnhet(fødselsnummer, enhetNr)
+        }
     }
 
     override fun finnITUtbetalingsperioderSistOppdatert(fødselsnummer: String) =

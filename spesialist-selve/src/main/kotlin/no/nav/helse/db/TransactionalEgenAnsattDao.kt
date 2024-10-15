@@ -4,7 +4,6 @@ import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import org.intellij.lang.annotations.Language
 import java.time.LocalDateTime
-import javax.naming.OperationNotSupportedException
 
 class TransactionalEgenAnsattDao(private val transactionalSession: TransactionalSession) : EgenAnsattRepository {
     override fun erEgenAnsatt(fødselsnummer: String): Boolean? {
@@ -31,6 +30,26 @@ class TransactionalEgenAnsattDao(private val transactionalSession: Transactional
         erEgenAnsatt: Boolean,
         opprettet: LocalDateTime,
     ) {
-        throw OperationNotSupportedException()
+        @Language("PostgreSQL")
+        val statement =
+            """
+            INSERT INTO egen_ansatt (person_ref, er_egen_ansatt, opprettet)
+            VALUES (
+                (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer),
+                :er_egen_ansatt,
+                :opprettet
+            )
+            ON CONFLICT (person_ref) DO UPDATE SET er_egen_ansatt = :er_egen_ansatt, opprettet = :opprettet
+            """.trimIndent()
+        transactionalSession.run(
+            queryOf(
+                statement,
+                mapOf(
+                    "fodselsnummer" to fødselsnummer.toLong(),
+                    "er_egen_ansatt" to erEgenAnsatt,
+                    "opprettet" to opprettet,
+                ),
+            ).asExecute,
+        )
     }
 }

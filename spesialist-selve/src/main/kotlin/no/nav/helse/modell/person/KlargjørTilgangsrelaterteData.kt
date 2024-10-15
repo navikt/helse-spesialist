@@ -1,6 +1,7 @@
 package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
+import kotliquery.TransactionalSession
 import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.db.PersonRepository
@@ -35,12 +36,20 @@ internal class KlargjørTilgangsrelaterteData private constructor(
         json = jsonNode.toString(),
     )
 
+    override fun skalKjøresTransaksjonelt(): Boolean = true
+
+    override fun transaksjonellBehandle(
+        person: Person,
+        kommandostarter: Kommandostarter,
+        transactionalSession: TransactionalSession,
+    ) {
+        kommandostarter { klargjørTilgangsrelaterteData(this@KlargjørTilgangsrelaterteData, transactionalSession) }
+    }
+
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
-    ) {
-        kommandostarter { klargjørTilgangsrelaterteData(this@KlargjørTilgangsrelaterteData) }
-    }
+    ) = throw UnsupportedOperationException()
 
     override fun fødselsnummer(): String = fødselsnummer
 

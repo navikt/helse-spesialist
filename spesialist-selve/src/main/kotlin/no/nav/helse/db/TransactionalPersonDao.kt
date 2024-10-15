@@ -31,12 +31,34 @@ internal class TransactionalPersonDao(
         transactionalSession.run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer)).asUpdate)
     }
 
-    override fun finnEnhetSistOppdatert(fødselsnummer: String): LocalDate = throw OperationNotSupportedException()
+    override fun finnEnhetSistOppdatert(fødselsnummer: String): LocalDate? {
+        @Language("PostgreSQL")
+        val query = "SELECT enhet_ref_oppdatert FROM person WHERE fodselsnummer=?;"
+        return transactionalSession.run(
+            queryOf(query, fødselsnummer.toLong())
+                .map { row ->
+                    row.localDateOrNull("enhet_ref_oppdatert")
+                }.asSingle,
+        )
+    }
 
     override fun oppdaterEnhet(
         fødselsnummer: String,
         enhetNr: Int,
-    ): Int = throw OperationNotSupportedException()
+    ): Int {
+        @Language("PostgreSQL")
+        val query =
+            "UPDATE person SET enhet_ref=:enhetNr, enhet_ref_oppdatert=now() WHERE fodselsnummer=:fodselsnummer;"
+        return transactionalSession.run(
+            queryOf(
+                query,
+                mapOf(
+                    "enhetNr" to enhetNr,
+                    "fodselsnummer" to fødselsnummer.toLong(),
+                ),
+            ).asUpdate,
+        )
+    }
 
     override fun finnITUtbetalingsperioderSistOppdatert(fødselsnummer: String): LocalDate = throw OperationNotSupportedException()
 
