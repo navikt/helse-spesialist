@@ -255,6 +255,7 @@ internal class SpesialistApp(
 
             routing {
                 webSocketsApi()
+                debugMinneApi()
             }
         }
     }
