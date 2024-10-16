@@ -12,7 +12,6 @@ import no.nav.helse.modell.kommando.OpprettKoblingTilUtbetalingCommand
 import no.nav.helse.modell.person.Person
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.util.UUID
-import javax.naming.OperationNotSupportedException
 
 internal class VedtaksperiodeNyUtbetaling private constructor(
     override val id: UUID,
@@ -46,7 +45,7 @@ internal class VedtaksperiodeNyUtbetaling private constructor(
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
-    ): Unit = throw OperationNotSupportedException()
+    ): Unit = throw UnsupportedOperationException()
 
     override fun transaksjonellBehandle(
         person: Person,

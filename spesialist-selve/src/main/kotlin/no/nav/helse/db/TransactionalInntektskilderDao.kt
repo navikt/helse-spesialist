@@ -3,7 +3,6 @@ package no.nav.helse.db
 import kotliquery.Session
 import no.nav.helse.modell.InntektskildeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
-import javax.naming.OperationNotSupportedException
 
 internal class TransactionalInntektskilderDao(
     session: Session,
@@ -30,5 +29,5 @@ internal class TransactionalInntektskilderDao(
     override fun finnInntektskilder(
         fødselsnummer: String,
         andreOrganisasjonsnumre: List<String>,
-    ): List<InntektskildeDto> = throw OperationNotSupportedException()
+    ): List<InntektskildeDto> = throw UnsupportedOperationException()
 }

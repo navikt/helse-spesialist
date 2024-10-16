@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
-import javax.naming.OperationNotSupportedException
 
 class OppgavehenterTest {
 
@@ -111,31 +110,31 @@ class OppgavehenterTest {
             )
         }
 
-        override fun finnOppgaveIdUansettStatus(fødselsnummer: String): Long =  throw OperationNotSupportedException()
+        override fun finnOppgaveIdUansettStatus(fødselsnummer: String): Long =  throw UnsupportedOperationException()
 
-        override fun finnUtbetalingId(oppgaveId: Long): UUID =  throw OperationNotSupportedException()
+        override fun finnUtbetalingId(oppgaveId: Long): UUID =  throw UnsupportedOperationException()
 
-        override fun oppgaveDataForAutomatisering(oppgaveId: Long): OppgaveDataForAutomatisering =  throw OperationNotSupportedException()
+        override fun oppgaveDataForAutomatisering(oppgaveId: Long): OppgaveDataForAutomatisering =  throw UnsupportedOperationException()
 
         override fun finnHendelseId(id: Long): UUID = UUID.randomUUID()
 
-        override fun finnOppgaveId(fødselsnummer: String): Long = throw OperationNotSupportedException()
+        override fun finnOppgaveId(fødselsnummer: String): Long = throw UnsupportedOperationException()
 
-        override fun finnVedtaksperiodeId(fødselsnummer: String): UUID = throw OperationNotSupportedException()
+        override fun finnVedtaksperiodeId(fødselsnummer: String): UUID = throw UnsupportedOperationException()
 
-        override fun harGyldigOppgave(utbetalingId: UUID): Boolean = throw OperationNotSupportedException()
+        override fun harGyldigOppgave(utbetalingId: UUID): Boolean = throw UnsupportedOperationException()
 
         override fun invaliderOppgaveFor(fødselsnummer: String) {
-            throw OperationNotSupportedException()
+            throw UnsupportedOperationException()
         }
 
-        override fun finnOppgaveId(utbetalingId: UUID): Long = throw OperationNotSupportedException()
+        override fun finnOppgaveId(utbetalingId: UUID): Long = throw UnsupportedOperationException()
 
-        override fun reserverNesteId(): Long = throw OperationNotSupportedException()
+        override fun reserverNesteId(): Long = throw UnsupportedOperationException()
 
-        override fun venterPåSaksbehandler(oppgaveId: Long): Boolean = throw OperationNotSupportedException()
+        override fun venterPåSaksbehandler(oppgaveId: Long): Boolean = throw UnsupportedOperationException()
 
-        override fun finnSpleisBehandlingId(oppgaveId: Long): UUID = throw OperationNotSupportedException()
+        override fun finnSpleisBehandlingId(oppgaveId: Long): UUID = throw UnsupportedOperationException()
 
         override fun finnOppgaverForVisning(
             ekskluderEgenskaper: List<String>,
@@ -147,19 +146,19 @@ class OppgavehenterTest {
             egneSaker: Boolean,
             tildelt: Boolean?,
             grupperteFiltrerteEgenskaper: Map<Egenskap.Kategori, List<EgenskapForDatabase>>?
-        ): List<OppgaveFraDatabaseForVisning> = throw OperationNotSupportedException()
+        ): List<OppgaveFraDatabaseForVisning> = throw UnsupportedOperationException()
 
-        override fun finnAntallOppgaver(saksbehandlerOid: UUID): AntallOppgaverFraDatabase = throw OperationNotSupportedException()
+        override fun finnAntallOppgaver(saksbehandlerOid: UUID): AntallOppgaverFraDatabase = throw UnsupportedOperationException()
 
         override fun finnBehandledeOppgaver(
             behandletAvOid: UUID,
             offset: Int,
             limit: Int
-        ): List<BehandletOppgaveFraDatabaseForVisning> = throw OperationNotSupportedException()
+        ): List<BehandletOppgaveFraDatabaseForVisning> = throw UnsupportedOperationException()
 
-        override fun finnEgenskaper(vedtaksperiodeId: UUID, utbetalingId: UUID): Set<EgenskapForDatabase> = throw OperationNotSupportedException()
+        override fun finnEgenskaper(vedtaksperiodeId: UUID, utbetalingId: UUID): Set<EgenskapForDatabase> = throw UnsupportedOperationException()
 
-        override fun finnIdForAktivOppgave(vedtaksperiodeId: UUID): Long = throw OperationNotSupportedException()
+        override fun finnIdForAktivOppgave(vedtaksperiodeId: UUID): Long = throw UnsupportedOperationException()
 
         override fun opprettOppgave(
             id: Long,
@@ -168,9 +167,9 @@ class OppgavehenterTest {
             vedtaksperiodeId: UUID,
             utbetalingId: UUID,
             kanAvvises: Boolean
-        ): Long = throw OperationNotSupportedException()
+        ): Long = throw UnsupportedOperationException()
 
-        override fun finnFødselsnummer(oppgaveId: Long): String = throw OperationNotSupportedException()
+        override fun finnFødselsnummer(oppgaveId: Long): String = throw UnsupportedOperationException()
 
         override fun updateOppgave(
             oppgaveId: Long,
@@ -178,9 +177,9 @@ class OppgavehenterTest {
             ferdigstiltAv: String?,
             oid: UUID?,
             egenskaper: List<EgenskapForDatabase>
-        ): Int = throw OperationNotSupportedException()
+        ): Int = throw UnsupportedOperationException()
 
-        override fun harFerdigstiltOppgave(vedtaksperiodeId: UUID): Boolean = throw OperationNotSupportedException()
+        override fun harFerdigstiltOppgave(vedtaksperiodeId: UUID): Boolean = throw UnsupportedOperationException()
     }
 
     private fun totrinnsvurderingRepository(

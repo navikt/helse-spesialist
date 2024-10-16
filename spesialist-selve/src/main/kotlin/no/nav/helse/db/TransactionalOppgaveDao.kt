@@ -10,7 +10,6 @@ import no.nav.helse.spesialist.api.graphql.schema.Mottaker
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import java.util.UUID
-import javax.naming.OperationNotSupportedException
 
 class TransactionalOppgaveDao(private val session: Session) : OppgaveRepository {
     override fun finnUtbetalingId(oppgaveId: Long): UUID? {
@@ -123,9 +122,9 @@ class TransactionalOppgaveDao(private val session: Session) : OppgaveRepository 
         )
     }
 
-    override fun finnVedtaksperiodeId(fødselsnummer: String): UUID = throw OperationNotSupportedException()
+    override fun finnVedtaksperiodeId(fødselsnummer: String): UUID = throw UnsupportedOperationException()
 
-    override fun harGyldigOppgave(utbetalingId: UUID): Boolean = throw OperationNotSupportedException()
+    override fun harGyldigOppgave(utbetalingId: UUID): Boolean = throw UnsupportedOperationException()
 
     override fun finnHendelseId(id: Long): UUID {
         @Language("PostgreSQL")

@@ -6,14 +6,13 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import org.intellij.lang.annotations.Language
 import java.util.UUID
-import javax.naming.OperationNotSupportedException
 
 class TransactionalVedtakDao(private val session: Session) : VedtakRepository {
     override fun leggTilVedtaksperiodetype(
         vedtaksperiodeId: UUID,
         type: Periodetype,
         inntektskilde: Inntektskilde,
-    ) = throw OperationNotSupportedException()
+    ) = throw UnsupportedOperationException()
 
     override fun erSpesialsak(vedtaksperiodeId: UUID): Boolean {
         @Language("PostgreSQL")
@@ -25,7 +24,7 @@ class TransactionalVedtakDao(private val session: Session) : VedtakRepository {
         ) ?: false
     }
 
-    override fun erAutomatiskGodkjent(utbetalingId: UUID): Boolean = throw OperationNotSupportedException()
+    override fun erAutomatiskGodkjent(utbetalingId: UUID): Boolean = throw UnsupportedOperationException()
 
     override fun opprettKobling(
         vedtaksperiodeId: UUID,

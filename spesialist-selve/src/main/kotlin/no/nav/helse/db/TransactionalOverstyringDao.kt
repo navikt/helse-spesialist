@@ -5,17 +5,16 @@ import kotliquery.queryOf
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.intellij.lang.annotations.Language
 import java.util.UUID
-import javax.naming.OperationNotSupportedException
 
 class TransactionalOverstyringDao(
     private val session: Session,
 ) : OverstyringRepository {
     override fun finnOverstyringerMedTypeForVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<OverstyringType> {
-        throw OperationNotSupportedException()
+        throw UnsupportedOperationException()
     }
 
     override fun finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId: UUID): List<OverstyringType> {
-        throw OperationNotSupportedException()
+        throw UnsupportedOperationException()
     }
 
     override fun finnesEksternHendelseId(eksternHendelseId: UUID): Boolean {

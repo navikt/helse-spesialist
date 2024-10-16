@@ -16,7 +16,6 @@ import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.abonnement.PersonOppdatertPayload
 import java.time.LocalDate
 import java.util.UUID
-import javax.naming.OperationNotSupportedException
 
 internal class OppdaterPersondata private constructor(
     override val id: UUID,
@@ -39,7 +38,7 @@ internal class OppdaterPersondata private constructor(
         person: Person,
         kommandostarter: Kommandostarter,
     ) {
-        throw OperationNotSupportedException()
+        throw UnsupportedOperationException()
     }
 
     override fun skalKjøresTransaksjonelt() = true

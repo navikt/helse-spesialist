@@ -7,7 +7,6 @@ import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
 import org.intellij.lang.annotations.Language
 import java.util.UUID
-import javax.naming.OperationNotSupportedException
 
 class TransactionalOpptegnelseDao(private val session: Session) : OpptegnelseRepository {
     override fun opprettOpptegnelse(
@@ -35,5 +34,5 @@ class TransactionalOpptegnelseDao(private val session: Session) : OpptegnelseRep
         )
     }
 
-    override fun finnOpptegnelser(saksbehandlerIdent: UUID): List<Opptegnelse> = throw OperationNotSupportedException()
+    override fun finnOpptegnelser(saksbehandlerIdent: UUID): List<Opptegnelse> = throw UnsupportedOperationException()
 }

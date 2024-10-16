@@ -9,7 +9,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import org.intellij.lang.annotations.Language
 import java.time.LocalDateTime
 import java.util.UUID
-import javax.naming.OperationNotSupportedException
 
 class TransactionalUtbetalingDao(private val session: Session) : UtbetalingRepository {
     override fun sisteUtbetalingIdFor(fødselsnummer: String): UUID? {
@@ -29,7 +28,7 @@ class TransactionalUtbetalingDao(private val session: Session) : UtbetalingRepos
         )
     }
 
-    override fun finnUtbetalingIdRef(utbetalingId: UUID): Long = throw OperationNotSupportedException()
+    override fun finnUtbetalingIdRef(utbetalingId: UUID): Long = throw UnsupportedOperationException()
 
     override fun hentUtbetaling(utbetalingId: UUID): Utbetaling =
         checkNotNull(utbetalingFor(utbetalingId)) { "Finner ikke utbetaling, utbetalingId=$utbetalingId" }
@@ -56,13 +55,13 @@ class TransactionalUtbetalingDao(private val session: Session) : UtbetalingRepos
         opprettet: LocalDateTime,
         json: String,
     ) {
-        throw OperationNotSupportedException()
+        throw UnsupportedOperationException()
     }
 
     override fun nyttOppdrag(
         fagsystemId: String,
         mottaker: String,
-    ): Long = throw OperationNotSupportedException()
+    ): Long = throw UnsupportedOperationException()
 
     override fun opprettUtbetalingId(
         utbetalingId: UUID,
@@ -74,7 +73,7 @@ class TransactionalUtbetalingDao(private val session: Session) : UtbetalingRepos
         personFagsystemIdRef: Long,
         arbeidsgiverbeløp: Int,
         personbeløp: Int,
-    ): Long = throw OperationNotSupportedException()
+    ): Long = throw UnsupportedOperationException()
 
     override fun opprettKobling(
         vedtaksperiodeId: UUID,
@@ -98,8 +97,8 @@ class TransactionalUtbetalingDao(private val session: Session) : UtbetalingRepos
     }
 
     override fun utbetalingerForVedtaksperiode(vedtaksperiodeId: UUID): List<UtbetalingDao.TidligereUtbetalingerForVedtaksperiodeDto> {
-        throw OperationNotSupportedException()
+        throw UnsupportedOperationException()
     }
 
-    override fun erUtbetalingForkastet(utbetalingId: UUID): Boolean = throw OperationNotSupportedException()
+    override fun erUtbetalingForkastet(utbetalingId: UUID): Boolean = throw UnsupportedOperationException()
 }

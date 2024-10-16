@@ -15,16 +15,15 @@ import no.nav.helse.spesialist.typer.Kjønn
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import java.time.LocalDateTime
-import javax.naming.OperationNotSupportedException
 import javax.sql.DataSource
 
 internal class PersonDao(
     private val dataSource: DataSource,
 ) : PersonRepository {
-    override fun finnMinimalPerson(fødselsnummer: String): MinimalPersonDto = throw OperationNotSupportedException()
+    override fun finnMinimalPerson(fødselsnummer: String): MinimalPersonDto = throw UnsupportedOperationException()
 
     override fun lagreMinimalPerson(minimalPerson: MinimalPersonDto) {
-        throw OperationNotSupportedException()
+        throw UnsupportedOperationException()
     }
 
     override fun personKlargjort(fødselsnummer: String) {

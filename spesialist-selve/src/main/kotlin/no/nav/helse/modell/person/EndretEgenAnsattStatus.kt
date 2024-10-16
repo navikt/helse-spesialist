@@ -14,7 +14,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import java.time.LocalDateTime
 import java.util.UUID
-import javax.naming.OperationNotSupportedException
 
 internal class EndretEgenAnsattStatus private constructor(
     override val id: UUID,
@@ -52,7 +51,7 @@ internal class EndretEgenAnsattStatus private constructor(
         person: Person,
         kommandostarter: Kommandostarter,
     ) {
-        throw OperationNotSupportedException()
+        throw UnsupportedOperationException()
     }
 
     override fun fødselsnummer(): String = fødselsnummer

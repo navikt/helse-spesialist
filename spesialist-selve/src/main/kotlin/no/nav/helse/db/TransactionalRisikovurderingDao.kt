@@ -7,7 +7,6 @@ import no.nav.helse.modell.risiko.Risikovurdering
 import org.intellij.lang.annotations.Language
 import java.time.LocalDateTime
 import java.util.UUID
-import javax.naming.OperationNotSupportedException
 
 class TransactionalRisikovurderingDao(private val session: Session) : RisikovurderingRepository {
     override fun hentRisikovurdering(vedtaksperiodeId: UUID): Risikovurdering? {
@@ -23,7 +22,7 @@ class TransactionalRisikovurderingDao(private val session: Session) : Risikovurd
         )?.let(Risikovurdering::restore)
     }
 
-    override fun kreverSupersaksbehandler(vedtaksperiodeId: UUID): Boolean = throw OperationNotSupportedException()
+    override fun kreverSupersaksbehandler(vedtaksperiodeId: UUID): Boolean = throw UnsupportedOperationException()
 
     override fun lagre(
         vedtaksperiodeId: UUID,
@@ -32,6 +31,6 @@ class TransactionalRisikovurderingDao(private val session: Session) : Risikovurd
         data: JsonNode,
         opprettet: LocalDateTime,
     ) {
-        throw OperationNotSupportedException()
+        throw UnsupportedOperationException()
     }
 }

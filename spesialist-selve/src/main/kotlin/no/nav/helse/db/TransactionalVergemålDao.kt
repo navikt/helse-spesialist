@@ -4,7 +4,6 @@ import kotliquery.Session
 import kotliquery.queryOf
 import no.nav.helse.modell.vergemal.VergemålOgFremtidsfullmakt
 import org.intellij.lang.annotations.Language
-import javax.naming.OperationNotSupportedException
 
 class TransactionalVergemålDao(private val session: Session) : VergemålRepository {
     override fun lagre(
@@ -12,7 +11,7 @@ class TransactionalVergemålDao(private val session: Session) : VergemålReposit
         vergemålOgFremtidsfullmakt: VergemålOgFremtidsfullmakt,
         fullmakt: Boolean,
     ) {
-        throw OperationNotSupportedException()
+        throw UnsupportedOperationException()
     }
 
     override fun harVergemål(fødselsnummer: String): Boolean? {

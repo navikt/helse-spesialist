@@ -12,7 +12,6 @@ import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.typer.Kjønn
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
-import javax.naming.OperationNotSupportedException
 
 internal class TransactionalPersonDao(
     private val session: Session,
@@ -60,7 +59,7 @@ internal class TransactionalPersonDao(
         )
     }
 
-    override fun finnITUtbetalingsperioderSistOppdatert(fødselsnummer: String): LocalDate = throw OperationNotSupportedException()
+    override fun finnITUtbetalingsperioderSistOppdatert(fødselsnummer: String): LocalDate = throw UnsupportedOperationException()
 
     override fun upsertInfotrygdutbetalinger(
         fødselsnummer: String,
@@ -112,7 +111,7 @@ internal class TransactionalPersonDao(
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate,
     ): List<Inntekter>? {
-        throw OperationNotSupportedException()
+        throw UnsupportedOperationException()
     }
 
     override fun lagreInntekter(
@@ -120,7 +119,7 @@ internal class TransactionalPersonDao(
         skjæringstidspunkt: LocalDate,
         inntekter: List<Inntekter>,
     ): Long? {
-        throw OperationNotSupportedException()
+        throw UnsupportedOperationException()
     }
 
     override fun finnEnhetId(fødselsnummer: String): String {
@@ -149,9 +148,9 @@ internal class TransactionalPersonDao(
         )
     }
 
-    override fun finnPersonMedFødselsnummer(fødselsnummer: String): Long = throw OperationNotSupportedException()
+    override fun finnPersonMedFødselsnummer(fødselsnummer: String): Long = throw UnsupportedOperationException()
 
-    override fun finnPersoninfoRef(fødselsnummer: String): Long = throw OperationNotSupportedException()
+    override fun finnPersoninfoRef(fødselsnummer: String): Long = throw UnsupportedOperationException()
 
     override fun finnPersoninfoSistOppdatert(fødselsnummer: String): LocalDate? {
         @Language("PostgreSQL")

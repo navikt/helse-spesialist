@@ -6,14 +6,13 @@ import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import org.intellij.lang.annotations.Language
 import java.util.UUID
-import javax.naming.OperationNotSupportedException
 
 class TransactionalPeriodehistorikkDao(private val session: Session) : PeriodehistorikkRepository {
     override fun lagre(
         historikkinnslag: HistorikkinnslagDto,
         oppgaveId: Long,
     ) {
-        throw OperationNotSupportedException()
+        throw UnsupportedOperationException()
     }
 
     override fun lagre(

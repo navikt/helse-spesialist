@@ -6,7 +6,6 @@ import no.nav.helse.modell.InntektskildeDto
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.NyInntektskildeDto
-import javax.naming.OperationNotSupportedException
 import javax.sql.DataSource
 
 internal class InntektskilderDao(
@@ -21,7 +20,7 @@ internal class InntektskilderDao(
         }
     }
 
-    override fun inntektskildeEksisterer(orgnummer: String): Boolean = throw OperationNotSupportedException()
+    override fun inntektskildeEksisterer(orgnummer: String): Boolean = throw UnsupportedOperationException()
 
     override fun finnInntektskilder(
         fødselsnummer: String,

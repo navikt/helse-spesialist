@@ -20,7 +20,6 @@ import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import java.util.UUID
-import javax.naming.OperationNotSupportedException
 
 internal class TilbakedateringBehandlet private constructor(
     override val id: UUID,
@@ -65,7 +64,7 @@ internal class TilbakedateringBehandlet private constructor(
         person: Person,
         kommandostarter: Kommandostarter,
     ) {
-        throw OperationNotSupportedException()
+        throw UnsupportedOperationException()
     }
 
     override fun fødselsnummer() = fødselsnummer

@@ -16,7 +16,6 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.util.UUID
-import javax.naming.OperationNotSupportedException
 
 internal class AdressebeskyttelseEndret private constructor(
     override val id: UUID,
@@ -43,7 +42,7 @@ internal class AdressebeskyttelseEndret private constructor(
         person: Person,
         kommandostarter: Kommandostarter,
     ) {
-        throw OperationNotSupportedException()
+        throw UnsupportedOperationException()
     }
 
     override fun skalKjøresTransaksjonelt(): Boolean = true

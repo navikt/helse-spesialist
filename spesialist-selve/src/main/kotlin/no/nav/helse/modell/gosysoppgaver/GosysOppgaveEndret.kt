@@ -22,7 +22,6 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.util.UUID
-import javax.naming.OperationNotSupportedException
 
 internal class GosysOppgaveEndret private constructor(
     override val id: UUID,
@@ -44,7 +43,7 @@ internal class GosysOppgaveEndret private constructor(
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
-    ) = throw OperationNotSupportedException()
+    ) = throw UnsupportedOperationException()
 
     override fun skalKjøresTransaksjonelt() = true
 

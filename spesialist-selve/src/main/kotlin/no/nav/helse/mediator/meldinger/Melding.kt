@@ -4,7 +4,6 @@ import kotliquery.TransactionalSession
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.modell.person.Person
 import java.util.UUID
-import javax.naming.OperationNotSupportedException
 
 internal interface Melding {
     val id: UUID
@@ -24,7 +23,7 @@ internal interface Personmelding : Melding {
         person: Person,
         kommandostarter: Kommandostarter,
         transactionalSession: TransactionalSession,
-    ): Unit = throw OperationNotSupportedException()
+    ): Unit = throw UnsupportedOperationException()
 
     fun fødselsnummer(): String
 }

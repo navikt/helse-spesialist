@@ -10,7 +10,6 @@ import no.nav.helse.db.TransactionalCommandContextDao.CommandContextTilstand.SUS
 import no.nav.helse.modell.kommando.CommandContext
 import org.intellij.lang.annotations.Language
 import java.util.UUID
-import javax.naming.OperationNotSupportedException
 
 internal class TransactionalCommandContextDao(
     private val session: Session,
@@ -59,7 +58,7 @@ internal class TransactionalCommandContextDao(
     override fun avbryt(
         vedtaksperiodeId: UUID,
         contextId: UUID,
-    ): List<Pair<UUID, UUID>> = throw OperationNotSupportedException()
+    ): List<Pair<UUID, UUID>> = throw UnsupportedOperationException()
 
     override fun tidsbrukForContext(contextId: UUID): Int {
         @Language("postgresql")
