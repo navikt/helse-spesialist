@@ -1,15 +1,15 @@
 package no.nav.helse.db
 
-import kotliquery.TransactionalSession
+import kotliquery.Session
 import kotliquery.queryOf
 import no.nav.helse.objectMapper
 import org.intellij.lang.annotations.Language
 
 class TransactionalArbeidsgiverDao(
-    private val transactionalSession: TransactionalSession,
+    private val session: Session,
 ) {
     fun findArbeidsgiverByOrgnummer(orgnummer: String) =
-        transactionalSession.run(
+        session.run(
             queryOf("SELECT id FROM arbeidsgiver WHERE orgnummer=?;", orgnummer.toLong())
                 .map { it.long("id") }
                 .asSingle,
@@ -19,33 +19,33 @@ class TransactionalArbeidsgiverDao(
         @Language("PostgreSQL")
         val query = "INSERT INTO arbeidsgiver(orgnummer) VALUES(:orgnummer)"
 
-        transactionalSession.run(queryOf(query, mapOf("orgnummer" to orgnummer.toLong())).asUpdate)
+        session.run(queryOf(query, mapOf("orgnummer" to orgnummer.toLong())).asUpdate)
     }
 
     fun upsertNavn(
         orgnummer: String,
         navn: String,
-    ) = transactionalSession
+    ) = session
         .finnArbeidsgiverNavnRef(orgnummer)
-        ?.also { transactionalSession.oppdaterArbeidsgivernavn(it, navn) }
-        ?: transactionalSession.opprettArbeidsgivernavn(orgnummer, navn)
+        ?.also { session.oppdaterArbeidsgivernavn(it, navn) }
+        ?: session.opprettArbeidsgivernavn(orgnummer, navn)
 
     fun upsertBransjer(
         orgnummer: String,
         bransjer: List<String>,
-    ) = transactionalSession
+    ) = session
         .finnArbeidsgiverbransjerRef(orgnummer)
-        ?.also { transactionalSession.oppdaterArbeidsgiverbransjer(it, bransjer) }
-        ?: transactionalSession.opprettArbeidsgiverbransjer(orgnummer, bransjer)
+        ?.also { session.oppdaterArbeidsgiverbransjer(it, bransjer) }
+        ?: session.opprettArbeidsgiverbransjer(orgnummer, bransjer)
 
-    private fun TransactionalSession.finnArbeidsgiverNavnRef(orgnummer: String): Long? {
+    private fun Session.finnArbeidsgiverNavnRef(orgnummer: String): Long? {
         @Language("PostgreSQL")
         val query = "SELECT navn_ref FROM arbeidsgiver WHERE orgnummer=?"
 
         return run(queryOf(query, orgnummer.toLong()).map { it.longOrNull("navn_ref") }.asSingle)
     }
 
-    private fun TransactionalSession.oppdaterArbeidsgivernavn(
+    private fun Session.oppdaterArbeidsgivernavn(
         arbeidsgivernavnRef: Long,
         navn: String,
     ) {
@@ -55,7 +55,7 @@ class TransactionalArbeidsgiverDao(
         run(queryOf(query, mapOf("navn" to navn, "arbeidsgivernavnRef" to arbeidsgivernavnRef)).asUpdate)
     }
 
-    private fun TransactionalSession.opprettArbeidsgivernavn(
+    private fun Session.opprettArbeidsgivernavn(
         orgnummer: String,
         navn: String,
     ) {
@@ -67,7 +67,7 @@ class TransactionalArbeidsgiverDao(
     }
 
     // Denne kan endres til update da det ikke ligger søknader som allerede har kommet inn på SendtSøknad-river, men ikke lest inn, igjen
-    private fun TransactionalSession.upsertNavnRef(
+    private fun Session.upsertNavnRef(
         arbeidsgivernavnRef: Long,
         orgnummer: String,
     ) {
@@ -83,14 +83,14 @@ class TransactionalArbeidsgiverDao(
         )
     }
 
-    private fun TransactionalSession.finnArbeidsgiverbransjerRef(orgnummer: String): Long? {
+    private fun Session.finnArbeidsgiverbransjerRef(orgnummer: String): Long? {
         @Language("PostgreSQL")
         val query = "SELECT bransjer_ref FROM arbeidsgiver WHERE orgnummer=?"
 
         return run(queryOf(query, orgnummer.toLong()).map { it.longOrNull("bransjer_ref") }.asSingle)
     }
 
-    private fun TransactionalSession.oppdaterArbeidsgiverbransjer(
+    private fun Session.oppdaterArbeidsgiverbransjer(
         bransjerRef: Long,
         bransjer: List<String>,
     ) {
@@ -105,7 +105,7 @@ class TransactionalArbeidsgiverDao(
         )
     }
 
-    private fun TransactionalSession.opprettArbeidsgiverbransjer(
+    private fun Session.opprettArbeidsgiverbransjer(
         orgnummer: String,
         bransjer: List<String>,
     ) {
@@ -118,7 +118,7 @@ class TransactionalArbeidsgiverDao(
     }
 
     // Denne kan endres til update da det ikke ligger søknader som allerede har kommet inn på SendtSøknad-river, men ikke lest inn, igjen
-    private fun TransactionalSession.upsertBransjerRef(
+    private fun Session.upsertBransjerRef(
         bransjerRef: Long,
         orgnummer: String,
     ) {

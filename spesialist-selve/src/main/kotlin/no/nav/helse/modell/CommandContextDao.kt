@@ -24,9 +24,7 @@ internal class CommandContextDao(
 
     override fun nyContext(meldingId: UUID): CommandContext =
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalCommandContextDao(transaction).nyContext(meldingId)
-            }
+            TransactionalCommandContextDao(session).nyContext(meldingId)
         }
 
     override fun opprett(
@@ -34,9 +32,7 @@ internal class CommandContextDao(
         contextId: UUID,
     ) {
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalCommandContextDao(transaction).opprett(hendelseId, contextId)
-            }
+            TransactionalCommandContextDao(session).opprett(hendelseId, contextId)
         }
     }
 
@@ -45,9 +41,7 @@ internal class CommandContextDao(
         contextId: UUID,
     ) {
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalCommandContextDao(transaction).ferdig(hendelseId, contextId)
-            }
+            TransactionalCommandContextDao(session).ferdig(hendelseId, contextId)
         }
     }
 
@@ -56,9 +50,7 @@ internal class CommandContextDao(
         contextId: UUID,
     ) {
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalCommandContextDao(transaction).feil(hendelseId, contextId)
-            }
+            TransactionalCommandContextDao(session).feil(hendelseId, contextId)
         }
     }
 
@@ -69,9 +61,7 @@ internal class CommandContextDao(
         sti: List<Int>,
     ) {
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalCommandContextDao(transaction).suspendert(hendelseId, contextId, hash, sti)
-            }
+            TransactionalCommandContextDao(session).suspendert(hendelseId, contextId, hash, sti)
         }
     }
 
@@ -112,9 +102,7 @@ internal class CommandContextDao(
 
     override fun tidsbrukForContext(contextId: UUID): Int =
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalCommandContextDao(transaction).tidsbrukForContext(contextId)
-            }
+            TransactionalCommandContextDao(session).tidsbrukForContext(contextId)
         }
 
     fun finnSuspendert(id: UUID) =

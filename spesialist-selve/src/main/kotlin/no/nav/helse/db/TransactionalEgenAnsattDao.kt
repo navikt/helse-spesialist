@@ -1,11 +1,11 @@
 package no.nav.helse.db
 
-import kotliquery.TransactionalSession
+import kotliquery.Session
 import kotliquery.queryOf
 import org.intellij.lang.annotations.Language
 import java.time.LocalDateTime
 
-class TransactionalEgenAnsattDao(private val transactionalSession: TransactionalSession) : EgenAnsattRepository {
+class TransactionalEgenAnsattDao(private val session: Session) : EgenAnsattRepository {
     override fun erEgenAnsatt(fødselsnummer: String): Boolean? {
         @Language("PostgreSQL")
         val query =
@@ -15,7 +15,7 @@ class TransactionalEgenAnsattDao(private val transactionalSession: Transactional
                 INNER JOIN person p on p.id = ea.person_ref
             WHERE p.fodselsnummer = :fodselsnummer
             """.trimIndent()
-        return transactionalSession.run(
+        return session.run(
             queryOf(
                 query,
                 mapOf("fodselsnummer" to fødselsnummer.toLong()),
@@ -41,7 +41,7 @@ class TransactionalEgenAnsattDao(private val transactionalSession: Transactional
             )
             ON CONFLICT (person_ref) DO UPDATE SET er_egen_ansatt = :er_egen_ansatt, opprettet = :opprettet
             """.trimIndent()
-        transactionalSession.run(
+        session.run(
             queryOf(
                 statement,
                 mapOf(

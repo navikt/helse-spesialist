@@ -1,6 +1,6 @@
 package no.nav.helse.db
 
-import kotliquery.TransactionalSession
+import kotliquery.Session
 import kotliquery.queryOf
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.intellij.lang.annotations.Language
@@ -8,7 +8,7 @@ import java.util.UUID
 import javax.naming.OperationNotSupportedException
 
 class TransactionalOverstyringDao(
-    private val transactionalSession: TransactionalSession,
+    private val session: Session,
 ) : OverstyringRepository {
     override fun finnOverstyringerMedTypeForVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<OverstyringType> {
         throw OperationNotSupportedException()
@@ -24,7 +24,7 @@ class TransactionalOverstyringDao(
             SELECT 1 from overstyring 
             WHERE ekstern_hendelse_id = :eksternHendelseId
         """
-        return transactionalSession.run(
+        return session.run(
             queryOf(
                 statement,
                 mapOf("eksternHendelseId" to eksternHendelseId),
@@ -46,7 +46,7 @@ class TransactionalOverstyringDao(
             ON CONFLICT DO NOTHING
             """.trimIndent()
         vedtaksperiodeIder.forEach { vedtaksperiode ->
-            transactionalSession.run(
+            session.run(
                 queryOf(
                     statement,
                     mapOf(
@@ -68,7 +68,7 @@ class TransactionalOverstyringDao(
             AND o.ferdigstilt = false
             LIMIT 1
             """.trimIndent()
-        return transactionalSession.run(
+        return session.run(
             queryOf(statement, mapOf("vedtaksperiode_id" to vedtaksperiodeId))
                 .map { row -> row.boolean(1) }.asSingle,
         ) ?: false

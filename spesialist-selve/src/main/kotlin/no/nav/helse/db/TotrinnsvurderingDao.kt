@@ -36,17 +36,13 @@ class TotrinnsvurderingDao(private val dataSource: DataSource) : Totrinnsvurderi
 
     override fun oppdater(totrinnsvurderingFraDatabase: TotrinnsvurderingFraDatabase) {
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalTotrinnsvurderingDao(transaction).oppdater(totrinnsvurderingFraDatabase)
-            }
+            TransactionalTotrinnsvurderingDao(session).oppdater(totrinnsvurderingFraDatabase)
         }
     }
 
     override fun hentAktivTotrinnsvurdering(oppgaveId: Long): TotrinnsvurderingFraDatabase? {
         return sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalTotrinnsvurderingDao(transaction).hentAktivTotrinnsvurdering(oppgaveId)
-            }
+            TransactionalTotrinnsvurderingDao(session).hentAktivTotrinnsvurdering(oppgaveId)
         }
     }
 

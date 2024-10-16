@@ -2,7 +2,7 @@ package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
-import kotliquery.TransactionalSession
+import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.db.PersonRepository
@@ -29,9 +29,7 @@ internal class PersonDao(
 
     override fun personKlargjort(fødselsnummer: String) {
         sessionOf(dataSource).use { session ->
-            session.transaction { tx ->
-                TransactionalPersonDao(tx).personKlargjort(fødselsnummer)
-            }
+            TransactionalPersonDao(session).personKlargjort(fødselsnummer)
         }
     }
 
@@ -55,9 +53,7 @@ internal class PersonDao(
 
     override fun finnPersoninfoSistOppdatert(fødselsnummer: String) =
         sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalPersonDao(transactionalSession).finnPersoninfoSistOppdatert(fødselsnummer)
-            }
+            TransactionalPersonDao(session).finnPersoninfoSistOppdatert(fødselsnummer)
         }
 
     override fun finnPersoninfoRef(fødselsnummer: String) =
@@ -125,7 +121,7 @@ internal class PersonDao(
         }
     }
 
-    private fun TransactionalSession.finnPersonRef(fødselsnummer: String): Long? {
+    private fun Session.finnPersonRef(fødselsnummer: String): Long? {
         @Language("PostgreSQL")
         val query = "SELECT id FROM person WHERE fodselsnummer=?"
 
@@ -150,9 +146,7 @@ internal class PersonDao(
         fødselsnummer: String,
         enhetNr: Int,
     ) = sessionOf(dataSource).use { session ->
-        session.transaction { transactionalSession ->
-            TransactionalPersonDao(transactionalSession).oppdaterEnhet(fødselsnummer, enhetNr)
-        }
+        TransactionalPersonDao(session).oppdaterEnhet(fødselsnummer, enhetNr)
     }
 
     override fun finnITUtbetalingsperioderSistOppdatert(fødselsnummer: String) =
@@ -192,24 +186,22 @@ internal class PersonDao(
         skjæringstidspunkt: LocalDate,
         inntekter: List<Inntekter>,
     ) = sessionOf(dataSource).use { session ->
-        session.transaction { transaction ->
-            transaction.finnPersonRef(fødselsnummer)?.also {
-                @Language("PostgreSQL")
-                val query = """
+        session.finnPersonRef(fødselsnummer)?.also {
+            @Language("PostgreSQL")
+            val query = """
                         INSERT INTO inntekt (person_ref, skjaeringstidspunkt, inntekter)
                         VALUES (:person_ref, :skjaeringstidspunkt, :inntekter::json)
                     """
-                transaction.run(
-                    queryOf(
-                        query,
-                        mapOf(
-                            "person_ref" to it,
-                            "skjaeringstidspunkt" to skjæringstidspunkt,
-                            "inntekter" to objectMapper.writeValueAsString(inntekter),
-                        ),
-                    ).asExecute,
-                )
-            }
+            session.run(
+                queryOf(
+                    query,
+                    mapOf(
+                        "person_ref" to it,
+                        "skjaeringstidspunkt" to skjæringstidspunkt,
+                        "inntekter" to objectMapper.writeValueAsString(inntekter),
+                    ),
+                ).asExecute,
+            )
         }
     }
 
@@ -217,9 +209,7 @@ internal class PersonDao(
         fødselsnummer: String,
         utbetalinger: JsonNode,
     ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-        session.transaction { transaction ->
-            TransactionalPersonDao(transaction).upsertInfotrygdutbetalinger(fødselsnummer, utbetalinger)
-        }
+        TransactionalPersonDao(session).upsertInfotrygdutbetalinger(fødselsnummer, utbetalinger)
     }
 
     internal fun insertPerson(
@@ -253,9 +243,7 @@ internal class PersonDao(
 
     override fun finnEnhetId(fødselsnummer: String) =
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalPersonDao(transaction).finnEnhetId(fødselsnummer)
-            }
+            TransactionalPersonDao(session).finnEnhetId(fødselsnummer)
         }
 }
 

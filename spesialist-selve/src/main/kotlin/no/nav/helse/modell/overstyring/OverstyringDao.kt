@@ -96,27 +96,21 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource),
         overstyringHendelseId: UUID,
     ) {
         sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalOverstyringDao(transactionalSession).kobleOverstyringOgVedtaksperiode(
-                    vedtaksperiodeIder,
-                    overstyringHendelseId,
-                )
-            }
+            TransactionalOverstyringDao(session).kobleOverstyringOgVedtaksperiode(
+                vedtaksperiodeIder,
+                overstyringHendelseId,
+            )
         }
     }
 
     override fun harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId: UUID): Boolean =
         sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalOverstyringDao(transactionalSession).harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId)
-            }
+            TransactionalOverstyringDao(session).harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId)
         }
 
     override fun finnesEksternHendelseId(eksternHendelseId: UUID): Boolean {
         return sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalOverstyringDao(transactionalSession).finnesEksternHendelseId(eksternHendelseId)
-            }
+            TransactionalOverstyringDao(session).finnesEksternHendelseId(eksternHendelseId)
         }
     }
 

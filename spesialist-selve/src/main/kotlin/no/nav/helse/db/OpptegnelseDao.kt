@@ -17,9 +17,7 @@ class OpptegnelseDao(private val dataSource: DataSource) : OpptegnelseRepository
         type: OpptegnelseType,
     ) {
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalOpptegnelseDao(transaction).opprettOpptegnelse(fødselsnummer, payload, type)
-            }
+            TransactionalOpptegnelseDao(session).opprettOpptegnelse(fødselsnummer, payload, type)
         }
     }
 

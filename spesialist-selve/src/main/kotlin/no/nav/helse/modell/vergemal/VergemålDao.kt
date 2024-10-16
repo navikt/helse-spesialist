@@ -56,9 +56,7 @@ class VergemålDao(val dataSource: DataSource) : VergemålRepository {
 
     override fun harVergemål(fødselsnummer: String): Boolean? {
         return sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalVergemålDao(transaction).harVergemål(fødselsnummer)
-            }
+            TransactionalVergemålDao(session).harVergemål(fødselsnummer)
         }
     }
 

@@ -1,11 +1,11 @@
 package no.nav.helse.db
 
-import kotliquery.TransactionalSession
+import kotliquery.Session
 import kotliquery.queryOf
 import org.intellij.lang.annotations.Language
 import java.util.UUID
 
-class TransactionalTildelingDao(private val transactionalSession: TransactionalSession) : TildelingRepository {
+class TransactionalTildelingDao(private val session: Session) : TildelingRepository {
     override fun tildelingForPerson(fødselsnummer: String): TildelingDto? {
         @Language("PostgreSQL")
         val query = """ 
@@ -17,7 +17,7 @@ class TransactionalTildelingDao(private val transactionalSession: TransactionalS
             WHERE fodselsnummer = :fnr AND o.status = 'AvventerSaksbehandler'
             ORDER BY o.opprettet DESC;
         """
-        return transactionalSession.run(
+        return session.run(
             queryOf(query, mapOf("fnr" to fødselsnummer.toLong())).map { row ->
                 TildelingDto(
                     navn = row.string("navn"),
@@ -35,7 +35,7 @@ class TransactionalTildelingDao(private val transactionalSession: TransactionalS
                 INNER JOIN saksbehandler s on s.oid = t.saksbehandler_ref
             WHERE t.oppgave_id_ref = :oppgaveId
         """
-        return transactionalSession.run(
+        return session.run(
             queryOf(query, mapOf("oppgaveId" to oppgaveId)).map { row ->
                 TildelingDto(
                     navn = row.string("navn"),
@@ -55,7 +55,7 @@ class TransactionalTildelingDao(private val transactionalSession: TransactionalS
             INSERT INTO tildeling(saksbehandler_ref, oppgave_id_ref) VALUES (:oid, :oppgave_id)
             ON CONFLICT (oppgave_id_ref) DO UPDATE SET saksbehandler_ref = :oid
         """
-        transactionalSession.run(
+        session.run(
             queryOf(
                 query,
                 mapOf(
@@ -71,6 +71,6 @@ class TransactionalTildelingDao(private val transactionalSession: TransactionalS
         val query = """
             DELETE FROM tildeling WHERE oppgave_id_ref = :oppgave_id
         """
-        transactionalSession.run(queryOf(query, mapOf("oppgave_id" to oppgaveId)).asUpdate)
+        session.run(queryOf(query, mapOf("oppgave_id" to oppgaveId)).asUpdate)
     }
 }

@@ -13,9 +13,7 @@ internal class AutomatiseringDao(val dataSource: DataSource) : AutomatiseringRep
         hendelseId: UUID,
         utbetalingId: UUID,
     ) = sessionOf(dataSource).use { session ->
-        session.transaction { transactionalSession ->
-            TransactionalAutomatiseringDao(transactionalSession).manuellSaksbehandling(problems, vedtaksperiodeId, hendelseId, utbetalingId)
-        }
+        TransactionalAutomatiseringDao(session).manuellSaksbehandling(problems, vedtaksperiodeId, hendelseId, utbetalingId)
     }
 
     override fun automatisert(
@@ -23,9 +21,7 @@ internal class AutomatiseringDao(val dataSource: DataSource) : AutomatiseringRep
         hendelseId: UUID,
         utbetalingId: UUID,
     ) = sessionOf(dataSource).use { session ->
-        session.transaction { transactionalSession ->
-            TransactionalAutomatiseringDao(transactionalSession).automatisert(vedtaksperiodeId, hendelseId, utbetalingId)
-        }
+        TransactionalAutomatiseringDao(session).automatisert(vedtaksperiodeId, hendelseId, utbetalingId)
     }
 
     override fun stikkprøve(
@@ -33,9 +29,7 @@ internal class AutomatiseringDao(val dataSource: DataSource) : AutomatiseringRep
         hendelseId: UUID,
         utbetalingId: UUID,
     ) = sessionOf(dataSource).use { session ->
-        session.transaction { transactionalSession ->
-            TransactionalAutomatiseringDao(transactionalSession).stikkprøve(vedtaksperiodeId, hendelseId, utbetalingId)
-        }
+        TransactionalAutomatiseringDao(session).stikkprøve(vedtaksperiodeId, hendelseId, utbetalingId)
     }
 
     override fun settAutomatiseringInaktiv(
@@ -43,9 +37,7 @@ internal class AutomatiseringDao(val dataSource: DataSource) : AutomatiseringRep
         hendelseId: UUID,
     ) {
         sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalAutomatiseringDao(transactionalSession).settAutomatiseringInaktiv(vedtaksperiodeId, hendelseId)
-            }
+            TransactionalAutomatiseringDao(session).settAutomatiseringInaktiv(vedtaksperiodeId, hendelseId)
         }
     }
 
@@ -54,9 +46,7 @@ internal class AutomatiseringDao(val dataSource: DataSource) : AutomatiseringRep
         hendelseId: UUID,
     ) {
         sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalAutomatiseringDao(transactionalSession).settAutomatiseringProblemInaktiv(vedtaksperiodeId, hendelseId)
-            }
+            TransactionalAutomatiseringDao(session).settAutomatiseringProblemInaktiv(vedtaksperiodeId, hendelseId)
         }
     }
 
@@ -64,34 +54,26 @@ internal class AutomatiseringDao(val dataSource: DataSource) : AutomatiseringRep
         vedtaksperiodeId: UUID,
         hendelseId: UUID,
     ) = sessionOf(dataSource).use { session ->
-        session.transaction { transactionalSession ->
-            TransactionalAutomatiseringDao(transactionalSession).plukketUtTilStikkprøve(vedtaksperiodeId, hendelseId)
-        }
+        TransactionalAutomatiseringDao(session).plukketUtTilStikkprøve(vedtaksperiodeId, hendelseId)
     }
 
     override fun hentAktivAutomatisering(
         vedtaksperiodeId: UUID,
         hendelseId: UUID,
     ) = sessionOf(dataSource).use { session ->
-        session.transaction { transactionalSession ->
-            TransactionalAutomatiseringDao(transactionalSession).hentAktivAutomatisering(vedtaksperiodeId, hendelseId)
-        }
+        TransactionalAutomatiseringDao(session).hentAktivAutomatisering(vedtaksperiodeId, hendelseId)
     }
 
     override fun finnAktiveProblemer(
         vedtaksperiodeRef: Long,
         hendelseId: UUID,
     ) = sessionOf(dataSource).use { session ->
-        session.transaction { transactionalSession ->
-            TransactionalAutomatiseringDao(transactionalSession).finnAktiveProblemer(vedtaksperiodeRef, hendelseId)
-        }
+        TransactionalAutomatiseringDao(session).finnAktiveProblemer(vedtaksperiodeRef, hendelseId)
     }
 
     override fun finnVedtaksperiode(vedtaksperiodeId: UUID): Long? =
         sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalAutomatiseringDao(transactionalSession).finnVedtaksperiode(vedtaksperiodeId)
-            }
+            TransactionalAutomatiseringDao(session).finnVedtaksperiode(vedtaksperiodeId)
         }
 }
 

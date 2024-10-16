@@ -1,12 +1,12 @@
 package no.nav.helse.db
 
-import kotliquery.TransactionalSession
+import kotliquery.Session
 import kotliquery.queryOf
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import org.intellij.lang.annotations.Language
 import java.util.UUID
 
-class TransactionalNotatDao(private val transactionalSession: TransactionalSession) : NotatRepository {
+class TransactionalNotatDao(private val session: Session) : NotatRepository {
     override fun lagreForOppgaveId(
         oppgaveId: Long,
         tekst: String,
@@ -27,7 +27,7 @@ class TransactionalNotatDao(private val transactionalSession: TransactionalSessi
                 CAST(:type as notattype)
             );            
             """.trimIndent()
-        return transactionalSession.run(
+        return session.run(
             queryOf(
                 statement,
                 mapOf(

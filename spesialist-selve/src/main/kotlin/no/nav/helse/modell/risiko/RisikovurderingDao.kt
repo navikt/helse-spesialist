@@ -40,9 +40,7 @@ internal class RisikovurderingDao(val dataSource: DataSource) : RisikovurderingR
 
     override fun hentRisikovurdering(vedtaksperiodeId: UUID) =
         sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalRisikovurderingDao(transactionalSession).hentRisikovurdering(vedtaksperiodeId)
-            }
+            TransactionalRisikovurderingDao(session).hentRisikovurdering(vedtaksperiodeId)
         }
 
     override fun kreverSupersaksbehandler(vedtaksperiodeId: UUID) =

@@ -13,16 +13,12 @@ class EgenAnsattDao(private val dataSource: DataSource) : EgenAnsattRepository {
         opprettet: LocalDateTime,
     ) {
         sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalEgenAnsattDao(transactionalSession).lagre(fødselsnummer, erEgenAnsatt, opprettet)
-            }
+            TransactionalEgenAnsattDao(session).lagre(fødselsnummer, erEgenAnsatt, opprettet)
         }
     }
 
     override fun erEgenAnsatt(fødselsnummer: String): Boolean? =
         sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalEgenAnsattDao(transactionalSession).erEgenAnsatt(fødselsnummer)
-            }
+            TransactionalEgenAnsattDao(session).erEgenAnsatt(fødselsnummer)
         }
 }

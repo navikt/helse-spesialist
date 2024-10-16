@@ -1,11 +1,11 @@
 package no.nav.helse.db
 
-import kotliquery.TransactionalSession
+import kotliquery.Session
 import kotliquery.queryOf
 import org.intellij.lang.annotations.Language
 import java.util.UUID
 
-class TransactionalReservasjonDao(private val transactionalSession: TransactionalSession) : ReservasjonRepository {
+class TransactionalReservasjonDao(private val session: Session) : ReservasjonRepository {
     override fun reserverPerson(
         saksbehandlerOid: UUID,
         fødselsnummer: String,
@@ -20,7 +20,7 @@ class TransactionalReservasjonDao(private val transactionalSession: Transactiona
                 DO UPDATE SET gyldig_til = current_date + time '23:59:59',
                               saksbehandler_ref = :saksbehandler_ref;
             """
-        transactionalSession.run(
+        session.run(
             queryOf(
                 query,
                 mapOf(
@@ -39,7 +39,7 @@ class TransactionalReservasjonDao(private val transactionalSession: Transactiona
             JOIN saksbehandler s ON r.saksbehandler_ref = s.oid
             WHERE p.fodselsnummer = :fnr AND r.gyldig_til > now();
             """
-        return transactionalSession.run(
+        return session.run(
             queryOf(
                 query,
                 mapOf(

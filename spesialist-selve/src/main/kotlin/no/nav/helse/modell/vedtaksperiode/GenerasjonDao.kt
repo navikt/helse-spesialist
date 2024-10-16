@@ -183,9 +183,7 @@ class GenerasjonDao(private val dataSource: DataSource) : GenerasjonRepository {
 
     override fun førsteGenerasjonVedtakFattetTidspunkt(vedtaksperiodeId: UUID): LocalDateTime? =
         sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalGenerasjonDao(transactionalSession).førsteGenerasjonVedtakFattetTidspunkt(vedtaksperiodeId)
-            }
+            TransactionalGenerasjonDao(session).førsteGenerasjonVedtakFattetTidspunkt(vedtaksperiodeId)
         }
 
     internal fun førsteKjenteDag(fødselsnummer: String): LocalDate {

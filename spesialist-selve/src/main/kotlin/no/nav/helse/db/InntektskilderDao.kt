@@ -17,9 +17,7 @@ internal class InntektskilderDao(
 
     override fun lagreInntektskilder(inntektskilder: List<InntektskildeDto>) {
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            session.transaction { tx ->
-                TransactionalInntektskilderDao(tx).lagreInntektskilder(inntektskilder)
-            }
+            TransactionalInntektskilderDao(session).lagreInntektskilder(inntektskilder)
         }
     }
 

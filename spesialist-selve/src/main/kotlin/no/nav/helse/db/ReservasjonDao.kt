@@ -11,17 +11,13 @@ class ReservasjonDao(private val dataSource: DataSource) : HelseDao(dataSource),
         fødselsnummer: String,
     ) {
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalReservasjonDao(transaction).reserverPerson(saksbehandlerOid, fødselsnummer)
-            }
+            TransactionalReservasjonDao(session).reserverPerson(saksbehandlerOid, fødselsnummer)
         }
     }
 
     override fun hentReservasjonFor(fødselsnummer: String): Reservasjon? =
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalReservasjonDao(transaction).hentReservasjonFor(fødselsnummer)
-            }
+            TransactionalReservasjonDao(session).hentReservasjonFor(fødselsnummer)
         }
 }
 

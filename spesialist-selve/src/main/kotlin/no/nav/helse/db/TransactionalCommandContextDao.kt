@@ -1,7 +1,7 @@
 package no.nav.helse.db
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import kotliquery.TransactionalSession
+import kotliquery.Session
 import kotliquery.queryOf
 import no.nav.helse.db.TransactionalCommandContextDao.CommandContextTilstand.FEIL
 import no.nav.helse.db.TransactionalCommandContextDao.CommandContextTilstand.FERDIG
@@ -13,7 +13,7 @@ import java.util.UUID
 import javax.naming.OperationNotSupportedException
 
 internal class TransactionalCommandContextDao(
-    private val transactionalSession: TransactionalSession,
+    private val session: Session,
 ) : CommandContextRepository {
     private companion object {
         private val mapper = jacksonObjectMapper()
@@ -70,7 +70,7 @@ internal class TransactionalCommandContextDao(
             where context_id = :contextId
             """.trimIndent()
         // Kan bruke !! fordi mappingen thrower hvis spørringen ikke fant noe
-        return transactionalSession.run(
+        return session.run(
             queryOf(
                 query,
                 mapOf("contextId" to contextId),
@@ -91,7 +91,7 @@ internal class TransactionalCommandContextDao(
             INSERT INTO command_context(context_id, hendelse_id, tilstand, data, hash)
             VALUES (:contextId, :hendelseId, :tilstand, :data::json, :hash)
             """.trimIndent()
-        transactionalSession.run(
+        session.run(
             queryOf(
                 query,
                 mapOf(

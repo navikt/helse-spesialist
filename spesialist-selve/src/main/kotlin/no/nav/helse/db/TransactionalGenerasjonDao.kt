@@ -1,12 +1,12 @@
 package no.nav.helse.db
 
-import kotliquery.TransactionalSession
+import kotliquery.Session
 import kotliquery.queryOf
 import org.intellij.lang.annotations.Language
 import java.time.LocalDateTime
 import java.util.UUID
 
-class TransactionalGenerasjonDao(private val transactionalSession: TransactionalSession) : GenerasjonRepository {
+class TransactionalGenerasjonDao(private val session: Session) : GenerasjonRepository {
     override fun førsteGenerasjonVedtakFattetTidspunkt(vedtaksperiodeId: UUID): LocalDateTime? {
         @Language("PostgreSQL")
         val query =
@@ -17,7 +17,7 @@ class TransactionalGenerasjonDao(private val transactionalSession: Transactional
             ORDER BY tilstand_endret_tidspunkt
             LIMIT 1
             """.trimIndent()
-        return transactionalSession.run(
+        return session.run(
             queryOf(
                 query,
                 mapOf(

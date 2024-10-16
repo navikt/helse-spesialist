@@ -12,31 +12,23 @@ import javax.sql.DataSource
 internal class MeldingDao(private val dataSource: DataSource) : MeldingRepository {
     override fun lagre(melding: Personmelding) {
         sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalMeldingDao(transactionalSession).lagre(melding)
-            }
+            TransactionalMeldingDao(session).lagre(melding)
         }
     }
 
     override fun finnFødselsnummer(meldingId: UUID): String =
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalMeldingDao(transaction).finnFødselsnummer(meldingId)
-            }
+            TransactionalMeldingDao(session).finnFødselsnummer(meldingId)
         }
 
     override fun finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId: UUID): Int =
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalMeldingDao(transaction).finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId)
-            }
+            TransactionalMeldingDao(session).finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId)
         }
 
     override fun erAutomatisertKorrigertSøknadHåndtert(meldingId: UUID): Boolean =
         sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalMeldingDao(transactionalSession).erAutomatisertKorrigertSøknadHåndtert(meldingId)
-            }
+            TransactionalMeldingDao(session).erAutomatisertKorrigertSøknadHåndtert(meldingId)
         }
 
     override fun opprettAutomatiseringKorrigertSøknad(
@@ -44,9 +36,7 @@ internal class MeldingDao(private val dataSource: DataSource) : MeldingRepositor
         meldingId: UUID,
     ) {
         sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalMeldingDao(transactionalSession).opprettAutomatiseringKorrigertSøknad(vedtaksperiodeId, meldingId)
-            }
+            TransactionalMeldingDao(session).opprettAutomatiseringKorrigertSøknad(vedtaksperiodeId, meldingId)
         }
     }
 
@@ -55,9 +45,7 @@ internal class MeldingDao(private val dataSource: DataSource) : MeldingRepositor
         vedtaksperiodeId: UUID,
     ): OverstyringIgangsattKorrigertSøknad? {
         return sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalMeldingDao(transactionalSession).sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, vedtaksperiodeId)
-            }
+            TransactionalMeldingDao(session).sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, vedtaksperiodeId)
         }
     }
 
@@ -75,17 +63,13 @@ internal class MeldingDao(private val dataSource: DataSource) : MeldingRepositor
 
     override fun finnGodkjenningsbehov(meldingId: UUID): Godkjenningsbehov {
         return sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalMeldingDao(transactionalSession).finnGodkjenningsbehov(meldingId)
-            }
+            TransactionalMeldingDao(session).finnGodkjenningsbehov(meldingId)
         }
     }
 
     override fun finn(id: UUID): Personmelding? {
         return sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalMeldingDao(transactionalSession).finn(id)
-            }
+            TransactionalMeldingDao(session).finn(id)
         }
     }
 }

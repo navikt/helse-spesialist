@@ -1,12 +1,12 @@
 package no.nav.helse.db
 
-import kotliquery.TransactionalSession
+import kotliquery.Session
 import kotliquery.queryOf
 import no.nav.helse.modell.vergemal.VergemålOgFremtidsfullmakt
 import org.intellij.lang.annotations.Language
 import javax.naming.OperationNotSupportedException
 
-class TransactionalVergemålDao(private val transactionalSession: TransactionalSession) : VergemålRepository {
+class TransactionalVergemålDao(private val session: Session) : VergemålRepository {
     override fun lagre(
         fødselsnummer: String,
         vergemålOgFremtidsfullmakt: VergemålOgFremtidsfullmakt,
@@ -24,7 +24,7 @@ class TransactionalVergemålDao(private val transactionalSession: TransactionalS
                 INNER JOIN person p on p.id = v.person_ref
             WHERE p.fodselsnummer = :fodselsnummer
             """.trimIndent()
-        return transactionalSession.run(
+        return session.run(
             queryOf(
                 query,
                 mapOf("fodselsnummer" to fødselsnummer.toLong()),

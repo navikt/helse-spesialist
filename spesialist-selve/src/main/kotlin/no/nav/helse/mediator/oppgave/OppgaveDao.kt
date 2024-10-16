@@ -18,17 +18,13 @@ import javax.sql.DataSource
 class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource), OppgaveRepository {
     override fun reserverNesteId(): Long {
         return sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalOppgaveDao(transaction).reserverNesteId()
-            }
+            TransactionalOppgaveDao(session).reserverNesteId()
         }
     }
 
     override fun finnOppgave(id: Long): OppgaveFraDatabase? {
         return sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalOppgaveDao(transaction).finnOppgave(id)
-            }
+            TransactionalOppgaveDao(session).finnOppgave(id)
         }
     }
 
@@ -44,19 +40,17 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource), Opp
         grupperteFiltrerteEgenskaper: Map<Egenskap.Kategori, List<EgenskapForDatabase>>?,
     ): List<OppgaveFraDatabaseForVisning> {
         return sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalOppgaveDao(transaction).finnOppgaverForVisning(
-                    ekskluderEgenskaper,
-                    saksbehandlerOid,
-                    offset,
-                    limit,
-                    sortering,
-                    egneSakerPåVent,
-                    egneSaker,
-                    tildelt,
-                    grupperteFiltrerteEgenskaper,
-                )
-            }
+            TransactionalOppgaveDao(session).finnOppgaverForVisning(
+                ekskluderEgenskaper,
+                saksbehandlerOid,
+                offset,
+                limit,
+                sortering,
+                egneSakerPåVent,
+                egneSaker,
+                tildelt,
+                grupperteFiltrerteEgenskaper,
+            )
         }
     }
 
@@ -65,16 +59,12 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource), Opp
         utbetalingId: UUID,
     ): Set<EgenskapForDatabase>? =
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalOppgaveDao(transaction).finnEgenskaper(vedtaksperiodeId, utbetalingId)
-            }
+            TransactionalOppgaveDao(session).finnEgenskaper(vedtaksperiodeId, utbetalingId)
         }
 
     override fun finnAntallOppgaver(saksbehandlerOid: UUID): AntallOppgaverFraDatabase {
         return sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalOppgaveDao(transaction).finnAntallOppgaver(saksbehandlerOid)
-            }
+            TransactionalOppgaveDao(session).finnAntallOppgaver(saksbehandlerOid)
         }
     }
 
@@ -84,37 +74,27 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource), Opp
         limit: Int,
     ): List<BehandletOppgaveFraDatabaseForVisning> =
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalOppgaveDao(transaction).finnBehandledeOppgaver(behandletAvOid, offset, limit)
-            }
+            TransactionalOppgaveDao(session).finnBehandledeOppgaver(behandletAvOid, offset, limit)
         }
 
     override fun finnUtbetalingId(oppgaveId: Long) =
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalOppgaveDao(transaction).finnUtbetalingId(oppgaveId)
-            }
+            TransactionalOppgaveDao(session).finnUtbetalingId(oppgaveId)
         }
 
     override fun finnSpleisBehandlingId(oppgaveId: Long) =
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalOppgaveDao(transaction).finnSpleisBehandlingId(oppgaveId)
-            }
+            TransactionalOppgaveDao(session).finnSpleisBehandlingId(oppgaveId)
         }
 
     override fun finnIdForAktivOppgave(vedtaksperiodeId: UUID) =
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalOppgaveDao(transaction).finnIdForAktivOppgave(vedtaksperiodeId)
-            }
+            TransactionalOppgaveDao(session).finnIdForAktivOppgave(vedtaksperiodeId)
         }
 
     override fun finnOppgaveIdUansettStatus(fødselsnummer: String) =
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalOppgaveDao(transaction).finnOppgaveIdUansettStatus(fødselsnummer)
-            }
+            TransactionalOppgaveDao(session).finnOppgaveIdUansettStatus(fødselsnummer)
         }
 
     override fun finnVedtaksperiodeId(fødselsnummer: String) =
@@ -131,16 +111,12 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource), Opp
 
     override fun finnOppgaveId(fødselsnummer: String) =
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalOppgaveDao(transaction).finnOppgaveId(fødselsnummer)
-            }
+            TransactionalOppgaveDao(session).finnOppgaveId(fødselsnummer)
         }
 
     override fun finnOppgaveId(utbetalingId: UUID) =
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalOppgaveDao(transaction).finnOppgaveId(utbetalingId)
-            }
+            TransactionalOppgaveDao(session).finnOppgaveId(utbetalingId)
         }
 
     fun finnVedtaksperiodeId(oppgaveId: Long) =
@@ -163,16 +139,14 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource), Opp
         utbetalingId: UUID,
         kanAvvises: Boolean,
     ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-        session.transaction { transaction ->
-            TransactionalOppgaveDao(transaction).opprettOppgave(
-                id,
-                commandContextId,
-                egenskaper,
-                vedtaksperiodeId,
-                utbetalingId,
-                kanAvvises,
-            )
-        }
+        TransactionalOppgaveDao(session).opprettOppgave(
+            id,
+            commandContextId,
+            egenskaper,
+            vedtaksperiodeId,
+            utbetalingId,
+            kanAvvises,
+        )
     }
 
     override fun updateOppgave(
@@ -182,16 +156,12 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource), Opp
         oid: UUID?,
         egenskaper: List<EgenskapForDatabase>,
     ) = sessionOf(dataSource).use { session ->
-        session.transaction { transaction ->
-            TransactionalOppgaveDao(transaction).updateOppgave(oppgaveId, oppgavestatus, ferdigstiltAv, oid, egenskaper)
-        }
+        TransactionalOppgaveDao(session).updateOppgave(oppgaveId, oppgavestatus, ferdigstiltAv, oid, egenskaper)
     }
 
     override fun finnHendelseId(id: Long) =
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalOppgaveDao(transaction).finnHendelseId(id)
-            }
+            TransactionalOppgaveDao(session).finnHendelseId(id)
         }
 
     override fun harGyldigOppgave(utbetalingId: UUID) =
@@ -206,38 +176,28 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource), Opp
 
     override fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) =
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalOppgaveDao(transaction).harFerdigstiltOppgave(vedtaksperiodeId)
-            }
+            TransactionalOppgaveDao(session).harFerdigstiltOppgave(vedtaksperiodeId)
         }
 
     override fun venterPåSaksbehandler(oppgaveId: Long) =
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalOppgaveDao(transaction).venterPåSaksbehandler(oppgaveId)
-            }
+            TransactionalOppgaveDao(session).venterPåSaksbehandler(oppgaveId)
         }
 
     override fun finnFødselsnummer(oppgaveId: Long) =
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalOppgaveDao(transaction).finnFødselsnummer(oppgaveId)
-            }
+            TransactionalOppgaveDao(session).finnFødselsnummer(oppgaveId)
         }
 
     override fun oppgaveDataForAutomatisering(oppgaveId: Long): OppgaveDataForAutomatisering? {
         return sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalOppgaveDao(transaction).oppgaveDataForAutomatisering(oppgaveId)
-            }
+            TransactionalOppgaveDao(session).oppgaveDataForAutomatisering(oppgaveId)
         }
     }
 
     override fun invaliderOppgaveFor(fødselsnummer: String) {
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalOppgaveDao(transaction).invaliderOppgaveFor(fødselsnummer)
-            }
+            TransactionalOppgaveDao(session).invaliderOppgaveFor(fødselsnummer)
         }
     }
 }

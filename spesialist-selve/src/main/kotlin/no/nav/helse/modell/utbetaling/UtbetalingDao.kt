@@ -157,9 +157,7 @@ class UtbetalingDao(private val dataSource: DataSource) : HelseDao(dataSource), 
         utbetalingId: UUID,
     ) {
         sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalUtbetalingDao(transactionalSession).opprettKobling(vedtaksperiodeId, utbetalingId)
-            }
+            TransactionalUtbetalingDao(session).opprettKobling(vedtaksperiodeId, utbetalingId)
         }
     }
 
@@ -168,9 +166,7 @@ class UtbetalingDao(private val dataSource: DataSource) : HelseDao(dataSource), 
         utbetalingId: UUID,
     ) {
         sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalUtbetalingDao(transactionalSession).fjernKobling(vedtaksperiodeId, utbetalingId)
-            }
+            TransactionalUtbetalingDao(session).fjernKobling(vedtaksperiodeId, utbetalingId)
         }
     }
 
@@ -182,17 +178,13 @@ class UtbetalingDao(private val dataSource: DataSource) : HelseDao(dataSource), 
 
     override fun hentUtbetaling(utbetalingId: UUID): Utbetaling {
         return sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalUtbetalingDao(transactionalSession).hentUtbetaling(utbetalingId)
-            }
+            TransactionalUtbetalingDao(session).hentUtbetaling(utbetalingId)
         }
     }
 
     override fun utbetalingFor(utbetalingId: UUID): Utbetaling? {
         return sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalUtbetalingDao(transactionalSession).utbetalingFor(utbetalingId)
-            }
+            TransactionalUtbetalingDao(session).utbetalingFor(utbetalingId)
         }
     }
 
@@ -227,23 +219,20 @@ class UtbetalingDao(private val dataSource: DataSource) : HelseDao(dataSource), 
         """
         return sessionOf(dataSource).use {
             it.run(
-                queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId))
-                    .map { row ->
-                        TidligereUtbetalingerForVedtaksperiodeDto(
-                            id = row.int("id"),
-                            utbetalingId = row.uuid("utbetaling_id"),
-                            utbetalingsstatus = Utbetalingsstatus.valueOf(row.string("status")),
-                        )
-                    }.asList,
+                queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).map { row ->
+                    TidligereUtbetalingerForVedtaksperiodeDto(
+                        id = row.int("id"),
+                        utbetalingId = row.uuid("utbetaling_id"),
+                        utbetalingsstatus = Utbetalingsstatus.valueOf(row.string("status")),
+                    )
+                }.asList,
             )
         }
     }
 
     override fun sisteUtbetalingIdFor(fødselsnummer: String): UUID? {
         return sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalUtbetalingDao(transactionalSession).sisteUtbetalingIdFor(fødselsnummer)
-            }
+            TransactionalUtbetalingDao(session).sisteUtbetalingIdFor(fødselsnummer)
         }
     }
 }

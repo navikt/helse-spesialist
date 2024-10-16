@@ -1,6 +1,6 @@
 package no.nav.helse.db
 
-import kotliquery.TransactionalSession
+import kotliquery.Session
 import kotliquery.queryOf
 import no.nav.helse.db.TransactionalMeldingDao.Meldingtype.ADRESSEBESKYTTELSE_ENDRET
 import no.nav.helse.db.TransactionalMeldingDao.Meldingtype.AVSLUTTET_MED_VEDTAK
@@ -50,12 +50,12 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import org.intellij.lang.annotations.Language
 import java.util.UUID
 
-internal class TransactionalMeldingDao(private val transactionalSession: TransactionalSession) : MeldingRepository {
+internal class TransactionalMeldingDao(private val session: Session) : MeldingRepository {
     override fun finnFødselsnummer(meldingId: UUID): String {
         @Language("PostgreSQL")
         val statement = """SELECT fodselsnummer FROM hendelse WHERE id = ?"""
         return requireNotNull(
-            transactionalSession.run(
+            session.run(
                 queryOf(statement, meldingId).map {
                     it.long("fodselsnummer").toFødselsnummer()
                 }.asSingle,
@@ -66,7 +66,7 @@ internal class TransactionalMeldingDao(private val transactionalSession: Transac
     override fun finn(id: UUID): Personmelding? {
         @Language("PostgreSQL")
         val statement = """SELECT type,data FROM hendelse WHERE id = ?"""
-        return transactionalSession.run(
+        return session.run(
             queryOf(statement, id).map { row ->
                 fraMeldingtype(enumValueOf(row.string("type")), row.string("data"))
             }.asSingle,
@@ -82,7 +82,7 @@ internal class TransactionalMeldingDao(private val transactionalSession: Transac
     }
 
     override fun lagre(melding: Personmelding) {
-        transactionalSession.run {
+        session.run {
             lagre(melding)
             if (melding is Vedtaksperiodemelding) {
                 opprettKobling(melding.vedtaksperiodeId(), melding.id)
@@ -104,7 +104,7 @@ internal class TransactionalMeldingDao(private val transactionalSession: Transac
             ORDER BY h.data ->> '@opprettet' DESC
             LIMIT 1
             """
-        return transactionalSession.run(
+        return session.run(
             queryOf(
                 statement,
                 mapOf("fodselsnummer" to fødselsnummer.toLong(), "vedtaksperiodeId" to vedtaksperiodeId.toString()),
@@ -140,7 +140,7 @@ internal class TransactionalMeldingDao(private val transactionalSession: Transac
             INSERT INTO automatisering_korrigert_soknad (vedtaksperiode_id, hendelse_ref)
             VALUES (:vedtaksperiodeId, :hendelseId)
             """.trimIndent()
-        transactionalSession.run(
+        session.run(
             queryOf(
                 statement,
                 mapOf("vedtaksperiodeId" to vedtaksperiodeId, "hendelseId" to meldingId),
@@ -156,7 +156,7 @@ internal class TransactionalMeldingDao(private val transactionalSession: Transac
                 WHERE vedtaksperiode_id = :vedtaksperiodeId
                 """
         return requireNotNull(
-            transactionalSession.run(
+            session.run(
                 queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).map {
                     it.int("antall")
                 }.asSingle,
@@ -173,7 +173,7 @@ internal class TransactionalMeldingDao(private val transactionalSession: Transac
             WHERE hendelse_ref = :hendelseId
             """.trimIndent()
         return requireNotNull(
-            transactionalSession.run(
+            session.run(
                 queryOf(statement, mapOf("hendelseId" to meldingId)).map {
                     it.int("antall") > 0
                 }.asSingle,
@@ -181,7 +181,7 @@ internal class TransactionalMeldingDao(private val transactionalSession: Transac
         )
     }
 
-    private fun TransactionalSession.opprettKobling(
+    private fun Session.opprettKobling(
         vedtaksperiodeId: UUID,
         meldingId: UUID,
     ) {
@@ -196,7 +196,7 @@ internal class TransactionalMeldingDao(private val transactionalSession: Transac
         )
     }
 
-    private fun TransactionalSession.lagre(melding: Personmelding) {
+    private fun Session.lagre(melding: Personmelding) {
         @Language("PostgreSQL")
         val query = """
             INSERT INTO hendelse(id, fodselsnummer, data, type)

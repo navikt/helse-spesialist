@@ -1,11 +1,11 @@
 package no.nav.helse.db
 
-import kotliquery.TransactionalSession
+import kotliquery.Session
 import kotliquery.queryOf
 import org.intellij.lang.annotations.Language
 
 internal class TransactionalTotrinnsvurderingDao(
-    private val transactionalSession: TransactionalSession,
+    private val session: Session,
 ) : TotrinnsvurderingRepository {
     override fun hentAktivTotrinnsvurdering(oppgaveId: Long): TotrinnsvurderingFraDatabase? {
         @Language("PostgreSQL")
@@ -26,7 +26,7 @@ internal class TransactionalTotrinnsvurderingDao(
               AND utbetaling_id_ref IS NULL
             """.trimIndent()
 
-        return transactionalSession.run(
+        return session.run(
             queryOf(query, mapOf("oppgaveId" to oppgaveId)).map { row ->
                 TotrinnsvurderingFraDatabase(
                     vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
@@ -55,7 +55,7 @@ internal class TransactionalTotrinnsvurderingDao(
               AND utbetaling_id_ref IS NULL
             """.trimIndent()
 
-        transactionalSession.run(
+        session.run(
             queryOf(
                 query,
                 mapOf(

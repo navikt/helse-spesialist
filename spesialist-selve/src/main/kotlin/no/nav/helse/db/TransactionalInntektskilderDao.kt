@@ -1,14 +1,14 @@
 package no.nav.helse.db
 
-import kotliquery.TransactionalSession
+import kotliquery.Session
 import no.nav.helse.modell.InntektskildeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import javax.naming.OperationNotSupportedException
 
 internal class TransactionalInntektskilderDao(
-    transactionalSession: TransactionalSession,
+    session: Session,
 ) : InntektskilderRepository {
-    private val arbeidsgiverDao = TransactionalArbeidsgiverDao(transactionalSession)
+    private val arbeidsgiverDao = TransactionalArbeidsgiverDao(session)
 
     override fun lagreInntektskilder(inntektskilder: List<InntektskildeDto>) {
         inntektskilder.forEach { inntekt ->

@@ -1,13 +1,13 @@
 package no.nav.helse.db
 
 import kotliquery.Row
-import kotliquery.TransactionalSession
+import kotliquery.Session
 import kotliquery.queryOf
 import no.nav.helse.modell.automatisering.AutomatiseringDto
 import org.intellij.lang.annotations.Language
 import java.util.UUID
 
-class TransactionalAutomatiseringDao(private val transactionalSession: TransactionalSession) :
+class TransactionalAutomatiseringDao(private val session: Session) :
     AutomatiseringRepository {
     override fun settAutomatiseringInaktiv(
         vedtaksperiodeId: UUID,
@@ -21,7 +21,7 @@ class TransactionalAutomatiseringDao(private val transactionalSession: Transacti
             WHERE vedtaksperiode_ref = (SELECT id FROM vedtak WHERE vedtak.vedtaksperiode_id = :vedtaksperiode_id LIMIT 1)
             AND hendelse_ref = :hendelse_ref
             """.trimIndent()
-        transactionalSession.run(
+        session.run(
             queryOf(
                 query,
                 mapOf(
@@ -44,7 +44,7 @@ class TransactionalAutomatiseringDao(private val transactionalSession: Transacti
             WHERE vedtaksperiode_ref = (SELECT id FROM vedtak WHERE vedtak.vedtaksperiode_id = :vedtaksperiode_id LIMIT 1)
             AND hendelse_ref = :hendelse_ref
             """.trimIndent()
-        transactionalSession.run(
+        session.run(
             queryOf(
                 query,
                 mapOf(
@@ -67,7 +67,7 @@ class TransactionalAutomatiseringDao(private val transactionalSession: Transacti
             AND hendelse_ref = ?
             AND (inaktiv_fra IS NULL OR inaktiv_fra > now())
             """.trimIndent()
-        return transactionalSession.run(
+        return session.run(
             queryOf(query, vedtaksperiodeId, hendelseId)
                 .map { it.boolean(1) }.asSingle,
         ) ?: false
@@ -109,7 +109,7 @@ class TransactionalAutomatiseringDao(private val transactionalSession: Transacti
             """.trimIndent()
         val vedtaksperiodeRef = finnVedtaksperiode(vedtaksperiodeId) ?: return null
         val problemer = finnAktiveProblemer(vedtaksperiodeRef, hendelseId)
-        return transactionalSession.run(
+        return session.run(
             queryOf(statement, vedtaksperiodeRef, hendelseId)
                 .map { tilAutomatiseringDto(problemer, it) }
                 .asSingle,
@@ -136,7 +136,7 @@ class TransactionalAutomatiseringDao(private val transactionalSession: Transacti
             INSERT INTO automatisering (vedtaksperiode_ref, hendelse_ref, automatisert, stikkprøve, utbetaling_id)
             VALUES ((SELECT id FROM vedtak WHERE vedtaksperiode_id = ?), ?, ?, ?, ?)
             """.trimIndent()
-        transactionalSession.run(
+        session.run(
             queryOf(
                 insertAutomatiseringStatement,
                 vedtaksperiodeId,
@@ -154,7 +154,7 @@ class TransactionalAutomatiseringDao(private val transactionalSession: Transacti
             VALUES ((SELECT id FROM vedtak WHERE vedtaksperiode_id = ?), ?, ?)
             """.trimIndent()
         problems.forEach { problem ->
-            transactionalSession.run(
+            session.run(
                 queryOf(
                     insertProblemStatement,
                     vedtaksperiodeId,
@@ -177,7 +177,7 @@ class TransactionalAutomatiseringDao(private val transactionalSession: Transacti
             AND vedtaksperiode_ref = ?
             AND (inaktiv_fra IS NULL OR inaktiv_fra > now())
             """.trimIndent()
-        return transactionalSession.run(
+        return session.run(
             queryOf(statement, hendelseId, vedtaksperiodeRef)
                 .map { it.string("problem") }
                 .asList,
@@ -187,7 +187,7 @@ class TransactionalAutomatiseringDao(private val transactionalSession: Transacti
     override fun finnVedtaksperiode(vedtaksperiodeId: UUID): Long? {
         @Language("PostgreSQL")
         val statement = "SELECT id FROM vedtak WHERE vedtaksperiode_id = ?"
-        return transactionalSession.run(
+        return session.run(
             queryOf(statement, vedtaksperiodeId)
                 .map { it.long(1) }
                 .asSingle,

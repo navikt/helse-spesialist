@@ -1,12 +1,12 @@
 package no.nav.helse.db
 
-import kotliquery.TransactionalSession
+import kotliquery.Session
 import kotliquery.queryOf
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak
 import org.intellij.lang.annotations.Language
 import java.time.LocalDateTime
 
-class TransactionalStansAutomatiskBehandlingDao(private val transactionalSession: TransactionalSession) : StansAutomatiskBehandlingRepository {
+class TransactionalStansAutomatiskBehandlingDao(private val session: Session) : StansAutomatiskBehandlingRepository {
     override fun hentFor(fødselsnummer: String): List<StansAutomatiskBehandlingFraDatabase> {
         @Language("PostgreSQL")
         val statement =
@@ -15,7 +15,7 @@ class TransactionalStansAutomatiskBehandlingDao(private val transactionalSession
             from stans_automatisering 
             where fødselsnummer = :fnr            
             """.trimIndent()
-        return transactionalSession.run(
+        return session.run(
             queryOf(statement, mapOf("fnr" to fødselsnummer))
                 .map { row ->
                     StansAutomatiskBehandlingFraDatabase(
@@ -43,7 +43,7 @@ class TransactionalStansAutomatiskBehandlingDao(private val transactionalSession
             insert into stans_automatisering (fødselsnummer, status, årsaker, opprettet, kilde, original_melding) 
             values (:fnr, :status, :arsaker::varchar[], :opprettet, :kilde, cast(:originalMelding as json))
             """.trimIndent()
-        transactionalSession.run(
+        session.run(
             queryOf(
                 statement,
                 mapOf(
@@ -65,7 +65,7 @@ class TransactionalStansAutomatiskBehandlingDao(private val transactionalSession
             insert into stans_automatisering (fødselsnummer, status, årsaker, opprettet, kilde, original_melding) 
             values (:fnr, 'NORMAL', '{}', now(), 'SPEIL', cast(:originalMelding as json))
             """.trimIndent()
-        transactionalSession.run(
+        session.run(
             queryOf(
                 statement,
                 mapOf(

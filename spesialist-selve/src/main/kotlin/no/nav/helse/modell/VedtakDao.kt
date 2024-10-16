@@ -85,9 +85,7 @@ internal class VedtakDao(private val dataSource: DataSource) : VedtakRepository 
         hendelseId: UUID,
     ) {
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalVedtakDao(transaction).opprettKobling(vedtaksperiodeId, hendelseId)
-            }
+            TransactionalVedtakDao(session).opprettKobling(vedtaksperiodeId, hendelseId)
         }
     }
 
@@ -96,9 +94,7 @@ internal class VedtakDao(private val dataSource: DataSource) : VedtakRepository 
         hendelseId: UUID,
     ) {
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalVedtakDao(transaction).fjernKobling(vedtaksperiodeId, hendelseId)
-            }
+            TransactionalVedtakDao(session).fjernKobling(vedtaksperiodeId, hendelseId)
         }
     }
 
@@ -111,9 +107,7 @@ internal class VedtakDao(private val dataSource: DataSource) : VedtakRepository 
 
     override fun erSpesialsak(vedtaksperiodeId: UUID) =
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalVedtakDao(transaction).erSpesialsak(vedtaksperiodeId)
-            }
+            TransactionalVedtakDao(session).erSpesialsak(vedtaksperiodeId)
         }
 
     internal fun spesialsakFerdigbehandlet(vedtaksperiodeId: UUID) =
@@ -165,9 +159,7 @@ internal class VedtakDao(private val dataSource: DataSource) : VedtakRepository 
 
     override fun finnInntektskilde(vedtaksperiodeId: UUID): Inntektskilde? =
         sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalVedtakDao(transactionalSession).finnInntektskilde(vedtaksperiodeId)
-            }
+            TransactionalVedtakDao(session).finnInntektskilde(vedtaksperiodeId)
         }
 
     override fun erAutomatiskGodkjent(utbetalingId: UUID) =
@@ -185,8 +177,6 @@ internal class VedtakDao(private val dataSource: DataSource) : VedtakRepository 
 
     override fun finnOrgnummer(vedtaksperiodeId: UUID) =
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalVedtakDao(transaction).finnOrgnummer(vedtaksperiodeId)
-            }
+            TransactionalVedtakDao(session).finnOrgnummer(vedtaksperiodeId)
         }
 }

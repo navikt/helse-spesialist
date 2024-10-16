@@ -1,6 +1,6 @@
 package no.nav.helse.db
 
-import kotliquery.TransactionalSession
+import kotliquery.Session
 import kotliquery.queryOf
 import no.nav.helse.spesialist.api.abonnement.OpptegnelsePayload
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
@@ -9,7 +9,7 @@ import org.intellij.lang.annotations.Language
 import java.util.UUID
 import javax.naming.OperationNotSupportedException
 
-class TransactionalOpptegnelseDao(private val transactionalSession: TransactionalSession) : OpptegnelseRepository {
+class TransactionalOpptegnelseDao(private val session: Session) : OpptegnelseRepository {
     override fun opprettOpptegnelse(
         fødselsnummer: String,
         payload: OpptegnelsePayload,
@@ -23,7 +23,7 @@ class TransactionalOpptegnelseDao(private val transactionalSession: Transactiona
             FROM person
             WHERE fodselsnummer = :fodselsnummer
             """.trimIndent()
-        transactionalSession.run(
+        session.run(
             queryOf(
                 statement,
                 mapOf(

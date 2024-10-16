@@ -6,7 +6,9 @@ import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak
 import java.time.LocalDateTime
 import javax.sql.DataSource
 
-class StansAutomatiskBehandlingDao(private val dataSource: DataSource) : HelseDao(dataSource), StansAutomatiskBehandlingRepository {
+class StansAutomatiskBehandlingDao(private val dataSource: DataSource) :
+    HelseDao(dataSource),
+    StansAutomatiskBehandlingRepository {
     override fun lagreFraISyfo(
         fødselsnummer: String,
         status: String,
@@ -16,32 +18,26 @@ class StansAutomatiskBehandlingDao(private val dataSource: DataSource) : HelseDa
         kilde: String,
     ) {
         sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalStansAutomatiskBehandlingDao(transactionalSession).lagreFraISyfo(
-                    fødselsnummer,
-                    status,
-                    årsaker,
-                    opprettet,
-                    originalMelding,
-                    kilde,
-                )
-            }
+            TransactionalStansAutomatiskBehandlingDao(session).lagreFraISyfo(
+                fødselsnummer,
+                status,
+                årsaker,
+                opprettet,
+                originalMelding,
+                kilde,
+            )
         }
     }
 
     override fun lagreFraSpeil(fødselsnummer: String) {
         sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalStansAutomatiskBehandlingDao(transactionalSession).lagreFraSpeil(fødselsnummer)
-            }
+            TransactionalStansAutomatiskBehandlingDao(session).lagreFraSpeil(fødselsnummer)
         }
     }
 
     override fun hentFor(fødselsnummer: String) =
         sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalStansAutomatiskBehandlingDao(transactionalSession).hentFor(fødselsnummer)
-            }
+            TransactionalStansAutomatiskBehandlingDao(session).hentFor(fødselsnummer)
         }
 }
 

@@ -38,8 +38,6 @@ class SaksbehandlerDao(private val dataSource: DataSource) : HelseDao(dataSource
 
     override fun finnSaksbehandler(oid: UUID) =
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalSaksbehandlerDao(transaction).finnSaksbehandler(oid)
-            }
+            TransactionalSaksbehandlerDao(session).finnSaksbehandler(oid)
         }
 }

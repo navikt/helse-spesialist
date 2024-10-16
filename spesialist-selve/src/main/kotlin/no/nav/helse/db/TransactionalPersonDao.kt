@@ -1,7 +1,7 @@
 package no.nav.helse.db
 
 import com.fasterxml.jackson.databind.JsonNode
-import kotliquery.TransactionalSession
+import kotliquery.Session
 import kotliquery.queryOf
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.kommando.MinimalPersonDto
@@ -15,7 +15,7 @@ import java.time.LocalDate
 import javax.naming.OperationNotSupportedException
 
 internal class TransactionalPersonDao(
-    private val transactionalSession: TransactionalSession,
+    private val session: Session,
 ) : PersonRepository {
     override fun finnMinimalPerson(fødselsnummer: String): MinimalPersonDto? =
         finnPerson(fødselsnummer)?.let {
@@ -28,13 +28,13 @@ internal class TransactionalPersonDao(
     override fun personKlargjort(fødselsnummer: String) {
         @Language("PostgreSQL")
         val query = "DELETE FROM person_klargjores WHERE fødselsnummer = :fodselsnummer"
-        transactionalSession.run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer)).asUpdate)
+        session.run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer)).asUpdate)
     }
 
     override fun finnEnhetSistOppdatert(fødselsnummer: String): LocalDate? {
         @Language("PostgreSQL")
         val query = "SELECT enhet_ref_oppdatert FROM person WHERE fodselsnummer=?;"
-        return transactionalSession.run(
+        return session.run(
             queryOf(query, fødselsnummer.toLong())
                 .map { row ->
                     row.localDateOrNull("enhet_ref_oppdatert")
@@ -49,7 +49,7 @@ internal class TransactionalPersonDao(
         @Language("PostgreSQL")
         val query =
             "UPDATE person SET enhet_ref=:enhetNr, enhet_ref_oppdatert=now() WHERE fodselsnummer=:fodselsnummer;"
-        return transactionalSession.run(
+        return session.run(
             queryOf(
                 query,
                 mapOf(
@@ -66,12 +66,12 @@ internal class TransactionalPersonDao(
         fødselsnummer: String,
         utbetalinger: JsonNode,
     ): Long {
-        return transactionalSession
+        return session
             .finnInfotrygdutbetalingerRef(fødselsnummer)
             ?.also {
-                transactionalSession.updateInfotrygdutbetalinger(it, fødselsnummer, utbetalinger)
+                session.updateInfotrygdutbetalinger(it, fødselsnummer, utbetalinger)
             }
-            ?: transactionalSession.insertInfotrygdubetalinger(utbetalinger, fødselsnummer)
+            ?: session.insertInfotrygdubetalinger(utbetalinger, fødselsnummer)
     }
 
     override fun upsertPersoninfo(
@@ -83,10 +83,10 @@ internal class TransactionalPersonDao(
         kjønn: Kjønn,
         adressebeskyttelse: Adressebeskyttelse,
     ) {
-        transactionalSession
+        session
             .finnPersonInfoRef(fødselsnummer)
             ?.also {
-                transactionalSession.updatePersonInfo(
+                session.updatePersonInfo(
                     it,
                     fornavn,
                     mellomnavn,
@@ -97,7 +97,7 @@ internal class TransactionalPersonDao(
                     fødselsnummer,
                 )
             }
-            ?: transactionalSession.insertPersoninfo(
+            ?: session.insertPersoninfo(
                 fornavn,
                 mellomnavn,
                 etternavn,
@@ -127,7 +127,7 @@ internal class TransactionalPersonDao(
         @Language("PostgreSQL")
         val statement = "SELECT enhet_ref FROM person where fodselsnummer = ?;"
         return requireNotNull(
-            transactionalSession.run(
+            session.run(
                 queryOf(statement, fødselsnummer.toLong())
                     .map {
                         it.int("enhet_ref").toEnhetnummer()
@@ -142,7 +142,7 @@ internal class TransactionalPersonDao(
             SELECT adressebeskyttelse FROM person_info
             WHERE id=(SELECT info_ref FROM person WHERE fodselsnummer=?);
         """
-        return transactionalSession.run(
+        return session.run(
             queryOf(adressebeskyttelseQuery, fødselsnummer.toLong())
                 .map { row -> Adressebeskyttelse.valueOf(row.string("adressebeskyttelse")) }
                 .asSingle,
@@ -156,7 +156,7 @@ internal class TransactionalPersonDao(
     override fun finnPersoninfoSistOppdatert(fødselsnummer: String): LocalDate? {
         @Language("PostgreSQL")
         val query = "SELECT personinfo_oppdatert FROM person WHERE fodselsnummer=?;"
-        return transactionalSession.run(
+        return session.run(
             queryOf(query, fødselsnummer.toLong())
                 .map { row -> row.localDateOrNull("personinfo_oppdatert") }
                 .asSingle,
@@ -166,7 +166,7 @@ internal class TransactionalPersonDao(
     override fun lagreMinimalPerson(minimalPerson: MinimalPersonDto) {
         @Language("PostgreSQL")
         val query = """INSERT INTO person(fodselsnummer, aktor_id) VALUES(:fodselsnummer, :aktorId); """
-        transactionalSession.run(
+        session.run(
             queryOf(
                 query,
                 mapOf(
@@ -180,7 +180,7 @@ internal class TransactionalPersonDao(
     internal fun finnPerson(fødselsnummer: String): PersonDto? {
         @Language("PostgreSQL")
         val query = "SELECT aktor_id, fodselsnummer FROM person WHERE fodselsnummer = :fodselsnummer"
-        return transactionalSession.run(
+        return session.run(
             queryOf(
                 query,
                 mapOf("fodselsnummer" to fødselsnummer.toLong()),
@@ -196,14 +196,14 @@ internal class TransactionalPersonDao(
         )
     }
 
-    private fun TransactionalSession.finnInfotrygdutbetalingerRef(fødselsnummer: String): Long? {
+    private fun Session.finnInfotrygdutbetalingerRef(fødselsnummer: String): Long? {
         @Language("PostgreSQL")
         val query = "SELECT infotrygdutbetalinger_ref FROM person WHERE fodselsnummer=?"
 
         return run(queryOf(query, fødselsnummer.toLong()).map { it.longOrNull("infotrygdutbetalinger_ref") }.asSingle)
     }
 
-    private fun TransactionalSession.updateInfotrygdutbetalinger(
+    private fun Session.updateInfotrygdutbetalinger(
         infotrygdutbetalingerId: Long,
         fødselsnummer: String,
         utbetalinger: JsonNode,
@@ -226,14 +226,14 @@ internal class TransactionalPersonDao(
         updateInfotrygdutbetalingerOppdatert(fødselsnummer)
     }
 
-    private fun TransactionalSession.updateInfotrygdutbetalingerOppdatert(fødselsnummer: String) {
+    private fun Session.updateInfotrygdutbetalingerOppdatert(fødselsnummer: String) {
         @Language("PostgreSQL")
         val query = "UPDATE person SET infotrygdutbetalinger_oppdatert=now() WHERE fodselsnummer=?"
 
         run(queryOf(query, fødselsnummer.toLong()).asUpdate)
     }
 
-    private fun TransactionalSession.insertInfotrygdubetalinger(
+    private fun Session.insertInfotrygdubetalinger(
         utbetalinger: JsonNode,
         fødselsnummer: String,
     ): Long {
@@ -253,7 +253,7 @@ internal class TransactionalPersonDao(
         return infotrygdutbetalingerId
     }
 
-    private fun TransactionalSession.updateInfotrygdutbetalingerRef(
+    private fun Session.updateInfotrygdutbetalingerRef(
         infotrygdutbetalingerId: Long,
         fødselsnummer: String,
     ) {
@@ -274,14 +274,14 @@ internal class TransactionalPersonDao(
         )
     }
 
-    private fun TransactionalSession.finnPersonInfoRef(fødselsnummer: String): Long? {
+    private fun Session.finnPersonInfoRef(fødselsnummer: String): Long? {
         @Language("PostgreSQL")
         val query = "SELECT info_ref FROM person WHERE fodselsnummer=?"
 
         return run(queryOf(query, fødselsnummer.toLong()).map { it.longOrNull("info_ref") }.asSingle)
     }
 
-    private fun TransactionalSession.updatePersonInfo(
+    private fun Session.updatePersonInfo(
         id: Long,
         fornavn: String,
         mellomnavn: String?,
@@ -321,14 +321,14 @@ internal class TransactionalPersonDao(
         updatePersoninfoOppdatert(fødselsnummer)
     }
 
-    private fun TransactionalSession.updatePersoninfoOppdatert(fødselsnummer: String) {
+    private fun Session.updatePersoninfoOppdatert(fødselsnummer: String) {
         @Language("PostgreSQL")
         val query = "UPDATE person SET personinfo_oppdatert=now() WHERE fodselsnummer=?"
 
         run(queryOf(query, fødselsnummer.toLong()).asUpdate)
     }
 
-    private fun TransactionalSession.insertPersoninfo(
+    private fun Session.insertPersoninfo(
         fornavn: String,
         mellomnavn: String?,
         etternavn: String,
@@ -362,7 +362,7 @@ internal class TransactionalPersonDao(
         updatePersoninfoRef(personinfoId, fødselsnummer)
     }
 
-    private fun TransactionalSession.updatePersoninfoRef(
+    private fun Session.updatePersoninfoRef(
         id: Long,
         fødselsnummer: String,
     ) {

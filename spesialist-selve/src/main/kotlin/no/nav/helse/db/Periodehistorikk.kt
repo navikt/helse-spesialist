@@ -76,15 +76,13 @@ class Periodehistorikk(
         json: String,
     ) {
         sessionOf(dataSource).use { session ->
-            session.transaction { transaction ->
-                TransactionalPeriodehistorikkDao(transaction).lagre(
-                    historikkType,
-                    saksbehandlerOid,
-                    utbetalingId,
-                    notatId,
-                    json,
-                )
-            }
+            TransactionalPeriodehistorikkDao(session).lagre(
+                historikkType,
+                saksbehandlerOid,
+                utbetalingId,
+                notatId,
+                json,
+            )
         }
     }
 

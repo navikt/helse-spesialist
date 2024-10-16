@@ -8,17 +8,13 @@ import javax.sql.DataSource
 internal class ÅpneGosysOppgaverDao(val dataSource: DataSource) : ÅpneGosysOppgaverRepository {
     override fun persisterÅpneGosysOppgaver(åpneGosysOppgaver: ÅpneGosysOppgaverDto) {
         sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalÅpneGosysOppgaverDao(transactionalSession).persisterÅpneGosysOppgaver(åpneGosysOppgaver)
-            }
+            TransactionalÅpneGosysOppgaverDao(session).persisterÅpneGosysOppgaver(åpneGosysOppgaver)
         }
     }
 
     override fun antallÅpneOppgaver(fødselsnummer: String): Int? {
         return sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalÅpneGosysOppgaverDao(transactionalSession).antallÅpneOppgaver(fødselsnummer)
-            }
+            TransactionalÅpneGosysOppgaverDao(session).antallÅpneOppgaver(fødselsnummer)
         }
     }
 }

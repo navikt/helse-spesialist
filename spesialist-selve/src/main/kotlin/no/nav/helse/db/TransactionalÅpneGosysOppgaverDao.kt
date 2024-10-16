@@ -1,11 +1,11 @@
 package no.nav.helse.db
 
-import kotliquery.TransactionalSession
+import kotliquery.Session
 import kotliquery.queryOf
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
 import org.intellij.lang.annotations.Language
 
-class TransactionalÅpneGosysOppgaverDao(private val transactionalSession: TransactionalSession) : ÅpneGosysOppgaverRepository {
+class TransactionalÅpneGosysOppgaverDao(private val session: Session) : ÅpneGosysOppgaverRepository {
     override fun persisterÅpneGosysOppgaver(åpneGosysOppgaver: ÅpneGosysOppgaverDto) {
         @Language("PostgreSQL")
         val query =
@@ -14,7 +14,7 @@ class TransactionalÅpneGosysOppgaverDao(private val transactionalSession: Trans
             VALUES ((SELECT id FROM person WHERE fodselsnummer = :fodselsnummer), :antall, :oppslag_feilet, :opprettet)
             ON CONFLICT (person_ref) DO UPDATE SET antall = :antall, oppslag_feilet = :oppslag_feilet, opprettet = :opprettet
             """.trimIndent()
-        transactionalSession.run(
+        session.run(
             queryOf(
                 query,
                 mapOf(
@@ -37,7 +37,7 @@ class TransactionalÅpneGosysOppgaverDao(private val transactionalSession: Trans
             WHERE p.fodselsnummer = ?
             AND go.oppslag_feilet = FALSE
             """.trimIndent()
-        return transactionalSession.run(
+        return session.run(
             queryOf(query, fødselsnummer.toLong())
                 .map { it.intOrNull("antall") }
                 .asSingle,

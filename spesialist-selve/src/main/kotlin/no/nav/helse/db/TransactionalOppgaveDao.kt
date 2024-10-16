@@ -1,6 +1,6 @@
 package no.nav.helse.db
 
-import kotliquery.TransactionalSession
+import kotliquery.Session
 import kotliquery.queryOf
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.oppgave.Egenskap
@@ -12,14 +12,14 @@ import java.time.LocalDate
 import java.util.UUID
 import javax.naming.OperationNotSupportedException
 
-class TransactionalOppgaveDao(private val transactionalSession: TransactionalSession) : OppgaveRepository {
+class TransactionalOppgaveDao(private val session: Session) : OppgaveRepository {
     override fun finnUtbetalingId(oppgaveId: Long): UUID? {
         @Language("PostgreSQL")
         val statement =
             """
             SELECT utbetaling_id FROM oppgave WHERE id = :oppgaveId;
             """.trimIndent()
-        return transactionalSession.run(
+        return session.run(
             queryOf(statement, mapOf("oppgaveId" to oppgaveId)).map {
                 it.uuid("utbetaling_id")
             }.asSingle,
@@ -39,7 +39,7 @@ class TransactionalOppgaveDao(private val transactionalSession: TransactionalSes
             LIMIT 1;
             """.trimIndent()
         return checkNotNull(
-            transactionalSession.run(
+            session.run(
                 queryOf(statement, mapOf("fodselsnummer" to fødselsnummer.toLong()))
                     .map {
                         it.long("oppgaveId")
@@ -61,7 +61,7 @@ class TransactionalOppgaveDao(private val transactionalSession: TransactionalSes
             ORDER BY o.id DESC LIMIT 1            
             """.trimIndent()
 
-        return transactionalSession.run(
+        return session.run(
             queryOf(statement, mapOf("oppgaveId" to id))
                 .map { row ->
                     val egenskaper: List<EgenskapForDatabase> =
@@ -101,7 +101,7 @@ class TransactionalOppgaveDao(private val transactionalSession: TransactionalSes
             WHERE o.status = 'AvventerSaksbehandler'::oppgavestatus
                 AND p.fodselsnummer = :fodselsnummer;                
             """.trimIndent()
-        return transactionalSession.run(
+        return session.run(
             queryOf(statement, mapOf("fodselsnummer" to fødselsnummer.toLong()))
                 .map { it.long("oppgaveId") }
                 .asSingle,
@@ -116,7 +116,7 @@ class TransactionalOppgaveDao(private val transactionalSession: TransactionalSes
             FROM oppgave o WHERE o.utbetaling_id = :utbetaling_id
             AND o.status NOT IN ('Invalidert'::oppgavestatus, 'Ferdigstilt'::oppgavestatus)
             """.trimIndent()
-        return transactionalSession.run(
+        return session.run(
             queryOf(statement, mapOf("utbetaling_id" to utbetalingId))
                 .map { it.long("oppgaveId") }
                 .asSingle,
@@ -137,7 +137,7 @@ class TransactionalOppgaveDao(private val transactionalSession: TransactionalSes
             """.trimIndent()
 
         return requireNotNull(
-            transactionalSession.run(
+            session.run(
                 queryOf(statement, mapOf("oppgaveId" to id))
                     .map { it.uuid("hendelse_id") }
                     .asSingle,
@@ -158,7 +158,7 @@ class TransactionalOppgaveDao(private val transactionalSession: TransactionalSes
             and o.id = o2.id
             AND o.status = 'AvventerSaksbehandler'::oppgavestatus;             
             """.trimIndent()
-        transactionalSession.run(
+        session.run(
             queryOf(
                 statement,
                 mapOf("fodselsnummer" to fødselsnummer.toLong()),
@@ -172,7 +172,7 @@ class TransactionalOppgaveDao(private val transactionalSession: TransactionalSes
             """
             SELECT nextval(pg_get_serial_sequence('oppgave', 'id')) as neste_id;              
             """.trimIndent()
-        return transactionalSession.run(
+        return session.run(
             queryOf(statement)
                 .map { it.long("neste_id") }
                 .asSingle,
@@ -188,7 +188,7 @@ class TransactionalOppgaveDao(private val transactionalSession: TransactionalSes
             )              
             """.trimIndent()
         return requireNotNull(
-            transactionalSession.run(
+            session.run(
                 queryOf(statement, mapOf("oppgaveId" to oppgaveId))
                     .map { it.boolean(1) }
                     .asSingle,
@@ -205,7 +205,7 @@ class TransactionalOppgaveDao(private val transactionalSession: TransactionalSes
             WHERE o.id = :oppgaveId;              
             """.trimIndent()
         return requireNotNull(
-            transactionalSession.run(
+            session.run(
                 queryOf(statement, mapOf("oppgaveId" to oppgaveId))
                     .map { it.uuid("spleis_behandling_id") }
                     .asSingle,
@@ -224,7 +224,7 @@ class TransactionalOppgaveDao(private val transactionalSession: TransactionalSes
             INNER JOIN saksbehandleroppgavetype s ON s.vedtak_ref = v.id
             WHERE o.id = :oppgaveId 
             """.trimIndent()
-        return transactionalSession.run(
+        return session.run(
             queryOf(statement, mapOf("oppgaveId" to oppgaveId))
                 .map { row ->
                     val json = objectMapper.readTree(row.string("godkjenningbehovJson"))
@@ -314,7 +314,7 @@ class TransactionalOppgaveDao(private val transactionalSession: TransactionalSes
             LIMIT :limit
             """.trimIndent()
 
-        return transactionalSession.run(
+        return session.run(
             queryOf(
                 statement,
                 mapOf(
@@ -381,7 +381,7 @@ class TransactionalOppgaveDao(private val transactionalSession: TransactionalSes
             WHERE o.status = 'AvventerSaksbehandler'
                 AND t.saksbehandler_ref = :oid              
             """.trimIndent()
-        return transactionalSession.run(
+        return session.run(
             queryOf(statement, mapOf("oid" to saksbehandlerOid))
                 .map { row ->
                     AntallOppgaverFraDatabase(
@@ -402,7 +402,7 @@ class TransactionalOppgaveDao(private val transactionalSession: TransactionalSes
             WHERE o.id = :oppgaveId
             """.trimIndent()
         return requireNotNull(
-            transactionalSession.run(
+            session.run(
                 queryOf(statement, mapOf("oppgaveId" to oppgaveId))
                     .map { it.long("fodselsnummer").toFødselsnummer() }
                     .asSingle,
@@ -424,7 +424,7 @@ class TransactionalOppgaveDao(private val transactionalSession: TransactionalSes
             SET ferdigstilt_av = :ferdigstiltAv, ferdigstilt_av_oid = :oid, status = :oppgavestatus::oppgavestatus, egenskaper = :egenskaper::varchar[]
             WHERE id=:oppgaveId;
             """.trimIndent()
-        return transactionalSession.run(
+        return session.run(
             queryOf(
                 statement,
                 mapOf(
@@ -447,7 +447,7 @@ class TransactionalOppgaveDao(private val transactionalSession: TransactionalSes
             WHERE v.vedtaksperiode_id = :vedtaksperiodeId AND o.status = 'Ferdigstilt'::oppgavestatus
             """.trimIndent()
         return requireNotNull(
-            transactionalSession.run(
+            session.run(
                 queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId))
                     .map { it.int("oppgave_count") }
                     .asSingle,
@@ -487,7 +487,7 @@ class TransactionalOppgaveDao(private val transactionalSession: TransactionalSes
             OFFSET :offset
             LIMIT :limit;
             """.trimIndent()
-        return transactionalSession.run(
+        return session.run(
             queryOf(
                 statement,
                 mapOf(
@@ -532,7 +532,7 @@ class TransactionalOppgaveDao(private val transactionalSession: TransactionalSes
             ORDER BY o.opprettet DESC
             LIMIT 1            
             """.trimIndent()
-        return transactionalSession.run(
+        return session.run(
             queryOf(
                 statement,
                 mapOf(
@@ -557,7 +557,7 @@ class TransactionalOppgaveDao(private val transactionalSession: TransactionalSes
             ORDER BY opprettet DESC
             LIMIT 1
             """.trimIndent()
-        return transactionalSession.run(
+        return session.run(
             queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId))
                 .map { it.long("id") }
                 .asSingle,
@@ -608,7 +608,7 @@ class TransactionalOppgaveDao(private val transactionalSession: TransactionalSes
                 )
             """.trimIndent()
         return requireNotNull(
-            transactionalSession.run(
+            session.run(
                 queryOf(
                     statement,
                     mapOf(
@@ -650,7 +650,7 @@ class TransactionalOppgaveDao(private val transactionalSession: TransactionalSes
                     )
             """.trimIndent()
         return requireNotNull(
-            transactionalSession.run(
+            session.run(
                 queryOf(
                     statement,
                     mapOf(
@@ -693,7 +693,7 @@ class TransactionalOppgaveDao(private val transactionalSession: TransactionalSes
             SELECT person_ref FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId;
             """.trimIndent()
         return requireNotNull(
-            transactionalSession.run(
+            session.run(
                 queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId))
                     .map { it.long("person_ref") }
                     .asSingle,
@@ -708,7 +708,7 @@ class TransactionalOppgaveDao(private val transactionalSession: TransactionalSes
             SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId;  
             """.trimIndent()
         return requireNotNull(
-            transactionalSession.run(
+            session.run(
                 queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId))
                     .map { it.long("id") }
                     .asSingle,

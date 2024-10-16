@@ -14,9 +14,7 @@ class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource), Notat
         notatType: NotatType,
     ): Long? {
         return sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                TransactionalNotatDao(transactionalSession).lagreForOppgaveId(oppgaveId, tekst, saksbehandler_oid, notatType)
-            }
+            TransactionalNotatDao(session).lagreForOppgaveId(oppgaveId, tekst, saksbehandler_oid, notatType)
         }
     }
 }
