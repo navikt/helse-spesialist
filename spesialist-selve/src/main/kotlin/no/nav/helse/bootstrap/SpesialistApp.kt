@@ -153,7 +153,7 @@ internal class SpesialistApp(
         TotrinnsvurderingMediator(
             dao = totrinnsvurderingDao,
             oppgaveDao = oppgaveDao,
-            periodehistorikkDao = periodehistorikkApiDao,
+            periodehistorikkRepository = periodehistorikk,
             notatRepository = notatRepository,
         )
 

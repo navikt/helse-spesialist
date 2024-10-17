@@ -40,4 +40,29 @@ class TransactionalPeriodehistorikkDao(private val session: Session) : Periodehi
             ).asUpdate,
         )
     }
+
+    override fun lagre(
+        historikkType: PeriodehistorikkType,
+        saksbehandlerOid: UUID?,
+        oppgaveId: Long,
+        notatId: Int?,
+        json: String,
+    ) {
+        @Language("PostgreSQL")
+        val statement = """
+                 SELECT utbetaling_id FROM oppgave WHERE id = :oppgaveId;
+        """
+        val utbetalingId =
+            session.run(
+                queryOf(
+                    statement,
+                    mapOf(
+                        "oppgaveId" to oppgaveId,
+                    ),
+                ).map { it.uuid("utbetaling_id") }.asSingle,
+            )
+        utbetalingId?.let {
+            lagre(historikkType, saksbehandlerOid, utbetalingId, notatId, json)
+        } ?: throw IllegalStateException("Forventer å finne utbetaling for oppgave med id=$oppgaveId")
+    }
 }

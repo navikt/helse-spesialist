@@ -2,6 +2,7 @@ import no.nav.helse.SpeilTilgangsgrupper
 import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.db.OpptegnelseDao
+import no.nav.helse.db.Periodehistorikk
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.TildelingDao
@@ -15,7 +16,6 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spesialist.api.notat.NotatApiDao
 import no.nav.helse.spesialist.api.notat.NotatApiRepository
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.testEnv
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -28,7 +28,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     protected val testRapid = __ikke_bruk_denne
     protected val oppgaveDao = OppgaveDao(dataSource)
     private val reservasjonDao = ReservasjonDao(dataSource)
-    private val periodehistorikkDao = PeriodehistorikkApiDao(dataSource)
+    private val periodehistorikk = Periodehistorikk(dataSource)
     private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
     private val meldingDao = MeldingDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
@@ -56,13 +56,12 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
             rapidsConnection = testRapid,
             oppgaveService = oppgaveService,
             reservasjonDao = reservasjonDao,
-            periodehistorikkDao = periodehistorikkDao,
             saksbehandlerRepository = saksbehandlerDao,
             totrinnsvurderingMediator =
                 TotrinnsvurderingMediator(
                     totrinnsvurderingDao,
                     oppgaveDao,
-                    periodehistorikkDao,
+                    periodehistorikk,
                     NotatApiRepository(NotatApiDao(dataSource)),
                 ),
         )

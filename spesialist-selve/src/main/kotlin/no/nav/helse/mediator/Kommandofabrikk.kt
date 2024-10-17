@@ -7,6 +7,7 @@ import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.OpptegnelseDao
+import no.nav.helse.db.Periodehistorikk
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
@@ -98,12 +99,13 @@ internal class Kommandofabrikk(
     private val notatDao: NotatApiDao = NotatApiDao(dataSource),
     private val notatRepository: NotatApiRepository = NotatApiRepository(notatDao),
     private val periodehistorikkDao: PeriodehistorikkApiDao = PeriodehistorikkApiDao(dataSource),
+    private val periodehistorikk: Periodehistorikk = Periodehistorikk(dataSource),
     private val påVentDao: PåVentDao = PåVentDao(dataSource),
     private val totrinnsvurderingMediator: TotrinnsvurderingMediator =
         TotrinnsvurderingMediator(
             totrinnsvurderingDao,
             oppgaveDao,
-            periodehistorikkDao,
+            periodehistorikk,
             notatRepository,
         ),
     private val godkjenningMediator: GodkjenningMediator,
@@ -218,7 +220,7 @@ internal class Kommandofabrikk(
             fødselsnummer = hendelse.fødselsnummer(),
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
             utbetalingRepository = utbetalingDao,
-            periodehistorikkDao = periodehistorikkDao,
+            periodehistorikkRepository = periodehistorikk,
             commandContextRepository = commandContextDao,
             oppgaveService = oppgaveService,
             reservasjonRepository = reservasjonDao,

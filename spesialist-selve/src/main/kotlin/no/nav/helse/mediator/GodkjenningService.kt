@@ -1,6 +1,7 @@
 package no.nav.helse.mediator
 
 import net.logstash.logback.argument.StructuredArguments
+import no.nav.helse.db.Periodehistorikk
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TotrinnsvurderingDao
@@ -15,7 +16,6 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.notat.NotatApiDao
 import no.nav.helse.spesialist.api.notat.NotatApiRepository
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType.TOTRINNSVURDERING_ATTESTERT
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.slf4j.LoggerFactory
@@ -32,13 +32,13 @@ internal class GodkjenningService(
     private val rapidsConnection: RapidsConnection,
     private val oppgaveService: OppgaveService,
     private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
-    private val periodehistorikkDao: PeriodehistorikkApiDao = PeriodehistorikkApiDao(dataSource),
+    private val periodehistorikk: Periodehistorikk = Periodehistorikk(dataSource),
     private val saksbehandlerRepository: SaksbehandlerRepository,
     private val totrinnsvurderingMediator: TotrinnsvurderingMediator =
         TotrinnsvurderingMediator(
             TotrinnsvurderingDao(dataSource),
             oppgaveDao,
-            periodehistorikkDao,
+            periodehistorikk,
             NotatApiRepository(
                 NotatApiDao(dataSource),
             ),
@@ -105,7 +105,7 @@ internal class GodkjenningService(
             overstyringDao.ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId)
 
             if (totrinnsvurdering?.erBeslutteroppgave() == true && godkjenningDTO.godkjent) {
-                periodehistorikkDao.lagre(TOTRINNSVURDERING_ATTESTERT, oid, utbetalingId, null)
+                periodehistorikk.lagre(TOTRINNSVURDERING_ATTESTERT, oid, utbetalingId, null)
             }
         }
     }

@@ -24,45 +24,6 @@ class PeriodehistorikkApiDao(private val dataSource: DataSource) : HelseDao(data
             )
         }
 
-    fun lagre(
-        historikkType: PeriodehistorikkType,
-        saksbehandlerOid: UUID? = null,
-        utbetalingId: UUID,
-        notatId: Int? = null,
-        json: String = "{}",
-    ) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val statement = """
-                INSERT INTO periodehistorikk (type, saksbehandler_oid, utbetaling_id, notat_id, json)
-                VALUES (:type, :saksbehandler_oid, :utbetaling_id, :notat_id, :json::json)
-        """
-        session.run(
-            queryOf(
-                statement,
-                mapOf(
-                    "type" to historikkType.name,
-                    "saksbehandler_oid" to saksbehandlerOid,
-                    "utbetaling_id" to utbetalingId,
-                    "notat_id" to notatId,
-                    "json" to json,
-                ),
-            ).asUpdate,
-        )
-    }
-
-    fun lagre(
-        historikkType: PeriodehistorikkType,
-        saksbehandlerOid: UUID? = null,
-        oppgaveId: Long,
-        notatId: Int? = null,
-        json: String = "{}",
-    ) = asSQL(
-        " SELECT utbetaling_id FROM oppgave WHERE id = :oppgaveId; ",
-        mapOf("oppgaveId" to oppgaveId),
-    ).single { it.uuid("utbetaling_id") }?.let {
-        lagre(historikkType, saksbehandlerOid, it, notatId, json)
-    }
-
     fun migrer(
         tidligereUtbetalingId: UUID,
         utbetalingId: UUID,

@@ -1,7 +1,7 @@
 package no.nav.helse.modell.kommando
 
+import no.nav.helse.db.PeriodehistorikkRepository
 import no.nav.helse.db.UtbetalingRepository
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -9,7 +9,7 @@ import java.util.UUID
 internal class VedtaksperiodeReberegnetPeriodehistorikk(
     private val vedtaksperiodeId: UUID,
     private val utbetalingRepository: UtbetalingRepository,
-    private val periodehistorikkDao: PeriodehistorikkApiDao,
+    private val periodehistorikkRepository: PeriodehistorikkRepository,
 ) : Command {
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
@@ -23,7 +23,7 @@ internal class VedtaksperiodeReberegnetPeriodehistorikk(
                 vedtaksperiodeId,
                 utbetalingId,
             )
-            periodehistorikkDao.lagre(PeriodehistorikkType.VEDTAKSPERIODE_REBEREGNET, null, utbetalingId)
+            periodehistorikkRepository.lagre(PeriodehistorikkType.VEDTAKSPERIODE_REBEREGNET, null, utbetalingId)
         } else {
             sikkerLogg.info(
                 "Kunne ikke legge til periodehistorikk ved reberegnet vedtaksperiode. Finner ikke utbetalingId for vedtaksperiodeId {} ",
