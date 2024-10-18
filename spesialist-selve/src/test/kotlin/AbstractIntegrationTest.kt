@@ -1,6 +1,7 @@
 import no.nav.helse.SpeilTilgangsgrupper
 import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.TestRapidHelpers.siste
+import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.Periodehistorikk
 import no.nav.helse.db.ReservasjonDao
@@ -14,8 +15,6 @@ import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.rapids_rivers.asLocalDateTime
-import no.nav.helse.spesialist.api.notat.NotatApiDao
-import no.nav.helse.spesialist.api.notat.NotatApiRepository
 import no.nav.helse.testEnv
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -32,6 +31,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
     private val meldingDao = MeldingDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
+    private val notatDao = NotatDao(dataSource)
 
     private val oppgaveService =
         OppgaveService(
@@ -57,12 +57,13 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
             oppgaveService = oppgaveService,
             reservasjonDao = reservasjonDao,
             saksbehandlerRepository = saksbehandlerDao,
+            notatRepository = notatDao,
             totrinnsvurderingMediator =
                 TotrinnsvurderingMediator(
                     totrinnsvurderingDao,
                     oppgaveDao,
                     periodehistorikk,
-                    NotatApiRepository(NotatApiDao(dataSource)),
+                    notatDao,
                 ),
         )
 

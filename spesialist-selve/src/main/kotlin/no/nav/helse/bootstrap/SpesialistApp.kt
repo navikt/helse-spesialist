@@ -53,7 +53,6 @@ import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.graphQLApi
 import no.nav.helse.spesialist.api.notat.NotatApiDao
-import no.nav.helse.spesialist.api.notat.NotatApiRepository
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
@@ -140,7 +139,6 @@ internal class SpesialistApp(
 
     private val behandlingsstatistikkService = BehandlingsstatistikkService(behandlingsstatistikkDao = behandlingsstatistikkDao)
     private val godkjenningMediator = GodkjenningMediator(opptegnelseDao)
-    private val notatRepository = NotatApiRepository(notatDao = notatApiDao)
     private val stansAutomatiskBehandlingMediator =
         StansAutomatiskBehandlingMediator(
             stansAutomatiskBehandlingDao,
@@ -154,7 +152,7 @@ internal class SpesialistApp(
             dao = totrinnsvurderingDao,
             oppgaveDao = oppgaveDao,
             periodehistorikkRepository = periodehistorikk,
-            notatRepository = notatRepository,
+            notatRepository = notatDao,
         )
 
     private val snapshotService = SnapshotService(snapshotDao = snapshotApiDao, snapshotClient = snapshotClient)
@@ -300,6 +298,7 @@ internal class SpesialistApp(
                 rapidsConnection = rapidsConnection,
                 oppgaveService = oppgaveService,
                 saksbehandlerRepository = saksbehandlerDao,
+                notatRepository = notatDao,
             )
         subsumsjonsmelder = Subsumsjonsmelder(versjonAvKode, rapidsConnection)
 
