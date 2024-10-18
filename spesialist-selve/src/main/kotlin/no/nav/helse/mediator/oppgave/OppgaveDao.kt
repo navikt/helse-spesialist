@@ -98,16 +98,9 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource), Opp
         }
 
     override fun finnVedtaksperiodeId(fødselsnummer: String) =
-        asSQL(
-            """ SELECT v.vedtaksperiode_id as vedtaksperiode_id
-            FROM oppgave o
-                     JOIN vedtak v ON v.id = o.vedtak_ref
-                     JOIN person p ON v.person_ref = p.id
-            WHERE p.fodselsnummer = :fodselsnummer
-            AND status = 'AvventerSaksbehandler'::oppgavestatus;
-        """,
-            mapOf("fodselsnummer" to fødselsnummer.toLong()),
-        ).single { it.uuid("vedtaksperiode_id") }!!
+        sessionOf(dataSource).use { session ->
+            TransactionalOppgaveDao(session).finnVedtaksperiodeId(fødselsnummer)
+        }
 
     override fun finnOppgaveId(fødselsnummer: String) =
         sessionOf(dataSource).use { session ->

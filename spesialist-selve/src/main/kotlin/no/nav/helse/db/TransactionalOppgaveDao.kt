@@ -122,7 +122,25 @@ class TransactionalOppgaveDao(private val session: Session) : OppgaveRepository 
         )
     }
 
-    override fun finnVedtaksperiodeId(fødselsnummer: String): UUID = throw UnsupportedOperationException()
+    override fun finnVedtaksperiodeId(fødselsnummer: String): UUID {
+        @Language("PostgreSQL")
+        val statement =
+            """
+             SELECT v.vedtaksperiode_id as vedtaksperiode_id
+            FROM oppgave o
+                     JOIN vedtak v ON v.id = o.vedtak_ref
+                     JOIN person p ON v.person_ref = p.id
+            WHERE p.fodselsnummer = :fodselsnummer
+            AND status = 'AvventerSaksbehandler'::oppgavestatus;
+            """.trimIndent()
+        return requireNotNull(
+            session.run(
+                queryOf(statement, mapOf("fodselsnummer" to fødselsnummer.toLong())).map {
+                    it.uuid("vedtaksperiode_id")
+                }.asSingle,
+            ),
+        )
+    }
 
     override fun harGyldigOppgave(utbetalingId: UUID): Boolean = throw UnsupportedOperationException()
 
