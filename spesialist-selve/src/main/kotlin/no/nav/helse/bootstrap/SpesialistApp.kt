@@ -149,8 +149,8 @@ internal class SpesialistApp(
         ) { subsumsjonsmelder }
     private val totrinnsvurderingMediator =
         TotrinnsvurderingMediator(
-            dao = totrinnsvurderingDao,
-            oppgaveDao = oppgaveDao,
+            totrinnsvurderingRepository = totrinnsvurderingDao,
+            oppgaveRepository = oppgaveDao,
             periodehistorikkRepository = periodehistorikk,
             notatRepository = notatDao,
         )

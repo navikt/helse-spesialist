@@ -6,9 +6,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.TransactionalCommandContextDao
-import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.AVBRUTT
 import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.FEIL
-import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.NY
 import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.SUSPENDERT
 import no.nav.helse.modell.kommando.CommandContext
 import org.intellij.lang.annotations.Language
@@ -69,34 +67,8 @@ internal class CommandContextDao(
         vedtaksperiodeId: UUID,
         contextId: UUID,
     ): List<Pair<UUID, UUID>> {
-        sessionOf(dataSource).use {
-            @Language("PostgreSQL")
-            val query = """
-                INSERT INTO command_context(context_id, hendelse_id, tilstand, data)
-                    SELECT context_id, hendelse_id, :avbrutt, data
-                    FROM (
-                        SELECT DISTINCT ON (context_id) *
-                        FROM command_context
-                        WHERE hendelse_id in (
-                            SELECT hendelse_ref FROM vedtaksperiode_hendelse WHERE vedtaksperiode_id = :vedtaksperiodeId
-                        )
-                        AND context_id != :contextId
-                        ORDER BY context_id, id DESC
-                ) AS command_contexts
-                WHERE tilstand IN (:ny, :suspendert) RETURNING context_id, hendelse_id
-            """
-            return it.run(
-                queryOf(
-                    query,
-                    mapOf(
-                        "avbrutt" to AVBRUTT.name,
-                        "vedtaksperiodeId" to vedtaksperiodeId,
-                        "contextId" to contextId,
-                        "ny" to NY.name,
-                        "suspendert" to SUSPENDERT.name,
-                    ),
-                ).map { rad -> rad.uuid("context_id") to rad.uuid("hendelse_id") }.asList,
-            )
+        sessionOf(dataSource).use { session ->
+            return TransactionalCommandContextDao(session).avbryt(vedtaksperiodeId, contextId)
         }
     }
 

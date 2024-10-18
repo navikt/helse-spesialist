@@ -1,30 +1,30 @@
 package no.nav.helse.modell.totrinnsvurdering
 
 import no.nav.helse.db.NotatRepository
+import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.PeriodehistorikkRepository
-import no.nav.helse.db.TotrinnsvurderingDao
-import no.nav.helse.mediator.oppgave.OppgaveDao
+import no.nav.helse.db.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import java.util.UUID
 
 class TotrinnsvurderingMediator(
-    private val dao: TotrinnsvurderingDao,
-    private val oppgaveDao: OppgaveDao,
+    private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
+    private val oppgaveRepository: OppgaveRepository,
     private val periodehistorikkRepository: PeriodehistorikkRepository,
     private val notatRepository: NotatRepository,
 ) : Totrinnsvurderinghåndterer {
-    fun opprett(vedtaksperiodeId: UUID): TotrinnsvurderingOld = dao.opprett(vedtaksperiodeId)
+    fun opprett(vedtaksperiodeId: UUID): TotrinnsvurderingOld = totrinnsvurderingRepository.opprett(vedtaksperiodeId)
 
     override fun settBeslutter(
         oppgaveId: Long,
         saksbehandlerOid: UUID,
-    ): Unit = dao.settBeslutter(oppgaveId, saksbehandlerOid)
+    ): Unit = totrinnsvurderingRepository.settBeslutter(oppgaveId, saksbehandlerOid)
 
     fun settAutomatiskRetur(vedtaksperiodeId: UUID) {
-        oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)?.let {
-            dao.settErRetur(vedtaksperiodeId)
+        oppgaveRepository.finnIdForAktivOppgave(vedtaksperiodeId)?.let {
+            totrinnsvurderingRepository.settErRetur(vedtaksperiodeId)
 
             lagrePeriodehistorikk(
                 oppgaveId = it,
@@ -45,7 +45,7 @@ class TotrinnsvurderingMediator(
             val (tekst, notattype) = notat
             notatId = notatRepository.lagreForOppgaveId(oppgaveId, tekst, saksbehandleroid, notattype)?.toInt()
         }
-        oppgaveDao.finnUtbetalingId(oppgaveId)?.also {
+        oppgaveRepository.finnUtbetalingId(oppgaveId)?.also {
             periodehistorikkRepository.lagre(type, saksbehandleroid, it, notatId)
         }
     }
@@ -57,9 +57,9 @@ class TotrinnsvurderingMediator(
         saksbehandleroid: UUID?,
     ): Boolean = hentAktiv(oppgaveId)?.saksbehandler == saksbehandleroid
 
-    fun ferdigstill(vedtaksperiodeId: UUID): Unit = dao.ferdigstill(vedtaksperiodeId)
+    fun ferdigstill(vedtaksperiodeId: UUID): Unit = totrinnsvurderingRepository.ferdigstill(vedtaksperiodeId)
 
-    fun hentAktiv(vedtaksperiodeId: UUID): TotrinnsvurderingOld? = dao.hentAktiv(vedtaksperiodeId)
+    fun hentAktiv(vedtaksperiodeId: UUID): TotrinnsvurderingOld? = totrinnsvurderingRepository.hentAktiv(vedtaksperiodeId)
 
-    private fun hentAktiv(oppgaveId: Long): TotrinnsvurderingOld? = dao.hentAktiv(oppgaveId)
+    private fun hentAktiv(oppgaveId: Long): TotrinnsvurderingOld? = totrinnsvurderingRepository.hentAktiv(oppgaveId)
 }

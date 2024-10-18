@@ -1,7 +1,25 @@
 package no.nav.helse.db
 
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
+import java.util.UUID
+
 interface TotrinnsvurderingRepository {
     fun hentAktivTotrinnsvurdering(oppgaveId: Long): TotrinnsvurderingFraDatabase?
 
     fun oppdater(totrinnsvurderingFraDatabase: TotrinnsvurderingFraDatabase)
+
+    fun settBeslutter(
+        oppgaveId: Long,
+        saksbehandlerOid: UUID,
+    )
+
+    fun settErRetur(vedtaksperiodeId: UUID)
+
+    fun opprett(vedtaksperiodeId: UUID): TotrinnsvurderingOld
+
+    fun hentAktiv(oppgaveId: Long): TotrinnsvurderingOld?
+
+    fun hentAktiv(vedtaksperiodeId: UUID): TotrinnsvurderingOld?
+
+    fun ferdigstill(vedtaksperiodeId: UUID)
 }

@@ -1,6 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
+import kotliquery.TransactionalSession
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.PeriodehistorikkRepository
@@ -47,11 +48,21 @@ internal class VedtaksperiodeReberegnet private constructor(
 
     override fun vedtaksperiodeId(): UUID = vedtaksperiodeId
 
+    override fun skalKjøresTransaksjonelt(): Boolean = true
+
+    override fun transaksjonellBehandle(
+        person: Person,
+        kommandostarter: Kommandostarter,
+        transactionalSession: TransactionalSession,
+    ) {
+        kommandostarter { vedtaksperiodeReberegnet(this@VedtaksperiodeReberegnet, transactionalSession) }
+    }
+
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
     ) {
-        kommandostarter { vedtaksperiodeReberegnet(this@VedtaksperiodeReberegnet) }
+        throw UnsupportedOperationException()
     }
 }
 

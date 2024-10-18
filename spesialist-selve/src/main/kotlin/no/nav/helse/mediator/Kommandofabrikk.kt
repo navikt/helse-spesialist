@@ -16,11 +16,15 @@ import no.nav.helse.db.TransactionalCommandContextDao
 import no.nav.helse.db.TransactionalEgenAnsattDao
 import no.nav.helse.db.TransactionalInntektskilderDao
 import no.nav.helse.db.TransactionalMeldingDao
+import no.nav.helse.db.TransactionalNotatDao
 import no.nav.helse.db.TransactionalOppgaveDao
 import no.nav.helse.db.TransactionalOpptegnelseDao
 import no.nav.helse.db.TransactionalOverstyringDao
+import no.nav.helse.db.TransactionalPeriodehistorikkDao
 import no.nav.helse.db.TransactionalPersonDao
+import no.nav.helse.db.TransactionalReservasjonDao
 import no.nav.helse.db.TransactionalTildelingDao
+import no.nav.helse.db.TransactionalTotrinnsvurderingDao
 import no.nav.helse.db.TransactionalUtbetalingDao
 import no.nav.helse.db.TransactionalÅpneGosysOppgaverDao
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
@@ -213,18 +217,27 @@ internal class Kommandofabrikk(
         }
     }
 
-    internal fun vedtaksperiodeReberegnet(hendelse: VedtaksperiodeReberegnet): VedtaksperiodeReberegnetCommand =
+    internal fun vedtaksperiodeReberegnet(
+        hendelse: VedtaksperiodeReberegnet,
+        session: TransactionalSession,
+    ): VedtaksperiodeReberegnetCommand =
         VedtaksperiodeReberegnetCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
-            utbetalingRepository = utbetalingDao,
-            periodehistorikkRepository = periodehistorikk,
-            commandContextRepository = commandContextDao,
-            oppgaveService = oppgaveService,
-            reservasjonRepository = reservasjonDao,
-            tildelingRepository = tildelingDao,
-            oppgaveRepository = oppgaveDao,
-            totrinnsvurderingMediator = totrinnsvurderingMediator,
+            utbetalingRepository = TransactionalUtbetalingDao(session),
+            periodehistorikkRepository = TransactionalPeriodehistorikkDao(session),
+            commandContextRepository = TransactionalCommandContextDao(session),
+            oppgaveService = transaksjonellOppgaveService(session),
+            reservasjonRepository = TransactionalReservasjonDao(session),
+            tildelingRepository = TransactionalTildelingDao(session),
+            oppgaveRepository = TransactionalOppgaveDao(session),
+            totrinnsvurderingMediator =
+                TotrinnsvurderingMediator(
+                    TransactionalTotrinnsvurderingDao(session),
+                    TransactionalOppgaveDao(session),
+                    TransactionalPeriodehistorikkDao(session),
+                    TransactionalNotatDao(session),
+                ),
         )
 
     internal fun vedtaksperiodeNyUtbetaling(

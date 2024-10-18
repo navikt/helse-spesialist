@@ -3,7 +3,7 @@ package no.nav.helse.db
 import kotliquery.Session
 import kotliquery.queryOf
 import no.nav.helse.modell.utbetaling.Utbetaling
-import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.modell.utbetaling.UtbetalingDao.TidligereUtbetalingerForVedtaksperiodeDto
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import org.intellij.lang.annotations.Language
@@ -96,8 +96,26 @@ class TransactionalUtbetalingDao(private val session: Session) : UtbetalingRepos
         session.run(queryOf(statement, utbetalingId, vedtaksperiodeId).asUpdate)
     }
 
-    override fun utbetalingerForVedtaksperiode(vedtaksperiodeId: UUID): List<UtbetalingDao.TidligereUtbetalingerForVedtaksperiodeDto> {
-        throw UnsupportedOperationException()
+    override fun utbetalingerForVedtaksperiode(vedtaksperiodeId: UUID): List<TidligereUtbetalingerForVedtaksperiodeDto> {
+        @Language("PostgreSQL")
+        val statement = """
+            SELECT vui.utbetaling_id, u.id, u.status
+            FROM vedtaksperiode_utbetaling_id vui
+            JOIN utbetaling_id ui ON ui.utbetaling_id = vui.utbetaling_id
+            JOIN utbetaling u ON u.utbetaling_id_ref = ui.id
+            WHERE vui.vedtaksperiode_id = :vedtaksperiodeId
+            ORDER BY u.id DESC
+            LIMIT 2;
+        """
+        return session.run(
+            queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).map { row ->
+                TidligereUtbetalingerForVedtaksperiodeDto(
+                    id = row.int("id"),
+                    utbetalingId = row.uuid("utbetaling_id"),
+                    utbetalingsstatus = Utbetalingsstatus.valueOf(row.string("status")),
+                )
+            }.asList,
+        )
     }
 
     override fun erUtbetalingForkastet(utbetalingId: UUID): Boolean = throw UnsupportedOperationException()

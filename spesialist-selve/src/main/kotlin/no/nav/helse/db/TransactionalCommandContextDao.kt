@@ -3,6 +3,7 @@ package no.nav.helse.db
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.Session
 import kotliquery.queryOf
+import no.nav.helse.db.TransactionalCommandContextDao.CommandContextTilstand.AVBRUTT
 import no.nav.helse.db.TransactionalCommandContextDao.CommandContextTilstand.FEIL
 import no.nav.helse.db.TransactionalCommandContextDao.CommandContextTilstand.FERDIG
 import no.nav.helse.db.TransactionalCommandContextDao.CommandContextTilstand.NY
@@ -58,7 +59,36 @@ internal class TransactionalCommandContextDao(
     override fun avbryt(
         vedtaksperiodeId: UUID,
         contextId: UUID,
-    ): List<Pair<UUID, UUID>> = throw UnsupportedOperationException()
+    ): List<Pair<UUID, UUID>> {
+        @Language("PostgreSQL")
+        val query =
+            """
+            INSERT INTO command_context(context_id, hendelse_id, tilstand, data)
+                SELECT context_id, hendelse_id, :avbrutt, data
+                FROM (
+                    SELECT DISTINCT ON (context_id) *
+                    FROM command_context
+                    WHERE hendelse_id in (
+                        SELECT hendelse_ref FROM vedtaksperiode_hendelse WHERE vedtaksperiode_id = :vedtaksperiodeId
+                    )
+                    AND context_id != :contextId
+                    ORDER BY context_id, id DESC
+            ) AS command_contexts
+            WHERE tilstand IN (:ny, :suspendert) RETURNING context_id, hendelse_id
+            """.trimIndent()
+        return session.run(
+            queryOf(
+                query,
+                mapOf(
+                    "avbrutt" to AVBRUTT.name,
+                    "vedtaksperiodeId" to vedtaksperiodeId,
+                    "contextId" to contextId,
+                    "ny" to NY.name,
+                    "suspendert" to SUSPENDERT.name,
+                ),
+            ).map { rad -> rad.uuid("context_id") to rad.uuid("hendelse_id") }.asList,
+        )
+    }
 
     override fun tidsbrukForContext(contextId: UUID): Int {
         @Language("postgresql")
