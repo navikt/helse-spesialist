@@ -5,6 +5,7 @@ import kotliquery.sessionOf
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.InntektskilderDao
+import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.Periodehistorikk
@@ -72,8 +73,6 @@ import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
 import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
-import no.nav.helse.spesialist.api.notat.NotatApiDao
-import no.nav.helse.spesialist.api.notat.NotatApiRepository
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -96,8 +95,7 @@ internal class Kommandofabrikk(
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     oppgaveService: () -> OppgaveService,
     private val totrinnsvurderingDao: TotrinnsvurderingDao = TotrinnsvurderingDao(dataSource),
-    private val notatDao: NotatApiDao = NotatApiDao(dataSource),
-    private val notatRepository: NotatApiRepository = NotatApiRepository(notatDao),
+    private val notatDao: NotatDao = NotatDao(dataSource),
     private val periodehistorikkDao: PeriodehistorikkApiDao = PeriodehistorikkApiDao(dataSource),
     private val periodehistorikk: Periodehistorikk = Periodehistorikk(dataSource),
     private val påVentDao: PåVentDao = PåVentDao(dataSource),
@@ -106,7 +104,7 @@ internal class Kommandofabrikk(
             totrinnsvurderingDao,
             oppgaveDao,
             periodehistorikk,
-            notatRepository,
+            notatDao,
         ),
     private val godkjenningMediator: GodkjenningMediator,
     private val automatisering: Automatisering,

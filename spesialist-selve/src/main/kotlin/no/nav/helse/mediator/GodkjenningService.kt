@@ -1,6 +1,7 @@
 package no.nav.helse.mediator
 
 import net.logstash.logback.argument.StructuredArguments
+import no.nav.helse.db.NotatRepository
 import no.nav.helse.db.Periodehistorikk
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerRepository
@@ -14,8 +15,6 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
-import no.nav.helse.spesialist.api.notat.NotatApiDao
-import no.nav.helse.spesialist.api.notat.NotatApiRepository
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType.TOTRINNSVURDERING_ATTESTERT
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.slf4j.LoggerFactory
@@ -34,14 +33,13 @@ internal class GodkjenningService(
     private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
     private val periodehistorikk: Periodehistorikk = Periodehistorikk(dataSource),
     private val saksbehandlerRepository: SaksbehandlerRepository,
+    private val notatRepository: NotatRepository,
     private val totrinnsvurderingMediator: TotrinnsvurderingMediator =
         TotrinnsvurderingMediator(
             TotrinnsvurderingDao(dataSource),
             oppgaveDao,
             periodehistorikk,
-            NotatApiRepository(
-                NotatApiDao(dataSource),
-            ),
+            notatRepository,
         ),
 ) : Godkjenninghåndterer {
     private companion object {

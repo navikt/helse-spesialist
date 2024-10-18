@@ -3,17 +3,17 @@ package no.nav.helse.modell.totrinnsvurdering
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.db.NotatRepository
 import no.nav.helse.db.PeriodehistorikkRepository
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.oppgave.OppgaveDao
-import no.nav.helse.spesialist.api.notat.NotatApiRepository
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class TotrinnsvurderingMediatorTest {
     private val totrinnsvurderingDao = mockk<TotrinnsvurderingDao>(relaxed = true)
-    private val notatRepository = mockk<NotatApiRepository>(relaxed = true)
+    private val notatRepository = mockk<NotatRepository>(relaxed = true)
 
     val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val periodehistorikkRepository = mockk<PeriodehistorikkRepository>(relaxed = true)
