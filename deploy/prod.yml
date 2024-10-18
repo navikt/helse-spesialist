@@ -76,7 +76,6 @@ spec:
           - name: spesialist
             envVarPrefix: DATABASE
             users:
-              - name: spesialist-migrering
               - name: bigquery_connection_user
   env:
     - name: KAFKA_RAPID_TOPIC

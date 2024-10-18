@@ -77,7 +77,6 @@ spec:
             envVarPrefix: DATABASE
             users:
               - name: spesialist-opprydding-dev
-              - name: spesialist-migrering
   env:
     - name: KAFKA_RAPID_TOPIC
       value: tbd.rapid.v1
