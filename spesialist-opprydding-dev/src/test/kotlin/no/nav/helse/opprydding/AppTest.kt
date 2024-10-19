@@ -48,6 +48,17 @@ internal class AppTest: AbstractDatabaseTest() {
         assertTrue(sendtMelding["@event_name"].asText() == "kommandokjede_avbrutt")
     }
 
+    @Test
+    fun `sender kvittering etter sletting`() {
+        opprettPerson("123")
+        assertTabellinnhold(AT_LEAST, 1)
+        testRapid.sendTestMessage(slettemelding("123"))
+        testRapid.inspektør.message(1).run {
+            assertTrue(path("@event_name").asText() == "person_slettet")
+            assertTrue(path("fødselsnummer").asText() == "123")
+        }
+    }
+
     @Language("JSON")
     private fun slettemelding(fødselsnummer: String) = """
         {

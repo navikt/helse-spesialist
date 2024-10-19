@@ -34,19 +34,33 @@ internal class SlettPersonRiver(
         sikkerlogg.info("Sletter person med fødselsnummer: $fødselsnummer")
         sendKommandokjederAvbrutt(fødselsnummer, context)
         personRepository.slett(fødselsnummer)
+        sendPersonSlettet(fødselsnummer, context)
     }
 
     private fun sendKommandokjederAvbrutt(
         fødselsnummer: String,
         context: MessageContext,
-    ) = finnAktiveKommandokjeder(fødselsnummer).map(::lagMelding).forEach(context::publish)
+    ) = finnAktiveKommandokjeder(fødselsnummer).map(Meldinger::kommandokjedeAvbrutt).forEach(context::publish)
 
-    private fun lagMelding(kommandokjedeinfo: CommandContextDao.Kommandokjedeinfo) =
-        mapOf(
-            "@event_name" to "kommandokjede_avbrutt",
-            "commandContextId" to kommandokjedeinfo.contextId,
-            "meldingId" to kommandokjedeinfo.hendelseId,
-        ).let(objectMapper::writeValueAsString)
+    private fun sendPersonSlettet(
+        fødselsnummer: String,
+        context: MessageContext,
+    ) = Meldinger.personSlettet(fødselsnummer).let(context::publish)
 
     private fun finnAktiveKommandokjeder(fødselsnummer: String) = commandContextDao.finnAktiveKommandokjeder(fødselsnummer)
+
+    private object Meldinger {
+        fun kommandokjedeAvbrutt(kommandokjedeinfo: CommandContextDao.Kommandokjedeinfo): String =
+            mapOf(
+                "@event_name" to "kommandokjede_avbrutt",
+                "commandContextId" to kommandokjedeinfo.contextId,
+                "meldingId" to kommandokjedeinfo.hendelseId,
+            ).let(objectMapper::writeValueAsString)
+
+        fun personSlettet(fødselsnummer: String): String =
+            mapOf(
+                "@event_name" to "person_slettet",
+                "fødselsnummer" to fødselsnummer,
+            ).let(objectMapper::writeValueAsString)
+    }
 }
