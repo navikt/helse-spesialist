@@ -18,7 +18,7 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.ReserverPersonHvisTildeltCommand
 import no.nav.helse.modell.kommando.VedtaksperiodeReberegnetPeriodehistorikk
 import no.nav.helse.modell.person.Person
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.util.UUID
 
@@ -76,7 +76,7 @@ internal class VedtaksperiodeReberegnetCommand(
     reservasjonRepository: ReservasjonRepository,
     tildelingRepository: TildelingRepository,
     oppgaveRepository: OppgaveRepository,
-    totrinnsvurderingMediator: TotrinnsvurderingMediator,
+    totrinnsvurderingService: TotrinnsvurderingService,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -90,7 +90,7 @@ internal class VedtaksperiodeReberegnetCommand(
                 reservasjonRepository = reservasjonRepository,
                 tildelingRepository = tildelingRepository,
                 oppgaveRepository = oppgaveRepository,
-                totrinnsvurderingMediator = totrinnsvurderingMediator,
+                totrinnsvurderingService = totrinnsvurderingService,
             ),
             AvbrytCommand(
                 fødselsnummer = fødselsnummer,
@@ -100,7 +100,7 @@ internal class VedtaksperiodeReberegnetCommand(
                 reservasjonRepository = reservasjonRepository,
                 tildelingRepository = tildelingRepository,
                 oppgaveRepository = oppgaveRepository,
-                totrinnsvurderingMediator = totrinnsvurderingMediator,
+                totrinnsvurderingService = totrinnsvurderingService,
             ),
         )
 }

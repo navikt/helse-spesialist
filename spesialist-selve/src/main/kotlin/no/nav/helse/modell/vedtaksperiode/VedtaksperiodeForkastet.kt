@@ -13,7 +13,7 @@ import no.nav.helse.modell.kommando.AvbrytCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.person.Person
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.util.UUID
 
@@ -60,7 +60,7 @@ internal class VedtaksperiodeForkastetCommand(
     reservasjonRepository: ReservasjonRepository,
     tildelingRepository: TildelingRepository,
     oppgaveRepository: OppgaveRepository,
-    totrinnsvurderingMediator: TotrinnsvurderingMediator,
+    totrinnsvurderingService: TotrinnsvurderingService,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -72,7 +72,7 @@ internal class VedtaksperiodeForkastetCommand(
                 reservasjonRepository = reservasjonRepository,
                 tildelingRepository = tildelingRepository,
                 oppgaveRepository = oppgaveRepository,
-                totrinnsvurderingMediator = totrinnsvurderingMediator,
+                totrinnsvurderingService = totrinnsvurderingService,
             ),
         )
 }

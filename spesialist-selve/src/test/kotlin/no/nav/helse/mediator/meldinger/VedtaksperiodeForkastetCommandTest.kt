@@ -37,7 +37,7 @@ internal class VedtaksperiodeForkastetCommandTest {
             reservasjonRepository = mockk(relaxed = true),
             tildelingRepository = mockk(relaxed = true),
             oppgaveRepository = mockk(relaxed = true),
-            totrinnsvurderingMediator = mockk(relaxed = true),
+            totrinnsvurderingService = mockk(relaxed = true),
         )
 
     @Test

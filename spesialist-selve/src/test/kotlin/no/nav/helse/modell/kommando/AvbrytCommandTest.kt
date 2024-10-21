@@ -20,7 +20,7 @@ internal class AvbrytCommandTest {
             reservasjonRepository = mockk(relaxed = true),
             tildelingRepository = mockk(relaxed = true),
             oppgaveRepository = mockk(relaxed = true),
-            totrinnsvurderingMediator = mockk(relaxed = true)
+            totrinnsvurderingService = mockk(relaxed = true)
         )
     }
     private val commandContextRepository = mockk<CommandContextRepository>(relaxed = true)

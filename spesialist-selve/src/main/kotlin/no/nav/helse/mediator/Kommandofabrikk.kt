@@ -58,7 +58,7 @@ import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.SøknadSendtCommand
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.utbetaling.UtbetalingEndretCommand
@@ -102,8 +102,8 @@ internal class Kommandofabrikk(
     private val periodehistorikkDao: PeriodehistorikkApiDao = PeriodehistorikkApiDao(dataSource),
     private val periodehistorikk: Periodehistorikk = Periodehistorikk(dataSource),
     private val påVentDao: PåVentDao = PåVentDao(dataSource),
-    private val totrinnsvurderingMediator: TotrinnsvurderingMediator =
-        TotrinnsvurderingMediator(
+    private val totrinnsvurderingService: TotrinnsvurderingService =
+        TotrinnsvurderingService(
             totrinnsvurderingDao,
             oppgaveDao,
             periodehistorikk,
@@ -229,8 +229,8 @@ internal class Kommandofabrikk(
             reservasjonRepository = TransactionalReservasjonDao(session),
             tildelingRepository = TransactionalTildelingDao(session),
             oppgaveRepository = TransactionalOppgaveDao(session),
-            totrinnsvurderingMediator =
-                TotrinnsvurderingMediator(
+            totrinnsvurderingService =
+                TotrinnsvurderingService(
                     TransactionalTotrinnsvurderingDao(session),
                     TransactionalOppgaveDao(session),
                     TransactionalPeriodehistorikkDao(session),
@@ -334,8 +334,8 @@ internal class Kommandofabrikk(
             oppgaveRepository = TransactionalOppgaveDao(session),
             tildelingRepository = TransactionalTildelingDao(session),
             oppgaveService = transaksjonellOppgaveService(session),
-            totrinnsvurderingMediator =
-                TotrinnsvurderingMediator(
+            totrinnsvurderingService =
+                TotrinnsvurderingService(
                     TransactionalTotrinnsvurderingDao(session),
                     TransactionalOppgaveDao(session),
                     TransactionalPeriodehistorikkDao(session),
@@ -354,7 +354,7 @@ internal class Kommandofabrikk(
             reservasjonRepository = reservasjonDao,
             tildelingRepository = tildelingDao,
             oppgaveRepository = oppgaveDao,
-            totrinnsvurderingMediator = totrinnsvurderingMediator,
+            totrinnsvurderingService = totrinnsvurderingService,
         )
 
     internal fun løsGodkjenningsbehov(
@@ -413,7 +413,7 @@ internal class Kommandofabrikk(
             avviksvurderingRepository = avviksvurderingDao,
             oppgaveService = oppgaveService,
             godkjenningMediator = godkjenningMediator,
-            totrinnsvurderingMediator = totrinnsvurderingMediator,
+            totrinnsvurderingService = totrinnsvurderingService,
             person = person,
         )
     }

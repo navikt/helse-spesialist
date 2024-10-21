@@ -13,7 +13,7 @@ import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.overstyring.OverstyringDao
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.testEnv
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -58,8 +58,8 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
             reservasjonDao = reservasjonDao,
             saksbehandlerRepository = saksbehandlerDao,
             notatRepository = notatDao,
-            totrinnsvurderingMediator =
-                TotrinnsvurderingMediator(
+            totrinnsvurderingService =
+                TotrinnsvurderingService(
                     totrinnsvurderingDao,
                     oppgaveDao,
                     periodehistorikk,

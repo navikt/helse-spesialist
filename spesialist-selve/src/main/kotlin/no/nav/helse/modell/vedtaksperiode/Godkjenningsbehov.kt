@@ -44,7 +44,7 @@ import no.nav.helse.modell.kommando.VurderBehovForTotrinnskontroll
 import no.nav.helse.modell.kommando.VurderVidereBehandlingAvGodkjenningsbehov
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.risiko.VurderVurderingsmomenter
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.VurderEnhetUtland
@@ -228,7 +228,7 @@ internal class GodkjenningsbehovCommand(
     avviksvurderingRepository: AvviksvurderingRepository,
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
-    totrinnsvurderingMediator: TotrinnsvurderingMediator,
+    totrinnsvurderingService: TotrinnsvurderingService,
     person: Person,
 ) : MacroCommand() {
     private val sykefraværstilfelle = person.sykefraværstilfelle(behovData.vedtaksperiodeId)
@@ -346,7 +346,7 @@ internal class GodkjenningsbehovCommand(
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
                 oppgaveService = oppgaveService,
                 overstyringRepository = overstyringRepository,
-                totrinnsvurderingMediator = totrinnsvurderingMediator,
+                totrinnsvurderingService = totrinnsvurderingService,
                 sykefraværstilfelle = sykefraværstilfelle,
                 spleisVedtaksperioder = behovData.spleisVedtaksperioder,
             ),

@@ -9,7 +9,7 @@ import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import java.util.UUID
 
-class TotrinnsvurderingMediator(
+class TotrinnsvurderingService(
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
     private val oppgaveRepository: OppgaveRepository,
     private val periodehistorikkRepository: PeriodehistorikkRepository,

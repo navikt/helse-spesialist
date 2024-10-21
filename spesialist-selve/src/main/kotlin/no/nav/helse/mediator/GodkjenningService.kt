@@ -10,8 +10,8 @@ import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.overstyring.OverstyringDao
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
@@ -34,8 +34,8 @@ internal class GodkjenningService(
     private val periodehistorikk: Periodehistorikk = Periodehistorikk(dataSource),
     private val saksbehandlerRepository: SaksbehandlerRepository,
     private val notatRepository: NotatRepository,
-    private val totrinnsvurderingMediator: TotrinnsvurderingMediator =
-        TotrinnsvurderingMediator(
+    private val totrinnsvurderingService: TotrinnsvurderingService =
+        TotrinnsvurderingService(
             TotrinnsvurderingDao(dataSource),
             oppgaveDao,
             periodehistorikk,
@@ -56,7 +56,7 @@ internal class GodkjenningService(
         val fødselsnummer = meldingDao.finnFødselsnummer(hendelseId)
         val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(godkjenningDTO.oppgavereferanse)
         val utbetalingId = requireNotNull(oppgaveDao.finnUtbetalingId(godkjenningDTO.oppgavereferanse))
-        val totrinnsvurdering = totrinnsvurderingMediator.hentAktiv(vedtaksperiodeId)
+        val totrinnsvurdering = totrinnsvurderingService.hentAktiv(vedtaksperiodeId)
         val reserverPersonOid: UUID = totrinnsvurdering?.saksbehandler ?: oid
         val saksbehandleroverstyringer = overstyringDao.finnAktiveOverstyringer(vedtaksperiodeId)
         val saksbehandler = saksbehandler(godkjenningDTO, totrinnsvurdering, oid)

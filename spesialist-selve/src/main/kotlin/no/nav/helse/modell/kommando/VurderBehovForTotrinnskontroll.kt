@@ -4,7 +4,7 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.db.OverstyringRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.modell.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.slf4j.LoggerFactory
@@ -15,7 +15,7 @@ internal class VurderBehovForTotrinnskontroll(
     private val vedtaksperiodeId: UUID,
     private val oppgaveService: OppgaveService,
     private val overstyringRepository: OverstyringRepository,
-    private val totrinnsvurderingMediator: TotrinnsvurderingMediator,
+    private val totrinnsvurderingService: TotrinnsvurderingService,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val spleisVedtaksperioder: List<SpleisVedtaksperiode>,
 ) : Command {
@@ -42,10 +42,10 @@ internal class VurderBehovForTotrinnskontroll(
 
         if ((kreverTotrinnsvurdering && !vedtaksperiodeHarFerdigstiltOppgave) || overstyringer.isNotEmpty()) {
             logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
-            val totrinnsvurdering = totrinnsvurderingMediator.opprett(vedtaksperiodeId)
+            val totrinnsvurdering = totrinnsvurderingService.opprett(vedtaksperiodeId)
 
             if (totrinnsvurdering.erBeslutteroppgave()) {
-                totrinnsvurderingMediator.settAutomatiskRetur(vedtaksperiodeId)
+                totrinnsvurderingService.settAutomatiskRetur(vedtaksperiodeId)
             }
             val behandlendeSaksbehandlerOid = totrinnsvurdering.saksbehandler
             if (behandlendeSaksbehandlerOid != null) {

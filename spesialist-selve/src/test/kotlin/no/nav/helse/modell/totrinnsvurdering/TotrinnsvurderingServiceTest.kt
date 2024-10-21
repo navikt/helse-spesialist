@@ -11,14 +11,14 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-class TotrinnsvurderingMediatorTest {
+class TotrinnsvurderingServiceTest {
     private val totrinnsvurderingDao = mockk<TotrinnsvurderingDao>(relaxed = true)
     private val notatRepository = mockk<NotatRepository>(relaxed = true)
 
     val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val periodehistorikkRepository = mockk<PeriodehistorikkRepository>(relaxed = true)
-    private val totrinnsvurderingMediator =
-        TotrinnsvurderingMediator(
+    private val totrinnsvurderingService =
+        TotrinnsvurderingService(
             totrinnsvurderingDao,
             oppgaveDao,
             periodehistorikkRepository,
@@ -35,7 +35,7 @@ class TotrinnsvurderingMediatorTest {
         every { oppgaveDao.finnIdForAktivOppgave(any()) } returns oppgaveId
         every { oppgaveDao.finnUtbetalingId(any<Long>()) } returns utbetalingId
 
-        totrinnsvurderingMediator.settAutomatiskRetur(vedtaksperiodeId)
+        totrinnsvurderingService.settAutomatiskRetur(vedtaksperiodeId)
 
         verify(exactly = 1) { totrinnsvurderingDao.settErRetur(vedtaksperiodeId) }
         verify(exactly = 1) { oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId) }

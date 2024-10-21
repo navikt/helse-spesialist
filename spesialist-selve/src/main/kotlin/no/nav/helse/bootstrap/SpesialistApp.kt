@@ -40,7 +40,7 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vergemal.VergemålDao
@@ -147,8 +147,8 @@ internal class SpesialistApp(
             utbetalingDao,
             notatDao,
         ) { subsumsjonsmelder }
-    private val totrinnsvurderingMediator =
-        TotrinnsvurderingMediator(
+    private val totrinnsvurderingService =
+        TotrinnsvurderingService(
             totrinnsvurderingRepository = totrinnsvurderingDao,
             oppgaveRepository = oppgaveDao,
             periodehistorikkRepository = periodehistorikk,
@@ -244,7 +244,7 @@ internal class SpesialistApp(
                 behandlingsstatistikkMediator = behandlingsstatistikkService,
                 saksbehandlerhåndtererProvider = { saksbehandlerMediator },
                 oppgavehåndtererProvider = { oppgaveService },
-                totrinnsvurderinghåndterer = totrinnsvurderingMediator,
+                totrinnsvurderinghåndterer = totrinnsvurderingService,
                 godkjenninghåndtererProvider = { godkjenningService },
                 personhåndtererProvider = { meldingMediator },
                 dokumenthåndtererProvider = { dokumentMediator },

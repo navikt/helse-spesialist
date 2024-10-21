@@ -9,7 +9,7 @@ import no.nav.helse.januar
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.SpleisVedtaksperiode
@@ -29,7 +29,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         private val FØDSELSNUMMER = "fnr"
     }
 
-    private val totrinnsvurderingMediator = mockk<TotrinnsvurderingMediator>(relaxed = true)
+    private val totrinnsvurderingService = mockk<TotrinnsvurderingService>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
     private val overstyringRepository = mockk<OverstyringRepository>(relaxed = true)
     private lateinit var context: CommandContext
@@ -49,7 +49,7 @@ internal class VurderBehovForTotrinnskontrollTest {
             vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
             oppgaveService = oppgaveService,
             overstyringRepository = overstyringRepository,
-            totrinnsvurderingMediator = totrinnsvurderingMediator,
+            totrinnsvurderingService = totrinnsvurderingService,
             sykefraværstilfelle = sykefraværstilfelle,
             spleisVedtaksperioder = listOf(SpleisVedtaksperiode(VEDTAKSPERIODE_ID_1, UUID.randomUUID(), 1.januar, 31.januar, 1.januar), SpleisVedtaksperiode(VEDTAKSPERIODE_ID_2, UUID.randomUUID(), 1.februar, 28.februar, 1.januar)),
         )
@@ -65,7 +65,7 @@ internal class VurderBehovForTotrinnskontrollTest {
 
         assertTrue(command.execute(context))
 
-        verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
+        verify(exactly = 1) { totrinnsvurderingService.opprett(any()) }
     }
 
     @Test
@@ -76,7 +76,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
         assertTrue(command.execute(context))
-        verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
+        verify(exactly = 1) { totrinnsvurderingService.opprett(any()) }
     }
 
     @ParameterizedTest
@@ -90,7 +90,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
         assertTrue(command.execute(context))
-        verify(exactly = 0) { totrinnsvurderingMediator.opprett(any()) }
+        verify(exactly = 0) { totrinnsvurderingService.opprett(any()) }
     }
 
     @Test
@@ -98,7 +98,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         val saksbehander = UUID.randomUUID()
 
         every { overstyringRepository.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
-        every { totrinnsvurderingMediator.opprett(any()) } returns
+        every { totrinnsvurderingService.opprett(any()) } returns
             TotrinnsvurderingOld(
                 vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
                 erRetur = false,
@@ -111,7 +111,7 @@ internal class VurderBehovForTotrinnskontrollTest {
 
         assertTrue(command.execute(context))
 
-        verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
+        verify(exactly = 1) { totrinnsvurderingService.opprett(any()) }
         verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehander, FØDSELSNUMMER) }
     }
 
@@ -121,7 +121,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         val beslutter = UUID.randomUUID()
 
         every { overstyringRepository.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
-        every { totrinnsvurderingMediator.opprett(any()) } returns
+        every { totrinnsvurderingService.opprett(any()) } returns
             TotrinnsvurderingOld(
                 vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
                 erRetur = false,
@@ -134,16 +134,16 @@ internal class VurderBehovForTotrinnskontrollTest {
 
         assertTrue(command.execute(context))
 
-        verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
+        verify(exactly = 1) { totrinnsvurderingService.opprett(any()) }
         verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehander, FØDSELSNUMMER) }
-        verify(exactly = 1) { totrinnsvurderingMediator.settAutomatiskRetur(VEDTAKSPERIODE_ID_2) }
+        verify(exactly = 1) { totrinnsvurderingService.settAutomatiskRetur(VEDTAKSPERIODE_ID_2) }
     }
 
     @Test
     fun `Oppretter ikke totrinnsvurdering om det ikke er overstyring eller varsel for lovvalg og medlemskap`() {
         assertTrue(command.execute(context))
 
-        verify(exactly = 0) { totrinnsvurderingMediator.opprett(any()) }
+        verify(exactly = 0) { totrinnsvurderingService.opprett(any()) }
     }
 
     @Test
@@ -151,7 +151,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         every { overstyringRepository.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
 
         assertTrue(command.execute(context))
-        verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
+        verify(exactly = 1) { totrinnsvurderingService.opprett(any()) }
     }
 
     @Test
@@ -159,6 +159,6 @@ internal class VurderBehovForTotrinnskontrollTest {
         every { overstyringRepository.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Sykepengegrunnlag)
 
         assertTrue(command.execute(context))
-        verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
+        verify(exactly = 1) { totrinnsvurderingService.opprett(any()) }
     }
 }
