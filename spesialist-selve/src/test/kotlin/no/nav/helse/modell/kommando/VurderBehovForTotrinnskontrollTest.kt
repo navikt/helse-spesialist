@@ -65,7 +65,7 @@ internal class VurderBehovForTotrinnskontrollTest {
 
         assertTrue(command.execute(context))
 
-        verify(exactly = 1) { totrinnsvurderingService.opprett(any()) }
+        verify(exactly = 1) { totrinnsvurderingService.finnEllerOpprettNy(any()) }
     }
 
     @Test
@@ -76,7 +76,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
         assertTrue(command.execute(context))
-        verify(exactly = 1) { totrinnsvurderingService.opprett(any()) }
+        verify(exactly = 1) { totrinnsvurderingService.finnEllerOpprettNy(any()) }
     }
 
     @ParameterizedTest
@@ -90,7 +90,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
         assertTrue(command.execute(context))
-        verify(exactly = 0) { totrinnsvurderingService.opprett(any()) }
+        verify(exactly = 0) { totrinnsvurderingService.finnEllerOpprettNy(any()) }
     }
 
     @Test
@@ -98,7 +98,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         val saksbehander = UUID.randomUUID()
 
         every { overstyringRepository.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
-        every { totrinnsvurderingService.opprett(any()) } returns
+        every { totrinnsvurderingService.finnEllerOpprettNy(any()) } returns
             TotrinnsvurderingOld(
                 vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
                 erRetur = false,
@@ -111,7 +111,7 @@ internal class VurderBehovForTotrinnskontrollTest {
 
         assertTrue(command.execute(context))
 
-        verify(exactly = 1) { totrinnsvurderingService.opprett(any()) }
+        verify(exactly = 1) { totrinnsvurderingService.finnEllerOpprettNy(any()) }
         verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehander, FØDSELSNUMMER) }
     }
 
@@ -121,7 +121,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         val beslutter = UUID.randomUUID()
 
         every { overstyringRepository.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
-        every { totrinnsvurderingService.opprett(any()) } returns
+        every { totrinnsvurderingService.finnEllerOpprettNy(any()) } returns
             TotrinnsvurderingOld(
                 vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
                 erRetur = false,
@@ -134,7 +134,7 @@ internal class VurderBehovForTotrinnskontrollTest {
 
         assertTrue(command.execute(context))
 
-        verify(exactly = 1) { totrinnsvurderingService.opprett(any()) }
+        verify(exactly = 1) { totrinnsvurderingService.finnEllerOpprettNy(any()) }
         verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehander, FØDSELSNUMMER) }
         verify(exactly = 1) { totrinnsvurderingService.settAutomatiskRetur(VEDTAKSPERIODE_ID_2) }
     }
@@ -143,7 +143,7 @@ internal class VurderBehovForTotrinnskontrollTest {
     fun `Oppretter ikke totrinnsvurdering om det ikke er overstyring eller varsel for lovvalg og medlemskap`() {
         assertTrue(command.execute(context))
 
-        verify(exactly = 0) { totrinnsvurderingService.opprett(any()) }
+        verify(exactly = 0) { totrinnsvurderingService.finnEllerOpprettNy(any()) }
     }
 
     @Test
@@ -151,7 +151,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         every { overstyringRepository.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
 
         assertTrue(command.execute(context))
-        verify(exactly = 1) { totrinnsvurderingService.opprett(any()) }
+        verify(exactly = 1) { totrinnsvurderingService.finnEllerOpprettNy(any()) }
     }
 
     @Test
@@ -159,6 +159,6 @@ internal class VurderBehovForTotrinnskontrollTest {
         every { overstyringRepository.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Sykepengegrunnlag)
 
         assertTrue(command.execute(context))
-        verify(exactly = 1) { totrinnsvurderingService.opprett(any()) }
+        verify(exactly = 1) { totrinnsvurderingService.finnEllerOpprettNy(any()) }
     }
 }

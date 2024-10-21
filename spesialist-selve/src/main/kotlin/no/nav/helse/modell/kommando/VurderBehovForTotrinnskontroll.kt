@@ -42,7 +42,7 @@ internal class VurderBehovForTotrinnskontroll(
 
         if ((kreverTotrinnsvurdering && !vedtaksperiodeHarFerdigstiltOppgave) || overstyringer.isNotEmpty()) {
             logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
-            val totrinnsvurdering = totrinnsvurderingService.opprett(vedtaksperiodeId)
+            val totrinnsvurdering = totrinnsvurderingService.finnEllerOpprettNy(vedtaksperiodeId)
 
             if (totrinnsvurdering.erBeslutteroppgave()) {
                 totrinnsvurderingService.settAutomatiskRetur(vedtaksperiodeId)

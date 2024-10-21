@@ -15,7 +15,7 @@ class TotrinnsvurderingService(
     private val periodehistorikkRepository: PeriodehistorikkRepository,
     private val notatRepository: NotatRepository,
 ) : Totrinnsvurderinghåndterer {
-    fun opprett(vedtaksperiodeId: UUID): TotrinnsvurderingOld = totrinnsvurderingRepository.opprett(vedtaksperiodeId)
+    fun finnEllerOpprettNy(vedtaksperiodeId: UUID): TotrinnsvurderingOld = totrinnsvurderingRepository.opprett(vedtaksperiodeId)
 
     override fun settBeslutter(
         oppgaveId: Long,
