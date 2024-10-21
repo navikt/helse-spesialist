@@ -60,33 +60,69 @@ internal class TransactionalCommandContextDao(
         vedtaksperiodeId: UUID,
         contextId: UUID,
     ): List<Pair<UUID, UUID>> {
+        val konteksterSomSkalAvbrytes = finnContexterSomSkalAvbrytes(contextId, vedtaksperiodeId)
+        konteksterSomSkalAvbrytes.forEach {
+            avbrytContext(it.contextId, it.hendelseId, it.data)
+        }
+        return konteksterSomSkalAvbrytes.map { it.contextId to it.hendelseId }
+    }
+
+    private data class ContextRad(
+        val contextId: UUID,
+        val hendelseId: UUID,
+        val data: String,
+    )
+
+    private fun avbrytContext(
+        contextId: UUID,
+        hendelseId: UUID,
+        data: String,
+    ) {
         @Language("PostgreSQL")
         val query =
             """
             INSERT INTO command_context(context_id, hendelse_id, tilstand, data)
-                SELECT context_id, hendelse_id, :avbrutt, data
-                FROM (
-                    SELECT DISTINCT ON (context_id) *
-                    FROM command_context
-                    WHERE hendelse_id in (
-                        SELECT hendelse_ref FROM vedtaksperiode_hendelse WHERE vedtaksperiode_id = :vedtaksperiodeId
-                    )
-                    AND context_id != :contextId
-                    ORDER BY context_id, id DESC
-            ) AS command_contexts
-            WHERE tilstand IN (:ny, :suspendert) RETURNING context_id, hendelse_id
+            VALUES (:contextId, :hendelseId, :avbrutt, :data::json)
             """.trimIndent()
+        session
+            .run(
+                queryOf(
+                    query,
+                    mapOf(
+                        "avbrutt" to AVBRUTT.name,
+                        "contextId" to contextId,
+                        "hendelseId" to hendelseId,
+                        "data" to data,
+                    ),
+                ).asUpdate,
+            )
+    }
+
+    private fun finnContexterSomSkalAvbrytes(
+        contextId: UUID,
+        vedtaksperiodeId: UUID,
+    ): List<ContextRad> {
+        @Language("PostgreSQL")
+        val query = """
+            WITH siste_contexter AS (SELECT DISTINCT ON (context_id) context_id, hendelse_id, tilstand, data
+            FROM command_context
+            WHERE hendelse_id in (
+                SELECT hendelse_ref FROM vedtaksperiode_hendelse WHERE vedtaksperiode_id = :vedtaksperiodeId
+            )
+            AND context_id != :contextId
+            ORDER BY context_id, id DESC)
+            SELECT * FROM siste_contexter WHERE tilstand IN (:ny, :suspendert)
+        """
         return session.run(
             queryOf(
                 query,
                 mapOf(
-                    "avbrutt" to AVBRUTT.name,
                     "vedtaksperiodeId" to vedtaksperiodeId,
                     "contextId" to contextId,
                     "ny" to NY.name,
                     "suspendert" to SUSPENDERT.name,
                 ),
-            ).map { rad -> rad.uuid("context_id") to rad.uuid("hendelse_id") }.asList,
+            ).map { ContextRad(it.uuid("context_id"), it.uuid("hendelse_id"), it.string("data")) }.asList,
         )
     }
 
