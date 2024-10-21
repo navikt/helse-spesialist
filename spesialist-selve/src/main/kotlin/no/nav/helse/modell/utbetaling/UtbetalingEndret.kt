@@ -1,6 +1,7 @@
 package no.nav.helse.modell.utbetaling
 
 import com.fasterxml.jackson.databind.JsonNode
+import kotliquery.TransactionalSession
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.db.ReservasjonRepository
@@ -65,12 +66,22 @@ internal class UtbetalingEndret private constructor(
         json = jsonNode.toString(),
     )
 
+    override fun skalKjøresTransaksjonelt(): Boolean = true
+
+    override fun transaksjonellBehandle(
+        person: Person,
+        kommandostarter: Kommandostarter,
+        transactionalSession: TransactionalSession,
+    ) {
+        if (gjeldendeStatus == Utbetalingsstatus.FORKASTET) person.utbetalingForkastet(utbetalingId)
+        this.kommandostarter { utbetalingEndret(this@UtbetalingEndret, transactionalSession) }
+    }
+
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
     ) {
-        if (gjeldendeStatus == Utbetalingsstatus.FORKASTET) person.utbetalingForkastet(utbetalingId)
-        this.kommandostarter { utbetalingEndret(this@UtbetalingEndret) }
+        throw UnsupportedOperationException()
     }
 
     override fun fødselsnummer(): String = fødselsnummer

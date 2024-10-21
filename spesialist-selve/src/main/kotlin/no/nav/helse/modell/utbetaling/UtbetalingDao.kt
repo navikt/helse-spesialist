@@ -25,14 +25,8 @@ class UtbetalingDao(private val dataSource: DataSource) : HelseDao(dataSource), 
     }
 
     override fun finnUtbetalingIdRef(utbetalingId: UUID): Long? {
-        @Language("PostgreSQL")
-        val statement = "SELECT id FROM utbetaling_id WHERE utbetaling_id = ? LIMIT 1;"
-        return sessionOf(dataSource).use {
-            it.run(
-                queryOf(statement, utbetalingId).map { row ->
-                    row.long("id")
-                }.asSingle,
-            )
+        sessionOf(dataSource).use { session ->
+            return TransactionalUtbetalingDao(session).finnUtbetalingIdRef(utbetalingId)
         }
     }
 
@@ -42,23 +36,8 @@ class UtbetalingDao(private val dataSource: DataSource) : HelseDao(dataSource), 
         opprettet: LocalDateTime,
         json: String,
     ) {
-        @Language("PostgreSQL")
-        val statement = """
-            INSERT INTO utbetaling ( utbetaling_id_ref, status, opprettet, data )
-            VALUES (:utbetalingIdRef, CAST(:status as utbetaling_status), :opprettet, CAST(:json as json)) ON CONFLICT (status, opprettet, utbetaling_id_ref) DO NOTHING;
-        """
-        sessionOf(dataSource).use {
-            it.run(
-                queryOf(
-                    statement,
-                    mapOf(
-                        "utbetalingIdRef" to utbetalingIdRef,
-                        "status" to status.toString(),
-                        "opprettet" to opprettet,
-                        "json" to json,
-                    ),
-                ).asExecute,
-            )
+        sessionOf(dataSource).use { session ->
+            TransactionalUtbetalingDao(session).nyUtbetalingStatus(utbetalingIdRef, status, opprettet, json)
         }
     }
 
@@ -90,42 +69,10 @@ class UtbetalingDao(private val dataSource: DataSource) : HelseDao(dataSource), 
         arbeidsgiverbeløp: Int,
         personbeløp: Int,
     ): Long {
-        @Language("PostgreSQL")
-        val statement = """
-            INSERT INTO utbetaling_id (
-                utbetaling_id, person_ref, arbeidsgiver_ref, type, opprettet, arbeidsgiver_fagsystem_id_ref, person_fagsystem_id_ref, arbeidsgiverbeløp, personbeløp
-            ) VALUES (
-                :utbetalingId,
-                (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer),
-                (SELECT id FROM arbeidsgiver WHERE orgnummer = :orgnummer),
-                CAST(:type as utbetaling_type),
-                :opprettet,
-                :arbeidsgiverFagsystemIdRef,
-                :personFagsystemIdRef,
-                :arbeidsgiverbelop,
-                :personbelop
-            )
-            ON CONFLICT (utbetaling_id) DO NOTHING RETURNING id
-        """
-        return sessionOf(dataSource, returnGeneratedKey = true).use {
-            requireNotNull(
-                it.run(
-                    queryOf(
-                        statement,
-                        mapOf(
-                            "utbetalingId" to utbetalingId,
-                            "fodselsnummer" to fødselsnummer.toLong(),
-                            "orgnummer" to orgnummer.toLong(),
-                            "type" to type.toString(),
-                            "opprettet" to opprettet,
-                            "arbeidsgiverFagsystemIdRef" to arbeidsgiverFagsystemIdRef,
-                            "personFagsystemIdRef" to personFagsystemIdRef,
-                            "arbeidsgiverbelop" to arbeidsgiverbeløp,
-                            "personbelop" to personbeløp,
-                        ),
-                    ).asUpdateAndReturnGeneratedKey,
-                ),
-            ) { "Kunne ikke opprette utbetaling" }
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            return TransactionalUtbetalingDao(
+                session,
+            ).opprettUtbetalingId(utbetalingId, fødselsnummer, orgnummer, type, opprettet, arbeidsgiverFagsystemIdRef, personFagsystemIdRef, arbeidsgiverbeløp, personbeløp)
         }
     }
 
@@ -133,22 +80,8 @@ class UtbetalingDao(private val dataSource: DataSource) : HelseDao(dataSource), 
         fagsystemId: String,
         mottaker: String,
     ): Long? {
-        @Language("PostgreSQL")
-        val statement = """
-            INSERT INTO oppdrag (fagsystem_id, mottaker)
-            VALUES (:fagsystemId, :mottaker)
-            ON CONFLICT DO NOTHING
-        """
-        return sessionOf(dataSource, returnGeneratedKey = true).use {
-            it.run(
-                queryOf(
-                    statement,
-                    mapOf(
-                        "fagsystemId" to fagsystemId,
-                        "mottaker" to mottaker,
-                    ),
-                ).asUpdateAndReturnGeneratedKey,
-            )
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            return TransactionalUtbetalingDao(session).nyttOppdrag(fagsystemId, mottaker)
         }
     }
 

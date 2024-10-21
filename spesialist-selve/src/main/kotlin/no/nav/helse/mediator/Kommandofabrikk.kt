@@ -7,7 +7,6 @@ import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveRepository
-import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.Periodehistorikk
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
@@ -114,7 +113,6 @@ internal class Kommandofabrikk(
     private val automatisering: Automatisering,
     private val arbeidsforholdDao: ArbeidsforholdDao = ArbeidsforholdDao(dataSource),
     private val utbetalingDao: UtbetalingDao = UtbetalingDao(dataSource),
-    private val opptegnelseDao: OpptegnelseDao = OpptegnelseDao(dataSource),
     private val generasjonService: GenerasjonService = GenerasjonService(dataSource),
     private val vergemålDao: VergemålDao = VergemålDao(dataSource),
 ) {
@@ -315,7 +313,10 @@ internal class Kommandofabrikk(
             overstyringRepository = TransactionalOverstyringDao(transactionalSession),
         )
 
-    internal fun utbetalingEndret(hendelse: UtbetalingEndret): UtbetalingEndretCommand =
+    internal fun utbetalingEndret(
+        hendelse: UtbetalingEndret,
+        session: TransactionalSession,
+    ): UtbetalingEndretCommand =
         UtbetalingEndretCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             organisasjonsnummer = hendelse.organisasjonsnummer,
@@ -327,13 +328,19 @@ internal class Kommandofabrikk(
             personOppdrag = hendelse.personOppdrag,
             arbeidsgiverbeløp = hendelse.arbeidsgiverbeløp,
             personbeløp = hendelse.personbeløp,
-            utbetalingRepository = utbetalingDao,
-            opptegnelseRepository = opptegnelseDao,
-            reservasjonRepository = reservasjonDao,
-            oppgaveRepository = oppgaveDao,
-            tildelingRepository = tildelingDao,
-            oppgaveService = oppgaveService,
-            totrinnsvurderingMediator = totrinnsvurderingMediator,
+            utbetalingRepository = TransactionalUtbetalingDao(session),
+            opptegnelseRepository = TransactionalOpptegnelseDao(session),
+            reservasjonRepository = TransactionalReservasjonDao(session),
+            oppgaveRepository = TransactionalOppgaveDao(session),
+            tildelingRepository = TransactionalTildelingDao(session),
+            oppgaveService = transaksjonellOppgaveService(session),
+            totrinnsvurderingMediator =
+                TotrinnsvurderingMediator(
+                    TransactionalTotrinnsvurderingDao(session),
+                    TransactionalOppgaveDao(session),
+                    TransactionalPeriodehistorikkDao(session),
+                    TransactionalNotatDao(session),
+                ),
             json = hendelse.toJson(),
         )
 

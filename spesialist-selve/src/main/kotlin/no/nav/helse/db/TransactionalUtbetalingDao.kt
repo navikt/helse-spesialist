@@ -28,7 +28,15 @@ class TransactionalUtbetalingDao(private val session: Session) : UtbetalingRepos
         )
     }
 
-    override fun finnUtbetalingIdRef(utbetalingId: UUID): Long = throw UnsupportedOperationException()
+    override fun finnUtbetalingIdRef(utbetalingId: UUID): Long? {
+        @Language("PostgreSQL")
+        val statement = "SELECT id FROM utbetaling_id WHERE utbetaling_id = ? LIMIT 1;"
+        return session.run(
+            queryOf(statement, utbetalingId).map { row ->
+                row.long("id")
+            }.asSingle,
+        )
+    }
 
     override fun hentUtbetaling(utbetalingId: UUID): Utbetaling =
         checkNotNull(utbetalingFor(utbetalingId)) { "Finner ikke utbetaling, utbetalingId=$utbetalingId" }
@@ -55,13 +63,44 @@ class TransactionalUtbetalingDao(private val session: Session) : UtbetalingRepos
         opprettet: LocalDateTime,
         json: String,
     ) {
-        throw UnsupportedOperationException()
+        @Language("PostgreSQL")
+        val statement = """
+            INSERT INTO utbetaling ( utbetaling_id_ref, status, opprettet, data )
+            VALUES (:utbetalingIdRef, CAST(:status as utbetaling_status), :opprettet, CAST(:json as json)) ON CONFLICT (status, opprettet, utbetaling_id_ref) DO NOTHING;
+        """
+        session.run(
+            queryOf(
+                statement,
+                mapOf(
+                    "utbetalingIdRef" to utbetalingIdRef,
+                    "status" to status.toString(),
+                    "opprettet" to opprettet,
+                    "json" to json,
+                ),
+            ).asExecute,
+        )
     }
 
     override fun nyttOppdrag(
         fagsystemId: String,
         mottaker: String,
-    ): Long = throw UnsupportedOperationException()
+    ): Long? {
+        @Language("PostgreSQL")
+        val statement = """
+            INSERT INTO oppdrag (fagsystem_id, mottaker)
+            VALUES (:fagsystemId, :mottaker)
+            ON CONFLICT DO NOTHING
+        """
+        return session.run(
+            queryOf(
+                statement,
+                mapOf(
+                    "fagsystemId" to fagsystemId,
+                    "mottaker" to mottaker,
+                ),
+            ).asUpdateAndReturnGeneratedKey,
+        )
+    }
 
     override fun opprettUtbetalingId(
         utbetalingId: UUID,
@@ -73,7 +112,43 @@ class TransactionalUtbetalingDao(private val session: Session) : UtbetalingRepos
         personFagsystemIdRef: Long,
         arbeidsgiverbeløp: Int,
         personbeløp: Int,
-    ): Long = throw UnsupportedOperationException()
+    ): Long {
+        @Language("PostgreSQL")
+        val statement = """
+            INSERT INTO utbetaling_id (
+                utbetaling_id, person_ref, arbeidsgiver_ref, type, opprettet, arbeidsgiver_fagsystem_id_ref, person_fagsystem_id_ref, arbeidsgiverbeløp, personbeløp
+            ) VALUES (
+                :utbetalingId,
+                (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer),
+                (SELECT id FROM arbeidsgiver WHERE orgnummer = :orgnummer),
+                CAST(:type as utbetaling_type),
+                :opprettet,
+                :arbeidsgiverFagsystemIdRef,
+                :personFagsystemIdRef,
+                :arbeidsgiverbelop,
+                :personbelop
+            )
+            ON CONFLICT (utbetaling_id) DO NOTHING RETURNING id
+        """
+        return requireNotNull(
+            session.run(
+                queryOf(
+                    statement,
+                    mapOf(
+                        "utbetalingId" to utbetalingId,
+                        "fodselsnummer" to fødselsnummer.toLong(),
+                        "orgnummer" to orgnummer.toLong(),
+                        "type" to type.toString(),
+                        "opprettet" to opprettet,
+                        "arbeidsgiverFagsystemIdRef" to arbeidsgiverFagsystemIdRef,
+                        "personFagsystemIdRef" to personFagsystemIdRef,
+                        "arbeidsgiverbelop" to arbeidsgiverbeløp,
+                        "personbelop" to personbeløp,
+                    ),
+                ).asUpdateAndReturnGeneratedKey,
+            ),
+        ) { "Kunne ikke opprette utbetaling" }
+    }
 
     override fun opprettKobling(
         vedtaksperiodeId: UUID,
