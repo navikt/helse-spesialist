@@ -19,6 +19,7 @@ import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
 import no.nav.helse.modell.oppgave.OppgaveDto
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -187,7 +188,12 @@ class OppgavehenterTest {
     ) = object : TotrinnsvurderingRepository {
         override fun hentAktivTotrinnsvurdering(oppgaveId: Long): TotrinnsvurderingFraDatabase? = totrinnsvurdering
         override fun oppdater(totrinnsvurderingFraDatabase: TotrinnsvurderingFraDatabase) {}
-    }
+        override fun settBeslutter(oppgaveId: Long, saksbehandlerOid: UUID) = TODO("Not yet implemented")
+        override fun settErRetur(vedtaksperiodeId: UUID) = TODO("Not yet implemented")
+        override fun opprett(vedtaksperiodeId: UUID): TotrinnsvurderingOld = TODO("Not yet implemented")
+        override fun hentAktiv(oppgaveId: Long): TotrinnsvurderingOld = TODO("Not yet implemented")
+        override fun hentAktiv(vedtaksperiodeId: UUID): TotrinnsvurderingOld = TODO("Not yet implemented")
+        override fun ferdigstill(vedtaksperiodeId: UUID) = TODO("Not yet implemented") }
 
     private val saksbehandlerRepository = object : SaksbehandlerRepository {
         val saksbehandlere = mapOf(
