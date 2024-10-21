@@ -49,15 +49,11 @@ class TotrinnsvurderingDao(private val dataSource: DataSource) : Totrinnsvurderi
 
     override fun hentAktiv(vedtaksperiodeId: UUID): TotrinnsvurderingOld? =
         sessionOf(dataSource).use { session ->
-            session.transaction {
-                TransactionalTotrinnsvurderingDao(session).hentAktiv(vedtaksperiodeId)
-            }
+            TransactionalTotrinnsvurderingDao(session).hentAktiv(vedtaksperiodeId)
         }
 
     override fun hentAktiv(oppgaveId: Long): TotrinnsvurderingOld? =
         sessionOf(dataSource).use { session ->
-            session.transaction {
-                TransactionalTotrinnsvurderingDao(session).hentAktiv(oppgaveId)
-            }
+            TransactionalTotrinnsvurderingDao(session).hentAktiv(oppgaveId)
         }
 }
