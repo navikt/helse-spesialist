@@ -118,6 +118,10 @@ internal class TransactionalTotrinnsvurderingDao(
     }
 
     override fun opprett(vedtaksperiodeId: UUID): TotrinnsvurderingOld {
+        return hentAktiv(vedtaksperiodeId) ?: opprettTotrinnsvurdering(vedtaksperiodeId)
+    }
+
+    private fun opprettTotrinnsvurdering(vedtaksperiodeId: UUID): TotrinnsvurderingOld {
         @Language("PostgreSQL")
         val query =
             """

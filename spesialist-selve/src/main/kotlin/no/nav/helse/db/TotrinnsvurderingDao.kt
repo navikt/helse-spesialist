@@ -21,8 +21,7 @@ class TotrinnsvurderingDao(private val dataSource: DataSource) : Totrinnsvurderi
     override fun opprett(vedtaksperiodeId: UUID): TotrinnsvurderingOld =
         sessionOf(dataSource).use { session ->
             session.transaction { transaction ->
-                val transactionalDao = TransactionalTotrinnsvurderingDao(transaction)
-                transactionalDao.hentAktiv(vedtaksperiodeId) ?: transactionalDao.opprett(vedtaksperiodeId)
+                TransactionalTotrinnsvurderingDao(transaction).opprett(vedtaksperiodeId)
             }
         }
 
