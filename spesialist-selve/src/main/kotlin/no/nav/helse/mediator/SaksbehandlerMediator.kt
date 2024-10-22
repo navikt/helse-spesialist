@@ -6,7 +6,7 @@ import no.nav.helse.db.AnnulleringDao
 import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.HistorikkinnslagRepository
 import no.nav.helse.db.OpptegnelseDao
-import no.nav.helse.db.PeriodehistorikkDao
+import no.nav.helse.db.PgHistorikkinnslagRepository
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -107,7 +107,7 @@ internal class SaksbehandlerMediator(
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
     private val påVentDao = PåVentDao(dataSource)
-    private val historikkinnslagRepository: HistorikkinnslagRepository = PeriodehistorikkDao(dataSource)
+    private val historikkinnslagRepository: HistorikkinnslagRepository = PgHistorikkinnslagRepository(dataSource)
     private val avslagDao = AvslagDao(dataSource)
     private val annulleringDao = AnnulleringDao(dataSource)
 

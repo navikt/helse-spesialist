@@ -14,7 +14,7 @@ import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OpptegnelseDao
-import no.nav.helse.db.PeriodehistorikkDao
+import no.nav.helse.db.PgHistorikkinnslagRepository
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
@@ -134,7 +134,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val oppgaveDao = OppgaveDao(dataSource)
     internal val oppgaveApiDao = OppgaveApiDao(dataSource)
     internal val periodehistorikkApiDao = PeriodehistorikkApiDao(dataSource)
-    internal val periodehistorikkDao = PeriodehistorikkDao(dataSource)
+    internal val pgHistorikkinnslagRepository = PgHistorikkinnslagRepository(dataSource)
     internal val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
     internal val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     internal val snapshotDao = SnapshotDao(dataSource)

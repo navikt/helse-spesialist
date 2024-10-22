@@ -9,7 +9,7 @@ import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OpptegnelseDao
-import no.nav.helse.db.PeriodehistorikkDao
+import no.nav.helse.db.PgHistorikkinnslagRepository
 import no.nav.helse.db.PoisonPillDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
@@ -99,7 +99,7 @@ internal class SpesialistApp(
     private val utbetalingDao = UtbetalingDao(dataSource)
     private val oppgaveApiDao = OppgaveApiDao(dataSource)
     private val periodehistorikkApiDao = PeriodehistorikkApiDao(dataSource)
-    private val periodehistorikkDao = PeriodehistorikkDao(dataSource)
+    private val pgHistorikkinnslagRepository = PgHistorikkinnslagRepository(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
     private val risikovurderingDao = RisikovurderingDao(dataSource)
     private val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
@@ -142,7 +142,7 @@ internal class SpesialistApp(
     private val stansAutomatiskBehandlingMediator =
         StansAutomatiskBehandlingMediator(
             stansAutomatiskBehandlingDao,
-            periodehistorikkDao,
+            pgHistorikkinnslagRepository,
             oppgaveDao,
             utbetalingDao,
             notatDao,
@@ -151,7 +151,7 @@ internal class SpesialistApp(
         TotrinnsvurderingService(
             totrinnsvurderingRepository = totrinnsvurderingDao,
             oppgaveRepository = oppgaveDao,
-            historikkinnslagRepository = periodehistorikkDao,
+            historikkinnslagRepository = pgHistorikkinnslagRepository,
             notatRepository = notatDao,
         )
 

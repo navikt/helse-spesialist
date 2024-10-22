@@ -6,14 +6,14 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-class PeriodehistorikkDaoApiDaoTest : DatabaseIntegrationTest() {
+class PeriodehistorikkApiDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `lagre og finn periodehistorikk`() {
         val periodeId = UUID.randomUUID()
         opprettSaksbehandler()
 
-        periodehistorikkDao.lagre(
+        pgHistorikkinnslagRepository.lagre(
             PeriodehistorikkType.TOTRINNSVURDERING_TIL_GODKJENNING,
             SAKSBEHANDLER_OID,
             periodeId

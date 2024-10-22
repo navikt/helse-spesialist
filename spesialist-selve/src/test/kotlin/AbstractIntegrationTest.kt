@@ -3,7 +3,7 @@ import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OpptegnelseDao
-import no.nav.helse.db.PeriodehistorikkDao
+import no.nav.helse.db.PgHistorikkinnslagRepository
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.TildelingDao
@@ -27,7 +27,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     protected val testRapid = __ikke_bruk_denne
     protected val oppgaveDao = OppgaveDao(dataSource)
     private val reservasjonDao = ReservasjonDao(dataSource)
-    private val periodehistorikkDao = PeriodehistorikkDao(dataSource)
+    private val pgHistorikkinnslagRepository = PgHistorikkinnslagRepository(dataSource)
     private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
     private val meldingDao = MeldingDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
@@ -62,7 +62,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
                 TotrinnsvurderingService(
                     totrinnsvurderingDao,
                     oppgaveDao,
-                    periodehistorikkDao,
+                    pgHistorikkinnslagRepository,
                     notatDao,
                 ),
         )

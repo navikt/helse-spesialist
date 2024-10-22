@@ -7,7 +7,7 @@ import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveRepository
-import no.nav.helse.db.PeriodehistorikkDao
+import no.nav.helse.db.PgHistorikkinnslagRepository
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.db.TransactionalCommandContextDao
 import no.nav.helse.db.TransactionalEgenAnsattDao
@@ -94,13 +94,13 @@ internal class Kommandofabrikk(
     oppgaveService: () -> OppgaveService,
     private val totrinnsvurderingDao: TotrinnsvurderingDao = TotrinnsvurderingDao(dataSource),
     private val notatDao: NotatDao = NotatDao(dataSource),
-    private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
+    private val pgHistorikkinnslagRepository: PgHistorikkinnslagRepository = PgHistorikkinnslagRepository(dataSource),
     private val påVentDao: PåVentDao = PåVentDao(dataSource),
     private val totrinnsvurderingService: TotrinnsvurderingService =
         TotrinnsvurderingService(
             totrinnsvurderingDao,
             oppgaveDao,
-            periodehistorikkDao,
+            pgHistorikkinnslagRepository,
             notatDao,
         ),
     private val godkjenningMediator: GodkjenningMediator,
@@ -411,7 +411,7 @@ internal class Kommandofabrikk(
             risikovurderingRepository = risikovurderingDao,
             påVentRepository = påVentDao,
             overstyringRepository = overstyringDao,
-            periodehistorikkDao = periodehistorikkDao,
+            periodehistorikkDao = pgHistorikkinnslagRepository,
             oppgaveRepository = oppgaveDao,
             avviksvurderingRepository = avviksvurderingDao,
             oppgaveService = oppgaveService,

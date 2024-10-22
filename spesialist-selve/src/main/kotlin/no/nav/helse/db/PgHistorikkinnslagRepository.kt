@@ -11,7 +11,7 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import java.util.UUID
 import javax.sql.DataSource
 
-class PeriodehistorikkDao(
+class PgHistorikkinnslagRepository(
     private val dataSource: DataSource,
 ) : HistorikkinnslagRepository {
     private val notatDao: NotatApiDao = NotatApiDao(dataSource)
