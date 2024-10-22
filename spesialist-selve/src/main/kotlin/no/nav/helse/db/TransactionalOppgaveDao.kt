@@ -25,6 +25,21 @@ class TransactionalOppgaveDao(private val session: Session) : OppgaveRepository 
         )
     }
 
+    override fun finnGenerasjonId(oppgaveId: Long): UUID {
+        @Language("PostgreSQL")
+        val statement =
+            """
+            SELECT generasjon_ref FROM oppgave WHERE id = :oppgaveId;
+            """.trimIndent()
+        return requireNotNull(
+            session.run(
+                queryOf(statement, mapOf("oppgaveId" to oppgaveId)).map {
+                    it.uuid("generasjon_ref")
+                }.asSingle,
+            ),
+        )
+    }
+
     override fun finnOppgaveIdUansettStatus(fødselsnummer: String): Long {
         @Language("PostgreSQL")
         val statement =

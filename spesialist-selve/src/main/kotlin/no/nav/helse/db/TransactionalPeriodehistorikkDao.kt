@@ -3,6 +3,7 @@ package no.nav.helse.db
 import kotliquery.Session
 import kotliquery.queryOf
 import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
+import no.nav.helse.modell.periodehistorikk.Innslagstype
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import org.intellij.lang.annotations.Language
 import java.util.UUID
@@ -14,6 +15,36 @@ class TransactionalPeriodehistorikkDao(private val session: Session) : Periodehi
     ) {
         throw UnsupportedOperationException()
     }
+
+    internal fun lagre(
+        historikkinnslag: HistorikkinnslagDto,
+        generasjonId: UUID,
+        notatId: Int?,
+    ) {
+        @Language("PostgreSQL")
+        val statement = """
+                INSERT INTO periodehistorikk (type, saksbehandler_oid, generasjon_id, utbetaling_id, notat_id, json)
+                VALUES (:type, :saksbehandler_oid, :generasjon_id, null, :notat_id, :json::json)
+        """
+        session.run(
+            queryOf(
+                statement,
+                mapOf(
+                    "type" to historikkinnslag.type.toDb(),
+                    "saksbehandler_oid" to historikkinnslag.saksbehandler?.oid,
+                    "generasjon_id" to generasjonId,
+                    "notat_id" to notatId,
+                    "json" to historikkinnslag.toJson(),
+                ),
+            ).asUpdate,
+        )
+    }
+
+    private fun Innslagstype.toDb() =
+        when (this) {
+            Innslagstype.LAGT_PA_VENT -> "LEGG_PA_VENT"
+            Innslagstype.FJERNET_FRA_PA_VENT -> "FJERN_FRA_PA_VENT" // TODO: Mangler å migrere typen i databasen
+        }
 
     override fun lagre(
         historikkType: PeriodehistorikkType,

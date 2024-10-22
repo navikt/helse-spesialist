@@ -25,6 +25,7 @@ import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -88,6 +89,17 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode(spleisBehandlingId = spleisBehandlingId)
         opprettOppgave(contextId = CONTEXT_ID)
         assertEquals(spleisBehandlingId, oppgaveDao.finnSpleisBehandlingId(oppgaveId))
+    }
+
+    @Test
+    fun `finn generasjonId`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(contextId = CONTEXT_ID)
+        assertDoesNotThrow {
+            oppgaveDao.finnGenerasjonId(oppgaveId)
+        }
     }
 
     @Test

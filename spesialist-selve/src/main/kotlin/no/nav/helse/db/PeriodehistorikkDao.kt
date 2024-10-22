@@ -1,9 +1,9 @@
 package no.nav.helse.db
 
 import kotliquery.sessionOf
+import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.periodehistorikk.FjernetFraPåVent
 import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
-import no.nav.helse.modell.periodehistorikk.Innslagstype
 import no.nav.helse.modell.periodehistorikk.LagtPåVent
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.notat.NotatApiDao
@@ -15,20 +15,15 @@ class PeriodehistorikkDao(
     private val dataSource: DataSource,
 ) : PeriodehistorikkRepository {
     private val notatDao: NotatApiDao = NotatApiDao(dataSource)
+    private val oppgaveDao = OppgaveDao(dataSource)
 
     override fun lagre(
         historikkinnslag: HistorikkinnslagDto,
         oppgaveId: Long,
     ) {
+        val generasjonId = oppgaveDao.finnGenerasjonId(oppgaveId)
         when (historikkinnslag) {
-            is FjernetFraPåVent ->
-                lagre(
-                    historikkType = historikkinnslag.type.tilPeriodehistorikkType(),
-                    saksbehandlerOid = historikkinnslag.saksbehandler.oid,
-                    oppgaveId = oppgaveId,
-                    notatId = null,
-                )
-
+            is FjernetFraPåVent -> lagre(historikkinnslag, generasjonId, null)
             is LagtPåVent -> {
                 val notatId =
                     historikkinnslag.notat?.let { notat ->
@@ -40,14 +35,18 @@ class PeriodehistorikkDao(
                                 type = NotatType.PaaVent,
                             )?.toInt()
                     }
-                lagre(
-                    historikkType = historikkinnslag.type.tilPeriodehistorikkType(),
-                    saksbehandlerOid = historikkinnslag.saksbehandler.oid,
-                    oppgaveId = oppgaveId,
-                    notatId = notatId,
-                    json = historikkinnslag.toJson(),
-                )
+                lagre(historikkinnslag, generasjonId, notatId)
             }
+        }
+    }
+
+    private fun lagre(
+        historikkinnslag: HistorikkinnslagDto,
+        generasjonId: UUID,
+        notatId: Int?,
+    ) {
+        sessionOf(dataSource).use { session ->
+            TransactionalPeriodehistorikkDao(session).lagre(historikkinnslag, generasjonId, notatId)
         }
     }
 
@@ -95,10 +94,4 @@ class PeriodehistorikkDao(
             )
         }
     }
-
-    private fun Innslagstype.tilPeriodehistorikkType() =
-        when (this) {
-            Innslagstype.LAGT_PA_VENT -> PeriodehistorikkType.LEGG_PA_VENT
-            Innslagstype.FJERNET_FRA_PA_VENT -> PeriodehistorikkType.FJERN_FRA_PA_VENT
-        }
 }

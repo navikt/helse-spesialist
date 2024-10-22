@@ -14,6 +14,8 @@ sealed interface HistorikkinnslagDto {
     val saksbehandler: SaksbehandlerDto?
     val tidspunkt: LocalDateTime
 
+    fun toJson(): String = "{}"
+
     companion object {
         fun lagtPåVentInnslag(
             notat: NotatDto?,
@@ -52,7 +54,7 @@ data class LagtPåVent(
     val årsak: List<PåVentÅrsak>,
     val frist: LocalDate,
 ) : HistorikkinnslagDto {
-    fun toJson(): String =
+    override fun toJson(): String =
         mapOf(
             "årsaker" to årsak.map { it },
             "frist" to frist,

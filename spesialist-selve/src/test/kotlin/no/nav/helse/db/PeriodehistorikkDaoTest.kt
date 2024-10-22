@@ -1,6 +1,8 @@
 package no.nav.helse.db
 
 import DatabaseIntegrationTest
+import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
+import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -15,11 +17,10 @@ class PeriodehistorikkDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode()
         opprettOppgave()
 
-        periodehistorikkDao.lagre(
-            PeriodehistorikkType.TOTRINNSVURDERING_TIL_GODKJENNING,
-            SAKSBEHANDLER_OID,
-            oppgaveId
-        )
+        val saksbehandler = SaksbehandlerDto(SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_IDENT)
+        val historikkinnslag = HistorikkinnslagDto.fjernetFraPåVentInnslag(saksbehandler)
+
+        periodehistorikkDao.lagre(historikkinnslag, oppgaveId)
         val result = periodehistorikkApiDao.finn(UTBETALING_ID)
 
         assertEquals(1, result.size)

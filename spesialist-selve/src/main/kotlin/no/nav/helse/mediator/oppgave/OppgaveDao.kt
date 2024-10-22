@@ -82,6 +82,12 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource), Opp
             TransactionalOppgaveDao(session).finnUtbetalingId(oppgaveId)
         }
 
+    override fun finnGenerasjonId(oppgaveId: Long): UUID {
+        return sessionOf(dataSource).use { session ->
+            TransactionalOppgaveDao(session).finnGenerasjonId(oppgaveId)
+        }
+    }
+
     override fun finnSpleisBehandlingId(oppgaveId: Long) =
         sessionOf(dataSource).use { session ->
             TransactionalOppgaveDao(session).finnSpleisBehandlingId(oppgaveId)

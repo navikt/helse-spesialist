@@ -9,6 +9,8 @@ interface OppgaveRepository {
 
     fun finnUtbetalingId(oppgaveId: Long): UUID?
 
+    fun finnGenerasjonId(oppgaveId: Long): UUID
+
     fun finnOppgave(id: Long): OppgaveFraDatabase?
 
     fun finnOppgaveId(fødselsnummer: String): Long?
