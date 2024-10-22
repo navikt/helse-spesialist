@@ -1,6 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
+import kotliquery.TransactionalSession
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.ReservasjonRepository
@@ -40,12 +41,22 @@ internal class VedtaksperiodeForkastet private constructor(
 
     override fun vedtaksperiodeId() = vedtaksperiodeId
 
+    override fun skalKjøresTransaksjonelt(): Boolean = true
+
+    override fun transaksjonellBehandle(
+        person: Person,
+        kommandostarter: Kommandostarter,
+        transactionalSession: TransactionalSession,
+    ) {
+        person.vedtaksperiodeForkastet(vedtaksperiodeId)
+        kommandostarter { vedtaksperiodeForkastet(this@VedtaksperiodeForkastet, transactionalSession) }
+    }
+
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
     ) {
-        person.vedtaksperiodeForkastet(vedtaksperiodeId)
-        kommandostarter { vedtaksperiodeForkastet(this@VedtaksperiodeForkastet) }
+        throw UnsupportedOperationException()
     }
 
     override fun toJson() = json

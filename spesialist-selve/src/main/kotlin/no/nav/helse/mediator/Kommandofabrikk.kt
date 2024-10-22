@@ -8,8 +8,6 @@ import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.Periodehistorikk
-import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.db.TransactionalCommandContextDao
 import no.nav.helse.db.TransactionalEgenAnsattDao
@@ -90,8 +88,6 @@ internal class Kommandofabrikk(
     private val vedtakDao: VedtakDao = VedtakDao(dataSource),
     private val oppgaveDao: OppgaveDao = OppgaveDao(dataSource),
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
-    private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
-    private val tildelingDao: TildelingDao = TildelingDao(dataSource),
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
     private val risikovurderingDao: RisikovurderingDao = RisikovurderingDao(dataSource),
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource),
@@ -344,17 +340,26 @@ internal class Kommandofabrikk(
             json = hendelse.toJson(),
         )
 
-    internal fun vedtaksperiodeForkastet(hendelse: VedtaksperiodeForkastet): VedtaksperiodeForkastetCommand =
+    internal fun vedtaksperiodeForkastet(
+        hendelse: VedtaksperiodeForkastet,
+        session: TransactionalSession,
+    ): VedtaksperiodeForkastetCommand =
         VedtaksperiodeForkastetCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
             id = hendelse.id,
-            commandContextRepository = commandContextDao,
-            oppgaveService = oppgaveService,
-            reservasjonRepository = reservasjonDao,
-            tildelingRepository = tildelingDao,
-            oppgaveRepository = oppgaveDao,
-            totrinnsvurderingService = totrinnsvurderingService,
+            commandContextRepository = TransactionalCommandContextDao(session),
+            oppgaveService = transaksjonellOppgaveService(session),
+            reservasjonRepository = TransactionalReservasjonDao(session),
+            tildelingRepository = TransactionalTildelingDao(session),
+            oppgaveRepository = TransactionalOppgaveDao(session),
+            totrinnsvurderingService =
+                TotrinnsvurderingService(
+                    TransactionalTotrinnsvurderingDao(session),
+                    TransactionalOppgaveDao(session),
+                    TransactionalPeriodehistorikkDao(session),
+                    TransactionalNotatDao(session),
+                ),
         )
 
     internal fun løsGodkjenningsbehov(
