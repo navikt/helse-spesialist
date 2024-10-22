@@ -18,14 +18,6 @@ interface HistorikkinnslagRepository {
         json: String = "{}",
     )
 
-    fun lagre(
-        historikkType: PeriodehistorikkType,
-        saksbehandlerOid: UUID? = null,
-        oppgaveId: Long,
-        notatId: Int? = null,
-        json: String = "{}",
-    )
-
     fun migrer(
         tidligereUtbetalingId: UUID,
         utbetalingId: UUID,

@@ -50,24 +50,6 @@ class PgHistorikkinnslagRepository(
         }
     }
 
-    override fun lagre(
-        historikkType: PeriodehistorikkType,
-        saksbehandlerOid: UUID?,
-        oppgaveId: Long,
-        notatId: Int?,
-        json: String,
-    ) {
-        sessionOf(dataSource).use { session ->
-            TransactionalPeriodehistorikkDao(session).lagre(
-                historikkType,
-                saksbehandlerOid,
-                oppgaveId,
-                notatId,
-                json,
-            )
-        }
-    }
-
     override fun migrer(
         tidligereUtbetalingId: UUID,
         utbetalingId: UUID,
