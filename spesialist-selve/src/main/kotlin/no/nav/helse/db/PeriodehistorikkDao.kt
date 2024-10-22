@@ -11,30 +11,7 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import java.util.UUID
 import javax.sql.DataSource
 
-interface PeriodehistorikkRepository {
-    fun lagre(
-        historikkinnslag: HistorikkinnslagDto,
-        oppgaveId: Long,
-    )
-
-    fun lagre(
-        historikkType: PeriodehistorikkType,
-        saksbehandlerOid: UUID? = null,
-        utbetalingId: UUID,
-        notatId: Int? = null,
-        json: String = "{}",
-    )
-
-    fun lagre(
-        historikkType: PeriodehistorikkType,
-        saksbehandlerOid: UUID? = null,
-        oppgaveId: Long,
-        notatId: Int? = null,
-        json: String = "{}",
-    )
-}
-
-class Periodehistorikk(
+class PeriodehistorikkDao(
     private val dataSource: DataSource,
 ) : PeriodehistorikkRepository {
     private val notatDao: NotatApiDao = NotatApiDao(dataSource)
@@ -89,6 +66,15 @@ class Periodehistorikk(
                 notatId,
                 json,
             )
+        }
+    }
+
+    override fun migrer(
+        tidligereUtbetalingId: UUID,
+        utbetalingId: UUID,
+    ) {
+        sessionOf(dataSource).use { session ->
+            TransactionalPeriodehistorikkDao(session).migrer(tidligereUtbetalingId, utbetalingId)
         }
     }
 

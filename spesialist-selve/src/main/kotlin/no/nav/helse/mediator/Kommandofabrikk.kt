@@ -7,7 +7,7 @@ import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveRepository
-import no.nav.helse.db.Periodehistorikk
+import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.db.TransactionalCommandContextDao
 import no.nav.helse.db.TransactionalEgenAnsattDao
@@ -74,7 +74,6 @@ import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
 import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import org.slf4j.LoggerFactory
 import java.util.UUID
 import javax.sql.DataSource
@@ -95,14 +94,13 @@ internal class Kommandofabrikk(
     oppgaveService: () -> OppgaveService,
     private val totrinnsvurderingDao: TotrinnsvurderingDao = TotrinnsvurderingDao(dataSource),
     private val notatDao: NotatDao = NotatDao(dataSource),
-    private val periodehistorikkDao: PeriodehistorikkApiDao = PeriodehistorikkApiDao(dataSource),
-    private val periodehistorikk: Periodehistorikk = Periodehistorikk(dataSource),
+    private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
     private val påVentDao: PåVentDao = PåVentDao(dataSource),
     private val totrinnsvurderingService: TotrinnsvurderingService =
         TotrinnsvurderingService(
             totrinnsvurderingDao,
             oppgaveDao,
-            periodehistorikk,
+            periodehistorikkDao,
             notatDao,
         ),
     private val godkjenningMediator: GodkjenningMediator,

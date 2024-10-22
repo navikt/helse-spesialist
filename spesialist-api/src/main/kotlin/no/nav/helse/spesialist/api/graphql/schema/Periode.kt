@@ -442,7 +442,7 @@ data class BeregnetPeriode(
     private val risikovurderingApiDao: RisikovurderingApiDao,
     private val varselRepository: ApiVarselRepository,
     private val oppgaveApiDao: OppgaveApiDao,
-    private val periodehistorikkDao: PeriodehistorikkApiDao,
+    private val periodehistorikkApiDao: PeriodehistorikkApiDao,
     private val notatDao: NotatApiDao,
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val påVentApiDao: PåVentApiDao,
@@ -504,7 +504,7 @@ data class BeregnetPeriode(
     }
 
     fun historikkinnslag(): List<Historikkinnslag> =
-        periodehistorikkDao
+        periodehistorikkApiDao
             .finn(utbetaling().id)
             .filterNot { it.type == PeriodehistorikkType.LEGG_PA_VENT }
             .map {

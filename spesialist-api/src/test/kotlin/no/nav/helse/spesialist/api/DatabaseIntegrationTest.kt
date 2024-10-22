@@ -102,7 +102,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val tildelingApiDao = TildelingApiDao(dataSource)
     protected val overstyringApiDao = OverstyringApiDao(dataSource)
     protected val oppgaveApiDao = OppgaveApiDao(dataSource)
-    protected val periodehistorikkDao = PeriodehistorikkApiDao(dataSource)
+    protected val periodehistorikkApiDao = PeriodehistorikkApiDao(dataSource)
     protected val vergemålApiDao = VergemålApiDao(dataSource)
     private val snapshotApiDao = SnapshotApiDao(dataSource)
 

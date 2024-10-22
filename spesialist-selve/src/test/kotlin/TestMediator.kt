@@ -2,7 +2,7 @@ import no.nav.helse.SpeilTilgangsgrupper
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OpptegnelseDao
-import no.nav.helse.db.Periodehistorikk
+import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
@@ -44,7 +44,7 @@ internal class TestMediator(
     private val vedtakDao = VedtakDao(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
-    private val periodehistorikkDao = Periodehistorikk(dataSource)
+    private val periodehistorikkDao = PeriodehistorikkDao(dataSource)
     private val utbetalingDao = UtbetalingDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
     private val meldingDao = MeldingDao(dataSource)

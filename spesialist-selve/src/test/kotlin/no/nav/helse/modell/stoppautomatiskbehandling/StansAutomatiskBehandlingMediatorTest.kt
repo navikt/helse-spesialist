@@ -7,7 +7,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.db.NotatRepository
-import no.nav.helse.db.Periodehistorikk
+import no.nav.helse.db.PeriodehistorikkRepository
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
 import no.nav.helse.mediator.Subsumsjonsmelder
@@ -36,7 +36,7 @@ import java.util.UUID.randomUUID
 
 class StansAutomatiskBehandlingMediatorTest {
     private val stansAutomatiskBehandlingDao = mockk<StansAutomatiskBehandlingDao>(relaxed = true)
-    private val periodehistorikk = mockk<Periodehistorikk>(relaxed = true)
+    private val periodehistorikkRepository = mockk<PeriodehistorikkRepository>(relaxed = true)
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val utbetalingDao = mockk<UtbetalingDao>(relaxed = true)
     private val notatDao = mockk<NotatRepository>(relaxed = true)
@@ -52,7 +52,7 @@ class StansAutomatiskBehandlingMediatorTest {
     private val mediator =
         StansAutomatiskBehandlingMediator(
             stansAutomatiskBehandlingDao,
-            periodehistorikk,
+            periodehistorikkRepository,
             oppgaveDao,
             utbetalingDao,
             notatDao,
@@ -85,7 +85,7 @@ class StansAutomatiskBehandlingMediatorTest {
             )
         }
         verify(exactly = 1) {
-            periodehistorikk.lagre(
+            periodehistorikkRepository.lagre(
                 historikkType = STANS_AUTOMATISK_BEHANDLING,
                 saksbehandlerOid = null,
                 utbetalingId = any(),

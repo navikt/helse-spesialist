@@ -9,7 +9,7 @@ import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OpptegnelseDao
-import no.nav.helse.db.Periodehistorikk
+import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PoisonPillDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
@@ -99,7 +99,7 @@ internal class SpesialistApp(
     private val utbetalingDao = UtbetalingDao(dataSource)
     private val oppgaveApiDao = OppgaveApiDao(dataSource)
     private val periodehistorikkApiDao = PeriodehistorikkApiDao(dataSource)
-    private val periodehistorikk = Periodehistorikk(dataSource)
+    private val periodehistorikkDao = PeriodehistorikkDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
     private val risikovurderingDao = RisikovurderingDao(dataSource)
     private val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
@@ -142,7 +142,7 @@ internal class SpesialistApp(
     private val stansAutomatiskBehandlingMediator =
         StansAutomatiskBehandlingMediator(
             stansAutomatiskBehandlingDao,
-            periodehistorikk,
+            periodehistorikkDao,
             oppgaveDao,
             utbetalingDao,
             notatDao,
@@ -151,7 +151,7 @@ internal class SpesialistApp(
         TotrinnsvurderingService(
             totrinnsvurderingRepository = totrinnsvurderingDao,
             oppgaveRepository = oppgaveDao,
-            periodehistorikkRepository = periodehistorikk,
+            periodehistorikkRepository = periodehistorikkDao,
             notatRepository = notatDao,
         )
 
@@ -230,7 +230,7 @@ internal class SpesialistApp(
                 risikovurderingApiDao = risikovurderingApiDao,
                 varselRepository = apiVarselRepository,
                 oppgaveApiDao = oppgaveApiDao,
-                periodehistorikkDao = periodehistorikkApiDao,
+                periodehistorikkApiDao = periodehistorikkApiDao,
                 notatDao = notatApiDao,
                 totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                 påVentApiDao = påVentApiDao,

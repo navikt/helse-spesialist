@@ -65,4 +65,25 @@ class TransactionalPeriodehistorikkDao(private val session: Session) : Periodehi
             lagre(historikkType, saksbehandlerOid, utbetalingId, notatId, json)
         } ?: throw IllegalStateException("Forventer å finne utbetaling for oppgave med id=$oppgaveId")
     }
+
+    override fun migrer(
+        tidligereUtbetalingId: UUID,
+        utbetalingId: UUID,
+    ) {
+        @Language("PostgreSQL")
+        val statement = """
+                UPDATE periodehistorikk 
+                SET utbetaling_id = :utbetalingId
+                WHERE utbetaling_id = :tidligereUtbetalingId
+        """
+        session.run(
+            queryOf(
+                statement,
+                mapOf(
+                    "utbetalingId" to utbetalingId,
+                    "tidligereUtbetalingId" to tidligereUtbetalingId,
+                ),
+            ).asUpdate,
+        )
+    }
 }

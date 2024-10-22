@@ -2,7 +2,7 @@ package no.nav.helse.mediator
 
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.db.NotatRepository
-import no.nav.helse.db.Periodehistorikk
+import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TotrinnsvurderingDao
@@ -31,14 +31,14 @@ internal class GodkjenningService(
     private val rapidsConnection: RapidsConnection,
     private val oppgaveService: OppgaveService,
     private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
-    private val periodehistorikk: Periodehistorikk = Periodehistorikk(dataSource),
+    private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
     private val saksbehandlerRepository: SaksbehandlerRepository,
     private val notatRepository: NotatRepository,
     private val totrinnsvurderingService: TotrinnsvurderingService =
         TotrinnsvurderingService(
             TotrinnsvurderingDao(dataSource),
             oppgaveDao,
-            periodehistorikk,
+            periodehistorikkDao,
             notatRepository,
         ),
 ) : Godkjenninghåndterer {
@@ -103,7 +103,7 @@ internal class GodkjenningService(
             overstyringDao.ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId)
 
             if (totrinnsvurdering?.erBeslutteroppgave() == true && godkjenningDTO.godkjent) {
-                periodehistorikk.lagre(TOTRINNSVURDERING_ATTESTERT, oid, utbetalingId, null)
+                periodehistorikkDao.lagre(TOTRINNSVURDERING_ATTESTERT, oid, utbetalingId, null)
             }
         }
     }

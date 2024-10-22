@@ -5,7 +5,7 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class PeriodehistorikkTest : DatabaseIntegrationTest() {
+class PeriodehistorikkDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `lagre periodehistorikk ved hjelp av oppgaveId`() {
@@ -15,12 +15,12 @@ class PeriodehistorikkTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode()
         opprettOppgave()
 
-        periodehistorikk.lagre(
+        periodehistorikkDao.lagre(
             PeriodehistorikkType.TOTRINNSVURDERING_TIL_GODKJENNING,
             SAKSBEHANDLER_OID,
             oppgaveId
         )
-        val result = periodehistorikkDao.finn(UTBETALING_ID)
+        val result = periodehistorikkApiDao.finn(UTBETALING_ID)
 
         assertEquals(1, result.size)
     }
@@ -33,12 +33,12 @@ class PeriodehistorikkTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode()
         opprettOppgave()
 
-        periodehistorikk.lagre(
+        periodehistorikkDao.lagre(
             PeriodehistorikkType.TOTRINNSVURDERING_TIL_GODKJENNING,
             SAKSBEHANDLER_OID,
             UTBETALING_ID
         )
-        val result = periodehistorikkDao.finn(UTBETALING_ID)
+        val result = periodehistorikkApiDao.finn(UTBETALING_ID)
 
         assertEquals(1, result.size)
     }

@@ -8,6 +8,7 @@ import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.OverstyringRepository
+import no.nav.helse.db.PeriodehistorikkRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.PåVentRepository
 import no.nav.helse.db.RisikovurderingRepository
@@ -52,7 +53,6 @@ import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.isMissingOrNull
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import java.time.LocalDate
 import java.util.UUID
 
@@ -223,7 +223,7 @@ internal class GodkjenningsbehovCommand(
     risikovurderingRepository: RisikovurderingRepository,
     påVentRepository: PåVentRepository,
     overstyringRepository: OverstyringRepository,
-    periodehistorikkDao: PeriodehistorikkApiDao,
+    periodehistorikkDao: PeriodehistorikkRepository,
     oppgaveRepository: OppgaveRepository,
     avviksvurderingRepository: AvviksvurderingRepository,
     oppgaveService: OppgaveService,

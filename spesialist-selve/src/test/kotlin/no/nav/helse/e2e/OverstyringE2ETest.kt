@@ -361,7 +361,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                 risikovurderingApiDao = RisikovurderingApiDao(dataSource),
                 varselRepository = ApiVarselRepository(dataSource),
                 oppgaveApiDao = OppgaveApiDao(dataSource),
-                periodehistorikkDao = PeriodehistorikkApiDao(dataSource),
+                periodehistorikkApiDao = PeriodehistorikkApiDao(dataSource),
                 notatDao = NotatApiDao(dataSource),
                 totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource),
                 påVentApiDao = PåVentApiDao(dataSource),
