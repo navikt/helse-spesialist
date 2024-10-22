@@ -12,10 +12,8 @@ import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
-import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.graphql.schema.PaVentRequest
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.LoggerFactory
 
@@ -118,11 +116,10 @@ class TotrinnsvurderingMutation(
                 besluttendeSaksbehandler,
             )
 
-            totrinnsvurderinghåndterer.lagrePeriodehistorikk(
+            totrinnsvurderinghåndterer.totrinnsvurderingRetur(
                 oppgaveId = oppgavereferanse.toLong(),
-                saksbehandleroid = besluttendeSaksbehandler.oid,
-                type = PeriodehistorikkType.TOTRINNSVURDERING_RETUR,
-                notat = notatTekst to NotatType.Retur,
+                saksbehandlerFraApi = besluttendeSaksbehandler,
+                notat = notatTekst,
             )
 
             log.info("OppgaveId $oppgavereferanse sendt i retur")

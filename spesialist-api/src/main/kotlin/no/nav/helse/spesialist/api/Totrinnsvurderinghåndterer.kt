@@ -18,6 +18,12 @@ interface Totrinnsvurderinghåndterer {
         notat: Pair<String, NotatType>? = null,
     )
 
+    fun totrinnsvurderingRetur(
+        oppgaveId: Long,
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+        notat: String,
+    )
+
     fun avventerTotrinnsvurdering(
         oppgaveId: Long,
         saksbehandlerFraApi: SaksbehandlerFraApi,

@@ -41,6 +41,11 @@ sealed interface HistorikkinnslagDto {
 
         fun avventerTotrinnsvurdering(saksbehandler: SaksbehandlerDto): AvventerTotrinnsvurdering =
             AvventerTotrinnsvurdering(saksbehandler = saksbehandler, tidspunkt = LocalDateTime.now())
+
+        fun totrinnsvurderingRetur(
+            notat: NotatDto,
+            saksbehandler: SaksbehandlerDto,
+        ): TotrinnsvurderingRetur = TotrinnsvurderingRetur(notat = notat, saksbehandler = saksbehandler, tidspunkt = LocalDateTime.now())
     }
 }
 
@@ -88,3 +93,9 @@ data class AvventerTotrinnsvurdering(
 ) : HistorikkinnslagDto {
     override val notat: NotatDto? = null
 }
+
+data class TotrinnsvurderingRetur(
+    override val notat: NotatDto,
+    override val saksbehandler: SaksbehandlerDto,
+    override val tidspunkt: LocalDateTime,
+) : HistorikkinnslagDto

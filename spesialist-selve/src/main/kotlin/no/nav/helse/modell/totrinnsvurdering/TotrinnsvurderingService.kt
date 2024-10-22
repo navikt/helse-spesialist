@@ -5,6 +5,7 @@ import no.nav.helse.db.NotatRepository
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.TotrinnsvurderingRepository
 import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
+import no.nav.helse.modell.periodehistorikk.NotatDto
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
@@ -51,6 +52,15 @@ class TotrinnsvurderingService(
         oppgaveRepository.finnUtbetalingId(oppgaveId)?.also {
             historikkinnslagRepository.lagre(type, saksbehandleroid, it, notatId)
         }
+    }
+
+    override fun totrinnsvurderingRetur(
+        oppgaveId: Long,
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+        notat: String,
+    ) {
+        val innslag = HistorikkinnslagDto.totrinnsvurderingRetur(notat = NotatDto(oppgaveId, notat), saksbehandlerFraApi.toDto())
+        historikkinnslagRepository.lagre(innslag, oppgaveId)
     }
 
     override fun avventerTotrinnsvurdering(
