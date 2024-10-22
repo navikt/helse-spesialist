@@ -8,7 +8,7 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import org.intellij.lang.annotations.Language
 import java.util.UUID
 
-class TransactionalPeriodehistorikkDao(private val session: Session) : PeriodehistorikkRepository {
+class TransactionalPeriodehistorikkDao(private val session: Session) : HistorikkinnslagRepository {
     override fun lagre(
         historikkinnslag: HistorikkinnslagDto,
         oppgaveId: Long,

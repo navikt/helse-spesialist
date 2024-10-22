@@ -4,9 +4,9 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.AnnulleringDao
 import no.nav.helse.db.AvslagDao
+import no.nav.helse.db.HistorikkinnslagRepository
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PeriodehistorikkDao
-import no.nav.helse.db.PeriodehistorikkRepository
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -107,7 +107,7 @@ internal class SaksbehandlerMediator(
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
     private val påVentDao = PåVentDao(dataSource)
-    private val periodehistorikkRepository: PeriodehistorikkRepository = PeriodehistorikkDao(dataSource)
+    private val historikkinnslagRepository: HistorikkinnslagRepository = PeriodehistorikkDao(dataSource)
     private val avslagDao = AvslagDao(dataSource)
     private val annulleringDao = AnnulleringDao(dataSource)
 
@@ -219,7 +219,7 @@ internal class SaksbehandlerMediator(
                     årsaker = handling.årsaker,
                     frist = handling.frist,
                 )
-            periodehistorikkRepository.lagre(innslag, handling.oppgaveId)
+            historikkinnslagRepository.lagre(innslag, handling.oppgaveId)
             oppgaveService.leggPåVent(handling, saksbehandler)
             PåVentRepository(påVentDao).leggPåVent(saksbehandler.oid(), handling)
         } catch (e: Modellfeil) {
@@ -237,7 +237,7 @@ internal class SaksbehandlerMediator(
         }
         try {
             val innslag = HistorikkinnslagDto.fjernetFraPåVentInnslag(saksbehandler.toDto())
-            periodehistorikkRepository.lagre(innslag, handling.oppgaveId)
+            historikkinnslagRepository.lagre(innslag, handling.oppgaveId)
             oppgaveService.fjernFraPåVent(handling.oppgaveId)
             PåVentRepository(påVentDao).fjernFraPåVent(handling.oppgaveId)
         } catch (e: Modellfeil) {

@@ -1,8 +1,8 @@
 package no.nav.helse.modell.totrinnsvurdering
 
+import no.nav.helse.db.HistorikkinnslagRepository
 import no.nav.helse.db.NotatRepository
 import no.nav.helse.db.OppgaveRepository
-import no.nav.helse.db.PeriodehistorikkRepository
 import no.nav.helse.db.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
@@ -12,7 +12,7 @@ import java.util.UUID
 class TotrinnsvurderingService(
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
     private val oppgaveRepository: OppgaveRepository,
-    private val periodehistorikkRepository: PeriodehistorikkRepository,
+    private val historikkinnslagRepository: HistorikkinnslagRepository,
     private val notatRepository: NotatRepository,
 ) : Totrinnsvurderinghåndterer {
     fun finnEllerOpprettNy(vedtaksperiodeId: UUID): TotrinnsvurderingOld = totrinnsvurderingRepository.opprett(vedtaksperiodeId)
@@ -46,7 +46,7 @@ class TotrinnsvurderingService(
             notatId = notatRepository.lagreForOppgaveId(oppgaveId, tekst, saksbehandleroid, notattype)?.toInt()
         }
         oppgaveRepository.finnUtbetalingId(oppgaveId)?.also {
-            periodehistorikkRepository.lagre(type, saksbehandleroid, it, notatId)
+            historikkinnslagRepository.lagre(type, saksbehandleroid, it, notatId)
         }
     }
 

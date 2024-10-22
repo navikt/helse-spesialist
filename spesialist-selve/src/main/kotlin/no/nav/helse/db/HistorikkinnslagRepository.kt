@@ -4,7 +4,7 @@ import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import java.util.UUID
 
-interface PeriodehistorikkRepository {
+interface HistorikkinnslagRepository {
     fun lagre(
         historikkinnslag: HistorikkinnslagDto,
         oppgaveId: Long,

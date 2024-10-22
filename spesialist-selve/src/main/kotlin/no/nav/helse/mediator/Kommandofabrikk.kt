@@ -217,7 +217,7 @@ internal class Kommandofabrikk(
             fødselsnummer = hendelse.fødselsnummer(),
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
             utbetalingRepository = TransactionalUtbetalingDao(session),
-            periodehistorikkRepository = TransactionalPeriodehistorikkDao(session),
+            historikkinnslagRepository = TransactionalPeriodehistorikkDao(session),
             commandContextRepository = TransactionalCommandContextDao(session),
             oppgaveService = transaksjonellOppgaveService(session),
             reservasjonRepository = TransactionalReservasjonDao(session),

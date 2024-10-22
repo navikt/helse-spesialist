@@ -13,7 +13,7 @@ import javax.sql.DataSource
 
 class PeriodehistorikkDao(
     private val dataSource: DataSource,
-) : PeriodehistorikkRepository {
+) : HistorikkinnslagRepository {
     private val notatDao: NotatApiDao = NotatApiDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
 

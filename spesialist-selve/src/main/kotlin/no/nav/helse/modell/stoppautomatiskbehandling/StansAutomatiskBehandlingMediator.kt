@@ -1,9 +1,9 @@
 package no.nav.helse.modell.stoppautomatiskbehandling
 
 import kotliquery.TransactionalSession
+import no.nav.helse.db.HistorikkinnslagRepository
 import no.nav.helse.db.NotatRepository
 import no.nav.helse.db.OppgaveRepository
-import no.nav.helse.db.PeriodehistorikkRepository
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
 import no.nav.helse.db.StansAutomatiskBehandlingRepository
 import no.nav.helse.db.TransactionalNotatDao
@@ -35,7 +35,7 @@ import java.util.UUID
 
 class StansAutomatiskBehandlingMediator(
     private val stansAutomatiskBehandlingRepository: StansAutomatiskBehandlingRepository,
-    private val periodehistorikkRepository: PeriodehistorikkRepository,
+    private val historikkinnslagRepository: HistorikkinnslagRepository,
     private val oppgaveRepository: OppgaveRepository,
     private val utbetalingRepository: UtbetalingRepository,
     private val notatRepository: NotatRepository,
@@ -105,7 +105,7 @@ class StansAutomatiskBehandlingMediator(
             oppgaveRepository.finnOppgaveId(fødselsnummer)?.let { oppgaveRepository.finnUtbetalingId(it) }
                 ?: utbetalingRepository.sisteUtbetalingIdFor(fødselsnummer)
         if (utbetalingId != null) {
-            periodehistorikkRepository.lagre(STANS_AUTOMATISK_BEHANDLING, null, utbetalingId, null)
+            historikkinnslagRepository.lagre(STANS_AUTOMATISK_BEHANDLING, null, utbetalingId, null)
         } else {
             sikkerlogg.error("Fant ikke oppgave for $fødselsnummer. Fikk ikke lagret historikkinnslag om stans av automatisk behandling")
         }

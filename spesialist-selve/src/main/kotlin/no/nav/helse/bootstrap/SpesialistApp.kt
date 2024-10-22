@@ -151,7 +151,7 @@ internal class SpesialistApp(
         TotrinnsvurderingService(
             totrinnsvurderingRepository = totrinnsvurderingDao,
             oppgaveRepository = oppgaveDao,
-            periodehistorikkRepository = periodehistorikkDao,
+            historikkinnslagRepository = periodehistorikkDao,
             notatRepository = notatDao,
         )
 
