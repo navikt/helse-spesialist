@@ -5,6 +5,7 @@ import kotliquery.queryOf
 import no.nav.helse.modell.periodehistorikk.FjernetFraPåVent
 import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
 import no.nav.helse.modell.periodehistorikk.LagtPåVent
+import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingFerdigbehandlet
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import org.intellij.lang.annotations.Language
 import java.util.UUID
@@ -45,6 +46,7 @@ class TransactionalPeriodehistorikkDao(private val session: Session) : Historikk
         when (this) {
             is LagtPåVent -> "LEGG_PA_VENT"
             is FjernetFraPåVent -> "FJERN_FRA_PA_VENT" // TODO: Mangler å migrere typen i databasen
+            is TotrinnsvurderingFerdigbehandlet -> "TOTRINNSVURDERING_ATTESTERT" // TODO: Mangler å migrere typen i databasen
         }
 
     override fun lagre(

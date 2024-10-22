@@ -1,5 +1,6 @@
 package no.nav.helse.db
 
+import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import java.util.UUID
 
 data class SaksbehandlerFraDatabase(
@@ -8,3 +9,5 @@ data class SaksbehandlerFraDatabase(
     val navn: String,
     val ident: String,
 )
+
+fun SaksbehandlerFraDatabase.toDto() = SaksbehandlerDto(epostadresse, oid, navn, ident)

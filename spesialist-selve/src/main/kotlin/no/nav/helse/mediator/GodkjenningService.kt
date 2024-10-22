@@ -6,16 +6,17 @@ import no.nav.helse.db.PgHistorikkinnslagRepository
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TotrinnsvurderingDao
+import no.nav.helse.db.toDto
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.overstyring.OverstyringDao
+import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType.TOTRINNSVURDERING_ATTESTERT
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.slf4j.LoggerFactory
 import java.sql.SQLException
@@ -55,12 +56,11 @@ internal class GodkjenningService(
         val hendelseId = oppgaveDao.finnHendelseId(godkjenningDTO.oppgavereferanse)
         val fødselsnummer = meldingDao.finnFødselsnummer(hendelseId)
         val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(godkjenningDTO.oppgavereferanse)
-        val utbetalingId = requireNotNull(oppgaveDao.finnUtbetalingId(godkjenningDTO.oppgavereferanse))
         val totrinnsvurdering = totrinnsvurderingService.hentAktiv(vedtaksperiodeId)
         val reserverPersonOid: UUID = totrinnsvurdering?.saksbehandler ?: oid
         val saksbehandleroverstyringer = overstyringDao.finnAktiveOverstyringer(vedtaksperiodeId)
-        val saksbehandler = saksbehandler(godkjenningDTO, totrinnsvurdering, oid)
-        val beslutter = beslutter(godkjenningDTO, totrinnsvurdering)
+        val saksbehandlerJson = saksbehandler(godkjenningDTO, totrinnsvurdering, oid)
+        val beslutterJson = beslutter(godkjenningDTO, totrinnsvurdering)
         val godkjenningMessage =
             JsonMessage.newMessage(
                 "saksbehandler_løsning",
@@ -80,12 +80,12 @@ internal class GodkjenningService(
                     "saksbehandlerepost" to epost,
                     "godkjenttidspunkt" to LocalDateTime.now(),
                     "saksbehandleroverstyringer" to saksbehandleroverstyringer,
-                    "saksbehandler" to saksbehandler,
+                    "saksbehandler" to saksbehandlerJson,
                 ).apply {
                     godkjenningDTO.årsak?.let { put("årsak", it) }
                     godkjenningDTO.begrunnelser?.let { put("begrunnelser", it) }
                     godkjenningDTO.kommentar?.let { put("kommentar", it) }
-                    compute("beslutter") { _, _ -> beslutter }
+                    compute("beslutter") { _, _ -> beslutterJson }
                 },
             ).also {
                 sikkerlogg.info("Publiserer saksbehandler-løsning: ${it.toJson()}")
@@ -103,7 +103,10 @@ internal class GodkjenningService(
             overstyringDao.ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId)
 
             if (totrinnsvurdering?.erBeslutteroppgave() == true && godkjenningDTO.godkjent) {
-                pgHistorikkinnslagRepository.lagre(TOTRINNSVURDERING_ATTESTERT, oid, utbetalingId, null)
+                val beslutter = totrinnsvurdering.beslutter?.let { saksbehandlerRepository.finnSaksbehandler(it)?.toDto() }
+                checkNotNull(beslutter) { "Forventer at beslutter er satt" }
+                val innslag = HistorikkinnslagDto.totrinnsvurderingFerdigbehandletInnslag(beslutter)
+                pgHistorikkinnslagRepository.lagre(innslag, godkjenningDTO.oppgavereferanse)
             }
         }
     }

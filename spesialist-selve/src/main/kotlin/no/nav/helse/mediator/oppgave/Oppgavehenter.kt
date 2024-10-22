@@ -1,14 +1,13 @@
 package no.nav.helse.mediator.oppgave
 
 import no.nav.helse.db.OppgaveRepository
-import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TotrinnsvurderingRepository
+import no.nav.helse.db.toDto
 import no.nav.helse.mediator.oppgave.OppgaveMapper.toDto
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.Oppgave.Companion.gjenopprett
 import no.nav.helse.modell.oppgave.OppgaveDto
-import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDto
 
@@ -68,6 +67,4 @@ class Oppgavehenter(
             else -> throw IllegalStateException("Oppgavestatus $oppgavestatus er ikke en gyldig status")
         }
     }
-
-    private fun SaksbehandlerFraDatabase.toDto() = SaksbehandlerDto(epostadresse, oid, navn, ident)
 }

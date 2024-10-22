@@ -5,6 +5,7 @@ import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.periodehistorikk.FjernetFraPåVent
 import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
 import no.nav.helse.modell.periodehistorikk.LagtPåVent
+import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingFerdigbehandlet
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.notat.NotatApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
@@ -37,6 +38,7 @@ class PgHistorikkinnslagRepository(
                     }
                 lagre(historikkinnslag, generasjonId, notatId)
             }
+            is TotrinnsvurderingFerdigbehandlet -> lagre(historikkinnslag, generasjonId, null)
         }
     }
 

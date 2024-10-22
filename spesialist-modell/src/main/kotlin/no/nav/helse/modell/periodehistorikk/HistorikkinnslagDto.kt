@@ -35,6 +35,9 @@ sealed interface HistorikkinnslagDto {
                 saksbehandler = saksbehandler,
                 tidspunkt = LocalDateTime.now(),
             )
+
+        fun totrinnsvurderingFerdigbehandletInnslag(saksbehandler: SaksbehandlerDto): TotrinnsvurderingFerdigbehandlet =
+            TotrinnsvurderingFerdigbehandlet(saksbehandler = saksbehandler, tidspunkt = LocalDateTime.now())
     }
 }
 
@@ -63,6 +66,13 @@ private val objectMapper =
         .registerModule(JavaTimeModule())
 
 data class FjernetFraPåVent(
+    override val saksbehandler: SaksbehandlerDto,
+    override val tidspunkt: LocalDateTime,
+) : HistorikkinnslagDto {
+    override val notat: NotatDto? = null
+}
+
+data class TotrinnsvurderingFerdigbehandlet(
     override val saksbehandler: SaksbehandlerDto,
     override val tidspunkt: LocalDateTime,
 ) : HistorikkinnslagDto {
