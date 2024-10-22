@@ -1,13 +1,10 @@
 package no.nav.helse.db
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
-import no.nav.helse.modell.vilkårsprøving.BeregningsgrunnlagDto
-import no.nav.helse.modell.vilkårsprøving.SammenligningsgrunnlagDto
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.avviksvurdering.Beregningsgrunnlag
 import no.nav.helse.spesialist.api.avviksvurdering.Sammenligningsgrunnlag
@@ -17,7 +14,7 @@ import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering as ApiAvviksvurdering
 
-class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSource), AvviksvurderingRepository {
+class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     internal fun lagre(avviksvurdering: AvviksvurderingDto) {
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
@@ -84,55 +81,11 @@ class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSour
         }
     }
 
-    internal fun finnAvviksvurderinger(fødselsnummer: String): List<AvviksvurderingDto> =
-        asSQL(
-            """
-            SELECT av.unik_id, vpa.vilkårsgrunnlag_id, av.fødselsnummer, av.skjæringstidspunkt, av.opprettet, avviksprosent, beregningsgrunnlag, sg.sammenligningsgrunnlag FROM avviksvurdering av 
-            INNER JOIN sammenligningsgrunnlag sg ON av.sammenligningsgrunnlag_ref = sg.id
-            INNER JOIN vilkarsgrunnlag_per_avviksvurdering vpa ON vpa.avviksvurdering_ref = av.unik_id
-            WHERE av.fødselsnummer = :fodselsnummer
-            AND av.slettet IS NULL;
-            """.trimIndent(),
-            mapOf(
-                "fodselsnummer" to fødselsnummer,
-            ),
-        ).list {
-            AvviksvurderingDto(
-                unikId = it.uuid("unik_id"),
-                vilkårsgrunnlagId = it.uuid("vilkårsgrunnlag_id"),
-                fødselsnummer = it.string("fødselsnummer"),
-                skjæringstidspunkt = it.localDate("skjæringstidspunkt"),
-                opprettet = it.localDateTime("opprettet"),
-                avviksprosent = it.double("avviksprosent"),
-                sammenligningsgrunnlag = objectMapper.readValue<SammenligningsgrunnlagDto>(it.string("sammenligningsgrunnlag")),
-                beregningsgrunnlag = objectMapper.readValue<BeregningsgrunnlagDto>(it.string("beregningsgrunnlag")),
-            )
+    fun finnAvviksvurderinger(fødselsnummer: String): List<AvviksvurderingDto> {
+        sessionOf(dataSource).use { session ->
+            return TransactionalAvviksvurderingDao(session).finnAvviksvurderinger(fødselsnummer)
         }
-
-    internal fun TransactionalSession.finnAvviksvurderinger(fødselsnummer: String): List<AvviksvurderingDto> =
-        asSQL(
-            """
-            SELECT av.unik_id, vpa.vilkårsgrunnlag_id, av.fødselsnummer, av.skjæringstidspunkt, av.opprettet, avviksprosent, beregningsgrunnlag, sg.sammenligningsgrunnlag FROM avviksvurdering av 
-            INNER JOIN sammenligningsgrunnlag sg ON av.sammenligningsgrunnlag_ref = sg.id
-            INNER JOIN vilkarsgrunnlag_per_avviksvurdering vpa ON vpa.avviksvurdering_ref = av.unik_id
-            WHERE av.fødselsnummer = :fodselsnummer
-            AND av.slettet IS NULL;
-            """.trimIndent(),
-            mapOf(
-                "fodselsnummer" to fødselsnummer,
-            ),
-        ).list(this) {
-            AvviksvurderingDto(
-                unikId = it.uuid("unik_id"),
-                vilkårsgrunnlagId = it.uuid("vilkårsgrunnlag_id"),
-                fødselsnummer = it.string("fødselsnummer"),
-                skjæringstidspunkt = it.localDate("skjæringstidspunkt"),
-                opprettet = it.localDateTime("opprettet"),
-                avviksprosent = it.double("avviksprosent"),
-                sammenligningsgrunnlag = objectMapper.readValue<SammenligningsgrunnlagDto>(it.string("sammenligningsgrunnlag")),
-                beregningsgrunnlag = objectMapper.readValue<BeregningsgrunnlagDto>(it.string("beregningsgrunnlag")),
-            )
-        }
+    }
 
     internal fun finnAvviksvurdering(vilkårsgrunnlagId: UUID): ApiAvviksvurdering? =
         asSQL(
@@ -161,21 +114,14 @@ class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSour
             )
         }
 
-    override fun opprettKobling(
+    fun opprettKobling(
         avviksvurderingId: UUID,
         vilkårsgrunnlagId: UUID,
     ) {
         try {
-            asSQL(
-                """
-                INSERT INTO vilkarsgrunnlag_per_avviksvurdering(avviksvurdering_ref, vilkårsgrunnlag_id)
-                VALUES (:unik_id, :vilkarsgrunnlag_id) ON CONFLICT DO NOTHING;
-                """.trimIndent(),
-                mapOf(
-                    "unik_id" to avviksvurderingId,
-                    "vilkarsgrunnlag_id" to vilkårsgrunnlagId,
-                ),
-            ).update()
+            sessionOf(dataSource).use { session ->
+                TransactionalAvviksvurderingDao(session).opprettKobling(avviksvurderingId, vilkårsgrunnlagId)
+            }
         } catch (e: Exception) {
             logg.error("Lagrer IKKE kobling mellom avviksvurdering ($avviksvurderingId) og vilkårsgrunnlag ($vilkårsgrunnlagId)", e)
         }

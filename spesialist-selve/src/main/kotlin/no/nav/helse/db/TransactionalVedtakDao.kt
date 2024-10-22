@@ -2,6 +2,9 @@ package no.nav.helse.db
 
 import kotliquery.Session
 import kotliquery.queryOf
+import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.HelseDao.Companion.single
+import no.nav.helse.HelseDao.Companion.update
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import org.intellij.lang.annotations.Language
@@ -12,7 +15,23 @@ class TransactionalVedtakDao(private val session: Session) : VedtakRepository {
         vedtaksperiodeId: UUID,
         type: Periodetype,
         inntektskilde: Inntektskilde,
-    ) = throw UnsupportedOperationException()
+    ) {
+        val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return
+        asSQL(
+            """
+            INSERT INTO saksbehandleroppgavetype (type, inntektskilde, vedtak_ref) VALUES (:type, :inntektskilde, :vedtak_ref)
+            ON CONFLICT (vedtak_ref) DO UPDATE SET type = :type, inntektskilde = :inntektskilde
+            """.trimIndent(),
+            "type" to type.name,
+            "inntektskilde" to inntektskilde.name,
+            "vedtak_ref" to vedtakRef,
+        ).update(session)
+    }
+
+    internal fun finnVedtakId(vedtaksperiodeId: UUID) =
+        asSQL("SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId", "vedtaksperiodeId" to vedtaksperiodeId).single(session) {
+            it.long("id")
+        }
 
     override fun erSpesialsak(vedtaksperiodeId: UUID): Boolean {
         @Language("PostgreSQL")
@@ -24,7 +43,19 @@ class TransactionalVedtakDao(private val session: Session) : VedtakRepository {
         ) ?: false
     }
 
-    override fun erAutomatiskGodkjent(utbetalingId: UUID): Boolean = throw UnsupportedOperationException()
+    override fun erAutomatiskGodkjent(utbetalingId: UUID) =
+        asSQL(
+            """
+            SELECT automatisert FROM automatisering 
+            WHERE utbetaling_id = :utbetalingId
+            AND (inaktiv_fra IS NULL OR inaktiv_fra > now())
+            ORDER BY id DESC
+            LIMIT 1
+            """.trimIndent(),
+            "utbetalingId" to utbetalingId,
+        ).single(session) {
+            it.boolean("automatisert")
+        } ?: false
 
     override fun opprettKobling(
         vedtaksperiodeId: UUID,

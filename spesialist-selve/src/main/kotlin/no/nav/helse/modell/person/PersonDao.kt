@@ -1,15 +1,12 @@
 package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.readValue
-import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.TransactionalPersonDao
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.kommando.MinimalPersonDto
-import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.typer.Kjønn
 import org.intellij.lang.annotations.Language
@@ -120,13 +117,6 @@ internal class PersonDao(
         }
     }
 
-    private fun Session.finnPersonRef(fødselsnummer: String): Long? {
-        @Language("PostgreSQL")
-        val query = "SELECT id FROM person WHERE fodselsnummer=?"
-
-        return run(queryOf(query, fødselsnummer.toLong()).map { it.longOrNull("id") }.asSingle)
-    }
-
     override fun finnAdressebeskyttelse(fødselsnummer: String): Adressebeskyttelse? =
         sessionOf(dataSource).use { session ->
             session.transaction { transactionalSession ->
@@ -149,59 +139,21 @@ internal class PersonDao(
     }
 
     override fun finnITUtbetalingsperioderSistOppdatert(fødselsnummer: String) =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = "SELECT infotrygdutbetalinger_oppdatert FROM person WHERE fodselsnummer=?;"
-            session.run(
-                queryOf(query, fødselsnummer.toLong())
-                    .map { row -> row.localDateOrNull("infotrygdutbetalinger_oppdatert") }
-                    .asSingle,
-            )
-        }
+        sessionOf(dataSource).use { TransactionalPersonDao(it).finnITUtbetalingsperioderSistOppdatert(fødselsnummer) }
 
     override fun finnInntekter(
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate,
-    ) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val query = """
-                SELECT * FROM inntekt 
-                WHERE person_ref=(SELECT id FROM person WHERE fodselsnummer=:fodselsnummer)
-                AND skjaeringstidspunkt=:skjaeringstidspunkt;
-            """
-        session.run(
-            queryOf(
-                query,
-                mapOf(
-                    "fodselsnummer" to fødselsnummer.toLong(),
-                    "skjaeringstidspunkt" to skjæringstidspunkt,
-                ),
-            ).map { row -> objectMapper.readValue<List<Inntekter>>(row.string("inntekter")) }.asSingle,
-        )
+    ) = sessionOf(dataSource).use {
+        TransactionalPersonDao(it).finnInntekter(fødselsnummer, skjæringstidspunkt)
     }
 
     override fun lagreInntekter(
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate,
         inntekter: List<Inntekter>,
-    ) = sessionOf(dataSource).use { session ->
-        session.finnPersonRef(fødselsnummer)?.also {
-            @Language("PostgreSQL")
-            val query = """
-                        INSERT INTO inntekt (person_ref, skjaeringstidspunkt, inntekter)
-                        VALUES (:person_ref, :skjaeringstidspunkt, :inntekter::json)
-                    """
-            session.run(
-                queryOf(
-                    query,
-                    mapOf(
-                        "person_ref" to it,
-                        "skjaeringstidspunkt" to skjæringstidspunkt,
-                        "inntekter" to objectMapper.writeValueAsString(inntekter),
-                    ),
-                ).asExecute,
-            )
-        }
+    ) = sessionOf(dataSource).use {
+        TransactionalPersonDao(it).lagreInntekter(fødselsnummer, skjæringstidspunkt, inntekter)
     }
 
     override fun upsertInfotrygdutbetalinger(

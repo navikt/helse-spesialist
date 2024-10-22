@@ -1,3 +1,4 @@
+
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -11,7 +12,6 @@ import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.db.AnnulleringDao
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgHistorikkinnslagRepository
@@ -20,6 +20,7 @@ import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
+import no.nav.helse.db.TransactionalInntektskilderDao
 import no.nav.helse.januar
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.CommandContextDao
@@ -66,6 +67,7 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGenerasjon
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUberegnetPeriode
 import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -164,7 +166,12 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val notatDao = NotatDao(dataSource)
     internal val annulleringDao = AnnulleringDao(dataSource)
     private val personService = PersonService(dataSource)
-    private val inntektskilderDao = InntektskilderDao(dataSource)
+    private val session = sessionOf(dataSource, returnGeneratedKey = true)
+    private val inntektskilderDao = TransactionalInntektskilderDao(session)
+
+    @AfterEach
+    fun lukkSession() =
+        session.close()
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,

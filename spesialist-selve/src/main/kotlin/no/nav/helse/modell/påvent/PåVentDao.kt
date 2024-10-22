@@ -1,12 +1,14 @@
 package no.nav.helse.modell.påvent
 
+import kotliquery.sessionOf
 import no.nav.helse.HelseDao
 import no.nav.helse.db.PåVentRepository
+import no.nav.helse.db.TransactionalPåVentDao
 import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 
-class PåVentDao(dataSource: DataSource) : HelseDao(dataSource), PåVentRepository {
+class PåVentDao(private val dataSource: DataSource) : HelseDao(dataSource), PåVentRepository {
     fun lagrePåVent(
         oppgaveId: Long,
         saksbehandlerOid: UUID,
@@ -54,13 +56,11 @@ class PåVentDao(dataSource: DataSource) : HelseDao(dataSource), PåVentReposito
             ).update()
         }
 
-    override fun erPåVent(vedtaksperiodeId: UUID) =
-        asSQL(
-            """
-            SELECT 1 FROM pa_vent WHERE vedtaksperiode_id = :vedtaksperiodeId
-            """.trimIndent(),
-            mapOf("vedtaksperiodeId" to vedtaksperiodeId),
-        ).single { it.boolean(1) } ?: false
+    override fun erPåVent(vedtaksperiodeId: UUID): Boolean {
+        sessionOf(dataSource).use { session ->
+            return TransactionalPåVentDao(session).erPåVent(vedtaksperiodeId)
+        }
+    }
 
     fun erPåVent(oppgaveId: Long) =
         asSQL(

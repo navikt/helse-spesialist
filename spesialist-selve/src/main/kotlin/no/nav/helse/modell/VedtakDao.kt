@@ -122,23 +122,7 @@ internal class VedtakDao(private val dataSource: DataSource) : VedtakRepository 
         type: Periodetype,
         inntektskilde: Inntektskilde,
     ) = sessionOf(dataSource).use { session ->
-        val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return@use
-
-        @Language("PostgreSQL")
-        val statement = """
-                INSERT INTO saksbehandleroppgavetype (type, inntektskilde, vedtak_ref) VALUES (:type, :inntektskilde, :vedtak_ref)
-                ON CONFLICT (vedtak_ref) DO UPDATE SET type = :type, inntektskilde = :inntektskilde
-            """
-        session.run(
-            queryOf(
-                statement,
-                mapOf(
-                    "type" to type.name,
-                    "inntektskilde" to inntektskilde.name,
-                    "vedtak_ref" to vedtakRef,
-                ),
-            ).asUpdate,
-        )
+        TransactionalVedtakDao(session).leggTilVedtaksperiodetype(vedtaksperiodeId, type, inntektskilde)
     }
 
     internal fun finnVedtaksperiodetype(vedtaksperiodeId: UUID): Periodetype =
@@ -163,17 +147,7 @@ internal class VedtakDao(private val dataSource: DataSource) : VedtakRepository 
         }
 
     override fun erAutomatiskGodkjent(utbetalingId: UUID) =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = """
-            SELECT automatisert FROM automatisering 
-            WHERE utbetaling_id = ?
-            AND (inaktiv_fra IS NULL OR inaktiv_fra > now())
-            ORDER BY id DESC
-            LIMIT 1
-        """
-            session.run(queryOf(query, utbetalingId).map { it.boolean("automatisert") }.asSingle)
-        } ?: false
+        sessionOf(dataSource).use { TransactionalVedtakDao(it).erAutomatiskGodkjent(utbetalingId) }
 
     override fun finnOrgnummer(vedtaksperiodeId: UUID) =
         sessionOf(dataSource).use { session ->

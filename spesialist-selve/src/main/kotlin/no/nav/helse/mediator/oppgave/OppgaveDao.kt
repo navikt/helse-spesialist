@@ -163,15 +163,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource), Opp
             TransactionalOppgaveDao(session).finnHendelseId(id)
         }
 
-    override fun harGyldigOppgave(utbetalingId: UUID) =
-        requireNotNull(
-            asSQL(
-                """ SELECT COUNT(1) AS oppgave_count FROM oppgave
-            WHERE utbetaling_id = :utbetalingId AND status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus, 'Ferdigstilt'::oppgavestatus)
-        """,
-                mapOf("utbetalingId" to utbetalingId),
-            ).single { it.int("oppgave_count") },
-        ) > 0
+    override fun harGyldigOppgave(utbetalingId: UUID) = TransactionalOppgaveDao(sessionOf(dataSource)).harGyldigOppgave(utbetalingId)
 
     override fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) =
         sessionOf(dataSource).use { session ->

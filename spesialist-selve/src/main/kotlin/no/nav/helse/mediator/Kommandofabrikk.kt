@@ -4,10 +4,9 @@ import kotliquery.TransactionalSession
 import kotliquery.sessionOf
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.CommandContextRepository
-import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.OppgaveRepository
-import no.nav.helse.db.PgHistorikkinnslagRepository
-import no.nav.helse.db.TotrinnsvurderingDao
+import no.nav.helse.db.TransactionalArbeidsforholdDao
+import no.nav.helse.db.TransactionalAvviksvurderingDao
 import no.nav.helse.db.TransactionalCommandContextDao
 import no.nav.helse.db.TransactionalEgenAnsattDao
 import no.nav.helse.db.TransactionalInntektskilderDao
@@ -17,10 +16,14 @@ import no.nav.helse.db.TransactionalOpptegnelseDao
 import no.nav.helse.db.TransactionalOverstyringDao
 import no.nav.helse.db.TransactionalPeriodehistorikkDao
 import no.nav.helse.db.TransactionalPersonDao
+import no.nav.helse.db.TransactionalPåVentDao
 import no.nav.helse.db.TransactionalReservasjonDao
+import no.nav.helse.db.TransactionalRisikovurderingDao
 import no.nav.helse.db.TransactionalTildelingDao
 import no.nav.helse.db.TransactionalTotrinnsvurderingDao
 import no.nav.helse.db.TransactionalUtbetalingDao
+import no.nav.helse.db.TransactionalVedtakDao
+import no.nav.helse.db.TransactionalVergemålDao
 import no.nav.helse.db.TransactionalÅpneGosysOppgaverDao
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
@@ -29,31 +32,24 @@ import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.MeldingDao
-import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommand
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
-import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.LøsGodkjenningsbehov
 import no.nav.helse.modell.kommando.OverstyringIgangsattCommand
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.kommando.TilbakedateringGodkjentCommand
-import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.EndretEgenAnsattStatusCommand
 import no.nav.helse.modell.person.KlargjørTilgangsrelaterteDataCommand
 import no.nav.helse.modell.person.OppdaterPersondataCommand
 import no.nav.helse.modell.person.Person
-import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.SøknadSendtCommand
-import no.nav.helse.modell.påvent.PåVentDao
-import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
@@ -69,7 +65,6 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetalingCommand
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnetCommand
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
-import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
 import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
@@ -82,30 +77,14 @@ internal typealias Kommandostarter = Personmelding.(Kommandofabrikk.() -> Comman
 internal class Kommandofabrikk(
     private val dataSource: DataSource,
     private val meldingDao: MeldingDao = MeldingDao(dataSource),
-    private val personDao: PersonDao = PersonDao(dataSource),
-    private val vedtakDao: VedtakDao = VedtakDao(dataSource),
     private val oppgaveDao: OppgaveDao = OppgaveDao(dataSource),
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
-    private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
-    private val risikovurderingDao: RisikovurderingDao = RisikovurderingDao(dataSource),
-    private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource),
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     oppgaveService: () -> OppgaveService,
-    private val totrinnsvurderingDao: TotrinnsvurderingDao = TotrinnsvurderingDao(dataSource),
-    private val pgHistorikkinnslagRepository: PgHistorikkinnslagRepository = PgHistorikkinnslagRepository(dataSource),
-    private val påVentDao: PåVentDao = PåVentDao(dataSource),
-    private val totrinnsvurderingService: TotrinnsvurderingService =
-        TotrinnsvurderingService(
-            totrinnsvurderingDao,
-            oppgaveDao,
-            pgHistorikkinnslagRepository,
-        ),
     private val godkjenningMediator: GodkjenningMediator,
     private val automatisering: Automatisering,
-    private val arbeidsforholdDao: ArbeidsforholdDao = ArbeidsforholdDao(dataSource),
     private val utbetalingDao: UtbetalingDao = UtbetalingDao(dataSource),
     private val generasjonService: GenerasjonService = GenerasjonService(dataSource),
-    private val vergemålDao: VergemålDao = VergemålDao(dataSource),
 ) {
     private companion object {
         private val logg = LoggerFactory.getLogger(this::class.java)
@@ -139,7 +118,9 @@ internal class Kommandofabrikk(
     ): GosysOppgaveEndretCommand {
         val utbetaling = TransactionalUtbetalingDao(transactionalSession).hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
         val harTildeltOppgave =
-            TransactionalTildelingDao(transactionalSession).tildelingForOppgave(oppgaveDataForAutomatisering.oppgaveId) != null
+            TransactionalTildelingDao(
+                transactionalSession,
+            ).tildelingForOppgave(oppgaveDataForAutomatisering.oppgaveId) != null
         val godkjenningsbehovData =
             TransactionalMeldingDao(
                 transactionalSession,
@@ -386,6 +367,7 @@ internal class Kommandofabrikk(
     internal fun godkjenningsbehov(
         godkjenningsbehovData: GodkjenningsbehovData,
         person: Person,
+        session: TransactionalSession,
     ): GodkjenningsbehovCommand {
         val utbetaling = utbetalingDao.hentUtbetaling(godkjenningsbehovData.utbetalingId)
         val førsteKjenteDagFinner = { generasjonService.førsteKjenteDag(godkjenningsbehovData.fødselsnummer) }
@@ -393,25 +375,30 @@ internal class Kommandofabrikk(
             behovData = godkjenningsbehovData,
             utbetaling = utbetaling,
             førsteKjenteDagFinner = førsteKjenteDagFinner,
-            automatisering = automatisering,
-            vedtakRepository = vedtakDao,
-            commandContextRepository = commandContextDao,
-            personRepository = personDao,
-            inntektskilderRepository = InntektskilderDao(dataSource),
-            arbeidsforholdRepository = arbeidsforholdDao,
-            egenAnsattRepository = egenAnsattDao,
-            utbetalingRepository = utbetalingDao,
-            vergemålRepository = vergemålDao,
-            åpneGosysOppgaverRepository = åpneGosysOppgaverDao,
-            risikovurderingRepository = risikovurderingDao,
-            påVentRepository = påVentDao,
-            overstyringRepository = overstyringDao,
-            periodehistorikkDao = pgHistorikkinnslagRepository,
-            oppgaveRepository = oppgaveDao,
-            avviksvurderingRepository = avviksvurderingDao,
-            oppgaveService = oppgaveService,
-            godkjenningMediator = godkjenningMediator,
-            totrinnsvurderingService = totrinnsvurderingService,
+            automatisering = automatisering.nyAutomatisering(session),
+            vedtakRepository = TransactionalVedtakDao(session),
+            commandContextRepository = TransactionalCommandContextDao(session),
+            personRepository = TransactionalPersonDao(session),
+            inntektskilderRepository = TransactionalInntektskilderDao(session),
+            arbeidsforholdRepository = TransactionalArbeidsforholdDao(session),
+            egenAnsattRepository = TransactionalEgenAnsattDao(session),
+            utbetalingRepository = TransactionalUtbetalingDao(session),
+            vergemålRepository = TransactionalVergemålDao(session),
+            åpneGosysOppgaverRepository = TransactionalÅpneGosysOppgaverDao(session),
+            risikovurderingRepository = TransactionalRisikovurderingDao(session),
+            påVentRepository = TransactionalPåVentDao(session),
+            overstyringRepository = TransactionalOverstyringDao(session),
+            periodehistorikkDao = TransactionalPeriodehistorikkDao(session),
+            oppgaveRepository = TransactionalOppgaveDao(session),
+            avviksvurderingRepository = TransactionalAvviksvurderingDao(session),
+            oppgaveService = transaksjonellOppgaveService(session),
+            godkjenningMediator = GodkjenningMediator(TransactionalOpptegnelseDao(session)),
+            totrinnsvurderingService =
+                TotrinnsvurderingService(
+                    TransactionalTotrinnsvurderingDao(session),
+                    TransactionalOppgaveDao(session),
+                    TransactionalPeriodehistorikkDao(session),
+                ),
             person = person,
         )
     }

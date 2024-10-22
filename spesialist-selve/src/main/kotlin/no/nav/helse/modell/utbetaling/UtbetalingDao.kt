@@ -41,22 +41,8 @@ class UtbetalingDao(private val dataSource: DataSource) : HelseDao(dataSource), 
         }
     }
 
-    override fun erUtbetalingForkastet(utbetalingId: UUID): Boolean {
-        @Language("PostgreSQL")
-        val query =
-            """
-            SELECT 1
-            FROM utbetaling u
-            JOIN utbetaling_id ui ON u.utbetaling_id_ref = ui.id
-            WHERE ui.utbetaling_id = :utbetaling_id
-            AND status = 'FORKASTET'
-            """.trimIndent()
-        return sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(query, mapOf("utbetaling_id" to utbetalingId)).map { true }.asSingle,
-            )
-        } ?: false
-    }
+    override fun erUtbetalingForkastet(utbetalingId: UUID): Boolean =
+        sessionOf(dataSource).use { TransactionalUtbetalingDao(it).erUtbetalingForkastet(utbetalingId) }
 
     override fun opprettUtbetalingId(
         utbetalingId: UUID,

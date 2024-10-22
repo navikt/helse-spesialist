@@ -1,7 +1,8 @@
 package no.nav.helse.modell.arbeidsgiver
 
 import DatabaseIntegrationTest
-import no.nav.helse.db.InntektskilderDao
+import kotliquery.sessionOf
+import no.nav.helse.db.TransactionalInntektskilderDao
 import no.nav.helse.modell.InntektskildetypeDto.ORDINÆR
 import no.nav.helse.modell.KomplettInntektskildeDto
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -10,7 +11,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class ArbeidsgiverDaoTest : DatabaseIntegrationTest() {
-    private val inntektskildeDao = InntektskilderDao(dataSource)
+    private val inntektskildeDao = TransactionalInntektskilderDao(sessionOf(dataSource, returnGeneratedKey = true))
 
     @Test
     fun `kan hente bransjer`() {

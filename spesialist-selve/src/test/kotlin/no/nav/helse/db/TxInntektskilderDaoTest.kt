@@ -1,6 +1,7 @@
 package no.nav.helse.db
 
 import DatabaseIntegrationTest
+import kotliquery.sessionOf
 import no.nav.helse.januar
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
@@ -19,8 +20,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-class InntektskilderDaoTest: DatabaseIntegrationTest() {
-    private val dao = InntektskilderDao(dataSource)
+class TxInntektskilderDaoTest: DatabaseIntegrationTest() {
+    private val session = sessionOf(dataSource, returnGeneratedKey = true)
+    private val dao = TransactionalInntektskilderDao(session)
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
 
     @Test

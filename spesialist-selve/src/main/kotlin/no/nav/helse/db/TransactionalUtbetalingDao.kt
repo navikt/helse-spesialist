@@ -193,5 +193,18 @@ class TransactionalUtbetalingDao(private val session: Session) : UtbetalingRepos
         )
     }
 
-    override fun erUtbetalingForkastet(utbetalingId: UUID): Boolean = throw UnsupportedOperationException()
+    override fun erUtbetalingForkastet(utbetalingId: UUID): Boolean {
+        @Language("PostgreSQL")
+        val query =
+            """
+            SELECT 1
+            FROM utbetaling u
+            JOIN utbetaling_id ui ON u.utbetaling_id_ref = ui.id
+            WHERE ui.utbetaling_id = :utbetaling_id
+            AND status = 'FORKASTET'
+            """.trimIndent()
+        return session.run(
+            queryOf(query, mapOf("utbetaling_id" to utbetalingId)).map { true }.asSingle,
+        ) ?: false
+    }
 }

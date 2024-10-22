@@ -127,16 +127,17 @@ internal class TransactionalTotrinnsvurderingDao(
             """
             INSERT INTO totrinnsvurdering (vedtaksperiode_id) 
             VALUES (:vedtaksperiodeId)
-            RETURNING *
             """.trimIndent()
-        return requireNotNull(
-            session.run(
-                queryOf(
-                    query,
-                    mapOf("vedtaksperiodeId" to vedtaksperiodeId),
-                ).tilTotrinnsvurdering(),
-            ),
-        )
+        session.run(queryOf(query, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).asUpdate)
+        @Language("PostgreSQL")
+        val selectQuery =
+            """
+            SELECT * FROM totrinnsvurdering 
+            WHERE vedtaksperiode_id = :vedtaksperiodeId
+            """.trimIndent()
+        val totrinnsvurdering = session.run(queryOf(selectQuery, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).tilTotrinnsvurdering())
+
+        return requireNotNull(totrinnsvurdering)
     }
 
     override fun hentAktiv(oppgaveId: Long): TotrinnsvurderingOld? {

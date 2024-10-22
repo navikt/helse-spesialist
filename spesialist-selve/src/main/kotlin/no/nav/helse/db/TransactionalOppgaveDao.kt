@@ -2,6 +2,8 @@ package no.nav.helse.db
 
 import kotliquery.Session
 import kotliquery.queryOf
+import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.HelseDao.Companion.single
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.objectMapper
@@ -157,7 +159,16 @@ class TransactionalOppgaveDao(private val session: Session) : OppgaveRepository 
         )
     }
 
-    override fun harGyldigOppgave(utbetalingId: UUID): Boolean = throw UnsupportedOperationException()
+    override fun harGyldigOppgave(utbetalingId: UUID) =
+        requireNotNull(
+            asSQL(
+                """
+                SELECT COUNT(1) AS oppgave_count FROM oppgave
+                WHERE utbetaling_id = :utbetalingId AND status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus, 'Ferdigstilt'::oppgavestatus)
+                """.trimIndent(),
+                "utbetalingId" to utbetalingId,
+            ).single(session) { it.int("oppgave_count") },
+        ) > 0
 
     override fun finnHendelseId(id: Long): UUID {
         @Language("PostgreSQL")

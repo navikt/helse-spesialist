@@ -1,8 +1,12 @@
 package no.nav.helse.db
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Session
 import kotliquery.queryOf
+import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.HelseDao.Companion.single
+import no.nav.helse.HelseDao.Companion.update
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.modell.person.PersonDto
@@ -59,7 +63,11 @@ internal class TransactionalPersonDao(
         )
     }
 
-    override fun finnITUtbetalingsperioderSistOppdatert(fødselsnummer: String): LocalDate = throw UnsupportedOperationException()
+    override fun finnITUtbetalingsperioderSistOppdatert(fødselsnummer: String) =
+        asSQL(
+            "SELECT infotrygdutbetalinger_oppdatert FROM person WHERE fodselsnummer = :foedselsnummer",
+            "foedselsnummer" to fødselsnummer.toLong(),
+        ).single(session) { it.localDateOrNull("infotrygdutbetalinger_oppdatert") }
 
     override fun upsertInfotrygdutbetalinger(
         fødselsnummer: String,
@@ -110,17 +118,37 @@ internal class TransactionalPersonDao(
     override fun finnInntekter(
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate,
-    ): List<Inntekter>? {
-        throw UnsupportedOperationException()
-    }
+    ) = asSQL(
+        """
+        SELECT * FROM inntekt 
+        WHERE person_ref=(SELECT id FROM person WHERE fodselsnummer=:fodselsnummer)
+        AND skjaeringstidspunkt=:skjaeringstidspunkt;
+        """.trimIndent(),
+        "fodselsnummer" to fødselsnummer.toLong(),
+        "skjaeringstidspunkt" to skjæringstidspunkt,
+    ).single(session) { objectMapper.readValue<List<Inntekter>>(it.string("inntekter")) }
 
     override fun lagreInntekter(
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate,
         inntekter: List<Inntekter>,
-    ): Long? {
-        throw UnsupportedOperationException()
+    ) = finnPersonRef(fødselsnummer)?.also {
+        asSQL(
+            """
+            INSERT INTO inntekt (person_ref, skjaeringstidspunkt, inntekter)
+            VALUES (:person_ref, :skjaeringstidspunkt, :inntekter::json)
+            """.trimIndent(),
+            "person_ref" to it,
+            "skjaeringstidspunkt" to skjæringstidspunkt,
+            "inntekter" to objectMapper.writeValueAsString(inntekter),
+        ).update(session)
     }
+
+    private fun finnPersonRef(fødselsnummer: String) =
+        asSQL(
+            "SELECT id FROM person WHERE fodselsnummer = :foedselsnummer",
+            "foedselsnummer" to fødselsnummer.toLong(),
+        ).single(session) { it.longOrNull("id") }
 
     override fun finnEnhetId(fødselsnummer: String): String {
         @Language("PostgreSQL")

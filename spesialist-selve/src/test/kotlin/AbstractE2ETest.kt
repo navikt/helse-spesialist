@@ -672,7 +672,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             godkjenningsbehovTestdata.aktørId,
             godkjenningsbehovTestdata.organisasjonsnummer,
         )
-        sisteMeldingId = sendGodkjenningsbehov(godkjenningsbehovTestdata)
+        sisteMeldingId = sendGodkjenningsbehov(godkjenningsbehovTestdata.copy(avviksvurderingId = avviksvurderingTestdata.avviksvurderingId))
         sisteGodkjenningsbehovId = sisteMeldingId
     }
 

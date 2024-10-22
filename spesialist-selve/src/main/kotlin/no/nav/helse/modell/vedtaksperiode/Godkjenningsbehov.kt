@@ -1,6 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
+import kotliquery.TransactionalSession
 import no.nav.helse.db.ArbeidsforholdRepository
 import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.db.CommandContextRepository
@@ -95,11 +96,21 @@ internal class Godkjenningsbehov private constructor(
 
     override fun toJson() = json
 
+    override fun skalKjøresTransaksjonelt(): Boolean = true
+
+    override fun transaksjonellBehandle(
+        person: Person,
+        kommandostarter: Kommandostarter,
+        transactionalSession: TransactionalSession,
+    ) {
+        kommandostarter { godkjenningsbehov(data(), person, transactionalSession) }
+    }
+
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
     ) {
-        kommandostarter { godkjenningsbehov(data(), person) }
+        throw UnsupportedOperationException()
     }
 
     internal fun data(): GodkjenningsbehovData =

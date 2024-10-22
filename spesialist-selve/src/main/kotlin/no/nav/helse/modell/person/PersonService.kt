@@ -2,8 +2,8 @@ package no.nav.helse.modell.person
 
 import kotliquery.TransactionalSession
 import kotliquery.sessionOf
-import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.SykefraværstilfelleDao
+import no.nav.helse.db.TransactionalAvviksvurderingDao
 import no.nav.helse.db.TransactionalPersonDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonService
 import javax.sql.DataSource
@@ -12,7 +12,6 @@ internal class PersonService(
     private val dataSource: DataSource,
 ) {
     private val sykefraværstilfelleDao = SykefraværstilfelleDao(dataSource)
-    private val avviksvurderingDao = AvviksvurderingDao(dataSource)
     private val generasjonService = GenerasjonService(dataSource)
 
     fun brukPersonHvisFinnes(
@@ -36,8 +35,8 @@ internal class PersonService(
                     with(sykefraværstilfelleDao) { finnSkjønnsfastsatteSykepengegrunnlag(fødselsnummer) },
             )?.copy(
                 avviksvurderinger =
-                    with(avviksvurderingDao) {
-                        this@hentPerson.finnAvviksvurderinger(fødselsnummer)
+                    with(TransactionalAvviksvurderingDao(this)) {
+                        finnAvviksvurderinger(fødselsnummer)
                     },
             )?.let {
                 Person.gjenopprett(
