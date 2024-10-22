@@ -2,8 +2,9 @@ package no.nav.helse.db
 
 import kotliquery.Session
 import kotliquery.queryOf
+import no.nav.helse.modell.periodehistorikk.FjernetFraPåVent
 import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
-import no.nav.helse.modell.periodehistorikk.Innslagstype
+import no.nav.helse.modell.periodehistorikk.LagtPåVent
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import org.intellij.lang.annotations.Language
 import java.util.UUID
@@ -30,7 +31,7 @@ class TransactionalPeriodehistorikkDao(private val session: Session) : Historikk
             queryOf(
                 statement,
                 mapOf(
-                    "type" to historikkinnslag.type.toDb(),
+                    "type" to historikkinnslag.type(),
                     "saksbehandler_oid" to historikkinnslag.saksbehandler?.oid,
                     "generasjon_id" to generasjonId,
                     "notat_id" to notatId,
@@ -40,10 +41,10 @@ class TransactionalPeriodehistorikkDao(private val session: Session) : Historikk
         )
     }
 
-    private fun Innslagstype.toDb() =
+    private fun HistorikkinnslagDto.type() =
         when (this) {
-            Innslagstype.LAGT_PA_VENT -> "LEGG_PA_VENT"
-            Innslagstype.FJERNET_FRA_PA_VENT -> "FJERN_FRA_PA_VENT" // TODO: Mangler å migrere typen i databasen
+            is LagtPåVent -> "LEGG_PA_VENT"
+            is FjernetFraPåVent -> "FJERN_FRA_PA_VENT" // TODO: Mangler å migrere typen i databasen
         }
 
     override fun lagre(

@@ -9,7 +9,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 sealed interface HistorikkinnslagDto {
-    val type: Innslagstype
     val notat: NotatDto?
     val saksbehandler: SaksbehandlerDto?
     val tidspunkt: LocalDateTime
@@ -24,7 +23,6 @@ sealed interface HistorikkinnslagDto {
             frist: LocalDate,
         ): LagtPåVent =
             LagtPåVent(
-                type = Innslagstype.LAGT_PA_VENT,
                 notat = notat,
                 saksbehandler = saksbehandler,
                 årsak = årsaker,
@@ -34,7 +32,6 @@ sealed interface HistorikkinnslagDto {
 
         fun fjernetFraPåVentInnslag(saksbehandler: SaksbehandlerDto): FjernetFraPåVent =
             FjernetFraPåVent(
-                type = Innslagstype.FJERNET_FRA_PA_VENT,
                 saksbehandler = saksbehandler,
                 tidspunkt = LocalDateTime.now(),
             )
@@ -47,7 +44,6 @@ data class NotatDto(
 )
 
 data class LagtPåVent(
-    override val type: Innslagstype,
     override val notat: NotatDto?,
     override val saksbehandler: SaksbehandlerDto,
     override val tidspunkt: LocalDateTime,
@@ -67,14 +63,8 @@ private val objectMapper =
         .registerModule(JavaTimeModule())
 
 data class FjernetFraPåVent(
-    override val type: Innslagstype,
     override val saksbehandler: SaksbehandlerDto,
     override val tidspunkt: LocalDateTime,
 ) : HistorikkinnslagDto {
     override val notat: NotatDto? = null
-}
-
-enum class Innslagstype {
-    LAGT_PA_VENT,
-    FJERNET_FRA_PA_VENT,
 }
