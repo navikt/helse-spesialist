@@ -41,15 +41,27 @@ class TotrinnsvurderingMutation(
             try {
                 saksbehandlerhåndterer.håndterTotrinnsvurdering(oppgavereferanse.toLong())
             } catch (error: ManglerVurderingAvVarsler) {
-                return@withContext DataFetcherResult.newResult<Boolean>().error(
-                    GraphqlErrorException.newErrorException().message(error.message)
-                        .extensions(mapOf("code" to error.httpkode)).build(),
-                ).data(false).build()
+                return@withContext DataFetcherResult
+                    .newResult<Boolean>()
+                    .error(
+                        GraphqlErrorException
+                            .newErrorException()
+                            .message(error.message)
+                            .extensions(mapOf("code" to error.httpkode))
+                            .build(),
+                    ).data(false)
+                    .build()
             } catch (error: RuntimeException) {
-                return@withContext DataFetcherResult.newResult<Boolean>().error(
-                    GraphqlErrorException.newErrorException().message("Kunne ikke håndtere totrinnsvurdering, ukjennt feil")
-                        .extensions(mapOf("code" to 500)).build(),
-                ).data(false).build()
+                return@withContext DataFetcherResult
+                    .newResult<Boolean>()
+                    .error(
+                        GraphqlErrorException
+                            .newErrorException()
+                            .message("Kunne ikke håndtere totrinnsvurdering, ukjennt feil")
+                            .extensions(mapOf("code" to 500))
+                            .build(),
+                    ).data(false)
+                    .build()
             }
 
             try {
@@ -60,11 +72,16 @@ class TotrinnsvurderingMutation(
                     behandlendeSaksbehandler,
                 )
             } catch (modellfeil: Modellfeil) {
-                return@withContext DataFetcherResult.newResult<Boolean>().error(
-                    GraphqlErrorException.newErrorException()
-                        .message("Feil ved sending til beslutter: ${modellfeil.message}")
-                        .extensions(mapOf("code" to modellfeil.httpkode)).build(),
-                ).data(false).build()
+                return@withContext DataFetcherResult
+                    .newResult<Boolean>()
+                    .error(
+                        GraphqlErrorException
+                            .newErrorException()
+                            .message("Feil ved sending til beslutter: ${modellfeil.message}")
+                            .extensions(mapOf("code" to modellfeil.httpkode))
+                            .build(),
+                    ).data(false)
+                    .build()
             }
 
             sikkerlogg.info(
@@ -73,11 +90,7 @@ class TotrinnsvurderingMutation(
                 StructuredArguments.kv("oid", behandlendeSaksbehandler.oid),
             )
 
-            totrinnsvurderinghåndterer.lagrePeriodehistorikk(
-                oppgavereferanse.toLong(),
-                behandlendeSaksbehandler.oid,
-                PeriodehistorikkType.TOTRINNSVURDERING_TIL_GODKJENNING,
-            )
+            totrinnsvurderinghåndterer.avventerTotrinnsvurdering(oppgavereferanse.toLong(), behandlendeSaksbehandler)
 
             log.info("OppgaveId $oppgavereferanse sendt til godkjenning")
 

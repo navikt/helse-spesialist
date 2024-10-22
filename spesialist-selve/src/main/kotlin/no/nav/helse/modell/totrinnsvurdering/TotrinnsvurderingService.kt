@@ -4,9 +4,12 @@ import no.nav.helse.db.HistorikkinnslagRepository
 import no.nav.helse.db.NotatRepository
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.TotrinnsvurderingRepository
+import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
+import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import java.util.UUID
 
 class TotrinnsvurderingService(
@@ -50,6 +53,14 @@ class TotrinnsvurderingService(
         }
     }
 
+    override fun avventerTotrinnsvurdering(
+        oppgaveId: Long,
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+    ) {
+        val innslag = HistorikkinnslagDto.avventerTotrinnsvurdering(saksbehandlerFraApi.toDto())
+        historikkinnslagRepository.lagre(innslag, oppgaveId)
+    }
+
     override fun erBeslutterOppgave(oppgaveId: Long): Boolean = hentAktiv(oppgaveId)?.erBeslutteroppgave() ?: false
 
     override fun erEgenOppgave(
@@ -62,4 +73,12 @@ class TotrinnsvurderingService(
     fun hentAktiv(vedtaksperiodeId: UUID): TotrinnsvurderingOld? = totrinnsvurderingRepository.hentAktiv(vedtaksperiodeId)
 
     private fun hentAktiv(oppgaveId: Long): TotrinnsvurderingOld? = totrinnsvurderingRepository.hentAktiv(oppgaveId)
+
+    private fun SaksbehandlerFraApi.toDto(): SaksbehandlerDto =
+        SaksbehandlerDto(
+            epostadresse = this.epost,
+            oid = this.oid,
+            navn = this.navn,
+            ident = this.ident,
+        )
 }

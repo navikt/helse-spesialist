@@ -2,6 +2,7 @@ package no.nav.helse.db
 
 import kotliquery.Session
 import kotliquery.queryOf
+import no.nav.helse.modell.periodehistorikk.AvventerTotrinnsvurdering
 import no.nav.helse.modell.periodehistorikk.FjernetFraPåVent
 import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
 import no.nav.helse.modell.periodehistorikk.LagtPåVent
@@ -10,13 +11,13 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import org.intellij.lang.annotations.Language
 import java.util.UUID
 
-class TransactionalPeriodehistorikkDao(private val session: Session) : HistorikkinnslagRepository {
+class TransactionalPeriodehistorikkDao(
+    private val session: Session,
+) : HistorikkinnslagRepository {
     override fun lagre(
         historikkinnslag: HistorikkinnslagDto,
         oppgaveId: Long,
-    ) {
-        throw UnsupportedOperationException()
-    }
+    ): Unit = throw UnsupportedOperationException()
 
     internal fun lagre(
         historikkinnslag: HistorikkinnslagDto,
@@ -47,6 +48,7 @@ class TransactionalPeriodehistorikkDao(private val session: Session) : Historikk
             is LagtPåVent -> "LEGG_PA_VENT"
             is FjernetFraPåVent -> "FJERN_FRA_PA_VENT" // TODO: Mangler å migrere typen i databasen
             is TotrinnsvurderingFerdigbehandlet -> "TOTRINNSVURDERING_ATTESTERT" // TODO: Mangler å migrere typen i databasen
+            is AvventerTotrinnsvurdering -> "TOTRINNSVURDERING_TIL_GODKJENNING" // TODO: Mangler å migrere typen i databasen
         }
 
     override fun lagre(

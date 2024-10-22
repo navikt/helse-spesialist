@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api
 
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import java.util.UUID
 
 interface Totrinnsvurderinghåndterer {
@@ -15,6 +16,11 @@ interface Totrinnsvurderinghåndterer {
         saksbehandleroid: UUID?,
         type: PeriodehistorikkType,
         notat: Pair<String, NotatType>? = null,
+    )
+
+    fun avventerTotrinnsvurdering(
+        oppgaveId: Long,
+        saksbehandlerFraApi: SaksbehandlerFraApi,
     )
 
     fun erBeslutterOppgave(oppgaveId: Long): Boolean
