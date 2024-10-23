@@ -1,7 +1,6 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
-import java.time.LocalDateTime
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.ANNULLERT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.GODKJENT
@@ -9,6 +8,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_GODKJENT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.OVERFØRT
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 
 internal class UtbetalingE2ETest : AbstractE2ETest() {
 
@@ -77,6 +77,8 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterUtbetalingOpprettet()
+        // så sender spleis ut godkjenningsbehov, som spinnvill begynner å behandle,
+        // men før spinnvill er ferdig reberegner spleis saken
         håndterUtbetalingEndret(gjeldendeStatus = FORKASTET, forrigeStatus = IKKE_GODKJENT)
 
         håndterGodkjenningsbehovUtenValidering()
