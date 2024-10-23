@@ -12,7 +12,6 @@ import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingFerdigbehandlet
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingRetur
 import no.nav.helse.modell.periodehistorikk.VedtaksperiodeReberegnet
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import org.intellij.lang.annotations.Language
 import java.util.UUID
 
@@ -99,32 +98,6 @@ class TransactionalPeriodehistorikkDao(
             is AutomatiskBehandlingStanset -> "STANS_AUTOMATISK_BEHANDLING" // TODO: Mangler å migrere typen i databasen
             is VedtaksperiodeReberegnet -> "VEDTAKSPERIODE_REBEREGNET" // TODO: Mangler å migrere typen i databasen
         }
-
-    override fun lagre(
-        historikkType: PeriodehistorikkType,
-        saksbehandlerOid: UUID?,
-        utbetalingId: UUID,
-        notatId: Int?,
-        json: String,
-    ) {
-        @Language("PostgreSQL")
-        val statement = """
-                INSERT INTO periodehistorikk (type, saksbehandler_oid, utbetaling_id, notat_id, json)
-                VALUES (:type, :saksbehandler_oid, :utbetaling_id, :notat_id, :json::json)
-        """
-        session.run(
-            queryOf(
-                statement,
-                mapOf(
-                    "type" to historikkType.name,
-                    "saksbehandler_oid" to saksbehandlerOid,
-                    "utbetaling_id" to utbetalingId,
-                    "notat_id" to notatId,
-                    "json" to json,
-                ),
-            ).asUpdate,
-        )
-    }
 
     override fun migrer(
         tidligereUtbetalingId: UUID,
