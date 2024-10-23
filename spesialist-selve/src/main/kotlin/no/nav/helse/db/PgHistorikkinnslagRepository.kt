@@ -6,6 +6,7 @@ import no.nav.helse.modell.periodehistorikk.AvventerTotrinnsvurdering
 import no.nav.helse.modell.periodehistorikk.FjernetFraPåVent
 import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
 import no.nav.helse.modell.periodehistorikk.LagtPåVent
+import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingAutomatiskRetur
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingFerdigbehandlet
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingRetur
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
@@ -42,6 +43,7 @@ class PgHistorikkinnslagRepository(
             }
             is TotrinnsvurderingFerdigbehandlet -> lagre(historikkinnslag, generasjonId, null)
             is AvventerTotrinnsvurdering -> lagre(historikkinnslag, generasjonId, null)
+            is TotrinnsvurderingAutomatiskRetur -> lagre(historikkinnslag, generasjonId, null)
             is TotrinnsvurderingRetur -> {
                 val notatId =
                     notatDao

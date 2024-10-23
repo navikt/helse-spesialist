@@ -5,7 +5,6 @@ import kotliquery.sessionOf
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.InntektskilderDao
-import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.PgHistorikkinnslagRepository
 import no.nav.helse.db.TotrinnsvurderingDao
@@ -13,7 +12,6 @@ import no.nav.helse.db.TransactionalCommandContextDao
 import no.nav.helse.db.TransactionalEgenAnsattDao
 import no.nav.helse.db.TransactionalInntektskilderDao
 import no.nav.helse.db.TransactionalMeldingDao
-import no.nav.helse.db.TransactionalNotatDao
 import no.nav.helse.db.TransactionalOppgaveDao
 import no.nav.helse.db.TransactionalOpptegnelseDao
 import no.nav.helse.db.TransactionalOverstyringDao
@@ -93,7 +91,6 @@ internal class Kommandofabrikk(
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     oppgaveService: () -> OppgaveService,
     private val totrinnsvurderingDao: TotrinnsvurderingDao = TotrinnsvurderingDao(dataSource),
-    private val notatDao: NotatDao = NotatDao(dataSource),
     private val pgHistorikkinnslagRepository: PgHistorikkinnslagRepository = PgHistorikkinnslagRepository(dataSource),
     private val påVentDao: PåVentDao = PåVentDao(dataSource),
     private val totrinnsvurderingService: TotrinnsvurderingService =
@@ -101,7 +98,6 @@ internal class Kommandofabrikk(
             totrinnsvurderingDao,
             oppgaveDao,
             pgHistorikkinnslagRepository,
-            notatDao,
         ),
     private val godkjenningMediator: GodkjenningMediator,
     private val automatisering: Automatisering,
@@ -141,7 +137,8 @@ internal class Kommandofabrikk(
         transactionalSession: TransactionalSession,
     ): GosysOppgaveEndretCommand {
         val utbetaling = TransactionalUtbetalingDao(transactionalSession).hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
-        val harTildeltOppgave = TransactionalTildelingDao(transactionalSession).tildelingForOppgave(oppgaveDataForAutomatisering.oppgaveId) != null
+        val harTildeltOppgave =
+            TransactionalTildelingDao(transactionalSession).tildelingForOppgave(oppgaveDataForAutomatisering.oppgaveId) != null
         val godkjenningsbehovData =
             TransactionalMeldingDao(
                 transactionalSession,
@@ -228,7 +225,6 @@ internal class Kommandofabrikk(
                     TransactionalTotrinnsvurderingDao(session),
                     TransactionalOppgaveDao(session),
                     TransactionalPeriodehistorikkDao(session),
-                    TransactionalNotatDao(session),
                 ),
         )
 
@@ -333,7 +329,6 @@ internal class Kommandofabrikk(
                     TransactionalTotrinnsvurderingDao(session),
                     TransactionalOppgaveDao(session),
                     TransactionalPeriodehistorikkDao(session),
-                    TransactionalNotatDao(session),
                 ),
             json = hendelse.toJson(),
         )
@@ -356,7 +351,6 @@ internal class Kommandofabrikk(
                     TransactionalTotrinnsvurderingDao(session),
                     TransactionalOppgaveDao(session),
                     TransactionalPeriodehistorikkDao(session),
-                    TransactionalNotatDao(session),
                 ),
         )
 

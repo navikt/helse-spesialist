@@ -3,17 +3,14 @@ package no.nav.helse.modell.totrinnsvurdering
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.db.NotatRepository
 import no.nav.helse.db.HistorikkinnslagRepository
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.oppgave.OppgaveDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class TotrinnsvurderingServiceTest {
     private val totrinnsvurderingDao = mockk<TotrinnsvurderingDao>(relaxed = true)
-    private val notatRepository = mockk<NotatRepository>(relaxed = true)
 
     val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val historikkinnslagRepository = mockk<HistorikkinnslagRepository>(relaxed = true)
@@ -22,7 +19,6 @@ class TotrinnsvurderingServiceTest {
             totrinnsvurderingDao,
             oppgaveDao,
             historikkinnslagRepository,
-            notatRepository,
         )
 
     @Test
@@ -41,9 +37,8 @@ class TotrinnsvurderingServiceTest {
         verify(exactly = 1) { oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId) }
         verify(exactly = 1) {
             historikkinnslagRepository.lagre(
-                historikkType = PeriodehistorikkType.TOTRINNSVURDERING_RETUR,
-                saksbehandlerOid = null,
-                utbetalingId = utbetalingId,
+                historikkinnslag = any(),
+                oppgaveId = oppgaveId,
             )
         }
     }

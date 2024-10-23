@@ -46,6 +46,9 @@ sealed interface HistorikkinnslagDto {
             notat: NotatDto,
             saksbehandler: SaksbehandlerDto,
         ): TotrinnsvurderingRetur = TotrinnsvurderingRetur(notat = notat, saksbehandler = saksbehandler, tidspunkt = LocalDateTime.now())
+
+        fun totrinnsvurderingAutomatiskRetur(): TotrinnsvurderingAutomatiskRetur =
+            TotrinnsvurderingAutomatiskRetur(tidspunkt = LocalDateTime.now())
     }
 }
 
@@ -99,3 +102,10 @@ data class TotrinnsvurderingRetur(
     override val saksbehandler: SaksbehandlerDto,
     override val tidspunkt: LocalDateTime,
 ) : HistorikkinnslagDto
+
+data class TotrinnsvurderingAutomatiskRetur(
+    override val tidspunkt: LocalDateTime,
+) : HistorikkinnslagDto {
+    override val notat: NotatDto? = null
+    override val saksbehandler: SaksbehandlerDto? = null
+}

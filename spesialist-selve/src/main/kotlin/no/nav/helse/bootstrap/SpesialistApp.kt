@@ -152,7 +152,6 @@ internal class SpesialistApp(
             totrinnsvurderingRepository = totrinnsvurderingDao,
             oppgaveRepository = oppgaveDao,
             historikkinnslagRepository = pgHistorikkinnslagRepository,
-            notatRepository = notatDao,
         )
 
     private val snapshotService = SnapshotService(snapshotDao = snapshotApiDao, snapshotClient = snapshotClient)
@@ -298,7 +297,6 @@ internal class SpesialistApp(
                 rapidsConnection = rapidsConnection,
                 oppgaveService = oppgaveService,
                 saksbehandlerRepository = saksbehandlerDao,
-                notatRepository = notatDao,
             )
         subsumsjonsmelder = Subsumsjonsmelder(versjonAvKode, rapidsConnection)
 

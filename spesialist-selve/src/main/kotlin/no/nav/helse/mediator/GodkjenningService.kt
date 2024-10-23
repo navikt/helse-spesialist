@@ -1,7 +1,6 @@
 package no.nav.helse.mediator
 
 import net.logstash.logback.argument.StructuredArguments
-import no.nav.helse.db.NotatRepository
 import no.nav.helse.db.PgHistorikkinnslagRepository
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerRepository
@@ -34,13 +33,11 @@ internal class GodkjenningService(
     private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
     private val pgHistorikkinnslagRepository: PgHistorikkinnslagRepository = PgHistorikkinnslagRepository(dataSource),
     private val saksbehandlerRepository: SaksbehandlerRepository,
-    private val notatRepository: NotatRepository,
     private val totrinnsvurderingService: TotrinnsvurderingService =
         TotrinnsvurderingService(
             TotrinnsvurderingDao(dataSource),
             oppgaveDao,
             pgHistorikkinnslagRepository,
-            notatRepository,
         ),
 ) : Godkjenninghåndterer {
     private companion object {
@@ -62,34 +59,35 @@ internal class GodkjenningService(
         val saksbehandlerJson = saksbehandler(godkjenningDTO, totrinnsvurdering, oid)
         val beslutterJson = beslutter(godkjenningDTO, totrinnsvurdering)
         val godkjenningMessage =
-            JsonMessage.newMessage(
-                "saksbehandler_løsning",
-                mutableMapOf(
-                    "@forårsaket_av" to
-                        mapOf(
-                            "event_name" to "behov",
-                            "behov" to "Godkjenning",
-                            "id" to hendelseId,
-                        ),
-                    "fødselsnummer" to fødselsnummer,
-                    "oppgaveId" to godkjenningDTO.oppgavereferanse,
-                    "hendelseId" to hendelseId,
-                    "godkjent" to godkjenningDTO.godkjent,
-                    "saksbehandlerident" to godkjenningDTO.saksbehandlerIdent,
-                    "saksbehandleroid" to oid,
-                    "saksbehandlerepost" to epost,
-                    "godkjenttidspunkt" to LocalDateTime.now(),
-                    "saksbehandleroverstyringer" to saksbehandleroverstyringer,
-                    "saksbehandler" to saksbehandlerJson,
-                ).apply {
-                    godkjenningDTO.årsak?.let { put("årsak", it) }
-                    godkjenningDTO.begrunnelser?.let { put("begrunnelser", it) }
-                    godkjenningDTO.kommentar?.let { put("kommentar", it) }
-                    compute("beslutter") { _, _ -> beslutterJson }
-                },
-            ).also {
-                sikkerlogg.info("Publiserer saksbehandler-løsning: ${it.toJson()}")
-            }
+            JsonMessage
+                .newMessage(
+                    "saksbehandler_løsning",
+                    mutableMapOf(
+                        "@forårsaket_av" to
+                            mapOf(
+                                "event_name" to "behov",
+                                "behov" to "Godkjenning",
+                                "id" to hendelseId,
+                            ),
+                        "fødselsnummer" to fødselsnummer,
+                        "oppgaveId" to godkjenningDTO.oppgavereferanse,
+                        "hendelseId" to hendelseId,
+                        "godkjent" to godkjenningDTO.godkjent,
+                        "saksbehandlerident" to godkjenningDTO.saksbehandlerIdent,
+                        "saksbehandleroid" to oid,
+                        "saksbehandlerepost" to epost,
+                        "godkjenttidspunkt" to LocalDateTime.now(),
+                        "saksbehandleroverstyringer" to saksbehandleroverstyringer,
+                        "saksbehandler" to saksbehandlerJson,
+                    ).apply {
+                        godkjenningDTO.årsak?.let { put("årsak", it) }
+                        godkjenningDTO.begrunnelser?.let { put("begrunnelser", it) }
+                        godkjenningDTO.kommentar?.let { put("kommentar", it) }
+                        compute("beslutter") { _, _ -> beslutterJson }
+                    },
+                ).also {
+                    sikkerlogg.info("Publiserer saksbehandler-løsning: ${it.toJson()}")
+                }
         logg.info(
             "Publiserer saksbehandler-løsning for {}, {}",
             StructuredArguments.keyValue("oppgaveId", godkjenningDTO.oppgavereferanse),
