@@ -132,8 +132,8 @@ VALUES (${sequence_number}, 'UTBETALT', now(), '{}'::json, ${sequence_number}, $
 INSERT INTO totrinnsvurdering(id, vedtaksperiode_id, er_retur, saksbehandler, beslutter, utbetaling_id_ref, opprettet, oppdatert)
 VALUES (${sequence_number}, '${vedtaksperiode_id}', false, '${saksbehandler_oid}', '${saksbehandler_oid}', ${sequence_number}, now(), null);
 
-INSERT INTO periodehistorikk(id, type, timestamp, utbetaling_id, saksbehandler_oid, notat_id)
-VALUES (${sequence_number}, 'TOTRINNSVURDERING_RETUR', now(), '${utbetaling_id}', '${saksbehandler_oid}',
+INSERT INTO periodehistorikk(id, type, timestamp, generasjon_id, saksbehandler_oid, notat_id)
+VALUES (${sequence_number}, 'TOTRINNSVURDERING_RETUR', now(), '${generasjon_id}', '${saksbehandler_oid}',
         ${sequence_number});
 
 INSERT INTO risikovurdering(id, vedtaksperiode_id, samlet_score, ufullstendig, opprettet)
