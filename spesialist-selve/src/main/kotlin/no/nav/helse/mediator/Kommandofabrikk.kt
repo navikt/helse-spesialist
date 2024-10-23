@@ -8,7 +8,6 @@ import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.TotrinnsvurderingDao
-import no.nav.helse.db.TransactionalArbeidsforholdDao
 import no.nav.helse.db.TransactionalAvviksvurderingDao
 import no.nav.helse.db.TransactionalCommandContextDao
 import no.nav.helse.db.TransactionalEgenAnsattDao
@@ -31,6 +30,7 @@ import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.MeldingDao
+import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
@@ -379,7 +379,7 @@ internal class Kommandofabrikk(
             commandContextRepository = TransactionalCommandContextDao(session),
             personRepository = TransactionalPersonDao(session),
             inntektskilderRepository = InntektskilderDao(session),
-            arbeidsforholdRepository = TransactionalArbeidsforholdDao(session),
+            arbeidsforholdRepository = ArbeidsforholdDao(session),
             egenAnsattRepository = TransactionalEgenAnsattDao(session),
             utbetalingRepository = TransactionalUtbetalingDao(session),
             vergemålRepository = TransactionalVergemålDao(session),

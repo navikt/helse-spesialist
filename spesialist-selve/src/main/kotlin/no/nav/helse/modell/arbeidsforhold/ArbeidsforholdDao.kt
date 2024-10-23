@@ -1,26 +1,78 @@
 package no.nav.helse.modell.arbeidsforhold
 
-import kotliquery.sessionOf
+import kotliquery.Session
+import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.HelseDao.Companion.list
+import no.nav.helse.HelseDao.Companion.update
 import no.nav.helse.db.ArbeidsforholdRepository
-import no.nav.helse.db.TransactionalArbeidsforholdDao
 import no.nav.helse.modell.KomplettArbeidsforholdDto
-import javax.sql.DataSource
 
-class ArbeidsforholdDao(private val dataSource: DataSource) : ArbeidsforholdRepository {
+internal class ArbeidsforholdDao(
+    private val session: Session,
+) : ArbeidsforholdRepository {
+    override fun findArbeidsforhold(
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+    ) = asSQL(
+        """
+        SELECT startdato, sluttdato, stillingstittel, stillingsprosent
+        FROM arbeidsforhold
+        WHERE person_ref = (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer)
+          AND arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE orgnummer = :organisasjonsnummer);
+        """.trimIndent(),
+        "fodselsnummer" to fødselsnummer.toLong(),
+        "organisasjonsnummer" to organisasjonsnummer.toLong(),
+    ).list(session) { row ->
+        KomplettArbeidsforholdDto(
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            startdato = row.localDate("startdato"),
+            sluttdato = row.localDateOrNull("sluttdato"),
+            stillingsprosent = row.int("stillingsprosent"),
+            stillingstittel = row.string("stillingstittel"),
+        )
+    }
+
     override fun upsertArbeidsforhold(
         fødselsnummer: String,
         organisasjonsnummer: String,
         arbeidsforhold: List<KomplettArbeidsforholdDto>,
-    ) = sessionOf(dataSource).use {
-        TransactionalArbeidsforholdDao(it).upsertArbeidsforhold(fødselsnummer, organisasjonsnummer, arbeidsforhold)
+    ) {
+        slettArbeidsforhold(fødselsnummer, organisasjonsnummer)
+        arbeidsforhold.forEach(::insertArbeidsforhold)
     }
 
-    override fun findArbeidsforhold(
+    private fun insertArbeidsforhold(arbeidsforholdDto: KomplettArbeidsforholdDto) {
+        asSQL(
+            """
+            INSERT INTO arbeidsforhold(person_ref, arbeidsgiver_ref, startdato, sluttdato, stillingstittel, stillingsprosent)
+            VALUES(
+                (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer),
+                (SELECT id FROM arbeidsgiver WHERE orgnummer = :organisasjonsnummer),
+                :startdato, :sluttdato, :stillingstittel, :stillingsprosent
+            );
+            """.trimIndent(),
+            "fodselsnummer" to arbeidsforholdDto.fødselsnummer.toLong(),
+            "organisasjonsnummer" to arbeidsforholdDto.organisasjonsnummer.toLong(),
+            "startdato" to arbeidsforholdDto.startdato,
+            "sluttdato" to arbeidsforholdDto.sluttdato,
+            "stillingstittel" to arbeidsforholdDto.stillingstittel,
+            "stillingsprosent" to arbeidsforholdDto.stillingsprosent,
+        ).update(session)
+    }
+
+    private fun slettArbeidsforhold(
         fødselsnummer: String,
         organisasjonsnummer: String,
-    ): List<KomplettArbeidsforholdDto> {
-        sessionOf(dataSource).use { session ->
-            return TransactionalArbeidsforholdDao(session).findArbeidsforhold(fødselsnummer, organisasjonsnummer)
-        }
+    ) {
+        asSQL(
+            """
+            DELETE FROM arbeidsforhold
+            WHERE person_ref = (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer)
+            AND arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE orgnummer = :organisasjonsnummer);
+            """.trimIndent(),
+            "fodselsnummer" to fødselsnummer.toLong(),
+            "organisasjonsnummer" to organisasjonsnummer.toLong(),
+        ).update(session)
     }
 }

@@ -141,7 +141,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val oppgaveApiDao = OppgaveApiDao(dataSource)
     internal val periodehistorikkApiDao = PeriodehistorikkApiDao(dataSource)
     internal val pgHistorikkinnslagRepository = PgHistorikkinnslagRepository(dataSource)
-    internal val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
+    internal val arbeidsforholdDao = ArbeidsforholdDao(session)
     internal val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     internal val snapshotDao = SnapshotDao(dataSource)
     internal val vedtakDao = VedtakDao(dataSource)
