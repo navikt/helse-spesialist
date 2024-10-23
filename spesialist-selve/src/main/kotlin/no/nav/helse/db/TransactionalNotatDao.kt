@@ -6,11 +6,13 @@ import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import org.intellij.lang.annotations.Language
 import java.util.UUID
 
-class TransactionalNotatDao(private val session: Session) : NotatRepository {
+class TransactionalNotatDao(
+    private val session: Session,
+) : NotatRepository {
     override fun lagreForOppgaveId(
         oppgaveId: Long,
         tekst: String,
-        saksbehandler_oid: UUID,
+        saksbehandlerOid: UUID,
         notatType: NotatType,
     ): Long? {
         @Language("PostgreSQL")
@@ -33,7 +35,7 @@ class TransactionalNotatDao(private val session: Session) : NotatRepository {
                 mapOf(
                     "oppgave_id" to oppgaveId,
                     "tekst" to tekst,
-                    "saksbehandler_oid" to saksbehandler_oid,
+                    "saksbehandler_oid" to saksbehandlerOid,
                     "type" to notatType.name,
                 ),
             ).asUpdateAndReturnGeneratedKey,

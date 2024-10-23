@@ -7,7 +7,10 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 import javax.sql.DataSource
 
-class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource), NotatRepository {
+class NotatDao(
+    private val dataSource: DataSource,
+) : HelseDao(dataSource),
+    NotatRepository {
     private companion object {
         private val log = LoggerFactory.getLogger(NotatDao::class.java)
     }
@@ -15,12 +18,12 @@ class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource), Notat
     override fun lagreForOppgaveId(
         oppgaveId: Long,
         tekst: String,
-        saksbehandler_oid: UUID,
+        saksbehandlerOid: UUID,
         notatType: NotatType,
     ): Long? {
-        log.info("{} lagrer {} notat for oppgaveId {}", saksbehandler_oid, notatType, oppgaveId)
+        log.info("{} lagrer {} notat for oppgaveId {}", saksbehandlerOid, notatType, oppgaveId)
         return sessionOf(dataSource).use { session ->
-            TransactionalNotatDao(session).lagreForOppgaveId(oppgaveId, tekst, saksbehandler_oid, notatType)
+            TransactionalNotatDao(session).lagreForOppgaveId(oppgaveId, tekst, saksbehandlerOid, notatType)
         }
     }
 }

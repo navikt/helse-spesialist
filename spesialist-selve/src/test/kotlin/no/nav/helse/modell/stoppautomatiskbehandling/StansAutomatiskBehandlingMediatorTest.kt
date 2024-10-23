@@ -109,7 +109,7 @@ class StansAutomatiskBehandlingMediatorTest {
             notatDao.lagreForOppgaveId(
                 oppgaveId = any(),
                 tekst = "begrunnelse",
-                saksbehandler_oid = oid,
+                saksbehandlerOid = oid,
                 notatType = NotatType.OpphevStans,
             )
         }

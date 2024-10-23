@@ -7,7 +7,7 @@ interface NotatRepository {
     fun lagreForOppgaveId(
         oppgaveId: Long,
         tekst: String,
-        saksbehandler_oid: UUID,
+        saksbehandlerOid: UUID,
         notatType: NotatType = NotatType.Generelt,
     ): Long?
 }

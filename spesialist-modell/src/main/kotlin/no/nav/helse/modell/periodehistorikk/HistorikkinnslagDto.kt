@@ -51,6 +51,8 @@ sealed interface HistorikkinnslagDto {
             TotrinnsvurderingAutomatiskRetur(tidspunkt = LocalDateTime.now())
 
         fun automatiskBehandlingStanset(): AutomatiskBehandlingStanset = AutomatiskBehandlingStanset(tidspunkt = LocalDateTime.now())
+
+        fun vedtaksperiodeReberegnet(): VedtaksperiodeReberegnet = VedtaksperiodeReberegnet(tidspunkt = LocalDateTime.now())
     }
 }
 
@@ -113,6 +115,13 @@ data class TotrinnsvurderingAutomatiskRetur(
 }
 
 data class AutomatiskBehandlingStanset(
+    override val tidspunkt: LocalDateTime,
+) : HistorikkinnslagDto {
+    override val notat: NotatDto? = null
+    override val saksbehandler: SaksbehandlerDto? = null
+}
+
+data class VedtaksperiodeReberegnet(
     override val tidspunkt: LocalDateTime,
 ) : HistorikkinnslagDto {
     override val notat: NotatDto? = null

@@ -10,6 +10,8 @@ import no.nav.helse.modell.periodehistorikk.LagtPåVent
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingAutomatiskRetur
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingFerdigbehandlet
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingRetur
+import no.nav.helse.modell.periodehistorikk.VedtaksperiodeReberegnet
+import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import org.intellij.lang.annotations.Language
 import java.util.UUID
@@ -21,6 +23,46 @@ class TransactionalPeriodehistorikkDao(
         historikkinnslag: HistorikkinnslagDto,
         oppgaveId: Long,
     ): Unit = throw UnsupportedOperationException()
+
+    override fun lagre(
+        historikkinnslag: HistorikkinnslagDto,
+        generasjonId: UUID,
+    ) {
+        when (historikkinnslag) {
+            is FjernetFraPåVent -> lagre(historikkinnslag, generasjonId, null)
+            is LagtPåVent -> {
+                val notatId =
+                    historikkinnslag.notat?.let { notat ->
+                        TransactionalNotatDao(session)
+                            .lagreForOppgaveId(
+                                oppgaveId = notat.oppgaveId,
+                                tekst = notat.tekst,
+                                saksbehandlerOid = historikkinnslag.saksbehandler.oid,
+                                notatType = NotatType.PaaVent,
+                            )?.toInt()
+                    }
+                lagre(historikkinnslag, generasjonId, notatId)
+            }
+
+            is TotrinnsvurderingFerdigbehandlet -> lagre(historikkinnslag, generasjonId, null)
+            is AvventerTotrinnsvurdering -> lagre(historikkinnslag, generasjonId, null)
+            is TotrinnsvurderingAutomatiskRetur -> lagre(historikkinnslag, generasjonId, null)
+            is TotrinnsvurderingRetur -> {
+                val notatId =
+                    TransactionalNotatDao(session)
+                        .lagreForOppgaveId(
+                            oppgaveId = historikkinnslag.notat.oppgaveId,
+                            tekst = historikkinnslag.notat.tekst,
+                            saksbehandlerOid = historikkinnslag.saksbehandler.oid,
+                            notatType = NotatType.Retur,
+                        )?.toInt()
+                lagre(historikkinnslag, generasjonId, notatId)
+            }
+
+            is AutomatiskBehandlingStanset -> lagre(historikkinnslag, generasjonId, null)
+            is VedtaksperiodeReberegnet -> lagre(historikkinnslag, generasjonId, null)
+        }
+    }
 
     internal fun lagre(
         historikkinnslag: HistorikkinnslagDto,
@@ -55,6 +97,7 @@ class TransactionalPeriodehistorikkDao(
             is TotrinnsvurderingRetur -> "TOTRINNSVURDERING_RETUR" // TODO: Mangler å migrere typen i databasen
             is TotrinnsvurderingAutomatiskRetur -> "TOTRINNSVURDERING_RETUR" // TODO: Mangler å migrere typen i databasen
             is AutomatiskBehandlingStanset -> "STANS_AUTOMATISK_BEHANDLING" // TODO: Mangler å migrere typen i databasen
+            is VedtaksperiodeReberegnet -> "VEDTAKSPERIODE_REBEREGNET" // TODO: Mangler å migrere typen i databasen
         }
 
     override fun lagre(

@@ -11,6 +11,11 @@ interface HistorikkinnslagRepository {
     )
 
     fun lagre(
+        historikkinnslag: HistorikkinnslagDto,
+        generasjonId: UUID,
+    )
+
+    fun lagre(
         historikkType: PeriodehistorikkType,
         saksbehandlerOid: UUID? = null,
         utbetalingId: UUID,

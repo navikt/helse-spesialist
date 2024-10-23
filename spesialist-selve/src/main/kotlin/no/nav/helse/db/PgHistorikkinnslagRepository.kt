@@ -2,16 +2,7 @@ package no.nav.helse.db
 
 import kotliquery.sessionOf
 import no.nav.helse.mediator.oppgave.OppgaveDao
-import no.nav.helse.modell.periodehistorikk.AutomatiskBehandlingStanset
-import no.nav.helse.modell.periodehistorikk.AvventerTotrinnsvurdering
-import no.nav.helse.modell.periodehistorikk.FjernetFraPåVent
 import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
-import no.nav.helse.modell.periodehistorikk.LagtPåVent
-import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingAutomatiskRetur
-import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingFerdigbehandlet
-import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingRetur
-import no.nav.helse.spesialist.api.graphql.schema.NotatType
-import no.nav.helse.spesialist.api.notat.NotatApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import java.util.UUID
 import javax.sql.DataSource
@@ -19,7 +10,6 @@ import javax.sql.DataSource
 class PgHistorikkinnslagRepository(
     private val dataSource: DataSource,
 ) : HistorikkinnslagRepository {
-    private val notatDao: NotatApiDao = NotatApiDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
 
     override fun lagre(
@@ -27,46 +17,15 @@ class PgHistorikkinnslagRepository(
         oppgaveId: Long,
     ) {
         val generasjonId = oppgaveDao.finnGenerasjonId(oppgaveId)
-        when (historikkinnslag) {
-            is FjernetFraPåVent -> lagre(historikkinnslag, generasjonId, null)
-            is LagtPåVent -> {
-                val notatId =
-                    historikkinnslag.notat?.let { notat ->
-                        notatDao
-                            .opprettNotatForOppgaveId(
-                                oppgaveId = notat.oppgaveId,
-                                tekst = notat.tekst,
-                                saksbehandlerOid = historikkinnslag.saksbehandler.oid,
-                                type = NotatType.PaaVent,
-                            )?.toInt()
-                    }
-                lagre(historikkinnslag, generasjonId, notatId)
-            }
-            is TotrinnsvurderingFerdigbehandlet -> lagre(historikkinnslag, generasjonId, null)
-            is AvventerTotrinnsvurdering -> lagre(historikkinnslag, generasjonId, null)
-            is TotrinnsvurderingAutomatiskRetur -> lagre(historikkinnslag, generasjonId, null)
-            is TotrinnsvurderingRetur -> {
-                val notatId =
-                    notatDao
-                        .opprettNotatForOppgaveId(
-                            oppgaveId = historikkinnslag.notat.oppgaveId,
-                            tekst = historikkinnslag.notat.tekst,
-                            saksbehandlerOid = historikkinnslag.saksbehandler.oid,
-                            type = NotatType.PaaVent,
-                        )?.toInt()
-                lagre(historikkinnslag, generasjonId, notatId)
-            }
-            is AutomatiskBehandlingStanset -> lagre(historikkinnslag, generasjonId, null)
-        }
+        lagre(historikkinnslag, generasjonId)
     }
 
-    private fun lagre(
+    override fun lagre(
         historikkinnslag: HistorikkinnslagDto,
         generasjonId: UUID,
-        notatId: Int?,
     ) {
-        sessionOf(dataSource).use { session ->
-            TransactionalPeriodehistorikkDao(session).lagre(historikkinnslag, generasjonId, notatId)
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            TransactionalPeriodehistorikkDao(session).lagre(historikkinnslag, generasjonId)
         }
     }
 

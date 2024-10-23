@@ -28,19 +28,19 @@ internal class Vedtaksperiode private constructor(
     private val gjeldendeUtbetalingId get() = gjeldendeGenerasjon.utbetalingId
     internal val gjeldendeSkjæringstidspunkt get() = gjeldendeGenerasjon.skjæringstidspunkt()
     internal val gjeldendeBehandlingId get() = gjeldendeGenerasjon.spleisBehandlingId()
+    internal val gjeldendeGenerasjonId get() = gjeldendeGenerasjon.unikId()
 
     fun vedtaksperiodeId() = vedtaksperiodeId
 
     fun organisasjonsnummer() = organisasjonsnummer
 
-    internal fun toDto(): VedtaksperiodeDto {
-        return VedtaksperiodeDto(
+    internal fun toDto(): VedtaksperiodeDto =
+        VedtaksperiodeDto(
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             forkastet = forkastet,
             generasjoner = generasjoner.map { it.toDto() },
         )
-    }
 
     internal fun behandleTilbakedateringGodkjent(perioder: List<Periode>) {
         if (forkastet || perioder.none { it.overlapperMed(Periode(fom, tom)) }) return
@@ -142,22 +142,20 @@ internal class Vedtaksperiode private constructor(
         gjeldendeGenerasjon.håndterNyUtbetaling(utbetalingId)
     }
 
-    internal fun finnGenerasjon(spleisBehandlingId: UUID): Generasjon {
-        return generasjoner.find { it.spleisBehandlingId() == spleisBehandlingId }
+    internal fun finnGenerasjon(spleisBehandlingId: UUID): Generasjon =
+        generasjoner.find { it.spleisBehandlingId() == spleisBehandlingId }
             ?: throw IllegalArgumentException("Forventer at generasjon med spleisBehandlingId=$spleisBehandlingId finnes")
-    }
 
     internal fun byggVedtak(vedtakBuilder: SykepengevedtakBuilder) {
         vedtakBuilder.organisasjonsnummer(organisasjonsnummer)
     }
 
-    private fun finnes(spleisBehandling: SpleisBehandling): Boolean {
-        return generasjoner.finnGenerasjonForSpleisBehandling(spleisBehandling.spleisBehandlingId) != null
-    }
+    private fun finnes(spleisBehandling: SpleisBehandling): Boolean =
+        generasjoner.finnGenerasjonForSpleisBehandling(spleisBehandling.spleisBehandlingId) != null
 
     companion object {
-        fun nyVedtaksperiode(spleisBehandling: SpleisBehandling): Vedtaksperiode {
-            return Vedtaksperiode(
+        fun nyVedtaksperiode(spleisBehandling: SpleisBehandling): Vedtaksperiode =
+            Vedtaksperiode(
                 vedtaksperiodeId = spleisBehandling.vedtaksperiodeId,
                 organisasjonsnummer = spleisBehandling.organisasjonsnummer,
                 generasjoner =
@@ -174,7 +172,6 @@ internal class Vedtaksperiode private constructor(
                     ),
                 forkastet = false,
             )
-        }
 
         fun gjenopprett(
             organisasjonsnummer: String,
@@ -191,18 +188,17 @@ internal class Vedtaksperiode private constructor(
             )
         }
 
-        internal fun List<Vedtaksperiode>.finnGenerasjon(spleisBehandlingId: UUID): Vedtaksperiode? {
-            return find { vedtaksperiode ->
+        internal fun List<Vedtaksperiode>.finnGenerasjon(spleisBehandlingId: UUID): Vedtaksperiode? =
+            find { vedtaksperiode ->
                 vedtaksperiode.generasjoner.any { it.spleisBehandlingId() == spleisBehandlingId }
             }
-        }
 
         internal fun List<Vedtaksperiode>.relevanteFor(skjæringstidspunkt: LocalDate) =
             filter { it.gjeldendeSkjæringstidspunkt == skjæringstidspunkt }
                 .map { it.gjeldendeGenerasjon }
 
-        private fun GenerasjonDto.tilGenerasjon(): Generasjon {
-            return Generasjon.fraLagring(
+        private fun GenerasjonDto.tilGenerasjon(): Generasjon =
+            Generasjon.fraLagring(
                 id = id,
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingId = utbetalingId,
@@ -231,24 +227,24 @@ internal class Vedtaksperiode private constructor(
                         )
                     },
                 varsler =
-                    varsler.map { varselDto ->
-                        Varsel(
-                            id = varselDto.id,
-                            varselkode = varselDto.varselkode,
-                            opprettet = varselDto.opprettet,
-                            vedtaksperiodeId = varselDto.vedtaksperiodeId,
-                            status =
-                                when (varselDto.status) {
-                                    VarselStatusDto.AKTIV -> Varsel.Status.AKTIV
-                                    VarselStatusDto.INAKTIV -> Varsel.Status.INAKTIV
-                                    VarselStatusDto.GODKJENT -> Varsel.Status.GODKJENT
-                                    VarselStatusDto.VURDERT -> Varsel.Status.VURDERT
-                                    VarselStatusDto.AVVIST -> Varsel.Status.AVVIST
-                                    VarselStatusDto.AVVIKLET -> Varsel.Status.AVVIKLET
-                                },
-                        )
-                    }.toSet(),
+                    varsler
+                        .map { varselDto ->
+                            Varsel(
+                                id = varselDto.id,
+                                varselkode = varselDto.varselkode,
+                                opprettet = varselDto.opprettet,
+                                vedtaksperiodeId = varselDto.vedtaksperiodeId,
+                                status =
+                                    when (varselDto.status) {
+                                        VarselStatusDto.AKTIV -> Varsel.Status.AKTIV
+                                        VarselStatusDto.INAKTIV -> Varsel.Status.INAKTIV
+                                        VarselStatusDto.GODKJENT -> Varsel.Status.GODKJENT
+                                        VarselStatusDto.VURDERT -> Varsel.Status.VURDERT
+                                        VarselStatusDto.AVVIST -> Varsel.Status.AVVIST
+                                        VarselStatusDto.AVVIKLET -> Varsel.Status.AVVIKLET
+                                    },
+                            )
+                        }.toSet(),
             )
-        }
     }
 }

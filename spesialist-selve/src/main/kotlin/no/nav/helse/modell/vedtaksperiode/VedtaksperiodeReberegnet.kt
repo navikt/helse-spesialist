@@ -7,7 +7,6 @@ import no.nav.helse.db.HistorikkinnslagRepository
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.ReservasjonRepository
 import no.nav.helse.db.TildelingRepository
-import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
@@ -55,21 +54,20 @@ internal class VedtaksperiodeReberegnet private constructor(
         kommandostarter: Kommandostarter,
         transactionalSession: TransactionalSession,
     ) {
-        kommandostarter { vedtaksperiodeReberegnet(this@VedtaksperiodeReberegnet, transactionalSession) }
+        val vedtaksperiode = person.vedtaksperiodeOrNull(vedtaksperiodeId)
+        checkNotNull(vedtaksperiode)
+        kommandostarter { vedtaksperiodeReberegnet(this@VedtaksperiodeReberegnet, vedtaksperiode, transactionalSession) }
     }
 
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
-    ) {
-        throw UnsupportedOperationException()
-    }
+    ): Unit = throw UnsupportedOperationException()
 }
 
 internal class VedtaksperiodeReberegnetCommand(
-    vedtaksperiodeId: UUID,
     fødselsnummer: String,
-    utbetalingRepository: UtbetalingRepository,
+    vedtaksperiode: Vedtaksperiode,
     historikkinnslagRepository: HistorikkinnslagRepository,
     commandContextRepository: CommandContextRepository,
     oppgaveService: OppgaveService,
@@ -81,8 +79,7 @@ internal class VedtaksperiodeReberegnetCommand(
     override val commands: List<Command> =
         listOf(
             VedtaksperiodeReberegnetPeriodehistorikk(
-                vedtaksperiodeId = vedtaksperiodeId,
-                utbetalingRepository = utbetalingRepository,
+                vedtaksperiode = vedtaksperiode,
                 historikkinnslagRepository = historikkinnslagRepository,
             ),
             ReserverPersonHvisTildeltCommand(
@@ -94,7 +91,7 @@ internal class VedtaksperiodeReberegnetCommand(
             ),
             AvbrytCommand(
                 fødselsnummer = fødselsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
+                vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId(),
                 commandContextRepository = commandContextRepository,
                 oppgaveService = oppgaveService,
                 reservasjonRepository = reservasjonRepository,

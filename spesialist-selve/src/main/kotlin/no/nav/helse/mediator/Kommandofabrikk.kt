@@ -61,6 +61,7 @@ import no.nav.helse.modell.utbetaling.UtbetalingEndretCommand
 import no.nav.helse.modell.vedtaksperiode.GenerasjonService
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovCommand
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
+import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastetCommand
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
@@ -208,12 +209,12 @@ internal class Kommandofabrikk(
 
     internal fun vedtaksperiodeReberegnet(
         hendelse: VedtaksperiodeReberegnet,
+        vedtaksperiode: Vedtaksperiode,
         session: TransactionalSession,
     ): VedtaksperiodeReberegnetCommand =
         VedtaksperiodeReberegnetCommand(
             fødselsnummer = hendelse.fødselsnummer(),
-            vedtaksperiodeId = hendelse.vedtaksperiodeId(),
-            utbetalingRepository = TransactionalUtbetalingDao(session),
+            vedtaksperiode = vedtaksperiode,
             historikkinnslagRepository = TransactionalPeriodehistorikkDao(session),
             commandContextRepository = TransactionalCommandContextDao(session),
             oppgaveService = transaksjonellOppgaveService(session),
