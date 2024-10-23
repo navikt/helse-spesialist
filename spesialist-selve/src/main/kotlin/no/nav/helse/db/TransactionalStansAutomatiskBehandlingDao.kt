@@ -41,7 +41,7 @@ class TransactionalStansAutomatiskBehandlingDao(private val session: Session) : 
         val statement =
             """
             insert into stans_automatisering (fødselsnummer, status, årsaker, opprettet, kilde, original_melding) 
-            values (:fnr, :status, :arsaker::varchar[], :opprettet, :kilde, cast(:originalMelding as json))
+            values (:fnr, :status, :arsaker, :opprettet, :kilde, cast(:originalMelding as json))
             """.trimIndent()
         session.run(
             queryOf(
@@ -49,7 +49,7 @@ class TransactionalStansAutomatiskBehandlingDao(private val session: Session) : 
                 mapOf(
                     "fnr" to fødselsnummer,
                     "status" to status,
-                    "arsaker" to årsaker.map(StoppknappÅrsak::name).somDbArray(),
+                    "arsaker" to session.createArrayOf("varchar", årsaker.map(StoppknappÅrsak::name)),
                     "opprettet" to opprettet,
                     "kilde" to kilde,
                     "originalMelding" to originalMelding,

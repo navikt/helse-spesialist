@@ -3,7 +3,7 @@ package no.nav.helse.db
 import kotliquery.Session
 import kotliquery.queryOf
 import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.HelseDao.Companion.asSQLForQuestionMarks
+import no.nav.helse.HelseDao.Companion.asSQLWithQuestionMarks
 import no.nav.helse.HelseDao.Companion.list
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.intellij.lang.annotations.Language
@@ -13,7 +13,7 @@ class TransactionalOverstyringDao(
     private val session: Session,
 ) : OverstyringRepository {
     override fun finnOverstyringerMedTypeForVedtaksperioder(vedtaksperiodeIder: List<UUID>) =
-        asSQLForQuestionMarks(
+        asSQLWithQuestionMarks(
             """
             SELECT DISTINCT o.id,
                 CASE
@@ -29,10 +29,10 @@ class TransactionalOverstyringDao(
             LEFT JOIN overstyring_tidslinje ot on o.id = ot.overstyring_ref
             LEFT JOIN skjonnsfastsetting_sykepengegrunnlag ss on o.id = ss.overstyring_ref
             LEFT JOIN overstyring_minimum_sykdomsgrad oms on o.id = oms.overstyring_ref
-            WHERE o.vedtaksperiode_id IN (${vedtaksperiodeIder.joinToString { "?" }})
+            WHERE o.vedtaksperiode_id = ANY (?)
             AND o.ferdigstilt = false
             """.trimIndent(),
-            *vedtaksperiodeIder.toTypedArray(),
+            vedtaksperiodeIder.toTypedArray(),
         ).list(session) { OverstyringType.valueOf(it.string("type")) }
 
     override fun finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId: UUID): List<OverstyringType> {

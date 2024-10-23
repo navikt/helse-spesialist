@@ -40,5 +40,3 @@ class StansAutomatiskBehandlingDao(private val dataSource: DataSource) :
             TransactionalStansAutomatiskBehandlingDao(session).hentFor(fødselsnummer)
         }
 }
-
-fun <T> Iterable<T>.somDbArray() = joinToString(prefix = "{", postfix = "}")

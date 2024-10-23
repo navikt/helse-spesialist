@@ -1,7 +1,7 @@
 package no.nav.helse.db
 
 import kotliquery.Session
-import no.nav.helse.HelseDao.Companion.asSQLForQuestionMarks
+import no.nav.helse.HelseDao.Companion.asSQLWithQuestionMarks
 import no.nav.helse.HelseDao.Companion.list
 import no.nav.helse.modell.InntektskildeDto
 import no.nav.helse.modell.InntektskildetypeDto
@@ -48,7 +48,7 @@ internal class TransactionalInntektskilderDao(
 
     private fun eksisterendeInntektskilder(organisasjonsnumre: List<String>): List<InntektskildeDto> {
         if (organisasjonsnumre.isEmpty()) return emptyList()
-        return asSQLForQuestionMarks(
+        return asSQLWithQuestionMarks(
             """
                 SELECT orgnummer, navn, bransjer, an.navn_oppdatert FROM arbeidsgiver ag
                 INNER JOIN arbeidsgiver_navn an on an.id = ag.navn_ref

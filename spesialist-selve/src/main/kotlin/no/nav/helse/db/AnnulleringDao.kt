@@ -77,3 +77,5 @@ class AnnulleringDao(
         return finnAnnullering(annulleringDto.arbeidsgiverFagsystemId, annulleringDto.personFagsystemId)
     }
 }
+
+fun <T> Iterable<T>.somDbArray() = joinToString(prefix = "{", postfix = "}")

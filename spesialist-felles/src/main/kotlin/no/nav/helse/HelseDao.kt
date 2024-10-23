@@ -17,7 +17,7 @@ abstract class HelseDao(private val dataSource: DataSource) {
         ) = queryOf(sql, params.toMap())
 
         // Plis bare bruk denne til ting det ikke går an å gjøre med navngitte parametere - eks. ".. AND orgnummer = ANY(?)"
-        fun asSQLForQuestionMarks(
+        fun asSQLWithQuestionMarks(
             @Language("SQL") sql: String,
             vararg params: Any?,
         ) = queryOf(sql, *params)
@@ -45,22 +45,21 @@ abstract class HelseDao(private val dataSource: DataSource) {
         vararg params: Any?,
     ) = queryOf(sql, *params)
 
-    fun <T> Query.single(mapping: (Row) -> T?) =
-        sessionOf(dataSource, strict = true).use { session -> session.run(this.map { mapping(it) }.asSingle) }
+    fun <T> Query.single(mapping: (Row) -> T?) = sessionOf(dataSource, strict = true).use { single(it, mapping) }
 
     fun <T> Query.single(
         session: TransactionalSession,
         mapping: (Row) -> T?,
-    ) = session.run(this.map { mapping(it) }.asSingle)
+    ) = with(Companion) { single(session, mapping) }
 
-    fun <T> Query.list(mapping: (Row) -> T?) = sessionOf(dataSource).use { session -> session.run(this.map { mapping(it) }.asList) }
+    fun <T> Query.list(mapping: (Row) -> T?) = sessionOf(dataSource).use { list(it, mapping) }
 
     fun <T> Query.list(
         session: TransactionalSession,
         mapping: (Row) -> T?,
-    ) = session.run(this.map { mapping(it) }.asList)
+    ) = with(Companion) { list(session, mapping) }
 
-    fun Query.update() = sessionOf(dataSource).use { session -> session.run(this.asUpdate) }
+    fun Query.update() = sessionOf(dataSource).use { update(it) }
 
     fun Query.updateAndReturnGeneratedKey() =
         sessionOf(
