@@ -45,7 +45,7 @@ internal class SlettPersonRiver(
     private fun sendPersonSlettet(
         fødselsnummer: String,
         context: MessageContext,
-    ) = Meldinger.personSlettet(fødselsnummer).let(context::publish)
+    ) = Meldinger.personSlettet(fødselsnummer).let { context.publish(fødselsnummer, it) }
 
     private fun finnAktiveKommandokjeder(fødselsnummer: String) = commandContextDao.finnAktiveKommandokjeder(fødselsnummer)
 
