@@ -6,6 +6,7 @@ import io.mockk.verify
 import no.nav.helse.db.HistorikkinnslagRepository
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.oppgave.OppgaveDao
+import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingAutomatiskRetur
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
@@ -37,7 +38,7 @@ class TotrinnsvurderingServiceTest {
         verify(exactly = 1) { oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId) }
         verify(exactly = 1) {
             historikkinnslagRepository.lagre(
-                historikkinnslag = any(),
+                historikkinnslag = any<TotrinnsvurderingAutomatiskRetur>(),
                 oppgaveId = oppgaveId,
             )
         }

@@ -27,7 +27,6 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
-import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -45,7 +44,6 @@ internal class TestMediator(
     private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
     private val pgHistorikkinnslagRepository = PgHistorikkinnslagRepository(dataSource)
-    private val utbetalingDao = UtbetalingDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
     private val meldingDao = MeldingDao(dataSource)
     private val generasjonDao = GenerasjonDao(dataSource)
@@ -61,7 +59,6 @@ internal class TestMediator(
             StansAutomatiskBehandlingDao(dataSource),
             pgHistorikkinnslagRepository,
             oppgaveDao,
-            utbetalingDao,
             notatDao,
         ) { Subsumsjonsmelder("versjonAvKode", testRapid) }
 

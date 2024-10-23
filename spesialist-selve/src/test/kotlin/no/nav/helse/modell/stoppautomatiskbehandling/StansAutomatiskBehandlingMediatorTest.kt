@@ -6,25 +6,24 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.TestRapidHelpers.hendelser
-import no.nav.helse.db.NotatRepository
 import no.nav.helse.db.HistorikkinnslagRepository
+import no.nav.helse.db.NotatRepository
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.oppgave.OppgaveDao
+import no.nav.helse.modell.periodehistorikk.AutomatiskBehandlingStanset
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.OpphevStans
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.AKTIVITETSKRAV
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.BESTRIDELSE_SYKMELDING
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.MANGLENDE_MEDVIRKING
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.MEDISINSK_VILKAR
-import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_UAVKLART
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -38,7 +37,6 @@ class StansAutomatiskBehandlingMediatorTest {
     private val stansAutomatiskBehandlingDao = mockk<StansAutomatiskBehandlingDao>(relaxed = true)
     private val historikkinnslagRepository = mockk<HistorikkinnslagRepository>(relaxed = true)
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
-    private val utbetalingDao = mockk<UtbetalingDao>(relaxed = true)
     private val notatDao = mockk<NotatRepository>(relaxed = true)
     private val testRapid = TestRapid()
     private val subsumsjonsmelder = Subsumsjonsmelder("versjonAvKode", testRapid)
@@ -54,7 +52,6 @@ class StansAutomatiskBehandlingMediatorTest {
             stansAutomatiskBehandlingDao,
             historikkinnslagRepository,
             oppgaveDao,
-            utbetalingDao,
             notatDao,
         ) { subsumsjonsmelder }
 
@@ -86,10 +83,8 @@ class StansAutomatiskBehandlingMediatorTest {
         }
         verify(exactly = 1) {
             historikkinnslagRepository.lagre(
-                historikkType = STANS_AUTOMATISK_BEHANDLING,
-                saksbehandlerOid = null,
-                utbetalingId = any(),
-                notatId = null,
+                historikkinnslag = any<AutomatiskBehandlingStanset>(),
+                oppgaveId = any(),
             )
         }
     }

@@ -67,7 +67,6 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             stansAutomatiskBehandlingDao,
             pgHistorikkinnslagRepository,
             oppgaveDao,
-            utbetalingDao,
             notatDao,
         ) { Subsumsjonsmelder("versjonAvKode", testRapid) }
     private val oppgaveService =
@@ -890,7 +889,8 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private fun annullering(
         begrunnelser: List<String> = listOf("EN_BEGRUNNELSE"),
         kommentar: String? = "EN_KOMMENTAR",
-        arsaker: List<AnnulleringArsak> = listOf(AnnulleringArsak(_key = "key01", arsak = "Ferie"), AnnulleringArsak(_key = "key02", arsak = "Perm")),
+        arsaker: List<AnnulleringArsak> =
+            listOf(AnnulleringArsak(_key = "key01", arsak = "Ferie"), AnnulleringArsak(_key = "key02", arsak = "Perm")),
     ) = AnnulleringData(
         aktorId = AKTØR_ID,
         fodselsnummer = FØDSELSNUMMER,

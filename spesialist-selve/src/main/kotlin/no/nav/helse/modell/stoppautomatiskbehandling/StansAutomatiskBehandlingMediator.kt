@@ -10,9 +10,8 @@ import no.nav.helse.db.TransactionalNotatDao
 import no.nav.helse.db.TransactionalOppgaveDao
 import no.nav.helse.db.TransactionalPeriodehistorikkDao
 import no.nav.helse.db.TransactionalStansAutomatiskBehandlingDao
-import no.nav.helse.db.TransactionalUtbetalingDao
-import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.mediator.Subsumsjonsmelder
+import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.Personhandling
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.AKTIVITETSKRAV
@@ -28,7 +27,6 @@ import no.nav.helse.modell.vilkårsprøving.SubsumsjonEvent
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.graphql.schema.UnntattFraAutomatiskGodkjenning
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
@@ -37,7 +35,6 @@ class StansAutomatiskBehandlingMediator(
     private val stansAutomatiskBehandlingRepository: StansAutomatiskBehandlingRepository,
     private val historikkinnslagRepository: HistorikkinnslagRepository,
     private val oppgaveRepository: OppgaveRepository,
-    private val utbetalingRepository: UtbetalingRepository,
     private val notatRepository: NotatRepository,
     private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
 ) : StansAutomatiskBehandlinghåndterer {
@@ -89,25 +86,22 @@ class StansAutomatiskBehandlingMediator(
         return stoppmeldinger.isNotEmpty()
     }
 
-    override fun nyStansAutomatiskBehandlinghåndterer(transactionalSession: TransactionalSession): StansAutomatiskBehandlinghåndterer {
-        return StansAutomatiskBehandlingMediator(
+    override fun nyStansAutomatiskBehandlinghåndterer(transactionalSession: TransactionalSession): StansAutomatiskBehandlinghåndterer =
+        StansAutomatiskBehandlingMediator(
             TransactionalStansAutomatiskBehandlingDao(transactionalSession),
             TransactionalPeriodehistorikkDao(transactionalSession),
             TransactionalOppgaveDao(transactionalSession),
-            TransactionalUtbetalingDao(transactionalSession),
             TransactionalNotatDao(transactionalSession),
             subsumsjonsmelderProvider,
         )
-    }
 
     private fun lagrePeriodehistorikk(fødselsnummer: String) {
-        val utbetalingId =
-            oppgaveRepository.finnOppgaveId(fødselsnummer)?.let { oppgaveRepository.finnUtbetalingId(it) }
-                ?: utbetalingRepository.sisteUtbetalingIdFor(fødselsnummer)
-        if (utbetalingId != null) {
-            historikkinnslagRepository.lagre(STANS_AUTOMATISK_BEHANDLING, null, utbetalingId, null)
+        val oppgaveId = oppgaveRepository.finnOppgaveId(fødselsnummer)
+        if (oppgaveId != null) {
+            val innslag = HistorikkinnslagDto.automatiskBehandlingStanset()
+            historikkinnslagRepository.lagre(innslag, oppgaveId)
         } else {
-            sikkerlogg.error("Fant ikke oppgave for $fødselsnummer. Fikk ikke lagret historikkinnslag om stans av automatisk behandling")
+            sikkerlogg.info("Fant ikke oppgave for $fødselsnummer. Fikk ikke lagret historikkinnslag om stans av automatisk behandling")
         }
     }
 
@@ -161,7 +155,9 @@ class StansAutomatiskBehandlingMediator(
         fødselsnummer: String,
         vedtaksperiodeId: UUID,
         organisasjonsnummer: String,
-    ) = stoppmeldinger.byggSubsumsjonEventer(fødselsnummer, vedtaksperiodeId, organisasjonsnummer).toMutableList()
+    ) = stoppmeldinger
+        .byggSubsumsjonEventer(fødselsnummer, vedtaksperiodeId, organisasjonsnummer)
+        .toMutableList()
         .apply {
             if (none { it.paragraf == "8-4" }) {
                 add(åtteFireOppfyltEvent(fødselsnummer, vedtaksperiodeId, organisasjonsnummer))

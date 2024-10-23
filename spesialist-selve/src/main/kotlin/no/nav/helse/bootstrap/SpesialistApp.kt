@@ -41,7 +41,6 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
-import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -96,7 +95,6 @@ internal class SpesialistApp(
     private val personDao = PersonDao(dataSource)
     private val personApiDao = PersonApiDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
-    private val utbetalingDao = UtbetalingDao(dataSource)
     private val oppgaveApiDao = OppgaveApiDao(dataSource)
     private val periodehistorikkApiDao = PeriodehistorikkApiDao(dataSource)
     private val pgHistorikkinnslagRepository = PgHistorikkinnslagRepository(dataSource)
@@ -144,7 +142,6 @@ internal class SpesialistApp(
             stansAutomatiskBehandlingDao,
             pgHistorikkinnslagRepository,
             oppgaveDao,
-            utbetalingDao,
             notatDao,
         ) { subsumsjonsmelder }
     private val totrinnsvurderingService =

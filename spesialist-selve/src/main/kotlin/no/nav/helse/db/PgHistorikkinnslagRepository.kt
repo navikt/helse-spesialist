@@ -2,6 +2,7 @@ package no.nav.helse.db
 
 import kotliquery.sessionOf
 import no.nav.helse.mediator.oppgave.OppgaveDao
+import no.nav.helse.modell.periodehistorikk.AutomatiskBehandlingStanset
 import no.nav.helse.modell.periodehistorikk.AvventerTotrinnsvurdering
 import no.nav.helse.modell.periodehistorikk.FjernetFraPåVent
 import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
@@ -55,6 +56,7 @@ class PgHistorikkinnslagRepository(
                         )?.toInt()
                 lagre(historikkinnslag, generasjonId, notatId)
             }
+            is AutomatiskBehandlingStanset -> lagre(historikkinnslag, generasjonId, null)
         }
     }
 
