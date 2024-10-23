@@ -291,11 +291,7 @@ internal class MeldingMediator(
                     logg.info("Ignorerer melding fordi kommandokonteksten ikke er suspendert")
                     return null
                 }
-            val melding =
-                meldingDao.finn(meldingId) ?: run {
-                    logg.info("Ignorerer melding fordi opprinnelig melding ikke finnes i databasen")
-                    return null
-                }
+            val melding = finnMelding(meldingId) ?: return null
             Løsninger(messageContext, melding, contextId, commandContext).also { løsninger = it }
         }
     }
@@ -305,30 +301,21 @@ internal class MeldingMediator(
         meldingId: UUID,
         contextId: UUID,
     ): Påminnelse? {
-        if (meldingId.toString() in
-            setOf(
-                "c2ffe6ca-4b63-421d-b4e8-e57f34da5bef",
-                "20bf35c2-1ff7-4af1-933c-0ffc91e206c6",
-                "08625b54-dfbe-4bf4-94b8-3bf6f81fbf73",
-                "233060cc-162c-4344-8052-daeae34c412b",
-            )
-        ) {
-            logg.info("Ignorerer påminnelse for kontekster for melding_id=$meldingId som ikke lar seg gjenoppta")
-            return null
-        }
         val commandContext =
             commandContextDao.finnSuspendertEllerFeil(contextId) ?: run {
                 logg.info("Ignorerer melding fordi kommandokonteksten ikke er suspendert eller feil")
                 return null
             }
-        val hendelse =
-            meldingDao.finn(meldingId) ?: run {
-                logg.info("Ignorerer melding fordi opprinnelig melding ikke finnes i databasen")
-                return null
-            }
+        val melding = finnMelding(meldingId) ?: return null
 
-        return Påminnelse(messageContext, hendelse, contextId, commandContext)
+        return Påminnelse(messageContext, melding, contextId, commandContext)
     }
+
+    private fun finnMelding(meldingId: UUID): Personmelding? =
+        meldingDao.finn(meldingId) ?: run {
+            logg.info("Ignorerer melding fordi opprinnelig melding ikke finnes i databasen")
+            return null
+        }
 
     // fortsetter en command (resume) med oppsamlet løsninger
     private fun fortsett(message: String) {
