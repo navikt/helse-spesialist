@@ -5,7 +5,6 @@ import kotliquery.sessionOf
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.OppgaveRepository
-import no.nav.helse.db.TransactionalArbeidsforholdDao
 import no.nav.helse.db.TransactionalAvviksvurderingDao
 import no.nav.helse.db.TransactionalCommandContextDao
 import no.nav.helse.db.TransactionalEgenAnsattDao
@@ -32,6 +31,7 @@ import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.MeldingDao
+import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommand
@@ -380,7 +380,7 @@ internal class Kommandofabrikk(
             commandContextRepository = TransactionalCommandContextDao(session),
             personRepository = TransactionalPersonDao(session),
             inntektskilderRepository = TransactionalInntektskilderDao(session),
-            arbeidsforholdRepository = TransactionalArbeidsforholdDao(session),
+            arbeidsforholdRepository = ArbeidsforholdDao(session),
             egenAnsattRepository = TransactionalEgenAnsattDao(session),
             utbetalingRepository = TransactionalUtbetalingDao(session),
             vergemålRepository = TransactionalVergemålDao(session),
