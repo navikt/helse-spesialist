@@ -426,7 +426,6 @@ type NyttInntektsforholdPeriode {
     organisasjonsnummer: String!
     skjaeringstidspunkt: LocalDate!
     tom: LocalDate!
-    vilkarsgrunnlagId: UUID
 }
 
 type OmregnetArsinntekt {
@@ -996,7 +995,6 @@ enum Inntektskilde {
     INNTEKTSMELDING
     SAKSBEHANDLER
     SKJONNSMESSIG_FASTSATT
-    SOKNAD
 }
 
 enum Inntektstype {

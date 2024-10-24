@@ -212,7 +212,6 @@ data class Person(
                 id = it.id,
                 fom = it.fom,
                 tom = it.tom,
-                vilkarsgrunnlagId = it.vilkarsgrunnlagId,
                 organisasjonsnummer = it.organisasjonsnummer,
                 skjaeringstidspunkt = it.skjaeringstidspunkt,
                 dagligBelop = it.dagligBelop,

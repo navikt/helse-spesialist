@@ -148,7 +148,6 @@ data class NyttInntektsforholdPeriode(
     val id: UUID,
     val fom: LocalDate,
     val tom: LocalDate,
-    val vilkarsgrunnlagId: UUID?,
     val organisasjonsnummer: String,
     val skjaeringstidspunkt: LocalDate,
     val dagligBelop: Double,
