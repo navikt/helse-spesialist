@@ -2,7 +2,6 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -48,6 +47,9 @@ internal class SøknadSendtArbeidsledigRiver(
             keyValue("hendelseId", packet["@id"].asUUID()),
             keyValue("hendelse", packet.toJson()),
         )
-        mediator.mottaSøknadSendt(SøknadSendt.søknadSendtArbeidsledig(packet), context)
+        val fødselsnummer = packet["fnr"].asText()
+        val aktørId = packet["aktorId"].asText()
+        val organisasjonsnummer = packet["tidligereArbeidsgiverOrgnummer"].asText()
+        mediator.mottaSøknadSendt(fødselsnummer, aktørId, organisasjonsnummer)
     }
 }

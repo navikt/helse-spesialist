@@ -7,7 +7,10 @@ import no.nav.helse.MetrikkRiver
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.CommandContextRepository
+import no.nav.helse.db.InntektskilderDao
+import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.TransactionalCommandContextDao
+import no.nav.helse.db.TransactionalPersonDao
 import no.nav.helse.mediator.meldinger.AvsluttetMedVedtakRiver
 import no.nav.helse.mediator.meldinger.AvsluttetUtenVedtakRiver
 import no.nav.helse.mediator.meldinger.AvvikVurdertRiver
@@ -48,15 +51,17 @@ import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.mediator.meldinger.påminnelser.KommandokjedePåminnelseRiver
 import no.nav.helse.modell.CommandContextDao
+import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.MeldingDuplikatkontrollDao
+import no.nav.helse.modell.NyInntektskildeDto
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.modell.person.AdressebeskyttelseEndretRiver
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.PersonService
-import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak
 import no.nav.helse.modell.varsel.VarselRepository
@@ -82,7 +87,7 @@ internal class MeldingMediator(
     private val dataSource: DataSource,
     private val rapidsConnection: RapidsConnection,
     private val vedtakDao: VedtakDao = VedtakDao(dataSource),
-    private val personDao: PersonDao = PersonDao(dataSource),
+    private val personDao: PersonRepository = PersonDao(dataSource),
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
     private val meldingDao: MeldingDao = MeldingDao(dataSource),
     private val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao = MeldingDuplikatkontrollDao(dataSource),
@@ -344,24 +349,29 @@ internal class MeldingMediator(
     }
 
     internal fun mottaSøknadSendt(
-        melding: SøknadSendt,
-        messageContext: MessageContext,
+        fødselsnummer: String,
+        aktørId: String,
+        organisasjonsnummer: String,
     ) {
-        val meldingnavn = requireNotNull(melding::class.simpleName)
-        withMDC(
-            mutableMapOf(
-                "meldingId" to melding.id.toString(),
-                "meldingnavn" to meldingnavn,
-            ),
-        ) {
-            logg.info("Melding SøknadSendt mottatt")
-            sikkerlogg.info("Melding SøknadSendt mottatt:\n${melding.toJson()}")
-            meldingDao.lagre(melding)
-            val commandContextTilstandMediator = CommandContextTilstandMediator()
-            kommandofabrikk.iverksettSøknadSendt(melding, commandContextTilstandMediator)
-            commandContextTilstandMediator.publiserTilstandsendringer(melding, messageContext)
-            logg.info("Melding SøknadSendt lest")
-            sikkerlogg.info("Melding SøknadSendt lest")
+        sessionOf(dataSource).use { session ->
+            session.transaction { transaction ->
+                val inntektskilderRepository = InntektskilderDao(transaction)
+                val personDao = TransactionalPersonDao(transaction)
+                if (personDao.finnMinimalPerson(fødselsnummer) == null) {
+                    personDao.lagreMinimalPerson(MinimalPersonDto(fødselsnummer, aktørId))
+                }
+
+                if (inntektskilderRepository.inntektskildeEksisterer(organisasjonsnummer)) {
+                    logg.info("Inntekstkilde finnes fra før, lager ikke ny")
+                } else {
+                    sikkerlogg.info("Oppretter minimal arbeidsgiver for organisasjonsnummer: $organisasjonsnummer")
+                    inntektskilderRepository.lagreInntektskilder(
+                        listOf(
+                            NyInntektskildeDto(organisasjonsnummer = organisasjonsnummer, type = InntektskildetypeDto.ORDINÆR),
+                        ),
+                    )
+                }
+            }
         }
     }
 

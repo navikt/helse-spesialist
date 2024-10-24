@@ -15,7 +15,6 @@ import no.nav.helse.db.TransactionalMeldingDao.Meldingtype.NYE_VARSLER
 import no.nav.helse.db.TransactionalMeldingDao.Meldingtype.OPPDATER_PERSONSNAPSHOT
 import no.nav.helse.db.TransactionalMeldingDao.Meldingtype.OVERSTYRING_IGANGSATT
 import no.nav.helse.db.TransactionalMeldingDao.Meldingtype.SAKSBEHANDLERLØSNING
-import no.nav.helse.db.TransactionalMeldingDao.Meldingtype.SØKNAD_SENDT
 import no.nav.helse.db.TransactionalMeldingDao.Meldingtype.UTBETALING_ENDRET
 import no.nav.helse.db.TransactionalMeldingDao.Meldingtype.VEDTAKSPERIODE_FORKASTET
 import no.nav.helse.db.TransactionalMeldingDao.Meldingtype.VEDTAKSPERIODE_NY_UTBETALING
@@ -34,7 +33,6 @@ import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.KlargjørTilgangsrelaterteData
 import no.nav.helse.modell.person.OppdaterPersondata
-import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.vedtaksperiode.BehandlingOpprettet
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
@@ -220,7 +218,6 @@ internal class TransactionalMeldingDao(private val session: Session) : MeldingRe
             ENDRET_EGEN_ANSATT_STATUS -> EndretEgenAnsattStatus(jsonNode)
             VEDTAK_FATTET -> VedtakFattet(jsonNode)
             NYE_VARSLER -> NyeVarsler(jsonNode)
-            SØKNAD_SENDT -> SøknadSendt(jsonNode)
             VEDTAKSPERIODE_NY_UTBETALING -> VedtaksperiodeNyUtbetaling(jsonNode)
             BEHANDLING_OPPRETTET -> BehandlingOpprettet(jsonNode)
             AVSLUTTET_UTEN_VEDTAK -> AvsluttetUtenVedtakMessage(jsonNode)
@@ -243,7 +240,6 @@ internal class TransactionalMeldingDao(private val session: Session) : MeldingRe
             is EndretEgenAnsattStatus -> ENDRET_EGEN_ANSATT_STATUS
             is VedtakFattet -> VEDTAK_FATTET
             is NyeVarsler -> NYE_VARSLER
-            is SøknadSendt -> SØKNAD_SENDT
             is VedtaksperiodeNyUtbetaling -> VEDTAKSPERIODE_NY_UTBETALING
             is TilbakedateringBehandlet -> GODKJENT_TILBAKEDATERT_SYKMELDING
             is BehandlingOpprettet -> BEHANDLING_OPPRETTET
@@ -267,7 +263,6 @@ internal class TransactionalMeldingDao(private val session: Session) : MeldingRe
         ENDRET_EGEN_ANSATT_STATUS,
         VEDTAK_FATTET,
         NYE_VARSLER,
-        SØKNAD_SENDT,
         VEDTAKSPERIODE_NY_UTBETALING,
         GODKJENT_TILBAKEDATERT_SYKMELDING,
         AVSLUTTET_UTEN_VEDTAK,

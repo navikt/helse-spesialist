@@ -49,8 +49,6 @@ import no.nav.helse.modell.person.EndretEgenAnsattStatusCommand
 import no.nav.helse.modell.person.KlargjørTilgangsrelaterteDataCommand
 import no.nav.helse.modell.person.OppdaterPersondataCommand
 import no.nav.helse.modell.person.Person
-import no.nav.helse.modell.person.SøknadSendt
-import no.nav.helse.modell.person.SøknadSendtCommand
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
@@ -219,18 +217,6 @@ internal class Kommandofabrikk(
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
             utbetalingId = hendelse.utbetalingId,
             utbetalingRepository = TransactionalUtbetalingDao(transactionalSession),
-        )
-
-    fun søknadSendt(
-        hendelse: SøknadSendt,
-        transactionalSession: TransactionalSession,
-    ): SøknadSendtCommand =
-        SøknadSendtCommand(
-            fødselsnummer = hendelse.fødselsnummer(),
-            aktørId = hendelse.aktørId,
-            organisasjonsnummer = hendelse.organisasjonsnummer,
-            personRepository = TransactionalPersonDao(transactionalSession),
-            inntektskilderRepository = InntektskilderDao(transactionalSession),
         )
 
     internal fun adressebeskyttelseEndret(
@@ -402,33 +388,6 @@ internal class Kommandofabrikk(
                 ),
             person = person,
         )
-    }
-
-    // Kanskje prøve å få håndtering av søknad inn i samme flyt som andre kommandokjeder
-    internal fun iverksettSøknadSendt(
-        melding: SøknadSendt,
-        commandContextObservers: CommandContextObserver,
-    ) {
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            session.transaction { transactionalSession ->
-                val transactionalCommandContextDao = TransactionalCommandContextDao(transactionalSession)
-                iverksett(
-                    command = søknadSendt(melding, transactionalSession),
-                    meldingId = melding.id,
-                    commandContext = nyContext(melding.id, transactionalCommandContextDao),
-                    commandContextObservers = setOf(commandContextObservers),
-                    commandContextDao = transactionalCommandContextDao,
-                    metrikkDao = MetrikkDao(transactionalSession),
-                )
-            }
-        }
-    }
-
-    private fun nyContext(
-        meldingId: UUID,
-        transactionalCommandContextDao: CommandContextRepository,
-    ) = CommandContext(UUID.randomUUID()).apply {
-        opprett(transactionalCommandContextDao, meldingId)
     }
 
     internal fun lagKommandostarter(
