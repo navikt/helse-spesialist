@@ -89,7 +89,6 @@ query HentSnapshot($fnr: String!) {
                 fom
                 tom
                 organisasjonsnummer
-                vilkarsgrunnlagId
                 skjaeringstidspunkt
                 dagligBelop
                 manedligBelop
