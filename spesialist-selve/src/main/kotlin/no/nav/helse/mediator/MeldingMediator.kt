@@ -52,6 +52,7 @@ import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.MeldingDuplikatkontrollDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.dokument.DokumentDao
+import no.nav.helse.modell.dokument.DokumentDaoInterface
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.AdressebeskyttelseEndretRiver
 import no.nav.helse.modell.person.PersonDao
@@ -87,7 +88,7 @@ internal class MeldingMediator(
     private val meldingDao: MeldingDao = MeldingDao(dataSource),
     private val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao = MeldingDuplikatkontrollDao(dataSource),
     private val kommandofabrikk: Kommandofabrikk,
-    private val dokumentDao: DokumentDao = DokumentDao(dataSource),
+    private val dokumentDao: DokumentDaoInterface = DokumentDao.NonTransactional(dataSource),
     avviksvurderingDao: AvviksvurderingDao,
     private val varselRepository: VarselRepository = VarselRepository(dataSource),
     private val stansAutomatiskBehandlingMediator: StansAutomatiskBehandlingMediator,

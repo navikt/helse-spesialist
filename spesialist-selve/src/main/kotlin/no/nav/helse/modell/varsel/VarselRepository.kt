@@ -3,7 +3,7 @@ package no.nav.helse.modell.varsel
 import javax.sql.DataSource
 
 internal class VarselRepository(dataSource: DataSource) {
-    private val varselDao = VarselDao(dataSource)
+    private val varselDao = VarselDao.NonTransactional(dataSource)
     private val definisjonDao = DefinisjonDao(dataSource)
 
     internal fun lagreDefinisjon(definisjonDto: VarseldefinisjonDto) {

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments
-import no.nav.helse.modell.dokument.DokumentDao
+import no.nav.helse.modell.dokument.DokumentDaoInterface
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -13,8 +13,8 @@ import no.nav.helse.spesialist.api.Dokumenthåndterer
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class DokumentMediator(
-    private val dokumentDao: DokumentDao,
+internal class DokumentMediator(
+    private val dokumentDao: DokumentDaoInterface,
     private val rapidsConnection: RapidsConnection,
     private val retries: Int = 50,
 ) : Dokumenthåndterer {

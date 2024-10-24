@@ -3,7 +3,7 @@ package no.nav.helse.mediator.meldinger.løsninger
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.SpesialistRiver
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.modell.dokument.DokumentDao
+import no.nav.helse.modell.dokument.DokumentDaoInterface
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -11,7 +11,7 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 
 internal class DokumentRiver(
-    private val dokumentDao: DokumentDao,
+    private val dokumentDao: DokumentDaoInterface,
 ) : SpesialistRiver {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
