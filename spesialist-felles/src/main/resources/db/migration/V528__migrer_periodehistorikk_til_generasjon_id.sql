@@ -27,11 +27,11 @@ WITH vinduer AS (
         isikktv.id,
         unik_id,
         opprettet_tidspunkt as opprettet,
-        LAG (unik_id) OVER (
+        LAG (unik_id, 1) OVER (
             PARTITION BY svg.vedtaksperiode_id
             ORDER BY opprettet_tidspunkt
             ) as forrige_unik_id,
-        LAG (opprettet_tidspunkt) OVER (
+        LAG (opprettet_tidspunkt, 1) OVER (
             PARTITION BY svg.vedtaksperiode_id
             ORDER BY opprettet_tidspunkt
             ) as forrige_opprettet
