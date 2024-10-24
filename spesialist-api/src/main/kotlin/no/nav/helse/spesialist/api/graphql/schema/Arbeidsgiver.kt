@@ -151,6 +151,8 @@ data class NyttInntektsforholdPeriode(
     val vilkarsgrunnlagId: UUID?,
     val organisasjonsnummer: String,
     val skjaeringstidspunkt: LocalDate,
+    val dagligBelop: Double,
+    val manedligBelop: Double,
 )
 
 data class Arbeidsgiver(

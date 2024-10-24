@@ -215,6 +215,8 @@ data class Person(
                 vilkarsgrunnlagId = it.vilkarsgrunnlagId,
                 organisasjonsnummer = it.organisasjonsnummer,
                 skjaeringstidspunkt = it.skjaeringstidspunkt,
+                dagligBelop = it.dagligBelop,
+                manedligBelop = it.manedligBelop,
             )
         }
 }

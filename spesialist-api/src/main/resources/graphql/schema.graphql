@@ -160,8 +160,10 @@ type GraphQLInntektsmelding implements GraphQLHendelse {
 }
 
 type GraphQLNyttInntektsforholdPeriode {
+  dagligBelop: Float!
   fom: LocalDate!
   id: UUID!
+  manedligBelop: Float!
   organisasjonsnummer: String!
   skjaeringstidspunkt: LocalDate!
   tom: LocalDate!

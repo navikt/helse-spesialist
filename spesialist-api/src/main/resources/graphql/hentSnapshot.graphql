@@ -91,6 +91,8 @@ query HentSnapshot($fnr: String!) {
                 organisasjonsnummer
                 vilkarsgrunnlagId
                 skjaeringstidspunkt
+                dagligBelop
+                manedligBelop
             }
             generasjoner {
                 id

@@ -419,8 +419,10 @@ type Notater {
 }
 
 type NyttInntektsforholdPeriode {
+    dagligBelop: Float!
     fom: LocalDate!
     id: UUID!
+    manedligBelop: Float!
     organisasjonsnummer: String!
     skjaeringstidspunkt: LocalDate!
     tom: LocalDate!
