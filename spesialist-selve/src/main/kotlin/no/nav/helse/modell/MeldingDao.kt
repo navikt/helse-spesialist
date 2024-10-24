@@ -16,11 +16,6 @@ internal class MeldingDao(private val dataSource: DataSource) : MeldingRepositor
         }
     }
 
-    override fun finnFødselsnummer(meldingId: UUID): String =
-        sessionOf(dataSource).use { session ->
-            TransactionalMeldingDao(session).finnFødselsnummer(meldingId)
-        }
-
     override fun finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId: UUID): Int =
         sessionOf(dataSource).use { session ->
             TransactionalMeldingDao(session).finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId)

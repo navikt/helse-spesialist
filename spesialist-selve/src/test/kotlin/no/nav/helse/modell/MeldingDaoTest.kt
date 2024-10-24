@@ -77,13 +77,6 @@ internal class MeldingDaoTest : DatabaseIntegrationTest() {
         assertEquals(VEDTAKSPERIODE, finnKobling())
     }
 
-    @Test
-    fun `finner fødselsnummer ved hjelp av hendelseId`() {
-        nyPerson()
-        godkjenningsbehov(HENDELSE_ID)
-        assertEquals(FNR, meldingDao.finnFødselsnummer(HENDELSE_ID))
-    }
-
     private fun mockOverstyringIgangsatt(fødselsnummer: String, berørtePeriodeIder: List<UUID>, årsak: String): OverstyringIgangsatt {
         return mockk<OverstyringIgangsatt>(relaxed = true) {
             every { id } returns UUID.randomUUID()

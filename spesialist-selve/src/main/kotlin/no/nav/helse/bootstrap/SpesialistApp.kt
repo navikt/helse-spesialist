@@ -27,7 +27,6 @@ import no.nav.helse.mediator.TilgangskontrollørForReservasjon
 import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.automatisering.PlukkTilManuell
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.dokument.DokumentDao
@@ -103,7 +102,6 @@ internal class SpesialistApp(
     private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
     private val snapshotApiDao = SnapshotApiDao(dataSource)
     private val apiVarselRepository = ApiVarselRepository(dataSource)
-    private val meldingDao = MeldingDao(dataSource)
     private val dokumentDao = DokumentDao(dataSource)
     private val påVentApiDao = PåVentApiDao(dataSource)
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
@@ -224,7 +222,6 @@ internal class SpesialistApp(
         rapidsConnection.register(this)
         oppgaveService =
             OppgaveService(
-                meldingRepository = meldingDao,
                 oppgaveRepository = oppgaveDao,
                 tildelingRepository = tildelingDao,
                 reservasjonRepository = reservasjonDao,

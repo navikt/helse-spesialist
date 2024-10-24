@@ -1,21 +1,17 @@
 package no.nav.helse.mediator.oppgave
 
 import TilgangskontrollForTestHarIkkeTilgang
-import io.mockk.every
-import io.mockk.mockk
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.UUID
 
 class OppgavemelderTest {
 
@@ -27,23 +23,14 @@ class OppgavemelderTest {
         private val HENDELSE_ID = UUID.randomUUID()
     }
 
-    private val meldingDao = mockk<MeldingDao>(relaxed = true)
     private val testRapid = TestRapid()
     private val saksbehandler = saksbehandler("saksbehandler@nav.no")
     private val beslutter = saksbehandler("beslutter@nav.no")
-    init {
-        every { meldingDao.finnFødselsnummer(any()) } returns FNR
-    }
-
-    @BeforeEach
-    fun beforeEach() {
-        testRapid.reset()
-    }
 
     @Test
     fun `bygg kafkamelding`() {
         val oppgave = nyOppgave()
-        oppgave.register(Oppgavemelder(meldingDao, testRapid))
+        oppgave.register(Oppgavemelder(FNR, testRapid))
         oppgave.avventerSystem("IDENT", UUID.randomUUID())
         val meldinger = testRapid.inspektør.meldinger()
         assertEquals(1, meldinger.size)
@@ -64,7 +51,7 @@ class OppgavemelderTest {
     fun `bygg kafkamelding med saksbehandler og beslutter`() {
         val oppgave = nyOppgave(totrinnsvurdering = totrinnsvurdering(beslutter))
         oppgave.forsøkTildelingVedReservasjon(saksbehandler = saksbehandler)
-        oppgave.register(Oppgavemelder(meldingDao, testRapid))
+        oppgave.register(Oppgavemelder(FNR, testRapid))
         oppgave.avventerSystem("IDENT", UUID.randomUUID())
         val meldinger = testRapid.inspektør.meldinger()
         assertEquals(1, meldinger.size)

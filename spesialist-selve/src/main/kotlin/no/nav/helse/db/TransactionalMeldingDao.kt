@@ -35,7 +35,6 @@ import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.KlargjørTilgangsrelaterteData
 import no.nav.helse.modell.person.OppdaterPersondata
 import no.nav.helse.modell.person.SøknadSendt
-import no.nav.helse.modell.person.toFødselsnummer
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.vedtaksperiode.BehandlingOpprettet
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
@@ -51,18 +50,6 @@ import org.intellij.lang.annotations.Language
 import java.util.UUID
 
 internal class TransactionalMeldingDao(private val session: Session) : MeldingRepository {
-    override fun finnFødselsnummer(meldingId: UUID): String {
-        @Language("PostgreSQL")
-        val statement = """SELECT fodselsnummer FROM hendelse WHERE id = ?"""
-        return requireNotNull(
-            session.run(
-                queryOf(statement, meldingId).map {
-                    it.long("fodselsnummer").toFødselsnummer()
-                }.asSingle,
-            ),
-        )
-    }
-
     override fun finn(id: UUID): Personmelding? {
         @Language("PostgreSQL")
         val statement = """SELECT type,data FROM hendelse WHERE id = ?"""

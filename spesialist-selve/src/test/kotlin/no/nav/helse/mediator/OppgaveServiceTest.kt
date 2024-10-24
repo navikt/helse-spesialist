@@ -11,7 +11,6 @@ import no.nav.helse.SpeilTilgangsgrupper
 import no.nav.helse.db.AntallOppgaverFraDatabase
 import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.db.MeldingRepository
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.db.OppgaveRepository
@@ -85,7 +84,6 @@ internal class OppgaveServiceTest {
     }
 
     private val oppgaveRepository = mockk<OppgaveRepository>(relaxed = true)
-    private val meldingRepository = mockk<MeldingRepository>(relaxed = true)
     private val tildelingRepository = mockk<TildelingRepository>(relaxed = true)
     private val reservasjonRepository = mockk<ReservasjonRepository>(relaxed = true)
     private val opptegnelseRepository = mockk<OpptegnelseRepository>(relaxed = true)
@@ -95,7 +93,6 @@ internal class OppgaveServiceTest {
 
     private val mediator =
         OppgaveService(
-            meldingRepository = meldingRepository,
             oppgaveRepository = oppgaveRepository,
             tildelingRepository = tildelingRepository,
             reservasjonRepository = reservasjonRepository,

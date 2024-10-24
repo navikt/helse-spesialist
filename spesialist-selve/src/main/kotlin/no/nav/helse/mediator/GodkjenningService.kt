@@ -8,7 +8,6 @@ import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.db.toDto
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
@@ -26,7 +25,6 @@ import javax.sql.DataSource
 internal class GodkjenningService(
     private val dataSource: DataSource,
     private val oppgaveDao: OppgaveDao = OppgaveDao(dataSource),
-    private val meldingDao: MeldingDao = MeldingDao(dataSource),
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
     private val rapidsConnection: RapidsConnection,
     private val oppgaveService: OppgaveService,
@@ -51,7 +49,7 @@ internal class GodkjenningService(
         oid: UUID,
     ) {
         val hendelseId = oppgaveDao.finnHendelseId(godkjenningDTO.oppgavereferanse)
-        val fødselsnummer = meldingDao.finnFødselsnummer(hendelseId)
+        val fødselsnummer = oppgaveDao.finnFødselsnummer(godkjenningDTO.oppgavereferanse)
         val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(godkjenningDTO.oppgavereferanse)
         val totrinnsvurdering = totrinnsvurderingService.hentAktiv(vedtaksperiodeId)
         val reserverPersonOid: UUID = totrinnsvurdering?.saksbehandler ?: oid

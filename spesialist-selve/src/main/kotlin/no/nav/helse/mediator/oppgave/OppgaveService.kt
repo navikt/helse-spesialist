@@ -4,7 +4,6 @@ import kotliquery.TransactionalSession
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.db.MeldingRepository
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.OpptegnelseRepository
@@ -14,7 +13,6 @@ import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.TildelingRepository
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.db.TotrinnsvurderingRepository
-import no.nav.helse.db.TransactionalMeldingDao
 import no.nav.helse.db.TransactionalOppgaveDao
 import no.nav.helse.db.TransactionalOpptegnelseDao
 import no.nav.helse.db.TransactionalReservasjonDao
@@ -62,7 +60,6 @@ interface Oppgavefinner {
 }
 
 internal class OppgaveService(
-    private val meldingRepository: MeldingRepository,
     private val oppgaveRepository: OppgaveRepository,
     private val tildelingRepository: TildelingRepository,
     private val reservasjonRepository: ReservasjonRepository,
@@ -78,7 +75,6 @@ internal class OppgaveService(
 
     internal fun nyOppgaveService(transactionalSession: TransactionalSession): OppgaveService =
         OppgaveService(
-            meldingRepository = TransactionalMeldingDao(transactionalSession),
             oppgaveRepository = TransactionalOppgaveDao(transactionalSession),
             tildelingRepository = TransactionalTildelingDao(transactionalSession),
             reservasjonRepository = TransactionalReservasjonDao(transactionalSession),
@@ -97,7 +93,7 @@ internal class OppgaveService(
     ) {
         val nesteId = oppgaveRepository.reserverNesteId()
         val oppgave = opprettOppgaveBlock(nesteId)
-        val oppgavemelder = Oppgavemelder(meldingRepository, rapidsConnection)
+        val oppgavemelder = Oppgavemelder(fødselsnummer, rapidsConnection)
         oppgave.register(oppgavemelder)
         tildelVedReservasjon(fødselsnummer, oppgave)
         Oppgavelagrer(tildelingRepository).lagre(this, oppgave.toDto(), contextId)
@@ -115,7 +111,8 @@ internal class OppgaveService(
                 saksbehandlerRepository,
                 tilgangskontroll,
             ).oppgave(id)
-        oppgave.register(Oppgavemelder(meldingRepository, rapidsConnection))
+        val fødselsnummer = oppgaveRepository.finnFødselsnummer(id)
+        oppgave.register(Oppgavemelder(fødselsnummer, rapidsConnection))
         val returverdi = oppgaveBlock(oppgave)
         Oppgavelagrer(tildelingRepository).oppdater(this@OppgaveService, oppgave.toDto())
         return returverdi

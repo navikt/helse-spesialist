@@ -71,7 +71,6 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         ) { Subsumsjonsmelder("versjonAvKode", testRapid) }
     private val oppgaveService =
         OppgaveService(
-            meldingDao,
             oppgaveDao,
             tildelingDbDao,
             reservasjonDao,

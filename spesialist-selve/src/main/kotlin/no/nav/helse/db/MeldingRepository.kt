@@ -6,8 +6,6 @@ import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import java.util.UUID
 
 internal interface MeldingRepository {
-    fun finnFødselsnummer(meldingId: UUID): String
-
     fun finnGodkjenningsbehov(meldingId: UUID): Godkjenningsbehov
 
     fun finn(id: UUID): Personmelding?

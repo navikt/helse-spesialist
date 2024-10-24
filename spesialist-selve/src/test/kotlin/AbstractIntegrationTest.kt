@@ -10,7 +10,6 @@ import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.GodkjenningService
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -28,7 +27,6 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val pgHistorikkinnslagRepository = PgHistorikkinnslagRepository(dataSource)
     private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
-    private val meldingDao = MeldingDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
 
     private val oppgaveService =
@@ -40,7 +38,6 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
             totrinnsvurderingRepository = totrinnsvurderingDao,
             saksbehandlerRepository = SaksbehandlerDao(dataSource),
             rapidsConnection = testRapid,
-            meldingRepository = meldingDao,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = SpeilTilgangsgrupper(testEnv),
         )
@@ -49,7 +46,6 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
         GodkjenningService(
             dataSource = dataSource,
             oppgaveDao = oppgaveDao,
-            meldingDao = meldingDao,
             overstyringDao = OverstyringDao(dataSource),
             rapidsConnection = testRapid,
             oppgaveService = oppgaveService,

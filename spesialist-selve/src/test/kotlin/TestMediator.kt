@@ -16,7 +16,6 @@ import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
@@ -35,7 +34,6 @@ internal class TestMediator(
     private val oppgaveDao = OppgaveDao(dataSource)
     private val pgHistorikkinnslagRepository = PgHistorikkinnslagRepository(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
-    private val meldingDao = MeldingDao(dataSource)
     private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
@@ -54,7 +52,6 @@ internal class TestMediator(
     private val tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
     private val oppgaveService =
         OppgaveService(
-            meldingRepository = meldingDao,
             oppgaveRepository = OppgaveDao(dataSource),
             tildelingRepository = tildelingDao,
             reservasjonRepository = ReservasjonDao(dataSource),
