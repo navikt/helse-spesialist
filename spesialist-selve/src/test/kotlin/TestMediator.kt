@@ -112,7 +112,7 @@ internal class TestMediator(
     }
 
     internal fun overstyringstyperForVedtaksperiode(vedtaksperiodeId: UUID) =
-        overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId)
+        overstyringDao.finnOverstyringerMedTypeForVedtaksperioder(listOf(vedtaksperiodeId))
 
     internal fun håndter(
         handling: HandlingFraApi,

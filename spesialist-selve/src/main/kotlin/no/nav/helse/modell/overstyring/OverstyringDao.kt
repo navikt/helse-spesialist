@@ -22,11 +22,6 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource),
             TransactionalOverstyringDao(it).finnOverstyringerMedTypeForVedtaksperioder(vedtaksperiodeIder)
         }
 
-    override fun finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId: UUID): List<OverstyringType> =
-        sessionOf(dataSource).use {
-            TransactionalOverstyringDao(it).finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId)
-        }
-
     fun finnAktiveOverstyringer(vedtaksperiodeId: UUID): List<EksternHendelseId> =
         asSQL(
             """
@@ -333,7 +328,12 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource),
                                             )
                                         },
                                     "overstyring_ref" to overstyringRef,
-                                    "initierende_vedtaksperiode_id" to enArbeidsgiver.initierendeVedtaksperiodeId?.let { UUID.fromString(it) },
+                                    "initierende_vedtaksperiode_id" to
+                                        enArbeidsgiver.initierendeVedtaksperiodeId?.let {
+                                            UUID.fromString(
+                                                it,
+                                            )
+                                        },
                                     "begrunnelse_fritekst_ref" to begrunnelseFritekstId,
                                     "begrunnelse_mal_ref" to begrunnelseMalId,
                                     "begrunnelse_konklusjon_ref" to begrunnelseKonklusjonId,

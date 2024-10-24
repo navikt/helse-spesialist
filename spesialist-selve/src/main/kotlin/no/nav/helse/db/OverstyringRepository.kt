@@ -6,8 +6,6 @@ import java.util.UUID
 interface OverstyringRepository {
     fun finnOverstyringerMedTypeForVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<OverstyringType>
 
-    fun finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId: UUID): List<OverstyringType>
-
     fun finnesEksternHendelseId(eksternHendelseId: UUID): Boolean
 
     fun kobleOverstyringOgVedtaksperiode(

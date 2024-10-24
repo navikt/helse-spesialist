@@ -35,7 +35,7 @@ class TransactionalOverstyringDao(
             vedtaksperiodeIder.toTypedArray(),
         ).list(session) { OverstyringType.valueOf(it.string("type")) }
 
-    override fun finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId: UUID): List<OverstyringType> {
+    fun finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId: UUID): List<OverstyringType> {
         return asSQL(
             """
             SELECT DISTINCT o.id,

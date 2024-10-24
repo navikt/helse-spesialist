@@ -75,7 +75,7 @@ internal class VurderBehovForTotrinnskontroll(
 
     // Overstyringer og Revurderinger
     private fun finnOverstyringerMedType(): List<OverstyringType> {
-        val vedtaksperiodeOverstyringtyper = overstyringRepository.finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId)
+        val vedtaksperiodeOverstyringtyper = overstyringRepository.finnOverstyringerMedTypeForVedtaksperioder(listOf(vedtaksperiodeId))
         if (vedtaksperiodeOverstyringtyper.isNotEmpty()) {
             logg.info(
                 "Vedtaksperioden: $vedtaksperiodeId har blitt overstyrt eller revurdert med typer: $vedtaksperiodeOverstyringtyper",
