@@ -18,10 +18,15 @@ import java.util.UUID
 class TransactionalPeriodehistorikkDao(
     private val session: Session,
 ) : HistorikkinnslagRepository {
+    val oppgaveDao = TransactionalOppgaveDao(session)
+
     override fun lagre(
         historikkinnslag: HistorikkinnslagDto,
         oppgaveId: Long,
-    ): Unit = throw UnsupportedOperationException()
+    ) {
+        val generasjonId = oppgaveDao.finnGenerasjonId(oppgaveId)
+        lagre(historikkinnslag, generasjonId)
+    }
 
     override fun lagre(
         historikkinnslag: HistorikkinnslagDto,

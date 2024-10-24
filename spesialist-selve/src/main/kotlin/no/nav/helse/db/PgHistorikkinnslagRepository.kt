@@ -1,7 +1,6 @@
 package no.nav.helse.db
 
 import kotliquery.sessionOf
-import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
 import java.util.UUID
 import javax.sql.DataSource
@@ -9,14 +8,13 @@ import javax.sql.DataSource
 class PgHistorikkinnslagRepository(
     private val dataSource: DataSource,
 ) : HistorikkinnslagRepository {
-    private val oppgaveDao = OppgaveDao(dataSource)
-
     override fun lagre(
         historikkinnslag: HistorikkinnslagDto,
         oppgaveId: Long,
     ) {
-        val generasjonId = oppgaveDao.finnGenerasjonId(oppgaveId)
-        lagre(historikkinnslag, generasjonId)
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            TransactionalPeriodehistorikkDao(session).lagre(historikkinnslag, oppgaveId)
+        }
     }
 
     override fun lagre(
