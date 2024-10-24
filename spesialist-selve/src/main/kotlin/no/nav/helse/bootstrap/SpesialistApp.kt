@@ -28,21 +28,11 @@ import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.MeldingDao
-import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.automatisering.Automatisering
-import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.automatisering.PlukkTilManuell
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.dokument.DokumentDao
-import no.nav.helse.modell.egenansatt.EgenAnsattDao
-import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
-import no.nav.helse.modell.overstyring.OverstyringDao
-import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
-import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
-import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.AzureConfig
@@ -92,19 +82,15 @@ internal class SpesialistApp(
     private val dataSourceBuilder = DataSourceBuilder(env)
     private val dataSource = dataSourceBuilder.getDataSource()
 
-    private val personDao = PersonDao(dataSource)
     private val personApiDao = PersonApiDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
     private val oppgaveApiDao = OppgaveApiDao(dataSource)
     private val periodehistorikkApiDao = PeriodehistorikkApiDao(dataSource)
     private val pgHistorikkinnslagRepository = PgHistorikkinnslagRepository(dataSource)
-    private val vedtakDao = VedtakDao(dataSource)
-    private val risikovurderingDao = RisikovurderingDao(dataSource)
     private val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val tildelingApiDao = TildelingApiDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
-    private val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
     private val overstyringApiDao = OverstyringApiDao(dataSource)
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
@@ -116,17 +102,12 @@ internal class SpesialistApp(
     private val totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource)
     private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
     private val snapshotApiDao = SnapshotApiDao(dataSource)
-    private val vergemålDao = VergemålDao(dataSource)
-    private val overstyringDao = OverstyringDao(dataSource)
     private val apiVarselRepository = ApiVarselRepository(dataSource)
     private val meldingDao = MeldingDao(dataSource)
     private val dokumentDao = DokumentDao(dataSource)
-    private val generasjonDao = GenerasjonDao(dataSource)
     private val påVentApiDao = PåVentApiDao(dataSource)
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
-    private val automatiseringDao = AutomatiseringDao(dataSource)
     private val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(dataSource)
-    private val egenAnsattDao = EgenAnsattDao(dataSource)
     private val vergemålApiDao = VergemålApiDao(dataSource)
 
     private lateinit var meldingMediator: MeldingMediator
@@ -189,28 +170,13 @@ internal class SpesialistApp(
             override fun fullRefusjonEnArbeidsgiver() = plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_EN_AG_DIVISOR"])
         }
 
-    private val automatisering =
-        Automatisering(
-            risikovurderingRepository = risikovurderingDao,
-            stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlingMediator,
-            automatiseringRepository = automatiseringDao,
-            åpneGosysOppgaverRepository = åpneGosysOppgaverDao,
-            vergemålRepository = vergemålDao,
-            personRepository = personDao,
-            vedtakRepository = vedtakDao,
-            overstyringRepository = overstyringDao,
-            stikkprøver = stikkprøver,
-            meldingRepository = meldingDao,
-            generasjonRepository = generasjonDao,
-            egenAnsattRepository = egenAnsattDao,
-        )
-
     private val kommandofabrikk =
         Kommandofabrikk(
             dataSource = dataSource,
             oppgaveService = { oppgaveService },
             godkjenningMediator = godkjenningMediator,
-            automatisering = automatisering,
+            subsumsjonsmelderProvider = { subsumsjonsmelder },
+            stikkprøver = stikkprøver,
         )
 
     internal fun ktorApp(application: Application) {

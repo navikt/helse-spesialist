@@ -17,18 +17,9 @@ import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.MeldingDao
-import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.automatisering.Automatisering
-import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.automatisering.Stikkprøver
-import no.nav.helse.modell.egenansatt.EgenAnsattDao
-import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
-import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
-import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
-import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
@@ -40,18 +31,15 @@ internal class TestMediator(
     testRapid: TestRapid,
     dataSource: DataSource,
 ) {
-    private val vedtakDao = VedtakDao(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
     private val pgHistorikkinnslagRepository = PgHistorikkinnslagRepository(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
     private val meldingDao = MeldingDao(dataSource)
-    private val generasjonDao = GenerasjonDao(dataSource)
     private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
-    private val egenAnsattDao = EgenAnsattDao(dataSource)
     private val notatDao = NotatDao(dataSource)
 
     private val stansAutomatiskBehandlingMediator =
@@ -86,43 +74,30 @@ internal class TestMediator(
             tilgangsgrupper,
             stansAutomatiskBehandlingMediator,
         )
-    private val automatisering =
-        Automatisering(
-            risikovurderingRepository = RisikovurderingDao(dataSource),
-            stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlingMediator,
-            automatiseringRepository = AutomatiseringDao(dataSource),
-            åpneGosysOppgaverRepository = ÅpneGosysOppgaverDao(dataSource),
-            vergemålRepository = VergemålDao(dataSource),
-            personRepository = PersonDao(dataSource),
-            vedtakRepository = vedtakDao,
-            overstyringRepository = OverstyringDao(dataSource),
-            stikkprøver =
-                object : Stikkprøver {
-                    override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
+    private val stikkprøver =
+        object : Stikkprøver {
+            override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
 
-                    override fun utsFlereArbeidsgivereForlengelse() = false
+            override fun utsFlereArbeidsgivereForlengelse() = false
 
-                    override fun utsEnArbeidsgiverFørstegangsbehandling() = false
+            override fun utsEnArbeidsgiverFørstegangsbehandling() = false
 
-                    override fun utsEnArbeidsgiverForlengelse() = false
+            override fun utsEnArbeidsgiverForlengelse() = false
 
-                    override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() = false
+            override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() = false
 
-                    override fun fullRefusjonFlereArbeidsgivereForlengelse() = false
+            override fun fullRefusjonFlereArbeidsgivereForlengelse() = false
 
-                    override fun fullRefusjonEnArbeidsgiver() = false
-                },
-            meldingRepository = meldingDao,
-            generasjonRepository = generasjonDao,
-            egenAnsattRepository = egenAnsattDao,
-        )
+            override fun fullRefusjonEnArbeidsgiver() = false
+        }
 
     private val kommandofabrikk =
         Kommandofabrikk(
             dataSource = dataSource,
             oppgaveService = { oppgaveService },
             godkjenningMediator = godkjenningMediator,
-            automatisering = automatisering,
+            subsumsjonsmelderProvider = { Subsumsjonsmelder("versjonAvKode", testRapid) },
+            stikkprøver = stikkprøver,
         )
 
     init {

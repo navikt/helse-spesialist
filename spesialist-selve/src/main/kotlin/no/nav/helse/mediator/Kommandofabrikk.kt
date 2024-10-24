@@ -33,6 +33,7 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.automatisering.Automatisering
+import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommand
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
@@ -82,9 +83,10 @@ internal class Kommandofabrikk(
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     oppgaveService: () -> OppgaveService,
     private val godkjenningMediator: GodkjenningMediator,
-    private val automatisering: Automatisering,
     private val utbetalingDao: UtbetalingDao = UtbetalingDao(dataSource),
     private val generasjonService: GenerasjonService = GenerasjonService(dataSource),
+    private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
+    private val stikkprøver: Stikkprøver,
 ) {
     private companion object {
         private val logg = LoggerFactory.getLogger(this::class.java)
@@ -375,7 +377,7 @@ internal class Kommandofabrikk(
             behovData = godkjenningsbehovData,
             utbetaling = utbetaling,
             førsteKjenteDagFinner = førsteKjenteDagFinner,
-            automatisering = automatisering.nyAutomatisering(session),
+            automatisering = Automatisering.Factory.automatisering(session, subsumsjonsmelderProvider, stikkprøver),
             vedtakRepository = TransactionalVedtakDao(session),
             commandContextRepository = TransactionalCommandContextDao(session),
             personRepository = TransactionalPersonDao(session),
@@ -469,7 +471,7 @@ internal class Kommandofabrikk(
         oppgaveService.nyOppgaveService(transactionalSession)
 
     private fun transaksjonellAutomatisering(transactionalSession: TransactionalSession): Automatisering =
-        automatisering.nyAutomatisering(transactionalSession)
+        Automatisering.Factory.automatisering(transactionalSession, subsumsjonsmelderProvider, stikkprøver)
 
     private fun iverksett(
         command: Command,

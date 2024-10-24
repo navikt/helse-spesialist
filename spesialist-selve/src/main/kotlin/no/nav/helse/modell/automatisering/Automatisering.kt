@@ -23,9 +23,11 @@ import no.nav.helse.db.TransactionalÅpneGosysOppgaverDao
 import no.nav.helse.db.VedtakRepository
 import no.nav.helse.db.VergemålRepository
 import no.nav.helse.db.ÅpneGosysOppgaverRepository
+import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.modell.MeldingDao.OverstyringIgangsattKorrigertSøknad
 import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.person.HentEnhetløsning.Companion.erEnhetUtland
+import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.utbetaling.Utbetaling
@@ -53,6 +55,33 @@ internal class Automatisering(
     private val generasjonRepository: GenerasjonRepository,
     private val egenAnsattRepository: EgenAnsattRepository,
 ) {
+    object Factory {
+        fun automatisering(
+            transactionalSession: TransactionalSession,
+            subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
+            stikkprøver: Stikkprøver,
+        ): Automatisering {
+            return Automatisering(
+                risikovurderingRepository = TransactionalRisikovurderingDao(transactionalSession),
+                stansAutomatiskBehandlinghåndterer =
+                    StansAutomatiskBehandlingMediator.Factory.stansAutomatiskBehandlingMediator(
+                        transactionalSession,
+                        subsumsjonsmelderProvider,
+                    ),
+                automatiseringRepository = TransactionalAutomatiseringDao(transactionalSession),
+                åpneGosysOppgaverRepository = TransactionalÅpneGosysOppgaverDao(transactionalSession),
+                vergemålRepository = TransactionalVergemålDao(transactionalSession),
+                personRepository = TransactionalPersonDao(transactionalSession),
+                vedtakRepository = TransactionalVedtakDao(transactionalSession),
+                overstyringRepository = TransactionalOverstyringDao(transactionalSession),
+                stikkprøver = stikkprøver,
+                meldingRepository = TransactionalMeldingDao(transactionalSession),
+                generasjonRepository = TransactionalGenerasjonDao(transactionalSession),
+                egenAnsattRepository = TransactionalEgenAnsattDao(transactionalSession),
+            )
+        }
+    }
+
     private companion object {
         private val logger = LoggerFactory.getLogger(Automatisering::class.java)
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
@@ -119,7 +148,10 @@ internal class Automatisering(
             }
         }
 
-        if (egenAnsattRepository.erEgenAnsatt(fødselsnummer) != true && personRepository.finnAdressebeskyttelse(fødselsnummer) == Adressebeskyttelse.Ugradert) {
+        if (egenAnsattRepository.erEgenAnsatt(
+                fødselsnummer,
+            ) != true && personRepository.finnAdressebeskyttelse(fødselsnummer) == Adressebeskyttelse.Ugradert
+        ) {
             avgjørStikkprøve(erUTS, flereArbeidsgivere, erFørstegangsbehandling)?.let {
                 tilStikkprøve(it, utfallslogger, vedtaksperiodeId, hendelseId, utbetaling.utbetalingId)
                 return@utfør
@@ -324,24 +356,6 @@ internal class Automatisering(
         vedtaksperiodeId: UUID,
         hendelseId: UUID,
     ) = automatiseringRepository.plukketUtTilStikkprøve(vedtaksperiodeId, hendelseId)
-
-    fun nyAutomatisering(transactionalSession: TransactionalSession): Automatisering {
-        return Automatisering(
-            risikovurderingRepository = TransactionalRisikovurderingDao(transactionalSession),
-            stansAutomatiskBehandlinghåndterer =
-                stansAutomatiskBehandlinghåndterer.nyStansAutomatiskBehandlinghåndterer(transactionalSession),
-            automatiseringRepository = TransactionalAutomatiseringDao(transactionalSession),
-            åpneGosysOppgaverRepository = TransactionalÅpneGosysOppgaverDao(transactionalSession),
-            vergemålRepository = TransactionalVergemålDao(transactionalSession),
-            personRepository = TransactionalPersonDao(transactionalSession),
-            vedtakRepository = TransactionalVedtakDao(transactionalSession),
-            overstyringRepository = TransactionalOverstyringDao(transactionalSession),
-            stikkprøver = stikkprøver,
-            meldingRepository = TransactionalMeldingDao(transactionalSession),
-            generasjonRepository = TransactionalGenerasjonDao(transactionalSession),
-            egenAnsattRepository = TransactionalEgenAnsattDao(transactionalSession),
-        )
-    }
 }
 
 internal typealias PlukkTilManuell<String> = (String?) -> Boolean

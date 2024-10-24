@@ -43,6 +43,20 @@ class StansAutomatiskBehandlingMediator(
 
     private val subsumsjonsmelder by lazy { subsumsjonsmelderProvider() }
 
+    object Factory {
+        fun stansAutomatiskBehandlingMediator(
+            transactionalSession: TransactionalSession,
+            subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
+        ): StansAutomatiskBehandlingMediator =
+            StansAutomatiskBehandlingMediator(
+                TransactionalStansAutomatiskBehandlingDao(transactionalSession),
+                TransactionalPeriodehistorikkDao(transactionalSession),
+                TransactionalOppgaveDao(transactionalSession),
+                TransactionalNotatDao(transactionalSession),
+                subsumsjonsmelderProvider,
+            )
+    }
+
     internal fun håndter(
         handling: Personhandling,
         saksbehandler: Saksbehandler,
@@ -85,15 +99,6 @@ class StansAutomatiskBehandlingMediator(
         sendSubsumsjonMeldinger(stoppmeldinger, fødselsnummer, vedtaksperiodeId, organisasjonsnummer)
         return stoppmeldinger.isNotEmpty()
     }
-
-    override fun nyStansAutomatiskBehandlinghåndterer(transactionalSession: TransactionalSession): StansAutomatiskBehandlinghåndterer =
-        StansAutomatiskBehandlingMediator(
-            TransactionalStansAutomatiskBehandlingDao(transactionalSession),
-            TransactionalPeriodehistorikkDao(transactionalSession),
-            TransactionalOppgaveDao(transactionalSession),
-            TransactionalNotatDao(transactionalSession),
-            subsumsjonsmelderProvider,
-        )
 
     private fun lagrePeriodehistorikk(fødselsnummer: String) {
         val oppgaveId = oppgaveRepository.finnOppgaveId(fødselsnummer)
