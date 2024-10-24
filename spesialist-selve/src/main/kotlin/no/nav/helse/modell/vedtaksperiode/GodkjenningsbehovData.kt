@@ -158,7 +158,7 @@ data class GodkjenningsbehovData(
         løsning =
             mapOf(
                 "Godkjenning" to
-                    mutableMapOf(
+                    mapOf(
                         "godkjent" to godkjent,
                         "saksbehandlerIdent" to saksbehandlerIdent,
                         "saksbehandlerEpost" to saksbehandlerEpost,
@@ -168,9 +168,8 @@ data class GodkjenningsbehovData(
                         "begrunnelser" to begrunnelser,
                         "kommentar" to kommentar,
                         "saksbehandleroverstyringer" to saksbehandleroverstyringer,
-                    ).apply {
-                        compute("refusjontype") { _, _ -> utbetaling.refusjonstype().name }
-                    }.toMap(),
+                        "refusjontype" to utbetaling.refusjonstype().name,
+                    ),
             )
         behov["@løsning"] = løsning
         behov["@id"] = UUID.randomUUID()

@@ -17,25 +17,16 @@ internal class VedtaksperiodeGodkjent private constructor(
     internal fun toJson() =
         JsonMessage.newMessage(
             "vedtaksperiode_godkjent",
-            mutableMapOf(
-                "fødselsnummer" to fødselsnummer,
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "periodetype" to periodetype.name,
-                "saksbehandlerIdent" to saksbehandler.ident,
-                "saksbehandlerEpost" to saksbehandler.epostadresse,
-                "automatiskBehandling" to automatiskBehandlet,
-                "saksbehandler" to
-                    mapOf(
-                        "ident" to saksbehandler.ident,
-                        "epostadresse" to saksbehandler.epostadresse,
-                    ),
-            ).apply {
-                compute("beslutter") { _, _ ->
-                    beslutter?.let {
-                        mapOf("ident" to beslutter.ident, "epostadresse" to beslutter.epostadresse)
-                    }
-                }
-                compute("behandlingId") { _, _ -> spleisBehandlingId }
+            buildMap {
+                put("fødselsnummer", fødselsnummer)
+                put("vedtaksperiodeId", vedtaksperiodeId)
+                put("periodetype", periodetype.name)
+                put("saksbehandlerIdent", saksbehandler.ident)
+                put("saksbehandlerEpost", saksbehandler.epostadresse)
+                put("automatiskBehandling", automatiskBehandlet)
+                put("saksbehandler", saksbehandler.apply { mapOf("ident" to ident, "epostadresse" to epostadresse) })
+                beslutter?.apply { put("beslutter", mapOf("ident" to ident, "epostadresse" to epostadresse)) }
+                spleisBehandlingId?.let { put("behandlingId", it) }
             },
         ).toJson()
 

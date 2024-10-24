@@ -35,16 +35,15 @@ internal class Oppgavemelder(
         return fødselsnummer to
             JsonMessage.newMessage(
                 eventName,
-                mutableMapOf(
-                    "@forårsaket_av" to mapOf("id" to oppgavemelding.hendelseId),
-                    "hendelseId" to oppgavemelding.hendelseId,
-                    "oppgaveId" to oppgavemelding.oppgaveId,
-                    "tilstand" to oppgavemelding.tilstand,
-                    "fødselsnummer" to fødselsnummer,
-                    "egenskaper" to oppgavemelding.egenskaper,
-                ).apply {
-                    compute("beslutter") { _, _ -> oppgavemelding.beslutter }
-                    compute("saksbehandler") { _, _ -> oppgavemelding.saksbehandler }
+                buildMap {
+                    put("@forårsaket_av", mapOf("id" to oppgavemelding.hendelseId))
+                    put("hendelseId", oppgavemelding.hendelseId)
+                    put("oppgaveId", oppgavemelding.oppgaveId)
+                    put("tilstand", oppgavemelding.tilstand)
+                    put("fødselsnummer", fødselsnummer)
+                    put("egenskaper", oppgavemelding.egenskaper)
+                    oppgavemelding.beslutter?.let { put("beslutter", it) }
+                    oppgavemelding.saksbehandler?.let { put("saksbehandler", it) }
                 },
             )
     }

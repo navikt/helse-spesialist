@@ -35,24 +35,23 @@ class Subsumsjonsmelder(private val versjonAvKode: String, private val rapidsCon
             "subsumsjon",
             mapOf(
                 "subsumsjon" to
-                    mutableMapOf(
-                        "id" to id,
-                        "versjon" to versjon,
-                        "kilde" to kilde,
-                        "versjonAvKode" to versjonAvKode,
-                        "fodselsnummer" to fødselsnummer,
-                        "sporing" to sporing,
-                        "tidsstempel" to tidsstempel,
-                        "lovverk" to lovverk,
-                        "lovverksversjon" to lovverksversjon,
-                        "paragraf" to paragraf,
-                        "input" to input,
-                        "output" to output,
-                        "utfall" to utfall,
-                    ).apply {
-                        compute("ledd") { _, _ -> ledd }
-                        compute("bokstav") { _, _ -> bokstav }
-                    }.toMap(),
+                    buildMap {
+                        put("id", id)
+                        put("versjon", versjon)
+                        put("kilde", kilde)
+                        put("versjonAvKode", versjonAvKode)
+                        put("fodselsnummer", fødselsnummer)
+                        put("sporing", sporing)
+                        put("tidsstempel", tidsstempel)
+                        put("lovverk", lovverk)
+                        put("lovverksversjon", lovverksversjon)
+                        put("paragraf", paragraf)
+                        put("input", input)
+                        put("output", output)
+                        put("utfall", utfall)
+                        ledd?.let { put("ledd", it) }
+                        bokstav?.let { put("bokstav", it) }
+                    },
             ),
         )
 }

@@ -18,23 +18,18 @@ internal class VedtaksperiodeAvvist private constructor(
     internal fun toJson() =
         JsonMessage.newMessage(
             "vedtaksperiode_avvist",
-            mutableMapOf(
-                "fødselsnummer" to fødselsnummer,
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "saksbehandlerIdent" to saksbehandler.ident,
-                "saksbehandlerEpost" to saksbehandler.epostadresse,
-                "saksbehandler" to
-                    mapOf(
-                        "ident" to saksbehandler.ident,
-                        "epostadresse" to saksbehandler.epostadresse,
-                    ),
-                "automatiskBehandling" to automatiskBehandlet,
-                "årsak" to løsning["Godkjenning"]["årsak"].asText(),
-                "begrunnelser" to løsning["Godkjenning"]["begrunnelser"].map(JsonNode::asText),
-                "kommentar" to løsning["Godkjenning"]["kommentar"].asText(),
-            ).apply {
-                compute("periodetype") { _, _ -> periodetype?.name }
-                compute("behandlingId") { _, _ -> spleisBehandlingId }
+            buildMap {
+                put("fødselsnummer", fødselsnummer)
+                put("vedtaksperiodeId", vedtaksperiodeId)
+                put("saksbehandlerIdent", saksbehandler.ident)
+                put("saksbehandlerEpost", saksbehandler.epostadresse)
+                put("saksbehandler", saksbehandler.apply { mapOf("ident" to ident, "epostadresse" to epostadresse) })
+                put("automatiskBehandling", automatiskBehandlet)
+                put("årsak", løsning["Godkjenning"]["årsak"].asText())
+                put("begrunnelser", løsning["Godkjenning"]["begrunnelser"].map(JsonNode::asText))
+                put("kommentar", løsning["Godkjenning"]["kommentar"].asText())
+                periodetype?.name?.let { put("periodetype", it) }
+                spleisBehandlingId?.let { put("behandlingId", it) }
             },
         ).toJson()
 

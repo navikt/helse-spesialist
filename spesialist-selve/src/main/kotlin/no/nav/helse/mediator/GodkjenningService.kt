@@ -62,28 +62,29 @@ internal class GodkjenningService(
             JsonMessage
                 .newMessage(
                     "saksbehandler_løsning",
-                    mutableMapOf(
-                        "@forårsaket_av" to
+                    buildMap {
+                        put(
+                            "@forårsaket_av",
                             mapOf(
                                 "event_name" to "behov",
                                 "behov" to "Godkjenning",
                                 "id" to hendelseId,
                             ),
-                        "fødselsnummer" to fødselsnummer,
-                        "oppgaveId" to godkjenningDTO.oppgavereferanse,
-                        "hendelseId" to hendelseId,
-                        "godkjent" to godkjenningDTO.godkjent,
-                        "saksbehandlerident" to godkjenningDTO.saksbehandlerIdent,
-                        "saksbehandleroid" to oid,
-                        "saksbehandlerepost" to epost,
-                        "godkjenttidspunkt" to LocalDateTime.now(),
-                        "saksbehandleroverstyringer" to saksbehandleroverstyringer,
-                        "saksbehandler" to saksbehandlerJson,
-                    ).apply {
+                        )
+                        put("fødselsnummer", fødselsnummer)
+                        put("oppgaveId", godkjenningDTO.oppgavereferanse)
+                        put("hendelseId", hendelseId)
+                        put("godkjent", godkjenningDTO.godkjent)
+                        put("saksbehandlerident", godkjenningDTO.saksbehandlerIdent)
+                        put("saksbehandleroid", oid)
+                        put("saksbehandlerepost", epost)
+                        put("godkjenttidspunkt", LocalDateTime.now())
+                        put("saksbehandleroverstyringer", saksbehandleroverstyringer)
+                        put("saksbehandler", saksbehandlerJson)
                         godkjenningDTO.årsak?.let { put("årsak", it) }
                         godkjenningDTO.begrunnelser?.let { put("begrunnelser", it) }
                         godkjenningDTO.kommentar?.let { put("kommentar", it) }
-                        compute("beslutter") { _, _ -> beslutterJson }
+                        beslutterJson?.let { put("beslutter", it) }
                     },
                 ).also {
                     sikkerlogg.info("Publiserer saksbehandler-løsning: ${it.toJson()}")

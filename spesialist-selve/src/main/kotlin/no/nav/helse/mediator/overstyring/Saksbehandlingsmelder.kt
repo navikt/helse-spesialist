@@ -126,26 +126,27 @@ internal class Saksbehandlingsmelder(
         val jsonMessage =
             JsonMessage.newMessage(
                 "annullering",
-                mutableMapOf(
-                    "fødselsnummer" to fødselsnummer,
-                    "organisasjonsnummer" to event.organisasjonsnummer,
-                    "aktørId" to event.aktørId,
-                    "saksbehandler" to
+                buildMap {
+                    put("fødselsnummer", fødselsnummer)
+                    put("organisasjonsnummer", event.organisasjonsnummer)
+                    put("aktørId", event.aktørId)
+                    put(
+                        "saksbehandler",
                         mapOf(
                             "epostaddresse" to event.saksbehandlerEpost,
                             "oid" to event.saksbehandlerOid,
                             "navn" to event.saksbehandlerNavn,
                             "ident" to event.saksbehandlerIdent,
                         ),
-                    "begrunnelser" to event.begrunnelser,
-                    "utbetalingId" to event.utbetalingId,
-                    "vedtaksperiodeId" to event.vedtaksperiodeId,
-                    "arbeidsgiverFagsystemId" to event.arbeidsgiverFagsystemId,
-                    "personFagsystemId" to event.personFagsystemId,
-                ).apply {
-                    compute("kommentar") { _, _ -> event.kommentar }
-                    compute("arsaker") { _, _ ->
-                        event.arsaker?.map { mapOf("arsak" to it.arsak, "key" to it.key) }
+                    )
+                    put("begrunnelser", event.begrunnelser)
+                    put("utbetalingId", event.utbetalingId)
+                    put("vedtaksperiodeId", event.vedtaksperiodeId)
+                    put("arbeidsgiverFagsystemId", event.arbeidsgiverFagsystemId)
+                    put("personFagsystemId", event.personFagsystemId)
+                    event.kommentar?.let { put("kommentar", it) }
+                    event.arsaker?.let { arsaker ->
+                        put("arsaker", arsaker.map { mapOf("arsak" to it.arsak, "key" to it.key) })
                     }
                 },
             )

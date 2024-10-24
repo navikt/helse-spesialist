@@ -71,9 +71,8 @@ internal class AdressebeskyttelseEndretCommand(
     utbetaling: Utbetaling?,
 ) : MacroCommand() {
     override val commands: List<Command> =
-        mutableListOf<Command>(
-            OppdaterPersoninfoCommand(fødselsnummer, personRepository, force = true),
-        ).apply {
+        buildList {
+            add(OppdaterPersoninfoCommand(fødselsnummer, personRepository, force = true))
             if (godkjenningsbehov != null) {
                 check(utbetaling != null) { "Forventer å finne utbetaling for godkjenningsbehov med id=${godkjenningsbehov.id}" }
                 add(

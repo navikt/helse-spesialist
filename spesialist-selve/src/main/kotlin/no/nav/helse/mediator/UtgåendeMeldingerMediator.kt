@@ -69,10 +69,9 @@ internal class UtgåendeMeldingerMediator : CommandContextObserver {
     private fun behovPacket(hendelse: Personmelding) =
         JsonMessage.newNeed(
             utgåendeBehov.keys.toList(),
-            mutableMapOf<String, Any>(
-                "hendelseId" to hendelse.id,
-                "fødselsnummer" to hendelse.fødselsnummer(),
-            ).apply {
+            buildMap {
+                put("hendelseId", hendelse.id)
+                put("fødselsnummer", hendelse.fødselsnummer())
                 putAll(ekstraKontekst)
                 putAll(utgåendeBehov)
             },
