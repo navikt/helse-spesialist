@@ -94,7 +94,6 @@ internal class Kommandofabrikk(
     }
 
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
-    private val metrikkDao = MetrikkDao(dataSource)
     private val oppgaveService: OppgaveService by lazy { oppgaveService() }
 
     internal fun avviksvurdering(avviksvurdering: AvviksvurderingDto) {
@@ -419,6 +418,7 @@ internal class Kommandofabrikk(
                     commandContext = nyContext(melding.id, transactionalCommandContextDao),
                     commandContextObservers = setOf(commandContextObservers),
                     commandContextDao = transactionalCommandContextDao,
+                    metrikkDao = MetrikkDao(transactionalSession),
                 )
             }
         }
@@ -438,13 +438,16 @@ internal class Kommandofabrikk(
         { kommandooppretter ->
             val melding = this
             this@Kommandofabrikk.kommandooppretter()?.let { command ->
+                val session = sessionOf(dataSource)
                 iverksett(
                     command = command,
                     meldingId = melding.id,
                     commandContext = commandContext,
                     commandContextObservers = commandContextObservers,
                     commandContextDao = commandContextDao,
+                    metrikkDao = MetrikkDao(session),
                 )
+                session.close()
             }
         }
 
@@ -463,6 +466,7 @@ internal class Kommandofabrikk(
                     commandContext = commandContext,
                     commandContextObservers = commandContextObservers,
                     commandContextDao = transactionalCommandContextDao,
+                    metrikkDao = MetrikkDao(transactionalSession),
                 )
             }
         }
@@ -479,6 +483,7 @@ internal class Kommandofabrikk(
         commandContext: CommandContext,
         commandContextObservers: Collection<CommandContextObserver>,
         commandContextDao: CommandContextRepository,
+        metrikkDao: MetrikkDao,
     ) {
         commandContextObservers.forEach { commandContext.nyObserver(it) }
         val contextId = commandContext.id()
@@ -488,7 +493,7 @@ internal class Kommandofabrikk(
             try {
                 if (commandContext.utfør(commandContextDao, meldingId, command)) {
                     val kjøretid = commandContextDao.tidsbrukForContext(contextId)
-                    metrikker(command.name, kjøretid, contextId)
+                    metrikker(command.name, kjøretid, contextId, metrikkDao)
                     logg.info(
                         "Kommando(er) for ${command.name} er utført ferdig. Det tok ca {}ms å kjøre hele kommandokjeden",
                         kjøretid,
@@ -509,6 +514,7 @@ internal class Kommandofabrikk(
         hendelsenavn: String,
         kjøretidMs: Int,
         contextId: UUID,
+        metrikkDao: MetrikkDao,
     ) {
         if (hendelsenavn == GodkjenningsbehovCommand::class.simpleName) {
             val utfall: GodkjenningsbehovUtfall = metrikkDao.finnUtfallForGodkjenningsbehov(contextId)

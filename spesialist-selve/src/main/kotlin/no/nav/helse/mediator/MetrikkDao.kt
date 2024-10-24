@@ -1,10 +1,11 @@
 package no.nav.helse.mediator
 
-import no.nav.helse.HelseDao
+import kotliquery.Session
+import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.HelseDao.Companion.single
 import java.util.UUID
-import javax.sql.DataSource
 
-class MetrikkDao(dataSource: DataSource) : HelseDao(dataSource) {
+class MetrikkDao(private val session: Session) {
     /**
      Denne funksjonen antar at den kun kalles for en **ferdigbehandlet** kommandokjede for **godkjenningsbehov**.
      */
@@ -16,8 +17,8 @@ class MetrikkDao(dataSource: DataSource) : HelseDao(dataSource) {
                 where context_id = :contextId
                 and tilstand = 'SUSPENDERT'
                 """.trimIndent(),
-                mapOf("contextId" to contextId),
-            ).single { row -> row.int(1) }!!
+                "contextId" to contextId,
+            ).single(session) { row -> row.int(1) }!!
 
         // Hvis kommandokjeden ikke ble suspendert anser vi at behandlingen av godkjenningsbehovet ble avbrutt.
         // Ja, det er passe shaky 🫠
@@ -30,8 +31,8 @@ class MetrikkDao(dataSource: DataSource) : HelseDao(dataSource) {
             join command_context cc on automatisering.hendelse_ref = cc.hendelse_id
             where context_id =  :contextId
             """,
-                mapOf("contextId" to contextId),
-            ).single { row -> row.boolean("automatisert") } ?: false
+                "contextId" to contextId,
+            ).single(session) { row -> row.boolean("automatisert") } ?: false
 
         if (bleAutomatiskGodkjent) return GodkjenningsbehovUtfall.AutomatiskGodkjent
 
@@ -42,8 +43,8 @@ class MetrikkDao(dataSource: DataSource) : HelseDao(dataSource) {
             from oppgave
             where command_context_id = :contextId
             """,
-                mapOf("contextId" to contextId),
-            ).single { true } ?: false
+                "contextId" to contextId,
+            ).single(session) { true } ?: false
 
         return if (gikkTilManuell) {
             GodkjenningsbehovUtfall.ManuellOppgave

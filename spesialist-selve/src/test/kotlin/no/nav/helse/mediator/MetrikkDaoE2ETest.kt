@@ -1,13 +1,19 @@
 package no.nav.helse.mediator
 
 import AbstractE2ETest
+import kotliquery.sessionOf
 import no.nav.helse.TestRapidHelpers.contextId
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class MetrikkDaoE2ETest : AbstractE2ETest() {
-    private val dao = MetrikkDao(dataSource)
+    private val session = sessionOf(dataSource)
+    private val dao = MetrikkDao(session)
+
+    @AfterEach
+    fun lukkSession() = session.close()
 
     @Test
     fun `identifiserer automatisk godkjenning`() {
