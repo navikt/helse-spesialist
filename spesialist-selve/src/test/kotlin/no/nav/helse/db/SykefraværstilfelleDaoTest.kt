@@ -13,10 +13,12 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 internal class SykefraværstilfelleDaoTest : DatabaseIntegrationTest() {
     private val session = sessionOf(dataSource)
+
     private val sykefraværstilfelleDao = SykefraværstilfelleDao(session)
 
     @AfterEach
@@ -25,12 +27,12 @@ internal class SykefraværstilfelleDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `Finn skjønnsfastsatt sykepengegrunnlag - gammel`() {
+    fun `Finner skjønnsfastsatt sykepengegrunnlag`() {
         nyPerson()
         opprettSaksbehandler()
         val hendelseId = UUID.randomUUID()
         testhendelse(hendelseId)
-        val tidspunkt = LocalDateTime.now()
+        val tidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)
         overstyringDao.persisterSkjønnsfastsettingSykepengegrunnlag(
             skjønnsfastsattSykepengegrunnlag =
                 skjønnsfastsattSykepengegrunnlag(
@@ -57,83 +59,7 @@ internal class SykefraværstilfelleDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `Finn skjønnsfastsatt sykepengegrunnlag`() {
-        nyPerson()
-        opprettSaksbehandler()
-        val hendelseId = UUID.randomUUID()
-        testhendelse(hendelseId)
-        val tidspunkt = LocalDateTime.now().withNano(0)
-        overstyringDao.persisterSkjønnsfastsettingSykepengegrunnlag(
-            skjønnsfastsattSykepengegrunnlag =
-                skjønnsfastsattSykepengegrunnlag(
-                    opprettet = tidspunkt,
-                    fødselsnummer = FNR,
-                ),
-            saksbehandlerOid = SAKSBEHANDLER_OID,
-        )
-
-        val funnet = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(FNR)
-        assertEquals(1, funnet.size)
-        assertEquals(
-            SkjønnsfastsattSykepengegrunnlagDto(
-                SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT,
-                SkjønnsfastsettingsårsakDto.ANDRE_AVSNITT,
-                1.januar,
-                "mal",
-                "fritekst",
-                "konklusjon",
-                tidspunkt,
-            ),
-            funnet.single(),
-        )
-    }
-
-    @Test
-    fun `Finn kun skjønnsfastsatt sykepengegrunnlag for bestemt fnr - gammel`() {
-        nyPerson()
-        val person2 = "111111111112"
-        val arbeidsgiver2 = "999999998"
-        nyPerson(fødselsnummer = person2, organisasjonsnummer = arbeidsgiver2, vedtaksperiodeId = UUID.randomUUID())
-        opprettSaksbehandler()
-        val hendelseId1 = UUID.randomUUID()
-        val hendelseId2 = UUID.randomUUID()
-        testhendelse(hendelseId1)
-        testhendelse(hendelseId2)
-        val tidspunkt = LocalDateTime.now()
-        overstyringDao.persisterSkjønnsfastsettingSykepengegrunnlag(
-            skjønnsfastsattSykepengegrunnlag(
-                opprettet = tidspunkt,
-                fødselsnummer = FNR,
-            ),
-            saksbehandlerOid = SAKSBEHANDLER_OID,
-        )
-        overstyringDao.persisterSkjønnsfastsettingSykepengegrunnlag(
-            skjønnsfastsattSykepengegrunnlag(
-                fødselsnummer = person2,
-                orgnummer = arbeidsgiver2,
-                type = RAPPORTERT_ÅRSINNTEKT,
-            ),
-            saksbehandlerOid = SAKSBEHANDLER_OID,
-        )
-
-        val funnet = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(FNR)
-        assertEquals(1, funnet.size)
-        assertEquals(
-            SkjønnsfastsattSykepengegrunnlagDto(
-                SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT,
-                SkjønnsfastsettingsårsakDto.ANDRE_AVSNITT,
-                1.januar,
-                "mal",
-                "fritekst",
-                "konklusjon",
-                tidspunkt,
-            ),
-            funnet.single(),
-        )
-    }
-
-    @Test
-    fun `Finn kun skjønnsfastsatt sykepengegrunnlag for bestemt fnr`() {
+    fun `Finner kun data for angitt fnr`() {
         nyPerson()
         val person2 = "111111111111"
         val arbeidsgiver2 = "999999999"
@@ -143,7 +69,7 @@ internal class SykefraværstilfelleDaoTest : DatabaseIntegrationTest() {
         val hendelseId2 = UUID.randomUUID()
         testhendelse(hendelseId1)
         testhendelse(hendelseId2)
-        val tidspunkt = LocalDateTime.now().withNano(0)
+        val tidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)
         overstyringDao.persisterSkjønnsfastsettingSykepengegrunnlag(
             skjønnsfastsattSykepengegrunnlag(
                 opprettet = tidspunkt,
