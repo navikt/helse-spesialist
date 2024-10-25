@@ -1,6 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode.vedtak
 
 import com.fasterxml.jackson.databind.JsonNode
+import kotliquery.TransactionalSession
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Personmelding
@@ -98,12 +99,18 @@ internal class Saksbehandlerløsning private constructor(
         val epostadresse: String,
     )
 
+    override fun skalKjøresTransaksjonelt() = true
+
+    override fun transaksjonellBehandle(
+        person: Person,
+        kommandostarter: Kommandostarter,
+        transactionalSession: TransactionalSession,
+    ) = kommandostarter { løsGodkjenningsbehov(this@Saksbehandlerløsning, person) }
+
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
-    ) {
-        kommandostarter { løsGodkjenningsbehov(this@Saksbehandlerløsning, person) }
-    }
+    ) = throw UnsupportedOperationException()
 
     override fun fødselsnummer() = fødselsnummer
 
