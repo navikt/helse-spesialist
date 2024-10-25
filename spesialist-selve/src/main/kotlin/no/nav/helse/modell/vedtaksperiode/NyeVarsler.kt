@@ -1,6 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
+import kotliquery.TransactionalSession
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Personmelding
@@ -33,12 +34,18 @@ internal class NyeVarsler private constructor(
 
     override fun toJson(): String = json
 
+    override fun skalKjøresTransaksjonelt() = true
+
+    override fun transaksjonellBehandle(
+        person: Person,
+        kommandostarter: Kommandostarter,
+        transactionalSession: TransactionalSession,
+    ) = person.nyeVarsler(varsler)
+
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
-    ) {
-        person.nyeVarsler(varsler)
-    }
+    ) = throw UnsupportedOperationException()
 
     companion object {
         fun JsonNode.varsler(): List<Varsel> =

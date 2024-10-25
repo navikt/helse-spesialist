@@ -1,6 +1,7 @@
 package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
+import kotliquery.TransactionalSession
 import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.Kommandostarter
@@ -32,13 +33,21 @@ internal class SøknadSendt private constructor(
 
     override fun toJson() = json
 
-    override fun behandle(
+    override fun skalKjøresTransaksjonelt() = true
+
+    override fun transaksjonellBehandle(
         person: Person,
         kommandostarter: Kommandostarter,
+        transactionalSession: TransactionalSession,
     ) {
         // Ikke i bruk, SøknadSendt har egen sti inn da det muligens ikke finnes noen person enda
         // På sikt ønsker vi kanskje å opprette personen dersom den ikke finnes enda, og da kan denne tas i bruk
     }
+
+    override fun behandle(
+        person: Person,
+        kommandostarter: Kommandostarter,
+    ) = throw UnsupportedOperationException()
 
     internal companion object {
         fun søknadSendt(packet: JsonMessage) =

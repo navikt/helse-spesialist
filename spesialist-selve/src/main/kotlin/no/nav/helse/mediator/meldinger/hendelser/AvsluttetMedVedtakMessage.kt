@@ -2,6 +2,7 @@ package no.nav.helse.mediator.meldinger.hendelser
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import kotliquery.TransactionalSession
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
@@ -43,12 +44,18 @@ internal class AvsluttetMedVedtakMessage(
 
     override fun vedtaksperiodeId(): UUID = vedtaksperiodeId
 
+    override fun skalKjøresTransaksjonelt() = true
+
+    override fun transaksjonellBehandle(
+        person: Person,
+        kommandostarter: Kommandostarter,
+        transactionalSession: TransactionalSession,
+    ) = person.fattVedtak(avsluttetMedVedtak)
+
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
-    ) {
-        person.fattVedtak(avsluttetMedVedtak)
-    }
+    ) = throw UnsupportedOperationException()
 
     override val id: UUID = packet["@id"].asUUID()
 

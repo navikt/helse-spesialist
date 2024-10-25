@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.meldinger.hendelser
 
 import com.fasterxml.jackson.databind.JsonNode
+import kotliquery.TransactionalSession
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
@@ -48,10 +49,16 @@ internal class AvsluttetUtenVedtakMessage private constructor(
 
     override fun toJson(): String = json
 
+    override fun skalKjøresTransaksjonelt() = true
+
+    override fun transaksjonellBehandle(
+        person: Person,
+        kommandostarter: Kommandostarter,
+        transactionalSession: TransactionalSession,
+    ) = person.avsluttetUtenVedtak(avsluttetUtenVedtak)
+
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
-    ) {
-        person.avsluttetUtenVedtak(avsluttetUtenVedtak)
-    }
+    ) = throw UnsupportedOperationException()
 }
