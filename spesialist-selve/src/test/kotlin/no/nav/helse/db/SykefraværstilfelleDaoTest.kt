@@ -4,14 +4,11 @@ import DatabaseIntegrationTest
 import kotliquery.sessionOf
 import no.nav.helse.db.SkjønnsfastsettingstypeForDatabase.OMREGNET_ÅRSINNTEKT
 import no.nav.helse.db.SkjønnsfastsettingstypeForDatabase.RAPPORTERT_ÅRSINNTEKT
-import no.nav.helse.februar
 import no.nav.helse.januar
-import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
-import no.nav.helse.modell.vedtak.Skjønnsfastsettingstype
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingstypeDto
-import no.nav.helse.modell.vedtak.Skjønnsfastsettingsårsak
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingsårsakDto
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -19,7 +16,13 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class SykefraværstilfelleDaoTest : DatabaseIntegrationTest() {
-    private val sykefraværstilfelleDao = SykefraværstilfelleDao(dataSource)
+    private val session = sessionOf(dataSource)
+    private val sykefraværstilfelleDao = SykefraværstilfelleDao(session)
+
+    @AfterEach
+    fun tearDown() {
+        session.close()
+    }
 
     @Test
     fun `Finn skjønnsfastsatt sykepengegrunnlag - gammel`() {
@@ -37,12 +40,12 @@ internal class SykefraværstilfelleDaoTest : DatabaseIntegrationTest() {
             saksbehandlerOid = SAKSBEHANDLER_OID,
         )
 
-        val funnet = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(FNR, 1.januar)
+        val funnet = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(FNR)
         assertEquals(1, funnet.size)
         assertEquals(
-            SkjønnsfastsattSykepengegrunnlag(
-                Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
-                Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
+            SkjønnsfastsattSykepengegrunnlagDto(
+                SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT,
+                SkjønnsfastsettingsårsakDto.ANDRE_AVSNITT,
                 1.januar,
                 "mal",
                 "fritekst",
@@ -69,14 +72,7 @@ internal class SykefraværstilfelleDaoTest : DatabaseIntegrationTest() {
             saksbehandlerOid = SAKSBEHANDLER_OID,
         )
 
-        val funnet =
-            sessionOf(dataSource).use {
-                it.transaction {
-                    with(sykefraværstilfelleDao) {
-                        it.finnSkjønnsfastsatteSykepengegrunnlag(FNR)
-                    }
-                }
-            }
+        val funnet = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(FNR)
         assertEquals(1, funnet.size)
         assertEquals(
             SkjønnsfastsattSykepengegrunnlagDto(
@@ -120,12 +116,12 @@ internal class SykefraværstilfelleDaoTest : DatabaseIntegrationTest() {
             saksbehandlerOid = SAKSBEHANDLER_OID,
         )
 
-        val funnet = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(FNR, 1.januar)
+        val funnet = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(FNR)
         assertEquals(1, funnet.size)
         assertEquals(
-            SkjønnsfastsattSykepengegrunnlag(
-                Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
-                Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
+            SkjønnsfastsattSykepengegrunnlagDto(
+                SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT,
+                SkjønnsfastsettingsårsakDto.ANDRE_AVSNITT,
                 1.januar,
                 "mal",
                 "fritekst",
@@ -164,53 +160,12 @@ internal class SykefraværstilfelleDaoTest : DatabaseIntegrationTest() {
             saksbehandlerOid = SAKSBEHANDLER_OID,
         )
 
-        val funnet =
-            sessionOf(dataSource).use {
-                it.transaction {
-                    with(sykefraværstilfelleDao) {
-                        it.finnSkjønnsfastsatteSykepengegrunnlag(FNR)
-                    }
-                }
-            }
+        val funnet = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(FNR)
         assertEquals(1, funnet.size)
         assertEquals(
             SkjønnsfastsattSykepengegrunnlagDto(
                 SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT,
                 SkjønnsfastsettingsårsakDto.ANDRE_AVSNITT,
-                1.januar,
-                "mal",
-                "fritekst",
-                "konklusjon",
-                tidspunkt,
-            ),
-            funnet.single(),
-        )
-    }
-
-    @Test
-    fun `Finner skjønnsfastsatt sykepengegrunnlag kun for aktuelt skjæringstidspunkt`() {
-        nyPerson()
-        opprettSaksbehandler()
-        val hendelseId1 = UUID.randomUUID()
-        val hendelseId2 = UUID.randomUUID()
-        testhendelse(hendelseId1)
-        testhendelse(hendelseId2)
-        val tidspunkt = LocalDateTime.now()
-        overstyringDao.persisterSkjønnsfastsettingSykepengegrunnlag(
-            skjønnsfastsattSykepengegrunnlag(opprettet = tidspunkt),
-            saksbehandlerOid = SAKSBEHANDLER_OID,
-        )
-        overstyringDao.persisterSkjønnsfastsettingSykepengegrunnlag(
-            skjønnsfastsattSykepengegrunnlag(skjæringstidspunkt = 1.februar),
-            saksbehandlerOid = SAKSBEHANDLER_OID,
-        )
-
-        val funnet = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(FNR, 1.januar)
-        assertEquals(1, funnet.size)
-        assertEquals(
-            SkjønnsfastsattSykepengegrunnlag(
-                Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
-                Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
                 1.januar,
                 "mal",
                 "fritekst",

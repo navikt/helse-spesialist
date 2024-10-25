@@ -11,7 +11,6 @@ import javax.sql.DataSource
 internal class PersonService(
     private val dataSource: DataSource,
 ) {
-    private val sykefraværstilfelleDao = SykefraværstilfelleDao(dataSource)
     private val generasjonService = GenerasjonService(dataSource)
 
     fun brukPersonHvisFinnes(
@@ -32,7 +31,7 @@ internal class PersonService(
             ?.copy(vedtaksperioder = with(generasjonService) { finnVedtaksperioder(fødselsnummer) })
             ?.copy(
                 skjønnsfastsatteSykepengegrunnlag =
-                    with(sykefraværstilfelleDao) { finnSkjønnsfastsatteSykepengegrunnlag(fødselsnummer) },
+                    SykefraværstilfelleDao(this).finnSkjønnsfastsatteSykepengegrunnlag(fødselsnummer),
             )?.copy(
                 avviksvurderinger =
                     with(TransactionalAvviksvurderingDao(this)) {
