@@ -11,14 +11,14 @@ import no.nav.helse.db.ReservasjonRepository
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.TildelingRepository
+import no.nav.helse.db.TotrinnsvurderingDao
+import no.nav.helse.db.TotrinnsvurderingDaoInterface
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
-import no.nav.helse.db.TotrinnsvurderingRepository
 import no.nav.helse.db.TransactionalOppgaveDao
 import no.nav.helse.db.TransactionalOpptegnelseDao
 import no.nav.helse.db.TransactionalReservasjonDao
 import no.nav.helse.db.TransactionalSaksbehandlerDao
 import no.nav.helse.db.TransactionalTildelingDao
-import no.nav.helse.db.TransactionalTotrinnsvurderingDao
 import no.nav.helse.mediator.SaksbehandlerMediator.Companion.tilApiversjon
 import no.nav.helse.mediator.TilgangskontrollørForApi
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilApiversjon
@@ -64,7 +64,7 @@ internal class OppgaveService(
     private val tildelingRepository: TildelingRepository,
     private val reservasjonRepository: ReservasjonRepository,
     private val opptegnelseRepository: OpptegnelseRepository,
-    private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
+    private val totrinnsvurderingDaoInterface: TotrinnsvurderingDaoInterface,
     private val saksbehandlerRepository: SaksbehandlerRepository,
     private val rapidsConnection: RapidsConnection,
     private val tilgangskontroll: Tilgangskontroll,
@@ -79,7 +79,7 @@ internal class OppgaveService(
             tildelingRepository = TransactionalTildelingDao(transactionalSession),
             reservasjonRepository = TransactionalReservasjonDao(transactionalSession),
             opptegnelseRepository = TransactionalOpptegnelseDao(transactionalSession),
-            totrinnsvurderingRepository = TransactionalTotrinnsvurderingDao(transactionalSession),
+            totrinnsvurderingDaoInterface = TotrinnsvurderingDao(transactionalSession),
             saksbehandlerRepository = TransactionalSaksbehandlerDao(transactionalSession),
             rapidsConnection = rapidsConnection,
             tilgangskontroll = tilgangskontroll,
@@ -107,7 +107,7 @@ internal class OppgaveService(
         val oppgave =
             Oppgavehenter(
                 oppgaveRepository,
-                totrinnsvurderingRepository,
+                totrinnsvurderingDaoInterface,
                 saksbehandlerRepository,
                 tilgangskontroll,
             ).oppgave(id)
@@ -139,7 +139,7 @@ internal class OppgaveService(
                 opprettet = totrinnsvurderingDto.opprettet,
                 oppdatert = totrinnsvurderingDto.oppdatert,
             )
-        totrinnsvurderingRepository.oppdater(totrinnsvurderingFraDatabase)
+        totrinnsvurderingDaoInterface.oppdater(totrinnsvurderingFraDatabase)
     }
 
     internal fun håndter(

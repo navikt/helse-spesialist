@@ -2,7 +2,7 @@ package no.nav.helse.modell.totrinnsvurdering
 
 import no.nav.helse.db.HistorikkinnslagRepository
 import no.nav.helse.db.OppgaveRepository
-import no.nav.helse.db.TotrinnsvurderingRepository
+import no.nav.helse.db.TotrinnsvurderingDaoInterface
 import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
 import no.nav.helse.modell.periodehistorikk.NotatDto
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
@@ -11,20 +11,20 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import java.util.UUID
 
 class TotrinnsvurderingService(
-    private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
+    private val totrinnsvurderingDaoInterface: TotrinnsvurderingDaoInterface,
     private val oppgaveRepository: OppgaveRepository,
     private val historikkinnslagRepository: HistorikkinnslagRepository,
 ) : Totrinnsvurderinghåndterer {
-    fun finnEllerOpprettNy(vedtaksperiodeId: UUID): TotrinnsvurderingOld = totrinnsvurderingRepository.opprett(vedtaksperiodeId)
+    fun finnEllerOpprettNy(vedtaksperiodeId: UUID): TotrinnsvurderingOld = totrinnsvurderingDaoInterface.opprett(vedtaksperiodeId)
 
     override fun settBeslutter(
         oppgaveId: Long,
         saksbehandlerOid: UUID,
-    ): Unit = totrinnsvurderingRepository.settBeslutter(oppgaveId, saksbehandlerOid)
+    ): Unit = totrinnsvurderingDaoInterface.settBeslutter(oppgaveId, saksbehandlerOid)
 
     fun settAutomatiskRetur(vedtaksperiodeId: UUID) {
         oppgaveRepository.finnIdForAktivOppgave(vedtaksperiodeId)?.let {
-            totrinnsvurderingRepository.settErRetur(vedtaksperiodeId)
+            totrinnsvurderingDaoInterface.settErRetur(vedtaksperiodeId)
             val innslag = HistorikkinnslagDto.totrinnsvurderingAutomatiskRetur()
             historikkinnslagRepository.lagre(innslag, it)
         }
@@ -55,11 +55,11 @@ class TotrinnsvurderingService(
         saksbehandleroid: UUID?,
     ): Boolean = hentAktiv(oppgaveId)?.saksbehandler == saksbehandleroid
 
-    fun ferdigstill(vedtaksperiodeId: UUID): Unit = totrinnsvurderingRepository.ferdigstill(vedtaksperiodeId)
+    fun ferdigstill(vedtaksperiodeId: UUID): Unit = totrinnsvurderingDaoInterface.ferdigstill(vedtaksperiodeId)
 
-    fun hentAktiv(vedtaksperiodeId: UUID): TotrinnsvurderingOld? = totrinnsvurderingRepository.hentAktiv(vedtaksperiodeId)
+    fun hentAktiv(vedtaksperiodeId: UUID): TotrinnsvurderingOld? = totrinnsvurderingDaoInterface.hentAktiv(vedtaksperiodeId)
 
-    private fun hentAktiv(oppgaveId: Long): TotrinnsvurderingOld? = totrinnsvurderingRepository.hentAktiv(oppgaveId)
+    private fun hentAktiv(oppgaveId: Long): TotrinnsvurderingOld? = totrinnsvurderingDaoInterface.hentAktiv(oppgaveId)
 
     private fun SaksbehandlerFraApi.toDto(): SaksbehandlerDto =
         SaksbehandlerDto(

@@ -35,7 +35,7 @@ internal class TestMediator(
     private val oppgaveDao = OppgaveDao(dataSource)
     private val pgHistorikkinnslagRepository = PgHistorikkinnslagRepository(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
-    private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
+    private val totrinnsvurderingDao = TotrinnsvurderingDao.NonTransactional(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
@@ -57,7 +57,7 @@ internal class TestMediator(
             tildelingRepository = tildelingDao,
             reservasjonRepository = ReservasjonDao(dataSource),
             opptegnelseRepository = opptegnelseDao,
-            totrinnsvurderingRepository = totrinnsvurderingDao,
+            totrinnsvurderingDaoInterface = totrinnsvurderingDao,
             saksbehandlerRepository = saksbehandlerDao,
             rapidsConnection = testRapid,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
@@ -72,7 +72,7 @@ internal class TestMediator(
             tilgangsgrupper,
             stansAutomatiskBehandlingMediator,
             totrinnsvurderingService = TotrinnsvurderingService(
-                totrinnsvurderingRepository = totrinnsvurderingDao,
+                totrinnsvurderingDaoInterface = totrinnsvurderingDao,
                 oppgaveRepository = oppgaveDao,
                 historikkinnslagRepository = pgHistorikkinnslagRepository
             )

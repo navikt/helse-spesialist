@@ -33,7 +33,7 @@ internal class GodkjenningService(
     private val saksbehandlerRepository: SaksbehandlerRepository,
     private val totrinnsvurderingService: TotrinnsvurderingService =
         TotrinnsvurderingService(
-            TotrinnsvurderingDao(dataSource),
+            TotrinnsvurderingDao.NonTransactional(dataSource),
             oppgaveDao,
             pgHistorikkinnslagRepository,
         ),

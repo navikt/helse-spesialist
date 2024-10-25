@@ -6,6 +6,7 @@ import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.OppgaveRepository
+import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.db.TransactionalArbeidsforholdDao
 import no.nav.helse.db.TransactionalAvviksvurderingDao
 import no.nav.helse.db.TransactionalCommandContextDao
@@ -20,7 +21,6 @@ import no.nav.helse.db.TransactionalPåVentDao
 import no.nav.helse.db.TransactionalReservasjonDao
 import no.nav.helse.db.TransactionalRisikovurderingDao
 import no.nav.helse.db.TransactionalTildelingDao
-import no.nav.helse.db.TransactionalTotrinnsvurderingDao
 import no.nav.helse.db.TransactionalUtbetalingDao
 import no.nav.helse.db.TransactionalVedtakDao
 import no.nav.helse.db.TransactionalVergemålDao
@@ -205,7 +205,7 @@ internal class Kommandofabrikk(
             oppgaveRepository = TransactionalOppgaveDao(session),
             totrinnsvurderingService =
                 TotrinnsvurderingService(
-                    TransactionalTotrinnsvurderingDao(session),
+                    TotrinnsvurderingDao(session),
                     TransactionalOppgaveDao(session),
                     TransactionalPeriodehistorikkDao(session),
                 ),
@@ -309,7 +309,7 @@ internal class Kommandofabrikk(
             oppgaveService = transaksjonellOppgaveService(session),
             totrinnsvurderingService =
                 TotrinnsvurderingService(
-                    TransactionalTotrinnsvurderingDao(session),
+                    TotrinnsvurderingDao(session),
                     TransactionalOppgaveDao(session),
                     TransactionalPeriodehistorikkDao(session),
                 ),
@@ -331,7 +331,7 @@ internal class Kommandofabrikk(
             oppgaveRepository = TransactionalOppgaveDao(session),
             totrinnsvurderingService =
                 TotrinnsvurderingService(
-                    TransactionalTotrinnsvurderingDao(session),
+                    TotrinnsvurderingDao(session),
                     TransactionalOppgaveDao(session),
                     TransactionalPeriodehistorikkDao(session),
                 ),
@@ -396,7 +396,7 @@ internal class Kommandofabrikk(
             godkjenningMediator = GodkjenningMediator(TransactionalOpptegnelseDao(session)),
             totrinnsvurderingService =
                 TotrinnsvurderingService(
-                    TransactionalTotrinnsvurderingDao(session),
+                    TotrinnsvurderingDao(session),
                     TransactionalOppgaveDao(session),
                     TransactionalPeriodehistorikkDao(session),
                 ),

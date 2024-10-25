@@ -26,7 +26,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     protected val oppgaveDao = OppgaveDao(dataSource)
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val pgHistorikkinnslagRepository = PgHistorikkinnslagRepository(dataSource)
-    private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
+    private val totrinnsvurderingDao = TotrinnsvurderingDao.NonTransactional(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
 
     private val oppgaveService =
@@ -35,7 +35,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
             tildelingRepository = TildelingDao(dataSource),
             reservasjonRepository = reservasjonDao,
             opptegnelseRepository = OpptegnelseDao(dataSource),
-            totrinnsvurderingRepository = totrinnsvurderingDao,
+            totrinnsvurderingDaoInterface = totrinnsvurderingDao,
             saksbehandlerRepository = SaksbehandlerDao(dataSource),
             rapidsConnection = testRapid,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,

@@ -99,7 +99,7 @@ internal class SpesialistApp(
     private val notatApiDao = NotatApiDao(dataSource)
     private val notatDao = NotatDao(dataSource)
     private val totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource)
-    private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
+    private val totrinnsvurderingDao = TotrinnsvurderingDao.NonTransactional(dataSource)
     private val snapshotApiDao = SnapshotApiDao(dataSource)
     private val apiVarselRepository = ApiVarselRepository(dataSource)
     private val dokumentDao = DokumentDao.NonTransactional(dataSource)
@@ -125,7 +125,7 @@ internal class SpesialistApp(
         ) { subsumsjonsmelder }
     private val totrinnsvurderingService =
         TotrinnsvurderingService(
-            totrinnsvurderingRepository = totrinnsvurderingDao,
+            totrinnsvurderingDaoInterface = totrinnsvurderingDao,
             oppgaveRepository = oppgaveDao,
             historikkinnslagRepository = pgHistorikkinnslagRepository,
         )
@@ -226,7 +226,7 @@ internal class SpesialistApp(
                 tildelingRepository = tildelingDao,
                 reservasjonRepository = reservasjonDao,
                 opptegnelseRepository = opptegnelseDao,
-                totrinnsvurderingRepository = totrinnsvurderingDao,
+                totrinnsvurderingDaoInterface = totrinnsvurderingDao,
                 saksbehandlerRepository = saksbehandlerDao,
                 rapidsConnection = rapidsConnection,
                 tilgangskontroll = tilgangskontrollørForReservasjon,
