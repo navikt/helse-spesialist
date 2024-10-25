@@ -11,6 +11,7 @@ import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
@@ -82,7 +83,11 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             tilgangsgrupper,
         )
     private val mediator =
-        SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, oppgaveService, tilgangsgrupper, stansAutomatiskBehandlingMediator)
+        SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, oppgaveService, tilgangsgrupper, stansAutomatiskBehandlingMediator, TotrinnsvurderingService(
+            totrinnsvurderingRepository = totrinnsvurderingDao,
+            oppgaveRepository = oppgaveDao,
+            historikkinnslagRepository = pgHistorikkinnslagRepository
+        ))
 
     private val AKTØR_ID = lagAktørId()
     private val FØDSELSNUMMER = lagFødselsnummer()

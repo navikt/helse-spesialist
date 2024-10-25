@@ -2,6 +2,7 @@ package no.nav.helse.mediator
 
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Tilgangsgrupper
+import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.AnnulleringDao
 import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.HistorikkinnslagRepository
@@ -22,6 +23,7 @@ import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
 import no.nav.helse.modell.OppgaveTildeltNoenAndre
+import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
 import no.nav.helse.modell.periodehistorikk.NotatDto
@@ -50,6 +52,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.Refusjonselement
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -60,6 +63,7 @@ import no.nav.helse.spesialist.api.feilhåndtering.IkkeTilgang
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagshandling
+import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation.VedtakResultat
 import no.nav.helse.spesialist.api.graphql.schema.AnnulleringData
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.Avslag
@@ -97,6 +101,7 @@ internal class SaksbehandlerMediator(
     private val oppgaveService: OppgaveService,
     private val tilgangsgrupper: Tilgangsgrupper,
     private val stansAutomatiskBehandlingMediator: StansAutomatiskBehandlingMediator,
+    private val totrinnsvurderingService: TotrinnsvurderingService,
 ) : Saksbehandlerhåndterer {
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val generasjonRepository = ApiGenerasjonRepository(dataSource)
@@ -110,6 +115,7 @@ internal class SaksbehandlerMediator(
     private val historikkinnslagRepository: HistorikkinnslagRepository = PgHistorikkinnslagRepository(dataSource)
     private val avslagDao = AvslagDao(dataSource)
     private val annulleringDao = AnnulleringDao(dataSource)
+    private val env = Environment()
 
     override fun håndter(
         handlingFraApi: HandlingFraApi,
@@ -140,6 +146,49 @@ internal class SaksbehandlerMediator(
             }
             sikkerlogg.info("Handling ${modellhandling.loggnavn()} utført")
         }
+    }
+
+    override fun vedtak(
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+        oppgavereferanse: Long,
+        godkjent: Boolean,
+        avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag?,
+    ): VedtakResultat {
+        val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
+        val erÅpenOppgave = oppgaveService.venterPåSaksbehandler(oppgavereferanse)
+        val spleisBehandlingId = oppgaveService.spleisBehandlingId(oppgavereferanse)
+        val fødselsnummer = oppgaveApiDao.finnFødselsnummer(oppgavereferanse)
+        if (!erÅpenOppgave) return VedtakResultat.Feil.IkkeÅpenOppgave()
+
+        if (totrinnsvurderingService.erBeslutterOppgave(oppgavereferanse)) {
+            if (!saksbehandler.harTilgangTil(listOf(Egenskap.BESLUTTER)) && !env.erDev) {
+                return VedtakResultat.Feil.BeslutterFeil.TrengerBeslutterRolle()
+            }
+            if (totrinnsvurderingService.erEgenOppgave(oppgavereferanse, saksbehandler.oid()) && !env.erDev) {
+                return VedtakResultat.Feil.BeslutterFeil.KanIkkeBeslutteEgenOppgave()
+            }
+            totrinnsvurderingService.settBeslutter(oppgavereferanse, saksbehandler.oid())
+        }
+
+        if (godkjent) {
+            val perioderTilBehandling = generasjonRepository.perioderTilBehandling(oppgavereferanse)
+            if (perioderTilBehandling.harAktiveVarsler()) return VedtakResultat.Feil.HarAktiveVarsler(oppgavereferanse)
+
+            perioderTilBehandling.godkjennVarsler(fødselsnummer, spleisBehandlingId, saksbehandler.ident(), this::vurderVarsel)
+        } else {
+            val periodeTilGodkjenning = generasjonRepository.periodeTilGodkjenning(oppgavereferanse)
+            periodeTilGodkjenning.avvisVarsler(fødselsnummer, spleisBehandlingId, saksbehandler.ident(), this::vurderVarsel)
+        }
+
+        påVentDao.slettPåVent(oppgavereferanse)
+        avslag?.let {
+            if (it.handling == Avslagshandling.INVALIDER) {
+                avslagDao.invaliderAvslag(oppgavereferanse)
+            } else {
+                avslagDao.lagreAvslag(oppgavereferanse, it.data!!, saksbehandler.oid())
+            }
+        }
+        return VedtakResultat.Ok(spleisBehandlingId)
     }
 
     override fun påVent(

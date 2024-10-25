@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api
 
+import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation
 import no.nav.helse.spesialist.api.graphql.schema.Annullering
 import no.nav.helse.spesialist.api.graphql.schema.Avslag
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
@@ -10,6 +11,13 @@ import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import java.util.UUID
 
 interface Saksbehandlerhåndterer {
+    fun vedtak(
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+        oppgavereferanse: Long,
+        godkjent: Boolean,
+        avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag?,
+    ): VedtakMutation.VedtakResultat
+
     fun håndter(
         handlingFraApi: HandlingFraApi,
         saksbehandlerFraApi: SaksbehandlerFraApi,

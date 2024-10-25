@@ -174,8 +174,6 @@ internal class SchemaBuilder(
                     ),
                     TopLevelObject(
                         VedtakMutation(
-                            oppgavehåndterer = oppgavehåndterer,
-                            totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
                             saksbehandlerhåndterer = saksbehandlerhåndterer,
                             godkjenninghåndterer = godkjenninghåndterer,
                         ),

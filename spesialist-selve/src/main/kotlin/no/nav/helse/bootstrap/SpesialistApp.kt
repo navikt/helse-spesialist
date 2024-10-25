@@ -249,6 +249,7 @@ internal class SpesialistApp(
                 oppgaveService = oppgaveService,
                 tilgangsgrupper = tilgangsgrupper,
                 stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
+                totrinnsvurderingService = totrinnsvurderingService,
             )
         dokumentMediator = DokumentMediator(dokumentDao, rapidsConnection)
         godkjenningService =

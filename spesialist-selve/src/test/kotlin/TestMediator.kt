@@ -19,6 +19,7 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
@@ -70,6 +71,11 @@ internal class TestMediator(
             oppgaveService,
             tilgangsgrupper,
             stansAutomatiskBehandlingMediator,
+            totrinnsvurderingService = TotrinnsvurderingService(
+                totrinnsvurderingRepository = totrinnsvurderingDao,
+                oppgaveRepository = oppgaveDao,
+                historikkinnslagRepository = pgHistorikkinnslagRepository
+            )
         )
     private val stikkprøver =
         object : Stikkprøver {
