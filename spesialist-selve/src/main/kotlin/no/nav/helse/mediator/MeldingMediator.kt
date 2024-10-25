@@ -432,7 +432,7 @@ internal class MeldingMediator(
                 sessionOf(dataSource, returnGeneratedKey = true).use { session ->
                     session.transaction { transactionalSession ->
                         kommandostarter =
-                            kommandofabrikk.lagTransaksjonellKommandostarter(
+                            kommandofabrikk.lagKommandostarter(
                                 setOf(utgåendeMeldingerMediator, commandContextTilstandMediator),
                                 commandContext(TransactionalCommandContextDao(transactionalSession)),
                                 transactionalSession,

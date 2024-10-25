@@ -30,7 +30,6 @@ import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.Stikkprøver
@@ -79,7 +78,6 @@ internal class Kommandofabrikk(
     private val dataSource: DataSource,
     private val meldingDao: MeldingDao = MeldingDao(dataSource),
     private val oppgaveDao: OppgaveDao = OppgaveDao(dataSource),
-    private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     oppgaveService: () -> OppgaveService,
     private val godkjenningMediator: GodkjenningMediator,
@@ -432,26 +430,6 @@ internal class Kommandofabrikk(
     }
 
     internal fun lagKommandostarter(
-        commandContext: CommandContext,
-        commandContextObservers: Set<CommandContextObserver>,
-    ): Kommandostarter =
-        { kommandooppretter ->
-            val melding = this
-            this@Kommandofabrikk.kommandooppretter()?.let { command ->
-                val session = sessionOf(dataSource)
-                iverksett(
-                    command = command,
-                    meldingId = melding.id,
-                    commandContext = commandContext,
-                    commandContextObservers = commandContextObservers,
-                    commandContextDao = commandContextDao,
-                    metrikkDao = MetrikkDao(session),
-                )
-                session.close()
-            }
-        }
-
-    internal fun lagTransaksjonellKommandostarter(
         commandContextObservers: Set<CommandContextObserver>,
         commandContext: CommandContext,
         transactionalSession: TransactionalSession,
