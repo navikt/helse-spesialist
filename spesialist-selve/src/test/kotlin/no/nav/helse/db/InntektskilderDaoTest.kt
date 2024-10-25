@@ -1,7 +1,11 @@
 package no.nav.helse.db
 
 import DatabaseIntegrationTest
+import com.fasterxml.jackson.module.kotlin.readValue
+import kotliquery.Session
 import kotliquery.sessionOf
+import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.HelseDao.Companion.single
 import no.nav.helse.januar
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
@@ -20,9 +24,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-class TxInntektskilderDaoTest: DatabaseIntegrationTest() {
+internal class InntektskilderDaoTest : DatabaseIntegrationTest() {
     private val session = sessionOf(dataSource, returnGeneratedKey = true)
-    private val dao = TransactionalInntektskilderDao(session)
+    private val dao = InntektskilderDao(session)
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
 
     @Test
@@ -75,9 +79,8 @@ class TxInntektskilderDaoTest: DatabaseIntegrationTest() {
                 skjæringstidspunkt = 1.januar,
                 opprettet = LocalDateTime.now(),
                 avviksprosent = 0.0,
-                sammenligningsgrunnlag = SammenligningsgrunnlagDto(600_000.0,
-                    listOf(InnrapportertInntektDto(organisasjonsnummer, emptyList())
-                    )
+                sammenligningsgrunnlag = SammenligningsgrunnlagDto(
+                    600_000.0, listOf(InnrapportertInntektDto(organisasjonsnummer, emptyList()))
                 ),
                 beregningsgrunnlag = BeregningsgrunnlagDto(600_000.0, emptyList())
             )
@@ -102,8 +105,10 @@ class TxInntektskilderDaoTest: DatabaseIntegrationTest() {
                 skjæringstidspunkt = 1.januar,
                 opprettet = LocalDateTime.now(),
                 avviksprosent = 0.0,
-                sammenligningsgrunnlag = SammenligningsgrunnlagDto(600_000.0,
-                    listOf(InnrapportertInntektDto(organisasjonsnummer, emptyList())
+                sammenligningsgrunnlag = SammenligningsgrunnlagDto(
+                    600_000.0,
+                    listOf(
+                        InnrapportertInntektDto(organisasjonsnummer, emptyList())
                     )
                 ),
                 beregningsgrunnlag = BeregningsgrunnlagDto(600_000.0, emptyList())
@@ -144,19 +149,40 @@ class TxInntektskilderDaoTest: DatabaseIntegrationTest() {
                 )
             )
         )
-
-        val funnet = dao.finnInntektskilder(lagFødselsnummer(), listOf(organisasjonsnummer1, organisasjonsnummer2))
-        assertEquals(2, funnet.size)
-        val første = funnet[0]
-        val andre = funnet[1]
-        check(første is KomplettInntektskildeDto && andre is KomplettInntektskildeDto)
-
-        assertEquals(organisasjonsnummer1, første.organisasjonsnummer)
-        assertEquals(navn1, første.navn)
-        assertEquals(bransjer1, første.bransjer)
-
-        assertEquals(organisasjonsnummer2, andre.organisasjonsnummer)
-        assertEquals(navn2, andre.navn)
-        assertEquals(bransjer2, andre.bransjer)
+        session.finnInntektskilde(organisasjonsnummer1).let { første ->
+            checkNotNull(første)
+            assertEquals(organisasjonsnummer1, første.organisasjonsnummer)
+            assertEquals(navn1, første.navn)
+            assertEquals(bransjer1, første.bransjer)
+        }
+        session.finnInntektskilde(organisasjonsnummer2).let { andre ->
+            checkNotNull(andre)
+            assertEquals(organisasjonsnummer2, andre.organisasjonsnummer)
+            assertEquals(navn2, andre.navn)
+            assertEquals(bransjer2, andre.bransjer)
+        }
     }
+
+    private fun Session.finnInntektskilde(orgnummer: String) = asSQL(
+        """
+        select orgnummer, navn, bransjer
+        from arbeidsgiver
+        join arbeidsgiver_bransjer ab on arbeidsgiver.bransjer_ref = ab.id
+        join arbeidsgiver_navn an on arbeidsgiver.navn_ref = an.id
+        where orgnummer = :orgnummer
+        """.trimIndent(),
+        "orgnummer" to orgnummer.toLong()
+    ).single(this) { row ->
+        ArbeidsgiverDto(
+            organisasjonsnummer = row.string("orgnummer"),
+            navn = row.string("navn"),
+            bransjer = objectMapper.readValue(row.string("bransjer")),
+        )
+    }
+
+    private data class ArbeidsgiverDto(
+        val organisasjonsnummer: String,
+        val navn: String,
+        val bransjer: List<String>,
+    )
 }

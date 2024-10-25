@@ -12,6 +12,7 @@ import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.db.AnnulleringDao
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.EgenskapForDatabase
+import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgHistorikkinnslagRepository
@@ -20,7 +21,6 @@ import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
-import no.nav.helse.db.TransactionalInntektskilderDao
 import no.nav.helse.januar
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.CommandContextDao
@@ -167,7 +167,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val annulleringDao = AnnulleringDao(dataSource)
     private val personService = PersonService(dataSource)
     private val session = sessionOf(dataSource, returnGeneratedKey = true)
-    private val inntektskilderDao = TransactionalInntektskilderDao(session)
+    private val inntektskilderDao = InntektskilderDao(session)
 
     @AfterEach
     fun lukkSession() =

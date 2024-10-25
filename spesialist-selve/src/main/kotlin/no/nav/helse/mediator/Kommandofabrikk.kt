@@ -4,12 +4,12 @@ import kotliquery.TransactionalSession
 import kotliquery.sessionOf
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.CommandContextRepository
+import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.TransactionalArbeidsforholdDao
 import no.nav.helse.db.TransactionalAvviksvurderingDao
 import no.nav.helse.db.TransactionalCommandContextDao
 import no.nav.helse.db.TransactionalEgenAnsattDao
-import no.nav.helse.db.TransactionalInntektskilderDao
 import no.nav.helse.db.TransactionalMeldingDao
 import no.nav.helse.db.TransactionalOppgaveDao
 import no.nav.helse.db.TransactionalOpptegnelseDao
@@ -230,7 +230,7 @@ internal class Kommandofabrikk(
             aktørId = hendelse.aktørId,
             organisasjonsnummer = hendelse.organisasjonsnummer,
             personRepository = TransactionalPersonDao(transactionalSession),
-            inntektskilderRepository = TransactionalInntektskilderDao(transactionalSession),
+            inntektskilderRepository = InntektskilderDao(transactionalSession),
         )
 
     internal fun adressebeskyttelseEndret(
@@ -380,7 +380,7 @@ internal class Kommandofabrikk(
             vedtakRepository = TransactionalVedtakDao(session),
             commandContextRepository = TransactionalCommandContextDao(session),
             personRepository = TransactionalPersonDao(session),
-            inntektskilderRepository = TransactionalInntektskilderDao(session),
+            inntektskilderRepository = InntektskilderDao(session),
             arbeidsforholdRepository = TransactionalArbeidsforholdDao(session),
             egenAnsattRepository = TransactionalEgenAnsattDao(session),
             utbetalingRepository = TransactionalUtbetalingDao(session),
