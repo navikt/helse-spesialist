@@ -99,18 +99,11 @@ internal class Saksbehandlerløsning private constructor(
         val epostadresse: String,
     )
 
-    override fun skalKjøresTransaksjonelt() = true
-
-    override fun transaksjonellBehandle(
+    override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
         transactionalSession: TransactionalSession,
     ) = kommandostarter { løsGodkjenningsbehov(this@Saksbehandlerløsning, person) }
-
-    override fun behandle(
-        person: Person,
-        kommandostarter: Kommandostarter,
-    ) = throw UnsupportedOperationException()
 
     override fun fødselsnummer() = fødselsnummer
 

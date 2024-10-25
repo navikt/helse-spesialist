@@ -44,18 +44,11 @@ internal class AvsluttetMedVedtakMessage(
 
     override fun vedtaksperiodeId(): UUID = vedtaksperiodeId
 
-    override fun skalKjøresTransaksjonelt() = true
-
-    override fun transaksjonellBehandle(
+    override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
         transactionalSession: TransactionalSession,
     ) = person.fattVedtak(avsluttetMedVedtak)
-
-    override fun behandle(
-        person: Person,
-        kommandostarter: Kommandostarter,
-    ) = throw UnsupportedOperationException()
 
     override val id: UUID = packet["@id"].asUUID()
 

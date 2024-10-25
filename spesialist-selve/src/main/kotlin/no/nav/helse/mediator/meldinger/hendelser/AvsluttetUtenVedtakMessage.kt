@@ -49,16 +49,9 @@ internal class AvsluttetUtenVedtakMessage private constructor(
 
     override fun toJson(): String = json
 
-    override fun skalKjøresTransaksjonelt() = true
-
-    override fun transaksjonellBehandle(
+    override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
         transactionalSession: TransactionalSession,
     ) = person.avsluttetUtenVedtak(avsluttetUtenVedtak)
-
-    override fun behandle(
-        person: Person,
-        kommandostarter: Kommandostarter,
-    ) = throw UnsupportedOperationException()
 }

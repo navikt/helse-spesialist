@@ -66,22 +66,13 @@ internal class UtbetalingEndret private constructor(
         json = jsonNode.toString(),
     )
 
-    override fun skalKjøresTransaksjonelt(): Boolean = true
-
-    override fun transaksjonellBehandle(
+    override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
         transactionalSession: TransactionalSession,
     ) {
         if (gjeldendeStatus == Utbetalingsstatus.FORKASTET) person.utbetalingForkastet(utbetalingId)
         this.kommandostarter { utbetalingEndret(this@UtbetalingEndret, transactionalSession) }
-    }
-
-    override fun behandle(
-        person: Person,
-        kommandostarter: Kommandostarter,
-    ) {
-        throw UnsupportedOperationException()
     }
 
     override fun fødselsnummer(): String = fødselsnummer

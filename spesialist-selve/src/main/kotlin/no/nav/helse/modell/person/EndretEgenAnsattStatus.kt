@@ -37,21 +37,12 @@ internal class EndretEgenAnsattStatus private constructor(
         json = jsonNode.toString(),
     )
 
-    override fun skalKjøresTransaksjonelt() = true
-
-    override fun transaksjonellBehandle(
+    override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
         transactionalSession: TransactionalSession,
     ) {
         kommandostarter { endretEgenAnsattStatus(this@EndretEgenAnsattStatus, transactionalSession) }
-    }
-
-    override fun behandle(
-        person: Person,
-        kommandostarter: Kommandostarter,
-    ) {
-        throw UnsupportedOperationException()
     }
 
     override fun fødselsnummer(): String = fødselsnummer

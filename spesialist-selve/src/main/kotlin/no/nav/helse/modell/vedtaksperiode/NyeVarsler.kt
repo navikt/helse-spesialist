@@ -34,18 +34,11 @@ internal class NyeVarsler private constructor(
 
     override fun toJson(): String = json
 
-    override fun skalKjøresTransaksjonelt() = true
-
-    override fun transaksjonellBehandle(
+    override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
         transactionalSession: TransactionalSession,
     ) = person.nyeVarsler(varsler)
-
-    override fun behandle(
-        person: Person,
-        kommandostarter: Kommandostarter,
-    ) = throw UnsupportedOperationException()
 
     companion object {
         fun JsonNode.varsler(): List<Varsel> =

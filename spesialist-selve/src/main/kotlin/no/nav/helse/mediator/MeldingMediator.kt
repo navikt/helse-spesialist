@@ -429,25 +429,16 @@ internal class MeldingMediator(
                 logg.info("Personen finnes i databasen, behandler melding $meldingnavn")
                 sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")
                 var kommandostarter: Kommandostarter
-                if (melding.skalKjøresTransaksjonelt()) {
-                    sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-                        session.transaction { transactionalSession ->
-                            kommandostarter =
-                                kommandofabrikk.lagTransaksjonellKommandostarter(
-                                    setOf(utgåendeMeldingerMediator, commandContextTilstandMediator),
-                                    commandContext(TransactionalCommandContextDao(transactionalSession)),
-                                    transactionalSession,
-                                )
-                            melding.transaksjonellBehandle(this, kommandostarter, transactionalSession)
-                        }
+                sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+                    session.transaction { transactionalSession ->
+                        kommandostarter =
+                            kommandofabrikk.lagTransaksjonellKommandostarter(
+                                setOf(utgåendeMeldingerMediator, commandContextTilstandMediator),
+                                commandContext(TransactionalCommandContextDao(transactionalSession)),
+                                transactionalSession,
+                            )
+                        melding.behandle(this, kommandostarter, transactionalSession)
                     }
-                } else {
-                    kommandostarter =
-                        kommandofabrikk.lagKommandostarter(
-                            commandContext(commandContextDao),
-                            setOf(utgåendeMeldingerMediator, commandContextTilstandMediator),
-                        )
-                    melding.behandle(this, kommandostarter)
                 }
             }
             if (melding is VedtakFattet) melding.doFinally(vedtakDao) // Midlertidig frem til spesialsak ikke er en ting lenger

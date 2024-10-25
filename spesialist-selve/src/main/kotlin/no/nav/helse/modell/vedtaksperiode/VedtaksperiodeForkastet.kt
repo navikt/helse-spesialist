@@ -41,22 +41,13 @@ internal class VedtaksperiodeForkastet private constructor(
 
     override fun vedtaksperiodeId() = vedtaksperiodeId
 
-    override fun skalKjøresTransaksjonelt(): Boolean = true
-
-    override fun transaksjonellBehandle(
+    override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
         transactionalSession: TransactionalSession,
     ) {
         person.vedtaksperiodeForkastet(vedtaksperiodeId)
         kommandostarter { vedtaksperiodeForkastet(this@VedtaksperiodeForkastet, transactionalSession) }
-    }
-
-    override fun behandle(
-        person: Person,
-        kommandostarter: Kommandostarter,
-    ) {
-        throw UnsupportedOperationException()
     }
 
     override fun toJson() = json

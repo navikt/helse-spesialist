@@ -46,9 +46,7 @@ internal class TilbakedateringBehandlet private constructor(
         json = jsonNode.toString(),
     )
 
-    override fun skalKjøresTransaksjonelt(): Boolean = true
-
-    override fun transaksjonellBehandle(
+    override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
         transactionalSession: TransactionalSession,
@@ -58,13 +56,6 @@ internal class TilbakedateringBehandlet private constructor(
             val oppgaveDataForAutomatisering = finnOppgavedata(fødselsnummer, TransactionalOppgaveDao(transactionalSession)) ?: return@kommandostarter null
             tilbakedateringGodkjent(this@TilbakedateringBehandlet, person, oppgaveDataForAutomatisering, transactionalSession)
         }
-    }
-
-    override fun behandle(
-        person: Person,
-        kommandostarter: Kommandostarter,
-    ) {
-        throw UnsupportedOperationException()
     }
 
     override fun fødselsnummer() = fødselsnummer

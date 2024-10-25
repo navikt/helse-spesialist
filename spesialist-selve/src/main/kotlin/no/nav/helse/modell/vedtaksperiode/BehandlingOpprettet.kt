@@ -52,21 +52,12 @@ internal class BehandlingOpprettet private constructor(
         json = jsonNode.toString(),
     )
 
-    override fun skalKjøresTransaksjonelt() = true
-
-    override fun transaksjonellBehandle(
+    override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
         transactionalSession: TransactionalSession,
     ) {
         person.nySpleisBehandling(SpleisBehandling(organisasjonsnummer, vedtaksperiodeId, spleisBehandlingId, fom, tom))
-    }
-
-    override fun behandle(
-        person: Person,
-        kommandostarter: Kommandostarter,
-    ) {
-        throw UnsupportedOperationException()
     }
 
     override fun fødselsnummer(): String = fødselsnummer

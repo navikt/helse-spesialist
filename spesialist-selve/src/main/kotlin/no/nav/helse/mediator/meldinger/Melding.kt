@@ -12,18 +12,11 @@ internal interface Melding {
 }
 
 internal interface Personmelding : Melding {
-    fun skalKjøresTransaksjonelt(): Boolean = false
-
     fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
-    )
-
-    fun transaksjonellBehandle(
-        person: Person,
-        kommandostarter: Kommandostarter,
         transactionalSession: TransactionalSession,
-    ): Unit = throw UnsupportedOperationException()
+    )
 
     fun fødselsnummer(): String
 }

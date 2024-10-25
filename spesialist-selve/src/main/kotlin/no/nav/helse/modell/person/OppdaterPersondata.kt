@@ -37,15 +37,6 @@ internal class OppdaterPersondata private constructor(
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
-    ) {
-        throw UnsupportedOperationException()
-    }
-
-    override fun skalKjøresTransaksjonelt() = true
-
-    override fun transaksjonellBehandle(
-        person: Person,
-        kommandostarter: Kommandostarter,
         transactionalSession: TransactionalSession,
     ) {
         kommandostarter { oppdaterPersondata(this@OppdaterPersondata, transactionalSession) }

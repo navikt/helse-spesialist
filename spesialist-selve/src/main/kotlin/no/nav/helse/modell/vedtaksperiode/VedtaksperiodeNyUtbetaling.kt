@@ -40,14 +40,7 @@ internal class VedtaksperiodeNyUtbetaling private constructor(
 
     override fun vedtaksperiodeId(): UUID = vedtaksperiodeId
 
-    override fun skalKjøresTransaksjonelt(): Boolean = true
-
     override fun behandle(
-        person: Person,
-        kommandostarter: Kommandostarter,
-    ): Unit = throw UnsupportedOperationException()
-
-    override fun transaksjonellBehandle(
         person: Person,
         kommandostarter: Kommandostarter,
         transactionalSession: TransactionalSession,

@@ -44,16 +44,9 @@ internal class VedtakFattet private constructor(
         if (vedtakDao.erSpesialsak(vedtaksperiodeId)) vedtakDao.spesialsakFerdigbehandlet(vedtaksperiodeId)
     }
 
-    override fun skalKjøresTransaksjonelt() = true
-
-    override fun transaksjonellBehandle(
+    override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
         transactionalSession: TransactionalSession,
     ) = person.vedtakFattet(vedtaksperiodeId = vedtaksperiodeId, spleisBehandlingId = spleisBehandlingId)
-
-    override fun behandle(
-        person: Person,
-        kommandostarter: Kommandostarter,
-    ) = throw UnsupportedOperationException()
 }

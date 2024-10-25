@@ -47,9 +47,7 @@ internal class VedtaksperiodeReberegnet private constructor(
 
     override fun vedtaksperiodeId(): UUID = vedtaksperiodeId
 
-    override fun skalKjøresTransaksjonelt(): Boolean = true
-
-    override fun transaksjonellBehandle(
+    override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
         transactionalSession: TransactionalSession,
@@ -58,11 +56,6 @@ internal class VedtaksperiodeReberegnet private constructor(
         checkNotNull(vedtaksperiode)
         kommandostarter { vedtaksperiodeReberegnet(this@VedtaksperiodeReberegnet, vedtaksperiode, transactionalSession) }
     }
-
-    override fun behandle(
-        person: Person,
-        kommandostarter: Kommandostarter,
-    ): Unit = throw UnsupportedOperationException()
 }
 
 internal class VedtaksperiodeReberegnetCommand(

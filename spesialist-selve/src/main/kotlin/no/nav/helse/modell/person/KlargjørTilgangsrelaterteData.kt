@@ -36,20 +36,13 @@ internal class KlargjørTilgangsrelaterteData private constructor(
         json = jsonNode.toString(),
     )
 
-    override fun skalKjøresTransaksjonelt(): Boolean = true
-
-    override fun transaksjonellBehandle(
+    override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
         transactionalSession: TransactionalSession,
     ) {
         kommandostarter { klargjørTilgangsrelaterteData(this@KlargjørTilgangsrelaterteData, transactionalSession) }
     }
-
-    override fun behandle(
-        person: Person,
-        kommandostarter: Kommandostarter,
-    ) = throw UnsupportedOperationException()
 
     override fun fødselsnummer(): String = fødselsnummer
 

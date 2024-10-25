@@ -2,6 +2,7 @@ package no.nav.helse.mediator
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import kotliquery.TransactionalSession
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.Person
@@ -85,7 +86,12 @@ internal class UtgåendeMeldingerMediatorTest {
             return vedtaksperiodeId
         }
 
-        override fun behandle(person: Person, kommandostarter: Kommandostarter) {}
+        override fun behandle(
+            person: Person,
+            kommandostarter: Kommandostarter,
+            transactionalSession: TransactionalSession
+        ) {
+        }
 
         @Language("JSON")
         override fun toJson(): String {

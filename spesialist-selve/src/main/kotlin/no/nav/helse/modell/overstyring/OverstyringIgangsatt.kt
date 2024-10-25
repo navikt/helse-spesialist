@@ -31,14 +31,7 @@ internal class OverstyringIgangsatt private constructor(
         json = jsonNode.toString(),
     )
 
-    override fun skalKjøresTransaksjonelt(): Boolean = true
-
     override fun behandle(
-        person: Person,
-        kommandostarter: Kommandostarter,
-    ): Unit = throw UnsupportedOperationException()
-
-    override fun transaksjonellBehandle(
         person: Person,
         kommandostarter: Kommandostarter,
         transactionalSession: TransactionalSession,

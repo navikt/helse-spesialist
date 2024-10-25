@@ -41,15 +41,6 @@ internal class AdressebeskyttelseEndret private constructor(
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
-    ) {
-        throw UnsupportedOperationException()
-    }
-
-    override fun skalKjøresTransaksjonelt(): Boolean = true
-
-    override fun transaksjonellBehandle(
-        person: Person,
-        kommandostarter: Kommandostarter,
         transactionalSession: TransactionalSession,
     ) {
         kommandostarter {

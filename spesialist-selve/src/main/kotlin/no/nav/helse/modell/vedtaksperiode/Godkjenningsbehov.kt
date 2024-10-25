@@ -96,21 +96,12 @@ internal class Godkjenningsbehov private constructor(
 
     override fun toJson() = json
 
-    override fun skalKjøresTransaksjonelt(): Boolean = true
-
-    override fun transaksjonellBehandle(
+    override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
         transactionalSession: TransactionalSession,
     ) {
         kommandostarter { godkjenningsbehov(data(), person, transactionalSession) }
-    }
-
-    override fun behandle(
-        person: Person,
-        kommandostarter: Kommandostarter,
-    ) {
-        throw UnsupportedOperationException()
     }
 
     internal fun data(): GodkjenningsbehovData =
