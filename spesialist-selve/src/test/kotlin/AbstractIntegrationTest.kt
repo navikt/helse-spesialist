@@ -34,7 +34,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
             oppgaveRepository = OppgaveDao(dataSource),
             tildelingRepository = TildelingDao(dataSource),
             reservasjonRepository = reservasjonDao,
-            opptegnelseRepository = OpptegnelseDao(dataSource),
+            opptegnelseRepository = OpptegnelseDao.NonTransactional(dataSource),
             totrinnsvurderingDaoInterface = totrinnsvurderingDao,
             saksbehandlerRepository = SaksbehandlerDao(dataSource),
             rapidsConnection = testRapid,

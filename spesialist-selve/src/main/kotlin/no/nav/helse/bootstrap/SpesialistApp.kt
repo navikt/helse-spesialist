@@ -94,7 +94,7 @@ internal class SpesialistApp(
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     private val egenAnsattApiDao = EgenAnsattApiDao(dataSource)
-    private val opptegnelseDao = OpptegnelseDao(dataSource)
+    private val opptegnelseDao = OpptegnelseDao.NonTransactional(dataSource)
     private val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
     private val notatApiDao = NotatApiDao(dataSource)
     private val notatDao = NotatDao(dataSource)

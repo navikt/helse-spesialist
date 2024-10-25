@@ -14,7 +14,6 @@ import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.NotatDao
-import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgHistorikkinnslagRepository
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
@@ -153,7 +152,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val automatiseringDao = AutomatiseringDao(dataSource)
     internal val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
     internal val egenAnsattDao = EgenAnsattDao(dataSource)
-    internal val opptegnelseDao = OpptegnelseDao(dataSource)
     internal val abonnementDao = AbonnementDao(dataSource)
     internal val utbetalingDao = UtbetalingDao(dataSource)
     internal val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)

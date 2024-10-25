@@ -107,7 +107,7 @@ internal class SaksbehandlerMediator(
     private val generasjonRepository = ApiGenerasjonRepository(dataSource)
     private val varselRepository = ApiVarselRepository(dataSource)
     private val oppgaveApiDao = OppgaveApiDao(dataSource)
-    private val opptegnelseDao = OpptegnelseDao(dataSource)
+    private val opptegnelseDao = OpptegnelseDao.NonTransactional(dataSource)
     private val abonnementDao = AbonnementDao(dataSource)
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)

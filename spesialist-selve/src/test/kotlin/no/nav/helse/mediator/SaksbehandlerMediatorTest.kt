@@ -6,7 +6,9 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.SpeilTilgangsgrupper
 import no.nav.helse.TestRapidHelpers.hendelser
+import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.SaksbehandlerDao
+import no.nav.helse.db.TildelingDao
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -59,9 +61,8 @@ import kotlin.random.Random
 internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private val tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
     private val testRapid = TestRapid()
-    private val tildelingDbDao =
-        no.nav.helse.db
-            .TildelingDao(dataSource)
+    private val tildelingDbDao = TildelingDao(dataSource)
+    private val opptegnelseDao = OpptegnelseDao.NonTransactional(dataSource)
     private val saksbehandlerRepository = SaksbehandlerDao(dataSource)
     private val stansAutomatiskBehandlingMediator =
         StansAutomatiskBehandlingMediator(

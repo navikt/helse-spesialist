@@ -2,16 +2,26 @@ package no.nav.helse.modell
 
 import DatabaseIntegrationTest
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import java.util.UUID
+import kotliquery.sessionOf
+import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType.UTBETALING_ANNULLERING_OK
 import no.nav.helse.spesialist.api.abonnement.UtbetalingPayload
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelsetype
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class OpptegnelseDaoTest : DatabaseIntegrationTest() {
+    private val session = sessionOf(dataSource)
+    private val opptegnelseDao = OpptegnelseDao(session)
+
+    @AfterEach
+    fun tearDown() {
+        session.close()
+    }
 
     private companion object {
         private val UTBETALING_PAYLOAD = UtbetalingPayload(UUID.randomUUID())
