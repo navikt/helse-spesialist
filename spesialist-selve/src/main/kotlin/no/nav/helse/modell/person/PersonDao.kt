@@ -1,15 +1,16 @@
 package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
-import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.HelseDao.Companion.single
+import no.nav.helse.HelseDao.Companion.updateAndReturnGeneratedKey
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.TransactionalPersonDao
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.typer.Kjønn
-import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.sql.DataSource
@@ -31,20 +32,18 @@ internal class PersonDao(
 
     override fun finnPersonMedFødselsnummer(fødselsnummer: String): Long? =
         sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = "SELECT id FROM person WHERE fodselsnummer=?;"
-            session.run(
-                queryOf(query, fødselsnummer.toLong())
-                    .map { row -> row.long("id") }
-                    .asSingle,
-            )
+            asSQL(
+                "SELECT id FROM person WHERE fodselsnummer = :foedselsnummer",
+                "foedselsnummer" to fødselsnummer.toLong(),
+            ).single(session) { row -> row.long("id") }
         }
 
     internal fun finnAktørId(fødselsnummer: String): String? =
         sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = "SELECT aktor_id FROM person WHERE fodselsnummer = ?"
-            session.run(queryOf(query, fødselsnummer.toLong()).map { it.string("aktor_id") }.asSingle)
+            asSQL(
+                "SELECT aktor_id FROM person WHERE fodselsnummer = :foedselsnummer",
+                "foedselsnummer" to fødselsnummer.toLong(),
+            ).single(session) { it.string("aktor_id") }
         }
 
     override fun finnPersoninfoSistOppdatert(fødselsnummer: String) =
@@ -54,13 +53,10 @@ internal class PersonDao(
 
     override fun finnPersoninfoRef(fødselsnummer: String) =
         sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = "SELECT info_ref FROM person WHERE fodselsnummer=?;"
-            session.run(
-                queryOf(query, fødselsnummer.toLong())
-                    .map { row -> row.longOrNull("info_ref") }
-                    .asSingle,
-            )
+            asSQL(
+                "SELECT info_ref FROM person WHERE fodselsnummer = :foedselsnummer",
+                "foedselsnummer" to fødselsnummer.toLong(),
+            ).single(session) { row -> row.longOrNull("info_ref") }
         }
 
     internal fun insertPersoninfo(
@@ -71,25 +67,19 @@ internal class PersonDao(
         kjønn: Kjønn,
         adressebeskyttelse: Adressebeskyttelse,
     ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-        @Language("PostgreSQL")
-        val query = """
-            INSERT INTO person_info(fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse)
-            VALUES(:fornavn, :mellomnavn, :etternavn, :fodselsdato, CAST(:kjonn as person_kjonn), :adressebeskyttelse);
-        """
         requireNotNull(
-            session.run(
-                queryOf(
-                    query,
-                    mapOf(
-                        "fornavn" to fornavn,
-                        "mellomnavn" to mellomnavn,
-                        "etternavn" to etternavn,
-                        "fodselsdato" to fødselsdato,
-                        "kjonn" to kjønn.name,
-                        "adressebeskyttelse" to adressebeskyttelse.name,
-                    ),
-                ).asUpdateAndReturnGeneratedKey,
-            ),
+            asSQL(
+                """
+                INSERT INTO person_info(fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse)
+                VALUES(:fornavn, :mellomnavn, :etternavn, :fodselsdato, CAST(:kjonn as person_kjonn), :adressebeskyttelse);
+                """.trimIndent(),
+                "fornavn" to fornavn,
+                "mellomnavn" to mellomnavn,
+                "etternavn" to etternavn,
+                "fodselsdato" to fødselsdato,
+                "kjonn" to kjønn.name,
+                "adressebeskyttelse" to adressebeskyttelse.name,
+            ).updateAndReturnGeneratedKey(session),
         )
     }
 
@@ -171,24 +161,18 @@ internal class PersonDao(
         infotrygdutbetalingerId: Long,
     ) = requireNotNull(
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            @Language("PostgreSQL")
-            val query = """
-            INSERT INTO person(fodselsnummer, aktor_id, info_ref, enhet_ref, infotrygdutbetalinger_ref, enhet_ref_oppdatert, personinfo_oppdatert, infotrygdutbetalinger_oppdatert)
-            VALUES(:fodselsnummer, :aktorId, :personinfoId, :enhetId, :infotrygdutbetalingerId, :timestamp, :timestamp, :timestamp);
-        """
-            session.run(
-                queryOf(
-                    query,
-                    mapOf(
-                        "fodselsnummer" to fødselsnummer.toLong(),
-                        "aktorId" to aktørId.toLong(),
-                        "personinfoId" to personinfoId,
-                        "enhetId" to enhetId,
-                        "infotrygdutbetalingerId" to infotrygdutbetalingerId,
-                        "timestamp" to LocalDateTime.now(),
-                    ),
-                ).asUpdateAndReturnGeneratedKey,
-            )
+            asSQL(
+                """
+                INSERT INTO person(fodselsnummer, aktor_id, info_ref, enhet_ref, infotrygdutbetalinger_ref, enhet_ref_oppdatert, personinfo_oppdatert, infotrygdutbetalinger_oppdatert)
+                VALUES(:fodselsnummer, :aktorId, :personinfoId, :enhetId, :infotrygdutbetalingerId, :timestamp, :timestamp, :timestamp);
+                """.trimIndent(),
+                "fodselsnummer" to fødselsnummer.toLong(),
+                "aktorId" to aktørId.toLong(),
+                "personinfoId" to personinfoId,
+                "enhetId" to enhetId,
+                "infotrygdutbetalingerId" to infotrygdutbetalingerId,
+                "timestamp" to LocalDateTime.now(),
+            ).updateAndReturnGeneratedKey(session)
         },
     )
 

@@ -32,6 +32,8 @@ abstract class HelseDao(private val dataSource: DataSource) {
         ) = session.run(map(mapping).asList)
 
         fun Query.update(session: Session) = session.run(asUpdate)
+
+        fun Query.updateAndReturnGeneratedKey(session: Session) = session.run(this.asUpdateAndReturnGeneratedKey)
     }
 
     fun <T> Query.single(mapping: (Row) -> T?) = sessionOf(dataSource, strict = true).use { single(it, mapping) }
