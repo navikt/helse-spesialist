@@ -10,14 +10,14 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-internal interface VarselDaoInterface {
+internal interface VarselDao {
     fun avvikleVarsel(
         varselkode: String,
         definisjonId: UUID,
     )
 }
 
-internal class VarselDao(queryRunner: QueryRunner) : VarselDaoInterface, QueryRunner by queryRunner {
+internal class PgVarselDao(queryRunner: QueryRunner) : VarselDao, QueryRunner by queryRunner {
     constructor(session: Session) : this(MedSession(session))
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
