@@ -1,5 +1,6 @@
 package no.nav.helse.mediator
 
+import kotliquery.Session
 import kotliquery.TransactionalSession
 import kotliquery.sessionOf
 import no.nav.helse.db.AvviksvurderingDao
@@ -201,12 +202,7 @@ internal class Kommandofabrikk(
             reservasjonRepository = TransactionalReservasjonDao(session),
             tildelingRepository = TransactionalTildelingDao(session),
             oppgaveRepository = TransactionalOppgaveDao(session),
-            totrinnsvurderingService =
-                TotrinnsvurderingService(
-                    TotrinnsvurderingDao(session),
-                    TransactionalOppgaveDao(session),
-                    TransactionalPeriodehistorikkDao(session),
-                ),
+            totrinnsvurderingService = lagTotrinnsvurderingService(session),
         )
 
     internal fun vedtaksperiodeNyUtbetaling(
@@ -305,12 +301,7 @@ internal class Kommandofabrikk(
             oppgaveRepository = TransactionalOppgaveDao(session),
             tildelingRepository = TransactionalTildelingDao(session),
             oppgaveService = transaksjonellOppgaveService(session),
-            totrinnsvurderingService =
-                TotrinnsvurderingService(
-                    TotrinnsvurderingDao(session),
-                    TransactionalOppgaveDao(session),
-                    TransactionalPeriodehistorikkDao(session),
-                ),
+            totrinnsvurderingService = lagTotrinnsvurderingService(session),
             json = hendelse.toJson(),
         )
 
@@ -327,12 +318,7 @@ internal class Kommandofabrikk(
             reservasjonRepository = TransactionalReservasjonDao(session),
             tildelingRepository = TransactionalTildelingDao(session),
             oppgaveRepository = TransactionalOppgaveDao(session),
-            totrinnsvurderingService =
-                TotrinnsvurderingService(
-                    TotrinnsvurderingDao(session),
-                    TransactionalOppgaveDao(session),
-                    TransactionalPeriodehistorikkDao(session),
-                ),
+            totrinnsvurderingService = lagTotrinnsvurderingService(session),
         )
 
     internal fun løsGodkjenningsbehov(
@@ -392,12 +378,7 @@ internal class Kommandofabrikk(
             avviksvurderingRepository = TransactionalAvviksvurderingDao(session),
             oppgaveService = transaksjonellOppgaveService(session),
             godkjenningMediator = GodkjenningMediator(OpptegnelseDao(session)),
-            totrinnsvurderingService =
-                TotrinnsvurderingService(
-                    TotrinnsvurderingDao(session),
-                    TransactionalOppgaveDao(session),
-                    TransactionalPeriodehistorikkDao(session),
-                ),
+            totrinnsvurderingService = lagTotrinnsvurderingService(session),
             person = person,
         )
     }
@@ -500,4 +481,11 @@ internal class Kommandofabrikk(
         }
         registrerTidsbrukForHendelse(hendelsenavn, kjøretidMs)
     }
+
+    private fun lagTotrinnsvurderingService(session: Session) =
+        TotrinnsvurderingService(
+            TotrinnsvurderingDao(session),
+            TransactionalOppgaveDao(session),
+            TransactionalPeriodehistorikkDao(session),
+        )
 }
