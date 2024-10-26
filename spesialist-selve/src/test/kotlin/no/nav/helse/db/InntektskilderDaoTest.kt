@@ -3,7 +3,6 @@ package no.nav.helse.db
 import DatabaseIntegrationTest
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Session
-import kotliquery.sessionOf
 import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.HelseDao.Companion.single
 import no.nav.helse.januar
@@ -25,7 +24,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class InntektskilderDaoTest : DatabaseIntegrationTest() {
-    private val session = sessionOf(dataSource, returnGeneratedKey = true)
     private val dao = InntektskilderDao(session)
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
 

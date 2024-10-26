@@ -1,10 +1,7 @@
 package no.nav.helse.db
 
 import kotliquery.Session
-import kotliquery.sessionOf
 import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.HelseDao.Companion.list
-import no.nav.helse.HelseDao.Companion.update
 import no.nav.helse.spesialist.api.abonnement.OpptegnelsePayload
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
@@ -12,24 +9,9 @@ import no.nav.helse.spesialist.api.graphql.schema.Opptegnelsetype
 import java.util.UUID
 import javax.sql.DataSource
 
-class OpptegnelseDao(private val session: Session) : OpptegnelseRepository {
-    object NonTransactional {
-        operator fun invoke(dataSource: DataSource): OpptegnelseRepository {
-            fun <T> inSession(block: (Session) -> T) = sessionOf(dataSource).use { block(it) }
-
-            return object : OpptegnelseRepository {
-                override fun opprettOpptegnelse(
-                    fødselsnummer: String,
-                    payload: OpptegnelsePayload,
-                    type: OpptegnelseType,
-                ) = inSession { OpptegnelseDao(it).opprettOpptegnelse(fødselsnummer, payload, type) }
-
-                override fun finnOpptegnelser(saksbehandlerIdent: UUID): List<Opptegnelse> {
-                    return inSession { OpptegnelseDao(it).finnOpptegnelser(saksbehandlerIdent) }
-                }
-            }
-        }
-    }
+class OpptegnelseDao(private val queryRunner: QueryRunner) : OpptegnelseRepository, QueryRunner by queryRunner {
+    constructor(session: Session) : this(MedSession(session))
+    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun opprettOpptegnelse(
         fødselsnummer: String,
@@ -46,7 +28,7 @@ class OpptegnelseDao(private val session: Session) : OpptegnelseRepository {
             "fodselsnummer" to fødselsnummer.toLong(),
             "payload" to payload.toJson(),
             "type" to "$type",
-        ).update(session)
+        ).update()
     }
 
     override fun finnOpptegnelser(saksbehandlerIdent: UUID) =
@@ -61,7 +43,7 @@ class OpptegnelseDao(private val session: Session) : OpptegnelseRepository {
             AND o.SEKVENSNUMMER > sos.siste_sekvensnummer
             """.trimIndent(),
             "saksbehandlerIdent" to saksbehandlerIdent,
-        ).list(session) { row ->
+        ).list { row ->
             Opptegnelse(
                 payload = row.string("payload"),
                 aktorId = row.long("aktor_id").toString(),

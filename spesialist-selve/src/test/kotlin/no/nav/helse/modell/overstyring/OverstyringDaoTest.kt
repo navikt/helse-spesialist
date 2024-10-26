@@ -1,8 +1,8 @@
 package no.nav.helse.modell.overstyring
 
 import DatabaseIntegrationTest
-import kotliquery.sessionOf
 import no.nav.helse.db.ArbeidsforholdForDatabase
+import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.LovhjemmelForDatabase
 import no.nav.helse.db.MinimumSykdomsgradForDatabase
 import no.nav.helse.db.OverstyrtArbeidsforholdForDatabase
@@ -14,7 +14,6 @@ import no.nav.helse.db.RefusjonselementForDatabase
 import no.nav.helse.db.SkjønnsfastsattArbeidsgiverForDatabase
 import no.nav.helse.db.SkjønnsfastsattSykepengegrunnlagForDatabase
 import no.nav.helse.db.SkjønnsfastsettingstypeForDatabase
-import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.januar
 import no.nav.helse.modell.InntektskildetypeDto.ORDINÆR
 import no.nav.helse.modell.KomplettInntektskildeDto
@@ -36,7 +35,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class OverstyringDaoTest : DatabaseIntegrationTest() {
-    private val session = sessionOf(dataSource, returnGeneratedKey = true)
     private val inntektskilderDao = InntektskilderDao(session)
     private val PERSON_FORNAVN = "Per"
     private val PERSON_ETTERNAVN = "Son"

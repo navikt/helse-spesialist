@@ -131,6 +131,11 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal var oppgaveId: Long = -1
         private set
 
+    protected val session = sessionOf(dataSource, returnGeneratedKey = true)
+
+    @AfterEach
+    fun tearDown() = session.close()
+
     internal val personDao = PersonDao(dataSource)
     internal val oppgaveDao = OppgaveDao(dataSource)
     internal val oppgaveApiDao = OppgaveApiDao(dataSource)
@@ -157,19 +162,14 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
     internal val vergemålDao = VergemålDao(dataSource)
     internal val generasjonDao = GenerasjonDao(dataSource)
-    internal val totrinnsvurderingDao = TotrinnsvurderingDao.NonTransactional(dataSource)
+    internal val totrinnsvurderingDao = TotrinnsvurderingDao(session)
     internal val dokumentDao = DokumentDao.NonTransactional(dataSource)
     internal val påVentDao = PåVentDao(dataSource)
     internal val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(dataSource)
     internal val notatDao = NotatDao(dataSource)
     internal val annulleringDao = AnnulleringDao(dataSource)
     private val personService = PersonService(dataSource)
-    private val session = sessionOf(dataSource, returnGeneratedKey = true)
     private val inntektskilderDao = InntektskilderDao(session)
-
-    @AfterEach
-    fun lukkSession() =
-        session.close()
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,

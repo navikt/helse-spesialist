@@ -31,11 +31,11 @@ internal class TestMediator(
     testRapid: TestRapid,
     dataSource: DataSource,
 ) {
-    private val opptegnelseDao = OpptegnelseDao.NonTransactional(dataSource)
+    private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
     private val pgHistorikkinnslagRepository = PgHistorikkinnslagRepository(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
-    private val totrinnsvurderingDao = TotrinnsvurderingDao.NonTransactional(dataSource)
+    private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)

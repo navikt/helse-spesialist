@@ -1,14 +1,12 @@
 package no.nav.helse.db
 
 import DatabaseIntegrationTest
-import kotliquery.sessionOf
 import no.nav.helse.db.SkjønnsfastsettingstypeForDatabase.OMREGNET_ÅRSINNTEKT
 import no.nav.helse.db.SkjønnsfastsettingstypeForDatabase.RAPPORTERT_ÅRSINNTEKT
 import no.nav.helse.januar
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingstypeDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingsårsakDto
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -17,14 +15,8 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 internal class SykefraværstilfelleDaoTest : DatabaseIntegrationTest() {
-    private val session = sessionOf(dataSource)
 
     private val sykefraværstilfelleDao = SykefraværstilfelleDao(session)
-
-    @AfterEach
-    fun tearDown() {
-        session.close()
-    }
 
     @Test
     fun `Finner skjønnsfastsatt sykepengegrunnlag`() {

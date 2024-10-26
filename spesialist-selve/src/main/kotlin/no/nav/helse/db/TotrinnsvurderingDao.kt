@@ -2,58 +2,17 @@ package no.nav.helse.db
 
 import kotliquery.Query
 import kotliquery.Session
-import kotliquery.queryOf
-import kotliquery.sessionOf
+import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import org.intellij.lang.annotations.Language
 import java.util.UUID
 import javax.sql.DataSource
 
 internal class TotrinnsvurderingDao(
-    private val session: Session,
-) : TotrinnsvurderingDaoInterface {
-    internal object NonTransactional {
-        operator fun invoke(dataSource: DataSource): TotrinnsvurderingDaoInterface {
-            fun <T> inSession(block: (Session) -> T) = sessionOf(dataSource).use { block(it) }
-
-            return object : TotrinnsvurderingDaoInterface {
-                override fun hentAktivTotrinnsvurdering(oppgaveId: Long): TotrinnsvurderingFraDatabase? {
-                    return inSession { TotrinnsvurderingDao(it).hentAktivTotrinnsvurdering(oppgaveId) }
-                }
-
-                override fun oppdater(totrinnsvurderingFraDatabase: TotrinnsvurderingFraDatabase) {
-                    inSession { TotrinnsvurderingDao(it).oppdater(totrinnsvurderingFraDatabase) }
-                }
-
-                override fun settBeslutter(
-                    oppgaveId: Long,
-                    saksbehandlerOid: UUID,
-                ) {
-                    inSession { TotrinnsvurderingDao(it).settBeslutter(oppgaveId, saksbehandlerOid) }
-                }
-
-                override fun settErRetur(vedtaksperiodeId: UUID) {
-                    inSession { TotrinnsvurderingDao(it).settErRetur(vedtaksperiodeId) }
-                }
-
-                override fun opprett(vedtaksperiodeId: UUID): TotrinnsvurderingOld {
-                    return inSession { TotrinnsvurderingDao(it).opprett(vedtaksperiodeId) }
-                }
-
-                override fun hentAktiv(oppgaveId: Long): TotrinnsvurderingOld? {
-                    return inSession { TotrinnsvurderingDao(it).hentAktiv(oppgaveId) }
-                }
-
-                override fun hentAktiv(vedtaksperiodeId: UUID): TotrinnsvurderingOld? {
-                    return inSession { TotrinnsvurderingDao(it).hentAktiv(vedtaksperiodeId) }
-                }
-
-                override fun ferdigstill(vedtaksperiodeId: UUID) {
-                    inSession { TotrinnsvurderingDao(it).ferdigstill(vedtaksperiodeId) }
-                }
-            }
-        }
-    }
+    queryRunner: QueryRunner,
+) : TotrinnsvurderingDaoInterface, QueryRunner by queryRunner {
+    constructor(session: Session) : this(MedSession(session))
+    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun hentAktivTotrinnsvurdering(oppgaveId: Long): TotrinnsvurderingFraDatabase? {
         @Language("PostgreSQL")
@@ -74,19 +33,17 @@ internal class TotrinnsvurderingDao(
               AND utbetaling_id_ref IS NULL
             """.trimIndent()
 
-        return session.run(
-            queryOf(query, mapOf("oppgaveId" to oppgaveId)).map { row ->
-                TotrinnsvurderingFraDatabase(
-                    vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                    erRetur = row.boolean("er_retur"),
-                    saksbehandler = row.uuidOrNull("saksbehandler"),
-                    beslutter = row.uuidOrNull("beslutter"),
-                    utbetalingId = row.uuidOrNull("utbetaling_id"),
-                    opprettet = row.localDateTime("opprettet"),
-                    oppdatert = row.localDateTimeOrNull("oppdatert"),
-                )
-            }.asSingle,
-        )
+        return asSQL(query, "oppgaveId" to oppgaveId).single { row ->
+            TotrinnsvurderingFraDatabase(
+                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                erRetur = row.boolean("er_retur"),
+                saksbehandler = row.uuidOrNull("saksbehandler"),
+                beslutter = row.uuidOrNull("beslutter"),
+                utbetalingId = row.uuidOrNull("utbetaling_id"),
+                opprettet = row.localDateTime("opprettet"),
+                oppdatert = row.localDateTimeOrNull("oppdatert"),
+            )
+        }
     }
 
     override fun oppdater(totrinnsvurderingFraDatabase: TotrinnsvurderingFraDatabase) {
@@ -103,19 +60,15 @@ internal class TotrinnsvurderingDao(
               AND utbetaling_id_ref IS NULL
             """.trimIndent()
 
-        session.run(
-            queryOf(
-                query,
-                mapOf(
-                    "saksbehandler" to totrinnsvurderingFraDatabase.saksbehandler,
-                    "beslutter" to totrinnsvurderingFraDatabase.beslutter,
-                    "er_retur" to totrinnsvurderingFraDatabase.erRetur,
-                    "oppdatert" to totrinnsvurderingFraDatabase.oppdatert,
-                    "utbetaling_id" to totrinnsvurderingFraDatabase.utbetalingId,
-                    "vedtaksperiode_id" to totrinnsvurderingFraDatabase.vedtaksperiodeId,
-                ),
-            ).asUpdate,
-        )
+        asSQL(
+            query,
+            "saksbehandler" to totrinnsvurderingFraDatabase.saksbehandler,
+            "beslutter" to totrinnsvurderingFraDatabase.beslutter,
+            "er_retur" to totrinnsvurderingFraDatabase.erRetur,
+            "oppdatert" to totrinnsvurderingFraDatabase.oppdatert,
+            "utbetaling_id" to totrinnsvurderingFraDatabase.utbetalingId,
+            "vedtaksperiode_id" to totrinnsvurderingFraDatabase.vedtaksperiodeId,
+        ).update()
     }
 
     override fun settBeslutter(
@@ -137,12 +90,11 @@ internal class TotrinnsvurderingDao(
             AND utbetaling_id_ref IS null
             """.trimIndent()
 
-        session.run(
-            queryOf(
-                query,
-                mapOf("oppgaveId" to oppgaveId, "saksbehandlerOid" to saksbehandlerOid),
-            ).asExecute,
-        )
+        asSQL(
+            query,
+            "oppgaveId" to oppgaveId,
+            "saksbehandlerOid" to saksbehandlerOid,
+        ).update()
     }
 
     override fun settErRetur(vedtaksperiodeId: UUID) {
@@ -154,12 +106,10 @@ internal class TotrinnsvurderingDao(
             AND utbetaling_id_ref IS null
             """.trimIndent()
 
-        session.run(
-            queryOf(
-                query,
-                mapOf("vedtaksperiodeId" to vedtaksperiodeId),
-            ).asExecute,
-        )
+        asSQL(
+            query,
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        ).update()
     }
 
     override fun opprett(vedtaksperiodeId: UUID): TotrinnsvurderingOld {
@@ -173,14 +123,14 @@ internal class TotrinnsvurderingDao(
             INSERT INTO totrinnsvurdering (vedtaksperiode_id) 
             VALUES (:vedtaksperiodeId)
             """.trimIndent()
-        session.run(queryOf(query, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).asUpdate)
+        asSQL(query, "vedtaksperiodeId" to vedtaksperiodeId).update()
         @Language("PostgreSQL")
         val selectQuery =
             """
             SELECT * FROM totrinnsvurdering 
             WHERE vedtaksperiode_id = :vedtaksperiodeId
             """.trimIndent()
-        val totrinnsvurdering = session.run(queryOf(selectQuery, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).tilTotrinnsvurdering())
+        val totrinnsvurdering = asSQL(selectQuery, "vedtaksperiodeId" to vedtaksperiodeId).tilTotrinnsvurdering()
 
         return requireNotNull(totrinnsvurdering)
     }
@@ -196,7 +146,7 @@ internal class TotrinnsvurderingDao(
             AND utbetaling_id_ref IS NULL
             """.trimIndent()
 
-        return session.run(queryOf(query, mapOf("oppgaveId" to oppgaveId)).tilTotrinnsvurdering())
+        return asSQL(query, "oppgaveId" to oppgaveId).tilTotrinnsvurdering()
     }
 
     override fun hentAktiv(vedtaksperiodeId: UUID): TotrinnsvurderingOld? {
@@ -208,7 +158,7 @@ internal class TotrinnsvurderingDao(
             AND utbetaling_id_ref IS NULL
             """.trimIndent()
 
-        return session.run(queryOf(query, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).tilTotrinnsvurdering())
+        return asSQL(query, "vedtaksperiodeId" to vedtaksperiodeId).tilTotrinnsvurdering()
     }
 
     override fun ferdigstill(vedtaksperiodeId: UUID) {
@@ -226,16 +176,14 @@ internal class TotrinnsvurderingDao(
             AND utbetaling_id_ref IS null
             """.trimIndent()
 
-        session.run(
-            queryOf(
-                query,
-                mapOf("vedtaksperiodeId" to vedtaksperiodeId),
-            ).asExecute,
-        )
+        asSQL(
+            query,
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        ).update()
     }
 
     private fun Query.tilTotrinnsvurdering() =
-        map { row ->
+        single { row ->
             TotrinnsvurderingOld(
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                 erRetur = row.boolean("er_retur"),
@@ -245,5 +193,5 @@ internal class TotrinnsvurderingDao(
                 opprettet = row.localDateTime("opprettet"),
                 oppdatert = row.localDateTimeOrNull("oppdatert"),
             )
-        }.asSingle
+        }
 }

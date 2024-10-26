@@ -62,7 +62,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private val tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
     private val testRapid = TestRapid()
     private val tildelingDbDao = TildelingDao(dataSource)
-    private val opptegnelseDao = OpptegnelseDao.NonTransactional(dataSource)
+    private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val saksbehandlerRepository = SaksbehandlerDao(dataSource)
     private val stansAutomatiskBehandlingMediator =
         StansAutomatiskBehandlingMediator(
