@@ -29,7 +29,7 @@ import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.PlukkTilManuell
 import no.nav.helse.modell.automatisering.Stikkprøver
-import no.nav.helse.modell.dokument.DokumentDao
+import no.nav.helse.modell.dokument.PgDokumentDao
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -102,7 +102,7 @@ internal class SpesialistApp(
     private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
     private val snapshotApiDao = SnapshotApiDao(dataSource)
     private val apiVarselRepository = ApiVarselRepository(dataSource)
-    private val dokumentDao = DokumentDao(dataSource)
+    private val dokumentDao = PgDokumentDao(dataSource)
     private val påVentApiDao = PåVentApiDao(dataSource)
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
     private val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(dataSource)

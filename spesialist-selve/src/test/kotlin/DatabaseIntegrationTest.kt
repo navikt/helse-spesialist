@@ -31,7 +31,7 @@ import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.automatisering.AutomatiseringDao
-import no.nav.helse.modell.dokument.DokumentDao
+import no.nav.helse.modell.dokument.PgDokumentDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.TestMelding
@@ -163,7 +163,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val vergemålDao = VergemålDao(dataSource)
     internal val generasjonDao = GenerasjonDao(dataSource)
     internal val totrinnsvurderingDao = TotrinnsvurderingDao(session)
-    internal val dokumentDao = DokumentDao(dataSource)
+    internal val dokumentDao = PgDokumentDao(dataSource)
     internal val påVentDao = PåVentDao(dataSource)
     internal val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(dataSource)
     internal val notatDao = NotatDao(dataSource)

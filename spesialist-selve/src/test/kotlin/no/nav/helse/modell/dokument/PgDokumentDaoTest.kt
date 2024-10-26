@@ -11,7 +11,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 
-internal class DokumentDaoTest : DatabaseIntegrationTest() {
+internal class PgDokumentDaoTest : DatabaseIntegrationTest() {
     @BeforeEach
     fun setup() {
         testhendelse()

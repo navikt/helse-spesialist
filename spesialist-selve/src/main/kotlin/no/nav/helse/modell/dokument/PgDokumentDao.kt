@@ -10,7 +10,7 @@ import no.nav.helse.objectMapper
 import java.util.UUID
 import javax.sql.DataSource
 
-internal interface DokumentDaoInterface {
+internal interface DokumentDao {
     fun lagre(
         fødselsnummer: String,
         dokumentId: UUID,
@@ -25,7 +25,7 @@ internal interface DokumentDaoInterface {
     fun slettGamleDokumenter(): Int
 }
 
-internal class DokumentDao(queryRunner: QueryRunner) : DokumentDaoInterface, QueryRunner by queryRunner {
+internal class PgDokumentDao(queryRunner: QueryRunner) : DokumentDao, QueryRunner by queryRunner {
     constructor(session: Session) : this(MedSession(session))
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
