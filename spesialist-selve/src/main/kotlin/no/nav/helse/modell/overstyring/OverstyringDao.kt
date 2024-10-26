@@ -36,20 +36,21 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource),
                 WHERE vedtaksperiode_id = :vedtaksperiode_id
             )
             AND o.ferdigstilt = false
-        """,
-            mapOf("vedtaksperiode_id" to vedtaksperiodeId),
+            """.trimIndent(),
+            "vedtaksperiode_id" to vedtaksperiodeId,
         ).list { it.uuid("ekstern_hendelse_id") }
 
     fun ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId: UUID) =
         asSQL(
-            """ UPDATE overstyring
+            """
+            UPDATE overstyring
             SET ferdigstilt = true
             WHERE id IN (
                 SELECT overstyring_ref FROM overstyringer_for_vedtaksperioder
                 WHERE vedtaksperiode_id = :vedtaksperiode_id
             )
-        """,
-            mapOf("vedtaksperiode_id" to vedtaksperiodeId),
+            """.trimIndent(),
+            "vedtaksperiode_id" to vedtaksperiodeId,
         ).update()
 
     override fun kobleOverstyringOgVedtaksperiode(
@@ -362,47 +363,42 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource),
         minimumSykdomsgrad: MinimumSykdomsgradForDatabase,
         saksbehandlerOid: UUID,
     ) = asSQL(
-        """ INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt, vedtaksperiode_id)
-            SELECT gen_random_uuid(), :ekstern_hendelse_id, p.id, :saksbehandler_ref, :tidspunkt, :vedtaksperiode_id
-                FROM person p
-                WHERE p.fodselsnummer = :fodselsnummer
-            RETURNING id
-        """,
-        mapOf(
-            "ekstern_hendelse_id" to minimumSykdomsgrad.id,
-            "saksbehandler_ref" to saksbehandlerOid,
-            "tidspunkt" to minimumSykdomsgrad.opprettet,
-            "fodselsnummer" to minimumSykdomsgrad.fødselsnummer.toLong(),
-            "vedtaksperiode_id" to minimumSykdomsgrad.initierendeVedtaksperiodeId,
-        ),
+        """
+        INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt, vedtaksperiode_id)
+        SELECT gen_random_uuid(), :ekstern_hendelse_id, p.id, :saksbehandler_ref, :tidspunkt, :vedtaksperiode_id
+            FROM person p
+            WHERE p.fodselsnummer = :fodselsnummer
+        RETURNING id
+        """.trimIndent(),
+        "ekstern_hendelse_id" to minimumSykdomsgrad.id,
+        "saksbehandler_ref" to saksbehandlerOid,
+        "tidspunkt" to minimumSykdomsgrad.opprettet,
+        "fodselsnummer" to minimumSykdomsgrad.fødselsnummer.toLong(),
+        "vedtaksperiode_id" to minimumSykdomsgrad.initierendeVedtaksperiodeId,
     ).single { it.long("id") }?.let { overstyringId ->
         asSQL(
             """
             INSERT INTO overstyring_minimum_sykdomsgrad(overstyring_ref, fom, tom, vurdering, begrunnelse)
             VALUES (:overstyringRef, :fom, :tom, :vurdering, :begrunnelse)
             RETURNING id
-        """,
-            mapOf(
-                "overstyringRef" to overstyringId,
-                "fom" to minimumSykdomsgrad.fom,
-                "tom" to minimumSykdomsgrad.tom,
-                "vurdering" to minimumSykdomsgrad.vurdering,
-                "begrunnelse" to minimumSykdomsgrad.begrunnelse,
-            ),
+            """.trimIndent(),
+            "overstyringRef" to overstyringId,
+            "fom" to minimumSykdomsgrad.fom,
+            "tom" to minimumSykdomsgrad.tom,
+            "vurdering" to minimumSykdomsgrad.vurdering,
+            "begrunnelse" to minimumSykdomsgrad.begrunnelse,
         ).single { it.long("id") }?.let { overstyringMinimumSykdomsgradId ->
             minimumSykdomsgrad.arbeidsgivere.forEach { arbeidsgiver ->
                 asSQL(
                     """
-                        INSERT INTO overstyring_minimum_sykdomsgrad_arbeidsgiver(berort_vedtaksperiode_id, arbeidsgiver_ref, overstyring_minimum_sykdomsgrad_ref)
-                        SELECT :berortVedtaksperiodeId, ag.id, :overstyringMinimumSykdomsgradRef
-                        FROM arbeidsgiver ag
-                        WHERE ag.orgnummer = :organisasjonsnummer
-                    """,
-                    mapOf(
-                        "berortVedtaksperiodeId" to arbeidsgiver.berørtVedtaksperiodeId,
-                        "overstyringMinimumSykdomsgradRef" to overstyringMinimumSykdomsgradId,
-                        "organisasjonsnummer" to arbeidsgiver.organisasjonsnummer.toLong(),
-                    ),
+                    INSERT INTO overstyring_minimum_sykdomsgrad_arbeidsgiver(berort_vedtaksperiode_id, arbeidsgiver_ref, overstyring_minimum_sykdomsgrad_ref)
+                    SELECT :berortVedtaksperiodeId, ag.id, :overstyringMinimumSykdomsgradRef
+                    FROM arbeidsgiver ag
+                    WHERE ag.orgnummer = :organisasjonsnummer
+                    """.trimIndent(),
+                    "berortVedtaksperiodeId" to arbeidsgiver.berørtVedtaksperiodeId,
+                    "overstyringMinimumSykdomsgradRef" to overstyringMinimumSykdomsgradId,
+                    "organisasjonsnummer" to arbeidsgiver.organisasjonsnummer.toLong(),
                 ).update()
             }
         }

@@ -24,13 +24,11 @@ class NotatApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 RETURNING *
             )
             SELECT * FROM inserted i INNER JOIN saksbehandler s ON i.saksbehandler_oid = s.oid
-        """,
-            mapOf(
-                "vedtaksperiode_id" to vedtaksperiodeId,
-                "tekst" to tekst,
-                "saksbehandler_oid" to saksbehandlerOid,
-                "type" to type.name,
-            ),
+            """.trimIndent(),
+            "vedtaksperiode_id" to vedtaksperiodeId,
+            "tekst" to tekst,
+            "saksbehandler_oid" to saksbehandlerOid,
+            "type" to type.name,
         ).single { mapNotatDto(it) }
 
     fun leggTilKommentar(
@@ -43,8 +41,10 @@ class NotatApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             insert into kommentarer (tekst, notat_ref, saksbehandlerident)
             values (:tekst, :notatId, :saksbehandlerident)
             returning *
-        """,
-            mapOf("tekst" to tekst, "notatId" to notatId, "saksbehandlerident" to saksbehandlerident),
+            """.trimIndent(),
+            "tekst" to tekst,
+            "notatId" to notatId,
+            "saksbehandlerident" to saksbehandlerident,
         ).single { mapKommentarDto(it) }
 
     fun opprettNotatForOppgaveId(
@@ -65,13 +65,11 @@ class NotatApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 :saksbehandler_oid,
                 CAST(:type as notattype)
             );
-        """,
-            mapOf(
-                "oppgave_id" to oppgaveId,
-                "tekst" to tekst,
-                "saksbehandler_oid" to saksbehandlerOid,
-                "type" to type.name,
-            ),
+            """.trimIndent(),
+            "oppgave_id" to oppgaveId,
+            "tekst" to tekst,
+            "saksbehandler_oid" to saksbehandlerOid,
+            "type" to type.name,
         ).updateAndReturnGeneratedKey()
 
     fun finnNotater(vedtaksperiodeId: UUID): List<NotatDto> =
@@ -80,8 +78,8 @@ class NotatApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             SELECT * FROM notat n
             JOIN saksbehandler s on s.oid = n.saksbehandler_oid
             WHERE n.vedtaksperiode_id = :vedtaksperiode_id::uuid;
-        """,
-            mapOf("vedtaksperiode_id" to vedtaksperiodeId),
+            """.trimIndent(),
+            "vedtaksperiode_id" to vedtaksperiodeId,
         ).list { mapNotatDto(it) }
 
     fun finnNotater(vedtaksperiodeIds: List<UUID>): Map<UUID, List<NotatDto>> =
@@ -113,8 +111,8 @@ class NotatApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             SELECT *
             FROM inserted i
             INNER JOIN saksbehandler s on s.oid = i.saksbehandler_oid
-        """,
-            mapOf("notatId" to notatId),
+            """.trimIndent(),
+            "notatId" to notatId,
         ).single(::mapNotatDto)
 
     fun feilregistrerKommentar(kommentarId: Int): KommentarDto? =
@@ -129,8 +127,8 @@ class NotatApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             SELECT *
             FROM inserted AS i
             INNER JOIN notat n on n.id = i.notat_ref
-        """,
-            mapOf("kommentarId" to kommentarId),
+            """.trimIndent(),
+            "kommentarId" to kommentarId,
         ).single(::mapKommentarDto)
 
     private fun finnKommentarer(notatId: Int): List<KommentarDto> =
@@ -140,8 +138,8 @@ class NotatApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             from kommentarer k
             inner join notat n on n.id = k.notat_ref
             where n.id = :notatId
-        """,
-            mapOf("notatId" to notatId),
+            """.trimIndent(),
+            "notatId" to notatId,
         ).list { mapKommentarDto(it) }
 
     private fun mapNotatDto(it: Row): NotatDto =

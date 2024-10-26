@@ -13,8 +13,8 @@ class TotrinnsvurderingApiDao(dataSource: DataSource) : HelseDao(dataSource) {
             SELECT * FROM totrinnsvurdering
             WHERE vedtaksperiode_id = :vedtaksperiodeId
             AND utbetaling_id_ref IS NULL
-        """,
-            mapOf("vedtaksperiodeId" to vedtaksperiodeId),
+            """.trimIndent(),
+            "vedtaksperiodeId" to vedtaksperiodeId,
         ).single(::tilTotrinnsvurdering)
 
     private fun tilTotrinnsvurdering(row: Row) =

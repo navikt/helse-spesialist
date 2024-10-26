@@ -20,19 +20,15 @@ class PåVentDao(private val dataSource: DataSource) : HelseDao(dataSource), På
         INNER JOIN oppgave o on v.id = o.vedtak_ref
         WHERE o.id = :oppgaveId
         """.trimIndent(),
-        mapOf(
-            "oppgaveId" to oppgaveId,
-        ),
+        "oppgaveId" to oppgaveId,
     ).single { it.uuid("vedtaksperiode_id") }.let { vedtaksperiodeId ->
         asSQL(
             """
             INSERT INTO pa_vent (vedtaksperiode_id, saksbehandler_ref, frist) VALUES (:vedtaksperiodeId, :saksbehandlerRef, :frist)
             """.trimIndent(),
-            mapOf(
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "saksbehandlerRef" to saksbehandlerOid,
-                "frist" to frist,
-            ),
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            "saksbehandlerRef" to saksbehandlerOid,
+            "frist" to frist,
         ).update()
     }
 
@@ -44,15 +40,13 @@ class PåVentDao(private val dataSource: DataSource) : HelseDao(dataSource), På
             INNER JOIN oppgave o on v.id = o.vedtak_ref
             WHERE o.id = :oppgaveId
             """.trimIndent(),
-            mapOf(
-                "oppgaveId" to oppgaveId,
-            ),
+            "oppgaveId" to oppgaveId,
         ).single { it.uuidOrNull("vedtaksperiode_id") }?.let { vedtaksperiodeId ->
             asSQL(
                 """
                 DELETE FROM pa_vent WHERE vedtaksperiode_id = :vedtaksperiodeId
                 """.trimIndent(),
-                mapOf("vedtaksperiodeId" to vedtaksperiodeId),
+                "vedtaksperiodeId" to vedtaksperiodeId,
             ).update()
         }
 
@@ -70,6 +64,6 @@ class PåVentDao(private val dataSource: DataSource) : HelseDao(dataSource), På
             join oppgave o on v.id = o.vedtak_ref
             where o.id = :oppgaveId
             """.trimIndent(),
-            mapOf("oppgaveId" to oppgaveId),
+            "oppgaveId" to oppgaveId,
         ).single { it.boolean(1) } ?: false
 }

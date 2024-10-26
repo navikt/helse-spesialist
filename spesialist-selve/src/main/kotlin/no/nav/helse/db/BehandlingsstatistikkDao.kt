@@ -44,8 +44,8 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
             WHERE status='Ferdigstilt'::oppgavestatus
               AND oppdatert >= :fom
               AND egenskaper @> ARRAY['EGEN_ANSATT']::VARCHAR[]
-        """,
-            mapOf("fom" to fom),
+            """.trimIndent(),
+            "fom" to fom,
         ).single { it.int("count") } ?: 0
 
     fun getAntallFullførteBeslutteroppgaver(fom: LocalDate) =
@@ -55,32 +55,32 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
             FROM totrinnsvurdering
             WHERE utbetaling_id_ref IS NOT NULL
             AND oppdatert >= :fom
-        """,
-            mapOf("fom" to fom),
+            """.trimIndent(),
+            "fom" to fom,
         ).single { it.int("count") } ?: 0
 
     fun getAutomatiseringPerKombinasjon(fom: LocalDate): StatistikkPerKombinasjon {
         val rader =
             asSQL(
                 """
-            SELECT s.type,
-                s.inntektskilde,
-                CASE WHEN ui.arbeidsgiverbeløp > 0 AND ui.personbeløp > 0 THEN '${Mottakertype.BEGGE}'
-                    WHEN ui.personbeløp > 0 THEN '${Mottakertype.SYKMELDT}'
-                    ELSE '${Mottakertype.ARBEIDSGIVER}'
-                END AS mottakertype,
-                ui.type AS utbetaling_type,
-                count(distinct a.id)
-            FROM automatisering a
-                     INNER JOIN saksbehandleroppgavetype s on s.vedtak_ref = a.vedtaksperiode_ref
-                     INNER JOIN vedtak v ON v.id = a.vedtaksperiode_ref
-                     INNER JOIN vedtaksperiode_utbetaling_id vui on vui.vedtaksperiode_id = v.vedtaksperiode_id 
-                     INNER JOIN utbetaling_id ui on ui.utbetaling_id = vui.utbetaling_id
-            WHERE a.opprettet >= :fom
-              AND a.automatisert = true
-            GROUP BY s.type, s.inntektskilde, mottakertype, utbetaling_type;
-        """,
-                mapOf("fom" to fom),
+                SELECT s.type,
+                    s.inntektskilde,
+                    CASE WHEN ui.arbeidsgiverbeløp > 0 AND ui.personbeløp > 0 THEN '${Mottakertype.BEGGE}'
+                        WHEN ui.personbeløp > 0 THEN '${Mottakertype.SYKMELDT}'
+                        ELSE '${Mottakertype.ARBEIDSGIVER}'
+                    END AS mottakertype,
+                    ui.type AS utbetaling_type,
+                    count(distinct a.id)
+                FROM automatisering a
+                         INNER JOIN saksbehandleroppgavetype s on s.vedtak_ref = a.vedtaksperiode_ref
+                         INNER JOIN vedtak v ON v.id = a.vedtaksperiode_ref
+                         INNER JOIN vedtaksperiode_utbetaling_id vui on vui.vedtaksperiode_id = v.vedtaksperiode_id 
+                         INNER JOIN utbetaling_id ui on ui.utbetaling_id = vui.utbetaling_id
+                WHERE a.opprettet >= :fom
+                  AND a.automatisert = true
+                GROUP BY s.type, s.inntektskilde, mottakertype, utbetaling_type;
+                """.trimIndent(),
+                "fom" to fom,
             )
                 .list {
                     AntallPerKombinasjonRad(
@@ -123,14 +123,14 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
         val rader =
             asSQL(
                 """
-            SELECT s.type, s.inntektskilde, count(distinct o.id)
-            FROM oppgave o
-                     INNER JOIN saksbehandleroppgavetype s on o.vedtak_ref = s.vedtak_ref
-            WHERE o.status = 'Ferdigstilt'
-              AND o.oppdatert >= :fom
-            GROUP BY s.type, s.inntektskilde;
-        """,
-                mapOf("fom" to fom),
+                SELECT s.type, s.inntektskilde, count(distinct o.id)
+                FROM oppgave o
+                         INNER JOIN saksbehandleroppgavetype s on o.vedtak_ref = s.vedtak_ref
+                WHERE o.status = 'Ferdigstilt'
+                  AND o.oppdatert >= :fom
+                GROUP BY s.type, s.inntektskilde;
+                """.trimIndent(),
+                "fom" to fom,
             )
                 .list {
                     AntallPerKombinasjonRad(
@@ -152,9 +152,7 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
             WHERE o.status = 'AvventerSaksbehandler'
             AND o.egenskaper @> ARRAY[:egenskap]::varchar[]
             """.trimIndent(),
-            mapOf(
-                "egenskap" to egenskap.name,
-            ),
+            "egenskap" to egenskap.name,
         ).single { it.int(1) } ?: 0
     }
 
@@ -169,10 +167,8 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
             AND o.oppdatert >= :fom
             AND o.egenskaper @> ARRAY[:egenskap]::varchar[]
             """.trimIndent(),
-            mapOf(
-                "egenskap" to egenskap.name,
-                "fom" to fom,
-            ),
+            "egenskap" to egenskap.name,
+            "fom" to fom,
         ).single { it.int(1) } ?: 0
     }
 
@@ -220,8 +216,8 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
             FROM utbetaling u
             WHERE u.status = 'ANNULLERT'
               AND u.opprettet >= :fom;
-        """,
-            mapOf("fom" to fom),
+            """.trimIndent(),
+            "fom" to fom,
         ).single { it.int("annulleringer") } ?: 0
 
     fun getAntallAvvisninger(fom: LocalDate) =
@@ -234,7 +230,7 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
                 FROM oppgave
                 WHERE status = 'Ferdigstilt' AND oppdatert::DATE = :fom)
             AND forkastet = True;
-        """,
-            mapOf("fom" to fom),
+            """.trimIndent(),
+            "fom" to fom,
         ).single { it.int("avvisninger") } ?: 0
 }

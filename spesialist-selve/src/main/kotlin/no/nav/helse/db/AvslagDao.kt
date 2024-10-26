@@ -16,11 +16,9 @@ class AvslagDao(dataSource: DataSource) : HelseDao(dataSource) {
         """
         INSERT INTO begrunnelse(tekst, type, saksbehandler_ref) VALUES (:tekst, :type, :saksbehandler_ref)
         """.trimIndent(),
-        mapOf(
-            "tekst" to avslagsdata.begrunnelse,
-            "type" to avslagsdata.type.toString(),
-            "saksbehandler_ref" to saksbehandlerOid,
-        ),
+        "tekst" to avslagsdata.begrunnelse,
+        "type" to avslagsdata.type.toString(),
+        "saksbehandler_ref" to saksbehandlerOid,
     ).updateAndReturnGeneratedKey()
 
     internal fun lagreAvslag(
@@ -35,20 +33,16 @@ class AvslagDao(dataSource: DataSource) : HelseDao(dataSource) {
         INNER JOIN selve_vedtaksperiode_generasjon svg ON svg.unik_id = o.generasjon_ref
         WHERE o.id = :oppgaveId 
         """.trimIndent(),
-        mapOf(
-            "oppgaveId" to oppgaveId,
-        ),
+        "oppgaveId" to oppgaveId,
     ).single { Pair(it.uuid("vedtaksperiode_id"), it.long("generasjon_id")) }?.let { (vedtaksperiodeId, generasjonId) ->
         lagreBegrunnelse(avslagsdata, saksbehandlerOid).let { begrunnelseId ->
             asSQL(
                 """
                 INSERT INTO avslag (vedtaksperiode_id, begrunnelse_ref, generasjon_ref) VALUES (:vedtaksperiodeId, :begrunnelseId, :generasjonId)
                 """.trimIndent(),
-                mapOf(
-                    "vedtaksperiodeId" to vedtaksperiodeId,
-                    "begrunnelseId" to begrunnelseId,
-                    "generasjonId" to generasjonId,
-                ),
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "begrunnelseId" to begrunnelseId,
+                "generasjonId" to generasjonId,
             ).update()
         }
     }
@@ -68,9 +62,7 @@ class AvslagDao(dataSource: DataSource) : HelseDao(dataSource) {
             FROM t
             WHERE a.vedtaksperiode_id = t.vedtaksperiode_id AND a.generasjon_ref = t.id
             """.trimIndent(),
-            mapOf(
-                "oppgaveId" to oppgaveId,
-            ),
+            "oppgaveId" to oppgaveId,
         ).update()
 
     internal fun finnAvslag(
@@ -84,17 +76,15 @@ class AvslagDao(dataSource: DataSource) : HelseDao(dataSource) {
         AND invalidert = false 
         ORDER BY opprettet DESC LIMIT 1
         """.trimIndent(),
-        mapOf(
-            "vedtaksperiodeId" to vedtaksperiodeId,
-            "generasjonId" to generasjonId,
-        ),
+        "vedtaksperiodeId" to vedtaksperiodeId,
+        "generasjonId" to generasjonId,
     ).single {
         it.longOrNull("begrunnelse_ref")?.let { begrunnelseRef ->
             asSQL(
                 """
                 SELECT type, tekst FROM begrunnelse WHERE id = :begrunnelseRef
                 """.trimIndent(),
-                mapOf("begrunnelseRef" to begrunnelseRef),
+                "begrunnelseRef" to begrunnelseRef,
             ).single { avslag ->
                 Avslag(enumValueOf(avslag.string("type")), avslag.string("tekst"))
             }
@@ -112,17 +102,15 @@ class AvslagDao(dataSource: DataSource) : HelseDao(dataSource) {
         AND invalidert = false 
         ORDER BY opprettet DESC LIMIT 1
         """.trimIndent(),
-        mapOf(
-            "vedtaksperiodeId" to vedtaksperiodeId,
-            "generasjonId" to generasjonId,
-        ),
+        "vedtaksperiodeId" to vedtaksperiodeId,
+        "generasjonId" to generasjonId,
     ).single(this) {
         it.longOrNull("begrunnelse_ref")?.let { begrunnelseRef ->
             asSQL(
                 """
                 SELECT type, tekst FROM begrunnelse WHERE id = :begrunnelseRef
                 """.trimIndent(),
-                mapOf("begrunnelseRef" to begrunnelseRef),
+                "begrunnelseRef" to begrunnelseRef,
             ).single { avslag ->
                 AvslagDto(enumValueOf(avslag.string("type")), avslag.string("tekst"))
             }
@@ -142,10 +130,8 @@ class AvslagDao(dataSource: DataSource) : HelseDao(dataSource) {
             WHERE a.vedtaksperiode_id = :vedtaksperiodeId AND svg.utbetaling_id = :utbetalingId 
             ORDER BY opprettet DESC
             """.trimIndent(),
-            mapOf(
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "utbetalingId" to utbetalingId,
-            ),
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            "utbetalingId" to utbetalingId,
         ).list { avslag ->
             no.nav.helse.spesialist.api.graphql.schema.Avslag(
                 enumValueOf(avslag.string("type")),

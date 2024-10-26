@@ -11,9 +11,7 @@ class PåVentApiDao(dataSource: DataSource) : HelseDao(dataSource) {
             """
             SELECT frist, saksbehandler_ref FROM pa_vent WHERE vedtaksperiode_id = :vedtaksperiodeId
             """.trimIndent(),
-            mapOf(
-                "vedtaksperiodeId" to vedtaksperiodeId,
-            ),
+            "vedtaksperiodeId" to vedtaksperiodeId,
         ).single {
             PaVent(
                 frist = it.localDate("frist"),

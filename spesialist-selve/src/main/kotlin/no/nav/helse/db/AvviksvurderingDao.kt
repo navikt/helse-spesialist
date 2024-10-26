@@ -98,9 +98,7 @@ class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSour
             ORDER BY av.opprettet DESC
             LIMIT 1;
             """.trimIndent(),
-            mapOf(
-                "vilkarsgrunnlagId" to vilkårsgrunnlagId,
-            ),
+            "vilkarsgrunnlagId" to vilkårsgrunnlagId,
         ).single {
             ApiAvviksvurdering(
                 unikId = it.uuid("unik_id"),

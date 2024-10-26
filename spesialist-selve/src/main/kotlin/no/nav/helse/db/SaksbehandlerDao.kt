@@ -21,7 +21,10 @@ class SaksbehandlerDao(private val dataSource: DataSource) : HelseDao(dataSource
             WHERE (saksbehandler.navn, saksbehandler.epost, saksbehandler.ident)
                 IS DISTINCT FROM (excluded.navn, excluded.epost, excluded.ident)
         """.trimIndent(),
-        mapOf("oid" to oid, "navn" to navn, "epost" to epost, "ident" to ident),
+        "oid" to oid,
+        "navn" to navn,
+        "epost" to epost,
+        "ident" to ident,
     ).update()
 
     fun oppdaterSistObservert(
@@ -33,7 +36,8 @@ class SaksbehandlerDao(private val dataSource: DataSource) : HelseDao(dataSource
         SET siste_handling_utført_tidspunkt = :siste_handling_utfort_tidspunkt
         WHERE oid = :oid
         """.trimIndent(),
-        mapOf("oid" to oid, "siste_handling_utfort_tidspunkt" to sisteHandlingUtført),
+        "oid" to oid,
+        "siste_handling_utfort_tidspunkt" to sisteHandlingUtført,
     ).update()
 
     override fun finnSaksbehandler(oid: UUID) =

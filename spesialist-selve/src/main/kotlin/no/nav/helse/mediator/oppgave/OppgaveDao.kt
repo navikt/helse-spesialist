@@ -121,12 +121,13 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource), Opp
     fun finnVedtaksperiodeId(oppgaveId: Long) =
         requireNotNull(
             asSQL(
-                """ SELECT v.vedtaksperiode_id
-            FROM vedtak v
-            INNER JOIN oppgave o on v.id = o.vedtak_ref
-            WHERE o.id = :oppgaveId
-        """,
-                mapOf("oppgaveId" to oppgaveId),
+                """
+                SELECT v.vedtaksperiode_id
+                FROM vedtak v
+                INNER JOIN oppgave o on v.id = o.vedtak_ref
+                WHERE o.id = :oppgaveId
+                """.trimIndent(),
+                "oppgaveId" to oppgaveId,
             ).single { row -> row.uuid("vedtaksperiode_id") },
         )
 

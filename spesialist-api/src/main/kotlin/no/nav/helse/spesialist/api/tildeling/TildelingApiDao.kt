@@ -16,8 +16,8 @@ class TildelingApiDao(dataSource: DataSource) : HelseDao(dataSource) {
                  RIGHT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
             WHERE fodselsnummer = :fnr AND o.status = 'AvventerSaksbehandler'
             ORDER BY o.opprettet DESC;
-        """,
-            mapOf("fnr" to fødselsnummer.toLong()),
+            """.trimIndent(),
+            "fnr" to fødselsnummer.toLong(),
         ).single(::tildelingDto)
 
     private fun tildelingDto(it: Row) =

@@ -20,7 +20,8 @@ class AbonnementDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     from person p
                     where p.aktor_id = :aktorId
                     """.trimIndent(),
-                    mapOf("saksbehandlerId" to saksbehandlerId, "aktorId" to aktørId),
+                    "saksbehandlerId" to saksbehandlerId,
+                    "aktorId" to aktørId,
                 )
             transactionalSession.run(abonnementQuery.asUpdate)
 
@@ -32,7 +33,8 @@ class AbonnementDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     on conflict (saksbehandler_id) do update
                         set siste_sekvensnummer = (coalesce((select max(sekvensnummer) from opptegnelse), 0))
                     """.trimIndent(),
-                    mapOf("saksbehandlerId" to saksbehandlerId, "aktorId" to aktørId),
+                    "saksbehandlerId" to saksbehandlerId,
+                    "aktorId" to aktørId,
                 )
             transactionalSession.run(sekvensnummerQuery.asUpdate)
         }
@@ -47,6 +49,7 @@ class AbonnementDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         set siste_sekvensnummer = :sisteSekvensId
         where saksbehandler_id = :saksbehandlerId;
         """.trimIndent(),
-        mapOf("sisteSekvensId" to sisteSekvensId, "saksbehandlerId" to saksbehandlerIdent),
+        "sisteSekvensId" to sisteSekvensId,
+        "saksbehandlerId" to saksbehandlerIdent,
     ).update()
 }

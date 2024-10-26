@@ -35,16 +35,6 @@ abstract class HelseDao(private val dataSource: DataSource) {
         fun Query.update(session: Session) = session.run(asUpdate)
     }
 
-    fun asSQL(
-        @Language("SQL") sql: String,
-        argMap: Map<String, Any?> = emptyMap(),
-    ) = queryOf(sql, argMap)
-
-    fun asSQL(
-        @Language("SQL") sql: String,
-        vararg params: Any?,
-    ) = queryOf(sql, *params)
-
     fun <T> Query.single(mapping: (Row) -> T?) = sessionOf(dataSource, strict = true).use { single(it, mapping) }
 
     fun <T> Query.single(

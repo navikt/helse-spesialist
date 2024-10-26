@@ -12,11 +12,12 @@ import javax.sql.DataSource
 class ArbeidsgiverApiDao(dataSource: DataSource) : HelseDao(dataSource) {
     fun finnBransjer(orgnummer: String) =
         asSQL(
-            """ SELECT ab.bransjer FROM arbeidsgiver a
+            """
+            SELECT ab.bransjer FROM arbeidsgiver a
             LEFT JOIN arbeidsgiver_bransjer ab on a.bransjer_ref = ab.id
             WHERE a.orgnummer=:orgnummer;
-        """,
-            mapOf("orgnummer" to orgnummer.toLong()),
+            """.trimIndent(),
+            "orgnummer" to orgnummer.toLong(),
         ).single { row ->
             row.stringOrNull("bransjer")
                 ?.let { objectMapper.readValue<List<String>>(it) }
@@ -25,22 +26,25 @@ class ArbeidsgiverApiDao(dataSource: DataSource) : HelseDao(dataSource) {
 
     fun finnNavn(orgnummer: String) =
         asSQL(
-            """ SELECT an.navn FROM arbeidsgiver a
+            """
+            SELECT an.navn FROM arbeidsgiver a
             JOIN arbeidsgiver_navn an ON a.navn_ref = an.id
             WHERE a.orgnummer=:orgnummer;
-        """,
-            mapOf("orgnummer" to orgnummer.toLong()),
+            """.trimIndent(),
+            "orgnummer" to orgnummer.toLong(),
         ).single { row -> row.string("navn") }
 
     fun finnArbeidsforhold(
         fødselsnummer: String,
         organisasjonsnummer: String,
     ) = asSQL(
-        """ SELECT startdato, sluttdato, stillingstittel, stillingsprosent FROM arbeidsforhold
-            WHERE arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE orgnummer = :orgnummer)
-            AND person_ref = (SELECT id FROM person WHERE fodselsnummer = :fnr);
-        """,
-        mapOf("orgnummer" to organisasjonsnummer.toLong(), "fnr" to fødselsnummer.toLong()),
+        """
+        SELECT startdato, sluttdato, stillingstittel, stillingsprosent FROM arbeidsforhold
+        WHERE arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE orgnummer = :orgnummer)
+        AND person_ref = (SELECT id FROM person WHERE fodselsnummer = :fnr);
+        """.trimIndent(),
+        "orgnummer" to organisasjonsnummer.toLong(),
+        "fnr" to fødselsnummer.toLong(),
     ).list { tilArbeidsforholdApiDto(organisasjonsnummer, it) }
 
     internal fun finnArbeidsgiverInntekterFraAordningen(
@@ -48,12 +52,11 @@ class ArbeidsgiverApiDao(dataSource: DataSource) : HelseDao(dataSource) {
         orgnummer: String,
     ): List<ArbeidsgiverInntekterFraAOrdningen> =
         asSQL(
-            """ SELECT inntekter, skjaeringstidspunkt FROM inntekt
-                WHERE person_ref=(SELECT id FROM person p WHERE p.fodselsnummer = :fodselsnummer)
-            """,
-            mapOf(
-                "fodselsnummer" to fødselsnummer.toLong(),
-            ),
+            """
+            SELECT inntekter, skjaeringstidspunkt FROM inntekt
+            WHERE person_ref=(SELECT id FROM person p WHERE p.fodselsnummer = :fodselsnummer)
+            """.trimIndent(),
+            "fodselsnummer" to fødselsnummer.toLong(),
         ).list { row ->
             ArbeidsgiverInntekterFraAOrdningen(
                 skjaeringstidspunkt = row.string("skjaeringstidspunkt"),

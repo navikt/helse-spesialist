@@ -12,7 +12,7 @@ class VergemålApiDao(dataSource: DataSource) : HelseDao(dataSource) {
             INNER JOIN person p on p.id = v.person_ref
             WHERE p.fodselsnummer = :fodselsnummer
             """.trimIndent(),
-            mapOf("fodselsnummer" to fødselsnummer.toLong()),
+            "fodselsnummer" to fødselsnummer.toLong(),
         ).single { row ->
             row.boolean("har_fremtidsfullmakter") || row.boolean("har_fullmakter")
         }
