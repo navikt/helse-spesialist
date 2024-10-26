@@ -157,7 +157,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val meldingDao = MeldingDao(dataSource)
     internal val meldingDuplikatkontrollDao = MeldingDuplikatkontrollDao(dataSource)
     internal val risikovurderingDao = RisikovurderingDao(dataSource)
-    internal val automatiseringDao = AutomatiseringDao(dataSource)
+    internal val automatiseringDao = AutomatiseringDao(session)
     internal val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
     internal val egenAnsattDao = EgenAnsattDao(dataSource)
     internal val abonnementDao = AbonnementDao(dataSource)

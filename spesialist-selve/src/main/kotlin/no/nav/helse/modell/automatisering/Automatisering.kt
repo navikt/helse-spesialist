@@ -10,7 +10,6 @@ import no.nav.helse.db.MeldingRepository
 import no.nav.helse.db.OverstyringRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.RisikovurderingRepository
-import no.nav.helse.db.TransactionalAutomatiseringDao
 import no.nav.helse.db.TransactionalEgenAnsattDao
 import no.nav.helse.db.TransactionalGenerasjonDao
 import no.nav.helse.db.TransactionalMeldingDao
@@ -68,7 +67,7 @@ internal class Automatisering(
                         transactionalSession,
                         subsumsjonsmelderProvider,
                     ),
-                automatiseringRepository = TransactionalAutomatiseringDao(transactionalSession),
+                automatiseringRepository = AutomatiseringDao(transactionalSession),
                 åpneGosysOppgaverRepository = TransactionalÅpneGosysOppgaverDao(transactionalSession),
                 vergemålRepository = TransactionalVergemålDao(transactionalSession),
                 personRepository = PersonDao(transactionalSession),
