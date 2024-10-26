@@ -9,7 +9,7 @@ import javax.sql.DataSource
 
 internal class PgTotrinnsvurderingDao(
     queryRunner: QueryRunner,
-) : TotrinnsvurderingDaoInterface, QueryRunner by queryRunner {
+) : TotrinnsvurderingDao, QueryRunner by queryRunner {
     constructor(session: Session) : this(MedSession(session))
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 

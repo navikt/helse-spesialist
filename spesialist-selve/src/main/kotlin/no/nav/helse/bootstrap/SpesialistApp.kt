@@ -125,7 +125,7 @@ internal class SpesialistApp(
         ) { subsumsjonsmelder }
     private val totrinnsvurderingService =
         TotrinnsvurderingService(
-            totrinnsvurderingDaoInterface = totrinnsvurderingDao,
+            totrinnsvurderingDao = totrinnsvurderingDao,
             oppgaveRepository = oppgaveDao,
             historikkinnslagRepository = pgHistorikkinnslagRepository,
         )
@@ -226,7 +226,7 @@ internal class SpesialistApp(
                 tildelingRepository = tildelingDao,
                 reservasjonRepository = reservasjonDao,
                 opptegnelseRepository = opptegnelseDao,
-                totrinnsvurderingDaoInterface = totrinnsvurderingDao,
+                totrinnsvurderingDao = totrinnsvurderingDao,
                 saksbehandlerRepository = saksbehandlerDao,
                 rapidsConnection = rapidsConnection,
                 tilgangskontroll = tilgangskontrollørForReservasjon,

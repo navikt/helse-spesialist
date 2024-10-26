@@ -2,7 +2,7 @@ package no.nav.helse.mediator.oppgave
 
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.SaksbehandlerRepository
-import no.nav.helse.db.TotrinnsvurderingDaoInterface
+import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.db.toDto
 import no.nav.helse.mediator.oppgave.OppgaveMapper.toDto
 import no.nav.helse.modell.oppgave.Oppgave
@@ -13,7 +13,7 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDto
 
 class Oppgavehenter(
     private val oppgaveRepository: OppgaveRepository,
-    private val totrinnsvurderingDaoInterface: TotrinnsvurderingDaoInterface,
+    private val totrinnsvurderingDao: TotrinnsvurderingDao,
     private val saksbehandlerRepository: SaksbehandlerRepository,
     private val tilgangskontroll: Tilgangskontroll,
 ) {
@@ -21,7 +21,7 @@ class Oppgavehenter(
         val oppgave =
             oppgaveRepository.finnOppgave(id)
                 ?: throw IllegalStateException("Forventer å finne oppgave med oppgaveId=$id")
-        val totrinnsvurdering = totrinnsvurderingDaoInterface.hentAktivTotrinnsvurdering(id)
+        val totrinnsvurdering = totrinnsvurderingDao.hentAktivTotrinnsvurdering(id)
 
         val dto =
             OppgaveDto(

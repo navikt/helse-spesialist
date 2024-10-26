@@ -11,7 +11,7 @@ import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
-import no.nav.helse.db.TotrinnsvurderingDaoInterface
+import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.EgenskapDto
@@ -187,7 +187,7 @@ class OppgavehenterTest {
 
     private fun totrinnsvurderingRepository(
         totrinnsvurdering: TotrinnsvurderingFraDatabase? = null
-    ) = object : TotrinnsvurderingDaoInterface {
+    ) = object : TotrinnsvurderingDao {
         override fun hentAktivTotrinnsvurdering(oppgaveId: Long): TotrinnsvurderingFraDatabase? = totrinnsvurdering
         override fun oppdater(totrinnsvurderingFraDatabase: TotrinnsvurderingFraDatabase) {}
         override fun settBeslutter(oppgaveId: Long, saksbehandlerOid: UUID) = TODO("Not yet implemented")

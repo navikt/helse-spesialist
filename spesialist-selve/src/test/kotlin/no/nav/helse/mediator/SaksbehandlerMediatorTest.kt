@@ -85,7 +85,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         )
     private val mediator =
         SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, oppgaveService, tilgangsgrupper, stansAutomatiskBehandlingMediator, TotrinnsvurderingService(
-            totrinnsvurderingDaoInterface = totrinnsvurderingDao,
+            totrinnsvurderingDao = totrinnsvurderingDao,
             oppgaveRepository = oppgaveDao,
             historikkinnslagRepository = pgHistorikkinnslagRepository
         ))

@@ -57,7 +57,7 @@ internal class TestMediator(
             tildelingRepository = tildelingDao,
             reservasjonRepository = ReservasjonDao(dataSource),
             opptegnelseRepository = opptegnelseDao,
-            totrinnsvurderingDaoInterface = totrinnsvurderingDao,
+            totrinnsvurderingDao = totrinnsvurderingDao,
             saksbehandlerRepository = saksbehandlerDao,
             rapidsConnection = testRapid,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
@@ -72,7 +72,7 @@ internal class TestMediator(
             tilgangsgrupper,
             stansAutomatiskBehandlingMediator,
             totrinnsvurderingService = TotrinnsvurderingService(
-                totrinnsvurderingDaoInterface = totrinnsvurderingDao,
+                totrinnsvurderingDao = totrinnsvurderingDao,
                 oppgaveRepository = oppgaveDao,
                 historikkinnslagRepository = pgHistorikkinnslagRepository
             )

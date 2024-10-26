@@ -21,7 +21,7 @@ import no.nav.helse.db.ReservasjonRepository
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TildelingRepository
-import no.nav.helse.db.TotrinnsvurderingDaoInterface
+import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.idForGruppe
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.TestMelding
@@ -87,7 +87,7 @@ internal class OppgaveServiceTest {
     private val tildelingRepository = mockk<TildelingRepository>(relaxed = true)
     private val reservasjonRepository = mockk<ReservasjonRepository>(relaxed = true)
     private val opptegnelseRepository = mockk<OpptegnelseRepository>(relaxed = true)
-    private val totrinnsvurderingDaoInterface = mockk<TotrinnsvurderingDaoInterface>(relaxed = true)
+    private val totrinnsvurderingDao = mockk<TotrinnsvurderingDao>(relaxed = true)
     private val saksbehandlerRepository = mockk<SaksbehandlerRepository>()
     private val testRapid = TestRapid()
 
@@ -97,7 +97,7 @@ internal class OppgaveServiceTest {
             tildelingRepository = tildelingRepository,
             reservasjonRepository = reservasjonRepository,
             opptegnelseRepository = opptegnelseRepository,
-            totrinnsvurderingDaoInterface = totrinnsvurderingDaoInterface,
+            totrinnsvurderingDao = totrinnsvurderingDao,
             saksbehandlerRepository = saksbehandlerRepository,
             rapidsConnection = testRapid,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,

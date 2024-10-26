@@ -35,7 +35,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
             tildelingRepository = TildelingDao(dataSource),
             reservasjonRepository = reservasjonDao,
             opptegnelseRepository = OpptegnelseDao(dataSource),
-            totrinnsvurderingDaoInterface = totrinnsvurderingDao,
+            totrinnsvurderingDao = totrinnsvurderingDao,
             saksbehandlerRepository = SaksbehandlerDao(dataSource),
             rapidsConnection = testRapid,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,

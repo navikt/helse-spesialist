@@ -4,14 +4,14 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.HistorikkinnslagRepository
-import no.nav.helse.db.TotrinnsvurderingDaoInterface
+import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingAutomatiskRetur
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class TotrinnsvurderingServiceTest {
-    private val totrinnsvurderingDao = mockk<TotrinnsvurderingDaoInterface>(relaxed = true)
+    private val totrinnsvurderingDao = mockk<TotrinnsvurderingDao>(relaxed = true)
 
     val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val historikkinnslagRepository = mockk<HistorikkinnslagRepository>(relaxed = true)

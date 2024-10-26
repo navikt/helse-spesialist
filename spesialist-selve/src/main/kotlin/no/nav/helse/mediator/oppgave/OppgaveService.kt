@@ -13,7 +13,7 @@ import no.nav.helse.db.ReservasjonRepository
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.TildelingRepository
-import no.nav.helse.db.TotrinnsvurderingDaoInterface
+import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.db.TransactionalOppgaveDao
 import no.nav.helse.db.TransactionalReservasjonDao
@@ -64,7 +64,7 @@ internal class OppgaveService(
     private val tildelingRepository: TildelingRepository,
     private val reservasjonRepository: ReservasjonRepository,
     private val opptegnelseRepository: OpptegnelseRepository,
-    private val totrinnsvurderingDaoInterface: TotrinnsvurderingDaoInterface,
+    private val totrinnsvurderingDao: TotrinnsvurderingDao,
     private val saksbehandlerRepository: SaksbehandlerRepository,
     private val rapidsConnection: RapidsConnection,
     private val tilgangskontroll: Tilgangskontroll,
@@ -79,7 +79,7 @@ internal class OppgaveService(
             tildelingRepository = TransactionalTildelingDao(transactionalSession),
             reservasjonRepository = TransactionalReservasjonDao(transactionalSession),
             opptegnelseRepository = OpptegnelseDao(transactionalSession),
-            totrinnsvurderingDaoInterface = PgTotrinnsvurderingDao(transactionalSession),
+            totrinnsvurderingDao = PgTotrinnsvurderingDao(transactionalSession),
             saksbehandlerRepository = TransactionalSaksbehandlerDao(transactionalSession),
             rapidsConnection = rapidsConnection,
             tilgangskontroll = tilgangskontroll,
@@ -107,7 +107,7 @@ internal class OppgaveService(
         val oppgave =
             Oppgavehenter(
                 oppgaveRepository,
-                totrinnsvurderingDaoInterface,
+                totrinnsvurderingDao,
                 saksbehandlerRepository,
                 tilgangskontroll,
             ).oppgave(id)
@@ -139,7 +139,7 @@ internal class OppgaveService(
                 opprettet = totrinnsvurderingDto.opprettet,
                 oppdatert = totrinnsvurderingDto.oppdatert,
             )
-        totrinnsvurderingDaoInterface.oppdater(totrinnsvurderingFraDatabase)
+        totrinnsvurderingDao.oppdater(totrinnsvurderingFraDatabase)
     }
 
     internal fun håndter(
