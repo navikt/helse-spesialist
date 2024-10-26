@@ -4,7 +4,6 @@ import kotliquery.Query
 import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
-import org.intellij.lang.annotations.Language
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -14,9 +13,8 @@ internal class TotrinnsvurderingDao(
     constructor(session: Session) : this(MedSession(session))
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
-    override fun hentAktivTotrinnsvurdering(oppgaveId: Long): TotrinnsvurderingFraDatabase? {
-        @Language("PostgreSQL")
-        val query =
+    override fun hentAktivTotrinnsvurdering(oppgaveId: Long) =
+        asSQL(
             """
             SELECT v.vedtaksperiode_id,
                    er_retur,
@@ -31,9 +29,9 @@ internal class TotrinnsvurderingDao(
                      LEFT JOIN utbetaling_id ui on ui.id = tv.utbetaling_id_ref
             WHERE o.id = :oppgaveId
               AND utbetaling_id_ref IS NULL
-            """.trimIndent()
-
-        return asSQL(query, "oppgaveId" to oppgaveId).single { row ->
+            """.trimIndent(),
+            "oppgaveId" to oppgaveId,
+        ).single { row ->
             TotrinnsvurderingFraDatabase(
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                 erRetur = row.boolean("er_retur"),
@@ -44,11 +42,9 @@ internal class TotrinnsvurderingDao(
                 oppdatert = row.localDateTimeOrNull("oppdatert"),
             )
         }
-    }
 
     override fun oppdater(totrinnsvurderingFraDatabase: TotrinnsvurderingFraDatabase) {
-        @Language("PostgreSQL")
-        val query =
+        asSQL(
             """
             UPDATE totrinnsvurdering
             SET saksbehandler     = :saksbehandler,
@@ -58,10 +54,7 @@ internal class TotrinnsvurderingDao(
                 utbetaling_id_ref = (SELECT id FROM utbetaling_id ui WHERE ui.utbetaling_id = :utbetaling_id)
             WHERE vedtaksperiode_id = :vedtaksperiode_id
               AND utbetaling_id_ref IS NULL
-            """.trimIndent()
-
-        asSQL(
-            query,
+            """.trimIndent(),
             "saksbehandler" to totrinnsvurderingFraDatabase.saksbehandler,
             "beslutter" to totrinnsvurderingFraDatabase.beslutter,
             "er_retur" to totrinnsvurderingFraDatabase.erRetur,
@@ -75,8 +68,7 @@ internal class TotrinnsvurderingDao(
         oppgaveId: Long,
         saksbehandlerOid: UUID,
     ) {
-        @Language("PostgreSQL")
-        val query =
+        asSQL(
             """
             UPDATE totrinnsvurdering SET beslutter = :saksbehandlerOid, oppdatert = now()
             WHERE vedtaksperiode_id = (
@@ -88,26 +80,19 @@ internal class TotrinnsvurderingDao(
                 LIMIT 1
             )
             AND utbetaling_id_ref IS null
-            """.trimIndent()
-
-        asSQL(
-            query,
+            """.trimIndent(),
             "oppgaveId" to oppgaveId,
             "saksbehandlerOid" to saksbehandlerOid,
         ).update()
     }
 
     override fun settErRetur(vedtaksperiodeId: UUID) {
-        @Language("PostgreSQL")
-        val query =
+        asSQL(
             """
             UPDATE totrinnsvurdering SET er_retur = true, oppdatert = now()
             WHERE vedtaksperiode_id = :vedtaksperiodeId
             AND utbetaling_id_ref IS null
-            """.trimIndent()
-
-        asSQL(
-            query,
+            """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
         ).update()
     }
@@ -117,53 +102,49 @@ internal class TotrinnsvurderingDao(
     }
 
     private fun opprettTotrinnsvurdering(vedtaksperiodeId: UUID): TotrinnsvurderingOld {
-        @Language("PostgreSQL")
-        val query =
+        asSQL(
             """
             INSERT INTO totrinnsvurdering (vedtaksperiode_id) 
             VALUES (:vedtaksperiodeId)
-            """.trimIndent()
-        asSQL(query, "vedtaksperiodeId" to vedtaksperiodeId).update()
-        @Language("PostgreSQL")
-        val selectQuery =
-            """
-            SELECT * FROM totrinnsvurdering 
-            WHERE vedtaksperiode_id = :vedtaksperiodeId
-            """.trimIndent()
-        val totrinnsvurdering = asSQL(selectQuery, "vedtaksperiodeId" to vedtaksperiodeId).tilTotrinnsvurdering()
+            """.trimIndent(),
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        ).update()
+        val totrinnsvurdering =
+            asSQL(
+                """
+                SELECT * FROM totrinnsvurdering 
+                WHERE vedtaksperiode_id = :vedtaksperiodeId
+                """.trimIndent(),
+                "vedtaksperiodeId" to vedtaksperiodeId,
+            ).tilTotrinnsvurdering()
 
         return requireNotNull(totrinnsvurdering)
     }
 
-    override fun hentAktiv(oppgaveId: Long): TotrinnsvurderingOld? {
-        @Language("PostgreSQL")
-        val query =
+    override fun hentAktiv(oppgaveId: Long) =
+        asSQL(
             """
             SELECT * FROM totrinnsvurdering
             INNER JOIN vedtak v on totrinnsvurdering.vedtaksperiode_id = v.vedtaksperiode_id
             INNER JOIN oppgave o on v.id = o.vedtak_ref
             WHERE o.id = :oppgaveId
             AND utbetaling_id_ref IS NULL
-            """.trimIndent()
+            """.trimIndent(),
+            "oppgaveId" to oppgaveId,
+        ).tilTotrinnsvurdering()
 
-        return asSQL(query, "oppgaveId" to oppgaveId).tilTotrinnsvurdering()
-    }
-
-    override fun hentAktiv(vedtaksperiodeId: UUID): TotrinnsvurderingOld? {
-        @Language("PostgreSQL")
-        val query =
+    override fun hentAktiv(vedtaksperiodeId: UUID) =
+        asSQL(
             """
             SELECT * FROM totrinnsvurdering
             WHERE vedtaksperiode_id = :vedtaksperiodeId
             AND utbetaling_id_ref IS NULL
-            """.trimIndent()
-
-        return asSQL(query, "vedtaksperiodeId" to vedtaksperiodeId).tilTotrinnsvurdering()
-    }
+            """.trimIndent(),
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        ).tilTotrinnsvurdering()
 
     override fun ferdigstill(vedtaksperiodeId: UUID) {
-        @Language("PostgreSQL")
-        val query =
+        asSQL(
             """
             UPDATE totrinnsvurdering SET utbetaling_id_ref = (
                 SELECT id FROM utbetaling_id ui
@@ -174,10 +155,7 @@ internal class TotrinnsvurderingDao(
             ), oppdatert = now()
             WHERE vedtaksperiode_id = :vedtaksperiodeId
             AND utbetaling_id_ref IS null
-            """.trimIndent()
-
-        asSQL(
-            query,
+            """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
         ).update()
     }
