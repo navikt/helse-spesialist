@@ -10,12 +10,12 @@ import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgHistorikkinnslagRepository
+import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.PoisonPillDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.BehandlingsstatistikkService
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.GodkjenningService
@@ -99,7 +99,7 @@ internal class SpesialistApp(
     private val notatApiDao = NotatApiDao(dataSource)
     private val notatDao = NotatDao(dataSource)
     private val totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource)
-    private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
+    private val totrinnsvurderingDao = PgTotrinnsvurderingDao(dataSource)
     private val snapshotApiDao = SnapshotApiDao(dataSource)
     private val apiVarselRepository = ApiVarselRepository(dataSource)
     private val dokumentDao = PgDokumentDao(dataSource)

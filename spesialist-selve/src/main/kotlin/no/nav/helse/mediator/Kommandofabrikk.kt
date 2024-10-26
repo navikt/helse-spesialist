@@ -8,7 +8,7 @@ import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.OpptegnelseDao
-import no.nav.helse.db.TotrinnsvurderingDao
+import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.TransactionalAvviksvurderingDao
 import no.nav.helse.db.TransactionalCommandContextDao
 import no.nav.helse.db.TransactionalEgenAnsattDao
@@ -484,7 +484,7 @@ internal class Kommandofabrikk(
 
     private fun lagTotrinnsvurderingService(session: Session) =
         TotrinnsvurderingService(
-            TotrinnsvurderingDao(session),
+            PgTotrinnsvurderingDao(session),
             TransactionalOppgaveDao(session),
             TransactionalPeriodehistorikkDao(session),
         )

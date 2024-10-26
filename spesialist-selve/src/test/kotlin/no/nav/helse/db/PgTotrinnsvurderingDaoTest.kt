@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
+internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `opprett totrinnsvurdering`() {

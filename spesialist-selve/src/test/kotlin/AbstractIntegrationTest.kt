@@ -6,7 +6,7 @@ import no.nav.helse.db.PgHistorikkinnslagRepository
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.TotrinnsvurderingDao
+import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.mediator.GodkjenningService
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -26,7 +26,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     protected val oppgaveDao = OppgaveDao(dataSource)
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val pgHistorikkinnslagRepository = PgHistorikkinnslagRepository(dataSource)
-    private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
+    private val totrinnsvurderingDao = PgTotrinnsvurderingDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
 
     private val oppgaveService =
