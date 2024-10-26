@@ -3,7 +3,6 @@ package no.nav.helse
 import kotliquery.Query
 import kotliquery.Row
 import kotliquery.Session
-import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
@@ -37,17 +36,7 @@ abstract class HelseDao(private val dataSource: DataSource) {
 
     fun <T> Query.single(mapping: (Row) -> T?) = sessionOf(dataSource, strict = true).use { single(it, mapping) }
 
-    fun <T> Query.single(
-        session: TransactionalSession,
-        mapping: (Row) -> T?,
-    ) = with(Companion) { single(session, mapping) }
-
     fun <T> Query.list(mapping: (Row) -> T?) = sessionOf(dataSource).use { list(it, mapping) }
-
-    fun <T> Query.list(
-        session: TransactionalSession,
-        mapping: (Row) -> T?,
-    ) = with(Companion) { list(session, mapping) }
 
     fun Query.update() = sessionOf(dataSource).use { update(it) }
 
