@@ -9,17 +9,19 @@ import kotliquery.action.QueryAction
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
+import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.HelseDao.Companion.updateAndReturnGeneratedKey
 import no.nav.helse.db.AnnulleringDao
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.PgHistorikkinnslagRepository
+import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.januar
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.CommandContextDao
@@ -57,6 +59,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.test.TestPerson
+import no.nav.helse.spesialist.typer.Kjønn
 import no.nav.helse.spleis.graphql.HentSnapshot
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
@@ -136,7 +139,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     @AfterEach
     fun tearDown() = session.close()
 
-    internal val personDao = PersonDao(dataSource)
+    internal val personDao = PersonDao(session)
     internal val oppgaveDao = OppgaveDao(dataSource)
     internal val oppgaveApiDao = OppgaveApiDao(dataSource)
     internal val periodehistorikkApiDao = PeriodehistorikkApiDao(dataSource)
@@ -282,7 +285,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
     ): Persondata {
         val personinfoId =
-            personDao.insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, adressebeskyttelse)
+            insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, adressebeskyttelse)
         val infotrygdutbetalingerId = personDao.upsertInfotrygdutbetalinger(fødselsnummer, objectMapper.createObjectNode())
         val enhetId = ENHET.toInt()
         personId = personDao.insertPerson(fødselsnummer, aktørId, personinfoId, enhetId, infotrygdutbetalingerId)
@@ -295,6 +298,29 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
     }
 
+    protected fun insertPersoninfo(
+        fornavn: String,
+        mellomnavn: String?,
+        etternavn: String,
+        fødselsdato: LocalDate,
+        kjønn: Kjønn,
+        adressebeskyttelse: Adressebeskyttelse,
+    ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+        requireNotNull(
+            asSQL(
+                """
+                INSERT INTO person_info(fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse)
+                VALUES(:fornavn, :mellomnavn, :etternavn, :foedselsdato, CAST(:kjonn as person_kjonn), :adressebeskyttelse);
+                """.trimIndent(),
+                "fornavn" to fornavn,
+                "mellomnavn" to mellomnavn,
+                "etternavn" to etternavn,
+                "foedselsdato" to fødselsdato,
+                "kjonn" to kjønn.name,
+                "adressebeskyttelse" to adressebeskyttelse.name,
+            ).updateAndReturnGeneratedKey(session),
+        )
+    }
 
     protected fun opprettSaksbehandler(
         saksbehandlerOID: UUID = SAKSBEHANDLER_OID,

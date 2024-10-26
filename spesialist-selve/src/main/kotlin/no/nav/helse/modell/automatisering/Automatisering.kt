@@ -15,7 +15,6 @@ import no.nav.helse.db.TransactionalEgenAnsattDao
 import no.nav.helse.db.TransactionalGenerasjonDao
 import no.nav.helse.db.TransactionalMeldingDao
 import no.nav.helse.db.TransactionalOverstyringDao
-import no.nav.helse.db.TransactionalPersonDao
 import no.nav.helse.db.TransactionalRisikovurderingDao
 import no.nav.helse.db.TransactionalVedtakDao
 import no.nav.helse.db.TransactionalVergemålDao
@@ -27,6 +26,7 @@ import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.modell.MeldingDao.OverstyringIgangsattKorrigertSøknad
 import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.person.HentEnhetløsning.Companion.erEnhetUtland
+import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Refusjonstype
@@ -71,7 +71,7 @@ internal class Automatisering(
                 automatiseringRepository = TransactionalAutomatiseringDao(transactionalSession),
                 åpneGosysOppgaverRepository = TransactionalÅpneGosysOppgaverDao(transactionalSession),
                 vergemålRepository = TransactionalVergemålDao(transactionalSession),
-                personRepository = TransactionalPersonDao(transactionalSession),
+                personRepository = PersonDao(transactionalSession),
                 vedtakRepository = TransactionalVedtakDao(transactionalSession),
                 overstyringRepository = TransactionalOverstyringDao(transactionalSession),
                 stikkprøver = stikkprøver,

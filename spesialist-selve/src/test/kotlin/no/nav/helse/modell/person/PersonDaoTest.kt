@@ -5,15 +5,20 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
+import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Isolated
 import java.time.LocalDate
+import java.time.LocalDateTime.now
 import java.time.YearMonth
 
 @Isolated
@@ -26,14 +31,31 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `oppretter minimal person`() {
+        personDao.lagreMinimalPerson(MinimalPersonDto(FNR, AKTØR))
+        val minimalPerson = personDao.finnMinimalPerson(FNR)
+        assertNotNull(minimalPerson)
+        assertEquals(FNR, minimalPerson?.fødselsnummer)
+        assertEquals(AKTØR, minimalPerson?.aktørId)
+    }
+
+    @Test
+    fun `kan fjerne en person fra klargjøringstabellen`() {
+        leggInnPersonIKlargjøringstabellen(FNR)
+        assertTrue(personFinnesIKlargjøringstabellen(FNR))
+        personDao.personKlargjort(FNR)
+        assertFalse(personFinnesIKlargjøringstabellen(FNR))
+    }
+
+    @Test
     fun `lagre personinfo`() {
-        personDao.insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE)
+        personDao.upsertPersoninfo(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE)
         assertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE)
     }
 
     @Test
     fun `ingen mellomnavn`() {
-        personDao.insertPersoninfo(FORNAVN, null, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE)
+        personDao.upsertPersoninfo(FNR, FORNAVN, null, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE)
         assertPersoninfo(FORNAVN, null, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE)
     }
 
@@ -252,6 +274,19 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
                     }.asList,
             )
         }
+
+    private fun leggInnPersonIKlargjøringstabellen(fødselsnummer: String) {
+        asSQL(
+            "insert into person_klargjores (fødselsnummer, opprettet) values (:foedselsnummer, :opprettet)",
+            "foedselsnummer" to fødselsnummer,
+            "opprettet" to now()
+        ).update()
+    }
+
+    private fun personFinnesIKlargjøringstabellen(fødselsnummer: String) = asSQL(
+        "select 1 from person_klargjores where fødselsnummer = :foedselsnummer",
+        "foedselsnummer" to fødselsnummer
+    ).single { true } ?: false
 
     private class Person(
         private val fødselsnummer: String,

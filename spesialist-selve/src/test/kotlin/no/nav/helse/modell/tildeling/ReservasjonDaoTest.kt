@@ -58,7 +58,7 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
     }
 
     private fun opprettData(fødselsnummer: String = FNR) {
-        val personinfoRef = personDao.insertPersoninfo(
+        val personinfoRef = insertPersoninfo(
             "KARI",
             "Mellomnavn",
             "Nordmann",

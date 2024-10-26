@@ -14,6 +14,8 @@ interface QueryRunner {
     fun <T> Query.list(mapping: (Row) -> T?): List<T>
 
     fun Query.update(): Int
+
+    fun Query.updateAndReturnGeneratedKey(): Long?
 }
 
 class MedSession(private val session: Session) : QueryRunner {
@@ -22,6 +24,8 @@ class MedSession(private val session: Session) : QueryRunner {
     override fun <T> Query.list(mapping: (Row) -> T?) = session.run(map(mapping).asList)
 
     override fun Query.update() = session.run(asUpdate)
+
+    override fun Query.updateAndReturnGeneratedKey() = session.run(asUpdateAndReturnGeneratedKey)
 }
 
 class MedDataSource(private val dataSource: DataSource) : QueryRunner {
@@ -32,4 +36,6 @@ class MedDataSource(private val dataSource: DataSource) : QueryRunner {
     override fun <T> Query.list(mapping: (Row) -> T?) = map(mapping).asList.runInSession()
 
     override fun Query.update() = asUpdate.runInSession()
+
+    override fun Query.updateAndReturnGeneratedKey() = asUpdateAndReturnGeneratedKey.runInSession()
 }

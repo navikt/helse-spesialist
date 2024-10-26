@@ -74,7 +74,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             )
         )
         val navn_ref =
-            personDao.insertPersoninfo(
+            insertPersoninfo(
                 PERSON_FORNAVN,
                 null,
                 PERSON_ETTERNAVN,
@@ -371,7 +371,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         assertEquals(1.januar, hentetMinimumSykdomsgrad.fom)
         assertEquals(31.januar, hentetMinimumSykdomsgrad.tom)
         assertTrue(hentetMinimumSykdomsgrad.vurdering)
-        assertEquals("en begrunnelse", hentetMinimumSykdomsgrad.begrunnelse,)
+        assertEquals("en begrunnelse", hentetMinimumSykdomsgrad.begrunnelse)
         assertEquals(SAKSBEHANDLER_NAVN, hentetMinimumSykdomsgrad.saksbehandlerNavn)
         assertEquals(SAKSBEHANDLER_IDENT, hentetMinimumSykdomsgrad.saksbehandlerIdent)
         assertEquals(OPPRETTET, hentetMinimumSykdomsgrad.timestamp)

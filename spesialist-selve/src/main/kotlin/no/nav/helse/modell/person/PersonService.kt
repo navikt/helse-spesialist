@@ -1,10 +1,10 @@
 package no.nav.helse.modell.person
 
+import kotliquery.Session
 import kotliquery.TransactionalSession
 import kotliquery.sessionOf
 import no.nav.helse.db.SykefraværstilfelleDao
 import no.nav.helse.db.TransactionalAvviksvurderingDao
-import no.nav.helse.db.TransactionalPersonDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonService
 import javax.sql.DataSource
 
@@ -53,5 +53,5 @@ internal class PersonService(
         }
     }
 
-    private fun TransactionalSession.finnPerson(fødselsnummer: String): PersonDto? = TransactionalPersonDao(this).finnPerson(fødselsnummer)
+    private fun Session.finnPerson(fødselsnummer: String): PersonDto? = PersonDao(this).finnPerson(fødselsnummer)
 }
