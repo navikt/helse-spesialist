@@ -97,9 +97,7 @@ internal class TotrinnsvurderingDao(
         ).update()
     }
 
-    override fun opprett(vedtaksperiodeId: UUID): TotrinnsvurderingOld {
-        return hentAktiv(vedtaksperiodeId) ?: opprettTotrinnsvurdering(vedtaksperiodeId)
-    }
+    override fun opprett(vedtaksperiodeId: UUID) = hentAktiv(vedtaksperiodeId) ?: opprettTotrinnsvurdering(vedtaksperiodeId)
 
     private fun opprettTotrinnsvurdering(vedtaksperiodeId: UUID): TotrinnsvurderingOld {
         asSQL(
