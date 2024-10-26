@@ -2,33 +2,35 @@ package no.nav.helse.db
 
 import kotliquery.Session
 import kotliquery.queryOf
+import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.HelseDao.Companion.single
+import no.nav.helse.HelseDao.Companion.update
+import no.nav.helse.HelseDao.Companion.updateAndReturnGeneratedKey
 import no.nav.helse.objectMapper
 import org.intellij.lang.annotations.Language
 
-class TransactionalArbeidsgiverDao(
+class ArbeidsgiverDao(
     private val session: Session,
 ) {
     fun findArbeidsgiverByOrgnummer(orgnummer: String) =
-        session.run(
-            queryOf("SELECT id FROM arbeidsgiver WHERE orgnummer=?;", orgnummer.toLong())
-                .map { it.long("id") }
-                .asSingle,
-        )
+        asSQL(
+            "SELECT id FROM arbeidsgiver WHERE orgnummer = :orgnummer;",
+            "orgnummer" to orgnummer.toLong(),
+        ).single(session) { it.long("id") }
 
     fun insertMinimalArbeidsgiver(orgnummer: String) {
-        @Language("PostgreSQL")
-        val query = "INSERT INTO arbeidsgiver(orgnummer) VALUES(:orgnummer)"
-
-        session.run(queryOf(query, mapOf("orgnummer" to orgnummer.toLong())).asUpdate)
+        asSQL(
+            "INSERT INTO arbeidsgiver (orgnummer) VALUES (:orgnummer)",
+            "orgnummer" to orgnummer.toLong(),
+        ).update(session)
     }
 
     fun upsertNavn(
         orgnummer: String,
         navn: String,
-    ) = session
-        .finnArbeidsgiverNavnRef(orgnummer)
-        ?.also { session.oppdaterArbeidsgivernavn(it, navn) }
-        ?: session.opprettArbeidsgivernavn(orgnummer, navn)
+    ) = finnArbeidsgiverNavnRef(orgnummer)
+        ?.also { oppdaterArbeidsgivernavn(it, navn) }
+        ?: opprettArbeidsgivernavn(orgnummer, navn)
 
     fun upsertBransjer(
         orgnummer: String,
@@ -38,49 +40,51 @@ class TransactionalArbeidsgiverDao(
         ?.also { session.oppdaterArbeidsgiverbransjer(it, bransjer) }
         ?: session.opprettArbeidsgiverbransjer(orgnummer, bransjer)
 
-    private fun Session.finnArbeidsgiverNavnRef(orgnummer: String): Long? {
-        @Language("PostgreSQL")
-        val query = "SELECT navn_ref FROM arbeidsgiver WHERE orgnummer=?"
+    private fun finnArbeidsgiverNavnRef(orgnummer: String) =
+        asSQL(
+            "SELECT navn_ref FROM arbeidsgiver WHERE orgnummer = :orgnummer",
+            "orgnummer" to orgnummer.toLong(),
+        ).single(session) { it.longOrNull("navn_ref") }
 
-        return run(queryOf(query, orgnummer.toLong()).map { it.longOrNull("navn_ref") }.asSingle)
-    }
-
-    private fun Session.oppdaterArbeidsgivernavn(
+    private fun oppdaterArbeidsgivernavn(
         arbeidsgivernavnRef: Long,
         navn: String,
     ) {
-        @Language("PostgreSQL")
-        val query = "UPDATE arbeidsgiver_navn SET navn=:navn, navn_oppdatert=now() WHERE id=:arbeidsgivernavnRef"
-
-        run(queryOf(query, mapOf("navn" to navn, "arbeidsgivernavnRef" to arbeidsgivernavnRef)).asUpdate)
+        asSQL(
+            "UPDATE arbeidsgiver_navn SET navn = :navn, navn_oppdatert = now() WHERE id = :arbeidsgivernavnRef",
+            "navn" to navn,
+            "arbeidsgivernavnRef" to arbeidsgivernavnRef,
+        ).update(session)
     }
 
-    private fun Session.opprettArbeidsgivernavn(
+    private fun opprettArbeidsgivernavn(
         orgnummer: String,
         navn: String,
     ) {
-        @Language("PostgreSQL")
-        val query = "INSERT INTO arbeidsgiver_navn (navn, navn_oppdatert) VALUES (?, now())"
-
-        val arbeidsgivernavnId = requireNotNull(run(queryOf(query, navn).asUpdateAndReturnGeneratedKey))
+        val arbeidsgivernavnId =
+            asSQL(
+                "INSERT INTO arbeidsgiver_navn (navn, navn_oppdatert) VALUES (:navn, now())",
+                "navn" to navn,
+            ).updateAndReturnGeneratedKey(session)
+        checkNotNull(arbeidsgivernavnId)
         upsertNavnRef(arbeidsgivernavnId, orgnummer)
     }
 
     // Denne kan endres til update da det ikke ligger søknader som allerede har kommet inn på SendtSøknad-river, men ikke lest inn, igjen
-    private fun Session.upsertNavnRef(
+    private fun upsertNavnRef(
         arbeidsgivernavnRef: Long,
         orgnummer: String,
     ) {
-        @Language("PostgreSQL")
-        val query =
-            "INSERT INTO arbeidsgiver (orgnummer, navn_ref) VALUES(:orgnummer, :arbeidsgivernavnRef) ON CONFLICT(orgnummer) DO UPDATE SET navn_ref=:arbeidsgivernavnRef"
-
-        run(
-            queryOf(
-                query,
-                mapOf("arbeidsgivernavnRef" to arbeidsgivernavnRef, "orgnummer" to orgnummer.toLong()),
-            ).asUpdate,
-        )
+        asSQL(
+            """
+            INSERT INTO arbeidsgiver (orgnummer, navn_ref)
+            VALUES (:orgnummer, :arbeidsgivernavnRef)
+                ON CONFLICT (orgnummer)
+                    DO UPDATE SET navn_ref = :arbeidsgivernavnRef
+            """.trimIndent(),
+            "arbeidsgivernavnRef" to arbeidsgivernavnRef,
+            "orgnummer" to orgnummer.toLong(),
+        ).update(session)
     }
 
     private fun Session.finnArbeidsgiverbransjerRef(orgnummer: String): Long? {
