@@ -9,6 +9,7 @@ import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.db.PgTotrinnsvurderingDao
+import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.ReservasjonRepository
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.SorteringsnøkkelForDatabase
@@ -16,7 +17,6 @@ import no.nav.helse.db.TildelingRepository
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.db.TransactionalOppgaveDao
-import no.nav.helse.db.TransactionalReservasjonDao
 import no.nav.helse.db.TransactionalSaksbehandlerDao
 import no.nav.helse.db.TransactionalTildelingDao
 import no.nav.helse.mediator.SaksbehandlerMediator.Companion.tilApiversjon
@@ -77,7 +77,7 @@ internal class OppgaveService(
         OppgaveService(
             oppgaveRepository = TransactionalOppgaveDao(transactionalSession),
             tildelingRepository = TransactionalTildelingDao(transactionalSession),
-            reservasjonRepository = TransactionalReservasjonDao(transactionalSession),
+            reservasjonRepository = ReservasjonDao(transactionalSession),
             opptegnelseRepository = OpptegnelseDao(transactionalSession),
             totrinnsvurderingDao = PgTotrinnsvurderingDao(transactionalSession),
             saksbehandlerRepository = TransactionalSaksbehandlerDao(transactionalSession),

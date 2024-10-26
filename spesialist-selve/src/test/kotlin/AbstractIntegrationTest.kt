@@ -3,10 +3,10 @@ import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgHistorikkinnslagRepository
+import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.mediator.GodkjenningService
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService

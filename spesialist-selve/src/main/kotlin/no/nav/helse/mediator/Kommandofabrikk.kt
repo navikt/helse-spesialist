@@ -9,6 +9,7 @@ import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
+import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TransactionalAvviksvurderingDao
 import no.nav.helse.db.TransactionalCommandContextDao
 import no.nav.helse.db.TransactionalEgenAnsattDao
@@ -17,7 +18,6 @@ import no.nav.helse.db.TransactionalOppgaveDao
 import no.nav.helse.db.TransactionalOverstyringDao
 import no.nav.helse.db.TransactionalPeriodehistorikkDao
 import no.nav.helse.db.TransactionalPåVentDao
-import no.nav.helse.db.TransactionalReservasjonDao
 import no.nav.helse.db.TransactionalRisikovurderingDao
 import no.nav.helse.db.TransactionalTildelingDao
 import no.nav.helse.db.TransactionalUtbetalingDao
@@ -199,7 +199,7 @@ internal class Kommandofabrikk(
             historikkinnslagRepository = TransactionalPeriodehistorikkDao(session),
             commandContextRepository = TransactionalCommandContextDao(session),
             oppgaveService = transaksjonellOppgaveService(session),
-            reservasjonRepository = TransactionalReservasjonDao(session),
+            reservasjonRepository = ReservasjonDao(session),
             tildelingRepository = TransactionalTildelingDao(session),
             oppgaveRepository = TransactionalOppgaveDao(session),
             totrinnsvurderingService = lagTotrinnsvurderingService(session),
@@ -297,7 +297,7 @@ internal class Kommandofabrikk(
             personbeløp = hendelse.personbeløp,
             utbetalingRepository = TransactionalUtbetalingDao(session),
             opptegnelseRepository = OpptegnelseDao(session),
-            reservasjonRepository = TransactionalReservasjonDao(session),
+            reservasjonRepository = ReservasjonDao(session),
             oppgaveRepository = TransactionalOppgaveDao(session),
             tildelingRepository = TransactionalTildelingDao(session),
             oppgaveService = transaksjonellOppgaveService(session),
@@ -315,7 +315,7 @@ internal class Kommandofabrikk(
             id = hendelse.id,
             commandContextRepository = TransactionalCommandContextDao(session),
             oppgaveService = transaksjonellOppgaveService(session),
-            reservasjonRepository = TransactionalReservasjonDao(session),
+            reservasjonRepository = ReservasjonDao(session),
             tildelingRepository = TransactionalTildelingDao(session),
             oppgaveRepository = TransactionalOppgaveDao(session),
             totrinnsvurderingService = lagTotrinnsvurderingService(session),

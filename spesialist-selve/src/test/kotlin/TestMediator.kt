@@ -3,11 +3,11 @@ import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgHistorikkinnslagRepository
+import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.MeldingMediator
