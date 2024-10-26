@@ -88,7 +88,7 @@ internal class MeldingMediator(
     private val meldingDao: MeldingDao = MeldingDao(dataSource),
     private val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao = MeldingDuplikatkontrollDao(dataSource),
     private val kommandofabrikk: Kommandofabrikk,
-    private val dokumentDao: DokumentDaoInterface = DokumentDao.NonTransactional(dataSource),
+    private val dokumentDao: DokumentDaoInterface = DokumentDao(dataSource),
     avviksvurderingDao: AvviksvurderingDao,
     private val varselRepository: VarselRepository = VarselRepository(dataSource),
     private val stansAutomatiskBehandlingMediator: StansAutomatiskBehandlingMediator,

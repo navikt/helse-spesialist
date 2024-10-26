@@ -163,7 +163,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val vergemålDao = VergemålDao(dataSource)
     internal val generasjonDao = GenerasjonDao(dataSource)
     internal val totrinnsvurderingDao = TotrinnsvurderingDao(session)
-    internal val dokumentDao = DokumentDao.NonTransactional(dataSource)
+    internal val dokumentDao = DokumentDao(dataSource)
     internal val påVentDao = PåVentDao(dataSource)
     internal val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(dataSource)
     internal val notatDao = NotatDao(dataSource)

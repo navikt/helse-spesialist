@@ -102,7 +102,7 @@ internal class SpesialistApp(
     private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
     private val snapshotApiDao = SnapshotApiDao(dataSource)
     private val apiVarselRepository = ApiVarselRepository(dataSource)
-    private val dokumentDao = DokumentDao.NonTransactional(dataSource)
+    private val dokumentDao = DokumentDao(dataSource)
     private val påVentApiDao = PåVentApiDao(dataSource)
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
     private val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(dataSource)
