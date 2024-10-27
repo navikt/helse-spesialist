@@ -11,7 +11,6 @@ import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TransactionalAvviksvurderingDao
-import no.nav.helse.db.TransactionalCommandContextDao
 import no.nav.helse.db.TransactionalEgenAnsattDao
 import no.nav.helse.db.TransactionalMeldingDao
 import no.nav.helse.db.TransactionalOppgaveDao
@@ -29,6 +28,7 @@ import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
+import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.automatisering.Automatisering
@@ -197,7 +197,7 @@ internal class Kommandofabrikk(
             fødselsnummer = hendelse.fødselsnummer(),
             vedtaksperiode = vedtaksperiode,
             historikkinnslagRepository = TransactionalPeriodehistorikkDao(session),
-            commandContextRepository = TransactionalCommandContextDao(session),
+            commandContextRepository = CommandContextDao(session),
             oppgaveService = transaksjonellOppgaveService(session),
             reservasjonRepository = ReservasjonDao(session),
             tildelingRepository = TransactionalTildelingDao(session),
@@ -313,7 +313,7 @@ internal class Kommandofabrikk(
             fødselsnummer = hendelse.fødselsnummer(),
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
             id = hendelse.id,
-            commandContextRepository = TransactionalCommandContextDao(session),
+            commandContextRepository = CommandContextDao(session),
             oppgaveService = transaksjonellOppgaveService(session),
             reservasjonRepository = ReservasjonDao(session),
             tildelingRepository = TransactionalTildelingDao(session),
@@ -362,7 +362,7 @@ internal class Kommandofabrikk(
             førsteKjenteDagFinner = førsteKjenteDagFinner,
             automatisering = Automatisering.Factory.automatisering(session, subsumsjonsmelderProvider, stikkprøver),
             vedtakRepository = TransactionalVedtakDao(session),
-            commandContextRepository = TransactionalCommandContextDao(session),
+            commandContextRepository = CommandContextDao(session),
             personRepository = PersonDao(session),
             inntektskilderRepository = InntektskilderDao(session),
             arbeidsforholdRepository = ArbeidsforholdDao(session),
@@ -390,7 +390,7 @@ internal class Kommandofabrikk(
     ) {
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             session.transaction { transactionalSession ->
-                val transactionalCommandContextDao = TransactionalCommandContextDao(transactionalSession)
+                val transactionalCommandContextDao = CommandContextDao(transactionalSession)
                 iverksett(
                     command = søknadSendt(melding, transactionalSession),
                     meldingId = melding.id,
@@ -416,7 +416,7 @@ internal class Kommandofabrikk(
         transactionalSession: TransactionalSession,
     ): Kommandostarter =
         { kommandooppretter ->
-            val transactionalCommandContextDao = TransactionalCommandContextDao(transactionalSession)
+            val transactionalCommandContextDao = CommandContextDao(transactionalSession)
             val melding = this
             this@Kommandofabrikk.kommandooppretter()?.let { command ->
                 iverksett(

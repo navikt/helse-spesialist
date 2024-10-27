@@ -7,7 +7,6 @@ import no.nav.helse.MetrikkRiver
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.CommandContextRepository
-import no.nav.helse.db.TransactionalCommandContextDao
 import no.nav.helse.mediator.meldinger.AvsluttetMedVedtakRiver
 import no.nav.helse.mediator.meldinger.AvsluttetUtenVedtakRiver
 import no.nav.helse.mediator.meldinger.AvvikVurdertRiver
@@ -434,7 +433,7 @@ internal class MeldingMediator(
                         kommandostarter =
                             kommandofabrikk.lagKommandostarter(
                                 setOf(utgåendeMeldingerMediator, commandContextTilstandMediator),
-                                commandContext(TransactionalCommandContextDao(transactionalSession)),
+                                commandContext(CommandContextDao(transactionalSession)),
                                 transactionalSession,
                             )
                         melding.behandle(this, kommandostarter, transactionalSession)

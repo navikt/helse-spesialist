@@ -2,54 +2,57 @@ package no.nav.helse.modell
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import kotliquery.queryOf
-import kotliquery.sessionOf
+import kotliquery.Session
+import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.db.CommandContextRepository
-import no.nav.helse.db.TransactionalCommandContextDao
+import no.nav.helse.db.MedDataSource
+import no.nav.helse.db.MedSession
+import no.nav.helse.db.QueryRunner
+import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.AVBRUTT
 import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.FEIL
+import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.FERDIG
+import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.NY
 import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.SUSPENDERT
 import no.nav.helse.modell.kommando.CommandContext
-import org.intellij.lang.annotations.Language
 import java.util.UUID
 import javax.sql.DataSource
 
 internal class CommandContextDao(
-    private val dataSource: DataSource,
-) : CommandContextRepository {
+    queryRunner: QueryRunner,
+) : CommandContextRepository, QueryRunner by queryRunner {
+    constructor(session: Session) : this(MedSession(session))
+    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
+
     private companion object {
         private val mapper = jacksonObjectMapper()
     }
 
-    override fun nyContext(meldingId: UUID): CommandContext =
-        sessionOf(dataSource).use { session ->
-            TransactionalCommandContextDao(session).nyContext(meldingId)
+    override fun nyContext(meldingId: UUID): CommandContext {
+        val contextId = UUID.randomUUID()
+        return CommandContext(contextId).apply {
+            opprett(meldingId, contextId)
         }
+    }
 
     override fun opprett(
         hendelseId: UUID,
         contextId: UUID,
     ) {
-        sessionOf(dataSource).use { session ->
-            TransactionalCommandContextDao(session).opprett(hendelseId, contextId)
-        }
+        lagre(hendelseId, contextId, NY, null)
     }
 
     override fun ferdig(
         hendelseId: UUID,
         contextId: UUID,
     ) {
-        sessionOf(dataSource).use { session ->
-            TransactionalCommandContextDao(session).ferdig(hendelseId, contextId)
-        }
+        lagre(hendelseId, contextId, FERDIG, null)
     }
 
     override fun feil(
         hendelseId: UUID,
         contextId: UUID,
     ) {
-        sessionOf(dataSource).use { session ->
-            TransactionalCommandContextDao(session).feil(hendelseId, contextId)
-        }
+        lagre(hendelseId, contextId, FEIL, null)
     }
 
     override fun suspendert(
@@ -58,51 +61,113 @@ internal class CommandContextDao(
         hash: UUID,
         sti: List<Int>,
     ) {
-        sessionOf(dataSource).use { session ->
-            TransactionalCommandContextDao(session).suspendert(hendelseId, contextId, hash, sti)
-        }
+        lagre(hendelseId, contextId, SUSPENDERT, hash, sti)
     }
 
     override fun avbryt(
         vedtaksperiodeId: UUID,
         contextId: UUID,
     ): List<Pair<UUID, UUID>> {
-        sessionOf(dataSource).use { session ->
-            return TransactionalCommandContextDao(session).avbryt(vedtaksperiodeId, contextId)
+        val konteksterSomSkalAvbrytes = finnContexterSomSkalAvbrytes(contextId, vedtaksperiodeId)
+        konteksterSomSkalAvbrytes.forEach {
+            avbrytContext(it.contextId, it.hendelseId, it.data)
         }
+        return konteksterSomSkalAvbrytes.map { it.contextId to it.hendelseId }
     }
 
-    override fun tidsbrukForContext(contextId: UUID): Int =
-        sessionOf(dataSource).use { session ->
-            TransactionalCommandContextDao(session).tidsbrukForContext(contextId)
+    private fun lagre(
+        hendelseId: UUID,
+        contextId: UUID,
+        tilstand: CommandContextTilstand,
+        hash: UUID?,
+        sti: List<Int> = emptyList(),
+    ) {
+        asSQL(
+            """
+            INSERT INTO command_context(context_id, hendelse_id, tilstand, data, hash)
+            VALUES (:contextId, :hendelseId, :tilstand, :data::json, :hash)
+            """.trimIndent(),
+            "contextId" to contextId,
+            "hendelseId" to hendelseId,
+            "tilstand" to tilstand.name,
+            "data" to mapper.writeValueAsString(CommandContextDto(sti)),
+            "hash" to hash,
+        ).update()
+    }
+
+    private data class ContextRad(
+        val contextId: UUID,
+        val hendelseId: UUID,
+        val data: String,
+    )
+
+    private fun avbrytContext(
+        contextId: UUID,
+        hendelseId: UUID,
+        data: String,
+    ) {
+        asSQL(
+            """
+            INSERT INTO command_context(context_id, hendelse_id, tilstand, data)
+            VALUES (:contextId, :hendelseId, :avbrutt, :data::json)
+            """.trimIndent(),
+            "avbrutt" to AVBRUTT.name,
+            "contextId" to contextId,
+            "hendelseId" to hendelseId,
+            "data" to data,
+        ).update()
+    }
+
+    private fun finnContexterSomSkalAvbrytes(
+        contextId: UUID,
+        vedtaksperiodeId: UUID,
+    ) = asSQL(
+        """
+        WITH siste_contexter AS (SELECT DISTINCT ON (context_id) context_id, hendelse_id, tilstand, data
+        FROM command_context
+        WHERE hendelse_id in (
+            SELECT hendelse_ref FROM vedtaksperiode_hendelse WHERE vedtaksperiode_id = :vedtaksperiodeId
+        )
+        AND context_id != :contextId
+        ORDER BY context_id, id DESC)
+        SELECT * FROM siste_contexter WHERE tilstand IN (:ny, :suspendert)
+        """.trimIndent(),
+        "vedtaksperiodeId" to vedtaksperiodeId,
+        "contextId" to contextId,
+        "ny" to NY.name,
+        "suspendert" to SUSPENDERT.name,
+    ).list { ContextRad(it.uuid("context_id"), it.uuid("hendelse_id"), it.string("data")) }
+
+    override fun tidsbrukForContext(contextId: UUID): Int {
+        return asSQL(
+            """
+            select extract(milliseconds from (max(opprettet) - min(opprettet))) as tid_brukt_ms
+            from command_context
+            where context_id = :contextId
+            """.trimIndent(),
+            "contextId" to contextId,
+        ).single { it.int("tid_brukt_ms") }!! // Kan bruke !! fordi mappingen thrower hvis spørringen ikke fant noe
+    }
+
+    fun finnSuspendert(contextId: UUID) =
+        finnSiste(contextId)?.takeIf { it.first == SUSPENDERT }?.let { (_, dto, hash) ->
+            CommandContext(contextId, dto.sti, hash?.let { UUID.fromString(it) })
         }
 
-    fun finnSuspendert(id: UUID) =
-        finnSiste(id)?.takeIf { it.first == SUSPENDERT }?.let { (_, dto, hash) ->
-            CommandContext(id, dto.sti, hash?.let { UUID.fromString(it) })
+    fun finnSuspendertEllerFeil(contextId: UUID) =
+        finnSiste(contextId)?.takeIf { it.first == SUSPENDERT || it.first == FEIL }?.let { (_, dto, hash) ->
+            CommandContext(contextId, dto.sti, hash?.let { UUID.fromString(it) })
         }
 
-    fun finnSuspendertEllerFeil(id: UUID) =
-        finnSiste(id)?.takeIf { it.first == SUSPENDERT || it.first == FEIL }?.let { (_, dto, hash) ->
-            CommandContext(id, dto.sti, hash?.let { UUID.fromString(it) })
-        }
-
-    private fun finnSiste(id: UUID) =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query =
-                """SELECT tilstand, data, hash FROM command_context WHERE context_id = ? ORDER BY id DESC LIMIT 1"""
-            session.run(
-                queryOf(
-                    query,
-                    id,
-                ).map {
-                    Triple(
-                        enumValueOf<CommandContextTilstand>(it.string("tilstand")),
-                        mapper.readValue<CommandContextDto>(it.string("data")),
-                        it.stringOrNull("hash"),
-                    )
-                }.asSingle,
+    private fun finnSiste(contextId: UUID) =
+        asSQL(
+            """SELECT tilstand, data, hash FROM command_context WHERE context_id = :contextId ORDER BY id DESC LIMIT 1""",
+            "contextId" to contextId,
+        ).single {
+            Triple(
+                enumValueOf<CommandContextTilstand>(it.string("tilstand")),
+                mapper.readValue<CommandContextDto>(it.string("data")),
+                it.stringOrNull("hash"),
             )
         }
 
