@@ -1,4 +1,4 @@
-package no.nav.helse.modell
+package no.nav.helse.modell.kommando
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -8,12 +8,11 @@ import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.MedDataSource
 import no.nav.helse.db.MedSession
 import no.nav.helse.db.QueryRunner
-import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.AVBRUTT
-import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.FEIL
-import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.FERDIG
-import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.NY
-import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.SUSPENDERT
-import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.kommando.CommandContextDao.CommandContextTilstand.AVBRUTT
+import no.nav.helse.modell.kommando.CommandContextDao.CommandContextTilstand.FEIL
+import no.nav.helse.modell.kommando.CommandContextDao.CommandContextTilstand.FERDIG
+import no.nav.helse.modell.kommando.CommandContextDao.CommandContextTilstand.NY
+import no.nav.helse.modell.kommando.CommandContextDao.CommandContextTilstand.SUSPENDERT
 import java.util.UUID
 import javax.sql.DataSource
 

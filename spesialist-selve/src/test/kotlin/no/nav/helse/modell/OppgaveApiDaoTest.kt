@@ -1,14 +1,15 @@
 package no.nav.helse.modell
 
 import DatabaseIntegrationTest
-import java.util.UUID
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.kommando.CommandContextDao
 import no.nav.helse.modell.kommando.TestMelding
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 class OppgaveApiDaoTest : DatabaseIntegrationTest() {
     private val CONTEXT_ID = UUID.randomUUID()
