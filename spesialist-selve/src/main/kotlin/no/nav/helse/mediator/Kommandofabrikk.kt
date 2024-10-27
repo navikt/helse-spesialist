@@ -16,7 +16,6 @@ import no.nav.helse.db.TransactionalMeldingDao
 import no.nav.helse.db.TransactionalOppgaveDao
 import no.nav.helse.db.TransactionalOverstyringDao
 import no.nav.helse.db.TransactionalPeriodehistorikkDao
-import no.nav.helse.db.TransactionalPåVentDao
 import no.nav.helse.db.TransactionalRisikovurderingDao
 import no.nav.helse.db.TransactionalUtbetalingDao
 import no.nav.helse.db.TransactionalVedtakDao
@@ -50,6 +49,7 @@ import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.SøknadSendtCommand
+import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
@@ -362,7 +362,7 @@ internal class Kommandofabrikk(
             vergemålRepository = TransactionalVergemålDao(session),
             åpneGosysOppgaverRepository = TransactionalÅpneGosysOppgaverDao(session),
             risikovurderingRepository = TransactionalRisikovurderingDao(session),
-            påVentRepository = TransactionalPåVentDao(session),
+            påVentRepository = PåVentDao(session),
             overstyringRepository = TransactionalOverstyringDao(session),
             periodehistorikkDao = TransactionalPeriodehistorikkDao(session),
             oppgaveRepository = TransactionalOppgaveDao(session),

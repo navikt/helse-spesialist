@@ -167,7 +167,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val generasjonDao = GenerasjonDao(dataSource)
     internal val totrinnsvurderingDao = PgTotrinnsvurderingDao(session)
     internal val dokumentDao = PgDokumentDao(dataSource)
-    internal val påVentDao = PåVentDao(dataSource)
+    internal val påVentDao = PåVentDao(session)
     internal val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(dataSource)
     internal val notatDao = NotatDao(dataSource)
     internal val annulleringDao = AnnulleringDao(dataSource)

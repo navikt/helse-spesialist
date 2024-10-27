@@ -1,14 +1,19 @@
 package no.nav.helse.modell.påvent
 
-import kotliquery.sessionOf
-import no.nav.helse.HelseDao
+import kotliquery.Session
+import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.db.MedDataSource
+import no.nav.helse.db.MedSession
 import no.nav.helse.db.PåVentRepository
-import no.nav.helse.db.TransactionalPåVentDao
+import no.nav.helse.db.QueryRunner
 import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 
-class PåVentDao(private val dataSource: DataSource) : HelseDao(dataSource), PåVentRepository {
+class PåVentDao(private val queryRunner: QueryRunner) : PåVentRepository, QueryRunner by queryRunner {
+    constructor(session: Session) : this(MedSession(session))
+    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
+
     fun lagrePåVent(
         oppgaveId: Long,
         saksbehandlerOid: UUID,
@@ -50,11 +55,13 @@ class PåVentDao(private val dataSource: DataSource) : HelseDao(dataSource), På
             ).update()
         }
 
-    override fun erPåVent(vedtaksperiodeId: UUID): Boolean {
-        sessionOf(dataSource).use { session ->
-            return TransactionalPåVentDao(session).erPåVent(vedtaksperiodeId)
-        }
-    }
+    override fun erPåVent(vedtaksperiodeId: UUID) =
+        asSQL(
+            """
+            SELECT 1 FROM pa_vent WHERE vedtaksperiode_id = :vedtaksperiodeId
+            """.trimIndent(),
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        ).single { true } ?: false
 
     fun erPåVent(oppgaveId: Long) =
         asSQL(
@@ -65,5 +72,5 @@ class PåVentDao(private val dataSource: DataSource) : HelseDao(dataSource), På
             where o.id = :oppgaveId
             """.trimIndent(),
             "oppgaveId" to oppgaveId,
-        ).single { it.boolean(1) } ?: false
+        ).single { true } ?: false
 }
