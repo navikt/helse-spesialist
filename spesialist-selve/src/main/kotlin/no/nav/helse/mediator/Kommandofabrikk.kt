@@ -10,6 +10,7 @@ import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.ReservasjonDao
+import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TransactionalAvviksvurderingDao
 import no.nav.helse.db.TransactionalEgenAnsattDao
 import no.nav.helse.db.TransactionalMeldingDao
@@ -18,7 +19,6 @@ import no.nav.helse.db.TransactionalOverstyringDao
 import no.nav.helse.db.TransactionalPeriodehistorikkDao
 import no.nav.helse.db.TransactionalPåVentDao
 import no.nav.helse.db.TransactionalRisikovurderingDao
-import no.nav.helse.db.TransactionalTildelingDao
 import no.nav.helse.db.TransactionalUtbetalingDao
 import no.nav.helse.db.TransactionalVedtakDao
 import no.nav.helse.db.TransactionalVergemålDao
@@ -118,13 +118,10 @@ internal class Kommandofabrikk(
     ): GosysOppgaveEndretCommand {
         val utbetaling = TransactionalUtbetalingDao(transactionalSession).hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
         val harTildeltOppgave =
-            TransactionalTildelingDao(
-                transactionalSession,
-            ).tildelingForOppgave(oppgaveDataForAutomatisering.oppgaveId) != null
+            TildelingDao(transactionalSession).tildelingForOppgave(oppgaveDataForAutomatisering.oppgaveId) != null
         val godkjenningsbehovData =
-            TransactionalMeldingDao(
-                transactionalSession,
-            ).finnGodkjenningsbehov(oppgaveDataForAutomatisering.hendelseId).data()
+            TransactionalMeldingDao(transactionalSession)
+                .finnGodkjenningsbehov(oppgaveDataForAutomatisering.hendelseId).data()
 
         return GosysOppgaveEndretCommand(
             utbetaling = utbetaling,
@@ -147,9 +144,7 @@ internal class Kommandofabrikk(
         transactionalSession: TransactionalSession,
     ): TilbakedateringGodkjentCommand {
         val godkjenningsbehovData =
-            TransactionalMeldingDao(
-                transactionalSession,
-            ).finnGodkjenningsbehov(oppgaveDataForAutomatisering.hendelseId).data()
+            TransactionalMeldingDao(transactionalSession).finnGodkjenningsbehov(oppgaveDataForAutomatisering.hendelseId).data()
         val sykefraværstilfelle = person.sykefraværstilfelle(godkjenningsbehovData.vedtaksperiodeId)
         val utbetaling = TransactionalUtbetalingDao(transactionalSession).hentUtbetaling(godkjenningsbehovData.utbetalingId)
 
@@ -200,7 +195,7 @@ internal class Kommandofabrikk(
             commandContextRepository = CommandContextDao(session),
             oppgaveService = transaksjonellOppgaveService(session),
             reservasjonRepository = ReservasjonDao(session),
-            tildelingRepository = TransactionalTildelingDao(session),
+            tildelingRepository = TildelingDao(session),
             oppgaveRepository = TransactionalOppgaveDao(session),
             totrinnsvurderingService = lagTotrinnsvurderingService(session),
         )
@@ -299,7 +294,7 @@ internal class Kommandofabrikk(
             opptegnelseRepository = OpptegnelseDao(session),
             reservasjonRepository = ReservasjonDao(session),
             oppgaveRepository = TransactionalOppgaveDao(session),
-            tildelingRepository = TransactionalTildelingDao(session),
+            tildelingRepository = TildelingDao(session),
             oppgaveService = transaksjonellOppgaveService(session),
             totrinnsvurderingService = lagTotrinnsvurderingService(session),
             json = hendelse.toJson(),
@@ -316,7 +311,7 @@ internal class Kommandofabrikk(
             commandContextRepository = CommandContextDao(session),
             oppgaveService = transaksjonellOppgaveService(session),
             reservasjonRepository = ReservasjonDao(session),
-            tildelingRepository = TransactionalTildelingDao(session),
+            tildelingRepository = TildelingDao(session),
             oppgaveRepository = TransactionalOppgaveDao(session),
             totrinnsvurderingService = lagTotrinnsvurderingService(session),
         )
