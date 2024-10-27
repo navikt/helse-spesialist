@@ -68,11 +68,9 @@ internal class CommandContextDao(
         vedtaksperiodeId: UUID,
         contextId: UUID,
     ): List<Pair<UUID, UUID>> {
-        val konteksterSomSkalAvbrytes = finnContexterSomSkalAvbrytes(contextId, vedtaksperiodeId)
-        konteksterSomSkalAvbrytes.forEach {
-            avbrytContext(it.contextId, it.hendelseId, it.data)
-        }
-        return konteksterSomSkalAvbrytes.map { it.contextId to it.hendelseId }
+        val kontekster = finnContexterSomSkalAvbrytes(contextId, vedtaksperiodeId)
+        kontekster.forEach(::avbrytContext)
+        return kontekster.map { it.contextId to it.hendelseId }
     }
 
     private fun lagre(
@@ -101,20 +99,16 @@ internal class CommandContextDao(
         val data: String,
     )
 
-    private fun avbrytContext(
-        contextId: UUID,
-        hendelseId: UUID,
-        data: String,
-    ) {
+    private fun avbrytContext(contextRad: ContextRad) {
         asSQL(
             """
             INSERT INTO command_context(context_id, hendelse_id, tilstand, data)
             VALUES (:contextId, :hendelseId, :avbrutt, :data::json)
             """.trimIndent(),
             "avbrutt" to AVBRUTT.name,
-            "contextId" to contextId,
-            "hendelseId" to hendelseId,
-            "data" to data,
+            "contextId" to contextRad.contextId,
+            "hendelseId" to contextRad.hendelseId,
+            "data" to contextRad.data,
         ).update()
     }
 
@@ -138,8 +132,8 @@ internal class CommandContextDao(
         "suspendert" to SUSPENDERT.name,
     ).list { ContextRad(it.uuid("context_id"), it.uuid("hendelse_id"), it.string("data")) }
 
-    override fun tidsbrukForContext(contextId: UUID): Int {
-        return asSQL(
+    override fun tidsbrukForContext(contextId: UUID) =
+        asSQL(
             """
             select extract(milliseconds from (max(opprettet) - min(opprettet))) as tid_brukt_ms
             from command_context
@@ -147,7 +141,6 @@ internal class CommandContextDao(
             """.trimIndent(),
             "contextId" to contextId,
         ).single { it.int("tid_brukt_ms") }!! // Kan bruke !! fordi mappingen thrower hvis spørringen ikke fant noe
-    }
 
     fun finnSuspendert(contextId: UUID) =
         finnSiste(contextId)?.takeIf { it.first == SUSPENDERT }?.let { (_, dto, hash) ->
