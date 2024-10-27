@@ -14,7 +14,6 @@ import no.nav.helse.db.TransactionalEgenAnsattDao
 import no.nav.helse.db.TransactionalGenerasjonDao
 import no.nav.helse.db.TransactionalMeldingDao
 import no.nav.helse.db.TransactionalOverstyringDao
-import no.nav.helse.db.TransactionalRisikovurderingDao
 import no.nav.helse.db.TransactionalVedtakDao
 import no.nav.helse.db.TransactionalVergemålDao
 import no.nav.helse.db.TransactionalÅpneGosysOppgaverDao
@@ -26,6 +25,7 @@ import no.nav.helse.modell.MeldingDao.OverstyringIgangsattKorrigertSøknad
 import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.person.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Refusjonstype
@@ -61,7 +61,7 @@ internal class Automatisering(
             stikkprøver: Stikkprøver,
         ): Automatisering {
             return Automatisering(
-                risikovurderingRepository = TransactionalRisikovurderingDao(transactionalSession),
+                risikovurderingRepository = RisikovurderingDao(transactionalSession),
                 stansAutomatiskBehandlinghåndterer =
                     StansAutomatiskBehandlingMediator.Factory.stansAutomatiskBehandlingMediator(
                         transactionalSession,
