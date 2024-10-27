@@ -29,7 +29,8 @@ class MedSession(private val session: Session) : QueryRunner {
 }
 
 class MedDataSource(private val dataSource: DataSource) : QueryRunner {
-    private fun <T> QueryAction<T>.runInSession() = sessionOf(dataSource).use(::runWithSession)
+    private fun <T> QueryAction<T>.runInSession(returnGeneratedKey: Boolean = false) =
+        sessionOf(dataSource, returnGeneratedKey).use(::runWithSession)
 
     override fun <T> Query.single(mapping: (Row) -> T?) = map(mapping).asSingle.runInSession()
 
@@ -37,5 +38,5 @@ class MedDataSource(private val dataSource: DataSource) : QueryRunner {
 
     override fun Query.update() = asUpdate.runInSession()
 
-    override fun Query.updateAndReturnGeneratedKey() = asUpdateAndReturnGeneratedKey.runInSession()
+    override fun Query.updateAndReturnGeneratedKey() = asUpdateAndReturnGeneratedKey.runInSession(returnGeneratedKey = true)
 }

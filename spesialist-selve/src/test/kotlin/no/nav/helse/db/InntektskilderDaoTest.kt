@@ -25,7 +25,7 @@ import java.util.UUID
 
 internal class InntektskilderDaoTest : DatabaseIntegrationTest() {
     private val dao = InntektskilderDao(session)
-    private val avviksvurderingDao = AvviksvurderingDao(dataSource)
+    private val avviksvurderingDao = AvviksvurderingDao(session)
 
     @Test
     fun `når det ikke finnes arbeidsgivere i databasen får vi kun tilbake nye inntektskilder`() {

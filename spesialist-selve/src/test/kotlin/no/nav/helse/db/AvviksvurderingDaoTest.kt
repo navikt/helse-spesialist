@@ -20,7 +20,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class AvviksvurderingDaoTest : DatabaseIntegrationTest() {
-    private val avviksvurderingDao = AvviksvurderingDao(dataSource)
+    private val avviksvurderingDao = AvviksvurderingDao(session)
 
     @Test
     fun `lagre avviksvurdering`() {

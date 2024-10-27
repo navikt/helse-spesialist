@@ -11,7 +11,6 @@ import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.TransactionalAvviksvurderingDao
 import no.nav.helse.db.TransactionalEgenAnsattDao
 import no.nav.helse.db.TransactionalMeldingDao
 import no.nav.helse.db.TransactionalOppgaveDao
@@ -92,12 +91,9 @@ internal class Kommandofabrikk(
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    private val avviksvurderingDao = AvviksvurderingDao(dataSource)
     private val oppgaveService: OppgaveService by lazy { oppgaveService() }
 
-    internal fun avviksvurdering(avviksvurdering: AvviksvurderingDto) {
-        avviksvurderingDao.lagre(avviksvurdering)
-    }
+    internal fun avviksvurdering(avviksvurdering: AvviksvurderingDto) = AvviksvurderingDao(dataSource).lagre(avviksvurdering)
 
     internal fun endretEgenAnsattStatus(
         melding: EndretEgenAnsattStatus,
@@ -370,7 +366,7 @@ internal class Kommandofabrikk(
             overstyringRepository = TransactionalOverstyringDao(session),
             periodehistorikkDao = TransactionalPeriodehistorikkDao(session),
             oppgaveRepository = TransactionalOppgaveDao(session),
-            avviksvurderingRepository = TransactionalAvviksvurderingDao(session),
+            avviksvurderingRepository = AvviksvurderingDao(session),
             oppgaveService = transaksjonellOppgaveService(session),
             godkjenningMediator = GodkjenningMediator(OpptegnelseDao(session)),
             totrinnsvurderingService = lagTotrinnsvurderingService(session),

@@ -1,91 +1,85 @@
 package no.nav.helse.db
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import no.nav.helse.HelseDao
+import kotliquery.Session
+import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
+import no.nav.helse.modell.vilkårsprøving.BeregningsgrunnlagDto
+import no.nav.helse.modell.vilkårsprøving.SammenligningsgrunnlagDto
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.avviksvurdering.Beregningsgrunnlag
 import no.nav.helse.spesialist.api.avviksvurdering.Sammenligningsgrunnlag
-import org.intellij.lang.annotations.Language
-import org.slf4j.LoggerFactory
 import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering as ApiAvviksvurdering
 
-class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
+class AvviksvurderingDao(private val queryRunner: QueryRunner) : AvviksvurderingRepository, QueryRunner by queryRunner {
+    constructor(session: Session) : this(MedSession(session))
+    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
+
     internal fun lagre(avviksvurdering: AvviksvurderingDto) {
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            @Language("PostgreSQL")
-            val opprettAvviksvurderingQuery =
+        val sammenligningsgrunnlagRef =
+            asSQL(
                 """
-                INSERT INTO avviksvurdering(unik_id, fødselsnummer, skjæringstidspunkt, opprettet, avviksprosent, beregningsgrunnlag, sammenligningsgrunnlag_ref)
-                VALUES (:unik_id, :fodselsnummer, :skjaeringstidspunkt, :opprettet, :avviksprosent, CAST(:beregningsgrunnlag as json), :sammenligningsgrunnlag_ref)
-                ON CONFLICT (unik_id) DO UPDATE SET opprettet = excluded.opprettet, avviksprosent = excluded.avviksprosent, beregningsgrunnlag = excluded.beregningsgrunnlag, sammenligningsgrunnlag_ref = excluded.sammenligningsgrunnlag_ref;
-                """.trimIndent()
+                INSERT INTO sammenligningsgrunnlag (fødselsnummer, skjæringstidspunkt, opprettet, sammenligningsgrunnlag)
+                VALUES (:foedselsnummer, :skjaeringstidspunkt, :opprettet, CAST(:sammenligningsgrunnlag as json));
+                """.trimIndent(),
+                "foedselsnummer" to avviksvurdering.fødselsnummer,
+                "skjaeringstidspunkt" to avviksvurdering.skjæringstidspunkt,
+                "opprettet" to avviksvurdering.opprettet,
+                "sammenligningsgrunnlag" to objectMapper.writeValueAsString(avviksvurdering.sammenligningsgrunnlag),
+            ).updateAndReturnGeneratedKey()
 
-            @Language("PostgreSQL")
-            val opprettSammenligningsgrunnlagQuery =
+        asSQL(
+            """
+            INSERT INTO avviksvurdering (unik_id, fødselsnummer, skjæringstidspunkt, opprettet, avviksprosent, beregningsgrunnlag, sammenligningsgrunnlag_ref)
+            VALUES (:unikId, :foedselsnummer, :skjaeringstidspunkt, :opprettet, :avviksprosent, CAST(:beregningsgrunnlag as json), :sammenligningsgrunnlagRef)
+            ON CONFLICT (unik_id) DO UPDATE SET opprettet = excluded.opprettet, avviksprosent = excluded.avviksprosent, beregningsgrunnlag = excluded.beregningsgrunnlag, sammenligningsgrunnlag_ref = excluded.sammenligningsgrunnlag_ref;
+            """.trimIndent(),
+            "unikId" to avviksvurdering.unikId,
+            "foedselsnummer" to avviksvurdering.fødselsnummer,
+            "skjaeringstidspunkt" to avviksvurdering.skjæringstidspunkt,
+            "opprettet" to avviksvurdering.opprettet,
+            "avviksprosent" to avviksvurdering.avviksprosent,
+            "beregningsgrunnlag" to objectMapper.writeValueAsString(avviksvurdering.beregningsgrunnlag),
+            "sammenligningsgrunnlagRef" to sammenligningsgrunnlagRef,
+        ).update()
+
+        if (avviksvurdering.vilkårsgrunnlagId != null) {
+            asSQL(
                 """
-                INSERT INTO sammenligningsgrunnlag(fødselsnummer, skjæringstidspunkt, opprettet, sammenligningsgrunnlag)
-                VALUES (:fodselsnummer, :skjaeringstidspunkt, :opprettet, CAST(:sammenligningsgrunnlag as json));
-                """.trimIndent()
-
-            @Language("PostgreSQL")
-            val opprettKoblingTilVilkårsgrunnlag =
-                """
-                INSERT INTO vilkarsgrunnlag_per_avviksvurdering(avviksvurdering_ref, vilkårsgrunnlag_id)
-                VALUES (:unik_id, :vilkarsgrunnlag_id) ON CONFLICT DO NOTHING;
-                """.trimIndent()
-
-            session.transaction { transactionalSession ->
-                val sammenligningsgrunnlagRef =
-                    transactionalSession.run(
-                        queryOf(
-                            opprettSammenligningsgrunnlagQuery,
-                            mapOf(
-                                "fodselsnummer" to avviksvurdering.fødselsnummer,
-                                "skjaeringstidspunkt" to avviksvurdering.skjæringstidspunkt,
-                                "opprettet" to avviksvurdering.opprettet,
-                                "sammenligningsgrunnlag" to objectMapper.writeValueAsString(avviksvurdering.sammenligningsgrunnlag),
-                            ),
-                        ).asUpdateAndReturnGeneratedKey,
-                    )
-                transactionalSession.run(
-                    queryOf(
-                        opprettAvviksvurderingQuery,
-                        mapOf(
-                            "unik_id" to avviksvurdering.unikId,
-                            "fodselsnummer" to avviksvurdering.fødselsnummer,
-                            "skjaeringstidspunkt" to avviksvurdering.skjæringstidspunkt,
-                            "opprettet" to avviksvurdering.opprettet,
-                            "avviksprosent" to avviksvurdering.avviksprosent,
-                            "beregningsgrunnlag" to objectMapper.writeValueAsString(avviksvurdering.beregningsgrunnlag),
-                            "sammenligningsgrunnlag_ref" to sammenligningsgrunnlagRef,
-                        ),
-                    ).asUpdate,
-                )
-                if (avviksvurdering.vilkårsgrunnlagId != null) {
-                    transactionalSession.run(
-                        queryOf(
-                            opprettKoblingTilVilkårsgrunnlag,
-                            mapOf(
-                                "unik_id" to avviksvurdering.unikId,
-                                "vilkarsgrunnlag_id" to avviksvurdering.vilkårsgrunnlagId,
-                            ),
-                        ).asUpdate,
-                    )
-                }
-            }
+                INSERT INTO vilkarsgrunnlag_per_avviksvurdering (avviksvurdering_ref, vilkårsgrunnlag_id)
+                VALUES (:unikId, :vilkaarsgrunnlagId) ON CONFLICT DO NOTHING;
+                """.trimIndent(),
+                "unikId" to avviksvurdering.unikId,
+                "vilkaarsgrunnlagId" to avviksvurdering.vilkårsgrunnlagId,
+            ).update()
         }
     }
 
-    fun finnAvviksvurderinger(fødselsnummer: String): List<AvviksvurderingDto> {
-        sessionOf(dataSource).use { session ->
-            return TransactionalAvviksvurderingDao(session).finnAvviksvurderinger(fødselsnummer)
+    override fun finnAvviksvurderinger(fødselsnummer: String): List<AvviksvurderingDto> =
+        asSQL(
+            """
+            SELECT av.unik_id, vpa.vilkårsgrunnlag_id, av.fødselsnummer, av.skjæringstidspunkt, av.opprettet, avviksprosent, beregningsgrunnlag, sg.sammenligningsgrunnlag
+            FROM avviksvurdering av 
+            INNER JOIN sammenligningsgrunnlag sg ON av.sammenligningsgrunnlag_ref = sg.id
+            INNER JOIN vilkarsgrunnlag_per_avviksvurdering vpa ON vpa.avviksvurdering_ref = av.unik_id
+            WHERE av.fødselsnummer = :foedselsnummer
+            AND av.slettet IS NULL;
+            """.trimIndent(),
+            "foedselsnummer" to fødselsnummer,
+        ).list {
+            AvviksvurderingDto(
+                unikId = it.uuid("unik_id"),
+                vilkårsgrunnlagId = it.uuid("vilkårsgrunnlag_id"),
+                fødselsnummer = it.string("fødselsnummer"),
+                skjæringstidspunkt = it.localDate("skjæringstidspunkt"),
+                opprettet = it.localDateTime("opprettet"),
+                avviksprosent = it.double("avviksprosent"),
+                sammenligningsgrunnlag = objectMapper.readValue<SammenligningsgrunnlagDto>(it.string("sammenligningsgrunnlag")),
+                beregningsgrunnlag = objectMapper.readValue<BeregningsgrunnlagDto>(it.string("beregningsgrunnlag")),
+            )
         }
-    }
 
     internal fun finnAvviksvurdering(vilkårsgrunnlagId: UUID): ApiAvviksvurdering? =
         asSQL(
@@ -94,11 +88,11 @@ class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSour
             FROM avviksvurdering av 
             INNER JOIN sammenligningsgrunnlag sg ON av.sammenligningsgrunnlag_ref = sg.id
             INNER JOIN vilkarsgrunnlag_per_avviksvurdering vpa ON vpa.avviksvurdering_ref = av.unik_id
-            WHERE vpa.vilkårsgrunnlag_id = :vilkarsgrunnlagId AND av.slettet IS NULL
+            WHERE vpa.vilkårsgrunnlag_id = :vilkaarsgrunnlagId AND av.slettet IS NULL
             ORDER BY av.opprettet DESC
             LIMIT 1;
             """.trimIndent(),
-            "vilkarsgrunnlagId" to vilkårsgrunnlagId,
+            "vilkaarsgrunnlagId" to vilkårsgrunnlagId,
         ).single {
             ApiAvviksvurdering(
                 unikId = it.uuid("unik_id"),
@@ -112,20 +106,17 @@ class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSour
             )
         }
 
-    fun opprettKobling(
+    override fun opprettKobling(
         avviksvurderingId: UUID,
         vilkårsgrunnlagId: UUID,
     ) {
-        try {
-            sessionOf(dataSource).use { session ->
-                TransactionalAvviksvurderingDao(session).opprettKobling(avviksvurderingId, vilkårsgrunnlagId)
-            }
-        } catch (e: Exception) {
-            logg.error("Lagrer IKKE kobling mellom avviksvurdering ($avviksvurderingId) og vilkårsgrunnlag ($vilkårsgrunnlagId)", e)
-        }
-    }
-
-    companion object {
-        private val logg = LoggerFactory.getLogger(AvviksvurderingDao::class.java)
+        asSQL(
+            """
+            INSERT INTO vilkarsgrunnlag_per_avviksvurdering (avviksvurdering_ref, vilkårsgrunnlag_id)
+            VALUES (:avviksvurderingId, :vilkaarsgrunnlagId) ON CONFLICT DO NOTHING;
+            """.trimIndent(),
+            "avviksvurderingId" to avviksvurderingId,
+            "vilkaarsgrunnlagId" to vilkårsgrunnlagId,
+        ).update()
     }
 }
