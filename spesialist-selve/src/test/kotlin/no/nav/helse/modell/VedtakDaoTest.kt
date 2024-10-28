@@ -3,6 +3,7 @@ package no.nav.helse.modell
 import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.januar
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDto
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -27,8 +28,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         opprettSnapshot()
         sessionOf(dataSource).use {
             it.transaction {
-                with(vedtakDao) {
-                    it.lagreVedtaksperiode(
+                PgVedtakDao(it).lagreVedtaksperiode(
                         fødselsnummer = FNR,
                         vedtaksperiodeDto =
                             VedtaksperiodeDto(
@@ -53,15 +53,12 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
                                     ),
                             ),
                     )
-                }
             }
         }
         val vedtaksperiode =
             sessionOf(dataSource).use {
                 it.transaction {
-                    with(vedtakDao) {
-                        it.finnVedtaksperiode(VEDTAKSPERIODE)
-                    }
+                    PgVedtakDao(it).finnVedtaksperiode(VEDTAKSPERIODE)
                 }
             }
         assertNotNull(vedtaksperiode)
@@ -77,8 +74,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         opprettSnapshot()
         sessionOf(dataSource).use {
             it.transaction {
-                with(vedtakDao) {
-                    it.lagreVedtaksperiode(
+                PgVedtakDao(it).lagreVedtaksperiode(
                         fødselsnummer = FNR,
                         vedtaksperiodeDto =
                             VedtaksperiodeDto(
@@ -103,15 +99,12 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
                                     ),
                             ),
                     )
-                }
             }
         }
         val vedtaksperiode =
             sessionOf(dataSource).use {
                 it.transaction {
-                    with(vedtakDao) {
-                        it.finnVedtaksperiode(VEDTAKSPERIODE)
-                    }
+                    PgVedtakDao(it).finnVedtaksperiode(VEDTAKSPERIODE)
                 }
             }
         assertNotNull(vedtaksperiode)

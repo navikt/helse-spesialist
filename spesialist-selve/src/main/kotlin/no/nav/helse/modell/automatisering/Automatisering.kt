@@ -9,11 +9,11 @@ import no.nav.helse.db.GenerasjonDao
 import no.nav.helse.db.MeldingRepository
 import no.nav.helse.db.OverstyringRepository
 import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.db.RisikovurderingRepository
-import no.nav.helse.db.TransactionalVedtakDao
 import no.nav.helse.db.TransactionalVergemålDao
 import no.nav.helse.db.TransactionalÅpneGosysOppgaverDao
-import no.nav.helse.db.VedtakRepository
+import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålRepository
 import no.nav.helse.db.ÅpneGosysOppgaverRepository
 import no.nav.helse.mediator.Subsumsjonsmelder
@@ -47,7 +47,7 @@ internal class Automatisering(
     private val åpneGosysOppgaverRepository: ÅpneGosysOppgaverRepository,
     private val vergemålRepository: VergemålRepository,
     private val personRepository: PersonRepository,
-    private val vedtakRepository: VedtakRepository,
+    private val vedtakDao: VedtakDao,
     private val overstyringRepository: OverstyringRepository,
     private val stikkprøver: Stikkprøver,
     private val meldingRepository: MeldingRepository,
@@ -71,7 +71,7 @@ internal class Automatisering(
                 åpneGosysOppgaverRepository = TransactionalÅpneGosysOppgaverDao(transactionalSession),
                 vergemålRepository = TransactionalVergemålDao(transactionalSession),
                 personRepository = PersonDao(transactionalSession),
-                vedtakRepository = TransactionalVedtakDao(transactionalSession),
+                vedtakDao = PgVedtakDao(transactionalSession),
                 overstyringRepository = OverstyringDao(transactionalSession),
                 stikkprøver = stikkprøver,
                 meldingRepository = MeldingDao(transactionalSession),
@@ -107,7 +107,7 @@ internal class Automatisering(
         val problemer =
             vurder(fødselsnummer, vedtaksperiodeId, utbetaling, periodetype, sykefraværstilfelle, organisasjonsnummer)
         val erUTS = utbetaling.harEndringIUtbetalingTilSykmeldt()
-        val flereArbeidsgivere = vedtakRepository.finnInntektskilde(vedtaksperiodeId) == Inntektskilde.FLERE_ARBEIDSGIVERE
+        val flereArbeidsgivere = vedtakDao.finnInntektskilde(vedtaksperiodeId) == Inntektskilde.FLERE_ARBEIDSGIVERE
         val erFørstegangsbehandling = periodetype == FØRSTEGANGSBEHANDLING
 
         val utfallslogger = { tekst: String ->
@@ -178,7 +178,7 @@ internal class Automatisering(
         val hendelseId = UUID.fromString(overstyringIgangsattKorrigertSøknad.meldingId)
         if (meldingRepository.erAutomatisertKorrigertSøknadHåndtert(hendelseId)) return Pair(true, null)
 
-        val orgnummer = vedtakRepository.finnOrgnummer(vedtaksperiodeId)
+        val orgnummer = vedtakDao.finnOrgnummer(vedtaksperiodeId)
         val vedtaksperiodeIdKorrigertSøknad =
             overstyringIgangsattKorrigertSøknad.let { overstyring ->
                 overstyring.berørtePerioder.find {
@@ -316,7 +316,7 @@ internal class Automatisering(
         utbetaling: Utbetaling,
         vedtaksperiodeId: UUID,
     ): Boolean {
-        val erSpesialsak = vedtakRepository.erSpesialsak(vedtaksperiodeId)
+        val erSpesialsak = vedtakDao.erSpesialsak(vedtaksperiodeId)
         val kanAutomatiseres = sykefraværstilfelle.spesialsakSomKanAutomatiseres(vedtaksperiodeId)
         val ingenUtbetaling = utbetaling.ingenUtbetaling()
 

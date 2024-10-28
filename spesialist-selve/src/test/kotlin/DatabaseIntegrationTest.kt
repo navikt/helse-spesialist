@@ -23,13 +23,13 @@ import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.PgNotatDao
 import no.nav.helse.db.PgPeriodehistorikkDao
+import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.januar
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.MeldingDuplikatkontrollDao
 import no.nav.helse.modell.SnapshotDao
-import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.dokument.PgDokumentDao
@@ -146,7 +146,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val arbeidsforholdDao = ArbeidsforholdDao(session)
     internal val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     internal val snapshotDao = SnapshotDao(dataSource)
-    internal val vedtakDao = VedtakDao(dataSource)
+    internal val vedtakDao = PgVedtakDao(dataSource)
     internal val commandContextDao = CommandContextDao(dataSource)
     internal val tildelingDao = TildelingDao(dataSource)
     internal val saksbehandlerDao = SaksbehandlerDao(dataSource)
@@ -381,7 +381,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             if (utbetalingId != null) this.nyUtbetalingForVedtaksperiode(vedtaksperiodeId, utbetalingId)
             if (forkastet) this.vedtaksperiodeForkastet(vedtaksperiodeId)
         }
-        vedtakDao.finnVedtakId(vedtaksperiodeId)?.also {
+        PgVedtakDao(dataSource).finnVedtakId(vedtaksperiodeId)?.also {
             vedtakId = it
         }
         opprettVedtakstype(vedtaksperiodeId, periodetype, inntektskilde)

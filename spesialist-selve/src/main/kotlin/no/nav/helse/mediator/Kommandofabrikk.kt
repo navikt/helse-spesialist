@@ -11,9 +11,9 @@ import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
+import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.TransactionalVedtakDao
 import no.nav.helse.db.TransactionalVergemålDao
 import no.nav.helse.db.TransactionalÅpneGosysOppgaverDao
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
@@ -346,7 +346,7 @@ internal class Kommandofabrikk(
             utbetaling = utbetaling,
             førsteKjenteDagFinner = førsteKjenteDagFinner,
             automatisering = Automatisering.Factory.automatisering(session, subsumsjonsmelderProvider, stikkprøver),
-            vedtakRepository = TransactionalVedtakDao(session),
+            vedtakDao = PgVedtakDao(session),
             commandContextRepository = CommandContextDao(session),
             personRepository = PersonDao(session),
             inntektskilderRepository = InntektskilderDao(session),

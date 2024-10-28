@@ -2,9 +2,10 @@ package no.nav.helse.db
 
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
 import java.util.UUID
 
-interface VedtakRepository {
+interface VedtakDao {
     fun leggTilVedtaksperiodetype(
         vedtaksperiodeId: UUID,
         type: Periodetype,
@@ -28,4 +29,17 @@ interface VedtakRepository {
     fun finnInntektskilde(vedtaksperiodeId: UUID): Inntektskilde?
 
     fun finnOrgnummer(vedtaksperiodeId: UUID): String?
+
+    fun finnVedtaksperiode(vedtaksperiodeId: UUID): VedtaksperiodeDto?
+
+    fun lagreVedtaksperiode(
+        fødselsnummer: String,
+        vedtaksperiodeDto: VedtaksperiodeDto,
+    )
+
+    fun lagreOpprinneligSøknadsdato(vedtaksperiodeId: UUID)
+
+    fun spesialsakFerdigbehandlet(vedtaksperiodeId: UUID): Int
+
+    fun finnVedtaksperiodetype(vedtaksperiodeId: UUID): Periodetype
 }

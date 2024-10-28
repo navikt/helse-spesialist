@@ -7,6 +7,8 @@ import no.nav.helse.MetrikkRiver
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.CommandContextRepository
+import no.nav.helse.db.PgVedtakDao
+import no.nav.helse.db.VedtakDao
 import no.nav.helse.mediator.meldinger.AvsluttetMedVedtakRiver
 import no.nav.helse.mediator.meldinger.AvsluttetUtenVedtakRiver
 import no.nav.helse.mediator.meldinger.AvvikVurdertRiver
@@ -48,7 +50,6 @@ import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.mediator.meldinger.påminnelser.KommandokjedePåminnelseRiver
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.MeldingDuplikatkontrollDao
-import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.modell.dokument.PgDokumentDao
 import no.nav.helse.modell.kommando.CommandContext
@@ -81,7 +82,7 @@ internal interface SpesialistRiver : River.PacketListener {
 internal class MeldingMediator(
     private val dataSource: DataSource,
     private val rapidsConnection: RapidsConnection,
-    private val vedtakDao: VedtakDao = VedtakDao(dataSource),
+    private val vedtakDao: VedtakDao = PgVedtakDao(dataSource),
     private val personDao: PersonDao = PersonDao(dataSource),
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
     private val meldingDao: MeldingDao = MeldingDao(dataSource),

@@ -1,7 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import kotliquery.TransactionalSession
-import no.nav.helse.modell.VedtakDao
+import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -9,7 +9,6 @@ import javax.sql.DataSource
 
 internal class GenerasjonService(dataSource: DataSource) {
     private val pgGenerasjonDao = PgGenerasjonDao(dataSource)
-    private val vedtakDao = VedtakDao(dataSource)
     private val hentedeGenerasjoner: MutableMap<UUID, List<GenerasjonDto>> = mutableMapOf()
 
     private val sikkerLogger = LoggerFactory.getLogger("tjenestekall")
@@ -26,11 +25,9 @@ internal class GenerasjonService(dataSource: DataSource) {
     }
 
     private fun TransactionalSession.finnVedtaksperiode(vedtaksperiodeId: UUID): VedtaksperiodeDto {
-        return with(vedtakDao) {
-            finnVedtaksperiode(vedtaksperiodeId)
-                ?.copy(generasjoner = finnGenerasjoner(vedtaksperiodeId))
-                ?: throw IllegalStateException("Forventer å finne vedtaksperiode for vedtaksperiodeId=$vedtaksperiodeId")
-        }
+        return PgVedtakDao(this).finnVedtaksperiode(vedtaksperiodeId)
+            ?.copy(generasjoner = finnGenerasjoner(vedtaksperiodeId))
+            ?: throw IllegalStateException("Forventer å finne vedtaksperiode for vedtaksperiodeId=$vedtaksperiodeId")
     }
 
     private fun TransactionalSession.finnGenerasjoner(vedtaksperiodeId: UUID): List<GenerasjonDto> {
@@ -41,17 +38,13 @@ internal class GenerasjonService(dataSource: DataSource) {
         fødselsnummer: String,
         vedtaksperiode: VedtaksperiodeDto,
     ) {
-        with(vedtakDao) {
-            lagreVedtaksperiode(fødselsnummer, vedtaksperiode)
-        }
+        PgVedtakDao(this).lagreVedtaksperiode(fødselsnummer, vedtaksperiode)
         loggDiffMellomHentetOgSkalLagres(vedtaksperiode)
         hentedeGenerasjoner.remove(vedtaksperiode.vedtaksperiodeId)
         vedtaksperiode.generasjoner.forEach { generasjonDto ->
             PgGenerasjonDao(this).lagreGenerasjon(generasjonDto)
         }
-        with(vedtakDao) {
-            lagreOpprinneligSøknadsdato(vedtaksperiode.vedtaksperiodeId)
-        }
+        PgVedtakDao(this).lagreOpprinneligSøknadsdato(vedtaksperiode.vedtaksperiodeId)
     }
 
     private fun loggDiffMellomHentetOgSkalLagres(vedtaksperiode: VedtaksperiodeDto) {

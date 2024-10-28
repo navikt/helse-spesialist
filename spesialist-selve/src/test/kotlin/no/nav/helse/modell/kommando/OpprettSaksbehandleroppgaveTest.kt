@@ -9,7 +9,7 @@ import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.PåVentRepository
 import no.nav.helse.db.RisikovurderingRepository
-import no.nav.helse.db.VedtakRepository
+import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålRepository
 import no.nav.helse.januar
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -65,7 +65,7 @@ internal class OpprettSaksbehandleroppgaveTest {
     private val egenAnsattRepository = mockk<EgenAnsattRepository>(relaxed = true)
     private val vergemålRepository = mockk<VergemålRepository>(relaxed = true)
     private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
-    private val vedtakRepository = mockk<VedtakRepository>(relaxed = true)
+    private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val påVentRepository = mockk<PåVentRepository>(relaxed = true)
     private lateinit var context: CommandContext
     private lateinit var contextId: UUID
@@ -281,7 +281,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter oppgave med egenskap spesialsak`() {
-        every { vedtakRepository.erSpesialsak(VEDTAKSPERIODE_ID) } returns true
+        every { vedtakDao.erSpesialsak(VEDTAKSPERIODE_ID) } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, capture(slot)) }
@@ -406,7 +406,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         sykefraværstilfelle = sykefraværstilfelle,
         utbetaling = utbetaling,
         vergemålRepository = vergemålRepository,
-        vedtakRepository = vedtakRepository,
+        vedtakDao = vedtakDao,
         påVentRepository = påVentRepository,
         behovData = GodkjenningsbehovData(
             id = UUID.randomUUID(),

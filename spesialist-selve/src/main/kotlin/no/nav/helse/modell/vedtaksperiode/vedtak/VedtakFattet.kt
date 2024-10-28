@@ -2,10 +2,10 @@ package no.nav.helse.modell.vedtaksperiode.vedtak
 
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.TransactionalSession
+import no.nav.helse.db.VedtakDao
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
-import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.person.Person
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.util.UUID

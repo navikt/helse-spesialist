@@ -14,7 +14,7 @@ import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.PåVentRepository
 import no.nav.helse.db.RisikovurderingRepository
 import no.nav.helse.db.UtbetalingRepository
-import no.nav.helse.db.VedtakRepository
+import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålRepository
 import no.nav.helse.db.ÅpneGosysOppgaverRepository
 import no.nav.helse.mediator.GodkjenningMediator
@@ -213,7 +213,7 @@ internal class GodkjenningsbehovCommand(
     utbetaling: Utbetaling,
     førsteKjenteDagFinner: () -> LocalDate,
     automatisering: Automatisering,
-    vedtakRepository: VedtakRepository,
+    vedtakDao: VedtakDao,
     commandContextRepository: CommandContextRepository,
     personRepository: PersonRepository,
     inntektskilderRepository: InntektskilderRepository,
@@ -253,11 +253,11 @@ internal class GodkjenningsbehovCommand(
                 commandData = behovData,
                 utbetalingRepository = utbetalingRepository,
                 oppgaveDao = oppgaveDao,
-                vedtakRepository = vedtakRepository,
+                vedtakDao = vedtakDao,
             ),
             OpprettKoblingTilHendelseCommand(
                 commandData = behovData,
-                vedtakRepository = vedtakRepository,
+                vedtakDao = vedtakDao,
             ),
             AvbrytContextCommand(
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
@@ -267,7 +267,7 @@ internal class GodkjenningsbehovCommand(
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
                 vedtaksperiodetype = behovData.periodetype,
                 inntektskilde = behovData.inntektskilde,
-                vedtakRepository = vedtakRepository,
+                vedtakDao = vedtakDao,
             ),
             OpprettKoblingTilUtbetalingCommand(
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
@@ -340,7 +340,7 @@ internal class GodkjenningsbehovCommand(
                 sykefraværstilfelle = sykefraværstilfelle,
                 utbetaling = utbetaling,
                 vergemålRepository = vergemålRepository,
-                vedtakRepository = vedtakRepository,
+                vedtakDao = vedtakDao,
                 påVentRepository = påVentRepository,
             ),
             VurderBehovForTotrinnskontroll(

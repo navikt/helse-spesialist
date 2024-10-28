@@ -6,10 +6,10 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.januar
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.Toggle
-import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -45,7 +45,7 @@ internal class AutomatiseringTest {
     private val periodetype = Periodetype.FORLENGELSE
     private val periodeFom = LocalDate.now()
 
-    private val vedtakDaoMock = mockk<VedtakDao>()
+    private val vedtakDaoMock = mockk<PgVedtakDao>()
     private val risikovurderingDaoMock =
         mockk<RisikovurderingDao> {
             every { hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(true)
@@ -93,7 +93,7 @@ internal class AutomatiseringTest {
             åpneGosysOppgaverRepository = åpneGosysOppgaverDaoMock,
             vergemålRepository = vergemålDaoMock,
             personRepository = personDaoMock,
-            vedtakRepository = vedtakDaoMock,
+            vedtakDao = vedtakDaoMock,
             overstyringRepository = overstyringDaoMock,
             stikkprøver = stikkprøver,
             meldingRepository = meldingDaoMock,
