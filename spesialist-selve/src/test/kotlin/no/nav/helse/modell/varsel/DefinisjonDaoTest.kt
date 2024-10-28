@@ -1,31 +1,22 @@
 package no.nav.helse.modell.varsel
 
 import DatabaseIntegrationTest
-import java.time.LocalDateTime
-import java.util.UUID
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.parallel.Execution
-import org.junit.jupiter.api.parallel.ExecutionMode
 import org.junit.jupiter.api.parallel.Isolated
+import java.time.LocalDateTime
+import java.util.UUID
 
-// Test å ta vekk denne når alle tester kjører grønt sammen, for å se om det er den som fikser at denne ikke brekker noen andre, eller om det bare er tilfeldig
 @Isolated
-@Execution(ExecutionMode.SAME_THREAD)
 internal class DefinisjonDaoTest: DatabaseIntegrationTest() {
 
     private val definisjonDao = DefinisjonDao(dataSource)
 
     @BeforeEach
     fun tømTabeller() {
-        sessionOf(dataSource).use  {
-            it.run(queryOf("truncate selve_varsel, api_varseldefinisjon").asExecute)
-        }
+        query("truncate selve_varsel, api_varseldefinisjon").execute()
     }
 
     @Test
@@ -114,27 +105,17 @@ internal class DefinisjonDaoTest: DatabaseIntegrationTest() {
         assertEquals(Varseldefinisjon(definisjonsId, "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now()), definisjon)
     }
 
-    private fun alleDefinisjoner(): List<Varseldefinisjon> {
-        @Language("PostgreSQL")
-        val query =
-            "SELECT * FROM api_varseldefinisjon;"
-
-        sessionOf(dataSource).use { session ->
-            return session.run(
-                queryOf(
-                    query
-                ).map {
-                    Varseldefinisjon(
-                        id = it.uuid("unik_id"),
-                        varselkode = it.string("kode"),
-                        tittel = it.string("tittel"),
-                        forklaring = it.stringOrNull("forklaring"),
-                        handling = it.stringOrNull("handling"),
-                        avviklet = it.boolean("avviklet"),
-                        opprettet = it.localDateTime("opprettet")
-                    )
-                }.asList
+    private fun alleDefinisjoner(): List<Varseldefinisjon> =
+        query("SELECT * FROM api_varseldefinisjon").list {
+            Varseldefinisjon(
+                id = it.uuid("unik_id"),
+                varselkode = it.string("kode"),
+                tittel = it.string("tittel"),
+                forklaring = it.stringOrNull("forklaring"),
+                handling = it.stringOrNull("handling"),
+                avviklet = it.boolean("avviklet"),
+                opprettet = it.localDateTime("opprettet")
             )
         }
-    }
+
 }

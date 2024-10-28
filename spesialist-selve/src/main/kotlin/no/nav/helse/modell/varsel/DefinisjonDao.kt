@@ -1,45 +1,25 @@
 package no.nav.helse.modell.varsel
 
 import kotliquery.Row
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import org.intellij.lang.annotations.Language
+import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.db.MedDataSource
+import no.nav.helse.db.QueryRunner
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-class DefinisjonDao(private val dataSource: DataSource) {
-    internal fun definisjonFor(definisjonId: UUID): Varseldefinisjon {
-        @Language("PostgreSQL")
-        val query = "SELECT * FROM api_varseldefinisjon WHERE unik_id = ?;"
+class DefinisjonDao(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource) {
+    internal fun definisjonFor(definisjonId: UUID) =
+        asSQL(
+            "SELECT * FROM api_varseldefinisjon WHERE unik_id = :definisjonId",
+            "definisjonId" to definisjonId,
+        ).single { it.mapToDefinisjon() }.let(::checkNotNull)
 
-        return requireNotNull(
-            sessionOf(dataSource).use { session ->
-                session.run(
-                    queryOf(
-                        query,
-                        definisjonId,
-                    ).map(this::mapToDefinisjon).asSingle,
-                )
-            },
-        )
-    }
-
-    internal fun sisteDefinisjonFor(varselkode: String): Varseldefinisjon {
-        @Language("PostgreSQL")
-        val query = "SELECT * FROM api_varseldefinisjon WHERE kode = ? ORDER BY opprettet DESC;"
-
-        return requireNotNull(
-            sessionOf(dataSource).use { session ->
-                session.run(
-                    queryOf(
-                        query,
-                        varselkode,
-                    ).map(this::mapToDefinisjon).asSingle,
-                )
-            },
-        )
-    }
+    internal fun sisteDefinisjonFor(varselkode: String) =
+        asSQL(
+            "SELECT * FROM api_varseldefinisjon WHERE kode = :varselKode ORDER BY opprettet DESC",
+            "varselKode" to varselkode,
+        ).single { it.mapToDefinisjon() }.let(::checkNotNull)
 
     internal fun lagreDefinisjon(
         unikId: UUID,
@@ -50,24 +30,30 @@ class DefinisjonDao(private val dataSource: DataSource) {
         avviklet: Boolean,
         opprettet: LocalDateTime,
     ) {
-        @Language("PostgreSQL")
-        val query =
-            "INSERT INTO api_varseldefinisjon (unik_id, kode, tittel, forklaring, handling, avviklet, opprettet) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (unik_id) DO NOTHING;"
-
-        sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, unikId, kode, tittel, forklaring, handling, avviklet, opprettet).asUpdate)
-        }
+        asSQL(
+            """
+            INSERT INTO api_varseldefinisjon (unik_id, kode, tittel, forklaring, handling, avviklet, opprettet)
+            VALUES (:unikId, :kode, :tittel, :forklaring, :handling, :avviklet, :opprettet)
+            ON CONFLICT (unik_id) DO NOTHING
+            """.trimIndent(),
+            "unikId" to unikId,
+            "kode" to kode,
+            "tittel" to tittel,
+            "forklaring" to forklaring,
+            "handling" to handling,
+            "avviklet" to avviklet,
+            "opprettet" to opprettet,
+        ).update()
     }
 
-    private fun mapToDefinisjon(row: Row): Varseldefinisjon {
-        return Varseldefinisjon(
-            id = row.uuid("unik_id"),
-            varselkode = row.string("kode"),
-            tittel = row.string("tittel"),
-            forklaring = row.stringOrNull("forklaring"),
-            handling = row.stringOrNull("handling"),
-            avviklet = row.boolean("avviklet"),
-            opprettet = row.localDateTime("opprettet"),
+    private fun Row.mapToDefinisjon() =
+        Varseldefinisjon(
+            id = uuid("unik_id"),
+            varselkode = string("kode"),
+            tittel = string("tittel"),
+            forklaring = stringOrNull("forklaring"),
+            handling = stringOrNull("handling"),
+            avviklet = boolean("avviklet"),
+            opprettet = localDateTime("opprettet"),
         )
-    }
 }
