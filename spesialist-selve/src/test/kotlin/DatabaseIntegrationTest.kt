@@ -160,7 +160,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
     internal val egenAnsattDao = EgenAnsattDao(session)
     internal val abonnementDao = AbonnementDao(dataSource)
-    internal val utbetalingDao = UtbetalingDao(dataSource)
+    internal val utbetalingDao = UtbetalingDao(session)
     internal val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
     internal val vergemålDao = VergemålDao(dataSource)
     internal val totrinnsvurderingDao = PgTotrinnsvurderingDao(session)

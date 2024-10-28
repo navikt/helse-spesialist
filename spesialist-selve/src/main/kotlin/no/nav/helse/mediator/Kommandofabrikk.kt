@@ -13,7 +13,6 @@ import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.TransactionalUtbetalingDao
 import no.nav.helse.db.TransactionalVedtakDao
 import no.nav.helse.db.TransactionalVergemålDao
 import no.nav.helse.db.TransactionalÅpneGosysOppgaverDao
@@ -76,7 +75,6 @@ internal class Kommandofabrikk(
     private val pgOppgaveDao: OppgaveDao = PgOppgaveDao(dataSource),
     oppgaveService: () -> OppgaveService,
     private val godkjenningMediator: GodkjenningMediator,
-    private val utbetalingDao: UtbetalingDao = UtbetalingDao(dataSource),
     private val generasjonService: GenerasjonService = GenerasjonService(dataSource),
     private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
     private val stikkprøver: Stikkprøver,
@@ -107,7 +105,7 @@ internal class Kommandofabrikk(
         oppgaveDataForAutomatisering: OppgaveDataForAutomatisering,
         transactionalSession: TransactionalSession,
     ): GosysOppgaveEndretCommand {
-        val utbetaling = TransactionalUtbetalingDao(transactionalSession).hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
+        val utbetaling = UtbetalingDao(transactionalSession).hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
         val harTildeltOppgave =
             TildelingDao(transactionalSession).tildelingForOppgave(oppgaveDataForAutomatisering.oppgaveId) != null
         val godkjenningsbehovData =
@@ -137,7 +135,7 @@ internal class Kommandofabrikk(
         val godkjenningsbehovData =
             MeldingDao(transactionalSession).finnGodkjenningsbehov(oppgaveDataForAutomatisering.hendelseId).data()
         val sykefraværstilfelle = person.sykefraværstilfelle(godkjenningsbehovData.vedtaksperiodeId)
-        val utbetaling = TransactionalUtbetalingDao(transactionalSession).hentUtbetaling(godkjenningsbehovData.utbetalingId)
+        val utbetaling = UtbetalingDao(transactionalSession).hentUtbetaling(godkjenningsbehovData.utbetalingId)
 
         return TilbakedateringGodkjentCommand(
             sykefraværstilfelle = sykefraværstilfelle,
@@ -198,7 +196,7 @@ internal class Kommandofabrikk(
         VedtaksperiodeNyUtbetalingCommand(
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
             utbetalingId = hendelse.utbetalingId,
-            utbetalingRepository = TransactionalUtbetalingDao(transactionalSession),
+            utbetalingRepository = UtbetalingDao(transactionalSession),
         )
 
     fun søknadSendt(
@@ -223,7 +221,7 @@ internal class Kommandofabrikk(
                 ?.let {
                     MeldingDao(transactionalSession).finnGodkjenningsbehov(it.hendelseId)
                 }?.data()
-        val utbetaling = godkjenningsbehovData?.let { utbetalingDao.hentUtbetaling(it.utbetalingId) }
+        val utbetaling = godkjenningsbehovData?.let { UtbetalingDao(transactionalSession).hentUtbetaling(it.utbetalingId) }
         return AdressebeskyttelseEndretCommand(
             fødselsnummer = melding.fødselsnummer(),
             personRepository = PersonDao(transactionalSession),
@@ -281,7 +279,7 @@ internal class Kommandofabrikk(
             personOppdrag = hendelse.personOppdrag,
             arbeidsgiverbeløp = hendelse.arbeidsgiverbeløp,
             personbeløp = hendelse.personbeløp,
-            utbetalingRepository = TransactionalUtbetalingDao(session),
+            utbetalingRepository = UtbetalingDao(session),
             opptegnelseRepository = OpptegnelseDao(session),
             reservasjonRepository = ReservasjonDao(session),
             oppgaveDao = PgOppgaveDao(session),
@@ -316,7 +314,7 @@ internal class Kommandofabrikk(
         val oppgaveId = melding.oppgaveId
         val sykefraværstilfelle = person.sykefraværstilfelle(godkjenningsbehov.vedtaksperiodeId())
         val utbetaling =
-            utbetalingDao.utbetalingFor(oppgaveId)
+            UtbetalingDao(transactionalSession).utbetalingFor(oppgaveId)
                 ?: throw IllegalStateException("Forventer å finne utbetaling for oppgave med id=$oppgaveId")
         return LøsGodkjenningsbehov(
             utbetaling = utbetaling,
@@ -341,7 +339,7 @@ internal class Kommandofabrikk(
         person: Person,
         session: TransactionalSession,
     ): GodkjenningsbehovCommand {
-        val utbetaling = utbetalingDao.hentUtbetaling(godkjenningsbehovData.utbetalingId)
+        val utbetaling = UtbetalingDao(session).hentUtbetaling(godkjenningsbehovData.utbetalingId)
         val førsteKjenteDagFinner = { generasjonService.førsteKjenteDag(godkjenningsbehovData.fødselsnummer) }
         return GodkjenningsbehovCommand(
             behovData = godkjenningsbehovData,
@@ -354,7 +352,7 @@ internal class Kommandofabrikk(
             inntektskilderRepository = InntektskilderDao(session),
             arbeidsforholdRepository = ArbeidsforholdDao(session),
             egenAnsattRepository = EgenAnsattDao(session),
-            utbetalingRepository = TransactionalUtbetalingDao(session),
+            utbetalingRepository = UtbetalingDao(session),
             vergemålRepository = TransactionalVergemålDao(session),
             åpneGosysOppgaverRepository = TransactionalÅpneGosysOppgaverDao(session),
             risikovurderingRepository = RisikovurderingDao(session),
