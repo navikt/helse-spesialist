@@ -37,7 +37,7 @@ class TransactionalPeriodehistorikkDao(
             is LagtPåVent -> {
                 val notatId =
                     historikkinnslag.notat?.let { notat ->
-                        TransactionalNotatDao(session)
+                        PgNotatDao(session)
                             .lagreForOppgaveId(
                                 oppgaveId = notat.oppgaveId,
                                 tekst = notat.tekst,
@@ -53,7 +53,7 @@ class TransactionalPeriodehistorikkDao(
             is TotrinnsvurderingAutomatiskRetur -> lagre(historikkinnslag, generasjonId, null)
             is TotrinnsvurderingRetur -> {
                 val notatId =
-                    TransactionalNotatDao(session)
+                    PgNotatDao(session)
                         .lagreForOppgaveId(
                             oppgaveId = historikkinnslag.notat.oppgaveId,
                             tekst = historikkinnslag.notat.tekst,

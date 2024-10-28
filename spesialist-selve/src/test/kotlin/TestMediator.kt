@@ -1,6 +1,5 @@
 import no.nav.helse.SpeilTilgangsgrupper
 import no.nav.helse.db.AvviksvurderingDao
-import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgHistorikkinnslagRepository
 import no.nav.helse.db.PgTotrinnsvurderingDao
@@ -9,6 +8,7 @@ import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.PgOppgaveDao
+import no.nav.helse.db.PgNotatDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.MeldingMediator
@@ -39,7 +39,7 @@ internal class TestMediator(
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
-    private val notatDao = NotatDao(dataSource)
+    private val notatDao = PgNotatDao(dataSource)
 
     private val stansAutomatiskBehandlingMediator =
         StansAutomatiskBehandlingMediator(

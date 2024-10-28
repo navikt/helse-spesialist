@@ -2,12 +2,12 @@ package no.nav.helse.modell.stoppautomatiskbehandling
 
 import kotliquery.TransactionalSession
 import no.nav.helse.db.HistorikkinnslagRepository
-import no.nav.helse.db.NotatRepository
+import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveDao
+import no.nav.helse.db.PgNotatDao
 import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
 import no.nav.helse.db.StansAutomatiskBehandlingRepository
-import no.nav.helse.db.TransactionalNotatDao
 import no.nav.helse.db.TransactionalPeriodehistorikkDao
 import no.nav.helse.db.TransactionalStansAutomatiskBehandlingDao
 import no.nav.helse.mediator.Subsumsjonsmelder
@@ -35,7 +35,7 @@ class StansAutomatiskBehandlingMediator(
     private val stansAutomatiskBehandlingRepository: StansAutomatiskBehandlingRepository,
     private val historikkinnslagRepository: HistorikkinnslagRepository,
     private val oppgaveDao: OppgaveDao,
-    private val notatRepository: NotatRepository,
+    private val notatDao: NotatDao,
     private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
 ) : StansAutomatiskBehandlinghåndterer {
     private val logg = LoggerFactory.getLogger(this::class.java)
@@ -52,7 +52,7 @@ class StansAutomatiskBehandlingMediator(
                 TransactionalStansAutomatiskBehandlingDao(transactionalSession),
                 TransactionalPeriodehistorikkDao(transactionalSession),
                 PgOppgaveDao(transactionalSession),
-                TransactionalNotatDao(transactionalSession),
+                PgNotatDao(transactionalSession),
                 subsumsjonsmelderProvider,
             )
     }
@@ -116,7 +116,7 @@ class StansAutomatiskBehandlingMediator(
         saksbehandlerOid: UUID,
     ) = try {
         val oppgaveId = fødselsnummer.finnOppgaveId()
-        notatRepository.lagreForOppgaveId(oppgaveId, begrunnelse, saksbehandlerOid, NotatType.OpphevStans)
+        notatDao.lagreForOppgaveId(oppgaveId, begrunnelse, saksbehandlerOid, NotatType.OpphevStans)
     } catch (e: Exception) {
         sikkerlogg.error("Fant ikke oppgave for $fødselsnummer. Fikk ikke lagret notat om oppheving av stans")
     }

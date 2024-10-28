@@ -7,9 +7,9 @@ import no.nav.helse.Gruppekontroll
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.BehandlingsstatistikkDao
-import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgHistorikkinnslagRepository
+import no.nav.helse.db.PgNotatDao
 import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.PoisonPillDao
@@ -97,7 +97,7 @@ internal class SpesialistApp(
     private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
     private val notatApiDao = NotatApiDao(dataSource)
-    private val notatDao = NotatDao(dataSource)
+    private val notatDao = PgNotatDao(dataSource)
     private val totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource)
     private val totrinnsvurderingDao = PgTotrinnsvurderingDao(dataSource)
     private val snapshotApiDao = SnapshotApiDao(dataSource)

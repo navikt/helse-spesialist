@@ -1,22 +1,24 @@
 package no.nav.helse.db
 
 import kotliquery.Session
-import kotliquery.queryOf
+import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
-import org.intellij.lang.annotations.Language
 import java.util.UUID
+import javax.sql.DataSource
 
-class TransactionalNotatDao(
-    private val session: Session,
-) : NotatRepository {
+class PgNotatDao(
+    queryRunner: QueryRunner,
+) : NotatDao, QueryRunner by queryRunner {
+    constructor(session: Session) : this(MedSession(session))
+    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
+
     override fun lagreForOppgaveId(
         oppgaveId: Long,
         tekst: String,
         saksbehandlerOid: UUID,
         notatType: NotatType,
     ): Long? {
-        @Language("PostgreSQL")
-        val statement =
+        return asSQL(
             """
             INSERT INTO notat (vedtaksperiode_id, tekst, saksbehandler_oid, type)
             VALUES (
@@ -27,18 +29,12 @@ class TransactionalNotatDao(
                 :tekst, 
                 :saksbehandler_oid,
                 CAST(:type as notattype)
-            );            
-            """.trimIndent()
-        return session.run(
-            queryOf(
-                statement,
-                mapOf(
-                    "oppgave_id" to oppgaveId,
-                    "tekst" to tekst,
-                    "saksbehandler_oid" to saksbehandlerOid,
-                    "type" to notatType.name,
-                ),
-            ).asUpdateAndReturnGeneratedKey,
-        )
+            )      
+            """,
+            "oppgave_id" to oppgaveId,
+            "tekst" to tekst,
+            "saksbehandler_oid" to saksbehandlerOid,
+            "type" to notatType.name,
+        ).updateAndReturnGeneratedKeyOrNull()
     }
 }

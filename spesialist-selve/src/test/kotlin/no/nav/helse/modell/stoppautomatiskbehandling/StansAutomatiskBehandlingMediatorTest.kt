@@ -7,7 +7,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.db.HistorikkinnslagRepository
-import no.nav.helse.db.NotatRepository
+import no.nav.helse.db.NotatDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
 import no.nav.helse.db.PgOppgaveDao
@@ -37,7 +37,7 @@ class StansAutomatiskBehandlingMediatorTest {
     private val stansAutomatiskBehandlingDao = mockk<StansAutomatiskBehandlingDao>(relaxed = true)
     private val historikkinnslagRepository = mockk<HistorikkinnslagRepository>(relaxed = true)
     private val pgOppgaveDao = mockk<PgOppgaveDao>(relaxed = true)
-    private val notatDao = mockk<NotatRepository>(relaxed = true)
+    private val notatDao = mockk<NotatDao>(relaxed = true)
     private val testRapid = TestRapid()
     private val subsumsjonsmelder = Subsumsjonsmelder("versjonAvKode", testRapid)
 
