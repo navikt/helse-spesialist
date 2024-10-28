@@ -15,9 +15,7 @@ internal class GenerasjonService(dataSource: DataSource) {
     private val sikkerLogger = LoggerFactory.getLogger("tjenestekall")
 
     internal fun TransactionalSession.finnVedtaksperioder(fødselsnummer: String): List<VedtaksperiodeDto> {
-        return with(generasjonDao) {
-            finnVedtaksperiodeIderFor(fødselsnummer).map { finnVedtaksperiode(it) }
-        }
+        return GenerasjonDao(this).finnVedtaksperiodeIderFor(fødselsnummer).map { finnVedtaksperiode(it) }
     }
 
     internal fun TransactionalSession.lagreVedtaksperioder(
@@ -36,9 +34,7 @@ internal class GenerasjonService(dataSource: DataSource) {
     }
 
     private fun TransactionalSession.finnGenerasjoner(vedtaksperiodeId: UUID): List<GenerasjonDto> {
-        return with(generasjonDao) {
-            finnGenerasjoner(vedtaksperiodeId).also { hentedeGenerasjoner[vedtaksperiodeId] = it }
-        }
+        return GenerasjonDao(this).finnGenerasjoner(vedtaksperiodeId).also { hentedeGenerasjoner[vedtaksperiodeId] = it }
     }
 
     private fun TransactionalSession.lagreVedtaksperiode(
@@ -48,12 +44,10 @@ internal class GenerasjonService(dataSource: DataSource) {
         with(vedtakDao) {
             lagreVedtaksperiode(fødselsnummer, vedtaksperiode)
         }
-        with(generasjonDao) {
-            loggDiffMellomHentetOgSkalLagres(vedtaksperiode)
-            hentedeGenerasjoner.remove(vedtaksperiode.vedtaksperiodeId)
-            vedtaksperiode.generasjoner.forEach { generasjonDto ->
-                lagreGenerasjon(generasjonDto)
-            }
+        loggDiffMellomHentetOgSkalLagres(vedtaksperiode)
+        hentedeGenerasjoner.remove(vedtaksperiode.vedtaksperiodeId)
+        vedtaksperiode.generasjoner.forEach { generasjonDto ->
+            GenerasjonDao(this).lagreGenerasjon(generasjonDto)
         }
         with(vedtakDao) {
             lagreOpprinneligSøknadsdato(vedtaksperiode.vedtaksperiodeId)

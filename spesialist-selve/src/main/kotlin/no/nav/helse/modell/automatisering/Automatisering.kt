@@ -10,7 +10,6 @@ import no.nav.helse.db.MeldingRepository
 import no.nav.helse.db.OverstyringRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.RisikovurderingRepository
-import no.nav.helse.db.TransactionalGenerasjonDao
 import no.nav.helse.db.TransactionalMeldingDao
 import no.nav.helse.db.TransactionalVedtakDao
 import no.nav.helse.db.TransactionalVergemålDao
@@ -30,6 +29,7 @@ import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMe
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.utbetaling.Utbetaling
+import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
@@ -75,7 +75,7 @@ internal class Automatisering(
                 overstyringRepository = OverstyringDao(transactionalSession),
                 stikkprøver = stikkprøver,
                 meldingRepository = TransactionalMeldingDao(transactionalSession),
-                generasjonRepository = TransactionalGenerasjonDao(transactionalSession),
+                generasjonRepository = GenerasjonDao(transactionalSession),
                 egenAnsattRepository = EgenAnsattDao(transactionalSession),
             )
         }

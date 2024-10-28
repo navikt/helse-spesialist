@@ -1,7 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import DatabaseIntegrationTest
-import kotliquery.sessionOf
 import no.nav.helse.januar
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
@@ -33,14 +32,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         opprettGenerasjon(vedtaksperiodeId2, generasjonId2)
         opprettGenerasjon(vedtaksperiodeId2, generasjonId3)
 
-        val vedtaksperiodeIder =
-            with(generasjonDao) {
-                sessionOf(dataSource).use { session ->
-                    session.transaction { tx ->
-                        tx.finnVedtaksperiodeIderFor(FNR)
-                    }
-                }
-            }
+        val vedtaksperiodeIder = GenerasjonDao(dataSource).finnVedtaksperiodeIderFor(FNR)
         assertEquals(2, vedtaksperiodeIder.size)
         assertTrue(vedtaksperiodeIder.containsAll(setOf(vedtaksperiodeId1, vedtaksperiodeId2)))
     }
@@ -71,23 +63,9 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             vedtaksperiodeId = vedtaksperiodeId2
         )
 
-        val vedtaksperiodeIderPerson1 =
-            with(generasjonDao) {
-                sessionOf(dataSource).use { session ->
-                    session.transaction { tx ->
-                        tx.finnVedtaksperiodeIderFor(person1)
-                    }
-                }
-            }
+        val vedtaksperiodeIderPerson1 = GenerasjonDao(dataSource).finnVedtaksperiodeIderFor(person1)
 
-        val vedtaksperiodeIderPerson2 =
-            with(generasjonDao) {
-                sessionOf(dataSource).use { session ->
-                    session.transaction { tx ->
-                        tx.finnVedtaksperiodeIderFor(person2)
-                    }
-                }
-            }
+        val vedtaksperiodeIderPerson2 = GenerasjonDao(dataSource).finnVedtaksperiodeIderFor(person2)
         assertEquals(1, vedtaksperiodeIderPerson1.size)
         assertEquals(1, vedtaksperiodeIderPerson2.size)
         assertTrue(vedtaksperiodeIderPerson1.containsAll(setOf(vedtaksperiodeId1)))
@@ -108,34 +86,23 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             status = VarselStatusDto.AKTIV
         )
         val avslag = AvslagDto(AvslagstypeDto.AVSLAG, begrunnelse = "En begrunnelse")
-        sessionOf(dataSource).use { session ->
-            session.transaction { tx ->
-                with(generasjonDao) {
-                    tx.lagreGenerasjon(
-                        GenerasjonDto(
-                            id = generasjonId,
-                            vedtaksperiodeId = vedtaksperiodeId,
-                            utbetalingId = utbetalingId,
-                            spleisBehandlingId = spleisBehandlingId,
-                            skjæringstidspunkt = 1.januar,
-                            fom = 1.januar,
-                            tom = 31.januar,
-                            tilstand = TilstandDto.KlarTilBehandling,
-                            tags = listOf("TAG"),
-                            varsler = listOf(varsel),
-                            avslag = avslag
-                        )
-                    )
-                }
-            }
-        }
-        val funnet = sessionOf(dataSource).use { session ->
-            session.transaction {
-                with(generasjonDao) {
-                    it.finnGenerasjoner(vedtaksperiodeId)
-                }
-            }
-        }
+        GenerasjonDao(dataSource).lagreGenerasjon(
+            GenerasjonDto(
+                id = generasjonId,
+                vedtaksperiodeId = vedtaksperiodeId,
+                utbetalingId = utbetalingId,
+                spleisBehandlingId = spleisBehandlingId,
+                skjæringstidspunkt = 1.januar,
+                fom = 1.januar,
+                tom = 31.januar,
+                tilstand = TilstandDto.KlarTilBehandling,
+                tags = listOf("TAG"),
+                varsler = listOf(varsel),
+                avslag = avslag
+            )
+
+        )
+        val funnet = GenerasjonDao(dataSource).finnGenerasjoner(vedtaksperiodeId)
         assertEquals(1, funnet.size)
         assertEquals(
             GenerasjonDto(
