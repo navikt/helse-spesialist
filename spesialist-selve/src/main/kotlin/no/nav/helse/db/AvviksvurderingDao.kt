@@ -28,7 +28,7 @@ class AvviksvurderingDao(private val queryRunner: QueryRunner) : Avviksvurdering
                 "skjaeringstidspunkt" to avviksvurdering.skjæringstidspunkt,
                 "opprettet" to avviksvurdering.opprettet,
                 "sammenligningsgrunnlag" to objectMapper.writeValueAsString(avviksvurdering.sammenligningsgrunnlag),
-            ).updateAndReturnGeneratedKeyOrNull()
+            ).updateAndReturnGeneratedKey()
 
         asSQL(
             """
