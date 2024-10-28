@@ -47,7 +47,7 @@ internal class PersonDao(
         asSQL(
             "SELECT aktor_id, fodselsnummer FROM person WHERE fodselsnummer = :foedselsnummer",
             "foedselsnummer" to fødselsnummer.toLong(),
-        ).single { row ->
+        ).singleOrNull { row ->
             PersonDto(
                 aktørId = row.long("aktor_id").toString(),
                 fødselsnummer = row.long("fodselsnummer").toFødselsnummer(),
@@ -61,25 +61,25 @@ internal class PersonDao(
         asSQL(
             "SELECT id FROM person WHERE fodselsnummer = :foedselsnummer",
             "foedselsnummer" to fødselsnummer.toLong(),
-        ).single { row -> row.long("id") }
+        ).singleOrNull { row -> row.long("id") }
 
     internal fun finnAktørId(fødselsnummer: String): String? =
         asSQL(
             "SELECT aktor_id FROM person WHERE fodselsnummer = :foedselsnummer",
             "foedselsnummer" to fødselsnummer.toLong(),
-        ).single { it.string("aktor_id") }
+        ).singleOrNull { it.string("aktor_id") }
 
     override fun finnPersoninfoSistOppdatert(fødselsnummer: String) =
         asSQL(
             "SELECT personinfo_oppdatert FROM person WHERE fodselsnummer = :foedselsnummer",
             "foedselsnummer" to fødselsnummer.toLong(),
-        ).single { row -> row.localDateOrNull("personinfo_oppdatert") }
+        ).singleOrNull { row -> row.localDateOrNull("personinfo_oppdatert") }
 
     override fun finnPersoninfoRef(fødselsnummer: String) =
         asSQL(
             "SELECT info_ref FROM person WHERE fodselsnummer = :foedselsnummer",
             "foedselsnummer" to fødselsnummer.toLong(),
-        ).single { row -> row.longOrNull("info_ref") }
+        ).singleOrNull { row -> row.longOrNull("info_ref") }
 
     private fun insertPersoninfo(
         fornavn: String,
@@ -102,7 +102,7 @@ internal class PersonDao(
                 "foedselsdato" to fødselsdato,
                 "kjonn" to kjønn.name,
                 "adressebeskyttelse" to adressebeskyttelse.name,
-            ).updateAndReturnGeneratedKey()
+            ).updateAndReturnGeneratedKeyOrNull()
         checkNotNull(personinfoId)
         updatePersoninfoRef(personinfoId, fødselsnummer)
     }
@@ -155,7 +155,7 @@ internal class PersonDao(
         asSQL(
             "SELECT info_ref FROM person WHERE fodselsnummer = :foedselsnummer",
             "foedselsnummer" to fødselsnummer.toLong(),
-        ).single { it.longOrNull("info_ref") }
+        ).singleOrNull { it.longOrNull("info_ref") }
 
     private fun updatePersonInfo(
         id: Long,
@@ -204,11 +204,11 @@ internal class PersonDao(
             WHERE id = (SELECT info_ref FROM person WHERE fodselsnummer = :foedselsnummer);
             """.trimIndent(),
             "foedselsnummer" to fødselsnummer.toLong(),
-        ).single { row -> Adressebeskyttelse.valueOf(row.string("adressebeskyttelse")) }
+        ).singleOrNull { row -> Adressebeskyttelse.valueOf(row.string("adressebeskyttelse")) }
 
     override fun finnEnhetSistOppdatert(fødselsnummer: String) =
         asSQL("SELECT enhet_ref_oppdatert FROM person WHERE fodselsnummer = :foedselsnummer", "foedselsnummer" to fødselsnummer.toLong())
-            .single { row -> row.localDateOrNull("enhet_ref_oppdatert") }
+            .singleOrNull { row -> row.localDateOrNull("enhet_ref_oppdatert") }
 
     override fun oppdaterEnhet(
         fødselsnummer: String,
@@ -223,7 +223,7 @@ internal class PersonDao(
         asSQL(
             "SELECT infotrygdutbetalinger_oppdatert FROM person WHERE fodselsnummer = :foedselsnummer",
             "foedselsnummer" to fødselsnummer.toLong(),
-        ).single { it.localDateOrNull("infotrygdutbetalinger_oppdatert") }
+        ).singleOrNull { it.localDateOrNull("infotrygdutbetalinger_oppdatert") }
 
     override fun finnInntekter(
         fødselsnummer: String,
@@ -236,7 +236,7 @@ internal class PersonDao(
         """.trimIndent(),
         "foedselsnummer" to fødselsnummer.toLong(),
         "skjaeringstidspunkt" to skjæringstidspunkt,
-    ).single { objectMapper.readValue<List<Inntekter>>(it.string("inntekter")) }
+    ).singleOrNull { objectMapper.readValue<List<Inntekter>>(it.string("inntekter")) }
 
     override fun lagreInntekter(
         fødselsnummer: String,
@@ -258,7 +258,7 @@ internal class PersonDao(
         asSQL(
             "SELECT id FROM person WHERE fodselsnummer = :foedselsnummer",
             "foedselsnummer" to fødselsnummer.toLong(),
-        ).single { it.longOrNull("id") }
+        ).singleOrNull { it.longOrNull("id") }
 
     override fun upsertInfotrygdutbetalinger(
         fødselsnummer: String,
@@ -301,7 +301,7 @@ internal class PersonDao(
             asSQL(
                 "INSERT INTO infotrygdutbetalinger (data) VALUES (CAST(:data as json))",
                 "data" to objectMapper.writeValueAsString(utbetalinger),
-            ).updateAndReturnGeneratedKey()
+            ).updateAndReturnGeneratedKeyOrNull()
         checkNotNull(infotrygdutbetalingerId)
         updateInfotrygdutbetalingerRef(infotrygdutbetalingerId, fødselsnummer)
         return infotrygdutbetalingerId
@@ -325,7 +325,7 @@ internal class PersonDao(
         asSQL(
             "SELECT infotrygdutbetalinger_ref FROM person WHERE fodselsnummer = :foedselsnummer",
             "foedselsnummer" to fødselsnummer.toLong(),
-        ).single { it.longOrNull("infotrygdutbetalinger_ref") }
+        ).singleOrNull { it.longOrNull("infotrygdutbetalinger_ref") }
 
     internal fun insertPerson(
         fødselsnummer: String,
@@ -344,13 +344,13 @@ internal class PersonDao(
         "enhetId" to enhetId,
         "infotrygdutbetalingerId" to infotrygdutbetalingerId,
         "timestamp" to LocalDateTime.now(),
-    ).updateAndReturnGeneratedKey().let(::checkNotNull)
+    ).updateAndReturnGeneratedKeyOrNull().let(::checkNotNull)
 
     override fun finnEnhetId(fødselsnummer: String): String =
         asSQL(
             "SELECT enhet_ref FROM person where fodselsnummer = :foedselsnummer",
             "foedselsnummer" to fødselsnummer.toLong(),
-        ).single {
+        ).singleOrNull {
             it.int("enhet_ref").toEnhetnummer()
         }.let { checkNotNull(it) }
 }

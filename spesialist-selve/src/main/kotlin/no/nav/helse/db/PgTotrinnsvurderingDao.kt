@@ -31,7 +31,7 @@ internal class PgTotrinnsvurderingDao(
               AND utbetaling_id_ref IS NULL
             """.trimIndent(),
             "oppgaveId" to oppgaveId,
-        ).single { row ->
+        ).singleOrNull { row ->
             TotrinnsvurderingFraDatabase(
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                 erRetur = row.boolean("er_retur"),
@@ -159,7 +159,7 @@ internal class PgTotrinnsvurderingDao(
     }
 
     private fun Query.tilTotrinnsvurdering() =
-        single { row ->
+        singleOrNull { row ->
             TotrinnsvurderingOld(
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                 erRetur = row.boolean("er_retur"),

@@ -26,7 +26,7 @@ class PåVentDao(private val queryRunner: QueryRunner) : PåVentRepository, Quer
         WHERE o.id = :oppgaveId
         """.trimIndent(),
         "oppgaveId" to oppgaveId,
-    ).single { it.uuid("vedtaksperiode_id") }.let { vedtaksperiodeId ->
+    ).singleOrNull { it.uuid("vedtaksperiode_id") }.let { vedtaksperiodeId ->
         asSQL(
             """
             INSERT INTO pa_vent (vedtaksperiode_id, saksbehandler_ref, frist) VALUES (:vedtaksperiodeId, :saksbehandlerRef, :frist)
@@ -46,7 +46,7 @@ class PåVentDao(private val queryRunner: QueryRunner) : PåVentRepository, Quer
             WHERE o.id = :oppgaveId
             """.trimIndent(),
             "oppgaveId" to oppgaveId,
-        ).single { it.uuidOrNull("vedtaksperiode_id") }?.let { vedtaksperiodeId ->
+        ).singleOrNull { it.uuidOrNull("vedtaksperiode_id") }?.let { vedtaksperiodeId ->
             asSQL(
                 """
                 DELETE FROM pa_vent WHERE vedtaksperiode_id = :vedtaksperiodeId
@@ -61,7 +61,7 @@ class PåVentDao(private val queryRunner: QueryRunner) : PåVentRepository, Quer
             SELECT 1 FROM pa_vent WHERE vedtaksperiode_id = :vedtaksperiodeId
             """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
-        ).single { true } ?: false
+        ).singleOrNull { true } ?: false
 
     fun erPåVent(oppgaveId: Long) =
         asSQL(
@@ -72,5 +72,5 @@ class PåVentDao(private val queryRunner: QueryRunner) : PåVentRepository, Quer
             where o.id = :oppgaveId
             """.trimIndent(),
             "oppgaveId" to oppgaveId,
-        ).single { true } ?: false
+        ).singleOrNull { true } ?: false
 }

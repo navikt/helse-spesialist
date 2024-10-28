@@ -18,7 +18,7 @@ internal class RisikovurderingDao(session: Session) : RisikovurderingRepository,
             WHERE vedtaksperiode_id = :vedtaksperiodeId ORDER BY id DESC LIMIT 1
             """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
-        ).single { it.boolean("kan_godkjennes_automatisk") }
+        ).singleOrNull { it.boolean("kan_godkjennes_automatisk") }
             ?.let(Risikovurdering::restore)
 
     override fun kreverSupersaksbehandler(vedtaksperiodeId: UUID) =
@@ -31,7 +31,7 @@ internal class RisikovurderingDao(session: Session) : RisikovurderingRepository,
             LIMIT 1
             """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
-        ).single { it.boolean("krever_supersaksbehandler") } ?: false
+        ).singleOrNull { it.boolean("krever_supersaksbehandler") } ?: false
 
     override fun lagre(
         vedtaksperiodeId: UUID,

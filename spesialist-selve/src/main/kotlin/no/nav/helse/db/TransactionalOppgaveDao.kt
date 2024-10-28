@@ -1,50 +1,32 @@
 package no.nav.helse.db
 
 import kotliquery.Session
-import kotliquery.queryOf
 import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.HelseDao.Companion.single
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
-import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import java.util.UUID
+import javax.sql.DataSource
 
-class TransactionalOppgaveDao(private val session: Session) : OppgaveRepository {
+class TransactionalOppgaveDao(queryRunner: QueryRunner) : OppgaveRepository, QueryRunner by queryRunner {
+    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
+    constructor(session: Session) : this(MedSession(session))
+
     override fun finnUtbetalingId(oppgaveId: Long): UUID? {
-        @Language("PostgreSQL")
-        val statement =
-            """
-            SELECT utbetaling_id FROM oppgave WHERE id = :oppgaveId;
-            """.trimIndent()
-        return session.run(
-            queryOf(statement, mapOf("oppgaveId" to oppgaveId)).map {
-                it.uuid("utbetaling_id")
-            }.asSingle,
-        )
+        return asSQL("SELECT utbetaling_id FROM oppgave WHERE id = :oppgaveId", "oppgaveId" to oppgaveId)
+            .singleOrNull { it.uuid("utbetaling_id") }
     }
 
     override fun finnGenerasjonId(oppgaveId: Long): UUID {
-        @Language("PostgreSQL")
-        val statement =
-            """
-            SELECT generasjon_ref FROM oppgave WHERE id = :oppgaveId;
-            """.trimIndent()
-        return requireNotNull(
-            session.run(
-                queryOf(statement, mapOf("oppgaveId" to oppgaveId)).map {
-                    it.uuid("generasjon_ref")
-                }.asSingle,
-            ),
-        )
+        return asSQL("SELECT generasjon_ref FROM oppgave WHERE id = :oppgaveId", "oppgaveId" to oppgaveId)
+            .single { it.uuid("generasjon_ref") }
     }
 
     override fun finnOppgaveIdUansettStatus(fødselsnummer: String): Long {
-        @Language("PostgreSQL")
-        val statement =
+        return asSQL(
             """
             SELECT o.id as oppgaveId
             FROM oppgave o
@@ -52,21 +34,17 @@ class TransactionalOppgaveDao(private val session: Session) : OppgaveRepository 
                      JOIN person p ON v.person_ref = p.id
             WHERE p.fodselsnummer = :fodselsnummer
             ORDER BY o.id DESC
-            LIMIT 1;
-            """.trimIndent()
-        return checkNotNull(
-            session.run(
-                queryOf(statement, mapOf("fodselsnummer" to fødselsnummer.toLong()))
-                    .map {
-                        it.long("oppgaveId")
-                    }.asSingle,
-            ),
+            LIMIT 1
+            """,
+            "fodselsnummer" to fødselsnummer.toLong(),
         )
+            .single {
+                it.long("oppgaveId")
+            }
     }
 
     override fun finnOppgave(id: Long): OppgaveFraDatabase? {
-        @Language("PostgreSQL")
-        val statement =
+        return asSQL(
             """
             SELECT o.egenskaper, o.status, v.vedtaksperiode_id, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id, s.navn, s.epost, s.ident, s.oid, o.kan_avvises
             FROM oppgave o
@@ -75,40 +53,36 @@ class TransactionalOppgaveDao(private val session: Session) : OppgaveRepository 
             LEFT JOIN saksbehandler s on s.oid = t.saksbehandler_ref
             WHERE o.id = :oppgaveId
             ORDER BY o.id DESC LIMIT 1            
-            """.trimIndent()
-
-        return session.run(
-            queryOf(statement, mapOf("oppgaveId" to id))
-                .map { row ->
-                    val egenskaper: List<EgenskapForDatabase> =
-                        row.array<String>("egenskaper").toList().map { enumValueOf(it) }
-                    OppgaveFraDatabase(
-                        id = id,
-                        egenskaper = egenskaper,
-                        status = row.string("status"),
-                        vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                        utbetalingId = row.uuid("utbetaling_id"),
-                        hendelseId = finnHendelseId(id),
-                        kanAvvises = row.boolean("kan_avvises"),
-                        ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
-                        ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString),
-                        tildelt =
-                            row.uuidOrNull("oid")?.let {
-                                SaksbehandlerFraDatabase(
-                                    epostadresse = row.string("epost"),
-                                    oid = it,
-                                    navn = row.string("navn"),
-                                    ident = row.string("ident"),
-                                )
-                            },
-                    )
-                }.asSingle,
-        )
+            """,
+            "oppgaveId" to id,
+        ).singleOrNull { row ->
+            val egenskaper: List<EgenskapForDatabase> =
+                row.array<String>("egenskaper").toList().map { enumValueOf(it) }
+            OppgaveFraDatabase(
+                id = id,
+                egenskaper = egenskaper,
+                status = row.string("status"),
+                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                utbetalingId = row.uuid("utbetaling_id"),
+                hendelseId = finnHendelseId(id),
+                kanAvvises = row.boolean("kan_avvises"),
+                ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
+                ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString),
+                tildelt =
+                    row.uuidOrNull("oid")?.let {
+                        SaksbehandlerFraDatabase(
+                            epostadresse = row.string("epost"),
+                            oid = it,
+                            navn = row.string("navn"),
+                            ident = row.string("ident"),
+                        )
+                    },
+            )
+        }
     }
 
     override fun finnOppgaveId(fødselsnummer: String): Long? {
-        @Language("PostgreSQL")
-        val statement =
+        return asSQL(
             """
             SELECT o.id as oppgaveId
             FROM oppgave o
@@ -116,32 +90,30 @@ class TransactionalOppgaveDao(private val session: Session) : OppgaveRepository 
             JOIN person p ON v.person_ref = p.id
             WHERE o.status = 'AvventerSaksbehandler'::oppgavestatus
                 AND p.fodselsnummer = :fodselsnummer;                
-            """.trimIndent()
-        return session.run(
-            queryOf(statement, mapOf("fodselsnummer" to fødselsnummer.toLong()))
-                .map { it.long("oppgaveId") }
-                .asSingle,
+            """,
+            "fodselsnummer" to fødselsnummer.toLong(),
         )
+            .singleOrNull {
+                it.long("oppgaveId")
+            }
     }
 
     override fun finnOppgaveId(utbetalingId: UUID): Long? {
-        @Language("PostgreSQL")
-        val statement =
+        return asSQL(
             """
             SELECT o.id as oppgaveId
             FROM oppgave o WHERE o.utbetaling_id = :utbetaling_id
             AND o.status NOT IN ('Invalidert'::oppgavestatus, 'Ferdigstilt'::oppgavestatus)
-            """.trimIndent()
-        return session.run(
-            queryOf(statement, mapOf("utbetaling_id" to utbetalingId))
-                .map { it.long("oppgaveId") }
-                .asSingle,
+            """,
+            "utbetaling_id" to utbetalingId,
         )
+            .singleOrNull {
+                it.long("oppgaveId")
+            }
     }
 
     override fun finnVedtaksperiodeId(fødselsnummer: String): UUID {
-        @Language("PostgreSQL")
-        val statement =
+        return asSQL(
             """
              SELECT v.vedtaksperiode_id as vedtaksperiode_id
             FROM oppgave o
@@ -149,48 +121,39 @@ class TransactionalOppgaveDao(private val session: Session) : OppgaveRepository 
                      JOIN person p ON v.person_ref = p.id
             WHERE p.fodselsnummer = :fodselsnummer
             AND status = 'AvventerSaksbehandler'::oppgavestatus;
-            """.trimIndent()
-        return requireNotNull(
-            session.run(
-                queryOf(statement, mapOf("fodselsnummer" to fødselsnummer.toLong())).map {
-                    it.uuid("vedtaksperiode_id")
-                }.asSingle,
-            ),
-        )
+            """,
+            "fodselsnummer" to fødselsnummer.toLong(),
+        ).single {
+            it.uuid("vedtaksperiode_id")
+        }
     }
 
     override fun harGyldigOppgave(utbetalingId: UUID) =
-        requireNotNull(
-            asSQL(
-                """
+        asSQL(
+            """
                 SELECT COUNT(1) AS oppgave_count FROM oppgave
                 WHERE utbetaling_id = :utbetalingId AND status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus, 'Ferdigstilt'::oppgavestatus)
-                """.trimIndent(),
-                "utbetalingId" to utbetalingId,
-            ).single(session) { it.int("oppgave_count") },
-        ) > 0
+                """,
+            "utbetalingId" to utbetalingId,
+        ).single {
+            it.int("oppgave_count")
+        } > 0
 
     override fun finnHendelseId(id: Long): UUID {
-        @Language("PostgreSQL")
-        val statement =
+        return asSQL(
             """
             SELECT DISTINCT hendelse_id 
             FROM command_context 
             WHERE context_id = (SELECT command_context_id FROM oppgave WHERE id = :oppgaveId);            
-            """.trimIndent()
-
-        return requireNotNull(
-            session.run(
-                queryOf(statement, mapOf("oppgaveId" to id))
-                    .map { it.uuid("hendelse_id") }
-                    .asSingle,
-            ),
-        )
+            """,
+            "oppgaveId" to id,
+        ).single {
+            it.uuid("hendelse_id")
+        }
     }
 
     override fun invaliderOppgaveFor(fødselsnummer: String) {
-        @Language("PostgreSQL")
-        val statement =
+        asSQL(
             """
             UPDATE oppgave o
             SET status = 'Invalidert'
@@ -200,65 +163,50 @@ class TransactionalOppgaveDao(private val session: Session) : OppgaveRepository 
             WHERE p.fodselsnummer = :fodselsnummer
             and o.id = o2.id
             AND o.status = 'AvventerSaksbehandler'::oppgavestatus;             
-            """.trimIndent()
-        session.run(
-            queryOf(
-                statement,
-                mapOf("fodselsnummer" to fødselsnummer.toLong()),
-            ).asUpdate,
-        )
+            """,
+            "fodselsnummer" to fødselsnummer.toLong(),
+        ).update()
     }
 
     override fun reserverNesteId(): Long {
-        @Language("PostgreSQL")
-        val statement =
+        return asSQL(
             """
-            SELECT nextval(pg_get_serial_sequence('oppgave', 'id')) as neste_id;              
-            """.trimIndent()
-        return session.run(
-            queryOf(statement)
-                .map { it.long("neste_id") }
-                .asSingle,
-        ) ?: throw IllegalStateException("Klarer ikke hente neste id i sekvens fra oppgave-tabellen")
+            SELECT nextval(pg_get_serial_sequence('oppgave', 'id')) as neste_id              
+            """,
+        )
+            .single {
+                it.long("neste_id")
+            }
     }
 
     override fun venterPåSaksbehandler(oppgaveId: Long): Boolean {
-        @Language("PostgreSQL")
-        val statement =
+        return asSQL(
             """
             SELECT EXISTS (
                 SELECT 1 FROM oppgave WHERE id=:oppgaveId AND status IN('AvventerSaksbehandler'::oppgavestatus)
             )              
-            """.trimIndent()
-        return requireNotNull(
-            session.run(
-                queryOf(statement, mapOf("oppgaveId" to oppgaveId))
-                    .map { it.boolean(1) }
-                    .asSingle,
-            ),
-        )
+            """,
+            "oppgaveId" to oppgaveId,
+        ).single {
+            it.boolean(1)
+        }
     }
 
     override fun finnSpleisBehandlingId(oppgaveId: Long): UUID {
-        @Language("PostgreSQL")
-        val statement =
+        return asSQL(
             """
             SELECT spleis_behandling_id FROM oppgave o
             INNER JOIN selve_vedtaksperiode_generasjon svg ON svg.unik_id = o.generasjon_ref
             WHERE o.id = :oppgaveId;              
-            """.trimIndent()
-        return requireNotNull(
-            session.run(
-                queryOf(statement, mapOf("oppgaveId" to oppgaveId))
-                    .map { it.uuid("spleis_behandling_id") }
-                    .asSingle,
-            ),
-        )
+            """,
+            "oppgaveId" to oppgaveId,
+        ).single {
+            it.uuid("spleis_behandling_id")
+        }
     }
 
     override fun oppgaveDataForAutomatisering(oppgaveId: Long): OppgaveDataForAutomatisering? {
-        @Language("PostgreSQL")
-        val statement =
+        return asSQL(
             """
             SELECT v.vedtaksperiode_id, v.fom, v.tom, o.utbetaling_id, h.id AS hendelseId, h.data AS godkjenningbehovJson, s.type as periodetype
             FROM vedtak v
@@ -266,25 +214,24 @@ class TransactionalOppgaveDao(private val session: Session) : OppgaveRepository 
             INNER JOIN hendelse h ON h.id = (SELECT hendelse_id FROM command_context WHERE context_id = o.command_context_id LIMIT 1)
             INNER JOIN saksbehandleroppgavetype s ON s.vedtak_ref = v.id
             WHERE o.id = :oppgaveId 
-            """.trimIndent()
-        return session.run(
-            queryOf(statement, mapOf("oppgaveId" to oppgaveId))
-                .map { row ->
-                    val json = objectMapper.readTree(row.string("godkjenningbehovJson"))
-                    val skjæringstidspunkt = json.path("Godkjenning").path("skjæringstidspunkt").asLocalDate()
-                    OppgaveDataForAutomatisering(
-                        oppgaveId = oppgaveId,
-                        vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                        periodeFom = row.localDate("fom"),
-                        periodeTom = row.localDate("tom"),
-                        skjæringstidspunkt = skjæringstidspunkt,
-                        utbetalingId = row.uuid("utbetaling_id"),
-                        hendelseId = row.uuid("hendelseId"),
-                        godkjenningsbehovJson = row.string("godkjenningbehovJson"),
-                        periodetype = enumValueOf(row.string("periodetype")),
-                    )
-                }.asSingle,
+            """,
+            "oppgaveId" to oppgaveId,
         )
+            .singleOrNull { row ->
+                val json = objectMapper.readTree(row.string("godkjenningbehovJson"))
+                val skjæringstidspunkt = json.path("Godkjenning").path("skjæringstidspunkt").asLocalDate()
+                OppgaveDataForAutomatisering(
+                    oppgaveId = oppgaveId,
+                    vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                    periodeFom = row.localDate("fom"),
+                    periodeTom = row.localDate("tom"),
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    utbetalingId = row.uuid("utbetaling_id"),
+                    hendelseId = row.uuid("hendelseId"),
+                    godkjenningsbehovJson = row.string("godkjenningbehovJson"),
+                    periodetype = enumValueOf(row.string("periodetype")),
+                )
+            }
     }
 
     override fun finnOppgaverForVisning(
@@ -307,8 +254,7 @@ class TransactionalOppgaveDao(private val session: Session) : OppgaveRepository 
         val antallArbeidsforholdEgenskaper = grupperteFiltrerteEgenskaper?.tilSqlString(Egenskap.Kategori.Inntektskilde)
         val statusEgenskaper = grupperteFiltrerteEgenskaper?.tilSqlString(Egenskap.Kategori.Status)
 
-        @Language("PostgreSQL")
-        val statement =
+        return asSQL(
             """
             SELECT
                 o.id as oppgave_id, 
@@ -355,66 +301,56 @@ class TransactionalOppgaveDao(private val session: Session) : OppgaveRepository 
             ORDER BY $orderBy NULLS LAST
             OFFSET :offset
             LIMIT :limit
-            """.trimIndent()
-
-        return session.run(
-            queryOf(
-                statement,
-                mapOf(
-                    "oid" to saksbehandlerOid,
-                    "offset" to offset,
-                    "limit" to limit,
-                    "egne_saker_pa_vent" to egneSakerPåVent,
-                    "egne_saker" to egneSaker,
-                    "tildelt" to tildelt,
-                    "ingen_ukategoriserte_egenskaper" to (ukategoriserteEgenskaper == null),
-                    "ingen_oppgavetype_egenskaper" to (oppgavetypeEgenskaper == null),
-                    "ingen_periodetype_egenskaper" to (periodetypeEgenskaper == null),
-                    "ingen_mottakertype_egenskaper" to (mottakerEgenskaper == null),
-                    "ingen_antallarbeidsforholdtype_egenskaper" to (antallArbeidsforholdEgenskaper == null),
-                    "ingen_statustype_egenskaper" to (statusEgenskaper == null),
-                ),
+            """,
+            "oid" to saksbehandlerOid,
+            "offset" to offset,
+            "limit" to limit,
+            "egne_saker_pa_vent" to egneSakerPåVent,
+            "egne_saker" to egneSaker,
+            "tildelt" to tildelt,
+            "ingen_ukategoriserte_egenskaper" to (ukategoriserteEgenskaper == null),
+            "ingen_oppgavetype_egenskaper" to (oppgavetypeEgenskaper == null),
+            "ingen_periodetype_egenskaper" to (periodetypeEgenskaper == null),
+            "ingen_mottakertype_egenskaper" to (mottakerEgenskaper == null),
+            "ingen_antallarbeidsforholdtype_egenskaper" to (antallArbeidsforholdEgenskaper == null),
+            "ingen_statustype_egenskaper" to (statusEgenskaper == null),
+        ).list { row ->
+            val egenskaper =
+                row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }.toSet()
+            OppgaveFraDatabaseForVisning(
+                id = row.long("oppgave_id"),
+                aktørId = row.string("aktor_id"),
+                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                navn =
+                    PersonnavnFraDatabase(
+                        row.string("fornavn"),
+                        row.stringOrNull("mellomnavn"),
+                        row.string("etternavn"),
+                    ),
+                egenskaper = egenskaper,
+                tildelt =
+                    row.uuidOrNull("oid")?.let {
+                        SaksbehandlerFraDatabase(
+                            epostadresse = row.string("epost"),
+                            it,
+                            row.string("navn"),
+                            row.string("ident"),
+                        )
+                    },
+                påVent = egenskaper.contains(EgenskapForDatabase.PÅ_VENT),
+                opprettet = row.localDateTime("opprettet"),
+                opprinneligSøknadsdato = row.localDateTime("opprinnelig_soknadsdato"),
+                tidsfrist = row.localDateOrNull("frist"),
+                filtrertAntall = row.int("filtered_count"),
             )
-                .map { row ->
-                    val egenskaper =
-                        row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }.toSet()
-                    OppgaveFraDatabaseForVisning(
-                        id = row.long("oppgave_id"),
-                        aktørId = row.string("aktor_id"),
-                        vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                        navn =
-                            PersonnavnFraDatabase(
-                                row.string("fornavn"),
-                                row.stringOrNull("mellomnavn"),
-                                row.string("etternavn"),
-                            ),
-                        egenskaper = egenskaper,
-                        tildelt =
-                            row.uuidOrNull("oid")?.let {
-                                SaksbehandlerFraDatabase(
-                                    epostadresse = row.string("epost"),
-                                    it,
-                                    row.string("navn"),
-                                    row.string("ident"),
-                                )
-                            },
-                        påVent = egenskaper.contains(EgenskapForDatabase.PÅ_VENT),
-                        opprettet = row.localDateTime("opprettet"),
-                        opprinneligSøknadsdato = row.localDateTime("opprinnelig_soknadsdato"),
-                        tidsfrist = row.localDateOrNull("frist"),
-                        filtrertAntall = row.int("filtered_count"),
-                    )
-                }
-                .asList,
-        )
+        }
     }
 
     private fun Map<Egenskap.Kategori, List<EgenskapForDatabase>>.tilSqlString(kategori: Egenskap.Kategori) =
         get(kategori)?.joinToString { "'${it.name}'" }
 
     override fun finnAntallOppgaver(saksbehandlerOid: UUID): AntallOppgaverFraDatabase {
-        @Language("PostgreSQL")
-        val statement =
+        return asSQL(
             """
             SELECT 
                 count(*) FILTER ( WHERE NOT o.egenskaper @> ARRAY['PÅ_VENT']::varchar[] ) AS antall_mine_saker,
@@ -423,34 +359,29 @@ class TransactionalOppgaveDao(private val session: Session) : OppgaveRepository 
                 LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
             WHERE o.status = 'AvventerSaksbehandler'
                 AND t.saksbehandler_ref = :oid              
-            """.trimIndent()
-        return session.run(
-            queryOf(statement, mapOf("oid" to saksbehandlerOid))
-                .map { row ->
-                    AntallOppgaverFraDatabase(
-                        antallMineSaker = row.int("antall_mine_saker"),
-                        antallMineSakerPåVent = row.int("antall_mine_saker_på_vent"),
-                    )
-                }.asSingle,
-        ) ?: AntallOppgaverFraDatabase(antallMineSaker = 0, antallMineSakerPåVent = 0)
+            """,
+            "oid" to saksbehandlerOid,
+        )
+            .singleOrNull { row ->
+                AntallOppgaverFraDatabase(
+                    antallMineSaker = row.int("antall_mine_saker"),
+                    antallMineSakerPåVent = row.int("antall_mine_saker_på_vent"),
+                )
+            } ?: AntallOppgaverFraDatabase(antallMineSaker = 0, antallMineSakerPåVent = 0)
     }
 
     override fun finnFødselsnummer(oppgaveId: Long): String {
-        @Language("PostgreSQL")
-        val statement =
+        return asSQL(
             """
             SELECT fodselsnummer from person
             INNER JOIN vedtak v on person.id = v.person_ref
             INNER JOIN oppgave o on v.id = o.vedtak_ref
             WHERE o.id = :oppgaveId
-            """.trimIndent()
-        return requireNotNull(
-            session.run(
-                queryOf(statement, mapOf("oppgaveId" to oppgaveId))
-                    .map { it.long("fodselsnummer").toFødselsnummer() }
-                    .asSingle,
-            ),
-        )
+            """,
+            "oppgaveId" to oppgaveId,
+        ).single {
+            it.long("fodselsnummer").toFødselsnummer()
+        }
     }
 
     override fun updateOppgave(
@@ -460,42 +391,31 @@ class TransactionalOppgaveDao(private val session: Session) : OppgaveRepository 
         oid: UUID?,
         egenskaper: List<EgenskapForDatabase>,
     ): Int {
-        @Language("PostgreSQL")
-        val statement =
+        return asSQL(
             """
             UPDATE oppgave
             SET ferdigstilt_av = :ferdigstiltAv, ferdigstilt_av_oid = :oid, status = :oppgavestatus::oppgavestatus, egenskaper = :egenskaper::varchar[]
-            WHERE id=:oppgaveId;
-            """.trimIndent()
-        return session.run(
-            queryOf(
-                statement,
-                mapOf(
-                    "ferdigstiltAv" to ferdigstiltAv,
-                    "oid" to oid,
-                    "oppgavestatus" to oppgavestatus,
-                    "egenskaper" to egenskaper.joinToString(prefix = "{", postfix = "}"),
-                    "oppgaveId" to oppgaveId,
-                ),
-            ).asUpdate,
-        )
+            WHERE id=:oppgaveId
+            """,
+            "ferdigstiltAv" to ferdigstiltAv,
+            "oid" to oid,
+            "oppgavestatus" to oppgavestatus,
+            "egenskaper" to egenskaper.joinToString(prefix = "{", postfix = "}"),
+            "oppgaveId" to oppgaveId,
+        ).update()
     }
 
     override fun harFerdigstiltOppgave(vedtaksperiodeId: UUID): Boolean {
-        @Language("PostgreSQL")
-        val statement =
+        return asSQL(
             """
             SELECT COUNT(1) AS oppgave_count FROM oppgave o
             INNER JOIN vedtak v on o.vedtak_ref = v.id
             WHERE v.vedtaksperiode_id = :vedtaksperiodeId AND o.status = 'Ferdigstilt'::oppgavestatus
-            """.trimIndent()
-        return requireNotNull(
-            session.run(
-                queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId))
-                    .map { it.int("oppgave_count") }
-                    .asSingle,
-            ),
-        ) > 0
+            """,
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        ).single {
+            it.int("oppgave_count")
+        } > 0
     }
 
     override fun finnBehandledeOppgaver(
@@ -503,8 +423,7 @@ class TransactionalOppgaveDao(private val session: Session) : OppgaveRepository 
         offset: Int,
         limit: Int,
     ): List<BehandletOppgaveFraDatabaseForVisning> {
-        @Language("PostgreSQL")
-        val statement =
+        return asSQL(
             """
             SELECT 
                 o.id as oppgave_id,
@@ -529,44 +448,36 @@ class TransactionalOppgaveDao(private val session: Session) : OppgaveRepository 
             ORDER BY o.oppdatert
             OFFSET :offset
             LIMIT :limit;
-            """.trimIndent()
-        return session.run(
-            queryOf(
-                statement,
-                mapOf(
-                    "oid" to behandletAvOid,
-                    "fom" to LocalDate.now(),
-                    "offset" to offset,
-                    "limit" to limit,
-                ),
+            """,
+            "oid" to behandletAvOid,
+            "fom" to LocalDate.now(),
+            "offset" to offset,
+            "limit" to limit,
+        ).list { row ->
+            BehandletOppgaveFraDatabaseForVisning(
+                id = row.long("oppgave_id"),
+                aktørId = row.string("aktor_id"),
+                egenskaper =
+                    row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }
+                        .toSet(),
+                ferdigstiltTidspunkt = row.localDateTime("ferdigstilt_tidspunkt"),
+                ferdigstiltAv = row.stringOrNull("ferdigstilt_av"),
+                navn =
+                    PersonnavnFraDatabase(
+                        row.string("fornavn"),
+                        row.stringOrNull("mellomnavn"),
+                        row.string("etternavn"),
+                    ),
+                filtrertAntall = row.int("filtered_count"),
             )
-                .map { row ->
-                    BehandletOppgaveFraDatabaseForVisning(
-                        id = row.long("oppgave_id"),
-                        aktørId = row.string("aktor_id"),
-                        egenskaper =
-                            row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }
-                                .toSet(),
-                        ferdigstiltTidspunkt = row.localDateTime("ferdigstilt_tidspunkt"),
-                        ferdigstiltAv = row.stringOrNull("ferdigstilt_av"),
-                        navn =
-                            PersonnavnFraDatabase(
-                                row.string("fornavn"),
-                                row.stringOrNull("mellomnavn"),
-                                row.string("etternavn"),
-                            ),
-                        filtrertAntall = row.int("filtered_count"),
-                    )
-                }.asList,
-        )
+        }
     }
 
     override fun finnEgenskaper(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
     ): Set<EgenskapForDatabase>? {
-        @Language("PostgreSQL")
-        val statement =
+        return asSQL(
             """
             SELECT o.egenskaper FROM oppgave o 
             INNER JOIN vedtak v ON o.vedtak_ref = v.id
@@ -574,24 +485,16 @@ class TransactionalOppgaveDao(private val session: Session) : OppgaveRepository 
             AND o.utbetaling_id = :utbetalingId
             ORDER BY o.opprettet DESC
             LIMIT 1            
-            """.trimIndent()
-        return session.run(
-            queryOf(
-                statement,
-                mapOf(
-                    "vedtaksperiodeId" to vedtaksperiodeId,
-                    "utbetalingId" to utbetalingId,
-                ),
-            )
-                .map { row ->
-                    row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }.toSet()
-                }.asSingle,
-        )
+            """,
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            "utbetalingId" to utbetalingId,
+        ).singleOrNull { row ->
+            row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }.toSet()
+        }
     }
 
     override fun finnIdForAktivOppgave(vedtaksperiodeId: UUID): Long? {
-        @Language("PostgreSQL")
-        val statement =
+        return asSQL(
             """
             SELECT id FROM oppgave
             WHERE vedtak_ref =
@@ -599,12 +502,11 @@ class TransactionalOppgaveDao(private val session: Session) : OppgaveRepository 
                     AND status not in ('Ferdigstilt'::oppgavestatus, 'Invalidert'::oppgavestatus)
             ORDER BY opprettet DESC
             LIMIT 1
-            """.trimIndent()
-        return session.run(
-            queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId))
-                .map { it.long("id") }
-                .asSingle,
-        )
+            """,
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        ).singleOrNull {
+            it.long("id")
+        }
     }
 
     override fun opprettOppgave(
@@ -621,8 +523,7 @@ class TransactionalOppgaveDao(private val session: Session) : OppgaveRepository 
         val (arbeidsgiverBeløp, personBeløp) = finnArbeidsgiverbeløpOgPersonbeløp(vedtaksperiodeId, utbetalingId)
         val mottaker = finnMottaker(arbeidsgiverBeløp > 0, personBeløp > 0)
 
-        @Language("PostgreSQL")
-        val statement =
+        return asSQL(
             """
             INSERT INTO oppgave(id, oppdatert, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, generasjon_ref, command_context_id, utbetaling_id, mottaker, egenskaper, kan_avvises)      
             SELECT 
@@ -649,35 +550,26 @@ class TransactionalOppgaveDao(private val session: Session) : OppgaveRepository 
                         WHERE o.status='AvventerSaksbehandler'::oppgavestatus 
                             AND v.person_ref=:personRef
                 )
-            """.trimIndent()
-        return requireNotNull(
-            session.run(
-                queryOf(
-                    statement,
-                    mapOf(
-                        "id" to id,
-                        "oppgavestatus" to "AvventerSaksbehandler",
-                        "ferdigstiltAv" to null,
-                        "ferdigstiltAvOid" to null,
-                        "vedtakRef" to vedtakRef,
-                        "commandContextId" to commandContextId,
-                        "utbetalingId" to utbetalingId,
-                        "mottaker" to mottaker?.name,
-                        "egenskaper" to egenskaper.joinToString(prefix = "{", postfix = "}"),
-                        "kanAvvises" to kanAvvises,
-                        "personRef" to personRef,
-                    ),
-                ).asUpdateAndReturnGeneratedKey,
-            ),
-        ) { "Kunne ikke opprette oppgave for vedtak: $vedtaksperiodeId" }
+            """,
+            "id" to id,
+            "oppgavestatus" to "AvventerSaksbehandler",
+            "ferdigstiltAv" to null,
+            "ferdigstiltAvOid" to null,
+            "vedtakRef" to vedtakRef,
+            "commandContextId" to commandContextId,
+            "utbetalingId" to utbetalingId,
+            "mottaker" to mottaker?.name,
+            "egenskaper" to egenskaper.joinToString(prefix = "{", postfix = "}"),
+            "kanAvvises" to kanAvvises,
+            "personRef" to personRef,
+        ).updateAndReturnGeneratedKey()
     }
 
     private fun finnArbeidsgiverbeløpOgPersonbeløp(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
     ): Pair<Int, Int> {
-        @Language("PostgreSQL")
-        val statement =
+        return asSQL(
             """
             SELECT SUM(ABS(arbeidsgiverbeløp)) as sumArbeidsgiverbeløp, SUM(ABS(personbeløp)) as sumPersonbeløp
             FROM utbetaling_id 
@@ -691,22 +583,12 @@ class TransactionalOppgaveDao(private val session: Session) : OppgaveRepository 
                             WHERE vedtaksperiode_id=:vedtaksperiodeId AND tilstand='VidereBehandlingAvklares'
                         ) AND tilstand='VidereBehandlingAvklares'
                     )
-            """.trimIndent()
-        return requireNotNull(
-            session.run(
-                queryOf(
-                    statement,
-                    mapOf(
-                        "utbetalingId" to utbetalingId,
-                        "vedtaksperiodeId" to vedtaksperiodeId,
-                    ),
-                )
-                    .map { row ->
-                        Pair(row.intOrNull("sumArbeidsgiverbeløp") ?: 0, row.intOrNull("sumPersonbeløp") ?: 0)
-                    }
-                    .asSingle,
-            ),
-        )
+            """,
+            "utbetalingId" to utbetalingId,
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        ).single { row ->
+            Pair(row.intOrNull("sumArbeidsgiverbeløp") ?: 0, row.intOrNull("sumPersonbeløp") ?: 0)
+        }
     }
 
     private fun finnMottaker(
@@ -730,33 +612,25 @@ class TransactionalOppgaveDao(private val session: Session) : OppgaveRepository 
         } + if (this.stigende) " ASC" else " DESC"
 
     private fun personRef(vedtaksperiodeId: UUID): Long {
-        @Language("PostgreSQL")
-        val statement =
+        return asSQL(
             """
             SELECT person_ref FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId;
-            """.trimIndent()
-        return requireNotNull(
-            session.run(
-                queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId))
-                    .map { it.long("person_ref") }
-                    .asSingle,
-            ),
-        ) { "Kunne ikke finne person for vedtaksperiodeId $vedtaksperiodeId" }
+            """,
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        ).single {
+            it.long("person_ref")
+        }
     }
 
     private fun vedtakRef(vedtaksperiodeId: UUID): Long {
-        @Language("PostgreSQL")
-        val statement =
+        return asSQL(
             """
             SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId;  
-            """.trimIndent()
-        return requireNotNull(
-            session.run(
-                queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId))
-                    .map { it.long("id") }
-                    .asSingle,
-            ),
-        ) { "Kunne ikke finne vedtak for vedtaksperiodeId $vedtaksperiodeId" }
+            """,
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        ).single {
+            it.long("id")
+        }
     }
 
     private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()

@@ -37,7 +37,7 @@ class ReservasjonDao(queryRunner: QueryRunner) : ReservasjonRepository, QueryRun
             WHERE p.fodselsnummer = :foedselsnummer AND r.gyldig_til > now();
             """.trimIndent(),
             "foedselsnummer" to fødselsnummer.toLong(),
-        ).single { row ->
+        ).singleOrNull { row ->
             Reservasjon(
                 SaksbehandlerFraDatabase(
                     oid = row.uuid("oid"),

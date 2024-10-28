@@ -39,7 +39,7 @@ internal class PgDokumentDao(queryRunner: QueryRunner) : DokumentDao, QueryRunne
             SELECT id FROM person WHERE fodselsnummer=:fodselsnummer
             """.trimIndent(),
             "fodselsnummer" to fødselsnummer.toLong(),
-        ).single { it.int("id") }?.let { personId ->
+        ).singleOrNull { it.int("id") }?.let { personId ->
             asSQL(
                 """
                 INSERT INTO dokumenter (dokument_id, person_ref, dokument)
@@ -67,7 +67,7 @@ internal class PgDokumentDao(queryRunner: QueryRunner) : DokumentDao, QueryRunne
             """.trimIndent(),
             "fodselsnummer" to fødselsnummer.toLong(),
             "dokumentId" to dokumentId,
-        ).single { row ->
+        ).singleOrNull { row ->
             row.stringOrNull("dokument")?.let { dokument -> objectMapper.readTree(dokument) }
         }
 

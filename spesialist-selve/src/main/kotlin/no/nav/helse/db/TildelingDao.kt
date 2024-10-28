@@ -44,7 +44,7 @@ class TildelingDao(queryRunner: QueryRunner) : TildelingRepository, QueryRunner 
             ORDER BY o.opprettet DESC;
             """.trimIndent(),
             "foedselsnummer" to fødselsnummer.toLong(),
-        ).single {
+        ).singleOrNull {
             TildelingDto(
                 navn = it.string("navn"),
                 epost = it.string("epost"),
@@ -60,7 +60,7 @@ class TildelingDao(queryRunner: QueryRunner) : TildelingRepository, QueryRunner 
             WHERE t.oppgave_id_ref = :oppgaveId
             """.trimIndent(),
             "oppgaveId" to oppgaveId,
-        ).single {
+        ).singleOrNull {
             TildelingDto(
                 navn = it.string("navn"),
                 epost = it.string("epost"),

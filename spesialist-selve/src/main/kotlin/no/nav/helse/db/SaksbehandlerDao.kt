@@ -45,7 +45,7 @@ class SaksbehandlerDao(private val queryRunner: QueryRunner) : SaksbehandlerRepo
 
     override fun finnSaksbehandler(oid: UUID) =
         asSQL("SELECT * FROM saksbehandler WHERE oid = :oid LIMIT 1", "oid" to oid)
-            .single { row ->
+            .singleOrNull { row ->
                 SaksbehandlerFraDatabase(
                     epostadresse = row.string("epost"),
                     oid = row.uuid("oid"),

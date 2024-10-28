@@ -139,7 +139,7 @@ internal class CommandContextDao(
             where context_id = :contextId
             """.trimIndent(),
             "contextId" to contextId,
-        ).single { it.int("tid_brukt_ms") }!! // Kan bruke !! fordi mappingen thrower hvis spørringen ikke fant noe
+        ).singleOrNull { it.int("tid_brukt_ms") }!! // Kan bruke !! fordi mappingen thrower hvis spørringen ikke fant noe
 
     fun finnSuspendert(contextId: UUID) =
         finnSiste(contextId)?.takeIf { it.first == SUSPENDERT }?.let { (_, dto, hash) ->
@@ -155,7 +155,7 @@ internal class CommandContextDao(
         asSQL(
             """SELECT tilstand, data, hash FROM command_context WHERE context_id = :contextId ORDER BY id DESC LIMIT 1""",
             "contextId" to contextId,
-        ).single {
+        ).singleOrNull {
             Triple(
                 enumValueOf<CommandContextTilstand>(it.string("tilstand")),
                 mapper.readValue<CommandContextDto>(it.string("data")),

@@ -28,7 +28,7 @@ class AvviksvurderingDao(private val queryRunner: QueryRunner) : Avviksvurdering
                 "skjaeringstidspunkt" to avviksvurdering.skjæringstidspunkt,
                 "opprettet" to avviksvurdering.opprettet,
                 "sammenligningsgrunnlag" to objectMapper.writeValueAsString(avviksvurdering.sammenligningsgrunnlag),
-            ).updateAndReturnGeneratedKey()
+            ).updateAndReturnGeneratedKeyOrNull()
 
         asSQL(
             """
@@ -93,7 +93,7 @@ class AvviksvurderingDao(private val queryRunner: QueryRunner) : Avviksvurdering
             LIMIT 1;
             """.trimIndent(),
             "vilkaarsgrunnlagId" to vilkårsgrunnlagId,
-        ).single {
+        ).singleOrNull {
             ApiAvviksvurdering(
                 unikId = it.uuid("unik_id"),
                 vilkårsgrunnlagId = it.uuid("vilkårsgrunnlag_id"),
