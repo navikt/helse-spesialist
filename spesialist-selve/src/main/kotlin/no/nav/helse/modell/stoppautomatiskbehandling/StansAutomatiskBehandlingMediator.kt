@@ -7,9 +7,9 @@ import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PgNotatDao
 import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgPeriodehistorikkDao
+import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
 import no.nav.helse.db.StansAutomatiskBehandlingRepository
-import no.nav.helse.db.TransactionalStansAutomatiskBehandlingDao
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
 import no.nav.helse.modell.saksbehandler.Saksbehandler
@@ -49,7 +49,7 @@ class StansAutomatiskBehandlingMediator(
             subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
         ): StansAutomatiskBehandlingMediator =
             StansAutomatiskBehandlingMediator(
-                TransactionalStansAutomatiskBehandlingDao(transactionalSession),
+                StansAutomatiskBehandlingDao(transactionalSession),
                 PgPeriodehistorikkDao(transactionalSession),
                 PgOppgaveDao(transactionalSession),
                 PgNotatDao(transactionalSession),

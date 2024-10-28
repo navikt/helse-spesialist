@@ -6,6 +6,7 @@ import kotliquery.Row
 import kotliquery.Session
 import kotliquery.action.QueryAction
 import kotliquery.sessionOf
+import java.sql.Array
 import javax.sql.DataSource
 
 interface QueryRunner {
@@ -20,6 +21,11 @@ interface QueryRunner {
     fun Query.updateAndReturnGeneratedKeyOrNull(): Long?
 
     fun Query.updateAndReturnGeneratedKey(): Long
+
+    fun createArrayOf(
+        typeName: String,
+        map: List<String>,
+    ): Array
 }
 
 class MedSession(private val session: Session) : QueryRunner {
@@ -40,6 +46,11 @@ class MedSession(private val session: Session) : QueryRunner {
         requireNotNull(session.run(asUpdateAndReturnGeneratedKey)) {
             "Forventer at ${this.statement} ikke gir null"
         }
+
+    override fun createArrayOf(
+        typeName: String,
+        map: List<String>,
+    ) = session.createArrayOf(typeName, map)
 }
 
 class MedDataSource(private val dataSource: DataSource) : QueryRunner {
@@ -63,4 +74,11 @@ class MedDataSource(private val dataSource: DataSource) : QueryRunner {
         requireNotNull(asUpdateAndReturnGeneratedKey.runInSession(returnGeneratedKey = true)) {
             "Forventer at ${this.statement} ikke gir null"
         }
+
+    override fun createArrayOf(
+        typeName: String,
+        map: List<String>,
+    ): Array {
+        throw UnsupportedOperationException("Dette har vi ikke støtte for...")
+    }
 }
