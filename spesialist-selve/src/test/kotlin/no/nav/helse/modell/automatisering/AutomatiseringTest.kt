@@ -56,9 +56,10 @@ internal class AutomatiseringTest {
         }
     private val åpneGosysOppgaverDaoMock = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
-    private val personDaoMock = mockk<PersonDao>(relaxed = true) {
-        every { finnAdressebeskyttelse(any()) } returns Adressebeskyttelse.Ugradert
-    }
+    private val personDaoMock =
+        mockk<PersonDao>(relaxed = true) {
+            every { finnAdressebeskyttelse(any()) } returns Adressebeskyttelse.Ugradert
+        }
     private val automatiseringDaoMock = mockk<AutomatiseringDao>(relaxed = true)
     private val vergemålDaoMock = mockk<VergemålDao>(relaxed = true)
     private val overstyringDaoMock = mockk<OverstyringDao>(relaxed = true)

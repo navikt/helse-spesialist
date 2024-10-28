@@ -10,7 +10,6 @@ import no.nav.helse.db.MeldingRepository
 import no.nav.helse.db.OverstyringRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.RisikovurderingRepository
-import no.nav.helse.db.TransactionalEgenAnsattDao
 import no.nav.helse.db.TransactionalGenerasjonDao
 import no.nav.helse.db.TransactionalMeldingDao
 import no.nav.helse.db.TransactionalVedtakDao
@@ -22,6 +21,7 @@ import no.nav.helse.db.ÅpneGosysOppgaverRepository
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.modell.MeldingDao.OverstyringIgangsattKorrigertSøknad
 import no.nav.helse.modell.Toggle
+import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.modell.person.PersonDao
@@ -76,7 +76,7 @@ internal class Automatisering(
                 stikkprøver = stikkprøver,
                 meldingRepository = TransactionalMeldingDao(transactionalSession),
                 generasjonRepository = TransactionalGenerasjonDao(transactionalSession),
-                egenAnsattRepository = TransactionalEgenAnsattDao(transactionalSession),
+                egenAnsattRepository = EgenAnsattDao(transactionalSession),
             )
         }
     }

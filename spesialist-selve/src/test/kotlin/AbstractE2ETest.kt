@@ -125,20 +125,23 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     private fun opprettSaksbehandler() {
         sessionOf(dataSource).use {
-            @Language("PostgreSQL") val query = """
+            @Language("PostgreSQL")
+            val query =
+                """
                 INSERT INTO saksbehandler
                 VALUES (:oid, :navn, :epost, :ident)
                 ON CONFLICT (oid) DO NOTHING
-            """.trimIndent()
+                """.trimIndent()
             it.run(
                 queryOf(
-                    query, mapOf(
+                    query,
+                    mapOf(
                         "oid" to SAKSBEHANDLER_OID,
                         "navn" to SAKSBEHANDLER_NAVN,
                         "epost" to SAKSBEHANDLER_EPOST,
                         "ident" to SAKSBEHANDLER_IDENT,
-                    )
-                ).asUpdate
+                    ),
+                ).asUpdate,
             )
         }
     }
@@ -184,8 +187,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             tom = tom,
             skjæringstidspunkt = skjæringstidspunkt,
             vedtaksperiodeId = vedtaksperiodeId,
-            spleisBehandlingId = behandlinger[vedtaksperiodeId]?.last()
-                ?: throw IllegalArgumentException("Det finnes ingen behandlinger for vedtaksperiodeId=$vedtaksperiodeId")
+            spleisBehandlingId =
+                behandlinger[vedtaksperiodeId]?.last()
+                    ?: throw IllegalArgumentException("Det finnes ingen behandlinger for vedtaksperiodeId=$vedtaksperiodeId"),
         )
         håndterVedtakFattet()
     }
@@ -673,7 +677,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             godkjenningsbehovTestdata.aktørId,
             godkjenningsbehovTestdata.organisasjonsnummer,
         )
-        sisteMeldingId = sendGodkjenningsbehov(godkjenningsbehovTestdata.copy(avviksvurderingId = avviksvurderingTestdata.avviksvurderingId))
+        sisteMeldingId =
+            sendGodkjenningsbehov(
+                godkjenningsbehovTestdata.copy(avviksvurderingId = avviksvurderingTestdata.avviksvurderingId),
+            )
         sisteGodkjenningsbehovId = sisteMeldingId
     }
 
@@ -828,7 +835,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 fødselsnummer = fødselsnummer,
                 vergemål = vergemål,
                 fremtidsfullmakter = fremtidsfullmakter,
-                fullmakter = fullmakter
+                fullmakter = fullmakter,
             )
     }
 
@@ -871,10 +878,14 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun saksbehandlerVurdererVarsel(
-        vedtaksperiodeId: UUID, varselkode: String, saksbehandlerIdent: String = SAKSBEHANDLER_IDENT
+        vedtaksperiodeId: UUID,
+        varselkode: String,
+        saksbehandlerIdent: String = SAKSBEHANDLER_IDENT,
     ) {
         sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL") val query = """
+            @Language("PostgreSQL")
+            val query =
+                """
                 UPDATE selve_varsel 
                 SET status = 'VURDERT', status_endret_ident = :ident, status_endret_tidspunkt = now()
                 WHERE vedtaksperiode_id = :vedtaksperiodeId
@@ -882,12 +893,13 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 """.trimIndent()
             session.run(
                 queryOf(
-                    query, mapOf(
+                    query,
+                    mapOf(
                         "vedtaksperiodeId" to vedtaksperiodeId,
                         "varselkode" to varselkode,
-                        "ident" to saksbehandlerIdent
-                    )
-                ).asUpdate
+                        "ident" to saksbehandlerIdent,
+                    ),
+                ).asUpdate,
             )
         }
     }
@@ -1067,7 +1079,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     fodselsnummer = fødselsnummer,
                     skjaringstidspunkt = skjæringstidspunkt,
                     arbeidsgivere = arbeidsgivere,
-                    vedtaksperiodeId = vedtaksperiodeId
+                    vedtaksperiodeId = vedtaksperiodeId,
                 )
             testMediator.håndter(handling, saksbehandler)
             // Her må det gjøres kall til api for å sende inn skjønnsfastsettelse
@@ -1629,16 +1641,16 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected fun mockSnapshot(fødselsnummer: String = FØDSELSNUMMER) {
         every { snapshotClient.hentSnapshot(fødselsnummer) } returns
-                snapshot(
-                    versjon = 1,
-                    fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
-                    aktørId = godkjenningsbehovTestdata.aktørId,
-                    organisasjonsnummer = godkjenningsbehovTestdata.organisasjonsnummer,
-                    vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
-                    utbetalingId = godkjenningsbehovTestdata.utbetalingId,
-                    arbeidsgiverbeløp = 0,
-                    personbeløp = 0,
-                )
+            snapshot(
+                versjon = 1,
+                fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
+                aktørId = godkjenningsbehovTestdata.aktørId,
+                organisasjonsnummer = godkjenningsbehovTestdata.organisasjonsnummer,
+                vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
+                utbetalingId = godkjenningsbehovTestdata.utbetalingId,
+                arbeidsgiverbeløp = 0,
+                personbeløp = 0,
+            )
     }
 
     protected enum class Kommandokjedetilstand {

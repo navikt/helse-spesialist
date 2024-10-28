@@ -4,8 +4,6 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
 import no.nav.helse.modell.kommando.CommandContext
@@ -14,6 +12,8 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class KontrollerEgenAnsattstatusTest {
     private companion object {
@@ -25,14 +25,20 @@ internal class KontrollerEgenAnsattstatusTest {
     private val command = KontrollerEgenAnsattstatus(FNR, dao)
     private lateinit var context: CommandContext
 
-    private val observer = object : CommandContextObserver {
-        val behov = mutableMapOf<String, Map<String, Any>>()
-        override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {
-            this.behov[behov] = detaljer
-        }
+    private val observer =
+        object : CommandContextObserver {
+            val behov = mutableMapOf<String, Map<String, Any>>()
 
-        override fun hendelse(hendelse: String) {}
-    }
+            override fun behov(
+                behov: String,
+                ekstraKontekst: Map<String, Any>,
+                detaljer: Map<String, Any>,
+            ) {
+                this.behov[behov] = detaljer
+            }
+
+            override fun hendelse(hendelse: String) {}
+        }
 
     @BeforeEach
     fun setup() {

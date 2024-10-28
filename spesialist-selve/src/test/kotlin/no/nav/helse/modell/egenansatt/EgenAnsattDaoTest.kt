@@ -1,12 +1,11 @@
 package no.nav.helse.modell.egenansatt
 
 import DatabaseIntegrationTest
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotNull
-
 
 internal class EgenAnsattDaoTest : DatabaseIntegrationTest() {
     @BeforeEach

@@ -12,7 +12,6 @@ import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.TransactionalEgenAnsattDao
 import no.nav.helse.db.TransactionalMeldingDao
 import no.nav.helse.db.TransactionalPeriodehistorikkDao
 import no.nav.helse.db.TransactionalUtbetalingDao
@@ -77,7 +76,6 @@ internal class Kommandofabrikk(
     private val dataSource: DataSource,
     private val meldingDao: MeldingDao = MeldingDao(dataSource),
     private val pgOppgaveDao: OppgaveDao = PgOppgaveDao(dataSource),
-    private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     oppgaveService: () -> OppgaveService,
     private val godkjenningMediator: GodkjenningMediator,
     private val utbetalingDao: UtbetalingDao = UtbetalingDao(dataSource),
@@ -102,7 +100,7 @@ internal class Kommandofabrikk(
             fødselsnummer = melding.fødselsnummer(),
             erEgenAnsatt = melding.erEgenAnsatt,
             opprettet = melding.opprettet,
-            egenAnsattRepository = egenAnsattDao,
+            egenAnsattRepository = EgenAnsattDao(transactionalSession),
             oppgaveService = transaksjonellOppgaveService(transactionalSession),
         )
 
@@ -256,7 +254,7 @@ internal class Kommandofabrikk(
         KlargjørTilgangsrelaterteDataCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             personRepository = PersonDao(transactionalSession),
-            egenAnsattRepository = TransactionalEgenAnsattDao(transactionalSession),
+            egenAnsattRepository = EgenAnsattDao(transactionalSession),
             opptegnelseRepository = OpptegnelseDao(transactionalSession),
         )
 
@@ -356,7 +354,7 @@ internal class Kommandofabrikk(
             personRepository = PersonDao(session),
             inntektskilderRepository = InntektskilderDao(session),
             arbeidsforholdRepository = ArbeidsforholdDao(session),
-            egenAnsattRepository = TransactionalEgenAnsattDao(session),
+            egenAnsattRepository = EgenAnsattDao(session),
             utbetalingRepository = TransactionalUtbetalingDao(session),
             vergemålRepository = TransactionalVergemålDao(session),
             åpneGosysOppgaverRepository = TransactionalÅpneGosysOppgaverDao(session),

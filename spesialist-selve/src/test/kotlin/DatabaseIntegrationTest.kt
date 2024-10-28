@@ -17,12 +17,12 @@ import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.PgHistorikkinnslagRepository
+import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.januar
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
@@ -159,7 +159,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val risikovurderingDao = RisikovurderingDao(session)
     internal val automatiseringDao = AutomatiseringDao(session)
     internal val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
-    internal val egenAnsattDao = EgenAnsattDao(dataSource)
+    internal val egenAnsattDao = EgenAnsattDao(session)
     internal val abonnementDao = AbonnementDao(dataSource)
     internal val utbetalingDao = UtbetalingDao(dataSource)
     internal val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
@@ -344,9 +344,9 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                     type = InntektskildetypeDto.ORDINÆR,
                     navn = navn,
                     bransjer = bransjer,
-                    sistOppdatert = LocalDate.now()
-                )
-            )
+                    sistOppdatert = LocalDate.now(),
+                ),
+            ),
         )
     }
 
