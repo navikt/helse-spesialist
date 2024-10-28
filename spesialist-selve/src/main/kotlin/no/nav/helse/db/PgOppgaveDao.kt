@@ -15,11 +15,6 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
     constructor(session: Session) : this(MedSession(session))
 
-    override fun finnUtbetalingId(oppgaveId: Long): UUID? {
-        return asSQL("SELECT utbetaling_id FROM oppgave WHERE id = :oppgaveId", "oppgaveId" to oppgaveId)
-            .singleOrNull { it.uuid("utbetaling_id") }
-    }
-
     override fun finnGenerasjonId(oppgaveId: Long): UUID {
         return asSQL("SELECT generasjon_ref FROM oppgave WHERE id = :oppgaveId", "oppgaveId" to oppgaveId)
             .single { it.uuid("generasjon_ref") }

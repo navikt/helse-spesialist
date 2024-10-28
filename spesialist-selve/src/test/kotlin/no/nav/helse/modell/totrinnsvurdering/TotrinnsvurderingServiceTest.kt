@@ -26,11 +26,9 @@ class TotrinnsvurderingServiceTest {
     fun `Sett er retur, oppdaterer status på totrinnsvurdering og oppdaterer periodehistorikk med vedtaksperiodeId`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val oppgaveId = 42L
-        val utbetalingId = UUID.randomUUID()
 
         every { pgOppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId) } returns oppgaveId
         every { pgOppgaveDao.finnIdForAktivOppgave(any()) } returns oppgaveId
-        every { pgOppgaveDao.finnUtbetalingId(any<Long>()) } returns utbetalingId
 
         totrinnsvurderingService.settAutomatiskRetur(vedtaksperiodeId)
 

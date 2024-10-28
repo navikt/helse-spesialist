@@ -107,8 +107,6 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
         settTotrinnsvurdering(opprinneligSaksbehandler, beslutter)
 
         godkjenningService.håndter(godkjenningDto(), "epost@nav.no", beslutter)
-
-        val utbetalingId = pgOppgaveDao.finnUtbetalingId(1.oppgave(VEDTAKSPERIODE_ID)) ?: fail("Fant ikke utbetalingId")
         assertPeriodehistorikk(utbetalingId)
     }
 

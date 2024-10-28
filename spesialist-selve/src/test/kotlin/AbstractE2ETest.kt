@@ -87,7 +87,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             spleisBehandlingId = behandlinger.getValue(VEDTAKSPERIODE_ID).last(),
         )
     private val avviksvurderingTestdata = AvviksvurderingTestdata()
-    private lateinit var utbetalingId: UUID
+    internal lateinit var utbetalingId: UUID
+        private set
     internal val snapshotClient = mockk<SnapshotClient>()
     private val testRapid = TestRapid()
     internal val inspektør get() = testRapid.inspektør

@@ -113,8 +113,6 @@ class OppgavehenterTest {
 
         override fun finnOppgaveIdUansettStatus(fødselsnummer: String): Long =  throw UnsupportedOperationException()
 
-        override fun finnUtbetalingId(oppgaveId: Long): UUID =  throw UnsupportedOperationException()
-
         override fun finnGenerasjonId(oppgaveId: Long): UUID = throw UnsupportedOperationException()
 
         override fun oppgaveDataForAutomatisering(oppgaveId: Long): OppgaveDataForAutomatisering =  throw UnsupportedOperationException()

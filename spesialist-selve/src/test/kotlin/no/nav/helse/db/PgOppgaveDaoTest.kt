@@ -214,15 +214,6 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `finner utbetalingId`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        opprettOppgave(utbetalingId = UTBETALING_ID)
-        assertEquals(UTBETALING_ID, pgOppgaveDao.finnUtbetalingId(oppgaveId))
-    }
-
-    @Test
     fun `finner hendelseId`() {
         opprettPerson()
         opprettArbeidsgiver()
