@@ -124,7 +124,7 @@ class OppgavehenterTest {
         override fun finnOppgaveId(fødselsnummer: String): Long = throw UnsupportedOperationException()
 
         override fun finnVedtaksperiodeId(fødselsnummer: String): UUID = throw UnsupportedOperationException()
-
+        override fun finnVedtaksperiodeId(oppgaveId: Long): UUID = throw UnsupportedOperationException()
         override fun harGyldigOppgave(utbetalingId: UUID): Boolean = throw UnsupportedOperationException()
 
         override fun invaliderOppgaveFor(fødselsnummer: String) {
