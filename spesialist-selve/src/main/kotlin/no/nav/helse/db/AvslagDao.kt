@@ -1,6 +1,5 @@
 package no.nav.helse.db
 
-import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.modell.vedtak.AvslagDto
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagsdata
@@ -9,7 +8,6 @@ import javax.sql.DataSource
 
 class AvslagDao(queryRunner: QueryRunner) : QueryRunner by queryRunner {
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
-    constructor(session: Session) : this(MedSession(session))
 
     private fun lagreBegrunnelse(
         avslagsdata: Avslagsdata,
@@ -21,7 +19,7 @@ class AvslagDao(queryRunner: QueryRunner) : QueryRunner by queryRunner {
         "tekst" to avslagsdata.begrunnelse,
         "type" to avslagsdata.type.toString(),
         "saksbehandler_ref" to saksbehandlerOid,
-    ).updateAndReturnGeneratedKeyOrNull()
+    ).updateAndReturnGeneratedKey()
 
     internal fun lagreAvslag(
         oppgaveId: Long,

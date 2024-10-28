@@ -102,8 +102,7 @@ internal class PersonDao(
                 "foedselsdato" to fødselsdato,
                 "kjonn" to kjønn.name,
                 "adressebeskyttelse" to adressebeskyttelse.name,
-            ).updateAndReturnGeneratedKeyOrNull()
-        checkNotNull(personinfoId)
+            ).updateAndReturnGeneratedKey()
         updatePersoninfoRef(personinfoId, fødselsnummer)
     }
 
@@ -301,8 +300,7 @@ internal class PersonDao(
             asSQL(
                 "INSERT INTO infotrygdutbetalinger (data) VALUES (CAST(:data as json))",
                 "data" to objectMapper.writeValueAsString(utbetalinger),
-            ).updateAndReturnGeneratedKeyOrNull()
-        checkNotNull(infotrygdutbetalingerId)
+            ).updateAndReturnGeneratedKey()
         updateInfotrygdutbetalingerRef(infotrygdutbetalingerId, fødselsnummer)
         return infotrygdutbetalingerId
     }
@@ -344,7 +342,7 @@ internal class PersonDao(
         "enhetId" to enhetId,
         "infotrygdutbetalingerId" to infotrygdutbetalingerId,
         "timestamp" to LocalDateTime.now(),
-    ).updateAndReturnGeneratedKeyOrNull().let(::checkNotNull)
+    ).updateAndReturnGeneratedKey()
 
     override fun finnEnhetId(fødselsnummer: String): String =
         asSQL(
