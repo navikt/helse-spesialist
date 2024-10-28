@@ -14,7 +14,6 @@ import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.TransactionalÅpneGosysOppgaverDao
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
 import no.nav.helse.mediator.meldinger.Personmelding
@@ -26,6 +25,7 @@ import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommand
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
+import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.CommandContextDao
@@ -118,7 +118,7 @@ internal class Kommandofabrikk(
             harTildeltOppgave = harTildeltOppgave,
             oppgavedataForAutomatisering = oppgaveDataForAutomatisering,
             automatisering = transaksjonellAutomatisering(transactionalSession),
-            åpneGosysOppgaverRepository = TransactionalÅpneGosysOppgaverDao(transactionalSession),
+            åpneGosysOppgaverRepository = ÅpneGosysOppgaverDao(transactionalSession),
             oppgaveDao = PgOppgaveDao(transactionalSession),
             oppgaveService = transaksjonellOppgaveService(transactionalSession),
             godkjenningMediator = GodkjenningMediator(OpptegnelseDao(transactionalSession)),
@@ -354,7 +354,7 @@ internal class Kommandofabrikk(
             egenAnsattRepository = EgenAnsattDao(session),
             utbetalingRepository = UtbetalingDao(session),
             vergemålRepository = VergemålDao(session),
-            åpneGosysOppgaverRepository = TransactionalÅpneGosysOppgaverDao(session),
+            åpneGosysOppgaverRepository = ÅpneGosysOppgaverDao(session),
             risikovurderingRepository = RisikovurderingDao(session),
             påVentRepository = PåVentDao(session),
             overstyringRepository = OverstyringDao(session),

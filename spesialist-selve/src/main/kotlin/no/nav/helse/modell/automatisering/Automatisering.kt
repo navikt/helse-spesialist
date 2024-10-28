@@ -11,7 +11,6 @@ import no.nav.helse.db.OverstyringRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.db.RisikovurderingRepository
-import no.nav.helse.db.TransactionalÅpneGosysOppgaverDao
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålRepository
 import no.nav.helse.db.ÅpneGosysOppgaverRepository
@@ -20,6 +19,7 @@ import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.MeldingDao.OverstyringIgangsattKorrigertSøknad
 import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
+import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.modell.person.PersonDao
@@ -68,7 +68,7 @@ internal class Automatisering(
                         subsumsjonsmelderProvider,
                     ),
                 automatiseringRepository = AutomatiseringDao(transactionalSession),
-                åpneGosysOppgaverRepository = TransactionalÅpneGosysOppgaverDao(transactionalSession),
+                åpneGosysOppgaverRepository = ÅpneGosysOppgaverDao(transactionalSession),
                 vergemålRepository = VergemålDao(transactionalSession),
                 personRepository = PersonDao(transactionalSession),
                 vedtakDao = PgVedtakDao(transactionalSession),
