@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
+internal class PgGenerasjonDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `finner liste av unike vedtaksperiodeIder med fnr`() {
         val vedtaksperiodeId1 = UUID.randomUUID()
@@ -32,7 +32,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         opprettGenerasjon(vedtaksperiodeId2, generasjonId2)
         opprettGenerasjon(vedtaksperiodeId2, generasjonId3)
 
-        val vedtaksperiodeIder = GenerasjonDao(dataSource).finnVedtaksperiodeIderFor(FNR)
+        val vedtaksperiodeIder = PgGenerasjonDao(dataSource).finnVedtaksperiodeIderFor(FNR)
         assertEquals(2, vedtaksperiodeIder.size)
         assertTrue(vedtaksperiodeIder.containsAll(setOf(vedtaksperiodeId1, vedtaksperiodeId2)))
     }
@@ -63,9 +63,9 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             vedtaksperiodeId = vedtaksperiodeId2
         )
 
-        val vedtaksperiodeIderPerson1 = GenerasjonDao(dataSource).finnVedtaksperiodeIderFor(person1)
+        val vedtaksperiodeIderPerson1 = PgGenerasjonDao(dataSource).finnVedtaksperiodeIderFor(person1)
 
-        val vedtaksperiodeIderPerson2 = GenerasjonDao(dataSource).finnVedtaksperiodeIderFor(person2)
+        val vedtaksperiodeIderPerson2 = PgGenerasjonDao(dataSource).finnVedtaksperiodeIderFor(person2)
         assertEquals(1, vedtaksperiodeIderPerson1.size)
         assertEquals(1, vedtaksperiodeIderPerson2.size)
         assertTrue(vedtaksperiodeIderPerson1.containsAll(setOf(vedtaksperiodeId1)))
@@ -86,7 +86,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             status = VarselStatusDto.AKTIV
         )
         val avslag = AvslagDto(AvslagstypeDto.AVSLAG, begrunnelse = "En begrunnelse")
-        GenerasjonDao(dataSource).lagreGenerasjon(
+        PgGenerasjonDao(dataSource).lagreGenerasjon(
             GenerasjonDto(
                 id = generasjonId,
                 vedtaksperiodeId = vedtaksperiodeId,
@@ -102,7 +102,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             )
 
         )
-        val funnet = GenerasjonDao(dataSource).finnGenerasjoner(vedtaksperiodeId)
+        val funnet = PgGenerasjonDao(dataSource).finnGenerasjoner(vedtaksperiodeId)
         assertEquals(1, funnet.size)
         assertEquals(
             GenerasjonDto(

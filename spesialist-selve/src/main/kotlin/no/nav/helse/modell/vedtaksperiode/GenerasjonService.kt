@@ -8,14 +8,14 @@ import java.util.UUID
 import javax.sql.DataSource
 
 internal class GenerasjonService(dataSource: DataSource) {
-    private val generasjonDao = GenerasjonDao(dataSource)
+    private val pgGenerasjonDao = PgGenerasjonDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
     private val hentedeGenerasjoner: MutableMap<UUID, List<GenerasjonDto>> = mutableMapOf()
 
     private val sikkerLogger = LoggerFactory.getLogger("tjenestekall")
 
     internal fun TransactionalSession.finnVedtaksperioder(fødselsnummer: String): List<VedtaksperiodeDto> {
-        return GenerasjonDao(this).finnVedtaksperiodeIderFor(fødselsnummer).map { finnVedtaksperiode(it) }
+        return PgGenerasjonDao(this).finnVedtaksperiodeIderFor(fødselsnummer).map { finnVedtaksperiode(it) }
     }
 
     internal fun TransactionalSession.lagreVedtaksperioder(
@@ -34,7 +34,7 @@ internal class GenerasjonService(dataSource: DataSource) {
     }
 
     private fun TransactionalSession.finnGenerasjoner(vedtaksperiodeId: UUID): List<GenerasjonDto> {
-        return GenerasjonDao(this).finnGenerasjoner(vedtaksperiodeId).also { hentedeGenerasjoner[vedtaksperiodeId] = it }
+        return PgGenerasjonDao(this).finnGenerasjoner(vedtaksperiodeId).also { hentedeGenerasjoner[vedtaksperiodeId] = it }
     }
 
     private fun TransactionalSession.lagreVedtaksperiode(
@@ -47,7 +47,7 @@ internal class GenerasjonService(dataSource: DataSource) {
         loggDiffMellomHentetOgSkalLagres(vedtaksperiode)
         hentedeGenerasjoner.remove(vedtaksperiode.vedtaksperiodeId)
         vedtaksperiode.generasjoner.forEach { generasjonDto ->
-            GenerasjonDao(this).lagreGenerasjon(generasjonDto)
+            PgGenerasjonDao(this).lagreGenerasjon(generasjonDto)
         }
         with(vedtakDao) {
             lagreOpprinneligSøknadsdato(vedtaksperiode.vedtaksperiodeId)
@@ -105,5 +105,5 @@ internal class GenerasjonService(dataSource: DataSource) {
         appendLine("  skj.tidspkt: ${hentet.skjæringstidspunkt} - ${skalLagres.skjæringstidspunkt}")
     }
 
-    internal fun førsteKjenteDag(fødselsnummer: String) = generasjonDao.førsteKjenteDag(fødselsnummer)
+    internal fun førsteKjenteDag(fødselsnummer: String) = pgGenerasjonDao.førsteKjenteDag(fødselsnummer)
 }

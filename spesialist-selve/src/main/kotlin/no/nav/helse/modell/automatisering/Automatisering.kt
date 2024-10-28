@@ -5,7 +5,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.db.AutomatiseringRepository
 import no.nav.helse.db.EgenAnsattRepository
-import no.nav.helse.db.GenerasjonRepository
+import no.nav.helse.db.GenerasjonDao
 import no.nav.helse.db.MeldingRepository
 import no.nav.helse.db.OverstyringRepository
 import no.nav.helse.db.PersonRepository
@@ -29,11 +29,11 @@ import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMe
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.utbetaling.Utbetaling
-import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
+import no.nav.helse.modell.vedtaksperiode.PgGenerasjonDao
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.slf4j.LoggerFactory
@@ -51,7 +51,7 @@ internal class Automatisering(
     private val overstyringRepository: OverstyringRepository,
     private val stikkprøver: Stikkprøver,
     private val meldingRepository: MeldingRepository,
-    private val generasjonRepository: GenerasjonRepository,
+    private val generasjonDao: GenerasjonDao,
     private val egenAnsattRepository: EgenAnsattRepository,
 ) {
     object Factory {
@@ -75,7 +75,7 @@ internal class Automatisering(
                 overstyringRepository = OverstyringDao(transactionalSession),
                 stikkprøver = stikkprøver,
                 meldingRepository = TransactionalMeldingDao(transactionalSession),
-                generasjonRepository = GenerasjonDao(transactionalSession),
+                generasjonDao = PgGenerasjonDao(transactionalSession),
                 egenAnsattRepository = EgenAnsattDao(transactionalSession),
             )
         }
@@ -167,7 +167,7 @@ internal class Automatisering(
         fødselsnummer: String,
         vedtaksperiodeId: UUID,
     ): OverstyringIgangsattKorrigertSøknad? =
-        generasjonRepository.førsteGenerasjonVedtakFattetTidspunkt(vedtaksperiodeId)?.let {
+        generasjonDao.førsteGenerasjonVedtakFattetTidspunkt(vedtaksperiodeId)?.let {
             meldingRepository.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, vedtaksperiodeId)
         }
 
@@ -191,7 +191,7 @@ internal class Automatisering(
 
         vedtaksperiodeIdKorrigertSøknad?.let {
             val merEnn6MånederSidenVedtakPåFørsteMottattSøknad =
-                generasjonRepository.førsteGenerasjonVedtakFattetTidspunkt(it)
+                generasjonDao.førsteGenerasjonVedtakFattetTidspunkt(it)
                     ?.isBefore(LocalDateTime.now().minusMonths(6))
                     ?: true
             val antallKorrigeringer = meldingRepository.finnAntallAutomatisertKorrigertSøknad(it)

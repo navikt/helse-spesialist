@@ -4,7 +4,7 @@ import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.HelseDao.Companion.asSQLWithQuestionMarks
 import no.nav.helse.db.AvslagDao
-import no.nav.helse.db.GenerasjonRepository
+import no.nav.helse.db.GenerasjonDao
 import no.nav.helse.db.MedDataSource
 import no.nav.helse.db.MedSession
 import no.nav.helse.db.QueryRunner
@@ -15,7 +15,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-class GenerasjonDao private constructor(private val queryRunner: QueryRunner) : GenerasjonRepository, QueryRunner by queryRunner {
+class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) : GenerasjonDao, QueryRunner by queryRunner {
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
     constructor(session: Session) : this(MedSession(session))
 

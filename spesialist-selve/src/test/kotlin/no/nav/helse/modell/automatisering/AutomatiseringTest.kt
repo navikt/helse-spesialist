@@ -22,7 +22,7 @@ import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Generasjon
-import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
+import no.nav.helse.modell.vedtaksperiode.PgGenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
@@ -64,7 +64,7 @@ internal class AutomatiseringTest {
     private val vergemålDaoMock = mockk<VergemålDao>(relaxed = true)
     private val overstyringDaoMock = mockk<OverstyringDao>(relaxed = true)
     private val meldingDaoMock = mockk<MeldingDao>(relaxed = true)
-    private val generasjonDaoMock = mockk<GenerasjonDao>(relaxed = true)
+    private val generasjonDaoMock = mockk<PgGenerasjonDao>(relaxed = true)
     private var stikkprøveFullRefusjonEnArbeidsgiver = false
     private var stikkprøveUtsEnArbeidsgiverFørstegangsbehandling = false
     private var stikkprøveUtsEnArbeidsgiverForlengelse = false
@@ -97,7 +97,7 @@ internal class AutomatiseringTest {
             overstyringRepository = overstyringDaoMock,
             stikkprøver = stikkprøver,
             meldingRepository = meldingDaoMock,
-            generasjonRepository = generasjonDaoMock,
+            generasjonDao = generasjonDaoMock,
             egenAnsattRepository = egenAnsattDao,
         )
 
