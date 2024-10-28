@@ -14,7 +14,6 @@ import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.TransactionalVergemålDao
 import no.nav.helse.db.TransactionalÅpneGosysOppgaverDao
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
@@ -61,6 +60,7 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetalingCommand
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnetCommand
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
+import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
 import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
@@ -353,7 +353,7 @@ internal class Kommandofabrikk(
             arbeidsforholdRepository = ArbeidsforholdDao(session),
             egenAnsattRepository = EgenAnsattDao(session),
             utbetalingRepository = UtbetalingDao(session),
-            vergemålRepository = TransactionalVergemålDao(session),
+            vergemålRepository = VergemålDao(session),
             åpneGosysOppgaverRepository = TransactionalÅpneGosysOppgaverDao(session),
             risikovurderingRepository = RisikovurderingDao(session),
             påVentRepository = PåVentDao(session),

@@ -15,15 +15,15 @@ import no.nav.helse.db.AnnulleringDao
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.InntektskilderDao
+import no.nav.helse.db.PgNotatDao
 import no.nav.helse.db.PgOppgaveDao
+import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
+import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.PgNotatDao
-import no.nav.helse.db.PgPeriodehistorikkDao
-import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.januar
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
@@ -162,7 +162,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val abonnementDao = AbonnementDao(dataSource)
     internal val utbetalingDao = UtbetalingDao(session)
     internal val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
-    internal val vergemålDao = VergemålDao(dataSource)
+    internal val vergemålDao = VergemålDao(session)
     internal val totrinnsvurderingDao = PgTotrinnsvurderingDao(session)
     internal val dokumentDao = PgDokumentDao(dataSource)
     internal val påVentDao = PåVentDao(session)

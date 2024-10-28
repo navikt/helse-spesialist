@@ -11,7 +11,6 @@ import no.nav.helse.db.OverstyringRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.db.RisikovurderingRepository
-import no.nav.helse.db.TransactionalVergemålDao
 import no.nav.helse.db.TransactionalÅpneGosysOppgaverDao
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålRepository
@@ -34,6 +33,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.PgGenerasjonDao
+import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.slf4j.LoggerFactory
@@ -69,7 +69,7 @@ internal class Automatisering(
                     ),
                 automatiseringRepository = AutomatiseringDao(transactionalSession),
                 åpneGosysOppgaverRepository = TransactionalÅpneGosysOppgaverDao(transactionalSession),
-                vergemålRepository = TransactionalVergemålDao(transactionalSession),
+                vergemålRepository = VergemålDao(transactionalSession),
                 personRepository = PersonDao(transactionalSession),
                 vedtakDao = PgVedtakDao(transactionalSession),
                 overstyringRepository = OverstyringDao(transactionalSession),
