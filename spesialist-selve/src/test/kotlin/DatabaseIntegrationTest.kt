@@ -151,7 +151,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val commandContextDao = CommandContextDao(dataSource)
     internal val tildelingDao = TildelingDao(dataSource)
     internal val saksbehandlerDao = SaksbehandlerDao(dataSource)
-    internal val overstyringDao = OverstyringDao(dataSource)
+    internal val overstyringDao = OverstyringDao(session)
     internal val overstyringApiDao = OverstyringApiDao(dataSource)
     internal val reservasjonDao = ReservasjonDao(session)
     internal val meldingDao = MeldingDao(dataSource)

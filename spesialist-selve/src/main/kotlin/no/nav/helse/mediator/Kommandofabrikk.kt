@@ -14,7 +14,6 @@ import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TransactionalEgenAnsattDao
 import no.nav.helse.db.TransactionalMeldingDao
 import no.nav.helse.db.TransactionalOppgaveDao
-import no.nav.helse.db.TransactionalOverstyringDao
 import no.nav.helse.db.TransactionalPeriodehistorikkDao
 import no.nav.helse.db.TransactionalUtbetalingDao
 import no.nav.helse.db.TransactionalVedtakDao
@@ -39,6 +38,7 @@ import no.nav.helse.modell.kommando.LøsGodkjenningsbehov
 import no.nav.helse.modell.kommando.OverstyringIgangsattCommand
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.kommando.TilbakedateringGodkjentCommand
+import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.EndretEgenAnsattStatusCommand
@@ -268,7 +268,7 @@ internal class Kommandofabrikk(
         OverstyringIgangsattCommand(
             berørteVedtaksperiodeIder = melding.berørteVedtaksperiodeIder,
             kilde = melding.kilde,
-            overstyringRepository = TransactionalOverstyringDao(transactionalSession),
+            overstyringRepository = OverstyringDao(transactionalSession),
         )
 
     internal fun utbetalingEndret(
@@ -363,7 +363,7 @@ internal class Kommandofabrikk(
             åpneGosysOppgaverRepository = TransactionalÅpneGosysOppgaverDao(session),
             risikovurderingRepository = RisikovurderingDao(session),
             påVentRepository = PåVentDao(session),
-            overstyringRepository = TransactionalOverstyringDao(session),
+            overstyringRepository = OverstyringDao(session),
             periodehistorikkDao = TransactionalPeriodehistorikkDao(session),
             oppgaveRepository = TransactionalOppgaveDao(session),
             avviksvurderingRepository = AvviksvurderingDao(session),

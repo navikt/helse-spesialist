@@ -1,31 +1,74 @@
 package no.nav.helse.modell.overstyring
 
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import no.nav.helse.HelseDao
+import kotliquery.Session
+import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.HelseDao.Companion.asSQLWithQuestionMarks
+import no.nav.helse.db.MedDataSource
+import no.nav.helse.db.MedSession
 import no.nav.helse.db.MinimumSykdomsgradForDatabase
 import no.nav.helse.db.OverstyringRepository
 import no.nav.helse.db.OverstyrtArbeidsforholdForDatabase
 import no.nav.helse.db.OverstyrtInntektOgRefusjonForDatabase
 import no.nav.helse.db.OverstyrtTidslinjeForDatabase
+import no.nav.helse.db.QueryRunner
 import no.nav.helse.db.SkjønnsfastsattSykepengegrunnlagForDatabase
-import no.nav.helse.db.TransactionalOverstyringDao
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
-import org.intellij.lang.annotations.Language
 import java.util.UUID
 import javax.sql.DataSource
 
-class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource), OverstyringRepository {
-    override fun finnOverstyringerMedTypeForVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<OverstyringType> =
-        sessionOf(dataSource).use {
-            TransactionalOverstyringDao(it).finnOverstyringerMedTypeForVedtaksperioder(vedtaksperiodeIder)
-        }
+class OverstyringDao(queryRunner: QueryRunner) : OverstyringRepository, QueryRunner by queryRunner {
+    constructor(session: Session) : this(MedSession(session))
+    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
-    override fun finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId: UUID): List<OverstyringType> =
-        sessionOf(dataSource).use {
-            TransactionalOverstyringDao(it).finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId)
-        }
+    override fun finnOverstyringerMedTypeForVedtaksperioder(vedtaksperiodeIder: List<UUID>) =
+        asSQLWithQuestionMarks(
+            """
+            SELECT DISTINCT o.id,
+                CASE
+                    WHEN oi.id IS NOT NULL THEN 'Inntekt'
+                    WHEN oa.id IS NOT NULL THEN 'Arbeidsforhold'
+                    WHEN ot.id IS NOT NULL THEN 'Dager'
+                    WHEN ss.id IS NOT NULL THEN 'Sykepengegrunnlag'
+                    WHEN oms.id IS NOT NULL THEN 'MinimumSykdomsgrad'
+                END as type
+            FROM overstyring o
+            LEFT JOIN overstyring_arbeidsforhold oa on o.id = oa.overstyring_ref
+            LEFT JOIN overstyring_inntekt oi on o.id = oi.overstyring_ref
+            LEFT JOIN overstyring_tidslinje ot on o.id = ot.overstyring_ref
+            LEFT JOIN skjonnsfastsetting_sykepengegrunnlag ss on o.id = ss.overstyring_ref
+            LEFT JOIN overstyring_minimum_sykdomsgrad oms on o.id = oms.overstyring_ref
+            WHERE o.vedtaksperiode_id = ANY (?)
+            AND o.ferdigstilt = false
+            """.trimIndent(),
+            vedtaksperiodeIder.toTypedArray(),
+        ).list { OverstyringType.valueOf(it.string("type")) }
+
+    override fun finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId: UUID) =
+        asSQL(
+            """
+            SELECT DISTINCT o.id,
+                CASE
+                    WHEN oi.id IS NOT NULL THEN 'Inntekt'
+                    WHEN oa.id IS NOT NULL THEN 'Arbeidsforhold'
+                    WHEN ot.id IS NOT NULL THEN 'Dager'
+                    WHEN ss.id IS NOT NULL THEN 'Sykepengegrunnlag'
+                    WHEN oms.id IS NOT NULL THEN 'MinimumSykdomsgrad'
+                END as type
+            FROM overstyring o
+            LEFT JOIN overstyring_arbeidsforhold oa on o.id = oa.overstyring_ref
+            LEFT JOIN overstyring_inntekt oi on o.id = oi.overstyring_ref
+            LEFT JOIN overstyring_tidslinje ot on o.id = ot.overstyring_ref
+            LEFT JOIN skjonnsfastsetting_sykepengegrunnlag ss on o.id = ss.overstyring_ref
+            LEFT JOIN overstyring_minimum_sykdomsgrad oms on o.id = oms.overstyring_ref
+            WHERE o.id IN (
+                SELECT overstyring_ref FROM overstyringer_for_vedtaksperioder
+                WHERE vedtaksperiode_id = :vedtaksperiodeId
+            )
+            AND o.ferdigstilt = false
+            """.trimIndent(),
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        ).list { OverstyringType.valueOf(it.string("type")) }
 
     fun finnAktiveOverstyringer(vedtaksperiodeId: UUID): List<EksternHendelseId> =
         asSQL(
@@ -57,96 +100,87 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource),
         vedtaksperiodeIder: List<UUID>,
         overstyringHendelseId: UUID,
     ) {
-        sessionOf(dataSource).use { session ->
-            TransactionalOverstyringDao(session).kobleOverstyringOgVedtaksperiode(
-                vedtaksperiodeIder,
-                overstyringHendelseId,
-            )
+        vedtaksperiodeIder.forEach { vedtaksperiode ->
+            asSQL(
+                """
+                INSERT INTO overstyringer_for_vedtaksperioder(vedtaksperiode_id, overstyring_ref)
+                SELECT :vedtaksperiodeId, o.id
+                FROM overstyring o
+                WHERE o.ekstern_hendelse_id = :overstyringHendelseId
+                ON CONFLICT DO NOTHING
+                """.trimIndent(),
+                "vedtaksperiodeId" to vedtaksperiode,
+                "overstyringHendelseId" to overstyringHendelseId,
+            ).update()
         }
     }
 
-    override fun harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId: UUID): Boolean =
-        sessionOf(dataSource).use { session ->
-            TransactionalOverstyringDao(session).harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId)
-        }
+    override fun harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId: UUID) =
+        asSQL(
+            """
+            SELECT 1
+            FROM overstyringer_for_vedtaksperioder ofv
+            JOIN overstyring o ON o.id = ofv.overstyring_ref
+            WHERE ofv.vedtaksperiode_id = :vedtaksperiodeId
+              AND o.ferdigstilt = false
+            LIMIT 1
+            """.trimIndent(),
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        ).single { true } ?: false
 
-    override fun finnesEksternHendelseId(eksternHendelseId: UUID): Boolean {
-        return sessionOf(dataSource).use { session ->
-            TransactionalOverstyringDao(session).finnesEksternHendelseId(eksternHendelseId)
-        }
-    }
+    override fun finnesEksternHendelseId(eksternHendelseId: UUID) =
+        asSQL(
+            """
+            SELECT 1 from overstyring
+            WHERE ekstern_hendelse_id = :eksternHendelseId
+            """.trimIndent(),
+            "eksternHendelseId" to eksternHendelseId,
+        ).single { true } ?: false
 
     internal fun persisterOverstyringTidslinje(
         overstyrtTidslinje: OverstyrtTidslinjeForDatabase,
         saksbehandlerOid: UUID,
     ) {
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            @Language("PostgreSQL")
-            val opprettOverstyringQuery =
+        val overstyringRef =
+            asSQL(
                 """
                 INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt, vedtaksperiode_id)
-                SELECT gen_random_uuid(), :ekstern_hendelse_id, p.id, :saksbehandler_ref, :tidspunkt, :vedtaksperiode_id
+                SELECT gen_random_uuid(), :eksternHendelseId, p.id, :saksbehandlerOid, :tidspunkt, :vedtaksperiodeId
                 FROM person p
-                WHERE p.fodselsnummer = :fodselsnummer
-                """.trimIndent()
-
-            @Language("PostgreSQL")
-            val opprettOverstyringTidslinjeQuery =
+                WHERE p.fodselsnummer = :foedselsnummer
+                """.trimIndent(),
+                "eksternHendelseId" to overstyrtTidslinje.id,
+                "foedselsnummer" to overstyrtTidslinje.fødselsnummer.toLong(),
+                "saksbehandlerOid" to saksbehandlerOid,
+                "tidspunkt" to overstyrtTidslinje.opprettet,
+                "vedtaksperiodeId" to overstyrtTidslinje.vedtaksperiodeId,
+            ).updateAndReturnGeneratedKey()
+        val overstyringTidslinjeRef =
+            asSQL(
                 """
                 INSERT INTO overstyring_tidslinje(overstyring_ref, arbeidsgiver_ref, begrunnelse)
-                SELECT :overstyring_ref, ag.id, :begrunnelse
+                SELECT :overstyringRef, ag.id, :begrunnelse
                 FROM arbeidsgiver ag
                 WHERE ag.orgnummer = :orgnr
-                """.trimIndent()
+                """.trimIndent(),
+                "overstyringRef" to overstyringRef,
+                "orgnr" to overstyrtTidslinje.organisasjonsnummer.toLong(),
+                "begrunnelse" to overstyrtTidslinje.begrunnelse,
+            ).updateAndReturnGeneratedKey()
 
-            @Language("PostgreSQL")
-            val opprettOverstyringDagQuery =
+        overstyrtTidslinje.dager.forEach { dag ->
+            asSQL(
                 """
                 INSERT INTO overstyring_dag(dato, dagtype, grad, fra_dagtype, fra_grad, overstyring_tidslinje_ref)
-                VALUES (:dato, :dagtype, :grad, :fra_dagtype, :fra_grad, :overstyring_tidslinje_ref)
-                """.trimIndent()
-
-            session.transaction { transactionalSession ->
-                val overstyringRef =
-                    transactionalSession.run(
-                        queryOf(
-                            opprettOverstyringQuery,
-                            mapOf(
-                                "ekstern_hendelse_id" to overstyrtTidslinje.id,
-                                "fodselsnummer" to overstyrtTidslinje.fødselsnummer.toLong(),
-                                "saksbehandler_ref" to saksbehandlerOid,
-                                "tidspunkt" to overstyrtTidslinje.opprettet,
-                                "vedtaksperiode_id" to overstyrtTidslinje.vedtaksperiodeId,
-                            ),
-                        ).asUpdateAndReturnGeneratedKey,
-                    )
-                val overstyringTidslinjeRef =
-                    transactionalSession.run(
-                        queryOf(
-                            opprettOverstyringTidslinjeQuery,
-                            mapOf(
-                                "overstyring_ref" to overstyringRef,
-                                "orgnr" to overstyrtTidslinje.organisasjonsnummer.toLong(),
-                                "begrunnelse" to overstyrtTidslinje.begrunnelse,
-                            ),
-                        ).asUpdateAndReturnGeneratedKey,
-                    )
-                overstyrtTidslinje.dager.forEach { dag ->
-                    transactionalSession.run(
-                        queryOf(
-                            opprettOverstyringDagQuery,
-                            mapOf(
-                                "dato" to dag.dato,
-                                "dagtype" to dag.type,
-                                "grad" to dag.grad,
-                                "fra_dagtype" to dag.fraType,
-                                "fra_grad" to dag.fraGrad,
-                                "overstyring_tidslinje_ref" to overstyringTidslinjeRef,
-                            ),
-                        ).asUpdate,
-                    )
-                }
-            }
+                VALUES (:dato, :dagtype, :grad, :fraDagtype, :fraGrad, :overstyringTidslinjeRef)
+                """.trimIndent(),
+                "dato" to dag.dato,
+                "dagtype" to dag.type,
+                "grad" to dag.grad,
+                "fraDagtype" to dag.fraType,
+                "fraGrad" to dag.fraGrad,
+                "overstyringTidslinjeRef" to overstyringTidslinjeRef,
+            ).update()
         }
     }
 
@@ -154,76 +188,56 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource),
         overstyrtInntektOgRefusjon: OverstyrtInntektOgRefusjonForDatabase,
         saksbehandlerOid: UUID,
     ) {
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            @Language("PostgreSQL")
-            val opprettOverstyringQuery =
+        val overstyringRef =
+            asSQL(
                 """
                 INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt, vedtaksperiode_id)
-                SELECT gen_random_uuid(), :ekstern_hendelse_id, p.id, :saksbehandler_ref, :tidspunkt, :vedtaksperiode_id
+                SELECT gen_random_uuid(), :eksternHendelseId, p.id, :saksbehandlerOid, :tidspunkt, :vedtaksperiodeId
                 FROM person p
-                WHERE p.fodselsnummer = :fodselsnummer
-                """.trimIndent()
-
-            @Language("PostgreSQL")
-            val opprettOverstyringInntektOgRefusjonQuery =
+                WHERE p.fodselsnummer = :foedselsnummer
+                """.trimIndent(),
+                "eksternHendelseId" to overstyrtInntektOgRefusjon.id,
+                "foedselsnummer" to overstyrtInntektOgRefusjon.fødselsnummer.toLong(),
+                "saksbehandlerOid" to saksbehandlerOid,
+                "tidspunkt" to overstyrtInntektOgRefusjon.opprettet,
+                "vedtaksperiodeId" to overstyrtInntektOgRefusjon.vedtaksperiodeId,
+            ).updateAndReturnGeneratedKey()
+        overstyrtInntektOgRefusjon.arbeidsgivere.forEach { arbeidsgiver ->
+            asSQL(
                 """
                 INSERT INTO overstyring_inntekt(forklaring, manedlig_inntekt, fra_manedlig_inntekt, skjaeringstidspunkt, overstyring_ref, refusjonsopplysninger, fra_refusjonsopplysninger, begrunnelse, arbeidsgiver_ref, subsumsjon, fom, tom)
-                SELECT :forklaring, :manedlig_inntekt, :fra_manedlig_inntekt, :skjaeringstidspunkt, :overstyring_ref, :refusjonsopplysninger::json, :fra_refusjonsopplysninger::json, :begrunnelse, ag.id, :subsumsjon::json, :fom, :tom
+                SELECT :forklaring, :maanedligInntekt, :fraMaanedligInntekt, :skjaeringstidspunkt, :overstyringRef, :refusjonsopplysninger::json, :fraRefusjonsopplysninger::json, :begrunnelse, ag.id, :subsumsjon::json, :fom, :tom
                 FROM arbeidsgiver ag
                 WHERE ag.orgnummer = :orgnr
-                """.trimIndent()
-
-            session.transaction { transactionalSession ->
-                val overstyringRef =
-                    transactionalSession.run(
-                        queryOf(
-                            opprettOverstyringQuery,
-                            mapOf(
-                                "ekstern_hendelse_id" to overstyrtInntektOgRefusjon.id,
-                                "fodselsnummer" to overstyrtInntektOgRefusjon.fødselsnummer.toLong(),
-                                "saksbehandler_ref" to saksbehandlerOid,
-                                "tidspunkt" to overstyrtInntektOgRefusjon.opprettet,
-                                "vedtaksperiode_id" to overstyrtInntektOgRefusjon.vedtaksperiodeId,
-                            ),
-                        ).asUpdateAndReturnGeneratedKey,
-                    )
-                overstyrtInntektOgRefusjon.arbeidsgivere.forEach { arbeidsgiver ->
-                    transactionalSession.run(
-                        queryOf(
-                            opprettOverstyringInntektOgRefusjonQuery,
-                            mapOf(
-                                "forklaring" to arbeidsgiver.forklaring,
-                                "manedlig_inntekt" to arbeidsgiver.månedligInntekt,
-                                "fra_manedlig_inntekt" to arbeidsgiver.fraMånedligInntekt,
-                                "skjaeringstidspunkt" to overstyrtInntektOgRefusjon.skjæringstidspunkt,
-                                "overstyring_ref" to overstyringRef,
-                                "refusjonsopplysninger" to
-                                    arbeidsgiver.refusjonsopplysninger?.let {
-                                        objectMapper.writeValueAsString(
-                                            arbeidsgiver.refusjonsopplysninger,
-                                        )
-                                    },
-                                "fra_refusjonsopplysninger" to
-                                    arbeidsgiver.fraRefusjonsopplysninger?.let {
-                                        objectMapper.writeValueAsString(
-                                            arbeidsgiver.fraRefusjonsopplysninger,
-                                        )
-                                    },
-                                "begrunnelse" to arbeidsgiver.begrunnelse,
-                                "orgnr" to arbeidsgiver.organisasjonsnummer.toLong(),
-                                "subsumsjon" to
-                                    arbeidsgiver.lovhjemmel?.let {
-                                        objectMapper.writeValueAsString(
-                                            arbeidsgiver.lovhjemmel,
-                                        )
-                                    },
-                                "fom" to arbeidsgiver.fom,
-                                "tom" to arbeidsgiver.tom,
-                            ),
-                        ).asUpdate,
-                    )
-                }
-            }
+                """.trimIndent(),
+                "forklaring" to arbeidsgiver.forklaring,
+                "maanedligInntekt" to arbeidsgiver.månedligInntekt,
+                "fraMaanedligInntekt" to arbeidsgiver.fraMånedligInntekt,
+                "skjaeringstidspunkt" to overstyrtInntektOgRefusjon.skjæringstidspunkt,
+                "overstyringRef" to overstyringRef,
+                "refusjonsopplysninger" to
+                    arbeidsgiver.refusjonsopplysninger?.let {
+                        objectMapper.writeValueAsString(
+                            arbeidsgiver.refusjonsopplysninger,
+                        )
+                    },
+                "fraRefusjonsopplysninger" to
+                    arbeidsgiver.fraRefusjonsopplysninger?.let {
+                        objectMapper.writeValueAsString(
+                            arbeidsgiver.fraRefusjonsopplysninger,
+                        )
+                    },
+                "begrunnelse" to arbeidsgiver.begrunnelse,
+                "orgnr" to arbeidsgiver.organisasjonsnummer.toLong(),
+                "subsumsjon" to
+                    arbeidsgiver.lovhjemmel?.let {
+                        objectMapper.writeValueAsString(
+                            arbeidsgiver.lovhjemmel,
+                        )
+                    },
+                "fom" to arbeidsgiver.fom,
+                "tom" to arbeidsgiver.tom,
+            ).update()
         }
     }
 
@@ -231,131 +245,96 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource),
         skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlagForDatabase,
         saksbehandlerOid: UUID,
     ) {
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            @Language("PostgreSQL")
-            val opprettOverstyringQuery =
+        val overstyringRef =
+            asSQL(
                 """
                 INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt, vedtaksperiode_id)
-                SELECT gen_random_uuid(), :ekstern_hendelse_id, p.id, :saksbehandler_ref, :tidspunkt, :vedtaksperiode_id
+                SELECT gen_random_uuid(), :eksternHendelseId, p.id, :saksbehandlerRef, :tidspunkt, :vedtaksperiodeId
                 FROM person p
-                WHERE p.fodselsnummer = :fodselsnummer
-                """.trimIndent()
-
-            @Language("PostgreSQL")
-            val opprettBegrunnelseQuery =
-                """
-                INSERT INTO begrunnelse(tekst, type, saksbehandler_ref) VALUES (:tekst, :type, :saksbehandler_ref)
-                """.trimIndent()
-
-            @Language("PostgreSQL")
-            val opprettSkjønnsfastsettingSykepengegrunnlagQuery =
-                """
-                INSERT INTO skjonnsfastsetting_sykepengegrunnlag(skjaeringstidspunkt, arsak, subsumsjon, overstyring_ref, initierende_vedtaksperiode_id, begrunnelse_fritekst_ref, begrunnelse_mal_ref, begrunnelse_konklusjon_ref, type)
-                VALUES (:skjaeringstidspunkt, :arsak, :subsumsjon::json, :overstyring_ref, :initierende_vedtaksperiode_id, :begrunnelse_fritekst_ref, :begrunnelse_mal_ref, :begrunnelse_konklusjon_ref, :type)
-                """.trimIndent()
-
-            @Language("PostgreSQL")
-            val opprettSkjønnsfastsettingSykepengegrunnlagArbeidsgiverQuery =
+                WHERE p.fodselsnummer = :foedselsnummer
+                """.trimIndent(),
+                "eksternHendelseId" to skjønnsfastsattSykepengegrunnlag.id,
+                "saksbehandlerRef" to saksbehandlerOid,
+                "tidspunkt" to skjønnsfastsattSykepengegrunnlag.opprettet,
+                "foedselsnummer" to skjønnsfastsattSykepengegrunnlag.fødselsnummer.toLong(),
+                "vedtaksperiodeId" to skjønnsfastsattSykepengegrunnlag.vedtaksperiodeId,
+            ).updateAndReturnGeneratedKey()
+        // Den felles informasjonen ligger på alle arbeidsgiverne. Burde kanskje skilles ut i eget objekt
+        val enArbeidsgiver = skjønnsfastsattSykepengegrunnlag.arbeidsgivere.first()
+        val begrunnelseFritekstId =
+            requireNotNull(
+                asSQL(
+                    """
+                    INSERT INTO begrunnelse(tekst, type, saksbehandler_ref) VALUES (:tekst, :type, :saksbehandlerRef)
+                    """.trimIndent(),
+                    "tekst" to enArbeidsgiver.begrunnelseFritekst,
+                    "type" to "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_FRITEKST",
+                    "saksbehandlerRef" to saksbehandlerOid,
+                ).updateAndReturnGeneratedKey(),
+            ) { "Forventer å kunne opprette begrunnelseFritekst" }
+        val begrunnelseMalId =
+            requireNotNull(
+                asSQL(
+                    """
+                    INSERT INTO begrunnelse(tekst, type, saksbehandler_ref) VALUES (:tekst, :type, :saksbehandlerRef)
+                    """.trimIndent(),
+                    "tekst" to enArbeidsgiver.begrunnelseMal,
+                    "type" to "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_MAL",
+                    "saksbehandlerRef" to saksbehandlerOid,
+                ).updateAndReturnGeneratedKey(),
+            ) { "Forventer å kunne opprette begrunnelseMal" }
+        val begrunnelseKonklusjonId =
+            requireNotNull(
+                asSQL(
+                    """
+                    INSERT INTO begrunnelse(tekst, type, saksbehandler_ref) VALUES (:tekst, :type, :saksbehandlerRef)
+                    """.trimIndent(),
+                    "tekst" to enArbeidsgiver.begrunnelseKonklusjon,
+                    "type" to "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_KONKLUSJON",
+                    "saksbehandlerRef" to saksbehandlerOid,
+                ).updateAndReturnGeneratedKey(),
+            ) { "Forventer å kunne opprette begrunnelseMal" }
+        val skjønnsfastsettingSykepengegrunnlagId =
+            requireNotNull(
+                asSQL(
+                    """
+                    INSERT INTO skjonnsfastsetting_sykepengegrunnlag(skjaeringstidspunkt, arsak, subsumsjon, overstyring_ref, initierende_vedtaksperiode_id, begrunnelse_fritekst_ref, begrunnelse_mal_ref, begrunnelse_konklusjon_ref, type)
+                    VALUES (:skjaeringstidspunkt, :aarsak, :subsumsjon::json, :overstyringRef, :initierendeVedtaksperiodeId, :begrunnelseFritekstRef, :begrunnelseMalRef, :begrunnelseKonklusjonRef, :type)
+                    """.trimIndent(),
+                    "skjaeringstidspunkt" to skjønnsfastsattSykepengegrunnlag.skjæringstidspunkt,
+                    "aarsak" to enArbeidsgiver.årsak,
+                    "type" to enArbeidsgiver.type.name,
+                    "subsumsjon" to
+                        enArbeidsgiver.lovhjemmel?.let {
+                            objectMapper.writeValueAsString(
+                                enArbeidsgiver.lovhjemmel,
+                            )
+                        },
+                    "overstyringRef" to overstyringRef,
+                    "initierendeVedtaksperiodeId" to
+                        enArbeidsgiver.initierendeVedtaksperiodeId?.let {
+                            UUID.fromString(
+                                it,
+                            )
+                        },
+                    "begrunnelseFritekstRef" to begrunnelseFritekstId,
+                    "begrunnelseMalRef" to begrunnelseMalId,
+                    "begrunnelseKonklusjonRef" to begrunnelseKonklusjonId,
+                ).updateAndReturnGeneratedKey(),
+            )
+        skjønnsfastsattSykepengegrunnlag.arbeidsgivere.forEach { arbeidsgiver ->
+            asSQL(
                 """
                 INSERT INTO skjonnsfastsetting_sykepengegrunnlag_arbeidsgiver(arlig, fra_arlig, arbeidsgiver_ref, skjonnsfastsetting_sykepengegrunnlag_ref)
-                SELECT :arlig, :fra_arlig, ag.id, :skjonnsfastsetting_sykepengegrunnlag_ref
+                SELECT :aarlig, :fraAarlig, ag.id, :skjoennsfastsettingSykepengegrunnlagRef
                 FROM arbeidsgiver ag
                 WHERE ag.orgnummer = :orgnr
-                """.trimIndent()
-
-            session.transaction { transactionalSession ->
-                val overstyringRef =
-                    transactionalSession.run(
-                        queryOf(
-                            opprettOverstyringQuery,
-                            mapOf(
-                                "ekstern_hendelse_id" to skjønnsfastsattSykepengegrunnlag.id,
-                                "saksbehandler_ref" to saksbehandlerOid,
-                                "tidspunkt" to skjønnsfastsattSykepengegrunnlag.opprettet,
-                                "fodselsnummer" to skjønnsfastsattSykepengegrunnlag.fødselsnummer.toLong(),
-                                "vedtaksperiode_id" to skjønnsfastsattSykepengegrunnlag.vedtaksperiodeId,
-                            ),
-                        ).asUpdateAndReturnGeneratedKey,
-                    )
-                // Den felles informasjonen ligger på alle arbeidsgiverne. Burde kanskje skilles ut i eget objekt
-                val enArbeidsgiver = skjønnsfastsattSykepengegrunnlag.arbeidsgivere.first()
-                val begrunnelseFritekstId =
-                    requireNotNull(
-                        transactionalSession.run(
-                            queryOf(
-                                opprettBegrunnelseQuery,
-                                mapOf(
-                                    "tekst" to enArbeidsgiver.begrunnelseFritekst,
-                                    "type" to "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_FRITEKST",
-                                    "saksbehandler_ref" to saksbehandlerOid,
-                                ),
-                            ).asUpdateAndReturnGeneratedKey,
-                        ),
-                    ) { "Forventer å kunne opprette begrunnelseFritekst" }
-                val begrunnelseMalId =
-                    requireNotNull(
-                        transactionalSession.run(
-                            queryOf(
-                                opprettBegrunnelseQuery,
-                                mapOf(
-                                    "tekst" to enArbeidsgiver.begrunnelseMal,
-                                    "type" to "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_MAL",
-                                    "saksbehandler_ref" to saksbehandlerOid,
-                                ),
-                            ).asUpdateAndReturnGeneratedKey,
-                        ),
-                    ) { "Forventer å kunne opprette begrunnelseMal" }
-                val begrunnelseKonklusjonId =
-                    requireNotNull(
-                        transactionalSession.run(
-                            queryOf(
-                                opprettBegrunnelseQuery,
-                                mapOf(
-                                    "tekst" to enArbeidsgiver.begrunnelseKonklusjon,
-                                    "type" to "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_KONKLUSJON",
-                                    "saksbehandler_ref" to saksbehandlerOid,
-                                ),
-                            ).asUpdateAndReturnGeneratedKey,
-                        ),
-                    ) { "Forventer å kunne opprette begrunnelseMal" }
-                val skjønnsfastsettingSykepengegrunnlagId =
-                    requireNotNull(
-                        transactionalSession.run(
-                            queryOf(
-                                opprettSkjønnsfastsettingSykepengegrunnlagQuery,
-                                mapOf(
-                                    "skjaeringstidspunkt" to skjønnsfastsattSykepengegrunnlag.skjæringstidspunkt,
-                                    "arsak" to enArbeidsgiver.årsak,
-                                    "type" to enArbeidsgiver.type.name,
-                                    "subsumsjon" to
-                                        enArbeidsgiver.lovhjemmel?.let {
-                                            objectMapper.writeValueAsString(
-                                                enArbeidsgiver.lovhjemmel,
-                                            )
-                                        },
-                                    "overstyring_ref" to overstyringRef,
-                                    "initierende_vedtaksperiode_id" to enArbeidsgiver.initierendeVedtaksperiodeId?.let { UUID.fromString(it) },
-                                    "begrunnelse_fritekst_ref" to begrunnelseFritekstId,
-                                    "begrunnelse_mal_ref" to begrunnelseMalId,
-                                    "begrunnelse_konklusjon_ref" to begrunnelseKonklusjonId,
-                                ),
-                            ).asUpdateAndReturnGeneratedKey,
-                        ),
-                    )
-                skjønnsfastsattSykepengegrunnlag.arbeidsgivere.forEach { arbeidsgiver ->
-                    transactionalSession.run(
-                        queryOf(
-                            opprettSkjønnsfastsettingSykepengegrunnlagArbeidsgiverQuery,
-                            mapOf(
-                                "arlig" to arbeidsgiver.årlig,
-                                "fra_arlig" to arbeidsgiver.fraÅrlig,
-                                "orgnr" to arbeidsgiver.organisasjonsnummer.toLong(),
-                                "skjonnsfastsetting_sykepengegrunnlag_ref" to skjønnsfastsettingSykepengegrunnlagId,
-                            ),
-                        ).asUpdate,
-                    )
-                }
-            }
+                """.trimIndent(),
+                "aarlig" to arbeidsgiver.årlig,
+                "fraAarlig" to arbeidsgiver.fraÅrlig,
+                "orgnr" to arbeidsgiver.organisasjonsnummer.toLong(),
+                "skjoennsfastsettingSykepengegrunnlagRef" to skjønnsfastsettingSykepengegrunnlagId,
+            ).update()
         }
     }
 
@@ -365,38 +344,36 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource),
     ) = asSQL(
         """
         INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt, vedtaksperiode_id)
-        SELECT gen_random_uuid(), :ekstern_hendelse_id, p.id, :saksbehandler_ref, :tidspunkt, :vedtaksperiode_id
+        SELECT gen_random_uuid(), :eksternHendelseId, p.id, :saksbehandlerRef, :tidspunkt, :vedtaksperiodeId
             FROM person p
-            WHERE p.fodselsnummer = :fodselsnummer
-        RETURNING id
+            WHERE p.fodselsnummer = :foedselsnummer
         """.trimIndent(),
-        "ekstern_hendelse_id" to minimumSykdomsgrad.id,
-        "saksbehandler_ref" to saksbehandlerOid,
+        "eksternHendelseId" to minimumSykdomsgrad.id,
+        "saksbehandlerRef" to saksbehandlerOid,
         "tidspunkt" to minimumSykdomsgrad.opprettet,
-        "fodselsnummer" to minimumSykdomsgrad.fødselsnummer.toLong(),
-        "vedtaksperiode_id" to minimumSykdomsgrad.initierendeVedtaksperiodeId,
-    ).single { it.long("id") }?.let { overstyringId ->
+        "foedselsnummer" to minimumSykdomsgrad.fødselsnummer.toLong(),
+        "vedtaksperiodeId" to minimumSykdomsgrad.initierendeVedtaksperiodeId,
+    ).updateAndReturnGeneratedKey()?.let { overstyringId ->
         asSQL(
             """
             INSERT INTO overstyring_minimum_sykdomsgrad(overstyring_ref, fom, tom, vurdering, begrunnelse)
             VALUES (:overstyringRef, :fom, :tom, :vurdering, :begrunnelse)
-            RETURNING id
             """.trimIndent(),
             "overstyringRef" to overstyringId,
             "fom" to minimumSykdomsgrad.fom,
             "tom" to minimumSykdomsgrad.tom,
             "vurdering" to minimumSykdomsgrad.vurdering,
             "begrunnelse" to minimumSykdomsgrad.begrunnelse,
-        ).single { it.long("id") }?.let { overstyringMinimumSykdomsgradId ->
+        ).updateAndReturnGeneratedKey()?.let { overstyringMinimumSykdomsgradId ->
             minimumSykdomsgrad.arbeidsgivere.forEach { arbeidsgiver ->
                 asSQL(
                     """
                     INSERT INTO overstyring_minimum_sykdomsgrad_arbeidsgiver(berort_vedtaksperiode_id, arbeidsgiver_ref, overstyring_minimum_sykdomsgrad_ref)
-                    SELECT :berortVedtaksperiodeId, ag.id, :overstyringMinimumSykdomsgradRef
+                    SELECT :beroertVedtaksperiodeId, ag.id, :overstyringMinimumSykdomsgradRef
                     FROM arbeidsgiver ag
                     WHERE ag.orgnummer = :organisasjonsnummer
                     """.trimIndent(),
-                    "berortVedtaksperiodeId" to arbeidsgiver.berørtVedtaksperiodeId,
+                    "beroertVedtaksperiodeId" to arbeidsgiver.berørtVedtaksperiodeId,
                     "overstyringMinimumSykdomsgradRef" to overstyringMinimumSykdomsgradId,
                     "organisasjonsnummer" to arbeidsgiver.organisasjonsnummer.toLong(),
                 ).update()
@@ -408,54 +385,36 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource),
         overstyrtArbeidsforhold: OverstyrtArbeidsforholdForDatabase,
         saksbehandlerOid: UUID,
     ) {
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            @Language("PostgreSQL")
-            val opprettOverstyringQuery =
+        val overstyringRef =
+            asSQL(
                 """
                 INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt, vedtaksperiode_id)
-                SELECT gen_random_uuid(), :ekstern_hendelse_id, p.id, :saksbehandler_ref, :tidspunkt, :vedtaksperiode_id
+                SELECT gen_random_uuid(), :eksternHendelseId, p.id, :saksbehandlerRef, :tidspunkt, :vedtaksperiodeId
                 FROM person p
-                WHERE p.fodselsnummer = :fodselsnummer
-                """.trimIndent()
+                WHERE p.fodselsnummer = :foedselsnummer
+                """.trimIndent(),
+                "eksternHendelseId" to overstyrtArbeidsforhold.id,
+                "foedselsnummer" to overstyrtArbeidsforhold.fødselsnummer.toLong(),
+                "saksbehandlerRef" to saksbehandlerOid,
+                "tidspunkt" to overstyrtArbeidsforhold.opprettet,
+                "vedtaksperiodeId" to overstyrtArbeidsforhold.vedtaksperiodeId,
+            ).updateAndReturnGeneratedKey()
 
-            @Language("PostgreSQL")
-            val opprettOverstyringArbeidsforholdQuery =
+        overstyrtArbeidsforhold.overstyrteArbeidsforhold.forEach { arbeidsforhold ->
+            asSQL(
                 """
                 INSERT INTO overstyring_arbeidsforhold(forklaring, deaktivert, skjaeringstidspunkt, overstyring_ref, begrunnelse, arbeidsgiver_ref)
-                SELECT :forklaring, :deaktivert, :skjaeringstidspunkt, :overstyring_ref, :begrunnelse, ag.id
+                SELECT :forklaring, :deaktivert, :skjaeringstidspunkt, :overstyringRef, :begrunnelse, ag.id
                 FROM arbeidsgiver ag
                 WHERE ag.orgnummer = :orgnr
-                """.trimIndent()
-
-            val overstyringRef =
-                session.run(
-                    queryOf(
-                        opprettOverstyringQuery,
-                        mapOf(
-                            "ekstern_hendelse_id" to overstyrtArbeidsforhold.id,
-                            "fodselsnummer" to overstyrtArbeidsforhold.fødselsnummer.toLong(),
-                            "saksbehandler_ref" to saksbehandlerOid,
-                            "tidspunkt" to overstyrtArbeidsforhold.opprettet,
-                            "vedtaksperiode_id" to overstyrtArbeidsforhold.vedtaksperiodeId,
-                        ),
-                    ).asUpdateAndReturnGeneratedKey,
-                )
-
-            overstyrtArbeidsforhold.overstyrteArbeidsforhold.forEach { arbeidsforhold ->
-                session.run(
-                    queryOf(
-                        opprettOverstyringArbeidsforholdQuery,
-                        mapOf(
-                            "forklaring" to arbeidsforhold.forklaring,
-                            "deaktivert" to arbeidsforhold.deaktivert,
-                            "skjaeringstidspunkt" to overstyrtArbeidsforhold.skjæringstidspunkt,
-                            "overstyring_ref" to overstyringRef,
-                            "begrunnelse" to arbeidsforhold.begrunnelse,
-                            "orgnr" to arbeidsforhold.organisasjonsnummer.toLong(),
-                        ),
-                    ).asUpdate,
-                )
-            }
+                """.trimIndent(),
+                "forklaring" to arbeidsforhold.forklaring,
+                "deaktivert" to arbeidsforhold.deaktivert,
+                "skjaeringstidspunkt" to overstyrtArbeidsforhold.skjæringstidspunkt,
+                "overstyringRef" to overstyringRef,
+                "begrunnelse" to arbeidsforhold.begrunnelse,
+                "orgnr" to arbeidsforhold.organisasjonsnummer.toLong(),
+            ).update()
         }
     }
 }

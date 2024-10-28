@@ -13,7 +13,6 @@ import no.nav.helse.db.RisikovurderingRepository
 import no.nav.helse.db.TransactionalEgenAnsattDao
 import no.nav.helse.db.TransactionalGenerasjonDao
 import no.nav.helse.db.TransactionalMeldingDao
-import no.nav.helse.db.TransactionalOverstyringDao
 import no.nav.helse.db.TransactionalVedtakDao
 import no.nav.helse.db.TransactionalVergemålDao
 import no.nav.helse.db.TransactionalÅpneGosysOppgaverDao
@@ -23,6 +22,7 @@ import no.nav.helse.db.ÅpneGosysOppgaverRepository
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.modell.MeldingDao.OverstyringIgangsattKorrigertSøknad
 import no.nav.helse.modell.Toggle
+import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -72,7 +72,7 @@ internal class Automatisering(
                 vergemålRepository = TransactionalVergemålDao(transactionalSession),
                 personRepository = PersonDao(transactionalSession),
                 vedtakRepository = TransactionalVedtakDao(transactionalSession),
-                overstyringRepository = TransactionalOverstyringDao(transactionalSession),
+                overstyringRepository = OverstyringDao(transactionalSession),
                 stikkprøver = stikkprøver,
                 meldingRepository = TransactionalMeldingDao(transactionalSession),
                 generasjonRepository = TransactionalGenerasjonDao(transactionalSession),
