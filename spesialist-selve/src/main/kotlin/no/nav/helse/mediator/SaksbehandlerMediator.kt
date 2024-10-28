@@ -5,9 +5,9 @@ import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.AnnulleringDao
 import no.nav.helse.db.AvslagDao
-import no.nav.helse.db.HistorikkinnslagRepository
 import no.nav.helse.db.OpptegnelseDao
-import no.nav.helse.db.PgHistorikkinnslagRepository
+import no.nav.helse.db.PeriodehistorikkDao
+import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -112,7 +112,7 @@ internal class SaksbehandlerMediator(
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
     private val påVentDao = PåVentDao(dataSource)
-    private val historikkinnslagRepository: HistorikkinnslagRepository = PgHistorikkinnslagRepository(dataSource)
+    private val periodehistorikkDao: PeriodehistorikkDao = PgPeriodehistorikkDao(dataSource)
     private val avslagDao = AvslagDao(dataSource)
     private val annulleringDao = AnnulleringDao(dataSource)
     private val env = Environment()
@@ -268,7 +268,7 @@ internal class SaksbehandlerMediator(
                     årsaker = handling.årsaker,
                     frist = handling.frist,
                 )
-            historikkinnslagRepository.lagre(innslag, handling.oppgaveId)
+            periodehistorikkDao.lagre(innslag, handling.oppgaveId)
             oppgaveService.leggPåVent(handling, saksbehandler)
             PåVentRepository(påVentDao).leggPåVent(saksbehandler.oid(), handling)
         } catch (e: Modellfeil) {
@@ -286,7 +286,7 @@ internal class SaksbehandlerMediator(
         }
         try {
             val innslag = HistorikkinnslagDto.fjernetFraPåVentInnslag(saksbehandler.toDto())
-            historikkinnslagRepository.lagre(innslag, handling.oppgaveId)
+            periodehistorikkDao.lagre(innslag, handling.oppgaveId)
             oppgaveService.fjernFraPåVent(handling.oppgaveId)
             PåVentRepository(påVentDao).fjernFraPåVent(handling.oppgaveId)
         } catch (e: Modellfeil) {

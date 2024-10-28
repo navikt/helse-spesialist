@@ -1,14 +1,14 @@
 package no.nav.helse.modell.stoppautomatiskbehandling
 
 import kotliquery.TransactionalSession
-import no.nav.helse.db.HistorikkinnslagRepository
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveDao
+import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PgNotatDao
 import no.nav.helse.db.PgOppgaveDao
+import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
 import no.nav.helse.db.StansAutomatiskBehandlingRepository
-import no.nav.helse.db.TransactionalPeriodehistorikkDao
 import no.nav.helse.db.TransactionalStansAutomatiskBehandlingDao
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
@@ -33,7 +33,7 @@ import java.util.UUID
 
 class StansAutomatiskBehandlingMediator(
     private val stansAutomatiskBehandlingRepository: StansAutomatiskBehandlingRepository,
-    private val historikkinnslagRepository: HistorikkinnslagRepository,
+    private val periodehistorikkDao: PeriodehistorikkDao,
     private val oppgaveDao: OppgaveDao,
     private val notatDao: NotatDao,
     private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
@@ -50,7 +50,7 @@ class StansAutomatiskBehandlingMediator(
         ): StansAutomatiskBehandlingMediator =
             StansAutomatiskBehandlingMediator(
                 TransactionalStansAutomatiskBehandlingDao(transactionalSession),
-                TransactionalPeriodehistorikkDao(transactionalSession),
+                PgPeriodehistorikkDao(transactionalSession),
                 PgOppgaveDao(transactionalSession),
                 PgNotatDao(transactionalSession),
                 subsumsjonsmelderProvider,
@@ -104,7 +104,7 @@ class StansAutomatiskBehandlingMediator(
         val oppgaveId = oppgaveDao.finnOppgaveId(fødselsnummer)
         if (oppgaveId != null) {
             val innslag = HistorikkinnslagDto.automatiskBehandlingStanset()
-            historikkinnslagRepository.lagre(innslag, oppgaveId)
+            periodehistorikkDao.lagre(innslag, oppgaveId)
         } else {
             sikkerlogg.info("Fant ikke oppgave for $fødselsnummer. Fikk ikke lagret historikkinnslag om stans av automatisk behandling")
         }

@@ -15,7 +15,6 @@ import no.nav.helse.db.AnnulleringDao
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.InntektskilderDao
-import no.nav.helse.db.PgHistorikkinnslagRepository
 import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.ReservasjonDao
@@ -23,6 +22,7 @@ import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.PgNotatDao
+import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.januar
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
@@ -142,7 +142,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val pgOppgaveDao = PgOppgaveDao(dataSource)
     internal val oppgaveApiDao = OppgaveApiDao(dataSource)
     internal val periodehistorikkApiDao = PeriodehistorikkApiDao(dataSource)
-    internal val pgHistorikkinnslagRepository = PgHistorikkinnslagRepository(dataSource)
+    internal val historikkinnslagRepository = PgPeriodehistorikkDao(dataSource)
     internal val arbeidsforholdDao = ArbeidsforholdDao(session)
     internal val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     internal val snapshotDao = SnapshotDao(dataSource)

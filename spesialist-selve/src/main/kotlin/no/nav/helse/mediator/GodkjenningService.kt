@@ -2,8 +2,9 @@ package no.nav.helse.mediator
 
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.db.OppgaveDao
-import no.nav.helse.db.PgHistorikkinnslagRepository
+import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PgOppgaveDao
+import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerRepository
@@ -30,13 +31,13 @@ internal class GodkjenningService(
     private val rapidsConnection: RapidsConnection,
     private val oppgaveService: OppgaveService,
     private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
-    private val pgHistorikkinnslagRepository: PgHistorikkinnslagRepository = PgHistorikkinnslagRepository(dataSource),
+    private val periodehistorikkDao: PeriodehistorikkDao = PgPeriodehistorikkDao(dataSource),
     private val saksbehandlerRepository: SaksbehandlerRepository,
     private val totrinnsvurderingService: TotrinnsvurderingService =
         TotrinnsvurderingService(
             PgTotrinnsvurderingDao(dataSource),
             pgOppgaveDao,
-            pgHistorikkinnslagRepository,
+            periodehistorikkDao,
         ),
 ) : Godkjenninghåndterer {
     private companion object {
@@ -103,7 +104,7 @@ internal class GodkjenningService(
                 val beslutter = totrinnsvurdering.beslutter?.let { saksbehandlerRepository.finnSaksbehandler(it)?.toDto() }
                 checkNotNull(beslutter) { "Forventer at beslutter er satt" }
                 val innslag = HistorikkinnslagDto.totrinnsvurderingFerdigbehandletInnslag(beslutter)
-                pgHistorikkinnslagRepository.lagre(innslag, godkjenningDTO.oppgavereferanse)
+                periodehistorikkDao.lagre(innslag, godkjenningDTO.oppgavereferanse)
             }
         }
     }

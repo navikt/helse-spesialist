@@ -6,7 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.TestRapidHelpers.hendelser
-import no.nav.helse.db.HistorikkinnslagRepository
+import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
@@ -35,7 +35,7 @@ import java.util.UUID.randomUUID
 
 class StansAutomatiskBehandlingMediatorTest {
     private val stansAutomatiskBehandlingDao = mockk<StansAutomatiskBehandlingDao>(relaxed = true)
-    private val historikkinnslagRepository = mockk<HistorikkinnslagRepository>(relaxed = true)
+    private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
     private val pgOppgaveDao = mockk<PgOppgaveDao>(relaxed = true)
     private val notatDao = mockk<NotatDao>(relaxed = true)
     private val testRapid = TestRapid()
@@ -50,7 +50,7 @@ class StansAutomatiskBehandlingMediatorTest {
     private val mediator =
         StansAutomatiskBehandlingMediator(
             stansAutomatiskBehandlingDao,
-            historikkinnslagRepository,
+            periodehistorikkDao,
             pgOppgaveDao,
             notatDao,
         ) { subsumsjonsmelder }
@@ -82,7 +82,7 @@ class StansAutomatiskBehandlingMediatorTest {
             )
         }
         verify(exactly = 1) {
-            historikkinnslagRepository.lagre(
+            periodehistorikkDao.lagre(
                 historikkinnslag = any<AutomatiskBehandlingStanset>(),
                 oppgaveId = any(),
             )

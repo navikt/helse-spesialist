@@ -3,7 +3,7 @@ package no.nav.helse.db
 import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
 import java.util.UUID
 
-interface HistorikkinnslagRepository {
+interface PeriodehistorikkDao {
     fun lagre(
         historikkinnslag: HistorikkinnslagDto,
         oppgaveId: Long,

@@ -6,10 +6,10 @@ import no.nav.helse.db.ArbeidsforholdRepository
 import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.EgenAnsattRepository
-import no.nav.helse.db.HistorikkinnslagRepository
 import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OverstyringRepository
+import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.PåVentRepository
 import no.nav.helse.db.RisikovurderingRepository
@@ -225,7 +225,7 @@ internal class GodkjenningsbehovCommand(
     risikovurderingRepository: RisikovurderingRepository,
     påVentRepository: PåVentRepository,
     overstyringRepository: OverstyringRepository,
-    periodehistorikkDao: HistorikkinnslagRepository,
+    periodehistorikkDao: PeriodehistorikkDao,
     oppgaveDao: OppgaveDao,
     avviksvurderingRepository: AvviksvurderingRepository,
     oppgaveService: OppgaveService,

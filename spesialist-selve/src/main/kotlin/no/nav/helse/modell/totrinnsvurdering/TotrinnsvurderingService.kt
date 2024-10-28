@@ -1,7 +1,7 @@
 package no.nav.helse.modell.totrinnsvurdering
 
-import no.nav.helse.db.HistorikkinnslagRepository
 import no.nav.helse.db.OppgaveDao
+import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
 import no.nav.helse.modell.periodehistorikk.NotatDto
@@ -13,7 +13,7 @@ import java.util.UUID
 class TotrinnsvurderingService(
     private val totrinnsvurderingDao: TotrinnsvurderingDao,
     private val oppgaveDao: OppgaveDao,
-    private val historikkinnslagRepository: HistorikkinnslagRepository,
+    private val periodehistorikkDao: PeriodehistorikkDao,
 ) : Totrinnsvurderinghåndterer {
     fun finnEllerOpprettNy(vedtaksperiodeId: UUID): TotrinnsvurderingOld = totrinnsvurderingDao.opprett(vedtaksperiodeId)
 
@@ -26,7 +26,7 @@ class TotrinnsvurderingService(
         oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)?.let {
             totrinnsvurderingDao.settErRetur(vedtaksperiodeId)
             val innslag = HistorikkinnslagDto.totrinnsvurderingAutomatiskRetur()
-            historikkinnslagRepository.lagre(innslag, it)
+            periodehistorikkDao.lagre(innslag, it)
         }
     }
 
@@ -37,7 +37,7 @@ class TotrinnsvurderingService(
     ) {
         val innslag =
             HistorikkinnslagDto.totrinnsvurderingRetur(notat = NotatDto(oppgaveId, notat), saksbehandlerFraApi.toDto())
-        historikkinnslagRepository.lagre(innslag, oppgaveId)
+        periodehistorikkDao.lagre(innslag, oppgaveId)
     }
 
     override fun avventerTotrinnsvurdering(
@@ -45,7 +45,7 @@ class TotrinnsvurderingService(
         saksbehandlerFraApi: SaksbehandlerFraApi,
     ) {
         val innslag = HistorikkinnslagDto.avventerTotrinnsvurdering(saksbehandlerFraApi.toDto())
-        historikkinnslagRepository.lagre(innslag, oppgaveId)
+        periodehistorikkDao.lagre(innslag, oppgaveId)
     }
 
     override fun erBeslutterOppgave(oppgaveId: Long): Boolean = hentAktiv(oppgaveId)?.erBeslutteroppgave() ?: false

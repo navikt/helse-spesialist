@@ -1,7 +1,7 @@
 package no.nav.helse.db
 
 import kotliquery.Session
-import kotliquery.queryOf
+import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.modell.periodehistorikk.AutomatiskBehandlingStanset
 import no.nav.helse.modell.periodehistorikk.AvventerTotrinnsvurdering
 import no.nav.helse.modell.periodehistorikk.FjernetFraPåVent
@@ -12,19 +12,20 @@ import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingFerdigbehandlet
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingRetur
 import no.nav.helse.modell.periodehistorikk.VedtaksperiodeReberegnet
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
-import org.intellij.lang.annotations.Language
 import java.util.UUID
+import javax.sql.DataSource
 
-class TransactionalPeriodehistorikkDao(
-    private val session: Session,
-) : HistorikkinnslagRepository {
-    val pgOppgaveDao = PgOppgaveDao(session)
+class PgPeriodehistorikkDao(
+    private val queryRunner: QueryRunner,
+) : PeriodehistorikkDao, QueryRunner by queryRunner {
+    constructor(session: Session) : this(MedSession(session))
+    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun lagre(
         historikkinnslag: HistorikkinnslagDto,
         oppgaveId: Long,
     ) {
-        val generasjonId = pgOppgaveDao.finnGenerasjonId(oppgaveId)
+        val generasjonId = PgOppgaveDao(queryRunner).finnGenerasjonId(oppgaveId)
         lagre(historikkinnslag, generasjonId)
     }
 
@@ -37,7 +38,7 @@ class TransactionalPeriodehistorikkDao(
             is LagtPåVent -> {
                 val notatId =
                     historikkinnslag.notat?.let { notat ->
-                        PgNotatDao(session)
+                        PgNotatDao(queryRunner)
                             .lagreForOppgaveId(
                                 oppgaveId = notat.oppgaveId,
                                 tekst = notat.tekst,
@@ -53,7 +54,7 @@ class TransactionalPeriodehistorikkDao(
             is TotrinnsvurderingAutomatiskRetur -> lagre(historikkinnslag, generasjonId, null)
             is TotrinnsvurderingRetur -> {
                 val notatId =
-                    PgNotatDao(session)
+                    PgNotatDao(queryRunner)
                         .lagreForOppgaveId(
                             oppgaveId = historikkinnslag.notat.oppgaveId,
                             tekst = historikkinnslag.notat.tekst,
@@ -73,23 +74,17 @@ class TransactionalPeriodehistorikkDao(
         generasjonId: UUID,
         notatId: Int?,
     ) {
-        @Language("PostgreSQL")
-        val statement = """
+        asSQL(
+            """
                 INSERT INTO periodehistorikk (type, saksbehandler_oid, generasjon_id, utbetaling_id, notat_id, json)
                 VALUES (:type, :saksbehandler_oid, :generasjon_id, null, :notat_id, :json::json)
-        """
-        session.run(
-            queryOf(
-                statement,
-                mapOf(
-                    "type" to historikkinnslag.type(),
-                    "saksbehandler_oid" to historikkinnslag.saksbehandler?.oid,
-                    "generasjon_id" to generasjonId,
-                    "notat_id" to notatId,
-                    "json" to historikkinnslag.toJson(),
-                ),
-            ).asUpdate,
-        )
+        """,
+            "type" to historikkinnslag.type(),
+            "saksbehandler_oid" to historikkinnslag.saksbehandler?.oid,
+            "generasjon_id" to generasjonId,
+            "notat_id" to notatId,
+            "json" to historikkinnslag.toJson(),
+        ).update()
     }
 
     private fun HistorikkinnslagDto.type() =
@@ -108,20 +103,14 @@ class TransactionalPeriodehistorikkDao(
         tidligereUtbetalingId: UUID,
         utbetalingId: UUID,
     ) {
-        @Language("PostgreSQL")
-        val statement = """
+        asSQL(
+            """
                 UPDATE periodehistorikk 
                 SET utbetaling_id = :utbetalingId
                 WHERE utbetaling_id = :tidligereUtbetalingId
-        """
-        session.run(
-            queryOf(
-                statement,
-                mapOf(
-                    "utbetalingId" to utbetalingId,
-                    "tidligereUtbetalingId" to tidligereUtbetalingId,
-                ),
-            ).asUpdate,
-        )
+        """,
+            "utbetalingId" to utbetalingId,
+            "tidligereUtbetalingId" to tidligereUtbetalingId,
+        ).update()
     }
 }

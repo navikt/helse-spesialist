@@ -3,7 +3,7 @@ package no.nav.helse.modell.totrinnsvurdering
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.db.HistorikkinnslagRepository
+import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingAutomatiskRetur
@@ -14,12 +14,12 @@ class TotrinnsvurderingServiceTest {
     private val totrinnsvurderingDao = mockk<TotrinnsvurderingDao>(relaxed = true)
 
     val pgOppgaveDao = mockk<PgOppgaveDao>(relaxed = true)
-    private val historikkinnslagRepository = mockk<HistorikkinnslagRepository>(relaxed = true)
+    private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
     private val totrinnsvurderingService =
         TotrinnsvurderingService(
             totrinnsvurderingDao,
             pgOppgaveDao,
-            historikkinnslagRepository,
+            periodehistorikkDao,
         )
 
     @Test
@@ -35,7 +35,7 @@ class TotrinnsvurderingServiceTest {
         verify(exactly = 1) { totrinnsvurderingDao.settErRetur(vedtaksperiodeId) }
         verify(exactly = 1) { pgOppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId) }
         verify(exactly = 1) {
-            historikkinnslagRepository.lagre(
+            periodehistorikkDao.lagre(
                 historikkinnslag = any<TotrinnsvurderingAutomatiskRetur>(),
                 oppgaveId = oppgaveId,
             )

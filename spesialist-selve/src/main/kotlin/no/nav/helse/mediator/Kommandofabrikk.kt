@@ -9,10 +9,10 @@ import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgOppgaveDao
+import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.TransactionalPeriodehistorikkDao
 import no.nav.helse.db.TransactionalUtbetalingDao
 import no.nav.helse.db.TransactionalVedtakDao
 import no.nav.helse.db.TransactionalVergemålDao
@@ -183,7 +183,7 @@ internal class Kommandofabrikk(
         VedtaksperiodeReberegnetCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             vedtaksperiode = vedtaksperiode,
-            historikkinnslagRepository = TransactionalPeriodehistorikkDao(session),
+            periodehistorikkDao = PgPeriodehistorikkDao(session),
             commandContextRepository = CommandContextDao(session),
             oppgaveService = transaksjonellOppgaveService(session),
             reservasjonRepository = ReservasjonDao(session),
@@ -360,7 +360,7 @@ internal class Kommandofabrikk(
             risikovurderingRepository = RisikovurderingDao(session),
             påVentRepository = PåVentDao(session),
             overstyringRepository = OverstyringDao(session),
-            periodehistorikkDao = TransactionalPeriodehistorikkDao(session),
+            periodehistorikkDao = PgPeriodehistorikkDao(session),
             oppgaveDao = PgOppgaveDao(session),
             avviksvurderingRepository = AvviksvurderingDao(session),
             oppgaveService = transaksjonellOppgaveService(session),
@@ -473,6 +473,6 @@ internal class Kommandofabrikk(
         TotrinnsvurderingService(
             PgTotrinnsvurderingDao(session),
             PgOppgaveDao(session),
-            TransactionalPeriodehistorikkDao(session),
+            PgPeriodehistorikkDao(session),
         )
 }

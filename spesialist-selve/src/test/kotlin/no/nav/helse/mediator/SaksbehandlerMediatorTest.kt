@@ -67,7 +67,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private val stansAutomatiskBehandlingMediator =
         StansAutomatiskBehandlingMediator(
             stansAutomatiskBehandlingDao,
-            pgHistorikkinnslagRepository,
+            historikkinnslagRepository,
             pgOppgaveDao,
             notatDao,
         ) { Subsumsjonsmelder("versjonAvKode", testRapid) }
@@ -87,7 +87,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, oppgaveService, tilgangsgrupper, stansAutomatiskBehandlingMediator, TotrinnsvurderingService(
             totrinnsvurderingDao = totrinnsvurderingDao,
             oppgaveDao = pgOppgaveDao,
-            historikkinnslagRepository = pgHistorikkinnslagRepository
+            periodehistorikkDao = historikkinnslagRepository
         ))
 
     private val AKTØR_ID = lagAktørId()

@@ -6,7 +6,7 @@ import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class PgHistorikkinnslagRepositoryTest : DatabaseIntegrationTest() {
+class PgPeriodehistorikkDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `lagre periodehistorikk ved hjelp av oppgaveId`() {
         opprettPerson()
@@ -18,7 +18,7 @@ class PgHistorikkinnslagRepositoryTest : DatabaseIntegrationTest() {
         val saksbehandler = SaksbehandlerDto(SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_IDENT)
         val historikkinnslag = HistorikkinnslagDto.fjernetFraPåVentInnslag(saksbehandler)
 
-        pgHistorikkinnslagRepository.lagre(historikkinnslag, oppgaveId)
+        historikkinnslagRepository.lagre(historikkinnslag, oppgaveId)
         val result = periodehistorikkApiDao.finn(UTBETALING_ID)
 
         assertEquals(1, result.size)
