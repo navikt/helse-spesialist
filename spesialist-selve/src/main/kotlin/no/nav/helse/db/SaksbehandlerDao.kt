@@ -1,12 +1,15 @@
 package no.nav.helse.db
 
-import kotliquery.sessionOf
-import no.nav.helse.HelseDao
+import kotliquery.Session
+import no.nav.helse.HelseDao.Companion.asSQL
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-class SaksbehandlerDao(private val dataSource: DataSource) : HelseDao(dataSource), SaksbehandlerRepository {
+class SaksbehandlerDao(private val queryRunner: QueryRunner) : SaksbehandlerRepository, QueryRunner by queryRunner {
+    constructor(session: Session) : this(MedSession(session))
+    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
+
     fun opprettEllerOppdater(
         oid: UUID,
         navn: String,
@@ -41,7 +44,13 @@ class SaksbehandlerDao(private val dataSource: DataSource) : HelseDao(dataSource
     ).update()
 
     override fun finnSaksbehandler(oid: UUID) =
-        sessionOf(dataSource).use { session ->
-            TransactionalSaksbehandlerDao(session).finnSaksbehandler(oid)
-        }
+        asSQL("SELECT * FROM saksbehandler WHERE oid = :oid LIMIT 1", "oid" to oid)
+            .single { row ->
+                SaksbehandlerFraDatabase(
+                    epostadresse = row.string("epost"),
+                    oid = row.uuid("oid"),
+                    navn = row.string("navn"),
+                    ident = row.string("ident"),
+                )
+            }
 }
