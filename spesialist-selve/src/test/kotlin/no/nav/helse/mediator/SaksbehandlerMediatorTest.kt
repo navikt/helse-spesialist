@@ -168,7 +168,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     @Test
     fun `invalider eksisterende oppgave ved overstyring`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
+        nyPerson(vedtaksperiodeId = vedtaksperiodeId, organisasjonsnummer = ORGANISASJONSNUMMER)
         mediator.håndter(
             TidslinjeOverstyring(VEDTAKSPERIODE, ORGANISASJONSNUMMER, FNR, AKTØR, "", dager = emptyList()),
             saksbehandler,

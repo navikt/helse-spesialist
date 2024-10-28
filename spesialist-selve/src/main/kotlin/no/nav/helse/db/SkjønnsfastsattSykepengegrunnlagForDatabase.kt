@@ -7,12 +7,14 @@ import java.util.UUID
 data class SkjønnsfastsattSykepengegrunnlagForDatabase(
     val id: UUID,
     val aktørId: String,
-    val fødselsnummer: String,
+    override val fødselsnummer: String,
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<SkjønnsfastsattArbeidsgiverForDatabase>,
-    val opprettet: LocalDateTime,
-    val vedtaksperiodeId: UUID,
-)
+    override val opprettet: LocalDateTime,
+    override val vedtaksperiodeId: UUID,
+) : OverstyringForDatabase {
+    override val eksternHendelseId: UUID = id
+}
 
 data class SkjønnsfastsattArbeidsgiverForDatabase(
     val organisasjonsnummer: String,

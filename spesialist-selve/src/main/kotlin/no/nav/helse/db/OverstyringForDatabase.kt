@@ -4,16 +4,25 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
+interface OverstyringForDatabase {
+    val eksternHendelseId: UUID
+    val fødselsnummer: String
+    val opprettet: LocalDateTime
+    val vedtaksperiodeId: UUID
+}
+
 data class OverstyrtTidslinjeForDatabase(
     val id: UUID,
     val aktørId: String,
-    val fødselsnummer: String,
+    override val fødselsnummer: String,
     val organisasjonsnummer: String,
     val dager: List<OverstyrtTidslinjedagForDatabase>,
     val begrunnelse: String,
-    val opprettet: LocalDateTime,
-    val vedtaksperiodeId: UUID,
-)
+    override val opprettet: LocalDateTime,
+    override val vedtaksperiodeId: UUID,
+) : OverstyringForDatabase {
+    override val eksternHendelseId: UUID = id
+}
 
 data class OverstyrtTidslinjedagForDatabase(
     val dato: LocalDate,
@@ -27,12 +36,14 @@ data class OverstyrtTidslinjedagForDatabase(
 data class OverstyrtInntektOgRefusjonForDatabase(
     val id: UUID,
     val aktørId: String,
-    val fødselsnummer: String,
+    override val fødselsnummer: String,
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<OverstyrtArbeidsgiverForDatabase>,
-    val opprettet: LocalDateTime,
-    val vedtaksperiodeId: UUID,
-)
+    override val opprettet: LocalDateTime,
+    override val vedtaksperiodeId: UUID,
+) : OverstyringForDatabase {
+    override val eksternHendelseId: UUID = id
+}
 
 data class OverstyrtArbeidsgiverForDatabase(
     val organisasjonsnummer: String,
@@ -55,13 +66,15 @@ data class RefusjonselementForDatabase(
 
 data class OverstyrtArbeidsforholdForDatabase(
     val id: UUID,
-    val fødselsnummer: String,
+    override val fødselsnummer: String,
     val aktørId: String,
     val skjæringstidspunkt: LocalDate,
     val overstyrteArbeidsforhold: List<ArbeidsforholdForDatabase>,
-    val opprettet: LocalDateTime,
-    val vedtaksperiodeId: UUID,
-)
+    override val opprettet: LocalDateTime,
+    override val vedtaksperiodeId: UUID,
+) : OverstyringForDatabase {
+    override val eksternHendelseId: UUID = id
+}
 
 data class ArbeidsforholdForDatabase(
     val organisasjonsnummer: String,
