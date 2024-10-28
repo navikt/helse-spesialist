@@ -73,7 +73,6 @@ internal typealias Kommandostarter = Personmelding.(Kommandofabrikk.() -> Comman
 
 internal class Kommandofabrikk(
     private val dataSource: DataSource,
-    private val meldingDao: MeldingDao = MeldingDao(dataSource),
     private val pgOppgaveDao: OppgaveDao = PgOppgaveDao(dataSource),
     oppgaveService: () -> OppgaveService,
     private val godkjenningMediator: GodkjenningMediator,
@@ -222,7 +221,7 @@ internal class Kommandofabrikk(
         val godkjenningsbehovData =
             oppgaveDataForAutomatisering
                 ?.let {
-                    meldingDao.finnGodkjenningsbehov(it.hendelseId)
+                    MeldingDao(transactionalSession).finnGodkjenningsbehov(it.hendelseId)
                 }?.data()
         val utbetaling = godkjenningsbehovData?.let { utbetalingDao.hentUtbetaling(it.utbetalingId) }
         return AdressebeskyttelseEndretCommand(
@@ -311,8 +310,9 @@ internal class Kommandofabrikk(
     internal fun løsGodkjenningsbehov(
         melding: Saksbehandlerløsning,
         person: Person,
+        transactionalSession: TransactionalSession,
     ): LøsGodkjenningsbehov {
-        val godkjenningsbehov = meldingDao.finnGodkjenningsbehov(melding.godkjenningsbehovhendelseId)
+        val godkjenningsbehov = MeldingDao(transactionalSession).finnGodkjenningsbehov(melding.godkjenningsbehovhendelseId)
         val oppgaveId = melding.oppgaveId
         val sykefraværstilfelle = person.sykefraværstilfelle(godkjenningsbehov.vedtaksperiodeId())
         val utbetaling =

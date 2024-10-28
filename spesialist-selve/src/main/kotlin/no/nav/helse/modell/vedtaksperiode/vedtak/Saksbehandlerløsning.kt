@@ -103,7 +103,7 @@ internal class Saksbehandlerløsning private constructor(
         person: Person,
         kommandostarter: Kommandostarter,
         transactionalSession: TransactionalSession,
-    ) = kommandostarter { løsGodkjenningsbehov(this@Saksbehandlerløsning, person) }
+    ) = kommandostarter { løsGodkjenningsbehov(this@Saksbehandlerløsning, person, transactionalSession) }
 
     override fun fødselsnummer() = fødselsnummer
 
