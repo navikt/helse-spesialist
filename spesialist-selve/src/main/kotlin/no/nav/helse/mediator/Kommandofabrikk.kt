@@ -12,7 +12,6 @@ import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.TransactionalMeldingDao
 import no.nav.helse.db.TransactionalPeriodehistorikkDao
 import no.nav.helse.db.TransactionalUtbetalingDao
 import no.nav.helse.db.TransactionalVedtakDao
@@ -113,7 +112,7 @@ internal class Kommandofabrikk(
         val harTildeltOppgave =
             TildelingDao(transactionalSession).tildelingForOppgave(oppgaveDataForAutomatisering.oppgaveId) != null
         val godkjenningsbehovData =
-            TransactionalMeldingDao(transactionalSession)
+            MeldingDao(transactionalSession)
                 .finnGodkjenningsbehov(oppgaveDataForAutomatisering.hendelseId).data()
 
         return GosysOppgaveEndretCommand(
@@ -137,7 +136,7 @@ internal class Kommandofabrikk(
         transactionalSession: TransactionalSession,
     ): TilbakedateringGodkjentCommand {
         val godkjenningsbehovData =
-            TransactionalMeldingDao(transactionalSession).finnGodkjenningsbehov(oppgaveDataForAutomatisering.hendelseId).data()
+            MeldingDao(transactionalSession).finnGodkjenningsbehov(oppgaveDataForAutomatisering.hendelseId).data()
         val sykefraværstilfelle = person.sykefraværstilfelle(godkjenningsbehovData.vedtaksperiodeId)
         val utbetaling = TransactionalUtbetalingDao(transactionalSession).hentUtbetaling(godkjenningsbehovData.utbetalingId)
 
