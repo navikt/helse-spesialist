@@ -46,7 +46,7 @@ internal class AdressebeskyttelseEndret private constructor(
         kommandostarter {
             adressebeskyttelseEndret(
                 this@AdressebeskyttelseEndret,
-                finnOppgavedata(fødselsnummer),
+                finnOppgavedata(fødselsnummer, transactionalSession),
                 transactionalSession,
             )
         }

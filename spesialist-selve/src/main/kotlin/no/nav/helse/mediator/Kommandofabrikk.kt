@@ -6,7 +6,6 @@ import kotliquery.sessionOf
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.InntektskilderDao
-import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgPeriodehistorikkDao
@@ -72,7 +71,6 @@ internal typealias Kommandostarter = Personmelding.(Kommandofabrikk.() -> Comman
 
 internal class Kommandofabrikk(
     private val dataSource: DataSource,
-    private val pgOppgaveDao: OppgaveDao = PgOppgaveDao(dataSource),
     oppgaveService: () -> OppgaveService,
     private val godkjenningMediator: GodkjenningMediator,
     private val generasjonService: GenerasjonService = GenerasjonService(dataSource),
@@ -151,8 +149,9 @@ internal class Kommandofabrikk(
 
     internal fun finnOppgavedata(
         fødselsnummer: String,
-        oppgaveDao: OppgaveDao = pgOppgaveDao,
+        session: Session,
     ): OppgaveDataForAutomatisering? {
+        val oppgaveDao = PgOppgaveDao(session)
         return oppgaveDao.finnOppgaveId(fødselsnummer)?.let { oppgaveId ->
             sikkerlogg.info("Fant en oppgave for {}: {}", fødselsnummer, oppgaveId)
             val oppgaveDataForAutomatisering = oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)
