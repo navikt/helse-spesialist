@@ -1,4 +1,4 @@
-package no.nav.helse.db
+package no.nav.helse.db.overstyring
 
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import java.util.UUID

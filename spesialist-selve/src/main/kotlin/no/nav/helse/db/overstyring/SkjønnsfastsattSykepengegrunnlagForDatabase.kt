@@ -1,4 +1,4 @@
-package no.nav.helse.db
+package no.nav.helse.db.overstyring
 
 import java.time.LocalDate
 import java.time.LocalDateTime

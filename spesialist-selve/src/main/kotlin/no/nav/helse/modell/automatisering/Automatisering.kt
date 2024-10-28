@@ -7,12 +7,12 @@ import no.nav.helse.db.AutomatiseringRepository
 import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.GenerasjonDao
 import no.nav.helse.db.MeldingRepository
-import no.nav.helse.db.OverstyringRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.db.RisikovurderingRepository
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålRepository
+import no.nav.helse.db.overstyring.OverstyringRepository
 import no.nav.helse.db.ÅpneGosysOppgaverRepository
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.modell.MeldingDao

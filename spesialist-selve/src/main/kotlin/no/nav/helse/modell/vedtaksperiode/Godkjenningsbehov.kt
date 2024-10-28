@@ -8,7 +8,6 @@ import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.db.OppgaveDao
-import no.nav.helse.db.OverstyringRepository
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.PåVentRepository
@@ -16,6 +15,7 @@ import no.nav.helse.db.RisikovurderingRepository
 import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålRepository
+import no.nav.helse.db.overstyring.OverstyringRepository
 import no.nav.helse.db.ÅpneGosysOppgaverRepository
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter

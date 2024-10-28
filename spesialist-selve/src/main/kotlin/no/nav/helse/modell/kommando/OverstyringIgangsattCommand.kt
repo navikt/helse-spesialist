@@ -1,6 +1,6 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.db.OverstyringRepository
+import no.nav.helse.db.overstyring.OverstyringRepository
 import java.util.UUID
 
 internal class OverstyringIgangsattCommand(

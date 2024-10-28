@@ -1,4 +1,4 @@
-package no.nav.helse.db
+package no.nav.helse.db.overstyring
 
 data class LovhjemmelForDatabase(
     val paragraf: String,
