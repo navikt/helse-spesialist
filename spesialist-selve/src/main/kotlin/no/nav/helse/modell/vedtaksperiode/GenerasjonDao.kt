@@ -15,8 +15,6 @@ import java.util.UUID
 import javax.sql.DataSource
 
 class GenerasjonDao(private val dataSource: DataSource) : GenerasjonRepository {
-    private val avslagDao = AvslagDao(dataSource)
-
     internal fun TransactionalSession.finnGenerasjoner(vedtaksperiodeId: UUID): List<GenerasjonDto> {
         @Language("PostgreSQL")
         val query = """
@@ -41,10 +39,7 @@ class GenerasjonDao(private val dataSource: DataSource) : GenerasjonRepository {
                     tilstand = enumValueOf(row.string("tilstand")),
                     tags = row.array<String>("tags").toList(),
                     varsler = finnVarsler(generasjonRef),
-                    avslag =
-                        with(avslagDao) {
-                            this@finnGenerasjoner.finnAvslag(vedtaksperiodeId, generasjonRef)
-                        },
+                    avslag = AvslagDao(this).finnAvslag(vedtaksperiodeId, generasjonRef),
                 )
             }.asList,
         )

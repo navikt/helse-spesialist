@@ -1,14 +1,16 @@
 package no.nav.helse.db
 
-import kotliquery.TransactionalSession
-import no.nav.helse.HelseDao
-import no.nav.helse.modell.vedtak.Avslag
+import kotliquery.Session
+import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.modell.vedtak.AvslagDto
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagsdata
 import java.util.UUID
 import javax.sql.DataSource
 
-class AvslagDao(dataSource: DataSource) : HelseDao(dataSource) {
+class AvslagDao(queryRunner: QueryRunner) : QueryRunner by queryRunner {
+    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
+    constructor(session: Session) : this(MedSession(session))
+
     private fun lagreBegrunnelse(
         avslagsdata: Avslagsdata,
         saksbehandlerOid: UUID,
@@ -19,7 +21,7 @@ class AvslagDao(dataSource: DataSource) : HelseDao(dataSource) {
         "tekst" to avslagsdata.begrunnelse,
         "type" to avslagsdata.type.toString(),
         "saksbehandler_ref" to saksbehandlerOid,
-    ).updateAndReturnGeneratedKey()
+    ).updateAndReturnGeneratedKeyOrNull()
 
     internal fun lagreAvslag(
         oppgaveId: Long,
@@ -34,7 +36,7 @@ class AvslagDao(dataSource: DataSource) : HelseDao(dataSource) {
         WHERE o.id = :oppgaveId 
         """.trimIndent(),
         "oppgaveId" to oppgaveId,
-    ).single { Pair(it.uuid("vedtaksperiode_id"), it.long("generasjon_id")) }?.let { (vedtaksperiodeId, generasjonId) ->
+    ).singleOrNull { Pair(it.uuid("vedtaksperiode_id"), it.long("generasjon_id")) }?.let { (vedtaksperiodeId, generasjonId) ->
         lagreBegrunnelse(avslagsdata, saksbehandlerOid).let { begrunnelseId ->
             asSQL(
                 """
@@ -78,40 +80,14 @@ class AvslagDao(dataSource: DataSource) : HelseDao(dataSource) {
         """.trimIndent(),
         "vedtaksperiodeId" to vedtaksperiodeId,
         "generasjonId" to generasjonId,
-    ).single {
+    ).singleOrNull {
         it.longOrNull("begrunnelse_ref")?.let { begrunnelseRef ->
             asSQL(
                 """
                 SELECT type, tekst FROM begrunnelse WHERE id = :begrunnelseRef
                 """.trimIndent(),
                 "begrunnelseRef" to begrunnelseRef,
-            ).single { avslag ->
-                Avslag(enumValueOf(avslag.string("type")), avslag.string("tekst"))
-            }
-        }
-    }
-
-    internal fun TransactionalSession.finnAvslag(
-        vedtaksperiodeId: UUID,
-        generasjonId: Long,
-    ) = asSQL(
-        """
-        SELECT begrunnelse_ref FROM avslag 
-        WHERE vedtaksperiode_id = :vedtaksperiodeId 
-        AND generasjon_ref = :generasjonId 
-        AND invalidert = false 
-        ORDER BY opprettet DESC LIMIT 1
-        """.trimIndent(),
-        "vedtaksperiodeId" to vedtaksperiodeId,
-        "generasjonId" to generasjonId,
-    ).single(this) {
-        it.longOrNull("begrunnelse_ref")?.let { begrunnelseRef ->
-            asSQL(
-                """
-                SELECT type, tekst FROM begrunnelse WHERE id = :begrunnelseRef
-                """.trimIndent(),
-                "begrunnelseRef" to begrunnelseRef,
-            ).single { avslag ->
+            ).singleOrNull { avslag ->
                 AvslagDto(enumValueOf(avslag.string("type")), avslag.string("tekst"))
             }
         }

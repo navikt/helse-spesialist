@@ -17,7 +17,7 @@ import java.util.UUID
 
 internal class AvslagDaoTest : DatabaseIntegrationTest() {
 
-    private val nyDao = AvslagDao(dataSource)
+    private val dao = AvslagDao(dataSource)
 
     @Test
     fun `lagrer og finner avslag`() {
@@ -26,11 +26,11 @@ internal class AvslagDaoTest : DatabaseIntegrationTest() {
         nyPerson(vedtaksperiodeId = vedtaksperiodeId)
         nySaksbehandler(oid)
         val avslag = Avslag(handling = Avslagshandling.OPPRETT, data = Avslagsdata(Avslagstype.AVSLAG, "En individuell begrunelse"))
-        nyDao.lagreAvslag(OPPGAVE_ID, avslag.data!!, oid)
+        dao.lagreAvslag(OPPGAVE_ID, avslag.data!!, oid)
 
         val generasjonId = finnGenerasjonId(vedtaksperiodeId)
 
-        val lagretAvslag = nyDao.finnAvslag(vedtaksperiodeId, generasjonId)
+        val lagretAvslag = dao.finnAvslag(vedtaksperiodeId, generasjonId)
         assertNotNull(lagretAvslag)
     }
 
@@ -41,17 +41,11 @@ internal class AvslagDaoTest : DatabaseIntegrationTest() {
         nyPerson(vedtaksperiodeId = vedtaksperiodeId)
         nySaksbehandler(oid)
         val avslag = Avslag(handling = Avslagshandling.OPPRETT, data = Avslagsdata(Avslagstype.AVSLAG, "En individuell begrunelse"))
-        nyDao.lagreAvslag(OPPGAVE_ID, avslag.data!!, oid)
+        dao.lagreAvslag(OPPGAVE_ID, avslag.data!!, oid)
 
         val generasjonId = finnGenerasjonId(vedtaksperiodeId)
 
-        val lagretAvslag = with(nyDao) {
-            sessionOf(dataSource).use { session ->
-                session.transaction {
-                    it.finnAvslag(vedtaksperiodeId, generasjonId)
-                }
-            }
-        }
+        val lagretAvslag = AvslagDao(dataSource).finnAvslag(vedtaksperiodeId, generasjonId)
         assertNotNull(lagretAvslag)
     }
 
@@ -63,9 +57,9 @@ internal class AvslagDaoTest : DatabaseIntegrationTest() {
         nySaksbehandler(oid)
         val generasjonId = finnGenerasjonId(vedtaksperiodeId)
         val avslag = Avslag(handling = Avslagshandling.OPPRETT, data = Avslagsdata(Avslagstype.AVSLAG, "En individuell begrunelse"))
-        nyDao.lagreAvslag(OPPGAVE_ID, avslag.data!!, oid)
-        nyDao.invaliderAvslag(OPPGAVE_ID)
-        val lagretAvslag = nyDao.finnAvslag(VEDTAKSPERIODE, generasjonId)
+        dao.lagreAvslag(OPPGAVE_ID, avslag.data!!, oid)
+        dao.invaliderAvslag(OPPGAVE_ID)
+        val lagretAvslag = dao.finnAvslag(VEDTAKSPERIODE, generasjonId)
         assertNull(lagretAvslag)
     }
 
@@ -76,11 +70,11 @@ internal class AvslagDaoTest : DatabaseIntegrationTest() {
         nySaksbehandler(oid)
         val avslag = Avslag(handling = Avslagshandling.OPPRETT, data = Avslagsdata(Avslagstype.AVSLAG, "En individuell begrunelse"))
         val avslag2 = Avslag(handling = Avslagshandling.OPPRETT, data = Avslagsdata(Avslagstype.DELVIS_AVSLAG, "En individuell begrunelse delvis avslag retter skrivefeil"))
-        nyDao.lagreAvslag(OPPGAVE_ID, avslag.data!!, oid)
-        nyDao.lagreAvslag(OPPGAVE_ID, avslag2.data!!, oid)
+        dao.lagreAvslag(OPPGAVE_ID, avslag.data!!, oid)
+        dao.lagreAvslag(OPPGAVE_ID, avslag2.data!!, oid)
 
         val lagredeAvslag: List<no.nav.helse.spesialist.api.graphql.schema.Avslag> =
-            nyDao.finnAlleAvslag(VEDTAKSPERIODE, UTBETALING_ID).toList()
+            dao.finnAlleAvslag(VEDTAKSPERIODE, UTBETALING_ID).toList()
 
         assertEquals(2, lagredeAvslag.size)
         assertEquals(Avslagstype.AVSLAG, lagredeAvslag.last().type)
