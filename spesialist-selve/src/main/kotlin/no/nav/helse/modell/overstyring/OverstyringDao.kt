@@ -220,36 +220,20 @@ class OverstyringDao(queryRunner: QueryRunner) : OverstyringRepository, QueryRun
         skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlagForDatabase,
         saksbehandlerOid: UUID,
     ) {
-        val overstyringRef = insertIntoOverstyring(skjønnsfastsattSykepengegrunnlag, saksbehandlerOid)
         // Den felles informasjonen ligger på alle arbeidsgiverne. Burde kanskje skilles ut i eget objekt
         val enArbeidsgiver = skjønnsfastsattSykepengegrunnlag.arbeidsgivere.first()
-        val begrunnelseFritekstId =
-            asSQL(
-                """
-                INSERT INTO begrunnelse (tekst, type, saksbehandler_ref) VALUES (:tekst, :type, :saksbehandlerRef)
-                """.trimIndent(),
-                "tekst" to enArbeidsgiver.begrunnelseFritekst,
-                "type" to "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_FRITEKST",
-                "saksbehandlerRef" to saksbehandlerOid,
-            ).updateAndReturnGeneratedKey()
-        val begrunnelseMalId =
-            asSQL(
-                """
-                INSERT INTO begrunnelse (tekst, type, saksbehandler_ref) VALUES (:tekst, :type, :saksbehandlerRef)
-                """.trimIndent(),
-                "tekst" to enArbeidsgiver.begrunnelseMal,
-                "type" to "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_MAL",
-                "saksbehandlerRef" to saksbehandlerOid,
-            ).updateAndReturnGeneratedKey()
-        val begrunnelseKonklusjonId =
-            asSQL(
-                """
-                INSERT INTO begrunnelse (tekst, type, saksbehandler_ref) VALUES (:tekst, :type, :saksbehandlerRef)
-                """.trimIndent(),
-                "tekst" to enArbeidsgiver.begrunnelseKonklusjon,
-                "type" to "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_KONKLUSJON",
-                "saksbehandlerRef" to saksbehandlerOid,
-            ).updateAndReturnGeneratedKey()
+
+        val (begrunnelseFritekstId, begrunnelseMalId, begrunnelseKonklusjonId) =
+            mapOf(
+                "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_FRITEKST" to enArbeidsgiver.begrunnelseFritekst,
+                "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_MAL" to enArbeidsgiver.begrunnelseMal,
+                "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_KONKLUSJON" to enArbeidsgiver.begrunnelseKonklusjon,
+            ).map { (type, tekst) ->
+                checkNotNull(tekst)
+                insertIntoBegrunnelse(type, tekst, saksbehandlerOid)
+            }
+
+        val overstyringRef = insertIntoOverstyring(skjønnsfastsattSykepengegrunnlag, saksbehandlerOid)
         val skjønnsfastsettingSykepengegrunnlagId =
             asSQL(
                 """
@@ -260,18 +244,10 @@ class OverstyringDao(queryRunner: QueryRunner) : OverstyringRepository, QueryRun
                 "aarsak" to enArbeidsgiver.årsak,
                 "type" to enArbeidsgiver.type.name,
                 "subsumsjon" to
-                    enArbeidsgiver.lovhjemmel?.let {
-                        objectMapper.writeValueAsString(
-                            enArbeidsgiver.lovhjemmel,
-                        )
-                    },
+                    enArbeidsgiver.lovhjemmel?.let { objectMapper.writeValueAsString(enArbeidsgiver.lovhjemmel) },
                 "overstyringRef" to overstyringRef,
                 "initierendeVedtaksperiodeId" to
-                    enArbeidsgiver.initierendeVedtaksperiodeId?.let {
-                        UUID.fromString(
-                            it,
-                        )
-                    },
+                    enArbeidsgiver.initierendeVedtaksperiodeId?.let { UUID.fromString(it) },
                 "begrunnelseFritekstRef" to begrunnelseFritekstId,
                 "begrunnelseMalRef" to begrunnelseMalId,
                 "begrunnelseKonklusjonRef" to begrunnelseKonklusjonId,
@@ -291,6 +267,20 @@ class OverstyringDao(queryRunner: QueryRunner) : OverstyringRepository, QueryRun
             ).update()
         }
     }
+
+    private fun insertIntoBegrunnelse(
+        type: String,
+        tekst: String,
+        saksbehandlerOid: UUID,
+    ) = asSQL(
+        """
+        INSERT INTO begrunnelse (type, tekst, saksbehandler_ref)
+        VALUES (:type, :tekst, :saksbehandlerRef)
+        """.trimIndent(),
+        "type" to type,
+        "tekst" to tekst,
+        "saksbehandlerRef" to saksbehandlerOid,
+    ).updateAndReturnGeneratedKey()
 
     internal fun persisterMinimumSykdomsgrad(
         minimumSykdomsgrad: MinimumSykdomsgradForDatabase,
