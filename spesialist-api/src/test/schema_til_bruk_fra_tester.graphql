@@ -357,7 +357,7 @@ type Kommentar {
 
 type LagtPaVent implements Historikkinnslag {
     arsaker: [String!]!
-    frist: LocalDate!
+    frist: LocalDate
     notatId: Int
     saksbehandlerIdent: String
     timestamp: LocalDateTime!

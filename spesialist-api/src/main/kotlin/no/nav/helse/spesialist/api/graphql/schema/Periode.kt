@@ -210,7 +210,7 @@ data class LagtPaVent(
     override val saksbehandlerIdent: String?,
     override val notatId: Int?,
     val arsaker: List<String>,
-    val frist: LocalDate,
+    val frist: LocalDate?,
 ) : Historikkinnslag
 
 data class FjernetFraPaVent(
@@ -496,10 +496,10 @@ data class BeregnetPeriode(
 
     fun notater(): List<Notat> = notater(notatDao, vedtaksperiodeId())
 
-    private fun mapLagtPåVentJson(json: String): Pair<List<String>, LocalDate> {
+    private fun mapLagtPåVentJson(json: String): Pair<List<String>, LocalDate?> {
         val node = objectMapper.readTree(json)
         val påVentÅrsaker = node["årsaker"].map { it["arsak"].asText() }
-        val frist = node["frist"].asLocalDate()
+        val frist = node["frist"]?.asLocalDate()
         return påVentÅrsaker to frist
     }
 
