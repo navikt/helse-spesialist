@@ -2,7 +2,7 @@ package no.nav.helse.modell.utbetaling
 
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.TransactionalSession
-import no.nav.helse.db.OppgaveRepository
+import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.db.ReservasjonRepository
 import no.nav.helse.db.TildelingRepository
@@ -104,7 +104,7 @@ internal class UtbetalingEndretCommand(
     utbetalingRepository: UtbetalingRepository,
     opptegnelseRepository: OpptegnelseRepository,
     reservasjonRepository: ReservasjonRepository,
-    oppgaveRepository: OppgaveRepository,
+    oppgaveDao: OppgaveDao,
     tildelingRepository: TildelingRepository,
     oppgaveService: OppgaveService,
     totrinnsvurderingService: TotrinnsvurderingService,
@@ -131,7 +131,7 @@ internal class UtbetalingEndretCommand(
                 fødselsnummer = fødselsnummer,
                 reservasjonRepository = reservasjonRepository,
                 tildelingRepository = tildelingRepository,
-                oppgaveRepository = oppgaveRepository,
+                oppgaveDao = oppgaveDao,
                 totrinnsvurderingService = totrinnsvurderingService,
             ),
             OppdaterOppgavestatusCommand(utbetalingId, gjeldendeStatus, oppgaveService),

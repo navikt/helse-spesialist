@@ -1,6 +1,6 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.db.OppgaveRepository
+import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.ReservasjonRepository
 import no.nav.helse.db.TildelingRepository
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
@@ -12,7 +12,7 @@ internal class ReserverPersonHvisTildeltCommand(
     private val fødselsnummer: String,
     private val reservasjonRepository: ReservasjonRepository,
     private val tildelingRepository: TildelingRepository,
-    private val oppgaveRepository: OppgaveRepository,
+    private val oppgaveDao: OppgaveDao,
     private val totrinnsvurderingService: TotrinnsvurderingService,
 ) : Command {
     private companion object {
@@ -21,7 +21,7 @@ internal class ReserverPersonHvisTildeltCommand(
 
     override fun execute(context: CommandContext): Boolean {
         val tildeltSaksbehandler = tildelingRepository.tildelingForPerson(fødselsnummer) ?: return true
-        val vedtaksperiodeId = oppgaveRepository.finnVedtaksperiodeId(fødselsnummer)
+        val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(fødselsnummer)
         val totrinnsvurdering = totrinnsvurderingService.hentAktiv(vedtaksperiodeId)
         val saksbehandlerOid: UUID =
             if (totrinnsvurdering?.erBeslutteroppgave() == true) {

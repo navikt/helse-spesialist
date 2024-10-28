@@ -8,7 +8,7 @@ import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.HistorikkinnslagRepository
 import no.nav.helse.db.InntektskilderRepository
-import no.nav.helse.db.OppgaveRepository
+import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OverstyringRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.PåVentRepository
@@ -226,7 +226,7 @@ internal class GodkjenningsbehovCommand(
     påVentRepository: PåVentRepository,
     overstyringRepository: OverstyringRepository,
     periodehistorikkDao: HistorikkinnslagRepository,
-    oppgaveRepository: OppgaveRepository,
+    oppgaveDao: OppgaveDao,
     avviksvurderingRepository: AvviksvurderingRepository,
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
@@ -252,7 +252,7 @@ internal class GodkjenningsbehovCommand(
             VurderVidereBehandlingAvGodkjenningsbehov(
                 commandData = behovData,
                 utbetalingRepository = utbetalingRepository,
-                oppgaveRepository = oppgaveRepository,
+                oppgaveDao = oppgaveDao,
                 vedtakRepository = vedtakRepository,
             ),
             OpprettKoblingTilHendelseCommand(

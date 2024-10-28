@@ -3,7 +3,7 @@ package no.nav.helse.modell.gosysoppgaver
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.TransactionalSession
 import no.nav.helse.db.OppgaveDao
-import no.nav.helse.db.OppgaveRepository
+import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.ÅpneGosysOppgaverRepository
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
@@ -49,7 +49,7 @@ internal class GosysOppgaveEndret private constructor(
             val oppgaveDataForAutomatisering =
                 finnOppgavedata(
                     fødselsnummer,
-                    OppgaveDao(transactionalSession),
+                    PgOppgaveDao(transactionalSession),
                 ) ?: return@kommandostarter null
             gosysOppgaveEndret(person, oppgaveDataForAutomatisering, transactionalSession)
         }
@@ -67,7 +67,7 @@ internal class GosysOppgaveEndretCommand(
     oppgavedataForAutomatisering: OppgaveDataForAutomatisering,
     automatisering: Automatisering,
     åpneGosysOppgaverRepository: ÅpneGosysOppgaverRepository,
-    oppgaveRepository: OppgaveRepository,
+    oppgaveDao: OppgaveDao,
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
     godkjenningsbehov: GodkjenningsbehovData,
@@ -84,7 +84,7 @@ internal class GosysOppgaveEndretCommand(
             ),
             SjekkAtOppgaveFortsattErÅpenCommand(
                 fødselsnummer = godkjenningsbehov.fødselsnummer,
-                oppgaveRepository = oppgaveRepository,
+                oppgaveDao = oppgaveDao,
             ),
             SettTidligereAutomatiseringInaktivCommand(
                 vedtaksperiodeId = oppgavedataForAutomatisering.vedtaksperiodeId,

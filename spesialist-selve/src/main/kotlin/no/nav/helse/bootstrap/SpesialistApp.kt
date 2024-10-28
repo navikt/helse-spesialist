@@ -8,9 +8,9 @@ import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.NotatDao
-import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgHistorikkinnslagRepository
+import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.PoisonPillDao
 import no.nav.helse.db.ReservasjonDao
@@ -82,7 +82,7 @@ internal class SpesialistApp(
     private val dataSource = dataSourceBuilder.getDataSource()
 
     private val personApiDao = PersonApiDao(dataSource)
-    private val oppgaveDao = OppgaveDao(dataSource)
+    private val pgOppgaveDao = PgOppgaveDao(dataSource)
     private val oppgaveApiDao = OppgaveApiDao(dataSource)
     private val periodehistorikkApiDao = PeriodehistorikkApiDao(dataSource)
     private val pgHistorikkinnslagRepository = PgHistorikkinnslagRepository(dataSource)
@@ -120,13 +120,13 @@ internal class SpesialistApp(
         StansAutomatiskBehandlingMediator(
             stansAutomatiskBehandlingDao,
             pgHistorikkinnslagRepository,
-            oppgaveDao,
+            pgOppgaveDao,
             notatDao,
         ) { subsumsjonsmelder }
     private val totrinnsvurderingService =
         TotrinnsvurderingService(
             totrinnsvurderingDao = totrinnsvurderingDao,
-            oppgaveRepository = oppgaveDao,
+            oppgaveDao = pgOppgaveDao,
             historikkinnslagRepository = pgHistorikkinnslagRepository,
         )
 
@@ -222,7 +222,7 @@ internal class SpesialistApp(
         rapidsConnection.register(this)
         oppgaveService =
             OppgaveService(
-                oppgaveRepository = oppgaveDao,
+                oppgaveDao = pgOppgaveDao,
                 tildelingRepository = tildelingDao,
                 reservasjonRepository = reservasjonDao,
                 opptegnelseRepository = opptegnelseDao,

@@ -4,7 +4,7 @@ import kotliquery.TransactionalSession
 import no.nav.helse.db.HistorikkinnslagRepository
 import no.nav.helse.db.NotatRepository
 import no.nav.helse.db.OppgaveDao
-import no.nav.helse.db.OppgaveRepository
+import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
 import no.nav.helse.db.StansAutomatiskBehandlingRepository
 import no.nav.helse.db.TransactionalNotatDao
@@ -34,7 +34,7 @@ import java.util.UUID
 class StansAutomatiskBehandlingMediator(
     private val stansAutomatiskBehandlingRepository: StansAutomatiskBehandlingRepository,
     private val historikkinnslagRepository: HistorikkinnslagRepository,
-    private val oppgaveRepository: OppgaveRepository,
+    private val oppgaveDao: OppgaveDao,
     private val notatRepository: NotatRepository,
     private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
 ) : StansAutomatiskBehandlinghåndterer {
@@ -51,7 +51,7 @@ class StansAutomatiskBehandlingMediator(
             StansAutomatiskBehandlingMediator(
                 TransactionalStansAutomatiskBehandlingDao(transactionalSession),
                 TransactionalPeriodehistorikkDao(transactionalSession),
-                OppgaveDao(transactionalSession),
+                PgOppgaveDao(transactionalSession),
                 TransactionalNotatDao(transactionalSession),
                 subsumsjonsmelderProvider,
             )
@@ -101,7 +101,7 @@ class StansAutomatiskBehandlingMediator(
     }
 
     private fun lagrePeriodehistorikk(fødselsnummer: String) {
-        val oppgaveId = oppgaveRepository.finnOppgaveId(fødselsnummer)
+        val oppgaveId = oppgaveDao.finnOppgaveId(fødselsnummer)
         if (oppgaveId != null) {
             val innslag = HistorikkinnslagDto.automatiskBehandlingStanset()
             historikkinnslagRepository.lagre(innslag, oppgaveId)
@@ -121,7 +121,7 @@ class StansAutomatiskBehandlingMediator(
         sikkerlogg.error("Fant ikke oppgave for $fødselsnummer. Fikk ikke lagret notat om oppheving av stans")
     }
 
-    private fun String.finnOppgaveId() = oppgaveRepository.finnOppgaveId(this) ?: oppgaveRepository.finnOppgaveIdUansettStatus(this)
+    private fun String.finnOppgaveId() = oppgaveDao.finnOppgaveId(this) ?: oppgaveDao.finnOppgaveIdUansettStatus(this)
 
     private fun List<StansAutomatiskBehandlingFraDatabase>.filtrerGjeldendeStopp(): List<StansAutomatiskBehandlingFraDatabase> {
         val gjeldende = mutableListOf<StansAutomatiskBehandlingFraDatabase>()

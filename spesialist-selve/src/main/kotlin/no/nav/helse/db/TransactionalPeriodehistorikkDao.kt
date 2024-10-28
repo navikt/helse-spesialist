@@ -18,13 +18,13 @@ import java.util.UUID
 class TransactionalPeriodehistorikkDao(
     private val session: Session,
 ) : HistorikkinnslagRepository {
-    val oppgaveDao = OppgaveDao(session)
+    val pgOppgaveDao = PgOppgaveDao(session)
 
     override fun lagre(
         historikkinnslag: HistorikkinnslagDto,
         oppgaveId: Long,
     ) {
-        val generasjonId = oppgaveDao.finnGenerasjonId(oppgaveId)
+        val generasjonId = pgOppgaveDao.finnGenerasjonId(oppgaveId)
         lagre(historikkinnslag, generasjonId)
     }
 

@@ -7,7 +7,7 @@ import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.OppgaveDao
+import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.mediator.GodkjenningService
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 // et annet opplegg for å teste samspillet mellom API og selve/mediator/modell
 internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     protected val testRapid = __ikke_bruk_denne
-    protected val oppgaveDao = OppgaveDao(dataSource)
+    protected val pgOppgaveDao = PgOppgaveDao(dataSource)
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val pgHistorikkinnslagRepository = PgHistorikkinnslagRepository(dataSource)
     private val totrinnsvurderingDao = PgTotrinnsvurderingDao(dataSource)
@@ -31,7 +31,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
 
     private val oppgaveService =
         OppgaveService(
-            oppgaveRepository = OppgaveDao(dataSource),
+            oppgaveDao = PgOppgaveDao(dataSource),
             tildelingRepository = TildelingDao(dataSource),
             reservasjonRepository = reservasjonDao,
             opptegnelseRepository = OpptegnelseDao(dataSource),
@@ -45,7 +45,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     val godkjenningService =
         GodkjenningService(
             dataSource = dataSource,
-            oppgaveDao = oppgaveDao,
+            pgOppgaveDao = pgOppgaveDao,
             overstyringDao = OverstyringDao(dataSource),
             rapidsConnection = testRapid,
             oppgaveService = oppgaveService,
@@ -54,7 +54,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
             totrinnsvurderingService =
                 TotrinnsvurderingService(
                     totrinnsvurderingDao,
-                    oppgaveDao,
+                    pgOppgaveDao,
                     pgHistorikkinnslagRepository,
                 ),
         )

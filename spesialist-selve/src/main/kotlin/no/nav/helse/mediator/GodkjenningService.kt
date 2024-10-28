@@ -2,8 +2,8 @@ package no.nav.helse.mediator
 
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.db.OppgaveDao
-import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.PgHistorikkinnslagRepository
+import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerRepository
@@ -25,7 +25,7 @@ import javax.sql.DataSource
 
 internal class GodkjenningService(
     private val dataSource: DataSource,
-    private val oppgaveDao: OppgaveRepository = OppgaveDao(dataSource),
+    private val pgOppgaveDao: OppgaveDao = PgOppgaveDao(dataSource),
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
     private val rapidsConnection: RapidsConnection,
     private val oppgaveService: OppgaveService,
@@ -35,7 +35,7 @@ internal class GodkjenningService(
     private val totrinnsvurderingService: TotrinnsvurderingService =
         TotrinnsvurderingService(
             PgTotrinnsvurderingDao(dataSource),
-            oppgaveDao,
+            pgOppgaveDao,
             pgHistorikkinnslagRepository,
         ),
 ) : Godkjenninghåndterer {
@@ -49,9 +49,9 @@ internal class GodkjenningService(
         epost: String,
         oid: UUID,
     ) {
-        val hendelseId = oppgaveDao.finnHendelseId(godkjenningDTO.oppgavereferanse)
-        val fødselsnummer = oppgaveDao.finnFødselsnummer(godkjenningDTO.oppgavereferanse)
-        val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(godkjenningDTO.oppgavereferanse)
+        val hendelseId = pgOppgaveDao.finnHendelseId(godkjenningDTO.oppgavereferanse)
+        val fødselsnummer = pgOppgaveDao.finnFødselsnummer(godkjenningDTO.oppgavereferanse)
+        val vedtaksperiodeId = pgOppgaveDao.finnVedtaksperiodeId(godkjenningDTO.oppgavereferanse)
         val totrinnsvurdering = totrinnsvurderingService.hentAktiv(vedtaksperiodeId)
         val reserverPersonOid: UUID = totrinnsvurdering?.saksbehandler ?: oid
         val saksbehandleroverstyringer = overstyringDao.finnAktiveOverstyringer(vedtaksperiodeId)

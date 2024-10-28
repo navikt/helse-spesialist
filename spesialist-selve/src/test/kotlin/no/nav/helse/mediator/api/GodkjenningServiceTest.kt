@@ -108,7 +108,7 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
 
         godkjenningService.håndter(godkjenningDto(), "epost@nav.no", beslutter)
 
-        val utbetalingId = oppgaveDao.finnUtbetalingId(1.oppgave(VEDTAKSPERIODE_ID)) ?: fail("Fant ikke utbetalingId")
+        val utbetalingId = pgOppgaveDao.finnUtbetalingId(1.oppgave(VEDTAKSPERIODE_ID)) ?: fail("Fant ikke utbetalingId")
         assertPeriodehistorikk(utbetalingId)
     }
 
@@ -144,7 +144,7 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
     // Per nå blir det opprettet "en totrinnsvurdering" på et tidspunkt, som så blir updated med uuid-er på et senere
     // tidspunkt
     private fun opprettInitiellTotrinnsvurdering() {
-        val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(fødselsnummer = FØDSELSNUMMER)
+        val vedtaksperiodeId = pgOppgaveDao.finnVedtaksperiodeId(fødselsnummer = FØDSELSNUMMER)
 
         @Language("postgresql") val sql = "insert into totrinnsvurdering (vedtaksperiode_id) values (:vedtaksperiodeId)"
         sessionOf(dataSource).use { session ->
@@ -153,7 +153,7 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
     }
 
     private fun settTotrinnsvurdering(opprinneligSaksbehandler: UUID?, beslutter: UUID?) {
-        val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(fødselsnummer = FØDSELSNUMMER)
+        val vedtaksperiodeId = pgOppgaveDao.finnVedtaksperiodeId(fødselsnummer = FØDSELSNUMMER)
 
         @Language("postgresql") val sql = """
             insert into totrinnsvurdering (

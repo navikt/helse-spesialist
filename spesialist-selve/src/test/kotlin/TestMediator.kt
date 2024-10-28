@@ -8,7 +8,7 @@ import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.OppgaveDao
+import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.MeldingMediator
@@ -32,7 +32,7 @@ internal class TestMediator(
     dataSource: DataSource,
 ) {
     private val opptegnelseDao = OpptegnelseDao(dataSource)
-    private val oppgaveDao = OppgaveDao(dataSource)
+    private val pgOppgaveDao = PgOppgaveDao(dataSource)
     private val pgHistorikkinnslagRepository = PgHistorikkinnslagRepository(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
     private val totrinnsvurderingDao = PgTotrinnsvurderingDao(dataSource)
@@ -45,7 +45,7 @@ internal class TestMediator(
         StansAutomatiskBehandlingMediator(
             StansAutomatiskBehandlingDao(dataSource),
             pgHistorikkinnslagRepository,
-            oppgaveDao,
+            pgOppgaveDao,
             notatDao,
         ) { Subsumsjonsmelder("versjonAvKode", testRapid) }
 
@@ -53,7 +53,7 @@ internal class TestMediator(
     private val tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
     private val oppgaveService =
         OppgaveService(
-            oppgaveRepository = OppgaveDao(dataSource),
+            oppgaveDao = PgOppgaveDao(dataSource),
             tildelingRepository = tildelingDao,
             reservasjonRepository = ReservasjonDao(dataSource),
             opptegnelseRepository = opptegnelseDao,
@@ -73,7 +73,7 @@ internal class TestMediator(
             stansAutomatiskBehandlingMediator,
             totrinnsvurderingService = TotrinnsvurderingService(
                 totrinnsvurderingDao = totrinnsvurderingDao,
-                oppgaveRepository = oppgaveDao,
+                oppgaveDao = pgOppgaveDao,
                 historikkinnslagRepository = pgHistorikkinnslagRepository
             )
         )

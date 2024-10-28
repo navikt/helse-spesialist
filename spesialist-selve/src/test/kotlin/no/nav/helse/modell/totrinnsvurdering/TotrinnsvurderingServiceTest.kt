@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.HistorikkinnslagRepository
 import no.nav.helse.db.TotrinnsvurderingDao
-import no.nav.helse.db.OppgaveDao
+import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingAutomatiskRetur
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -13,12 +13,12 @@ import java.util.UUID
 class TotrinnsvurderingServiceTest {
     private val totrinnsvurderingDao = mockk<TotrinnsvurderingDao>(relaxed = true)
 
-    val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
+    val pgOppgaveDao = mockk<PgOppgaveDao>(relaxed = true)
     private val historikkinnslagRepository = mockk<HistorikkinnslagRepository>(relaxed = true)
     private val totrinnsvurderingService =
         TotrinnsvurderingService(
             totrinnsvurderingDao,
-            oppgaveDao,
+            pgOppgaveDao,
             historikkinnslagRepository,
         )
 
@@ -28,14 +28,14 @@ class TotrinnsvurderingServiceTest {
         val oppgaveId = 42L
         val utbetalingId = UUID.randomUUID()
 
-        every { oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId) } returns oppgaveId
-        every { oppgaveDao.finnIdForAktivOppgave(any()) } returns oppgaveId
-        every { oppgaveDao.finnUtbetalingId(any<Long>()) } returns utbetalingId
+        every { pgOppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId) } returns oppgaveId
+        every { pgOppgaveDao.finnIdForAktivOppgave(any()) } returns oppgaveId
+        every { pgOppgaveDao.finnUtbetalingId(any<Long>()) } returns utbetalingId
 
         totrinnsvurderingService.settAutomatiskRetur(vedtaksperiodeId)
 
         verify(exactly = 1) { totrinnsvurderingDao.settErRetur(vedtaksperiodeId) }
-        verify(exactly = 1) { oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId) }
+        verify(exactly = 1) { pgOppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId) }
         verify(exactly = 1) {
             historikkinnslagRepository.lagre(
                 historikkinnslag = any<TotrinnsvurderingAutomatiskRetur>(),

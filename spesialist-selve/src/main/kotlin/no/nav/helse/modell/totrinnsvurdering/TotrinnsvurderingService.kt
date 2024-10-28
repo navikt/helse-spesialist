@@ -1,7 +1,7 @@
 package no.nav.helse.modell.totrinnsvurdering
 
 import no.nav.helse.db.HistorikkinnslagRepository
-import no.nav.helse.db.OppgaveRepository
+import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
 import no.nav.helse.modell.periodehistorikk.NotatDto
@@ -12,7 +12,7 @@ import java.util.UUID
 
 class TotrinnsvurderingService(
     private val totrinnsvurderingDao: TotrinnsvurderingDao,
-    private val oppgaveRepository: OppgaveRepository,
+    private val oppgaveDao: OppgaveDao,
     private val historikkinnslagRepository: HistorikkinnslagRepository,
 ) : Totrinnsvurderinghåndterer {
     fun finnEllerOpprettNy(vedtaksperiodeId: UUID): TotrinnsvurderingOld = totrinnsvurderingDao.opprett(vedtaksperiodeId)
@@ -23,7 +23,7 @@ class TotrinnsvurderingService(
     ) = totrinnsvurderingDao.settBeslutter(oppgaveId, saksbehandlerOid)
 
     fun settAutomatiskRetur(vedtaksperiodeId: UUID) {
-        oppgaveRepository.finnIdForAktivOppgave(vedtaksperiodeId)?.let {
+        oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)?.let {
             totrinnsvurderingDao.settErRetur(vedtaksperiodeId)
             val innslag = HistorikkinnslagDto.totrinnsvurderingAutomatiskRetur()
             historikkinnslagRepository.lagre(innslag, it)

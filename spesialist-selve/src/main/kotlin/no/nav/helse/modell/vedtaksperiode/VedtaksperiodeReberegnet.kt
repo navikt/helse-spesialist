@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.TransactionalSession
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.HistorikkinnslagRepository
-import no.nav.helse.db.OppgaveRepository
+import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.ReservasjonRepository
 import no.nav.helse.db.TildelingRepository
 import no.nav.helse.mediator.Kommandostarter
@@ -66,7 +66,7 @@ internal class VedtaksperiodeReberegnetCommand(
     oppgaveService: OppgaveService,
     reservasjonRepository: ReservasjonRepository,
     tildelingRepository: TildelingRepository,
-    oppgaveRepository: OppgaveRepository,
+    oppgaveDao: OppgaveDao,
     totrinnsvurderingService: TotrinnsvurderingService,
 ) : MacroCommand() {
     override val commands: List<Command> =
@@ -79,7 +79,7 @@ internal class VedtaksperiodeReberegnetCommand(
                 fødselsnummer = fødselsnummer,
                 reservasjonRepository = reservasjonRepository,
                 tildelingRepository = tildelingRepository,
-                oppgaveRepository = oppgaveRepository,
+                oppgaveDao = oppgaveDao,
                 totrinnsvurderingService = totrinnsvurderingService,
             ),
             AvbrytCommand(
@@ -89,7 +89,7 @@ internal class VedtaksperiodeReberegnetCommand(
                 oppgaveService = oppgaveService,
                 reservasjonRepository = reservasjonRepository,
                 tildelingRepository = tildelingRepository,
-                oppgaveRepository = oppgaveRepository,
+                oppgaveDao = oppgaveDao,
                 totrinnsvurderingService = totrinnsvurderingService,
             ),
         )

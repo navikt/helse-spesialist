@@ -2,7 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.TransactionalSession
-import no.nav.helse.db.OppgaveRepository
+import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
@@ -56,7 +56,7 @@ internal class AdressebeskyttelseEndret private constructor(
 internal class AdressebeskyttelseEndretCommand(
     fødselsnummer: String,
     personRepository: PersonRepository,
-    oppgaveRepository: OppgaveRepository,
+    oppgaveDao: OppgaveDao,
     godkjenningMediator: GodkjenningMediator,
     godkjenningsbehov: GodkjenningsbehovData?,
     utbetaling: Utbetaling?,
@@ -70,7 +70,7 @@ internal class AdressebeskyttelseEndretCommand(
                 add(
                     AvvisVedStrengtFortroligAdressebeskyttelseCommand(
                         personRepository = personRepository,
-                        oppgaveRepository = oppgaveRepository,
+                        oppgaveDao = oppgaveDao,
                         godkjenningMediator = godkjenningMediator,
                         godkjenningsbehov = godkjenningsbehov,
                         utbetaling = utbetaling,

@@ -5,10 +5,10 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
-import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.OpptegnelseRepository
+import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.ReservasjonRepository
@@ -60,7 +60,7 @@ interface Oppgavefinner {
 }
 
 internal class OppgaveService(
-    private val oppgaveRepository: OppgaveRepository,
+    private val oppgaveDao: OppgaveDao,
     private val tildelingRepository: TildelingRepository,
     private val reservasjonRepository: ReservasjonRepository,
     private val opptegnelseRepository: OpptegnelseRepository,
@@ -75,7 +75,7 @@ internal class OppgaveService(
 
     internal fun nyOppgaveService(transactionalSession: TransactionalSession): OppgaveService =
         OppgaveService(
-            oppgaveRepository = OppgaveDao(transactionalSession),
+            oppgaveDao = PgOppgaveDao(transactionalSession),
             tildelingRepository = TildelingDao(transactionalSession),
             reservasjonRepository = ReservasjonDao(transactionalSession),
             opptegnelseRepository = OpptegnelseDao(transactionalSession),
@@ -91,7 +91,7 @@ internal class OppgaveService(
         contextId: UUID,
         opprettOppgaveBlock: (reservertId: Long) -> Oppgave,
     ) {
-        val nesteId = oppgaveRepository.reserverNesteId()
+        val nesteId = oppgaveDao.reserverNesteId()
         val oppgave = opprettOppgaveBlock(nesteId)
         val oppgavemelder = Oppgavemelder(fødselsnummer, rapidsConnection)
         oppgave.register(oppgavemelder)
@@ -106,12 +106,12 @@ internal class OppgaveService(
     ): T {
         val oppgave =
             Oppgavehenter(
-                oppgaveRepository,
+                oppgaveDao,
                 totrinnsvurderingDao,
                 saksbehandlerRepository,
                 tilgangskontroll,
             ).oppgave(id)
-        val fødselsnummer = oppgaveRepository.finnFødselsnummer(id)
+        val fødselsnummer = oppgaveDao.finnFødselsnummer(id)
         oppgave.register(Oppgavemelder(fødselsnummer, rapidsConnection))
         val returverdi = oppgaveBlock(oppgave)
         Oppgavelagrer(tildelingRepository).oppdater(this@OppgaveService, oppgave.toDto())
@@ -122,7 +122,7 @@ internal class OppgaveService(
         utbetalingId: UUID,
         oppgaveBlock: Oppgave?.() -> Unit,
     ) {
-        val oppgaveId = oppgaveRepository.finnOppgaveId(utbetalingId)
+        val oppgaveId = oppgaveDao.finnOppgaveId(utbetalingId)
         oppgaveId?.let {
             oppgave(it, oppgaveBlock)
         }
@@ -153,7 +153,7 @@ internal class OppgaveService(
     }
 
     internal fun håndter(handling: Overstyring) {
-        oppgaveRepository.finnOppgaveId(handling.gjelderFødselsnummer())?.let {
+        oppgaveDao.finnOppgaveId(handling.gjelderFødselsnummer())?.let {
             oppgave(it) {
                 this.avbryt()
             }
@@ -208,7 +208,7 @@ internal class OppgaveService(
         fødselsnummer: String,
     ) {
         val oppgaveId =
-            oppgaveRepository.finnOppgaveId(fødselsnummer) ?: run {
+            oppgaveDao.finnOppgaveId(fødselsnummer) ?: run {
                 sikkerlogg.info("Ingen aktiv oppgave for {}", kv("fødselsnummer", fødselsnummer))
                 return
             }
@@ -225,9 +225,9 @@ internal class OppgaveService(
         }
     }
 
-    override fun venterPåSaksbehandler(oppgaveId: Long): Boolean = oppgaveRepository.venterPåSaksbehandler(oppgaveId)
+    override fun venterPåSaksbehandler(oppgaveId: Long): Boolean = oppgaveDao.venterPåSaksbehandler(oppgaveId)
 
-    override fun spleisBehandlingId(oppgaveId: Long): UUID = oppgaveRepository.finnSpleisBehandlingId(oppgaveId)
+    override fun spleisBehandlingId(oppgaveId: Long): UUID = oppgaveDao.finnSpleisBehandlingId(oppgaveId)
 
     override fun oppgaver(
         saksbehandlerFraApi: SaksbehandlerFraApi,
@@ -263,7 +263,7 @@ internal class OppgaveService(
                 .toMap()
 
         val oppgaver =
-            oppgaveRepository
+            oppgaveDao
                 .finnOppgaverForVisning(
                     ekskluderEgenskaper = egenskaperSomSkalEkskluderes,
                     saksbehandlerOid = saksbehandler.oid(),
@@ -283,7 +283,7 @@ internal class OppgaveService(
 
     override fun antallOppgaver(saksbehandlerFraApi: SaksbehandlerFraApi): AntallOppgaver {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
-        val antallOppgaver = oppgaveRepository.finnAntallOppgaver(saksbehandlerOid = saksbehandler.oid())
+        val antallOppgaver = oppgaveDao.finnAntallOppgaver(saksbehandlerOid = saksbehandler.oid())
         return antallOppgaver.tilApiversjon()
     }
 
@@ -294,7 +294,7 @@ internal class OppgaveService(
     ): BehandledeOppgaver {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         val behandledeOppgaver =
-            oppgaveRepository.finnBehandledeOppgaver(
+            oppgaveDao.finnBehandledeOppgaver(
                 behandletAvOid = saksbehandler.oid(),
                 offset = offset,
                 limit = limit,
@@ -310,7 +310,7 @@ internal class OppgaveService(
         utbetalingId: UUID,
     ): List<Oppgaveegenskap> {
         val egenskaper =
-            oppgaveRepository.finnEgenskaper(
+            oppgaveDao.finnEgenskaper(
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingId = utbetalingId,
             )
@@ -319,7 +319,7 @@ internal class OppgaveService(
     }
 
     fun avbrytOppgaveFor(vedtaksperiodeId: UUID) {
-        oppgaveRepository.finnIdForAktivOppgave(vedtaksperiodeId)?.also {
+        oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)?.also {
             oppgave(it) {
                 this.avbryt()
             }
@@ -327,7 +327,7 @@ internal class OppgaveService(
     }
 
     fun fjernTilbakedatert(vedtaksperiodeId: UUID) {
-        oppgaveRepository.finnIdForAktivOppgave(vedtaksperiodeId)?.also { oppgaveId ->
+        oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)?.also { oppgaveId ->
             oppgave(oppgaveId) {
                 logg.info("Fjerner egenskap TILBAKEDATERT på {}", kv("oppgaveId", oppgaveId))
                 fjernTilbakedatert()
@@ -336,7 +336,7 @@ internal class OppgaveService(
     }
 
     fun fjernGosysEgenskap(vedtaksperiodeId: UUID) {
-        oppgaveRepository.finnIdForAktivOppgave(vedtaksperiodeId)?.also { oppgaveId ->
+        oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)?.also { oppgaveId ->
             oppgave(oppgaveId) {
                 logg.info("Fjerner egenskap GOSYS på {}", kv("oppgaveId", oppgaveId))
                 fjernGosys()
@@ -345,7 +345,7 @@ internal class OppgaveService(
     }
 
     fun leggTilGosysEgenskap(vedtaksperiodeId: UUID) {
-        oppgaveRepository.finnIdForAktivOppgave(vedtaksperiodeId)?.also { oppgaveId ->
+        oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)?.also { oppgaveId ->
             oppgave(oppgaveId) {
                 logg.info("Legger til egenskap GOSYS på {}", kv("oppgaveId", oppgaveId))
                 leggTilGosys()
@@ -362,9 +362,9 @@ internal class OppgaveService(
         hendelseId: UUID,
         kanAvvises: Boolean,
     ) {
-        oppgaveRepository.opprettOppgave(id, contextId, egenskaper, vedtaksperiodeId, utbetalingId, kanAvvises)
+        oppgaveDao.opprettOppgave(id, contextId, egenskaper, vedtaksperiodeId, utbetalingId, kanAvvises)
         opptegnelseRepository.opprettOpptegnelse(
-            oppgaveRepository.finnFødselsnummer(id),
+            oppgaveDao.finnFødselsnummer(id),
             GodkjenningsbehovPayload(hendelseId),
             OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE,
         )
@@ -377,7 +377,7 @@ internal class OppgaveService(
         ferdigstiltAvOid: UUID?,
         egenskaper: List<EgenskapForDatabase>,
     ) {
-        oppgaveRepository.updateOppgave(oppgaveId, status, ferdigstiltAvIdent, ferdigstiltAvOid, egenskaper)
+        oppgaveDao.updateOppgave(oppgaveId, status, ferdigstiltAvIdent, ferdigstiltAvOid, egenskaper)
     }
 
     fun reserverOppgave(
@@ -411,7 +411,7 @@ internal class OppgaveService(
         oppgave.forsøkTildelingVedReservasjon(saksbehandler)
     }
 
-    fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) = oppgaveRepository.harFerdigstiltOppgave(vedtaksperiodeId)
+    fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) = oppgaveDao.harFerdigstiltOppgave(vedtaksperiodeId)
 
     private fun SaksbehandlerFraApi.tilSaksbehandler() =
         Saksbehandler(

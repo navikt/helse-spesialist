@@ -7,8 +7,8 @@ import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.OppgaveDao
-import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.OpptegnelseDao
+import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
@@ -76,7 +76,7 @@ internal typealias Kommandostarter = Personmelding.(Kommandofabrikk.() -> Comman
 internal class Kommandofabrikk(
     private val dataSource: DataSource,
     private val meldingDao: MeldingDao = MeldingDao(dataSource),
-    private val oppgaveDao: OppgaveRepository = OppgaveDao(dataSource),
+    private val pgOppgaveDao: OppgaveDao = PgOppgaveDao(dataSource),
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     oppgaveService: () -> OppgaveService,
     private val godkjenningMediator: GodkjenningMediator,
@@ -125,7 +125,7 @@ internal class Kommandofabrikk(
             oppgavedataForAutomatisering = oppgaveDataForAutomatisering,
             automatisering = transaksjonellAutomatisering(transactionalSession),
             åpneGosysOppgaverRepository = TransactionalÅpneGosysOppgaverDao(transactionalSession),
-            oppgaveRepository = OppgaveDao(transactionalSession),
+            oppgaveDao = PgOppgaveDao(transactionalSession),
             oppgaveService = transaksjonellOppgaveService(transactionalSession),
             godkjenningMediator = GodkjenningMediator(OpptegnelseDao(transactionalSession)),
             godkjenningsbehov = godkjenningsbehovData,
@@ -157,11 +157,11 @@ internal class Kommandofabrikk(
 
     internal fun finnOppgavedata(
         fødselsnummer: String,
-        oppgaveRepository: OppgaveRepository = oppgaveDao,
+        oppgaveDao: OppgaveDao = pgOppgaveDao,
     ): OppgaveDataForAutomatisering? {
-        return oppgaveRepository.finnOppgaveId(fødselsnummer)?.let { oppgaveId ->
+        return oppgaveDao.finnOppgaveId(fødselsnummer)?.let { oppgaveId ->
             sikkerlogg.info("Fant en oppgave for {}: {}", fødselsnummer, oppgaveId)
-            val oppgaveDataForAutomatisering = oppgaveRepository.oppgaveDataForAutomatisering(oppgaveId)
+            val oppgaveDataForAutomatisering = oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)
 
             if (oppgaveDataForAutomatisering == null) {
                 sikkerlogg.info("Fant ikke oppgavedata for {} og {}", fødselsnummer, oppgaveId)
@@ -191,7 +191,7 @@ internal class Kommandofabrikk(
             oppgaveService = transaksjonellOppgaveService(session),
             reservasjonRepository = ReservasjonDao(session),
             tildelingRepository = TildelingDao(session),
-            oppgaveRepository = OppgaveDao(session),
+            oppgaveDao = PgOppgaveDao(session),
             totrinnsvurderingService = lagTotrinnsvurderingService(session),
         )
 
@@ -231,7 +231,7 @@ internal class Kommandofabrikk(
         return AdressebeskyttelseEndretCommand(
             fødselsnummer = melding.fødselsnummer(),
             personRepository = PersonDao(transactionalSession),
-            oppgaveRepository = OppgaveDao(transactionalSession),
+            oppgaveDao = PgOppgaveDao(transactionalSession),
             godkjenningMediator = GodkjenningMediator(OpptegnelseDao(transactionalSession)),
             godkjenningsbehov = godkjenningsbehovData,
             utbetaling = utbetaling,
@@ -288,7 +288,7 @@ internal class Kommandofabrikk(
             utbetalingRepository = TransactionalUtbetalingDao(session),
             opptegnelseRepository = OpptegnelseDao(session),
             reservasjonRepository = ReservasjonDao(session),
-            oppgaveRepository = OppgaveDao(session),
+            oppgaveDao = PgOppgaveDao(session),
             tildelingRepository = TildelingDao(session),
             oppgaveService = transaksjonellOppgaveService(session),
             totrinnsvurderingService = lagTotrinnsvurderingService(session),
@@ -307,7 +307,7 @@ internal class Kommandofabrikk(
             oppgaveService = transaksjonellOppgaveService(session),
             reservasjonRepository = ReservasjonDao(session),
             tildelingRepository = TildelingDao(session),
-            oppgaveRepository = OppgaveDao(session),
+            oppgaveDao = PgOppgaveDao(session),
             totrinnsvurderingService = lagTotrinnsvurderingService(session),
         )
 
@@ -364,7 +364,7 @@ internal class Kommandofabrikk(
             påVentRepository = PåVentDao(session),
             overstyringRepository = OverstyringDao(session),
             periodehistorikkDao = TransactionalPeriodehistorikkDao(session),
-            oppgaveRepository = OppgaveDao(session),
+            oppgaveDao = PgOppgaveDao(session),
             avviksvurderingRepository = AvviksvurderingDao(session),
             oppgaveService = transaksjonellOppgaveService(session),
             godkjenningMediator = GodkjenningMediator(OpptegnelseDao(session)),
@@ -475,7 +475,7 @@ internal class Kommandofabrikk(
     private fun lagTotrinnsvurderingService(session: Session) =
         TotrinnsvurderingService(
             PgTotrinnsvurderingDao(session),
-            OppgaveDao(session),
+            PgOppgaveDao(session),
             TransactionalPeriodehistorikkDao(session),
         )
 }

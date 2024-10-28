@@ -68,12 +68,12 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         StansAutomatiskBehandlingMediator(
             stansAutomatiskBehandlingDao,
             pgHistorikkinnslagRepository,
-            oppgaveDao,
+            pgOppgaveDao,
             notatDao,
         ) { Subsumsjonsmelder("versjonAvKode", testRapid) }
     private val oppgaveService =
         OppgaveService(
-            oppgaveDao,
+            pgOppgaveDao,
             tildelingDbDao,
             reservasjonDao,
             opptegnelseDao,
@@ -86,7 +86,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private val mediator =
         SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, oppgaveService, tilgangsgrupper, stansAutomatiskBehandlingMediator, TotrinnsvurderingService(
             totrinnsvurderingDao = totrinnsvurderingDao,
-            oppgaveRepository = oppgaveDao,
+            oppgaveDao = pgOppgaveDao,
             historikkinnslagRepository = pgHistorikkinnslagRepository
         ))
 

@@ -10,7 +10,7 @@ import no.nav.helse.db.HistorikkinnslagRepository
 import no.nav.helse.db.NotatRepository
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
-import no.nav.helse.db.OppgaveDao
+import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.modell.periodehistorikk.AutomatiskBehandlingStanset
 import no.nav.helse.modell.saksbehandler.Saksbehandler
@@ -36,7 +36,7 @@ import java.util.UUID.randomUUID
 class StansAutomatiskBehandlingMediatorTest {
     private val stansAutomatiskBehandlingDao = mockk<StansAutomatiskBehandlingDao>(relaxed = true)
     private val historikkinnslagRepository = mockk<HistorikkinnslagRepository>(relaxed = true)
-    private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
+    private val pgOppgaveDao = mockk<PgOppgaveDao>(relaxed = true)
     private val notatDao = mockk<NotatRepository>(relaxed = true)
     private val testRapid = TestRapid()
     private val subsumsjonsmelder = Subsumsjonsmelder("versjonAvKode", testRapid)
@@ -51,7 +51,7 @@ class StansAutomatiskBehandlingMediatorTest {
         StansAutomatiskBehandlingMediator(
             stansAutomatiskBehandlingDao,
             historikkinnslagRepository,
-            oppgaveDao,
+            pgOppgaveDao,
             notatDao,
         ) { subsumsjonsmelder }
 

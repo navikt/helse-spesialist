@@ -13,7 +13,7 @@ import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
-import no.nav.helse.db.OppgaveRepository
+import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.Reservasjon
@@ -83,7 +83,7 @@ internal class OppgaveServiceTest {
             )
     }
 
-    private val oppgaveRepository = mockk<OppgaveRepository>(relaxed = true)
+    private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val tildelingRepository = mockk<TildelingRepository>(relaxed = true)
     private val reservasjonRepository = mockk<ReservasjonRepository>(relaxed = true)
     private val opptegnelseRepository = mockk<OpptegnelseRepository>(relaxed = true)
@@ -93,7 +93,7 @@ internal class OppgaveServiceTest {
 
     private val mediator =
         OppgaveService(
-            oppgaveRepository = oppgaveRepository,
+            oppgaveDao = oppgaveDao,
             tildelingRepository = tildelingRepository,
             reservasjonRepository = reservasjonRepository,
             opptegnelseRepository = opptegnelseRepository,
@@ -120,21 +120,21 @@ internal class OppgaveServiceTest {
 
     @BeforeEach
     fun setup() {
-        clearMocks(oppgaveRepository, tildelingRepository, opptegnelseRepository)
+        clearMocks(oppgaveDao, tildelingRepository, opptegnelseRepository)
         testRapid.reset()
     }
 
     @Test
     fun `lagrer oppgaver`() {
-        every { oppgaveRepository.reserverNesteId() } returns 0L
-        every { oppgaveRepository.finnHendelseId(any()) } returns HENDELSE_ID
-        every { oppgaveRepository.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
+        every { oppgaveDao.reserverNesteId() } returns 0L
+        every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
+        every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
         every { reservasjonRepository.hentReservasjonFor(FNR) } returns null
         mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
             søknadsoppgave(it)
         }
         verify(exactly = 1) {
-            oppgaveRepository.opprettOppgave(
+            oppgaveDao.opprettOppgave(
                 0L,
                 COMMAND_CONTEXT_ID,
                 listOf(EGENSKAP_SØKNAD),
@@ -150,9 +150,9 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `lagrer oppgave og tildeler til saksbehandler som har reservert personen`() {
-        every { oppgaveRepository.reserverNesteId() } returns 0L
+        every { oppgaveDao.reserverNesteId() } returns 0L
         every { reservasjonRepository.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns Reservasjon(saksbehandlerFraDatabase)
-        every { oppgaveRepository.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
+        every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
         lateinit var oppgave: Oppgave
         mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
             søknadsoppgave(it).also { søknadsoppgave -> oppgave = søknadsoppgave }
@@ -167,9 +167,9 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `tildeler ikke reservert personen når oppgave er stikkprøve`() {
-        every { oppgaveRepository.reserverNesteId() } returns 0L
+        every { oppgaveDao.reserverNesteId() } returns 0L
         every { reservasjonRepository.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns Reservasjon(saksbehandlerFraDatabase)
-        every { oppgaveRepository.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
+        every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
         mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
             stikkprøveoppgave(it)
         }
@@ -180,8 +180,8 @@ internal class OppgaveServiceTest {
     @Test
     fun `kaller bare hentGrupper når personen er reservert`() {
         every { reservasjonRepository.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns null
-        every { oppgaveRepository.reserverNesteId() } returns 0L
-        every { oppgaveRepository.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
+        every { oppgaveDao.reserverNesteId() } returns 0L
+        every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
         lateinit var oppgave: Oppgave
         mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
             stikkprøveoppgave(it).also { stikkprøveoppgave -> oppgave = stikkprøveoppgave }
@@ -195,8 +195,8 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `oppdaterer oppgave`() {
-        every { oppgaveRepository.finnOppgave(OPPGAVE_ID) } returns oppgaveFraDatabase()
-        every { oppgaveRepository.finnHendelseId(any()) } returns HENDELSE_ID
+        every { oppgaveDao.finnOppgave(OPPGAVE_ID) } returns oppgaveFraDatabase()
+        every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
         every { saksbehandlerRepository.finnSaksbehandler(any()) } returns saksbehandlerFraDatabase
         mediator.oppgave(OPPGAVE_ID) {
             avventerSystem(SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
@@ -211,9 +211,9 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `lagrer ikke dobbelt`() {
-        every { oppgaveRepository.reserverNesteId() } returns 0L
-        every { oppgaveRepository.opprettOppgave(any(), any(), listOf(EGENSKAP_SØKNAD), any(), any(), any()) } returns 0L
-        every { oppgaveRepository.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
+        every { oppgaveDao.reserverNesteId() } returns 0L
+        every { oppgaveDao.opprettOppgave(any(), any(), listOf(EGENSKAP_SØKNAD), any(), any(), any()) } returns 0L
+        every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
         every { reservasjonRepository.hentReservasjonFor(FNR) } returns null
 
         mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
@@ -229,7 +229,7 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `Hent oppgaver til visning`() {
-        every { oppgaveRepository.finnOppgaverForVisning(any(), any()) } returns
+        every { oppgaveDao.finnOppgaverForVisning(any(), any()) } returns
             listOf(
                 oppgaveFraDatabaseForVisning(filtrertAntall = 2),
                 oppgaveFraDatabaseForVisning(filtrertAntall = 2),
@@ -240,7 +240,7 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `Hent antall mine saker og mine saker på vent til visning`() {
-        every { oppgaveRepository.finnAntallOppgaver(any()) } returns AntallOppgaverFraDatabase(antallMineSaker = 2, antallMineSakerPåVent = 1)
+        every { oppgaveDao.finnAntallOppgaver(any()) } returns AntallOppgaverFraDatabase(antallMineSaker = 2, antallMineSakerPåVent = 1)
         val antallOppgaver = mediator.antallOppgaver(saksbehandlerFraApi())
         assertEquals(2, antallOppgaver.antallMineSaker)
         assertEquals(1, antallOppgaver.antallMineSakerPaVent)
@@ -248,7 +248,7 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `Hent behandlede oppgaver til visning`() {
-        every { oppgaveRepository.finnBehandledeOppgaver(any()) } returns
+        every { oppgaveDao.finnBehandledeOppgaver(any()) } returns
             listOf(
                 behandletOppgaveFraDatabaseForVisning(filtrertAntall = 2),
                 behandletOppgaveFraDatabaseForVisning(filtrertAntall = 2),
@@ -261,7 +261,7 @@ internal class OppgaveServiceTest {
     fun `Hent kun oppgaver til visning som saksbehandler har tilgang til`() {
         mediator.oppgaver(saksbehandlerFraApi(), 0, MAX_VALUE, emptyList(), Filtrering())
         verify(exactly = 1) {
-            oppgaveRepository.finnOppgaverForVisning(
+            oppgaveDao.finnOppgaverForVisning(
                 ekskluderEgenskaper = Egenskap.alleTilgangsstyrteEgenskaper.map { it.name },
                 SAKSBEHANDLEROID,
                 0,
@@ -274,7 +274,7 @@ internal class OppgaveServiceTest {
     fun `Ekskluderer alle ukategoriserte egenskaper hvis ingenUkategoriserteEgenskaper i Filtrering er satt til true`() {
         mediator.oppgaver(saksbehandlerFraApi(), 0, MAX_VALUE, emptyList(), Filtrering(ingenUkategoriserteEgenskaper = true))
         verify(exactly = 1) {
-            oppgaveRepository.finnOppgaverForVisning(
+            oppgaveDao.finnOppgaverForVisning(
                 ekskluderEgenskaper = Egenskap.alleTilgangsstyrteEgenskaper.map { it.name } + Egenskap.alleUkategoriserteEgenskaper.map { it.name },
                 SAKSBEHANDLEROID,
                 0,
@@ -301,7 +301,7 @@ internal class OppgaveServiceTest {
             ),
         )
         verify(exactly = 1) {
-            oppgaveRepository.finnOppgaverForVisning(
+            oppgaveDao.finnOppgaverForVisning(
                 ekskluderEgenskaper = Egenskap.alleTilgangsstyrteEgenskaper.map { it.name } + Egenskap.PÅ_VENT.name,
                 SAKSBEHANDLEROID,
                 0,
@@ -313,7 +313,7 @@ internal class OppgaveServiceTest {
     @Test
     fun `Mapper behandlet oppgave til visning riktig`() {
         val ferdigstiltTidspunkt = LocalDateTime.now()
-        every { oppgaveRepository.finnBehandledeOppgaver(any()) } returns
+        every { oppgaveDao.finnBehandledeOppgaver(any()) } returns
             listOf(
                 behandletOppgaveFraDatabaseForVisning(
                     oppgaveId = 1L,
@@ -344,7 +344,7 @@ internal class OppgaveServiceTest {
         val opprettet = LocalDateTime.now()
         val vedtaksperiodeId = UUID.randomUUID()
         val opprinneligSøknadsdato = LocalDateTime.now()
-        every { oppgaveRepository.finnOppgaverForVisning(any(), any()) } returns
+        every { oppgaveDao.finnOppgaverForVisning(any(), any()) } returns
             listOf(
                 oppgaveFraDatabaseForVisning(
                     oppgaveId = 1L,
@@ -388,7 +388,7 @@ internal class OppgaveServiceTest {
                 EgenskapForDatabase.EN_ARBEIDSGIVER,
                 EgenskapForDatabase.FORSTEGANGSBEHANDLING,
             )
-        every { oppgaveRepository.finnOppgaverForVisning(any(), any()) } returns
+        every { oppgaveDao.finnOppgaverForVisning(any(), any()) } returns
             listOf(
                 oppgaveFraDatabaseForVisning(
                     oppgaveId = 1L,
@@ -416,7 +416,7 @@ internal class OppgaveServiceTest {
         val opprinneligSøknadsdato = LocalDateTime.now()
         val egenskaper =
             setOf(egenskap, EgenskapForDatabase.UTBETALING_TIL_SYKMELDT, EgenskapForDatabase.EN_ARBEIDSGIVER, EgenskapForDatabase.SØKNAD)
-        every { oppgaveRepository.finnOppgaverForVisning(any(), any()) } returns
+        every { oppgaveDao.finnOppgaverForVisning(any(), any()) } returns
             listOf(
                 oppgaveFraDatabaseForVisning(
                     oppgaveId = 1L,
@@ -447,7 +447,7 @@ internal class OppgaveServiceTest {
         val opprinneligSøknadsdato = LocalDateTime.now()
         val egenskaper =
             setOf(egenskap, EgenskapForDatabase.FORSTEGANGSBEHANDLING, EgenskapForDatabase.EN_ARBEIDSGIVER, EgenskapForDatabase.SØKNAD)
-        every { oppgaveRepository.finnOppgaverForVisning(any(), any()) } returns
+        every { oppgaveDao.finnOppgaverForVisning(any(), any()) } returns
             listOf(
                 oppgaveFraDatabaseForVisning(
                     oppgaveId = 1L,
@@ -480,7 +480,7 @@ internal class OppgaveServiceTest {
                 EgenskapForDatabase.UTBETALING_TIL_SYKMELDT,
                 EgenskapForDatabase.SØKNAD,
             )
-        every { oppgaveRepository.finnOppgaverForVisning(ekskluderEgenskaper = any(), saksbehandlerOid = any()) } returns
+        every { oppgaveDao.finnOppgaverForVisning(ekskluderEgenskaper = any(), saksbehandlerOid = any()) } returns
             listOf(
                 oppgaveFraDatabaseForVisning(
                     oppgaveId = 1L,

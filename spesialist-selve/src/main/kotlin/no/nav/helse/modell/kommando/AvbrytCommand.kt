@@ -1,7 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.CommandContextRepository
-import no.nav.helse.db.OppgaveRepository
+import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.ReservasjonRepository
 import no.nav.helse.db.TildelingRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -15,7 +15,7 @@ internal class AvbrytCommand(
     oppgaveService: OppgaveService,
     reservasjonRepository: ReservasjonRepository,
     tildelingRepository: TildelingRepository,
-    oppgaveRepository: OppgaveRepository,
+    oppgaveDao: OppgaveDao,
     totrinnsvurderingService: TotrinnsvurderingService,
 ) : MacroCommand() {
     override val commands: List<Command> =
@@ -24,7 +24,7 @@ internal class AvbrytCommand(
                 fødselsnummer = fødselsnummer,
                 reservasjonRepository = reservasjonRepository,
                 tildelingRepository = tildelingRepository,
-                oppgaveRepository = oppgaveRepository,
+                oppgaveDao = oppgaveDao,
                 totrinnsvurderingService = totrinnsvurderingService,
             ),
             AvbrytOppgaveCommand(vedtaksperiodeId = vedtaksperiodeId, oppgaveService = oppgaveService),

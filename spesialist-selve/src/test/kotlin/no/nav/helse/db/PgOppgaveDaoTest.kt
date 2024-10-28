@@ -42,7 +42,7 @@ import java.util.UUID
 
 @Isolated
 @Execution(ExecutionMode.SAME_THREAD)
-class OppgaveDaoTest : DatabaseIntegrationTest() {
+class PgOppgaveDaoTest : DatabaseIntegrationTest() {
     private val CONTEXT_ID = UUID.randomUUID()
     private val TESTHENDELSE = TestMelding(HENDELSE_ID, UUID.randomUUID(), FNR)
     private val OPPGAVETYPE = "SØKNAD"
@@ -56,8 +56,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `Finn neste ledige id`() {
-        val id1 = oppgaveDao.reserverNesteId()
-        val id2 = oppgaveDao.reserverNesteId()
+        val id1 = pgOppgaveDao.reserverNesteId()
+        val id2 = pgOppgaveDao.reserverNesteId()
         assertEquals(1L, id1)
         assertEquals(2L, id2)
     }
@@ -88,7 +88,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode(spleisBehandlingId = spleisBehandlingId)
         opprettOppgave(contextId = CONTEXT_ID)
-        assertEquals(spleisBehandlingId, oppgaveDao.finnSpleisBehandlingId(oppgaveId))
+        assertEquals(spleisBehandlingId, pgOppgaveDao.finnSpleisBehandlingId(oppgaveId))
     }
 
     @Test
@@ -98,7 +98,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode()
         opprettOppgave(contextId = CONTEXT_ID)
         assertDoesNotThrow {
-            oppgaveDao.finnGenerasjonId(oppgaveId)
+            pgOppgaveDao.finnGenerasjonId(oppgaveId)
         }
     }
 
@@ -219,7 +219,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         opprettOppgave(utbetalingId = UTBETALING_ID)
-        assertEquals(UTBETALING_ID, oppgaveDao.finnUtbetalingId(oppgaveId))
+        assertEquals(UTBETALING_ID, pgOppgaveDao.finnUtbetalingId(oppgaveId))
     }
 
     @Test
@@ -230,42 +230,42 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val contextId = UUID.randomUUID()
         val hendelseId = UUID.randomUUID()
         opprettOppgave(contextId = contextId, hendelseId = hendelseId)
-        assertEquals(hendelseId, oppgaveDao.finnHendelseId(oppgaveId))
+        assertEquals(hendelseId, pgOppgaveDao.finnHendelseId(oppgaveId))
     }
 
     @Test
     fun `finner oppgaveId ved hjelp av fødselsnummer`() {
         nyPerson()
-        assertEquals(oppgaveId, oppgaveDao.finnOppgaveId(FNR))
+        assertEquals(oppgaveId, pgOppgaveDao.finnOppgaveId(FNR))
         nyPerson(
             fødselsnummer = FNR.reversed(),
             aktørId = AKTØR.reversed(),
             organisasjonsnummer = ORGNUMMER.reversed(),
             vedtaksperiodeId = UUID.randomUUID(),
         )
-        assertEquals(oppgaveId, oppgaveDao.finnOppgaveId(FNR.reversed()))
+        assertEquals(oppgaveId, pgOppgaveDao.finnOppgaveId(FNR.reversed()))
     }
 
     @Test
     fun `finner oppgaveId for ikke-avsluttet oppgave ved hjelp av vedtaksperiodeId`() {
         nyPerson()
-        oppgaveDao.updateOppgave(oppgaveId = OPPGAVE_ID, oppgavestatus = "Ferdigstilt", egenskaper = listOf(EGENSKAP))
+        pgOppgaveDao.updateOppgave(oppgaveId = OPPGAVE_ID, oppgavestatus = "Ferdigstilt", egenskaper = listOf(EGENSKAP))
         opprettOppgave()
 
-        assertEquals(OPPGAVE_ID, oppgaveDao.finnIdForAktivOppgave(VEDTAKSPERIODE))
+        assertEquals(OPPGAVE_ID, pgOppgaveDao.finnIdForAktivOppgave(VEDTAKSPERIODE))
 
-        oppgaveDao.invaliderOppgaveFor(fødselsnummer = FNR)
-        assertNull(oppgaveDao.finnIdForAktivOppgave(VEDTAKSPERIODE))
+        pgOppgaveDao.invaliderOppgaveFor(fødselsnummer = FNR)
+        assertNull(pgOppgaveDao.finnIdForAktivOppgave(VEDTAKSPERIODE))
 
         opprettOppgave()
-        assertEquals(OPPGAVE_ID, oppgaveDao.finnIdForAktivOppgave(VEDTAKSPERIODE))
+        assertEquals(OPPGAVE_ID, pgOppgaveDao.finnIdForAktivOppgave(VEDTAKSPERIODE))
     }
 
     @Test
     fun `finner OppgaveFraDatabase`() {
         val hendelseId = UUID.randomUUID()
         nyPerson(hendelseId = hendelseId)
-        val oppgave = oppgaveDao.finnOppgave(oppgaveId) ?: fail { "Fant ikke oppgave" }
+        val oppgave = pgOppgaveDao.finnOppgave(oppgaveId) ?: fail { "Fant ikke oppgave" }
         assertEquals(
             OppgaveFraDatabase(
                 id = oppgaveId,
@@ -284,7 +284,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     fun `finner OppgaveFraDatabase med flere egenskaper`() {
         val hendelseId = UUID.randomUUID()
         nyPerson(hendelseId = hendelseId, oppgaveEgenskaper = listOf(EGENSKAP, RISK_QA))
-        val oppgave = oppgaveDao.finnOppgave(oppgaveId) ?: fail { "Fant ikke oppgave" }
+        val oppgave = pgOppgaveDao.finnOppgave(oppgaveId) ?: fail { "Fant ikke oppgave" }
         assertEquals(
             OppgaveFraDatabase(
                 id = oppgaveId,
@@ -313,7 +313,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             vedtaksperiodeId = vedtaksperiodeId
         )
         tildelOppgave(saksbehandlerOid = saksbehandlerOid)
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID())
+        val oppgaver = pgOppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID())
         assertEquals(1, oppgaver.size)
         val førsteOppgave = oppgaver.first()
         assertEquals(OPPGAVE_ID, førsteOppgave.id)
@@ -345,7 +345,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         tildelOppgave(saksbehandlerOid = saksbehandlerOid)
         ferdigstillOppgave(OPPGAVE_ID, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
 
-        val oppgaver = oppgaveDao.finnBehandledeOppgaver(saksbehandlerOid)
+        val oppgaver = pgOppgaveDao.finnBehandledeOppgaver(saksbehandlerOid)
         assertEquals(1, oppgaver.size)
         val førsteOppgave = oppgaver.first()
         assertEquals(OPPGAVE_ID, førsteOppgave.id)
@@ -397,7 +397,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         tildelOppgave(saksbehandlerOid = annenSaksbehandlerOid)
         ferdigstillOppgave(OPPGAVE_ID, ferdigstiltAvOid = annenSaksbehandlerOid, ferdigstiltAv = "ANNEN_SAKSBEHANDLER")
 
-        val oppgaver = oppgaveDao.finnBehandledeOppgaver(saksbehandlerOid)
+        val oppgaver = pgOppgaveDao.finnBehandledeOppgaver(saksbehandlerOid)
         assertEquals(3, oppgaver.size)
         assertEquals(3, oppgaver.first().filtrertAntall)
     }
@@ -421,9 +421,9 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettTotrinnsvurdering(vedtaksperiodeId = VEDTAKSPERIODE, saksbehandler = saksbehandlerOid, ferdigstill = true)
         ferdigstillOppgave(OPPGAVE_ID, ferdigstiltAvOid = beslutterOid, ferdigstiltAv = "NAVN TIL BESLUTTER")
 
-        val behandletIDagForSaksbehandler = oppgaveDao.finnBehandledeOppgaver(saksbehandlerOid)
-        val behandletIDagForBeslutter = oppgaveDao.finnBehandledeOppgaver(beslutterOid)
-        val behandletIDagForAnnenSaksbehandler = oppgaveDao.finnBehandledeOppgaver(annenSaksbehandlerOid)
+        val behandletIDagForSaksbehandler = pgOppgaveDao.finnBehandledeOppgaver(saksbehandlerOid)
+        val behandletIDagForBeslutter = pgOppgaveDao.finnBehandledeOppgaver(beslutterOid)
+        val behandletIDagForAnnenSaksbehandler = pgOppgaveDao.finnBehandledeOppgaver(annenSaksbehandlerOid)
 
         assertEquals(1, behandletIDagForSaksbehandler.size)
         assertEquals("NAVN TIL BESLUTTER", behandletIDagForSaksbehandler.first().ferdigstiltAv)
@@ -452,7 +452,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             organisasjonsnummer = lagOrganisasjonsnummer(),
             vedtaksperiodeId = UUID.randomUUID(),
         )
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID())
+        val oppgaver = pgOppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID())
         assertEquals(3, oppgaver.size)
     }
 
@@ -481,7 +481,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         )
         val oppgaveId3 = OPPGAVE_ID
         val oppgaver =
-            oppgaveDao.finnOppgaverForVisning(
+            pgOppgaveDao.finnOppgaverForVisning(
                 emptyList(),
                 UUID.randomUUID(),
                 grupperteFiltrerteEgenskaper =
@@ -517,7 +517,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             oppgaveEgenskaper = listOf(RISK_QA),
         )
         val oppgaver =
-            oppgaveDao.finnOppgaverForVisning(
+            pgOppgaveDao.finnOppgaverForVisning(
                 emptyList(),
                 UUID.randomUUID(),
                 grupperteFiltrerteEgenskaper =
@@ -551,7 +551,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             organisasjonsnummer = lagOrganisasjonsnummer(),
             vedtaksperiodeId = UUID.randomUUID(),
         )
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), 1, 2)
+        val oppgaver = pgOppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), 1, 2)
         assertEquals(2, oppgaver.size)
         assertEquals(listOf(oppgaveId2, oppgaveId1), oppgaver.map { it.id })
     }
@@ -586,7 +586,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val oppgaveId3 = OPPGAVE_ID
         ferdigstillOppgave(oppgaveId3, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
 
-        val oppgaver = oppgaveDao.finnBehandledeOppgaver(saksbehandlerOid, 1, 2)
+        val oppgaver = pgOppgaveDao.finnBehandledeOppgaver(saksbehandlerOid, 1, 2)
         assertEquals(2, oppgaver.size)
         assertEquals(listOf(oppgaveId2, oppgaveId3), oppgaver.map { it.id })
     }
@@ -615,7 +615,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         )
         val oppgaveId3 = OPPGAVE_ID
         avventerSystem(oppgaveId3, ferdigstiltAv = "navn", ferdigstiltAvOid = UUID.randomUUID())
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID())
+        val oppgaver = pgOppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID())
         assertEquals(2, oppgaver.size)
         assertEquals(listOf(oppgaveId2, oppgaveId1), oppgaver.map { it.id })
     }
@@ -644,7 +644,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         )
         val oppgaveId3 = OPPGAVE_ID
         val oppgaver =
-            oppgaveDao.finnOppgaverForVisning(
+            pgOppgaveDao.finnOppgaverForVisning(
                 emptyList(),
                 UUID.randomUUID(),
                 sortering =
@@ -680,7 +680,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         )
         val oppgaveId3 = OPPGAVE_ID
         val oppgaver =
-            oppgaveDao.finnOppgaverForVisning(
+            pgOppgaveDao.finnOppgaverForVisning(
                 emptyList(),
                 UUID.randomUUID(),
                 sortering =
@@ -716,7 +716,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         )
         val oppgaveId3 = OPPGAVE_ID
         val oppgaver =
-            oppgaveDao.finnOppgaverForVisning(
+            pgOppgaveDao.finnOppgaverForVisning(
                 emptyList(),
                 UUID.randomUUID(),
                 sortering =
@@ -752,7 +752,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         )
         val oppgaveId3 = OPPGAVE_ID
         val oppgaver =
-            oppgaveDao.finnOppgaverForVisning(
+            pgOppgaveDao.finnOppgaverForVisning(
                 emptyList(),
                 UUID.randomUUID(),
                 sortering =
@@ -790,7 +790,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val oppgaveId3 = OPPGAVE_ID
         tildelOppgave(oppgaveId3, UUID.randomUUID(), "B")
         val oppgaver =
-            oppgaveDao.finnOppgaverForVisning(
+            pgOppgaveDao.finnOppgaverForVisning(
                 emptyList(),
                 UUID.randomUUID(),
                 sortering =
@@ -828,7 +828,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val oppgaveId3 = OPPGAVE_ID
         tildelOppgave(oppgaveId3, UUID.randomUUID(), "B")
         val oppgaver =
-            oppgaveDao.finnOppgaverForVisning(
+            pgOppgaveDao.finnOppgaverForVisning(
                 emptyList(),
                 UUID.randomUUID(),
                 sortering =
@@ -875,7 +875,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val oppgaveId4 = OPPGAVE_ID
         tildelOppgave(oppgaveId4, saksbehandlerOid2, "B")
         val oppgaver =
-            oppgaveDao.finnOppgaverForVisning(
+            pgOppgaveDao.finnOppgaverForVisning(
                 emptyList(),
                 UUID.randomUUID(),
                 sortering =
@@ -919,7 +919,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 ),
         )
         val oppgaver =
-            oppgaveDao.finnOppgaverForVisning(
+            pgOppgaveDao.finnOppgaverForVisning(
                 ekskluderEgenskaper = listOf("BESLUTTER", "RISK_QA"),
                 UUID.randomUUID(),
             )
@@ -969,7 +969,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 ),
         )
         val oppgaver =
-            oppgaveDao.finnOppgaverForVisning(
+            pgOppgaveDao.finnOppgaverForVisning(
                 ekskluderEgenskaper = listOf("BESLUTTER", "RISK_QA") + Egenskap.alleUkategoriserteEgenskaper.map(Egenskap::toString),
                 UUID.randomUUID(),
             )
@@ -1000,7 +1000,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             vedtaksperiodeId = UUID.randomUUID(),
         )
 
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), tildelt = true)
+        val oppgaver = pgOppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), tildelt = true)
         assertEquals(1, oppgaver.size)
         assertEquals(1, oppgaver.first().filtrertAntall)
         assertEquals(listOf(oppgaveId1), oppgaver.map { it.id })
@@ -1031,7 +1031,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         )
         val oppgaveId3 = OPPGAVE_ID
 
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), tildelt = false)
+        val oppgaver = pgOppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), tildelt = false)
         assertEquals(2, oppgaver.size)
         assertEquals(2, oppgaver.first().filtrertAntall)
         assertEquals(listOf(oppgaveId3, oppgaveId2), oppgaver.map { it.id })
@@ -1062,7 +1062,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         )
         val oppgaveId3 = OPPGAVE_ID
 
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), tildelt = null)
+        val oppgaver = pgOppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), tildelt = null)
         assertEquals(3, oppgaver.size)
         assertEquals(3, oppgaver.first().filtrertAntall)
         assertEquals(listOf(oppgaveId3, oppgaveId2, oppgaveId1), oppgaver.map { it.id })
@@ -1096,7 +1096,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 ),
         )
         val oppgaveId3 = OPPGAVE_ID
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID())
+        val oppgaver = pgOppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID())
         assertEquals(3, oppgaver.size)
         assertEquals(3, oppgaver.first().filtrertAntall)
         assertEquals(listOf(oppgaveId3, oppgaveId2, oppgaveId1), oppgaver.map { it.id })
@@ -1131,21 +1131,21 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val oppgaveId3 = OPPGAVE_ID
 
         val oppgaverSomErTildelt =
-            oppgaveDao.finnOppgaverForVisning(
+            pgOppgaveDao.finnOppgaverForVisning(
                 emptyList(),
                 saksbehandlerOid = saksbehandlerOid,
                 egneSaker = true,
                 egneSakerPåVent = false,
             )
         val oppgaverSomErTildeltOgPåvent =
-            oppgaveDao.finnOppgaverForVisning(
+            pgOppgaveDao.finnOppgaverForVisning(
                 emptyList(),
                 saksbehandlerOid = saksbehandlerOid,
                 egneSaker = true,
                 egneSakerPåVent = true,
             )
         val alleOppgaver =
-            oppgaveDao.finnOppgaverForVisning(
+            pgOppgaveDao.finnOppgaverForVisning(
                 emptyList(),
                 saksbehandlerOid = saksbehandlerOid,
                 egneSaker = false,
@@ -1175,7 +1175,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         )
         opprettSaksbehandler(saksbehandlerOid)
         opprettTotrinnsvurdering(vedtaksperiodeId, saksbehandlerOid)
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(ekskluderEgenskaper = emptyList(), saksbehandlerOid = saksbehandlerOid)
+        val oppgaver = pgOppgaveDao.finnOppgaverForVisning(ekskluderEgenskaper = emptyList(), saksbehandlerOid = saksbehandlerOid)
         assertEquals(0, oppgaver.size)
     }
 
@@ -1196,7 +1196,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettSaksbehandler(saksbehandlerOid)
         opprettTotrinnsvurdering(vedtaksperiodeId, saksbehandlerOid)
         val oppgaver =
-            oppgaveDao.finnOppgaverForVisning(
+            pgOppgaveDao.finnOppgaverForVisning(
                 ekskluderEgenskaper = listOf("STRENGT_FORTROLIG_ADRESSE"),
                 saksbehandlerOid = saksbehandlerOid,
             )
@@ -1257,19 +1257,19 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val oppgaveId4 = OPPGAVE_ID
 
         val oppgaver =
-            oppgaveDao.finnOppgaverForVisning(
+            pgOppgaveDao.finnOppgaverForVisning(
                 ekskluderEgenskaper = emptyList(),
                 saksbehandlerOid = UUID.randomUUID(),
                 grupperteFiltrerteEgenskaper = mapOf(Egenskap.Kategori.Oppgavetype to listOf(SØKNAD, REVURDERING)),
             )
         val oppgaver1 =
-            oppgaveDao.finnOppgaverForVisning(
+            pgOppgaveDao.finnOppgaverForVisning(
                 ekskluderEgenskaper = emptyList(),
                 saksbehandlerOid = UUID.randomUUID(),
                 grupperteFiltrerteEgenskaper = mapOf(Egenskap.Kategori.Ukategorisert to listOf(HASTER, UTLAND)),
             )
         val oppgaver2 =
-            oppgaveDao.finnOppgaverForVisning(
+            pgOppgaveDao.finnOppgaverForVisning(
                 ekskluderEgenskaper = emptyList(),
                 saksbehandlerOid = UUID.randomUUID(),
                 grupperteFiltrerteEgenskaper =
@@ -1282,7 +1282,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                     ),
             )
         val oppgaver3 =
-            oppgaveDao.finnOppgaverForVisning(
+            pgOppgaveDao.finnOppgaverForVisning(
                 ekskluderEgenskaper = emptyList(),
                 saksbehandlerOid = UUID.randomUUID(),
                 grupperteFiltrerteEgenskaper =
@@ -1292,7 +1292,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                     ),
             )
         val oppgaver5 =
-            oppgaveDao.finnOppgaverForVisning(
+            pgOppgaveDao.finnOppgaverForVisning(
                 ekskluderEgenskaper = emptyList(),
                 saksbehandlerOid = UUID.randomUUID(),
                 grupperteFiltrerteEgenskaper = emptyMap(),
@@ -1343,7 +1343,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         )
 
         val oppgaver =
-            oppgaveDao.finnOppgaverForVisning(
+            pgOppgaveDao.finnOppgaverForVisning(
                 ekskluderEgenskaper = Egenskap.alleUkategoriserteEgenskaper.map(Egenskap::toString),
                 saksbehandlerOid = UUID.randomUUID(),
                 grupperteFiltrerteEgenskaper =
@@ -1363,7 +1363,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `finner vedtaksperiodeId`() {
         nyPerson()
-        val actual = oppgaveDao.finnVedtaksperiodeId(oppgaveId)
+        val actual = pgOppgaveDao.finnVedtaksperiodeId(oppgaveId)
         assertEquals(VEDTAKSPERIODE, actual)
     }
 
@@ -1374,7 +1374,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         opprettOppgave(contextId = CONTEXT_ID)
-        oppgaveDao.updateOppgave(oppgaveId, nyStatus, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, listOf(EGENSKAP, RISK_QA))
+        pgOppgaveDao.updateOppgave(oppgaveId, nyStatus, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, listOf(EGENSKAP, RISK_QA))
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(
             LocalDate.now(),
@@ -1391,17 +1391,17 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `sjekker om det fins aktiv oppgave`() {
         nyPerson()
-        oppgaveDao.updateOppgave(oppgaveId, "AvventerSaksbehandler", null, null, listOf(EGENSKAP))
-        assertTrue(oppgaveDao.venterPåSaksbehandler(oppgaveId))
+        pgOppgaveDao.updateOppgave(oppgaveId, "AvventerSaksbehandler", null, null, listOf(EGENSKAP))
+        assertTrue(pgOppgaveDao.venterPåSaksbehandler(oppgaveId))
 
-        oppgaveDao.updateOppgave(oppgaveId, "Ferdigstilt", null, null, listOf(EGENSKAP))
-        assertFalse(oppgaveDao.venterPåSaksbehandler(oppgaveId))
+        pgOppgaveDao.updateOppgave(oppgaveId, "Ferdigstilt", null, null, listOf(EGENSKAP))
+        assertFalse(pgOppgaveDao.venterPåSaksbehandler(oppgaveId))
     }
 
     @Test
     fun `sjekker om det fins aktiv oppgave med to oppgaver`() {
         nyPerson()
-        oppgaveDao.updateOppgave(
+        pgOppgaveDao.updateOppgave(
             oppgaveId = oppgaveId,
             oppgavestatus = "Ferdigstilt",
             egenskaper =
@@ -1411,7 +1411,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         )
 
         opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE)
-        oppgaveDao.updateOppgave(
+        pgOppgaveDao.updateOppgave(
             oppgaveId = oppgaveId,
             oppgavestatus = "AvventerSaksbehandler",
             egenskaper =
@@ -1420,13 +1420,13 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 ),
         )
 
-        assertTrue(oppgaveDao.harGyldigOppgave(UTBETALING_ID))
+        assertTrue(pgOppgaveDao.harGyldigOppgave(UTBETALING_ID))
     }
 
     @Test
     fun `sjekker at det ikke fins ferdigstilt oppgave`() {
         nyPerson()
-        oppgaveDao.updateOppgave(
+        pgOppgaveDao.updateOppgave(
             oppgaveId = oppgaveId,
             oppgavestatus = "AvventerSaksbehandler",
             egenskaper =
@@ -1435,22 +1435,22 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 ),
         )
 
-        assertFalse(oppgaveDao.harFerdigstiltOppgave(VEDTAKSPERIODE))
+        assertFalse(pgOppgaveDao.harFerdigstiltOppgave(VEDTAKSPERIODE))
     }
 
     @Test
     fun `sjekker at det fins ferdigstilt oppgave`() {
         nyPerson()
-        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "Ferdigstilt", egenskaper = listOf(EGENSKAP))
-        oppgaveDao.updateOppgave(oppgaveId = 2L, oppgavestatus = "AvventerSaksbehandler", egenskaper = listOf(EGENSKAP))
+        pgOppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "Ferdigstilt", egenskaper = listOf(EGENSKAP))
+        pgOppgaveDao.updateOppgave(oppgaveId = 2L, oppgavestatus = "AvventerSaksbehandler", egenskaper = listOf(EGENSKAP))
 
-        assertTrue(oppgaveDao.harFerdigstiltOppgave(VEDTAKSPERIODE))
+        assertTrue(pgOppgaveDao.harFerdigstiltOppgave(VEDTAKSPERIODE))
     }
 
     @Test
     fun `henter fødselsnummeret til personen en oppgave gjelder for`() {
         nyPerson()
-        val fødselsnummer = oppgaveDao.finnFødselsnummer(oppgaveId)
+        val fødselsnummer = pgOppgaveDao.finnFødselsnummer(oppgaveId)
         assertEquals(fødselsnummer, FNR)
     }
 
@@ -1461,7 +1461,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode()
         opprettOppgave(contextId = CONTEXT_ID)
 
-        assertEquals(VEDTAKSPERIODE, oppgaveDao.finnVedtaksperiodeId(oppgaveId))
+        assertEquals(VEDTAKSPERIODE, pgOppgaveDao.finnVedtaksperiodeId(oppgaveId))
     }
 
     @Test
@@ -1485,7 +1485,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettOppgave(vedtaksperiodeId = vedtaksperiodeId2, utbetalingId = UUID.randomUUID())
         val oppgaveId2 = oppgaveId
 
-        oppgaveDao.invaliderOppgaveFor(fødselsnummer = FNR)
+        pgOppgaveDao.invaliderOppgaveFor(fødselsnummer = FNR)
 
         assertOppgaveStatus(oppgaveId1, Oppgave.Invalidert)
         assertOppgaveStatus(oppgaveId2, Oppgave.AvventerSaksbehandler)
@@ -1517,10 +1517,10 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             utbetalingId = utbetalingId2,
         )
 
-        oppgaveDao.invaliderOppgaveFor(fødselsnummer = FNR)
+        pgOppgaveDao.invaliderOppgaveFor(fødselsnummer = FNR)
 
-        val egenskaperOppgaveId1 = oppgaveDao.finnEgenskaper(VEDTAKSPERIODE, UTBETALING_ID)
-        val egenskaperOppgaveId2 = oppgaveDao.finnEgenskaper(vedtaksperiodeId2, utbetalingId2)
+        val egenskaperOppgaveId1 = pgOppgaveDao.finnEgenskaper(VEDTAKSPERIODE, UTBETALING_ID)
+        val egenskaperOppgaveId2 = pgOppgaveDao.finnEgenskaper(vedtaksperiodeId2, utbetalingId2)
         assertEquals(setOf(SØKNAD), egenskaperOppgaveId1)
         assertEquals(setOf(SØKNAD, PÅ_VENT), egenskaperOppgaveId2)
     }
@@ -1566,7 +1566,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val oppgaveId4 = OPPGAVE_ID
         tildelOppgave(oppgaveId = oppgaveId4, saksbehandlerOid = UUID.randomUUID(), egenskaper = listOf(SØKNAD, PÅ_VENT))
 
-        val antallOppgaver = oppgaveDao.finnAntallOppgaver(saksbehandlerOid)
+        val antallOppgaver = pgOppgaveDao.finnAntallOppgaver(saksbehandlerOid)
 
         assertEquals(2, antallOppgaver.antallMineSaker)
         assertEquals(1, antallOppgaver.antallMineSakerPåVent)
@@ -1585,7 +1585,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             vedtaksperiodeId = vedtaksperiodeId1,
         )
 
-        val antallOppgaver = oppgaveDao.finnAntallOppgaver(saksbehandlerOid)
+        val antallOppgaver = pgOppgaveDao.finnAntallOppgaver(saksbehandlerOid)
 
         assertEquals(0, antallOppgaver.antallMineSaker)
         assertEquals(0, antallOppgaver.antallMineSakerPåVent)
