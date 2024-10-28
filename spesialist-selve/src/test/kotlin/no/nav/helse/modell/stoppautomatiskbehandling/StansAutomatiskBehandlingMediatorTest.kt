@@ -10,8 +10,8 @@ import no.nav.helse.db.HistorikkinnslagRepository
 import no.nav.helse.db.NotatRepository
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
+import no.nav.helse.db.OppgaveDao
 import no.nav.helse.mediator.Subsumsjonsmelder
-import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.periodehistorikk.AutomatiskBehandlingStanset
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.OpphevStans

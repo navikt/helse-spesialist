@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.HistorikkinnslagRepository
 import no.nav.helse.db.TotrinnsvurderingDao
-import no.nav.helse.mediator.oppgave.OppgaveDao
+import no.nav.helse.db.OppgaveDao
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingAutomatiskRetur
 import org.junit.jupiter.api.Test
 import java.util.UUID

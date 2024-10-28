@@ -2,8 +2,8 @@ package no.nav.helse.modell.gosysoppgaver
 
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.TransactionalSession
+import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OppgaveRepository
-import no.nav.helse.db.TransactionalOppgaveDao
 import no.nav.helse.db.ÅpneGosysOppgaverRepository
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
@@ -49,7 +49,7 @@ internal class GosysOppgaveEndret private constructor(
             val oppgaveDataForAutomatisering =
                 finnOppgavedata(
                     fødselsnummer,
-                    TransactionalOppgaveDao(transactionalSession),
+                    OppgaveDao(transactionalSession),
                 ) ?: return@kommandostarter null
             gosysOppgaveEndret(person, oppgaveDataForAutomatisering, transactionalSession)
         }

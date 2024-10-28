@@ -18,7 +18,7 @@ import java.util.UUID
 class TransactionalPeriodehistorikkDao(
     private val session: Session,
 ) : HistorikkinnslagRepository {
-    val oppgaveDao = TransactionalOppgaveDao(session)
+    val oppgaveDao = OppgaveDao(session)
 
     override fun lagre(
         historikkinnslag: HistorikkinnslagDto,

@@ -3,9 +3,9 @@ package no.nav.helse.mediator.meldinger
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.db.OppgaveDao
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
-import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.vedtaksperiode.Periodetype

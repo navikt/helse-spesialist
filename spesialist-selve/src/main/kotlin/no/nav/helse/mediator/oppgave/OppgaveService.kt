@@ -4,6 +4,7 @@ import kotliquery.TransactionalSession
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.EgenskapForDatabase
+import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.OpptegnelseDao
@@ -18,7 +19,6 @@ import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TildelingRepository
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
-import no.nav.helse.db.TransactionalOppgaveDao
 import no.nav.helse.mediator.SaksbehandlerMediator.Companion.tilApiversjon
 import no.nav.helse.mediator.TilgangskontrollørForApi
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilApiversjon
@@ -75,7 +75,7 @@ internal class OppgaveService(
 
     internal fun nyOppgaveService(transactionalSession: TransactionalSession): OppgaveService =
         OppgaveService(
-            oppgaveRepository = TransactionalOppgaveDao(transactionalSession),
+            oppgaveRepository = OppgaveDao(transactionalSession),
             tildelingRepository = TildelingDao(transactionalSession),
             reservasjonRepository = ReservasjonDao(transactionalSession),
             opptegnelseRepository = OpptegnelseDao(transactionalSession),

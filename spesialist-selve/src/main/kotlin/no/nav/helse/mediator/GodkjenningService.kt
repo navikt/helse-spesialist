@@ -1,12 +1,13 @@
 package no.nav.helse.mediator
 
 import net.logstash.logback.argument.StructuredArguments
+import no.nav.helse.db.OppgaveDao
+import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.PgHistorikkinnslagRepository
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.toDto
-import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
@@ -24,7 +25,7 @@ import javax.sql.DataSource
 
 internal class GodkjenningService(
     private val dataSource: DataSource,
-    private val oppgaveDao: OppgaveDao = OppgaveDao(dataSource),
+    private val oppgaveDao: OppgaveRepository = OppgaveDao(dataSource),
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
     private val rapidsConnection: RapidsConnection,
     private val oppgaveService: OppgaveService,

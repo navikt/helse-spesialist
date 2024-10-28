@@ -11,7 +11,7 @@ import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 
-class TransactionalOppgaveDao(queryRunner: QueryRunner) : OppgaveRepository, QueryRunner by queryRunner {
+class OppgaveDao(queryRunner: QueryRunner) : OppgaveRepository, QueryRunner by queryRunner {
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
     constructor(session: Session) : this(MedSession(session))
 
@@ -127,6 +127,17 @@ class TransactionalOppgaveDao(queryRunner: QueryRunner) : OppgaveRepository, Que
             it.uuid("vedtaksperiode_id")
         }
     }
+
+    override fun finnVedtaksperiodeId(oppgaveId: Long) =
+        asSQL(
+            """
+            SELECT v.vedtaksperiode_id
+            FROM vedtak v
+            INNER JOIN oppgave o on v.id = o.vedtak_ref
+            WHERE o.id = :oppgaveId
+            """.trimIndent(),
+            "oppgaveId" to oppgaveId,
+        ).single { row -> row.uuid("vedtaksperiode_id") }
 
     override fun harGyldigOppgave(utbetalingId: UUID) =
         asSQL(

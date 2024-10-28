@@ -3,11 +3,11 @@ package no.nav.helse.modell.stoppautomatiskbehandling
 import kotliquery.TransactionalSession
 import no.nav.helse.db.HistorikkinnslagRepository
 import no.nav.helse.db.NotatRepository
+import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OppgaveRepository
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
 import no.nav.helse.db.StansAutomatiskBehandlingRepository
 import no.nav.helse.db.TransactionalNotatDao
-import no.nav.helse.db.TransactionalOppgaveDao
 import no.nav.helse.db.TransactionalPeriodehistorikkDao
 import no.nav.helse.db.TransactionalStansAutomatiskBehandlingDao
 import no.nav.helse.mediator.Subsumsjonsmelder
@@ -51,7 +51,7 @@ class StansAutomatiskBehandlingMediator(
             StansAutomatiskBehandlingMediator(
                 TransactionalStansAutomatiskBehandlingDao(transactionalSession),
                 TransactionalPeriodehistorikkDao(transactionalSession),
-                TransactionalOppgaveDao(transactionalSession),
+                OppgaveDao(transactionalSession),
                 TransactionalNotatDao(transactionalSession),
                 subsumsjonsmelderProvider,
             )

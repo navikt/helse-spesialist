@@ -2,7 +2,7 @@ package no.nav.helse.modell.kommando
 
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.TransactionalSession
-import no.nav.helse.db.TransactionalOppgaveDao
+import no.nav.helse.db.OppgaveDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
@@ -53,7 +53,7 @@ internal class TilbakedateringBehandlet private constructor(
     ) {
         person.behandleTilbakedateringBehandlet(perioder)
         kommandostarter {
-            val oppgaveDataForAutomatisering = finnOppgavedata(fødselsnummer, TransactionalOppgaveDao(transactionalSession)) ?: return@kommandostarter null
+            val oppgaveDataForAutomatisering = finnOppgavedata(fødselsnummer, OppgaveDao(transactionalSession)) ?: return@kommandostarter null
             tilbakedateringGodkjent(this@TilbakedateringBehandlet, person, oppgaveDataForAutomatisering, transactionalSession)
         }
     }

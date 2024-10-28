@@ -8,6 +8,7 @@ import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.NotatDao
+import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgHistorikkinnslagRepository
 import no.nav.helse.db.PgTotrinnsvurderingDao
@@ -25,7 +26,6 @@ import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.TilgangskontrollørForReservasjon
 import no.nav.helse.mediator.dokument.DokumentMediator
-import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.PlukkTilManuell
 import no.nav.helse.modell.automatisering.Stikkprøver

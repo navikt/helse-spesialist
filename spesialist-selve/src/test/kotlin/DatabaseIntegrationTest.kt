@@ -22,8 +22,8 @@ import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.TildelingDao
+import no.nav.helse.db.OppgaveDao
 import no.nav.helse.januar
-import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.MeldingDao

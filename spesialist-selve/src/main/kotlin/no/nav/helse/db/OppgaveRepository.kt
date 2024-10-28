@@ -19,6 +19,8 @@ interface OppgaveRepository {
 
     fun finnVedtaksperiodeId(fødselsnummer: String): UUID
 
+    fun finnVedtaksperiodeId(oppgaveId: Long): UUID
+
     fun harGyldigOppgave(utbetalingId: UUID): Boolean
 
     fun finnHendelseId(id: Long): UUID
