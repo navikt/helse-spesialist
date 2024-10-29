@@ -37,6 +37,7 @@ import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.KlargjørTilgangsrelaterteData
 import no.nav.helse.modell.person.OppdaterPersondata
 import no.nav.helse.modell.person.SøknadSendt
+import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMelding
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.vedtaksperiode.BehandlingOpprettet
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
@@ -229,6 +230,7 @@ internal class MeldingDao(queryRunner: QueryRunner) : MeldingRepository, QueryRu
             is AvsluttetUtenVedtakMessage -> AVSLUTTET_UTEN_VEDTAK
             is AvsluttetMedVedtakMessage -> AVSLUTTET_MED_VEDTAK
             is KlargjørTilgangsrelaterteData -> KLARGJØR_TILGANGSRELATERTE_DATA
+            is StansAutomatiskBehandlingMelding -> Meldingtype.STANS_AUTOMATISK_BEHANDLING
             else -> throw IllegalArgumentException("ukjent meldingtype: ${melding::class.simpleName}")
         }
 
@@ -252,5 +254,6 @@ internal class MeldingDao(queryRunner: QueryRunner) : MeldingRepository, QueryRu
         AVSLUTTET_UTEN_VEDTAK,
         AVSLUTTET_MED_VEDTAK,
         KLARGJØR_TILGANGSRELATERTE_DATA,
+        STANS_AUTOMATISK_BEHANDLING,
     }
 }
