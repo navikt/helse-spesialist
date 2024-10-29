@@ -1,7 +1,7 @@
 import no.nav.helse.SpeilTilgangsgrupper
-import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgDialogDao
+import no.nav.helse.db.PgAvviksvurderingDao
 import no.nav.helse.db.PgNotatDao
 import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgPeriodehistorikkDao
@@ -39,7 +39,7 @@ internal class TestMediator(
     private val totrinnsvurderingDao = PgTotrinnsvurderingDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
-    private val avviksvurderingDao = AvviksvurderingDao(dataSource)
+    private val avviksvurderingDao = PgAvviksvurderingDao(dataSource)
     private val notatDao = PgNotatDao(dataSource)
     private val dialogDao = PgDialogDao(dataSource)
 

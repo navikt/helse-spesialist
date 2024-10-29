@@ -5,9 +5,9 @@ import io.ktor.server.routing.routing
 import no.nav.helse.DataSourceBuilder
 import no.nav.helse.Gruppekontroll
 import no.nav.helse.Tilgangsgrupper
-import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.OpptegnelseDao
+import no.nav.helse.db.PgAvviksvurderingDao
 import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgNotatDao
 import no.nav.helse.db.PgOppgaveDao
@@ -106,7 +106,7 @@ internal class SpesialistApp(
     private val apiVarselRepository = ApiVarselRepository(dataSource)
     private val dokumentDao = PgDokumentDao(dataSource)
     private val påVentApiDao = PåVentApiDao(dataSource)
-    private val avviksvurderingDao = AvviksvurderingDao(dataSource)
+    private val avviksvurderingDao = PgAvviksvurderingDao(dataSource)
     private val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(dataSource)
     private val vergemålApiDao = VergemålApiDao(dataSource)
 
@@ -140,7 +140,7 @@ internal class SpesialistApp(
     private val avviksvurderinghenter =
         object : Avviksvurderinghenter {
             override fun hentAvviksvurdering(vilkårsgrunnlagId: UUID): Avviksvurdering? =
-                avviksvurderingDao.finnAvviksvurdering(vilkårsgrunnlagId)
+                avviksvurderingDao.hentAvviksvurdering(vilkårsgrunnlagId)
         }
 
     private val plukkTilManuell: PlukkTilManuell<String> = (

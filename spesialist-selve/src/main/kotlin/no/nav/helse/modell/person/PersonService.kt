@@ -3,7 +3,7 @@ package no.nav.helse.modell.person
 import kotliquery.Session
 import kotliquery.TransactionalSession
 import kotliquery.sessionOf
-import no.nav.helse.db.AvviksvurderingDao
+import no.nav.helse.db.PgAvviksvurderingDao
 import no.nav.helse.db.SykefraværstilfelleDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonService
 import javax.sql.DataSource
@@ -33,7 +33,7 @@ internal class PersonService(
                 skjønnsfastsatteSykepengegrunnlag =
                     SykefraværstilfelleDao(this).finnSkjønnsfastsatteSykepengegrunnlag(fødselsnummer),
             )?.copy(
-                avviksvurderinger = AvviksvurderingDao(this).finnAvviksvurderinger(fødselsnummer),
+                avviksvurderinger = PgAvviksvurderingDao(this).finnAvviksvurderinger(fødselsnummer),
             )?.let {
                 Person.gjenopprett(
                     aktørId = it.aktørId,

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.TransactionalSession
 import no.nav.helse.db.ArbeidsforholdRepository
 import no.nav.helse.db.AutomatiseringRepository
-import no.nav.helse.db.AvviksvurderingRepository
+import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.InntektskilderRepository
@@ -225,7 +225,7 @@ internal class GodkjenningsbehovCommand(
     automatiseringRepository: AutomatiseringRepository,
     periodehistorikkDao: PeriodehistorikkDao,
     oppgaveDao: OppgaveDao,
-    avviksvurderingRepository: AvviksvurderingRepository,
+    avviksvurderingDao: AvviksvurderingDao,
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
     totrinnsvurderingService: TotrinnsvurderingService,
@@ -245,7 +245,7 @@ internal class GodkjenningsbehovCommand(
             ),
             OpprettKoblingTilAvviksvurdering(
                 commandData = behovData,
-                avviksvurderingRepository = avviksvurderingRepository,
+                avviksvurderingDao = avviksvurderingDao,
             ),
             VurderVidereBehandlingAvGodkjenningsbehov(
                 commandData = behovData,

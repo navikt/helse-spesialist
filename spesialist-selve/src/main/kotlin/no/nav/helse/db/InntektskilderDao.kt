@@ -12,7 +12,7 @@ internal class InntektskilderDao(
     private val session: Session,
 ) : InntektskilderRepository {
     private val arbeidsgiverDao = ArbeidsgiverDao(session)
-    private val avviksvurderingDao = AvviksvurderingDao(session)
+    private val avviksvurderingDao = PgAvviksvurderingDao(session)
 
     override fun lagreInntektskilder(inntektskilder: List<InntektskildeDto>) {
         inntektskilder.forEach { inntekt ->
