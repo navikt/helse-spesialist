@@ -25,7 +25,6 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
     fun `lagre og finn vedtaksperiode`() {
         opprettPerson()
         opprettArbeidsgiver()
-        opprettSnapshot()
         sessionOf(dataSource).use {
             it.transaction {
                 PgVedtakDao(it).lagreVedtaksperiode(
@@ -71,7 +70,6 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
     fun `finn forkastet vedtaksperiode`() {
         opprettPerson()
         opprettArbeidsgiver()
-        opprettSnapshot()
         sessionOf(dataSource).use {
             it.transaction {
                 PgVedtakDao(it).lagreVedtaksperiode(

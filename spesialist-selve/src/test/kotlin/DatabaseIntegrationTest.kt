@@ -1,5 +1,4 @@
 
-import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -29,7 +28,6 @@ import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.MeldingDuplikatkontrollDao
-import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.dokument.PgDokumentDao
@@ -59,14 +57,6 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.spesialist.typer.Kjønn
-import no.nav.helse.spleis.graphql.HentSnapshot
-import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
-import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
-import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetype
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiver
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGenerasjon
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUberegnetPeriode
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -145,7 +135,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val historikkinnslagRepository = PgPeriodehistorikkDao(dataSource)
     internal val arbeidsforholdDao = ArbeidsforholdDao(session)
     internal val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
-    internal val snapshotDao = SnapshotDao(dataSource)
     internal val vedtakDao = PgVedtakDao(dataSource)
     internal val commandContextDao = CommandContextDao(dataSource)
     internal val tildelingDao = TildelingDao(dataSource)
@@ -348,13 +337,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
     }
 
-    protected fun opprettSnapshot(
-        person: GraphQLPerson = snapshot(fødselsnummer = FNR, aktørId = AKTØR).data!!.person!!,
-        fødselsnummer: String = FNR,
-    ) {
-        snapshotDao.lagre(fødselsnummer, person)
-    }
-
     protected fun opprettGenerasjon(
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         spleisBehandlingId: UUID = UUID.randomUUID(),
@@ -517,55 +499,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val enhetId: Int,
         val infotrygdutbetalingerId: Long,
     )
-
-    protected fun snapshot(
-        fødselsnummer: String = FNR,
-        aktørId: String = AKTØR,
-        versjon: Int = 1,
-    ): GraphQLClientResponse<HentSnapshot.Result> =
-        object : GraphQLClientResponse<HentSnapshot.Result> {
-            override val data =
-                HentSnapshot.Result(
-                    GraphQLPerson(
-                        versjon = versjon,
-                        aktorId = aktørId,
-                        fodselsnummer = fødselsnummer,
-                        arbeidsgivere =
-                            listOf(
-                                GraphQLArbeidsgiver(
-                                    organisasjonsnummer = "987654321",
-                                    ghostPerioder = emptyList(),
-                                    nyeInntektsforholdPerioder = emptyList(),
-                                    generasjoner =
-                                        listOf(
-                                            GraphQLGenerasjon(
-                                                id = UUID.randomUUID(),
-                                                perioder =
-                                                    listOf(
-                                                        GraphQLUberegnetPeriode(
-                                                            erForkastet = false,
-                                                            fom = 1.januar(2020),
-                                                            tom = 31.januar(2020),
-                                                            inntektstype = GraphQLInntektstype.ENARBEIDSGIVER,
-                                                            opprettet = 31.januar(2020).atStartOfDay(),
-                                                            periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
-                                                            tidslinje = emptyList(),
-                                                            vedtaksperiodeId = UUID.randomUUID(),
-                                                            periodetilstand = GraphQLPeriodetilstand.VENTERPAANNENPERIODE,
-                                                            skjaeringstidspunkt = 1.januar(2020),
-                                                            hendelser = emptyList(),
-                                                            behandlingId = UUID.randomUUID(),
-                                                        ),
-                                                    ),
-                                            ),
-                                        ),
-                                ),
-                            ),
-                        dodsdato = null,
-                        vilkarsgrunnlag = emptyList(),
-                    ),
-                )
-        }
 
     protected fun nyttVarsel(
         id: UUID = UUID.randomUUID(),
