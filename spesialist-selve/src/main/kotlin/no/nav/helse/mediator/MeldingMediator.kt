@@ -262,7 +262,7 @@ internal class MeldingMediator(
     }
 
     internal fun håndter(avviksvurdering: AvviksvurderingDto) {
-        kommandofabrikk.avviksvurdering(avviksvurdering)
+        AvviksvurderingDao(dataSource).lagre(avviksvurdering)
     }
 
     fun stansAutomatiskBehandling(
