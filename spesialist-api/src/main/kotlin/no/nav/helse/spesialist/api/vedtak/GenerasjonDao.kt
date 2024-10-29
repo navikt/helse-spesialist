@@ -1,33 +1,33 @@
 package no.nav.helse.spesialist.api.vedtak
 
-import no.nav.helse.HelseDao
+import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.db.MedDataSource
+import no.nav.helse.db.QueryRunner
 import no.nav.helse.spesialist.api.varsel.Varsel
 import java.util.UUID
 import javax.sql.DataSource
 
-internal class GenerasjonDao(dataSource: DataSource) : HelseDao(dataSource) {
+internal class GenerasjonDao(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource) {
     internal fun gjeldendeGenerasjonFor(oppgaveId: Long): Vedtaksperiode =
-        requireNotNull(
-            asSQL(
-                """
-                SELECT svg.vedtaksperiode_id, svg.fom, svg.tom, svg.skjæringstidspunkt
-                FROM vedtak v 
-                INNER JOIN selve_vedtaksperiode_generasjon svg on v.vedtaksperiode_id = svg.vedtaksperiode_id
-                JOIN oppgave o ON v.id = o.vedtak_ref
-                WHERE o.id = :oppgave_id
-                ORDER BY svg.id DESC LIMIT 1;
-                """.trimIndent(),
-                "oppgave_id" to oppgaveId,
-            ).single {
-                Vedtaksperiode(
-                    it.uuid("vedtaksperiode_id"),
-                    it.localDate("fom"),
-                    it.localDate("tom"),
-                    it.localDate("skjæringstidspunkt"),
-                    emptySet(),
-                )
-            },
-        )
+        asSQL(
+            """
+            SELECT svg.vedtaksperiode_id, svg.fom, svg.tom, svg.skjæringstidspunkt
+            FROM vedtak v 
+            INNER JOIN selve_vedtaksperiode_generasjon svg on v.vedtaksperiode_id = svg.vedtaksperiode_id
+            JOIN oppgave o ON v.id = o.vedtak_ref
+            WHERE o.id = :oppgave_id
+            ORDER BY svg.id DESC LIMIT 1;
+            """.trimIndent(),
+            "oppgave_id" to oppgaveId,
+        ).single {
+            Vedtaksperiode(
+                it.uuid("vedtaksperiode_id"),
+                it.localDate("fom"),
+                it.localDate("tom"),
+                it.localDate("skjæringstidspunkt"),
+                emptySet(),
+            )
+        }
 
     internal fun gjeldendeGenerasjonerForPerson(oppgaveId: Long): Set<Vedtaksperiode> =
         asSQL(
@@ -56,27 +56,25 @@ internal class GenerasjonDao(dataSource: DataSource) : HelseDao(dataSource) {
         oppgaveId: Long,
         varselGetter: (generasjonId: UUID) -> Set<Varsel>,
     ): Vedtaksperiode =
-        requireNotNull(
-            asSQL(
-                """
-                SELECT svg.vedtaksperiode_id, svg.unik_id, svg.fom, svg.tom, svg.skjæringstidspunkt
-                FROM vedtak v 
-                INNER JOIN selve_vedtaksperiode_generasjon svg on v.vedtaksperiode_id = svg.vedtaksperiode_id
-                JOIN oppgave o ON v.id = o.vedtak_ref
-                WHERE o.id = :oppgave_id
-                ORDER BY svg.id DESC LIMIT 1;
-                """.trimIndent(),
-                "oppgave_id" to oppgaveId,
-            ).single {
-                Vedtaksperiode(
-                    it.uuid("vedtaksperiode_id"),
-                    it.localDate("fom"),
-                    it.localDate("tom"),
-                    it.localDate("skjæringstidspunkt"),
-                    varselGetter(it.uuid("unik_id")),
-                )
-            },
-        )
+        asSQL(
+            """
+            SELECT svg.vedtaksperiode_id, svg.unik_id, svg.fom, svg.tom, svg.skjæringstidspunkt
+            FROM vedtak v 
+            INNER JOIN selve_vedtaksperiode_generasjon svg on v.vedtaksperiode_id = svg.vedtaksperiode_id
+            JOIN oppgave o ON v.id = o.vedtak_ref
+            WHERE o.id = :oppgave_id
+            ORDER BY svg.id DESC LIMIT 1;
+            """.trimIndent(),
+            "oppgave_id" to oppgaveId,
+        ).single {
+            Vedtaksperiode(
+                it.uuid("vedtaksperiode_id"),
+                it.localDate("fom"),
+                it.localDate("tom"),
+                it.localDate("skjæringstidspunkt"),
+                varselGetter(it.uuid("unik_id")),
+            )
+        }
 
     internal fun gjeldendeGenerasjonerForPerson(
         oppgaveId: Long,
