@@ -2,6 +2,8 @@ package no.nav.helse.mediator.meldinger
 
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SpesialistRiver
+import no.nav.helse.mediator.asUUID
+import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMelding
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -39,19 +41,25 @@ internal class StansAutomatiskBehandlingRiver(
     ) {
         sikkerlogg.info("Mottok melding stans_automatisk_behandling:\n{}", packet.toJson())
 
+        val id = packet["@id"].asUUID()
         val fødselsnummer = packet["fødselsnummer"].asText()
         val status = packet["status"].asText()
         val årsaker = packet["årsaker"].map { enumValueOf<StoppknappÅrsak>(it.asText()) }.toSet()
         val opprettet = packet["opprettet"].asLocalDateTime()
         val originalMelding = packet["originalMelding"].asText()
 
-        mediator.stansAutomatiskBehandling(
-            fødselsnummer,
-            status,
-            årsaker,
-            opprettet,
-            originalMelding,
-            "ISYFO",
+        mediator.mottaMelding(
+            StansAutomatiskBehandlingMelding(
+                id = id,
+                fødselsnummer = fødselsnummer,
+                status = status,
+                årsaker = årsaker,
+                opprettet = opprettet,
+                originalMelding = originalMelding,
+                json = packet.toJson(),
+                kilde = "ISYFO",
+            ),
+            context,
         )
     }
 }

@@ -30,8 +30,7 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
             rapidsConnection = testRapid,
             kommandofabrikk = kommandofabrikk,
             avviksvurderingDao = avviksvurderingDao,
-            poisonPills = PoisonPills(emptyMap()),
-            subsumsjonsmelderProvider = { mockk() }
+            poisonPills = PoisonPills(emptyMap())
         )
 
     @BeforeEach

@@ -110,7 +110,6 @@ internal class TestMediator(
             kommandofabrikk = kommandofabrikk,
             avviksvurderingDao = avviksvurderingDao,
             poisonPills = PoisonPills(emptyMap()),
-            subsumsjonsmelderProvider = { Subsumsjonsmelder("versjonAvKode", testRapid) },
         )
     }
 

@@ -6,11 +6,11 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.TestRapidHelpers.hendelser
-import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.NotatDao
+import no.nav.helse.db.PeriodehistorikkDao
+import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
-import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.modell.periodehistorikk.AutomatiskBehandlingStanset
 import no.nav.helse.modell.saksbehandler.Saksbehandler
@@ -63,12 +63,16 @@ class StansAutomatiskBehandlingMediatorTest {
     @Test
     fun `Lagrer melding og periodehistorikk når stoppknapp-mleding håndteres`() {
         mediator.håndter(
-            fødselsnummer = FNR,
-            status = "STOPP_AUTOMATIKK",
-            årsaker = setOf(MEDISINSK_VILKAR),
-            opprettet = now(),
-            originalMelding = "{}",
-            kilde = "ISYFO",
+            StansAutomatiskBehandlingMelding(
+                id = randomUUID(),
+                fødselsnummer = FNR,
+                status = "STOPP_AUTOMATIKK",
+                årsaker = setOf(MEDISINSK_VILKAR),
+                opprettet = now(),
+                originalMelding = "{}",
+                kilde = "ISYFO",
+                json = ""
+            )
         )
 
         verify(exactly = 1) {

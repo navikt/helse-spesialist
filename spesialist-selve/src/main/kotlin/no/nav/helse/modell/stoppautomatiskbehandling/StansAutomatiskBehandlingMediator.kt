@@ -28,7 +28,6 @@ import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.graphql.schema.UnntattFraAutomatiskGodkjenning
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 import java.util.UUID
 
 class StansAutomatiskBehandlingMediator(
@@ -65,23 +64,16 @@ class StansAutomatiskBehandlingMediator(
         lagreNotat(handling.gjelderFødselsnummer(), handling.begrunnelse(), saksbehandler.oid())
     }
 
-    internal fun håndter(
-        fødselsnummer: String,
-        status: String,
-        årsaker: Set<StoppknappÅrsak>,
-        opprettet: LocalDateTime,
-        originalMelding: String,
-        kilde: String,
-    ) {
+    internal fun håndter(melding: StansAutomatiskBehandlingMelding) {
         stansAutomatiskBehandlingRepository.lagreFraISyfo(
-            fødselsnummer = fødselsnummer,
-            status = status,
-            årsaker = årsaker,
-            opprettet = opprettet,
-            originalMelding = originalMelding,
-            kilde = kilde,
+            fødselsnummer = melding.fødselsnummer(),
+            status = melding.status,
+            årsaker = melding.årsaker,
+            opprettet = melding.opprettet,
+            originalMelding = melding.originalMelding,
+            kilde = melding.kilde,
         )
-        lagrePeriodehistorikk(fødselsnummer)
+        lagrePeriodehistorikk(melding.fødselsnummer())
     }
 
     override fun unntattFraAutomatiskGodkjenning(fødselsnummer: String): UnntattFraAutomatiskGodkjenning =

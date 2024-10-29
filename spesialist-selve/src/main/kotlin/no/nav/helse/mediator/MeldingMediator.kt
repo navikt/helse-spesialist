@@ -58,8 +58,6 @@ import no.nav.helse.modell.person.AdressebeskyttelseEndretRiver
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.PersonService
 import no.nav.helse.modell.person.SøknadSendt
-import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
-import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
@@ -71,7 +69,6 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.spesialist.api.Personhåndterer
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -93,7 +90,6 @@ internal class MeldingMediator(
     private val varselRepository: VarselRepository = VarselRepository(dataSource),
     private val personService: PersonService = PersonService(dataSource),
     private val poisonPills: PoisonPills,
-    private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
 ) : Personhåndterer {
     private companion object {
         private val env = Environment()
@@ -263,20 +259,6 @@ internal class MeldingMediator(
 
     internal fun håndter(avviksvurdering: AvviksvurderingDto) {
         AvviksvurderingDao(dataSource).lagre(avviksvurdering)
-    }
-
-    fun stansAutomatiskBehandling(
-        fødselsnummer: String,
-        status: String,
-        årsaker: Set<StoppknappÅrsak>,
-        opprettet: LocalDateTime,
-        originalMelding: String,
-        kilde: String,
-    ) = sessionOf(dataSource).use {
-        StansAutomatiskBehandlingMediator.Factory.stansAutomatiskBehandlingMediator(
-            it,
-            subsumsjonsmelderProvider,
-        ).håndter(fødselsnummer, status, årsaker, opprettet, originalMelding, kilde)
     }
 
     fun slettGamleDokumenter(): Int = dokumentDao.slettGamleDokumenter()

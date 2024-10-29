@@ -17,7 +17,7 @@ internal class StansAutomatiskBehandlingRiverTest {
     @Test
     fun `Leser stans automatisk behandling`() {
         testRapid.sendTestMessage(event())
-        verify(exactly = 1) { mediator.stansAutomatiskBehandling(any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 1) { mediator.mottaMelding(any(), any()) }
     }
 
     @Language("JSON")

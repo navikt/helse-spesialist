@@ -239,7 +239,6 @@ internal class SpesialistApp(
                 kommandofabrikk = kommandofabrikk,
                 avviksvurderingDao = avviksvurderingDao,
                 poisonPills = PoisonPillDao(dataSource).poisonPills(),
-                subsumsjonsmelderProvider = { subsumsjonsmelder },
             )
         saksbehandlerMediator =
             SaksbehandlerMediator(

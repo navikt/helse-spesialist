@@ -32,6 +32,7 @@ import no.nav.helse.modell.kommando.LøsGodkjenningsbehov
 import no.nav.helse.modell.kommando.OverstyringIgangsattCommand
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.kommando.TilbakedateringGodkjentCommand
+import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
@@ -44,6 +45,8 @@ import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.SøknadSendtCommand
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
+import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMelding
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
@@ -300,6 +303,16 @@ internal class Kommandofabrikk(
             oppgaveDao = PgOppgaveDao(session),
             totrinnsvurderingService = lagTotrinnsvurderingService(session),
         )
+
+    internal fun stansAutomatiskBehandling(
+        hendelse: StansAutomatiskBehandlingMelding,
+        session: Session,
+    ) = ikkesuspenderendeCommand {
+        StansAutomatiskBehandlingMediator.Factory.stansAutomatiskBehandlingMediator(
+            session,
+            subsumsjonsmelderProvider,
+        ).håndter(hendelse)
+    }
 
     internal fun løsGodkjenningsbehov(
         melding: Saksbehandlerløsning,
