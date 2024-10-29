@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.utils.io.core.toByteArray
 import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.Toggle
@@ -499,7 +500,7 @@ data class BeregnetPeriode(
     private fun mapLagtPåVentJson(json: String): Pair<List<String>, LocalDate?> {
         val node = objectMapper.readTree(json)
         val påVentÅrsaker = node["årsaker"].map { it["arsak"].asText() }
-        val frist = node["frist"]?.asLocalDate()
+        val frist = node["frist"]?.takeUnless { it.isMissingOrNull() }?.asLocalDate()
         return påVentÅrsaker to frist
     }
 
