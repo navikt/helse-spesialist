@@ -65,7 +65,7 @@ internal class GenerasjonDao(dataSource: DataSource) : HelseDao(dataSource) {
                 JOIN oppgave o ON v.id = o.vedtak_ref
                 WHERE o.id = :oppgave_id
                 ORDER BY svg.id DESC LIMIT 1;
-            """,
+                """.trimIndent(),
                 "oppgave_id" to oppgaveId,
             ).single {
                 Vedtaksperiode(
@@ -84,15 +84,15 @@ internal class GenerasjonDao(dataSource: DataSource) : HelseDao(dataSource) {
     ): Set<Vedtaksperiode> =
         asSQL(
             """
-                SELECT DISTINCT ON (svg.vedtaksperiode_id) svg.vedtaksperiode_id, svg.unik_id, svg.fom, svg.tom, svg.skjæringstidspunkt 
-                FROM vedtak v
-                INNER JOIN selve_vedtaksperiode_generasjon svg on v.vedtaksperiode_id = svg.vedtaksperiode_id
-                WHERE person_ref = 
-                    (SELECT person_ref FROM vedtak v2
-                    JOIN oppgave o on v2.id = o.vedtak_ref
-                    WHERE o.id = :oppgave_id) AND v.forkastet = false
-                ORDER BY svg.vedtaksperiode_id, svg.id DESC;
-            """,
+            SELECT DISTINCT ON (svg.vedtaksperiode_id) svg.vedtaksperiode_id, svg.unik_id, svg.fom, svg.tom, svg.skjæringstidspunkt 
+            FROM vedtak v
+            INNER JOIN selve_vedtaksperiode_generasjon svg on v.vedtaksperiode_id = svg.vedtaksperiode_id
+            WHERE person_ref = 
+                (SELECT person_ref FROM vedtak v2
+                JOIN oppgave o on v2.id = o.vedtak_ref
+                WHERE o.id = :oppgave_id) AND v.forkastet = false
+            ORDER BY svg.vedtaksperiode_id, svg.id DESC;
+            """.trimIndent(),
             "oppgave_id" to oppgaveId,
         ).list {
             Vedtaksperiode(
