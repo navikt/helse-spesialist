@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.vedtak
 
+import kotliquery.Row
 import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.db.MedDataSource
 import no.nav.helse.db.QueryRunner
@@ -19,15 +20,7 @@ internal class GenerasjonDao(dataSource: DataSource) : QueryRunner by MedDataSou
             ORDER BY svg.id DESC LIMIT 1;
             """.trimIndent(),
             "oppgave_id" to oppgaveId,
-        ).single {
-            Vedtaksperiode(
-                it.uuid("vedtaksperiode_id"),
-                it.localDate("fom"),
-                it.localDate("tom"),
-                it.localDate("skjæringstidspunkt"),
-                emptySet(),
-            )
-        }
+        ).single { it.tilVedtaksperiode() }
 
     internal fun gjeldendeGenerasjonerForPerson(oppgaveId: Long): Set<Vedtaksperiode> =
         asSQL(
@@ -42,15 +35,7 @@ internal class GenerasjonDao(dataSource: DataSource) : QueryRunner by MedDataSou
             ORDER BY svg.vedtaksperiode_id, svg.id DESC;
             """.trimIndent(),
             "oppgave_id" to oppgaveId,
-        ).list {
-            Vedtaksperiode(
-                it.uuid("vedtaksperiode_id"),
-                it.localDate("fom"),
-                it.localDate("tom"),
-                it.localDate("skjæringstidspunkt"),
-                emptySet(),
-            )
-        }.toSet()
+        ).list { it.tilVedtaksperiode() }.toSet()
 
     internal fun gjeldendeGenerasjonFor(
         oppgaveId: Long,
@@ -66,15 +51,7 @@ internal class GenerasjonDao(dataSource: DataSource) : QueryRunner by MedDataSou
             ORDER BY svg.id DESC LIMIT 1;
             """.trimIndent(),
             "oppgave_id" to oppgaveId,
-        ).single {
-            Vedtaksperiode(
-                it.uuid("vedtaksperiode_id"),
-                it.localDate("fom"),
-                it.localDate("tom"),
-                it.localDate("skjæringstidspunkt"),
-                varselGetter(it.uuid("unik_id")),
-            )
-        }
+        ).single { it.tilVedtaksperiode(varselGetter) }
 
     internal fun gjeldendeGenerasjonerForPerson(
         oppgaveId: Long,
@@ -92,13 +69,16 @@ internal class GenerasjonDao(dataSource: DataSource) : QueryRunner by MedDataSou
             ORDER BY svg.vedtaksperiode_id, svg.id DESC;
             """.trimIndent(),
             "oppgave_id" to oppgaveId,
-        ).list {
-            Vedtaksperiode(
-                it.uuid("vedtaksperiode_id"),
-                it.localDate("fom"),
-                it.localDate("tom"),
-                it.localDate("skjæringstidspunkt"),
-                varselGetter(it.uuid("unik_id")),
-            )
-        }.toSet()
+        ).list { it.tilVedtaksperiode(varselGetter) }.toSet()
+
+    private fun Row.tilVedtaksperiode(varselGetter: (generasjonId: UUID) -> Set<Varsel>) = tilVedtaksperiode(varselGetter(uuid("unik_id")))
+
+    private fun Row.tilVedtaksperiode(varsler: Set<Varsel> = emptySet()) =
+        Vedtaksperiode(
+            uuid("vedtaksperiode_id"),
+            localDate("fom"),
+            localDate("tom"),
+            localDate("skjæringstidspunkt"),
+            varsler,
+        )
 }
