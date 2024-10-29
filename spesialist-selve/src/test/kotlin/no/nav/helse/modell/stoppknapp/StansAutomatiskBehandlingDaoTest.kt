@@ -1,12 +1,14 @@
 package no.nav.helse.modell.stoppknapp
 
 import DatabaseIntegrationTest
+import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMelding
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.AKTIVITETSKRAV
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.MEDISINSK_VILKAR
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
+import java.util.UUID
 
 internal class StansAutomatiskBehandlingDaoTest : DatabaseIntegrationTest() {
     @Test
@@ -41,12 +43,16 @@ internal class StansAutomatiskBehandlingDaoTest : DatabaseIntegrationTest() {
 
     private fun lagreFraISyfo(fødselsnummer: String = FNR) =
         stansAutomatiskBehandlingDao.lagreFraISyfo(
-            fødselsnummer = fødselsnummer,
-            status = "STOPP_AUTOMATIKK",
-            årsaker = setOf(MEDISINSK_VILKAR, AKTIVITETSKRAV),
-            opprettet = now(),
-            originalMelding = "{}",
-            kilde = "ISYFO",
+            StansAutomatiskBehandlingMelding(
+                id = UUID.randomUUID(),
+                fødselsnummer = fødselsnummer,
+                kilde = "ISYFO",
+                status = "STOPP_AUTOMATIKK",
+                årsaker = setOf(MEDISINSK_VILKAR, AKTIVITETSKRAV),
+                opprettet = now(),
+                originalMelding = "{}",
+                json = "{}"
+            ),
         )
 
     private inline fun <reified T> data(

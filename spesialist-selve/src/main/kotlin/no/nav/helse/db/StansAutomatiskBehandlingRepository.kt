@@ -1,19 +1,11 @@
 package no.nav.helse.db
 
-import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak
-import java.time.LocalDateTime
+import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMelding
 
-interface StansAutomatiskBehandlingRepository {
+internal interface StansAutomatiskBehandlingRepository {
     fun hentFor(fødselsnummer: String): List<StansAutomatiskBehandlingFraDatabase>
 
-    fun lagreFraISyfo(
-        fødselsnummer: String,
-        status: String,
-        årsaker: Set<StoppknappÅrsak>,
-        opprettet: LocalDateTime,
-        originalMelding: String?,
-        kilde: String,
-    )
+    fun lagreFraISyfo(melding: StansAutomatiskBehandlingMelding)
 
     fun lagreFraSpeil(fødselsnummer: String)
 }

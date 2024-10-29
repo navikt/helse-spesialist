@@ -30,7 +30,7 @@ import no.nav.helse.spesialist.api.graphql.schema.UnntattFraAutomatiskGodkjennin
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class StansAutomatiskBehandlingMediator(
+internal class StansAutomatiskBehandlingMediator(
     private val stansAutomatiskBehandlingRepository: StansAutomatiskBehandlingRepository,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val oppgaveDao: OppgaveDao,
@@ -65,14 +65,7 @@ class StansAutomatiskBehandlingMediator(
     }
 
     internal fun håndter(melding: StansAutomatiskBehandlingMelding) {
-        stansAutomatiskBehandlingRepository.lagreFraISyfo(
-            fødselsnummer = melding.fødselsnummer(),
-            status = melding.status,
-            årsaker = melding.årsaker,
-            opprettet = melding.opprettet,
-            originalMelding = melding.originalMelding,
-            kilde = melding.kilde,
-        )
+        stansAutomatiskBehandlingRepository.lagreFraISyfo(melding)
         lagrePeriodehistorikk(melding.fødselsnummer())
     }
 

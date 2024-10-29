@@ -2,34 +2,27 @@ package no.nav.helse.db
 
 import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMelding
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak
-import java.time.LocalDateTime
 import javax.sql.DataSource
 
-class StansAutomatiskBehandlingDao(queryRunner: QueryRunner) :
+internal class StansAutomatiskBehandlingDao(queryRunner: QueryRunner) :
     StansAutomatiskBehandlingRepository, QueryRunner by queryRunner {
     constructor(session: Session) : this(MedSession(session))
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
-    override fun lagreFraISyfo(
-        fødselsnummer: String,
-        status: String,
-        årsaker: Set<StoppknappÅrsak>,
-        opprettet: LocalDateTime,
-        originalMelding: String?,
-        kilde: String,
-    ) {
+    override fun lagreFraISyfo(melding: StansAutomatiskBehandlingMelding) {
         asSQL(
             """
             insert into stans_automatisering (fødselsnummer, status, årsaker, opprettet, kilde, original_melding) 
             values (:fnr, :status, :arsaker, :opprettet, :kilde, cast(:originalMelding as json))
             """.trimIndent(),
-            "fnr" to fødselsnummer,
-            "status" to status,
-            "arsaker" to createArrayOf("varchar", årsaker.map(StoppknappÅrsak::name)),
-            "opprettet" to opprettet,
-            "kilde" to kilde,
-            "originalMelding" to originalMelding,
+            "fnr" to melding.fødselsnummer(),
+            "status" to melding.status,
+            "arsaker" to createArrayOf("varchar", melding.årsaker.map(StoppknappÅrsak::name)),
+            "opprettet" to melding.opprettet,
+            "kilde" to melding.kilde,
+            "originalMelding" to melding.originalMelding,
         ).update()
     }
 

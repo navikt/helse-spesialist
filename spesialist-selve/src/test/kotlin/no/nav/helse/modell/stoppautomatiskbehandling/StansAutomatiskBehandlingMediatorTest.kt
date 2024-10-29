@@ -62,29 +62,20 @@ class StansAutomatiskBehandlingMediatorTest {
 
     @Test
     fun `Lagrer melding og periodehistorikk når stoppknapp-mleding håndteres`() {
-        mediator.håndter(
-            StansAutomatiskBehandlingMelding(
-                id = randomUUID(),
-                fødselsnummer = FNR,
-                status = "STOPP_AUTOMATIKK",
-                årsaker = setOf(MEDISINSK_VILKAR),
-                opprettet = now(),
-                originalMelding = "{}",
-                kilde = "ISYFO",
-                json = ""
-            )
+        val melding = StansAutomatiskBehandlingMelding(
+            id = randomUUID(),
+            fødselsnummer = FNR,
+            status = "STOPP_AUTOMATIKK",
+            årsaker = setOf(MEDISINSK_VILKAR),
+            opprettet = now(),
+            originalMelding = "{}",
+            kilde = "ISYFO",
+            json = "",
         )
 
-        verify(exactly = 1) {
-            stansAutomatiskBehandlingDao.lagreFraISyfo(
-                fødselsnummer = FNR,
-                status = "STOPP_AUTOMATIKK",
-                årsaker = setOf(MEDISINSK_VILKAR),
-                opprettet = any(),
-                originalMelding = "{}",
-                kilde = "ISYFO",
-            )
-        }
+        mediator.håndter(melding)
+
+        verify(exactly = 1) { stansAutomatiskBehandlingDao.lagreFraISyfo(melding) }
         verify(exactly = 1) {
             periodehistorikkDao.lagre(
                 historikkinnslag = any<AutomatiskBehandlingStanset>(),
