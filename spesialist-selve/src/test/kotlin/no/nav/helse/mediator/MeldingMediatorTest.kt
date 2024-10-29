@@ -7,7 +7,6 @@ import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.meldinger.PoisonPills
-import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -24,7 +23,6 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
 
     private val avviksvurderingDao = mockk<AvviksvurderingDao>()
     private val kommandofabrikk = mockk<Kommandofabrikk>(relaxed = true)
-    private val stansAutomatiskBehandlingMediator = mockk<StansAutomatiskBehandlingMediator>(relaxed = true)
 
     private val meldingMediator =
         MeldingMediator(
@@ -32,8 +30,8 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
             rapidsConnection = testRapid,
             kommandofabrikk = kommandofabrikk,
             avviksvurderingDao = avviksvurderingDao,
-            stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
             poisonPills = PoisonPills(emptyMap()),
+            subsumsjonsmelderProvider = { mockk() }
         )
 
     @BeforeEach

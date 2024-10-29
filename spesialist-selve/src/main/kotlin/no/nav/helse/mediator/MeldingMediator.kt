@@ -91,9 +91,9 @@ internal class MeldingMediator(
     private val dokumentDao: DokumentDao = PgDokumentDao(dataSource),
     avviksvurderingDao: AvviksvurderingDao,
     private val varselRepository: VarselRepository = VarselRepository(dataSource),
-    private val stansAutomatiskBehandlingMediator: StansAutomatiskBehandlingMediator,
     private val personService: PersonService = PersonService(dataSource),
     private val poisonPills: PoisonPills,
+    private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
 ) : Personhåndterer {
     private companion object {
         private val env = Environment()
@@ -272,7 +272,12 @@ internal class MeldingMediator(
         opprettet: LocalDateTime,
         originalMelding: String,
         kilde: String,
-    ) = stansAutomatiskBehandlingMediator.håndter(fødselsnummer, status, årsaker, opprettet, originalMelding, kilde)
+    ) = sessionOf(dataSource).use {
+        StansAutomatiskBehandlingMediator.Factory.stansAutomatiskBehandlingMediator(
+            it,
+            subsumsjonsmelderProvider,
+        ).håndter(fødselsnummer, status, årsaker, opprettet, originalMelding, kilde)
+    }
 
     fun slettGamleDokumenter(): Int = dokumentDao.slettGamleDokumenter()
 

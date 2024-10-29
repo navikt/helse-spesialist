@@ -1,6 +1,6 @@
 package no.nav.helse.modell.stoppautomatiskbehandling
 
-import kotliquery.TransactionalSession
+import kotliquery.Session
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
@@ -45,14 +45,14 @@ class StansAutomatiskBehandlingMediator(
 
     object Factory {
         fun stansAutomatiskBehandlingMediator(
-            transactionalSession: TransactionalSession,
+            session: Session,
             subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
         ): StansAutomatiskBehandlingMediator =
             StansAutomatiskBehandlingMediator(
-                StansAutomatiskBehandlingDao(transactionalSession),
-                PgPeriodehistorikkDao(transactionalSession),
-                PgOppgaveDao(transactionalSession),
-                PgNotatDao(transactionalSession),
+                StansAutomatiskBehandlingDao(session),
+                PgPeriodehistorikkDao(session),
+                PgOppgaveDao(session),
+                PgNotatDao(session),
                 subsumsjonsmelderProvider,
             )
     }

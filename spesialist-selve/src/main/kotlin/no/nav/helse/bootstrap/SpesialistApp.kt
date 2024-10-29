@@ -238,8 +238,8 @@ internal class SpesialistApp(
                 rapidsConnection = rapidsConnection,
                 kommandofabrikk = kommandofabrikk,
                 avviksvurderingDao = avviksvurderingDao,
-                stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
                 poisonPills = PoisonPillDao(dataSource).poisonPills(),
+                subsumsjonsmelderProvider = { subsumsjonsmelder },
             )
         saksbehandlerMediator =
             SaksbehandlerMediator(
