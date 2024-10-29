@@ -82,7 +82,7 @@ internal class SpesialistApp(
     private val dataSource = dataSourceBuilder.getDataSource()
 
     private val personApiDao = PersonApiDao(dataSource)
-    private val pgOppgaveDao = PgOppgaveDao(dataSource)
+    private val oppgaveDao = PgOppgaveDao(dataSource)
     private val oppgaveApiDao = OppgaveApiDao(dataSource)
     private val periodehistorikkApiDao = PeriodehistorikkApiDao(dataSource)
     private val historikkinnslagRepository = PgPeriodehistorikkDao(dataSource)
@@ -120,13 +120,13 @@ internal class SpesialistApp(
         StansAutomatiskBehandlingMediator(
             stansAutomatiskBehandlingDao,
             historikkinnslagRepository,
-            pgOppgaveDao,
+            oppgaveDao,
             notatDao,
         ) { subsumsjonsmelder }
     private val totrinnsvurderingService =
         TotrinnsvurderingService(
             totrinnsvurderingDao = totrinnsvurderingDao,
-            oppgaveDao = pgOppgaveDao,
+            oppgaveDao = oppgaveDao,
             periodehistorikkDao = historikkinnslagRepository,
         )
 
@@ -222,7 +222,7 @@ internal class SpesialistApp(
         rapidsConnection.register(this)
         oppgaveService =
             OppgaveService(
-                oppgaveDao = pgOppgaveDao,
+                oppgaveDao = oppgaveDao,
                 tildelingRepository = tildelingDao,
                 reservasjonRepository = reservasjonDao,
                 opptegnelseRepository = opptegnelseDao,

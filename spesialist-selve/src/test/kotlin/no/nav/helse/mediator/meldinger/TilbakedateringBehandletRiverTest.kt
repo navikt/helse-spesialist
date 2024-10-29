@@ -3,7 +3,7 @@ package no.nav.helse.mediator.meldinger
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.db.PgOppgaveDao
+import no.nav.helse.db.OppgaveDao
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
@@ -19,7 +19,7 @@ import java.util.UUID
 internal class TilbakedateringBehandletRiverTest {
     private val mediator = mockk<MeldingMediator>(relaxed = true)
     private val testRapid = TestRapid().medRivers(TilbakedateringBehandletRiver(mediator))
-    private val pgOppgaveDao = mockk<PgOppgaveDao>(relaxed = true)
+    private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
 
     @Test
     fun `Leser tilbakedatering behandlet`() {
@@ -43,8 +43,8 @@ internal class TilbakedateringBehandletRiverTest {
                 skjæringstidspunkt = LocalDate.now(),
             ),
     ) {
-        every { pgOppgaveDao.finnOppgaveId(any<String>()) }.returns(oppgaveId)
-        every { pgOppgaveDao.oppgaveDataForAutomatisering(any()) }.returns(commandData)
+        every { oppgaveDao.finnOppgaveId(any<String>()) }.returns(oppgaveId)
+        every { oppgaveDao.oppgaveDataForAutomatisering(any()) }.returns(commandData)
     }
 
     @Language("JSON")

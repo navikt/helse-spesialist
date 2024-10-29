@@ -139,7 +139,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     fun tearDown() = session.close()
 
     internal val personDao = PersonDao(session)
-    internal val pgOppgaveDao = PgOppgaveDao(dataSource)
+    internal val oppgaveDao = PgOppgaveDao(dataSource)
     internal val oppgaveApiDao = OppgaveApiDao(dataSource)
     internal val periodehistorikkApiDao = PeriodehistorikkApiDao(dataSource)
     internal val historikkinnslagRepository = PgPeriodehistorikkDao(dataSource)
@@ -261,7 +261,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         egenskaper: List<EgenskapForDatabase> = listOf(EgenskapForDatabase.SØKNAD),
     ) {
         opprettSaksbehandler(saksbehandlerOid, navn = navn, epost = SAKSBEHANDLER_EPOST, ident = SAKSBEHANDLER_IDENT)
-        pgOppgaveDao.updateOppgave(oppgaveId, oppgavestatus = "AvventerSaksbehandler", egenskaper = egenskaper)
+        oppgaveDao.updateOppgave(oppgaveId, oppgavestatus = "AvventerSaksbehandler", egenskaper = egenskaper)
         @Language("PostgreSQL")
         val query = "INSERT INTO tildeling(saksbehandler_ref, oppgave_id_ref) VALUES (?, ?)"
         return sessionOf(dataSource).use { session ->
@@ -398,7 +398,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val hendelse = testhendelse(hendelseId = hendelseId)
         opprettCommandContext(hendelse, contextId)
         oppgaveId =
-            pgOppgaveDao.opprettOppgave(
+            oppgaveDao.opprettOppgave(
                 nextLong().also { OPPGAVE_ID = it },
                 contextId,
                 egenskaper,
@@ -413,7 +413,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         ferdigstiltAv: String,
         ferdigstiltAvOid: UUID,
     ) {
-        pgOppgaveDao.updateOppgave(
+        oppgaveDao.updateOppgave(
             oppgaveId = oppgaveId,
             oppgavestatus = "AvventerSystem",
             ferdigstiltAv = ferdigstiltAv,
@@ -427,7 +427,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         ferdigstiltAv: String? = null,
         ferdigstiltAvOid: UUID? = null,
     ) {
-        pgOppgaveDao.updateOppgave(
+        oppgaveDao.updateOppgave(
             oppgaveId = oppgaveId,
             oppgavestatus = "Ferdigstilt",
             ferdigstiltAv = ferdigstiltAv,

@@ -2,12 +2,12 @@ import no.nav.helse.SpeilTilgangsgrupper
 import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.db.OpptegnelseDao
+import no.nav.helse.db.PgOppgaveDao
+import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.PgOppgaveDao
-import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.mediator.GodkjenningService
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 // et annet opplegg for å teste samspillet mellom API og selve/mediator/modell
 internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     protected val testRapid = __ikke_bruk_denne
-    protected val pgOppgaveDao = PgOppgaveDao(dataSource)
+    protected val oppgaveDao = PgOppgaveDao(dataSource)
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val historikkinnslagRepository = PgPeriodehistorikkDao(dataSource)
     private val totrinnsvurderingDao = PgTotrinnsvurderingDao(dataSource)
@@ -45,7 +45,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     val godkjenningService =
         GodkjenningService(
             dataSource = dataSource,
-            pgOppgaveDao = pgOppgaveDao,
+            oppgaveDao = oppgaveDao,
             overstyringDao = OverstyringDao(dataSource),
             rapidsConnection = testRapid,
             oppgaveService = oppgaveService,
@@ -54,7 +54,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
             totrinnsvurderingService =
                 TotrinnsvurderingService(
                     totrinnsvurderingDao,
-                    pgOppgaveDao,
+                    oppgaveDao,
                     historikkinnslagRepository,
                 ),
         )

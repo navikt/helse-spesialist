@@ -59,7 +59,7 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `hent antall ferdigstilte oppgaver for gitt egenskap`() {
         nyPerson()
-        pgOppgaveDao.updateOppgave(OPPGAVE_ID, oppgavestatus = "Ferdigstilt", egenskaper = listOf(EgenskapForDatabase.SØKNAD))
+        oppgaveDao.updateOppgave(OPPGAVE_ID, oppgavestatus = "Ferdigstilt", egenskaper = listOf(EgenskapForDatabase.SØKNAD))
         val antall = behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.SØKNAD, LocalDate.now())
         assertEquals(1, antall)
     }
@@ -68,7 +68,7 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
     fun`Får antall tilgjengelige beslutteroppgaver`() {
         nyPerson()
         opprettSaksbehandler()
-        pgOppgaveDao.updateOppgave(
+        oppgaveDao.updateOppgave(
             oppgaveId = OPPGAVE_ID,
             oppgavestatus = Oppgavestatus.AvventerSaksbehandler.toString(),
             egenskaper = listOf(EGENSKAP, EgenskapForDatabase.BESLUTTER)
@@ -76,7 +76,7 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
         assertEquals(0, behandlingsstatistikkDao.getAntallTilgjengeligeBeslutteroppgaver())
         opprettTotrinnsvurdering(saksbehandler = SAKSBEHANDLER_OID)
         assertEquals(1, behandlingsstatistikkDao.getAntallTilgjengeligeBeslutteroppgaver())
-        pgOppgaveDao.updateOppgave(
+        oppgaveDao.updateOppgave(
             oppgaveId = OPPGAVE_ID,
             oppgavestatus = Oppgavestatus.Ferdigstilt.toString(),
             egenskaper = listOf(EGENSKAP, EgenskapForDatabase.BESLUTTER)
@@ -104,13 +104,13 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
     fun`Får antall tilgjengelige egen ansatt-oppgaver`() {
         nyPerson()
         opprettSaksbehandler()
-        pgOppgaveDao.updateOppgave(
+        oppgaveDao.updateOppgave(
             oppgaveId = OPPGAVE_ID,
             oppgavestatus = Oppgavestatus.AvventerSaksbehandler.toString(),
             egenskaper = listOf(EGENSKAP, EgenskapForDatabase.EGEN_ANSATT)
         )
         assertEquals(1, behandlingsstatistikkDao.getAntallTilgjengeligeEgenAnsattOppgaver())
-        pgOppgaveDao.updateOppgave(
+        oppgaveDao.updateOppgave(
             oppgaveId = OPPGAVE_ID,
             oppgavestatus = Oppgavestatus.Ferdigstilt.toString(),
             egenskaper = listOf(EGENSKAP, EgenskapForDatabase.EGEN_ANSATT)
@@ -122,7 +122,7 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
     fun`Får antall fullførte egen ansatt-oppgaver`() {
         nyPerson()
         opprettSaksbehandler()
-        pgOppgaveDao.updateOppgave(
+        oppgaveDao.updateOppgave(
             oppgaveId = OPPGAVE_ID,
             oppgavestatus = Oppgavestatus.Ferdigstilt.toString(),
             egenskaper = listOf(EGENSKAP, EgenskapForDatabase.EGEN_ANSATT)

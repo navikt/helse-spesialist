@@ -32,7 +32,7 @@ internal class TestMediator(
     dataSource: DataSource,
 ) {
     private val opptegnelseDao = OpptegnelseDao(dataSource)
-    private val pgOppgaveDao = PgOppgaveDao(dataSource)
+    private val oppgaveDao = PgOppgaveDao(dataSource)
     private val historikkinnslagRepository = PgPeriodehistorikkDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
     private val totrinnsvurderingDao = PgTotrinnsvurderingDao(dataSource)
@@ -45,7 +45,7 @@ internal class TestMediator(
         StansAutomatiskBehandlingMediator(
             StansAutomatiskBehandlingDao(dataSource),
             historikkinnslagRepository,
-            pgOppgaveDao,
+            oppgaveDao,
             notatDao,
         ) { Subsumsjonsmelder("versjonAvKode", testRapid) }
 
@@ -73,7 +73,7 @@ internal class TestMediator(
             stansAutomatiskBehandlingMediator,
             totrinnsvurderingService = TotrinnsvurderingService(
                 totrinnsvurderingDao = totrinnsvurderingDao,
-                oppgaveDao = pgOppgaveDao,
+                oppgaveDao = oppgaveDao,
                 periodehistorikkDao = historikkinnslagRepository
             )
         )

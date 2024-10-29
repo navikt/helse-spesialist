@@ -70,9 +70,9 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
         val arbeidsgiveroppdragId1 = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
         val personOppdragId1 = lagPersonoppdrag(personFagsystemId)
         val utbetalingId = UUID.randomUUID()
-        pgOppgaveDao.updateOppgave(oppgaveId = OPPGAVE_ID, oppgavestatus = "Ferdigstilt", egenskaper = listOf(EGENSKAP))
+        oppgaveDao.updateOppgave(oppgaveId = OPPGAVE_ID, oppgavestatus = "Ferdigstilt", egenskaper = listOf(EGENSKAP))
         val oppgaveId =
-            pgOppgaveDao.opprettOppgave(
+            oppgaveDao.opprettOppgave(
                 nextLong(),
                 UUID.randomUUID(),
                 listOf(EGENSKAP),

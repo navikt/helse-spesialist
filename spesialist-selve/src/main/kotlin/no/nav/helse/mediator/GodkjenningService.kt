@@ -26,7 +26,7 @@ import javax.sql.DataSource
 
 internal class GodkjenningService(
     private val dataSource: DataSource,
-    private val pgOppgaveDao: OppgaveDao = PgOppgaveDao(dataSource),
+    private val oppgaveDao: OppgaveDao = PgOppgaveDao(dataSource),
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
     private val rapidsConnection: RapidsConnection,
     private val oppgaveService: OppgaveService,
@@ -36,7 +36,7 @@ internal class GodkjenningService(
     private val totrinnsvurderingService: TotrinnsvurderingService =
         TotrinnsvurderingService(
             PgTotrinnsvurderingDao(dataSource),
-            pgOppgaveDao,
+            oppgaveDao,
             periodehistorikkDao,
         ),
 ) : Godkjenninghåndterer {
@@ -50,9 +50,9 @@ internal class GodkjenningService(
         epost: String,
         oid: UUID,
     ) {
-        val hendelseId = pgOppgaveDao.finnHendelseId(godkjenningDTO.oppgavereferanse)
-        val fødselsnummer = pgOppgaveDao.finnFødselsnummer(godkjenningDTO.oppgavereferanse)
-        val vedtaksperiodeId = pgOppgaveDao.finnVedtaksperiodeId(godkjenningDTO.oppgavereferanse)
+        val hendelseId = oppgaveDao.finnHendelseId(godkjenningDTO.oppgavereferanse)
+        val fødselsnummer = oppgaveDao.finnFødselsnummer(godkjenningDTO.oppgavereferanse)
+        val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(godkjenningDTO.oppgavereferanse)
         val totrinnsvurdering = totrinnsvurderingService.hentAktiv(vedtaksperiodeId)
         val reserverPersonOid: UUID = totrinnsvurdering?.saksbehandler ?: oid
         val saksbehandleroverstyringer = overstyringDao.finnAktiveOverstyringer(vedtaksperiodeId)

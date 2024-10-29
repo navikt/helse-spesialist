@@ -66,7 +66,7 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         opprettOppgave()
-        pgOppgaveDao.updateOppgave(
+        oppgaveDao.updateOppgave(
             oppgaveId = oppgaveId,
             oppgavestatus = "Ferdigstilt",
             ferdigstiltAv = SAKSBEHANDLER_EPOST,

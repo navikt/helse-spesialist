@@ -142,7 +142,7 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
     // Per nå blir det opprettet "en totrinnsvurdering" på et tidspunkt, som så blir updated med uuid-er på et senere
     // tidspunkt
     private fun opprettInitiellTotrinnsvurdering() {
-        val vedtaksperiodeId = pgOppgaveDao.finnVedtaksperiodeId(fødselsnummer = FØDSELSNUMMER)
+        val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(fødselsnummer = FØDSELSNUMMER)
 
         @Language("postgresql") val sql = "insert into totrinnsvurdering (vedtaksperiode_id) values (:vedtaksperiodeId)"
         sessionOf(dataSource).use { session ->
@@ -151,7 +151,7 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
     }
 
     private fun settTotrinnsvurdering(opprinneligSaksbehandler: UUID?, beslutter: UUID?) {
-        val vedtaksperiodeId = pgOppgaveDao.finnVedtaksperiodeId(fødselsnummer = FØDSELSNUMMER)
+        val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(fødselsnummer = FØDSELSNUMMER)
 
         @Language("postgresql") val sql = """
             insert into totrinnsvurdering (

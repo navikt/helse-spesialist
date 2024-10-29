@@ -7,8 +7,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.db.NotatDao
+import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
-import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
 import no.nav.helse.mediator.Subsumsjonsmelder
@@ -36,7 +36,7 @@ import java.util.UUID.randomUUID
 class StansAutomatiskBehandlingMediatorTest {
     private val stansAutomatiskBehandlingDao = mockk<StansAutomatiskBehandlingDao>(relaxed = true)
     private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
-    private val pgOppgaveDao = mockk<PgOppgaveDao>(relaxed = true)
+    private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val notatDao = mockk<NotatDao>(relaxed = true)
     private val testRapid = TestRapid()
     private val subsumsjonsmelder = Subsumsjonsmelder("versjonAvKode", testRapid)
@@ -51,7 +51,7 @@ class StansAutomatiskBehandlingMediatorTest {
         StansAutomatiskBehandlingMediator(
             stansAutomatiskBehandlingDao,
             periodehistorikkDao,
-            pgOppgaveDao,
+            oppgaveDao,
             notatDao,
         ) { subsumsjonsmelder }
 
