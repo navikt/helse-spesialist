@@ -610,9 +610,6 @@ data class BeregnetPeriode(
                 ).toList()
         }
 
-    @Deprecated("Oppgavereferanse bør hentes fra periodens oppgave")
-    fun oppgavereferanse(): String? = oppgaveApiDao.finnOppgaveId(vedtaksperiodeId())?.toString()
-
     private val oppgaveDto: OppgaveForPeriodevisningDto? by lazy {
         oppgaveApiDao.finnPeriodeoppgave(periode.vedtaksperiodeId)
     }

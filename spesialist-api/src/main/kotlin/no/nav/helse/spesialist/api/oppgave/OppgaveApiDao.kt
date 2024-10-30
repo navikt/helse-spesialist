@@ -5,17 +5,6 @@ import java.util.UUID
 import javax.sql.DataSource
 
 class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
-    fun finnOppgaveId(vedtaksperiodeId: UUID) =
-        asSQL(
-            """
-            SELECT id FROM oppgave
-            WHERE vedtak_ref =
-                (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
-            AND status = 'AvventerSaksbehandler'::oppgavestatus
-            """.trimIndent(),
-            "vedtaksperiodeId" to vedtaksperiodeId,
-        ).single { it.long("id") }
-
     fun finnOppgaveId(fødselsnummer: String) =
         asSQL(
             """

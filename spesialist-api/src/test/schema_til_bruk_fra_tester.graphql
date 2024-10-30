@@ -195,7 +195,6 @@ type BeregnetPeriode implements Periode {
     maksdato: LocalDate!
     notater: [Notat!]!
     oppgave: OppgaveForPeriodevisning
-    oppgavereferanse: String @deprecated(reason: "Oppgavereferanse bør hentes fra periodens oppgave")
     opprettet: LocalDateTime!
     paVent: PaVent
     periodetilstand: Periodetilstand!

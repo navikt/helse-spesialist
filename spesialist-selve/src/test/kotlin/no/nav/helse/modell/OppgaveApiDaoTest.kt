@@ -4,7 +4,6 @@ import DatabaseIntegrationTest
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.CommandContextDao
 import no.nav.helse.modell.kommando.TestMelding
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
@@ -19,22 +18,6 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
     fun setupDaoTest() {
         godkjenningsbehov(TESTHENDELSE.id)
         CommandContext(CONTEXT_ID).opprett(CommandContextDao(dataSource), TESTHENDELSE.id)
-    }
-
-    @Test
-    fun `Finner oppgaveId basert på vedtaksperiodeId`() {
-        nyPerson()
-        val oppgaveId = oppgaveApiDao.finnOppgaveId(VEDTAKSPERIODE)
-        assertNotNull(oppgaveId)
-        assertEquals(this.oppgaveId, oppgaveId)
-    }
-
-    @Test
-    fun `Finner ikke oppgaveId basert på vedtaksperiodeId dersom vedtaksperiode ikke finnes`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        val oppgaveId = oppgaveApiDao.finnOppgaveId(VEDTAKSPERIODE)
-        assertNull(oppgaveId)
     }
 
     @Test
