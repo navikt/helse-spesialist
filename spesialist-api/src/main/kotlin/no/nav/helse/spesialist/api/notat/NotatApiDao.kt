@@ -1,15 +1,15 @@
 package no.nav.helse.spesialist.api.notat
 
 import kotliquery.Row
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import no.nav.helse.HelseDao
+import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.HelseDao.Companion.asSQLWithQuestionMarks
+import no.nav.helse.db.MedDataSource
+import no.nav.helse.db.QueryRunner
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
-import org.intellij.lang.annotations.Language
 import java.util.UUID
 import javax.sql.DataSource
 
-class NotatApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
+class NotatApiDao(private val dataSource: DataSource) : QueryRunner by MedDataSource(dataSource) {
     fun opprettNotat(
         vedtaksperiodeId: UUID,
         tekst: String,
@@ -29,7 +29,7 @@ class NotatApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             "tekst" to tekst,
             "saksbehandler_oid" to saksbehandlerOid,
             "type" to type.name,
-        ).single { mapNotatDto(it) }
+        ).singleOrNull { mapNotatDto(it) }
 
     fun leggTilKommentar(
         notatId: Int,
@@ -45,32 +45,7 @@ class NotatApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             "tekst" to tekst,
             "notatId" to notatId,
             "saksbehandlerident" to saksbehandlerident,
-        ).single { mapKommentarDto(it) }
-
-    fun opprettNotatForOppgaveId(
-        oppgaveId: Long,
-        tekst: String,
-        saksbehandlerOid: UUID,
-        type: NotatType = NotatType.Generelt,
-    ): Long? =
-        asSQL(
-            """ 
-            INSERT INTO notat (vedtaksperiode_id, tekst, saksbehandler_oid, type)
-            VALUES (
-                (SELECT v.vedtaksperiode_id 
-                    FROM vedtak v 
-                    INNER JOIN oppgave o on v.id = o.vedtak_ref 
-                    WHERE o.id = :oppgave_id), 
-                :tekst, 
-                :saksbehandler_oid,
-                CAST(:type as notattype)
-            );
-            """.trimIndent(),
-            "oppgave_id" to oppgaveId,
-            "tekst" to tekst,
-            "saksbehandler_oid" to saksbehandlerOid,
-            "type" to type.name,
-        ).updateAndReturnGeneratedKey()
+        ).singleOrNull { mapKommentarDto(it) }
 
     fun finnNotater(vedtaksperiodeId: UUID): List<NotatDto> =
         asSQL(
@@ -82,22 +57,16 @@ class NotatApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             "vedtaksperiode_id" to vedtaksperiodeId,
         ).list { mapNotatDto(it) }
 
-    fun finnNotater(vedtaksperiodeIds: List<UUID>): Map<UUID, List<NotatDto>> =
-        sessionOf(dataSource).use { session ->
-            val questionMarks = vedtaksperiodeIds.joinToString { "?" }
-            val values = vedtaksperiodeIds.toTypedArray()
-
-            @Language("PostgreSQL")
-            val statement = """
-                SELECT * FROM notat n
-                JOIN saksbehandler s on s.oid = n.saksbehandler_oid
-                WHERE vedtaksperiode_id in ($questionMarks)
-        """
-            session.run(
-                queryOf(statement, *values)
-                    .map(::mapNotatDto).asList,
-            ).groupBy { it.vedtaksperiodeId }
-        }
+    fun finnNotater(vedtaksperiodeIds: List<UUID>): Map<UUID, List<NotatDto>> {
+        return asSQLWithQuestionMarks(
+            """
+            SELECT * FROM notat n
+            JOIN saksbehandler s on s.oid = n.saksbehandler_oid
+            WHERE vedtaksperiode_id in (${vedtaksperiodeIds.joinToString { "?" }})
+            """.trimIndent(),
+            *vedtaksperiodeIds.toTypedArray(),
+        ).list { mapNotatDto(it) }.groupBy { it.vedtaksperiodeId }
+    }
 
     fun feilregistrerNotat(notatId: Int): NotatDto? =
         asSQL(
@@ -113,7 +82,7 @@ class NotatApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             INNER JOIN saksbehandler s on s.oid = i.saksbehandler_oid
             """.trimIndent(),
             "notatId" to notatId,
-        ).single(::mapNotatDto)
+        ).singleOrNull { mapNotatDto(it) }
 
     fun feilregistrerKommentar(kommentarId: Int): KommentarDto? =
         asSQL(
@@ -129,7 +98,7 @@ class NotatApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             INNER JOIN notat n on n.id = i.notat_ref
             """.trimIndent(),
             "kommentarId" to kommentarId,
-        ).single(::mapKommentarDto)
+        ).singleOrNull { mapKommentarDto(it) }
 
     private fun finnKommentarer(notatId: Int): List<KommentarDto> =
         asSQL(
