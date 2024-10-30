@@ -2,14 +2,16 @@ package no.nav.helse.spesialist.api.arbeidsgiver
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
-import no.nav.helse.HelseDao
+import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.db.MedDataSource
+import no.nav.helse.db.QueryRunner
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsgiverInntekterFraAOrdningen
 import no.nav.helse.spesialist.api.graphql.schema.InntektFraAOrdningen
 import no.nav.helse.spesialist.api.objectMapper
 import java.time.YearMonth
 import javax.sql.DataSource
 
-class ArbeidsgiverApiDao(dataSource: DataSource) : HelseDao(dataSource) {
+class ArbeidsgiverApiDao(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource) {
     fun finnBransjer(orgnummer: String) =
         asSQL(
             """
