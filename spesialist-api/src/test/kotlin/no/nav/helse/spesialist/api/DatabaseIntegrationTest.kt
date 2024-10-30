@@ -991,11 +991,6 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val epost: String,
     )
 
-    protected fun query(
-        @Language("postgresql") query: String,
-        vararg params: Pair<String, Any>,
-    ) = queryOf(query, params.toMap())
-
     protected fun Query.update() = asUpdate.runInSession()
 
     protected fun <T> Query.single(mapper: (Row) -> T?) = map(mapper).asSingle.runInSession()

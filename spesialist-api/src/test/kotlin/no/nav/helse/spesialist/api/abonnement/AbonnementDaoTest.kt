@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.abonnement
 
+import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
@@ -70,21 +71,21 @@ internal class AbonnementDaoTest : DatabaseIntegrationTest() {
         }
     }
 
-    private fun settSekvensnummer(saksbehandlerId: UUID, sekvensnummer: Int) = query(
+    private fun settSekvensnummer(saksbehandlerId: UUID, sekvensnummer: Int) = asSQL(
         """
             insert into saksbehandler_opptegnelse_sekvensnummer
             values ('$saksbehandlerId', $sekvensnummer)
         """.trimIndent()
     ).update()
 
-    private fun lagOpptegnelse(personRef: Long, eksisterendeSekvensnummer: Int) = query(
+    private fun lagOpptegnelse(personRef: Long, eksisterendeSekvensnummer: Int) = asSQL(
         """
             insert into opptegnelse
             values (:person_id, :sekvensnummer, '{"innhold": "noe oppdateringsrelatert"}', 'en eller annen opptegnelsestype')
         """.trimIndent(), "person_id" to personRef, "sekvensnummer" to eksisterendeSekvensnummer
     ).update()
 
-    private fun finnSekvensnummer(saksbehandlerId: UUID) = query(
+    private fun finnSekvensnummer(saksbehandlerId: UUID) = asSQL(
         """
             select siste_sekvensnummer
             from saksbehandler_opptegnelse_sekvensnummer
@@ -92,7 +93,7 @@ internal class AbonnementDaoTest : DatabaseIntegrationTest() {
         """.trimIndent(), "saksbehandlerId" to saksbehandlerId
     ).single { it.intOrNull("siste_sekvensnummer") }
 
-    private fun finnPersonerSaksbehandlerAbonnererPå(saksbehandlerId: UUID) = query(
+    private fun finnPersonerSaksbehandlerAbonnererPå(saksbehandlerId: UUID) = asSQL(
         """
             select aktor_id
             from abonnement_for_opptegnelse

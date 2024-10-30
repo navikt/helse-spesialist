@@ -1,55 +1,64 @@
 package no.nav.helse.spesialist.api.abonnement
 
-import kotliquery.sessionOf
-import no.nav.helse.HelseDao
+import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.db.MedDataSource
+import no.nav.helse.db.QueryRunner
 import java.util.UUID
 import javax.sql.DataSource
 
-class AbonnementDao(private val dataSource: DataSource) : HelseDao(dataSource) {
+class AbonnementDao(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource) {
     fun opprettAbonnement(
         saksbehandlerId: UUID,
         aktørId: Long,
-    ) = sessionOf(dataSource).use { session ->
-        session.transaction { transactionalSession ->
-            val abonnementQuery =
-                asSQL(
-                    """
-                    delete from abonnement_for_opptegnelse where saksbehandler_id = :saksbehandlerId;
-                    insert into abonnement_for_opptegnelse
-                    select :saksbehandlerId, p.id
-                    from person p
-                    where p.aktor_id = :aktorId
-                    """.trimIndent(),
-                    "saksbehandlerId" to saksbehandlerId,
-                    "aktorId" to aktørId,
-                )
-            transactionalSession.run(abonnementQuery.asUpdate)
-
-            val sekvensnummerQuery =
-                asSQL(
-                    """
-                    insert into saksbehandler_opptegnelse_sekvensnummer
-                    values (:saksbehandlerId, coalesce((select max(sekvensnummer) from opptegnelse), 0))
-                    on conflict (saksbehandler_id) do update
-                        set siste_sekvensnummer = (coalesce((select max(sekvensnummer) from opptegnelse), 0))
-                    """.trimIndent(),
-                    "saksbehandlerId" to saksbehandlerId,
-                    "aktorId" to aktørId,
-                )
-            transactionalSession.run(sekvensnummerQuery.asUpdate)
-        }
+    ) {
+        lagre(saksbehandlerId, aktørId)
+        upsertSekvensnummer(saksbehandlerId, aktørId)
     }
 
     fun registrerSistekvensnummer(
         saksbehandlerIdent: UUID,
         sisteSekvensId: Int,
-    ) = asSQL(
-        """
-        update saksbehandler_opptegnelse_sekvensnummer
-        set siste_sekvensnummer = :sisteSekvensId
-        where saksbehandler_id = :saksbehandlerId;
-        """.trimIndent(),
-        "sisteSekvensId" to sisteSekvensId,
-        "saksbehandlerId" to saksbehandlerIdent,
-    ).update()
+    ): Int =
+        asSQL(
+            """
+            update saksbehandler_opptegnelse_sekvensnummer
+            set siste_sekvensnummer = :sisteSekvensId
+            where saksbehandler_id = :saksbehandlerId;
+            """.trimIndent(),
+            "sisteSekvensId" to sisteSekvensId,
+            "saksbehandlerId" to saksbehandlerIdent,
+        ).update()
+
+    private fun upsertSekvensnummer(
+        saksbehandlerId: UUID,
+        aktørId: Long,
+    ) {
+        asSQL(
+            """
+            insert into saksbehandler_opptegnelse_sekvensnummer
+            values (:saksbehandlerId, coalesce((select max(sekvensnummer) from opptegnelse), 0))
+            on conflict (saksbehandler_id) do update
+                set siste_sekvensnummer = (coalesce((select max(sekvensnummer) from opptegnelse), 0))
+            """.trimIndent(),
+            "saksbehandlerId" to saksbehandlerId,
+            "aktorId" to aktørId,
+        ).update()
+    }
+
+    private fun lagre(
+        saksbehandlerId: UUID,
+        aktørId: Long,
+    ) {
+        asSQL(
+            """
+            delete from abonnement_for_opptegnelse where saksbehandler_id = :saksbehandlerId;
+            insert into abonnement_for_opptegnelse
+            select :saksbehandlerId, p.id
+            from person p
+            where p.aktor_id = :aktorId
+            """.trimIndent(),
+            "saksbehandlerId" to saksbehandlerId,
+            "aktorId" to aktørId,
+        ).update()
+    }
 }
