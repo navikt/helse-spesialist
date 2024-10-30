@@ -27,24 +27,37 @@ import org.testcontainers.containers.PostgreSQLContainer
 import java.util.UUID
 
 fun main() {
-    val mockOAuth2Server = MockOAuth2Server()
-    mockOAuth2Server.start()
-    val clientId = "en-client-id"
-    val issuerId = "LocalTestIssuer"
-    val token =
+    LocalApp.start()
+}
+
+object LocalApp {
+
+    // Simulerer RapidApp, der SpesialistApp (som trenger RapidsConnection) først gis
+    // til RapidApplicationBuildern, og deretter får ut en RapidsConnection, dvs. at RapidsConnection er en
+    // lateinit var
+    @Suppress("JoinDeclarationAndAssignment")
+    private lateinit var testRapid: TestRapid
+
+    private val mockOAuth2Server = MockOAuth2Server()
+    private val clientId = "en-client-id"
+    private val issuerId = "LocalTestIssuer"
+    private val token =
         mockOAuth2Server.issueToken(
             issuerId = issuerId,
             audience = clientId,
             claims =
-                mapOf(
-                    "preferred_username" to "saksbehandler@nav.no",
-                    "oid" to "${UUID.randomUUID()}",
-                    "name" to "En Saksbehandler",
-                    "NAVident" to "X123456",
-                ),
-        ).serialize()
-    println("OAuth2-token: $token")
-    val azureConfig =
+            mapOf(
+                "preferred_username" to "saksbehandler@nav.no",
+                "oid" to "${UUID.randomUUID()}",
+                "name" to "En Saksbehandler",
+                "NAVident" to "X123456",
+            ),
+        ).serialize().also {
+            println("OAuth2-token:")
+            println(it)
+        }
+
+    private val azureConfig =
         AzureConfig(
             clientId = clientId,
             issuerUrl = mockOAuth2Server.issuerUrl(issuerId).toString(),
@@ -52,7 +65,7 @@ fun main() {
             tokenEndpoint = mockOAuth2Server.tokenEndpointUrl(issuerId).toString(),
         )
 
-    val spesialistApp =
+    private val spesialistApp =
         SpesialistApp(
             env = Environment(database.envvars + mapOf("LOKAL_UTVIKLING" to "true")),
             gruppekontroll = gruppekontroll,
@@ -62,10 +75,10 @@ fun main() {
             reservasjonClient = reservasjonClient,
             versjonAvKode = "versjon_1",
         ) {
-            TestRapid()
+            testRapid
         }
 
-    val server =
+    private val server =
         embeddedServer(CIO, port = 4321) {
             spesialistApp.ktorApp(this)
             routing {
@@ -74,8 +87,15 @@ fun main() {
                 }
             }
         }
-    spesialistApp.start()
-    server.start(wait = true)
+
+    init {
+        testRapid = TestRapid()
+    }
+
+    fun start() {
+        spesialistApp.start()
+        server.start(wait = true)
+    }
 }
 
 private val snapshotClient =
