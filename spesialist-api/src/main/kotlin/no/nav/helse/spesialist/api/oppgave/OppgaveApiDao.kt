@@ -1,10 +1,12 @@
 package no.nav.helse.spesialist.api.oppgave
 
-import no.nav.helse.HelseDao
+import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.db.MedDataSource
+import no.nav.helse.db.QueryRunner
 import java.util.UUID
 import javax.sql.DataSource
 
-class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
+class OppgaveApiDao(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource) {
     fun finnOppgaveId(fødselsnummer: String) =
         asSQL(
             """
@@ -14,7 +16,7 @@ class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
             WHERE p.fodselsnummer = :fodselsnummer AND status = 'AvventerSaksbehandler'::oppgavestatus;
             """.trimIndent(),
             "fodselsnummer" to fødselsnummer.toLong(),
-        ).single { it.long("oppgaveId") }
+        ).singleOrNull { it.long("oppgaveId") }
 
     fun finnPeriodeoppgave(vedtaksperiodeId: UUID) =
         asSQL(
@@ -26,20 +28,18 @@ class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
                 AND status = 'AvventerSaksbehandler'::oppgavestatus 
             """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
-        ).single { OppgaveForPeriodevisningDto(id = it.string("id"), kanAvvises = it.boolean("kan_avvises")) }
+        ).singleOrNull { OppgaveForPeriodevisningDto(id = it.string("id"), kanAvvises = it.boolean("kan_avvises")) }
 
     fun finnFødselsnummer(oppgaveId: Long) =
-        requireNotNull(
-            asSQL(
-                """
-                SELECT fodselsnummer from person
-                INNER JOIN vedtak v on person.id = v.person_ref
-                INNER JOIN oppgave o on v.id = o.vedtak_ref
-                WHERE o.id = :oppgaveId
-                """.trimIndent(),
-                "oppgaveId" to oppgaveId,
-            ).single { it.long("fodselsnummer").toFødselsnummer() },
-        )
+        asSQL(
+            """
+            SELECT fodselsnummer from person
+            INNER JOIN vedtak v on person.id = v.person_ref
+            INNER JOIN oppgave o on v.id = o.vedtak_ref
+            WHERE o.id = :oppgaveId
+            """.trimIndent(),
+            "oppgaveId" to oppgaveId,
+        ).single { it.long("fodselsnummer").toFødselsnummer() }
 
     companion object {
         private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
