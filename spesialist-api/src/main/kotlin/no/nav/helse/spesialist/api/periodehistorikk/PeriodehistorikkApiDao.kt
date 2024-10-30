@@ -1,28 +1,23 @@
 package no.nav.helse.spesialist.api.periodehistorikk
 
 import kotliquery.Row
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import no.nav.helse.HelseDao
-import org.intellij.lang.annotations.Language
+import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.db.MedDataSource
+import no.nav.helse.db.QueryRunner
 import java.util.UUID
 import javax.sql.DataSource
 
-class PeriodehistorikkApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
+class PeriodehistorikkApiDao(private val dataSource: DataSource) : QueryRunner by MedDataSource(dataSource) {
     fun finn(utbetalingId: UUID) =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val statement = """
-                SELECT ph.id, ph.type, ph.timestamp, ph.notat_id, ph.json, s.ident 
-                FROM periodehistorikk ph
-                LEFT JOIN saksbehandler s on ph.saksbehandler_oid = s.oid
-                WHERE ph.utbetaling_id = :utbetaling_id OR ph.generasjon_id IN (SELECT unik_id FROM selve_vedtaksperiode_generasjon svg WHERE svg.utbetaling_id = :utbetaling_id)
-        """
-            session.run(
-                queryOf(statement, mapOf("utbetaling_id" to utbetalingId))
-                    .map(::periodehistorikkDto).asList,
-            )
-        }
+        asSQL(
+            """              
+            SELECT ph.id, ph.type, ph.timestamp, ph.notat_id, ph.json, s.ident
+            FROM periodehistorikk ph
+            LEFT JOIN saksbehandler s on ph.saksbehandler_oid = s.oid
+            WHERE ph.utbetaling_id = :utbetaling_id OR ph.generasjon_id IN (SELECT unik_id FROM selve_vedtaksperiode_generasjon svg WHERE svg.utbetaling_id = :utbetaling_id)
+            """.trimIndent(),
+            "utbetaling_id" to utbetalingId,
+        ).list { periodehistorikkDto(it) }
 
     companion object {
         fun periodehistorikkDto(it: Row) =
