@@ -1,11 +1,13 @@
 package no.nav.helse.spesialist.api.person
 
-import no.nav.helse.HelseDao
+import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.db.MedDataSource
+import no.nav.helse.db.QueryRunner
 import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
 import java.time.LocalDateTime
 import javax.sql.DataSource
 
-class PersonApiDao(dataSource: DataSource) : HelseDao(dataSource) {
+class PersonApiDao(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource) {
     fun personKlargjøres(fødselsnummer: String) {
         asSQL(
             "INSERT INTO person_klargjores(fødselsnummer, opprettet) VALUES(:fodselsnummer, :opprettet) ON CONFLICT DO NOTHING",
@@ -18,16 +20,14 @@ class PersonApiDao(dataSource: DataSource) : HelseDao(dataSource) {
         return asSQL(
             "SELECT true FROM person_klargjores WHERE fødselsnummer = :fodselsnummer",
             "fodselsnummer" to fødselsnummer, "opprettet" to LocalDateTime.now(),
-        ).single { it.boolean(1) } ?: false
+        ).singleOrNull { it.boolean(1) } ?: false
     }
 
     fun finnEnhet(fødselsnummer: String) =
-        requireNotNull(
-            asSQL(
-                " SELECT id, navn from enhet WHERE id = (SELECT enhet_ref FROM person where fodselsnummer = :fodselsnummer); ",
-                "fodselsnummer" to fødselsnummer.toLong(),
-            ).single { row -> EnhetDto(row.string("id"), row.string("navn")) },
-        )
+        asSQL(
+            " SELECT id, navn from enhet WHERE id = (SELECT enhet_ref FROM person where fodselsnummer = :fodselsnummer); ",
+            "fodselsnummer" to fødselsnummer.toLong(),
+        ).single { row -> EnhetDto(row.string("id"), row.string("navn")) }
 
     fun finnInfotrygdutbetalinger(fødselsnummer: String) =
         asSQL(
@@ -35,13 +35,13 @@ class PersonApiDao(dataSource: DataSource) : HelseDao(dataSource) {
             WHERE id = (SELECT infotrygdutbetalinger_ref FROM person WHERE fodselsnummer = :fodselsnummer);
         """,
             "fodselsnummer" to fødselsnummer.toLong(),
-        ).single { row -> row.string("data") }
+        ).singleOrNull { row -> row.string("data") }
 
     fun finnesPersonMedFødselsnummer(fødselsnummer: String) =
         asSQL(
             " SELECT 1 FROM person WHERE fodselsnummer = :fodselsnummer; ",
             "fodselsnummer" to fødselsnummer.toLong(),
-        ).single { true } ?: false
+        ).singleOrNull { true } ?: false
 
     fun personHarAdressebeskyttelse(
         fødselsnummer: String,
@@ -55,18 +55,16 @@ class PersonApiDao(dataSource: DataSource) : HelseDao(dataSource) {
     ).list { it }.isNotEmpty()
 
     fun finnAktørId(fødselsnummer: String): String =
-        requireNotNull(
-            asSQL(
-                "SELECT aktor_id FROM person WHERE fodselsnummer = :fodselsnummer",
-                "fodselsnummer" to fødselsnummer.toLong(),
-            ).single { it.string("aktor_id") },
-        )
+        asSQL(
+            "SELECT aktor_id FROM person WHERE fodselsnummer = :fodselsnummer",
+            "fodselsnummer" to fødselsnummer.toLong(),
+        ).single { it.string("aktor_id") }
 
     fun finnFødselsnummer(aktørId: Long): String? =
         asSQL(
             " SELECT fodselsnummer FROM person WHERE aktor_id = :aktor_id; ",
             "aktor_id" to aktørId,
-        ).single { it.string("fodselsnummer").padStart(11, '0') }
+        ).singleOrNull { it.string("fodselsnummer").padStart(11, '0') }
 
     fun finnFødselsnumre(aktørId: Long): List<String> =
         asSQL(
@@ -86,5 +84,5 @@ class PersonApiDao(dataSource: DataSource) : HelseDao(dataSource) {
                 and (pi.id is not null and ea.er_egen_ansatt is not null and e.id is not null)
             """.trimIndent(),
             "fodselsnummer" to fødselsnummer.toLong(),
-        ).single { true } ?: false
+        ).singleOrNull { true } ?: false
 }
