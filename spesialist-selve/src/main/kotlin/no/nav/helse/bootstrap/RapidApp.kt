@@ -52,9 +52,8 @@ internal class RapidApp(env: Map<String, String>) {
             tilgangsgrupper = tilgangsgrupper,
             reservasjonClient = reservasjonClient,
             versjonAvKode = versjonAvKode(env),
-        ) {
-            rapidsConnection
-        }
+            rapidsConnection = rapidsConnection,
+        )
 
     private fun versjonAvKode(env: Map<String, String>): String {
         return env["NAIS_APP_IMAGE"] ?: throw IllegalArgumentException("NAIS_APP_IMAGE env variable is missing")

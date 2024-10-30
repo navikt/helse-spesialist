@@ -61,9 +61,8 @@ fun main() {
             tilgangsgrupper = tilgangsgrupper,
             reservasjonClient = reservasjonClient,
             versjonAvKode = "versjon_1",
-        ) {
-            TestRapid()
-        }
+            rapidsConnection = TestRapid()
+        )
 
     val server =
         embeddedServer(CIO, port = 4321) {
