@@ -1,30 +1,19 @@
 package no.nav.helse.spesialist.api.egenAnsatt
 
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import org.intellij.lang.annotations.Language
+import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.db.MedDataSource
+import no.nav.helse.db.QueryRunner
 import javax.sql.DataSource
 
-class EgenAnsattApiDao(private val dataSource: DataSource) {
-    fun erEgenAnsatt(fødselsnummer: String): Boolean? {
-        @Language("PostgreSQL")
-        val query = """
+class EgenAnsattApiDao(private val dataSource: DataSource) : QueryRunner by MedDataSource(dataSource) {
+    fun erEgenAnsatt(fødselsnummer: String): Boolean? =
+        asSQL(
+            """
             SELECT er_egen_ansatt
                 FROM egen_ansatt ea
                     INNER JOIN person p on p.id = ea.person_ref
                 WHERE p.fodselsnummer = :fodselsnummer
-            """
-        return sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(
-                    query,
-                    mapOf(
-                        "fodselsnummer" to fødselsnummer.toLong(),
-                    ),
-                )
-                    .map { it.boolean("er_egen_ansatt") }
-                    .asSingle,
-            )
-        }
-    }
+            """.trimIndent(),
+            "fodselsnummer" to fødselsnummer.toLong(),
+        ).singleOrNull { it.boolean("er_egen_ansatt") }
 }
