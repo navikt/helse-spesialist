@@ -71,9 +71,11 @@ internal class SpesialistApp(
     private val azureConfig: AzureConfig,
     private val tilgangsgrupper: Tilgangsgrupper,
     private val reservasjonClient: ReservasjonClient,
-    versjonAvKode: String,
-    private val rapidsConnection: RapidsConnection,
+    private val versjonAvKode: String,
+    private val rapidsConnectionProvider: () -> RapidsConnection,
 ) : RapidsConnection.StatusListener {
+    private val rapidsConnection: RapidsConnection by lazy { rapidsConnectionProvider() }
+
     private val tilgangskontrollørForReservasjon = TilgangskontrollørForReservasjon(gruppekontroll, tilgangsgrupper)
 
     private val dataSourceBuilder = DataSourceBuilder(env)
@@ -106,25 +108,14 @@ internal class SpesialistApp(
     private val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(dataSource)
     private val vergemålApiDao = VergemålApiDao(dataSource)
 
-    private val oppgaveService =
-        OppgaveService(
-            oppgaveDao = oppgaveDao,
-            tildelingRepository = tildelingDao,
-            reservasjonRepository = reservasjonDao,
-            opptegnelseRepository = opptegnelseDao,
-            totrinnsvurderingDao = totrinnsvurderingDao,
-            saksbehandlerRepository = saksbehandlerDao,
-            rapidsConnection = rapidsConnection,
-            tilgangskontroll = tilgangskontrollørForReservasjon,
-            tilgangsgrupper = tilgangsgrupper,
-        )
+    private lateinit var meldingMediator: MeldingMediator
+    private lateinit var saksbehandlerMediator: SaksbehandlerMediator
+    private lateinit var oppgaveService: OppgaveService
+    private lateinit var dokumentMediator: DokumentMediator
+    private lateinit var subsumsjonsmelder: Subsumsjonsmelder
 
-    private val totrinnsvurderingService =
-        TotrinnsvurderingService(
-            totrinnsvurderingDao = totrinnsvurderingDao,
-            oppgaveDao = oppgaveDao,
-            periodehistorikkDao = historikkinnslagRepository,
-        )
+    private val behandlingsstatistikkService = BehandlingsstatistikkService(behandlingsstatistikkDao = behandlingsstatistikkDao)
+    private val godkjenningMediator = GodkjenningMediator(opptegnelseDao)
     private val stansAutomatiskBehandlingMediator =
         StansAutomatiskBehandlingMediator(
             stansAutomatiskBehandlingDao,
@@ -132,19 +123,32 @@ internal class SpesialistApp(
             oppgaveDao,
             notatDao,
         ) { subsumsjonsmelder }
-
-    private val saksbehandlerMediator =
-        SaksbehandlerMediator(
-            dataSource = dataSource,
-            versjonAvKode = versjonAvKode,
-            rapidsConnection = rapidsConnection,
-            oppgaveService = oppgaveService,
-            tilgangsgrupper = tilgangsgrupper,
-            stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
-            totrinnsvurderingService = totrinnsvurderingService,
+    private val totrinnsvurderingService =
+        TotrinnsvurderingService(
+            totrinnsvurderingDao = totrinnsvurderingDao,
+            oppgaveDao = oppgaveDao,
+            periodehistorikkDao = historikkinnslagRepository,
         )
 
-    private var dokumentMediator: DokumentMediator = DokumentMediator(dokumentDao, rapidsConnection)
+    private val snapshotService = SnapshotService(snapshotDao = snapshotApiDao, snapshotClient = snapshotClient)
+    private lateinit var godkjenningService: GodkjenningService
+
+    private val avviksvurderinghenter =
+        object : Avviksvurderinghenter {
+            override fun hentAvviksvurdering(vilkårsgrunnlagId: UUID): Avviksvurdering? =
+                avviksvurderingDao.finnAvviksvurdering(vilkårsgrunnlagId)
+        }
+
+    private val plukkTilManuell: PlukkTilManuell<String> = (
+        {
+            it?.let {
+                val divisor = it.toInt()
+                require(divisor > 0) { "Her er et vennlig tips: ikke prøv å dele på 0" }
+                Random.nextInt(divisor) == 0
+            } ?: false
+        }
+    )
+
     private val stikkprøver =
         object : Stikkprøver {
             override fun utsFlereArbeidsgivereFørstegangsbehandling() = plukkTilManuell(env["STIKKPROEVER_UTS_FLERE_AG_FGB_DIVISOR"])
@@ -163,7 +167,6 @@ internal class SpesialistApp(
 
             override fun fullRefusjonEnArbeidsgiver() = plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_EN_AG_DIVISOR"])
         }
-    private val godkjenningMediator = GodkjenningMediator(opptegnelseDao)
 
     private val kommandofabrikk =
         Kommandofabrikk(
@@ -173,43 +176,6 @@ internal class SpesialistApp(
             subsumsjonsmelderProvider = { subsumsjonsmelder },
             stikkprøver = stikkprøver,
         )
-    private val subsumsjonsmelder = Subsumsjonsmelder(versjonAvKode, rapidsConnection)
-    private val behandlingsstatistikkService =
-        BehandlingsstatistikkService(behandlingsstatistikkDao = behandlingsstatistikkDao)
-    private val meldingMediator =
-        MeldingMediator(
-            dataSource = dataSource,
-            rapidsConnection = rapidsConnection,
-            kommandofabrikk = kommandofabrikk,
-            avviksvurderingDao = avviksvurderingDao,
-            poisonPills = PoisonPillDao(dataSource).poisonPills(),
-        )
-
-    private val snapshotService = SnapshotService(snapshotDao = snapshotApiDao, snapshotClient = snapshotClient)
-
-    private val godkjenningService =
-        GodkjenningService(
-            dataSource = dataSource,
-            rapidsConnection = rapidsConnection,
-            oppgaveService = oppgaveService,
-            saksbehandlerRepository = saksbehandlerDao,
-        )
-
-    private val avviksvurderinghenter =
-        object : Avviksvurderinghenter {
-            override fun hentAvviksvurdering(vilkårsgrunnlagId: UUID): Avviksvurdering? =
-                avviksvurderingDao.finnAvviksvurdering(vilkårsgrunnlagId)
-        }
-
-    private val plukkTilManuell: PlukkTilManuell<String> = (
-        {
-            it?.let {
-                val divisor = it.toInt()
-                require(divisor > 0) { "Her er et vennlig tips: ikke prøv å dele på 0" }
-                Random.nextInt(divisor) == 0
-            } ?: false
-        }
-    )
 
     internal fun ktorApp(application: Application) {
         application.apply {
@@ -254,6 +220,45 @@ internal class SpesialistApp(
 
     fun start() {
         rapidsConnection.register(this)
+        oppgaveService =
+            OppgaveService(
+                oppgaveDao = oppgaveDao,
+                tildelingRepository = tildelingDao,
+                reservasjonRepository = reservasjonDao,
+                opptegnelseRepository = opptegnelseDao,
+                totrinnsvurderingDao = totrinnsvurderingDao,
+                saksbehandlerRepository = saksbehandlerDao,
+                rapidsConnection = rapidsConnection,
+                tilgangskontroll = tilgangskontrollørForReservasjon,
+                tilgangsgrupper = tilgangsgrupper,
+            )
+        meldingMediator =
+            MeldingMediator(
+                dataSource = dataSource,
+                rapidsConnection = rapidsConnection,
+                kommandofabrikk = kommandofabrikk,
+                avviksvurderingDao = avviksvurderingDao,
+                poisonPills = PoisonPillDao(dataSource).poisonPills(),
+            )
+        saksbehandlerMediator =
+            SaksbehandlerMediator(
+                dataSource = dataSource,
+                versjonAvKode = versjonAvKode,
+                rapidsConnection = rapidsConnection,
+                oppgaveService = oppgaveService,
+                tilgangsgrupper = tilgangsgrupper,
+                stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
+                totrinnsvurderingService = totrinnsvurderingService,
+            )
+        dokumentMediator = DokumentMediator(dokumentDao, rapidsConnection)
+        godkjenningService =
+            GodkjenningService(
+                dataSource = dataSource,
+                rapidsConnection = rapidsConnection,
+                oppgaveService = oppgaveService,
+                saksbehandlerRepository = saksbehandlerDao,
+            )
+        subsumsjonsmelder = Subsumsjonsmelder(versjonAvKode, rapidsConnection)
 
         rapidsConnection.start().also {
             val beans: List<GarbageCollectorMXBean> = ManagementFactory.getGarbageCollectorMXBeans()
