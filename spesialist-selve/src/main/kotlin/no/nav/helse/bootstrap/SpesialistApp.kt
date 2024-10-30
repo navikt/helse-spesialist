@@ -202,12 +202,12 @@ internal class SpesialistApp(
                 beslutterGruppeId = tilgangsgrupper.beslutterGruppeId,
                 snapshotService = snapshotService,
                 behandlingsstatistikkMediator = behandlingsstatistikkService,
-                saksbehandlerhåndtererProvider = { saksbehandlerMediator },
-                oppgavehåndtererProvider = { oppgaveService },
+                saksbehandlerhåndterer = saksbehandlerMediator,
+                oppgavehåndterer = oppgaveService,
                 totrinnsvurderinghåndterer = totrinnsvurderingService,
-                godkjenninghåndtererProvider = { godkjenningService },
-                personhåndtererProvider = { meldingMediator },
-                dokumenthåndtererProvider = { dokumentMediator },
+                godkjenninghåndterer = godkjenningService,
+                personhåndterer = meldingMediator,
+                dokumenthåndterer = dokumentMediator,
                 stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlingMediator,
             )
 
