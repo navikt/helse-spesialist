@@ -183,30 +183,29 @@ internal class VurderAutomatiskInnvilgelseTest {
     @Test
     fun `Skal holde igjen personer som er berørt av replikeringsfeil - KanAutomatiseres`() {
         every { automatiseringRepository.skalHoldesIgjen(fødselsnummer) } returns true
-        every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
         assertFalse(command.execute(context))
+        assertFalse(command.resume(context))
     }
 
     @Test
     fun `Skal holde igjen personer som er berørt av replikeringsfeil - KanAutomatisereSpesialsak`() {
         every { automatiseringRepository.skalHoldesIgjen(fødselsnummer) } returns true
-        every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatisereSpesialsak
         assertFalse(command.execute(context))
+        assertFalse(command.resume(context))
     }
 
     @Test
     fun `Skal holde igjen personer som er berørt av replikeringsfeil - Stikkprøve`() {
         every { automatiseringRepository.skalHoldesIgjen(fødselsnummer) } returns true
-        every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.Stikkprøve("Årsak")
         assertFalse(command.execute(context))
+        assertFalse(command.resume(context))
     }
 
     @Test
     fun `Skal holde igjen personer som er berørt av replikeringsfeil - KanIkkeAutomatiseres`() {
         every { automatiseringRepository.skalHoldesIgjen(fødselsnummer) } returns true
-        every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanIkkeAutomatiseres(
-            listOf("Problem 1"))
         assertFalse(command.execute(context))
+        assertFalse(command.resume(context))
     }
 
     private val commandContextRepository = object : CommandContextRepository {

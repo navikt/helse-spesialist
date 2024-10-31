@@ -90,6 +90,18 @@ internal class VurderAutomatiskInnvilgelse(
         return true
     }
 
+    override fun resume(context: CommandContext): Boolean {
+        val fødselsnummer = godkjenningsbehov.fødselsnummer
+        if (automatiseringRepository.skalHoldesIgjen(fødselsnummer)) {
+            sikkerlogg.info(
+                "Person med {} skal holdes igjen på grunn av replikeringsfeil",
+                kv("fødselsnummer", fødselsnummer),
+            )
+            return false
+        }
+        return true
+    }
+
     private fun manuellSaksbehandling(problemer: List<String>) {
         automatiseringRepository.manuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId, utbetalingId)
     }
