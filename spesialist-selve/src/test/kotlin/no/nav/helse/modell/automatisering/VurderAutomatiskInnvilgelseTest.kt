@@ -3,10 +3,14 @@ package no.nav.helse.modell.automatisering
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.db.AutomatiseringRepository
+import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.januar
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.person.vedtaksperiode.Varsel
+import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -18,11 +22,12 @@ import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
-import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 internal class VurderAutomatiskInnvilgelseTest {
@@ -37,6 +42,7 @@ internal class VurderAutomatiskInnvilgelseTest {
 
     private val automatisering = mockk<Automatisering>(relaxed = true)
     private val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
+    private val automatiseringRepository = mockk<AutomatiseringRepository>(relaxed = true)
     private val command =
         VurderAutomatiskInnvilgelse(
             automatisering,
@@ -49,62 +55,154 @@ internal class VurderAutomatiskInnvilgelseTest {
                 skjæringstidspunkt = 1.januar,
                 gjeldendeGenerasjoner = listOf(generasjon),
             ),
-            godkjenningsbehov = godkjenningsbehov(id = hendelseId, organisasjonsnummer = orgnummer, periodetype = periodetype, json = """{ "@event_name": "behov" }"""),
+            godkjenningsbehov = godkjenningsbehov(
+                id = hendelseId,
+                organisasjonsnummer = orgnummer,
+                periodetype = periodetype,
+                vedtaksperiodeId = vedtaksperiodeId,
+                utbetalingId = utbetalingId,
+                json = """{ "@event_name": "behov" }"""
+            ),
+            automatiseringRepository = automatiseringRepository,
+            oppgaveService = mockk(relaxed = true),
         )
 
     private lateinit var context: CommandContext
 
-    private val observer =
-        object : CommandContextObserver {
-            val hendelser = mutableListOf<String>()
-
-            override fun behov(
-                behov: String,
-                ekstraKontekst: Map<String, Any>,
-                detaljer: Map<String, Any>,
-            ) {}
-
-            override fun hendelse(hendelse: String) {
-                hendelser.add(hendelse)
-            }
-        }
-
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
-        context.nyObserver(observer)
+        context.nyObserver(this.observatør)
     }
 
     @Test
     fun `kaller automatiser utfør og returnerer true`() {
         assertTrue(command.execute(context))
-        verify {
-            automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any())
+        verify(exactly = 1) {
+            automatisering.utfør(any(), any(), any(), any(), any(), any())
         }
     }
 
     @Test
     fun `publiserer godkjenningsmelding ved automatisert godkjenning`() {
         every {
-            automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), captureLambda())
-        } answers {
-            arg<() -> Unit>(7).invoke()
-        }
+            automatisering.utfør(any(), any(), any(), any(), any(), any())
+        } returns Automatiseringsresultat.KanAutomatiseres
 
         assertTrue(command.execute(context))
 
         val løsning =
-            observer.hendelser
+            this.observatør.hendelser
                 .map(objectMapper::readTree)
                 .filter { it["@event_name"].asText() == "behov" }
                 .firstOrNull { it["@løsning"].hasNonNull("Godkjenning") }
 
-        assertNotNull(løsning)
-        if (løsning != null) {
-            val automatiskBehandling: Boolean =
-                løsning["@løsning"]["Godkjenning"]["automatiskBehandling"].booleanValue()
+        checkNotNull(løsning)
+        val automatiskBehandling: Boolean =
+            løsning["@løsning"]["Godkjenning"]["automatiskBehandling"].booleanValue()
 
-            assertTrue(automatiskBehandling)
+        assertTrue(automatiskBehandling)
+    }
+
+    @Test
+    fun `publiserer godkjenningsmelding ved automatisk godkjent spesialsak`() {
+        every {
+            automatisering.utfør(any(), any(), any(), any(), any(), any())
+        } returns Automatiseringsresultat.KanAutomatisereSpesialsak
+
+        assertTrue(command.execute(context))
+
+        val løsning =
+            this.observatør.hendelser
+                .map(objectMapper::readTree)
+                .filter { it["@event_name"].asText() == "behov" }
+                .firstOrNull { it["@løsning"].hasNonNull("Godkjenning") }
+
+        checkNotNull(løsning)
+        val automatiskBehandling: Boolean =
+            løsning["@løsning"]["Godkjenning"]["automatiskBehandling"].booleanValue()
+
+        assertTrue(automatiskBehandling)
+    }
+
+    @Test
+    fun `automatiserer når resultat er at perioden kan automatiseres`() {
+        every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
+        assertTrue(command.execute(context))
+        verify(exactly = 1) { automatiseringRepository.automatisert(vedtaksperiodeId, hendelseId, utbetalingId) }
+        verify(exactly = 0) { automatiseringRepository.manuellSaksbehandling(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `automatiserer når resultat er at perioden er spesialsak som kan automatiseres`() {
+        every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatisereSpesialsak
+        assertTrue(command.execute(context))
+        verify(exactly = 1) { automatiseringRepository.automatisert(any(), any(), any()) }
+        verify(exactly = 0) { automatiseringRepository.manuellSaksbehandling(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `Godkjenner alle varsler ved automatisering som følge av spesialsak`() {
+        every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatisereSpesialsak
+        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "RV_IT_1", LocalDateTime.now(), vedtaksperiodeId))
+        assertTrue(command.execute(context))
+        assertEquals(VarselStatusDto.GODKJENT, generasjon.toDto().varsler.single().status)
+    }
+
+    @Test
+    fun `automatiserer ikke når resultat er at perioden kan ikke automatiseres`() {
+        val problemer = listOf("Problem 1", "Problem 2")
+        every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanIkkeAutomatiseres(problemer)
+        assertTrue(command.execute(context))
+        verify(exactly = 0) { automatiseringRepository.automatisert(any(), any(), any()) }
+        verify(exactly = 1) { automatiseringRepository.manuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId, utbetalingId) }
+    }
+
+    @Test
+    fun `automatiserer ikke når resultat er at perioden er stikkprøve`() {
+        every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.Stikkprøve("En årsak")
+        assertTrue(command.execute(context))
+        verify(exactly = 0) { automatiseringRepository.automatisert(any(), any(), any()) }
+        verify(exactly = 1) { automatiseringRepository.stikkprøve(vedtaksperiodeId, hendelseId, utbetalingId) }
+    }
+
+    @Test
+    fun `Ferdigstiller kjede når perioden kan behandles automatisk`() {
+        every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
+        context.utfør(commandContextRepository, UUID.randomUUID(), command)
+        assertEquals("FERDIGSTILT", observatør.gjeldendeTilstand)
+    }
+
+    @Test
+    fun `Ferdigstiller kjede når perioden er spesialsak som kan behandles automatisk`() {
+        every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
+        context.utfør(commandContextRepository, UUID.randomUUID(), command)
+        assertEquals("FERDIGSTILT", observatør.gjeldendeTilstand)
+    }
+
+    private val commandContextRepository = object : CommandContextRepository {
+        override fun nyContext(meldingId: UUID): CommandContext = TODO("Not yet implemented")
+        override fun opprett(hendelseId: UUID, contextId: UUID) {}
+        override fun ferdig(hendelseId: UUID, contextId: UUID) {}
+        override fun suspendert(hendelseId: UUID, contextId: UUID, hash: UUID, sti: List<Int>) {}
+        override fun feil(hendelseId: UUID, contextId: UUID) {}
+        override fun tidsbrukForContext(contextId: UUID): Int = TODO("Not yet implemented")
+        override fun avbryt(vedtaksperiodeId: UUID, contextId: UUID): List<Pair<UUID, UUID>> = TODO("Not yet implemented")
+    }
+
+    private val observatør = object : CommandContextObserver {
+        val hendelser = mutableListOf<String>()
+        lateinit var gjeldendeTilstand: String
+            private set
+
+        override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {}
+
+        override fun hendelse(hendelse: String) {
+            hendelser.add(hendelse)
+        }
+
+        override fun tilstandEndret(nyTilstand: String, hendelse: String) {
+            gjeldendeTilstand = nyTilstand
         }
     }
 

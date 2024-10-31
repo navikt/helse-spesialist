@@ -1,7 +1,6 @@
 package no.nav.helse.modell.automatisering
 
 import kotliquery.TransactionalSession
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.db.AutomatiseringRepository
 import no.nav.helse.db.EgenAnsattRepository
@@ -97,71 +96,45 @@ internal class Automatisering(
     internal fun utfør(
         fødselsnummer: String,
         vedtaksperiodeId: UUID,
-        hendelseId: UUID,
         utbetaling: Utbetaling,
         periodetype: Periodetype,
         sykefraværstilfelle: Sykefraværstilfelle,
         organisasjonsnummer: String,
-        onAutomatiserbar: () -> Unit,
-    ) {
+    ): Automatiseringsresultat {
         val problemer =
             vurder(fødselsnummer, vedtaksperiodeId, utbetaling, periodetype, sykefraværstilfelle, organisasjonsnummer)
         val erUTS = utbetaling.harEndringIUtbetalingTilSykmeldt()
         val flereArbeidsgivere = vedtakDao.finnInntektskilde(vedtaksperiodeId) == Inntektskilde.FLERE_ARBEIDSGIVERE
         val erFørstegangsbehandling = periodetype == FØRSTEGANGSBEHANDLING
 
-        val utfallslogger = { tekst: String ->
-            sikkerLogg.info(
-                tekst,
-                keyValue("vedtaksperiodeId", vedtaksperiodeId),
-                keyValue("utbetalingId", utbetaling.utbetalingId),
-                problemer,
-            )
-        }
-
         if (Toggle.AutomatiserSpesialsak.enabled && erSpesialsakSomKanAutomatiseres(sykefraværstilfelle, utbetaling, vedtaksperiodeId)) {
-            utfallslogger("Automatiserer spesialsak med {} ({})")
-            onAutomatiserbar()
-            sykefraværstilfelle.automatiskGodkjennSpesialsakvarsler(vedtaksperiodeId)
-            automatiseringRepository.automatisert(vedtaksperiodeId, hendelseId, utbetaling.utbetalingId)
-            return
+            return Automatiseringsresultat.KanAutomatisereSpesialsak
         }
 
-        if (problemer.isNotEmpty()) {
-            utfallslogger("Automatiserer ikke {} ({}) fordi: {}")
-            automatiseringRepository.manuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId, utbetaling.utbetalingId)
-            return
-        }
+        if (problemer.isNotEmpty()) return Automatiseringsresultat.KanIkkeAutomatiseres(problemer)
 
         overstyringIgangsattKorrigertSøknad(fødselsnummer, vedtaksperiodeId)?.let {
-            val kanKorrigertSøknadAutomatiseres = kanKorrigertSøknadAutomatiseres(vedtaksperiodeId, it)
-            if (!kanKorrigertSøknadAutomatiseres.first) {
-                utfallslogger("Automatiserer ikke {} ({}) fordi: ${kanKorrigertSøknadAutomatiseres.second}")
-                automatiseringRepository.manuellSaksbehandling(
-                    listOf("${kanKorrigertSøknadAutomatiseres.second}"),
-                    vedtaksperiodeId,
-                    hendelseId,
-                    utbetaling.utbetalingId,
-                )
-                return
+            when (val resultat = kanKorrigertSøknadAutomatiseres(vedtaksperiodeId, it)) {
+                is AutomatiserKorrigertSøknadResultat.KanIkkeAutomatiseres -> {
+                    return Automatiseringsresultat.KanIkkeAutomatiseres(listOf(resultat.årsak))
+                }
+                AutomatiserKorrigertSøknadResultat.OK -> {}
             }
         }
 
-        if (egenAnsattRepository.erEgenAnsatt(
-                fødselsnummer,
-            ) != true && personRepository.finnAdressebeskyttelse(fødselsnummer) == Adressebeskyttelse.Ugradert
-        ) {
+        if (!erEgenAnsattEllerSkjermet(fødselsnummer)) {
             avgjørStikkprøve(erUTS, flereArbeidsgivere, erFørstegangsbehandling)?.let {
-                tilStikkprøve(it, utfallslogger, vedtaksperiodeId, hendelseId, utbetaling.utbetalingId)
-                return@utfør
+                return Automatiseringsresultat.Stikkprøve(it)
             }
         } else {
             logger.info("Vurderer ikke om det skal tas stikkprøve.")
         }
-        utfallslogger("Automatiserer {} ({})")
-        onAutomatiserbar()
-        automatiseringRepository.automatisert(vedtaksperiodeId, hendelseId, utbetaling.utbetalingId)
+        return Automatiseringsresultat.KanAutomatiseres
     }
+
+    private fun erEgenAnsattEllerSkjermet(fødselsnummer: String) =
+        egenAnsattRepository.erEgenAnsatt(fødselsnummer) == true ||
+            personRepository.finnAdressebeskyttelse(fødselsnummer) != Adressebeskyttelse.Ugradert
 
     private fun overstyringIgangsattKorrigertSøknad(
         fødselsnummer: String,
@@ -171,12 +144,18 @@ internal class Automatisering(
             meldingRepository.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, vedtaksperiodeId)
         }
 
+    private sealed interface AutomatiserKorrigertSøknadResultat {
+        data object OK : AutomatiserKorrigertSøknadResultat
+
+        data class KanIkkeAutomatiseres(val årsak: String) : AutomatiserKorrigertSøknadResultat
+    }
+
     private fun kanKorrigertSøknadAutomatiseres(
         vedtaksperiodeId: UUID,
         overstyringIgangsattKorrigertSøknad: OverstyringIgangsattKorrigertSøknad,
-    ): Pair<Boolean, String?> {
+    ): AutomatiserKorrigertSøknadResultat {
         val hendelseId = UUID.fromString(overstyringIgangsattKorrigertSøknad.meldingId)
-        if (meldingRepository.erAutomatisertKorrigertSøknadHåndtert(hendelseId)) return Pair(true, null)
+        if (meldingRepository.erAutomatisertKorrigertSøknadHåndtert(hendelseId)) return AutomatiserKorrigertSøknadResultat.OK
 
         val orgnummer = vedtakDao.finnOrgnummer(vedtaksperiodeId)
         val vedtaksperiodeIdKorrigertSøknad =
@@ -198,18 +177,21 @@ internal class Automatisering(
             meldingRepository.opprettAutomatiseringKorrigertSøknad(it, hendelseId)
 
             if (merEnn6MånederSidenVedtakPåFørsteMottattSøknad) {
-                return Pair(
-                    false,
+                return AutomatiserKorrigertSøknadResultat.KanIkkeAutomatiseres(
                     "Mer enn 6 måneder siden vedtak på første mottatt søknad",
                 )
             }
-            if (antallKorrigeringer >= 2) return Pair(false, "Antall automatisk godkjente korrigerte søknader er større eller lik 2")
+            if (antallKorrigeringer >= 2) {
+                return AutomatiserKorrigertSøknadResultat.KanIkkeAutomatiseres(
+                    "Antall automatisk godkjente korrigerte søknader er større eller lik 2",
+                )
+            }
 
-            return Pair(true, null)
+            return AutomatiserKorrigertSøknadResultat.OK
         }
 
         // Hvis vi ikke finner vedtaksperiodeIdKorrigertSøknad, så er det fordi vi vedtaksperioden som er korrigert er AUU som vi ikke trenger å telle
-        return Pair(true, null)
+        return AutomatiserKorrigertSøknadResultat.OK
     }
 
     private fun avgjørStikkprøve(
@@ -239,21 +221,6 @@ internal class Automatisering(
             stikkprøver.fullRefusjonEnArbeidsgiver() -> return "Refusjon, en arbeidsgiver"
         }
         return null
-    }
-
-    private fun tilStikkprøve(
-        årsak: String,
-        utfallslogger: (String) -> Unit,
-        vedtaksperiodeId: UUID,
-        hendelseId: UUID,
-        utbetalingId: UUID,
-    ) {
-        utfallslogger("Automatiserer ikke {} ({}), plukket ut til stikkprøve for $årsak")
-        automatiseringRepository.stikkprøve(vedtaksperiodeId, hendelseId, utbetalingId)
-        logger.info(
-            "Automatisk godkjenning av {} avbrutt, sendes til manuell behandling",
-            keyValue("vedtaksperiodeId", vedtaksperiodeId),
-        )
     }
 
     private fun vurder(

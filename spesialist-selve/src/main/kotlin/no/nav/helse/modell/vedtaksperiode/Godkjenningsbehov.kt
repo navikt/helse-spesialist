@@ -3,6 +3,7 @@ package no.nav.helse.modell.vedtaksperiode
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.TransactionalSession
 import no.nav.helse.db.ArbeidsforholdRepository
+import no.nav.helse.db.AutomatiseringRepository
 import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.EgenAnsattRepository
@@ -225,6 +226,7 @@ internal class GodkjenningsbehovCommand(
     risikovurderingRepository: RisikovurderingRepository,
     påVentRepository: PåVentRepository,
     overstyringRepository: OverstyringRepository,
+    automatiseringRepository: AutomatiseringRepository,
     periodehistorikkDao: PeriodehistorikkDao,
     oppgaveDao: OppgaveDao,
     avviksvurderingRepository: AvviksvurderingRepository,
@@ -328,6 +330,8 @@ internal class GodkjenningsbehovCommand(
                 utbetaling = utbetaling,
                 sykefraværstilfelle = sykefraværstilfelle,
                 godkjenningsbehov = behovData,
+                automatiseringRepository = automatiseringRepository,
+                oppgaveService = oppgaveService,
             ),
             OpprettSaksbehandleroppgave(
                 behovData = behovData,

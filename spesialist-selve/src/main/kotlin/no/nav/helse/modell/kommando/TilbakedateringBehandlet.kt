@@ -2,14 +2,15 @@ package no.nav.helse.modell.kommando
 
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.TransactionalSession
+import no.nav.helse.db.AutomatiseringRepository
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
-import no.nav.helse.modell.automatisering.ForsøkÅAutomatisereEksisterendeOppgave
 import no.nav.helse.modell.automatisering.SettTidligereAutomatiseringInaktivCommand
+import no.nav.helse.modell.automatisering.VurderAutomatiskInnvilgelse
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
@@ -72,6 +73,7 @@ internal class TilbakedateringGodkjentCommand(
     godkjenningMediator: GodkjenningMediator,
     søknadsperioder: List<Periode>,
     godkjenningsbehov: GodkjenningsbehovData,
+    automatiseringRepository: AutomatiseringRepository,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -84,13 +86,14 @@ internal class TilbakedateringGodkjentCommand(
                 hendelseId = godkjenningsbehov.id,
                 automatisering = automatisering,
             ),
-            ForsøkÅAutomatisereEksisterendeOppgave(
+            VurderAutomatiskInnvilgelse(
                 automatisering = automatisering,
                 godkjenningMediator = godkjenningMediator,
                 oppgaveService = oppgaveService,
                 utbetaling = utbetaling,
                 sykefraværstilfelle = sykefraværstilfelle,
                 godkjenningsbehov = godkjenningsbehov,
+                automatiseringRepository = automatiseringRepository,
             ),
         )
 }

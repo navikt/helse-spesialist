@@ -20,6 +20,7 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.automatisering.Automatisering
+import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommand
@@ -121,6 +122,7 @@ internal class Kommandofabrikk(
             oppgaveService = transaksjonellOppgaveService(transactionalSession),
             godkjenningMediator = GodkjenningMediator(OpptegnelseDao(transactionalSession)),
             godkjenningsbehov = godkjenningsbehovData,
+            automatiseringRepository = AutomatiseringDao(transactionalSession),
         )
     }
 
@@ -144,6 +146,7 @@ internal class Kommandofabrikk(
             godkjenningMediator = GodkjenningMediator(OpptegnelseDao(transactionalSession)),
             søknadsperioder = melding.perioder,
             godkjenningsbehov = godkjenningsbehovData,
+            automatiseringRepository = AutomatiseringDao(transactionalSession),
         )
     }
 
@@ -354,7 +357,7 @@ internal class Kommandofabrikk(
             behovData = godkjenningsbehovData,
             utbetaling = utbetaling,
             førsteKjenteDagFinner = førsteKjenteDagFinner,
-            automatisering = Automatisering.Factory.automatisering(session, subsumsjonsmelderProvider, stikkprøver),
+            automatisering = transaksjonellAutomatisering(session),
             vedtakDao = PgVedtakDao(session),
             commandContextRepository = CommandContextDao(session),
             personRepository = PersonDao(session),
@@ -367,6 +370,7 @@ internal class Kommandofabrikk(
             risikovurderingRepository = RisikovurderingDao(session),
             påVentRepository = PåVentDao(session),
             overstyringRepository = OverstyringDao(session),
+            automatiseringRepository = AutomatiseringDao(session),
             periodehistorikkDao = PgPeriodehistorikkDao(session),
             oppgaveDao = PgOppgaveDao(session),
             avviksvurderingRepository = AvviksvurderingDao(session),
