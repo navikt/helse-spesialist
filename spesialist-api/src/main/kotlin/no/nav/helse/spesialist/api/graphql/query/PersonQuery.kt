@@ -18,6 +18,7 @@ import no.nav.helse.spesialist.api.graphql.schema.Person
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 private sealed interface Inputvalidering {
     class Ok(val fødselsnummer: String) : Inputvalidering
@@ -40,6 +41,11 @@ interface PersonoppslagService {
         fødselsnummer: String,
         tilganger: SaksbehandlerTilganger,
     ): FetchPersonResult
+
+    fun personSkalHoldesIgjen(
+        fødselsnummer: String,
+        saksbehandlerOid: UUID,
+    ): Boolean
 
     fun finnesPersonMedFødselsnummer(fødselsnummer: String): Boolean
 
@@ -84,6 +90,12 @@ class PersonQuery(
                 }
             }
         sikkerLogg.info("Personoppslag på fnr=$fødselsnummer")
+
+        // Skal ikke kunne slå opp personer som holdes igjen på grunn av replikeringsfeil
+        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
+        if (personoppslagService.personSkalHoldesIgjen(fødselsnummer, saksbehandler.oid)) {
+            return forbiddenError(fødselsnummer).tilGraphqlResult()
+        }
 
         val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>(TILGANGER)
 

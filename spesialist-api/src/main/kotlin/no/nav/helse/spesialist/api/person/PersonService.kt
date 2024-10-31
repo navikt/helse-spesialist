@@ -34,6 +34,7 @@ import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vergemål.VergemålApiDao
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 private sealed interface HentSnapshotResult {
     class Ok(val snapshot: Pair<Personinfo, GraphQLPerson>) : HentSnapshotResult
@@ -107,6 +108,15 @@ class PersonService(
 
         return person(fødselsnummer, snapshot, tilganger, reservasjon)
     }
+
+    override fun personSkalHoldesIgjen(
+        fødselsnummer: String,
+        saksbehandlerOid: UUID,
+    ): Boolean =
+        personApiDao.skalHoldesIgjen(
+            fødselsnummer,
+            saksbehandlerOid,
+        )
 
     private fun person(
         fødselsnummer: String,

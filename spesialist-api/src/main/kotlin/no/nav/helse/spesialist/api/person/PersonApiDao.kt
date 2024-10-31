@@ -5,9 +5,22 @@ import no.nav.helse.db.MedDataSource
 import no.nav.helse.db.QueryRunner
 import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
 import java.time.LocalDateTime
+import java.util.UUID
 import javax.sql.DataSource
 
 class PersonApiDao(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource) {
+    fun skalHoldesIgjen(
+        fødselsnummer: String,
+        saksbehandlerOid: UUID,
+    ): Boolean {
+        return asSQL(
+            """SELECT true FROM person_som_skal_holdes_igjen WHERE fodselsnummer = :fodselsnummer AND NOT (:oid = ANY(oider_som_kan_sla_opp))""",
+            "fodselsnummer" to fødselsnummer, "oid" to saksbehandlerOid,
+        ).singleOrNull {
+            it.boolean(1)
+        } ?: false
+    }
+
     fun personKlargjøres(fødselsnummer: String) {
         asSQL(
             "INSERT INTO person_klargjores(fødselsnummer, opprettet) VALUES(:fodselsnummer, :opprettet) ON CONFLICT DO NOTHING",
