@@ -84,7 +84,7 @@ internal class MeldingDao(queryRunner: QueryRunner) : MeldingRepository, QueryRu
             "vedtaksperiodeId" to vedtaksperiodeId,
         ).single { it.int("antall") }
 
-    override fun erAutomatisertKorrigertSøknadHåndtert(meldingId: UUID): Boolean =
+    override fun erKorrigertSøknadAutomatiskBehandlet(meldingId: UUID): Boolean =
         asSQL(
             """
             SELECT count(1) AS antall

@@ -47,7 +47,7 @@ internal class MeldingDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `finn ut om automatisering av korrigert søknad allerede er håndtert`() {
         meldingDao.opprettAutomatiseringKorrigertSøknad(VEDTAKSPERIODE, HENDELSE_ID)
-        val håndtert = meldingDao.erAutomatisertKorrigertSøknadHåndtert(HENDELSE_ID)
+        val håndtert = meldingDao.erKorrigertSøknadAutomatiskBehandlet(HENDELSE_ID)
         assertTrue(håndtert)
     }
 

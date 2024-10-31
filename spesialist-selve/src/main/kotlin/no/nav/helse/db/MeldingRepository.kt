@@ -17,7 +17,7 @@ internal interface MeldingRepository {
         vedtaksperiodeId: UUID,
     ): OverstyringIgangsattKorrigertSøknad?
 
-    fun erAutomatisertKorrigertSøknadHåndtert(meldingId: UUID): Boolean
+    fun erKorrigertSøknadAutomatiskBehandlet(meldingId: UUID): Boolean
 
     fun finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId: UUID): Int
 

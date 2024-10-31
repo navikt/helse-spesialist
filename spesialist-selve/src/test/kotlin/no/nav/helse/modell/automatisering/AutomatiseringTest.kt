@@ -45,7 +45,7 @@ internal class AutomatiseringTest {
     private val vedtaksperiodeId = UUID.randomUUID()
     private val utbetalingId = UUID.randomUUID()
     private val hendelseId = UUID.randomUUID()
-    private val periodetype = Periodetype.FORLENGELSE
+    private val periodetype = FORLENGELSE
     private val periodeFom = LocalDate.now()
 
     private val vedtakDaoMock = mockk<PgVedtakDao>()
@@ -127,7 +127,7 @@ internal class AutomatiseringTest {
             )
         every { vedtakDaoMock.finnOrgnummer(vedtaksperiodeId) } returns orgnummer
         every { meldingDaoMock.finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId) } returns 1
-        every { meldingDaoMock.erAutomatisertKorrigertSøknadHåndtert(hendelseId) } returns false
+        every { meldingDaoMock.erKorrigertSøknadAutomatiskBehandlet(hendelseId) } returns false
         every {
             generasjonDaoMock.førsteGenerasjonVedtakFattetTidspunkt(
                 vedtaksperiodeId,
@@ -197,7 +197,7 @@ internal class AutomatiseringTest {
 
     @Test
     fun `Automatisering av korrigert søknad er allerede håndtert for tidligere sykefraværstilfelle`() {
-        every { meldingDaoMock.erAutomatisertKorrigertSøknadHåndtert(hendelseId) } returns true
+        every { meldingDaoMock.erKorrigertSøknadAutomatiskBehandlet(hendelseId) } returns true
         blirAutomatiskBehandlet()
     }
 
@@ -339,7 +339,7 @@ internal class AutomatiseringTest {
     }
 
     private fun forsøkAutomatisering(
-        periodetype: Periodetype = Periodetype.FORLENGELSE,
+        periodetype: Periodetype = FORLENGELSE,
         generasjoner: List<Generasjon> = listOf(Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)),
         utbetaling: Utbetaling = enUtbetaling(),
     ) = automatisering.utfør(
