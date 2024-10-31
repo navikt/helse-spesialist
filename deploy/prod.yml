@@ -21,7 +21,13 @@ spec:
       cpu: 100m
       memory: 512Mi
   replicas:
-    disableAutoScaling: true
+    min: 12
+    max: 24
+    scalingStrategy:
+      kafka:
+        topic: tbd.rapid.v1
+        consumerGroup: tbd-spesialist-v1
+        threshold: 200
   observability:
     autoInstrumentation:
       enabled: true
