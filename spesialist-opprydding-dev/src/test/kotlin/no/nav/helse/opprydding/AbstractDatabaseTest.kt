@@ -130,6 +130,7 @@ internal abstract class AbstractDatabaseTest {
                 "sammenligningsgrunnlag_spinnvillgate",
                 "melding_duplikatkontroll",
                 "poison_pill",
+                "dialog",
             ),
         )
         tabeller.forEach { tabellnavn ->
