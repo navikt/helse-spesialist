@@ -6,15 +6,15 @@ import no.nav.helse.rapids_rivers.MessageContext
 import org.slf4j.LoggerFactory
 
 internal interface CommandContextObserver : UtgåendeMeldingerObserver {
-    fun tilstandEndret(hendelse: KommandokjedeEndretEvent) {}
+    fun tilstandEndret(event: KommandokjedeEndretEvent) {}
 }
 
 internal class CommandContextTilstandMediator : CommandContextObserver {
     private val utgåendeTilstandEndringer = mutableListOf<Pair<String, String>>()
 
-    override fun tilstandEndret(hendelse: KommandokjedeEndretEvent) {
-        val message = JsonMessage.newMessage(hendelse.eventName, hendelse.detaljer()).toJson()
-        utgåendeTilstandEndringer.add(hendelse::class.simpleName!! to message)
+    override fun tilstandEndret(event: KommandokjedeEndretEvent) {
+        val message = JsonMessage.newMessage(event.eventName, event.detaljer()).toJson()
+        utgåendeTilstandEndringer.add(event::class.simpleName!! to message)
     }
 
     internal fun publiserTilstandsendringer(

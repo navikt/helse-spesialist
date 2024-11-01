@@ -202,8 +202,8 @@ internal class VurderAutomatiskInnvilgelseTest {
             hendelser.add(hendelse)
         }
 
-        override fun tilstandEndret(hendelse: KommandokjedeEndretEvent) {
-            gjeldendeTilstand = hendelse::class.simpleName!!
+        override fun tilstandEndret(event: KommandokjedeEndretEvent) {
+            gjeldendeTilstand = event::class.simpleName!!
         }
     }
 
