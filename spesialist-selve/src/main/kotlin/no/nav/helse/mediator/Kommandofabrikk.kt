@@ -458,9 +458,6 @@ internal class Kommandofabrikk(
                 } else {
                     logg.info("${command.name} er suspendert")
                 }
-            } catch (err: Exception) {
-                command.undo(commandContext)
-                throw err
             } finally {
                 commandContextObservers.forEach { commandContext.avregistrerObserver(it) }
             }

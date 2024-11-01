@@ -233,7 +233,6 @@ internal class CommandContextTest {
     ) : Command {
         var executed = false
         var resumed = false
-        var undo = false
 
         val id: UUID = HENDELSE
 
@@ -247,8 +246,5 @@ internal class CommandContextTest {
             return resumeAction(this)
         }
 
-        override fun undo(context: CommandContext) {
-            undo = true
-        }
     }
 }

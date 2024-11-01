@@ -12,8 +12,4 @@ internal class OpprettKoblingTilUtbetalingCommand(
         utbetalingRepository.opprettKobling(vedtaksperiodeId, utbetalingId)
         return true
     }
-
-    override fun undo(context: CommandContext) {
-        utbetalingRepository.fjernKobling(vedtaksperiodeId, utbetalingId)
-    }
 }

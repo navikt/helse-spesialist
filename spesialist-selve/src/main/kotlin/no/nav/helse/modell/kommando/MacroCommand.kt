@@ -31,13 +31,6 @@ internal abstract class MacroCommand : Command {
         return run(context, commands.subList(currentIndex, commands.size))
     }
 
-    final override fun undo(context: CommandContext) {
-        logg.info("Reverserer utførelse av ${this::class.simpleName}")
-        context.register(this)
-        historikk.forEach { it.undo(context) }
-        context.clear()
-    }
-
     final override fun hash(): String {
         return name + commands.joinToString { it.hash() }
     }

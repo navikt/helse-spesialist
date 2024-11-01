@@ -1,19 +1,18 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import java.util.*
-import org.junit.jupiter.api.Assertions.assertEquals
+import java.util.UUID
 
 internal class MacroCommandTest {
     private val constants: MutableList<String> = mutableListOf()
     private var executeCount: Int = 0
     private var resumeCount: Int = 0
-    private var undoCount: Int = 0
 
     private lateinit var context: CommandContext
 
@@ -22,7 +21,6 @@ internal class MacroCommandTest {
         constants.clear()
         executeCount = 0
         resumeCount = 0
-        undoCount = 0
         context = CommandContext(UUID.randomUUID())
     }
 
@@ -117,91 +115,6 @@ internal class MacroCommandTest {
     }
 
     @Test
-    fun `Undo gjør ingenting dersom ingen kommandoer er kjørt`() {
-        val macroCommand =
-            command(
-                execute = { constants.add("B før"); true },
-                undo = { constants.add("B etter") }
-            ) +
-            command(
-                execute = { constants.add("C før"); true },
-                undo = { constants.add("C etter") }
-            )
-        macroCommand.undo(context)
-        assertRekkefølge()
-        assertTellere(0, 0, 0)
-    }
-
-    @Test
-    fun `Undo reverserer alle kommandoer`() {
-        val macroCommand =
-            command(
-                execute = { constants.add("B før"); true },
-                undo = { constants.add("B etter") }
-            ) +
-            command(
-                execute = { constants.add("C før"); true },
-                undo = { constants.add("C etter") }
-            )
-        macroCommand.execute(context)
-        macroCommand.undo(context)
-        assertRekkefølge("B før", "C før", "C etter", "B etter")
-        assertTellere(2, 0, 2)
-    }
-
-    @Test
-    fun `Undo reverserer alle kjørte kommandoer når en kommando suspender`() {
-        val macroCommand =
-            command(
-                execute = { constants.add("B før"); false },
-                undo = { constants.add("B etter") }
-            ) +
-            command(
-                execute = { constants.add("C før"); true },
-                undo = { constants.add("C etter") }
-            )
-        macroCommand.execute(context)
-        macroCommand.undo(context)
-        assertRekkefølge("B før", "B etter")
-        assertTellere(1, 0, 1)
-    }
-
-    @Test
-    fun `Undo reverserer riktig etter restore`() {
-        val macroCommand =
-            command(
-                execute = { constants.add("B før"); false },
-                undo = { constants.add("B etter") }
-            ) +
-            command(
-                execute = { constants.add("C før"); true },
-                undo = { constants.add("C etter") }
-            )
-        macroCommand.undo(CommandContext(UUID.randomUUID(), listOf(1)))
-        assertRekkefølge("C etter", "B etter")
-        assertTellere(0, 0, 2)
-    }
-
-    @Test
-    fun `Undo reverserer riktig etter resume`() {
-        val macroCommand =
-            command(
-                execute = { constants.add("B før"); true },
-                undo = { constants.add("B undo") }
-            ) +
-            command(
-                execute = { constants.add("C før"); false },
-                resume = { constants.add("C etter"); true },
-                undo = { constants.add("C undo") }
-            )
-        context = CommandContext(UUID.randomUUID(), listOf(1))
-        macroCommand.resume(context)
-        macroCommand.undo(context)
-        assertRekkefølge("C etter", "C undo", "B undo")
-        assertTellere(0, 1, 2)
-    }
-
-    @Test
     fun `Utfører ikke commands etter at context er ferdigstilt i execute`() {
         val macroCommand =
             command(
@@ -230,19 +143,13 @@ internal class MacroCommandTest {
         assertEquals(konstanter.toList(), constants)
     }
 
-    private fun assertTellere(expectedExecuteCount: Int, expectedResumeCount: Int, expectedUndoCount: Int) {
-        assertEquals(expectedExecuteCount, executeCount)
-        assertEquals(expectedResumeCount, resumeCount)
-        assertEquals(expectedUndoCount, undoCount)
-    }
-
     private operator fun Command.plus(other: Command): MacroCommand {
         return object : MacroCommand() {
             override val commands: List<Command> = listOf(this@plus, other)
         }
     }
 
-    private fun command(execute: Command.(context: CommandContext) -> Boolean, resume: Command.(context: CommandContext) -> Boolean = { true }, undo: () -> Unit = {}): Command {
+    private fun command(execute: Command.(context: CommandContext) -> Boolean, resume: Command.(context: CommandContext) -> Boolean = { true }): Command {
         return object : Command {
             override fun execute(context: CommandContext): Boolean {
                 executeCount += 1
@@ -254,10 +161,6 @@ internal class MacroCommandTest {
                 return resume(this, context)
             }
 
-            override fun undo(context: CommandContext) {
-                undoCount += 1
-                return undo()
-            }
         }
     }
 }
