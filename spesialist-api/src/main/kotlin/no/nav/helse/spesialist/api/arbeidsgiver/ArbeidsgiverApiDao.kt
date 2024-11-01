@@ -20,7 +20,7 @@ class ArbeidsgiverApiDao(dataSource: DataSource) : QueryRunner by MedDataSource(
             WHERE a.orgnummer=:orgnummer;
             """.trimIndent(),
             "orgnummer" to orgnummer.toLong(),
-        ).single { row ->
+        ).singleOrNull { row ->
             row.stringOrNull("bransjer")
                 ?.let { objectMapper.readValue<List<String>>(it) }
                 ?.filter { it.isNotBlank() }
@@ -34,7 +34,7 @@ class ArbeidsgiverApiDao(dataSource: DataSource) : QueryRunner by MedDataSource(
             WHERE a.orgnummer=:orgnummer;
             """.trimIndent(),
             "orgnummer" to orgnummer.toLong(),
-        ).single { row -> row.string("navn") }
+        ).singleOrNull { row -> row.string("navn") }
 
     fun finnArbeidsforhold(
         fødselsnummer: String,
