@@ -49,6 +49,4 @@ internal interface AutomatiseringRepository {
     ): List<String>
 
     fun finnVedtaksperiode(vedtaksperiodeId: UUID): Long?
-
-    fun skalHoldesIgjen(fødselsnummer: String): Boolean
 }

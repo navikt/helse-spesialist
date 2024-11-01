@@ -1,0 +1,1 @@
+Drop table person_som_skal_holdes_igjen;

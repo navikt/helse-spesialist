@@ -23,7 +23,6 @@ import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -32,12 +31,14 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class VurderAutomatiskInnvilgelseTest {
-    private val vedtaksperiodeId = UUID.randomUUID()
-    private val utbetalingId = UUID.randomUUID()
-    private val fødselsnummer = lagFødselsnummer()
-    private val orgnummer = lagOrganisasjonsnummer()
-    private val hendelseId = UUID.randomUUID()
-    private val periodetype = Periodetype.FORLENGELSE
+    private companion object {
+        private val vedtaksperiodeId = UUID.randomUUID()
+        private val utbetalingId = UUID.randomUUID()
+        private const val fødselsnummer = "12345678910"
+        private const val orgnummer = "123456789"
+        private val hendelseId = UUID.randomUUID()
+        private val periodetype = Periodetype.FORLENGELSE
+    }
 
     private val automatisering = mockk<Automatisering>(relaxed = true)
     private val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
@@ -55,7 +56,6 @@ internal class VurderAutomatiskInnvilgelseTest {
                 gjeldendeGenerasjoner = listOf(generasjon),
             ),
             godkjenningsbehov = godkjenningsbehov(
-                fødselsnummer = fødselsnummer,
                 id = hendelseId,
                 organisasjonsnummer = orgnummer,
                 periodetype = periodetype,
@@ -178,34 +178,6 @@ internal class VurderAutomatiskInnvilgelseTest {
         every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
         context.utfør(commandContextRepository, UUID.randomUUID(), command)
         assertEquals("FERDIGSTILT", observatør.gjeldendeTilstand)
-    }
-
-    @Test
-    fun `Skal holde igjen personer som er berørt av replikeringsfeil - KanAutomatiseres`() {
-        every { automatiseringRepository.skalHoldesIgjen(fødselsnummer) } returns true
-        assertFalse(command.execute(context))
-        assertFalse(command.resume(context))
-    }
-
-    @Test
-    fun `Skal holde igjen personer som er berørt av replikeringsfeil - KanAutomatisereSpesialsak`() {
-        every { automatiseringRepository.skalHoldesIgjen(fødselsnummer) } returns true
-        assertFalse(command.execute(context))
-        assertFalse(command.resume(context))
-    }
-
-    @Test
-    fun `Skal holde igjen personer som er berørt av replikeringsfeil - Stikkprøve`() {
-        every { automatiseringRepository.skalHoldesIgjen(fødselsnummer) } returns true
-        assertFalse(command.execute(context))
-        assertFalse(command.resume(context))
-    }
-
-    @Test
-    fun `Skal holde igjen personer som er berørt av replikeringsfeil - KanIkkeAutomatiseres`() {
-        every { automatiseringRepository.skalHoldesIgjen(fødselsnummer) } returns true
-        assertFalse(command.execute(context))
-        assertFalse(command.resume(context))
     }
 
     private val commandContextRepository = object : CommandContextRepository {

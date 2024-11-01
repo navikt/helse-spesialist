@@ -3,12 +3,13 @@ package no.nav.helse.modell.automatisering
 import kotliquery.Row
 import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.HelseDao.Companion.list
+import no.nav.helse.HelseDao.Companion.single
+import no.nav.helse.HelseDao.Companion.update
 import no.nav.helse.db.AutomatiseringRepository
-import no.nav.helse.db.MedSession
-import no.nav.helse.db.QueryRunner
 import java.util.UUID
 
-internal class AutomatiseringDao(val session: Session) : AutomatiseringRepository, QueryRunner by MedSession(session) {
+internal class AutomatiseringDao(val session: Session) : AutomatiseringRepository {
     override fun settAutomatiseringInaktiv(
         vedtaksperiodeId: UUID,
         hendelseId: UUID,
@@ -24,7 +25,7 @@ internal class AutomatiseringDao(val session: Session) : AutomatiseringRepositor
             """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
             "hendelseRef" to hendelseId,
-        ).update()
+        ).update(session)
     }
 
     override fun settAutomatiseringProblemInaktiv(
@@ -42,7 +43,7 @@ internal class AutomatiseringDao(val session: Session) : AutomatiseringRepositor
             """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
             "hendelseRef" to hendelseId,
-        ).update()
+        ).update(session)
     }
 
     override fun plukketUtTilStikkprøve(
@@ -58,7 +59,7 @@ internal class AutomatiseringDao(val session: Session) : AutomatiseringRepositor
         AND (inaktiv_fra IS NULL OR inaktiv_fra > now())
         """.trimIndent(),
         "vedtaksperiodeId" to vedtaksperiodeId, "hendelseId" to hendelseId,
-    ).singleOrNull { it.boolean(1) } ?: false
+    ).single(session) { it.boolean(1) } ?: false
 
     override fun automatisert(
         vedtaksperiodeId: UUID,
@@ -97,7 +98,7 @@ internal class AutomatiseringDao(val session: Session) : AutomatiseringRepositor
             """.trimIndent(),
             "vedtaksperiodeRef" to vedtaksperiodeRef,
             "hendelseId" to hendelseId,
-        ).singleOrNull { tilAutomatiseringDto(problemer, it) }
+        ).single(session) { tilAutomatiseringDto(problemer, it) }
     }
 
     private fun lagre(
@@ -124,7 +125,7 @@ internal class AutomatiseringDao(val session: Session) : AutomatiseringRepositor
             "automatisert" to automatisert,
             "stikkproeve" to stikkprøve,
             "utbetalingId" to utbetalingId,
-        ).update()
+        ).update(session)
 
         problems.forEach { problem ->
             asSQL(
@@ -135,7 +136,7 @@ internal class AutomatiseringDao(val session: Session) : AutomatiseringRepositor
                 "vedtaksperiodeId" to vedtaksperiodeId,
                 "hendelseId" to hendelseId,
                 "problem" to problem,
-            ).update()
+            ).update(session)
         }
     }
 
@@ -151,22 +152,13 @@ internal class AutomatiseringDao(val session: Session) : AutomatiseringRepositor
         """.trimIndent(),
         "hendelseId" to hendelseId,
         "vedtaksperiodeRef" to vedtaksperiodeRef,
-    ).list { it.string("problem") }
+    ).list(session) { it.string("problem") }
 
     override fun finnVedtaksperiode(vedtaksperiodeId: UUID) =
         asSQL(
             "SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId",
             "vedtaksperiodeId" to vedtaksperiodeId,
-        ).singleOrNull { it.long(1) }
-
-    override fun skalHoldesIgjen(fødselsnummer: String): Boolean {
-        return asSQL(
-            "SELECT true FROM person_som_skal_holdes_igjen WHERE fodselsnummer = :fodselsnummer",
-            "fodselsnummer" to fødselsnummer,
-        ).singleOrNull {
-            it.boolean(1)
-        } ?: false
-    }
+        ).single(session) { it.long(1) }
 
     private fun tilAutomatiseringDto(
         problemer: List<String>,

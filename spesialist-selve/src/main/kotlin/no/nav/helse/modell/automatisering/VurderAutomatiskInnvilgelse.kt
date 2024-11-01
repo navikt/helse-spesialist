@@ -1,7 +1,6 @@
 package no.nav.helse.modell.automatisering
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.db.AutomatiseringRepository
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -42,17 +41,9 @@ internal class VurderAutomatiskInnvilgelse(
     )
 
     override fun execute(context: CommandContext): Boolean {
-        val fødselsnummer = godkjenningsbehov.fødselsnummer
-        if (automatiseringRepository.skalHoldesIgjen(fødselsnummer)) {
-            sikkerlogg.info(
-                "Person med {} skal holdes igjen på grunn av replikeringsfeil",
-                kv("fødselsnummer", fødselsnummer),
-            )
-            return false
-        }
         val resultat =
             automatisering.utfør(
-                fødselsnummer = fødselsnummer,
+                fødselsnummer = godkjenningsbehov.fødselsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetaling = utbetaling,
                 periodetype = godkjenningsbehov.periodetype,
@@ -87,18 +78,6 @@ internal class VurderAutomatiskInnvilgelse(
             }
         }
 
-        return true
-    }
-
-    override fun resume(context: CommandContext): Boolean {
-        val fødselsnummer = godkjenningsbehov.fødselsnummer
-        if (automatiseringRepository.skalHoldesIgjen(fødselsnummer)) {
-            sikkerlogg.info(
-                "Person med {} skal holdes igjen på grunn av replikeringsfeil",
-                kv("fødselsnummer", fødselsnummer),
-            )
-            return false
-        }
         return true
     }
 
