@@ -432,8 +432,7 @@ internal class MeldingMediator(
             vedtakFattetMelder.publiserUtgåendeMeldinger()
             utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, messageContext)
         } catch (e: Exception) {
-            logg.error("Feil ved behandling av melding $meldingnavn", e.message, e)
-            throw e
+            throw RuntimeException("Feil ved behandling av melding $meldingnavn", e)
         } finally {
             commandContextTilstandMediator.publiserTilstandsendringer(melding, messageContext)
             logg.info("Melding $meldingnavn lest")
