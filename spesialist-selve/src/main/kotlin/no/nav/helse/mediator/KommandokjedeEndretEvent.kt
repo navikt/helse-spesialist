@@ -30,13 +30,14 @@ sealed class KommandokjedeEndretEvent {
 
     class Suspendert(
         private val kommandonavn: String,
+        private val sti: List<Int>,
         override val commandContextId: UUID,
         override val hendelseId: UUID,
     ) : KommandokjedeEndretEvent() {
         override val eventName: String = "kommandokjede_suspendert"
 
         override fun ekstraDetaljer(): Map<String, Any> {
-            return mapOf("command" to kommandonavn)
+            return mapOf("command" to kommandonavn, "sti" to sti)
         }
     }
 

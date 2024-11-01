@@ -109,7 +109,7 @@ internal class CommandContext(
                 }
             } else {
                 commandContextDao.suspendert(hendelseId, id, newHash, sti).also {
-                    kommandokjedetilstandEndret(KommandokjedeEndretEvent.Suspendert(command.name, id, hendelseId))
+                    kommandokjedetilstandEndret(KommandokjedeEndretEvent.Suspendert(command.name, sti, id, hendelseId))
                 }
             }
         }
