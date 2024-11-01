@@ -114,7 +114,7 @@ internal class CommandContext(
         commandContextDao: CommandContextRepository,
         hendelseId: UUID,
         command: Command,
-    ) = try {
+    ): Boolean {
         val newHash = command.hash().convertToUUID()
         if (hash != null && newHash != hash) {
             logger.info(
@@ -122,7 +122,7 @@ internal class CommandContext(
             )
             sti.clear()
         }
-        utfør(command).also {
+        return utfør(command).also {
             if (ferdigstilt || it) {
                 commandContextDao.ferdig(hendelseId, id).also {
                     publiserTilstandsendring(
@@ -156,27 +156,6 @@ internal class CommandContext(
                 }
             }
         }
-    } catch (rootErr: Exception) {
-        try {
-            commandContextDao.feil(hendelseId, id).also {
-                publiserTilstandsendring(
-                    "FEILET",
-                    JsonMessage
-                        .newMessage(
-                            "kommandokjede_feilet",
-                            mutableMapOf(
-                                "commandContextId" to id,
-                                "meldingId" to hendelseId,
-                                "command" to command.name,
-                                "sti" to sti,
-                            ),
-                        ).toJson(),
-                )
-            }
-        } catch (nestedErr: Exception) {
-            throw RuntimeException("Feil ved lagring av FEIL-tilstand: $nestedErr", rootErr)
-        }
-        throw rootErr
     }
 
     private fun utfør(command: Command) =

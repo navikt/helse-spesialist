@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.util.UUID
 
 internal class CommandContextTest {
@@ -104,26 +103,6 @@ internal class CommandContextTest {
     }
 
     @Test
-    fun `feil ved execute`() {
-        TestCommand(executeAction = { throw Exception() }).apply {
-            assertThrows<Exception> { context.utfør(commandContextRepository, this.id, this) }
-            verify(exactly = 0) { commandContextRepository.ferdig(any(), any()) }
-            verify(exactly = 1) { commandContextRepository.feil(this@apply.id, CONTEXT) }
-        }
-    }
-
-    @Test
-    fun `feil ved resume`() {
-        val sti = listOf(1)
-        context = CommandContext(CONTEXT, sti)
-        TestCommand(resumeAction = { throw Exception() }).apply {
-            assertThrows<Exception> { context.utfør(commandContextRepository, this.id, this) }
-            verify(exactly = 0) { commandContextRepository.ferdig(any(), any()) }
-            verify(exactly = 1) { commandContextRepository.feil(this@apply.id, CONTEXT) }
-        }
-    }
-
-    @Test
     fun ferdigstiller() {
         TestCommand(executeAction = { this.ferdigstill(context) }).apply {
             context.utfør(commandContextRepository, this.id, this)
@@ -165,17 +144,6 @@ internal class CommandContextTest {
         val result = observer.utgåendeTilstandEndringer
         assertTrue(result.isNotEmpty())
         assertTrue(result.last().contains("kommandokjede_avbrutt"))
-    }
-
-    @Test
-    fun `lager kommandokjede_feilet hendelse når kommandokjeden feiler`() {
-        every { commandContextRepository.avbryt(any(), any()) } returns listOf(Pair(context.id(), HENDELSE))
-        TestCommand(executeAction = { throw Exception() }).apply {
-            assertThrows<Exception> { context.utfør(commandContextRepository, this.id, this) }
-        }
-        val result = observer.utgåendeTilstandEndringer
-        assertTrue(result.isNotEmpty())
-        assertTrue(result.last().contains("kommandokjede_feilet"))
     }
 
     @Test
