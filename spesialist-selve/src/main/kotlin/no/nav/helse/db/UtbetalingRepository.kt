@@ -45,11 +45,6 @@ interface UtbetalingRepository {
         utbetalingId: UUID,
     )
 
-    fun fjernKobling(
-        vedtaksperiodeId: UUID,
-        utbetalingId: UUID,
-    )
-
     fun utbetalingerForVedtaksperiode(vedtaksperiodeId: UUID): List<TidligereUtbetalingerForVedtaksperiodeDto>
 
     fun erUtbetalingForkastet(utbetalingId: UUID): Boolean

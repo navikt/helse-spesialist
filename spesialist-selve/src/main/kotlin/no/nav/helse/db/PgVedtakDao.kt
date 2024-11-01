@@ -132,18 +132,6 @@ class PgVedtakDao(queryRunner: QueryRunner) : VedtakDao, QueryRunner by queryRun
         ).update()
     }
 
-    override fun fjernKobling(
-        vedtaksperiodeId: UUID,
-        hendelseId: UUID,
-    ) {
-        asSQL(
-            "DELETE FROM vedtaksperiode_hendelse WHERE hendelse_ref = :hendelseId AND vedtaksperiode_id = :vedtaksperiodeId",
-            "vedtaksperiodeId" to vedtaksperiodeId,
-            "hendelseId" to hendelseId,
-        )
-            .update()
-    }
-
     override fun finnOrgnummer(vedtaksperiodeId: UUID): String? {
         return asSQL(
             """

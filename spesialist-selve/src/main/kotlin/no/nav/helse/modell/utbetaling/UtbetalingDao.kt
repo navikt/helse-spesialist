@@ -126,18 +126,6 @@ class UtbetalingDao(session: Session) : UtbetalingRepository, QueryRunner by Med
         ).update()
     }
 
-    override fun fjernKobling(
-        vedtaksperiodeId: UUID,
-        utbetalingId: UUID,
-    ) {
-        asSQL(
-            """DELETE FROM vedtaksperiode_utbetaling_id WHERE utbetaling_id = :utbetaling_id AND vedtaksperiode_id = :vedtaksperiode_id"""
-                .trimIndent(),
-            "utbetaling_id" to utbetalingId,
-            "vedtaksperiode_id" to vedtaksperiodeId,
-        ).update()
-    }
-
     data class TidligereUtbetalingerForVedtaksperiodeDto(
         val utbetalingId: UUID,
         val id: Int,

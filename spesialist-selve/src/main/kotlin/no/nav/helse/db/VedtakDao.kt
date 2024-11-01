@@ -21,11 +21,6 @@ interface VedtakDao {
         hendelseId: UUID,
     )
 
-    fun fjernKobling(
-        vedtaksperiodeId: UUID,
-        hendelseId: UUID,
-    )
-
     fun finnInntektskilde(vedtaksperiodeId: UUID): Inntektskilde?
 
     fun finnOrgnummer(vedtaksperiodeId: UUID): String?

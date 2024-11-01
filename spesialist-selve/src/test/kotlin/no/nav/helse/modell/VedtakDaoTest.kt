@@ -14,7 +14,6 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -129,18 +128,6 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         nyPerson()
         vedtakDao.opprettKobling(VEDTAKSPERIODE, HENDELSE_ID)
         assertEquals(VEDTAKSPERIODE, finnKobling(HENDELSE_ID))
-    }
-
-    @Test
-    fun `fjerner innslag i koblingstabellen`() {
-        godkjenningsbehov(HENDELSE_ID)
-        nyPerson()
-        vedtakDao.opprettKobling(VEDTAKSPERIODE, HENDELSE_ID)
-        assertEquals(VEDTAKSPERIODE, finnKobling(HENDELSE_ID))
-
-        vedtakDao.fjernKobling(VEDTAKSPERIODE, HENDELSE_ID)
-
-        assertNull(finnKobling(HENDELSE_ID))
     }
 
     @Test
