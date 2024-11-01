@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.mediator.CommandContextObserver
+import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.modell.kommando.CommandContext.Companion.convertToUUID
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -29,7 +30,7 @@ internal class CommandContextTest {
         object : CommandContextObserver {
             val behov = mutableMapOf<String, Map<String, Any>>()
             val hendelser = mutableListOf<String>()
-            val utgåendeTilstandEndringer = mutableListOf<String>()
+            val utgåendeTilstandEndringer = mutableListOf<KommandokjedeEndretEvent>()
 
             override fun behov(
                 behov: String,
@@ -43,7 +44,7 @@ internal class CommandContextTest {
                 this.hendelser.add(hendelse)
             }
 
-            override fun tilstandEndret(nyTilstand: String, hendelse: String) {
+            override fun tilstandEndret(hendelse: KommandokjedeEndretEvent) {
                 this.utgåendeTilstandEndringer.add(hendelse)
             }
         }
@@ -117,7 +118,7 @@ internal class CommandContextTest {
         }
         val result = observer.utgåendeTilstandEndringer
         assertTrue(result.isNotEmpty())
-        assertTrue(result.first().contains("kommandokjede_ferdigstilt"))
+        assertTrue(result.first() is KommandokjedeEndretEvent.Ferdig)
     }
 
     @Test
@@ -129,7 +130,7 @@ internal class CommandContextTest {
         }
         val result = observer.utgåendeTilstandEndringer
         assertTrue(result.isNotEmpty())
-        assertTrue(result.first().contains("kommandokjede_suspendert"))
+        assertTrue(result.first() is KommandokjedeEndretEvent.Suspendert)
     }
 
     @Test
@@ -143,7 +144,7 @@ internal class CommandContextTest {
         context.avbrytAlleForPeriode(commandContextRepository, UUID.randomUUID())
         val result = observer.utgåendeTilstandEndringer
         assertTrue(result.isNotEmpty())
-        assertTrue(result.last().contains("kommandokjede_avbrutt"))
+        assertTrue(result.last() is KommandokjedeEndretEvent.Avbrutt)
     }
 
     @Test

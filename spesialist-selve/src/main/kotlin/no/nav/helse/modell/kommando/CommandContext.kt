@@ -3,8 +3,8 @@ package no.nav.helse.modell.kommando
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.mediator.CommandContextObserver
+import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.mediator.UtgåendeMeldingerObserver
-import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -15,7 +15,7 @@ internal class CommandContext(
 ) {
     private val data = mutableListOf<Any>()
     private val sti: MutableList<Int> = sti.toMutableList()
-    private var ferdigstilt = false
+    private var tidligFerdigstilt = false
     private val observers = mutableSetOf<CommandContextObserver>()
 
     internal fun nyObserver(observer: CommandContextObserver) {
@@ -44,11 +44,8 @@ internal class CommandContext(
         observers.forEach { it.hendelse(melding) }
     }
 
-    private fun publiserTilstandsendring(
-        nyTilstand: String,
-        melding: String,
-    ) {
-        observers.forEach { it.tilstandEndret(nyTilstand, melding) }
+    private fun kommandokjedetilstandEndret(kommandokjedeEndretEvent: KommandokjedeEndretEvent) {
+        observers.forEach { it.tilstandEndret(kommandokjedeEndretEvent) }
     }
 
     internal fun add(data: Any) {
@@ -82,30 +79,13 @@ internal class CommandContext(
         vedtaksperiodeId: UUID,
     ) {
         val avbrutteKommandokjeder = commandContextRepository.avbryt(vedtaksperiodeId, id)
-        avbrutteKommandokjeder.forEach {
-            publiserAvbrutt(it.first, it.second)
+        avbrutteKommandokjeder.forEach { (contextId, hendelseId) ->
+            kommandokjedetilstandEndret(KommandokjedeEndretEvent.Avbrutt(contextId, hendelseId))
         }
     }
 
-    private fun publiserAvbrutt(
-        contextId: UUID,
-        meldingId: UUID,
-    ) {
-        publiserTilstandsendring(
-            "AVBRUTT",
-            JsonMessage
-                .newMessage(
-                    "kommandokjede_avbrutt",
-                    mutableMapOf(
-                        "commandContextId" to contextId,
-                        "meldingId" to meldingId,
-                    ),
-                ).toJson(),
-        )
-    }
-
     private fun ferdigstill() {
-        ferdigstilt = true
+        tidligFerdigstilt = true
     }
 
     internal inline fun <reified T> get(): T? = data.filterIsInstance<T>().firstOrNull()
@@ -122,37 +102,14 @@ internal class CommandContext(
             )
             sti.clear()
         }
-        return utfør(command).also {
-            if (ferdigstilt || it) {
+        return utfør(command).also { ferdig ->
+            if (tidligFerdigstilt || ferdig) {
                 commandContextDao.ferdig(hendelseId, id).also {
-                    publiserTilstandsendring(
-                        "FERDIGSTILT",
-                        JsonMessage
-                            .newMessage(
-                                "kommandokjede_ferdigstilt",
-                                mutableMapOf(
-                                    "commandContextId" to id,
-                                    "meldingId" to hendelseId,
-                                    "command" to command.name,
-                                ),
-                            ).toJson(),
-                    )
+                    kommandokjedetilstandEndret(KommandokjedeEndretEvent.Ferdig(command.name, id, hendelseId))
                 }
             } else {
                 commandContextDao.suspendert(hendelseId, id, newHash, sti).also {
-                    publiserTilstandsendring(
-                        "SUSPENDERT",
-                        JsonMessage
-                            .newMessage(
-                                "kommandokjede_suspendert",
-                                mutableMapOf(
-                                    "commandContextId" to id,
-                                    "meldingId" to hendelseId,
-                                    "command" to command.name,
-                                    "sti" to sti,
-                                ),
-                            ).toJson(),
-                    )
+                    kommandokjedetilstandEndret(KommandokjedeEndretEvent.Suspendert(command.name, id, hendelseId))
                 }
             }
         }
@@ -181,7 +138,7 @@ internal class CommandContext(
             commands: List<Command>,
             runner: (command: Command) -> Boolean,
         ) = commands.all {
-            if (context.ferdigstilt) {
+            if (context.tidligFerdigstilt) {
                 true
             } else {
                 runner(it)

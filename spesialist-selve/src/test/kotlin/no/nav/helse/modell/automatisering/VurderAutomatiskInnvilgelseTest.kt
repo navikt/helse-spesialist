@@ -8,6 +8,7 @@ import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.januar
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.GodkjenningMediator
+import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
@@ -170,14 +171,14 @@ internal class VurderAutomatiskInnvilgelseTest {
     fun `Ferdigstiller kjede når perioden kan behandles automatisk`() {
         every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
         context.utfør(commandContextRepository, UUID.randomUUID(), command)
-        assertEquals("FERDIGSTILT", observatør.gjeldendeTilstand)
+        assertEquals("Ferdig", observatør.gjeldendeTilstand)
     }
 
     @Test
     fun `Ferdigstiller kjede når perioden er spesialsak som kan behandles automatisk`() {
         every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
         context.utfør(commandContextRepository, UUID.randomUUID(), command)
-        assertEquals("FERDIGSTILT", observatør.gjeldendeTilstand)
+        assertEquals("Ferdig", observatør.gjeldendeTilstand)
     }
 
     private val commandContextRepository = object : CommandContextRepository {
@@ -201,8 +202,8 @@ internal class VurderAutomatiskInnvilgelseTest {
             hendelser.add(hendelse)
         }
 
-        override fun tilstandEndret(nyTilstand: String, hendelse: String) {
-            gjeldendeTilstand = nyTilstand
+        override fun tilstandEndret(hendelse: KommandokjedeEndretEvent) {
+            gjeldendeTilstand = hendelse::class.simpleName!!
         }
     }
 
