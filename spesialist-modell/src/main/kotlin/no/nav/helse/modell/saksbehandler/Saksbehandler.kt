@@ -29,10 +29,6 @@ class Saksbehandler(
 
     fun epostadresse(): String = epostadresse
 
-    fun accept(visitor: SaksbehandlerVisitor) {
-        visitor.visitSaksbehandler(epostadresse, oid, navn, ident)
-    }
-
     fun harTilgangTil(egenskaper: List<Egenskap>): Boolean = tilgangskontroll.harTilgangTil(oid, egenskaper)
 
     internal fun håndter(hendelse: OverstyrtTidslinje) {

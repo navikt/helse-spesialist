@@ -15,7 +15,6 @@ import no.nav.helse.mediator.overstyring.Overstyringlagrer
 import no.nav.helse.mediator.overstyring.Saksbehandlingsmelder
 import no.nav.helse.mediator.påvent.PåVentRepository
 import no.nav.helse.mediator.saksbehandler.SaksbehandlerLagrer
-import no.nav.helse.mediator.saksbehandler.SaksbehandlerMapper.tilApiversjon
 import no.nav.helse.modell.AlleredeAnnullert
 import no.nav.helse.modell.ManglerTilgang
 import no.nav.helse.modell.Modellfeil
@@ -451,13 +450,9 @@ internal class SaksbehandlerMediator(
             when (this) {
                 is no.nav.helse.modell.OppgaveIkkeTildelt -> OppgaveIkkeTildelt(oppgaveId)
                 is OppgaveTildeltNoenAndre -> {
-                    val (oid, navn, epost) = this.saksbehandler.tilApiversjon()
+                    val (epost, oid, navn) = this.saksbehandler.toDto()
                     no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre(
-                        TildelingApiDto(
-                            navn,
-                            epost,
-                            oid,
-                        ),
+                        TildelingApiDto(navn, epost, oid),
                     )
                 }
 
