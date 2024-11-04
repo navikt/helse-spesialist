@@ -3,6 +3,7 @@ package no.nav.helse.mediator
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
+import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
@@ -38,6 +39,7 @@ internal class GodkjenningService(
             PgTotrinnsvurderingDao(dataSource),
             oppgaveDao,
             periodehistorikkDao,
+            PgDialogDao(dataSource),
         ),
 ) : Godkjenninghåndterer {
     private companion object {
@@ -104,7 +106,7 @@ internal class GodkjenningService(
                 val beslutter = totrinnsvurdering.beslutter?.let { saksbehandlerRepository.finnSaksbehandler(it)?.toDto() }
                 checkNotNull(beslutter) { "Forventer at beslutter er satt" }
                 val innslag = HistorikkinnslagDto.totrinnsvurderingFerdigbehandletInnslag(beslutter)
-                periodehistorikkDao.lagre(innslag, godkjenningDTO.oppgavereferanse)
+                periodehistorikkDao.lagre(innslag, godkjenningDTO.oppgavereferanse, null)
             }
         }
     }

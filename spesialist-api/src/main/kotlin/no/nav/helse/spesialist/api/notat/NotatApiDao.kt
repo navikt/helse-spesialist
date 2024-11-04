@@ -18,9 +18,14 @@ class NotatApiDao(private val dataSource: DataSource) : QueryRunner by MedDataSo
     ): NotatDto? =
         asSQL(
             """ 
-            with inserted AS (
-                INSERT INTO notat (vedtaksperiode_id, tekst, saksbehandler_oid, type)
-                VALUES (:vedtaksperiode_id, :tekst, :saksbehandler_oid, CAST(:type as notattype))
+            with dialog_ref AS (
+                INSERT INTO dialog (opprettet)
+                     VALUES (now())
+                     RETURNING id
+            ),
+            inserted AS (
+                INSERT INTO notat (vedtaksperiode_id, tekst, saksbehandler_oid, type, dialog_ref)
+                VALUES (:vedtaksperiode_id, :tekst, :saksbehandler_oid, CAST(:type as notattype), (select id from dialog_ref))
                 RETURNING *
             )
             SELECT * FROM inserted i INNER JOIN saksbehandler s ON i.saksbehandler_oid = s.oid
@@ -38,8 +43,8 @@ class NotatApiDao(private val dataSource: DataSource) : QueryRunner by MedDataSo
     ): KommentarDto? =
         asSQL(
             """
-            insert into kommentarer (tekst, notat_ref, saksbehandlerident)
-            values (:tekst, :notatId, :saksbehandlerident)
+            insert into kommentarer (tekst, notat_ref, saksbehandlerident, dialog_ref)
+            values (:tekst, :notatId, :saksbehandlerident, (select dialog_ref from notat where id = :notatId))
             returning *
             """.trimIndent(),
             "tekst" to tekst,

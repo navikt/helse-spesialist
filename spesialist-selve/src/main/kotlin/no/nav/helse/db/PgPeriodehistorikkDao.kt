@@ -17,24 +17,27 @@ import javax.sql.DataSource
 
 class PgPeriodehistorikkDao(
     private val queryRunner: QueryRunner,
-) : PeriodehistorikkDao, QueryRunner by queryRunner {
+) : PeriodehistorikkDao,
+    QueryRunner by queryRunner {
     constructor(session: Session) : this(MedSession(session))
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun lagre(
         historikkinnslag: HistorikkinnslagDto,
         oppgaveId: Long,
+        dialogRef: Long?,
     ) {
         val generasjonId = PgOppgaveDao(queryRunner).finnGenerasjonId(oppgaveId)
-        lagre(historikkinnslag, generasjonId)
+        lagre(historikkinnslag, generasjonId, dialogRef)
     }
 
     override fun lagre(
         historikkinnslag: HistorikkinnslagDto,
         generasjonId: UUID,
+        dialogRef: Long?,
     ) {
         when (historikkinnslag) {
-            is FjernetFraPåVent -> lagre(historikkinnslag, generasjonId, null)
+            is FjernetFraPåVent -> lagre(historikkinnslag, generasjonId, null, null)
             is LagtPåVent -> {
                 val notatId =
                     historikkinnslag.notat?.let { notat ->
@@ -44,14 +47,14 @@ class PgPeriodehistorikkDao(
                                 tekst = notat.tekst,
                                 saksbehandlerOid = historikkinnslag.saksbehandler.oid,
                                 notatType = NotatType.PaaVent,
+                                dialogRef = dialogRef,
                             )?.toInt()
                     }
-                lagre(historikkinnslag, generasjonId, notatId)
+                lagre(historikkinnslag, generasjonId, notatId, dialogRef)
             }
-
-            is TotrinnsvurderingFerdigbehandlet -> lagre(historikkinnslag, generasjonId, null)
-            is AvventerTotrinnsvurdering -> lagre(historikkinnslag, generasjonId, null)
-            is TotrinnsvurderingAutomatiskRetur -> lagre(historikkinnslag, generasjonId, null)
+            is TotrinnsvurderingFerdigbehandlet -> lagre(historikkinnslag, generasjonId, null, null)
+            is AvventerTotrinnsvurdering -> lagre(historikkinnslag, generasjonId, null, null)
+            is TotrinnsvurderingAutomatiskRetur -> lagre(historikkinnslag, generasjonId, null, null)
             is TotrinnsvurderingRetur -> {
                 val notatId =
                     PgNotatDao(queryRunner)
@@ -60,29 +63,32 @@ class PgPeriodehistorikkDao(
                             tekst = historikkinnslag.notat.tekst,
                             saksbehandlerOid = historikkinnslag.saksbehandler.oid,
                             notatType = NotatType.Retur,
+                            dialogRef = dialogRef,
                         )?.toInt()
-                lagre(historikkinnslag, generasjonId, notatId)
+                lagre(historikkinnslag, generasjonId, notatId, dialogRef)
             }
 
-            is AutomatiskBehandlingStanset -> lagre(historikkinnslag, generasjonId, null)
-            is VedtaksperiodeReberegnet -> lagre(historikkinnslag, generasjonId, null)
+            is AutomatiskBehandlingStanset -> lagre(historikkinnslag, generasjonId, null, null)
+            is VedtaksperiodeReberegnet -> lagre(historikkinnslag, generasjonId, null, null)
         }
     }
 
-    internal fun lagre(
+    private fun lagre(
         historikkinnslag: HistorikkinnslagDto,
         generasjonId: UUID,
         notatId: Int?,
+        dialogRef: Long?,
     ) {
         asSQL(
             """
-                INSERT INTO periodehistorikk (type, saksbehandler_oid, generasjon_id, utbetaling_id, notat_id, json)
-                VALUES (:type, :saksbehandler_oid, :generasjon_id, null, :notat_id, :json::json)
+                INSERT INTO periodehistorikk (type, saksbehandler_oid, generasjon_id, utbetaling_id, notat_id, dialog_ref, json)
+                VALUES (:type, :saksbehandler_oid, :generasjon_id, null, :notat_id, :dialog_ref, :json::json)
         """,
             "type" to historikkinnslag.type(),
             "saksbehandler_oid" to historikkinnslag.saksbehandler?.oid,
             "generasjon_id" to generasjonId,
             "notat_id" to notatId,
+            "dialog_ref" to dialogRef,
             "json" to historikkinnslag.toJson(),
         ).update()
     }

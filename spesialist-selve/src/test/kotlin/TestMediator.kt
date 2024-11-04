@@ -1,6 +1,7 @@
 import no.nav.helse.SpeilTilgangsgrupper
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.OpptegnelseDao
+import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgNotatDao
 import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgPeriodehistorikkDao
@@ -40,6 +41,7 @@ internal class TestMediator(
     private val tildelingDao = TildelingDao(dataSource)
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
     private val notatDao = PgNotatDao(dataSource)
+    private val dialogDao = PgDialogDao(dataSource)
 
     private val stansAutomatiskBehandlingMediator =
         StansAutomatiskBehandlingMediator(
@@ -47,6 +49,7 @@ internal class TestMediator(
             historikkinnslagRepository,
             oppgaveDao,
             notatDao,
+            dialogDao,
         ) { Subsumsjonsmelder("versjonAvKode", testRapid) }
 
     private val godkjenningMediator = GodkjenningMediator(opptegnelseDao)
@@ -71,11 +74,13 @@ internal class TestMediator(
             oppgaveService,
             tilgangsgrupper,
             stansAutomatiskBehandlingMediator,
-            totrinnsvurderingService = TotrinnsvurderingService(
-                totrinnsvurderingDao = totrinnsvurderingDao,
-                oppgaveDao = oppgaveDao,
-                periodehistorikkDao = historikkinnslagRepository
-            )
+            totrinnsvurderingService =
+                TotrinnsvurderingService(
+                    totrinnsvurderingDao = totrinnsvurderingDao,
+                    oppgaveDao = oppgaveDao,
+                    periodehistorikkDao = historikkinnslagRepository,
+                    dialogDao = dialogDao,
+                ),
         )
     private val stikkprøver =
         object : Stikkprøver {

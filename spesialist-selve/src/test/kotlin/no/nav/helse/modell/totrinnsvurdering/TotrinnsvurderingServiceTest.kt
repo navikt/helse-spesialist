@@ -3,6 +3,7 @@ package no.nav.helse.modell.totrinnsvurdering
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.db.DialogDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.TotrinnsvurderingDao
@@ -15,11 +16,13 @@ class TotrinnsvurderingServiceTest {
 
     val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
+    private val dialogDao = mockk<DialogDao>(relaxed = true)
     private val totrinnsvurderingService =
         TotrinnsvurderingService(
             totrinnsvurderingDao,
             oppgaveDao,
             periodehistorikkDao,
+            dialogDao,
         )
 
     @Test
@@ -38,6 +41,7 @@ class TotrinnsvurderingServiceTest {
             periodehistorikkDao.lagre(
                 historikkinnslag = any<TotrinnsvurderingAutomatiskRetur>(),
                 oppgaveId = oppgaveId,
+                dialogRef = any(),
             )
         }
     }

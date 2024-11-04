@@ -8,6 +8,7 @@ import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.OpptegnelseDao
+import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgNotatDao
 import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgPeriodehistorikkDao
@@ -98,6 +99,7 @@ internal class SpesialistApp(
     private val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
     private val notatApiDao = NotatApiDao(dataSource)
     private val notatDao = PgNotatDao(dataSource)
+    private val dialogDao = PgDialogDao(dataSource)
     private val totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource)
     private val totrinnsvurderingDao = PgTotrinnsvurderingDao(dataSource)
     private val snapshotApiDao = SnapshotApiDao(dataSource)
@@ -122,12 +124,14 @@ internal class SpesialistApp(
             historikkinnslagRepository,
             oppgaveDao,
             notatDao,
+            dialogDao,
         ) { subsumsjonsmelder }
     private val totrinnsvurderingService =
         TotrinnsvurderingService(
             totrinnsvurderingDao = totrinnsvurderingDao,
             oppgaveDao = oppgaveDao,
             periodehistorikkDao = historikkinnslagRepository,
+            dialogDao = dialogDao,
         )
 
     private val snapshotService = SnapshotService(snapshotDao = snapshotApiDao, snapshotClient = snapshotClient)

@@ -9,6 +9,7 @@ import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
+import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
 import no.nav.helse.mediator.Subsumsjonsmelder
@@ -38,6 +39,7 @@ class StansAutomatiskBehandlingMediatorTest {
     private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val notatDao = mockk<NotatDao>(relaxed = true)
+    private val dialogDao = mockk<PgDialogDao>(relaxed = true)
     private val testRapid = TestRapid()
     private val subsumsjonsmelder = Subsumsjonsmelder("versjonAvKode", testRapid)
 
@@ -53,6 +55,7 @@ class StansAutomatiskBehandlingMediatorTest {
             periodehistorikkDao,
             oppgaveDao,
             notatDao,
+            dialogDao,
         ) { subsumsjonsmelder }
 
     @BeforeEach
@@ -62,16 +65,17 @@ class StansAutomatiskBehandlingMediatorTest {
 
     @Test
     fun `Lagrer melding og periodehistorikk når stoppknapp-mleding håndteres`() {
-        val melding = StansAutomatiskBehandlingMelding(
-            id = randomUUID(),
-            fødselsnummer = FNR,
-            status = "STOPP_AUTOMATIKK",
-            årsaker = setOf(MEDISINSK_VILKAR),
-            opprettet = now(),
-            originalMelding = "{}",
-            kilde = "ISYFO",
-            json = "",
-        )
+        val melding =
+            StansAutomatiskBehandlingMelding(
+                id = randomUUID(),
+                fødselsnummer = FNR,
+                status = "STOPP_AUTOMATIKK",
+                årsaker = setOf(MEDISINSK_VILKAR),
+                opprettet = now(),
+                originalMelding = "{}",
+                kilde = "ISYFO",
+                json = "",
+            )
 
         mediator.håndter(melding)
 
@@ -80,6 +84,7 @@ class StansAutomatiskBehandlingMediatorTest {
             periodehistorikkDao.lagre(
                 historikkinnslag = any<AutomatiskBehandlingStanset>(),
                 oppgaveId = any(),
+                dialogRef = any(),
             )
         }
     }
@@ -106,6 +111,7 @@ class StansAutomatiskBehandlingMediatorTest {
                 tekst = "begrunnelse",
                 saksbehandlerOid = oid,
                 notatType = NotatType.OpphevStans,
+                dialogRef = any(),
             )
         }
     }

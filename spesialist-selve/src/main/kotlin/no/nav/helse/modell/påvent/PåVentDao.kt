@@ -10,7 +10,10 @@ import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 
-class PåVentDao(private val queryRunner: QueryRunner) : PåVentRepository, QueryRunner by queryRunner {
+class PåVentDao(
+    private val queryRunner: QueryRunner,
+) : PåVentRepository,
+    QueryRunner by queryRunner {
     constructor(session: Session) : this(MedSession(session))
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
@@ -18,6 +21,7 @@ class PåVentDao(private val queryRunner: QueryRunner) : PåVentRepository, Quer
         oppgaveId: Long,
         saksbehandlerOid: UUID,
         frist: LocalDate?,
+        dialogRef: Long? = null,
     ) = asSQL(
         """
         SELECT v.vedtaksperiode_id
@@ -29,11 +33,12 @@ class PåVentDao(private val queryRunner: QueryRunner) : PåVentRepository, Quer
     ).singleOrNull { it.uuid("vedtaksperiode_id") }.let { vedtaksperiodeId ->
         asSQL(
             """
-            INSERT INTO pa_vent (vedtaksperiode_id, saksbehandler_ref, frist) VALUES (:vedtaksperiodeId, :saksbehandlerRef, :frist)
+            INSERT INTO pa_vent (vedtaksperiode_id, saksbehandler_ref, frist, dialog_ref) VALUES (:vedtaksperiodeId, :saksbehandlerRef, :frist, :dialog_ref)
             """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
             "saksbehandlerRef" to saksbehandlerOid,
             "frist" to frist,
+            "dialog_ref" to dialogRef,
         ).update()
     }
 

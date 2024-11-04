@@ -25,7 +25,7 @@ sealed interface HistorikkinnslagDto {
             LagtPåVent(
                 notat = notat,
                 saksbehandler = saksbehandler,
-                årsak = årsaker,
+                årsaker = årsaker,
                 tidspunkt = LocalDateTime.now(),
                 frist = frist,
             )
@@ -65,13 +65,14 @@ data class LagtPåVent(
     override val notat: NotatDto?,
     override val saksbehandler: SaksbehandlerDto,
     override val tidspunkt: LocalDateTime,
-    val årsak: List<PåVentÅrsak>,
+    val årsaker: List<PåVentÅrsak>,
     val frist: LocalDate,
 ) : HistorikkinnslagDto {
     override fun toJson(): String =
         mapOf(
-            "årsaker" to årsak.map { it },
+            "årsaker" to årsaker.map { it },
             "frist" to frist,
+            "notattekst" to notat?.tekst,
         ).let { objectMapper.writeValueAsString(it) }
 }
 

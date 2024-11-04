@@ -9,5 +9,6 @@ interface NotatDao {
         tekst: String,
         saksbehandlerOid: UUID,
         notatType: NotatType = NotatType.Generelt,
+        dialogRef: Long?,
     ): Long?
 }

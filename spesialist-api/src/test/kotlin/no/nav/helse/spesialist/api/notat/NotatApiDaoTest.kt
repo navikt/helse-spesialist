@@ -66,6 +66,19 @@ internal class NotatApiDaoTest: DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `lagre kommentar`() {
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        val oid = opprettSaksbehandler()
+        val vedtaksperiodeId = PERIODE.id
+
+        val tekst = "tekst"
+        val notatDto = notatDao.opprettNotat(vedtaksperiodeId, tekst, oid)
+        checkNotNull(notatDto)
+        val kommentarDto = notatDao.leggTilKommentar(notatDto.id, tekst, SAKSBEHANDLER.ident)
+        assertEquals(tekst, kommentarDto?.tekst)
+    }
+
+    @Test
     fun `lagre påvent-notat`() {
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         val oid = opprettSaksbehandler()

@@ -7,11 +7,13 @@ interface PeriodehistorikkDao {
     fun lagre(
         historikkinnslag: HistorikkinnslagDto,
         oppgaveId: Long,
+        dialogRef: Long?,
     )
 
     fun lagre(
         historikkinnslag: HistorikkinnslagDto,
         generasjonId: UUID,
+        dialogRef: Long?,
     )
 
     fun migrer(

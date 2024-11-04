@@ -17,10 +17,11 @@ class PgNotatDao(
         tekst: String,
         saksbehandlerOid: UUID,
         notatType: NotatType,
+        dialogRef: Long?,
     ): Long? {
         return asSQL(
             """
-            INSERT INTO notat (vedtaksperiode_id, tekst, saksbehandler_oid, type)
+            INSERT INTO notat (vedtaksperiode_id, tekst, saksbehandler_oid, type, dialog_ref)
             VALUES (
                 (SELECT v.vedtaksperiode_id 
                     FROM vedtak v 
@@ -28,13 +29,15 @@ class PgNotatDao(
                     WHERE o.id = :oppgave_id), 
                 :tekst, 
                 :saksbehandler_oid,
-                CAST(:type as notattype)
+                CAST(:type as notattype),
+                :dialog_ref
             )      
             """,
             "oppgave_id" to oppgaveId,
             "tekst" to tekst,
             "saksbehandler_oid" to saksbehandlerOid,
             "type" to notatType.name,
+            "dialog_ref" to dialogRef,
         ).updateAndReturnGeneratedKeyOrNull()
     }
 }

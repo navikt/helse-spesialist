@@ -70,6 +70,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             historikkinnslagRepository,
             oppgaveDao,
             notatDao,
+            dialogDao,
         ) { Subsumsjonsmelder("versjonAvKode", testRapid) }
     private val oppgaveService =
         OppgaveService(
@@ -84,11 +85,20 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             tilgangsgrupper,
         )
     private val mediator =
-        SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, oppgaveService, tilgangsgrupper, stansAutomatiskBehandlingMediator, TotrinnsvurderingService(
-            totrinnsvurderingDao = totrinnsvurderingDao,
-            oppgaveDao = oppgaveDao,
-            periodehistorikkDao = historikkinnslagRepository
-        ))
+        SaksbehandlerMediator(
+            dataSource,
+            "versjonAvKode",
+            testRapid,
+            oppgaveService,
+            tilgangsgrupper,
+            stansAutomatiskBehandlingMediator,
+            TotrinnsvurderingService(
+                totrinnsvurderingDao = totrinnsvurderingDao,
+                oppgaveDao = oppgaveDao,
+                periodehistorikkDao = historikkinnslagRepository,
+                dialogDao = dialogDao,
+            ),
+        )
 
     private val AKTØR_ID = lagAktørId()
     private val FØDSELSNUMMER = lagFødselsnummer()

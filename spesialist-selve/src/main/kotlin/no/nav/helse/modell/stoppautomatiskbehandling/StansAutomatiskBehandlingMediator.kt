@@ -1,9 +1,11 @@
 package no.nav.helse.modell.stoppautomatiskbehandling
 
 import kotliquery.Session
+import no.nav.helse.db.DialogDao
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
+import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgNotatDao
 import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgPeriodehistorikkDao
@@ -35,6 +37,7 @@ internal class StansAutomatiskBehandlingMediator(
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val oppgaveDao: OppgaveDao,
     private val notatDao: NotatDao,
+    private val dialogDao: DialogDao,
     private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
 ) : StansAutomatiskBehandlinghåndterer {
     private val logg = LoggerFactory.getLogger(this::class.java)
@@ -52,6 +55,7 @@ internal class StansAutomatiskBehandlingMediator(
                 PgPeriodehistorikkDao(session),
                 PgOppgaveDao(session),
                 PgNotatDao(session),
+                PgDialogDao(session),
                 subsumsjonsmelderProvider,
             )
     }
@@ -70,7 +74,10 @@ internal class StansAutomatiskBehandlingMediator(
     }
 
     override fun unntattFraAutomatiskGodkjenning(fødselsnummer: String): UnntattFraAutomatiskGodkjenning =
-        stansAutomatiskBehandlingRepository.hentFor(fødselsnummer).filtrerGjeldendeStopp().tilUnntattFraAutomatiskGodkjenning()
+        stansAutomatiskBehandlingRepository
+            .hentFor(fødselsnummer)
+            .filtrerGjeldendeStopp()
+            .tilUnntattFraAutomatiskGodkjenning()
 
     override fun sjekkOmAutomatiseringErStanset(
         fødselsnummer: String,
@@ -89,7 +96,7 @@ internal class StansAutomatiskBehandlingMediator(
         val oppgaveId = oppgaveDao.finnOppgaveId(fødselsnummer)
         if (oppgaveId != null) {
             val innslag = HistorikkinnslagDto.automatiskBehandlingStanset()
-            periodehistorikkDao.lagre(innslag, oppgaveId)
+            periodehistorikkDao.lagre(innslag, oppgaveId, null)
         } else {
             sikkerlogg.info("Fant ikke oppgave for $fødselsnummer. Fikk ikke lagret historikkinnslag om stans av automatisk behandling")
         }
@@ -101,7 +108,8 @@ internal class StansAutomatiskBehandlingMediator(
         saksbehandlerOid: UUID,
     ) = try {
         val oppgaveId = fødselsnummer.finnOppgaveId()
-        notatDao.lagreForOppgaveId(oppgaveId, begrunnelse, saksbehandlerOid, NotatType.OpphevStans)
+        val dialogRef = dialogDao.lagre()
+        notatDao.lagreForOppgaveId(oppgaveId, begrunnelse, saksbehandlerOid, NotatType.OpphevStans, dialogRef)
     } catch (e: Exception) {
         sikkerlogg.error("Fant ikke oppgave for $fødselsnummer. Fikk ikke lagret notat om oppheving av stans")
     }

@@ -13,6 +13,7 @@ internal class VedtaksperiodeReberegnetPeriodehistorikk(
         periodehistorikkDao.lagre(
             historikkinnslag = innslag,
             generasjonId = vedtaksperiode.gjeldendeGenerasjonId,
+            null,
         )
         return true
     }

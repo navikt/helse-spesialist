@@ -7,6 +7,7 @@ import no.nav.helse.db.AnnulleringDao
 import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PeriodehistorikkDao
+import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
@@ -114,6 +115,7 @@ internal class SaksbehandlerMediator(
     private val periodehistorikkDao: PeriodehistorikkDao = PgPeriodehistorikkDao(dataSource)
     private val avslagDao = AvslagDao(dataSource)
     private val annulleringDao = AnnulleringDao(dataSource)
+    private val dialogDao = PgDialogDao(dataSource)
     private val env = Environment()
 
     override fun håndter(
@@ -267,9 +269,10 @@ internal class SaksbehandlerMediator(
                     årsaker = handling.årsaker,
                     frist = handling.frist,
                 )
-            periodehistorikkDao.lagre(innslag, handling.oppgaveId)
+            val dialogRef = dialogDao.lagre()
+            periodehistorikkDao.lagre(innslag, handling.oppgaveId, dialogRef)
             oppgaveService.leggPåVent(handling, saksbehandler)
-            PåVentRepository(påVentDao).leggPåVent(saksbehandler.oid(), handling)
+            PåVentRepository(påVentDao).leggPåVent(saksbehandler.oid(), handling, dialogRef)
         } catch (e: Modellfeil) {
             throw e.tilApiversjon()
         }
@@ -285,7 +288,7 @@ internal class SaksbehandlerMediator(
         }
         try {
             val innslag = HistorikkinnslagDto.fjernetFraPåVentInnslag(saksbehandler.toDto())
-            periodehistorikkDao.lagre(innslag, handling.oppgaveId)
+            periodehistorikkDao.lagre(innslag, handling.oppgaveId, null)
             oppgaveService.fjernFraPåVent(handling.oppgaveId)
             PåVentRepository(påVentDao).fjernFraPåVent(handling.oppgaveId)
         } catch (e: Modellfeil) {

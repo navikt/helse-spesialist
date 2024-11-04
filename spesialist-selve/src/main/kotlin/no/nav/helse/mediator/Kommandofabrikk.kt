@@ -7,6 +7,7 @@ import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.OpptegnelseDao
+import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
@@ -109,7 +110,8 @@ internal class Kommandofabrikk(
             TildelingDao(transactionalSession).tildelingForOppgave(oppgaveDataForAutomatisering.oppgaveId) != null
         val godkjenningsbehovData =
             MeldingDao(transactionalSession)
-                .finnGodkjenningsbehov(oppgaveDataForAutomatisering.hendelseId).data()
+                .finnGodkjenningsbehov(oppgaveDataForAutomatisering.hendelseId)
+                .data()
 
         return GosysOppgaveEndretCommand(
             utbetaling = utbetaling,
@@ -311,10 +313,11 @@ internal class Kommandofabrikk(
         hendelse: StansAutomatiskBehandlingMelding,
         session: Session,
     ) = ikkesuspenderendeCommand {
-        StansAutomatiskBehandlingMediator.Factory.stansAutomatiskBehandlingMediator(
-            session,
-            subsumsjonsmelderProvider,
-        ).håndter(hendelse)
+        StansAutomatiskBehandlingMediator.Factory
+            .stansAutomatiskBehandlingMediator(
+                session,
+                subsumsjonsmelderProvider,
+            ).håndter(hendelse)
     }
 
     internal fun løsGodkjenningsbehov(
@@ -482,5 +485,6 @@ internal class Kommandofabrikk(
             PgTotrinnsvurderingDao(session),
             PgOppgaveDao(session),
             PgPeriodehistorikkDao(session),
+            PgDialogDao(session),
         )
 }

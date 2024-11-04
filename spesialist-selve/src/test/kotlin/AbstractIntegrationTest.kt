@@ -2,6 +2,7 @@ import no.nav.helse.SpeilTilgangsgrupper
 import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.db.OpptegnelseDao
+import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
@@ -56,6 +57,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
                     totrinnsvurderingDao,
                     oppgaveDao,
                     historikkinnslagRepository,
+                    PgDialogDao(dataSource),
                 ),
         )
 
