@@ -17,7 +17,7 @@ spec:
     initialDelay: 5
   readiness:
     path: isready
-    initialDelay: 5
+    initialDelay: 15
   preStopHook:
     http:
       path: /stop
