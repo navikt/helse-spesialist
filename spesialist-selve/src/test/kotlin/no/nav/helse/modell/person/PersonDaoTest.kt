@@ -235,11 +235,11 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
     private fun person() =
         sessionOf(dataSource).use { session ->
             session.run(
-                queryOf("SELECT fodselsnummer, aktor_id, info_ref, enhet_ref, infotrygdutbetalinger_ref FROM person")
+                queryOf("SELECT fødselsnummer, aktør_id, info_ref, enhet_ref, infotrygdutbetalinger_ref FROM person")
                     .map { row ->
                         Person(
-                            row.long("fodselsnummer").toFødselsnummer(),
-                            row.long("aktor_id").toString(),
+                            row.string("fødselsnummer"),
+                            row.string("aktør_id"),
                             row.longOrNull("info_ref"),
                             row.intOrNull("enhet_ref"),
                             row.longOrNull("infotrygdutbetalinger_ref"),

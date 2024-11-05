@@ -11,10 +11,10 @@ internal class ÅpneGosysOppgaverDao(session: Session) : ÅpneGosysOppgaverRepos
         asSQL(
             """
             INSERT INTO gosysoppgaver (person_ref, antall, oppslag_feilet, opprettet)
-            VALUES ((SELECT id FROM person WHERE fodselsnummer = :fodselsnummer), :antall, :oppslag_feilet, :opprettet)
+            VALUES ((SELECT id FROM person WHERE fødselsnummer = :fodselsnummer), :antall, :oppslag_feilet, :opprettet)
             ON CONFLICT (person_ref) DO UPDATE SET antall = :antall, oppslag_feilet = :oppslag_feilet, opprettet = :opprettet
             """.trimIndent(),
-            "fodselsnummer" to åpneGosysOppgaver.fødselsnummer.toLong(),
+            "fodselsnummer" to åpneGosysOppgaver.fødselsnummer,
             "antall" to åpneGosysOppgaver.antall,
             "oppslag_feilet" to åpneGosysOppgaver.oppslagFeilet,
             "opprettet" to åpneGosysOppgaver.opprettet,
@@ -27,9 +27,9 @@ internal class ÅpneGosysOppgaverDao(session: Session) : ÅpneGosysOppgaverRepos
             SELECT go.antall
             FROM gosysoppgaver go
                 INNER JOIN person p on p.id = go.person_ref
-            WHERE p.fodselsnummer = :fodselsnummer
+            WHERE p.fødselsnummer = :fodselsnummer
             AND go.oppslag_feilet = FALSE
             """.trimIndent(),
-            "fodselsnummer" to fødselsnummer.toLong(),
+            "fodselsnummer" to fødselsnummer,
         ).singleOrNull { it.int("antall") }
 }

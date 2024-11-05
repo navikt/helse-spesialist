@@ -10,9 +10,9 @@ class VergemålApiDao(dataSource: DataSource) : HelseDao(dataSource) {
             SELECT har_fremtidsfullmakter, har_fullmakter
             FROM vergemal v
             INNER JOIN person p on p.id = v.person_ref
-            WHERE p.fodselsnummer = :fodselsnummer
+            WHERE p.fødselsnummer = :fodselsnummer
             """.trimIndent(),
-            "fodselsnummer" to fødselsnummer.toLong(),
+            "fodselsnummer" to fødselsnummer,
         ).single { row ->
             row.boolean("har_fremtidsfullmakter") || row.boolean("har_fullmakter")
         }

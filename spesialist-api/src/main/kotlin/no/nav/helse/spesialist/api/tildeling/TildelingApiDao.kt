@@ -14,10 +14,10 @@ class TildelingApiDao(dataSource: DataSource) : HelseDao(dataSource) {
                  RIGHT JOIN oppgave o on v.id = o.vedtak_ref
                  RIGHT JOIN tildeling t on o.id = t.oppgave_id_ref
                  RIGHT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
-            WHERE fodselsnummer = :fnr AND o.status = 'AvventerSaksbehandler'
+            WHERE fødselsnummer = :fnr AND o.status = 'AvventerSaksbehandler'
             ORDER BY o.opprettet DESC;
             """.trimIndent(),
-            "fnr" to fødselsnummer.toLong(),
+            "fnr" to fødselsnummer,
         ).single(::tildelingDto)
 
     private fun tildelingDto(it: Row) =

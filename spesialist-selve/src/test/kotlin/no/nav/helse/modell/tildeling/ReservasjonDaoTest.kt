@@ -90,11 +90,11 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
             SELECT r.gyldig_til
             FROM reserver_person r
             JOIN person p ON p.id = r.person_ref
-            WHERE p.fodselsnummer = :fnr AND r.gyldig_til > now();
+            WHERE p.fødselsnummer = :fnr AND r.gyldig_til > now();
             """
         return sessionOf(dataSource).use { session ->
             session.run(
-                queryOf(query, mapOf("fnr" to FNR.toLong()))
+                queryOf(query, mapOf("fnr" to FNR))
                     .map { it.localDateTime("gyldig_til") }.asSingle
             )
         }!!

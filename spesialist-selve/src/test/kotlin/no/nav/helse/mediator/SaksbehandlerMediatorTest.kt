@@ -861,13 +861,13 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private fun finnOverstyringId(fødselsnummer: String): UUID? {
         @Language("PostgreSQL")
         val query =
-            " select ekstern_hendelse_id from overstyring where person_ref = (select id from person where fodselsnummer = :fodselsnummer) "
+            " select ekstern_hendelse_id from overstyring where person_ref = (select id from person where fødselsnummer = :fodselsnummer) "
 
         return sessionOf(dataSource).use {
             it.run(
                 queryOf(
                     query,
-                    mapOf("fodselsnummer" to fødselsnummer.toLong()),
+                    mapOf("fodselsnummer" to fødselsnummer),
                 ).map { it.uuid("ekstern_hendelse_id") }.asSingle,
             )
         }

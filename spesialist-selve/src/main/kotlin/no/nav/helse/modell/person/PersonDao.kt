@@ -33,9 +33,9 @@ internal class PersonDao(
 
     override fun lagreMinimalPerson(minimalPerson: MinimalPersonDto) {
         asSQL(
-            """INSERT INTO person (fodselsnummer, aktor_id) VALUES (:foedselsnummer, :aktoerId)""",
-            "foedselsnummer" to minimalPerson.fødselsnummer.toLong(),
-            "aktoerId" to minimalPerson.aktørId.toLong(),
+            """INSERT INTO person (fødselsnummer, aktør_id) VALUES (:foedselsnummer, :aktoerId)""",
+            "foedselsnummer" to minimalPerson.fødselsnummer,
+            "aktoerId" to minimalPerson.aktørId,
         ).update()
     }
 
@@ -45,12 +45,12 @@ internal class PersonDao(
 
     internal fun finnPerson(fødselsnummer: String) =
         asSQL(
-            "SELECT aktor_id, fodselsnummer FROM person WHERE fodselsnummer = :foedselsnummer",
-            "foedselsnummer" to fødselsnummer.toLong(),
+            "SELECT aktør_id, fødselsnummer FROM person WHERE fødselsnummer = :foedselsnummer",
+            "foedselsnummer" to fødselsnummer,
         ).singleOrNull { row ->
             PersonDto(
-                aktørId = row.long("aktor_id").toString(),
-                fødselsnummer = row.long("fodselsnummer").toFødselsnummer(),
+                aktørId = row.string("aktør_id"),
+                fødselsnummer = row.string("fødselsnummer"),
                 vedtaksperioder = emptyList(),
                 avviksvurderinger = emptyList(),
                 skjønnsfastsatteSykepengegrunnlag = emptyList(),
@@ -59,26 +59,26 @@ internal class PersonDao(
 
     override fun finnPersonMedFødselsnummer(fødselsnummer: String): Long? =
         asSQL(
-            "SELECT id FROM person WHERE fodselsnummer = :foedselsnummer",
-            "foedselsnummer" to fødselsnummer.toLong(),
+            "SELECT id FROM person WHERE fødselsnummer = :foedselsnummer",
+            "foedselsnummer" to fødselsnummer,
         ).singleOrNull { row -> row.long("id") }
 
     internal fun finnAktørId(fødselsnummer: String): String? =
         asSQL(
-            "SELECT aktor_id FROM person WHERE fodselsnummer = :foedselsnummer",
-            "foedselsnummer" to fødselsnummer.toLong(),
-        ).singleOrNull { it.string("aktor_id") }
+            "SELECT aktør_id FROM person WHERE fødselsnummer = :foedselsnummer",
+            "foedselsnummer" to fødselsnummer,
+        ).singleOrNull { it.string("aktør_id") }
 
     override fun finnPersoninfoSistOppdatert(fødselsnummer: String) =
         asSQL(
-            "SELECT personinfo_oppdatert FROM person WHERE fodselsnummer = :foedselsnummer",
-            "foedselsnummer" to fødselsnummer.toLong(),
+            "SELECT personinfo_oppdatert FROM person WHERE fødselsnummer = :foedselsnummer",
+            "foedselsnummer" to fødselsnummer,
         ).singleOrNull { row -> row.localDateOrNull("personinfo_oppdatert") }
 
     override fun finnPersoninfoRef(fødselsnummer: String) =
         asSQL(
-            "SELECT info_ref FROM person WHERE fodselsnummer = :foedselsnummer",
-            "foedselsnummer" to fødselsnummer.toLong(),
+            "SELECT info_ref FROM person WHERE fødselsnummer = :foedselsnummer",
+            "foedselsnummer" to fødselsnummer,
         ).singleOrNull { row -> row.longOrNull("info_ref") }
 
     private fun insertPersoninfo(
@@ -111,9 +111,9 @@ internal class PersonDao(
         fødselsnummer: String,
     ) {
         asSQL(
-            "UPDATE person SET info_ref = :id, personinfo_oppdatert = now() WHERE fodselsnummer = :foedselsnummer",
+            "UPDATE person SET info_ref = :id, personinfo_oppdatert = now() WHERE fødselsnummer = :foedselsnummer",
             "id" to id,
-            "foedselsnummer" to fødselsnummer.toLong(),
+            "foedselsnummer" to fødselsnummer,
         ).update()
     }
 
@@ -152,8 +152,8 @@ internal class PersonDao(
 
     private fun finnPersonInfoRef(fødselsnummer: String) =
         asSQL(
-            "SELECT info_ref FROM person WHERE fodselsnummer = :foedselsnummer",
-            "foedselsnummer" to fødselsnummer.toLong(),
+            "SELECT info_ref FROM person WHERE fødselsnummer = :foedselsnummer",
+            "foedselsnummer" to fødselsnummer,
         ).singleOrNull { it.longOrNull("info_ref") }
 
     private fun updatePersonInfo(
@@ -191,8 +191,8 @@ internal class PersonDao(
 
     private fun updatePersoninfoOppdatert(fødselsnummer: String) {
         asSQL(
-            "UPDATE person SET personinfo_oppdatert = now() WHERE fodselsnummer = :foedselsnummer",
-            "foedselsnummer" to fødselsnummer.toLong(),
+            "UPDATE person SET personinfo_oppdatert = now() WHERE fødselsnummer = :foedselsnummer",
+            "foedselsnummer" to fødselsnummer,
         ).update()
     }
 
@@ -200,28 +200,28 @@ internal class PersonDao(
         asSQL(
             """
             SELECT adressebeskyttelse FROM person_info
-            WHERE id = (SELECT info_ref FROM person WHERE fodselsnummer = :foedselsnummer);
+            WHERE id = (SELECT info_ref FROM person WHERE fødselsnummer = :foedselsnummer);
             """.trimIndent(),
-            "foedselsnummer" to fødselsnummer.toLong(),
+            "foedselsnummer" to fødselsnummer,
         ).singleOrNull { row -> Adressebeskyttelse.valueOf(row.string("adressebeskyttelse")) }
 
     override fun finnEnhetSistOppdatert(fødselsnummer: String) =
-        asSQL("SELECT enhet_ref_oppdatert FROM person WHERE fodselsnummer = :foedselsnummer", "foedselsnummer" to fødselsnummer.toLong())
+        asSQL("SELECT enhet_ref_oppdatert FROM person WHERE fødselsnummer = :foedselsnummer", "foedselsnummer" to fødselsnummer)
             .singleOrNull { row -> row.localDateOrNull("enhet_ref_oppdatert") }
 
     override fun oppdaterEnhet(
         fødselsnummer: String,
         enhetNr: Int,
     ) = asSQL(
-        "UPDATE person SET enhet_ref = :enhetNr, enhet_ref_oppdatert = now() WHERE fodselsnummer = :foedselsnummer",
+        "UPDATE person SET enhet_ref = :enhetNr, enhet_ref_oppdatert = now() WHERE fødselsnummer = :foedselsnummer",
         "enhetNr" to enhetNr,
-        "foedselsnummer" to fødselsnummer.toLong(),
+        "foedselsnummer" to fødselsnummer,
     ).update()
 
     override fun finnITUtbetalingsperioderSistOppdatert(fødselsnummer: String) =
         asSQL(
-            "SELECT infotrygdutbetalinger_oppdatert FROM person WHERE fodselsnummer = :foedselsnummer",
-            "foedselsnummer" to fødselsnummer.toLong(),
+            "SELECT infotrygdutbetalinger_oppdatert FROM person WHERE fødselsnummer = :foedselsnummer",
+            "foedselsnummer" to fødselsnummer,
         ).singleOrNull { it.localDateOrNull("infotrygdutbetalinger_oppdatert") }
 
     override fun finnInntekter(
@@ -230,10 +230,10 @@ internal class PersonDao(
     ) = asSQL(
         """
         SELECT * FROM inntekt 
-        WHERE person_ref = (SELECT id FROM person WHERE fodselsnummer = :foedselsnummer)
+        WHERE person_ref = (SELECT id FROM person WHERE fødselsnummer = :foedselsnummer)
         AND skjaeringstidspunkt = :skjaeringstidspunkt;
         """.trimIndent(),
-        "foedselsnummer" to fødselsnummer.toLong(),
+        "foedselsnummer" to fødselsnummer,
         "skjaeringstidspunkt" to skjæringstidspunkt,
     ).singleOrNull { objectMapper.readValue<List<Inntekter>>(it.string("inntekter")) }
 
@@ -255,8 +255,8 @@ internal class PersonDao(
 
     private fun finnPersonRef(fødselsnummer: String) =
         asSQL(
-            "SELECT id FROM person WHERE fodselsnummer = :foedselsnummer",
-            "foedselsnummer" to fødselsnummer.toLong(),
+            "SELECT id FROM person WHERE fødselsnummer = :foedselsnummer",
+            "foedselsnummer" to fødselsnummer,
         ).singleOrNull { it.longOrNull("id") }
 
     override fun upsertInfotrygdutbetalinger(
@@ -287,8 +287,8 @@ internal class PersonDao(
 
     private fun updateInfotrygdutbetalingerOppdatert(fødselsnummer: String) {
         asSQL(
-            "UPDATE person SET infotrygdutbetalinger_oppdatert = now() WHERE fodselsnummer = :foedselsnummer",
-            "foedselsnummer" to fødselsnummer.toLong(),
+            "UPDATE person SET infotrygdutbetalinger_oppdatert = now() WHERE fødselsnummer = :foedselsnummer",
+            "foedselsnummer" to fødselsnummer,
         ).update()
     }
 
@@ -312,17 +312,17 @@ internal class PersonDao(
         asSQL(
             """
             UPDATE person SET infotrygdutbetalinger_ref = :infotrygdutbetalingerId, infotrygdutbetalinger_oppdatert = now()
-            WHERE fodselsnummer = :foedselsnummer
+            WHERE fødselsnummer = :foedselsnummer
             """.trimIndent(),
             "infotrygdutbetalingerId" to infotrygdutbetalingerId,
-            "foedselsnummer" to fødselsnummer.toLong(),
+            "foedselsnummer" to fødselsnummer,
         ).update()
     }
 
     private fun finnInfotrygdutbetalingerRef(fødselsnummer: String) =
         asSQL(
-            "SELECT infotrygdutbetalinger_ref FROM person WHERE fodselsnummer = :foedselsnummer",
-            "foedselsnummer" to fødselsnummer.toLong(),
+            "SELECT infotrygdutbetalinger_ref FROM person WHERE fødselsnummer = :foedselsnummer",
+            "foedselsnummer" to fødselsnummer,
         ).singleOrNull { it.longOrNull("infotrygdutbetalinger_ref") }
 
     internal fun insertPerson(
@@ -333,11 +333,11 @@ internal class PersonDao(
         infotrygdutbetalingerId: Long,
     ) = asSQL(
         """
-        INSERT INTO person(fodselsnummer, aktor_id, info_ref, enhet_ref, infotrygdutbetalinger_ref, enhet_ref_oppdatert, personinfo_oppdatert, infotrygdutbetalinger_oppdatert)
+        INSERT INTO person(fødselsnummer, aktør_id, info_ref, enhet_ref, infotrygdutbetalinger_ref, enhet_ref_oppdatert, personinfo_oppdatert, infotrygdutbetalinger_oppdatert)
         VALUES(:foedselsnummer, :aktorId, :personinfoId, :enhetId, :infotrygdutbetalingerId, :timestamp, :timestamp, :timestamp);
         """.trimIndent(),
-        "foedselsnummer" to fødselsnummer.toLong(),
-        "aktorId" to aktørId.toLong(),
+        "foedselsnummer" to fødselsnummer,
+        "aktorId" to aktørId,
         "personinfoId" to personinfoId,
         "enhetId" to enhetId,
         "infotrygdutbetalingerId" to infotrygdutbetalingerId,
@@ -346,13 +346,11 @@ internal class PersonDao(
 
     override fun finnEnhetId(fødselsnummer: String): String =
         asSQL(
-            "SELECT enhet_ref FROM person where fodselsnummer = :foedselsnummer",
-            "foedselsnummer" to fødselsnummer.toLong(),
+            "SELECT enhet_ref FROM person where fødselsnummer = :foedselsnummer",
+            "foedselsnummer" to fødselsnummer,
         ).singleOrNull {
             it.int("enhet_ref").toEnhetnummer()
         }.let { checkNotNull(it) }
 }
 
 private fun Int.toEnhetnummer() = if (this < 1000) "0$this" else "$this"
-
-internal fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else "$this"

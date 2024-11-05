@@ -15,9 +15,9 @@ class UtbetalingDao(session: Session) : UtbetalingRepository, QueryRunner by Med
             SELECT 1 FROM utbetaling u 
             JOIN utbetaling_id ui ON u.utbetaling_id_ref = ui.id
             INNER JOIN person p ON ui.person_ref = p.id
-            WHERE u.status = 'UTBETALT' AND p.aktor_id = :aktor_id
+            WHERE u.status = 'UTBETALT' AND p.aktør_id = :aktor_id
             """.trimIndent(),
-            "aktor_id" to aktørId.toLong(),
+            "aktor_id" to aktørId,
         ).list { it }.isNotEmpty()
 
     override fun finnUtbetalingIdRef(utbetalingId: UUID): Long? =
@@ -75,7 +75,7 @@ class UtbetalingDao(session: Session) : UtbetalingRepository, QueryRunner by Med
                 utbetaling_id, person_ref, arbeidsgiver_ref, type, opprettet, arbeidsgiver_fagsystem_id_ref, person_fagsystem_id_ref, arbeidsgiverbeløp, personbeløp
             ) VALUES (
                 :utbetalingId,
-                (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer),
+                (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer),
                 (SELECT id FROM arbeidsgiver WHERE orgnummer = :orgnummer),
                 CAST(:type as utbetaling_type),
                 :opprettet,
@@ -88,7 +88,7 @@ class UtbetalingDao(session: Session) : UtbetalingRepository, QueryRunner by Med
         """
                 .trimIndent(),
             "utbetalingId" to utbetalingId,
-            "fodselsnummer" to fødselsnummer.toLong(),
+            "fodselsnummer" to fødselsnummer,
             "orgnummer" to orgnummer.toLong(),
             "type" to type.toString(),
             "opprettet" to opprettet,
@@ -189,10 +189,10 @@ class UtbetalingDao(session: Session) : UtbetalingRepository, QueryRunner by Med
             """
             select ui.utbetaling_id from utbetaling_id ui 
             join person p on ui.person_ref = p.id 
-            where p.fodselsnummer = :fnr
+            where p.fødselsnummer = :fnr
             order by ui.id desc
             limit 1;
             """.trimIndent(),
-            "fnr" to fødselsnummer.toLong(),
+            "fnr" to fødselsnummer,
         ).singleOrNull { it.uuid("utbetaling_id") }
 }

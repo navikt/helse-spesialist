@@ -413,7 +413,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         @Language("PostgreSQL")
         val statement =
             """
-            INSERT INTO person (fodselsnummer, aktor_id, info_ref, enhet_ref, infotrygdutbetalinger_ref)
+            INSERT INTO person (fødselsnummer, aktør_id, info_ref, enhet_ref, infotrygdutbetalinger_ref)
             VALUES (:foedselsnummer, :aktoerId, :personinfoId, :enhetId, :infotrygdutbetalingerId)
             """.trimIndent()
         val personId =
@@ -423,8 +423,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                         queryOf(
                             statement,
                             mapOf(
-                                "foedselsnummer" to fødselsnummer.toLong(),
-                                "aktoerId" to aktørId.toLong(),
+                                "foedselsnummer" to fødselsnummer,
+                                "aktoerId" to aktørId,
                                 "personinfoId" to personinfoid,
                                 "enhetId" to bostedId,
                                 "infotrygdutbetalingerId" to infotrygdutbetalingerid
@@ -501,7 +501,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                         when (:harInfotrygdutbetalingerRef is not null) then now()
                     END
                 )
-            where fodselsnummer=:fodselsnummer
+            where fødselsnummer=:fodselsnummer
         """.trimIndent()
 
         sessionOf(dataSource).use {
@@ -512,7 +512,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                         "harPersoninfoId" to (personinfoId != null),
                         "infotrygdutbetalingerRef" to infotrygdutbetalingerId,
                         "harInfotrygdutbetalingerRef" to (infotrygdutbetalingerId != null),
-                        "fodselsnummer" to fødselsnummer.toLong()
+                        "fodselsnummer" to fødselsnummer
                     )
                 ).asUpdate
             )

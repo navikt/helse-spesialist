@@ -151,9 +151,9 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
             SELECT svg.vedtaksperiode_id FROM selve_vedtaksperiode_generasjon svg 
             INNER JOIN vedtak v on svg.vedtaksperiode_id = v.vedtaksperiode_id
             INNER JOIN person p on p.id = v.person_ref
-            WHERE fodselsnummer = :fodselsnummer
+            WHERE fødselsnummer = :fodselsnummer
             """,
-            "fodselsnummer" to fødselsnummer.toLong(),
+            "fodselsnummer" to fødselsnummer,
         ).list {
             it.uuid("vedtaksperiode_id")
         }.toSet()
@@ -181,9 +181,9 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
             from selve_vedtaksperiode_generasjon svg
             join vedtak v on svg.vedtaksperiode_id = v.vedtaksperiode_id
             join person p on p.id = v.person_ref
-            where p.fodselsnummer = :fodselsnummer
+            where p.fødselsnummer = :fodselsnummer
             """,
-            "fodselsnummer" to fødselsnummer.toLong(),
+            "fodselsnummer" to fødselsnummer,
         ).single {
             it.localDate("foersteFom")
         }

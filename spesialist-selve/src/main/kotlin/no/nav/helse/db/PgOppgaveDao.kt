@@ -27,11 +27,11 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
             FROM oppgave o
                      JOIN vedtak v ON v.id = o.vedtak_ref
                      JOIN person p ON v.person_ref = p.id
-            WHERE p.fodselsnummer = :fodselsnummer
+            WHERE p.fødselsnummer = :fodselsnummer
             ORDER BY o.id DESC
             LIMIT 1
             """,
-            "fodselsnummer" to fødselsnummer.toLong(),
+            "fodselsnummer" to fødselsnummer,
         )
             .single {
                 it.long("oppgaveId")
@@ -85,9 +85,9 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
             JOIN vedtak v ON v.id = o.vedtak_ref
             JOIN person p ON v.person_ref = p.id
             WHERE o.status = 'AvventerSaksbehandler'::oppgavestatus
-                AND p.fodselsnummer = :fodselsnummer;                
+                AND p.fødselsnummer = :fodselsnummer;                
             """,
-            "fodselsnummer" to fødselsnummer.toLong(),
+            "fodselsnummer" to fødselsnummer,
         )
             .singleOrNull {
                 it.long("oppgaveId")
@@ -115,10 +115,10 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
             FROM oppgave o
                      JOIN vedtak v ON v.id = o.vedtak_ref
                      JOIN person p ON v.person_ref = p.id
-            WHERE p.fodselsnummer = :fodselsnummer
+            WHERE p.fødselsnummer = :fodselsnummer
             AND status = 'AvventerSaksbehandler'::oppgavestatus;
             """,
-            "fodselsnummer" to fødselsnummer.toLong(),
+            "fodselsnummer" to fødselsnummer,
         ).single {
             it.uuid("vedtaksperiode_id")
         }
@@ -167,11 +167,11 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
             FROM oppgave o2
             JOIN vedtak v on v.id = o2.vedtak_ref
             JOIN person p on v.person_ref = p.id
-            WHERE p.fodselsnummer = :fodselsnummer
+            WHERE p.fødselsnummer = :fodselsnummer
             and o.id = o2.id
             AND o.status = 'AvventerSaksbehandler'::oppgavestatus;             
             """,
-            "fodselsnummer" to fødselsnummer.toLong(),
+            "fodselsnummer" to fødselsnummer,
         ).update()
     }
 
@@ -265,7 +265,7 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
             """
             SELECT
                 o.id as oppgave_id, 
-                p.aktor_id,
+                p.aktør_id,
                 v.vedtaksperiode_id, 
                 pi.fornavn, pi.mellomnavn, pi.etternavn, 
                 o.egenskaper,
@@ -326,7 +326,7 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
                 row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }.toSet()
             OppgaveFraDatabaseForVisning(
                 id = row.long("oppgave_id"),
-                aktørId = row.string("aktor_id"),
+                aktørId = row.string("aktør_id"),
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                 navn =
                     PersonnavnFraDatabase(
@@ -380,14 +380,14 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
     override fun finnFødselsnummer(oppgaveId: Long): String {
         return asSQL(
             """
-            SELECT fodselsnummer from person
+            SELECT fødselsnummer from person
             INNER JOIN vedtak v on person.id = v.person_ref
             INNER JOIN oppgave o on v.id = o.vedtak_ref
             WHERE o.id = :oppgaveId
             """,
             "oppgaveId" to oppgaveId,
         ).single {
-            it.long("fodselsnummer").toFødselsnummer()
+            it.string("fødselsnummer")
         }
     }
 
@@ -434,7 +434,7 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
             """
             SELECT 
                 o.id as oppgave_id,
-                p.aktor_id,
+                p.aktør_id,
                 o.egenskaper,
                 o.oppdatert as ferdigstilt_tidspunkt,
                 o.ferdigstilt_av,
@@ -463,7 +463,7 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
         ).list { row ->
             BehandletOppgaveFraDatabaseForVisning(
                 id = row.long("oppgave_id"),
-                aktørId = row.string("aktor_id"),
+                aktørId = row.string("aktør_id"),
                 egenskaper =
                     row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }
                         .toSet(),
@@ -642,6 +642,4 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
             it.long("id")
         }
     }
-
-    private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
 }

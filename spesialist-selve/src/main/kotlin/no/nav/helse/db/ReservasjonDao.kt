@@ -18,13 +18,13 @@ class ReservasjonDao(queryRunner: QueryRunner) : ReservasjonRepository, QueryRun
             INSERT INTO reserver_person(saksbehandler_ref, person_ref)
             SELECT :saksbehandler_ref, person.id
             FROM person
-            WHERE person.fodselsnummer = :foedselsnummer
+            WHERE person.fødselsnummer = :foedselsnummer
             ON CONFLICT (person_ref)
                 DO UPDATE SET gyldig_til = current_date + time '23:59:59',
                               saksbehandler_ref = :saksbehandler_ref;
             """.trimIndent(),
             "saksbehandler_ref" to saksbehandlerOid,
-            "foedselsnummer" to fødselsnummer.toLong(),
+            "foedselsnummer" to fødselsnummer,
         ).update()
     }
 
@@ -34,9 +34,9 @@ class ReservasjonDao(queryRunner: QueryRunner) : ReservasjonRepository, QueryRun
             SELECT r.*, s.* FROM reserver_person r
             JOIN person p ON p.id = r.person_ref
             JOIN saksbehandler s ON r.saksbehandler_ref = s.oid
-            WHERE p.fodselsnummer = :foedselsnummer AND r.gyldig_til > now();
+            WHERE p.fødselsnummer = :foedselsnummer AND r.gyldig_til > now();
             """.trimIndent(),
-            "foedselsnummer" to fødselsnummer.toLong(),
+            "foedselsnummer" to fødselsnummer,
         ).singleOrNull { row ->
             Reservasjon(
                 SaksbehandlerFraDatabase(

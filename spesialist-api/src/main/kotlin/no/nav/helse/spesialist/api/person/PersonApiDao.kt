@@ -25,22 +25,22 @@ class PersonApiDao(dataSource: DataSource) : QueryRunner by MedDataSource(dataSo
 
     fun finnEnhet(fødselsnummer: String) =
         asSQL(
-            " SELECT id, navn from enhet WHERE id = (SELECT enhet_ref FROM person where fodselsnummer = :fodselsnummer); ",
-            "fodselsnummer" to fødselsnummer.toLong(),
+            " SELECT id, navn from enhet WHERE id = (SELECT enhet_ref FROM person where fødselsnummer = :fodselsnummer); ",
+            "fodselsnummer" to fødselsnummer,
         ).single { row -> EnhetDto(row.string("id"), row.string("navn")) }
 
     fun finnInfotrygdutbetalinger(fødselsnummer: String) =
         asSQL(
             """ SELECT data FROM infotrygdutbetalinger
-            WHERE id = (SELECT infotrygdutbetalinger_ref FROM person WHERE fodselsnummer = :fodselsnummer);
+            WHERE id = (SELECT infotrygdutbetalinger_ref FROM person WHERE fødselsnummer = :fodselsnummer);
         """,
-            "fodselsnummer" to fødselsnummer.toLong(),
+            "fodselsnummer" to fødselsnummer,
         ).singleOrNull { row -> row.string("data") }
 
     fun finnesPersonMedFødselsnummer(fødselsnummer: String) =
         asSQL(
-            " SELECT 1 FROM person WHERE fodselsnummer = :fodselsnummer; ",
-            "fodselsnummer" to fødselsnummer.toLong(),
+            " SELECT 1 FROM person WHERE fødselsnummer = :fodselsnummer; ",
+            "fodselsnummer" to fødselsnummer,
         ).singleOrNull { true } ?: false
 
     fun personHarAdressebeskyttelse(
@@ -48,29 +48,23 @@ class PersonApiDao(dataSource: DataSource) : QueryRunner by MedDataSource(dataSo
         adressebeskyttelse: Adressebeskyttelse,
     ) = asSQL(
         """SELECT 1 FROM person p JOIN person_info pi ON p.info_ref = pi.id
-            WHERE p.fodselsnummer = :fodselsnummer
+            WHERE p.fødselsnummer = :fodselsnummer
             AND pi.adressebeskyttelse = '${adressebeskyttelse.name}'
         """,
-        "fodselsnummer" to fødselsnummer.toLong(),
+        "fodselsnummer" to fødselsnummer,
     ).list { it }.isNotEmpty()
 
     fun finnAktørId(fødselsnummer: String): String =
         asSQL(
-            "SELECT aktor_id FROM person WHERE fodselsnummer = :fodselsnummer",
-            "fodselsnummer" to fødselsnummer.toLong(),
-        ).single { it.string("aktor_id") }
+            "SELECT aktør_id FROM person WHERE fødselsnummer = :fodselsnummer",
+            "fodselsnummer" to fødselsnummer,
+        ).single { it.string("aktør_id") }
 
-    fun finnFødselsnummer(aktørId: Long): String? =
+    fun finnFødselsnumre(aktørId: String): List<String> =
         asSQL(
-            " SELECT fodselsnummer FROM person WHERE aktor_id = :aktor_id; ",
+            " SELECT fødselsnummer FROM person WHERE aktør_id = :aktor_id; ",
             "aktor_id" to aktørId,
-        ).singleOrNull { it.string("fodselsnummer").padStart(11, '0') }
-
-    fun finnFødselsnumre(aktørId: Long): List<String> =
-        asSQL(
-            " SELECT fodselsnummer FROM person WHERE aktor_id = :aktor_id; ",
-            "aktor_id" to aktørId,
-        ).list { it.string("fodselsnummer").padStart(11, '0') }
+        ).list { it.string("fødselsnummer") }
 
     fun harDataNødvendigForVisning(fødselsnummer: String) =
         asSQL(
@@ -80,9 +74,9 @@ class PersonApiDao(dataSource: DataSource) : QueryRunner by MedDataSource(dataSo
             left join person_info pi on p.info_ref = pi.id
             left join egen_ansatt ea on ea.person_ref = p.id
             left join enhet e on p.enhet_ref = e.id
-            where p.fodselsnummer = :fodselsnummer
+            where p.fødselsnummer = :fodselsnummer
                 and (pi.id is not null and ea.er_egen_ansatt is not null and e.id is not null)
             """.trimIndent(),
-            "fodselsnummer" to fødselsnummer.toLong(),
+            "fodselsnummer" to fødselsnummer,
         ).singleOrNull { true } ?: false
 }

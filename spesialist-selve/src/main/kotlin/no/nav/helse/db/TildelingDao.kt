@@ -40,10 +40,10 @@ class TildelingDao(queryRunner: QueryRunner) : TildelingRepository, QueryRunner 
                  RIGHT JOIN oppgave o on v.id = o.vedtak_ref
                  RIGHT JOIN tildeling t on o.id = t.oppgave_id_ref
                  RIGHT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
-            WHERE fodselsnummer = :foedselsnummer AND o.status = 'AvventerSaksbehandler'
+            WHERE fødselsnummer = :foedselsnummer AND o.status = 'AvventerSaksbehandler'
             ORDER BY o.opprettet DESC;
             """.trimIndent(),
-            "foedselsnummer" to fødselsnummer.toLong(),
+            "foedselsnummer" to fødselsnummer,
         ).singleOrNull {
             TildelingDto(
                 navn = it.string("navn"),

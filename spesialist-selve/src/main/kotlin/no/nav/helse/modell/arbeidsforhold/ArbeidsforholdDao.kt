@@ -17,10 +17,10 @@ internal class ArbeidsforholdDao(
         """
         SELECT startdato, sluttdato, stillingstittel, stillingsprosent
         FROM arbeidsforhold
-        WHERE person_ref = (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer)
+        WHERE person_ref = (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer)
           AND arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE orgnummer = :organisasjonsnummer);
         """.trimIndent(),
-        "fodselsnummer" to fødselsnummer.toLong(),
+        "fodselsnummer" to fødselsnummer,
         "organisasjonsnummer" to organisasjonsnummer.toLong(),
     ).list(session) { row ->
         KomplettArbeidsforholdDto(
@@ -47,12 +47,12 @@ internal class ArbeidsforholdDao(
             """
             INSERT INTO arbeidsforhold(person_ref, arbeidsgiver_ref, startdato, sluttdato, stillingstittel, stillingsprosent)
             VALUES(
-                (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer),
+                (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer),
                 (SELECT id FROM arbeidsgiver WHERE orgnummer = :organisasjonsnummer),
                 :startdato, :sluttdato, :stillingstittel, :stillingsprosent
             );
             """.trimIndent(),
-            "fodselsnummer" to arbeidsforholdDto.fødselsnummer.toLong(),
+            "fodselsnummer" to arbeidsforholdDto.fødselsnummer,
             "organisasjonsnummer" to arbeidsforholdDto.organisasjonsnummer.toLong(),
             "startdato" to arbeidsforholdDto.startdato,
             "sluttdato" to arbeidsforholdDto.sluttdato,
@@ -68,10 +68,10 @@ internal class ArbeidsforholdDao(
         asSQL(
             """
             DELETE FROM arbeidsforhold
-            WHERE person_ref = (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer)
+            WHERE person_ref = (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer)
             AND arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE orgnummer = :organisasjonsnummer);
             """.trimIndent(),
-            "fodselsnummer" to fødselsnummer.toLong(),
+            "fodselsnummer" to fødselsnummer,
             "organisasjonsnummer" to organisasjonsnummer.toLong(),
         ).update(session)
     }

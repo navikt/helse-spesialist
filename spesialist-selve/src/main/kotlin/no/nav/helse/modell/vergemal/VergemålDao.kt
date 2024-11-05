@@ -22,7 +22,7 @@ class VergemålDao(session: Session) : VergemålRepository, QueryRunner by MedSe
             """
             INSERT INTO vergemal (person_ref, har_vergemal, har_fremtidsfullmakter, har_fullmakter, vergemål_oppdatert, fullmakt_oppdatert)
             VALUES (
-                (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer),
+                (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer),
                 :har_vergemal,
                 :har_fremtidsfullmakter,
                 :har_fullmakter,
@@ -37,7 +37,7 @@ class VergemålDao(session: Session) : VergemålRepository, QueryRunner by MedSe
                 vergemål_oppdatert = :oppdatert,
                 fullmakt_oppdatert = :oppdatert
             """.trimIndent(),
-            "fodselsnummer" to fødselsnummer.toLong(),
+            "fodselsnummer" to fødselsnummer,
             "har_vergemal" to vergemålOgFremtidsfullmakt.harVergemål,
             "har_fremtidsfullmakter" to vergemålOgFremtidsfullmakt.harFremtidsfullmakter,
             "har_fullmakter" to fullmakt,
@@ -51,9 +51,9 @@ class VergemålDao(session: Session) : VergemålRepository, QueryRunner by MedSe
             SELECT har_vergemal
             FROM vergemal v
                 INNER JOIN person p on p.id = v.person_ref
-            WHERE p.fodselsnummer = :fodselsnummer
+            WHERE p.fødselsnummer = :fodselsnummer
             """.trimIndent(),
-            "fodselsnummer" to fødselsnummer.toLong(),
+            "fodselsnummer" to fødselsnummer,
         ).singleOrNull { it.boolean("har_vergemal") }
 
     fun harFullmakt(fødselsnummer: String): Boolean? =
@@ -62,8 +62,8 @@ class VergemålDao(session: Session) : VergemålRepository, QueryRunner by MedSe
             SELECT har_fremtidsfullmakter, har_fullmakter
                 FROM vergemal v
                     INNER JOIN person p on p.id = v.person_ref
-                WHERE p.fodselsnummer = :fodselsnummer
+                WHERE p.fødselsnummer = :fodselsnummer
             """.trimIndent(),
-            "fodselsnummer" to fødselsnummer.toLong(),
+            "fodselsnummer" to fødselsnummer,
         ).singleOrNull { it.boolean("har_fremtidsfullmakter") || it.boolean("har_fullmakter") }
 }

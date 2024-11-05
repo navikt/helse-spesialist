@@ -78,7 +78,7 @@ class PersonService(
     }
 
     override fun fødselsnumreKnyttetTil(aktørId: String): Set<String> {
-        return personApiDao.finnFødselsnumre(aktørId.toLong()).toSet()
+        return personApiDao.finnFødselsnumre(aktørId).toSet()
     }
 
     override suspend fun hentPerson(

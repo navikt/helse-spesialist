@@ -348,10 +348,10 @@ class OverstyringDao(queryRunner: QueryRunner) : OverstyringRepository, QueryRun
             INSERT INTO overstyring (hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt, vedtaksperiode_id)
             SELECT gen_random_uuid(), :eksternHendelseId, p.id, :saksbehandlerRef, :opprettet, :vedtaksperiodeId
             FROM person p
-            WHERE p.fodselsnummer = :foedselsnummer
+            WHERE p.fødselsnummer = :foedselsnummer
             """.trimIndent(),
             "eksternHendelseId" to request.eksternHendelseId,
-            "foedselsnummer" to request.fødselsnummer.toLong(),
+            "foedselsnummer" to request.fødselsnummer,
             "saksbehandlerRef" to saksbehandlerOid,
             "opprettet" to request.opprettet,
             "vedtaksperiodeId" to request.vedtaksperiodeId,

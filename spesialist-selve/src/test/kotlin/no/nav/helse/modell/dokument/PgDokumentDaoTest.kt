@@ -2,13 +2,13 @@ package no.nav.helse.modell.dokument
 
 import DatabaseIntegrationTest
 import com.fasterxml.jackson.databind.JsonNode
-import java.time.LocalDateTime
-import java.util.UUID
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.UUID
 
 
 internal class PgDokumentDaoTest : DatabaseIntegrationTest() {
@@ -77,8 +77,8 @@ internal class PgDokumentDaoTest : DatabaseIntegrationTest() {
         dokument: JsonNode,
     ) = query(
         """
-            SELECT id FROM person WHERE fodselsnummer=:fodselsnummer
-        """.trimIndent(), "fodselsnummer" to fødselsnummer.toLong()
+            SELECT id FROM person WHERE fødselsnummer = :fodselsnummer
+        """.trimIndent(), "fodselsnummer" to fødselsnummer
     ).single { it.int("id") }?.let { personId ->
         query(
         """

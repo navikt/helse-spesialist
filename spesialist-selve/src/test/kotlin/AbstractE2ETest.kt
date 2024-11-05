@@ -1567,9 +1567,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     ): Int {
         return sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
-            val query = "SELECT COUNT(*) FROM person WHERE fodselsnummer = ? AND aktor_id = ?"
+            val query = "SELECT COUNT(*) FROM person WHERE fødselsnummer = ? AND aktør_id = ?"
             requireNotNull(
-                session.run(queryOf(query, fødselsnummer.toLong(), aktørId.toLong()).map { row -> row.int(1) }.asSingle),
+                session.run(queryOf(query, fødselsnummer, aktørId).map { row -> row.int(1) }.asSingle),
             )
         }
     }

@@ -19,9 +19,9 @@ internal class SykefraværstilfelleDao(private val session: Session) {
             JOIN begrunnelse konklusjon ON konklusjon.id = ss.begrunnelse_konklusjon_ref
             JOIN overstyring o ON ss.overstyring_ref = o.id
             JOIN person ON o.person_ref = person.id
-            WHERE fodselsnummer = :fodselsnummer
+            WHERE fødselsnummer = :fodselsnummer
             """.trimIndent(),
-            "fodselsnummer" to fødselsnummer.toLong(),
+            "fodselsnummer" to fødselsnummer,
         ).list(session) {
             SkjønnsfastsattSykepengegrunnlagDto(
                 type = enumValueOf(it.string("type")),

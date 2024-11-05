@@ -50,8 +50,8 @@ internal class PersonRepository(private val dataSource: DataSource) {
 
     private fun TransactionalSession.finnPerson(fødselsnummer: String): Int? {
         @Language("PostgreSQL")
-        val query = "SELECT id FROM person WHERE fodselsnummer = ?"
-        return run(queryOf(query, fødselsnummer.toLong()).map { it.int("id") }.asSingle)
+        val query = "SELECT id FROM person WHERE fødselsnummer = ?"
+        return run(queryOf(query, fødselsnummer).map { it.int("id") }.asSingle)
     }
 
     private fun TransactionalSession.slettPerson(personRef: Int) {
@@ -394,7 +394,7 @@ internal class PersonRepository(private val dataSource: DataSource) {
     private fun TransactionalSession.slettUnntaFraAutomatisering(fødselsnummer: String) {
         @Language("PostgreSQL")
         val query = "DELETE FROM unnta_fra_automatisk_godkjenning WHERE fødselsnummer = :fodselsnummer"
-        run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer.toLong())).asUpdate)
+        run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer)).asUpdate)
     }
 
     private fun TransactionalSession.slettStansAutomatisering(fødselsnummer: String) {

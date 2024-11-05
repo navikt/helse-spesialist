@@ -21,12 +21,12 @@ class SnapshotApiDao(private val dataSource: DataSource) {
                 SELECT * FROM person AS p
                 INNER JOIN person_info as pi ON pi.id = p.info_ref
                 INNER JOIN snapshot AS s ON s.person_ref = p.id
-                WHERE p.fodselsnummer = :fnr;
+                WHERE p.fødselsnummer = :fnr;
                 """.trimIndent()
             session.run(
                 queryOf(
                     statement,
-                    mapOf("fnr" to fødselsnummer.toLong()),
+                    mapOf("fnr" to fødselsnummer),
                 ).map { row ->
                     val personinfo =
                         Personinfo(
@@ -89,8 +89,8 @@ private fun TransactionalSession.lagre(
 
 private fun TransactionalSession.finnPersonRef(fødselsnummer: String): Int {
     @Language("PostgreSQL")
-    val statement = "SELECT id FROM person WHERE fodselsnummer = ?"
-    return requireNotNull(this.run(queryOf(statement, fødselsnummer.toLong()).map { it.int("id") }.asSingle))
+    val statement = "SELECT id FROM person WHERE fødselsnummer = ?"
+    return requireNotNull(this.run(queryOf(statement, fødselsnummer).map { it.int("id") }.asSingle))
 }
 
 private fun TransactionalSession.finnGlobalVersjon(): Int {

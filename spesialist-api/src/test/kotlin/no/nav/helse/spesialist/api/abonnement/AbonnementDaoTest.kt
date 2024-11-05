@@ -24,7 +24,7 @@ internal class AbonnementDaoTest : DatabaseIntegrationTest() {
         val personId = opprettPerson(aktørId = aktørId)
         lagOpptegnelse(personId, 962)
 
-        abonnementDao.opprettAbonnement(saksbehandlerId, aktørId.toLong())
+        abonnementDao.opprettAbonnement(saksbehandlerId, aktørId)
 
         assertEquals(962, finnSekvensnummer(saksbehandlerId))
     }
@@ -38,7 +38,7 @@ internal class AbonnementDaoTest : DatabaseIntegrationTest() {
         lagOpptegnelse(personId, sekvensnummerForEnUrelatertPerson)
         lagOpptegnelse(personId, endaEtSekvensnummerForEnUrelatertPerson)
 
-        abonnementDao.opprettAbonnement(saksbehandlerId, AKTØRID.toLong())
+        abonnementDao.opprettAbonnement(saksbehandlerId, AKTØRID)
 
         assertEquals(endaEtSekvensnummerForEnUrelatertPerson, finnSekvensnummer(saksbehandlerId))
     }
@@ -51,9 +51,9 @@ internal class AbonnementDaoTest : DatabaseIntegrationTest() {
         opprettPerson(aktørId = aktørId1)
         opprettPerson(aktørId = aktørId2, fødselsnummer = lagFødselsnummer())
 
-        abonnementDao.opprettAbonnement(saksbehandlerId, aktørId1.toLong())
+        abonnementDao.opprettAbonnement(saksbehandlerId, aktørId1)
         assertEquals(listOf(aktørId1), finnPersonerSaksbehandlerAbonnererPå(saksbehandlerId))
-        abonnementDao.opprettAbonnement(saksbehandlerId, aktørId2.toLong())
+        abonnementDao.opprettAbonnement(saksbehandlerId, aktørId2)
         assertEquals(listOf(aktørId2), finnPersonerSaksbehandlerAbonnererPå(saksbehandlerId))
     }
 
@@ -67,7 +67,7 @@ internal class AbonnementDaoTest : DatabaseIntegrationTest() {
         opprettPerson(aktørId = aktørId1, fødselsnummer = fødselsnummer)
 
         assertDoesNotThrow {
-            abonnementDao.opprettAbonnement(saksbehandlerId, aktørId1.toLong())
+            abonnementDao.opprettAbonnement(saksbehandlerId, aktørId1)
         }
     }
 
@@ -95,10 +95,10 @@ internal class AbonnementDaoTest : DatabaseIntegrationTest() {
 
     private fun finnPersonerSaksbehandlerAbonnererPå(saksbehandlerId: UUID) = asSQL(
         """
-            select aktor_id
+            select aktør_id
             from abonnement_for_opptegnelse
             join person p on abonnement_for_opptegnelse.person_id = p.id
             where saksbehandler_id = :saksbehandlerId
         """.trimIndent(), "saksbehandlerId" to saksbehandlerId
-    ).list { it.string("aktor_id") }
+    ).list { it.string("aktør_id") }
 }

@@ -26,21 +26,21 @@ class OverstyringApiDao(
         @Language("PostgreSQL")
         val finnOverstyringQuery = """
             SELECT o.id, o.tidspunkt, o.person_ref, o.hendelse_ref, o.saksbehandler_ref, o.ekstern_hendelse_id, 
-            o.ferdigstilt, ot.id AS overstyring_tidslinje_id, ot.arbeidsgiver_ref, ot.begrunnelse, p.fodselsnummer, 
+            o.ferdigstilt, ot.id AS overstyring_tidslinje_id, ot.arbeidsgiver_ref, ot.begrunnelse, p.fødselsnummer, 
             a.orgnummer, s.navn, s.ident, o.vedtaksperiode_id FROM overstyring o
                 INNER JOIN overstyring_tidslinje ot ON ot.overstyring_ref = o.id
                 INNER JOIN person p ON p.id = o.person_ref
                 INNER JOIN arbeidsgiver a ON a.id = ot.arbeidsgiver_ref
                 INNER JOIN saksbehandler s ON s.oid = o.saksbehandler_ref
-            WHERE p.fodselsnummer = ? 
+            WHERE p.fødselsnummer = ? 
         """
         return this.run(
-            queryOf(finnOverstyringQuery, fødselsnummer.toLong())
+            queryOf(finnOverstyringQuery, fødselsnummer)
                 .map { overstyringRow ->
                     val id = overstyringRow.long("overstyring_tidslinje_id")
                     OverstyringTidslinjeDto(
                         hendelseId = overstyringRow.uuid("hendelse_ref"),
-                        fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
+                        fødselsnummer = overstyringRow.string("fødselsnummer"),
                         organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
                         vedtaksperiodeId = overstyringRow.uuidOrNull("vedtaksperiode_id"),
                         begrunnelse = overstyringRow.string("begrunnelse"),
@@ -75,19 +75,19 @@ class OverstyringApiDao(
         @Language("PostgreSQL")
         val finnOverstyringQuery = """
             SELECT o.id, o.tidspunkt, o.person_ref, o.hendelse_ref, o.saksbehandler_ref, o.ekstern_hendelse_id, 
-            o.ferdigstilt, oi.*, p.fodselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring o
+            o.ferdigstilt, oi.*, p.fødselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring o
                 INNER JOIN overstyring_inntekt oi ON o.id = oi.overstyring_ref
                 INNER JOIN person p ON p.id = o.person_ref
                 INNER JOIN arbeidsgiver a ON a.id = oi.arbeidsgiver_ref
                 INNER JOIN saksbehandler s ON s.oid = o.saksbehandler_ref
-            WHERE p.fodselsnummer = ?
+            WHERE p.fødselsnummer = ?
         """
         return this.run(
-            queryOf(finnOverstyringQuery, fødselsnummer.toLong())
+            queryOf(finnOverstyringQuery, fødselsnummer)
                 .map { overstyringRow ->
                     OverstyringInntektDto(
                         hendelseId = overstyringRow.uuid("hendelse_ref"),
-                        fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
+                        fødselsnummer = overstyringRow.string("fødselsnummer"),
                         organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
                         begrunnelse = overstyringRow.string("begrunnelse"),
                         forklaring = overstyringRow.string("forklaring"),
@@ -120,7 +120,7 @@ class OverstyringApiDao(
         val finnSkjønnsfastsettingQuery = """
                 SELECT o.id, o.tidspunkt, o.person_ref, o.hendelse_ref, o.saksbehandler_ref, o.ekstern_hendelse_id, 
                 o.ferdigstilt, ss.arsak, ss.type, ssa.arlig, ssa.fra_arlig, ss.skjaeringstidspunkt, 
-                b1.tekst as fritekst, b2.tekst as mal, b3.tekst as konklusjon, p.fodselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring o
+                b1.tekst as fritekst, b2.tekst as mal, b3.tekst as konklusjon, p.fødselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring o
                     INNER JOIN skjonnsfastsetting_sykepengegrunnlag ss ON o.id = ss.overstyring_ref
                     INNER JOIN skjonnsfastsetting_sykepengegrunnlag_arbeidsgiver ssa ON ssa.skjonnsfastsetting_sykepengegrunnlag_ref = ss.id
                     INNER JOIN person p ON p.id = o.person_ref
@@ -129,14 +129,14 @@ class OverstyringApiDao(
                     INNER JOIN begrunnelse b1 ON ss.begrunnelse_fritekst_ref = b1.id 
                     INNER JOIN begrunnelse b2 ON ss.begrunnelse_mal_ref = b2.id 
                     INNER JOIN begrunnelse b3 ON ss.begrunnelse_konklusjon_ref = b3.id 
-                WHERE p.fodselsnummer = ?
+                WHERE p.fødselsnummer = ?
             """
         return this.run(
-            queryOf(finnSkjønnsfastsettingQuery, fødselsnummer.toLong())
+            queryOf(finnSkjønnsfastsettingQuery, fødselsnummer)
                 .map { overstyringRow ->
                     SkjønnsfastsettingSykepengegrunnlagDto(
                         hendelseId = overstyringRow.uuid("hendelse_ref"),
-                        fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
+                        fødselsnummer = overstyringRow.string("fødselsnummer"),
                         organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
                         timestamp = overstyringRow.localDateTime("tidspunkt"),
                         saksbehandlerNavn = overstyringRow.string("navn"),
@@ -163,20 +163,20 @@ class OverstyringApiDao(
         val finnOverstyringMinimumSykdomsgradQuery = """
                 SELECT o.id, o.tidspunkt, o.person_ref, o.hendelse_ref, o.saksbehandler_ref, o.ekstern_hendelse_id, 
                 o.ferdigstilt, o.vedtaksperiode_id, oms.fom, oms.tom, oms.vurdering, oms.begrunnelse, omsa.berort_vedtaksperiode_id, 
-                p.fodselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring o
+                p.fødselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring o
                     INNER JOIN overstyring_minimum_sykdomsgrad oms ON o.id = oms.overstyring_ref
                     INNER JOIN overstyring_minimum_sykdomsgrad_arbeidsgiver omsa ON omsa.overstyring_minimum_sykdomsgrad_ref = oms.id
                     INNER JOIN person p ON p.id = o.person_ref
                     INNER JOIN arbeidsgiver a ON a.id = omsa.arbeidsgiver_ref
                     INNER JOIN saksbehandler s ON s.oid = o.saksbehandler_ref
-                WHERE p.fodselsnummer = ?
+                WHERE p.fødselsnummer = ?
             """
         return this.run(
-            queryOf(finnOverstyringMinimumSykdomsgradQuery, fødselsnummer.toLong())
+            queryOf(finnOverstyringMinimumSykdomsgradQuery, fødselsnummer)
                 .map { overstyringRow ->
                     OverstyringMinimumSykdomsgradDto(
                         hendelseId = overstyringRow.uuid("hendelse_ref"),
-                        fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
+                        fødselsnummer = overstyringRow.string("fødselsnummer"),
                         organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
                         timestamp = overstyringRow.localDateTime("tidspunkt"),
                         saksbehandlerNavn = overstyringRow.string("navn"),
@@ -196,19 +196,19 @@ class OverstyringApiDao(
         @Language("PostgreSQL")
         val finnOverstyringQuery = """
                 SELECT o.id, o.tidspunkt, o.person_ref, o.hendelse_ref, o.saksbehandler_ref, o.ekstern_hendelse_id, 
-                o.ferdigstilt, oa.*, p.fodselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring o 
+                o.ferdigstilt, oa.*, p.fødselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring o 
                     INNER JOIN overstyring_arbeidsforhold oa ON o.id = oa.overstyring_ref
                     INNER JOIN person p ON p.id = o.person_ref
                     INNER JOIN arbeidsgiver a ON a.id = oa.arbeidsgiver_ref
                     INNER JOIN saksbehandler s ON s.oid = o.saksbehandler_ref
-                WHERE p.fodselsnummer = ?
+                WHERE p.fødselsnummer = ?
             """
         return this.run(
-            queryOf(finnOverstyringQuery, fødselsnummer.toLong())
+            queryOf(finnOverstyringQuery, fødselsnummer)
                 .map { overstyringRow ->
                     OverstyringArbeidsforholdDto(
                         hendelseId = overstyringRow.uuid("hendelse_ref"),
-                        fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
+                        fødselsnummer = overstyringRow.string("fødselsnummer"),
                         organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
                         begrunnelse = overstyringRow.string("begrunnelse"),
                         forklaring = overstyringRow.string("forklaring"),
@@ -222,6 +222,4 @@ class OverstyringApiDao(
                 }.asList,
         )
     }
-
-    private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
 }

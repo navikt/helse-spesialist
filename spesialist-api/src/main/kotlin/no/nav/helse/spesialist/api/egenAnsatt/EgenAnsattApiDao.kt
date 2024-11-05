@@ -12,8 +12,8 @@ class EgenAnsattApiDao(private val dataSource: DataSource) : QueryRunner by MedD
             SELECT er_egen_ansatt
                 FROM egen_ansatt ea
                     INNER JOIN person p on p.id = ea.person_ref
-                WHERE p.fodselsnummer = :fodselsnummer
+                WHERE p.fødselsnummer = :fodselsnummer
             """.trimIndent(),
-            "fodselsnummer" to fødselsnummer.toLong(),
+            "fodselsnummer" to fødselsnummer,
         ).singleOrNull { it.boolean("er_egen_ansatt") }
 }

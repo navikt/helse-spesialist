@@ -1,10 +1,8 @@
 package no.nav.helse.modell.dokument
 
 import com.fasterxml.jackson.databind.JsonNode
-import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.db.MedDataSource
-import no.nav.helse.db.MedSession
 import no.nav.helse.db.QueryRunner
 import no.nav.helse.objectMapper
 import java.util.UUID
@@ -26,7 +24,6 @@ internal interface DokumentDao {
 }
 
 internal class PgDokumentDao(queryRunner: QueryRunner) : DokumentDao, QueryRunner by queryRunner {
-    constructor(session: Session) : this(MedSession(session))
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun lagre(
@@ -36,9 +33,9 @@ internal class PgDokumentDao(queryRunner: QueryRunner) : DokumentDao, QueryRunne
     ) {
         asSQL(
             """
-            SELECT id FROM person WHERE fodselsnummer=:fodselsnummer
+            SELECT id FROM person WHERE fødselsnummer=:fodselsnummer
             """.trimIndent(),
-            "fodselsnummer" to fødselsnummer.toLong(),
+            "fodselsnummer" to fødselsnummer,
         ).singleOrNull { it.int("id") }?.let { personId ->
             asSQL(
                 """
@@ -63,9 +60,9 @@ internal class PgDokumentDao(queryRunner: QueryRunner) : DokumentDao, QueryRunne
     ): JsonNode? =
         asSQL(
             """
-            SELECT dokument FROM dokumenter WHERE person_ref = (SELECT id FROM person WHERE fodselsnummer=:fodselsnummer) AND dokument_id =:dokumentId
+            SELECT dokument FROM dokumenter WHERE person_ref = (SELECT id FROM person WHERE fødselsnummer=:fodselsnummer) AND dokument_id =:dokumentId
             """.trimIndent(),
-            "fodselsnummer" to fødselsnummer.toLong(),
+            "fodselsnummer" to fødselsnummer,
             "dokumentId" to dokumentId,
         ).singleOrNull { row ->
             row.stringOrNull("dokument")?.let { dokument -> objectMapper.readTree(dokument) }

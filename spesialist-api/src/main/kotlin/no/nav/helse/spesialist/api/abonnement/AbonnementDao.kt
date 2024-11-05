@@ -9,10 +9,10 @@ import javax.sql.DataSource
 class AbonnementDao(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource) {
     fun opprettAbonnement(
         saksbehandlerId: UUID,
-        aktørId: Long,
+        aktørId: String,
     ) {
         lagre(saksbehandlerId, aktørId)
-        upsertSekvensnummer(saksbehandlerId, aktørId)
+        upsertSekvensnummer(saksbehandlerId)
     }
 
     fun registrerSistekvensnummer(
@@ -29,10 +29,7 @@ class AbonnementDao(dataSource: DataSource) : QueryRunner by MedDataSource(dataS
             "saksbehandlerId" to saksbehandlerIdent,
         ).update()
 
-    private fun upsertSekvensnummer(
-        saksbehandlerId: UUID,
-        aktørId: Long,
-    ) {
+    private fun upsertSekvensnummer(saksbehandlerId: UUID) {
         asSQL(
             """
             insert into saksbehandler_opptegnelse_sekvensnummer
@@ -41,13 +38,12 @@ class AbonnementDao(dataSource: DataSource) : QueryRunner by MedDataSource(dataS
                 set siste_sekvensnummer = (coalesce((select max(sekvensnummer) from opptegnelse), 0))
             """.trimIndent(),
             "saksbehandlerId" to saksbehandlerId,
-            "aktorId" to aktørId,
         ).update()
     }
 
     private fun lagre(
         saksbehandlerId: UUID,
-        aktørId: Long,
+        aktørId: String,
     ) {
         asSQL(
             """
@@ -55,7 +51,7 @@ class AbonnementDao(dataSource: DataSource) : QueryRunner by MedDataSource(dataS
             insert into abonnement_for_opptegnelse
             select :saksbehandlerId, p.id
             from person p
-            where p.aktor_id = :aktorId
+            where p.aktør_id = :aktorId
             """.trimIndent(),
             "saksbehandlerId" to saksbehandlerId,
             "aktorId" to aktørId,

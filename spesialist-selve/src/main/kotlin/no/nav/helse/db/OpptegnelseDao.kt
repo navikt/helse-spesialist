@@ -23,9 +23,9 @@ class OpptegnelseDao(private val queryRunner: QueryRunner) : OpptegnelseReposito
             INSERT INTO opptegnelse (person_id, payload, type)
             SELECT id, :payload::jsonb, :type
             FROM person
-            WHERE fodselsnummer = :fodselsnummer
+            WHERE fødselsnummer = :fodselsnummer
             """.trimIndent(),
-            "fodselsnummer" to fødselsnummer.toLong(),
+            "fodselsnummer" to fødselsnummer,
             "payload" to payload.toJson(),
             "type" to "$type",
         ).update()
@@ -34,7 +34,7 @@ class OpptegnelseDao(private val queryRunner: QueryRunner) : OpptegnelseReposito
     override fun finnOpptegnelser(saksbehandlerIdent: UUID) =
         asSQL(
             """
-            SELECT o.sekvensnummer, p.aktor_id, o.payload, o.type
+            SELECT o.sekvensnummer, p.aktør_id, o.payload, o.type
             FROM opptegnelse o
             JOIN person p ON o.person_id = p.id
             JOIN abonnement_for_opptegnelse a ON a.person_id = o.person_id
@@ -46,7 +46,7 @@ class OpptegnelseDao(private val queryRunner: QueryRunner) : OpptegnelseReposito
         ).list { row ->
             Opptegnelse(
                 payload = row.string("payload"),
-                aktorId = row.long("aktor_id").toString(),
+                aktorId = row.long("aktør_id").toString(),
                 sekvensnummer = row.int("sekvensnummer"),
                 type = Opptegnelsetype.valueOf(row.string("type")),
             )

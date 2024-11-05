@@ -39,10 +39,10 @@ class PgVedtakDao(queryRunner: QueryRunner) : VedtakDao, QueryRunner by queryRun
         asSQL(
             """
             INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, forkastet)
-            VALUES (:vedtaksperiode_id, :fom, :tom, (SELECT id FROM arbeidsgiver WHERE orgnummer = :organisasjonsnummer), (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer), :forkastet)
+            VALUES (:vedtaksperiode_id, :fom, :tom, (SELECT id FROM arbeidsgiver WHERE orgnummer = :organisasjonsnummer), (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer), :forkastet)
             ON CONFLICT (vedtaksperiode_id) DO UPDATE SET forkastet = excluded.forkastet
             """,
-            "fodselsnummer" to fødselsnummer.toLong(),
+            "fodselsnummer" to fødselsnummer,
             "organisasjonsnummer" to vedtaksperiodeDto.organisasjonsnummer.toLong(),
             "vedtaksperiode_id" to vedtaksperiodeDto.vedtaksperiodeId,
             "fom" to vedtaksperiodeDto.generasjoner.last().fom,

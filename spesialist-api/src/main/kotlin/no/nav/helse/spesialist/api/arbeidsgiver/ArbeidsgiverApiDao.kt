@@ -43,10 +43,10 @@ class ArbeidsgiverApiDao(dataSource: DataSource) : QueryRunner by MedDataSource(
         """
         SELECT startdato, sluttdato, stillingstittel, stillingsprosent FROM arbeidsforhold
         WHERE arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE orgnummer = :orgnummer)
-        AND person_ref = (SELECT id FROM person WHERE fodselsnummer = :fnr);
+        AND person_ref = (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer);
         """.trimIndent(),
         "orgnummer" to organisasjonsnummer.toLong(),
-        "fnr" to fødselsnummer.toLong(),
+        "fodselsnummer" to fødselsnummer,
     ).list { tilArbeidsforholdApiDto(organisasjonsnummer, it) }
 
     internal fun finnArbeidsgiverInntekterFraAordningen(
@@ -56,9 +56,9 @@ class ArbeidsgiverApiDao(dataSource: DataSource) : QueryRunner by MedDataSource(
         asSQL(
             """
             SELECT inntekter, skjaeringstidspunkt FROM inntekt
-            WHERE person_ref=(SELECT id FROM person p WHERE p.fodselsnummer = :fodselsnummer)
+            WHERE person_ref=(SELECT id FROM person p WHERE p.fødselsnummer = :fodselsnummer)
             """.trimIndent(),
-            "fodselsnummer" to fødselsnummer.toLong(),
+            "fodselsnummer" to fødselsnummer,
         ).list { row ->
             ArbeidsgiverInntekterFraAOrdningen(
                 skjaeringstidspunkt = row.string("skjaeringstidspunkt"),

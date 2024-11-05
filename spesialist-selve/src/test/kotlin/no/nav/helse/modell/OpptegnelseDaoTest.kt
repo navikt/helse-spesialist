@@ -28,7 +28,7 @@ internal class OpptegnelseDaoTest : DatabaseIntegrationTest() {
     fun `Kan opprette abonnement og få opptegnelser`() {
         opprettPerson()
         opprettSaksbehandler()
-        abonnementDao.opprettAbonnement(SAKSBEHANDLER_OID, AKTØR.toLong())
+        abonnementDao.opprettAbonnement(SAKSBEHANDLER_OID, AKTØR)
         opptegnelseDao.opprettOpptegnelse(
             FNR,
             UTBETALING_PAYLOAD,
@@ -41,12 +41,12 @@ internal class OpptegnelseDaoTest : DatabaseIntegrationTest() {
         assertEquals(2, alle.size)
 
         alle.first { it.type == Opptegnelsetype.UTBETALING_ANNULLERING_OK }.also { opptegnelse ->
-            assertEquals(AKTØR.toLong(), opptegnelse.aktorId.toLong())
+            assertEquals(AKTØR, opptegnelse.aktorId)
             assertJson(UTBETALING_PAYLOAD.toJson(), opptegnelse.payload)
         }
 
         alle.first { it.type == Opptegnelsetype.NY_SAKSBEHANDLEROPPGAVE }.also { opptegnelse ->
-            assertEquals(AKTØR.toLong(), opptegnelse.aktorId.toLong())
+            assertEquals(AKTØR, opptegnelse.aktorId)
             assertJson(GODKJENNINGSBEHOV_PAYLOAD.toJson(), opptegnelse.payload)
         }
     }
@@ -60,7 +60,7 @@ internal class OpptegnelseDaoTest : DatabaseIntegrationTest() {
             UTBETALING_PAYLOAD,
             UTBETALING_ANNULLERING_OK
         )
-        abonnementDao.opprettAbonnement(SAKSBEHANDLER_OID, AKTØR.toLong())
+        abonnementDao.opprettAbonnement(SAKSBEHANDLER_OID, AKTØR)
 
         val alle = opptegnelseDao.finnOpptegnelser(SAKSBEHANDLER_OID)
         assertEquals(0, alle.size)

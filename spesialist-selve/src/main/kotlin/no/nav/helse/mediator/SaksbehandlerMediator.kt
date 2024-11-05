@@ -329,7 +329,7 @@ internal class SaksbehandlerMediator(
     ) {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         SaksbehandlerLagrer(saksbehandlerDao).lagre(saksbehandler)
-        abonnementDao.opprettAbonnement(saksbehandler.oid(), personidentifikator.toLong())
+        abonnementDao.opprettAbonnement(saksbehandler.oid(), personidentifikator)
     }
 
     override fun hentAbonnerteOpptegnelser(

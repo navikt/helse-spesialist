@@ -260,7 +260,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             """
                 SELECT COUNT(1) FROM overstyring o 
                 INNER JOIN overstyring_tidslinje ot on o.id = ot.overstyring_ref 
-                WHERE o.person_ref = (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer)
+                WHERE o.person_ref = (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer)
             """
         val antallOverstyrTidslinje =
             sessionOf(dataSource).use { session ->
@@ -268,7 +268,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                     queryOf(
                         query,
                         mapOf(
-                            "fodselsnummer" to fødselsnummer.toLong(),
+                            "fodselsnummer" to fødselsnummer,
                         ),
                     ).map { it.int(1) }.asSingle,
                 )
@@ -286,7 +286,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             """
                 SELECT COUNT(1) FROM overstyring o
                 INNER JOIN overstyring_arbeidsforhold oa on o.id = oa.overstyring_ref
-                WHERE o.person_ref = (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer)
+                WHERE o.person_ref = (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer)
             """
         val antallOverstyrArbeidsforhold =
             sessionOf(dataSource).use { session ->
@@ -294,7 +294,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                     queryOf(
                         query,
                         mapOf(
-                            "fodselsnummer" to fødselsnummer.toLong(),
+                            "fodselsnummer" to fødselsnummer,
                         ),
                     ).map { it.int(1) }.asSingle,
                 )
@@ -312,7 +312,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             """
                 SELECT COUNT(1) FROM overstyring o
                 INNER JOIN overstyring_inntekt oi on o.id = oi.overstyring_ref
-                WHERE o.person_ref = (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer)
+                WHERE o.person_ref = (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer)
             """
         val antallOverstyrInntektOgRefusjon =
             sessionOf(dataSource).use { session ->
@@ -320,7 +320,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                     queryOf(
                         query,
                         mapOf(
-                            "fodselsnummer" to fødselsnummer.toLong(),
+                            "fodselsnummer" to fødselsnummer,
                         ),
                     ).map { it.int(1) }.asSingle,
                 )

@@ -22,13 +22,13 @@ class EgenAnsattDao(queryRunner: QueryRunner) : EgenAnsattRepository, QueryRunne
             """
             INSERT INTO egen_ansatt (person_ref, er_egen_ansatt, opprettet)
             VALUES (
-                (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer),
+                (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer),
                 :er_egen_ansatt,
                 :opprettet
             )
             ON CONFLICT (person_ref) DO UPDATE SET er_egen_ansatt = :er_egen_ansatt, opprettet = :opprettet
             """.trimIndent(),
-            "fodselsnummer" to fødselsnummer.toLong(),
+            "fodselsnummer" to fødselsnummer,
             "er_egen_ansatt" to erEgenAnsatt,
             "opprettet" to opprettet,
         ).update()
@@ -40,8 +40,8 @@ class EgenAnsattDao(queryRunner: QueryRunner) : EgenAnsattRepository, QueryRunne
             SELECT er_egen_ansatt
             FROM egen_ansatt ea
                 INNER JOIN person p on p.id = ea.person_ref
-            WHERE p.fodselsnummer = :fodselsnummer
+            WHERE p.fødselsnummer = :fodselsnummer
             """.trimIndent(),
-            "fodselsnummer" to fødselsnummer.toLong(),
+            "fodselsnummer" to fødselsnummer,
         ).singleOrNull { it.boolean("er_egen_ansatt") }
 }

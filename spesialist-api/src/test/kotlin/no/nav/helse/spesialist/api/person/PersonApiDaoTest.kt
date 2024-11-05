@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.api.person
 
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse.Ugradert
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -37,12 +36,6 @@ internal class PersonApiDaoTest : DatabaseIntegrationTest() {
     fun `person med ukjent adressebeskyttelse er (kanskje) ikke kode 7`() {
         opprettPerson(adressebeskyttelse = Adressebeskyttelse.Ukjent)
         assertFalse(personApiDao.personHarAdressebeskyttelse(FØDSELSNUMMER, Adressebeskyttelse.Fortrolig))
-    }
-
-    @Test
-    fun `henter fødselsnummer for person med gitt aktørId`() {
-        opprettPerson()
-        assertEquals(FØDSELSNUMMER, personApiDao.finnFødselsnummer(AKTØRID.toLong()))
     }
 
     @Test

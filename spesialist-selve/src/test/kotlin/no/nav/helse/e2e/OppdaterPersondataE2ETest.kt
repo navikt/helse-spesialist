@@ -1,11 +1,11 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
-import java.time.LocalDate
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class OppdaterPersondataE2ETest : AbstractE2ETest() {
 
@@ -34,8 +34,8 @@ internal class OppdaterPersondataE2ETest : AbstractE2ETest() {
         sessionOf(dataSource).use {
             it.run(
                 queryOf(
-                    "update person set infotrygdutbetalinger_oppdatert = now() - interval '$antallDager days' where fodselsnummer=:fnr",
-                    mapOf("fnr" to fødselsnummer.toLong()),
+                    "update person set infotrygdutbetalinger_oppdatert = now() - interval '$antallDager days' where fødselsnummer=:fnr",
+                    mapOf("fnr" to fødselsnummer),
                 ).asUpdate
             )
         }
@@ -47,8 +47,8 @@ internal class OppdaterPersondataE2ETest : AbstractE2ETest() {
         val dato = sessionOf(dataSource).use {
             it.run(
                 queryOf(
-                    "select infotrygdutbetalinger_oppdatert from person where fodselsnummer=:fnr",
-                    mapOf("fnr" to fødselsnummer.toLong()),
+                    "select infotrygdutbetalinger_oppdatert from person where fødselsnummer=:fnr",
+                    mapOf("fnr" to fødselsnummer),
                 ).map { row -> row.localDate(1) }.asSingle
             )
         }
