@@ -45,6 +45,8 @@ private val organisasjonsnavnDel2 = listOf("AVDELINGEN", "SENTERET", "FORUM", "K
 fun lagOrganisasjonsnavn() = organisasjonsnavnDel1.random() + organisasjonsnavnDel2.random()
 
 fun lagSaksbehandlerident() = ('A'..'Z').random() + "${nextInt(from = 100_000, until = 999_999)}"
+fun lagSaksbehandlernavn() = "${lagFornavn()} ${lagEtternavn()}"
+fun lagEpostadresseFraFulltNavn(navn: String) = navn.split(" ").joinToString(".").lowercase() + "@nav.no"
 
 fun fødselsdato(): LocalDate {
     val end = LocalDate.now().minusYears(18)

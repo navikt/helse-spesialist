@@ -29,6 +29,7 @@ import no.nav.helse.mediator.oppgave.OppgaveMapper.tilOppgaverTilBehandling
 import no.nav.helse.modell.Modellfeil
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.Oppgave.Companion.nyOppgave
 import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
@@ -89,15 +90,21 @@ internal class OppgaveService(
     internal fun nyOppgave(
         fødselsnummer: String,
         contextId: UUID,
-        opprettOppgaveBlock: (reservertId: Long) -> Oppgave,
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+        hendelseId: UUID,
+        kanAvvises: Boolean,
+        egenskaper: Set<Egenskap>,
     ) {
+        logg.info("Oppretter saksbehandleroppgave")
+        sikkerlogg.info("Oppretter saksbehandleroppgave for {}", kv("fødselsnummer", fødselsnummer))
         val nesteId = oppgaveDao.reserverNesteId()
-        val oppgave = opprettOppgaveBlock(nesteId)
         val oppgavemelder = Oppgavemelder(fødselsnummer, rapidsConnection)
+        val oppgave = nyOppgave(nesteId, vedtaksperiodeId, utbetalingId, hendelseId, kanAvvises, egenskaper)
         oppgave.register(oppgavemelder)
+        oppgavemelder.oppgaveOpprettet(oppgave)
         tildelVedReservasjon(fødselsnummer, oppgave)
         Oppgavelagrer(tildelingRepository).lagre(this, oppgave.toDto(), contextId)
-        oppgavemelder.oppgaveOpprettet(oppgave)
     }
 
     fun <T> oppgave(

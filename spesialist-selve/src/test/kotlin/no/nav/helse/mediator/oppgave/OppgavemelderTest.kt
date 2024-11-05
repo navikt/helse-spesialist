@@ -83,7 +83,7 @@ class OppgavemelderTest {
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         utbetalingId = UTBETALING_ID,
         hendelseId = HENDELSE_ID,
-        egenskaper = listOf(SØKNAD),
+        egenskaper = setOf(SØKNAD),
         totrinnsvurdering = totrinnsvurdering,
         kanAvvises = true,
     )

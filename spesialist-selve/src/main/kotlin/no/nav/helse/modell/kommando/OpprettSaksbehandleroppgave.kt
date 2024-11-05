@@ -35,7 +35,6 @@ import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.oppgave.Egenskap.UTLAND
 import no.nav.helse.modell.oppgave.Egenskap.VERGEMÅL
-import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
@@ -44,7 +43,6 @@ import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
-import org.slf4j.LoggerFactory
 import java.util.UUID
 
 internal class OpprettSaksbehandleroppgave(
@@ -61,22 +59,17 @@ internal class OpprettSaksbehandleroppgave(
     private val vedtakDao: VedtakDao,
     private val påVentRepository: PåVentRepository,
 ) : Command {
-    private companion object {
-        private val logg = LoggerFactory.getLogger(OpprettSaksbehandleroppgave::class.java)
-        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-    }
-
     override fun execute(context: CommandContext): Boolean {
         val fødselsnummer = behovData.fødselsnummer
         val vedtaksperiodeId = behovData.vedtaksperiodeId
         val hendelseId = behovData.id
-        val utbetalingId = utbetaling.utbetalingId
+        val utbetalingId = behovData.utbetalingId
         val periodetype = behovData.periodetype
         val inntektskilde = behovData.inntektskilde
         val kanAvvises = behovData.kanAvvises
 
         val egenskaper =
-            emptyList<Egenskap>()
+            emptySet<Egenskap>()
                 .vurderEgenAnsatt(fødselsnummer)
                 .vurderAdressebeskyttelse(fødselsnummer)
                 .vurderOppgavetype(utbetalingtype)
@@ -95,23 +88,16 @@ internal class OpprettSaksbehandleroppgave(
                 .vurderMedlemskap(vedtaksperiodeId)
                 .vurderHaster(vedtaksperiodeId)
 
-        oppgaveService.nyOppgave(fødselsnummer, context.id()) { reservertId ->
-            val oppgave = Oppgave.nyOppgave(reservertId, vedtaksperiodeId, utbetalingId, hendelseId, kanAvvises, egenskaper)
-
-            logg.info("Saksbehandleroppgave opprettet, avventer lagring: $oppgave")
-            sikkerLogg.info("Saksbehandleroppgave opprettet, avventer lagring: $oppgave")
-            oppgave
-        }
-
+        oppgaveService.nyOppgave(fødselsnummer, context.id(), vedtaksperiodeId, utbetalingId, hendelseId, kanAvvises, egenskaper)
         return true
     }
 
-    private fun List<Egenskap>.vurderEgenAnsatt(fødselsnummer: String): List<Egenskap> {
+    private fun Set<Egenskap>.vurderEgenAnsatt(fødselsnummer: String): Set<Egenskap> {
         if (egenAnsattRepository.erEgenAnsatt(fødselsnummer) == true) return this + EGEN_ANSATT
         return this
     }
 
-    private fun List<Egenskap>.vurderAdressebeskyttelse(fødselsnummer: String): List<Egenskap> {
+    private fun Set<Egenskap>.vurderAdressebeskyttelse(fødselsnummer: String): Set<Egenskap> {
         val adressebeskyttelse = personRepository.finnAdressebeskyttelse(fødselsnummer) ?: return this
         return when (adressebeskyttelse) {
             Adressebeskyttelse.StrengtFortrolig,
@@ -122,37 +108,37 @@ internal class OpprettSaksbehandleroppgave(
         }
     }
 
-    private fun List<Egenskap>.vurderOppgavetype(utbetalingtype: Utbetalingtype): List<Egenskap> {
+    private fun Set<Egenskap>.vurderOppgavetype(utbetalingtype: Utbetalingtype): Set<Egenskap> {
         if (utbetalingtype == Utbetalingtype.REVURDERING) return this + REVURDERING
         return this + SØKNAD
     }
 
-    private fun List<Egenskap>.vurderStikkprøve(
+    private fun Set<Egenskap>.vurderStikkprøve(
         vedtaksperiodeId: UUID,
         hendelseId: UUID,
-    ): List<Egenskap> {
+    ): Set<Egenskap> {
         if (automatisering.erStikkprøve(vedtaksperiodeId, hendelseId)) return this + STIKKPRØVE
         return this
     }
 
-    private fun List<Egenskap>.vurderVurderingsmomenter(vedtaksperiodeId: UUID): List<Egenskap> {
+    private fun Set<Egenskap>.vurderVurderingsmomenter(vedtaksperiodeId: UUID): Set<Egenskap> {
         if (!this.contains(REVURDERING) && risikovurderingRepository.kreverSupersaksbehandler(vedtaksperiodeId)) {
             return this + RISK_QA
         }
         return this
     }
 
-    private fun List<Egenskap>.vurderVergemål(fødselsnummer: String): List<Egenskap> {
+    private fun Set<Egenskap>.vurderVergemål(fødselsnummer: String): Set<Egenskap> {
         if (vergemålRepository.harVergemål(fødselsnummer) == true) return this + VERGEMÅL
         return this
     }
 
-    private fun List<Egenskap>.vurderEnhetUtland(fødselsnummer: String): List<Egenskap> {
+    private fun Set<Egenskap>.vurderEnhetUtland(fødselsnummer: String): Set<Egenskap> {
         if (HentEnhetløsning.erEnhetUtland(personRepository.finnEnhetId(fødselsnummer))) return this + UTLAND
         return this
     }
 
-    private fun List<Egenskap>.vurderMottaker(): List<Egenskap> {
+    private fun Set<Egenskap>.vurderMottaker(): Set<Egenskap> {
         return when {
             utbetaling.delvisRefusjon() -> this + DELVIS_REFUSJON
             utbetaling.kunUtbetalingTilSykmeldt() -> this + UTBETALING_TIL_SYKMELDT
@@ -162,14 +148,14 @@ internal class OpprettSaksbehandleroppgave(
         }
     }
 
-    private fun List<Egenskap>.vurderInntektskilde(inntektskilde: Inntektskilde): List<Egenskap> {
+    private fun Set<Egenskap>.vurderInntektskilde(inntektskilde: Inntektskilde): Set<Egenskap> {
         return when (inntektskilde) {
             Inntektskilde.EN_ARBEIDSGIVER -> this + EN_ARBEIDSGIVER
             Inntektskilde.FLERE_ARBEIDSGIVERE -> this + FLERE_ARBEIDSGIVERE
         }
     }
 
-    private fun List<Egenskap>.vurderPeriodetype(periodetype: Periodetype): List<Egenskap> {
+    private fun Set<Egenskap>.vurderPeriodetype(periodetype: Periodetype): Set<Egenskap> {
         return when (periodetype) {
             Periodetype.FØRSTEGANGSBEHANDLING -> this + FORSTEGANGSBEHANDLING
             Periodetype.FORLENGELSE -> this + FORLENGELSE
@@ -178,37 +164,37 @@ internal class OpprettSaksbehandleroppgave(
         }
     }
 
-    private fun List<Egenskap>.vurderSpesialsak(vedtaksperiodeId: UUID): List<Egenskap> {
+    private fun Set<Egenskap>.vurderSpesialsak(vedtaksperiodeId: UUID): Set<Egenskap> {
         if (vedtakDao.erSpesialsak(vedtaksperiodeId)) return this + SPESIALSAK
         return this
     }
 
-    private fun List<Egenskap>.vurderPåVent(vedtaksperiodeId: UUID): List<Egenskap> {
+    private fun Set<Egenskap>.vurderPåVent(vedtaksperiodeId: UUID): Set<Egenskap> {
         if (påVentRepository.erPåVent(vedtaksperiodeId)) return this + PÅ_VENT
         return this
     }
 
-    private fun List<Egenskap>.vurderSkjønnsfastsettelse(vedtaksperiodeId: UUID): List<Egenskap> {
+    private fun Set<Egenskap>.vurderSkjønnsfastsettelse(vedtaksperiodeId: UUID): Set<Egenskap> {
         if (sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId)) return this + SKJØNNSFASTSETTELSE
         return this
     }
 
-    private fun List<Egenskap>.vurderTilbakedatert(vedtaksperiodeId: UUID): List<Egenskap> {
+    private fun Set<Egenskap>.vurderTilbakedatert(vedtaksperiodeId: UUID): Set<Egenskap> {
         if (sykefraværstilfelle.erTilbakedatert(vedtaksperiodeId)) return this + TILBAKEDATERT
         return this
     }
 
-    private fun List<Egenskap>.vurderKunÅpenGosysOppgave(vedtaksperiodeId: UUID): List<Egenskap> {
+    private fun Set<Egenskap>.vurderKunÅpenGosysOppgave(vedtaksperiodeId: UUID): Set<Egenskap> {
         if (sykefraværstilfelle.harKunÅpenGosysOppgave(vedtaksperiodeId)) return this + GOSYS
         return this
     }
 
-    private fun List<Egenskap>.vurderMedlemskap(vedtaksperiodeId: UUID): List<Egenskap> {
+    private fun Set<Egenskap>.vurderMedlemskap(vedtaksperiodeId: UUID): Set<Egenskap> {
         if (sykefraværstilfelle.harMedlemskapsvarsel(vedtaksperiodeId)) return this + MEDLEMSKAP
         return this
     }
 
-    private fun List<Egenskap>.vurderHaster(vedtaksperiodeId: UUID): List<Egenskap> {
+    private fun Set<Egenskap>.vurderHaster(vedtaksperiodeId: UUID): Set<Egenskap> {
         if (sykefraværstilfelle.haster(vedtaksperiodeId) && utbetaling.harEndringIUtbetalingTilSykmeldt()) return this + HASTER
         return this
     }

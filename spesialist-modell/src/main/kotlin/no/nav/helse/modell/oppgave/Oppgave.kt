@@ -333,12 +333,19 @@ class Oppgave private constructor(
             utbetalingId: UUID,
             hendelseId: UUID,
             kanAvvises: Boolean,
-            egenskaper: List<Egenskap>,
+            egenskaper: Set<Egenskap>,
             totrinnsvurdering: Totrinnsvurdering? = null,
         ): Oppgave {
-            return Oppgave(id, AvventerSaksbehandler, vedtaksperiodeId, utbetalingId, hendelseId, kanAvvises, totrinnsvurdering).also {
-                it.egenskaper.addAll(egenskaper)
-            }
+            return Oppgave(
+                id = id,
+                tilstand = AvventerSaksbehandler,
+                vedtaksperiodeId = vedtaksperiodeId,
+                utbetalingId = utbetalingId,
+                hendelseId = hendelseId,
+                kanAvvises = kanAvvises,
+                totrinnsvurdering = totrinnsvurdering,
+                egenskaper = egenskaper.toMutableSet(),
+            )
         }
 
         fun Oppgave.toDto() =

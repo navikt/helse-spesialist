@@ -28,10 +28,6 @@ import no.nav.helse.modell.kommando.TestMelding
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
-import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.OppgaveInspector.Companion.oppgaveinspektør
-import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.graphql.schema.AntallArbeidsforhold
@@ -44,6 +40,10 @@ import no.nav.helse.spesialist.api.graphql.schema.Oppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.Periodetype
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
+import no.nav.helse.spesialist.test.lagEpostadresseFraFulltNavn
+import no.nav.helse.spesialist.test.lagFødselsnummer
+import no.nav.helse.spesialist.test.lagSaksbehandlerident
+import no.nav.helse.spesialist.test.lagSaksbehandlernavn
 import no.nav.helse.testEnv
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -59,29 +59,27 @@ import kotlin.Int.Companion.MAX_VALUE
 import kotlin.random.Random.Default.nextLong
 
 internal class OppgaveServiceTest {
-    private companion object {
-        private const val FNR = "12345678911"
-        private val VEDTAKSPERIODE_ID = UUID.randomUUID()
-        private val UTBETALING_ID = UUID.randomUUID()
-        private val UTBETALING_ID_2 = UUID.randomUUID()
-        private val VEDTAKSPERIODE_ID_2 = UUID.randomUUID()
-        private val HENDELSE_ID = UUID.randomUUID()
-        private val COMMAND_CONTEXT_ID = UUID.randomUUID()
-        private val TESTHENDELSE = TestMelding(HENDELSE_ID, VEDTAKSPERIODE_ID, FNR)
-        private val OPPGAVE_ID = nextLong()
-        private const val SAKSBEHANDLERIDENT = "Z999999"
-        private val SAKSBEHANDLEROID = UUID.randomUUID()
-        private const val SAKSBEHANDLEREPOST = "saksbehandler@nav.no"
-        private const val SAKSBEHANDLERNAVN = "Hen Saksbehandler"
-        private val EGENSKAP_SØKNAD = EgenskapForDatabase.SØKNAD
-        private val EGENSKAPER =
-            setOf(
-                EgenskapForDatabase.SØKNAD,
-                EgenskapForDatabase.UTBETALING_TIL_SYKMELDT,
-                EgenskapForDatabase.EN_ARBEIDSGIVER,
-                EgenskapForDatabase.FORSTEGANGSBEHANDLING,
-            )
-    }
+    private val FNR = lagFødselsnummer()
+    private val VEDTAKSPERIODE_ID = UUID.randomUUID()
+    private val UTBETALING_ID = UUID.randomUUID()
+    private val UTBETALING_ID_2 = UUID.randomUUID()
+    private val VEDTAKSPERIODE_ID_2 = UUID.randomUUID()
+    private val HENDELSE_ID = UUID.randomUUID()
+    private val COMMAND_CONTEXT_ID = UUID.randomUUID()
+    private val TESTHENDELSE = TestMelding(HENDELSE_ID, VEDTAKSPERIODE_ID, FNR)
+    private val OPPGAVE_ID = nextLong()
+    private val SAKSBEHANDLERIDENT = lagSaksbehandlerident()
+    private val SAKSBEHANDLEROID = UUID.randomUUID()
+    private val SAKSBEHANDLERNAVN = lagSaksbehandlernavn()
+    private val SAKSBEHANDLEREPOST = lagEpostadresseFraFulltNavn(SAKSBEHANDLERNAVN)
+    private val EGENSKAP_SØKNAD = EgenskapForDatabase.SØKNAD
+    private val EGENSKAPER =
+        setOf(
+            EgenskapForDatabase.SØKNAD,
+            EgenskapForDatabase.UTBETALING_TIL_SYKMELDT,
+            EgenskapForDatabase.EN_ARBEIDSGIVER,
+            EgenskapForDatabase.FORSTEGANGSBEHANDLING,
+        )
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val tildelingRepository = mockk<TildelingRepository>(relaxed = true)
@@ -109,14 +107,13 @@ internal class OppgaveServiceTest {
     private fun saksbehandlerFraApi(tilganger: List<UUID> = emptyList()) =
         SaksbehandlerFraApi(SAKSBEHANDLEROID, SAKSBEHANDLEREPOST, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT, tilganger)
 
-    private val saksbehandler =
-        Saksbehandler(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT, TilgangskontrollForTestHarIkkeTilgang)
+    private fun lagSøknadsoppgave(fødselsnummer: String, contextId: UUID) {
+        mediator.nyOppgave(fødselsnummer, contextId, VEDTAKSPERIODE_ID, UTBETALING_ID, HENDELSE_ID, true, setOf(SØKNAD))
+    }
 
-    private fun søknadsoppgave(id: Long): Oppgave =
-        Oppgave.nyOppgave(id, VEDTAKSPERIODE_ID, UTBETALING_ID, HENDELSE_ID, true, listOf(SØKNAD))
-
-    private fun stikkprøveoppgave(id: Long): Oppgave =
-        Oppgave.nyOppgave(id, VEDTAKSPERIODE_ID_2, UTBETALING_ID_2, UUID.randomUUID(), true, listOf(STIKKPRØVE))
+    private fun lagStikkprøveoppgave(fødselsnummer: String, contextId: UUID) {
+        mediator.nyOppgave(fødselsnummer, contextId, VEDTAKSPERIODE_ID_2, UTBETALING_ID_2, HENDELSE_ID, true, setOf(STIKKPRØVE))
+    }
 
     @BeforeEach
     fun setup() {
@@ -126,13 +123,12 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `lagrer oppgaver`() {
+        val fødselsnummer = lagFødselsnummer()
         every { oppgaveDao.reserverNesteId() } returns 0L
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
-        every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
-        every { reservasjonRepository.hentReservasjonFor(FNR) } returns null
-        mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
-            søknadsoppgave(it)
-        }
+        every { oppgaveDao.finnFødselsnummer(any()) } returns fødselsnummer
+        every { reservasjonRepository.hentReservasjonFor(fødselsnummer) } returns null
+        lagSøknadsoppgave(fødselsnummer, COMMAND_CONTEXT_ID)
         verify(exactly = 1) {
             oppgaveDao.opprettOppgave(
                 0L,
@@ -145,52 +141,41 @@ internal class OppgaveServiceTest {
         }
         assertEquals(1, testRapid.inspektør.size)
         assertOppgaveevent(0, "oppgave_opprettet")
-        assertAntallOpptegnelser(1)
+        assertAntallOpptegnelser(1, fødselsnummer)
     }
 
     @Test
     fun `lagrer oppgave og tildeler til saksbehandler som har reservert personen`() {
         every { oppgaveDao.reserverNesteId() } returns 0L
-        every { reservasjonRepository.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns Reservasjon(saksbehandlerFraDatabase)
-        every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
-        lateinit var oppgave: Oppgave
-        mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
-            søknadsoppgave(it).also { søknadsoppgave -> oppgave = søknadsoppgave }
-        }
-
-        oppgaveinspektør(oppgave) {
-            assertEquals(saksbehandler.toDto(), tildeltTil)
-        }
-        verify(exactly = 1) { tildelingRepository.tildel(any(), SAKSBEHANDLEROID) }
-        assertAntallOpptegnelser(1)
+        val fødselsnummer = lagFødselsnummer()
+        every { reservasjonRepository.hentReservasjonFor(fødselsnummer) } returns Reservasjon(saksbehandlerFraDatabase)
+        every { oppgaveDao.finnFødselsnummer(0L) } returns fødselsnummer
+        lagSøknadsoppgave(fødselsnummer, COMMAND_CONTEXT_ID)
+        verify(exactly = 1) { tildelingRepository.tildel(0L, SAKSBEHANDLEROID) }
+        assertAntallOpptegnelser(1, fødselsnummer)
     }
 
     @Test
     fun `tildeler ikke reservert personen når oppgave er stikkprøve`() {
-        every { oppgaveDao.reserverNesteId() } returns 0L
-        every { reservasjonRepository.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns Reservasjon(saksbehandlerFraDatabase)
-        every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
-        mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
-            stikkprøveoppgave(it)
-        }
+        val fødselsnummer = lagFødselsnummer()
+        val oppgaveId = 0L
+        every { oppgaveDao.reserverNesteId() } returns oppgaveId
+        every { reservasjonRepository.hentReservasjonFor(fødselsnummer) } returns Reservasjon(saksbehandlerFraDatabase)
+        every { oppgaveDao.finnFødselsnummer(oppgaveId) } returns fødselsnummer
+        lagStikkprøveoppgave(fødselsnummer, COMMAND_CONTEXT_ID)
         verify(exactly = 0) { tildelingRepository.tildel(any(), any()) }
-        assertAntallOpptegnelser(1)
+        assertAntallOpptegnelser(1, fødselsnummer)
     }
 
     @Test
     fun `kaller bare hentGrupper når personen er reservert`() {
-        every { reservasjonRepository.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns null
-        every { oppgaveDao.reserverNesteId() } returns 0L
-        every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
-        lateinit var oppgave: Oppgave
-        mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
-            stikkprøveoppgave(it).also { stikkprøveoppgave -> oppgave = stikkprøveoppgave }
-        }
-
-        oppgaveinspektør(oppgave) {
-            assertEquals(null, tildeltTil)
-        }
-        assertAntallOpptegnelser(1)
+        val fødselsnummer = lagFødselsnummer()
+        val oppgaveId = 0L
+        every { reservasjonRepository.hentReservasjonFor(fødselsnummer) } returns null
+        every { oppgaveDao.reserverNesteId() } returns oppgaveId
+        every { oppgaveDao.finnFødselsnummer(oppgaveId) } returns fødselsnummer
+        lagStikkprøveoppgave(fødselsnummer, COMMAND_CONTEXT_ID)
+        assertAntallOpptegnelser(1, fødselsnummer)
     }
 
     @Test
@@ -206,25 +191,26 @@ internal class OppgaveServiceTest {
         assertOppgaveevent(1, "oppgave_oppdatert", Oppgavestatus.Ferdigstilt) {
             assertEquals(OPPGAVE_ID, it.path("oppgaveId").longValue())
         }
-        assertOpptegnelseIkkeOpprettet()
+        assertOpptegnelseIkkeOpprettet(TESTHENDELSE.fødselsnummer())
     }
 
     @Test
     fun `lagrer ikke dobbelt`() {
-        every { oppgaveDao.reserverNesteId() } returns 0L
-        every { oppgaveDao.opprettOppgave(any(), any(), listOf(EGENSKAP_SØKNAD), any(), any(), any()) } returns 0L
-        every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
-        every { reservasjonRepository.hentReservasjonFor(FNR) } returns null
+        val fødselsnummer = lagFødselsnummer()
+        val oppgaveId = 0L
+        every { oppgaveDao.reserverNesteId() } returns oppgaveId
+        every { oppgaveDao.opprettOppgave(any(), any(), listOf(EGENSKAP_SØKNAD), any(), any(), any()) } returns oppgaveId
+        every { oppgaveDao.finnFødselsnummer(oppgaveId) } returns fødselsnummer
+        every { reservasjonRepository.hentReservasjonFor(fødselsnummer) } returns null
 
-        mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
-            søknadsoppgave(it)
-        }
+        lagSøknadsoppgave(fødselsnummer, COMMAND_CONTEXT_ID)
+
         assertEquals(1, testRapid.inspektør.size)
-        assertAntallOpptegnelser(1)
+        assertAntallOpptegnelser(1, fødselsnummer)
         testRapid.reset()
         clearMocks(opptegnelseRepository)
         assertEquals(0, testRapid.inspektør.size)
-        assertOpptegnelseIkkeOpprettet()
+        assertOpptegnelseIkkeOpprettet(fødselsnummer)
     }
 
     @Test
@@ -500,16 +486,16 @@ internal class OppgaveServiceTest {
         assertEquals(egenskap.antallArbeidsforhold(), oppgave.antallArbeidsforhold)
     }
 
-    private fun assertAntallOpptegnelser(antallOpptegnelser: Int) =
+    private fun assertAntallOpptegnelser(antallOpptegnelser: Int, fødselsnummer: String) =
         verify(exactly = antallOpptegnelser) {
             opptegnelseRepository.opprettOpptegnelse(
-                eq(TESTHENDELSE.fødselsnummer()),
+                eq(fødselsnummer),
                 any(),
                 eq(OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE),
             )
         }
 
-    private fun assertOpptegnelseIkkeOpprettet() = assertAntallOpptegnelser(0)
+    private fun assertOpptegnelseIkkeOpprettet(fødselsnummer: String) = assertAntallOpptegnelser(0, fødselsnummer)
 
     private fun assertOppgaveevent(
         indeks: Int,

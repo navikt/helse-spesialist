@@ -604,16 +604,16 @@ internal class OppgaveTest {
                 UTBETALING_ID,
                 UUID.randomUUID(),
                 true,
-                listOf(OPPGAVETYPE),
+                setOf(OPPGAVETYPE),
             )
         val oppgave1 =
-            Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), true, listOf(SØKNAD))
+            Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), true, setOf(SØKNAD))
         val oppgave2 =
-            Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), true, listOf(SØKNAD))
+            Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), true, setOf(SØKNAD))
         val oppgave3 =
-            Oppgave.nyOppgave(OPPGAVE_ID, UUID.randomUUID(), UTBETALING_ID, UUID.randomUUID(), true, listOf(SØKNAD))
+            Oppgave.nyOppgave(OPPGAVE_ID, UUID.randomUUID(), UTBETALING_ID, UUID.randomUUID(), true, setOf(SØKNAD))
         val oppgave4 =
-            Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), true, listOf(STIKKPRØVE))
+            Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), true, setOf(STIKKPRØVE))
         assertEquals(oppgave1, oppgave2)
         assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
         assertNotEquals(oppgave1, oppgave3)
@@ -643,7 +643,7 @@ internal class OppgaveTest {
             UTBETALING_ID,
             UUID.randomUUID(),
             true,
-            egenskaper.toList(),
+            egenskaper.toSet(),
             totrinnsvurdering,
         )
     }

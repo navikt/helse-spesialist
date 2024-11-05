@@ -293,7 +293,7 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID,
             hendelseId = HENDELSE_ID,
-            egenskaper = listOf(OPPGAVETYPE),
+            egenskaper = setOf(OPPGAVETYPE),
             totrinnsvurdering = if (medTotrinnsvurdering) nyTotrinnsvurdering() else null,
             kanAvvises = true,
         )
