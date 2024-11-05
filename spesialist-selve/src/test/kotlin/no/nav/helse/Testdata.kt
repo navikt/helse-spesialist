@@ -140,4 +140,5 @@ internal data class AvviksvurderingTestdata(
     val sammenligningsgrunnlag: Double = 650_000.0,
     val skjæringstidspunkt: LocalDate = 1.januar,
     val avviksvurderingId: UUID = UUID.randomUUID(),
+    val vedtaksperiodeId: UUID = UUID.randomUUID(),
 )

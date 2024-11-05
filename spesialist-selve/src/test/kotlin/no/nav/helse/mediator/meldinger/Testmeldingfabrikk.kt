@@ -1143,6 +1143,7 @@ internal object Testmeldingfabrikk {
                 "fødselsnummer" to fødselsnummer,
                 "aktørId" to aktørId,
                 "skjæringstidspunkt" to avviksvurderingTestdata.skjæringstidspunkt,
+                "vedtaksperiodeId" to avviksvurderingTestdata.vedtaksperiodeId,
                 "avviksvurdering" to mapOf(
                     "id" to avviksvurderingTestdata.avviksvurderingId,
                     "opprettet" to 1.januar.atStartOfDay(),
