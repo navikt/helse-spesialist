@@ -8,16 +8,18 @@ import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
+import kotlin.random.Random.Default.nextLong
 
 class OppgavemelderTest {
 
     private companion object {
-        private const val FNR = "12345678910"
-        private const val OPPGAVE_ID = 1L
+        private val FNR = lagFødselsnummer()
+        private val OPPGAVE_ID = nextLong()
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private val BEHANDLING_ID = UUID.randomUUID()
         private val UTBETALING_ID = UUID.randomUUID()
@@ -41,6 +43,7 @@ class OppgavemelderTest {
         assertEquals(HENDELSE_ID, melding["hendelseId"].asUUID())
         assertEquals(HENDELSE_ID, melding["@forårsaket_av"]["id"].asUUID())
         assertEquals(OPPGAVE_ID, melding["oppgaveId"].asLong())
+        assertEquals(BEHANDLING_ID, melding["behandlingId"].asUUID())
         assertEquals("AvventerSystem", melding["tilstand"].asText())
         assertEquals(FNR, melding["fødselsnummer"].asText())
         assertEquals(null, melding["beslutter"])
@@ -62,6 +65,7 @@ class OppgavemelderTest {
         assertEquals(HENDELSE_ID, melding["hendelseId"].asUUID())
         assertEquals(HENDELSE_ID, melding["@forårsaket_av"]["id"].asUUID())
         assertEquals(OPPGAVE_ID, melding["oppgaveId"].asLong())
+        assertEquals(BEHANDLING_ID, melding["behandlingId"].asUUID())
         assertEquals("AvventerSystem", melding["tilstand"].asText())
         assertEquals(FNR, melding["fødselsnummer"].asText())
         assertEquals(beslutter.epostadresse(), melding["beslutter"]["epostadresse"].asText())

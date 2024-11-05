@@ -40,6 +40,7 @@ internal class Oppgavemelder(
                     "tilstand" to oppgavemelding.tilstand,
                     "fødselsnummer" to fødselsnummer,
                     "egenskaper" to oppgavemelding.egenskaper,
+                    "behandlingId" to oppgavemelding.behandlingId,
                 ).apply {
                     compute("beslutter") { _, _ -> oppgavemelding.beslutter }
                     compute("saksbehandler") { _, _ -> oppgavemelding.saksbehandler }
@@ -54,6 +55,7 @@ private class OppgaveForKafkaBygger {
         return Oppgavemelding(
             hendelseId = dto.hendelseId,
             oppgaveId = dto.id,
+            behandlingId = dto.behandlingId,
             tilstand = mapTilstand(dto.tilstand),
             beslutter = dto.totrinnsvurdering?.beslutter?.toMap(),
             saksbehandler = dto.tildeltTil?.toMap(),
@@ -64,6 +66,7 @@ private class OppgaveForKafkaBygger {
     data class Oppgavemelding(
         val hendelseId: UUID,
         val oppgaveId: Long,
+        val behandlingId: UUID,
         val tilstand: String,
         val beslutter: Map<String, Any>?,
         val saksbehandler: Map<String, Any>?,
