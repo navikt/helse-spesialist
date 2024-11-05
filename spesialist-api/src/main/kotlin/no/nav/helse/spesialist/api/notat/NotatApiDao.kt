@@ -9,7 +9,9 @@ import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import java.util.UUID
 import javax.sql.DataSource
 
-class NotatApiDao(private val dataSource: DataSource) : QueryRunner by MedDataSource(dataSource) {
+class NotatApiDao(
+    private val dataSource: DataSource,
+) : QueryRunner by MedDataSource(dataSource) {
     fun opprettNotat(
         vedtaksperiodeId: UUID,
         tekst: String,
@@ -62,8 +64,8 @@ class NotatApiDao(private val dataSource: DataSource) : QueryRunner by MedDataSo
             "vedtaksperiode_id" to vedtaksperiodeId,
         ).list { mapNotatDto(it) }
 
-    fun finnNotater(vedtaksperiodeIds: List<UUID>): Map<UUID, List<NotatDto>> {
-        return asSQLWithQuestionMarks(
+    fun finnNotater(vedtaksperiodeIds: List<UUID>): Map<UUID, List<NotatDto>> =
+        asSQLWithQuestionMarks(
             """
             SELECT * FROM notat n
             JOIN saksbehandler s on s.oid = n.saksbehandler_oid
@@ -71,7 +73,6 @@ class NotatApiDao(private val dataSource: DataSource) : QueryRunner by MedDataSo
             """.trimIndent(),
             *vedtaksperiodeIds.toTypedArray(),
         ).list { mapNotatDto(it) }.groupBy { it.vedtaksperiodeId }
-    }
 
     fun feilregistrerNotat(notatId: Int): NotatDto? =
         asSQL(
@@ -114,6 +115,16 @@ class NotatApiDao(private val dataSource: DataSource) : QueryRunner by MedDataSo
             where n.id = :notatId
             """.trimIndent(),
             "notatId" to notatId,
+        ).list { mapKommentarDto(it) }
+
+    fun finnKommentarerMedDialogRef(dialogRef: Int): List<KommentarDto> =
+        asSQL(
+            """
+            select id, tekst, feilregistrert_tidspunkt, opprettet, saksbehandlerident
+            from kommentarer k
+            where dialog_ref = :dialogRef
+            """.trimIndent(),
+            "dialogRef" to dialogRef,
         ).list { mapKommentarDto(it) }
 
     private fun mapNotatDto(it: Row): NotatDto =

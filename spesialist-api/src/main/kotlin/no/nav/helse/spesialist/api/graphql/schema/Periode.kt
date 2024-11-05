@@ -203,6 +203,7 @@ sealed interface Historikkinnslag {
     val timestamp: LocalDateTime
     val saksbehandlerIdent: String?
     val notatId: Int?
+    val dialogRef: Int?
 }
 
 data class LagtPaVent(
@@ -210,8 +211,11 @@ data class LagtPaVent(
     override val timestamp: LocalDateTime,
     override val saksbehandlerIdent: String?,
     override val notatId: Int?,
+    override val dialogRef: Int?,
     val arsaker: List<String>,
     val frist: LocalDate?,
+    val notatTekst: String?,
+    val kommentarer: List<Kommentar>,
 ) : Historikkinnslag
 
 data class FjernetFraPaVent(
@@ -219,6 +223,7 @@ data class FjernetFraPaVent(
     override val timestamp: LocalDateTime,
     override val saksbehandlerIdent: String?,
     override val notatId: Int?,
+    override val dialogRef: Int?,
 ) : Historikkinnslag
 
 data class PeriodeHistorikkElementNy(
@@ -226,6 +231,7 @@ data class PeriodeHistorikkElementNy(
     override val timestamp: LocalDateTime,
     override val saksbehandlerIdent: String?,
     override val notatId: Int?,
+    override val dialogRef: Int?,
 ) : Historikkinnslag
 
 data class Faresignal(
@@ -497,11 +503,12 @@ data class BeregnetPeriode(
 
     fun notater(): List<Notat> = notater(notatDao, vedtaksperiodeId())
 
-    private fun mapLagtPåVentJson(json: String): Pair<List<String>, LocalDate?> {
+    private fun mapLagtPåVentJson(json: String): Triple<List<String>, LocalDate?, String?> {
         val node = objectMapper.readTree(json)
         val påVentÅrsaker = node["årsaker"].map { it["arsak"].asText() }
         val frist = node["frist"]?.takeUnless { it.isMissingOrNull() }?.asLocalDate()
-        return påVentÅrsaker to frist
+        val notatTekst = node["notattekst"]?.takeUnless { it.isMissingOrNull() }?.asText()
+        return Triple(påVentÅrsaker, frist, notatTekst)
     }
 
     fun historikkinnslag(): List<Historikkinnslag> =
@@ -510,16 +517,43 @@ data class BeregnetPeriode(
             .map {
                 when (it.type) {
                     PeriodehistorikkType.LEGG_PA_VENT -> {
-                        val (påVentÅrsaker, frist) = mapLagtPåVentJson(json = it.json)
-                        LagtPaVent(it.type, it.timestamp, it.saksbehandler_ident, it.notat_id, påVentÅrsaker, frist)
+                        val (påVentÅrsaker, frist, notatTekst) = mapLagtPåVentJson(json = it.json)
+                        LagtPaVent(
+                            type = it.type,
+                            timestamp = it.timestamp,
+                            saksbehandlerIdent = it.saksbehandlerIdent,
+                            notatId = it.notatId,
+                            dialogRef = it.dialogRef,
+                            arsaker = påVentÅrsaker,
+                            frist = frist,
+                            notatTekst = notatTekst,
+                            kommentarer =
+                                notatDao.finnKommentarerMedDialogRef(it.dialogRef!!).map { kommentar ->
+                                    Kommentar(
+                                        id = kommentar.id,
+                                        tekst = kommentar.tekst,
+                                        opprettet = kommentar.opprettet,
+                                        saksbehandlerident = kommentar.saksbehandlerident,
+                                        feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+                                    )
+                                },
+                        )
                     }
-                    PeriodehistorikkType.FJERN_FRA_PA_VENT -> FjernetFraPaVent(it.type, it.timestamp, it.saksbehandler_ident, it.notat_id)
+                    PeriodehistorikkType.FJERN_FRA_PA_VENT ->
+                        FjernetFraPaVent(
+                            it.type,
+                            it.timestamp,
+                            it.saksbehandlerIdent,
+                            it.notatId,
+                            it.dialogRef,
+                        )
                     else ->
                         PeriodeHistorikkElementNy(
                             type = it.type,
-                            saksbehandlerIdent = it.saksbehandler_ident,
+                            saksbehandlerIdent = it.saksbehandlerIdent,
                             timestamp = it.timestamp,
-                            notatId = it.notat_id,
+                            notatId = it.notatId,
+                            dialogRef = it.dialogRef,
                         )
                 }
             }

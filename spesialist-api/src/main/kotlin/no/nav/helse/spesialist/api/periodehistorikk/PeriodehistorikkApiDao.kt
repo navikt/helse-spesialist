@@ -7,11 +7,13 @@ import no.nav.helse.db.QueryRunner
 import java.util.UUID
 import javax.sql.DataSource
 
-class PeriodehistorikkApiDao(private val dataSource: DataSource) : QueryRunner by MedDataSource(dataSource) {
+class PeriodehistorikkApiDao(
+    private val dataSource: DataSource,
+) : QueryRunner by MedDataSource(dataSource) {
     fun finn(utbetalingId: UUID) =
         asSQL(
             """              
-            SELECT ph.id, ph.type, ph.timestamp, ph.notat_id, ph.json, s.ident
+            SELECT ph.id, ph.type, ph.timestamp, ph.notat_id, ph.json, s.ident, ph.dialog_ref
             FROM periodehistorikk ph
             LEFT JOIN saksbehandler s on ph.saksbehandler_oid = s.oid
             WHERE ph.utbetaling_id = :utbetaling_id OR ph.generasjon_id IN (SELECT unik_id FROM selve_vedtaksperiode_generasjon svg WHERE svg.utbetaling_id = :utbetaling_id)
@@ -25,8 +27,9 @@ class PeriodehistorikkApiDao(private val dataSource: DataSource) : QueryRunner b
                 id = it.int("id"),
                 type = PeriodehistorikkType.valueOf(it.string("type")),
                 timestamp = it.localDateTime("timestamp"),
-                saksbehandler_ident = it.stringOrNull("ident"),
-                notat_id = it.intOrNull("notat_id"),
+                saksbehandlerIdent = it.stringOrNull("ident"),
+                notatId = it.intOrNull("notat_id"),
+                dialogRef = it.longOrNull("dialog_ref")?.toInt(),
                 json = it.string("json"),
             )
     }
