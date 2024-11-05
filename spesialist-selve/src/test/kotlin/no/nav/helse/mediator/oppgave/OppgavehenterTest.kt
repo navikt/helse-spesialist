@@ -33,6 +33,7 @@ class OppgavehenterTest {
         private val TYPE = EgenskapForDatabase.SØKNAD
         private const val STATUS = "AvventerSaksbehandler"
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
+        private val BEHANDLING_ID = UUID.randomUUID()
         private val UTBETALING_ID = UUID.randomUUID()
         private val HENDELSE_ID = UUID.randomUUID()
         private const val SAKSBEHANDLER_IDENT = "S199999"
@@ -102,6 +103,7 @@ class OppgavehenterTest {
                 egenskaper = oppgaveegenskaper,
                 status = STATUS,
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                behandlingId = BEHANDLING_ID,
                 utbetalingId = UTBETALING_ID,
                 hendelseId = HENDELSE_ID,
                 kanAvvises = KAN_AVVISES,
@@ -166,9 +168,10 @@ class OppgavehenterTest {
             commandContextId: UUID,
             egenskaper: List<EgenskapForDatabase>,
             vedtaksperiodeId: UUID,
+            behandlingId: UUID,
             utbetalingId: UUID,
             kanAvvises: Boolean
-        ): Long = throw UnsupportedOperationException()
+        ) = throw UnsupportedOperationException()
 
         override fun finnFødselsnummer(oppgaveId: Long): String = throw UnsupportedOperationException()
 

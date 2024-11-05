@@ -88,7 +88,17 @@ internal class OpprettSaksbehandleroppgave(
                 .vurderMedlemskap(vedtaksperiodeId)
                 .vurderHaster(vedtaksperiodeId)
 
-        oppgaveService.nyOppgave(fødselsnummer, context.id(), vedtaksperiodeId, utbetalingId, hendelseId, kanAvvises, egenskaper)
+        val behandlingId = behovData.spleisBehandlingId
+        oppgaveService.nyOppgave(
+            fødselsnummer = fødselsnummer,
+            contextId = context.id(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            utbetalingId = utbetalingId,
+            hendelseId = hendelseId,
+            kanAvvises = kanAvvises,
+            egenskaper = egenskaper,
+        )
         return true
     }
 

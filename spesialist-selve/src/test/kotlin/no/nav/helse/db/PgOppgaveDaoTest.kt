@@ -255,7 +255,8 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `finner OppgaveFraDatabase`() {
         val hendelseId = UUID.randomUUID()
-        nyPerson(hendelseId = hendelseId)
+        val behandlingId = UUID.randomUUID()
+        nyPerson(hendelseId = hendelseId, spleisBehandlingId = behandlingId)
         val oppgave = oppgaveDao.finnOppgave(oppgaveId) ?: fail { "Fant ikke oppgave" }
         assertEquals(
             OppgaveFraDatabase(
@@ -263,6 +264,7 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
                 egenskaper = listOf(EGENSKAP),
                 status = "AvventerSaksbehandler",
                 vedtaksperiodeId = VEDTAKSPERIODE,
+                behandlingId = behandlingId,
                 utbetalingId = UTBETALING_ID,
                 hendelseId = hendelseId,
                 kanAvvises = true,
@@ -274,7 +276,8 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `finner OppgaveFraDatabase med flere egenskaper`() {
         val hendelseId = UUID.randomUUID()
-        nyPerson(hendelseId = hendelseId, oppgaveEgenskaper = listOf(EGENSKAP, RISK_QA))
+        val behandlingId = UUID.randomUUID()
+        nyPerson(hendelseId = hendelseId, oppgaveEgenskaper = listOf(EGENSKAP, RISK_QA), spleisBehandlingId = behandlingId)
         val oppgave = oppgaveDao.finnOppgave(oppgaveId) ?: fail { "Fant ikke oppgave" }
         assertEquals(
             OppgaveFraDatabase(
@@ -282,6 +285,7 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
                 egenskaper = listOf(EGENSKAP, RISK_QA),
                 status = "AvventerSaksbehandler",
                 vedtaksperiodeId = VEDTAKSPERIODE,
+                behandlingId = behandlingId,
                 utbetalingId = UTBETALING_ID,
                 hendelseId = hendelseId,
                 kanAvvises = true,

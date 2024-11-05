@@ -39,6 +39,7 @@ internal class OppgaveTest {
     private companion object {
         private val OPPGAVETYPE = SØKNAD
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
+        private val BEHANDLING_ID = UUID.randomUUID()
         private val UTBETALING_ID = UUID.randomUUID()
         private const val SAKSBEHANDLER_IDENT = "Z999999"
         private const val SAKSBEHANDLER_EPOST = "saksbehandler@nav.no"
@@ -573,6 +574,7 @@ internal class OppgaveTest {
                 id = nextLong(),
                 tilstand = tilstand,
                 vedtaksperiodeId = vedtaksperiodeId,
+                behandlingId = UUID.randomUUID(),
                 utbetalingId = utbetalingId,
                 hendelseId = UUID.randomUUID(),
                 kanAvvises = true,
@@ -599,21 +601,22 @@ internal class OppgaveTest {
     fun equals() {
         val gjenopptattOppgave =
             Oppgave.nyOppgave(
-                1L,
-                VEDTAKSPERIODE_ID,
-                UTBETALING_ID,
-                UUID.randomUUID(),
-                true,
-                setOf(OPPGAVETYPE),
+                id = 1L,
+                vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                behandlingId = BEHANDLING_ID,
+                utbetalingId = UTBETALING_ID,
+                hendelseId = UUID.randomUUID(),
+                kanAvvises = true,
+                egenskaper = setOf(OPPGAVETYPE),
             )
         val oppgave1 =
-            Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), true, setOf(SØKNAD))
+            Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, BEHANDLING_ID, UTBETALING_ID, UUID.randomUUID(), true, setOf(SØKNAD))
         val oppgave2 =
-            Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), true, setOf(SØKNAD))
+            Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, BEHANDLING_ID, UTBETALING_ID, UUID.randomUUID(), true, setOf(SØKNAD))
         val oppgave3 =
-            Oppgave.nyOppgave(OPPGAVE_ID, UUID.randomUUID(), UTBETALING_ID, UUID.randomUUID(), true, setOf(SØKNAD))
+            Oppgave.nyOppgave(OPPGAVE_ID, UUID.randomUUID(), BEHANDLING_ID, UTBETALING_ID, UUID.randomUUID(), true, setOf(SØKNAD))
         val oppgave4 =
-            Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), true, setOf(STIKKPRØVE))
+            Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, BEHANDLING_ID, UTBETALING_ID, UUID.randomUUID(), true, setOf(STIKKPRØVE))
         assertEquals(oppgave1, oppgave2)
         assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
         assertNotEquals(oppgave1, oppgave3)
@@ -638,13 +641,14 @@ internal class OppgaveTest {
     ): Oppgave {
         val totrinnsvurdering = if (medTotrinnsvurdering) totrinnsvurdering() else null
         return Oppgave.nyOppgave(
-            OPPGAVE_ID,
-            VEDTAKSPERIODE_ID,
-            UTBETALING_ID,
-            UUID.randomUUID(),
-            true,
-            egenskaper.toSet(),
-            totrinnsvurdering,
+            id = OPPGAVE_ID,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            behandlingId = UTBETALING_ID,
+            utbetalingId = BEHANDLING_ID,
+            hendelseId = UUID.randomUUID(),
+            kanAvvises = true,
+            egenskaper = egenskaper.toSet(),
+            totrinnsvurdering = totrinnsvurdering,
         )
     }
 

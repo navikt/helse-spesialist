@@ -28,6 +28,7 @@ class Oppgavehenter(
                 id = oppgave.id,
                 tilstand = tilstand(oppgave.status),
                 vedtaksperiodeId = oppgave.vedtaksperiodeId,
+                behandlingId = oppgave.behandlingId,
                 utbetalingId = oppgave.utbetalingId,
                 hendelseId = oppgave.hendelseId,
                 kanAvvises = oppgave.kanAvvises,

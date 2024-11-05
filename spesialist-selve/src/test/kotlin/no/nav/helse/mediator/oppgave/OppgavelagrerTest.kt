@@ -23,6 +23,7 @@ import kotlin.random.Random
 class OppgavelagrerTest : DatabaseIntegrationTest() {
     private val OPPGAVETYPE = SØKNAD
     private val VEDTAKSPERIODE_ID = UUID.randomUUID()
+    private val BEHANDLING_ID = UUID.randomUUID()
     override val UTBETALING_ID = UUID.randomUUID()
     override val SAKSBEHANDLER_IDENT = "Z999999"
     override val SAKSBEHANDLER_EPOST = "saksbehandler@nav.no"
@@ -69,13 +70,14 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
         oppgavelagrer.lagre(oppgaveService, oppgave.toDto(), CONTEXT_ID)
         verify(exactly = 1) {
             oppgaveService.opprett(
-                OPPGAVE_ID,
-                CONTEXT_ID,
-                VEDTAKSPERIODE_ID,
-                UTBETALING_ID,
-                listOf(EgenskapForDatabase.SØKNAD),
-                HENDELSE_ID,
-                true,
+                id = OPPGAVE_ID,
+                contextId = CONTEXT_ID,
+                vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                behandlingId = BEHANDLING_ID,
+                utbetalingId = UTBETALING_ID,
+                egenskaper = listOf(EgenskapForDatabase.SØKNAD),
+                hendelseId = HENDELSE_ID,
+                kanAvvises = true,
             )
         }
         verify(exactly = 0) { tildelingRepository.tildel(any(), any()) }
@@ -101,13 +103,14 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
         oppgavelagrer.lagre(oppgaveService, oppgave.toDto(), CONTEXT_ID)
         verify(exactly = 1) {
             oppgaveService.opprett(
-                OPPGAVE_ID,
-                CONTEXT_ID,
-                VEDTAKSPERIODE_ID,
-                UTBETALING_ID,
-                listOf(EgenskapForDatabase.SØKNAD),
-                HENDELSE_ID,
-                true,
+                id = OPPGAVE_ID,
+                contextId = CONTEXT_ID,
+                vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                behandlingId = BEHANDLING_ID,
+                utbetalingId = UTBETALING_ID,
+                egenskaper = listOf(EgenskapForDatabase.SØKNAD),
+                hendelseId = HENDELSE_ID,
+                kanAvvises = true,
             )
         }
         verify(exactly = 0) { tildelingRepository.tildel(any(), any()) }
@@ -122,13 +125,14 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
         oppgavelagrer.lagre(oppgaveService, oppgave.toDto(), CONTEXT_ID)
         verify(exactly = 1) {
             oppgaveService.opprett(
-                OPPGAVE_ID,
-                CONTEXT_ID,
-                VEDTAKSPERIODE_ID,
-                UTBETALING_ID,
-                listOf(EgenskapForDatabase.SØKNAD),
-                HENDELSE_ID,
-                true,
+                id = OPPGAVE_ID,
+                contextId = CONTEXT_ID,
+                vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                behandlingId = BEHANDLING_ID,
+                utbetalingId = UTBETALING_ID,
+                egenskaper = listOf(EgenskapForDatabase.SØKNAD),
+                hendelseId = HENDELSE_ID,
+                kanAvvises = true,
             )
         }
         verify(exactly = 0) { tildelingRepository.tildel(any(), any()) }
@@ -156,13 +160,14 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
         oppgavelagrer.lagre(oppgaveService, oppgave.toDto(), CONTEXT_ID)
         verify(exactly = 1) {
             oppgaveService.opprett(
-                OPPGAVE_ID,
-                CONTEXT_ID,
-                VEDTAKSPERIODE_ID,
-                UTBETALING_ID,
-                listOf(EgenskapForDatabase.SØKNAD),
-                HENDELSE_ID,
-                true,
+                id = OPPGAVE_ID,
+                contextId = CONTEXT_ID,
+                vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                behandlingId = BEHANDLING_ID,
+                utbetalingId = UTBETALING_ID,
+                egenskaper = listOf(EgenskapForDatabase.SØKNAD),
+                hendelseId = HENDELSE_ID,
+                kanAvvises = true,
             )
         }
         verify(exactly = 1) { tildelingRepository.tildel(OPPGAVE_ID, SAKSBEHANDLER_OID) }
@@ -178,13 +183,14 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
         oppgavelagrer.lagre(oppgaveService, oppgave.toDto(), CONTEXT_ID)
         verify(exactly = 1) {
             oppgaveService.opprett(
-                OPPGAVE_ID,
-                CONTEXT_ID,
-                VEDTAKSPERIODE_ID,
-                UTBETALING_ID,
-                listOf(EgenskapForDatabase.SØKNAD),
-                HENDELSE_ID,
-                true,
+                id = OPPGAVE_ID,
+                contextId = CONTEXT_ID,
+                vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                behandlingId = BEHANDLING_ID,
+                utbetalingId = UTBETALING_ID,
+                egenskaper = listOf(EgenskapForDatabase.SØKNAD),
+                hendelseId = HENDELSE_ID,
+                kanAvvises = true,
             )
         }
         verify(exactly = 1) { tildelingRepository.tildel(OPPGAVE_ID, SAKSBEHANDLER_OID) }
@@ -291,6 +297,7 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
         Oppgave.nyOppgave(
             id = OPPGAVE_ID,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            behandlingId = BEHANDLING_ID,
             utbetalingId = UTBETALING_ID,
             hendelseId = HENDELSE_ID,
             egenskaper = setOf(OPPGAVETYPE),

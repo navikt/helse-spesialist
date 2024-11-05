@@ -19,6 +19,7 @@ class OppgavemelderTest {
         private const val FNR = "12345678910"
         private const val OPPGAVE_ID = 1L
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
+        private val BEHANDLING_ID = UUID.randomUUID()
         private val UTBETALING_ID = UUID.randomUUID()
         private val HENDELSE_ID = UUID.randomUUID()
     }
@@ -81,6 +82,7 @@ class OppgavemelderTest {
     private fun nyOppgave(totrinnsvurdering: Totrinnsvurdering? = null) = Oppgave.nyOppgave(
         id = OPPGAVE_ID,
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
+        behandlingId = BEHANDLING_ID,
         utbetalingId = UTBETALING_ID,
         hendelseId = HENDELSE_ID,
         egenskaper = setOf(SØKNAD),

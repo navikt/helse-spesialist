@@ -56,6 +56,7 @@ import java.util.UUID
 internal class OpprettSaksbehandleroppgaveTest {
     private val FNR = lagFødselsnummer()
     private val VEDTAKSPERIODE_ID = UUID.randomUUID()
+    private val BEHANDLING_ID = UUID.randomUUID()
     private val UTBETALING_ID = UUID.randomUUID()
     private val HENDELSE_ID = UUID.randomUUID()
     private val contextId = UUID.randomUUID()
@@ -253,7 +254,16 @@ internal class OpprettSaksbehandleroppgaveTest {
     }
 
     private fun assertForventedeEgenskaper(vararg egenskaper: Egenskap, kanAvvises: Boolean = true) {
-        verify(exactly = 1) { oppgaveService.nyOppgave(FNR, contextId, VEDTAKSPERIODE_ID, UTBETALING_ID, HENDELSE_ID, kanAvvises, egenskaper.toSet()) }
+        verify(exactly = 1) { oppgaveService.nyOppgave(
+            FNR,
+            contextId,
+            VEDTAKSPERIODE_ID,
+            BEHANDLING_ID,
+            UTBETALING_ID,
+            HENDELSE_ID,
+            kanAvvises,
+            egenskaper.toSet()
+        ) }
     }
 
     private fun opprettSaksbehandlerOppgaveCommand(
@@ -281,7 +291,7 @@ internal class OpprettSaksbehandleroppgaveTest {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             spleisVedtaksperioder = emptyList(),
             utbetalingId = UTBETALING_ID,
-            spleisBehandlingId = UUID.randomUUID(),
+            spleisBehandlingId = BEHANDLING_ID,
             avviksvurderingId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID(),
             tags = emptyList(),

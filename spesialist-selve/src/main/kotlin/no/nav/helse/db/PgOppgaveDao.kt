@@ -41,7 +41,7 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
     override fun finnOppgave(id: Long): OppgaveFraDatabase? {
         return asSQL(
             """
-            SELECT o.egenskaper, o.status, v.vedtaksperiode_id, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id, s.navn, s.epost, s.ident, s.oid, o.kan_avvises
+            SELECT o.egenskaper, o.status, v.vedtaksperiode_id, o.behandling_id, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id, s.navn, s.epost, s.ident, s.oid, o.kan_avvises
             FROM oppgave o
             INNER JOIN vedtak v on o.vedtak_ref = v.id
             LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
@@ -58,6 +58,7 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
                 egenskaper = egenskaper,
                 status = row.string("status"),
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                behandlingId = row.uuid("behandling_id"),
                 utbetalingId = row.uuid("utbetaling_id"),
                 hendelseId = finnHendelseId(id),
                 kanAvvises = row.boolean("kan_avvises"),
@@ -520,18 +521,19 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
         commandContextId: UUID,
         egenskaper: List<EgenskapForDatabase>,
         vedtaksperiodeId: UUID,
+        behandlingId: UUID,
         utbetalingId: UUID,
         kanAvvises: Boolean,
-    ): Long {
+    ) {
         val vedtakRef = vedtakRef(vedtaksperiodeId)
         val personRef = personRef(vedtaksperiodeId)
 
         val (arbeidsgiverBeløp, personBeløp) = finnArbeidsgiverbeløpOgPersonbeløp(vedtaksperiodeId, utbetalingId)
         val mottaker = finnMottaker(arbeidsgiverBeløp > 0, personBeløp > 0)
 
-        return asSQL(
+        asSQL(
             """
-            INSERT INTO oppgave(id, oppdatert, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, generasjon_ref, command_context_id, utbetaling_id, mottaker, egenskaper, kan_avvises)      
+            INSERT INTO oppgave(id, oppdatert, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, generasjon_ref, behandling_id, command_context_id, utbetaling_id, mottaker, egenskaper, kan_avvises)      
             SELECT 
                 :id, 
                 now(), 
@@ -544,6 +546,7 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
                         SELECT vedtaksperiode_id FROM vedtak v WHERE v.id = :vedtakRef
                     ) ORDER BY id DESC LIMIT 1
                 ),
+                :behandlingId,
                 :commandContextId, 
                 :utbetalingId,
                 CAST(:mottaker as mottakertype), 
@@ -562,6 +565,7 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
             "ferdigstiltAv" to null,
             "ferdigstiltAvOid" to null,
             "vedtakRef" to vedtakRef,
+            "behandlingId" to behandlingId,
             "commandContextId" to commandContextId,
             "utbetalingId" to utbetalingId,
             "mottaker" to mottaker?.name,

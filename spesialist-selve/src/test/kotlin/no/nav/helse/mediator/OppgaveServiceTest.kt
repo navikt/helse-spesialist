@@ -61,9 +61,11 @@ import kotlin.random.Random.Default.nextLong
 internal class OppgaveServiceTest {
     private val FNR = lagFødselsnummer()
     private val VEDTAKSPERIODE_ID = UUID.randomUUID()
+    private val VEDTAKSPERIODE_ID_2 = UUID.randomUUID()
+    private val BEHANDLING_ID = UUID.randomUUID()
+    private val BEHANDLING_ID_2 = UUID.randomUUID()
     private val UTBETALING_ID = UUID.randomUUID()
     private val UTBETALING_ID_2 = UUID.randomUUID()
-    private val VEDTAKSPERIODE_ID_2 = UUID.randomUUID()
     private val HENDELSE_ID = UUID.randomUUID()
     private val COMMAND_CONTEXT_ID = UUID.randomUUID()
     private val TESTHENDELSE = TestMelding(HENDELSE_ID, VEDTAKSPERIODE_ID, FNR)
@@ -108,11 +110,29 @@ internal class OppgaveServiceTest {
         SaksbehandlerFraApi(SAKSBEHANDLEROID, SAKSBEHANDLEREPOST, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT, tilganger)
 
     private fun lagSøknadsoppgave(fødselsnummer: String, contextId: UUID) {
-        mediator.nyOppgave(fødselsnummer, contextId, VEDTAKSPERIODE_ID, UTBETALING_ID, HENDELSE_ID, true, setOf(SØKNAD))
+        mediator.nyOppgave(
+            fødselsnummer = fødselsnummer,
+            contextId = contextId,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            behandlingId = BEHANDLING_ID,
+            utbetalingId = UTBETALING_ID,
+            hendelseId = HENDELSE_ID,
+            kanAvvises = true,
+            egenskaper = setOf(SØKNAD)
+        )
     }
 
     private fun lagStikkprøveoppgave(fødselsnummer: String, contextId: UUID) {
-        mediator.nyOppgave(fødselsnummer, contextId, VEDTAKSPERIODE_ID_2, UTBETALING_ID_2, HENDELSE_ID, true, setOf(STIKKPRØVE))
+        mediator.nyOppgave(
+            fødselsnummer = fødselsnummer,
+            contextId = contextId,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
+            behandlingId = BEHANDLING_ID_2,
+            utbetalingId = UTBETALING_ID_2,
+            hendelseId = HENDELSE_ID,
+            kanAvvises = true,
+            egenskaper = setOf(STIKKPRØVE)
+        )
     }
 
     @BeforeEach
@@ -124,19 +144,21 @@ internal class OppgaveServiceTest {
     @Test
     fun `lagrer oppgaver`() {
         val fødselsnummer = lagFødselsnummer()
-        every { oppgaveDao.reserverNesteId() } returns 0L
+        val oppgaveId = 0L
+        every { oppgaveDao.reserverNesteId() } returns oppgaveId
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
-        every { oppgaveDao.finnFødselsnummer(any()) } returns fødselsnummer
+        every { oppgaveDao.finnFødselsnummer(oppgaveId) } returns fødselsnummer
         every { reservasjonRepository.hentReservasjonFor(fødselsnummer) } returns null
         lagSøknadsoppgave(fødselsnummer, COMMAND_CONTEXT_ID)
         verify(exactly = 1) {
             oppgaveDao.opprettOppgave(
-                0L,
-                COMMAND_CONTEXT_ID,
-                listOf(EGENSKAP_SØKNAD),
-                VEDTAKSPERIODE_ID,
-                UTBETALING_ID,
-                true,
+                id = oppgaveId,
+                commandContextId = COMMAND_CONTEXT_ID,
+                egenskaper = listOf(EGENSKAP_SØKNAD),
+                vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                behandlingId = BEHANDLING_ID,
+                utbetalingId = UTBETALING_ID,
+                kanAvvises = true,
             )
         }
         assertEquals(1, testRapid.inspektør.size)
@@ -199,7 +221,6 @@ internal class OppgaveServiceTest {
         val fødselsnummer = lagFødselsnummer()
         val oppgaveId = 0L
         every { oppgaveDao.reserverNesteId() } returns oppgaveId
-        every { oppgaveDao.opprettOppgave(any(), any(), listOf(EGENSKAP_SØKNAD), any(), any(), any()) } returns oppgaveId
         every { oppgaveDao.finnFødselsnummer(oppgaveId) } returns fødselsnummer
         every { reservasjonRepository.hentReservasjonFor(fødselsnummer) } returns null
 
@@ -564,6 +585,7 @@ internal class OppgaveServiceTest {
         egenskaper = listOf(EgenskapForDatabase.SØKNAD),
         status = "AvventerSaksbehandler",
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
+        behandlingId = BEHANDLING_ID,
         utbetalingId = UTBETALING_ID,
         hendelseId = HENDELSE_ID,
         kanAvvises = true,

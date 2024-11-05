@@ -91,6 +91,7 @@ internal class OppgaveService(
         fødselsnummer: String,
         contextId: UUID,
         vedtaksperiodeId: UUID,
+        behandlingId: UUID,
         utbetalingId: UUID,
         hendelseId: UUID,
         kanAvvises: Boolean,
@@ -100,7 +101,16 @@ internal class OppgaveService(
         sikkerlogg.info("Oppretter saksbehandleroppgave for {}", kv("fødselsnummer", fødselsnummer))
         val nesteId = oppgaveDao.reserverNesteId()
         val oppgavemelder = Oppgavemelder(fødselsnummer, rapidsConnection)
-        val oppgave = nyOppgave(nesteId, vedtaksperiodeId, utbetalingId, hendelseId, kanAvvises, egenskaper)
+        val oppgave =
+            nyOppgave(
+                id = nesteId,
+                vedtaksperiodeId = vedtaksperiodeId,
+                behandlingId = behandlingId,
+                utbetalingId = utbetalingId,
+                hendelseId = hendelseId,
+                kanAvvises = kanAvvises,
+                egenskaper = egenskaper,
+            )
         oppgave.register(oppgavemelder)
         oppgavemelder.oppgaveOpprettet(oppgave)
         tildelVedReservasjon(fødselsnummer, oppgave)
@@ -364,12 +374,13 @@ internal class OppgaveService(
         id: Long,
         contextId: UUID,
         vedtaksperiodeId: UUID,
+        behandlingId: UUID,
         utbetalingId: UUID,
         egenskaper: List<EgenskapForDatabase>,
         hendelseId: UUID,
         kanAvvises: Boolean,
     ) {
-        oppgaveDao.opprettOppgave(id, contextId, egenskaper, vedtaksperiodeId, utbetalingId, kanAvvises)
+        oppgaveDao.opprettOppgave(id, contextId, egenskaper, vedtaksperiodeId, behandlingId, utbetalingId, kanAvvises)
         opptegnelseRepository.opprettOpptegnelse(
             oppgaveDao.finnFødselsnummer(id),
             GodkjenningsbehovPayload(hendelseId),

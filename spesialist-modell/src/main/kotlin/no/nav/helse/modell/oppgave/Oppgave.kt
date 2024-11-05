@@ -28,6 +28,7 @@ class Oppgave private constructor(
     private val id: Long,
     private var tilstand: Tilstand,
     private val vedtaksperiodeId: UUID,
+    private val behandlingId: UUID,
     private val utbetalingId: UUID,
     private val hendelseId: UUID,
     private val kanAvvises: Boolean,
@@ -330,6 +331,7 @@ class Oppgave private constructor(
         fun nyOppgave(
             id: Long,
             vedtaksperiodeId: UUID,
+            behandlingId: UUID,
             utbetalingId: UUID,
             hendelseId: UUID,
             kanAvvises: Boolean,
@@ -340,6 +342,7 @@ class Oppgave private constructor(
                 id = id,
                 tilstand = AvventerSaksbehandler,
                 vedtaksperiodeId = vedtaksperiodeId,
+                behandlingId = behandlingId,
                 utbetalingId = utbetalingId,
                 hendelseId = hendelseId,
                 kanAvvises = kanAvvises,
@@ -359,6 +362,7 @@ class Oppgave private constructor(
                         Invalidert -> OppgaveDto.TilstandDto.Invalidert
                     },
                 vedtaksperiodeId = vedtaksperiodeId,
+                behandlingId = behandlingId,
                 utbetalingId = utbetalingId,
                 hendelseId = hendelseId,
                 kanAvvises = kanAvvises,
@@ -379,6 +383,7 @@ class Oppgave private constructor(
                         OppgaveDto.TilstandDto.Ferdigstilt -> Ferdigstilt
                         OppgaveDto.TilstandDto.Invalidert -> Invalidert
                     },
+                behandlingId = behandlingId,
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingId = utbetalingId,
                 hendelseId = hendelseId,

@@ -9,6 +9,7 @@ data class OppgaveFraDatabase(
     val egenskaper: List<EgenskapForDatabase>,
     val status: String,
     val vedtaksperiodeId: UUID,
+    val behandlingId: UUID,
     val utbetalingId: UUID,
     val hendelseId: UUID,
     val kanAvvises: Boolean,

@@ -30,6 +30,7 @@ internal class OppdaterOppgavestatusCommandTest {
             hendelseId = UUID.randomUUID(),
             egenskaper = setOf(SØKNAD),
             kanAvvises = true,
+            behandlingId = UUID.randomUUID(),
         )
     }
 

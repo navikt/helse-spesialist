@@ -65,9 +65,10 @@ interface OppgaveDao {
         commandContextId: UUID,
         egenskaper: List<EgenskapForDatabase>,
         vedtaksperiodeId: UUID,
+        behandlingId: UUID,
         utbetalingId: UUID,
         kanAvvises: Boolean,
-    ): Long
+    )
 
     fun finnFødselsnummer(oppgaveId: Long): String
 

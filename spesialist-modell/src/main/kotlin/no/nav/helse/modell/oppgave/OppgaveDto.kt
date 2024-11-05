@@ -8,6 +8,7 @@ data class OppgaveDto(
     val id: Long,
     val tilstand: TilstandDto,
     val vedtaksperiodeId: UUID,
+    val behandlingId: UUID,
     val utbetalingId: UUID,
     val hendelseId: UUID,
     val kanAvvises: Boolean,

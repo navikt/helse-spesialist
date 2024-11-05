@@ -15,6 +15,7 @@ class Oppgavelagrer(private val tildelingRepository: TildelingRepository) {
             id = oppgaveDto.id,
             contextId = contextId,
             vedtaksperiodeId = oppgaveDto.vedtaksperiodeId,
+            behandlingId = oppgaveDto.behandlingId,
             utbetalingId = oppgaveDto.utbetalingId,
             egenskaper = oppgaveDto.egenskaper.map { it.tilDatabaseversjon() },
             hendelseId = oppgaveDto.hendelseId,

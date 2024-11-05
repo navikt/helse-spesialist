@@ -218,6 +218,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         utbetalingId: UUID = UTBETALING_ID,
         contextId: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
+        spleisBehandlingId: UUID = UUID.randomUUID(),
         oppgaveEgenskaper: List<EgenskapForDatabase> = listOf(EGENSKAP),
     ) {
         opprettPerson(fødselsnummer = fødselsnummer, aktørId = aktørId)
@@ -229,12 +230,14 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             periodetype = periodetype,
             inntektskilde = inntektskilde,
             utbetalingId = utbetalingId,
+            spleisBehandlingId = spleisBehandlingId
         )
         opprettOppgave(
             contextId = contextId,
             vedtaksperiodeId = vedtaksperiodeId,
             egenskaper = oppgaveEgenskaper,
             hendelseId = hendelseId,
+            behandlingId = spleisBehandlingId,
         )
     }
 
@@ -377,19 +380,23 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         egenskaper: List<EgenskapForDatabase> = listOf(EGENSKAP),
         kanAvvises: Boolean = true,
         utbetalingId: UUID = UTBETALING_ID,
+        behandlingId: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
     ) {
         val hendelse = testhendelse(hendelseId = hendelseId)
         opprettCommandContext(hendelse, contextId)
-        oppgaveId =
-            oppgaveDao.opprettOppgave(
-                nextLong().also { OPPGAVE_ID = it },
-                contextId,
-                egenskaper,
-                vedtaksperiodeId,
-                utbetalingId,
-                kanAvvises,
-            )
+        oppgaveId = nextLong()
+        OPPGAVE_ID = oppgaveId
+        oppgaveDao.opprettOppgave(
+            id = oppgaveId,
+            commandContextId = contextId,
+            egenskaper = egenskaper,
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            utbetalingId = utbetalingId,
+            kanAvvises = kanAvvises,
+        )
+
     }
 
     protected fun avventerSystem(
