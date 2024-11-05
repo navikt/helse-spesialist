@@ -11,9 +11,11 @@ import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetUtenVedtakMessage
+import no.nav.helse.mediator.meldinger.hendelser.AvvikVurdertMessage
 import no.nav.helse.modell.MeldingDao.Meldingtype.ADRESSEBESKYTTELSE_ENDRET
 import no.nav.helse.modell.MeldingDao.Meldingtype.AVSLUTTET_MED_VEDTAK
 import no.nav.helse.modell.MeldingDao.Meldingtype.AVSLUTTET_UTEN_VEDTAK
+import no.nav.helse.modell.MeldingDao.Meldingtype.AVVIK_VURDERT
 import no.nav.helse.modell.MeldingDao.Meldingtype.BEHANDLING_OPPRETTET
 import no.nav.helse.modell.MeldingDao.Meldingtype.ENDRET_EGEN_ANSATT_STATUS
 import no.nav.helse.modell.MeldingDao.Meldingtype.GODKJENNING
@@ -231,6 +233,7 @@ internal class MeldingDao(queryRunner: QueryRunner) : MeldingRepository, QueryRu
             is AvsluttetMedVedtakMessage -> AVSLUTTET_MED_VEDTAK
             is KlargjørTilgangsrelaterteData -> KLARGJØR_TILGANGSRELATERTE_DATA
             is StansAutomatiskBehandlingMelding -> Meldingtype.STANS_AUTOMATISK_BEHANDLING
+            is AvvikVurdertMessage -> AVVIK_VURDERT
             else -> throw IllegalArgumentException("ukjent meldingtype: ${melding::class.simpleName}")
         }
 
@@ -255,5 +258,6 @@ internal class MeldingDao(queryRunner: QueryRunner) : MeldingRepository, QueryRu
         AVSLUTTET_MED_VEDTAK,
         KLARGJØR_TILGANGSRELATERTE_DATA,
         STANS_AUTOMATISK_BEHANDLING,
+        AVVIK_VURDERT,
     }
 }
