@@ -3,6 +3,7 @@ package no.nav.helse.modell.påvent
 import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -17,17 +18,34 @@ internal class PåVentDaoTest : DatabaseIntegrationTest() {
     fun `lagre påvent`() {
         nyPerson()
         val frist = LocalDate.now().plusDays(21)
-        påVentDao.lagrePåVent(OPPGAVE_ID, SAKSBEHANDLER_OID, frist)
+        påVentDao.lagrePåVent(OPPGAVE_ID, SAKSBEHANDLER_OID, frist, emptyList(), null, 1L)
         val påVent = påvent()
         assertEquals(1, påVent.size)
-        påVent.first().assertEquals(VEDTAKSPERIODE, SAKSBEHANDLER_OID, frist)
+        påVent.first().assertEquals(VEDTAKSPERIODE, SAKSBEHANDLER_OID, frist, emptyList(), null)
+    }
+
+    @Test
+    fun `lagre påvent med årsaker`() {
+        nyPerson()
+        val frist = LocalDate.now().plusDays(21)
+        påVentDao.lagrePåVent(
+            OPPGAVE_ID,
+            SAKSBEHANDLER_OID,
+            frist,
+            listOf(PåVentÅrsak("key1", "årsak1"), PåVentÅrsak("key2", "årsak2")),
+            "Et notat",
+            1L,
+        )
+        val påVent = påvent()
+        assertEquals(1, påVent.size)
+        påVent.first().assertEquals(VEDTAKSPERIODE, SAKSBEHANDLER_OID, frist, listOf("årsak1", "årsak2"), "Et notat")
     }
 
     @Test
     fun `slett påvent`() {
         nyPerson()
         val frist = LocalDate.now().plusDays(21)
-        påVentDao.lagrePåVent(oppgaveId, SAKSBEHANDLER_OID, frist)
+        påVentDao.lagrePåVent(oppgaveId, SAKSBEHANDLER_OID, frist, emptyList(), null, 1L)
         val påVent = påvent()
         assertEquals(1, påVent.size)
         påVentDao.slettPåVent(oppgaveId)
@@ -39,7 +57,7 @@ internal class PåVentDaoTest : DatabaseIntegrationTest() {
     fun `finnes påvent`() {
         nyPerson()
         val frist = LocalDate.now().plusDays(21)
-        påVentDao.lagrePåVent(OPPGAVE_ID, SAKSBEHANDLER_OID, frist)
+        påVentDao.lagrePåVent(OPPGAVE_ID, SAKSBEHANDLER_OID, frist, emptyList(), null, 1L)
         val erPåVent = påVentDao.erPåVent(VEDTAKSPERIODE)
         assertTrue(erPåVent)
     }
@@ -49,14 +67,17 @@ internal class PåVentDaoTest : DatabaseIntegrationTest() {
             @Language("PostgreSQL")
             val statement = "SELECT * FROM pa_vent WHERE vedtaksperiode_id = :vedtaksperiodeId"
             session.run(
-                queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).map { row ->
-                    PåVent(
-                        row.uuid("vedtaksperiode_id"),
-                        row.uuid("saksbehandler_ref"),
-                        row.localDateOrNull("frist"),
-                        row.localDateTime("opprettet"),
-                    )
-                }.asList,
+                queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId))
+                    .map { row ->
+                        PåVent(
+                            row.uuid("vedtaksperiode_id"),
+                            row.uuid("saksbehandler_ref"),
+                            row.localDateOrNull("frist"),
+                            row.localDateTime("opprettet"),
+                            row.array<String>("årsaker").toList(),
+                            row.stringOrNull("notattekst"),
+                        )
+                    }.asList,
             )
         }
 
@@ -65,16 +86,22 @@ internal class PåVentDaoTest : DatabaseIntegrationTest() {
         private val saksbehandlerRef: UUID,
         private val frist: LocalDate?,
         private val opprettet: LocalDateTime,
+        private val årsaker: List<String>,
+        private val notatTekst: String?,
     ) {
         fun assertEquals(
             forventetVedtaksperiodeId: UUID,
             forventetSaksbehandlerRef: UUID,
             forventetFrist: LocalDate?,
+            forventetÅrsaker: List<String>,
+            forventetNotatTekst: String?,
         ) {
             assertEquals(forventetVedtaksperiodeId, vedtaksperiodeId)
             assertEquals(forventetSaksbehandlerRef, saksbehandlerRef)
             assertEquals(forventetFrist, frist)
             assertNotNull(opprettet)
+            assertEquals(forventetÅrsaker, årsaker)
+            assertEquals(forventetNotatTekst, notatTekst)
         }
     }
 }

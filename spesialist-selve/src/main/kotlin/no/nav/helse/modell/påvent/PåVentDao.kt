@@ -6,6 +6,8 @@ import no.nav.helse.db.MedDataSource
 import no.nav.helse.db.MedSession
 import no.nav.helse.db.PåVentRepository
 import no.nav.helse.db.QueryRunner
+import no.nav.helse.db.somDbArray
+import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
@@ -21,7 +23,9 @@ class PåVentDao(
         oppgaveId: Long,
         saksbehandlerOid: UUID,
         frist: LocalDate?,
-        dialogRef: Long? = null,
+        årsaker: List<PåVentÅrsak>,
+        notatTekst: String? = null,
+        dialogRef: Long,
     ) = asSQL(
         """
         SELECT v.vedtaksperiode_id
@@ -33,12 +37,14 @@ class PåVentDao(
     ).singleOrNull { it.uuid("vedtaksperiode_id") }.let { vedtaksperiodeId ->
         asSQL(
             """
-            INSERT INTO pa_vent (vedtaksperiode_id, saksbehandler_ref, frist, dialog_ref) VALUES (:vedtaksperiodeId, :saksbehandlerRef, :frist, :dialog_ref)
+            INSERT INTO pa_vent (vedtaksperiode_id, saksbehandler_ref, frist, dialog_ref, notattekst, årsaker) VALUES (:vedtaksperiodeId, :saksbehandlerRef, :frist, :dialogRef, :notatTekst, :arsaker::varchar[])
             """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
             "saksbehandlerRef" to saksbehandlerOid,
             "frist" to frist,
-            "dialog_ref" to dialogRef,
+            "dialogRef" to dialogRef,
+            "notatTekst" to notatTekst,
+            "arsaker" to årsaker.map { it.årsak }.somDbArray(),
         ).update()
     }
 

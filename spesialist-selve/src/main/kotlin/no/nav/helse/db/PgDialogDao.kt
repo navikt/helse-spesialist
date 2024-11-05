@@ -11,11 +11,11 @@ class PgDialogDao(
     constructor(session: Session) : this(MedSession(session))
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
-    override fun lagre(): Long? =
+    override fun lagre(): Long =
         asSQL(
             """
             INSERT INTO dialog (opprettet)
             VALUES (now())      
             """,
-        ).updateAndReturnGeneratedKeyOrNull()
+        ).updateAndReturnGeneratedKey()
 }

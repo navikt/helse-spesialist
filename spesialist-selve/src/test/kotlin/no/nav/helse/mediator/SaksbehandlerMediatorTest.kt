@@ -267,7 +267,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     fun `håndterer på vent`() {
         val vedtaksperiodeId = UUID.randomUUID()
         nyPerson(vedtaksperiodeId = vedtaksperiodeId)
-        påVentDao.lagrePåVent(oppgaveId, saksbehandler.oid, LocalDate.now())
+        påVentDao.lagrePåVent(oppgaveId, saksbehandler.oid, LocalDate.now(), emptyList(), null, 1L)
         assertDoesNotThrow {
             mediator.håndter(godkjenning(oppgaveId, true), UUID.randomUUID(), saksbehandler)
         }

@@ -47,7 +47,7 @@ class PgPeriodehistorikkDao(
                                 tekst = notat.tekst,
                                 saksbehandlerOid = historikkinnslag.saksbehandler.oid,
                                 notatType = NotatType.PaaVent,
-                                dialogRef = dialogRef,
+                                dialogRef = dialogRef!!,
                             )?.toInt()
                     }
                 lagre(historikkinnslag, generasjonId, notatId, dialogRef)
@@ -63,7 +63,7 @@ class PgPeriodehistorikkDao(
                             tekst = historikkinnslag.notat.tekst,
                             saksbehandlerOid = historikkinnslag.saksbehandler.oid,
                             notatType = NotatType.Retur,
-                            dialogRef = dialogRef,
+                            dialogRef = dialogRef!!,
                         )?.toInt()
                 lagre(historikkinnslag, generasjonId, notatId, dialogRef)
             }

@@ -8,7 +8,8 @@ import javax.sql.DataSource
 
 class PgNotatDao(
     queryRunner: QueryRunner,
-) : NotatDao, QueryRunner by queryRunner {
+) : NotatDao,
+    QueryRunner by queryRunner {
     constructor(session: Session) : this(MedSession(session))
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
@@ -17,9 +18,9 @@ class PgNotatDao(
         tekst: String,
         saksbehandlerOid: UUID,
         notatType: NotatType,
-        dialogRef: Long?,
-    ): Long? {
-        return asSQL(
+        dialogRef: Long,
+    ): Long? =
+        asSQL(
             """
             INSERT INTO notat (vedtaksperiode_id, tekst, saksbehandler_oid, type, dialog_ref)
             VALUES (
@@ -39,5 +40,4 @@ class PgNotatDao(
             "type" to notatType.name,
             "dialog_ref" to dialogRef,
         ).updateAndReturnGeneratedKeyOrNull()
-    }
 }

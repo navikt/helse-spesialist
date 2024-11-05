@@ -10,9 +10,9 @@ class PåVentRepository(
     internal fun leggPåVent(
         saksbehandlerOid: UUID,
         påVent: LeggPåVent,
-        dialogRef: Long?,
+        dialogRef: Long,
     ) {
-        dao.lagrePåVent(påVent.oppgaveId, saksbehandlerOid, påVent.frist, dialogRef)
+        dao.lagrePåVent(påVent.oppgaveId, saksbehandlerOid, påVent.frist, påVent.årsaker, påVent.notatTekst, dialogRef)
     }
 
     internal fun fjernFraPåVent(oppgaveId: Long) {
