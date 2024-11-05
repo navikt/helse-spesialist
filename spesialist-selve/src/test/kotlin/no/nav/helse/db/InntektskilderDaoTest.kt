@@ -104,6 +104,34 @@ internal class InntektskilderDaoTest : DatabaseIntegrationTest() {
         assertTrue(funnet.single() is NyInntektskildeDto)
     }
 
+
+    @Test
+    fun `Takler at arbeidsgivere kan opptre kun i sammenligningsgrunnlag, uten å være med i godkjenningsbehovet`() {
+        val fødselsnummer = lagFødselsnummer()
+        val organisasjonsnummerSomSpleisKjennerTil = lagOrganisasjonsnummer()
+        val enAnnenArbeidsgiverForPersonen = lagOrganisasjonsnummer()
+
+        avviksvurderingDao.lagre(
+            AvviksvurderingDto(
+                unikId = UUID.randomUUID(),
+                vilkårsgrunnlagId = UUID.randomUUID(),
+                fødselsnummer = fødselsnummer,
+                skjæringstidspunkt = 1.januar,
+                opprettet = LocalDateTime.now(),
+                avviksprosent = 0.0,
+                sammenligningsgrunnlag = SammenligningsgrunnlagDto(
+                    600_000.0, listOf(InnrapportertInntektDto(organisasjonsnummerSomSpleisKjennerTil, emptyList()),
+                        InnrapportertInntektDto(enAnnenArbeidsgiverForPersonen, emptyList()))
+                ),
+                beregningsgrunnlag = BeregningsgrunnlagDto(600_000.0, emptyList())
+            )
+        )
+
+        val funnet = dao.finnInntektskilder(fødselsnummer, listOf(organisasjonsnummerSomSpleisKjennerTil))
+        assertEquals(2, funnet.size)
+        assertTrue(funnet.all { it is NyInntektskildeDto})
+    }
+
     @Test
     fun `Hvis en inntektskilde i sammenligningsgrunnlaget finnes fra før får vi tilbake en eksisterende inntektskilde`() {
         val fødselsnummer = lagFødselsnummer()

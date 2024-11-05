@@ -36,9 +36,9 @@ internal class InntektskilderDao(
         andreOrganisasjonsnumre: List<String>,
     ): List<InntektskildeDto> {
         val alleOrganisasjonsnumre =
-            andreOrganisasjonsnumre + organisasjonsnumreFraSammenligningsgrunnlag(fødselsnummer).distinct()
+            (andreOrganisasjonsnumre + organisasjonsnumreFraSammenligningsgrunnlag(fødselsnummer)).distinct()
         val eksisterendeInntektskilder = eksisterendeInntektskilder(alleOrganisasjonsnumre)
-        val nyeInntektskilder = andreOrganisasjonsnumre.organisasjonsnumreSomIkkeFinnesI(eksisterendeInntektskilder)
+        val nyeInntektskilder = alleOrganisasjonsnumre.organisasjonsnumreSomIkkeFinnesI(eksisterendeInntektskilder)
         return eksisterendeInntektskilder + nyeInntektskilder
     }
 
