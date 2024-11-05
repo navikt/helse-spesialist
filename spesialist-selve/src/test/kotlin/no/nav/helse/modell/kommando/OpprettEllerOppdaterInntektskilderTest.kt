@@ -432,7 +432,7 @@ class OpprettEllerOppdaterInntektskilderTest {
         forventetBransjer: List<String>,
     ) {
         check(this is KomplettInntektskildeDto)
-        assertEquals(forventetOrganisasjonsnummer, this.organisasjonsnummer)
+        assertEquals(forventetOrganisasjonsnummer, this.identifikator)
         assertEquals(forventetType, this.type)
         assertEquals(forventetNavn, this.navn)
         assertEquals(forventetBransjer, this.bransjer)

@@ -63,7 +63,7 @@ internal class OpprettEllerOppdaterInntektskilder(
 
     private fun List<Inntektskilde>.lagBehov(): Map<String, Map<String, List<String>>> {
         return this
-            .groupBy(keySelector = { it.type }, valueTransform = { it.organisasjonsnummer })
+            .groupBy(keySelector = { it.type }, valueTransform = { it.identifikator })
             .map { (inntektskildetype, inntektskilder) ->
                 when (inntektskildetype) {
                     Inntektskildetype.ORDINÆR -> "Arbeidsgiverinformasjon" to mapOf("organisasjonsnummer" to inntektskilder)

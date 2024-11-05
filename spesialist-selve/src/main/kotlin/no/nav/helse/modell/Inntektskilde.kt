@@ -23,23 +23,23 @@ internal sealed class Inntektskilde {
         return when (type) {
             Inntektskildetype.ORDINÆR ->
                 arbeidsgiverinformasjonløsning
-                    ?.relevantLøsning(organisasjonsnummer)
+                    ?.relevantLøsning(identifikator)
                     ?.oppdaterInntektskilde()
             Inntektskildetype.ENKELTPERSONFORETAK ->
                 personinfoløsninger
-                    ?.relevantLøsning(organisasjonsnummer)
+                    ?.relevantLøsning(identifikator)
                     ?.oppdaterInntektskilde()
         } ?: this
     }
 
-    abstract val organisasjonsnummer: String
+    abstract val identifikator: String
     abstract val type: Inntektskildetype
 
     fun måOppdateres() = this is NyInntektskilde || (this is KomplettInntektskilde && this.erUtdatert())
 
     private fun Arbeidsgiverinformasjonløsning.ArbeidsgiverDto.oppdaterInntektskilde(): Inntektskilde {
         return KomplettInntektskilde(
-            organisasjonsnummer = organisasjonsnummer,
+            identifikator = identifikator,
             type = type,
             navn = navn,
             bransjer = bransjer,
@@ -49,7 +49,7 @@ internal sealed class Inntektskilde {
 
     private fun HentPersoninfoløsning.oppdaterInntektskilde(): Inntektskilde {
         return KomplettInntektskilde(
-            organisasjonsnummer = ident,
+            identifikator = ident,
             type = type,
             navn = navn(),
             bransjer = listOf(BRANSJE_PRIVATPERSON),
@@ -59,12 +59,12 @@ internal sealed class Inntektskilde {
 }
 
 internal class NyInntektskilde(
-    override val organisasjonsnummer: String,
+    override val identifikator: String,
     override val type: Inntektskildetype,
 ) : Inntektskilde() {
     fun toDto() =
         NyInntektskildeDto(
-            organisasjonsnummer = organisasjonsnummer,
+            identifikator = identifikator,
             type =
                 when (type) {
                     Inntektskildetype.ORDINÆR -> InntektskildetypeDto.ORDINÆR
@@ -74,7 +74,7 @@ internal class NyInntektskilde(
 }
 
 internal class KomplettInntektskilde(
-    override val organisasjonsnummer: String,
+    override val identifikator: String,
     override val type: Inntektskildetype,
     val navn: String,
     val bransjer: List<String>,
@@ -86,7 +86,7 @@ internal class KomplettInntektskilde(
 
     fun toDto() =
         KomplettInntektskildeDto(
-            organisasjonsnummer = organisasjonsnummer,
+            identifikator = identifikator,
             type =
                 when (type) {
                     Inntektskildetype.ORDINÆR -> InntektskildetypeDto.ORDINÆR

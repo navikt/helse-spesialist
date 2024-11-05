@@ -46,7 +46,22 @@ internal class InntektskilderDaoTest : DatabaseIntegrationTest() {
         assertEquals(1, funnet.size)
         val dto = funnet.single()
         check(dto is KomplettInntektskildeDto)
-        assertEquals(organisasjonsnummer, dto.organisasjonsnummer)
+        assertEquals(organisasjonsnummer, dto.identifikator)
+        assertEquals(navn, dto.navn)
+        assertEquals(listOf("Uteliv", "Reise"), dto.bransjer)
+    }
+
+    @Test
+    fun `når arbeidsgiver har fødselsnummer som id og starter med tallet 0 får vi riktig fødselsnummer ut igjen`() {
+        val identifikator = lagFødselsnummer().replaceFirstChar { "0" }
+        val navn = lagOrganisasjonsnavn()
+
+        opprettArbeidsgiver(identifikator, navn, listOf("Uteliv", "Reise"))
+        val funnet = dao.finnInntektskilder(lagFødselsnummer(), listOf(identifikator))
+        assertEquals(1, funnet.size)
+        val dto = funnet.single()
+        check(dto is KomplettInntektskildeDto)
+        assertEquals(identifikator, dto.identifikator)
         assertEquals(navn, dto.navn)
         assertEquals(listOf("Uteliv", "Reise"), dto.bransjer)
     }
@@ -132,14 +147,14 @@ internal class InntektskilderDaoTest : DatabaseIntegrationTest() {
         dao.lagreInntektskilder(
             listOf(
                 KomplettInntektskildeDto(
-                    organisasjonsnummer = organisasjonsnummer1,
+                    identifikator = organisasjonsnummer1,
                     type = InntektskildetypeDto.ORDINÆR,
                     navn = navn1,
                     bransjer = bransjer1,
                     sistOppdatert = LocalDate.now(),
                 ),
                 KomplettInntektskildeDto(
-                    organisasjonsnummer = organisasjonsnummer2,
+                    identifikator = organisasjonsnummer2,
                     type = InntektskildetypeDto.ORDINÆR,
                     navn = navn2,
                     bransjer = bransjer2,

@@ -21,7 +21,7 @@ internal class OpprettMinimalArbeidsgiverCommand(
             sikkerLog.info("Oppretter minimal arbeidsgiver for organisasjonsnummer: $organisasjonsnummer")
             inntektskilderRepository.lagreInntektskilder(
                 listOf(
-                    NyInntektskildeDto(organisasjonsnummer = organisasjonsnummer, type = InntektskildetypeDto.ORDINÆR),
+                    NyInntektskildeDto(identifikator = organisasjonsnummer, type = InntektskildetypeDto.ORDINÆR),
                 ),
             )
         }

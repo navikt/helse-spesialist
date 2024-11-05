@@ -18,12 +18,12 @@ internal class InntektskilderDao(
         inntektskilder.forEach { inntekt ->
             when (inntekt) {
                 is KomplettInntektskildeDto -> {
-                    arbeidsgiverDao.upsertNavn(inntekt.organisasjonsnummer, inntekt.navn)
-                    arbeidsgiverDao.upsertBransjer(inntekt.organisasjonsnummer, inntekt.bransjer)
+                    arbeidsgiverDao.upsertNavn(inntekt.identifikator, inntekt.navn)
+                    arbeidsgiverDao.upsertBransjer(inntekt.identifikator, inntekt.bransjer)
                 }
 
                 else -> {
-                    arbeidsgiverDao.insertMinimalArbeidsgiver(inntekt.organisasjonsnummer)
+                    arbeidsgiverDao.insertMinimalArbeidsgiver(inntekt.identifikator)
                 }
             }
         }
@@ -43,7 +43,7 @@ internal class InntektskilderDao(
     }
 
     private fun List<String>.organisasjonsnumreSomIkkeFinnesI(inntektskilder: List<InntektskildeDto>) =
-        filterNot { organisasjonsnummer -> organisasjonsnummer in inntektskilder.map { it.organisasjonsnummer } }
+        filterNot { organisasjonsnummer -> organisasjonsnummer in inntektskilder.map { it.identifikator } }
             .map { NyInntektskildeDto(it, inntektskildetype(it)) }
 
     private fun eksisterendeInntektskilder(organisasjonsnumre: List<String>): List<InntektskildeDto> {
@@ -57,10 +57,10 @@ internal class InntektskilderDao(
             """,
             organisasjonsnumre.map { it.toLong() }.toTypedArray(),
         ).list(session) {
-            val organisasjonsnummer = it.string("orgnummer")
+            val identifikator = it.string("orgnummer")
             KomplettInntektskildeDto(
-                organisasjonsnummer = organisasjonsnummer,
-                type = inntektskildetype(organisasjonsnummer),
+                identifikator = organisasjonsnummerEllerFødselsnummer(identifikator),
+                type = inntektskildetype(identifikator),
                 navn = it.string("navn"),
                 bransjer =
                     it
@@ -85,4 +85,12 @@ internal class InntektskilderDao(
             organisasjonsnummer.length == 9 -> InntektskildetypeDto.ORDINÆR
             else -> InntektskildetypeDto.ENKELTPERSONFORETAK
         }
+
+    private fun organisasjonsnummerEllerFødselsnummer(organisasjonsnummer: String): String =
+        when {
+            organisasjonsnummer.length == 10 -> organisasjonsnummer.toFødselsnummer()
+            else -> organisasjonsnummer
+        }
+
+    private fun String.toFødselsnummer() = "0$this"
 }

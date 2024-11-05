@@ -332,7 +332,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         inntektskilderDao.lagreInntektskilder(
             listOf(
                 KomplettInntektskildeDto(
-                    organisasjonsnummer = organisasjonsnummer,
+                    identifikator = organisasjonsnummer,
                     type = InntektskildetypeDto.ORDINÆR,
                     navn = navn,
                     bransjer = bransjer,

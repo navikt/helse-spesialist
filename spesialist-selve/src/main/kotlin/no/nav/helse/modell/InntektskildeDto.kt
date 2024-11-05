@@ -16,7 +16,7 @@ internal enum class InntektskildetypeDto {
 }
 
 internal sealed interface InntektskildeDto {
-    val organisasjonsnummer: String
+    val identifikator: String
     val type: InntektskildetypeDto
 
     private fun gjenopprett(): Inntektskilde {
@@ -24,12 +24,12 @@ internal sealed interface InntektskildeDto {
         return when (this) {
             is NyInntektskildeDto ->
                 NyInntektskilde(
-                    organisasjonsnummer = organisasjonsnummer,
+                    identifikator = identifikator,
                     type = type,
                 )
             is KomplettInntektskildeDto ->
                 KomplettInntektskilde(
-                    organisasjonsnummer = organisasjonsnummer,
+                    identifikator = identifikator,
                     type = type,
                     navn = navn,
                     bransjer = bransjer,
@@ -44,7 +44,7 @@ internal sealed interface InntektskildeDto {
 }
 
 internal data class KomplettInntektskildeDto(
-    override val organisasjonsnummer: String,
+    override val identifikator: String,
     override val type: InntektskildetypeDto,
     val navn: String,
     val bransjer: List<String>,
@@ -52,6 +52,6 @@ internal data class KomplettInntektskildeDto(
 ) : InntektskildeDto
 
 internal data class NyInntektskildeDto(
-    override val organisasjonsnummer: String,
+    override val identifikator: String,
     override val type: InntektskildetypeDto,
 ) : InntektskildeDto

@@ -30,7 +30,7 @@ internal class OpprettMinimalArbeidsgiverCommandTest {
         assertTrue(command.execute(context))
         assertEquals(1, lagredeInntektskilder.size)
         assertEquals(
-            NyInntektskildeDto(organisasjonsnummer = ORGNR, type = InntektskildetypeDto.ORDINÆR),
+            NyInntektskildeDto(identifikator = ORGNR, type = InntektskildetypeDto.ORDINÆR),
             lagredeInntektskilder.single(),
         )
     }
