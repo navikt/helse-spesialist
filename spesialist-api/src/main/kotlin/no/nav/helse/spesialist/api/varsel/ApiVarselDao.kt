@@ -212,7 +212,11 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
 
     private fun sjekkForDefinisjonOgMapVerdier(row: Row): TmpVarsel {
         if (row.uuidOrNull("definisjon_id") == null) {
-            log.error("Fant ikke varseldefinisjon for varselkode ${row.string("kode")}. Varseldefinisjonen bør republiseres i Spalten.")
+            log.error(
+                "Fant ikke varseldefinisjon for varselkode ${row.string(
+                    "kode",
+                )}. Det bør opprettes en definisjon for varselet i Spalten. Dersom dette finnes allerede, republiser definisjonen i Spalten.",
+            )
         }
         val definisjonId = row.uuidOrNull("definisjon_id")
         val status = Varselstatus.valueOf(row.string("status"))
