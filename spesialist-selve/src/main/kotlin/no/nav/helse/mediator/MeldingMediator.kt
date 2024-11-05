@@ -61,7 +61,6 @@ import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
-import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -255,10 +254,6 @@ internal class MeldingMediator(
         if (varseldefinisjonDto.avviklet) {
             varselRepository.avvikleVarsel(varseldefinisjonDto)
         }
-    }
-
-    internal fun håndter(avviksvurdering: AvviksvurderingDto) {
-        AvviksvurderingDao(dataSource).lagre(avviksvurdering)
     }
 
     fun slettGamleDokumenter(): Int = dokumentDao.slettGamleDokumenter()
