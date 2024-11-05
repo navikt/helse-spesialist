@@ -6,6 +6,7 @@ import no.nav.helse.modell.Inntektskildetype
 import no.nav.helse.modell.KomplettInntektskilde
 import no.nav.helse.modell.arbeidsgiver.Arbeidsgiverinformasjonløsning
 import no.nav.helse.modell.person.HentPersoninfoløsninger
+import org.slf4j.LoggerFactory
 
 internal class OpprettEllerOppdaterInntektskilder(
     inntektskilder: List<Inntektskilde>,
@@ -25,9 +26,11 @@ internal class OpprettEllerOppdaterInntektskilder(
                 .supplerMedLøsninger(context)
                 .partition { it.måOppdateres() }
 
+        sikkerlogg.info("Lagrer oppdaterte inntektskilder: ${inntektskilderSomSkalLagres.prettyPrint()}")
         inntektskilderSomSkalLagres.lagreOppdaterteInntektskilder()
 
         if (inntektskilderSomFortsattMåOppdateres.isEmpty()) return true
+        sikkerlogg.info("Trenger fortsatt oppdatert info for inntektskilder: ${inntektskilderSomFortsattMåOppdateres.prettyPrint()}")
         sendBehov(context, inntektskilderSomFortsattMåOppdateres)
         return false
     }
@@ -71,4 +74,10 @@ internal class OpprettEllerOppdaterInntektskilder(
                 }
             }.toMap()
     }
+
+    companion object {
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+    }
 }
+
+private fun Collection<Inntektskilde>.prettyPrint() = joinToString { "${it.identifikator} (${it.type})" }
