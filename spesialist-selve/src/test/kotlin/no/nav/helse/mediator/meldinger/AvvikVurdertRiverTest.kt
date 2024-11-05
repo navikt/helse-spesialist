@@ -22,13 +22,13 @@ class AvvikVurdertRiverTest {
     @Test
     fun `leser avviksvurdering fra kafka`() {
         testRapid.sendTestMessage(event())
-        verify(exactly = 1) { mediator.håndter(any<AvviksvurderingDto>()) }
+        verify(exactly = 1) { mediator.mottaMelding(any(), any()) }
     }
 
     @Test
     fun `leser ikke inn avviksvurdering uten sammenligningsgrunnlag`() {
         testRapid.sendTestMessage(eventUtenSammenligningsgrunnlag())
-        verify(exactly = 0) { mediator.håndter(any<AvviksvurderingDto>()) }
+        verify(exactly = 0) { mediator.mottaMelding(any(), any()) }
     }
 
     @Language("JSON")
@@ -39,6 +39,7 @@ class AvvikVurdertRiverTest {
       "fødselsnummer": "12345678910",
       "aktørId": "11111100000",
       "skjæringstidspunkt": "2018-01-01",
+      "vedtaksperiodeId": "653cdd83-9940-4f89-80be-3bb07bf10089",
       "avviksvurdering": {
         "id": "cc3af2c3-fa9e-4d84-a57e-a7972226cdae",
         "opprettet": "2018-01-01T00:00:00.000",

@@ -22,7 +22,7 @@ internal class AvvikVurdertRiver(
     override fun validations() =
         River.PacketValidation {
             it.demandValue("@event_name", "avvik_vurdert")
-            it.requireKey("@id", "fødselsnummer", "skjæringstidspunkt")
+            it.requireKey("@id", "fødselsnummer", "skjæringstidspunkt", "vedtaksperiodeId")
             it.interestedIn("avviksvurdering.vilkårsgrunnlagId")
             it.requireKey(
                 "avviksvurdering.id",
@@ -65,6 +65,10 @@ internal class AvvikVurdertRiver(
             kv("hendelse", packet.toJson()),
         )
         val message = AvvikVurdertMessage(packet)
-        message.sendInnTil(mediator)
+        // message.sendInnTil(mediator)
+        mediator.mottaMelding(
+            message,
+            context,
+        )
     }
 }
