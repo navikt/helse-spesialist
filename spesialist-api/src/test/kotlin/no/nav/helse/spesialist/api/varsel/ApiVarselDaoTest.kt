@@ -46,6 +46,22 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `Ignorerer varsel når varseldefinisjon mangler`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val utbetalingId = UUID.randomUUID()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettVarseldefinisjon(kode = "EN_KODE")
+        val generasjonRef = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
+        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef)
+        nyttVarsel(kode = "EN_KODE_UTEN_DEFINISJON", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef)
+        val varsler = apiVarselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId)
+
+        assertTrue(varsler.isNotEmpty())
+        // Forventer kun varsler for varsel med definisjon, men det skal error-logges at definisjonen mangler.
+        assertEquals(1, varsler.size)
+    }
+
+    @Test
     fun `Finner varsler som skal med for siste snapshotgenerasjon`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
@@ -59,6 +75,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef2)
         nyttVarsel(kode = "EN_ANNEN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef2)
         nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef3)
+        nyttVarsel(kode = "EN_KODE_UTEN_DEFINISJON", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef3)
         val varsler = apiVarselDao.finnVarslerSomIkkeErInaktiveForSisteGenerasjon(vedtaksperiodeId, utbetalingId)
 
         assertTrue(varsler.isNotEmpty())
@@ -77,6 +94,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         val generasjonRef2 = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
         nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef2)
         nyttVarsel(kode = "EN_ANNEN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef2)
+        nyttVarsel(kode = "EN_KODE_UTEN_DEFINISJON", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef2)
         val varsler = apiVarselDao.finnVarslerForUberegnetPeriode(vedtaksperiodeId)
 
         assertEquals(4, varsler.size)
@@ -94,6 +112,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         val generasjonRef2 = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
         nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef2)
         nyttVarsel(kode = "EN_ANNEN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef2)
+        nyttVarsel(kode = "EN_KODE_UTEN_DEFINISJON", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef2)
         val varsler = apiVarselDao.finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId)
 
         assertEquals(1, varsler.size)
