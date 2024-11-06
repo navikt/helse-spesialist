@@ -88,7 +88,7 @@ internal class AvvikVurdertMessage(private val packet: JsonMessage) : Vedtaksper
         kommandostarter: Kommandostarter,
         transactionalSession: TransactionalSession,
     ) {
-        kommandostarter { håndterAvvikVurdert(transactionalSession, avviksvurdering) }
+        kommandostarter { håndterAvvikVurdert(avviksvurdering, transactionalSession) }
     }
 
     override fun fødselsnummer(): String = fødselsnummer
