@@ -9,17 +9,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class UtbetalingDao(session: Session) : UtbetalingRepository, QueryRunner by MedSession(session) {
-    fun erUtbetaltFør(aktørId: String): Boolean =
-        asSQL(
-            """
-            SELECT 1 FROM utbetaling u 
-            JOIN utbetaling_id ui ON u.utbetaling_id_ref = ui.id
-            INNER JOIN person p ON ui.person_ref = p.id
-            WHERE u.status = 'UTBETALT' AND p.aktør_id = :aktor_id
-            """.trimIndent(),
-            "aktor_id" to aktørId,
-        ).list { it }.isNotEmpty()
-
     override fun finnUtbetalingIdRef(utbetalingId: UUID): Long? =
         asSQL(
             """
@@ -183,16 +172,4 @@ class UtbetalingDao(session: Session) : UtbetalingRepository, QueryRunner by Med
                 utbetalingsstatus = Utbetalingsstatus.valueOf(it.string("status")),
             )
         }
-
-    override fun sisteUtbetalingIdFor(fødselsnummer: String): UUID? =
-        asSQL(
-            """
-            select ui.utbetaling_id from utbetaling_id ui 
-            join person p on ui.person_ref = p.id 
-            where p.fødselsnummer = :fnr
-            order by ui.id desc
-            limit 1;
-            """.trimIndent(),
-            "fnr" to fødselsnummer,
-        ).singleOrNull { it.uuid("utbetaling_id") }
 }

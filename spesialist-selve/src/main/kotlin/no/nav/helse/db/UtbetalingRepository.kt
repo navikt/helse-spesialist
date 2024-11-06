@@ -8,8 +8,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 interface UtbetalingRepository {
-    fun sisteUtbetalingIdFor(fødselsnummer: String): UUID?
-
     fun finnUtbetalingIdRef(utbetalingId: UUID): Long?
 
     fun hentUtbetaling(utbetalingId: UUID): Utbetaling
