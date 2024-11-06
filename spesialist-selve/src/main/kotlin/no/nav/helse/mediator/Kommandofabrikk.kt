@@ -319,8 +319,8 @@ internal class Kommandofabrikk(
     }
 
     internal fun håndterAvvikVurdert(
-        session: Session,
         avviksvurdering: AvviksvurderingDto,
+        session: Session,
     ) = ikkesuspenderendeCommand {
         AvviksvurderingDao(session).lagre(avviksvurdering)
     }

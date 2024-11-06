@@ -64,11 +64,6 @@ internal class AvvikVurdertRiver(
             kv("hendelseId", hendelseId),
             kv("hendelse", packet.toJson()),
         )
-        val message = AvvikVurdertMessage(packet)
-        // message.sendInnTil(mediator)
-        mediator.mottaMelding(
-            message,
-            context,
-        )
+        mediator.mottaMelding(AvvikVurdertMessage(packet), context)
     }
 }

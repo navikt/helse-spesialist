@@ -1,12 +1,15 @@
 package no.nav.helse.mediator.meldinger
 
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
-import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
+import no.nav.helse.mediator.meldinger.hendelser.AvvikVurdertMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.rapids_rivers.toUUID
 import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -21,8 +24,10 @@ class AvvikVurdertRiverTest {
 
     @Test
     fun `leser avviksvurdering fra kafka`() {
+        val melding = slot<AvvikVurdertMessage>()
         testRapid.sendTestMessage(event())
-        verify(exactly = 1) { mediator.mottaMelding(any(), any()) }
+        verify(exactly = 1) { mediator.mottaMelding(capture(melding), any()) }
+        assertEquals("653cdd83-9940-4f89-80be-3bb07bf10089".toUUID(), melding.captured.vedtaksperiodeId())
     }
 
     @Test
