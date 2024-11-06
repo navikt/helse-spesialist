@@ -118,7 +118,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         val vedtaksperiodetype = Periodetype.FØRSTEGANGSBEHANDLING
         val inntektskilde = Inntektskilde.EN_ARBEIDSGIVER
         vedtakDao.leggTilVedtaksperiodetype(VEDTAKSPERIODE, vedtaksperiodetype, inntektskilde)
-        assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, vedtakDao.finnVedtaksperiodetype(VEDTAKSPERIODE))
+        assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, finnVedtaksperiodetype(VEDTAKSPERIODE))
         assertEquals(inntektskilde, vedtakDao.finnInntektskilde(VEDTAKSPERIODE))
     }
 
@@ -155,7 +155,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Finner orgnummer med vedtaksperiodeId`() {
         nyPerson()
-        assertEquals(ORGNUMMER, vedtakDao.finnOrgnummer(VEDTAKSPERIODE))
+        assertEquals(ORGNUMMER, vedtakDao.finnOrganisasjonsnummer(VEDTAKSPERIODE))
     }
 
     @Test
@@ -178,6 +178,15 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         assertTrue(vedtakDao.erSpesialsak(VEDTAKSPERIODE))
         vedtakDao.spesialsakFerdigbehandlet(VEDTAKSPERIODE)
         assertFalse(vedtakDao.erSpesialsak(VEDTAKSPERIODE))
+    }
+
+    private fun finnVedtaksperiodetype(vedtaksperiodeId: UUID): Periodetype {
+        return sessionOf(dataSource).use {
+            it.run(
+                queryOf("SELECT type FROM saksbehandleroppgavetype WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?)", vedtaksperiodeId)
+                    .map { row -> enumValueOf<Periodetype>(row.string("type")) }.asSingle,
+            )!!
+        }
     }
 
     private fun finnKobling(hendelseId: UUID) =

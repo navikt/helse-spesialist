@@ -23,7 +23,7 @@ interface VedtakDao {
 
     fun finnInntektskilde(vedtaksperiodeId: UUID): Inntektskilde?
 
-    fun finnOrgnummer(vedtaksperiodeId: UUID): String?
+    fun finnOrganisasjonsnummer(vedtaksperiodeId: UUID): String?
 
     fun finnVedtaksperiode(vedtaksperiodeId: UUID): VedtaksperiodeDto?
 
@@ -35,6 +35,4 @@ interface VedtakDao {
     fun lagreOpprinneligSøknadsdato(vedtaksperiodeId: UUID)
 
     fun spesialsakFerdigbehandlet(vedtaksperiodeId: UUID): Int
-
-    fun finnVedtaksperiodetype(vedtaksperiodeId: UUID): Periodetype
 }

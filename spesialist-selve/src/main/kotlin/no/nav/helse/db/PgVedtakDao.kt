@@ -73,13 +73,6 @@ class PgVedtakDao(queryRunner: QueryRunner) : VedtakDao, QueryRunner by queryRun
             .update()
     }
 
-    override fun finnVedtaksperiodetype(vedtaksperiodeId: UUID): Periodetype {
-        val vedtakRef =
-            checkNotNull(finnVedtakId(vedtaksperiodeId)) { "Finner ikke vedtakRef for $vedtaksperiodeId" }
-        return asSQL("SELECT type FROM saksbehandleroppgavetype WHERE vedtak_ref = :vedtakRef", "vedtakRef" to vedtakRef)
-            .single { enumValueOf<Periodetype>(it.string("type")) }
-    }
-
     override fun leggTilVedtaksperiodetype(
         vedtaksperiodeId: UUID,
         type: Periodetype,
@@ -132,7 +125,7 @@ class PgVedtakDao(queryRunner: QueryRunner) : VedtakDao, QueryRunner by queryRun
         ).update()
     }
 
-    override fun finnOrgnummer(vedtaksperiodeId: UUID): String? {
+    override fun finnOrganisasjonsnummer(vedtaksperiodeId: UUID): String? {
         return asSQL(
             """
             SELECT organisasjonsnummer FROM arbeidsgiver a

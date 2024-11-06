@@ -172,7 +172,7 @@ internal class Automatisering(
         val hendelseId = UUID.fromString(overstyringIgangsattKorrigertSøknad.meldingId)
         if (meldingRepository.erKorrigertSøknadAutomatiskBehandlet(hendelseId)) return SkyldesKorrigertSøknad.KanAutomatiseres
 
-        val orgnummer = vedtakDao.finnOrgnummer(vedtaksperiodeId)
+        val orgnummer = vedtakDao.finnOrganisasjonsnummer(vedtaksperiodeId)
         val vedtaksperiodeIdKorrigertSøknad =
             overstyringIgangsattKorrigertSøknad.let { overstyring ->
                 overstyring.berørtePerioder.find {

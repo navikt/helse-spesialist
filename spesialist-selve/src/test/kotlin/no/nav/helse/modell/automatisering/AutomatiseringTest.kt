@@ -45,7 +45,6 @@ internal class AutomatiseringTest {
     private val vedtaksperiodeId = UUID.randomUUID()
     private val utbetalingId = UUID.randomUUID()
     private val hendelseId = UUID.randomUUID()
-    private val periodetype = FORLENGELSE
     private val periodeFom = LocalDate.now()
 
     private val vedtakDaoMock = mockk<PgVedtakDao>()
@@ -108,7 +107,6 @@ internal class AutomatiseringTest {
     fun setupDefaultTilHappyCase() {
         every { vedtakDaoMock.erSpesialsak(vedtaksperiodeId) } returns false
         every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(true)
-        every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns periodetype
         every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
         every { åpneGosysOppgaverDaoMock.antallÅpneOppgaver(any()) } returns 0
         every { overstyringDaoMock.harVedtaksperiodePågåendeOverstyring(any()) } returns false
@@ -125,7 +123,7 @@ internal class AutomatiseringTest {
                         ),
                     ),
             )
-        every { vedtakDaoMock.finnOrgnummer(vedtaksperiodeId) } returns orgnummer
+        every { vedtakDaoMock.finnOrganisasjonsnummer(vedtaksperiodeId) } returns orgnummer
         every { meldingDaoMock.finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId) } returns 1
         every { meldingDaoMock.erKorrigertSøknadAutomatiskBehandlet(hendelseId) } returns false
         every {
@@ -143,7 +141,6 @@ internal class AutomatiseringTest {
         Toggle.AutomatiserSpesialsak.enable()
         every { vedtakDaoMock.erSpesialsak(vedtaksperiodeId) } returns true
         every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(false)
-        every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns periodetype
         every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
         every { åpneGosysOppgaverDaoMock.antallÅpneOppgaver(any()) } returns 1
         every { vergemålDaoMock.harVergemål(fødselsnummer) } returns true
@@ -160,7 +157,6 @@ internal class AutomatiseringTest {
         Toggle.AutomatiserSpesialsak.disable()
         every { vedtakDaoMock.erSpesialsak(vedtaksperiodeId) } returns true
         every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(false)
-        every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns periodetype
         every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
         every { åpneGosysOppgaverDaoMock.antallÅpneOppgaver(any()) } returns 1
         every { vergemålDaoMock.harVergemål(fødselsnummer) } returns true
