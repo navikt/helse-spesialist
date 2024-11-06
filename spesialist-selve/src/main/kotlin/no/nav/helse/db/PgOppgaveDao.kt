@@ -8,6 +8,7 @@ import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -401,13 +402,14 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
         return asSQL(
             """
             UPDATE oppgave
-            SET ferdigstilt_av = :ferdigstiltAv, ferdigstilt_av_oid = :oid, status = :oppgavestatus::oppgavestatus, egenskaper = :egenskaper::varchar[]
+            SET ferdigstilt_av = :ferdigstiltAv, ferdigstilt_av_oid = :oid, status = :oppgavestatus::oppgavestatus, egenskaper = :egenskaper::varchar[], oppdatert = :oppdatert
             WHERE id=:oppgaveId
             """,
             "ferdigstiltAv" to ferdigstiltAv,
             "oid" to oid,
             "oppgavestatus" to oppgavestatus,
             "egenskaper" to egenskaper.joinToString(prefix = "{", postfix = "}"),
+            "oppdatert" to LocalDateTime.now(),
             "oppgaveId" to oppgaveId,
         ).update()
     }
@@ -536,7 +538,7 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
             INSERT INTO oppgave(id, oppdatert, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, generasjon_ref, behandling_id, command_context_id, utbetaling_id, mottaker, egenskaper, kan_avvises)      
             SELECT 
                 :id, 
-                now(), 
+                :oppdatert, 
                 CAST(:oppgavestatus as oppgavestatus), 
                 :ferdigstiltAv, 
                 :ferdigstiltAvOid, 
@@ -561,6 +563,7 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
                 )
             """,
             "id" to id,
+            "oppdatert" to LocalDateTime.now(),
             "oppgavestatus" to "AvventerSaksbehandler",
             "ferdigstiltAv" to null,
             "ferdigstiltAvOid" to null,
