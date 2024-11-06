@@ -491,7 +491,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         utbetalingDao.opprettUtbetalingId(
             utbetalingId = utbetalingId,
             fødselsnummer = FNR,
-            orgnummer = ORGNUMMER,
+            organisasjonsnummer = ORGNUMMER,
             type = utbetalingtype,
             opprettet = LocalDateTime.now(),
             arbeidsgiverFagsystemIdRef = arbeidsgiverOppdragId,

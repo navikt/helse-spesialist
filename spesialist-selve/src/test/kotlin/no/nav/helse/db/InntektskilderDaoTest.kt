@@ -204,18 +204,18 @@ internal class InntektskilderDaoTest : DatabaseIntegrationTest() {
         }
     }
 
-    private fun Session.finnInntektskilde(orgnummer: String) = asSQL(
+    private fun Session.finnInntektskilde(organisasjonsnummer: String) = asSQL(
         """
-        select orgnummer, navn, bransjer
+        select organisasjonsnummer, navn, bransjer
         from arbeidsgiver
         join arbeidsgiver_bransjer ab on arbeidsgiver.bransjer_ref = ab.id
         join arbeidsgiver_navn an on arbeidsgiver.navn_ref = an.id
-        where orgnummer = :orgnummer
+        where organisasjonsnummer = :organisasjonsnummer
         """.trimIndent(),
-        "orgnummer" to orgnummer.toLong()
+        "organisasjonsnummer" to organisasjonsnummer
     ).single(this) { row ->
         ArbeidsgiverDto(
-            organisasjonsnummer = row.string("orgnummer"),
+            organisasjonsnummer = row.string("organisasjonsnummer"),
             navn = row.string("navn"),
             bransjer = objectMapper.readValue(row.string("bransjer")),
         )

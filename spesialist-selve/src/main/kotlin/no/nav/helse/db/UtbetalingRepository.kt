@@ -31,7 +31,7 @@ interface UtbetalingRepository {
     fun opprettUtbetalingId(
         utbetalingId: UUID,
         fødselsnummer: String,
-        orgnummer: String,
+        organisasjonsnummer: String,
         type: Utbetalingtype,
         opprettet: LocalDateTime,
         arbeidsgiverFagsystemIdRef: Long,

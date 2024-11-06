@@ -12,28 +12,28 @@ import java.time.YearMonth
 import javax.sql.DataSource
 
 class ArbeidsgiverApiDao(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource) {
-    fun finnBransjer(orgnummer: String) =
+    fun finnBransjer(organisasjonsnummer: String) =
         asSQL(
             """
             SELECT ab.bransjer FROM arbeidsgiver a
             LEFT JOIN arbeidsgiver_bransjer ab on a.bransjer_ref = ab.id
-            WHERE a.orgnummer=:orgnummer;
+            WHERE a.organisasjonsnummer = :organisasjonsnummer;
             """.trimIndent(),
-            "orgnummer" to orgnummer.toLong(),
+            "organisasjonsnummer" to organisasjonsnummer,
         ).singleOrNull { row ->
             row.stringOrNull("bransjer")
                 ?.let { objectMapper.readValue<List<String>>(it) }
                 ?.filter { it.isNotBlank() }
         } ?: emptyList()
 
-    fun finnNavn(orgnummer: String) =
+    fun finnNavn(organisasjonsnummer: String) =
         asSQL(
             """
             SELECT an.navn FROM arbeidsgiver a
             JOIN arbeidsgiver_navn an ON a.navn_ref = an.id
-            WHERE a.orgnummer=:orgnummer;
+            WHERE a.organisasjonsnummer=:organisasjonsnummer;
             """.trimIndent(),
-            "orgnummer" to orgnummer.toLong(),
+            "organisasjonsnummer" to organisasjonsnummer,
         ).singleOrNull { row -> row.string("navn") }
 
     fun finnArbeidsforhold(
@@ -42,10 +42,10 @@ class ArbeidsgiverApiDao(dataSource: DataSource) : QueryRunner by MedDataSource(
     ) = asSQL(
         """
         SELECT startdato, sluttdato, stillingstittel, stillingsprosent FROM arbeidsforhold
-        WHERE arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE orgnummer = :orgnummer)
+        WHERE arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE organisasjonsnummer = :organisasjonsnummer)
         AND person_ref = (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer);
         """.trimIndent(),
-        "orgnummer" to organisasjonsnummer.toLong(),
+        "organisasjonsnummer" to organisasjonsnummer,
         "fodselsnummer" to fødselsnummer,
     ).list { tilArbeidsforholdApiDto(organisasjonsnummer, it) }
 
@@ -56,7 +56,7 @@ class ArbeidsgiverApiDao(dataSource: DataSource) : QueryRunner by MedDataSource(
         asSQL(
             """
             SELECT inntekter, skjaeringstidspunkt FROM inntekt
-            WHERE person_ref=(SELECT id FROM person p WHERE p.fødselsnummer = :fodselsnummer)
+            WHERE person_ref = (SELECT id FROM person p WHERE p.fødselsnummer = :fodselsnummer)
             """.trimIndent(),
             "fodselsnummer" to fødselsnummer,
         ).list { row ->

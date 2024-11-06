@@ -18,10 +18,10 @@ internal class ArbeidsforholdDao(
         SELECT startdato, sluttdato, stillingstittel, stillingsprosent
         FROM arbeidsforhold
         WHERE person_ref = (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer)
-          AND arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE orgnummer = :organisasjonsnummer);
+          AND arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE organisasjonsnummer = :organisasjonsnummer);
         """.trimIndent(),
         "fodselsnummer" to fødselsnummer,
-        "organisasjonsnummer" to organisasjonsnummer.toLong(),
+        "organisasjonsnummer" to organisasjonsnummer,
     ).list(session) { row ->
         KomplettArbeidsforholdDto(
             fødselsnummer = fødselsnummer,
@@ -48,12 +48,12 @@ internal class ArbeidsforholdDao(
             INSERT INTO arbeidsforhold(person_ref, arbeidsgiver_ref, startdato, sluttdato, stillingstittel, stillingsprosent)
             VALUES(
                 (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer),
-                (SELECT id FROM arbeidsgiver WHERE orgnummer = :organisasjonsnummer),
+                (SELECT id FROM arbeidsgiver WHERE organisasjonsnummer = :organisasjonsnummer),
                 :startdato, :sluttdato, :stillingstittel, :stillingsprosent
             );
             """.trimIndent(),
             "fodselsnummer" to arbeidsforholdDto.fødselsnummer,
-            "organisasjonsnummer" to arbeidsforholdDto.organisasjonsnummer.toLong(),
+            "organisasjonsnummer" to arbeidsforholdDto.organisasjonsnummer,
             "startdato" to arbeidsforholdDto.startdato,
             "sluttdato" to arbeidsforholdDto.sluttdato,
             "stillingstittel" to arbeidsforholdDto.stillingstittel,
@@ -69,10 +69,10 @@ internal class ArbeidsforholdDao(
             """
             DELETE FROM arbeidsforhold
             WHERE person_ref = (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer)
-            AND arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE orgnummer = :organisasjonsnummer);
+            AND arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE organisasjonsnummer = :organisasjonsnummer);
             """.trimIndent(),
             "fodselsnummer" to fødselsnummer,
-            "organisasjonsnummer" to organisasjonsnummer.toLong(),
+            "organisasjonsnummer" to organisasjonsnummer,
         ).update(session)
     }
 }

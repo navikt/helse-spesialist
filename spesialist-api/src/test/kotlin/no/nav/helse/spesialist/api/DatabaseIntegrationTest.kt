@@ -556,12 +556,12 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
         @Language("PostgreSQL")
         val statement =
-            "INSERT INTO arbeidsgiver(orgnummer, navn_ref, bransjer_ref) VALUES(?, ?, ?) ON CONFLICT DO NOTHING"
+            "INSERT INTO arbeidsgiver(organisasjonsnummer, navn_ref, bransjer_ref) VALUES(?, ?, ?) ON CONFLICT DO NOTHING"
         requireNotNull(
             session.run(
                 queryOf(
                     statement,
-                    organisasjonsnummer.toLong(),
+                    organisasjonsnummer,
                     navnid,
                     bransjeid,
                 ).asUpdateAndReturnGeneratedKey,
@@ -573,8 +573,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         requireNotNull(
             sessionOf(dataSource).use { session ->
                 @Language("PostgreSQL")
-                val statement = "SELECT id FROM arbeidsgiver WHERE orgnummer = ?"
-                session.run(queryOf(statement, ORGANISASJONSNUMMER.toLong()).map { it.int("id") }.asSingle)
+                val statement = "SELECT id FROM arbeidsgiver WHERE organisasjonsnummer = ?"
+                session.run(queryOf(statement, ORGANISASJONSNUMMER).map { it.int("id") }.asSingle)
             },
         )
 

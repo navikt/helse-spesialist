@@ -61,7 +61,7 @@ class UtbetalingDao(session: Session) : UtbetalingRepository, QueryRunner by Med
     override fun opprettUtbetalingId(
         utbetalingId: UUID,
         fødselsnummer: String,
-        orgnummer: String,
+        organisasjonsnummer: String,
         type: Utbetalingtype,
         opprettet: LocalDateTime,
         arbeidsgiverFagsystemIdRef: Long,
@@ -76,7 +76,7 @@ class UtbetalingDao(session: Session) : UtbetalingRepository, QueryRunner by Med
             ) VALUES (
                 :utbetalingId,
                 (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer),
-                (SELECT id FROM arbeidsgiver WHERE orgnummer = :orgnummer),
+                (SELECT id FROM arbeidsgiver WHERE organisasjonsnummer = :organisasjonsnummer),
                 CAST(:type as utbetaling_type),
                 :opprettet,
                 :arbeidsgiverFagsystemIdRef,
@@ -89,7 +89,7 @@ class UtbetalingDao(session: Session) : UtbetalingRepository, QueryRunner by Med
                 .trimIndent(),
             "utbetalingId" to utbetalingId,
             "fodselsnummer" to fødselsnummer,
-            "orgnummer" to orgnummer.toLong(),
+            "organisasjonsnummer" to organisasjonsnummer,
             "type" to type.toString(),
             "opprettet" to opprettet,
             "arbeidsgiverFagsystemIdRef" to arbeidsgiverFagsystemIdRef,

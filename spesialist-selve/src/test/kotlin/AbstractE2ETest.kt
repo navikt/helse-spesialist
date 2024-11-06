@@ -694,8 +694,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         val alleArbeidsforhold =
             sessionOf(dataSource).use { session ->
                 @Language("PostgreSQL")
-                val query = "SELECT a.orgnummer FROM arbeidsgiver a"
-                session.run(queryOf(query).map { it.string("orgnummer") }.asList)
+                val query = "SELECT a.organisasjonsnummer FROM arbeidsgiver a"
+                session.run(queryOf(query).map { it.string("organisasjonsnummer") }.asList)
             }
         håndterGodkjenningsbehovUtenValidering(
             arbeidsgiverbeløp = arbeidsgiverbeløp,
@@ -1577,9 +1577,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected fun arbeidsgiver(organisasjonsnummer: String): Int {
         return sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
-            val query = "SELECT COUNT(*) FROM arbeidsgiver WHERE orgnummer = ?"
+            val query = "SELECT COUNT(*) FROM arbeidsgiver WHERE organisasjonsnummer = ?"
             requireNotNull(
-                session.run(queryOf(query, organisasjonsnummer.toLong()).map { row -> row.int(1) }.asSingle),
+                session.run(queryOf(query, organisasjonsnummer).map { row -> row.int(1) }.asSingle),
             )
         }
     }

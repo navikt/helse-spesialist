@@ -17,14 +17,14 @@ class PgVedtakDao(queryRunner: QueryRunner) : VedtakDao, QueryRunner by queryRun
             """
             SELECT 
             vedtaksperiode_id,
-            (SELECT orgnummer FROM arbeidsgiver WHERE id = arbeidsgiver_ref),
+            (SELECT organisasjonsnummer FROM arbeidsgiver WHERE id = arbeidsgiver_ref),
             forkastet
             from vedtak WHERE vedtaksperiode_id = :vedtaksperiode_id
             """,
             "vedtaksperiode_id" to vedtaksperiodeId,
         ).singleOrNull {
             VedtaksperiodeDto(
-                organisasjonsnummer = it.long("orgnummer").toString(),
+                organisasjonsnummer = it.long("organisasjonsnummer").toString(),
                 vedtaksperiodeId = it.uuid("vedtaksperiode_id"),
                 forkastet = it.boolean("forkastet"),
                 generasjoner = emptyList(),
@@ -39,11 +39,11 @@ class PgVedtakDao(queryRunner: QueryRunner) : VedtakDao, QueryRunner by queryRun
         asSQL(
             """
             INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, forkastet)
-            VALUES (:vedtaksperiode_id, :fom, :tom, (SELECT id FROM arbeidsgiver WHERE orgnummer = :organisasjonsnummer), (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer), :forkastet)
+            VALUES (:vedtaksperiode_id, :fom, :tom, (SELECT id FROM arbeidsgiver WHERE organisasjonsnummer = :organisasjonsnummer), (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer), :forkastet)
             ON CONFLICT (vedtaksperiode_id) DO UPDATE SET forkastet = excluded.forkastet
             """,
             "fodselsnummer" to fødselsnummer,
-            "organisasjonsnummer" to vedtaksperiodeDto.organisasjonsnummer.toLong(),
+            "organisasjonsnummer" to vedtaksperiodeDto.organisasjonsnummer,
             "vedtaksperiode_id" to vedtaksperiodeDto.vedtaksperiodeId,
             "fom" to vedtaksperiodeDto.generasjoner.last().fom,
             "tom" to vedtaksperiodeDto.generasjoner.last().tom,
@@ -135,14 +135,14 @@ class PgVedtakDao(queryRunner: QueryRunner) : VedtakDao, QueryRunner by queryRun
     override fun finnOrgnummer(vedtaksperiodeId: UUID): String? {
         return asSQL(
             """
-            SELECT orgnummer FROM arbeidsgiver a
+            SELECT organisasjonsnummer FROM arbeidsgiver a
             INNER JOIN vedtak v ON a.id = v.arbeidsgiver_ref
             WHERE v.vedtaksperiode_id = :vedtaksperiodeId
         """,
             "vedtaksperiodeId" to vedtaksperiodeId,
         )
             .singleOrNull {
-                it.long("orgnummer").toString()
+                it.long("organisasjonsnummer").toString()
             }
     }
 

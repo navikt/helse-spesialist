@@ -50,14 +50,14 @@ internal class InntektskilderDao(
         if (organisasjonsnumre.isEmpty()) return emptyList()
         return asSQLWithQuestionMarks(
             """
-                SELECT orgnummer, navn, bransjer, an.navn_oppdatert FROM arbeidsgiver ag
+                SELECT organisasjonsnummer, navn, bransjer, an.navn_oppdatert FROM arbeidsgiver ag
                 INNER JOIN arbeidsgiver_navn an on an.id = ag.navn_ref
                 LEFT JOIN arbeidsgiver_bransjer ab on ab.id = ag.bransjer_ref
-                WHERE orgnummer = ANY (?)
+                WHERE organisasjonsnummer = ANY (?)
             """,
-            organisasjonsnumre.map { it.toLong() }.toTypedArray(),
+            organisasjonsnumre.toTypedArray(),
         ).list(session) {
-            val identifikator = it.string("orgnummer")
+            val identifikator = it.string("organisasjonsnummer")
             KomplettInntektskildeDto(
                 identifikator = organisasjonsnummerEllerFødselsnummer(identifikator),
                 type = inntektskildetype(identifikator),

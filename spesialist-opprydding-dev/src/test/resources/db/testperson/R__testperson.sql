@@ -20,8 +20,8 @@ INSERT INTO arbeidsgiver_navn(id, navn, navn_oppdatert)
 VALUES (${sequence_number}, 'ARBEIDSGIVER', '2018-01-01');
 INSERT INTO arbeidsgiver_bransjer(id, bransjer, oppdatert)
 VALUES (${sequence_number}, 'BRANSJE', now());
-INSERT INTO arbeidsgiver(id, orgnummer, navn_ref, bransjer_ref)
-VALUES (${sequence_number}, ${organisasjonsnummer}, ${sequence_number}, ${sequence_number});
+INSERT INTO arbeidsgiver(id, organisasjonsnummer, navn_ref, bransjer_ref)
+VALUES (${sequence_number}, '${organisasjonsnummer}', ${sequence_number}, ${sequence_number});
 INSERT INTO arbeidsforhold(id, person_ref, arbeidsgiver_ref, startdato, sluttdato, stillingstittel, stillingsprosent,
                            oppdatert)
 VALUES (${sequence_number}, ${sequence_number}, ${sequence_number}, '2018-01-01', '2018-01-31', 'STILLING', 100, now());

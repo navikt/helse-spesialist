@@ -149,10 +149,10 @@ class OverstyringDao(queryRunner: QueryRunner) : OverstyringRepository, QueryRun
                 INSERT INTO overstyring_tidslinje (overstyring_ref, arbeidsgiver_ref, begrunnelse)
                 SELECT :overstyringRef, ag.id, :begrunnelse
                 FROM arbeidsgiver ag
-                WHERE ag.orgnummer = :orgnr
+                WHERE ag.organisasjonsnummer = :organisasjonsnummer
                 """.trimIndent(),
                 "overstyringRef" to overstyringRef,
-                "orgnr" to overstyrtTidslinje.organisasjonsnummer.toLong(),
+                "organisasjonsnummer" to overstyrtTidslinje.organisasjonsnummer,
                 "begrunnelse" to overstyrtTidslinje.begrunnelse,
             ).updateAndReturnGeneratedKey()
 
@@ -183,7 +183,7 @@ class OverstyringDao(queryRunner: QueryRunner) : OverstyringRepository, QueryRun
                 INSERT INTO overstyring_inntekt (forklaring, manedlig_inntekt, fra_manedlig_inntekt, skjaeringstidspunkt, overstyring_ref, refusjonsopplysninger, fra_refusjonsopplysninger, begrunnelse, arbeidsgiver_ref, subsumsjon, fom, tom)
                 SELECT :forklaring, :maanedligInntekt, :fraMaanedligInntekt, :skjaeringstidspunkt, :overstyringRef, :refusjonsopplysninger::json, :fraRefusjonsopplysninger::json, :begrunnelse, ag.id, :subsumsjon::json, :fom, :tom
                 FROM arbeidsgiver ag
-                WHERE ag.orgnummer = :orgnr
+                WHERE ag.organisasjonsnummer = :organisasjonsnummer
                 """.trimIndent(),
                 "forklaring" to arbeidsgiver.forklaring,
                 "maanedligInntekt" to arbeidsgiver.månedligInntekt,
@@ -203,7 +203,7 @@ class OverstyringDao(queryRunner: QueryRunner) : OverstyringRepository, QueryRun
                         )
                     },
                 "begrunnelse" to arbeidsgiver.begrunnelse,
-                "orgnr" to arbeidsgiver.organisasjonsnummer.toLong(),
+                "organisasjonsnummer" to arbeidsgiver.organisasjonsnummer,
                 "subsumsjon" to
                     arbeidsgiver.lovhjemmel?.let {
                         objectMapper.writeValueAsString(
@@ -258,11 +258,11 @@ class OverstyringDao(queryRunner: QueryRunner) : OverstyringRepository, QueryRun
                 INSERT INTO skjonnsfastsetting_sykepengegrunnlag_arbeidsgiver (arlig, fra_arlig, arbeidsgiver_ref, skjonnsfastsetting_sykepengegrunnlag_ref)
                 SELECT :aarlig, :fraAarlig, ag.id, :skjoennsfastsettingSykepengegrunnlagRef
                 FROM arbeidsgiver ag
-                WHERE ag.orgnummer = :orgnr
+                WHERE ag.organisasjonsnummer = :organisasjonsnummer
                 """.trimIndent(),
                 "aarlig" to arbeidsgiver.årlig,
                 "fraAarlig" to arbeidsgiver.fraÅrlig,
-                "orgnr" to arbeidsgiver.organisasjonsnummer.toLong(),
+                "organisasjonsnummer" to arbeidsgiver.organisasjonsnummer,
                 "skjoennsfastsettingSykepengegrunnlagRef" to skjønnsfastsettingSykepengegrunnlagId,
             ).update()
         }
@@ -306,11 +306,11 @@ class OverstyringDao(queryRunner: QueryRunner) : OverstyringRepository, QueryRun
                 INSERT INTO overstyring_minimum_sykdomsgrad_arbeidsgiver (berort_vedtaksperiode_id, arbeidsgiver_ref, overstyring_minimum_sykdomsgrad_ref)
                 SELECT :beroertVedtaksperiodeId, ag.id, :overstyringMinimumSykdomsgradRef
                 FROM arbeidsgiver ag
-                WHERE ag.orgnummer = :organisasjonsnummer
+                WHERE ag.organisasjonsnummer = :organisasjonsnummer
                 """.trimIndent(),
                 "beroertVedtaksperiodeId" to arbeidsgiver.berørtVedtaksperiodeId,
                 "overstyringMinimumSykdomsgradRef" to overstyringMinimumSykdomsgradId,
-                "organisasjonsnummer" to arbeidsgiver.organisasjonsnummer.toLong(),
+                "organisasjonsnummer" to arbeidsgiver.organisasjonsnummer,
             ).update()
         }
     }
@@ -327,14 +327,14 @@ class OverstyringDao(queryRunner: QueryRunner) : OverstyringRepository, QueryRun
                 INSERT INTO overstyring_arbeidsforhold (forklaring, deaktivert, skjaeringstidspunkt, overstyring_ref, begrunnelse, arbeidsgiver_ref)
                 SELECT :forklaring, :deaktivert, :skjaeringstidspunkt, :overstyringRef, :begrunnelse, ag.id
                 FROM arbeidsgiver ag
-                WHERE ag.orgnummer = :orgnr
+                WHERE ag.organisasjonsnummer = :organisasjonsnummer
                 """.trimIndent(),
                 "forklaring" to arbeidsforhold.forklaring,
                 "deaktivert" to arbeidsforhold.deaktivert,
                 "skjaeringstidspunkt" to overstyrtArbeidsforhold.skjæringstidspunkt,
                 "overstyringRef" to overstyringRef,
                 "begrunnelse" to arbeidsforhold.begrunnelse,
-                "orgnr" to arbeidsforhold.organisasjonsnummer.toLong(),
+                "organisasjonsnummer" to arbeidsforhold.organisasjonsnummer,
             ).update()
         }
     }
