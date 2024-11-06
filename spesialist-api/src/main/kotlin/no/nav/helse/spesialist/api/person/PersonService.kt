@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api.person
 
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import net.logstash.logback.argument.StructuredArguments.keyValue
@@ -96,6 +97,7 @@ class PersonService(
         }
         if (manglerTilgang(egenAnsattApiDao, personApiDao, fødselsnummer, tilganger)) return FetchPersonResult.Feil.ManglerTilgang
 
+        val reservasjon = finnReservasjonsstatus(fødselsnummer)
         val snapshot =
             when (val snapshotResult = hentSnapshot(fødselsnummer)) {
                 HentSnapshotResult.Feil.IkkeFunnet -> return FetchPersonResult.Feil.IkkeFunnet
@@ -103,16 +105,14 @@ class PersonService(
                 is HentSnapshotResult.Ok -> snapshotResult.snapshot
             }
 
-        val reservasjon = finnReservasjonsstatus(fødselsnummer).await()
-
         return person(fødselsnummer, snapshot, tilganger, reservasjon)
     }
 
-    private fun person(
+    private suspend fun person(
         fødselsnummer: String,
         snapshot: Pair<Personinfo, GraphQLPerson>,
         tilganger: SaksbehandlerTilganger,
-        reservasjon: Reservasjon?,
+        reservasjon: Deferred<Reservasjon?>,
     ): FetchPersonResult.Ok {
         val (personinfo, personSnapshot) = snapshot
         return FetchPersonResult.Ok(
@@ -120,7 +120,7 @@ class PersonService(
                 snapshot = personSnapshot,
                 personinfo =
                     personinfo.copy(
-                        reservasjon = reservasjon,
+                        reservasjon = reservasjon.await(),
                         unntattFraAutomatisering = stansAutomatiskBehandlinghåndterer.unntattFraAutomatiskGodkjenning(fødselsnummer),
                         fullmakt = vergemålApiDao.harFullmakt(fødselsnummer),
                     ),
