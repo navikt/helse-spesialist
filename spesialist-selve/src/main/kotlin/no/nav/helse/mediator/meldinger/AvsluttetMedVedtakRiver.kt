@@ -18,7 +18,7 @@ internal class AvsluttetMedVedtakRiver(
     override fun validations() =
         River.PacketValidation {
             it.demandValue("@event_name", "avsluttet_med_vedtak")
-            it.requireKey("@id", "fødselsnummer", "aktørId", "vedtaksperiodeId", "organisasjonsnummer")
+            it.requireKey("@id", "fødselsnummer", "vedtaksperiodeId", "organisasjonsnummer")
             it.requireKey("fom", "tom", "skjæringstidspunkt")
             it.requireArray("hendelser")
             it.requireKey(

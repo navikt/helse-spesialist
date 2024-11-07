@@ -24,7 +24,6 @@ internal class AvsluttetMedVedtakMessage(
     private val avviksvurderingDao: AvviksvurderingDao,
 ) : Vedtaksperiodemelding {
     private val fødselsnummer = packet["fødselsnummer"].asText()
-    private val aktørId = packet["aktørId"].asText()
     private val vedtakFattetTidspunkt = packet["vedtakFattetTidspunkt"].asLocalDateTime()
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID()
     private val spleisBehandlingId = packet["behandlingId"].asUUID()
@@ -138,7 +137,7 @@ internal class AvsluttetMedVedtakMessage(
         checkNotNull(
             avviksvurderingDao.finnAvviksvurderinger(fødselsnummer).gjenopprett().finnRiktigAvviksvurdering(skjæringstidspunkt),
         ) {
-            "Forventet å finne avviksvurdering for $aktørId og skjæringstidspunkt $skjæringstidspunkt"
+            "Forventet å finne avviksvurdering for behandlingId=$spleisBehandlingId og skjæringstidspunkt $skjæringstidspunkt"
         }
 
     private fun innrapporterteInntekter(
