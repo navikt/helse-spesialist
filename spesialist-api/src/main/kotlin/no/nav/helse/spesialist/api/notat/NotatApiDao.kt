@@ -54,6 +54,22 @@ class NotatApiDao(
             "saksbehandlerident" to saksbehandlerident,
         ).singleOrNull { mapKommentarDto(it) }
 
+    fun leggTilKommentarMedDialogRef(
+        dialogRef: Int,
+        tekst: String,
+        saksbehandlerident: String,
+    ): KommentarDto? =
+        asSQL(
+            """
+            insert into kommentarer (tekst, saksbehandlerident, dialog_ref)
+            values (:tekst, :saksbehandlerident, :dialogRef)
+            returning *
+            """.trimIndent(),
+            "tekst" to tekst,
+            "dialogRef" to dialogRef,
+            "saksbehandlerident" to saksbehandlerident,
+        ).singleOrNull { mapKommentarDto(it) }
+
     fun finnNotater(vedtaksperiodeId: UUID): List<NotatDto> =
         asSQL(
             """ 

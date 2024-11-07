@@ -332,6 +332,18 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         }
     }
 
+    protected fun opprettDialog() =
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            @Language("PostgreSQL")
+            val statement =
+                "INSERT INTO dialog(opprettet) VALUES (now())"
+            session.run(
+                queryOf(
+                    statement,
+                ).asUpdateAndReturnGeneratedKey,
+        )
+    }
+
     protected fun opprettNotat(
         tekst: String = "Et notat",
         saksbehandlerOid: UUID = SAKSBEHANDLER.oid,
