@@ -100,7 +100,6 @@ data class InntektHentetFraAOrdningen(
     override val id: UUID,
     override val type: Hendelsetype,
     val mottattDato: LocalDateTime,
-    val eksternDokumentId: UUID,
 ) : Hendelse
 
 internal fun GraphQLHendelse.tilHendelse(): Hendelse? =
