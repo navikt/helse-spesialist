@@ -16,7 +16,6 @@ import java.util.UUID
 data class GodkjenningsbehovData(
     val id: UUID,
     val fødselsnummer: String,
-    val aktørId: String,
     val organisasjonsnummer: String,
     val vedtaksperiodeId: UUID,
     val spleisVedtaksperioder: List<SpleisVedtaksperiode>,

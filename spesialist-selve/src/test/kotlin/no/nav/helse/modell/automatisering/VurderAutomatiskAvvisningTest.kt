@@ -15,7 +15,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -91,14 +90,13 @@ internal class VurderAutomatiskAvvisningTest {
         godkjenningMediator = godkjenningMediator,
         utbetaling = Utbetaling(utbetalingId, 1000, 1000, Utbetalingtype.UTBETALING),
         godkjenningsbehov = godkjenningsbehov(
-            kanAvvises = kanAvvises,
-            fødselsnummer = fødselsnummer
+            fødselsnummer = fødselsnummer,
+            kanAvvises = kanAvvises
         )
     )
 
     private fun godkjenningsbehov(
         id: UUID = UUID.randomUUID(),
-        aktørId: String = lagAktørId(),
         fødselsnummer: String = lagFødselsnummer(),
         organisasjonsnummer: String = lagOrganisasjonsnummer(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
@@ -120,7 +118,6 @@ internal class VurderAutomatiskAvvisningTest {
     ) = GodkjenningsbehovData(
         id = id,
         fødselsnummer = fødselsnummer,
-        aktørId = aktørId,
         organisasjonsnummer = organisasjonsnummer,
         vedtaksperiodeId = vedtaksperiodeId,
         spleisVedtaksperioder = emptyList(),

@@ -45,7 +45,6 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.OVERGANG_FRA_IT
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
-import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -286,7 +285,6 @@ internal class OpprettSaksbehandleroppgaveTest {
         behovData = GodkjenningsbehovData(
             id = HENDELSE_ID,
             fødselsnummer = FNR,
-            aktørId = lagAktørId(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             spleisVedtaksperioder = emptyList(),

@@ -25,7 +25,6 @@ internal class GodkjenningsbehovRiver(
             it.requireKey(
                 "@id",
                 "fødselsnummer",
-                "aktørId",
                 "organisasjonsnummer",
                 "vedtaksperiodeId",
                 "utbetalingId",

@@ -14,7 +14,6 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
-import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -67,7 +66,6 @@ internal class UtbetalingsgodkjenningMessageTest {
 
     private fun godkjenningsbehov(
         id: UUID = UUID.randomUUID(),
-        aktørId: String = lagAktørId(),
         fødselsnummer: String = lagFødselsnummer(),
         organisasjonsnummer: String = lagOrganisasjonsnummer(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
@@ -89,7 +87,6 @@ internal class UtbetalingsgodkjenningMessageTest {
     ) = GodkjenningsbehovData(
         id = id,
         fødselsnummer = fødselsnummer,
-        aktørId = aktørId,
         organisasjonsnummer = organisasjonsnummer,
         vedtaksperiodeId = vedtaksperiodeId,
         spleisVedtaksperioder = emptyList(),

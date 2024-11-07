@@ -26,7 +26,6 @@ import java.util.UUID
 internal class VurderÅpenGosysoppgaveTest {
     private companion object {
         private const val FNR = "12345678911"
-        private const val AKTØR_ID = "1234567891112"
         private val VEDTAKPERIODE_ID_AG_1 = UUID.randomUUID()
         private val VEDTAKPERIODE_ID_AG_2 = UUID.randomUUID()
     }
@@ -45,7 +44,6 @@ internal class VurderÅpenGosysoppgaveTest {
     private fun command(
         harTildeltOppgave: Boolean = false,
     ) = VurderÅpenGosysoppgave(
-        aktørId = AKTØR_ID,
         åpneGosysOppgaverRepository = åpneGosysOppgaverRepository,
         vedtaksperiodeId = VEDTAKPERIODE_ID_AG_1,
         sykefraværstilfelle = sykefraværstilfelle,

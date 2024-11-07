@@ -15,7 +15,6 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.objectMapper
-import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -88,7 +87,12 @@ internal class LøsGodkjenningsbehovTest {
             godkjenningMediator = GodkjenningMediator(
                 mockk(relaxed = true),
             ),
-            godkjenningsbehovData = godkjenningsbehov(id = GODKJENNINGSBEHOV_ID, fødselsnummer = fødselsnummer, vedtaksperiodeId = vedtaksperiodeId, json = godkjenningsbehovJson)
+            godkjenningsbehovData = godkjenningsbehov(
+                id = GODKJENNINGSBEHOV_ID,
+                fødselsnummer = fødselsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                json = godkjenningsbehovJson
+            )
         )
     }
 
@@ -104,7 +108,6 @@ internal class LøsGodkjenningsbehovTest {
 
     private fun godkjenningsbehov(
         id: UUID = UUID.randomUUID(),
-        aktørId: String = lagAktørId(),
         fødselsnummer: String = lagFødselsnummer(),
         organisasjonsnummer: String = lagOrganisasjonsnummer(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
@@ -126,7 +129,6 @@ internal class LøsGodkjenningsbehovTest {
     ) = GodkjenningsbehovData(
         id = id,
         fødselsnummer = fødselsnummer,
-        aktørId = aktørId,
         organisasjonsnummer = organisasjonsnummer,
         vedtaksperiodeId = vedtaksperiodeId,
         spleisVedtaksperioder = emptyList(),

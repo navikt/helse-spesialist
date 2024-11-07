@@ -12,7 +12,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class VurderÅpenGosysoppgave(
-    private val aktørId: String,
     private val åpneGosysOppgaverRepository: ÅpneGosysOppgaverRepository,
     private val vedtaksperiodeId: UUID,
     private val sykefraværstilfelle: Sykefraværstilfelle,
@@ -33,7 +32,7 @@ internal class VurderÅpenGosysoppgave(
             logg.info("Trenger oppgaveinformasjon fra Gosys")
             context.behov(
                 "ÅpneOppgaver",
-                mapOf("aktørId" to aktørId, "ikkeEldreEnn" to ikkeEldreEnn(vedtaksperiodeId)),
+                mapOf("ikkeEldreEnn" to ikkeEldreEnn(vedtaksperiodeId)),
             )
             return false
         }

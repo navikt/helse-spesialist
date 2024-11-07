@@ -73,7 +73,6 @@ internal class GosysOppgaveEndretCommand(
     override val commands: List<Command> =
         listOf(
             VurderÅpenGosysoppgave(
-                aktørId = godkjenningsbehov.aktørId,
                 åpneGosysOppgaverRepository = åpneGosysOppgaverRepository,
                 vedtaksperiodeId = oppgavedataForAutomatisering.vedtaksperiodeId,
                 sykefraværstilfelle = sykefraværstilfelle,

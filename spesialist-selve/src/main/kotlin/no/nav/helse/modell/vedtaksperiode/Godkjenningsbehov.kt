@@ -71,7 +71,6 @@ data class SpleisVedtaksperiode(
 internal class Godkjenningsbehov private constructor(
     override val id: UUID,
     private val fødselsnummer: String,
-    val aktørId: String,
     val organisasjonsnummer: String,
     private val vedtaksperiodeId: UUID,
     private val spleisVedtaksperioder: List<SpleisVedtaksperiode>,
@@ -109,7 +108,6 @@ internal class Godkjenningsbehov private constructor(
         GodkjenningsbehovData(
             id = id,
             fødselsnummer = fødselsnummer,
-            aktørId = aktørId,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             spleisVedtaksperioder = spleisVedtaksperioder,
@@ -133,7 +131,6 @@ internal class Godkjenningsbehov private constructor(
     internal constructor(packet: JsonMessage) : this(
         id = packet["@id"].asUUID(),
         fødselsnummer = packet["fødselsnummer"].asText(),
-        aktørId = packet["aktørId"].asText(),
         organisasjonsnummer = packet["organisasjonsnummer"].asText(),
         periodeFom = LocalDate.parse(packet["Godkjenning.periodeFom"].asText()),
         periodeTom = LocalDate.parse(packet["Godkjenning.periodeTom"].asText()),
@@ -171,7 +168,6 @@ internal class Godkjenningsbehov private constructor(
     internal constructor(jsonNode: JsonNode) : this(
         id = UUID.fromString(jsonNode.path("@id").asText()),
         fødselsnummer = jsonNode.path("fødselsnummer").asText(),
-        aktørId = jsonNode.path("aktørId").asText(),
         organisasjonsnummer = jsonNode.path("organisasjonsnummer").asText(),
         periodeFom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeFom").asText()),
         periodeTom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeTom").asText()),
@@ -302,7 +298,6 @@ internal class GodkjenningsbehovCommand(
                 sykefraværstilfelle = sykefraværstilfelle,
             ),
             VurderÅpenGosysoppgave(
-                aktørId = behovData.aktørId,
                 åpneGosysOppgaverRepository = åpneGosysOppgaverRepository,
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
                 sykefraværstilfelle = sykefraværstilfelle,

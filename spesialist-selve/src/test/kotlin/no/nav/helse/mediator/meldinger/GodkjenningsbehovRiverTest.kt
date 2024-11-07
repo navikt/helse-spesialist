@@ -63,7 +63,6 @@ internal class GodkjenningsbehovRiverTest {
             melding = withArg<Godkjenningsbehov> {
                 assertEquals(HENDELSE, it.id)
                 assertEquals(FNR, it.fødselsnummer())
-                assertEquals(AKTØR, it.aktørId)
                 assertEquals(VEDTAKSPERIODE, it.vedtaksperiodeId())
                 assertEquals(ORGNR, it.organisasjonsnummer)
                 assertEquals(FOM, it.periodeFom)
