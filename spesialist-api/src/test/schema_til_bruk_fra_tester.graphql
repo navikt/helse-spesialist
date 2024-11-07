@@ -15,6 +15,7 @@ interface Hendelse {
 
 interface Historikkinnslag {
     dialogRef: Int
+    id: Int!
     notatId: Int
     saksbehandlerIdent: String
     timestamp: LocalDateTime!
@@ -268,6 +269,7 @@ type Faresignal {
 
 type FjernetFraPaVent implements Historikkinnslag {
     dialogRef: Int
+    id: Int!
     notatId: Int
     saksbehandlerIdent: String
     timestamp: LocalDateTime!
@@ -360,6 +362,7 @@ type LagtPaVent implements Historikkinnslag {
     arsaker: [String!]!
     dialogRef: Int
     frist: LocalDate
+    id: Int!
     kommentarer: [Kommentar!]!
     notatId: Int
     notatTekst: String
@@ -516,6 +519,7 @@ type PaVent {
 
 type PeriodeHistorikkElementNy implements Historikkinnslag {
     dialogRef: Int
+    id: Int!
     notatId: Int
     saksbehandlerIdent: String
     timestamp: LocalDateTime!

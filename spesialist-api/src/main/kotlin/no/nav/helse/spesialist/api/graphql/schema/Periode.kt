@@ -199,6 +199,7 @@ enum class NotatType {
 }
 
 sealed interface Historikkinnslag {
+    val id: Int
     val type: PeriodehistorikkType
     val timestamp: LocalDateTime
     val saksbehandlerIdent: String?
@@ -207,6 +208,7 @@ sealed interface Historikkinnslag {
 }
 
 data class LagtPaVent(
+    override val id: Int,
     override val type: PeriodehistorikkType,
     override val timestamp: LocalDateTime,
     override val saksbehandlerIdent: String?,
@@ -219,6 +221,7 @@ data class LagtPaVent(
 ) : Historikkinnslag
 
 data class FjernetFraPaVent(
+    override val id: Int,
     override val type: PeriodehistorikkType,
     override val timestamp: LocalDateTime,
     override val saksbehandlerIdent: String?,
@@ -227,6 +230,7 @@ data class FjernetFraPaVent(
 ) : Historikkinnslag
 
 data class PeriodeHistorikkElementNy(
+    override val id: Int,
     override val type: PeriodehistorikkType,
     override val timestamp: LocalDateTime,
     override val saksbehandlerIdent: String?,
@@ -519,6 +523,7 @@ data class BeregnetPeriode(
                     PeriodehistorikkType.LEGG_PA_VENT -> {
                         val (påVentÅrsaker, frist, notatTekst) = mapLagtPåVentJson(json = it.json)
                         LagtPaVent(
+                            id = it.id,
                             type = it.type,
                             timestamp = it.timestamp,
                             saksbehandlerIdent = it.saksbehandlerIdent,
@@ -541,14 +546,16 @@ data class BeregnetPeriode(
                     }
                     PeriodehistorikkType.FJERN_FRA_PA_VENT ->
                         FjernetFraPaVent(
-                            it.type,
-                            it.timestamp,
-                            it.saksbehandlerIdent,
-                            it.notatId,
-                            it.dialogRef,
+                            id = it.id,
+                            type = it.type,
+                            timestamp = it.timestamp,
+                            saksbehandlerIdent = it.saksbehandlerIdent,
+                            notatId = it.notatId,
+                            dialogRef = it.dialogRef,
                         )
                     else ->
                         PeriodeHistorikkElementNy(
+                            id = it.id,
                             type = it.type,
                             saksbehandlerIdent = it.saksbehandlerIdent,
                             timestamp = it.timestamp,
