@@ -192,6 +192,13 @@ query HentSnapshot($fnr: String!) {
                             tom
                             type
                         }
+                        ... on GraphQLInntektFraAOrdningen {
+                            __typename
+                            id
+                            mottattDato
+                            type
+                            eksternDokumentId
+                        }
                     }
                     vedtaksperiodeId
                     ... on GraphQLUberegnetPeriode {

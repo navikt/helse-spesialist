@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLHendelse
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntektFraAOrdningen
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntektsmelding
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadArbeidsgiver
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadArbeidsledig
@@ -14,6 +15,7 @@ import java.util.UUID
 
 enum class Hendelsetype {
     INNTEKTSMELDING,
+    INNTEKT_HENTET_FRA_AORDNINGEN,
     NY_SOKNAD,
     SENDT_SOKNAD_ARBEIDSGIVER,
     SENDT_SOKNAD_NAV,
@@ -94,7 +96,14 @@ data class Sykmelding(
     val rapportertDato: LocalDateTime,
 ) : Hendelse
 
-internal fun GraphQLHendelse.tilHendelse(): Hendelse =
+data class InntektHentetFraAOrdningen(
+    override val id: UUID,
+    override val type: Hendelsetype,
+    val mottattDato: LocalDateTime,
+    val eksternDokumentId: UUID,
+) : Hendelse
+
+internal fun GraphQLHendelse.tilHendelse(): Hendelse? =
     when (this) {
         is GraphQLInntektsmelding ->
             Inntektsmelding(
@@ -168,6 +177,9 @@ internal fun GraphQLHendelse.tilHendelse(): Hendelse =
                 tom = tom,
                 rapportertDato = rapportertDato,
             )
+
+        // Midlertidig for at Spleiselaget skal kunne pushe kode som sender disse til oss
+        is GraphQLInntektFraAOrdningen -> null
 
         else -> throw Exception("Ukjent hendelsestype ${javaClass.name}")
     }

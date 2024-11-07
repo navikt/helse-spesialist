@@ -146,6 +146,13 @@ type GraphQLInfotrygdVilkarsgrunnlag implements GraphQLVilkarsgrunnlag {
   sykepengegrunnlag: Float!
 }
 
+type GraphQLInntektFraAOrdningen implements GraphQLHendelse {
+  eksternDokumentId: String!
+  id: String!
+  mottattDato: LocalDateTime!
+  type: GraphQLHendelsetype!
+}
+
 type GraphQLInntekterFraAOrdningen {
   maned: YearMonth!
   sum: Float!
@@ -167,7 +174,6 @@ type GraphQLNyttInntektsforholdPeriode {
   organisasjonsnummer: String!
   skjaeringstidspunkt: LocalDate!
   tom: LocalDate!
-  vilkarsgrunnlagId: UUID!
 }
 
 type GraphQLOmregnetArsinntekt {
@@ -419,6 +425,7 @@ enum GraphQLBegrunnelse {
 }
 
 enum GraphQLHendelsetype {
+  InntektFraAOrdningen
   Inntektsmelding
   NySoknad
   SendtSoknadArbeidsgiver
@@ -435,7 +442,6 @@ enum GraphQLInntektskilde {
   Infotrygd
   Inntektsmelding
   Saksbehandler
-  Soknad
 }
 
 enum GraphQLInntektstype {
