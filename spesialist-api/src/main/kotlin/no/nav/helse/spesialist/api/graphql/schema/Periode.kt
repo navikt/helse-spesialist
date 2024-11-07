@@ -421,7 +421,7 @@ data class UberegnetPeriode(
 
     override fun skjaeringstidspunkt(): LocalDate = periode.skjaeringstidspunkt
 
-    override fun hendelser(): List<Hendelse> = periode.hendelser.mapNotNull { it.tilHendelse() }
+    override fun hendelser(): List<Hendelse> = periode.hendelser.map { it.tilHendelse() }
 
     override fun varsler(): List<VarselDTO> =
         if (skalViseAktiveVarsler) {
@@ -503,7 +503,7 @@ data class BeregnetPeriode(
                 }
         }
 
-    override fun hendelser(): List<Hendelse> = periode.hendelser.mapNotNull { it.tilHendelse() }
+    override fun hendelser(): List<Hendelse> = periode.hendelser.map { it.tilHendelse() }
 
     fun notater(): List<Notat> = notater(notatDao, vedtaksperiodeId())
 

@@ -102,7 +102,7 @@ data class InntektHentetFraAOrdningen(
     val mottattDato: LocalDateTime,
 ) : Hendelse
 
-internal fun GraphQLHendelse.tilHendelse(): Hendelse? =
+internal fun GraphQLHendelse.tilHendelse(): Hendelse =
     when (this) {
         is GraphQLInntektsmelding ->
             Inntektsmelding(
@@ -176,9 +176,12 @@ internal fun GraphQLHendelse.tilHendelse(): Hendelse? =
                 tom = tom,
                 rapportertDato = rapportertDato,
             )
-
-        // Midlertidig for at Spleiselaget skal kunne pushe kode som sender disse til oss
-        is GraphQLInntektFraAOrdningen -> null
+        is GraphQLInntektFraAOrdningen ->
+            InntektHentetFraAOrdningen(
+                id = UUID.fromString(id),
+                type = Hendelsetype.INNTEKT_HENTET_FRA_AORDNINGEN,
+                mottattDato = mottattDato,
+            )
 
         else -> throw Exception("Ukjent hendelsestype ${javaClass.name}")
     }
