@@ -30,6 +30,16 @@ data class OppgaveFraDatabaseForVisning(
     val opprinneligSøknadsdato: LocalDateTime,
     val tidsfrist: LocalDate?,
     val filtrertAntall: Int,
+    val paVentInfo: PaVentInfoFraDatabase?,
+)
+
+data class PaVentInfoFraDatabase(
+    val årsaker: List<String>,
+    val tekst: String,
+    val dialogRef: Long,
+    val saksbehandler: String,
+    val opprettet: LocalDateTime,
+    val tidsfrist: LocalDate,
 )
 
 data class AntallOppgaverFraDatabase(

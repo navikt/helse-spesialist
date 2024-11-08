@@ -94,6 +94,15 @@ data class AntallOppgaver(
     val antallMineSakerPaVent: Int,
 )
 
+data class PaVentInfo(
+    val arsaker: List<String>,
+    val tekst: String,
+    val dialogRef: Int,
+    val saksbehandler: String,
+    val opprettet: LocalDateTime,
+    val tidsfrist: LocalDate,
+)
+
 data class OppgaveTilBehandling(
     val id: String,
     val opprettet: LocalDateTime,
@@ -108,6 +117,7 @@ data class OppgaveTilBehandling(
     val oppgavetype: Oppgavetype,
     val mottaker: Mottaker,
     val antallArbeidsforhold: AntallArbeidsforhold,
+    val paVentInfo: PaVentInfo?,
 )
 
 data class Oppgaveegenskap(

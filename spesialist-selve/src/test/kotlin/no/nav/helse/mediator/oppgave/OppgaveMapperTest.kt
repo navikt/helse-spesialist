@@ -14,6 +14,7 @@ import no.nav.helse.db.EgenskapForDatabase.SØKNAD
 import no.nav.helse.db.EgenskapForDatabase.UTBETALING_TIL_ARBEIDSGIVER
 import no.nav.helse.db.EgenskapForDatabase.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
+import no.nav.helse.db.PaVentInfoFraDatabase
 import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilEgenskaperForVisning
@@ -64,7 +65,15 @@ internal class OppgaveMapperTest {
                 opprinneligSøknadsdato = opprinneligSøknadsdato,
                 tidsfrist = tidsfrist,
                 filtrertAntall = 1,
-            )
+                paVentInfo = PaVentInfoFraDatabase(
+                    årsaker = listOf("årsak"),
+                    tekst = "tekster",
+                    dialogRef = 1L,
+                    saksbehandler = saksbehandler.ident,
+                    opprettet = opprettet,
+                    tidsfrist = tidsfrist
+                ),
+                )
         val oppgaverTilBehandling = listOf(oppgaveFraDatabaseForVisning).tilOppgaverTilBehandling()
         assertEquals(1, oppgaverTilBehandling.size)
         val oppgaveTilBehandling = oppgaverTilBehandling.single()
@@ -88,6 +97,12 @@ internal class OppgaveMapperTest {
             ),
             oppgaveTilBehandling.egenskaper.toSet(),
         )
+        assertEquals(listOf("årsak"), oppgaveTilBehandling.paVentInfo?.arsaker)
+        assertEquals("tekster", oppgaveTilBehandling.paVentInfo?.tekst)
+        assertEquals(1, oppgaveTilBehandling.paVentInfo?.dialogRef)
+        assertEquals(saksbehandler.ident, oppgaveTilBehandling.paVentInfo?.saksbehandler)
+        assertEquals(opprettet, oppgaveTilBehandling.paVentInfo?.opprettet)
+        assertEquals(tidsfrist, oppgaveTilBehandling.paVentInfo?.tidsfrist)
     }
 
     @ParameterizedTest
@@ -102,11 +117,12 @@ internal class OppgaveMapperTest {
                 navn = PersonnavnFraDatabase(fornavn, mellomnavn, etternavn),
                 egenskaper = setOf(egenskapSomMapperTilPeriodetype, DELVIS_REFUSJON, SØKNAD, EN_ARBEIDSGIVER),
                 tildelt = saksbehandler,
-                påVent = true,
+                påVent = false,
                 opprettet = opprettet,
                 opprinneligSøknadsdato = opprinneligSøknadsdato,
                 tidsfrist = null,
                 filtrertAntall = 1,
+                paVentInfo = null,
             )
         val oppgaverTilBehandling = listOf(oppgaveFraDatabaseForVisning).tilOppgaverTilBehandling()
         assertEquals(1, oppgaverTilBehandling.size)
@@ -128,11 +144,12 @@ internal class OppgaveMapperTest {
                 navn = PersonnavnFraDatabase(fornavn, mellomnavn, etternavn),
                 egenskaper = setOf(egenskapSomMapperTilPeriodetype, DELVIS_REFUSJON, SØKNAD, EN_ARBEIDSGIVER),
                 tildelt = saksbehandler,
-                påVent = true,
+                påVent = false,
                 opprettet = opprettet,
                 opprinneligSøknadsdato = opprinneligSøknadsdato,
                 tidsfrist = null,
                 filtrertAntall = 1,
+                paVentInfo = null,
             )
         assertThrows<NoSuchElementException> {
             listOf(oppgaveFraDatabaseForVisning).tilOppgaverTilBehandling()
@@ -156,11 +173,12 @@ internal class OppgaveMapperTest {
                 navn = PersonnavnFraDatabase(fornavn, mellomnavn, etternavn),
                 egenskaper = setOf(egenskapSomMapperTilOppgavetype, DELVIS_REFUSJON, FORSTEGANGSBEHANDLING, EN_ARBEIDSGIVER),
                 tildelt = saksbehandler,
-                påVent = true,
+                påVent = false,
                 opprettet = opprettet,
                 opprinneligSøknadsdato = opprinneligSøknadsdato,
                 tidsfrist = null,
                 filtrertAntall = 1,
+                paVentInfo = null,
             )
         val oppgaverTilBehandling = listOf(oppgaveFraDatabaseForVisning).tilOppgaverTilBehandling()
         assertEquals(1, oppgaverTilBehandling.size)
@@ -211,11 +229,12 @@ internal class OppgaveMapperTest {
                 navn = PersonnavnFraDatabase(fornavn, mellomnavn, etternavn),
                 egenskaper = andreEgenskaper + egenskapSomIkkeMapperTilOppgavetype,
                 tildelt = saksbehandler,
-                påVent = true,
+                påVent = false,
                 opprettet = opprettet,
                 opprinneligSøknadsdato = opprinneligSøknadsdato,
                 tidsfrist = null,
                 filtrertAntall = 1,
+                paVentInfo = null,
             )
         assertThrows<NoSuchElementException> {
             listOf(oppgaveFraDatabaseForVisning).tilOppgaverTilBehandling()
@@ -239,11 +258,12 @@ internal class OppgaveMapperTest {
                 navn = PersonnavnFraDatabase(fornavn, mellomnavn, etternavn),
                 egenskaper = setOf(egenskapSomMapperTilAntallArbeidsforhold, DELVIS_REFUSJON, FORSTEGANGSBEHANDLING, SØKNAD),
                 tildelt = saksbehandler,
-                påVent = true,
+                påVent = false,
                 opprettet = opprettet,
                 opprinneligSøknadsdato = opprinneligSøknadsdato,
                 tidsfrist = null,
                 filtrertAntall = 1,
+                paVentInfo = null,
             )
         val oppgaverTilBehandling = listOf(oppgaveFraDatabaseForVisning).tilOppgaverTilBehandling()
         assertEquals(1, oppgaverTilBehandling.size)
@@ -294,11 +314,12 @@ internal class OppgaveMapperTest {
                 navn = PersonnavnFraDatabase(fornavn, mellomnavn, etternavn),
                 egenskaper = andreEgenskaper + egenskapSomIkkeMapperTilAntallArbeidsforhold,
                 tildelt = saksbehandler,
-                påVent = true,
+                påVent = false,
                 opprettet = opprettet,
                 opprinneligSøknadsdato = opprinneligSøknadsdato,
                 tidsfrist = null,
                 filtrertAntall = 1,
+                paVentInfo = null,
             )
         assertThrows<NoSuchElementException> {
             listOf(oppgaveFraDatabaseForVisning).tilOppgaverTilBehandling()

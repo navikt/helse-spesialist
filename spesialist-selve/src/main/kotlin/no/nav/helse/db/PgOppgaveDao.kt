@@ -275,6 +275,11 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
                 os.soknad_mottatt AS opprinnelig_soknadsdato,
                 o.kan_avvises,
                 pv.frist,
+                pv.opprettet AS på_vent_opprettet,
+                pv.årsaker,
+                pv.notattekst,
+                sb.ident AS på_vent_saksbehandler,
+                pv.dialog_ref,
                 count(1) OVER() AS filtered_count
             FROM oppgave o
             INNER JOIN vedtak v ON o.vedtak_ref = v.id
@@ -285,6 +290,7 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
             LEFT JOIN totrinnsvurdering ttv ON (ttv.vedtaksperiode_id = v.vedtaksperiode_id AND ttv.utbetaling_id_ref IS NULL)
             LEFT JOIN saksbehandler s ON t.saksbehandler_ref = s.oid
             LEFT JOIN pa_vent pv ON v.vedtaksperiode_id = pv.vedtaksperiode_id
+            LEFT JOIN saksbehandler sb ON pv.saksbehandler_ref = sb.oid
             WHERE o.status = 'AvventerSaksbehandler'
                 AND (:ingen_ukategoriserte_egenskaper OR egenskaper @> ARRAY[$ukategoriserteEgenskaper]::varchar[]) -- egenskaper saksbehandler har filtrert på
                 AND (:ingen_oppgavetype_egenskaper OR egenskaper && ARRAY[$oppgavetypeEgenskaper]::varchar[]) -- egenskaper saksbehandler har filtrert på
@@ -350,6 +356,17 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
                 opprinneligSøknadsdato = row.localDateTime("opprinnelig_soknadsdato"),
                 tidsfrist = row.localDateOrNull("frist"),
                 filtrertAntall = row.int("filtered_count"),
+                paVentInfo =
+                    row.localDateTimeOrNull("på_vent_opprettet")?.let {
+                        PaVentInfoFraDatabase(
+                            årsaker = row.array<String>("årsaker").toList(),
+                            tekst = row.string("notattekst"),
+                            dialogRef = row.long("dialog_ref"),
+                            saksbehandler = row.string("på_vent_saksbehandler"),
+                            opprettet = it,
+                            tidsfrist = row.localDate("tidsfrist"),
+                        )
+                    },
             )
         }
     }

@@ -14,6 +14,7 @@ import no.nav.helse.spesialist.api.graphql.schema.Mottaker
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavetype
+import no.nav.helse.spesialist.api.graphql.schema.PaVentInfo
 import no.nav.helse.spesialist.api.graphql.schema.Periodetype
 import no.nav.helse.spesialist.api.graphql.schema.Personnavn
 import no.nav.helse.spesialist.api.graphql.schema.Tildeling
@@ -28,6 +29,17 @@ internal object OppgaveMapper {
                 opprettet = oppgave.opprettet,
                 opprinneligSoknadsdato = oppgave.opprinneligSøknadsdato,
                 tidsfrist = oppgave.tidsfrist,
+                paVentInfo =
+                    oppgave.paVentInfo?.let {
+                        PaVentInfo(
+                            arsaker = it.årsaker,
+                            tekst = it.tekst,
+                            dialogRef = it.dialogRef.toInt(),
+                            saksbehandler = it.saksbehandler,
+                            opprettet = it.opprettet,
+                            tidsfrist = it.tidsfrist,
+                        )
+                    },
                 vedtaksperiodeId = oppgave.vedtaksperiodeId,
                 navn =
                     Personnavn(

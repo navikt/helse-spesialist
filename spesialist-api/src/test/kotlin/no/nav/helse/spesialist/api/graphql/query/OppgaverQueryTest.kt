@@ -230,6 +230,7 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
             oppgavetype = OppgavetypeForApi.SOKNAD,
             mottaker = Mottaker.SYKMELDT,
             antallArbeidsforhold = AntallArbeidsforhold.ET_ARBEIDSFORHOLD,
+            paVentInfo = null,
         )
 
     private fun behandletOppgave() =

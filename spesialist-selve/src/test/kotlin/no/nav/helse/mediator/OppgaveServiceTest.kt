@@ -11,9 +11,9 @@ import no.nav.helse.SpeilTilgangsgrupper
 import no.nav.helse.db.AntallOppgaverFraDatabase
 import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
+import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
-import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.Reservasjon
@@ -109,7 +109,10 @@ internal class OppgaveServiceTest {
     private fun saksbehandlerFraApi(tilganger: List<UUID> = emptyList()) =
         SaksbehandlerFraApi(SAKSBEHANDLEROID, SAKSBEHANDLEREPOST, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT, tilganger)
 
-    private fun lagSøknadsoppgave(fødselsnummer: String, contextId: UUID) {
+    private fun lagSøknadsoppgave(
+        fødselsnummer: String,
+        contextId: UUID,
+    ) {
         mediator.nyOppgave(
             fødselsnummer = fødselsnummer,
             contextId = contextId,
@@ -118,11 +121,14 @@ internal class OppgaveServiceTest {
             utbetalingId = UTBETALING_ID,
             hendelseId = HENDELSE_ID,
             kanAvvises = true,
-            egenskaper = setOf(SØKNAD)
+            egenskaper = setOf(SØKNAD),
         )
     }
 
-    private fun lagStikkprøveoppgave(fødselsnummer: String, contextId: UUID) {
+    private fun lagStikkprøveoppgave(
+        fødselsnummer: String,
+        contextId: UUID,
+    ) {
         mediator.nyOppgave(
             fødselsnummer = fødselsnummer,
             contextId = contextId,
@@ -131,7 +137,7 @@ internal class OppgaveServiceTest {
             utbetalingId = UTBETALING_ID_2,
             hendelseId = HENDELSE_ID,
             kanAvvises = true,
-            egenskaper = setOf(STIKKPRØVE)
+            egenskaper = setOf(STIKKPRØVE),
         )
     }
 
@@ -282,7 +288,8 @@ internal class OppgaveServiceTest {
         mediator.oppgaver(saksbehandlerFraApi(), 0, MAX_VALUE, emptyList(), Filtrering(ingenUkategoriserteEgenskaper = true))
         verify(exactly = 1) {
             oppgaveDao.finnOppgaverForVisning(
-                ekskluderEgenskaper = Egenskap.alleTilgangsstyrteEgenskaper.map { it.name } + Egenskap.alleUkategoriserteEgenskaper.map { it.name },
+                ekskluderEgenskaper =
+                    Egenskap.alleTilgangsstyrteEgenskaper.map { it.name } + Egenskap.alleUkategoriserteEgenskaper.map { it.name },
                 SAKSBEHANDLEROID,
                 0,
                 MAX_VALUE,
@@ -507,14 +514,16 @@ internal class OppgaveServiceTest {
         assertEquals(egenskap.antallArbeidsforhold(), oppgave.antallArbeidsforhold)
     }
 
-    private fun assertAntallOpptegnelser(antallOpptegnelser: Int, fødselsnummer: String) =
-        verify(exactly = antallOpptegnelser) {
-            opptegnelseRepository.opprettOpptegnelse(
-                eq(fødselsnummer),
-                any(),
-                eq(OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE),
-            )
-        }
+    private fun assertAntallOpptegnelser(
+        antallOpptegnelser: Int,
+        fødselsnummer: String,
+    ) = verify(exactly = antallOpptegnelser) {
+        opptegnelseRepository.opprettOpptegnelse(
+            eq(fødselsnummer),
+            any(),
+            eq(OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE),
+        )
+    }
 
     private fun assertOpptegnelseIkkeOpprettet(fødselsnummer: String) = assertAntallOpptegnelser(0, fødselsnummer)
 
@@ -575,6 +584,7 @@ internal class OppgaveServiceTest {
         opprinneligSøknadsdato = opprinneligSøknadsdato,
         tidsfrist = tidsfrist,
         filtrertAntall = filtrertAntall,
+        paVentInfo = null,
     )
 
     private fun oppgaveFraDatabase(
