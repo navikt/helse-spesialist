@@ -3,6 +3,7 @@ package no.nav.helse.mediator.meldinger
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.helse.kafka.AvvikVurdertRiver
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.hendelser.AvvikVurdertMessage

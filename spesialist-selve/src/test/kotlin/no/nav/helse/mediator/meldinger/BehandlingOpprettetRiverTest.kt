@@ -4,6 +4,7 @@ import io.mockk.called
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.kafka.BehandlingOpprettetRiver
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.vedtaksperiode.BehandlingOpprettet

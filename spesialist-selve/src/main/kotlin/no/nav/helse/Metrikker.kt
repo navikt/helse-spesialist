@@ -1,19 +1,9 @@
 package no.nav.helse
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.prometheus.client.Counter
 import io.prometheus.client.Histogram
 import io.prometheus.client.Summary
 import no.nav.helse.mediator.GodkjenningsbehovUtfall
-import no.nav.helse.mediator.SpesialistRiver
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.River
-import no.nav.helse.rapids_rivers.asLocalDateTime
-import no.nav.helse.rapids_rivers.isMissingOrNull
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import java.time.temporal.ChronoUnit.MILLIS
 
 internal val automatiseringsteller =
     Counter.build("automatiseringer", "Teller antall automatiseringer")
@@ -27,16 +17,6 @@ internal val automatiskAvvistÅrsakerTeller =
         .labelNames("aarsak")
         .register()
 
-private val varselteller =
-    Counter.build("aktivitet_totals", "Teller antall warnings opprettet i Spesialist")
-        .labelNames("alvorlighetsgrad", "melding")
-        .register()
-
-private val inaktiveVarslerteller =
-    Counter.build("inaktive_warning_totals", "Teller antall warnings satt inaktive i Spesialist")
-        .labelNames("alvorlighetsgrad", "melding")
-        .register()
-
 private val registrerTidsbrukForHendelse =
     Summary.build("command_tidsbruk", "Måler hvor lang tid en command bruker på å kjøre i ms")
         .labelNames("command")
@@ -48,14 +28,10 @@ private val godkjenningsbehovUtfall =
         .labelNames("utfall")
         .register()
 
-private val registrerTidsbrukForBehov =
+internal val registrerTidsbrukForBehov =
     Summary.build("behov_tidsbruk", "Måler hvor lang tid et behov tok å løse i ms")
         .labelNames("behov")
         .register()
-
-internal fun tellVarsel(varselkode: String) = varselteller.labels("WARN", varselkode).inc()
-
-internal fun tellInaktivtVarsel(varselkode: String) = inaktiveVarslerteller.labels("WARN", varselkode).inc()
 
 internal fun registrerTidsbrukForHendelse(
     command: String,
@@ -68,38 +44,3 @@ internal fun registrerTidsbrukForGodkjenningsbehov(
     utfall: GodkjenningsbehovUtfall,
     tidBruktMs: Int,
 ) = godkjenningsbehovUtfall.labels(utfall.name).observe(tidBruktMs.toDouble())
-
-internal class MetrikkRiver : SpesialistRiver {
-    val log: Logger = LoggerFactory.getLogger("MetrikkRiver")
-
-    override fun validations() =
-        River.PacketValidation {
-            it.demandValue("@event_name", "behov")
-            it.demandValue("@final", true)
-            it.requireKey("@besvart", "@behov", "system_participating_services")
-            it.interestedIn("@løsning.Godkjenning.godkjent")
-            it.interestedIn("@løsning.Godkjenning.automatiskBehandling")
-        }
-
-    override fun onPacket(
-        packet: JsonMessage,
-        context: MessageContext,
-    ) {
-        val besvart = packet["@besvart"].asLocalDateTime()
-        val opprettet = packet["system_participating_services"][0].let { it["time"].asLocalDateTime() }
-        val delay = MILLIS.between(opprettet, besvart)
-        val behov = packet["@behov"].map(JsonNode::asText)
-        val godkjent: Boolean? = packet["@løsning.Godkjenning.godkjent"].takeUnless { it.isMissingOrNull() }?.asBoolean()
-        val automatisk: Boolean? = packet["@løsning.Godkjenning.automatiskBehandling"].takeUnless { it.isMissingOrNull() }?.asBoolean()
-
-        val godkjenningslog =
-            if (godkjent != null && automatisk != null) {
-                " Løsning er ${if (automatisk) "automatisk" else "manuelt"} ${if (godkjent) "godkjent" else "avvist"}."
-            } else {
-                ""
-            }
-
-        log.info("Registrerer svartid for $behov som $delay ms.$godkjenningslog")
-        registrerTidsbrukForBehov.labels(behov.first()).observe(delay.toDouble())
-    }
-}

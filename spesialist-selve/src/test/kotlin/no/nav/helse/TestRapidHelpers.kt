@@ -1,7 +1,7 @@
 package no.nav.helse
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.mediator.SpesialistRiver
+import no.nav.helse.kafka.SpesialistRiver
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.rapids_rivers.testsupport.TestRapid

@@ -4,7 +4,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
-import no.nav.helse.modell.person.AdressebeskyttelseEndretRiver
+import no.nav.helse.kafka.AdressebeskyttelseEndretRiver
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import java.util.UUID

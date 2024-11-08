@@ -3,7 +3,7 @@ package no.nav.helse.mediator.meldinger
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.medRivers
-import no.nav.helse.mediator.meldinger.løsninger.DokumentRiver
+import no.nav.helse.kafka.DokumentRiver
 import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.testsupport.TestRapid

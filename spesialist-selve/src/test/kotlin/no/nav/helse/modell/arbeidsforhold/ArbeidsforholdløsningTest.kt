@@ -5,7 +5,7 @@ import io.mockk.verify
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
-import no.nav.helse.mediator.meldinger.løsninger.ArbeidsforholdRiver
+import no.nav.helse.kafka.ArbeidsforholdLøsningRiver
 import no.nav.helse.modell.KomplettArbeidsforholdDto
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
@@ -27,7 +27,7 @@ internal class ArbeidsforholdløsningTest {
 
     private val dao = mockk<ArbeidsforholdDao>(relaxed = true)
     private val mediator = mockk<MeldingMediator>(relaxed = true)
-    private val rapid = TestRapid().medRivers(ArbeidsforholdRiver(mediator))
+    private val rapid = TestRapid().medRivers(ArbeidsforholdLøsningRiver(mediator))
 
     @BeforeEach
     internal fun resetTestSetup() {

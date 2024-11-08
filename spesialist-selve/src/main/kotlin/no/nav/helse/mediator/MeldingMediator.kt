@@ -1,60 +1,60 @@
 package no.nav.helse.mediator
 
-import SøknadSendtArbeidsledigRiver
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.sessionOf
-import no.nav.helse.MetrikkRiver
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.db.VedtakDao
-import no.nav.helse.mediator.meldinger.AvsluttetMedVedtakRiver
-import no.nav.helse.mediator.meldinger.AvsluttetUtenVedtakRiver
-import no.nav.helse.mediator.meldinger.AvvikVurdertRiver
-import no.nav.helse.mediator.meldinger.BehandlingOpprettetRiver
-import no.nav.helse.mediator.meldinger.EndretSkjermetinfoRiver
-import no.nav.helse.mediator.meldinger.GodkjenningsbehovRiver
-import no.nav.helse.mediator.meldinger.GosysOppgaveEndretRiver
-import no.nav.helse.mediator.meldinger.KlargjørPersonForVisningRiver
-import no.nav.helse.mediator.meldinger.MidnattRiver
-import no.nav.helse.mediator.meldinger.NyeVarslerRiver
-import no.nav.helse.mediator.meldinger.OppdaterPersondataRiver
-import no.nav.helse.mediator.meldinger.OverstyringIgangsattRiver
+import no.nav.helse.kafka.AdressebeskyttelseEndretRiver
+import no.nav.helse.kafka.ArbeidsforholdLøsningRiver
+import no.nav.helse.kafka.ArbeidsgiverinformasjonLøsningRiver
+import no.nav.helse.kafka.AvsluttetMedVedtakRiver
+import no.nav.helse.kafka.AvsluttetUtenVedtakRiver
+import no.nav.helse.kafka.AvvikVurdertRiver
+import no.nav.helse.kafka.BehandlingOpprettetRiver
+import no.nav.helse.kafka.DokumentRiver
+import no.nav.helse.kafka.EgenAnsattLøsningRiver
+import no.nav.helse.kafka.EndretSkjermetinfoRiver
+import no.nav.helse.kafka.FlerePersoninfoRiver
+import no.nav.helse.kafka.FullmaktLøsningRiver
+import no.nav.helse.kafka.GodkjenningsbehovRiver
+import no.nav.helse.kafka.GosysOppgaveEndretRiver
+import no.nav.helse.kafka.HentEnhetLøsningRiver
+import no.nav.helse.kafka.InfotrygdutbetalingerLøsningRiver
+import no.nav.helse.kafka.InntektLøsningRiver
+import no.nav.helse.kafka.KlargjørPersonForVisningRiver
+import no.nav.helse.kafka.KommandokjedePåminnelseRiver
+import no.nav.helse.kafka.MetrikkRiver
+import no.nav.helse.kafka.MidnattRiver
+import no.nav.helse.kafka.NyeVarslerRiver
+import no.nav.helse.kafka.OppdaterPersondataRiver
+import no.nav.helse.kafka.OverstyringIgangsattRiver
+import no.nav.helse.kafka.PersoninfoløsningRiver
+import no.nav.helse.kafka.SaksbehandlerløsningRiver
+import no.nav.helse.kafka.StansAutomatiskBehandlingRiver
+import no.nav.helse.kafka.SøknadSendtArbeidsledigRiver
+import no.nav.helse.kafka.SøknadSendtRiver
+import no.nav.helse.kafka.TilbakedateringBehandletRiver
+import no.nav.helse.kafka.UtbetalingEndretRiver
+import no.nav.helse.kafka.VarseldefinisjonRiver
+import no.nav.helse.kafka.VedtakFattetRiver
+import no.nav.helse.kafka.VedtaksperiodeForkastetRiver
+import no.nav.helse.kafka.VedtaksperiodeNyUtbetalingRiver
+import no.nav.helse.kafka.VedtaksperiodeReberegnetRiver
+import no.nav.helse.kafka.VergemålLøsningRiver
+import no.nav.helse.kafka.VurderingsmomenterLøsningRiver
+import no.nav.helse.kafka.ÅpneGosysOppgaverLøsningRiver
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.PoisonPills
-import no.nav.helse.mediator.meldinger.StansAutomatiskBehandlingRiver
-import no.nav.helse.mediator.meldinger.SøknadSendtRiver
-import no.nav.helse.mediator.meldinger.TilbakedateringBehandletRiver
-import no.nav.helse.mediator.meldinger.UtbetalingEndretRiver
-import no.nav.helse.mediator.meldinger.VarseldefinisjonRiver
-import no.nav.helse.mediator.meldinger.VedtakFattetRiver
-import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastetRiver
-import no.nav.helse.mediator.meldinger.VedtaksperiodeNyUtbetalingRiver
-import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnetRiver
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
-import no.nav.helse.mediator.meldinger.løsninger.ArbeidsforholdRiver
-import no.nav.helse.mediator.meldinger.løsninger.ArbeidsgiverRiver
-import no.nav.helse.mediator.meldinger.løsninger.DokumentRiver
-import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
-import no.nav.helse.mediator.meldinger.løsninger.FlerePersoninfoRiver
-import no.nav.helse.mediator.meldinger.løsninger.Fullmaktløsning
-import no.nav.helse.mediator.meldinger.løsninger.HentEnhetRiver
-import no.nav.helse.mediator.meldinger.løsninger.InfotrygdutbetalingerRiver
-import no.nav.helse.mediator.meldinger.løsninger.Inntektløsning
-import no.nav.helse.mediator.meldinger.løsninger.PersoninfoRiver
-import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
-import no.nav.helse.mediator.meldinger.løsninger.SaksbehandlerløsningRiver
-import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
-import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
-import no.nav.helse.mediator.meldinger.påminnelser.KommandokjedePåminnelseRiver
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.MeldingDuplikatkontrollDao
 import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.modell.dokument.PgDokumentDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.CommandContextDao
-import no.nav.helse.modell.person.AdressebeskyttelseEndretRiver
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.PersonService
 import no.nav.helse.modell.person.SøknadSendt
@@ -70,10 +70,6 @@ import no.nav.helse.spesialist.api.Personhåndterer
 import org.slf4j.LoggerFactory
 import java.util.UUID
 import javax.sql.DataSource
-
-internal interface SpesialistRiver : River.PacketListener {
-    fun validations(): River.PacketValidation
-}
 
 internal class MeldingMediator(
     private val dataSource: DataSource,
@@ -146,22 +142,22 @@ internal class MeldingMediator(
                 GodkjenningsbehovRiver(this),
                 SøknadSendtRiver(this),
                 SøknadSendtArbeidsledigRiver(this),
-                PersoninfoRiver(this),
+                PersoninfoløsningRiver(this),
                 FlerePersoninfoRiver(this),
-                HentEnhetRiver(this),
-                InfotrygdutbetalingerRiver(this),
+                HentEnhetLøsningRiver(this),
+                InfotrygdutbetalingerLøsningRiver(this),
                 SaksbehandlerløsningRiver(this),
-                ArbeidsgiverRiver(this),
-                ArbeidsforholdRiver(this),
+                ArbeidsgiverinformasjonLøsningRiver(this),
+                ArbeidsforholdLøsningRiver(this),
                 VedtaksperiodeForkastetRiver(this),
                 AdressebeskyttelseEndretRiver(this),
                 OverstyringIgangsattRiver(this),
-                EgenAnsattløsning.EgenAnsattRiver(this),
-                Vergemålløsning.VergemålRiver(this),
-                Fullmaktløsning.FullmaktRiver(this),
-                ÅpneGosysOppgaverløsning.ÅpneGosysOppgaverRiver(this),
-                Risikovurderingløsning.V2River(this),
-                Inntektløsning.InntektRiver(this),
+                EgenAnsattLøsningRiver(this),
+                VergemålLøsningRiver(this),
+                FullmaktLøsningRiver(this),
+                ÅpneGosysOppgaverLøsningRiver(this),
+                VurderingsmomenterLøsningRiver(this),
+                InntektLøsningRiver(this),
                 OppdaterPersondataRiver(this),
                 KlargjørPersonForVisningRiver(this),
                 UtbetalingEndretRiver(this),
