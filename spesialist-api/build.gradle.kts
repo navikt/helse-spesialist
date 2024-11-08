@@ -18,7 +18,8 @@ dependencies {
     implementation(libs.bundles.logging)
     implementation(libs.jackson.datatype)
     implementation(libs.jackson.helpers)
-    implementation(libs.prometheus.core)
+    implementation(libs.ktor.micrometer)
+    implementation(libs.micrometer.prometheus)
 
     testImplementation(testFixtures(project(":spesialist-felles")))
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")

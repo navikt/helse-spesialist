@@ -6,8 +6,8 @@ import io.ktor.server.application.createRouteScopedPlugin
 import io.ktor.server.plugins.callloging.processingTimeMillis
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.receive
-import io.prometheus.metrics.core.metrics.Counter
-import io.prometheus.metrics.core.metrics.Summary
+import io.prometheus.client.Counter
+import io.prometheus.client.Summary
 
 val GraphQLMetrikker =
     createRouteScopedPlugin("GraphQLMetrikker") {
@@ -16,22 +16,20 @@ val GraphQLMetrikker =
             if (call.request.httpMethod == HttpMethod.Get) return@onCallRespond
             (call.receive<JsonNode>()["operationName"]?.textValue() ?: "ukjent").let { operationName ->
                 val elapsed = call.processingTimeMillis()
-                graphQLResponstider.labelValues(operationName).observe(elapsed.toDouble())
+                graphQLResponstider.labels(operationName).observe(elapsed.toDouble())
             }
         }
     }
 
 private val graphQLResponstider =
     Summary
-        .builder()
-        .name("graphql_responstider")
-        .help("Måler responstider for GraphQL-kall")
+        .build("graphql_responstider", "Måler responstider for GraphQL-kall")
         .labelNames("operationName")
         .register()
 
 internal val auditLogTeller =
     Counter
-        .builder()
+        .build()
         .name("auditlog_total")
         .help("Teller antall auditlogginnslag")
         .register()

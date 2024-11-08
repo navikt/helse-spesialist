@@ -6,8 +6,8 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
-import io.prometheus.metrics.core.metrics.Counter
-import io.prometheus.metrics.core.metrics.Histogram
+import io.prometheus.client.Counter
+import io.prometheus.client.Histogram
 import no.nav.helse.spesialist.api.client.AccessTokenClient
 import no.nav.helse.spesialist.api.graphql.schema.Reservasjon
 import org.slf4j.Logger
@@ -30,13 +30,13 @@ class KRRClient(
     companion object {
         private val responstidReservasjonsstatus: Histogram =
             Histogram
-                .builder()
+                .build()
                 .name("responstid_hent_reservasjonsstatus")
                 .help("Responstid for kall til digdir-krr-proxy")
                 .register()
         private val statusEtterKallReservasjonsstatus: Counter =
             Counter
-                .builder()
+                .build()
                 .name("status_kall_hent_reservasjonsstatus")
                 .help("Status på kall til digdir-krr-proxy, success eller failure")
                 .labelNames("status")
@@ -57,10 +57,10 @@ class KRRClient(
                         header("Nav-Call-Id", callId)
                         accept(ContentType.Application.Json)
                     }.body<Reservasjon>()
-            statusEtterKallReservasjonsstatus.labelValues("success").inc()
+            statusEtterKallReservasjonsstatus.labels("success").inc()
             return reservasjon
         } catch (e: Exception) {
-            statusEtterKallReservasjonsstatus.labelValues("failure").inc()
+            statusEtterKallReservasjonsstatus.labels("failure").inc()
             logg.warn("Feil under kall til Kontakt- og reservasjonsregisteret")
             sikkerLogg.warn("Feil under kall til Kontakt- og reservasjonsregisteret", e)
         } finally {
