@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.api.graphql
 
-import no.nav.helse.rapids_rivers.asYearMonth
+import com.github.navikt.tbd_libs.jackson.asYearMonth
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.april
 import no.nav.helse.spesialist.api.februar

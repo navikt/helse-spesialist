@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
-import no.nav.helse.rapids_rivers.asOptionalLocalDateTime
+import com.github.navikt.tbd_libs.jackson.asLocalDateTimeOrNull
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -45,7 +45,7 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
         """,
             )
 
-        assertNotNull(body["data"]["feilregistrerKommentar"]["feilregistrert_tidspunkt"].asOptionalLocalDateTime())
+        assertNotNull(body["data"]["feilregistrerKommentar"]["feilregistrert_tidspunkt"].asLocalDateTimeOrNull())
     }
 
     @Test

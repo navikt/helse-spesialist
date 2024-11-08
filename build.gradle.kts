@@ -2,7 +2,6 @@ val junitJupiterVersion = "5.10.2"
 val ktorVersion = "2.3.12"
 val jvmTargetVersion = "21"
 val graphqlKotlinVersion = "8.1.0"
-val rapidsAndRiversVersion = "2024022311041708682651.01821651ed22"
 val logbackSyslog4jVersion = "1.0.0"
 val hikariCPVersion = "5.1.0"
 val flywayCoreVersion = "10.9.0"
@@ -47,7 +46,6 @@ allprojects {
     }
 
     dependencies {
-        implementation("com.github.navikt:rapids-and-rivers:$rapidsAndRiversVersion")
         implementation("io.ktor:ktor-server-cio:$ktorVersion")
         implementation("io.ktor:ktor-server-websockets:$ktorVersion")
         implementation("org.postgresql:postgresql:$postgresqlVersion")

@@ -11,6 +11,7 @@ repositories {
 dependencies {
     implementation("com.google.cloud.sql:postgres-socket-factory:$cloudSqlVersion")
     implementation("org.postgresql:postgresql:$postgresqlVersion")
+    implementation(libs.rapids.and.rivers)
 
     testImplementation(project(":spesialist-felles"))
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion") {

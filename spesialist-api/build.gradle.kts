@@ -15,6 +15,11 @@ dependencies {
     implementation(project(":spesialist-felles"))
     implementation("com.expediagroup:graphql-kotlin-ktor-server:$graphQLKotlinVersion")
 
+    implementation(libs.bundles.logging)
+    implementation(libs.jackson.datatype)
+    implementation(libs.jackson.helpers)
+    implementation(libs.prometheus.core)
+
     testImplementation(testFixtures(project(":spesialist-felles")))
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
     testImplementation("io.ktor:ktor-server-netty:$ktorVersion")
