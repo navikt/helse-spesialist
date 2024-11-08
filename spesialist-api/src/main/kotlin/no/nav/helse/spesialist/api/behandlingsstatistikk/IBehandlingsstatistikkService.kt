@@ -1,6 +1,5 @@
-package no.nav.helse.mediator
+package no.nav.helse.spesialist.api.behandlingsstatistikk
 
-import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkResponse
 import java.time.LocalDate
 
 interface IBehandlingsstatistikkService {

@@ -1,4 +1,4 @@
-package no.nav.helse
+package no.nav.helse.spesialist.api.bootstrap
 
 import java.util.UUID
 
@@ -30,7 +30,7 @@ interface Tilgangsgrupper {
     fun gruppeId(gruppe: Gruppe): UUID
 }
 
-internal class SpeilTilgangsgrupper(private val env: Map<String, String>) : Tilgangsgrupper {
+class SpeilTilgangsgrupper(private val env: Map<String, String>) : Tilgangsgrupper {
     override val kode7GruppeId: UUID by lazy { Gruppe.KODE7.idFra(env) }
     override val beslutterGruppeId: UUID by lazy { Gruppe.BESLUTTER.idFra(env) }
     override val skjermedePersonerGruppeId: UUID by lazy { Gruppe.SKJERMEDE.idFra(env) }

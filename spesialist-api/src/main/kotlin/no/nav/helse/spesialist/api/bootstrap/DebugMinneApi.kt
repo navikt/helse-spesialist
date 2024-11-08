@@ -1,4 +1,4 @@
-package no.nav.helse.bootstrap
+package no.nav.helse.spesialist.api.bootstrap
 
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode

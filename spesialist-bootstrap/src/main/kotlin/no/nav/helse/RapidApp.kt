@@ -1,14 +1,22 @@
-package no.nav.helse.bootstrap
+package no.nav.helse
 
-import no.nav.helse.MsGraphClient
-import no.nav.helse.SpeilTilgangsgrupper
+import no.nav.helse.bootstrap.Environment
+import no.nav.helse.bootstrap.SpesialistApp
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.AzureConfig
+import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
+import no.nav.helse.spesialist.api.bootstrap.azureAdClient
+import no.nav.helse.spesialist.api.bootstrap.httpClient
 import no.nav.helse.spesialist.api.client.AccessTokenClient
 import no.nav.helse.spesialist.api.reservasjon.KRRClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import java.net.URI
+
+fun main() {
+    val applicationBuilder = RapidApp(System.getenv())
+    applicationBuilder.start()
+}
 
 internal class RapidApp(env: Map<String, String>) {
     private lateinit var rapidsConnection: RapidsConnection

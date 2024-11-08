@@ -2,7 +2,6 @@ package no.nav.helse.mediator.oppgave
 
 import kotliquery.TransactionalSession
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OppgavesorteringForDatabase
@@ -40,6 +39,7 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDto
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
+import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.BehandledeOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.Filtrering

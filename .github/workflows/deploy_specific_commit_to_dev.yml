@@ -27,7 +27,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    uses: navikt/helse-spesialist/.github/workflows/build-image.yml@master
+    uses: ./.github/workflows/build-image.yml
     secrets: inherit
     with:
       ref: denne_skal_deployes_til_dev

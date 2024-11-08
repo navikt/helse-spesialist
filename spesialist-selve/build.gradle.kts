@@ -19,29 +19,3 @@ dependencies {
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
     testImplementation("no.nav.security:mock-oauth2-server:$mockOAuth2ServerVersion")
 }
-
-tasks {
-    val copyDeps by registering(Sync::class) {
-        from(configurations.runtimeClasspath)
-        exclude("spesialist-*")
-        into("build/deps")
-    }
-    val copyLibs by registering(Sync::class) {
-        from(configurations.runtimeClasspath)
-        include("spesialist-*")
-        into("build/libs")
-    }
-
-    named<Jar>("jar") {
-        dependsOn(copyDeps, copyLibs)
-        archiveBaseName.set("app")
-
-        manifest {
-            attributes["Main-Class"] = "no.nav.helse.MainKt"
-            attributes["Class-Path"] =
-                configurations.runtimeClasspath.get().joinToString(separator = " ") {
-                    it.name
-                }
-        }
-    }
-}

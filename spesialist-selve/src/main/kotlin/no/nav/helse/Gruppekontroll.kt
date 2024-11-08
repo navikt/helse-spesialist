@@ -13,7 +13,7 @@ import no.nav.helse.mediator.asUUID
 import no.nav.helse.spesialist.api.client.AccessTokenClient
 import java.util.UUID
 
-internal interface Gruppekontroll {
+interface Gruppekontroll {
     suspend fun erIGrupper(
         oid: UUID,
         gruppeIder: List<UUID>,

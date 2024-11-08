@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.api.graphql.query
 
 import com.expediagroup.graphql.server.operations.Query
 import graphql.execution.DataFetcherResult
-import no.nav.helse.mediator.IBehandlingsstatistikkService
+import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.graphql.schema.Behandlingsstatistikk
 
 class BehandlingsstatistikkQuery(private val behandlingsstatistikkMediator: IBehandlingsstatistikkService) : Query {
