@@ -12,17 +12,19 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryRunner {
+class PgOppgaveDao(
+    queryRunner: QueryRunner,
+) : OppgaveDao,
+    QueryRunner by queryRunner {
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
     constructor(session: Session) : this(MedSession(session))
 
-    override fun finnGenerasjonId(oppgaveId: Long): UUID {
-        return asSQL("SELECT generasjon_ref FROM oppgave WHERE id = :oppgaveId", "oppgaveId" to oppgaveId)
+    override fun finnGenerasjonId(oppgaveId: Long): UUID =
+        asSQL("SELECT generasjon_ref FROM oppgave WHERE id = :oppgaveId", "oppgaveId" to oppgaveId)
             .single { it.uuid("generasjon_ref") }
-    }
 
-    override fun finnOppgaveIdUansettStatus(fødselsnummer: String): Long {
-        return asSQL(
+    override fun finnOppgaveIdUansettStatus(fødselsnummer: String): Long =
+        asSQL(
             """
             SELECT o.id as oppgaveId
             FROM oppgave o
@@ -33,14 +35,12 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
             LIMIT 1
             """,
             "fodselsnummer" to fødselsnummer,
-        )
-            .single {
-                it.long("oppgaveId")
-            }
-    }
+        ).single {
+            it.long("oppgaveId")
+        }
 
-    override fun finnOppgave(id: Long): OppgaveFraDatabase? {
-        return asSQL(
+    override fun finnOppgave(id: Long): OppgaveFraDatabase? =
+        asSQL(
             """
             SELECT o.egenskaper, o.status, v.vedtaksperiode_id, o.behandling_id, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id, s.navn, s.epost, s.ident, s.oid, o.kan_avvises
             FROM oppgave o
@@ -76,10 +76,9 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
                     },
             )
         }
-    }
 
-    override fun finnOppgaveId(fødselsnummer: String): Long? {
-        return asSQL(
+    override fun finnOppgaveId(fødselsnummer: String): Long? =
+        asSQL(
             """
             SELECT o.id as oppgaveId
             FROM oppgave o
@@ -89,28 +88,24 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
                 AND p.fødselsnummer = :fodselsnummer;                
             """,
             "fodselsnummer" to fødselsnummer,
-        )
-            .singleOrNull {
-                it.long("oppgaveId")
-            }
-    }
+        ).singleOrNull {
+            it.long("oppgaveId")
+        }
 
-    override fun finnOppgaveId(utbetalingId: UUID): Long? {
-        return asSQL(
+    override fun finnOppgaveId(utbetalingId: UUID): Long? =
+        asSQL(
             """
             SELECT o.id as oppgaveId
             FROM oppgave o WHERE o.utbetaling_id = :utbetaling_id
             AND o.status NOT IN ('Invalidert'::oppgavestatus, 'Ferdigstilt'::oppgavestatus)
             """,
             "utbetaling_id" to utbetalingId,
-        )
-            .singleOrNull {
-                it.long("oppgaveId")
-            }
-    }
+        ).singleOrNull {
+            it.long("oppgaveId")
+        }
 
-    override fun finnVedtaksperiodeId(fødselsnummer: String): UUID {
-        return asSQL(
+    override fun finnVedtaksperiodeId(fødselsnummer: String): UUID =
+        asSQL(
             """
              SELECT v.vedtaksperiode_id as vedtaksperiode_id
             FROM oppgave o
@@ -123,7 +118,6 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
         ).single {
             it.uuid("vedtaksperiode_id")
         }
-    }
 
     override fun finnVedtaksperiodeId(oppgaveId: Long) =
         asSQL(
@@ -147,8 +141,8 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
             it.int("oppgave_count")
         } > 0
 
-    override fun finnHendelseId(id: Long): UUID {
-        return asSQL(
+    override fun finnHendelseId(id: Long): UUID =
+        asSQL(
             """
             SELECT DISTINCT hendelse_id 
             FROM command_context 
@@ -158,7 +152,6 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
         ).single {
             it.uuid("hendelse_id")
         }
-    }
 
     override fun invaliderOppgaveFor(fødselsnummer: String) {
         asSQL(
@@ -176,19 +169,17 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
         ).update()
     }
 
-    override fun reserverNesteId(): Long {
-        return asSQL(
+    override fun reserverNesteId(): Long =
+        asSQL(
             """
             SELECT nextval(pg_get_serial_sequence('oppgave', 'id')) as neste_id              
             """,
-        )
-            .single {
-                it.long("neste_id")
-            }
-    }
+        ).single {
+            it.long("neste_id")
+        }
 
-    override fun venterPåSaksbehandler(oppgaveId: Long): Boolean {
-        return asSQL(
+    override fun venterPåSaksbehandler(oppgaveId: Long): Boolean =
+        asSQL(
             """
             SELECT EXISTS (
                 SELECT 1 FROM oppgave WHERE id=:oppgaveId AND status IN('AvventerSaksbehandler'::oppgavestatus)
@@ -198,10 +189,9 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
         ).single {
             it.boolean(1)
         }
-    }
 
-    override fun finnSpleisBehandlingId(oppgaveId: Long): UUID {
-        return asSQL(
+    override fun finnSpleisBehandlingId(oppgaveId: Long): UUID =
+        asSQL(
             """
             SELECT spleis_behandling_id FROM oppgave o
             INNER JOIN selve_vedtaksperiode_generasjon svg ON svg.unik_id = o.generasjon_ref
@@ -211,10 +201,9 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
         ).single {
             it.uuid("spleis_behandling_id")
         }
-    }
 
-    override fun oppgaveDataForAutomatisering(oppgaveId: Long): OppgaveDataForAutomatisering? {
-        return asSQL(
+    override fun oppgaveDataForAutomatisering(oppgaveId: Long): OppgaveDataForAutomatisering? =
+        asSQL(
             """
             SELECT v.vedtaksperiode_id, v.fom, v.tom, o.utbetaling_id, h.id AS hendelseId, h.data AS godkjenningbehovJson, s.type as periodetype
             FROM vedtak v
@@ -224,23 +213,21 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
             WHERE o.id = :oppgaveId 
             """,
             "oppgaveId" to oppgaveId,
-        )
-            .singleOrNull { row ->
-                val json = objectMapper.readTree(row.string("godkjenningbehovJson"))
-                val skjæringstidspunkt = json.path("Godkjenning").path("skjæringstidspunkt").asLocalDate()
-                OppgaveDataForAutomatisering(
-                    oppgaveId = oppgaveId,
-                    vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                    periodeFom = row.localDate("fom"),
-                    periodeTom = row.localDate("tom"),
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    utbetalingId = row.uuid("utbetaling_id"),
-                    hendelseId = row.uuid("hendelseId"),
-                    godkjenningsbehovJson = row.string("godkjenningbehovJson"),
-                    periodetype = enumValueOf(row.string("periodetype")),
-                )
-            }
-    }
+        ).singleOrNull { row ->
+            val json = objectMapper.readTree(row.string("godkjenningbehovJson"))
+            val skjæringstidspunkt = json.path("Godkjenning").path("skjæringstidspunkt").asLocalDate()
+            OppgaveDataForAutomatisering(
+                oppgaveId = oppgaveId,
+                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                periodeFom = row.localDate("fom"),
+                periodeTom = row.localDate("tom"),
+                skjæringstidspunkt = skjæringstidspunkt,
+                utbetalingId = row.uuid("utbetaling_id"),
+                hendelseId = row.uuid("hendelseId"),
+                godkjenningsbehovJson = row.string("godkjenningbehovJson"),
+                periodetype = enumValueOf(row.string("periodetype")),
+            )
+        }
 
     override fun finnOppgaverForVisning(
         ekskluderEgenskaper: List<String>,
@@ -364,7 +351,7 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
                             dialogRef = row.long("dialog_ref"),
                             saksbehandler = row.string("på_vent_saksbehandler"),
                             opprettet = it,
-                            tidsfrist = row.localDate("tidsfrist"),
+                            tidsfrist = row.localDate("frist"),
                         )
                     },
             )
@@ -374,8 +361,8 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
     private fun Map<Egenskap.Kategori, List<EgenskapForDatabase>>.tilSqlString(kategori: Egenskap.Kategori) =
         get(kategori)?.joinToString { "'${it.name}'" }
 
-    override fun finnAntallOppgaver(saksbehandlerOid: UUID): AntallOppgaverFraDatabase {
-        return asSQL(
+    override fun finnAntallOppgaver(saksbehandlerOid: UUID): AntallOppgaverFraDatabase =
+        asSQL(
             """
             SELECT 
                 count(*) FILTER ( WHERE NOT o.egenskaper @> ARRAY['PÅ_VENT']::varchar[] ) AS antall_mine_saker,
@@ -386,17 +373,15 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
                 AND t.saksbehandler_ref = :oid              
             """,
             "oid" to saksbehandlerOid,
-        )
-            .singleOrNull { row ->
-                AntallOppgaverFraDatabase(
-                    antallMineSaker = row.int("antall_mine_saker"),
-                    antallMineSakerPåVent = row.int("antall_mine_saker_på_vent"),
-                )
-            } ?: AntallOppgaverFraDatabase(antallMineSaker = 0, antallMineSakerPåVent = 0)
-    }
+        ).singleOrNull { row ->
+            AntallOppgaverFraDatabase(
+                antallMineSaker = row.int("antall_mine_saker"),
+                antallMineSakerPåVent = row.int("antall_mine_saker_på_vent"),
+            )
+        } ?: AntallOppgaverFraDatabase(antallMineSaker = 0, antallMineSakerPåVent = 0)
 
-    override fun finnFødselsnummer(oppgaveId: Long): String {
-        return asSQL(
+    override fun finnFødselsnummer(oppgaveId: Long): String =
+        asSQL(
             """
             SELECT fødselsnummer from person
             INNER JOIN vedtak v on person.id = v.person_ref
@@ -407,7 +392,6 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
         ).single {
             it.string("fødselsnummer")
         }
-    }
 
     override fun updateOppgave(
         oppgaveId: Long,
@@ -415,8 +399,8 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
         ferdigstiltAv: String?,
         oid: UUID?,
         egenskaper: List<EgenskapForDatabase>,
-    ): Int {
-        return asSQL(
+    ): Int =
+        asSQL(
             """
             UPDATE oppgave
             SET ferdigstilt_av = :ferdigstiltAv, ferdigstilt_av_oid = :oid, status = :oppgavestatus::oppgavestatus, egenskaper = :egenskaper::varchar[], oppdatert = :oppdatert
@@ -429,10 +413,9 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
             "oppdatert" to LocalDateTime.now(),
             "oppgaveId" to oppgaveId,
         ).update()
-    }
 
-    override fun harFerdigstiltOppgave(vedtaksperiodeId: UUID): Boolean {
-        return asSQL(
+    override fun harFerdigstiltOppgave(vedtaksperiodeId: UUID): Boolean =
+        asSQL(
             """
             SELECT COUNT(1) AS oppgave_count FROM oppgave o
             INNER JOIN vedtak v on o.vedtak_ref = v.id
@@ -442,14 +425,13 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
         ).single {
             it.int("oppgave_count")
         } > 0
-    }
 
     override fun finnBehandledeOppgaver(
         behandletAvOid: UUID,
         offset: Int,
         limit: Int,
-    ): List<BehandletOppgaveFraDatabaseForVisning> {
-        return asSQL(
+    ): List<BehandletOppgaveFraDatabaseForVisning> =
+        asSQL(
             """
             SELECT 
                 o.id as oppgave_id,
@@ -484,7 +466,9 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
                 id = row.long("oppgave_id"),
                 aktørId = row.string("aktør_id"),
                 egenskaper =
-                    row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }
+                    row
+                        .array<String>("egenskaper")
+                        .map { enumValueOf<EgenskapForDatabase>(it) }
                         .toSet(),
                 ferdigstiltTidspunkt = row.localDateTime("ferdigstilt_tidspunkt"),
                 ferdigstiltAv = row.stringOrNull("ferdigstilt_av"),
@@ -497,13 +481,12 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
                 filtrertAntall = row.int("filtered_count"),
             )
         }
-    }
 
     override fun finnEgenskaper(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
-    ): Set<EgenskapForDatabase>? {
-        return asSQL(
+    ): Set<EgenskapForDatabase>? =
+        asSQL(
             """
             SELECT o.egenskaper FROM oppgave o 
             INNER JOIN vedtak v ON o.vedtak_ref = v.id
@@ -517,10 +500,9 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
         ).singleOrNull { row ->
             row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }.toSet()
         }
-    }
 
-    override fun finnIdForAktivOppgave(vedtaksperiodeId: UUID): Long? {
-        return asSQL(
+    override fun finnIdForAktivOppgave(vedtaksperiodeId: UUID): Long? =
+        asSQL(
             """
             SELECT id FROM oppgave
             WHERE vedtak_ref =
@@ -533,7 +515,6 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
         ).singleOrNull {
             it.long("id")
         }
-    }
 
     override fun opprettOppgave(
         id: Long,
@@ -598,8 +579,8 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
     private fun finnArbeidsgiverbeløpOgPersonbeløp(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
-    ): Pair<Int, Int> {
-        return asSQL(
+    ): Pair<Int, Int> =
+        asSQL(
             """
             SELECT SUM(ABS(arbeidsgiverbeløp)) as sumArbeidsgiverbeløp, SUM(ABS(personbeløp)) as sumPersonbeløp
             FROM utbetaling_id 
@@ -619,19 +600,17 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
         ).single { row ->
             Pair(row.intOrNull("sumArbeidsgiverbeløp") ?: 0, row.intOrNull("sumPersonbeløp") ?: 0)
         }
-    }
 
     private fun finnMottaker(
         harArbeidsgiverbeløp: Boolean,
         harPersonbeløp: Boolean,
-    ): Mottaker? {
-        return when {
+    ): Mottaker? =
+        when {
             harArbeidsgiverbeløp && harPersonbeløp -> Mottaker.BEGGE
             harPersonbeløp -> Mottaker.SYKMELDT
             harArbeidsgiverbeløp -> Mottaker.ARBEIDSGIVER
             else -> null
         }
-    }
 
     private fun OppgavesorteringForDatabase.nøkkelTilKolonne() =
         when (this.nøkkel) {
@@ -641,8 +620,8 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
             SorteringsnøkkelForDatabase.SØKNAD_MOTTATT -> "opprinnelig_soknadsdato"
         } + if (this.stigende) " ASC" else " DESC"
 
-    private fun personRef(vedtaksperiodeId: UUID): Long {
-        return asSQL(
+    private fun personRef(vedtaksperiodeId: UUID): Long =
+        asSQL(
             """
             SELECT person_ref FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId;
             """,
@@ -650,10 +629,9 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
         ).single {
             it.long("person_ref")
         }
-    }
 
-    private fun vedtakRef(vedtaksperiodeId: UUID): Long {
-        return asSQL(
+    private fun vedtakRef(vedtaksperiodeId: UUID): Long =
+        asSQL(
             """
             SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId;  
             """,
@@ -661,5 +639,4 @@ class PgOppgaveDao(queryRunner: QueryRunner) : OppgaveDao, QueryRunner by queryR
         ).single {
             it.long("id")
         }
-    }
 }
