@@ -62,6 +62,10 @@ class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
                 }
             }
         sikkerLogg.debug("Query OppgaverTilBehandling er ferdig etter ${tid.inWholeMilliseconds} ms")
+        val grense = 5000
+        if (tid.inWholeMilliseconds > grense) {
+            sikkerLogg.info("Det tok over $grense ms å hente oppgaver med disse filtrene: $filtrering")
+        }
 
         return DataFetcherResult.newResult<OppgaverTilBehandling>().data(oppgaver).build()
     }
