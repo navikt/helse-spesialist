@@ -15,7 +15,7 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.Duration
+import kotlin.time.measureTimedValue
 
 class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
@@ -47,48 +47,39 @@ class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
         filtrering: Filtrering,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<OppgaverTilBehandling> {
-        sikkerLogg.info("Henter OppgaverTilBehandling")
-        val startTrace = startSporing(env)
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
-        val oppgaver =
-            withContext(Dispatchers.IO) {
-                oppgavehåndterer.oppgaver(
-                    saksbehandlerFraApi = saksbehandler,
-                    offset = offset,
-                    limit = limit,
-                    sortering = sortering,
-                    filtrering = filtrering,
-                )
+        sikkerLogg.debug("Henter OppgaverTilBehandling for ${saksbehandler.navn}")
+        val (oppgaver, tid) =
+            measureTimedValue {
+                withContext(Dispatchers.IO) {
+                    oppgavehåndterer.oppgaver(
+                        saksbehandlerFraApi = saksbehandler,
+                        offset = offset,
+                        limit = limit,
+                        sortering = sortering,
+                        filtrering = filtrering,
+                    )
+                }
             }
-        avsluttSporing(startTrace)
+        sikkerLogg.debug("Query OppgaverTilBehandling er ferdig etter ${tid.inWholeMilliseconds} ms")
 
         return DataFetcherResult.newResult<OppgaverTilBehandling>().data(oppgaver).build()
     }
 
     @Suppress("unused")
     suspend fun antallOppgaver(env: DataFetchingEnvironment): DataFetcherResult<AntallOppgaver> {
-        sikkerLogg.info("Henter AntallOppgaver")
-        val startTrace = startSporing(env)
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
-        val antallOppgaver =
-            withContext(Dispatchers.IO) {
-                oppgavehåndterer.antallOppgaver(
-                    saksbehandlerFraApi = saksbehandler,
-                )
+        sikkerLogg.info("Henter AntallOppgaver for ${saksbehandler.navn}")
+        val (antallOppgaver, tid) =
+            measureTimedValue {
+                withContext(Dispatchers.IO) {
+                    oppgavehåndterer.antallOppgaver(
+                        saksbehandlerFraApi = saksbehandler,
+                    )
+                }
             }
-        avsluttSporing(startTrace)
+        sikkerLogg.debug("Query antallOppgaver er ferdig etter ${tid.inWholeMilliseconds} ms")
 
         return DataFetcherResult.newResult<AntallOppgaver>().data(antallOppgaver).build()
-    }
-
-    private fun startSporing(env: DataFetchingEnvironment): Long {
-        val hvem = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER).navn
-        sikkerLogg.trace("Henter oppgaver for $hvem")
-        return System.nanoTime()
-    }
-
-    private fun avsluttSporing(start: Long) {
-        val tidBrukt = Duration.ofNanos(System.nanoTime() - start)
-        sikkerLogg.trace("Hentet oppgaver, det tok ${tidBrukt.toMillis()} ms")
     }
 }
