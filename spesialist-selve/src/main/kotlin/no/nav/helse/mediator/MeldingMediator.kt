@@ -7,6 +7,7 @@ import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.db.VedtakDao
+import no.nav.helse.duplikatsjekkTidsbruk
 import no.nav.helse.kafka.AdressebeskyttelseEndretRiver
 import no.nav.helse.kafka.ArbeidsforholdLøsningRiver
 import no.nav.helse.kafka.ArbeidsgiverinformasjonLøsningRiver
@@ -70,6 +71,8 @@ import no.nav.helse.spesialist.api.Personhåndterer
 import org.slf4j.LoggerFactory
 import java.util.UUID
 import javax.sql.DataSource
+import kotlin.time.DurationUnit
+import kotlin.time.measureTimedValue
 
 internal class MeldingMediator(
     private val dataSource: DataSource,
@@ -101,13 +104,13 @@ internal class MeldingMediator(
     }
 
     private fun erDuplikat(jsonNode: JsonNode): Boolean {
-        jsonNode["@id"]?.asUUID()?.let { id ->
-            if (meldingDuplikatkontrollDao.erBehandlet(id)) {
-                logg.info("Ignorerer melding {} pga duplikatkontroll", id)
-                return true
-            }
-        }
-        return false
+        return jsonNode["@id"]?.asUUID()?.let { id ->
+            val (erDuplikat, tid) = measureTimedValue { meldingDuplikatkontrollDao.erBehandlet(id) }
+            duplikatsjekkTidsbruk.labels(erDuplikat.toString()).observe(tid.toDouble(DurationUnit.MILLISECONDS))
+            if (erDuplikat) logg.info("Ignorerer melding {} pga duplikatkontroll", id)
+
+            erDuplikat
+        } ?: false
     }
 
     private fun skalBehandleMeldingIDev(jsonNode: JsonNode): Boolean {

@@ -33,6 +33,11 @@ internal val registrerTidsbrukForBehov =
         .labelNames("behov")
         .register()
 
+internal val duplikatsjekkTidsbruk =
+    Summary.build("duplikatsjekk_tidsbruk", "Hvor lang tid det tar å sjekke om en melding allerede er behandlet, i ms")
+        .labelNames("var_duplikat")
+        .register()
+
 internal fun registrerTidsbrukForHendelse(
     command: String,
     tidBruktMs: Int,
