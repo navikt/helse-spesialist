@@ -106,6 +106,7 @@ internal class MeldingMediator(
     private fun erDuplikat(jsonNode: JsonNode): Boolean {
         return jsonNode["@id"]?.asUUID()?.let { id ->
             val (erDuplikat, tid) = measureTimedValue { meldingDuplikatkontrollDao.erBehandlet(id) }
+            logg.info("Det tok ${tid.toInt(DurationUnit.MILLISECONDS)} ms å gjøre duplikatsjekk mot databasen")
             duplikatsjekkTidsbruk.labels(erDuplikat.toString()).observe(tid.toDouble(DurationUnit.MILLISECONDS))
             if (erDuplikat) logg.info("Ignorerer melding {} pga duplikatkontroll", id)
 
