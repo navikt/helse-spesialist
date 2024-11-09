@@ -12,20 +12,29 @@ class PeriodehistorikkApiDao(
 ) : QueryRunner by MedDataSource(dataSource) {
     fun finn(utbetalingId: UUID) =
         asSQL(
-            // Bruker UNION som en quick fix for å unngå seq scan på en spørring som gjøres mange ganger når
-            // GraphQL skal bygge person-dataene.
-            // Må kaste til jsonb for at databasen skal klare å filtrere vekk duplikate rader
+            // Fiklete greier, for å unngå sequential scan. Spørringen gjøres mange ganger når GraphQL skal bygge
+            // person-dataene.
             """
-            SELECT ph.id, ph.type, ph.timestamp, ph.notat_id, ph.json::jsonb, s.ident, ph.dialog_ref
-            FROM periodehistorikk ph
-            LEFT JOIN saksbehandler s ON ph.saksbehandler_oid = s.oid
-            WHERE ph.utbetaling_id = :utbetaling_id
-            UNION
-            SELECT ph.id, ph.type, ph.timestamp, ph.notat_id, ph.json::jsonb, s.ident, ph.dialog_ref
-            FROM periodehistorikk ph
-            LEFT JOIN saksbehandler s ON ph.saksbehandler_oid = s.oid
-            LEFT JOIN selve_vedtaksperiode_generasjon svg ON ph.generasjon_id = svg.unik_id
-            WHERE svg.utbetaling_id = :utbetaling_id
+            WITH innslag_med_utbetaling_id AS
+            (
+                SELECT id FROM periodehistorikk WHERE utbetaling_id = :utbetalingId
+            ),
+            innslag_via_selve_vedtaksperiode_generasjon AS
+            (
+                SELECT ph.id
+                FROM periodehistorikk ph
+                JOIN selve_vedtaksperiode_generasjon svg ON generasjon_id = unik_id
+                WHERE svg.utbetaling_id = :utbetaling_id
+            )
+            SELECT id, type, timestamp, notat_id, json, ident, dialog_ref, utbetaling_id, generasjon_id
+            FROM periodehistorikk
+            LEFT JOIN saksbehandler s ON saksbehandler_oid = s.oid
+            WHERE id IN
+            (
+                SELECT id FROM innslag_med_utbetaling_id
+                UNION ALL
+                SELECT id FROM innslag_via_selve_vedtaksperiode_generasjon
+            )
             """.trimIndent(),
             "utbetaling_id" to utbetalingId,
         ).list { periodehistorikkDto(it) }
