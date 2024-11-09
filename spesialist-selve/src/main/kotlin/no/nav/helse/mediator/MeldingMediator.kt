@@ -67,6 +67,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.toUUID
 import no.nav.helse.spesialist.api.Personhåndterer
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -97,22 +98,33 @@ internal class MeldingMediator(
 
     private fun skalBehandleMelding(melding: String): Boolean {
         val jsonNode = objectMapper.readTree(melding)
-        if (erDuplikat(jsonNode)) return false
         if (poisonPills.erPoisonPill(jsonNode)) return false
         if (env.erProd) return true
         return skalBehandleMeldingIDev(jsonNode)
     }
 
-    private fun erDuplikat(jsonNode: JsonNode): Boolean {
-        return jsonNode["@id"]?.asUUID()?.let { id ->
-            val (erDuplikat, tid) = measureTimedValue { meldingDuplikatkontrollDao.erBehandlet(id) }
-            logg.info("Det tok ${tid.toInt(DurationUnit.MILLISECONDS)} ms å gjøre duplikatsjekk mot databasen")
-            duplikatsjekkTidsbruk.labels(erDuplikat.toString()).observe(tid.toDouble(DurationUnit.MILLISECONDS))
-            if (erDuplikat) logg.info("Ignorerer melding {} pga duplikatkontroll", id)
+    private fun erDuplikat(id: UUID): Boolean {
+        val (erDuplikat, tid) = measureTimedValue { meldingDuplikatkontrollDao.erBehandlet(id) }
+        logg.info("Det tok ${tid.toInt(DurationUnit.MILLISECONDS)} ms å gjøre duplikatsjekk mot databasen")
+        duplikatsjekkTidsbruk.labels(erDuplikat.toString()).observe(tid.toDouble(DurationUnit.MILLISECONDS))
 
-            erDuplikat
-        } ?: false
+        return erDuplikat
     }
+
+    private fun duplikatsjekkendeRiver(river: River.PacketListener) =
+        object : River.PacketListener by river {
+            override fun onPacket(
+                packet: JsonMessage,
+                context: MessageContext,
+            ) {
+                val id = packet.id.toUUID()
+                if (erDuplikat(id)) {
+                    logg.info("Ignorerer melding {} pga duplikatkontroll", id)
+                    return
+                }
+                river.onPacket(packet, context)
+            }
+        }
 
     private fun skalBehandleMeldingIDev(jsonNode: JsonNode): Boolean {
         val eventName = jsonNode["@event_name"]?.asText()
@@ -186,7 +198,7 @@ internal class MeldingMediator(
         rivers.forEach { river ->
             River(delegatedRapid)
                 .validate(river.validations())
-                .register(river)
+                .register(duplikatsjekkendeRiver(river))
                 .onSuccess { packet, _ ->
                     logg.info(
                         "${river.name()} leste melding id=${packet.id}, event_name=${packet.eventName()}, meldingPasserteValidering=$meldingPasserteValidering",
