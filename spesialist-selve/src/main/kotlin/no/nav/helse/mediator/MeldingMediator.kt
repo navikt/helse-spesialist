@@ -188,16 +188,19 @@ internal class MeldingMediator(
                 .validate(river.validations())
                 .register(river)
                 .onSuccess { packet, _ ->
-                    packet.interestedIn("@id", "@event_name")
-                    val id = packet["@id"].asText() ?: "ukjent"
-                    val type = packet["@event_name"].asText() ?: "ukjent"
                     logg.info(
-                        "${river.name()} leste melding id=$id, event_name=$type, meldingPasserteValidering=$meldingPasserteValidering",
+                        "${river.name()} leste melding id=${packet.id}, event_name=${packet.eventName()}, meldingPasserteValidering=$meldingPasserteValidering",
                     )
                     meldingPasserteValidering = true
                 }
         }
     }
+
+    private fun JsonMessage.eventName() =
+        run {
+            interestedIn("@event_name")
+            get("@event_name").textValue() ?: "ukjent"
+        }
 
     private var løsninger: Løsninger? = null
     private var meldingPasserteValidering = false
