@@ -72,7 +72,7 @@ import no.nav.helse.spesialist.api.Personhåndterer
 import org.slf4j.LoggerFactory
 import java.util.UUID
 import javax.sql.DataSource
-import kotlin.time.DurationUnit
+import kotlin.time.DurationUnit.MILLISECONDS
 import kotlin.time.measureTimedValue
 
 internal class MeldingMediator(
@@ -105,8 +105,8 @@ internal class MeldingMediator(
 
     private fun erDuplikat(id: UUID): Boolean {
         val (erDuplikat, tid) = measureTimedValue { meldingDuplikatkontrollDao.erBehandlet(id) }
-        logg.info("Det tok ${tid.toInt(DurationUnit.MILLISECONDS)} ms å gjøre duplikatsjekk mot databasen")
-        duplikatsjekkTidsbruk.labels(erDuplikat.toString()).observe(tid.toDouble(DurationUnit.MILLISECONDS))
+        logg.info("Det tok ${tid.inWholeMilliseconds} ms å gjøre duplikatsjekk mot databasen")
+        duplikatsjekkTidsbruk.labels(erDuplikat.toString()).observe(tid.toDouble(MILLISECONDS))
 
         return erDuplikat
     }
