@@ -264,10 +264,14 @@ internal class SpesialistApp(
             )
         subsumsjonsmelder = Subsumsjonsmelder(versjonAvKode, rapidsConnection)
 
-        rapidsConnection.start().also {
-            val beans: List<GarbageCollectorMXBean> = ManagementFactory.getGarbageCollectorMXBeans()
-            logg.info("Registrerte garbage collectors etter oppstart: ${beans.joinToString { it.name }}")
-        }
+        loggOppstartsmelding()
+
+        rapidsConnection.start()
+    }
+
+    private fun loggOppstartsmelding() {
+        val beans: List<GarbageCollectorMXBean> = ManagementFactory.getGarbageCollectorMXBeans()
+        logg.info("Registrerte garbage collectors etter oppstart: ${beans.joinToString { it.name }}")
     }
 
     override fun onStartup(rapidsConnection: RapidsConnection) {
