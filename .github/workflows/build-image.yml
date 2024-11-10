@@ -50,7 +50,6 @@ jobs:
           ACTIONS_RUNTIME_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TRIVY_JAVA_DB_REPOSITORY: "public.ecr.aws/aquasecurity/trivy-java-db:1"
         with:
-          docker_context: .
           team: tbd
           tag: ${{ inputs.ref }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
