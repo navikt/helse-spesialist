@@ -1,14 +1,14 @@
-package no.nav.helse.mediator.api
+package no.nav.helse.spesialist.api
 
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
-import io.ktor.http.*
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.routing.get
-import io.ktor.server.testing.*
-import no.nav.helse.bootstrap.installErrorHandling
-import no.nav.helse.objectMapper
+import io.ktor.server.testing.testApplication
+import no.nav.helse.spesialist.api.bootstrap.installErrorHandling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

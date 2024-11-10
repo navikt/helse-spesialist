@@ -2,7 +2,6 @@ package no.nav.helse.mediator
 
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.Gruppekontroll
-import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
 import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
@@ -11,9 +10,10 @@ import no.nav.helse.modell.oppgave.Egenskap.SPESIALSAK
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
+import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import java.util.UUID
 
-internal abstract class MicrosoftTilgangskontroll(private val tilgangsgrupper: Tilgangsgrupper) : Tilgangskontroll {
+abstract class MicrosoftTilgangskontroll(private val tilgangsgrupper: Tilgangsgrupper) : Tilgangskontroll {
     final override fun harTilgangTil(
         oid: UUID,
         egenskaper: Collection<Egenskap>,
@@ -51,7 +51,7 @@ internal class TilgangskontrollørForReservasjon(
         }
 }
 
-internal class TilgangskontrollørForApi(
+class TilgangskontrollørForApi(
     private val saksbehandlergrupper: List<UUID>,
     tilgangsgrupper: Tilgangsgrupper,
 ) : MicrosoftTilgangskontroll(tilgangsgrupper) {

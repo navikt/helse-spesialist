@@ -35,7 +35,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    uses: navikt/helse-spesialist/.github/workflows/build-image.yml@master
+    uses: ./.github/workflows/build-image.yml
     secrets: inherit
     with:
       ref: ${{ needs.lag_tag.outputs.tag }}

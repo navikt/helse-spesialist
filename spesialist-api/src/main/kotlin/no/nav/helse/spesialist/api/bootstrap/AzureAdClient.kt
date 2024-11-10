@@ -1,4 +1,4 @@
-package no.nav.helse.bootstrap
+package no.nav.helse.spesialist.api.bootstrap
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -14,7 +14,7 @@ import java.net.ProxySelector
 
 private val logg = LoggerFactory.getLogger("AzureAdClient")
 
-internal fun azureAdClient() =
+fun azureAdClient() =
     HttpClient(Apache) {
         install(HttpRequestRetry) {
             retryOnExceptionIf(3) { request, throwable ->

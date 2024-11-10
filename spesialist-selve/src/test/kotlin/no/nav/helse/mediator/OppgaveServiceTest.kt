@@ -6,8 +6,6 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.Gruppe
-import no.nav.helse.SpeilTilgangsgrupper
 import no.nav.helse.db.AntallOppgaverFraDatabase
 import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
@@ -30,6 +28,8 @@ import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
+import no.nav.helse.spesialist.api.bootstrap.Gruppe
+import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import no.nav.helse.spesialist.api.graphql.schema.AntallArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.Egenskap.PA_VENT
 import no.nav.helse.spesialist.api.graphql.schema.Filtrering

@@ -1,4 +1,4 @@
-package no.nav.helse.bootstrap
+package no.nav.helse.spesialist.api.bootstrap
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
@@ -6,7 +6,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.serialization.jackson.JacksonConverter
 
-internal fun httpClient(
+fun httpClient(
     socketTimeout: Int,
     connectTimeout: Int,
     connectionRequestTimeout: Int,

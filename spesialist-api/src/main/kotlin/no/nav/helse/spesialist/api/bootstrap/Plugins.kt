@@ -1,4 +1,4 @@
-package no.nav.helse.bootstrap
+package no.nav.helse.spesialist.api.bootstrap
 
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
@@ -19,9 +19,8 @@ import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.websocket.WebSockets
-import no.nav.helse.objectMapper
-import no.nav.helse.requestResponseTracing
 import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil
+import no.nav.helse.spesialist.api.objectMapper
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 import java.util.UUID

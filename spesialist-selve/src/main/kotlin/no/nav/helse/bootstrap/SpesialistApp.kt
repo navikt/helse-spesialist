@@ -1,10 +1,8 @@
 package no.nav.helse.bootstrap
 
 import io.ktor.server.application.Application
-import io.ktor.server.routing.routing
 import no.nav.helse.DataSourceBuilder
 import no.nav.helse.Gruppekontroll
-import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgAvviksvurderingDao
@@ -34,44 +32,26 @@ import no.nav.helse.modell.dokument.PgDokumentDao
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.AzureConfig
-import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
-import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering
-import no.nav.helse.spesialist.api.azureAdAppAuthentication
-import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
-import no.nav.helse.spesialist.api.graphql.graphQLApi
-import no.nav.helse.spesialist.api.notat.NotatApiDao
-import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
-import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
-import no.nav.helse.spesialist.api.person.PersonApiDao
-import no.nav.helse.spesialist.api.påvent.PåVentApiDao
+import no.nav.helse.spesialist.api.bootstrap.ApiAvhengigheter
+import no.nav.helse.spesialist.api.bootstrap.Bootstrap
+import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
-import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
-import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
-import no.nav.helse.spesialist.api.snapshot.SnapshotService
-import no.nav.helse.spesialist.api.tildeling.TildelingApiDao
-import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
-import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
-import no.nav.helse.spesialist.api.vergemål.VergemålApiDao
-import no.nav.helse.spesialist.api.websockets.webSocketsApi
 import org.slf4j.LoggerFactory
 import java.lang.management.GarbageCollectorMXBean
 import java.lang.management.ManagementFactory
-import java.util.UUID
 import kotlin.random.Random
 
 private val logg = LoggerFactory.getLogger("SpesialistApp")
 
-internal class SpesialistApp(
+class SpesialistApp(
     private val env: Environment,
     gruppekontroll: Gruppekontroll,
     snapshotClient: ISnapshotClient,
     private val azureConfig: AzureConfig,
     private val tilgangsgrupper: Tilgangsgrupper,
-    private val reservasjonClient: ReservasjonClient,
+    reservasjonClient: ReservasjonClient,
     private val versjonAvKode: String,
     private val rapidsConnectionProvider: () -> RapidsConnection,
 ) : RapidsConnection.StatusListener {
@@ -82,33 +62,19 @@ internal class SpesialistApp(
     private val dataSourceBuilder = DataSourceBuilder(env)
     private val dataSource = dataSourceBuilder.getDataSource()
 
-    private val personApiDao = PersonApiDao(dataSource)
     private val oppgaveDao = PgOppgaveDao(dataSource)
-    private val oppgaveApiDao = OppgaveApiDao(dataSource)
-    private val periodehistorikkApiDao = PeriodehistorikkApiDao(dataSource)
     private val historikkinnslagRepository = PgPeriodehistorikkDao(dataSource)
-    private val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
-    private val tildelingApiDao = TildelingApiDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
-    private val overstyringApiDao = OverstyringApiDao(dataSource)
     private val reservasjonDao = ReservasjonDao(dataSource)
-    private val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
-    private val egenAnsattApiDao = EgenAnsattApiDao(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
-    private val notatApiDao = NotatApiDao(dataSource)
     private val notatDao = PgNotatDao(dataSource)
     private val dialogDao = PgDialogDao(dataSource)
-    private val totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource)
     private val totrinnsvurderingDao = PgTotrinnsvurderingDao(dataSource)
-    private val snapshotApiDao = SnapshotApiDao(dataSource)
-    private val apiVarselRepository = ApiVarselRepository(dataSource)
     private val dokumentDao = PgDokumentDao(dataSource)
-    private val påVentApiDao = PåVentApiDao(dataSource)
     private val avviksvurderingDao = PgAvviksvurderingDao(dataSource)
     private val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(dataSource)
-    private val vergemålApiDao = VergemålApiDao(dataSource)
 
     private lateinit var meldingMediator: MeldingMediator
     private lateinit var saksbehandlerMediator: SaksbehandlerMediator
@@ -134,14 +100,23 @@ internal class SpesialistApp(
             dialogDao = dialogDao,
         )
 
-    private val snapshotService = SnapshotService(snapshotDao = snapshotApiDao, snapshotClient = snapshotClient)
     private lateinit var godkjenningService: GodkjenningService
 
-    private val avviksvurderinghenter =
-        object : Avviksvurderinghenter {
-            override fun hentAvviksvurdering(vilkårsgrunnlagId: UUID): Avviksvurdering? =
-                avviksvurderingDao.hentAvviksvurdering(vilkårsgrunnlagId)
-        }
+    private val apiAvhengigheter =
+        ApiAvhengigheter(
+            saksbehandlerhåndtererProvider = { saksbehandlerMediator },
+            oppgavehåndtererProvider = { oppgaveService },
+            totrinnsvurderinghåndterer = { totrinnsvurderingService },
+            godkjenninghåndtererProvider = { godkjenningService },
+            personhåndtererProvider = { meldingMediator },
+            dokumenthåndtererProvider = { dokumentMediator },
+            stansAutomatiskBehandlinghåndterer = { stansAutomatiskBehandlingMediator },
+            behandlingstatistikk = behandlingsstatistikkService,
+            snapshotClient = snapshotClient,
+            avviksvurderinghenter = PgAvviksvurderingDao(dataSource),
+        )
+
+    private val bootstrap = Bootstrap(dataSource, apiAvhengigheter, reservasjonClient, tilgangsgrupper)
 
     private val plukkTilManuell: PlukkTilManuell<String> = (
         {
@@ -180,47 +155,6 @@ internal class SpesialistApp(
             subsumsjonsmelderProvider = { subsumsjonsmelder },
             stikkprøver = stikkprøver,
         )
-
-    internal fun ktorApp(application: Application) {
-        application.apply {
-            installPlugins()
-            azureAdAppAuthentication(azureConfig, env)
-            graphQLApi(
-                personApiDao = personApiDao,
-                egenAnsattApiDao = egenAnsattApiDao,
-                tildelingApiDao = tildelingApiDao,
-                arbeidsgiverApiDao = arbeidsgiverApiDao,
-                overstyringApiDao = overstyringApiDao,
-                risikovurderingApiDao = risikovurderingApiDao,
-                varselRepository = apiVarselRepository,
-                oppgaveApiDao = oppgaveApiDao,
-                periodehistorikkApiDao = periodehistorikkApiDao,
-                notatDao = notatApiDao,
-                totrinnsvurderingApiDao = totrinnsvurderingApiDao,
-                påVentApiDao = påVentApiDao,
-                vergemålApiDao = vergemålApiDao,
-                reservasjonClient = reservasjonClient,
-                avviksvurderinghenter = avviksvurderinghenter,
-                skjermedePersonerGruppeId = tilgangsgrupper.skjermedePersonerGruppeId,
-                kode7Saksbehandlergruppe = tilgangsgrupper.kode7GruppeId,
-                beslutterGruppeId = tilgangsgrupper.beslutterGruppeId,
-                snapshotService = snapshotService,
-                behandlingsstatistikkMediator = behandlingsstatistikkService,
-                saksbehandlerhåndterer = saksbehandlerMediator,
-                oppgavehåndterer = oppgaveService,
-                totrinnsvurderinghåndterer = totrinnsvurderingService,
-                godkjenninghåndterer = godkjenningService,
-                personhåndterer = meldingMediator,
-                dokumenthåndterer = dokumentMediator,
-                stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlingMediator,
-            )
-
-            routing {
-                webSocketsApi()
-                debugMinneApi()
-            }
-        }
-    }
 
     fun start() {
         rapidsConnection.register(this)
@@ -280,5 +214,9 @@ internal class SpesialistApp(
 
     override fun onShutdown(rapidsConnection: RapidsConnection) {
         dataSource.close()
+    }
+
+    fun ktorApp(application: Application) {
+        bootstrap.ktorApp(application, azureConfig, env)
     }
 }

@@ -1,10 +1,6 @@
 package no.nav.helse.mediator
 
-import no.nav.helse.Gruppe
-import no.nav.helse.Gruppe.KODE7
-import no.nav.helse.Gruppe.SKJERMEDE
 import no.nav.helse.Gruppekontroll
-import no.nav.helse.SpeilTilgangsgrupper
 import no.nav.helse.idForGruppe
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
@@ -13,6 +9,10 @@ import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.SPESIALSAK
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
+import no.nav.helse.spesialist.api.bootstrap.Gruppe
+import no.nav.helse.spesialist.api.bootstrap.Gruppe.KODE7
+import no.nav.helse.spesialist.api.bootstrap.Gruppe.SKJERMEDE
+import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import no.nav.helse.testEnv
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue

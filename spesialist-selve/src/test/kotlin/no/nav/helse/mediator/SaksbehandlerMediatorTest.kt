@@ -4,7 +4,6 @@ import DatabaseIntegrationTest
 import TilgangskontrollForTestHarIkkeTilgang
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.SpeilTilgangsgrupper
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.SaksbehandlerDao
@@ -16,6 +15,7 @@ import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMe
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
