@@ -13,24 +13,30 @@ jobs:
     permissions:
       contents: write
     runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.lage-tag.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.commitHash }}
       - name: Lag tag for senere workflows
+        id: lage-tag
         run: |
-          git tag denne_skal_deployes_til_dev-$(date +%Y-%m-%dT%H.%M.%S)
-          git push origin denne_skal_deployes_til_dev
+          export TAG="denne_skal_deployes_til_dev-$(date +%Y-%m-%dT%H.%M.%S)"
+          git tag $TAG
+          git push origin $TAG
+          echo "TAG=$TAG" >> $GITHUB_OUTPUT
 
   build:
     needs: [ lag_tag ]
+    if: ${{ needs.lag_tag.outputs.tag != '' }}
     permissions:
       contents: read
       id-token: write
     uses: navikt/helse-spesialist/.github/workflows/build-image.yml@master
     secrets: inherit
     with:
-      ref: denne_skal_deployes_til_dev
+      ref: ${{ needs.lag_tag.outputs.tag }}
 
   deployDev:
     name: deploy to dev
@@ -39,7 +45,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: denne_skal_deployes_til_dev
+          ref: ${{ needs.lag_tag.outputs.tag }}
       - uses: nais/deploy/actions/deploy@v2
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
@@ -51,10 +57,10 @@ jobs:
     name: Fjern deploy-tag
     permissions:
       contents: write
-    if: always()
-    needs: [ deployDev ]
+    needs: [ lag_tag, deployDev ]
+    if: ${{ needs.lag_tag.outputs.tag != '' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: |
-          git push --delete origin refs/tags/denne_skal_deployes_til_dev
+          git push --delete origin refs/tags/${{ needs.lag_tag.outputs.tag }}
