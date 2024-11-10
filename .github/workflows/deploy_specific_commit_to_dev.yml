@@ -19,7 +19,7 @@ jobs:
           ref: ${{ github.event.inputs.commitHash }}
       - name: Lag tag for senere workflows
         run: |
-          git tag denne_skal_deployes_til_dev
+          git tag denne_skal_deployes_til_dev-$(date +%Y-%m-%dT%H.%M.%S)
           git push origin denne_skal_deployes_til_dev
 
   build:
