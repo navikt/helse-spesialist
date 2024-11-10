@@ -22,7 +22,7 @@ jobs:
       - name: Lag tag for senere workflows
         id: lage-tag
         run: |
-          export TAG="denne_skal_deployes_til_dev-$(date +%Y-%m-%dT%H.%M.%S)"
+          export TAG="denne_skal_deployes_til_dev-$(TZ=Europe/Oslo date +%Y-%m-%dT%H.%M.%S)"
           git tag $TAG
           git push origin $TAG
           echo "TAG=$TAG" >> $GITHUB_OUTPUT
@@ -42,7 +42,15 @@ jobs:
     name: deploy to dev
     needs: [ lag_tag, build ]
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write # for nais/login
     steps:
+      - uses: nais/login@v0
+        id: login
+        with:
+          team: tbd
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.lag_tag.outputs.tag }}
@@ -51,7 +59,9 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: deploy/dev.yml
-          IMAGE: ${{ needs.build.outputs.image }}
+          # Konstruere image-navn selv, for å unngå at imaget som er tagget med sha-en til HEAD på den branchen
+          # workflowen ble startet fra blir deployet. Det bugde imaget har to tags.
+          IMAGE: ${{ steps.login.outputs.registry }}/${{ github.event.repository.name }}:${{ needs.lag_tag.outputs.tag }}
 
   fjern_tag:
     name: Fjern deploy-tag
