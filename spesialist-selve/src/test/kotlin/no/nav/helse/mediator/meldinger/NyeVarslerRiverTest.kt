@@ -1,14 +1,18 @@
 package no.nav.helse.mediator.meldinger
 
+import io.mockk.clearMocks
 import io.mockk.mockk
+import io.mockk.spyk
 import io.mockk.verify
 import no.nav.helse.kafka.NyeVarslerRiver
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
+import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.util.UUID
 
 internal class NyeVarslerRiverTest {
@@ -39,4 +43,46 @@ internal class NyeVarslerRiverTest {
         testRapid.sendTestMessage(Testmeldingfabrikk.lagNyeVarsler(FNR, HENDELSE, VEDTAKSPERIODE, ORGNR))
         verify(exactly = 1) { mediator.mottaMelding(any<NyeVarsler>(), any()) }
     }
+
+    @Test
+    fun `leser ikke meldinger som ikke inneholder varsler`() {
+        val riverSpy = spyk(NyeVarslerRiver(mediator))
+        val rapid = TestRapid().medRivers(riverSpy)
+
+        rapid.sendTestMessage(melding(FNR, "VARSEL", "INFO", "VARSEL"))
+        verify(exactly = 1) { riverSpy.onPacket(any(), any()) }
+        clearMocks(riverSpy)
+
+        rapid.sendTestMessage(melding(FNR, "INFO", "INFO"))
+        verify(exactly = 0) { riverSpy.onPacket(any(), any()) }
+        clearMocks(riverSpy)
+
+        rapid.sendTestMessage(melding(FNR, "VARSEL"))
+        verify(exactly = 1) { riverSpy.onPacket(any(), any()) }
+    }
+
+    private fun melding(fødselsnummer: String, vararg nivåer: String) = mapOf(
+        "@event_name" to "aktivitetslogg_ny_aktivitet",
+        "@id" to "${UUID.randomUUID()}",
+        "@opprettet" to "${LocalDateTime.now()}",
+        "fødselsnummer" to fødselsnummer,
+        "aktiviteter" to nivåer.map { nivå ->
+            buildMap {
+                put("id", "${UUID.randomUUID()}")
+                put("nivå", nivå)
+                if (nivå == "VARSEL") put("varselkode", "123")
+                put("melding", "en melding")
+                val vedtaksperiodeId = UUID.randomUUID()
+                put(
+                    "kontekster", listOf(
+                        mapOf(
+                            "konteksttype" to "Vedtaksperiode",
+                            "kontekstmap" to mapOf("vedtaksperiodeId" to "$vedtaksperiodeId")
+                        )
+                    )
+                )
+                put("tidsstempel", "${LocalDateTime.now()}")
+            }
+        }
+    ).let(objectMapper::writeValueAsString)
 }

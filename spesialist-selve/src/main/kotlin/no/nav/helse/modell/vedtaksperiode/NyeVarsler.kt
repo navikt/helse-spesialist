@@ -41,8 +41,8 @@ internal class NyeVarsler private constructor(
     ) = person.nyeVarsler(varsler)
 
     companion object {
-        fun JsonNode.varsler(): List<Varsel> =
-            this.filter { it["nivå"].asText() == "VARSEL" && it["varselkode"]?.asText() != null }
+        private fun JsonNode.varsler(): List<Varsel> =
+            filter { it["nivå"].asText() == "VARSEL" && it["varselkode"]?.asText() != null }
                 .filter { it["kontekster"].any { kontekst -> kontekst["konteksttype"].asText() == "Vedtaksperiode" } }
                 .map { jsonNode ->
                     val vedtaksperiodeId =
