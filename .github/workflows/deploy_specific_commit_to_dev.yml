@@ -12,6 +12,7 @@ jobs:
     name: Lag en tag
     permissions:
       contents: write
+      id-token: read # For å kunne kjøre workflowen fra master-branchen
       actions: write # For å kunne kjøre workflowen fra master-branchen
     runs-on: ubuntu-latest
     outputs:
