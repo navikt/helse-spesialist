@@ -53,7 +53,7 @@ internal object Testmeldingfabrikk {
                 "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
                 "aktiviteter" to varselkoder.map {
-                    lagAktivitet(
+                    lagVarsel(
                         fødselsnummer = fødselsnummer,
                         kode = it,
                         vedtaksperiodeId = vedtaksperiodeId,
@@ -905,7 +905,7 @@ internal object Testmeldingfabrikk {
         orgnummer: String,
         aktiviteter: List<Map<String, Any>> =
             listOf(
-                lagAktivitet(
+                lagVarsel(
                     fødselsnummer = fødselsnummer,
                     vedtaksperiodeId = vedtaksperiodeId,
                     orgnummer = orgnummer,
@@ -930,13 +930,12 @@ internal object Testmeldingfabrikk {
         orgnummer: String,
         aktiviteter: List<Map<String, Any>> =
             listOf(
-                lagAktivitet(
+                lagVarsel(
                     fødselsnummer = fødselsnummer,
                     vedtaksperiodeId = vedtaksperiodeId,
                     orgnummer = orgnummer,
                 )
             ),
-
         ): String {
         return nyHendelse(
             id, "nye_varsler",
@@ -947,7 +946,7 @@ internal object Testmeldingfabrikk {
         )
     }
 
-    private fun lagAktivitet(
+    private fun lagVarsel(
         fødselsnummer: String,
         id: UUID = UUID.randomUUID(),
         kode: String = "RV_VV",
