@@ -40,7 +40,7 @@ jobs:
 
   deployDev:
     name: deploy to dev
-    needs: [ build ]
+    needs: [ lag_tag, build ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
