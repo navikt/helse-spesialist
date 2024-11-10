@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.time.LocalDateTime
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -64,7 +63,6 @@ internal class AppTest: AbstractDatabaseTest() {
         {
           "@event_name": "slett_person",
           "@id": "${UUID.randomUUID()}",
-          "opprettet": "${LocalDateTime.now()}",
           "fødselsnummer": "$fødselsnummer"
         }
     """.trimIndent()
