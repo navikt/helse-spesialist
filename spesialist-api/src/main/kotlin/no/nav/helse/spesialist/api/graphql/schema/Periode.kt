@@ -509,7 +509,7 @@ data class BeregnetPeriode(
 
     private fun mapLagtPåVentJson(json: String): Triple<List<String>, LocalDate?, String?> {
         val node = objectMapper.readTree(json)
-        val påVentÅrsaker = node["årsaker"].map { it["arsak"].asText() }
+        val påVentÅrsaker = node["årsaker"].map { it["årsak"].asText() }
         val frist = node["frist"]?.takeUnless { it.isMissingOrNull() }?.asLocalDate()
         val notatTekst = node["notattekst"]?.takeUnless { it.isMissingOrNull() }?.asText()
         return Triple(påVentÅrsaker, frist, notatTekst)
