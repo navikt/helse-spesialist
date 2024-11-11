@@ -1,5 +1,6 @@
 package no.nav.helse.db
 
+import no.nav.helse.modell.Inntektskilde
 import no.nav.helse.modell.InntektskildeDto
 
 internal interface InntektskilderRepository {
@@ -11,4 +12,6 @@ internal interface InntektskilderRepository {
         fødselsnummer: String,
         andreOrganisasjonsnumre: List<String>,
     ): List<InntektskildeDto>
+
+    fun finnInntektskilderSomManglerNavn(): List<Inntektskilde> = emptyList()
 }

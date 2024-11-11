@@ -22,8 +22,10 @@ import no.nav.helse.kafka.FlerePersoninfoRiver
 import no.nav.helse.kafka.FullmaktLøsningRiver
 import no.nav.helse.kafka.GodkjenningsbehovRiver
 import no.nav.helse.kafka.GosysOppgaveEndretRiver
+import no.nav.helse.kafka.HentArbeidsgivernavnRiver
 import no.nav.helse.kafka.HentEnhetLøsningRiver
 import no.nav.helse.kafka.InfotrygdutbetalingerLøsningRiver
+import no.nav.helse.kafka.InnhentArbeidsgivernavn
 import no.nav.helse.kafka.InntektLøsningRiver
 import no.nav.helse.kafka.KlargjørPersonForVisningRiver
 import no.nav.helse.kafka.KommandokjedePåminnelseRiver
@@ -194,6 +196,7 @@ internal class MeldingMediator(
                 BehandlingOpprettetRiver(this),
                 KommandokjedePåminnelseRiver(this),
                 StansAutomatiskBehandlingRiver(this),
+                HentArbeidsgivernavnRiver(this),
             )
         rivers.forEach { river ->
             River(delegatedRapid)
@@ -447,6 +450,42 @@ internal class MeldingMediator(
             logg.info("Melding $meldingnavn lest")
             sikkerlogg.info("Melding $meldingnavn lest")
         }
+    }
+
+    fun behandleInnhentArbeidsgivernavn(
+        melding: InnhentArbeidsgivernavn,
+        messageContext: MessageContext,
+    ) {
+        val commandContextTilstandMediator = CommandContextTilstandMediator()
+        val behovObserver =
+            object : CommandContextObserver {
+                private val utgåendeBehov = mutableMapOf<String, Map<String, Any>>()
+
+                fun publiserBehov() = lagUtgåendeMeldinger().forEach { messageContext.publish(it) }
+
+                private fun lagUtgåendeMeldinger() = utgåendeBehov.map { JsonMessage.newNeed(setOf(it.key), it.value).toJson() }
+
+                override fun behov(
+                    behov: String,
+                    ekstraKontekst: Map<String, Any>,
+                    detaljer: Map<String, Any>,
+                ) {
+                    utgåendeBehov[behov] = detaljer
+                }
+            }
+
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            session.transaction { transactionalSession ->
+                val kommandostarter =
+                    kommandofabrikk.lagKommandostarter(
+                        setOf(behovObserver, commandContextTilstandMediator),
+                        CommandContextDao(transactionalSession).nyContext(melding.id),
+                        transactionalSession,
+                    )
+                melding.behandle(kommandostarter, transactionalSession)
+            }
+        }
+        behovObserver.publiserBehov()
     }
 
     private class Løsninger(

@@ -1,11 +1,14 @@
 package no.nav.helse.db
 
 import kotliquery.Session
+import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.HelseDao.Companion.asSQLWithQuestionMarks
 import no.nav.helse.HelseDao.Companion.list
 import no.nav.helse.modell.InntektskildeDto
+import no.nav.helse.modell.Inntektskildetype
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
+import no.nav.helse.modell.NyInntektskilde
 import no.nav.helse.modell.NyInntektskildeDto
 
 internal class InntektskilderDao(
@@ -41,6 +44,24 @@ internal class InntektskilderDao(
         val nyeInntektskilder = alleOrganisasjonsnumre.organisasjonsnumreSomIkkeFinnesI(eksisterendeInntektskilder)
         return eksisterendeInntektskilder + nyeInntektskilder
     }
+
+    override fun finnInntektskilderSomManglerNavn() =
+        asSQL(
+            """
+            select organisasjonsnummer from arbeidsgiver
+            left join arbeidsgiver_navn an on navn_ref = an.id
+            where an.id is null
+            """.trimIndent(),
+        ).list(session) {
+            it.string("organisasjonsnummer")
+        }.map {
+            val type =
+                when {
+                    it.length == 9 -> Inntektskildetype.ORDINÆR
+                    else -> Inntektskildetype.ENKELTPERSONFORETAK
+                }
+            NyInntektskilde(it, type)
+        }
 
     private fun List<String>.organisasjonsnumreSomIkkeFinnesI(inntektskilder: List<InntektskildeDto>) =
         filterNot { organisasjonsnummer -> organisasjonsnummer in inntektskilder.map { it.identifikator } }
