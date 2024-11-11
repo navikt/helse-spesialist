@@ -348,7 +348,7 @@ class PgOppgaveDao(
                     row.localDateTimeOrNull("på_vent_opprettet")?.let {
                         PaVentInfoFraDatabase(
                             årsaker = row.array<String>("årsaker").toList(),
-                            tekst = row.string("notattekst"),
+                            tekst = row.stringOrNull("notattekst"),
                             dialogRef = row.long("dialog_ref"),
                             saksbehandler = row.string("på_vent_saksbehandler"),
                             opprettet = it,

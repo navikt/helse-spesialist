@@ -99,7 +99,7 @@ data class AntallOppgaver(
 
 data class PaVentInfo(
     val arsaker: List<String>,
-    val tekst: String,
+    val tekst: String?,
     val dialogRef: Int,
     val saksbehandler: String,
     val opprettet: LocalDateTime,

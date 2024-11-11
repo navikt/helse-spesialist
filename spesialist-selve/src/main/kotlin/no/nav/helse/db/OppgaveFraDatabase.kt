@@ -35,7 +35,7 @@ data class OppgaveFraDatabaseForVisning(
 
 data class PaVentInfoFraDatabase(
     val årsaker: List<String>,
-    val tekst: String,
+    val tekst: String?,
     val dialogRef: Long,
     val saksbehandler: String,
     val opprettet: LocalDateTime,
