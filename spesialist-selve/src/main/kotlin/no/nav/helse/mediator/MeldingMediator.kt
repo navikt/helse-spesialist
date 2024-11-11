@@ -425,10 +425,9 @@ internal class MeldingMediator(
                 this.nyObserver(vedtakFattetMelder)
                 logg.info("Personen finnes i databasen, behandler melding $meldingnavn")
                 sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")
-                var kommandostarter: Kommandostarter
                 sessionOf(dataSource, returnGeneratedKey = true).use { session ->
                     session.transaction { transactionalSession ->
-                        kommandostarter =
+                        val kommandostarter =
                             kommandofabrikk.lagKommandostarter(
                                 setOf(utgåendeMeldingerMediator, commandContextTilstandMediator),
                                 commandContext(CommandContextDao(transactionalSession)),
