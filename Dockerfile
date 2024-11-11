@@ -1,5 +1,5 @@
 # Bygg noen artefakter vi trenger senere
-FROM cgr.dev/navikt/chainguard-base:latest as build
+FROM alpine:3.12 as build
 
 # GCP profiling agent
 RUN mkdir -p /opt/cprof && \
