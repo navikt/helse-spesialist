@@ -1,5 +1,6 @@
 package no.nav.helse.db
 
+import kotliquery.Row
 import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
@@ -352,11 +353,30 @@ class PgOppgaveDao(
                             saksbehandler = row.string("på_vent_saksbehandler"),
                             opprettet = it,
                             tidsfrist = row.localDate("frist"),
+                            kommentarer = finnKommentarerMedDialogRef(row.long("dialog_ref").toInt()),
                         )
                     },
             )
         }
     }
+
+    private fun finnKommentarerMedDialogRef(dialogRef: Int): List<KommentarFraDatabase> =
+        asSQL(
+            """
+            select id, tekst, feilregistrert_tidspunkt, opprettet, saksbehandlerident
+            from kommentarer k
+            where dialog_ref = :dialogRef
+            """.trimIndent(),
+            "dialogRef" to dialogRef,
+        ).list { mapKommentarFraDatabase(it) }
+
+    private fun mapKommentarFraDatabase(it: Row): KommentarFraDatabase =
+        KommentarFraDatabase(
+            id = it.int("id"),
+            tekst = it.string("tekst"),
+            opprettet = it.localDateTime("opprettet"),
+            saksbehandlerident = it.string("saksbehandlerident"),
+        )
 
     private fun Map<Egenskap.Kategori, List<EgenskapForDatabase>>.tilSqlString(kategori: Egenskap.Kategori) =
         get(kategori)?.joinToString { "'${it.name}'" }

@@ -28,6 +28,7 @@ import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
@@ -305,7 +306,7 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
             fødselsnummer = fnr,
             aktørId = aktørId,
             organisasjonsnummer = arbeidsgiver,
-            vedtaksperiodeId = vedtaksperiodeId
+            vedtaksperiodeId = vedtaksperiodeId,
         )
         tildelOppgave(saksbehandlerOid = saksbehandlerOid)
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID())
@@ -328,6 +329,46 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
             førsteOppgave.tildelt,
         )
         assertEquals(vedtaksperiodeId, førsteOppgave.vedtaksperiodeId)
+    }
+
+    @Test
+    fun `Finn oppgave som ligger på vent for visning`() {
+        val fnr = lagFødselsnummer()
+        val aktørId = lagAktørId()
+        val arbeidsgiver = lagOrganisasjonsnummer()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val saksbehandlerOid = UUID.randomUUID()
+        nyPerson(
+            fødselsnummer = fnr,
+            aktørId = aktørId,
+            organisasjonsnummer = arbeidsgiver,
+            vedtaksperiodeId = vedtaksperiodeId,
+        )
+        tildelOppgave(saksbehandlerOid = saksbehandlerOid)
+        leggOppgavePåVent(saksbehandlerOid = saksbehandlerOid)
+        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID())
+        assertEquals(1, oppgaver.size)
+        val førsteOppgave = oppgaver.first()
+        assertEquals(OPPGAVE_ID, førsteOppgave.id)
+        assertEquals(aktørId, førsteOppgave.aktørId)
+        assertEquals(setOf(EGENSKAP), førsteOppgave.egenskaper)
+        assertEquals(FORNAVN, førsteOppgave.navn.fornavn)
+        assertEquals(MELLOMNAVN, førsteOppgave.navn.mellomnavn)
+        assertEquals(ETTERNAVN, førsteOppgave.navn.etternavn)
+        assertEquals(false, førsteOppgave.påVent)
+        assertEquals(
+            SaksbehandlerFraDatabase(
+                SAKSBEHANDLER_EPOST,
+                saksbehandlerOid,
+                SAKSBEHANDLER_NAVN,
+                SAKSBEHANDLER_IDENT,
+            ),
+            førsteOppgave.tildelt,
+        )
+        assertEquals(vedtaksperiodeId, førsteOppgave.vedtaksperiodeId)
+        assertNotNull(førsteOppgave.paVentInfo)
+        assertEquals(SAKSBEHANDLER_IDENT, førsteOppgave.paVentInfo?.saksbehandler)
+        assertEquals(1, førsteOppgave.paVentInfo?.kommentarer?.size)
     }
 
     @Test
@@ -407,7 +448,7 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
             fødselsnummer = FNR,
             aktørId = AKTØR,
             organisasjonsnummer = ORGNUMMER,
-            vedtaksperiodeId = VEDTAKSPERIODE
+            vedtaksperiodeId = VEDTAKSPERIODE,
         )
         utbetalingsopplegg(1000, 0)
         opprettSaksbehandler(saksbehandlerOID = saksbehandlerOid)
@@ -1476,7 +1517,8 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode(
             fødselsnummer = fnr2,
             organisasjonsnummer = organisasjonsnummer2,
-            vedtaksperiodeId = vedtaksperiodeId2)
+            vedtaksperiodeId = vedtaksperiodeId2,
+        )
         opprettOppgave(vedtaksperiodeId = vedtaksperiodeId2, utbetalingId = UUID.randomUUID())
         val oppgaveId2 = oppgaveId
 
@@ -1504,7 +1546,7 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
             fødselsnummer = fnr2,
             vedtaksperiodeId = vedtaksperiodeId2,
             organisasjonsnummer = organisasjonsnummer2,
-            utbetalingId = utbetalingId2
+            utbetalingId = utbetalingId2,
         )
         opprettOppgave(
             vedtaksperiodeId = vedtaksperiodeId2,

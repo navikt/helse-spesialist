@@ -70,7 +70,10 @@ data class Filtrering(
     val egneSaker: Boolean = false,
 )
 
-data class Oppgavesortering(val nokkel: Sorteringsnokkel, val stigende: Boolean)
+data class Oppgavesortering(
+    val nokkel: Sorteringsnokkel,
+    val stigende: Boolean,
+)
 
 enum class Sorteringsnokkel {
     TILDELT_TIL,
@@ -101,6 +104,7 @@ data class PaVentInfo(
     val saksbehandler: String,
     val opprettet: LocalDateTime,
     val tidsfrist: LocalDate,
+    val kommentarer: List<Kommentar>,
 )
 
 data class OppgaveTilBehandling(

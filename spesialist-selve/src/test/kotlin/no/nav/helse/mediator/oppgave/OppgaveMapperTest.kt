@@ -13,6 +13,7 @@ import no.nav.helse.db.EgenskapForDatabase.REVURDERING
 import no.nav.helse.db.EgenskapForDatabase.SØKNAD
 import no.nav.helse.db.EgenskapForDatabase.UTBETALING_TIL_ARBEIDSGIVER
 import no.nav.helse.db.EgenskapForDatabase.UTBETALING_TIL_SYKMELDT
+import no.nav.helse.db.KommentarFraDatabase
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.db.PaVentInfoFraDatabase
 import no.nav.helse.db.PersonnavnFraDatabase
@@ -65,15 +66,25 @@ internal class OppgaveMapperTest {
                 opprinneligSøknadsdato = opprinneligSøknadsdato,
                 tidsfrist = tidsfrist,
                 filtrertAntall = 1,
-                paVentInfo = PaVentInfoFraDatabase(
-                    årsaker = listOf("årsak"),
-                    tekst = "tekster",
-                    dialogRef = 1L,
-                    saksbehandler = saksbehandler.ident,
-                    opprettet = opprettet,
-                    tidsfrist = tidsfrist
-                ),
-                )
+                paVentInfo =
+                    PaVentInfoFraDatabase(
+                        årsaker = listOf("årsak"),
+                        tekst = "tekst",
+                        dialogRef = 1L,
+                        saksbehandler = saksbehandler.ident,
+                        opprettet = opprettet,
+                        tidsfrist = tidsfrist,
+                        kommentarer =
+                            listOf(
+                                KommentarFraDatabase(
+                                    id = 1,
+                                    tekst = "kommentar",
+                                    opprettet = opprettet,
+                                    saksbehandlerident = saksbehandler.ident,
+                                ),
+                            ),
+                    ),
+            )
         val oppgaverTilBehandling = listOf(oppgaveFraDatabaseForVisning).tilOppgaverTilBehandling()
         assertEquals(1, oppgaverTilBehandling.size)
         val oppgaveTilBehandling = oppgaverTilBehandling.single()
@@ -98,15 +109,46 @@ internal class OppgaveMapperTest {
             oppgaveTilBehandling.egenskaper.toSet(),
         )
         assertEquals(listOf("årsak"), oppgaveTilBehandling.paVentInfo?.arsaker)
-        assertEquals("tekster", oppgaveTilBehandling.paVentInfo?.tekst)
+        assertEquals("tekst", oppgaveTilBehandling.paVentInfo?.tekst)
         assertEquals(1, oppgaveTilBehandling.paVentInfo?.dialogRef)
         assertEquals(saksbehandler.ident, oppgaveTilBehandling.paVentInfo?.saksbehandler)
         assertEquals(opprettet, oppgaveTilBehandling.paVentInfo?.opprettet)
         assertEquals(tidsfrist, oppgaveTilBehandling.paVentInfo?.tidsfrist)
+        assertEquals(
+            1,
+            oppgaveTilBehandling.paVentInfo
+                ?.kommentarer
+                ?.first()
+                ?.id,
+        )
+        assertEquals(
+            opprettet,
+            oppgaveTilBehandling.paVentInfo
+                ?.kommentarer
+                ?.first()
+                ?.opprettet,
+        )
+        assertEquals(
+            "kommentar",
+            oppgaveTilBehandling.paVentInfo
+                ?.kommentarer
+                ?.first()
+                ?.tekst,
+        )
+        assertEquals(
+            saksbehandler.ident,
+            oppgaveTilBehandling.paVentInfo
+                ?.kommentarer
+                ?.first()
+                ?.saksbehandlerident,
+        )
     }
 
     @ParameterizedTest
-    @EnumSource(names = ["FORLENGELSE", "FORSTEGANGSBEHANDLING", "INFOTRYGDFORLENGELSE", "OVERGANG_FRA_IT"], mode = EnumSource.Mode.INCLUDE)
+    @EnumSource(
+        names = ["FORLENGELSE", "FORSTEGANGSBEHANDLING", "INFOTRYGDFORLENGELSE", "OVERGANG_FRA_IT"],
+        mode = EnumSource.Mode.INCLUDE,
+    )
     fun `map til periodetype`(egenskapSomMapperTilPeriodetype: EgenskapForDatabase) {
         val (fornavn, mellomnavn, etternavn) = navn
         val oppgaveFraDatabaseForVisning =
@@ -131,7 +173,10 @@ internal class OppgaveMapperTest {
     }
 
     @ParameterizedTest
-    @EnumSource(names = ["FORLENGELSE", "FORSTEGANGSBEHANDLING", "INFOTRYGDFORLENGELSE", "OVERGANG_FRA_IT"], mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(
+        names = ["FORLENGELSE", "FORSTEGANGSBEHANDLING", "INFOTRYGDFORLENGELSE", "OVERGANG_FRA_IT"],
+        mode = EnumSource.Mode.EXCLUDE,
+    )
     fun `map til periodetype kaster exception når det mangler en egenskap som er periodetype`(
         egenskapSomMapperTilPeriodetype: EgenskapForDatabase,
     ) {
@@ -171,7 +216,13 @@ internal class OppgaveMapperTest {
                 aktørId = aktørId,
                 vedtaksperiodeId = vedtaksperiodeId,
                 navn = PersonnavnFraDatabase(fornavn, mellomnavn, etternavn),
-                egenskaper = setOf(egenskapSomMapperTilOppgavetype, DELVIS_REFUSJON, FORSTEGANGSBEHANDLING, EN_ARBEIDSGIVER),
+                egenskaper =
+                    setOf(
+                        egenskapSomMapperTilOppgavetype,
+                        DELVIS_REFUSJON,
+                        FORSTEGANGSBEHANDLING,
+                        EN_ARBEIDSGIVER,
+                    ),
                 tildelt = saksbehandler,
                 påVent = false,
                 opprettet = opprettet,
@@ -218,7 +269,16 @@ internal class OppgaveMapperTest {
                 } else {
                     DELVIS_REFUSJON
                 },
-                if (egenskapSomIkkeMapperTilOppgavetype in listOf(EN_ARBEIDSGIVER, FLERE_ARBEIDSGIVERE)) null else EN_ARBEIDSGIVER,
+                if (egenskapSomIkkeMapperTilOppgavetype in
+                    listOf(
+                        EN_ARBEIDSGIVER,
+                        FLERE_ARBEIDSGIVERE,
+                    )
+                ) {
+                    null
+                } else {
+                    EN_ARBEIDSGIVER
+                },
             )
         val (fornavn, mellomnavn, etternavn) = navn
         val oppgaveFraDatabaseForVisning =
@@ -256,7 +316,13 @@ internal class OppgaveMapperTest {
                 aktørId = aktørId,
                 vedtaksperiodeId = vedtaksperiodeId,
                 navn = PersonnavnFraDatabase(fornavn, mellomnavn, etternavn),
-                egenskaper = setOf(egenskapSomMapperTilAntallArbeidsforhold, DELVIS_REFUSJON, FORSTEGANGSBEHANDLING, SØKNAD),
+                egenskaper =
+                    setOf(
+                        egenskapSomMapperTilAntallArbeidsforhold,
+                        DELVIS_REFUSJON,
+                        FORSTEGANGSBEHANDLING,
+                        SØKNAD,
+                    ),
                 tildelt = saksbehandler,
                 påVent = false,
                 opprettet = opprettet,

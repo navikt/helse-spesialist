@@ -10,6 +10,7 @@ import no.nav.helse.spesialist.api.graphql.schema.AntallArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
 import no.nav.helse.spesialist.api.graphql.schema.Kategori
+import no.nav.helse.spesialist.api.graphql.schema.Kommentar
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
@@ -30,14 +31,24 @@ internal object OppgaveMapper {
                 opprinneligSoknadsdato = oppgave.opprinneligSøknadsdato,
                 tidsfrist = oppgave.tidsfrist,
                 paVentInfo =
-                    oppgave.paVentInfo?.let {
+                    oppgave.paVentInfo?.let { påVentInfo ->
                         PaVentInfo(
-                            arsaker = it.årsaker,
-                            tekst = it.tekst,
-                            dialogRef = it.dialogRef.toInt(),
-                            saksbehandler = it.saksbehandler,
-                            opprettet = it.opprettet,
-                            tidsfrist = it.tidsfrist,
+                            arsaker = påVentInfo.årsaker,
+                            tekst = påVentInfo.tekst,
+                            dialogRef = påVentInfo.dialogRef.toInt(),
+                            saksbehandler = påVentInfo.saksbehandler,
+                            opprettet = påVentInfo.opprettet,
+                            tidsfrist = påVentInfo.tidsfrist,
+                            kommentarer =
+                                påVentInfo.kommentarer.map {
+                                    Kommentar(
+                                        id = it.id,
+                                        tekst = it.tekst,
+                                        opprettet = it.opprettet,
+                                        saksbehandlerident = it.saksbehandlerident,
+                                        feilregistrert_tidspunkt = null,
+                                    )
+                                },
                         )
                     },
                 vedtaksperiodeId = oppgave.vedtaksperiodeId,
@@ -72,9 +83,11 @@ internal object OppgaveMapper {
             Oppgaveegenskap(egenskap.tilApiversjon(), egenskap.kategori.tilApiversjon())
         }
 
-    internal fun AntallOppgaverFraDatabase.tilApiversjon(): AntallOppgaver {
-        return AntallOppgaver(antallMineSaker = this.antallMineSaker, antallMineSakerPaVent = this.antallMineSakerPåVent)
-    }
+    internal fun AntallOppgaverFraDatabase.tilApiversjon(): AntallOppgaver =
+        AntallOppgaver(
+            antallMineSaker = this.antallMineSaker,
+            antallMineSakerPaVent = this.antallMineSakerPåVent,
+        )
 
     internal fun List<BehandletOppgaveFraDatabaseForVisning>.tilBehandledeOppgaver() =
         map {
@@ -226,8 +239,8 @@ internal object OppgaveMapper {
 
     // Eksplisitt mapping i stedet for toString sørger for at vi ikke utilsiktet knekker et api hvis vi gjør endringer
     // i navn på enumene
-    internal fun EgenskapDto.mapTilString(): String {
-        return when (this) {
+    internal fun EgenskapDto.mapTilString(): String =
+        when (this) {
             EgenskapDto.SØKNAD -> "SØKNAD"
             EgenskapDto.STIKKPRØVE -> "STIKKPRØVE"
             EgenskapDto.RISK_QA -> "RISK_QA"
@@ -257,12 +270,11 @@ internal object OppgaveMapper {
             EgenskapDto.GOSYS -> "GOSYS"
             EgenskapDto.MEDLEMSKAP -> "MEDLEMSKAP"
         }
-    }
 
     // Eksplisitt mapping i stedet for toString sørger for at vi ikke utilsiktet knekker et api hvis vi gjør endringer
     // i navn på enumene
-    internal fun EgenskapForDatabase.toDto(): EgenskapDto {
-        return when (this) {
+    internal fun EgenskapForDatabase.toDto(): EgenskapDto =
+        when (this) {
             EgenskapForDatabase.SØKNAD -> EgenskapDto.SØKNAD
             EgenskapForDatabase.STIKKPRØVE -> EgenskapDto.STIKKPRØVE
             EgenskapForDatabase.RISK_QA -> EgenskapDto.RISK_QA
@@ -292,7 +304,6 @@ internal object OppgaveMapper {
             EgenskapForDatabase.GOSYS -> EgenskapDto.GOSYS
             EgenskapForDatabase.MEDLEMSKAP -> EgenskapDto.MEDLEMSKAP
         }
-    }
 
     private fun Oppgaveegenskap.tilDatabaseversjon() =
         when (this.egenskap) {

@@ -41,6 +41,7 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.PersonService
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -52,6 +53,7 @@ import no.nav.helse.modell.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.spesialist.api.notat.NotatApiDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
@@ -132,6 +134,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val personDao = PersonDao(session)
     internal val oppgaveDao = PgOppgaveDao(dataSource)
     internal val oppgaveApiDao = OppgaveApiDao(dataSource)
+    internal val notatApiDao = NotatApiDao(dataSource)
     internal val periodehistorikkApiDao = PeriodehistorikkApiDao(dataSource)
     internal val historikkinnslagRepository = PgPeriodehistorikkDao(dataSource)
     internal val arbeidsforholdDao = ArbeidsforholdDao(session)
@@ -230,7 +233,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             periodetype = periodetype,
             inntektskilde = inntektskilde,
             utbetalingId = utbetalingId,
-            spleisBehandlingId = spleisBehandlingId
+            spleisBehandlingId = spleisBehandlingId,
         )
         opprettOppgave(
             contextId = contextId,
@@ -261,6 +264,18 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         return sessionOf(dataSource).use { session ->
             session.run(queryOf(query, saksbehandlerOid, oppgaveId).asExecute)
         }
+    }
+
+    protected fun leggOppgavePåVent(
+        oppgaveId: Long = OPPGAVE_ID,
+        saksbehandlerOid: UUID,
+        frist: LocalDate = LocalDate.now().plusDays(1),
+        årsaker: List<PåVentÅrsak> = emptyList(),
+        tekst: String = "En notattekst",
+    ) {
+        val dialogRef = dialogDao.lagre()
+        påVentDao.lagrePåVent(oppgaveId, saksbehandlerOid, frist, årsaker, tekst, dialogRef)
+        notatApiDao.leggTilKommentarMedDialogRef(dialogRef.toInt(), "En kommentar", SAKSBEHANDLER_IDENT)
     }
 
     private fun opprettVedtakstype(
@@ -396,7 +411,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             utbetalingId = utbetalingId,
             kanAvvises = kanAvvises,
         )
-
     }
 
     protected fun avventerSystem(

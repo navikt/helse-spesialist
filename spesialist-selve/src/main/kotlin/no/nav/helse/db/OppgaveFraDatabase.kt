@@ -40,6 +40,14 @@ data class PaVentInfoFraDatabase(
     val saksbehandler: String,
     val opprettet: LocalDateTime,
     val tidsfrist: LocalDate,
+    val kommentarer: List<KommentarFraDatabase>,
+)
+
+data class KommentarFraDatabase(
+    val id: Int,
+    val tekst: String,
+    val opprettet: LocalDateTime,
+    val saksbehandlerident: String,
 )
 
 data class AntallOppgaverFraDatabase(
@@ -57,7 +65,10 @@ data class BehandletOppgaveFraDatabaseForVisning(
     val filtrertAntall: Int,
 )
 
-data class OppgavesorteringForDatabase(val nøkkel: SorteringsnøkkelForDatabase, val stigende: Boolean)
+data class OppgavesorteringForDatabase(
+    val nøkkel: SorteringsnøkkelForDatabase,
+    val stigende: Boolean,
+)
 
 enum class SorteringsnøkkelForDatabase {
     TILDELT_TIL,
