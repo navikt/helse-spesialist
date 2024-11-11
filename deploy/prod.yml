@@ -137,4 +137,4 @@ spec:
     - name: AUTOMATISER_SPESIALSAK
       value: "true"
     - name: JDK_JAVA_OPTIONS
-      value: -agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=spesialist,-cprof_enable_heap_sampling=true,-logtostderr,-minloglevel=0,-cprof_project_id=tbd-prod-eacd
+      value: -agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=spesialist,-cprof_enable_heap_sampling=true,-logtostderr,-minloglevel=1,-cprof_project_id=tbd-prod-eacd
