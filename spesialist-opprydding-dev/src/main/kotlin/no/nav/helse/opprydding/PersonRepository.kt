@@ -7,7 +7,9 @@ import org.intellij.lang.annotations.Language
 import org.slf4j.LoggerFactory
 import javax.sql.DataSource
 
-internal class PersonRepository(private val dataSource: DataSource) {
+internal class PersonRepository(
+    private val dataSource: DataSource,
+) {
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
@@ -25,6 +27,7 @@ internal class PersonRepository(private val dataSource: DataSource) {
                 it.slettAvslag(personId)
                 it.slettReserverPerson(personId)
                 it.slettOpptegnelse(personId)
+                it.slettDialog(personId)
                 it.slettPåVent(personId)
                 it.slettPeriodehistorikk(personId)
                 it.slettTotrinnsvurdering(personId)
@@ -96,9 +99,10 @@ internal class PersonRepository(private val dataSource: DataSource) {
         val query =
             "SELECT sammenligningsgrunnlag_ref FROM avviksvurdering WHERE fødselsnummer = :fodselsnummer"
         return run(
-            queryOf(query, mapOf("fodselsnummer" to fødselsnummer)).map {
-                it.int("sammenligningsgrunnlag_ref")
-            }.asList,
+            queryOf(query, mapOf("fodselsnummer" to fødselsnummer))
+                .map {
+                    it.int("sammenligningsgrunnlag_ref")
+                }.asList,
         )
     }
 
@@ -209,13 +213,14 @@ internal class PersonRepository(private val dataSource: DataSource) {
         val query = "DELETE FROM skjonnsfastsetting_sykepengegrunnlag WHERE overstyring_ref IN (SELECT id FROM overstyring WHERE person_ref = ?) RETURNING begrunnelse_fritekst_ref, begrunnelse_mal_ref, begrunnelse_konklusjon_ref"
         val begrunnelseRef =
             run(
-                queryOf(query, personRef).map {
-                    listOf(
-                        it.longOrNull("begrunnelse_fritekst_ref"),
-                        it.longOrNull("begrunnelse_mal_ref"),
-                        it.longOrNull("begrunnelse_konklusjon_ref"),
-                    )
-                }.asSingle,
+                queryOf(query, personRef)
+                    .map {
+                        listOf(
+                            it.longOrNull("begrunnelse_fritekst_ref"),
+                            it.longOrNull("begrunnelse_mal_ref"),
+                            it.longOrNull("begrunnelse_konklusjon_ref"),
+                        )
+                    }.asSingle,
             )
         begrunnelseRef?.forEach {
             it?.let { slettBegrunnelse(it) }
@@ -239,9 +244,10 @@ internal class PersonRepository(private val dataSource: DataSource) {
         val query = "DELETE FROM avslag WHERE vedtaksperiode_id IN (SELECT vedtaksperiode_id FROM vedtak WHERE person_ref = ?) RETURNING begrunnelse_ref"
         val begrunnelseRef =
             run(
-                queryOf(query, personRef).map {
-                    it.longOrNull("begrunnelse_ref")
-                }.asSingle,
+                queryOf(query, personRef)
+                    .map {
+                        it.longOrNull("begrunnelse_ref")
+                    }.asSingle,
             )
         begrunnelseRef?.let { slettBegrunnelse(it) }
     }
@@ -290,6 +296,28 @@ internal class PersonRepository(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val query = "DELETE FROM pa_vent pv USING vedtak v WHERE pv.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?"
         run(queryOf(query, personRef).asExecute)
+    }
+
+    private fun TransactionalSession.slettDialog(personRef: Int) {
+        @Language("PostgreSQL")
+        val query1 =
+            """
+            DELETE FROM dialog d USING periodehistorikk ph 
+            INNER JOIN selve_vedtaksperiode_generasjon svg ON ph.generasjon_id = svg.unik_id
+            INNER JOIN vedtak v ON v.vedtaksperiode_id = svg.vedtaksperiode_id
+            WHERE d.id = ph.dialog_ref AND v.person_ref = :personRef
+            """.trimIndent()
+
+        @Language("PostgreSQL")
+        val query2 =
+            """
+            DELETE FROM dialog d USING notat n 
+            INNER JOIN vedtak v ON v.vedtaksperiode_id = n.vedtaksperiode_id
+            WHERE d.id = n.dialog_ref AND v.person_ref = :personRef
+            """.trimIndent()
+
+        run(queryOf(query1, mapOf("personRef" to personRef)).asExecute)
+        run(queryOf(query2, mapOf("personRef" to personRef)).asExecute)
     }
 
     private fun TransactionalSession.slettVedtaksperiodegenerasjoner(personRef: Int) {
@@ -460,9 +488,10 @@ internal class PersonRepository(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val query = "SELECT arbeidsgiver_fagsystem_id_ref, person_fagsystem_id_ref FROM utbetaling_id WHERE person_ref = ?"
         return run(
-            queryOf(query, personRef).map {
-                listOf(it.int("arbeidsgiver_fagsystem_id_ref"), it.int("person_fagsystem_id_ref"))
-            }.asList,
+            queryOf(query, personRef)
+                .map {
+                    listOf(it.int("arbeidsgiver_fagsystem_id_ref"), it.int("person_fagsystem_id_ref"))
+                }.asList,
         ).flatten()
     }
 

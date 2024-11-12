@@ -67,8 +67,8 @@ VALUES ('${saksbehandler_oid}', ${sequence_number});
 INSERT INTO reserver_person(saksbehandler_ref, person_ref, gyldig_til)
 VALUES ('${saksbehandler_oid}', ${sequence_number}, now());
 
-INSERT INTO pa_vent(id, vedtaksperiode_id, saksbehandler_ref, frist, opprettet)
-VALUES (${sequence_number}, '${vedtaksperiode_id}', '${saksbehandler_oid}', now(), now());
+INSERT INTO pa_vent(id, vedtaksperiode_id, saksbehandler_ref, frist, opprettet, dialog_ref)
+VALUES (${sequence_number}, '${vedtaksperiode_id}', '${saksbehandler_oid}', now(), now(), ${sequence_number});
 
 INSERT INTO opptegnelse(person_id, sekvensnummer, payload, type)
 VALUES (${sequence_number}, 1, '{}'::json, 'TESTTYPE');
@@ -79,10 +79,12 @@ VALUES ('${saksbehandler_oid}', 1);
 INSERT INTO dokumenter(dokument_id, person_ref, dokument, opprettet)
 VALUES (gen_random_uuid(), ${sequence_number}, '{}'::json, now());
 
-INSERT INTO notat(id, tekst, opprettet, saksbehandler_oid, vedtaksperiode_id, feilregistrert, feilregistrert_tidspunkt)
-VALUES (${sequence_number}, 'TEST_TEXT', now(), '${saksbehandler_oid}', '${vedtaksperiode_id}', false, now());
-INSERT INTO kommentarer(tekst, notat_ref, feilregistrert_tidspunkt, saksbehandlerident)
-VALUES ('EN_KOMMENTAR', ${sequence_number}, null, '${saksbehandler_oid}');
+INSERT INTO dialog(id, opprettet)
+VALUES (${sequence_number}, now());
+INSERT INTO notat(id, tekst, opprettet, saksbehandler_oid, vedtaksperiode_id, feilregistrert, feilregistrert_tidspunkt, dialog_ref)
+VALUES (${sequence_number}, 'TEST_TEXT', now(), '${saksbehandler_oid}', '${vedtaksperiode_id}', false, now(), ${sequence_number});
+INSERT INTO kommentarer(tekst, notat_ref, feilregistrert_tidspunkt, saksbehandlerident, dialog_ref)
+VALUES ('EN_KOMMENTAR', ${sequence_number}, null, '${saksbehandler_oid}', ${sequence_number});
 
 INSERT INTO overstyring(id, tidspunkt, person_ref, hendelse_ref, saksbehandler_ref, vedtaksperiode_id)
 VALUES (${sequence_number}, now(), ${sequence_number}, '${hendelse_id}',
@@ -132,9 +134,9 @@ VALUES (${sequence_number}, 'UTBETALT', now(), '{}'::json, ${sequence_number}, $
 INSERT INTO totrinnsvurdering(id, vedtaksperiode_id, er_retur, saksbehandler, beslutter, utbetaling_id_ref, opprettet, oppdatert)
 VALUES (${sequence_number}, '${vedtaksperiode_id}', false, '${saksbehandler_oid}', '${saksbehandler_oid}', ${sequence_number}, now(), null);
 
-INSERT INTO periodehistorikk(id, type, timestamp, generasjon_id, saksbehandler_oid, notat_id)
+INSERT INTO periodehistorikk(id, type, timestamp, generasjon_id, saksbehandler_oid, notat_id, dialog_ref)
 VALUES (${sequence_number}, 'TOTRINNSVURDERING_RETUR', now(), '${generasjon_id}', '${saksbehandler_oid}',
-        ${sequence_number});
+        ${sequence_number}, ${sequence_number});
 
 INSERT INTO feilende_meldinger(id, event_name, opprettet, blob)
 VALUES (gen_random_uuid(), 'FEILENDE_TESTHENDELSE', now(), '{}'::json);
