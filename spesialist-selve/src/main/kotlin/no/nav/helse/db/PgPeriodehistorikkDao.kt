@@ -22,24 +22,24 @@ class PgPeriodehistorikkDao(
     constructor(session: Session) : this(MedSession(session))
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
-    override fun lagre(
+    override fun lagreMedOppgaveId(
         historikkinnslag: HistorikkinnslagDto,
         oppgaveId: Long,
     ) {
         val generasjonId = PgOppgaveDao(queryRunner).finnGenerasjonId(oppgaveId)
-        lagre(historikkinnslag, generasjonId)
+        lagreMedGenerasjonId(historikkinnslag, generasjonId)
     }
 
-    override fun lagre(
+    override fun lagreMedGenerasjonId(
         historikkinnslag: HistorikkinnslagDto,
         generasjonId: UUID,
     ) {
         when (historikkinnslag) {
-            is FjernetFraPåVent -> lagre(historikkinnslag, generasjonId, null)
-            is LagtPåVent -> lagre(historikkinnslag, generasjonId, null)
-            is TotrinnsvurderingFerdigbehandlet -> lagre(historikkinnslag, generasjonId, null)
-            is AvventerTotrinnsvurdering -> lagre(historikkinnslag, generasjonId, null)
-            is TotrinnsvurderingAutomatiskRetur -> lagre(historikkinnslag, generasjonId, null)
+            is FjernetFraPåVent -> lagre(historikkinnslag, generasjonId)
+            is LagtPåVent -> lagre(historikkinnslag, generasjonId)
+            is TotrinnsvurderingFerdigbehandlet -> lagre(historikkinnslag, generasjonId)
+            is AvventerTotrinnsvurdering -> lagre(historikkinnslag, generasjonId)
+            is TotrinnsvurderingAutomatiskRetur -> lagre(historikkinnslag, generasjonId)
             is TotrinnsvurderingRetur -> {
                 val notatId =
                     PgNotatDao(queryRunner)
@@ -53,15 +53,15 @@ class PgPeriodehistorikkDao(
                 lagre(historikkinnslag, generasjonId, notatId)
             }
 
-            is AutomatiskBehandlingStanset -> lagre(historikkinnslag, generasjonId, null)
-            is VedtaksperiodeReberegnet -> lagre(historikkinnslag, generasjonId, null)
+            is AutomatiskBehandlingStanset -> lagre(historikkinnslag, generasjonId)
+            is VedtaksperiodeReberegnet -> lagre(historikkinnslag, generasjonId)
         }
     }
 
     private fun lagre(
         historikkinnslag: HistorikkinnslagDto,
         generasjonId: UUID,
-        notatId: Int?,
+        notatId: Int? = null,
     ) {
         asSQL(
             """

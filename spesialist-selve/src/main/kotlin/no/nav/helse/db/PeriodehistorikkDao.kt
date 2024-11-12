@@ -4,12 +4,12 @@ import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
 import java.util.UUID
 
 interface PeriodehistorikkDao {
-    fun lagre(
+    fun lagreMedOppgaveId(
         historikkinnslag: HistorikkinnslagDto,
         oppgaveId: Long,
     )
 
-    fun lagre(
+    fun lagreMedGenerasjonId(
         historikkinnslag: HistorikkinnslagDto,
         generasjonId: UUID,
     )

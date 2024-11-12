@@ -38,7 +38,7 @@ class TotrinnsvurderingServiceTest {
         verify(exactly = 1) { totrinnsvurderingDao.settErRetur(vedtaksperiodeId) }
         verify(exactly = 1) { oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId) }
         verify(exactly = 1) {
-            periodehistorikkDao.lagre(
+            periodehistorikkDao.lagreMedOppgaveId(
                 historikkinnslag = any<TotrinnsvurderingAutomatiskRetur>(),
                 oppgaveId = oppgaveId,
             )

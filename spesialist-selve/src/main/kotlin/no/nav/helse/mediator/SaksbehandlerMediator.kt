@@ -270,7 +270,7 @@ internal class SaksbehandlerMediator(
                     frist = handling.frist,
                     dialogRef = dialogRef,
                 )
-            periodehistorikkDao.lagre(innslag, handling.oppgaveId)
+            periodehistorikkDao.lagreMedOppgaveId(innslag, handling.oppgaveId)
             oppgaveService.leggPåVent(handling, saksbehandler)
             PåVentRepository(påVentDao).leggPåVent(saksbehandler.oid(), handling, dialogRef)
         } catch (e: Modellfeil) {
@@ -288,7 +288,7 @@ internal class SaksbehandlerMediator(
         }
         try {
             val innslag = HistorikkinnslagDto.fjernetFraPåVentInnslag(saksbehandler.toDto())
-            periodehistorikkDao.lagre(innslag, handling.oppgaveId)
+            periodehistorikkDao.lagreMedOppgaveId(innslag, handling.oppgaveId)
             oppgaveService.fjernFraPåVent(handling.oppgaveId)
             PåVentRepository(påVentDao).fjernFraPåVent(handling.oppgaveId)
         } catch (e: Modellfeil) {

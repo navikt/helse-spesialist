@@ -18,7 +18,7 @@ class PgPeriodehistorikkDaoTest : DatabaseIntegrationTest() {
         val saksbehandler = SaksbehandlerDto(SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_IDENT)
         val historikkinnslag = HistorikkinnslagDto.fjernetFraPåVentInnslag(saksbehandler)
 
-        historikkinnslagRepository.lagre(historikkinnslag, oppgaveId)
+        historikkinnslagRepository.lagreMedOppgaveId(historikkinnslag, oppgaveId)
         val result = periodehistorikkApiDao.finn(UTBETALING_ID)
 
         assertEquals(1, result.size)

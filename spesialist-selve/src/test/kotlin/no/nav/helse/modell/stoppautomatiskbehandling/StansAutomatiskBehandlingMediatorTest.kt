@@ -81,7 +81,7 @@ class StansAutomatiskBehandlingMediatorTest {
 
         verify(exactly = 1) { stansAutomatiskBehandlingDao.lagreFraISyfo(melding) }
         verify(exactly = 1) {
-            periodehistorikkDao.lagre(
+            periodehistorikkDao.lagreMedOppgaveId(
                 historikkinnslag = any<AutomatiskBehandlingStanset>(),
                 oppgaveId = any(),
             )
