@@ -88,13 +88,17 @@ data class OverstyringMinimumSykdomsgradDto(
     val timestamp: LocalDateTime,
     override val saksbehandlerNavn: String,
     override val saksbehandlerIdent: String?,
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val vurdering: Boolean,
+    val perioderVurdertOk: List<OverstyringMinimumSykdomsgradPeriodeDto>,
+    val perioderVurdertIkkeOk: List<OverstyringMinimumSykdomsgradPeriodeDto>,
     val begrunnelse: String,
     val initierendeVedtaksperiodeId: UUID,
     val ferdigstilt: Boolean,
-) : OverstyringDto
+) : OverstyringDto {
+    data class OverstyringMinimumSykdomsgradPeriodeDto(
+        val fom: LocalDate,
+        val tom: LocalDate,
+    )
+}
 
 enum class Skjonnsfastsettingstype {
     OMREGNET_ARSINNTEKT,

@@ -7,9 +7,8 @@ import java.util.UUID
 data class MinimumSykdomsgrad(
     val aktorId: String,
     val fodselsnummer: String,
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val vurdering: Boolean,
+    val perioderVurdertOk: List<Periode>,
+    val perioderVurdertIkkeOk: List<Periode>,
     val begrunnelse: String,
     val arbeidsgivere: List<Arbeidsgiver>,
     val initierendeVedtaksperiodeId: UUID,
@@ -17,5 +16,10 @@ data class MinimumSykdomsgrad(
     data class Arbeidsgiver(
         val organisasjonsnummer: String,
         val berortVedtaksperiodeId: UUID,
+    )
+
+    data class Periode(
+        val fom: LocalDate,
+        val tom: LocalDate,
     )
 }

@@ -771,9 +771,11 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             MinimumSykdomsgrad(
                 fodselsnummer = FØDSELSNUMMER,
                 aktorId = AKTØR_ID,
-                fom = 1.januar,
-                tom = 31.januar,
-                vurdering = true,
+                perioderVurdertOk = listOf(MinimumSykdomsgrad.Periode(
+                    fom = 1.januar,
+                    tom = 31.januar
+                )),
+                perioderVurdertIkkeOk = emptyList(),
                 begrunnelse = "en begrunnelse",
                 arbeidsgivere =
                     listOf(
@@ -810,9 +812,11 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             MinimumSykdomsgrad(
                 fodselsnummer = FØDSELSNUMMER,
                 aktorId = AKTØR_ID,
-                fom = 1.januar,
-                tom = 31.januar,
-                vurdering = false,
+                perioderVurdertOk = emptyList(),
+                perioderVurdertIkkeOk = listOf(MinimumSykdomsgrad.Periode(
+                    fom = 1.januar,
+                    tom = 31.januar
+                )),
                 begrunnelse = "en begrunnelse",
                 arbeidsgivere =
                     listOf(

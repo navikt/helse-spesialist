@@ -347,9 +347,12 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                 id = EKSTERN_HENDELSE_ID,
                 aktørId = AKTØR,
                 fødselsnummer = FNR,
-                fom = 1.januar,
-                tom = 31.januar,
-                vurdering = true,
+                perioderVurdertOk = listOf(
+                    MinimumSykdomsgradForDatabase.MinimumSykdomsgradPeriodeForDatabase(
+                    fom = 1.januar,
+                    tom = 31.januar
+                )),
+                perioderVurdertIkkeOk = emptyList(),
                 begrunnelse = "en begrunnelse",
                 opprettet = OPPRETTET,
                 initierendeVedtaksperiodeId = VEDTAKSPERIODE,
@@ -368,9 +371,10 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
 
         assertEquals(FNR, hentetMinimumSykdomsgrad.fødselsnummer)
         assertEquals(ORGNUMMER, hentetMinimumSykdomsgrad.organisasjonsnummer)
-        assertEquals(1.januar, hentetMinimumSykdomsgrad.fom)
-        assertEquals(31.januar, hentetMinimumSykdomsgrad.tom)
-        assertTrue(hentetMinimumSykdomsgrad.vurdering)
+        assertEquals(1.januar, hentetMinimumSykdomsgrad.perioderVurdertOk.first().fom)
+        assertEquals(31.januar, hentetMinimumSykdomsgrad.perioderVurdertOk.first().tom)
+        assertTrue(hentetMinimumSykdomsgrad.perioderVurdertOk.isNotEmpty())
+        assertTrue(hentetMinimumSykdomsgrad.perioderVurdertIkkeOk.isEmpty())
         assertEquals("en begrunnelse", hentetMinimumSykdomsgrad.begrunnelse)
         assertEquals(SAKSBEHANDLER_NAVN, hentetMinimumSykdomsgrad.saksbehandlerNavn)
         assertEquals(SAKSBEHANDLER_IDENT, hentetMinimumSykdomsgrad.saksbehandlerIdent)

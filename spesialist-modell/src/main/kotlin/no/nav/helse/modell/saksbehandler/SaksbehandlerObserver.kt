@@ -1,7 +1,7 @@
 package no.nav.helse.modell.saksbehandler
 
 import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringArsak
-import no.nav.helse.modell.saksbehandler.handlinger.Vurdering
+import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradPeriode
 import no.nav.helse.modell.vilkårsprøving.SubsumsjonEvent
 import java.time.LocalDate
 import java.util.UUID
@@ -140,8 +140,8 @@ data class MinimumSykdomsgradVurdertEvent(
     val saksbehandlerNavn: String,
     val saksbehandlerIdent: String,
     val saksbehandlerEpost: String,
-    val perioderMedMinimumSykdomsgradVurdertOk: List<Vurdering>,
-    val perioderMedMinimumSykdomsgradVurdertIkkeOk: List<Vurdering>,
+    val perioderMedMinimumSykdomsgradVurdertOk: List<MinimumSykdomsgradPeriode>,
+    val perioderMedMinimumSykdomsgradVurdertIkkeOk: List<MinimumSykdomsgradPeriode>,
 )
 
 data class AnnullertUtbetalingEvent(

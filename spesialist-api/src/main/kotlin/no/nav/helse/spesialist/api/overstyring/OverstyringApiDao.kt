@@ -162,7 +162,7 @@ class OverstyringApiDao(
         @Language("PostgreSQL")
         val finnOverstyringMinimumSykdomsgradQuery = """
                 SELECT o.id, o.tidspunkt, o.person_ref, o.hendelse_ref, o.saksbehandler_ref, o.ekstern_hendelse_id, 
-                o.ferdigstilt, o.vedtaksperiode_id, oms.fom, oms.tom, oms.vurdering, oms.begrunnelse, omsa.berort_vedtaksperiode_id, 
+                o.ferdigstilt, o.vedtaksperiode_id, oms.id as overstyring_minimum_sykdomsgrad_ref, oms.fom, oms.tom, oms.vurdering, oms.begrunnelse, omsa.berort_vedtaksperiode_id, 
                 p.fødselsnummer, a.organisasjonsnummer, s.navn, s.ident FROM overstyring o
                     INNER JOIN overstyring_minimum_sykdomsgrad oms ON o.id = oms.overstyring_ref
                     INNER JOIN overstyring_minimum_sykdomsgrad_arbeidsgiver omsa ON omsa.overstyring_minimum_sykdomsgrad_ref = oms.id
@@ -174,6 +174,28 @@ class OverstyringApiDao(
         return this.run(
             queryOf(finnOverstyringMinimumSykdomsgradQuery, fødselsnummer)
                 .map { overstyringRow ->
+                    @Language("PostgreSQL")
+                    val finnPerioder = """
+                        SELECT fom, tom, vurdering 
+                        FROM overstyring_minimum_sykdomsgrad_periode 
+                        WHERE overstyring_minimum_sykdomsgrad_ref = ?
+                    """
+                    val perioderVurdertOk = mutableListOf<OverstyringMinimumSykdomsgradDto.OverstyringMinimumSykdomsgradPeriodeDto>()
+                    val perioderVurdertIkkeOk = mutableListOf<OverstyringMinimumSykdomsgradDto.OverstyringMinimumSykdomsgradPeriodeDto>()
+                    this.run(
+                        queryOf(finnPerioder, overstyringRow.long("overstyring_minimum_sykdomsgrad_ref")).map { vurdertPeriode ->
+                            val periode =
+                                OverstyringMinimumSykdomsgradDto.OverstyringMinimumSykdomsgradPeriodeDto(
+                                    fom = vurdertPeriode.localDate("fom"),
+                                    tom = vurdertPeriode.localDate("tom"),
+                                )
+                            if (vurdertPeriode.boolean("vurdering")) {
+                                perioderVurdertOk.add(periode)
+                            } else {
+                                perioderVurdertIkkeOk.add(periode)
+                            }
+                        }.asList,
+                    )
                     OverstyringMinimumSykdomsgradDto(
                         hendelseId = overstyringRow.uuid("hendelse_ref"),
                         fødselsnummer = overstyringRow.string("fødselsnummer"),
@@ -182,9 +204,8 @@ class OverstyringApiDao(
                         saksbehandlerNavn = overstyringRow.string("navn"),
                         saksbehandlerIdent = overstyringRow.stringOrNull("ident"),
                         ferdigstilt = overstyringRow.boolean("ferdigstilt"),
-                        fom = overstyringRow.localDate("fom"),
-                        tom = overstyringRow.localDate("tom"),
-                        vurdering = overstyringRow.boolean("vurdering"),
+                        perioderVurdertOk = perioderVurdertOk,
+                        perioderVurdertIkkeOk = perioderVurdertIkkeOk,
                         begrunnelse = overstyringRow.string("begrunnelse"),
                         initierendeVedtaksperiodeId = overstyringRow.uuid("vedtaksperiode_id"),
                     )

@@ -175,9 +175,20 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
             id = id,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
-            fom = fom,
-            tom = tom,
-            vurdering = vurdering,
+            perioderVurdertOk =
+                perioderVurdertOk.map {
+                    MinimumSykdomsgradForDatabase.MinimumSykdomsgradPeriodeForDatabase(
+                        fom = it.fom,
+                        tom = it.tom,
+                    )
+                },
+            perioderVurdertIkkeOk =
+                perioderVurdertIkkeOk.map {
+                    MinimumSykdomsgradForDatabase.MinimumSykdomsgradPeriodeForDatabase(
+                        fom = it.fom,
+                        tom = it.tom,
+                    )
+                },
             begrunnelse = begrunnelse,
             arbeidsgivere =
                 arbeidsgivere.map {

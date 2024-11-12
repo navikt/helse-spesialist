@@ -330,9 +330,20 @@ private fun OverstyringMinimumSykdomsgradDto.tilMinimumSykdomsgradOverstyring() 
             ),
         minimumSykdomsgrad =
             MinimumSykdomsgradOverstyring.OverstyrtMinimumSykdomsgrad(
-                fom = fom,
-                tom = tom,
-                vurdering = vurdering,
+                perioderVurdertOk =
+                    perioderVurdertOk.map {
+                        MinimumSykdomsgradOverstyring.OverstyrtMinimumSykdomsgradPeriode(
+                            fom = it.fom,
+                            tom = it.tom,
+                        )
+                    },
+                perioderVurdertIkkeOk =
+                    perioderVurdertIkkeOk.map {
+                        MinimumSykdomsgradOverstyring.OverstyrtMinimumSykdomsgradPeriode(
+                            fom = it.fom,
+                            tom = it.tom,
+                        )
+                    },
                 begrunnelse = begrunnelse,
                 initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,
             ),

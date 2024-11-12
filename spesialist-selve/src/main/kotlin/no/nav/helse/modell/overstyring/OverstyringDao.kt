@@ -294,11 +294,14 @@ class OverstyringDao(queryRunner: QueryRunner) : OverstyringRepository, QueryRun
                 VALUES (:overstyringRef, :fom, :tom, :vurdering, :begrunnelse)
                 """.trimIndent(),
                 "overstyringRef" to overstyringId,
-                "fom" to minimumSykdomsgrad.fom,
-                "tom" to minimumSykdomsgrad.tom,
-                "vurdering" to minimumSykdomsgrad.vurdering,
+                "fom" to (minimumSykdomsgrad.perioderVurdertOk.firstOrNull()?.fom ?: minimumSykdomsgrad.perioderVurdertIkkeOk.first().fom),
+                "tom" to (minimumSykdomsgrad.perioderVurdertOk.firstOrNull()?.tom ?: minimumSykdomsgrad.perioderVurdertIkkeOk.first().tom),
+                "vurdering" to (minimumSykdomsgrad.perioderVurdertOk.isNotEmpty()),
                 "begrunnelse" to minimumSykdomsgrad.begrunnelse,
             ).updateAndReturnGeneratedKey()
+
+        insertOverstyrtMinimumSykdomsgradPerioder(minimumSykdomsgrad.perioderVurdertOk, true, overstyringMinimumSykdomsgradId)
+        insertOverstyrtMinimumSykdomsgradPerioder(minimumSykdomsgrad.perioderVurdertIkkeOk, false, overstyringMinimumSykdomsgradId)
 
         minimumSykdomsgrad.arbeidsgivere.forEach { arbeidsgiver ->
             asSQL(
@@ -311,6 +314,25 @@ class OverstyringDao(queryRunner: QueryRunner) : OverstyringRepository, QueryRun
                 "beroertVedtaksperiodeId" to arbeidsgiver.berørtVedtaksperiodeId,
                 "overstyringMinimumSykdomsgradRef" to overstyringMinimumSykdomsgradId,
                 "organisasjonsnummer" to arbeidsgiver.organisasjonsnummer,
+            ).update()
+        }
+    }
+
+    private fun insertOverstyrtMinimumSykdomsgradPerioder(
+        perioder: List<MinimumSykdomsgradForDatabase.MinimumSykdomsgradPeriodeForDatabase>,
+        vurdering: Boolean,
+        overstyringMinimumSykdomsgradId: Long,
+    ) {
+        perioder.forEach { vurdertPeriode ->
+            asSQL(
+                """
+                INSERT INTO overstyring_minimum_sykdomsgrad_periode (fom, tom, vurdering, overstyring_minimum_sykdomsgrad_ref)
+                VALUES (:fom, :tom, :vurdering, :overstyringMinimumSykdomsgradRef)
+                """.trimIndent(),
+                "fom" to vurdertPeriode.fom,
+                "tom" to vurdertPeriode.tom,
+                "vurdering" to vurdering,
+                "overstyringMinimumSykdomsgradRef" to overstyringMinimumSykdomsgradId,
             ).update()
         }
     }

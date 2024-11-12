@@ -36,6 +36,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.FjernPåVentUtenHistorikkinn
 import no.nav.helse.modell.saksbehandler.handlinger.Handling
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradArbeidsgiver
+import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradPeriode
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
@@ -562,9 +563,20 @@ internal class SaksbehandlerMediator(
         no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad(
             aktørId = aktorId,
             fødselsnummer = fodselsnummer,
-            fom = fom,
-            tom = tom,
-            vurdering = vurdering,
+            perioderVurdertOk =
+                perioderVurdertOk.map {
+                    MinimumSykdomsgradPeriode(
+                        fom = it.fom,
+                        tom = it.tom,
+                    )
+                },
+            perioderVurdertIkkeOk =
+                perioderVurdertIkkeOk.map {
+                    MinimumSykdomsgradPeriode(
+                        fom = it.fom,
+                        tom = it.tom,
+                    )
+                },
             begrunnelse = begrunnelse,
             arbeidsgivere =
                 arbeidsgivere.map {

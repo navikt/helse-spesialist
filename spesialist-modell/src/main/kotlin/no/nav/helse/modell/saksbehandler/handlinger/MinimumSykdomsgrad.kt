@@ -15,9 +15,8 @@ class MinimumSykdomsgrad(
     private val id: UUID = UUID.randomUUID(),
     private val aktørId: String,
     private val fødselsnummer: String,
-    private val fom: LocalDate,
-    private val tom: LocalDate,
-    private val vurdering: Boolean,
+    private val perioderVurdertOk: List<MinimumSykdomsgradPeriode>,
+    private val perioderVurdertIkkeOk: List<MinimumSykdomsgradPeriode>,
     private val begrunnelse: String,
     private val arbeidsgivere: List<MinimumSykdomsgradArbeidsgiver>,
     private val initierendeVedtaksperiodeId: UUID,
@@ -36,9 +35,6 @@ class MinimumSykdomsgrad(
         epost: String,
         ident: String,
     ): MinimumSykdomsgradVurdertEvent {
-        val vurdertOk = if (vurdering) listOf(Vurdering(fom, tom)) else emptyList()
-        val vurdertIkkeOk = if (!vurdering) listOf(Vurdering(fom, tom)) else emptyList()
-
         return MinimumSykdomsgradVurdertEvent(
             id = id,
             fødselsnummer = fødselsnummer,
@@ -47,8 +43,8 @@ class MinimumSykdomsgrad(
             saksbehandlerNavn = navn,
             saksbehandlerIdent = ident,
             saksbehandlerEpost = epost,
-            perioderMedMinimumSykdomsgradVurdertOk = vurdertOk,
-            perioderMedMinimumSykdomsgradVurdertIkkeOk = vurdertIkkeOk,
+            perioderMedMinimumSykdomsgradVurdertOk = perioderVurdertOk,
+            perioderMedMinimumSykdomsgradVurdertIkkeOk = perioderVurdertIkkeOk,
         )
     }
 
@@ -57,9 +53,8 @@ class MinimumSykdomsgrad(
             id = id,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
-            fom = fom,
-            tom = tom,
-            vurdering = vurdering,
+            perioderVurdertOk = perioderVurdertOk.map(MinimumSykdomsgradPeriode::toDto),
+            perioderVurdertIkkeOk = perioderVurdertIkkeOk.map(MinimumSykdomsgradPeriode::toDto),
             begrunnelse = begrunnelse,
             arbeidsgivere = arbeidsgivere.map(MinimumSykdomsgradArbeidsgiver::toDto),
             initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,
@@ -77,12 +72,13 @@ class MinimumSykdomsgrad(
             fødselsnummer = fødselsnummer,
             input =
                 mapOf(
-                    "fom" to fom,
-                    "tom" to tom,
+                    "fom" to if (perioderVurdertOk.isNotEmpty()) perioderVurdertOk.first().fom else perioderVurdertIkkeOk.first().fom,
+                    "tom" to if (perioderVurdertOk.isNotEmpty()) perioderVurdertOk.first().tom else perioderVurdertIkkeOk.first().tom,
                     "initierendeVedtaksperiode" to initierendeVedtaksperiodeId,
                 ),
             output = emptyMap(),
-            utfall = if (vurdering) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+            // @TODO her må vi finne ut hva miks av ok og ikke ok skal gi, evt. om hver subperiode får sin egen subsumsjon
+            utfall = if (perioderVurdertOk.isNotEmpty()) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
             sporing =
                 SporingSkjønnsfastsattSykepengegrunnlag(
                     vedtaksperioder = arbeidsgivere.map { it.toDto().berørtVedtaksperiodeId },
@@ -104,7 +100,13 @@ class MinimumSykdomsgradArbeidsgiver(
         )
 }
 
-data class Vurdering(
+class MinimumSykdomsgradPeriode(
     val fom: LocalDate,
     val tom: LocalDate,
-)
+) {
+    fun toDto() =
+        MinimumSykdomsgradDto.MinimumSykdomsgradPeriodeDto(
+            fom = fom,
+            tom = tom,
+        )
+}

@@ -94,11 +94,15 @@ data class MinimumSykdomsgradOverstyring(
     val minimumSykdomsgrad: OverstyrtMinimumSykdomsgrad,
 ) : Overstyring {
     data class OverstyrtMinimumSykdomsgrad(
-        val fom: LocalDate,
-        val tom: LocalDate,
-        val vurdering: Boolean,
+        val perioderVurdertOk: List<OverstyrtMinimumSykdomsgradPeriode>,
+        val perioderVurdertIkkeOk: List<OverstyrtMinimumSykdomsgradPeriode>,
         val begrunnelse: String,
         val initierendeVedtaksperiodeId: UUID,
+    )
+
+    data class OverstyrtMinimumSykdomsgradPeriode(
+        val fom: LocalDate,
+        val tom: LocalDate,
     )
 }
 

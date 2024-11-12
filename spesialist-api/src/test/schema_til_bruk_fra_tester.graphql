@@ -513,10 +513,14 @@ type OverstyrtInntekt {
 
 type OverstyrtMinimumSykdomsgrad {
     begrunnelse: String!
-    fom: LocalDate!
     initierendeVedtaksperiodeId: UUID!
+    perioderVurdertIkkeOk: [OverstyrtMinimumSykdomsgradPeriode!]!
+    perioderVurdertOk: [OverstyrtMinimumSykdomsgradPeriode!]!
+}
+
+type OverstyrtMinimumSykdomsgradPeriode {
+    fom: LocalDate!
     tom: LocalDate!
-    vurdering: Boolean!
 }
 
 type PaVent {
@@ -1377,10 +1381,9 @@ input MinimumSykdomsgradInput {
     arbeidsgivere: [ArbeidsgiverInput!]!
     begrunnelse: String!
     fodselsnummer: String!
-    fom: LocalDate!
     initierendeVedtaksperiodeId: UUID!
-    tom: LocalDate!
-    vurdering: Boolean!
+    perioderVurdertIkkeOk: [PeriodeInput!]!
+    perioderVurdertOk: [PeriodeInput!]!
 }
 
 input OppgaveegenskapInput {
@@ -1432,6 +1435,11 @@ input OverstyringRefusjonselementInput {
 input PaVentArsakInput {
     _key: String!
     arsak: String!
+}
+
+input PeriodeInput {
+    fom: LocalDate!
+    tom: LocalDate!
 }
 
 input SkjonnsfastsettelseArbeidsgiverInput {

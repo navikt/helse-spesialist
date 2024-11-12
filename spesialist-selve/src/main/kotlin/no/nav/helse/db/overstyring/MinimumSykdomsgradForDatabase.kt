@@ -8,9 +8,8 @@ data class MinimumSykdomsgradForDatabase(
     val id: UUID,
     val aktørId: String,
     override val fødselsnummer: String,
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val vurdering: Boolean,
+    val perioderVurdertOk: List<MinimumSykdomsgradPeriodeForDatabase>,
+    val perioderVurdertIkkeOk: List<MinimumSykdomsgradPeriodeForDatabase>,
     val begrunnelse: String,
     val initierendeVedtaksperiodeId: UUID,
     val arbeidsgivere: List<MinimumSykdomsgradArbeidsgiverForDatabase>,
@@ -22,5 +21,10 @@ data class MinimumSykdomsgradForDatabase(
     data class MinimumSykdomsgradArbeidsgiverForDatabase(
         val organisasjonsnummer: String,
         val berørtVedtaksperiodeId: UUID,
+    )
+
+    data class MinimumSykdomsgradPeriodeForDatabase(
+        val fom: LocalDate,
+        val tom: LocalDate,
     )
 }
