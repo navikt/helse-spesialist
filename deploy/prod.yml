@@ -95,6 +95,9 @@ spec:
             envVarPrefix: DATABASE
             users:
               - name: bigquery_connection_user
+        flags:
+          - name: maintenance_work_mem
+          - value: "41943040"
   env:
     - name: KAFKA_RAPID_TOPIC
       value: tbd.rapid.v1
