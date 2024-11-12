@@ -31,6 +31,7 @@ import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Egenskap.TILBAKEDATERT
+import no.nav.helse.modell.oppgave.Egenskap.TILKOMMEN
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.oppgave.Egenskap.UTLAND
@@ -252,6 +253,12 @@ internal class OpprettSaksbehandleroppgaveTest {
         assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, kanAvvises = false)
     }
 
+    @Test
+    fun `oppretter oppgave med tilkommen inntekt`() {
+        assertTrue(opprettSaksbehandlerOppgaveCommand(tags = listOf("TilkommenInntekt")).execute(context))
+        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, TILKOMMEN)
+    }
+
     private fun assertForventedeEgenskaper(vararg egenskaper: Egenskap, kanAvvises: Boolean = true) {
         verify(exactly = 1) { oppgaveService.nyOppgave(
             FNR,
@@ -270,6 +277,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
         utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
         kanAvvises: Boolean = true,
+        tags: List<String> = emptyList()
     ) = OpprettSaksbehandleroppgave(
         oppgaveService = oppgaveService,
         automatisering = automatisering,
@@ -292,7 +300,7 @@ internal class OpprettSaksbehandleroppgaveTest {
             spleisBehandlingId = BEHANDLING_ID,
             avviksvurderingId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID(),
-            tags = emptyList(),
+            tags = tags,
             periodeFom = 1.januar,
             periodeTom = 31.januar,
             periodetype = periodetype,

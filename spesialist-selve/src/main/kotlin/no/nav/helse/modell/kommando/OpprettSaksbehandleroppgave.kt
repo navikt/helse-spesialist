@@ -9,32 +9,7 @@ import no.nav.helse.db.VergemålRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.oppgave.Egenskap.DELVIS_REFUSJON
-import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
-import no.nav.helse.modell.oppgave.Egenskap.EN_ARBEIDSGIVER
-import no.nav.helse.modell.oppgave.Egenskap.FLERE_ARBEIDSGIVERE
-import no.nav.helse.modell.oppgave.Egenskap.FORLENGELSE
-import no.nav.helse.modell.oppgave.Egenskap.FORSTEGANGSBEHANDLING
-import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
-import no.nav.helse.modell.oppgave.Egenskap.GOSYS
-import no.nav.helse.modell.oppgave.Egenskap.HASTER
-import no.nav.helse.modell.oppgave.Egenskap.INFOTRYGDFORLENGELSE
-import no.nav.helse.modell.oppgave.Egenskap.INGEN_UTBETALING
-import no.nav.helse.modell.oppgave.Egenskap.MEDLEMSKAP
-import no.nav.helse.modell.oppgave.Egenskap.OVERGANG_FRA_IT
-import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
-import no.nav.helse.modell.oppgave.Egenskap.REVURDERING
-import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
-import no.nav.helse.modell.oppgave.Egenskap.SKJØNNSFASTSETTELSE
-import no.nav.helse.modell.oppgave.Egenskap.SPESIALSAK
-import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
-import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
-import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
-import no.nav.helse.modell.oppgave.Egenskap.TILBAKEDATERT
-import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
-import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
-import no.nav.helse.modell.oppgave.Egenskap.UTLAND
-import no.nav.helse.modell.oppgave.Egenskap.VERGEMÅL
+import no.nav.helse.modell.oppgave.Egenskap.*
 import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
@@ -87,6 +62,7 @@ internal class OpprettSaksbehandleroppgave(
                 .vurderKunÅpenGosysOppgave(vedtaksperiodeId)
                 .vurderMedlemskap(vedtaksperiodeId)
                 .vurderHaster(vedtaksperiodeId)
+                .vurderTilkommenInntekt(behovData.tags)
 
         val behandlingId = behovData.spleisBehandlingId
         oppgaveService.nyOppgave(
@@ -201,6 +177,11 @@ internal class OpprettSaksbehandleroppgave(
 
     private fun Set<Egenskap>.vurderMedlemskap(vedtaksperiodeId: UUID): Set<Egenskap> {
         if (sykefraværstilfelle.harMedlemskapsvarsel(vedtaksperiodeId)) return this + MEDLEMSKAP
+        return this
+    }
+
+    private fun Set<Egenskap>.vurderTilkommenInntekt(tags: List<String>): Set<Egenskap> {
+        if (tags.contains("TilkommenInntekt")) return this + TILKOMMEN
         return this
     }
 
