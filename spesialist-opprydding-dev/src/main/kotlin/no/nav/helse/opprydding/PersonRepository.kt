@@ -166,6 +166,7 @@ internal class PersonRepository(
         slettSkjønnsfastsettingSykepengegrunnlagArbeidsgiver(personRef)
         slettSkjønnsfastsettingSykepengegrunnlag(personRef)
         slettOverstyringMinimumSykdomsgradArbeidsgiver(personRef)
+        slettOverstyringMinimumSykdomsgradPeriode(personRef)
         slettOverstyringMinimumSykdomsgrad(personRef)
         @Language("PostgreSQL")
         val query = "DELETE FROM overstyring WHERE person_ref = ?"
@@ -230,6 +231,12 @@ internal class PersonRepository(
     private fun TransactionalSession.slettOverstyringMinimumSykdomsgradArbeidsgiver(personRef: Int) {
         @Language("PostgreSQL")
         val query = "DELETE FROM overstyring_minimum_sykdomsgrad_arbeidsgiver WHERE overstyring_minimum_sykdomsgrad_ref IN (SELECT oms.id FROM overstyring_minimum_sykdomsgrad oms JOIN overstyring o ON oms.overstyring_ref = o.id WHERE o.person_ref = ?)"
+        run(queryOf(query, personRef).asExecute)
+    }
+
+    private fun TransactionalSession.slettOverstyringMinimumSykdomsgradPeriode(personRef: Int) {
+        @Language("PostgreSQL")
+        val query = "DELETE FROM overstyring_minimum_sykdomsgrad_periode WHERE overstyring_minimum_sykdomsgrad_ref IN (SELECT oms.id FROM overstyring_minimum_sykdomsgrad oms JOIN overstyring o ON oms.overstyring_ref = o.id WHERE o.person_ref = ?)"
         run(queryOf(query, personRef).asExecute)
     }
 

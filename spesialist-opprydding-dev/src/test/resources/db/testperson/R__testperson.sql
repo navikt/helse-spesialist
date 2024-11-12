@@ -99,6 +99,8 @@ INSERT INTO overstyring_arbeidsforhold(id, overstyring_ref, forklaring, deaktive
 VALUES (${sequence_number}, ${sequence_number}, 'FORKLARING', false, '2018-01-01', 'BEGRUNNELSE', ${sequence_number});
 INSERT INTO overstyring_minimum_sykdomsgrad(id, overstyring_ref, fom, tom, vurdering, begrunnelse)
 VALUES (${sequence_number}, ${sequence_number}, '2018-01-01', '2018-01-31', true, 'En begrunnelse');
+INSERT INTO overstyring_minimum_sykdomsgrad_periode(id, fom, tom, vurdering, overstyring_minimum_sykdomsgrad_ref)
+VALUES (${sequence_number}, '2018-01-01', '2018-01-31', true, ${sequence_number});
 INSERT INTO overstyring_minimum_sykdomsgrad_arbeidsgiver(id, berort_vedtaksperiode_id, arbeidsgiver_ref, overstyring_minimum_sykdomsgrad_ref)
 VALUES (${sequence_number}, '${vedtaksperiode_id}', ${sequence_number}, ${sequence_number});
 
