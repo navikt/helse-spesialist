@@ -28,7 +28,7 @@ class TotrinnsvurderingService(
         oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)?.let {
             totrinnsvurderingDao.settErRetur(vedtaksperiodeId)
             val innslag = HistorikkinnslagDto.totrinnsvurderingAutomatiskRetur()
-            periodehistorikkDao.lagre(innslag, it, null)
+            periodehistorikkDao.lagre(innslag, it)
         }
     }
 
@@ -37,10 +37,14 @@ class TotrinnsvurderingService(
         saksbehandlerFraApi: SaksbehandlerFraApi,
         notat: String,
     ) {
-        val innslag =
-            HistorikkinnslagDto.totrinnsvurderingRetur(notat = NotatDto(oppgaveId, notat), saksbehandlerFraApi.toDto())
         val dialogRef = dialogDao.lagre()
-        periodehistorikkDao.lagre(innslag, oppgaveId, dialogRef)
+        val innslag =
+            HistorikkinnslagDto.totrinnsvurderingRetur(
+                notat = NotatDto(oppgaveId, notat),
+                saksbehandler = saksbehandlerFraApi.toDto(),
+                dialogRef = dialogRef,
+            )
+        periodehistorikkDao.lagre(innslag, oppgaveId)
     }
 
     override fun avventerTotrinnsvurdering(
@@ -48,7 +52,7 @@ class TotrinnsvurderingService(
         saksbehandlerFraApi: SaksbehandlerFraApi,
     ) {
         val innslag = HistorikkinnslagDto.avventerTotrinnsvurdering(saksbehandlerFraApi.toDto())
-        periodehistorikkDao.lagre(innslag, oppgaveId, null)
+        periodehistorikkDao.lagre(innslag, oppgaveId)
     }
 
     override fun erBeslutterOppgave(oppgaveId: Long): Boolean = hentAktiv(oppgaveId)?.erBeslutteroppgave() ?: false

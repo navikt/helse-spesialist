@@ -84,7 +84,6 @@ class StansAutomatiskBehandlingMediatorTest {
             periodehistorikkDao.lagre(
                 historikkinnslag = any<AutomatiskBehandlingStanset>(),
                 oppgaveId = any(),
-                dialogRef = any(),
             )
         }
     }

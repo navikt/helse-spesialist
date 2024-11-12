@@ -25,7 +25,6 @@ import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
-import no.nav.helse.modell.periodehistorikk.NotatDto
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
@@ -262,15 +261,16 @@ internal class SaksbehandlerMediator(
         saksbehandler: Saksbehandler,
     ) {
         try {
+            val dialogRef = dialogDao.lagre()
             val innslag =
                 HistorikkinnslagDto.lagtPåVentInnslag(
-                    notat = handling.notatTekst?.let { NotatDto(oppgaveId = handling.oppgaveId, tekst = handling.notatTekst!!) },
+                    notattekst = handling.notatTekst,
                     saksbehandler = saksbehandler.toDto(),
                     årsaker = handling.årsaker,
                     frist = handling.frist,
+                    dialogRef = dialogRef,
                 )
-            val dialogRef = dialogDao.lagre()
-            periodehistorikkDao.lagre(innslag, handling.oppgaveId, dialogRef)
+            periodehistorikkDao.lagre(innslag, handling.oppgaveId)
             oppgaveService.leggPåVent(handling, saksbehandler)
             PåVentRepository(påVentDao).leggPåVent(saksbehandler.oid(), handling, dialogRef)
         } catch (e: Modellfeil) {
@@ -288,7 +288,7 @@ internal class SaksbehandlerMediator(
         }
         try {
             val innslag = HistorikkinnslagDto.fjernetFraPåVentInnslag(saksbehandler.toDto())
-            periodehistorikkDao.lagre(innslag, handling.oppgaveId, null)
+            periodehistorikkDao.lagre(innslag, handling.oppgaveId)
             oppgaveService.fjernFraPåVent(handling.oppgaveId)
             PåVentRepository(påVentDao).fjernFraPåVent(handling.oppgaveId)
         } catch (e: Modellfeil) {

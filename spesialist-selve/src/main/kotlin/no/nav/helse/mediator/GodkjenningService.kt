@@ -106,7 +106,7 @@ internal class GodkjenningService(
                 val beslutter = totrinnsvurdering.beslutter?.let { saksbehandlerRepository.finnSaksbehandler(it)?.toDto() }
                 checkNotNull(beslutter) { "Forventer at beslutter er satt" }
                 val innslag = HistorikkinnslagDto.totrinnsvurderingFerdigbehandletInnslag(beslutter)
-                periodehistorikkDao.lagre(innslag, godkjenningDTO.oppgavereferanse, null)
+                periodehistorikkDao.lagre(innslag, godkjenningDTO.oppgavereferanse)
             }
         }
     }

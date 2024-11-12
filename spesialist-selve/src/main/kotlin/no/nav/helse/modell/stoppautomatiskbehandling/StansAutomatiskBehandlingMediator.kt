@@ -96,7 +96,7 @@ internal class StansAutomatiskBehandlingMediator(
         val oppgaveId = oppgaveDao.finnOppgaveId(fødselsnummer)
         if (oppgaveId != null) {
             val innslag = HistorikkinnslagDto.automatiskBehandlingStanset()
-            periodehistorikkDao.lagre(innslag, oppgaveId, null)
+            periodehistorikkDao.lagre(innslag, oppgaveId)
         } else {
             sikkerlogg.info("Fant ikke oppgave for $fødselsnummer. Fikk ikke lagret historikkinnslag om stans av automatisk behandling")
         }

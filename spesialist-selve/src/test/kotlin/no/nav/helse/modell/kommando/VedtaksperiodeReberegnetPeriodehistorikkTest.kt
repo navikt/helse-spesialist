@@ -15,6 +15,6 @@ class VedtaksperiodeReberegnetPeriodehistorikkTest {
         val repository = mockk<PeriodehistorikkDao>(relaxed = true)
         val command = VedtaksperiodeReberegnetPeriodehistorikk(mockk(relaxed = true), repository)
         assertTrue(command.execute(context))
-        verify(exactly = 1) { repository.lagre(any<VedtaksperiodeReberegnet>(), any<UUID>(), any()) }
+        verify(exactly = 1) { repository.lagre(any<VedtaksperiodeReberegnet>(), any<UUID>()) }
     }
 }

@@ -10,6 +10,7 @@ import java.time.LocalDateTime
 
 sealed interface HistorikkinnslagDto {
     val notat: NotatDto?
+    val dialogRef: Long?
     val saksbehandler: SaksbehandlerDto?
     val tidspunkt: LocalDateTime
 
@@ -17,17 +18,19 @@ sealed interface HistorikkinnslagDto {
 
     companion object {
         fun lagtPåVentInnslag(
-            notat: NotatDto?,
+            notattekst: String?,
             saksbehandler: SaksbehandlerDto,
             årsaker: List<PåVentÅrsak>,
             frist: LocalDate,
+            dialogRef: Long,
         ): LagtPåVent =
             LagtPåVent(
-                notat = notat,
+                notattekst = notattekst,
                 saksbehandler = saksbehandler,
                 årsaker = årsaker,
                 tidspunkt = LocalDateTime.now(),
                 frist = frist,
+                dialogRef = dialogRef,
             )
 
         fun fjernetFraPåVentInnslag(saksbehandler: SaksbehandlerDto): FjernetFraPåVent =
@@ -45,7 +48,9 @@ sealed interface HistorikkinnslagDto {
         fun totrinnsvurderingRetur(
             notat: NotatDto,
             saksbehandler: SaksbehandlerDto,
-        ): TotrinnsvurderingRetur = TotrinnsvurderingRetur(notat = notat, saksbehandler = saksbehandler, tidspunkt = LocalDateTime.now())
+            dialogRef: Long,
+        ): TotrinnsvurderingRetur =
+            TotrinnsvurderingRetur(notat = notat, saksbehandler = saksbehandler, tidspunkt = LocalDateTime.now(), dialogRef = dialogRef)
 
         fun totrinnsvurderingAutomatiskRetur(): TotrinnsvurderingAutomatiskRetur =
             TotrinnsvurderingAutomatiskRetur(tidspunkt = LocalDateTime.now())
@@ -62,17 +67,20 @@ data class NotatDto(
 )
 
 data class LagtPåVent(
-    override val notat: NotatDto?,
     override val saksbehandler: SaksbehandlerDto,
     override val tidspunkt: LocalDateTime,
+    override val dialogRef: Long,
     val årsaker: List<PåVentÅrsak>,
+    val notattekst: String?,
     val frist: LocalDate,
 ) : HistorikkinnslagDto {
+    override val notat: NotatDto? = null
+
     override fun toJson(): String =
         mapOf(
             "årsaker" to årsaker.map { it },
             "frist" to frist,
-            "notattekst" to notat?.tekst,
+            "notattekst" to notattekst,
         ).let { objectMapper.writeValueAsString(it) }
 }
 
@@ -86,6 +94,7 @@ data class FjernetFraPåVent(
     override val tidspunkt: LocalDateTime,
 ) : HistorikkinnslagDto {
     override val notat: NotatDto? = null
+    override val dialogRef: Long? = null
 }
 
 data class TotrinnsvurderingFerdigbehandlet(
@@ -93,6 +102,7 @@ data class TotrinnsvurderingFerdigbehandlet(
     override val tidspunkt: LocalDateTime,
 ) : HistorikkinnslagDto {
     override val notat: NotatDto? = null
+    override val dialogRef: Long? = null
 }
 
 data class AvventerTotrinnsvurdering(
@@ -100,18 +110,21 @@ data class AvventerTotrinnsvurdering(
     override val tidspunkt: LocalDateTime,
 ) : HistorikkinnslagDto {
     override val notat: NotatDto? = null
+    override val dialogRef: Long? = null
 }
 
 data class TotrinnsvurderingRetur(
     override val notat: NotatDto,
     override val saksbehandler: SaksbehandlerDto,
     override val tidspunkt: LocalDateTime,
+    override val dialogRef: Long,
 ) : HistorikkinnslagDto
 
 data class TotrinnsvurderingAutomatiskRetur(
     override val tidspunkt: LocalDateTime,
 ) : HistorikkinnslagDto {
     override val notat: NotatDto? = null
+    override val dialogRef: Long? = null
     override val saksbehandler: SaksbehandlerDto? = null
 }
 
@@ -119,6 +132,7 @@ data class AutomatiskBehandlingStanset(
     override val tidspunkt: LocalDateTime,
 ) : HistorikkinnslagDto {
     override val notat: NotatDto? = null
+    override val dialogRef: Long? = null
     override val saksbehandler: SaksbehandlerDto? = null
 }
 
@@ -126,5 +140,6 @@ data class VedtaksperiodeReberegnet(
     override val tidspunkt: LocalDateTime,
 ) : HistorikkinnslagDto {
     override val notat: NotatDto? = null
+    override val dialogRef: Long? = null
     override val saksbehandler: SaksbehandlerDto? = null
 }

@@ -25,36 +25,21 @@ class PgPeriodehistorikkDao(
     override fun lagre(
         historikkinnslag: HistorikkinnslagDto,
         oppgaveId: Long,
-        dialogRef: Long?,
     ) {
         val generasjonId = PgOppgaveDao(queryRunner).finnGenerasjonId(oppgaveId)
-        lagre(historikkinnslag, generasjonId, dialogRef)
+        lagre(historikkinnslag, generasjonId)
     }
 
     override fun lagre(
         historikkinnslag: HistorikkinnslagDto,
         generasjonId: UUID,
-        dialogRef: Long?,
     ) {
         when (historikkinnslag) {
-            is FjernetFraPåVent -> lagre(historikkinnslag, generasjonId, null, null)
-            is LagtPåVent -> {
-                val notatId =
-                    historikkinnslag.notat?.let { notat ->
-                        PgNotatDao(queryRunner)
-                            .lagreForOppgaveId(
-                                oppgaveId = notat.oppgaveId,
-                                tekst = notat.tekst,
-                                saksbehandlerOid = historikkinnslag.saksbehandler.oid,
-                                notatType = NotatType.PaaVent,
-                                dialogRef = dialogRef!!,
-                            )?.toInt()
-                    }
-                lagre(historikkinnslag, generasjonId, notatId, dialogRef)
-            }
-            is TotrinnsvurderingFerdigbehandlet -> lagre(historikkinnslag, generasjonId, null, null)
-            is AvventerTotrinnsvurdering -> lagre(historikkinnslag, generasjonId, null, null)
-            is TotrinnsvurderingAutomatiskRetur -> lagre(historikkinnslag, generasjonId, null, null)
+            is FjernetFraPåVent -> lagre(historikkinnslag, generasjonId, null)
+            is LagtPåVent -> lagre(historikkinnslag, generasjonId, null)
+            is TotrinnsvurderingFerdigbehandlet -> lagre(historikkinnslag, generasjonId, null)
+            is AvventerTotrinnsvurdering -> lagre(historikkinnslag, generasjonId, null)
+            is TotrinnsvurderingAutomatiskRetur -> lagre(historikkinnslag, generasjonId, null)
             is TotrinnsvurderingRetur -> {
                 val notatId =
                     PgNotatDao(queryRunner)
@@ -63,13 +48,13 @@ class PgPeriodehistorikkDao(
                             tekst = historikkinnslag.notat.tekst,
                             saksbehandlerOid = historikkinnslag.saksbehandler.oid,
                             notatType = NotatType.Retur,
-                            dialogRef = dialogRef!!,
+                            dialogRef = historikkinnslag.dialogRef,
                         )?.toInt()
-                lagre(historikkinnslag, generasjonId, notatId, dialogRef)
+                lagre(historikkinnslag, generasjonId, notatId)
             }
 
-            is AutomatiskBehandlingStanset -> lagre(historikkinnslag, generasjonId, null, null)
-            is VedtaksperiodeReberegnet -> lagre(historikkinnslag, generasjonId, null, null)
+            is AutomatiskBehandlingStanset -> lagre(historikkinnslag, generasjonId, null)
+            is VedtaksperiodeReberegnet -> lagre(historikkinnslag, generasjonId, null)
         }
     }
 
@@ -77,7 +62,6 @@ class PgPeriodehistorikkDao(
         historikkinnslag: HistorikkinnslagDto,
         generasjonId: UUID,
         notatId: Int?,
-        dialogRef: Long?,
     ) {
         asSQL(
             """
@@ -88,7 +72,7 @@ class PgPeriodehistorikkDao(
             "saksbehandler_oid" to historikkinnslag.saksbehandler?.oid,
             "generasjon_id" to generasjonId,
             "notat_id" to notatId,
-            "dialog_ref" to dialogRef,
+            "dialog_ref" to historikkinnslag.dialogRef,
             "json" to historikkinnslag.toJson(),
         ).update()
     }

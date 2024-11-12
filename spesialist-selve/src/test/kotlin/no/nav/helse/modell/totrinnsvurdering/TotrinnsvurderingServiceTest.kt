@@ -41,7 +41,6 @@ class TotrinnsvurderingServiceTest {
             periodehistorikkDao.lagre(
                 historikkinnslag = any<TotrinnsvurderingAutomatiskRetur>(),
                 oppgaveId = oppgaveId,
-                dialogRef = any(),
             )
         }
     }
