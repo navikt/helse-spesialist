@@ -106,4 +106,5 @@ enum class EgenskapForDatabase {
     TILBAKEDATERT,
     GOSYS,
     MEDLEMSKAP,
+    TILKOMMEN,
 }

@@ -193,6 +193,7 @@ internal object OppgaveMapper {
             Egenskap.TILBAKEDATERT -> EgenskapForApi.TILBAKEDATERT
             Egenskap.GOSYS -> EgenskapForApi.GOSYS
             Egenskap.MEDLEMSKAP -> EgenskapForApi.MEDLEMSKAP
+            Egenskap.TILKOMMEN -> EgenskapForApi.TILKOMMEN
         }
 
     private fun Egenskap.Kategori.tilApiversjon(): Kategori =
@@ -235,6 +236,7 @@ internal object OppgaveMapper {
             EgenskapForDatabase.TILBAKEDATERT -> Egenskap.TILBAKEDATERT
             EgenskapForDatabase.GOSYS -> Egenskap.GOSYS
             EgenskapForDatabase.MEDLEMSKAP -> Egenskap.MEDLEMSKAP
+            EgenskapForDatabase.TILKOMMEN -> Egenskap.TILKOMMEN
         }
 
     // Eksplisitt mapping i stedet for toString sørger for at vi ikke utilsiktet knekker et api hvis vi gjør endringer
@@ -269,6 +271,7 @@ internal object OppgaveMapper {
             EgenskapDto.TILBAKEDATERT -> "TILBAKEDATERT"
             EgenskapDto.GOSYS -> "GOSYS"
             EgenskapDto.MEDLEMSKAP -> "MEDLEMSKAP"
+            EgenskapDto.TILKOMMEN -> "TILKOMMEN"
         }
 
     // Eksplisitt mapping i stedet for toString sørger for at vi ikke utilsiktet knekker et api hvis vi gjør endringer
@@ -303,6 +306,7 @@ internal object OppgaveMapper {
             EgenskapForDatabase.TILBAKEDATERT -> EgenskapDto.TILBAKEDATERT
             EgenskapForDatabase.GOSYS -> EgenskapDto.GOSYS
             EgenskapForDatabase.MEDLEMSKAP -> EgenskapDto.MEDLEMSKAP
+            EgenskapForDatabase.TILKOMMEN -> EgenskapDto.TILKOMMEN
         }
 
     private fun Oppgaveegenskap.tilDatabaseversjon() =
@@ -335,6 +339,7 @@ internal object OppgaveMapper {
             EgenskapForApi.TILBAKEDATERT -> EgenskapForDatabase.TILBAKEDATERT
             EgenskapForApi.GOSYS -> EgenskapForDatabase.GOSYS
             EgenskapForApi.MEDLEMSKAP -> EgenskapForDatabase.MEDLEMSKAP
+            EgenskapForApi.TILKOMMEN -> EgenskapForDatabase.TILKOMMEN
         }
 
     internal fun EgenskapDto.tilDatabaseversjon() =
@@ -367,5 +372,6 @@ internal object OppgaveMapper {
             EgenskapDto.GOSYS -> EgenskapForDatabase.GOSYS
             EgenskapDto.MEDLEMSKAP -> EgenskapForDatabase.MEDLEMSKAP
             EgenskapDto.VERGEMÅL -> EgenskapForDatabase.VERGEMÅL
+            EgenskapDto.TILKOMMEN -> EgenskapForDatabase.TILKOMMEN
         }
 }

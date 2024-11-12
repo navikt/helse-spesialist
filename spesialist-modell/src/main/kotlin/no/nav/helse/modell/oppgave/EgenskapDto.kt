@@ -29,6 +29,7 @@ enum class EgenskapDto {
     GOSYS,
     MEDLEMSKAP,
     VERGEMÅL,
+    TILKOMMEN,
     ;
 
     internal companion object {
@@ -62,6 +63,7 @@ enum class EgenskapDto {
                 Egenskap.GOSYS -> GOSYS
                 Egenskap.MEDLEMSKAP -> MEDLEMSKAP
                 Egenskap.VERGEMÅL -> VERGEMÅL
+                Egenskap.TILKOMMEN -> TILKOMMEN
             }
         }
 
@@ -95,6 +97,7 @@ enum class EgenskapDto {
                 GOSYS -> Egenskap.GOSYS
                 MEDLEMSKAP -> Egenskap.MEDLEMSKAP
                 VERGEMÅL -> Egenskap.VERGEMÅL
+                TILKOMMEN -> Egenskap.TILKOMMEN
             }
     }
 }

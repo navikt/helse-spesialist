@@ -40,6 +40,7 @@ enum class Egenskap(
     GOSYS,
     MEDLEMSKAP,
     VERGEMÅL,
+    TILKOMMEN,
     ;
 
     enum class Kategori {

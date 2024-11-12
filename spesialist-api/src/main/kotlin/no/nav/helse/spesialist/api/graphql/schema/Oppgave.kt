@@ -50,6 +50,7 @@ enum class Egenskap {
     TILBAKEDATERT,
     GOSYS,
     MEDLEMSKAP,
+    TILKOMMEN,
 }
 
 enum class Kategori {
