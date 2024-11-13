@@ -12,7 +12,7 @@ internal class OppdaterPersoninfoCommand(
     private val force: Boolean,
 ) : Command {
     private companion object {
-        private val BEHOV = Behov.Personinfo(null)
+        private val BEHOV = Behov.Personinfo
         private val logg = LoggerFactory.getLogger(OppdaterPersoninfoCommand::class.simpleName)
     }
 

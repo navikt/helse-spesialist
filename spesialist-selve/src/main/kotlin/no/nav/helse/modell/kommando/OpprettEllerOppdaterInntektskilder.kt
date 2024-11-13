@@ -70,8 +70,8 @@ internal class OpprettEllerOppdaterInntektskilder(
             .groupBy(keySelector = { it.type }, valueTransform = { it.identifikator })
             .map { (inntektskildetype, inntektskilder) ->
                 when (inntektskildetype) {
-                    Inntektskildetype.ORDINÆR -> Behov.Arbeidsgiverinformasjon(inntektskilder)
-                    Inntektskildetype.ENKELTPERSONFORETAK -> Behov.Personinfo(inntektskilder)
+                    Inntektskildetype.ORDINÆR -> Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver(inntektskilder)
+                    Inntektskildetype.ENKELTPERSONFORETAK -> Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak(inntektskilder)
                 }
             }
     }

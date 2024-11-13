@@ -52,7 +52,7 @@ internal class OppdaterPersoninfoCommandTest {
         utdatertPersoninfo()
         assertFalse(command.execute(context))
         assertTrue(observer.behov.isNotEmpty())
-        assertEquals(listOf(Behov.Personinfo(null)), observer.behov.toList())
+        assertEquals(listOf(Behov.Personinfo), observer.behov.toList())
     }
 
     @Test

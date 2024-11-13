@@ -72,7 +72,7 @@ class OpprettEllerOppdaterInntektskilderTest {
 
         val ferdig = command.execute(context)
         assertFalse(ferdig)
-        assertEquals(listOf(Behov.Arbeidsgiverinformasjon(listOf(organisasjonsnummer))), observer.behov.toList())
+        assertEquals(listOf(Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver(listOf(organisasjonsnummer))), observer.behov.toList())
     }
 
     @Test
@@ -86,7 +86,7 @@ class OpprettEllerOppdaterInntektskilderTest {
 
         val ferdig = command.execute(context)
         assertFalse(ferdig)
-        assertEquals(listOf(Behov.Personinfo(listOf(organisasjonsnummer))), observer.behov.toList())
+        assertEquals(listOf(Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak(listOf(organisasjonsnummer))), observer.behov.toList())
     }
 
     @Test
@@ -100,7 +100,7 @@ class OpprettEllerOppdaterInntektskilderTest {
 
         val ferdig = command.execute(context)
         assertFalse(ferdig)
-        assertEquals(listOf(Behov.Arbeidsgiverinformasjon(listOf(organisasjonsnummer))), observer.behov.toList())
+        assertEquals(listOf(Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver(listOf(organisasjonsnummer))), observer.behov.toList())
     }
 
     @Test
@@ -120,7 +120,7 @@ class OpprettEllerOppdaterInntektskilderTest {
 
         val ferdig = command.execute(context)
         assertFalse(ferdig)
-        assertEquals(listOf(Behov.Personinfo(listOf(organisasjonsnummer))), observer.behov.toList())
+        assertEquals(listOf(Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak(listOf(organisasjonsnummer))), observer.behov.toList())
     }
 
     @Test
@@ -175,7 +175,7 @@ class OpprettEllerOppdaterInntektskilderTest {
 
         val ferdig = command.execute(context)
         assertFalse(ferdig)
-        assertEquals(listOf(Behov.Arbeidsgiverinformasjon(listOf(organisasjonsnummer2, organisasjonsnummer3))), observer.behov.toList())
+        assertEquals(listOf(Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver(listOf(organisasjonsnummer2, organisasjonsnummer3))), observer.behov.toList())
     }
 
     @Test
@@ -196,7 +196,7 @@ class OpprettEllerOppdaterInntektskilderTest {
 
         val ferdig = command.execute(context)
         assertFalse(ferdig)
-        assertEquals(listOf(Behov.Personinfo(listOf(organisasjonsnummer2, organisasjonsnummer3))), observer.behov.toList())
+        assertEquals(listOf(Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak(listOf(organisasjonsnummer2, organisasjonsnummer3))), observer.behov.toList())
     }
 
     @Test
@@ -215,7 +215,7 @@ class OpprettEllerOppdaterInntektskilderTest {
 
         val ferdig = command.execute(context)
         assertFalse(ferdig)
-        assertEquals(setOf(Behov.Arbeidsgiverinformasjon(listOf(organisasjonsnummer1)), Behov.Personinfo(listOf(organisasjonsnummer2))), observer.behov.toSet())
+        assertEquals(setOf(Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver(listOf(organisasjonsnummer1)), Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak(listOf(organisasjonsnummer2))), observer.behov.toSet())
     }
 
     @Test
@@ -348,7 +348,7 @@ class OpprettEllerOppdaterInntektskilderTest {
             forventetBransjer = bransjer,
         )
 
-        assertEquals(setOf(Behov.Personinfo(listOf(organisasjonsnummer2))), observer.behov.toSet())
+        assertEquals(setOf(Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak(listOf(organisasjonsnummer2))), observer.behov.toSet())
     }
 
     private fun nyInntektskilde(

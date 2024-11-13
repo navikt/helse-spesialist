@@ -26,13 +26,15 @@ internal fun Collection<Behov>.somJsonMessage(
 internal fun Behov.behovName() =
     when (this) {
         is Behov.Arbeidsforhold -> "Arbeidsforhold"
-        is Behov.Arbeidsgiverinformasjon -> "Arbeidsgiverinformasjon"
-        is Behov.EgenAnsatt -> "EgenAnsatt"
+        is Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver -> "Arbeidsgiverinformasjon"
         is Behov.Enhet -> "HentEnhet"
         is Behov.Fullmakt -> "Fullmakt"
         is Behov.Infotrygdutbetalinger -> "HentInfotrygdutbetalinger"
         is Behov.InntekterForSykepengegrunnlag -> "InntekterForSykepengegrunnlag"
-        is Behov.Personinfo -> "HentPersoninfoV2"
+        is Behov.EgenAnsatt -> "EgenAnsatt"
+        is Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak,
+        is Behov.Personinfo,
+        -> "HentPersoninfoV2"
         is Behov.Risikovurdering -> "Risikovurdering"
         is Behov.Vergemål -> "Vergemål"
         is Behov.ÅpneOppgaver -> "ÅpneOppgaver"
@@ -44,49 +46,51 @@ private fun Behov.somJsonMessage(): Map<String, Any> {
         is Behov.Enhet -> emptyMap()
         is Behov.Fullmakt -> emptyMap()
         is Behov.Vergemål -> emptyMap()
-        is Behov.Arbeidsforhold -> somJsonMessage()
-        is Behov.Arbeidsgiverinformasjon -> somJsonMessage()
-        is Behov.Infotrygdutbetalinger -> somJsonMessage()
-        is Behov.InntekterForSykepengegrunnlag -> somJsonMessage()
-        is Behov.Personinfo -> somJsonMessage()
-        is Behov.Risikovurdering -> somJsonMessage()
-        is Behov.ÅpneOppgaver -> somJsonMessage()
+        is Behov.Arbeidsforhold -> detaljer()
+        is Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver -> detaljer()
+        is Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak -> detaljer()
+        is Behov.Infotrygdutbetalinger -> detaljer()
+        is Behov.InntekterForSykepengegrunnlag -> detaljer()
+        is Behov.Personinfo -> emptyMap()
+        is Behov.Risikovurdering -> detaljer()
+        is Behov.ÅpneOppgaver -> detaljer()
     }
 }
 
-private fun Behov.Arbeidsforhold.somJsonMessage(): Map<String, Any> {
+private fun Behov.Arbeidsforhold.detaljer(): Map<String, Any> {
     return mapOf(
         "fødselsnummer" to fødselsnummer,
         "organisasjonsnummer" to organisasjonsnummer,
     )
 }
 
-private fun Behov.Arbeidsgiverinformasjon.somJsonMessage(): Map<String, Any> {
+private fun Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver.detaljer(): Map<String, Any> {
     return mapOf(
         "organisasjonsnummer" to this.organisasjonsnumre,
     )
 }
 
-private fun Behov.Infotrygdutbetalinger.somJsonMessage(): Map<String, Any> {
+private fun Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak.detaljer(): Map<String, Any> {
+    return mapOf(
+        "ident" to this.identer,
+    )
+}
+
+private fun Behov.Infotrygdutbetalinger.detaljer(): Map<String, Any> {
     return mapOf(
         "historikkFom" to this.fom,
         "historikkTom" to this.tom,
     )
 }
 
-private fun Behov.InntekterForSykepengegrunnlag.somJsonMessage(): Map<String, Any> {
+private fun Behov.InntekterForSykepengegrunnlag.detaljer(): Map<String, Any> {
     return mapOf(
         "beregningStart" to this.fom.toString(),
         "beregningSlutt" to this.tom.toString(),
     )
 }
 
-private fun Behov.Personinfo.somJsonMessage(): Map<String, Any> {
-    val andreIdenter = this.andreIdenter
-    return if (!andreIdenter.isNullOrEmpty()) mapOf("ident" to andreIdenter) else emptyMap()
-}
-
-private fun Behov.Risikovurdering.somJsonMessage(): Map<String, Any> {
+private fun Behov.Risikovurdering.detaljer(): Map<String, Any> {
     return mapOf(
         "vedtaksperiodeId" to vedtaksperiodeId,
         "organisasjonsnummer" to organisasjonsnummer,
@@ -95,6 +99,6 @@ private fun Behov.Risikovurdering.somJsonMessage(): Map<String, Any> {
     )
 }
 
-private fun Behov.ÅpneOppgaver.somJsonMessage(): Map<String, Any> {
+private fun Behov.ÅpneOppgaver.detaljer(): Map<String, Any> {
     return mapOf("ikkeEldreEnn" to this.ikkeEldreEnn)
 }
