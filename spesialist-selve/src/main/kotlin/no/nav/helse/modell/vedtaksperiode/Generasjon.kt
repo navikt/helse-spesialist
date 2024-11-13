@@ -138,6 +138,7 @@ internal class Generasjon private constructor(
 
     internal fun deaktiverVarsel(varselkode: String) {
         val funnetVarsel = varsler.finnEksisterendeVarsel(varselkode) ?: return
+        sikkerlogg.info("Deaktiverer varsel: {}", funnetVarsel)
         funnetVarsel.deaktiver()
     }
 
