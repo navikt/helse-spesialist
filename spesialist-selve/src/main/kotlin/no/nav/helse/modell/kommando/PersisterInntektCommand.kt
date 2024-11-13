@@ -2,6 +2,7 @@ package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.meldinger.løsninger.Inntektløsning
+import no.nav.helse.modell.behov.Behov
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
@@ -35,10 +36,9 @@ internal class PersisterInntektCommand(
 
     private fun trengerInntekt(context: CommandContext): Boolean {
         context.behov(
-            "InntekterForSykepengegrunnlag",
-            mapOf(
-                "beregningStart" to skjæringstidspunkt.minusMonths(12).toYearMonth().toString(),
-                "beregningSlutt" to skjæringstidspunkt.minusMonths(1).toYearMonth().toString(),
+            Behov.InntekterForSykepengegrunnlag(
+                fom = skjæringstidspunkt.minusMonths(12).toYearMonth(),
+                tom = skjæringstidspunkt.minusMonths(1).toYearMonth(),
             ),
         )
 

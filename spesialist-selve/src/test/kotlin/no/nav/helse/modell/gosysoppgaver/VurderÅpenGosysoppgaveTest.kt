@@ -8,6 +8,7 @@ import no.nav.helse.januar
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.mediator.oppgave.OppgaveService
+import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
@@ -55,17 +56,11 @@ internal class VurderÅpenGosysoppgaveTest {
 
     private val observer =
         object : CommandContextObserver {
-            val behov = mutableMapOf<String, Map<String, Any>>()
+            val behov = mutableListOf<Behov>()
 
-            override fun behov(
-                behov: String,
-                ekstraKontekst: Map<String, Any>,
-                detaljer: Map<String, Any>,
-            ) {
-                this.behov[behov] = detaljer
+            override fun behov(behov: Behov, commandContextId: UUID) {
+                this.behov.add(behov)
             }
-
-            override fun hendelse(hendelse: String) {}
         }
 
     @BeforeEach
@@ -78,8 +73,7 @@ internal class VurderÅpenGosysoppgaveTest {
     @Test
     fun `Ber om åpne oppgaver i gosys`() {
         assertFalse(command().execute(context))
-        assertEquals(listOf("ÅpneOppgaver"), observer.behov.keys.toList())
-        assertEquals(skjæringstidspunkt.minusYears(1), observer.behov["ÅpneOppgaver"]!!["ikkeEldreEnn"])
+        assertEquals(listOf(Behov.ÅpneOppgaver(skjæringstidspunkt.minusYears(1))), observer.behov.toList())
     }
 
     @Test

@@ -8,6 +8,7 @@ import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.mediator.meldinger.løsninger.Inntektløsning
+import no.nav.helse.modell.behov.Behov
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -25,12 +26,11 @@ internal class PersisterInntektCommandTest {
     private lateinit var context: CommandContext
 
     private val observer = object : CommandContextObserver {
-        val behov = mutableListOf<String>()
-        override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {
+        val behov = mutableListOf<Behov>()
+
+        override fun behov(behov: Behov, commandContextId: UUID) {
             this.behov.add(behov)
         }
-
-        override fun hendelse(hendelse: String) {}
     }
 
     @BeforeEach

@@ -195,8 +195,6 @@ internal class VurderAutomatiskInnvilgelseTest {
         lateinit var gjeldendeTilstand: String
             private set
 
-        override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {}
-
         override fun hendelse(hendelse: String) {
             hendelser.add(hendelse)
         }

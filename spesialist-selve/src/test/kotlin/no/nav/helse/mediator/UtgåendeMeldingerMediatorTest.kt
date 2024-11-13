@@ -1,17 +1,20 @@
 package no.nav.helse.mediator
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.TransactionalSession
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
+import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.Person
+import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -39,19 +42,17 @@ internal class UtgåendeMeldingerMediatorTest {
 
     @Test
     fun `sender behov`() {
-        val params = mapOf(
-            "param 1" to 1,
-            "param 2" to 2
-        )
-        testContext.behov("type 1", params)
+        val fom = LocalDate.now().minusDays(1)
+        val tom = LocalDate.now()
+        testContext.behov(Behov.Infotrygdutbetalinger(fom, tom))
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(testmelding, testRapid)
-        assertEquals(listOf("type 1"), testRapid.inspektør.field(0, "@behov").map(JsonNode::asText))
+        assertTrue(!testRapid.inspektør.field(0, "@behov").isMissingOrNull())
+        assertEquals("behov", testRapid.inspektør.field(0, "@event_name").asText())
+        assertEquals(FNR, testRapid.inspektør.field(0, "fødselsnummer").asText())
         assertEquals(contextId.toString(), testRapid.inspektør.field(0, "contextId").asText())
         assertEquals(hendelseId.toString(), testRapid.inspektør.field(0, "hendelseId").asText())
-        testRapid.inspektør.field(0, "type 1").also {
-            assertEquals(1, it.path("param 1").asInt())
-            assertEquals(2, it.path("param 2").asInt())
-        }
+        assertDoesNotThrow { UUID.fromString(testRapid.inspektør.field(0, "@id").asText()) }
+        assertDoesNotThrow { LocalDateTime.parse(testRapid.inspektør.field(0, "@opprettet").asText()) }
     }
 
     @Test
@@ -64,16 +65,6 @@ internal class UtgåendeMeldingerMediatorTest {
         assertEquals(2, testRapid.inspektør.size)
         assertEquals(objectMapper.readTree(melding1), testRapid.inspektør.message(0))
         assertEquals(objectMapper.readTree(melding2), testRapid.inspektør.message(1))
-    }
-
-    @Test
-    fun standardfelter() {
-        testContext.behov("testbehov")
-        utgåendeMeldingerMediator.publiserOppsamledeMeldinger(testmelding, testRapid)
-        assertEquals("behov", testRapid.inspektør.field(0, "@event_name").asText())
-        assertEquals(FNR, testRapid.inspektør.field(0, "fødselsnummer").asText())
-        assertDoesNotThrow { UUID.fromString(testRapid.inspektør.field(0, "@id").asText()) }
-        assertDoesNotThrow { LocalDateTime.parse(testRapid.inspektør.field(0, "@opprettet").asText()) }
     }
 
     private inner class Testmelding(override val id: UUID) : Vedtaksperiodemelding {

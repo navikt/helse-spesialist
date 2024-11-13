@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
+import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.kommando.CommandContext
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -27,17 +28,11 @@ internal class KontrollerEgenAnsattstatusTest {
 
     private val observer =
         object : CommandContextObserver {
-            val behov = mutableMapOf<String, Map<String, Any>>()
+            val behov = mutableListOf<Behov>()
 
-            override fun behov(
-                behov: String,
-                ekstraKontekst: Map<String, Any>,
-                detaljer: Map<String, Any>,
-            ) {
-                this.behov[behov] = detaljer
+            override fun behov(behov: Behov, commandContextId: UUID) {
+                this.behov.add(behov)
             }
-
-            override fun hendelse(hendelse: String) {}
         }
 
     @BeforeEach
@@ -51,7 +46,7 @@ internal class KontrollerEgenAnsattstatusTest {
     fun `ber om informasjon om egen ansatt`() {
         every { dao.erEgenAnsatt(any()) } returns null
         assertFalse(command.execute(context))
-        assertEquals(listOf("EgenAnsatt"), observer.behov.keys.toList())
+        assertEquals(listOf(Behov.EgenAnsatt), observer.behov.toList())
     }
 
     @Test
@@ -73,10 +68,10 @@ internal class KontrollerEgenAnsattstatusTest {
     fun `sender ikke behov om informasjonen finnes`() {
         every { dao.erEgenAnsatt(any()) } returns false
         assertTrue(command.resume(context))
-        assertEquals(emptyList<String>(), observer.behov.keys.toList())
+        assertEquals(emptyList<Behov>(), observer.behov.toList())
 
         every { dao.erEgenAnsatt(any()) } returns true
         assertTrue(command.resume(context))
-        assertEquals(emptyList<String>(), observer.behov.keys.toList())
+        assertEquals(emptyList<Behov>(), observer.behov.toList())
     }
 }

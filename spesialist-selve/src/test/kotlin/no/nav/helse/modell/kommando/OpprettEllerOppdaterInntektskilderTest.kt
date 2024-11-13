@@ -10,6 +10,7 @@ import no.nav.helse.modell.KomplettInntektskilde
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.NyInntektskilde
 import no.nav.helse.modell.arbeidsgiver.Arbeidsgiverinformasjonløsning
+import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.person.HentPersoninfoløsning
 import no.nav.helse.modell.person.HentPersoninfoløsninger
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
@@ -22,8 +23,6 @@ import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -46,24 +45,20 @@ class OpprettEllerOppdaterInntektskilderTest {
             override fun inntektskildeEksisterer(orgnummer: String) = false
         }
 
-    private val contextObserver =
+    private val observer =
         object : CommandContextObserver {
             fun reset() = behov.clear()
 
-            val behov = mutableMapOf<String, Map<String, Any>>()
+            val behov = mutableListOf<Behov>()
 
-            override fun behov(
-                behov: String,
-                ekstraKontekst: Map<String, Any>,
-                detaljer: Map<String, Any>,
-            ) {
-                this.behov[behov] = detaljer
+            override fun behov(behov: Behov, commandContextId: UUID) {
+                this.behov.add(behov)
             }
         }
 
     private val context =
         CommandContext(UUID.randomUUID()).also {
-            it.nyObserver(contextObserver)
+            it.nyObserver(observer)
         }
 
     @Test
@@ -77,8 +72,7 @@ class OpprettEllerOppdaterInntektskilderTest {
 
         val ferdig = command.execute(context)
         assertFalse(ferdig)
-        val behov = contextObserver.behov["Arbeidsgiverinformasjon"]
-        assertEquals(mapOf("organisasjonsnummer" to listOf(organisasjonsnummer)), behov)
+        assertEquals(listOf(Behov.Arbeidsgiverinformasjon(listOf(organisasjonsnummer))), observer.behov.toList())
     }
 
     @Test
@@ -92,8 +86,7 @@ class OpprettEllerOppdaterInntektskilderTest {
 
         val ferdig = command.execute(context)
         assertFalse(ferdig)
-        val behov = contextObserver.behov["HentPersoninfoV2"]
-        assertEquals(mapOf("ident" to listOf(organisasjonsnummer)), behov)
+        assertEquals(listOf(Behov.Personinfo(listOf(organisasjonsnummer))), observer.behov.toList())
     }
 
     @Test
@@ -107,8 +100,7 @@ class OpprettEllerOppdaterInntektskilderTest {
 
         val ferdig = command.execute(context)
         assertFalse(ferdig)
-        val behov = contextObserver.behov["Arbeidsgiverinformasjon"]
-        assertEquals(mapOf("organisasjonsnummer" to listOf(organisasjonsnummer)), behov)
+        assertEquals(listOf(Behov.Arbeidsgiverinformasjon(listOf(organisasjonsnummer))), observer.behov.toList())
     }
 
     @Test
@@ -128,8 +120,7 @@ class OpprettEllerOppdaterInntektskilderTest {
 
         val ferdig = command.execute(context)
         assertFalse(ferdig)
-        val behov = contextObserver.behov["HentPersoninfoV2"]
-        assertEquals(mapOf("ident" to listOf(organisasjonsnummer)), behov)
+        assertEquals(listOf(Behov.Personinfo(listOf(organisasjonsnummer))), observer.behov.toList())
     }
 
     @Test
@@ -143,7 +134,7 @@ class OpprettEllerOppdaterInntektskilderTest {
 
         val ferdig = command.execute(context)
         assertTrue(ferdig)
-        assertTrue(contextObserver.behov.isEmpty())
+        assertTrue(observer.behov.isEmpty())
     }
 
     @Test
@@ -163,7 +154,7 @@ class OpprettEllerOppdaterInntektskilderTest {
 
         val ferdig = command.execute(context)
         assertTrue(ferdig)
-        assertTrue(contextObserver.behov.isEmpty())
+        assertTrue(observer.behov.isEmpty())
     }
 
     @Test
@@ -184,8 +175,7 @@ class OpprettEllerOppdaterInntektskilderTest {
 
         val ferdig = command.execute(context)
         assertFalse(ferdig)
-        val behov = contextObserver.behov["Arbeidsgiverinformasjon"]
-        assertEquals(mapOf("organisasjonsnummer" to listOf(organisasjonsnummer2, organisasjonsnummer3)), behov)
+        assertEquals(listOf(Behov.Arbeidsgiverinformasjon(listOf(organisasjonsnummer2, organisasjonsnummer3))), observer.behov.toList())
     }
 
     @Test
@@ -206,8 +196,7 @@ class OpprettEllerOppdaterInntektskilderTest {
 
         val ferdig = command.execute(context)
         assertFalse(ferdig)
-        val behov = contextObserver.behov["HentPersoninfoV2"]
-        assertEquals(mapOf("ident" to listOf(organisasjonsnummer2, organisasjonsnummer3)), behov)
+        assertEquals(listOf(Behov.Personinfo(listOf(organisasjonsnummer2, organisasjonsnummer3))), observer.behov.toList())
     }
 
     @Test
@@ -226,10 +215,7 @@ class OpprettEllerOppdaterInntektskilderTest {
 
         val ferdig = command.execute(context)
         assertFalse(ferdig)
-        val arbeidsgiverinformasjonbehov = contextObserver.behov["Arbeidsgiverinformasjon"]
-        val personinfobehov = contextObserver.behov["HentPersoninfoV2"]
-        assertEquals(mapOf("organisasjonsnummer" to listOf(organisasjonsnummer1)), arbeidsgiverinformasjonbehov)
-        assertEquals(mapOf("ident" to listOf(organisasjonsnummer2)), personinfobehov)
+        assertEquals(setOf(Behov.Arbeidsgiverinformasjon(listOf(organisasjonsnummer1)), Behov.Personinfo(listOf(organisasjonsnummer2))), observer.behov.toSet())
     }
 
     @Test
@@ -347,7 +333,7 @@ class OpprettEllerOppdaterInntektskilderTest {
             )
 
         command.execute(context)
-        contextObserver.reset()
+        observer.reset()
 
         mottaOrdinærLøsning(organisasjonsnummer1, arbeidsgivernavn, bransjer)
 
@@ -362,10 +348,7 @@ class OpprettEllerOppdaterInntektskilderTest {
             forventetBransjer = bransjer,
         )
 
-        val personinfobehov = contextObserver.behov["HentPersoninfoV2"]
-        val arbeidsgiverinformasjonbehov = contextObserver.behov["Arbeidsgiverinformasjon"]
-        assertNotNull(personinfobehov)
-        assertNull(arbeidsgiverinformasjonbehov) // Har løsning for arbeidsgiverinformasjon, trenger ikke etterspørre denne på nytt
+        assertEquals(setOf(Behov.Personinfo(listOf(organisasjonsnummer2))), observer.behov.toSet())
     }
 
     private fun nyInntektskilde(

@@ -6,10 +6,10 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.CommandContextObserver
+import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerløsning
 import no.nav.helse.modell.person.HentPersoninfoløsning
-import no.nav.helse.rapids_rivers.JsonMessage
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -25,16 +25,16 @@ internal class OppdaterPersonCommandTest {
 
     private val personRepository = mockk<PersonRepository>(relaxed = true)
 
-    private val command = OppdaterPersonCommand(FNR, { LocalDate.now() }, personRepository)
+    val førsteKjenteDagFinner = { LocalDate.now() }
+    private val command = OppdaterPersonCommand(FNR, førsteKjenteDagFinner, personRepository)
     private lateinit var context: CommandContext
 
     private val observer = object : CommandContextObserver {
-        val behov = mutableMapOf<String, Map<String, Any>>()
-        override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {
-            this.behov[behov] = detaljer
-        }
+        val behov = mutableListOf<Behov>()
 
-        override fun hendelse(hendelse: String) {}
+        override fun behov(behov: Behov, commandContextId: UUID) {
+            this.behov.add(behov)
+        }
     }
 
     @BeforeEach
@@ -60,8 +60,7 @@ internal class OppdaterPersonCommandTest {
         utdatertEnhet()
         assertFalse(command.execute(context))
         assertTrue(observer.behov.isNotEmpty())
-        assertEquals(listOf("HentEnhet"), observer.behov.keys.toList())
-        println(JsonMessage.newMessage(observer.behov).toJson())
+        assertEquals(listOf(Behov.Enhet), observer.behov.toList())
     }
 
     @Test
@@ -78,8 +77,10 @@ internal class OppdaterPersonCommandTest {
         utdatertUtbetalinger()
         assertFalse(command.execute(context))
         assertTrue(observer.behov.isNotEmpty())
-        assertEquals(listOf("HentInfotrygdutbetalinger"), observer.behov.keys.toList())
-        assertTrue(observer.behov.values.any { it["historikkFom"] != null && it["historikkTom"] != null})
+        assertEquals(listOf(Behov.Infotrygdutbetalinger(
+            fom = førsteKjenteDagFinner().minusYears(3),
+            tom = LocalDate.now()
+        )), observer.behov.toList())
     }
 
     @Test

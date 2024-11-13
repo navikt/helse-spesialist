@@ -4,6 +4,7 @@ import no.nav.helse.db.ArbeidsforholdRepository
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.modell.KomplettArbeidsforholdDto
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
+import no.nav.helse.modell.behov.Behov
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -52,13 +53,11 @@ class OpprettEllerOppdaterArbeidsforholdTest {
     )
 
     private val observer = object : CommandContextObserver {
-        val behov = mutableListOf<String>()
+        val behov = mutableListOf<Behov>()
 
-        override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {
+        override fun behov(behov: Behov, commandContextId: UUID) {
             this.behov.add(behov)
         }
-
-        override fun hendelse(hendelse: String) {}
     }
 
     @BeforeEach

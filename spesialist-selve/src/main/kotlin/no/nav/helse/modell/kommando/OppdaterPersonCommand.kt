@@ -1,6 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.PersonRepository
+import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerløsning
 import org.slf4j.LoggerFactory
@@ -25,8 +26,7 @@ internal class OppdaterPersonCommand(
     internal abstract class OppdaterCommand protected constructor(
         private val fødselsnummer: String,
         private val personRepository: PersonRepository,
-        private val behov: String,
-        private val parametere: Map<String, Any> = emptyMap(),
+        private val behov: Behov,
     ) : Command {
         override fun execute(context: CommandContext): Boolean {
             if (erOppdatert(personRepository, fødselsnummer)) return ignorer()
@@ -38,7 +38,7 @@ internal class OppdaterPersonCommand(
         }
 
         private fun ignorer(): Boolean {
-            log.info("har ikke behov for $behov, informasjonen er ny nok")
+            log.info("har ikke behov for ${behov::class.simpleName}, informasjonen er ny nok")
             return true
         }
 
@@ -55,7 +55,7 @@ internal class OppdaterPersonCommand(
 
         protected fun trengerMerInformasjon(context: CommandContext): Boolean {
             log.info("trenger oppdatert $behov")
-            context.behov(behov, parametere)
+            context.behov(behov)
             return false
         }
     }
@@ -63,7 +63,7 @@ internal class OppdaterPersonCommand(
     internal class OppdaterEnhetCommand(
         fødselsnummer: String,
         personRepository: PersonRepository,
-    ) : OppdaterCommand(fødselsnummer, personRepository, "HentEnhet") {
+    ) : OppdaterCommand(fødselsnummer, personRepository, Behov.Enhet) {
         override fun erOppdatert(
             personRepository: PersonRepository,
             fødselsnummer: String,
@@ -92,11 +92,10 @@ internal class OppdaterPersonCommand(
         OppdaterCommand(
                 fødselsnummer = fødselsnummer,
                 personRepository = personRepository,
-                behov = "HentInfotrygdutbetalinger",
-                parametere =
-                    mapOf(
-                        "historikkFom" to førsteKjenteDagFinner().minusYears(3),
-                        "historikkTom" to LocalDate.now(),
+                behov =
+                    Behov.Infotrygdutbetalinger(
+                        førsteKjenteDagFinner().minusYears(3),
+                        LocalDate.now(),
                     ),
             ) {
         override fun erOppdatert(

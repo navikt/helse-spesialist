@@ -6,6 +6,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.CommandContextObserver
+import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.person.HentPersoninfoløsning
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.typer.Kjønn
@@ -32,12 +33,11 @@ internal class OppdaterPersoninfoCommandTest {
     private val personRepository = mockk<PersonRepository>(relaxed = true)
 
     private val observer = object : CommandContextObserver {
-        val behov = mutableMapOf<String, Map<String, Any>>()
-        override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {
-            this.behov[behov] = detaljer
-        }
+        val behov = mutableListOf<Behov>()
 
-        override fun hendelse(hendelse: String) {}
+        override fun behov(behov: Behov, commandContextId: UUID) {
+            this.behov.add(behov)
+        }
     }
 
     @BeforeEach
@@ -52,7 +52,7 @@ internal class OppdaterPersoninfoCommandTest {
         utdatertPersoninfo()
         assertFalse(command.execute(context))
         assertTrue(observer.behov.isNotEmpty())
-        assertEquals(listOf("HentPersoninfoV2"), observer.behov.keys.toList())
+        assertEquals(listOf(Behov.Personinfo(null)), observer.behov.toList())
     }
 
     @Test

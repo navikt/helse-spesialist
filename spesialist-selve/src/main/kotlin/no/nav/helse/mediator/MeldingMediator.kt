@@ -464,14 +464,6 @@ internal class MeldingMediator(
                 fun publiserBehov() = lagUtgåendeMeldinger().forEach { messageContext.publish(it) }
 
                 private fun lagUtgåendeMeldinger() = utgåendeBehov.map { JsonMessage.newNeed(setOf(it.key), it.value).toJson() }
-
-                override fun behov(
-                    behov: String,
-                    ekstraKontekst: Map<String, Any>,
-                    detaljer: Map<String, Any>,
-                ) {
-                    utgåendeBehov[behov] = detaljer
-                }
             }
 
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->

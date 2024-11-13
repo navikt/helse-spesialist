@@ -41,11 +41,6 @@ internal class GodkjenningMediatorTest {
                 hendelser.add(objectMapper.readTree(hendelse))
             }
 
-            override fun behov(
-                behov: String,
-                ekstraKontekst: Map<String, Any>,
-                detaljer: Map<String, Any>,
-            ) {}
         }
     private val mediator = GodkjenningMediator(opptegnelseDao)
 

@@ -82,7 +82,6 @@ internal class SaksbehandlerløsningTest {
 
     private val observer = object : CommandContextObserver {
         val hendelser = mutableListOf<String>()
-        override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {}
 
         override fun hendelse(hendelse: String) {
             this.hendelser.add(hendelse)
