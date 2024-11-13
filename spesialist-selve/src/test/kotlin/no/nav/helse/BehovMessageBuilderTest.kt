@@ -25,15 +25,8 @@ class BehovMessageBuilderTest {
 
     @Test
     fun `Personinfo-behov`() {
-        val behov = Behov.Personinfo(null).somJson()
+        val behov = Behov.Personinfo.somJson()
         behov.assertBehov("HentPersoninfoV2", emptyMap())
-    }
-
-    @Test
-    fun `Personinfo-behov med andre identer`() {
-        val annetFødselsnummer = lagFødselsnummer()
-        val behov = Behov.Personinfo(listOf(annetFødselsnummer)).somJson()
-        behov.assertBehov("HentPersoninfoV2", mapOf("ident" to listOf(annetFødselsnummer)))
     }
 
     @Test
@@ -43,10 +36,17 @@ class BehovMessageBuilderTest {
     }
 
     @Test
-    fun `Arbeidsgiverinformasjon-behov`() {
+    fun `Arbeidsgiverinformasjon-behov for OrdinærArbeidsgiver`() {
         val organisasjonsnumre = listOf(lagOrganisasjonsnummer())
-        val behov = Behov.Arbeidsgiverinformasjon(organisasjonsnumre).somJson()
+        val behov = Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver(organisasjonsnumre).somJson()
         behov.assertBehov("Arbeidsgiverinformasjon", mapOf("organisasjonsnummer" to organisasjonsnumre))
+    }
+
+    @Test
+    fun `Arbeidsgiverinformasjon-behov for Enkeltpersonforetak`() {
+        val identer = listOf(lagFødselsnummer())
+        val behov = Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak(identer).somJson()
+        behov.assertBehov("HentPersoninfoV2", mapOf("ident" to identer))
     }
 
     @Test

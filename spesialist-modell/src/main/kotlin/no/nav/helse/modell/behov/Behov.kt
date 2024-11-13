@@ -15,11 +15,15 @@ sealed interface Behov {
 
     data class Infotrygdutbetalinger(val fom: LocalDate, val tom: LocalDate) : Behov
 
-    data class Personinfo(val andreIdenter: List<String>?) : Behov
+    data object Personinfo : Behov
 
     data object Enhet : Behov
 
-    data class Arbeidsgiverinformasjon(val organisasjonsnumre: List<String>) : Behov
+    sealed interface Arbeidsgiverinformasjon : Behov {
+        data class Enkeltpersonforetak(val identer: List<String>) : Arbeidsgiverinformasjon
+
+        data class OrdinærArbeidsgiver(val organisasjonsnumre: List<String>) : Arbeidsgiverinformasjon
+    }
 
     data class Arbeidsforhold(val fødselsnummer: String, val organisasjonsnummer: String) : Behov
 
