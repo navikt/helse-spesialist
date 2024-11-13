@@ -1,6 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.PersonRepository
+import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerløsning
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -9,7 +10,6 @@ internal class OppdaterInfotrygdutbetalingerHardt(
     private val fødselsnummer: String,
     private val personRepository: PersonRepository,
     private val førsteKjenteDagFinner: () -> LocalDate,
-    private val behov: String = "HentInfotrygdutbetalinger",
 ) : Command {
     override fun execute(context: CommandContext) = behandle(context, personRepository, fødselsnummer)
 
@@ -29,10 +29,9 @@ internal class OppdaterInfotrygdutbetalingerHardt(
     private fun trengerMerInformasjon(context: CommandContext): Boolean {
         log.info("Etterspør Infotrygdutbetalinger")
         context.behov(
-            behov,
-            mapOf(
-                "historikkFom" to førsteKjenteDagFinner().minusYears(3),
-                "historikkTom" to LocalDate.now(),
+            Behov.Infotrygdutbetalinger(
+                fom = førsteKjenteDagFinner().minusYears(3),
+                tom = LocalDate.now(),
             ),
         )
         return false

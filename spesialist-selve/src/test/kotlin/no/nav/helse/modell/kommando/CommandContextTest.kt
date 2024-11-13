@@ -6,6 +6,7 @@ import io.mockk.verify
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.KommandokjedeEndretEvent
+import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.kommando.CommandContext.Companion.convertToUUID
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -28,16 +29,12 @@ internal class CommandContextTest {
 
     private val observer =
         object : CommandContextObserver {
-            val behov = mutableMapOf<String, Map<String, Any>>()
+            val behov = mutableListOf<Behov>()
             val hendelser = mutableListOf<String>()
             val utgåendeTilstandEndringer = mutableListOf<KommandokjedeEndretEvent>()
 
-            override fun behov(
-                behov: String,
-                ekstraKontekst: Map<String, Any>,
-                detaljer: Map<String, Any>,
-            ) {
-                this.behov[behov] = detaljer
+            override fun behov(behov: Behov, commandContextId: UUID) {
+                this.behov.add(behov)
             }
 
             override fun hendelse(hendelse: String) {
@@ -180,20 +177,18 @@ internal class CommandContextTest {
 
     @Test
     fun `samler opp behov`() {
-        context.behov("type 1", mapOf("param 1" to 1))
-        context.behov("type 2")
+        context.behov(Behov.Vergemål)
+        context.behov(Behov.Fullmakt)
         val result = observer.behov
-        assertTrue(result.isNotEmpty())
-        assertTrue(result.containsKey("type 1"))
-        assertTrue(result.containsKey("type 2"))
-        assertEquals(mapOf("param 1" to 1), result.getValue("type 1") as Map<*, *>)
+        assertEquals(2, result.size)
+        assertEquals(setOf(Behov.Vergemål, Behov.Fullmakt), result.toSet())
     }
 
     @Test
     fun `har ingen behov`() {
         val result = observer.behov
         assertTrue(result.isEmpty())
-        assertEquals(emptyMap<String, Any>(), result)
+        assertEquals(emptyList<Behov>(), result)
     }
 
     @Test
@@ -201,27 +196,6 @@ internal class CommandContextTest {
         val melding = """{ "a_key": "with_a_value" }"""
         context.publiser(melding)
         assertEquals(listOf(melding), observer.hendelser)
-    }
-
-    @Test
-    fun `overskriver behov som allerede finnes`() {
-        context.behov("type 1", mapOf("param 1" to 1))
-        context.behov("type 2", mapOf("param 2" to 1))
-        assertEquals(
-            mapOf(
-                "type 1" to mapOf("param 1" to 1),
-                "type 2" to mapOf("param 2" to 1),
-            ),
-            observer.behov,
-        )
-        context.behov("type 1", mapOf("param 1" to 2))
-        assertEquals(
-            mapOf(
-                "type 1" to mapOf("param 1" to 2),
-                "type 2" to mapOf("param 2" to 1),
-            ),
-            observer.behov,
-        )
     }
 
     private class TestObject1

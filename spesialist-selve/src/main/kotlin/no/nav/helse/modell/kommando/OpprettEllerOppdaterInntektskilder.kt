@@ -5,6 +5,7 @@ import no.nav.helse.modell.Inntektskilde
 import no.nav.helse.modell.Inntektskildetype
 import no.nav.helse.modell.KomplettInntektskilde
 import no.nav.helse.modell.arbeidsgiver.Arbeidsgiverinformasjonløsning
+import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.person.HentPersoninfoløsninger
 import org.slf4j.LoggerFactory
 
@@ -41,8 +42,8 @@ internal class OpprettEllerOppdaterInntektskilder(
     ) {
         inntektskilder
             .lagBehov()
-            .forEach { (behovKey, payload) ->
-                context.behov(behovKey, payload)
+            .forEach {
+                context.behov(it)
             }
     }
 
@@ -64,15 +65,15 @@ internal class OpprettEllerOppdaterInntektskilder(
         }
     }
 
-    private fun List<Inntektskilde>.lagBehov(): Map<String, Map<String, List<String>>> {
+    private fun List<Inntektskilde>.lagBehov(): List<Behov> {
         return this
             .groupBy(keySelector = { it.type }, valueTransform = { it.identifikator })
             .map { (inntektskildetype, inntektskilder) ->
                 when (inntektskildetype) {
-                    Inntektskildetype.ORDINÆR -> "Arbeidsgiverinformasjon" to mapOf("organisasjonsnummer" to inntektskilder)
-                    Inntektskildetype.ENKELTPERSONFORETAK -> "HentPersoninfoV2" to mapOf("ident" to inntektskilder)
+                    Inntektskildetype.ORDINÆR -> Behov.Arbeidsgiverinformasjon(inntektskilder)
+                    Inntektskildetype.ENKELTPERSONFORETAK -> Behov.Personinfo(inntektskilder)
                 }
-            }.toMap()
+            }
     }
 
     companion object {

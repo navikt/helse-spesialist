@@ -1,6 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.PersonRepository
+import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.person.HentPersoninfoløsning
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -11,8 +12,8 @@ internal class OppdaterPersoninfoCommand(
     private val force: Boolean,
 ) : Command {
     private companion object {
-        private const val BEHOV = "HentPersoninfoV2"
-        private val log = LoggerFactory.getLogger(BEHOV)
+        private val BEHOV = Behov.Personinfo(null)
+        private val logg = LoggerFactory.getLogger(OppdaterPersoninfoCommand::class.simpleName)
     }
 
     override fun execute(context: CommandContext): Boolean {
@@ -25,7 +26,7 @@ internal class OppdaterPersoninfoCommand(
     }
 
     private fun ignorer(): Boolean {
-        log.info("har ikke behov for $BEHOV, informasjonen er ny nok")
+        logg.info("har ikke behov for ${BEHOV::class.simpleName}, informasjonen er ny nok")
         return true
     }
 
@@ -43,14 +44,14 @@ internal class OppdaterPersoninfoCommand(
         fødselsnummer: String,
     ): Boolean {
         val personinfo = context.get<HentPersoninfoløsning>() ?: return trengerMerInformasjon(context)
-        log.info("oppdaterer personinfo")
+        logg.info("oppdaterer personinfo")
         personinfo.oppdater(personRepository, fødselsnummer)
         return true
     }
 
     private fun trengerMerInformasjon(context: CommandContext): Boolean {
-        log.info("trenger oppdatert $BEHOV")
-        context.behov(BEHOV, emptyMap())
+        logg.info("trenger oppdatert ${BEHOV::class.simpleName}")
+        context.behov(BEHOV)
         return false
     }
 }

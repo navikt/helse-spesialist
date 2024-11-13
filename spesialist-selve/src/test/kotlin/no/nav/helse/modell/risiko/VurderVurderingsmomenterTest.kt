@@ -9,6 +9,7 @@ import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
+import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
@@ -50,17 +51,11 @@ internal class VurderVurderingsmomenterTest {
 
     private val observer =
         object : CommandContextObserver {
-            val behov = mutableMapOf<String, Map<String, Any>>()
+            val behov = mutableListOf<Behov>()
 
-            override fun behov(
-                behov: String,
-                ekstraKontekst: Map<String, Any>,
-                detaljer: Map<String, Any>,
-            ) {
-                this.behov[behov] = detaljer
+            override fun behov(behov: Behov, commandContextId: UUID) {
+                this.behov.add(behov)
             }
-
-            override fun hendelse(hendelse: String) {}
         }
 
     @BeforeEach
@@ -71,33 +66,61 @@ internal class VurderVurderingsmomenterTest {
     }
 
     @Test
-    fun `Sender behov for risikovurdering`() {
+    fun `Sender behov for risikovurdering ved execute`() {
+        every { utbetalingMock.harEndringIUtbetalingTilSykmeldt() } returns true
         val risikoCommand = risikoCommand()
-        risikoCommand.assertFalse()
+        assertFalse(risikoCommand.execute(context))
         assertTrue(observer.behov.isNotEmpty())
-        assertEquals(1, observer.behov.size)
-        assertEquals("Risikovurdering", observer.behov.keys.first())
-        assertTrue(observer.behov.getValue("Risikovurdering").keys.contains("førstegangsbehandling"))
+
+        assertEquals(Behov.Risikovurdering(
+            vedtaksperiodeId = testperson.vedtaksperiodeId1,
+            organisasjonsnummer = testperson.orgnummer,
+            førstegangsbehandling = true,
+            kunRefusjon = false
+        ), observer.behov.single())
+    }
+
+    @Test
+    fun `Sender behov for risikovurdering ved resume dersom vi mangler løsning`() {
+        every { utbetalingMock.harEndringIUtbetalingTilSykmeldt() } returns true
+        val risikoCommand = risikoCommand()
+        assertFalse(risikoCommand.resume(context))
+        assertTrue(observer.behov.isNotEmpty())
+
+        assertEquals(Behov.Risikovurdering(
+            vedtaksperiodeId = testperson.vedtaksperiodeId1,
+            organisasjonsnummer = testperson.orgnummer,
+            førstegangsbehandling = true,
+            kunRefusjon = false
+        ), observer.behov.single())
     }
 
     @Test
     fun `Sender kunRefusjon=true når det ikke skal utbetales noe til den sykmeldte`() {
         every { utbetalingMock.harEndringIUtbetalingTilSykmeldt() } returns false
 
-        risikoCommand().assertFalse()
+        assertFalse(risikoCommand().execute(context))
 
-        val risikobehov = observer.behov.getValue("Risikovurdering")
-        assertTrue(risikobehov["kunRefusjon"] as Boolean)
+        assertEquals(Behov.Risikovurdering(
+            vedtaksperiodeId = testperson.vedtaksperiodeId1,
+            organisasjonsnummer = testperson.orgnummer,
+            førstegangsbehandling = true,
+            kunRefusjon = true
+        ), observer.behov.single())
     }
 
     @Test
     fun `Sender kunRefusjon=false når det er utbetaling til den sykmeldte`() {
         every { utbetalingMock.harEndringIUtbetalingTilSykmeldt() } returns true
 
-        risikoCommand().assertFalse()
+        assertFalse(risikoCommand().execute(context))
 
-        val risikobehov = observer.behov.getValue("Risikovurdering")
-        assertFalse(risikobehov["kunRefusjon"] as Boolean)
+        assertEquals(Behov.Risikovurdering(
+            vedtaksperiodeId = testperson.vedtaksperiodeId1,
+            organisasjonsnummer = testperson.orgnummer,
+            førstegangsbehandling = true,
+            kunRefusjon = false
+        ), observer.behov.single())
     }
 
     @Test
@@ -159,8 +182,12 @@ internal class VurderVurderingsmomenterTest {
         val risikoCommand = risikoCommand()
         risikoCommand.assertFalse()
         assertTrue(observer.behov.isNotEmpty())
-        assertEquals(setOf("Risikovurdering"), observer.behov.keys)
-        assertEquals(testperson.vedtaksperiodeId1, observer.behov.entries.first().value["vedtaksperiodeId"])
+        assertEquals(Behov.Risikovurdering(
+            vedtaksperiodeId = testperson.vedtaksperiodeId1,
+            organisasjonsnummer = testperson.orgnummer,
+            førstegangsbehandling = true,
+            kunRefusjon = true
+        ), observer.behov.first())
     }
 
     private fun VurderVurderingsmomenter.assertTrue() {

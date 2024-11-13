@@ -2,6 +2,7 @@ package no.nav.helse.modell.risiko
 
 import no.nav.helse.db.RisikovurderingRepository
 import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
+import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
@@ -29,12 +30,11 @@ internal class VurderVurderingsmomenter(
         if (løsning == null || !løsning.gjelderVedtaksperiode(vedtaksperiodeId)) {
             logg.info("Trenger risikovurdering av vedtaksperiode $vedtaksperiodeId")
             context.behov(
-                "Risikovurdering",
-                mapOf(
-                    "vedtaksperiodeId" to vedtaksperiodeId,
-                    "organisasjonsnummer" to organisasjonsnummer,
-                    "førstegangsbehandling" to førstegangsbehandling,
-                    "kunRefusjon" to !utbetaling.harEndringIUtbetalingTilSykmeldt(),
+                Behov.Risikovurdering(
+                    vedtaksperiodeId,
+                    organisasjonsnummer,
+                    førstegangsbehandling,
+                    !utbetaling.harEndringIUtbetalingTilSykmeldt(),
                 ),
             )
             return false

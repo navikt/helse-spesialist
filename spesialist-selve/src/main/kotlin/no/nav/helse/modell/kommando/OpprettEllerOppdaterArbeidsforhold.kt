@@ -3,6 +3,7 @@ package no.nav.helse.modell.kommando
 import no.nav.helse.db.ArbeidsforholdRepository
 import no.nav.helse.modell.ArbeidsforholdDto
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
+import no.nav.helse.modell.behov.Behov
 import org.slf4j.LoggerFactory
 
 internal class OpprettEllerOppdaterArbeidsforhold(
@@ -44,13 +45,7 @@ internal class OpprettEllerOppdaterArbeidsforhold(
     }
 
     private fun trengerMerInformasjon(context: CommandContext): Boolean {
-        context.behov(
-            "Arbeidsforhold",
-            mapOf(
-                "fødselsnummer" to fødselsnummer,
-                "organisasjonsnummer" to organisasjonsnummer,
-            ),
-        )
+        context.behov(Behov.Arbeidsforhold(fødselsnummer, organisasjonsnummer))
         return false
     }
 }

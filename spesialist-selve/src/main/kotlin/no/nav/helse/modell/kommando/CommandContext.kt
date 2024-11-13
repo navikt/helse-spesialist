@@ -5,6 +5,7 @@ import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.mediator.UtgåendeMeldingerObserver
+import no.nav.helse.modell.behov.Behov
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -26,12 +27,9 @@ internal class CommandContext(
         observers.remove(observer)
     }
 
-    internal fun behov(
-        behovtype: String,
-        params: Map<String, Any> = emptyMap(),
-    ) {
+    internal fun behov(behov: Behov) {
         observers.forEach {
-            it.behov(behovtype, mapOf("contextId" to id), params)
+            it.behov(behov = behov, commandContextId = id)
         }
     }
 

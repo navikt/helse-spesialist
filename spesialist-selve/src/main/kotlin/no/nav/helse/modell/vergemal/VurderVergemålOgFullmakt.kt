@@ -3,6 +3,7 @@ package no.nav.helse.modell.vergemal
 import no.nav.helse.db.VergemålRepository
 import no.nav.helse.mediator.meldinger.løsninger.Fullmaktløsning
 import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
+import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
@@ -26,8 +27,8 @@ internal class VurderVergemålOgFullmakt(
 
         if (vergemålløsning == null || fullmaktløsning == null) {
             logg.info("Trenger informasjon om vergemål, fremtidsfullmakter og fullmakt")
-            context.behov("Vergemål")
-            context.behov("Fullmakt")
+            context.behov(Behov.Vergemål)
+            context.behov(Behov.Fullmakt)
             return false
         }
 

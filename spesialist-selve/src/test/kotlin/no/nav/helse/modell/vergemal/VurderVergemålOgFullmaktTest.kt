@@ -8,6 +8,7 @@ import no.nav.helse.januar
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.løsninger.Fullmaktløsning
 import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
+import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.gosysoppgaver.inspektør
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
@@ -40,19 +41,15 @@ class VurderVergemålOgFullmaktTest {
 
     private val observer =
         object : CommandContextObserver {
-            val behov = mutableListOf<String>()
+            val behov = mutableListOf<Behov>()
             val hendelser = mutableListOf<String>()
-
-            override fun behov(
-                behov: String,
-                ekstraKontekst: Map<String, Any>,
-                detaljer: Map<String, Any>,
-            ) {
-                this.behov.add(behov)
-            }
 
             override fun hendelse(hendelse: String) {
                 hendelser.add(hendelse)
+            }
+
+            override fun behov(behov: Behov, commandContextId: UUID) {
+                this.behov.add(behov)
             }
         }
 
@@ -66,7 +63,7 @@ class VurderVergemålOgFullmaktTest {
     @Test
     fun `Ber om informasjon om vergemål hvis den mangler`() {
         assertFalse(command.execute(context))
-        assertEquals(listOf("Vergemål", "Fullmakt"), observer.behov)
+        assertEquals(setOf(Behov.Vergemål, Behov.Fullmakt), observer.behov.toSet())
     }
 
     @Test

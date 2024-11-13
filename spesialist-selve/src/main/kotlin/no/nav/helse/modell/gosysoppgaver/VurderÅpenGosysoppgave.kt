@@ -4,6 +4,7 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.db.ÅpneGosysOppgaverRepository
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.mediator.oppgave.OppgaveService
+import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
@@ -31,8 +32,9 @@ internal class VurderÅpenGosysoppgave(
         if (løsning == null) {
             logg.info("Trenger oppgaveinformasjon fra Gosys")
             context.behov(
-                "ÅpneOppgaver",
-                mapOf("ikkeEldreEnn" to ikkeEldreEnn(vedtaksperiodeId)),
+                Behov.ÅpneOppgaver(
+                    ikkeEldreEnn = ikkeEldreEnn(vedtaksperiodeId),
+                ),
             )
             return false
         }
