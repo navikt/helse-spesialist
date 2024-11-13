@@ -51,7 +51,7 @@ internal class UtgåendeMeldingerMediator : CommandContextObserver {
         utgåendeHendelser.forEach { utgåendeHendelse ->
             logg.info("Publiserer hendelse i forbindelse med ${hendelse.javaClass.simpleName}")
             sikkerlogg.info("Publiserer hendelse i forbindelse med ${hendelse.javaClass.simpleName}\n{}", utgåendeHendelse)
-            messageContext.publish(hendelse.fødselsnummer(), utgåendeHendelse)
+            messageContext.publish(utgåendeHendelse)
         }
     }
 
@@ -63,7 +63,7 @@ internal class UtgåendeMeldingerMediator : CommandContextObserver {
         val packet = behovPacket(hendelse)
         logg.info("Publiserer behov for ${utgåendeBehov.keys}")
         sikkerlogg.info("Publiserer behov for ${utgåendeBehov.keys}\n{}", packet)
-        messageContext.publish(hendelse.fødselsnummer(), packet)
+        messageContext.publish(packet)
     }
 
     private fun behovPacket(hendelse: Personmelding) =

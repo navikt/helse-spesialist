@@ -37,7 +37,7 @@ internal class CommandContextTilstandMediator : CommandContextObserver {
                 "Publiserer CommandContext tilstandendring i forbindelse med ${hendelse.javaClass.simpleName}, ny tilstand: $nyTilstand\n{}",
                 utgåendeTilstandEndringer,
             )
-            messageContext.publish(hendelse.fødselsnummer(), utgåendeTilstandEndringer)
+            messageContext.publish(utgåendeTilstandEndringer)
         }
     }
 

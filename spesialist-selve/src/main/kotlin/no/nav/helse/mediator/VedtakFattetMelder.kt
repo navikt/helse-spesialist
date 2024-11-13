@@ -36,7 +36,7 @@ internal class VedtakFattetMelder(
             kv("organisasjonsnummer", sykepengevedtak.organisasjonsnummer),
             kv("vedtaksperiodeId", sykepengevedtak.vedtaksperiodeId),
         )
-        messageContext.publish(sykepengevedtak.fødselsnummer, json)
+        messageContext.publish(json)
         this.sykepengevedtak.clear()
     }
 
