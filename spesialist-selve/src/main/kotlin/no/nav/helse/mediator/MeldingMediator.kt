@@ -2,6 +2,9 @@ package no.nav.helse.mediator
 
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.sessionOf
+import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.HelseDao.Companion.update
+import no.nav.helse.HelseDao.Companion.updateAndReturnGeneratedKey
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.CommandContextRepository
@@ -48,12 +51,14 @@ import no.nav.helse.kafka.VedtaksperiodeNyUtbetalingRiver
 import no.nav.helse.kafka.VedtaksperiodeReberegnetRiver
 import no.nav.helse.kafka.VergemålLøsningRiver
 import no.nav.helse.kafka.VurderingsmomenterLøsningRiver
+import no.nav.helse.kafka.behovName
 import no.nav.helse.kafka.ÅpneGosysOppgaverLøsningRiver
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.MeldingDuplikatkontrollDao
+import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.modell.dokument.PgDokumentDao
 import no.nav.helse.modell.kommando.CommandContext
@@ -456,14 +461,51 @@ internal class MeldingMediator(
         melding: InnhentArbeidsgivernavn,
         messageContext: MessageContext,
     ) {
+        logg.info("Melding InnhentArbeidsgivernavn mottatt")
+        sikkerlogg.info("Melding InnhentArbeidsgivernavn mottatt\n{}", melding.data())
+
+        meldingDao.lagre(melding, "InnhentArbeidsgivernavn")
         val commandContextTilstandMediator = CommandContextTilstandMediator()
         val behovObserver =
             object : CommandContextObserver {
-                private val utgåendeBehov = mutableMapOf<String, Map<String, Any>>()
+                private val utgåendeBehov = mutableSetOf<Behov>()
+                private lateinit var utgåendeCommandContextId: UUID
 
-                fun publiserBehov() = lagUtgåendeMeldinger().forEach { messageContext.publish(it) }
+                fun publiserBehov() = messageContext.publish(lagUtgåendeMeldinger().toJson())
 
-                private fun lagUtgåendeMeldinger() = utgåendeBehov.map { JsonMessage.newNeed(setOf(it.key), it.value).toJson() }
+                private fun lagUtgåendeMeldinger() =
+                    JsonMessage.newNeed(
+                        behov = utgåendeBehov.map { behov -> behov.behovName() },
+                        map =
+                            utgåendeBehov.associate {
+                                it.behovName() to (it as Behov.Arbeidsgiverinformasjon).arbeidsgiverdetaljer()
+                            } +
+                                mapOf(
+                                    "contextId" to utgåendeCommandContextId,
+                                    "hendelseId" to melding.id,
+                                ),
+                    )
+
+                private fun Behov.Arbeidsgiverinformasjon.arbeidsgiverdetaljer() =
+                    when (this) {
+                        is Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver ->
+                            mapOf(
+                                "organisasjonsnummer" to organisasjonsnumre,
+                            )
+
+                        is Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak ->
+                            mapOf(
+                                "identer" to identer,
+                            )
+                    }
+
+                override fun behov(
+                    behov: Behov,
+                    commandContextId: UUID,
+                ) {
+                    utgåendeBehov += behov
+                    utgåendeCommandContextId = commandContextId
+                }
             }
 
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
@@ -537,6 +579,36 @@ internal class MeldingMediator(
                 .newMessage("oppdater_persondata", mapOf("fødselsnummer" to fødselsnummer))
                 .toJson()
         rapidsConnection.publish(fødselsnummer, event)
+    }
+
+    fun oppdaterInntektskilder(list: Set<Triple<String, String, List<String>>>) {
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            session.transaction { transaction ->
+                list.map { (organisasjonsnummer, navn, bransjer) ->
+                    val navnId =
+                        asSQL(
+                            "insert into arbeidsgiver_navn (navn) values (:navn)",
+                            "navn" to navn,
+                        ).updateAndReturnGeneratedKey(transaction)
+                    val bransjerId =
+                        asSQL(
+                            "insert into arbeidsgiver_bransjer (bransjer) values (:bransjer)",
+                            "bransjer" to objectMapper.writeValueAsString(bransjer),
+                        ).updateAndReturnGeneratedKey(transaction)
+
+                    asSQL(
+                        """
+                        update arbeidsgiver
+                        set bransjer_ref =:bransjerId, navn_ref = :navnId
+                        where organisasjonsnummer = :organisasjonsnummer
+                        """.trimIndent(),
+                        "navnId" to navnId,
+                        "bransjerId" to bransjerId,
+                        "organisasjonsnummer" to organisasjonsnummer,
+                    ).update(transaction)
+                }
+            }
+        }
     }
 
     override fun klargjørPersonForVisning(fødselsnummer: String) {

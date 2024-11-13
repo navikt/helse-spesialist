@@ -773,7 +773,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected fun håndterArbeidsgiverinformasjonløsning(
         aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
+        fødselsnummer: String? = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
         arbeidsgiverinformasjonJson: List<Testmeldingfabrikk.ArbeidsgiverinformasjonJson>? = null,
@@ -784,7 +784,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             sisteMeldingId =
                 meldingssender.sendArbeidsgiverinformasjonKompositt(
                     aktørId,
-                    fødselsnummer,
+                    fødselsnummer!!,
                     organisasjonsnummer,
                     vedtaksperiodeId,
                 )
@@ -1041,6 +1041,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     ) {
         sisteMeldingId = meldingssender.sendKlargjørPersonForVisning(aktørId, fødselsnummer)
         assertEtterspurteBehov("HentPersoninfoV2")
+    }
+
+    protected fun håndterInnhentArbeidsgivernavn() {
+        sisteMeldingId = meldingssender.sendInnhentArbeidsgivernavn()
     }
 
     protected fun håndterSkjønnsfastsattSykepengegrunnlag(

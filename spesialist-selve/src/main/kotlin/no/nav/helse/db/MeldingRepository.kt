@@ -1,6 +1,8 @@
 package no.nav.helse.db
 
+import no.nav.helse.mediator.meldinger.Melding
 import no.nav.helse.mediator.meldinger.Personmelding
+import no.nav.helse.modell.CommandData
 import no.nav.helse.modell.MeldingDao.OverstyringIgangsattKorrigertSøknad
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import java.util.UUID
@@ -8,7 +10,7 @@ import java.util.UUID
 internal interface MeldingRepository {
     fun finnGodkjenningsbehov(meldingId: UUID): Godkjenningsbehov
 
-    fun finn(id: UUID): Personmelding?
+    fun finn(id: UUID): Melding?
 
     fun lagre(melding: Personmelding)
 
@@ -24,5 +26,10 @@ internal interface MeldingRepository {
     fun opprettAutomatiseringKorrigertSøknad(
         vedtaksperiodeId: UUID,
         meldingId: UUID,
+    )
+
+    fun lagre(
+        data: CommandData,
+        type: String,
     )
 }

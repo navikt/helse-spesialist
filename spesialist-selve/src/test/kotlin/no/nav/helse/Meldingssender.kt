@@ -340,7 +340,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
 
     fun sendArbeidsgiverinformasjonløsning(
         aktørId: String,
-        fødselsnummer: String,
+        fødselsnummer: String?,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
         arbeidsgiverinformasjonJson: List<ArbeidsgiverinformasjonJson>? = null,
@@ -703,6 +703,13 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         newUUID.also { id ->
             testRapid.sendTestMessage(
                 Testmeldingfabrikk.lagKlargjørPersonForVisning(aktørId, fødselsnummer, id)
+            )
+        }
+
+    fun sendInnhentArbeidsgivernavn(): UUID =
+        newUUID.also { id ->
+            testRapid.sendTestMessage(
+                Testmeldingfabrikk.lagInnhentArbeidsgivernavn(id)
             )
         }
 

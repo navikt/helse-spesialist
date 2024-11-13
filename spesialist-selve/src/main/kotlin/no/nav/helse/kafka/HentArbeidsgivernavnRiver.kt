@@ -1,9 +1,11 @@
 package no.nav.helse.kafka
 
 import kotliquery.TransactionalSession
+import no.nav.helse.kafka.InnhentArbeidsgivernavn.Companion.opprettFra
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.Melding
+import no.nav.helse.modell.CommandData
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.River
@@ -22,19 +24,24 @@ internal class HentArbeidsgivernavnRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        mediator.behandleInnhentArbeidsgivernavn(InnhentArbeidsgivernavn(packet), context)
+        mediator.behandleInnhentArbeidsgivernavn(opprettFra(packet), context)
     }
 }
 
-internal class InnhentArbeidsgivernavn(private val packet: JsonMessage) : Melding {
-    override val id: UUID = packet.id.toUUID()
+internal class InnhentArbeidsgivernavn
+    private constructor(override val id: UUID, private val data: String) : Melding, CommandData {
+        fun behandle(
+            kommandostarter: Kommandostarter,
+            transactionalSession: TransactionalSession,
+        ) {
+            kommandostarter { innhentArbeidsgivernavn(transactionalSession) }
+        }
 
-    fun behandle(
-        kommandostarter: Kommandostarter,
-        transactionalSession: TransactionalSession,
-    ) {
-        kommandostarter { innhentArbeidsgivernavn(transactionalSession) }
+        override fun toJson() = data
+
+        override fun data() = data
+
+        companion object {
+            fun opprettFra(packet: JsonMessage) = InnhentArbeidsgivernavn(packet.id.toUUID(), packet.toJson())
+        }
     }
-
-    override fun toJson() = packet.toJson()
-}

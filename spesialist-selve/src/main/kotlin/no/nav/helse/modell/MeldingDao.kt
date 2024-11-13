@@ -21,6 +21,7 @@ import no.nav.helse.modell.MeldingDao.Meldingtype.ENDRET_EGEN_ANSATT_STATUS
 import no.nav.helse.modell.MeldingDao.Meldingtype.GODKJENNING
 import no.nav.helse.modell.MeldingDao.Meldingtype.GODKJENT_TILBAKEDATERT_SYKMELDING
 import no.nav.helse.modell.MeldingDao.Meldingtype.GOSYS_OPPGAVE_ENDRET
+import no.nav.helse.modell.MeldingDao.Meldingtype.INNHENT_ARBEIDSGIVERNAVN
 import no.nav.helse.modell.MeldingDao.Meldingtype.KLARGJØR_TILGANGSRELATERTE_DATA
 import no.nav.helse.modell.MeldingDao.Meldingtype.NYE_VARSLER
 import no.nav.helse.modell.MeldingDao.Meldingtype.OPPDATER_PERSONSNAPSHOT
@@ -73,6 +74,27 @@ internal class MeldingDao(queryRunner: QueryRunner) : MeldingRepository, QueryRu
         if (melding is Vedtaksperiodemelding) {
             opprettKobling(melding.vedtaksperiodeId(), melding.id)
         }
+    }
+
+    override fun lagre(
+        data: CommandData,
+        type: String,
+    ) {
+        asSQL(
+            """
+            INSERT INTO hendelse
+            VALUES (:id, :data::json, :type)
+            ON CONFLICT DO NOTHING
+            """.trimIndent(),
+            "id" to data.id,
+            "data" to data.data(),
+            "type" to mapType(type).name,
+        ).update()
+    }
+
+    private fun mapType(type: String): Meldingtype {
+        if (type == "InnhentArbeidsgivernavn") return INNHENT_ARBEIDSGIVERNAVN
+        error("ikke implementert støtte for å behandle $type ennå")
     }
 
     override fun finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId: UUID): Int =
@@ -258,5 +280,12 @@ internal class MeldingDao(queryRunner: QueryRunner) : MeldingRepository, QueryRu
         KLARGJØR_TILGANGSRELATERTE_DATA,
         STANS_AUTOMATISK_BEHANDLING,
         AVVIK_VURDERT,
+        INNHENT_ARBEIDSGIVERNAVN,
     }
+}
+
+interface CommandData {
+    fun data(): String
+
+    val id: UUID
 }
