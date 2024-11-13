@@ -89,14 +89,17 @@ internal class GenerasjonService(dataSource: DataSource) {
         hentet: GenerasjonDto,
         skalLagres: GenerasjonDto,
     ) {
+        appendLine("               forrige - skal lagres")
         appendLine("   utbetaling: ${hentet.utbetalingId} - ${skalLagres.utbetalingId}")
-        appendLine("      varsler: ${hentet.varsler.map { it.varselkode }} - ${skalLagres.varsler.map(VarselDto::varselkode)}")
+        appendLine("      varsler: ${hentet.varsler.prettyPrint()} - ${skalLagres.varsler.prettyPrint()}")
         appendLine("         tags: ${hentet.tags} - ${skalLagres.tags}")
         appendLine("          fom: ${hentet.fom} - ${skalLagres.fom}")
         appendLine("          tom: ${hentet.tom} - ${skalLagres.tom}")
         appendLine("     tilstand: ${hentet.tilstand} - ${skalLagres.tilstand}")
         appendLine("  skj.tidspkt: ${hentet.skjæringstidspunkt} - ${skalLagres.skjæringstidspunkt}")
     }
+
+    private fun List<VarselDto>.prettyPrint(): List<String> = map { "${it.varselkode} (${it.status})" }
 
     internal fun førsteKjenteDag(fødselsnummer: String) = pgGenerasjonDao.førsteKjenteDag(fødselsnummer)
 }
