@@ -188,14 +188,13 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         hendelseId: UUID,
         fødselsnummer: String = FNR,
         type: String,
-        json: String = "{}",
+        json: String = """{"fødselsnummer": "$fødselsnummer"}""",
     ) {
         sessionOf(dataSource).use {
             it.run(
                 queryOf(
-                    "INSERT INTO hendelse(id, fodselsnummer, data, type) VALUES(?, ?, ?::json, ?)",
+                    "INSERT INTO hendelse(id, data, type) VALUES(?, ?::json, ?)",
                     hendelseId,
-                    fødselsnummer.toLong(),
                     json,
                     type,
                 ).asExecute,

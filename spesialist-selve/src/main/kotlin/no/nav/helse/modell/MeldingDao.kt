@@ -62,12 +62,11 @@ internal class MeldingDao(queryRunner: QueryRunner) : MeldingRepository, QueryRu
     override fun lagre(melding: Personmelding) {
         asSQL(
             """
-            INSERT INTO hendelse(id, fodselsnummer, data, type)
-                VALUES(:id, :fodselsnummer, CAST(:data as json), :type)
+            INSERT INTO hendelse(id, data, type)
+                VALUES(:id, CAST(:data as json), :type)
             ON CONFLICT DO NOTHING
             """,
             "id" to melding.id,
-            "fodselsnummer" to melding.fødselsnummer().toLong(),
             "data" to melding.toJson(),
             "type" to tilMeldingtype(melding).name,
         ).update()

@@ -684,17 +684,17 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     private fun opprettHendelse(
         hendelseId: UUID,
-        foedselsnummer: String = FØDSELSNUMMER,
+        fødselsnummer: String = FØDSELSNUMMER,
     ) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val statement = """
-            INSERT INTO hendelse(id, fodselsnummer, data, type)
-            VALUES (:hendelseId, :foedselsnummer, '{}', 'type')
+            INSERT INTO hendelse(id, data, type)
+            VALUES (:hendelseId, '{"fødselsnummer": "$fødselsnummer"}', 'type')
         """
         session.run(
             queryOf(
                 statement,
-                mapOf("hendelseId" to hendelseId, "foedselsnummer" to foedselsnummer.toLong()),
+                mapOf("hendelseId" to hendelseId),
             ).asUpdate,
         )
     }
