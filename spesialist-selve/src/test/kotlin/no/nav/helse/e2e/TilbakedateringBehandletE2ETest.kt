@@ -13,6 +13,9 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
+import org.opentest4j.AssertionFailedError
 import java.util.UUID
 
 internal class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
@@ -93,6 +96,31 @@ internal class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
         håndterTilbakedateringBehandlet(perioder = listOf(Periode(1.januar, 31.januar)))
         assertVarsel("RV_SØ_3", VEDTAKSPERIODE_ID, Varsel.Status.INAKTIV)
         assertVarsel("RV_SØ_3", vedtaksperiodeId2, Varsel.Status.INAKTIV)
+    }
+
+    @Test
+    fun `Varselet skal bli liggende om det kommer en delvis overlappende godkjent tilbakedatering`() {
+        val RV_SØ_3 = "RV_SØ_3"
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
+        spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver(regelverksvarsler = listOf(RV_SØ_3))
+        assertVarsel(RV_SØ_3, VEDTAKSPERIODE_ID, Varsel.Status.AKTIV)
+        håndterÅpneOppgaverløsning()
+        håndterRisikovurderingløsning()
+        håndterInntektløsning()
+
+        // Ny sykmelding kommer til Nav. Per i dag tolker sparkel-tilbakedatert det som en sykmelding som er
+        // tilbakedatert og godkjent hvis den ikke har merknader, og sender:
+        håndterTilbakedateringBehandlet(perioder = listOf(Periode(fom = 25.januar, tom = 5.februar)))
+
+        assertThrows<AssertionFailedError> {
+            // TODO: Denne asserten skal ikke throwe
+            assertVarsel(RV_SØ_3, VEDTAKSPERIODE_ID, Varsel.Status.AKTIV)
+        }
+        assertDoesNotThrow {
+            // Dette er IKKE sånn vi vil ha det:
+            assertVarsel(RV_SØ_3, VEDTAKSPERIODE_ID, Varsel.Status.INAKTIV)
+        }
     }
 
     private fun assertVarsel(
