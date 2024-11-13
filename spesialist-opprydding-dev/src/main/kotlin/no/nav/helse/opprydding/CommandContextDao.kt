@@ -16,12 +16,12 @@ class CommandContextDao(private val dataSource: DataSource) {
                 from command_context cc
                          join hendelse h on cc.hendelse_id = h.id
                 where tilstand in ('NY', 'SUSPENDERT', 'FEIL')
-                  and h.fodselsnummer = :fodselsnummer
+                  and h.data->>'fødselsnummer' = :fodselsnummer
                 """.trimIndent()
             session.run(
                 queryOf(
                     query,
-                    mapOf("fodselsnummer" to fødselsnummer.toLong()),
+                    mapOf("fodselsnummer" to fødselsnummer),
                 ).map { Kommandokjedeinfo(it.uuid("context_id"), it.uuid("hendelse_id")) }.asList,
             )
         }

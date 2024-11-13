@@ -4,7 +4,7 @@ import no.nav.helse.opprydding.Comparison.AT_LEAST
 import no.nav.helse.opprydding.Comparison.EXACTLY
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -44,7 +44,7 @@ internal class AppTest: AbstractDatabaseTest() {
         assertTabellinnhold(AT_LEAST, 1)
         testRapid.sendTestMessage(slettemelding("123"))
         val sendtMelding = testRapid.inspektør.message(0)
-        assertTrue(sendtMelding["@event_name"].asText() == "kommandokjede_avbrutt")
+        assertEquals("kommandokjede_avbrutt", sendtMelding["@event_name"].asText())
     }
 
     @Test
@@ -53,8 +53,8 @@ internal class AppTest: AbstractDatabaseTest() {
         assertTabellinnhold(AT_LEAST, 1)
         testRapid.sendTestMessage(slettemelding("123"))
         testRapid.inspektør.message(1).run {
-            assertTrue(path("@event_name").asText() == "person_slettet")
-            assertTrue(path("fødselsnummer").asText() == "123")
+            assertEquals("person_slettet", path("@event_name").asText())
+            assertEquals("123", path("fødselsnummer").asText())
         }
     }
 

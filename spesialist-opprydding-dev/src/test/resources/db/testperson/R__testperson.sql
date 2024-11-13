@@ -2,7 +2,7 @@ INSERT INTO saksbehandler(oid, navn, epost, ident)
 VALUES ('${saksbehandler_oid}', 'SAKSBEHANDLER SAKSBEHANDLERSEN', 'saksbehandler@nav.no', 'I123456');
 
 INSERT INTO hendelse(id, data, type, fodselsnummer)
-VALUES ('${hendelse_id}', '{}'::json, 'TESTHENDELSE', ${fødselsnummer});
+VALUES ('${hendelse_id}', '{"fødselsnummer": "${fødselsnummer}"}'::json, 'TESTHENDELSE', ${fødselsnummer});
 INSERT INTO vedtaksperiode_hendelse(hendelse_ref, vedtaksperiode_id)
 VALUES ('${hendelse_id}', '${vedtaksperiode_id}');
 INSERT INTO command_context(context_id, hendelse_id, tilstand, data)

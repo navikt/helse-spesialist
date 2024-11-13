@@ -118,13 +118,13 @@ internal class MeldingDao(queryRunner: QueryRunner) : MeldingRepository, QueryRu
             """
             SELECT h.data
             FROM hendelse h, json_array_elements(h.data -> 'berørtePerioder') AS bp
-            WHERE fodselsnummer = :fodselsnummer
+            WHERE data->>'fødselsnummer' = :fodselsnummer
             AND h.type='OVERSTYRING_IGANGSATT'
             AND bp ->> 'vedtaksperiodeId' = :vedtaksperiodeId
             ORDER BY h.data ->> '@opprettet' DESC
             LIMIT 1
             """,
-            "fodselsnummer" to fødselsnummer.toLong(),
+            "fodselsnummer" to fødselsnummer,
             "vedtaksperiodeId" to vedtaksperiodeId.toString(),
         ).singleOrNull { row ->
             row.stringOrNull("data")?.let {

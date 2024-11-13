@@ -536,8 +536,8 @@ internal class PersonRepository(
 
     private fun TransactionalSession.slettHendelse(fødselsnummer: String) {
         @Language("PostgreSQL")
-        val query = "DELETE FROM hendelse WHERE fodselsnummer = ?"
-        run(queryOf(query, fødselsnummer.toLong()).asExecute)
+        val query = "DELETE FROM hendelse WHERE data->>'fødselsnummer' = ?"
+        run(queryOf(query, fødselsnummer).asExecute)
     }
 
     private fun TransactionalSession.slettInntekt(personRef: Int) {
