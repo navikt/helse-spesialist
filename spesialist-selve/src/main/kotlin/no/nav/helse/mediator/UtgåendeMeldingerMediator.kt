@@ -1,6 +1,5 @@
 package no.nav.helse.mediator
 
-import no.nav.helse.behovName
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.behov.Behov
 import no.nav.helse.rapids_rivers.MessageContext
