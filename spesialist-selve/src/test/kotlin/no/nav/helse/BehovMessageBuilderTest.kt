@@ -1,6 +1,7 @@
 package no.nav.helse
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.kafka.somJsonMessage
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.behov.Behov
 import no.nav.helse.spesialist.test.lagFødselsnummer

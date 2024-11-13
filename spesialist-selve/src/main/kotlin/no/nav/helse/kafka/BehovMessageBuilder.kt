@@ -1,4 +1,4 @@
-package no.nav.helse
+package no.nav.helse.kafka
 
 import no.nav.helse.modell.behov.Behov
 import no.nav.helse.rapids_rivers.JsonMessage

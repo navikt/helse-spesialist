@@ -1,10 +1,10 @@
 package no.nav.helse.mediator
 
-import no.nav.helse.behovName
+import no.nav.helse.kafka.behovName
+import no.nav.helse.kafka.somJsonMessage
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.behov.Behov
 import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.somJsonMessage
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
