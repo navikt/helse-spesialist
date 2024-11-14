@@ -13,5 +13,5 @@ internal interface InntektskilderRepository {
         andreOrganisasjonsnumre: List<String>,
     ): List<InntektskildeDto>
 
-    fun finnInntektskilderSomManglerNavn(): List<Inntektskilde> = emptyList()
+    fun finnInntektskilderSomManglerNavnForAktiveOppgaver(): List<Inntektskilde> = emptyList()
 }

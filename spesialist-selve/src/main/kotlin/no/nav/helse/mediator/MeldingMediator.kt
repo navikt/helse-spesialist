@@ -472,6 +472,10 @@ internal class MeldingMediator(
                 private lateinit var utgåendeCommandContextId: UUID
 
                 fun publiserBehov() {
+                    if (!this::utgåendeCommandContextId.isInitialized) {
+                        sikkerlogg.info("Ingen behov å sende ut fra alternativ løype 🫠")
+                        return
+                    }
                     val packet = lagUtgåendeMeldinger().toJson()
                     sikkerlogg.info("Publiserer ${utgåendeBehov.size} behov fra custom behovObserver\n{}", packet)
                     messageContext.publish(packet)

@@ -137,7 +137,7 @@ internal class Kommandofabrikk(
     ): OpprettEllerOppdaterInntektskilder {
         val inntektskilderRepository = InntektskilderDao(session)
         val liste =
-            inntektskilderRepository.finnInntektskilderSomManglerNavn().let {
+            inntektskilderRepository.finnInntektskilderSomManglerNavnForAktiveOppgaver().let {
                 logg.info("Fant ${it.size} arbeidsgivere det mangler navn for, innhenter for (maks) $batchSize.")
                 it.take(batchSize)
             }

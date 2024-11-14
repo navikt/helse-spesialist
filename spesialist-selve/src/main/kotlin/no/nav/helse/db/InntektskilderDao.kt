@@ -45,12 +45,20 @@ internal class InntektskilderDao(
         return eksisterendeInntektskilder + nyeInntektskilder
     }
 
-    override fun finnInntektskilderSomManglerNavn() =
+    override fun finnInntektskilderSomManglerNavnForAktiveOppgaver() =
         asSQL(
             """
-            select organisasjonsnummer from arbeidsgiver
-            left join arbeidsgiver_navn an on navn_ref = an.id
-            where an.id is null
+            with utvalg as (
+                select p.id from person p
+                join vedtak v on p.id = v.person_ref
+                join oppgave o on v.id = o.vedtak_ref and o.status = 'AvventerSaksbehandler'
+            )
+            select organisasjonsnummer
+            from utvalg u
+            join vedtak v on u.id = v.person_ref
+            join arbeidsgiver a on v.arbeidsgiver_ref = a.id
+            left join arbeidsgiver_navn an on a.navn_ref = an.id
+            where an.id is null;
             """.trimIndent(),
         ).list(session) {
             it.string("organisasjonsnummer")
