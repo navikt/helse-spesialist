@@ -10,6 +10,7 @@ import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 internal class ArbeidsgiverinformasjonLøsningRiver(
     private val mediator: MeldingMediator,
@@ -42,7 +43,7 @@ internal class ArbeidsgiverinformasjonLøsningRiver(
         val contextId = packet["contextId"].asUUID()
         val løsning = packet["@løsning.$behov"]
         if (packet["fødselsnummer"].isMissingOrNull()) {
-            alternativHåndtering(løsning)
+            alternativHåndtering(løsning, contextId, hendelseId)
             return
         }
         mediator.løsning(
@@ -62,7 +63,11 @@ internal class ArbeidsgiverinformasjonLøsningRiver(
         )
     }
 
-    private fun alternativHåndtering(løsning: JsonNode) {
+    private fun alternativHåndtering(
+        løsning: JsonNode,
+        contextId: UUID,
+        hendelseId: UUID,
+    ) {
         val navnOgBransjer =
             løsning.map { arbeidsgiver ->
                 Triple(
@@ -71,6 +76,10 @@ internal class ArbeidsgiverinformasjonLøsningRiver(
                     arbeidsgiver.path("bransjer").map { it.asText() },
                 )
             }.toSet()
-        mediator.oppdaterInntektskilder(navnOgBransjer)
+        mediator.oppdaterInntektskilder(
+            navnOgBransjer,
+            contextId,
+            hendelseId,
+        )
     }
 }

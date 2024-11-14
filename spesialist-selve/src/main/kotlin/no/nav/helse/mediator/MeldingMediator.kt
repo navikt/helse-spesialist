@@ -585,11 +585,15 @@ internal class MeldingMediator(
         rapidsConnection.publish(fødselsnummer, event)
     }
 
-    fun oppdaterInntektskilder(list: Set<Triple<String, String, List<String>>>) {
-        sikkerlogg.info("Lagrer arbeidsgiverinformasjon for ${list.size} inntektskilder")
+    fun oppdaterInntektskilder(
+        info: Set<Triple<String, String, List<String>>>,
+        contextId: UUID,
+        hendelseId: UUID,
+    ) {
+        sikkerlogg.info("Lagrer arbeidsgiverinformasjon for ${info.size} inntektskilder")
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             session.transaction { transaction ->
-                list.map { (organisasjonsnummer, navn, bransjer) ->
+                info.map { (organisasjonsnummer, navn, bransjer) ->
                     val navnId =
                         asSQL(
                             "insert into arbeidsgiver_navn (navn) values (:navn)",
@@ -612,6 +616,7 @@ internal class MeldingMediator(
                         "organisasjonsnummer" to organisasjonsnummer,
                     ).update(transaction)
                 }
+                commandContextDao.ferdig(hendelseId, contextId)
             }
         }
     }

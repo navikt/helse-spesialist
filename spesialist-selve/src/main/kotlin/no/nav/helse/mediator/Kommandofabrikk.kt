@@ -135,8 +135,9 @@ internal class Kommandofabrikk(
         val inntektskilderRepository = InntektskilderDao(transactionalSession)
         val liste =
             inntektskilderRepository.finnInntektskilderSomManglerNavn().let {
-                logg.info("Fant ${it.size} arbeidsgivere det mangler navn for, innhenter for (maks) 15.")
-                it.take(50)
+                logg.info("Fant ${it.size} arbeidsgivere det mangler navn for, innhenter for (maks) antall.")
+                val antall = 50
+                it.take(antall)
             }
 
         return OpprettEllerOppdaterInntektskilder(
