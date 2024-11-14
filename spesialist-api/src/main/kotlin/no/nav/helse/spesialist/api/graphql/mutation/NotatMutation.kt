@@ -82,25 +82,6 @@ class NotatMutation(
         return DataFetcherResult.newResult<Kommentar?>().data(kommentarDto?.let(::tilKommentar)).build()
     }
 
-    @Suppress("unused")
-    fun leggTilKommentarMedDialogRef(
-        dialogRef: Int,
-        tekst: String,
-        saksbehandlerident: String,
-    ): DataFetcherResult<Kommentar?> {
-        val kommentarDto =
-            try {
-                notatDao.leggTilKommentar(dialogRef, tekst, saksbehandlerident)
-            } catch (e: Exception) {
-                return DataFetcherResult
-                    .newResult<Kommentar?>()
-                    .error(kunneIkkeLeggeTilKommentar(dialogRef))
-                    .build()
-            }
-
-        return DataFetcherResult.newResult<Kommentar?>().data(kommentarDto?.let(::tilKommentar)).build()
-    }
-
     private fun kunneIkkeLeggeTilKommentar(dialogRef: Int): GraphQLError =
         GraphqlErrorException
             .newErrorException()

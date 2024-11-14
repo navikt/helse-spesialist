@@ -90,23 +90,4 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
 
         assertEquals("En kommentar", body["data"]["leggTilKommentar"]["tekst"].asText())
     }
-
-    @Test
-    fun `legger til kommentar med dialogRef`() {
-        opprettSaksbehandler()
-        val dialogRef = opprettDialog()
-
-        val body =
-            runQuery(
-                """
-            mutation LeggTilKommentarMedDialogRef {
-                leggTilKommentarMedDialogRef(dialogRef: $dialogRef, tekst: "En kommentar", saksbehandlerident: "${SAKSBEHANDLER.ident}") {
-                    tekst
-                }
-            }
-        """,
-            )
-
-        assertEquals("En kommentar", body["data"]["leggTilKommentarMedDialogRef"]["tekst"].asText())
-    }
 }
