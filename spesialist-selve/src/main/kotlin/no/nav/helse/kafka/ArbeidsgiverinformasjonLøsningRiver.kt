@@ -43,6 +43,7 @@ internal class ArbeidsgiverinformasjonLøsningRiver(
         val contextId = packet["contextId"].asUUID()
         val løsning = packet["@løsning.$behov"]
         if (packet["fødselsnummer"].isMissingOrNull()) {
+            sikkerLog.debug("Mottok svar for arbeidsgivernavn\n{}", packet.toJson())
             alternativHåndtering(løsning, contextId, hendelseId)
             return
         }

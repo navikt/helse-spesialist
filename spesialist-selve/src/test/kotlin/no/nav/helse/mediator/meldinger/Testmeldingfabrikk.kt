@@ -732,7 +732,7 @@ internal object Testmeldingfabrikk {
     )
 
     fun lagInnhentArbeidsgivernavn(id: UUID) = nyHendelse(
-        id, "innhent_arbeidsgivernavn", emptyMap()
+        id = id, navn = "innhent_arbeidsgivernavn", hendelse = mapOf("batchSize" to 99)
     )
 
     fun lagSaksbehandlerløsning(

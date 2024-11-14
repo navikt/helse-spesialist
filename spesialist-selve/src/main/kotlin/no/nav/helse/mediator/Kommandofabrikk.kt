@@ -131,13 +131,15 @@ internal class Kommandofabrikk(
         )
     }
 
-    internal fun innhentArbeidsgivernavn(transactionalSession: TransactionalSession): OpprettEllerOppdaterInntektskilder {
-        val inntektskilderRepository = InntektskilderDao(transactionalSession)
+    internal fun innhentArbeidsgivernavn(
+        batchSize: Int,
+        session: Session,
+    ): OpprettEllerOppdaterInntektskilder {
+        val inntektskilderRepository = InntektskilderDao(session)
         val liste =
             inntektskilderRepository.finnInntektskilderSomManglerNavn().let {
-                logg.info("Fant ${it.size} arbeidsgivere det mangler navn for, innhenter for (maks) antall.")
-                val antall = 50
-                it.take(antall)
+                logg.info("Fant ${it.size} arbeidsgivere det mangler navn for, innhenter for (maks) $batchSize.")
+                it.take(batchSize)
             }
 
         return OpprettEllerOppdaterInntektskilder(

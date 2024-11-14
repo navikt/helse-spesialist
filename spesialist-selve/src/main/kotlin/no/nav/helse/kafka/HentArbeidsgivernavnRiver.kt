@@ -18,6 +18,7 @@ internal class HentArbeidsgivernavnRiver(
     override fun validations() =
         River.PacketValidation {
             it.demandValue("@event_name", "innhent_arbeidsgivernavn")
+            it.requireKey("batchSize")
         }
 
     override fun onPacket(
@@ -29,12 +30,12 @@ internal class HentArbeidsgivernavnRiver(
 }
 
 internal class InnhentArbeidsgivernavn
-    private constructor(override val id: UUID, private val data: String) : Melding, CommandData {
+    private constructor(override val id: UUID, private val data: String, val batchSize: Int) : Melding, CommandData {
         fun behandle(
             kommandostarter: Kommandostarter,
             transactionalSession: TransactionalSession,
         ) {
-            kommandostarter { innhentArbeidsgivernavn(transactionalSession) }
+            kommandostarter { innhentArbeidsgivernavn(batchSize, transactionalSession) }
         }
 
         override fun toJson() = data
@@ -42,6 +43,7 @@ internal class InnhentArbeidsgivernavn
         override fun data() = data
 
         companion object {
-            fun opprettFra(packet: JsonMessage) = InnhentArbeidsgivernavn(packet.id.toUUID(), packet.toJson())
+            fun opprettFra(packet: JsonMessage) =
+                InnhentArbeidsgivernavn(packet.id.toUUID(), packet.toJson(), packet["batchSize"].intValue())
         }
     }
