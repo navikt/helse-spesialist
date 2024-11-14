@@ -274,7 +274,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ) {
         val dialogRef = dialogDao.lagre()
         påVentDao.lagrePåVent(oppgaveId, saksbehandlerOid, frist, årsaker, tekst, dialogRef)
-        notatApiDao.leggTilKommentarMedDialogRef(dialogRef.toInt(), "En kommentar", SAKSBEHANDLER_IDENT)
+        notatApiDao.leggTilKommentar(dialogRef.toInt(), "En kommentar", SAKSBEHANDLER_IDENT)
     }
 
     private fun opprettVedtakstype(

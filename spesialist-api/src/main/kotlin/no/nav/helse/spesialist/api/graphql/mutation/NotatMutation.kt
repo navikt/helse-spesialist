@@ -65,17 +65,17 @@ class NotatMutation(
 
     @Suppress("unused")
     fun leggTilKommentar(
-        notatId: Int,
+        dialogRef: Int,
         tekst: String,
         saksbehandlerident: String,
     ): DataFetcherResult<Kommentar?> {
         val kommentarDto =
             try {
-                notatDao.leggTilKommentar(notatId, tekst, saksbehandlerident)
+                notatDao.leggTilKommentar(dialogRef, tekst, saksbehandlerident)
             } catch (e: Exception) {
                 return DataFetcherResult
                     .newResult<Kommentar?>()
-                    .error(kunneIkkeLeggeTilKommentarMed("notatId", notatId))
+                    .error(kunneIkkeLeggeTilKommentar(dialogRef))
                     .build()
             }
 
@@ -90,24 +90,21 @@ class NotatMutation(
     ): DataFetcherResult<Kommentar?> {
         val kommentarDto =
             try {
-                notatDao.leggTilKommentarMedDialogRef(dialogRef, tekst, saksbehandlerident)
+                notatDao.leggTilKommentar(dialogRef, tekst, saksbehandlerident)
             } catch (e: Exception) {
                 return DataFetcherResult
                     .newResult<Kommentar?>()
-                    .error(kunneIkkeLeggeTilKommentarMed("dialogRef", dialogRef))
+                    .error(kunneIkkeLeggeTilKommentar(dialogRef))
                     .build()
             }
 
         return DataFetcherResult.newResult<Kommentar?>().data(kommentarDto?.let(::tilKommentar)).build()
     }
 
-    private fun kunneIkkeLeggeTilKommentarMed(
-        idNavn: String,
-        id: Int,
-    ): GraphQLError =
+    private fun kunneIkkeLeggeTilKommentar(dialogRef: Int): GraphQLError =
         GraphqlErrorException
             .newErrorException()
-            .message("Kunne ikke legge til kommentar med $idNavn: $id")
+            .message("Kunne ikke legge til kommentar med dialog-ref: $dialogRef")
             .extensions(mapOf("code" to 500))
             .build()
 

@@ -75,14 +75,13 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
     @Test
     fun `legger til ny kommentar`() {
         opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        val notatId = opprettNotat()
+        val dialogRef = opprettDialog()
 
         val body =
             runQuery(
                 """
             mutation LeggTilKommentar {
-                leggTilKommentar(notatId: $notatId, tekst: "En kommentar", saksbehandlerident: "${SAKSBEHANDLER.ident}") {
+                leggTilKommentar(dialogRef: $dialogRef, tekst: "En kommentar", saksbehandlerident: "${SAKSBEHANDLER.ident}") {
                     tekst
                 }
             }

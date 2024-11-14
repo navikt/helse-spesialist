@@ -8,23 +8,22 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class NotatApiDaoTest: DatabaseIntegrationTest() {
-
+internal class NotatApiDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `finner flere notater tilhørende samme vedtaksperiode`() {
-        //given
+        // given
         val saksbehandler_oid = opprettSaksbehandler()
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         val vedtaksperiodeId = PERIODE.id
         val tekster = listOf("Banan eple kake", "Eple kake banan")
 
-        //when
+        // when
         notatDao.opprettNotat(vedtaksperiodeId, tekster[0], saksbehandler_oid)
         notatDao.opprettNotat(vedtaksperiodeId, tekster[1], saksbehandler_oid)
 
         val notater = notatDao.finnNotater(listOf(vedtaksperiodeId))
 
-        //then
+        // then
         assertEquals(1, notater.size)
         assertEquals(2, notater[vedtaksperiodeId]?.size)
 
@@ -74,7 +73,7 @@ internal class NotatApiDaoTest: DatabaseIntegrationTest() {
         val tekst = "tekst"
         val notatDto = notatDao.opprettNotat(vedtaksperiodeId, tekst, oid)
         checkNotNull(notatDto)
-        val kommentarDto = notatDao.leggTilKommentar(notatDto.id, tekst, SAKSBEHANDLER.ident)
+        val kommentarDto = notatDao.leggTilKommentar(notatDto.dialogRef, tekst, SAKSBEHANDLER.ident)
         assertEquals(tekst, kommentarDto?.tekst)
     }
 
@@ -88,7 +87,8 @@ internal class NotatApiDaoTest: DatabaseIntegrationTest() {
 
         val notater = notatDao.finnNotater(listOf(vedtaksperiodeId))
 
-        assertEquals(NotatType.PaaVent, notater[vedtaksperiodeId]?.get(0)?.type) }
+        assertEquals(NotatType.PaaVent, notater[vedtaksperiodeId]?.get(0)?.type)
+    }
 
     @Test
     fun `feilregistrer notat`() {
@@ -107,5 +107,4 @@ internal class NotatApiDaoTest: DatabaseIntegrationTest() {
         assertTrue(feilregistrerteNotater[vedtaksperiodeId]?.get(0)!!.feilregistrert)
         assertNotNull(feilregistrerteNotater[vedtaksperiodeId]?.get(0)!!.feilregistrert_tidspunkt)
     }
-
 }

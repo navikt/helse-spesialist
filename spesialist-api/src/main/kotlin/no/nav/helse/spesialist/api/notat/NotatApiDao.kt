@@ -39,22 +39,6 @@ class NotatApiDao(
         ).singleOrNull { mapNotatDto(it) }
 
     fun leggTilKommentar(
-        notatId: Int,
-        tekst: String,
-        saksbehandlerident: String,
-    ): KommentarDto? =
-        asSQL(
-            """
-            insert into kommentarer (tekst, notat_ref, saksbehandlerident, dialog_ref)
-            values (:tekst, :notatId, :saksbehandlerident, (select dialog_ref from notat where id = :notatId))
-            returning *
-            """.trimIndent(),
-            "tekst" to tekst,
-            "notatId" to notatId,
-            "saksbehandlerident" to saksbehandlerident,
-        ).singleOrNull { mapKommentarDto(it) }
-
-    fun leggTilKommentarMedDialogRef(
         dialogRef: Int,
         tekst: String,
         saksbehandlerident: String,
