@@ -471,7 +471,11 @@ internal class MeldingMediator(
                 private val utgåendeBehov = mutableSetOf<Behov>()
                 private lateinit var utgåendeCommandContextId: UUID
 
-                fun publiserBehov() = messageContext.publish(lagUtgåendeMeldinger().toJson())
+                fun publiserBehov() {
+                    val packet = lagUtgåendeMeldinger().toJson()
+                    sikkerlogg.info("Publiserer ${utgåendeBehov.size} behov fra custom behovObserver\n{}", packet)
+                    messageContext.publish(packet)
+                }
 
                 private fun lagUtgåendeMeldinger() =
                     JsonMessage.newNeed(
