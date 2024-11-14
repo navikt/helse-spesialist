@@ -178,6 +178,7 @@ data class Notater(
 
 data class Notat(
     val id: Int,
+    val dialogRef: Int,
     val tekst: String,
     val opprettet: LocalDateTime,
     val saksbehandlerOid: UUID,
@@ -362,6 +363,7 @@ interface Periode {
         notatDao.finnNotater(vedtaksperiodeId).map {
             Notat(
                 id = it.id,
+                dialogRef = it.dialogRef,
                 tekst = it.tekst,
                 opprettet = it.opprettet,
                 saksbehandlerOid = it.saksbehandlerOid,

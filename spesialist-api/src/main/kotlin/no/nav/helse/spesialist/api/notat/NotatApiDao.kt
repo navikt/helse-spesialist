@@ -146,6 +146,7 @@ class NotatApiDao(
     private fun mapNotatDto(it: Row): NotatDto =
         NotatDto(
             id = it.int("id"),
+            dialogRef = it.long("dialog_ref").toInt(),
             tekst = it.string("tekst"),
             opprettet = it.localDateTime("opprettet"),
             saksbehandlerOid = UUID.fromString(it.string("oid")),

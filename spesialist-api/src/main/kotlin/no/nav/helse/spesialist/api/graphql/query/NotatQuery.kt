@@ -14,20 +14,26 @@ import no.nav.helse.spesialist.api.notat.NotatApiDao
 import no.nav.helse.spesialist.api.notat.NotatDto
 import java.util.UUID
 
-class NotatQuery(private val notatDao: NotatApiDao) : Query {
+class NotatQuery(
+    private val notatDao: NotatApiDao,
+) : Query {
     @Suppress("unused")
     suspend fun notater(forPerioder: List<String>): DataFetcherResult<List<Notater>> {
         if (forPerioder.isEmpty()) {
-            return DataFetcherResult.newResult<List<Notater>>()
-                .error(getEmptyListError()).build()
+            return DataFetcherResult
+                .newResult<List<Notater>>()
+                .error(getEmptyListError())
+                .build()
         }
 
         val ids =
             try {
                 forPerioder.map(UUID::fromString)
             } catch (_: Exception) {
-                return DataFetcherResult.newResult<List<Notater>>()
-                    .error(getBadUUIDStringError()).build()
+                return DataFetcherResult
+                    .newResult<List<Notater>>()
+                    .error(getBadUUIDStringError())
+                    .build()
             }
 
         val notater =
@@ -35,18 +41,22 @@ class NotatQuery(private val notatDao: NotatApiDao) : Query {
                 notatDao.finnNotater(ids)
             }.tilNotater()
 
-        return DataFetcherResult.newResult<List<Notater>>()
-            .data(notater).build()
+        return DataFetcherResult
+            .newResult<List<Notater>>()
+            .data(notater)
+            .build()
     }
 
     private fun getBadUUIDStringError(): GraphQLError =
-        GraphqlErrorException.newErrorException()
+        GraphqlErrorException
+            .newErrorException()
             .message("Requesten inneholder UUIDer på feil format")
             .extensions(mapOf("code" to 400))
             .build()
 
     private fun getEmptyListError(): GraphQLError =
-        GraphqlErrorException.newErrorException()
+        GraphqlErrorException
+            .newErrorException()
             .message("Requesten mangler liste med vedtaksperiode-ider")
             .extensions(mapOf("code" to 400))
             .build()
@@ -63,6 +73,7 @@ private fun Map<UUID, List<NotatDto>>.tilNotater(): List<Notater> =
 internal fun tilNotat(notat: NotatDto) =
     Notat(
         id = notat.id,
+        dialogRef = notat.dialogRef,
         tekst = notat.tekst,
         opprettet = notat.opprettet,
         saksbehandlerOid = notat.saksbehandlerOid,

@@ -341,8 +341,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                 queryOf(
                     statement,
                 ).asUpdateAndReturnGeneratedKey,
-        )
-    }
+            )
+        }
 
     protected fun opprettNotat(
         tekst: String = "Et notat",
@@ -351,7 +351,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         @Language("PostgreSQL")
         val statement =
-            "INSERT INTO notat(tekst, saksbehandler_oid, vedtaksperiode_id, type) VALUES (?, ?, ?, CAST(? as notattype))"
+            "INSERT INTO notat(tekst, saksbehandler_oid, vedtaksperiode_id, type, dialog_ref) VALUES (?, ?, ?, CAST(? as notattype), ?)"
         session.run(
             queryOf(
                 statement,
@@ -359,6 +359,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                 saksbehandlerOid,
                 vedtaksperiodeId,
                 NotatType.Generelt.name,
+                opprettDialog(),
             ).asUpdateAndReturnGeneratedKey,
         )
     }
@@ -420,7 +421,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         aktørId: String,
         personinfoid: Long?,
         bostedId: Int?,
-        infotrygdutbetalingerid: Long?
+        infotrygdutbetalingerid: Long?,
     ): Long {
         @Language("PostgreSQL")
         val statement =
@@ -439,11 +440,11 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                                 "aktoerId" to aktørId,
                                 "personinfoId" to personinfoid,
                                 "enhetId" to bostedId,
-                                "infotrygdutbetalingerId" to infotrygdutbetalingerid
-                            )
+                                "infotrygdutbetalingerId" to infotrygdutbetalingerid,
+                            ),
                         ).asUpdateAndReturnGeneratedKey,
                     )
-                }
+                },
             )
         return personId
     }
@@ -499,7 +500,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         infotrygdutbetalingerId: Long? = null,
     ) {
         @Language("PostgreSQL")
-        val query = """
+        val query =
+            """
             update person
             set info_ref=:personinfoId,
                 infotrygdutbetalinger_ref=:infotrygdutbetalingerRef,
@@ -514,19 +516,20 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                     END
                 )
             where fødselsnummer=:fodselsnummer
-        """.trimIndent()
+            """.trimIndent()
 
         sessionOf(dataSource).use {
             it.run(
                 queryOf(
-                    query, mapOf(
+                    query,
+                    mapOf(
                         "personinfoId" to personinfoId,
                         "harPersoninfoId" to (personinfoId != null),
                         "infotrygdutbetalingerRef" to infotrygdutbetalingerId,
                         "harInfotrygdutbetalingerRef" to (infotrygdutbetalingerId != null),
-                        "fodselsnummer" to fødselsnummer
-                    )
-                ).asUpdate
+                        "fodselsnummer" to fødselsnummer,
+                    ),
+                ).asUpdate,
             )
         }
     }

@@ -1,13 +1,12 @@
 package no.nav.helse.spesialist.api.graphql.query
 
-import java.util.UUID
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class NotatQueryTest : AbstractGraphQLApiTest() {
-
     @Test
     fun `henter notater`() {
         opprettSaksbehandler()
@@ -15,8 +14,9 @@ internal class NotatQueryTest : AbstractGraphQLApiTest() {
         opprettNotat("Et notat")
         opprettNotat("Et annet notat")
 
-        val notater = runQuery(
-            """
+        val notater =
+            runQuery(
+                """
             {
                 notater(forPerioder: ["${PERIODE.id}"]) {
                     id
@@ -42,8 +42,8 @@ internal class NotatQueryTest : AbstractGraphQLApiTest() {
                     }
                 }
             }
-        """
-        )["data"]["notater"].first()
+        """,
+            )["data"]["notater"].first()
 
         assertEquals(PERIODE.id.toString(), notater["id"].asText())
         assertEquals(2, notater["notater"].size())
@@ -64,13 +64,15 @@ internal class NotatQueryTest : AbstractGraphQLApiTest() {
         opprettNotat(tekst = "Et annet notat", vedtaksperiodeId = førstePeriode)
         opprettNotat(tekst = "Et tredje notat", vedtaksperiodeId = andrePeriode)
 
-        val notater = runQuery(
-            """
+        val notater =
+            runQuery(
+                """
             {
                 notater(forPerioder: ["$førstePeriode"]) {
                     id
                     notater {
                         id
+                        dialogRef
                         tekst
                         type
                         opprettet
@@ -91,12 +93,11 @@ internal class NotatQueryTest : AbstractGraphQLApiTest() {
                     }
                 }
             }
-        """
-        )["data"]["notater"]
+        """,
+            )["data"]["notater"]
 
         assertEquals(1, notater.size())
         assertEquals(førstePeriode.toString(), notater.first()["id"].asText())
         assertTrue(notater.first()["notater"].none { it["tekst"].asText() == "Et tredje notat" })
     }
-
 }

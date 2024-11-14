@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.api.notat
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 data class KommentarDto(
     val id: Int,
@@ -16,6 +16,7 @@ data class KommentarDto(
 @JsonIgnoreProperties
 data class NotatDto(
     val id: Int,
+    val dialogRef: Int,
     val tekst: String,
     val type: NotatType,
     val opprettet: LocalDateTime,

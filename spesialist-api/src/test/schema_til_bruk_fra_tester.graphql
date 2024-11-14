@@ -413,6 +413,7 @@ type Mutation {
 }
 
 type Notat {
+    dialogRef: Int!
     feilregistrert: Boolean!
     feilregistrert_tidspunkt: LocalDateTime
     id: Int!
@@ -531,9 +532,10 @@ type PaVent {
 type PaVentInfo {
     arsaker: [String!]!
     dialogRef: Int!
+    kommentarer: [Kommentar!]!
     opprettet: LocalDateTime!
     saksbehandler: String!
-    tekst: String!
+    tekst: String
     tidsfrist: LocalDate!
 }
 
