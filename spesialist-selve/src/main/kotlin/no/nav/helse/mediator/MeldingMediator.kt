@@ -586,6 +586,7 @@ internal class MeldingMediator(
     }
 
     fun oppdaterInntektskilder(list: Set<Triple<String, String, List<String>>>) {
+        sikkerlogg.info("Lagrer arbeidsgiverinformasjon for ${list.size} inntektskilder")
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             session.transaction { transaction ->
                 list.map { (organisasjonsnummer, navn, bransjer) ->

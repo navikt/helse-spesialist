@@ -136,7 +136,7 @@ internal class Kommandofabrikk(
         val liste =
             inntektskilderRepository.finnInntektskilderSomManglerNavn().let {
                 logg.info("Fant ${it.size} arbeidsgivere det mangler navn for, innhenter for (maks) 15.")
-                it.take(15)
+                it.take(50)
             }
 
         return OpprettEllerOppdaterInntektskilder(
