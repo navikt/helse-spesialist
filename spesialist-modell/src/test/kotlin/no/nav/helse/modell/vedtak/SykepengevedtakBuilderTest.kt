@@ -63,6 +63,7 @@ class SykepengevedtakBuilderTest {
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_HOVEDREGEL))
+            .saksbehandlerVurdering(SaksbehandlerVurdering.Innvilgelse())
             .tags(listOf("IngenNyArbeidsgiverperiode"))
 
         val utkast = builder.build()
@@ -150,13 +151,13 @@ class SykepengevedtakBuilderTest {
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_SKJØNN),
                 utbetalingId = utbetalingId,
                 skjønnsfastsettingopplysninger =
-                    SkjønnsfastsettingopplysningerDto(
-                        "Mal",
-                        "Fritekst",
-                        "Konklusjon",
-                        Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
-                        Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
-                    ),
+                SkjønnsfastsettingopplysningerDto(
+                    "Mal",
+                    "Fritekst",
+                    "Konklusjon",
+                    Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
+                    Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
+                ),
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 avslag = null,
             ),
@@ -190,6 +191,9 @@ class SykepengevedtakBuilderTest {
                     Avslagstype.DELVIS_AVSLAG,
                     "En individuell begrunnelse for avslag"
                 )
+            )
+            .saksbehandlerVurdering(
+                SaksbehandlerVurdering.DelvisAvslag("En individuell begrunnelse for avslag")
             )
             .tags(listOf("IngenNyArbeidsgiverperiode"))
 
@@ -259,6 +263,9 @@ class SykepengevedtakBuilderTest {
                     Avslagstype.AVSLAG,
                     "En individuell begrunnelse for avslag"
                 )
+            )
+            .saksbehandlerVurdering(
+                SaksbehandlerVurdering.Avslag("En individuell begrunnelse for avslag")
             )
             .tags(listOf("IngenNyArbeidsgiverperiode"))
 
@@ -471,7 +478,7 @@ class SykepengevedtakBuilderTest {
     }
 
     @Test
-    fun`Forventer at skjønnsfastsettingData er satt ved bygging av vedtak etter skjønn`() {
+    fun `Forventer at skjønnsfastsettingData er satt ved bygging av vedtak etter skjønn`() {
         val builder = SykepengevedtakBuilder()
         builder
             .fødselsnummer(fødselsnummer)
@@ -565,11 +572,12 @@ class SykepengevedtakBuilderTest {
                     skjønnsfastsatt = 650000.0,
                     tags = mutableSetOf(),
                     arbeidsgivere =
-                        listOf(
-                            Arbeidsgiver.EtterSkjønn(organisasjonsnummer, 300000.0, 300000.0, 325000.0),
-                            Arbeidsgiver.EtterSkjønn("987654321", 300000.0, 300000.0, 325000.0),
-                        ),
+                    listOf(
+                        Arbeidsgiver.EtterSkjønn(organisasjonsnummer, 300000.0, 300000.0, 325000.0),
+                        Arbeidsgiver.EtterSkjønn("987654321", 300000.0, 300000.0, 325000.0),
+                    ),
                 )
+
             ETTER_HOVEDREGEL ->
                 Spleis.EtterHovedregel(
                     omregnetÅrsinntekt = omregnetÅrsinntekt,
@@ -578,11 +586,12 @@ class SykepengevedtakBuilderTest {
                     seksG = seksG2023,
                     tags = mutableSetOf(),
                     arbeidsgivere =
-                        listOf(
-                            Arbeidsgiver.EtterHovedregel(organisasjonsnummer, 300000.0, 300000.0),
-                            Arbeidsgiver.EtterHovedregel("987654321", 300000.0, 300000.0),
-                        ),
+                    listOf(
+                        Arbeidsgiver.EtterHovedregel(organisasjonsnummer, 300000.0, 300000.0),
+                        Arbeidsgiver.EtterHovedregel("987654321", 300000.0, 300000.0),
+                    ),
                 )
+
             I_INFOTRYGD ->
                 Infotrygd(
                     omregnetÅrsinntekt = omregnetÅrsinntekt,

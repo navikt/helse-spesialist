@@ -98,7 +98,8 @@ internal class PgGenerasjonDaoTest : DatabaseIntegrationTest() {
                 tilstand = TilstandDto.KlarTilBehandling,
                 tags = listOf("TAG"),
                 varsler = listOf(varsel),
-                avslag = avslag
+                avslag = avslag,
+                saksbehandlerVurdering = null,
             )
 
         )
@@ -116,7 +117,8 @@ internal class PgGenerasjonDaoTest : DatabaseIntegrationTest() {
                 tilstand = TilstandDto.KlarTilBehandling,
                 tags = listOf("TAG"),
                 varsler = listOf(varsel),
-                avslag = null //Lagres ikke enda
+                avslag = null, //Lagres ikke enda
+                saksbehandlerVurdering = null,
             ),
             funnet.single()
         )

@@ -2,6 +2,7 @@ package no.nav.helse.db
 
 import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.modell.vedtak.AvslagDto
+import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagsdata
 import java.util.UUID
 import javax.sql.DataSource
@@ -87,6 +88,43 @@ class AvslagDao(queryRunner: QueryRunner) : QueryRunner by queryRunner {
                 "begrunnelseRef" to begrunnelseRef,
             ).singleOrNull { avslag ->
                 AvslagDto(enumValueOf(avslag.string("type")), avslag.string("tekst"))
+            }
+        }
+    }
+
+    // TODO: Tabell avslag bør endre navn og mye av denne klassen skal skrives om når vi kommer dit
+    internal fun finnVurdering(
+        vedtaksperiodeId: UUID,
+        generasjonId: Long,
+    ): SaksbehandlerVurderingDto? {
+        return asSQL(
+            """
+            SELECT begrunnelse_ref FROM avslag 
+            WHERE vedtaksperiode_id = :vedtaksperiodeId 
+            AND generasjon_ref = :generasjonId 
+            AND invalidert = false 
+            ORDER BY opprettet DESC LIMIT 1
+            """.trimIndent(),
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            "generasjonId" to generasjonId,
+        ).singleOrNull {
+            it.longOrNull("begrunnelse_ref")?.let { begrunnelseRef ->
+                asSQL(
+                    """
+                    SELECT type, tekst FROM begrunnelse WHERE id = :begrunnelseRef
+                    """.trimIndent(),
+                    "begrunnelseRef" to begrunnelseRef,
+                ).singleOrNull { avslag ->
+                    val vurdering = SaksbehandlerVurderingDto.VurderingDto.valueOf(avslag.string("type"))
+                    val begrunnelse = avslag.string("tekst")
+                    when (vurdering) {
+                        SaksbehandlerVurderingDto.VurderingDto.AVSLAG -> SaksbehandlerVurderingDto.Avslag(begrunnelse)
+                        SaksbehandlerVurderingDto.VurderingDto.DELVIS_AVSLAG -> SaksbehandlerVurderingDto.DelvisAvslag(begrunnelse)
+                        SaksbehandlerVurderingDto.VurderingDto.INNVILGELSE -> throw RuntimeException(
+                            "Innvilgelse bør ikke forekomme før alt dette er skrevet om.",
+                        )
+                    }
+                }
             }
         }
     }

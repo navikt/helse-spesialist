@@ -46,7 +46,8 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
                                             tilstand = TilstandDto.VidereBehandlingAvklares,
                                             tags = emptyList(),
                                             varsler = emptyList(),
-                                            avslag = null
+                                            avslag = null,
+                                            saksbehandlerVurdering = null,
                                         ),
                                     ),
                             ),
@@ -91,7 +92,8 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
                                             tilstand = TilstandDto.VidereBehandlingAvklares,
                                             tags = emptyList(),
                                             varsler = emptyList(),
-                                            avslag = null
+                                            avslag = null,
+                                            saksbehandlerVurdering = null,
                                         ),
                                     ),
                             ),

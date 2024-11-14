@@ -26,6 +26,7 @@ class SykepengevedtakBuilder {
     private var skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlag? = null
     private var skjønnsfastsettingopplysninger: SkjønnsfastsettingopplysningerDto? = null
     private var avslag: AvslagDto? = null
+    private lateinit var saksbehandlerVurdering: SaksbehandlerVurderingDto
     private val tags: MutableSet<String> = mutableSetOf()
     private val tagsForSykepengegrunnlagsfakta: MutableSet<String> = mutableSetOf()
 
@@ -81,10 +82,21 @@ class SykepengevedtakBuilder {
             avslag.byggVedtak(this)
         }
 
+    fun saksbehandlerVurdering(saksbehandlerVurdering: SaksbehandlerVurdering) =
+        apply {
+            saksbehandlerVurdering.byggVedtak(this)
+        }
+
     fun tags(tags: List<String>) =
         apply {
             this.tags.addAll(tags.filterNot { TAGS_SOM_SKAL_LIGGE_I_SYKEPENGEGRUNNLAGSFAKTA.contains(it) })
-            this.tagsForSykepengegrunnlagsfakta.addAll(tags.filter { TAGS_SOM_SKAL_LIGGE_I_SYKEPENGEGRUNNLAGSFAKTA.contains(it) })
+            this.tagsForSykepengegrunnlagsfakta.addAll(
+                tags.filter {
+                    TAGS_SOM_SKAL_LIGGE_I_SYKEPENGEGRUNNLAGSFAKTA.contains(
+                        it,
+                    )
+                },
+            )
         }
 
     fun skjønnsfastsettingData(
@@ -117,6 +129,11 @@ class SykepengevedtakBuilder {
                 begrunnelse,
             )
     }
+
+    fun saksbehandlerVurderingData(saksbehandlerVurdering: SaksbehandlerVurdering) =
+        apply {
+            this.saksbehandlerVurdering = saksbehandlerVurdering.toDto()
+        }
 
     fun build(): Sykepengevedtak {
         if (utbetalingId != null && sykepengegrunnlagsfakta != null) return buildVedtak()

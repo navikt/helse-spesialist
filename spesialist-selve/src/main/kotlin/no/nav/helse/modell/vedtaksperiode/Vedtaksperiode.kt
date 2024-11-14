@@ -8,6 +8,8 @@ import no.nav.helse.modell.vedtak.Avslag
 import no.nav.helse.modell.vedtak.Avslagstype
 import no.nav.helse.modell.vedtak.AvslagstypeDto
 import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
+import no.nav.helse.modell.vedtak.SaksbehandlerVurdering
+import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForSpleisBehandling
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnSisteGenerasjonUtenSpleisBehandlingId
@@ -225,6 +227,14 @@ internal class Vedtaksperiode private constructor(
                                 },
                             begrunnelse = it.begrunnelse,
                         )
+                    },
+                saksbehandlerVurdering =
+                    saksbehandlerVurdering?.let {
+                        when (it) {
+                            is SaksbehandlerVurderingDto.Avslag -> SaksbehandlerVurdering.Avslag(it.begrunnelse)
+                            is SaksbehandlerVurderingDto.DelvisAvslag -> SaksbehandlerVurdering.DelvisAvslag(it.begrunnelse)
+                            is SaksbehandlerVurderingDto.Innvilgelse -> SaksbehandlerVurdering.Innvilgelse(it.begrunnelse)
+                        }
                     },
                 varsler =
                     varsler

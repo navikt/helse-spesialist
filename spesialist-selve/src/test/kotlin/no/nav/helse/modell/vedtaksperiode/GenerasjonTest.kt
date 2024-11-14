@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -517,7 +516,8 @@ internal class GenerasjonTest {
                 TilstandDto.KlarTilBehandling,
                 tags,
                 listOf(varsel.toDto()),
-                null
+                null,
+                null,
             ),
             dto,
         )

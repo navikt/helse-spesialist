@@ -42,6 +42,7 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
                     tags = row.array<String>("tags").toList(),
                     varsler = finnVarsler(generasjonRef),
                     avslag = AvslagDao(queryRunner).finnAvslag(vedtaksperiodeId, generasjonRef),
+                    saksbehandlerVurdering = AvslagDao(queryRunner).finnVurdering(vedtaksperiodeId, generasjonRef),
                 )
             }
     }

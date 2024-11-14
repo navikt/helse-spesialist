@@ -42,7 +42,8 @@ class GenerasjonServiceTest: DatabaseIntegrationTest() {
                         tilstand = TilstandDto.VidereBehandlingAvklares,
                         emptyList(),
                         emptyList(),
-                        null
+                        null,
+                        null,
                     ),
                 )
             ),
@@ -62,7 +63,8 @@ class GenerasjonServiceTest: DatabaseIntegrationTest() {
                         tilstand = TilstandDto.VidereBehandlingAvklares,
                         emptyList(),
                         emptyList(),
-                        null
+                        null,
+                        null,
                     ),
                 )
             )
