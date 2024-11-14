@@ -142,7 +142,7 @@ data class Person(
         }.toSet().map { orgnr ->
             TilleggsinfoForInntektskilde(
                 orgnummer = orgnr,
-                navn = arbeidsgiverApiDao.finnNavn(orgnr) ?: "Ikke tilgjengelig",
+                navn = arbeidsgiverApiDao.finnNavn(orgnr) ?: "navn er utilgjengelig",
             )
         }
     }
@@ -153,7 +153,7 @@ data class Person(
         return snapshot.arbeidsgivere.map { arbeidsgiver ->
             Arbeidsgiver(
                 organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-                navn = arbeidsgiverApiDao.finnNavn(arbeidsgiver.organisasjonsnummer) ?: "Ikke tilgjengelig",
+                navn = arbeidsgiverApiDao.finnNavn(arbeidsgiver.organisasjonsnummer) ?: "navn er utilgjengelig",
                 bransjer = arbeidsgiverApiDao.finnBransjer(arbeidsgiver.organisasjonsnummer),
                 ghostPerioder = arbeidsgiver.ghostPerioder.tilGhostPerioder(arbeidsgiver.organisasjonsnummer),
                 nyeInntektsforholdPerioder = arbeidsgiver.nyeInntektsforholdPerioder.tilNyeInntektsforholdPerioder(),
