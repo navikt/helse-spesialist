@@ -16,7 +16,6 @@ import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
-import no.nav.helse.mediator.meldinger.Melding
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.MeldingDao
@@ -32,7 +31,6 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.CommandContextDao
 import no.nav.helse.modell.kommando.LøsGodkjenningsbehov
-import no.nav.helse.modell.kommando.OpprettEllerOppdaterInntektskilder
 import no.nav.helse.modell.kommando.OverstyringIgangsattCommand
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.kommando.TilbakedateringGodkjentCommand
@@ -74,7 +72,7 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 import javax.sql.DataSource
 
-internal typealias Kommandostarter = Melding.(Kommandofabrikk.() -> Command?) -> Unit
+internal typealias Kommandostarter = Personmelding.(Kommandofabrikk.() -> Command?) -> Unit
 
 internal class Kommandofabrikk(
     private val dataSource: DataSource,
@@ -128,23 +126,6 @@ internal class Kommandofabrikk(
             godkjenningMediator = GodkjenningMediator(OpptegnelseDao(transactionalSession)),
             godkjenningsbehov = godkjenningsbehovData,
             automatiseringRepository = AutomatiseringDao(transactionalSession),
-        )
-    }
-
-    internal fun innhentArbeidsgivernavn(
-        batchSize: Int,
-        session: Session,
-    ): OpprettEllerOppdaterInntektskilder {
-        val inntektskilderRepository = InntektskilderDao(session)
-        val liste =
-            inntektskilderRepository.finnInntektskilderSomManglerNavnForAktiveOppgaver().let {
-                logg.info("Fant ${it.size} arbeidsgivere det mangler navn for, innhenter for (maks) $batchSize.")
-                it.take(batchSize)
-            }
-
-        return OpprettEllerOppdaterInntektskilder(
-            liste,
-            inntektskilderRepository,
         )
     }
 

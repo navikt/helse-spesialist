@@ -1,14 +1,11 @@
 package no.nav.helse.db
 
 import kotliquery.Session
-import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.HelseDao.Companion.asSQLWithQuestionMarks
 import no.nav.helse.HelseDao.Companion.list
 import no.nav.helse.modell.InntektskildeDto
-import no.nav.helse.modell.Inntektskildetype
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
-import no.nav.helse.modell.NyInntektskilde
 import no.nav.helse.modell.NyInntektskildeDto
 
 internal class InntektskilderDao(
@@ -44,32 +41,6 @@ internal class InntektskilderDao(
         val nyeInntektskilder = alleOrganisasjonsnumre.organisasjonsnumreSomIkkeFinnesI(eksisterendeInntektskilder)
         return eksisterendeInntektskilder + nyeInntektskilder
     }
-
-    override fun finnInntektskilderSomManglerNavnForAktiveOppgaver() =
-        asSQL(
-            """
-            with utvalg as (
-                select p.id from person p
-                join vedtak v on p.id = v.person_ref
-                join oppgave o on v.id = o.vedtak_ref and o.status = 'AvventerSaksbehandler'
-            )
-            select organisasjonsnummer
-            from utvalg u
-            join vedtak v on u.id = v.person_ref
-            join arbeidsgiver a on v.arbeidsgiver_ref = a.id
-            left join arbeidsgiver_navn an on a.navn_ref = an.id
-            where an.id is null;
-            """.trimIndent(),
-        ).list(session) {
-            it.string("organisasjonsnummer")
-        }.map {
-            val type =
-                when {
-                    it.length == 9 -> Inntektskildetype.ORDINÆR
-                    else -> Inntektskildetype.ENKELTPERSONFORETAK
-                }
-            NyInntektskilde(it, type)
-        }
 
     private fun List<String>.organisasjonsnumreSomIkkeFinnesI(inntektskilder: List<InntektskildeDto>) =
         filterNot { organisasjonsnummer -> organisasjonsnummer in inntektskilder.map { it.identifikator } }

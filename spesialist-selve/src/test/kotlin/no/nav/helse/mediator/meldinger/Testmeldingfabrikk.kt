@@ -326,7 +326,7 @@ internal object Testmeldingfabrikk {
 
     fun lagArbeidsgiverinformasjonløsning(
         aktørId: String,
-        fødselsnummer: String?,
+        fødselsnummer: String,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
         ekstraArbeidsgivere: List<ArbeidsgiverinformasjonJson> = emptyList(),
@@ -339,17 +339,14 @@ internal object Testmeldingfabrikk {
             "@behov" to listOf("Arbeidsgiverinformasjon"),
             "hendelseId" to "$hendelseId",
             "contextId" to "$contextId",
+            "vedtaksperiodeId" to "$vedtaksperiodeId",
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId,
             "orgnummer" to organisasjonsnummer,
             "@løsning" to mapOf(
                 "Arbeidsgiverinformasjon" to arbeidsgiverinformasjon(ekstraArbeidsgivere)
             )
-        ).toMutableMap().apply {
-            if (fødselsnummer != null) {
-                put("aktørId", aktørId)
-                put("fødselsnummer", fødselsnummer)
-                put("vedtaksperiodeId", vedtaksperiodeId)
-            }
-        }
+        )
     )
 
     fun lagArbeidsgiverinformasjonKomposittLøsning(
@@ -729,10 +726,6 @@ internal object Testmeldingfabrikk {
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId
         )
-    )
-
-    fun lagInnhentArbeidsgivernavn(id: UUID) = nyHendelse(
-        id = id, navn = "innhent_arbeidsgivernavn", hendelse = mapOf("batchSize" to 99)
     )
 
     fun lagSaksbehandlerløsning(
