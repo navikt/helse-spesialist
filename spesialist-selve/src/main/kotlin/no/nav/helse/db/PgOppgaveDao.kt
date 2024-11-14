@@ -296,8 +296,8 @@ class PgOppgaveDao(
                     END
                 AND
                     CASE
-                        WHEN :tildelt THEN t.saksbehandler_ref IS NOT NULL
-                        WHEN :tildelt = false THEN t.saksbehandler_ref IS NULL
+                        WHEN :tildelt THEN t.oppgave_id_ref IS NOT NULL
+                        WHEN :tildelt = false THEN t.oppgave_id_ref IS NULL
                         ELSE true
                     END
             ORDER BY $orderBy NULLS LAST
