@@ -20,7 +20,6 @@ import no.nav.helse.spesialist.api.graphql.schema.Arbeidsforholdoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Dagoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Inntektoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Lovhjemmel
-import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.Person
@@ -152,18 +151,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
-        håndterOverstyrArbeidsforhold(
-            overstyrteArbeidsforhold =
-                listOf(
-                    OverstyringArbeidsforhold(
-                        orgnummer = ORGNR,
-                        deaktivert = true,
-                        begrunnelse = "begrunnelse",
-                        forklaring = "forklaring",
-                        lovhjemmel = Lovhjemmel("8-15", null, null, "folketrygdloven", "1998-12-18"),
-                    ),
-                ),
-        )
+        håndterOverstyrArbeidsforhold()
         assertOppgaver(UTBETALING_ID, "AvventerSaksbehandler", 0)
         assertOverstyrArbeidsforhold(FØDSELSNUMMER, 1)
 
