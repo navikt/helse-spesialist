@@ -67,6 +67,21 @@ internal class InntektskilderDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `når arbeidsgiver har fødselsnummer som id og starter med annet siffer enn 0 får vi riktig fødselsnummer ut igjen`() {
+        val identifikator = lagFødselsnummer().replaceFirstChar { "1" }
+        val navn = lagOrganisasjonsnavn()
+
+        opprettArbeidsgiver(identifikator, navn, listOf("Uteliv", "Reise"))
+        val funnet = dao.finnInntektskilder(lagFødselsnummer(), listOf(identifikator))
+        assertEquals(1, funnet.size)
+        val dto = funnet.single()
+        check(dto is KomplettInntektskildeDto)
+        assertEquals(identifikator, dto.identifikator)
+        assertEquals(navn, dto.navn)
+        assertEquals(listOf("Uteliv", "Reise"), dto.bransjer)
+    }
+
+    @Test
     fun `når noen arbeidsgivere finnes i db og andre ikke får vi tilbake en kombinasjon av eksisterende og nye inntektskilder`() {
         val organisasjonsnummer1 = lagOrganisasjonsnummer()
         val organisasjonsnummer2 = lagOrganisasjonsnummer()

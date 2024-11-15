@@ -59,7 +59,7 @@ internal class InntektskilderDao(
         ).list(session) {
             val identifikator = it.string("organisasjonsnummer")
             KomplettInntektskildeDto(
-                identifikator = organisasjonsnummerEllerFødselsnummer(identifikator),
+                identifikator = identifikator,
                 type = inntektskildetype(identifikator),
                 navn = it.string("navn"),
                 bransjer =
@@ -85,12 +85,4 @@ internal class InntektskilderDao(
             organisasjonsnummer.length == 9 -> InntektskildetypeDto.ORDINÆR
             else -> InntektskildetypeDto.ENKELTPERSONFORETAK
         }
-
-    private fun organisasjonsnummerEllerFødselsnummer(organisasjonsnummer: String): String =
-        when {
-            organisasjonsnummer.length == 10 -> organisasjonsnummer.toFødselsnummer()
-            else -> organisasjonsnummer
-        }
-
-    private fun String.toFødselsnummer() = "0$this"
 }
