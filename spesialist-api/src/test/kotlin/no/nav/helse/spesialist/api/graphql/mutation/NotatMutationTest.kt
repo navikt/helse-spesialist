@@ -31,8 +31,9 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
     fun `feilregistrerer kommentar`() {
         opprettSaksbehandler()
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        val notatId = opprettNotat()!!
-        val kommentarId = opprettKommentar(notatRef = notatId.toInt())
+        val dialogRef = opprettDialog()!!
+        opprettNotat(dialogRef = dialogRef)!!
+        val kommentarId = opprettKommentar(dialogRef = dialogRef)
 
         val body =
             runQuery(

@@ -535,7 +535,7 @@ data class BeregnetPeriode(
                             frist = frist,
                             notatTekst = notatTekst,
                             kommentarer =
-                                notatDao.finnKommentarerMedDialogRef(it.dialogRef!!).map { kommentar ->
+                                notatDao.finnKommentarer(it.dialogRef!!.toLong()).map { kommentar ->
                                     Kommentar(
                                         id = kommentar.id,
                                         tekst = kommentar.tekst,

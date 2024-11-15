@@ -101,27 +101,16 @@ class NotatApiDao(
             )
             SELECT *
             FROM inserted AS i
-            INNER JOIN notat n on n.id = i.notat_ref
+            INNER JOIN notat n on n.dialog_ref = i.dialog_ref
             """.trimIndent(),
             "kommentarId" to kommentarId,
         ).singleOrNull { mapKommentarDto(it) }
 
-    private fun finnKommentarer(notatId: Int): List<KommentarDto> =
-        asSQL(
-            """
-            select k.id, k.tekst, k.feilregistrert_tidspunkt, k.opprettet, k.saksbehandlerident
-            from kommentarer k
-            inner join notat n on n.id = k.notat_ref
-            where n.id = :notatId
-            """.trimIndent(),
-            "notatId" to notatId,
-        ).list { mapKommentarDto(it) }
-
-    fun finnKommentarerMedDialogRef(dialogRef: Int): List<KommentarDto> =
+    fun finnKommentarer(dialogRef: Long): List<KommentarDto> =
         asSQL(
             """
             select id, tekst, feilregistrert_tidspunkt, opprettet, saksbehandlerident
-            from kommentarer k
+            from kommentarer
             where dialog_ref = :dialogRef
             """.trimIndent(),
             "dialogRef" to dialogRef,
@@ -141,7 +130,7 @@ class NotatApiDao(
             feilregistrert = it.boolean("feilregistrert"),
             feilregistrert_tidspunkt = it.localDateTimeOrNull("feilregistrert_tidspunkt"),
             type = NotatType.valueOf(it.string("type")),
-            kommentarer = finnKommentarer(it.int("id")),
+            kommentarer = finnKommentarer(it.long("dialog_ref")),
         )
 
     private fun mapKommentarDto(it: Row): KommentarDto =

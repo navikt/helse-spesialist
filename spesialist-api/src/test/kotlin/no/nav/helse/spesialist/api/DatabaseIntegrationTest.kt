@@ -348,6 +348,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         tekst: String = "Et notat",
         saksbehandlerOid: UUID = SAKSBEHANDLER.oid,
         vedtaksperiodeId: UUID = PERIODE.id,
+        dialogRef: Long = opprettDialog()!!,
     ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         @Language("PostgreSQL")
         val statement =
@@ -359,24 +360,24 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                 saksbehandlerOid,
                 vedtaksperiodeId,
                 NotatType.Generelt.name,
-                opprettDialog(),
+                dialogRef,
             ).asUpdateAndReturnGeneratedKey,
         )
     }
 
     protected fun opprettKommentar(
         tekst: String = "En kommentar",
-        notatRef: Int,
         saksbehandlerIdent: String = SAKSBEHANDLER.ident,
+        dialogRef: Long = opprettDialog()!!,
     ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         @Language("PostgreSQL")
-        val statement = "INSERT INTO kommentarer(tekst, notat_ref, saksbehandlerident) VALUES (?, ?, ?)"
+        val statement = "INSERT INTO kommentarer(tekst, saksbehandlerident, dialog_ref) VALUES (?, ?, ?)"
         session.run(
             queryOf(
                 statement,
                 tekst,
-                notatRef,
                 saksbehandlerIdent,
+                dialogRef,
             ).asUpdateAndReturnGeneratedKey,
         )
     }
