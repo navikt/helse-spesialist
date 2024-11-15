@@ -364,8 +364,8 @@ internal class PersonRepository(
         @Language("PostgreSQL")
         val query = """
             DELETE FROM kommentarer 
-            WHERE notat_ref IN (
-                SELECT n.id 
+            WHERE dialog_ref IN (
+                SELECT n.dialog_ref 
                 FROM notat n 
                     INNER JOIN vedtak v ON n.vedtaksperiode_id = v.vedtaksperiode_id 
                 WHERE v.person_ref = ?

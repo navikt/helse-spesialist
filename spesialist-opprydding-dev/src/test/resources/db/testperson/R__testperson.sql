@@ -83,8 +83,8 @@ INSERT INTO dialog(id, opprettet)
 VALUES (${sequence_number}, now());
 INSERT INTO notat(id, tekst, opprettet, saksbehandler_oid, vedtaksperiode_id, feilregistrert, feilregistrert_tidspunkt, dialog_ref)
 VALUES (${sequence_number}, 'TEST_TEXT', now(), '${saksbehandler_oid}', '${vedtaksperiode_id}', false, now(), ${sequence_number});
-INSERT INTO kommentarer(tekst, notat_ref, feilregistrert_tidspunkt, saksbehandlerident, dialog_ref)
-VALUES ('EN_KOMMENTAR', ${sequence_number}, null, '${saksbehandler_oid}', ${sequence_number});
+INSERT INTO kommentarer(tekst, feilregistrert_tidspunkt, saksbehandlerident, dialog_ref)
+VALUES ('EN_KOMMENTAR', null, '${saksbehandler_oid}', ${sequence_number});
 
 INSERT INTO overstyring(id, tidspunkt, person_ref, hendelse_ref, saksbehandler_ref, vedtaksperiode_id)
 VALUES (${sequence_number}, now(), ${sequence_number}, '${hendelse_id}',
