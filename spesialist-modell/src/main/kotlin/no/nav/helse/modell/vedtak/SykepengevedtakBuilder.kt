@@ -26,7 +26,7 @@ class SykepengevedtakBuilder {
     private var skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlag? = null
     private var skjønnsfastsettingopplysninger: SkjønnsfastsettingopplysningerDto? = null
     private var avslag: AvslagDto? = null
-    private lateinit var saksbehandlerVurdering: SaksbehandlerVurderingDto
+    private var saksbehandlerVurdering: SaksbehandlerVurderingDto? = null // TODO: Endre denne til not null (lateinit) når avslag er erstattet av denne
     private val tags: MutableSet<String> = mutableSetOf()
     private val tagsForSykepengegrunnlagsfakta: MutableSet<String> = mutableSetOf()
 
@@ -200,6 +200,7 @@ class SykepengevedtakBuilder {
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
             tags = tags,
             avslag = avslag,
+            saksbehandlerVurdering = saksbehandlerVurdering,
         )
     }
 
@@ -228,6 +229,7 @@ class SykepengevedtakBuilder {
             skjønnsfastsettingopplysninger = null,
             tags = tags,
             avslag = avslag,
+            saksbehandlerVurdering = saksbehandlerVurdering,
         )
     }
 

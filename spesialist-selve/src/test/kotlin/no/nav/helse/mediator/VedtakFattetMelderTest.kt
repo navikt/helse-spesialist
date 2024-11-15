@@ -5,6 +5,7 @@ import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.januar
 import no.nav.helse.modell.vedtak.AvslagDto
 import no.nav.helse.modell.vedtak.AvslagstypeDto
+import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingopplysningerDto
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingstype
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingsårsak
@@ -116,8 +117,9 @@ internal class VedtakFattetMelderTest {
                     ),
                 skjønnsfastsettingopplysninger = null,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-            avslag = null,
-        )
+                avslag = null,
+                saksbehandlerVurdering = null,
+            )
         vedtakFattetMelder.vedtakFattet(infotrygd)
         vedtakFattetMelder.publiserUtgåendeMeldinger()
         val eventer = testRapid.inspektør.meldinger()
@@ -190,8 +192,9 @@ internal class VedtakFattetMelderTest {
                     ),
                 skjønnsfastsettingopplysninger = null,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-            avslag = null,
-        )
+                avslag = null,
+                saksbehandlerVurdering = null,
+            )
         vedtakFattetMelder.vedtakFattet(infotrygd)
         vedtakFattetMelder.publiserUtgåendeMeldinger()
         val eventer = testRapid.inspektør.meldinger()
@@ -279,6 +282,7 @@ internal class VedtakFattetMelderTest {
                 skjønnsfastsettingopplysninger = null,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 avslag = AvslagDto(AvslagstypeDto.DELVIS_AVSLAG, "En individuell begrunnelse"),
+                saksbehandlerVurdering = SaksbehandlerVurderingDto.DelvisAvslag("En individuell begrunnelse"),
         )
         vedtakFattetMelder.vedtakFattet(spleis)
         vedtakFattetMelder.publiserUtgåendeMeldinger()
@@ -374,16 +378,17 @@ internal class VedtakFattetMelderTest {
                         skjønnsfastsatt = 13000.0,
                     ),
                 skjønnsfastsettingopplysninger =
-                    SkjønnsfastsettingopplysningerDto(
-                        "Mal",
-                        "Fritekst",
-                        "Konklusjon",
-                        Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
-                        Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
-                    ),
+                SkjønnsfastsettingopplysningerDto(
+                    "Mal",
+                    "Fritekst",
+                    "Konklusjon",
+                    Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
+                    Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
+                ),
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-            avslag = null,
-        )
+                avslag = null,
+                saksbehandlerVurdering = null,
+            )
         vedtakFattetMelder.vedtakFattet(infotrygd)
         vedtakFattetMelder.publiserUtgåendeMeldinger()
         val eventer = testRapid.inspektør.meldinger()
@@ -485,14 +490,14 @@ internal class VedtakFattetMelderTest {
                         seksG = 711720.0,
                         tags = mutableSetOf(),
                         arbeidsgivere =
-                            listOf(
-                                Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
-                                    organisasjonsnummer = ORGANISASJONSNUMMER,
-                                    omregnetÅrsinntekt = 10000.0,
-                                    skjønnsfastsatt = 13000.0,
-                                    innrapportertÅrsinntekt = 13000.0,
-                                ),
+                        listOf(
+                            Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
+                                organisasjonsnummer = ORGANISASJONSNUMMER,
+                                omregnetÅrsinntekt = 10000.0,
+                                skjønnsfastsatt = 13000.0,
+                                innrapportertÅrsinntekt = 13000.0,
                             ),
+                        ),
                         skjønnsfastsatt = 13000.0,
                     ),
                 skjønnsfastsettingopplysninger =
@@ -504,11 +509,9 @@ internal class VedtakFattetMelderTest {
                         Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
                     ),
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-            avslag = AvslagDto(
-                AvslagstypeDto.AVSLAG,
-                "En individuell begrunnelse"
-            ),
-        )
+                avslag = AvslagDto(AvslagstypeDto.AVSLAG, "En individuell begrunnelse"),
+                saksbehandlerVurdering = SaksbehandlerVurderingDto.Avslag("En individuell begrunnelse")
+            )
         vedtakFattetMelder.vedtakFattet(infotrygd)
         vedtakFattetMelder.publiserUtgåendeMeldinger()
         val eventer = testRapid.inspektør.meldinger()

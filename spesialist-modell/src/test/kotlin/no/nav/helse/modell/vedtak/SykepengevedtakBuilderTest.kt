@@ -44,8 +44,7 @@ class SykepengevedtakBuilderTest {
 
     @Test
     fun `Bygg vanlig vedtak - sykepengegrunnlag fastsatt etter hovedregel`() {
-        val builder = SykepengevedtakBuilder()
-        builder
+        val utkast = SykepengevedtakBuilder()
             .fødselsnummer(fødselsnummer)
             .aktørId(aktørId)
             .organisasjonsnummer(organisasjonsnummer)
@@ -65,8 +64,8 @@ class SykepengevedtakBuilderTest {
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_HOVEDREGEL))
             .saksbehandlerVurdering(SaksbehandlerVurdering.Innvilgelse())
             .tags(listOf("IngenNyArbeidsgiverperiode"))
+            .build()
 
-        val utkast = builder.build()
         assertTrue(utkast is Sykepengevedtak.Vedtak)
         assertEquals(
             Sykepengevedtak.Vedtak(
@@ -90,6 +89,7 @@ class SykepengevedtakBuilderTest {
                 skjønnsfastsettingopplysninger = null,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 avslag = null,
+                saksbehandlerVurdering = SaksbehandlerVurdering.Innvilgelse().toDto(),
             ),
             utkast,
         )
@@ -97,8 +97,7 @@ class SykepengevedtakBuilderTest {
 
     @Test
     fun `Bygg vanlig vedtak - sykepengegrunnlag fastsatt skjønn`() {
-        val builder = SykepengevedtakBuilder()
-        builder
+        val utkast = SykepengevedtakBuilder()
             .fødselsnummer(fødselsnummer)
             .aktørId(aktørId)
             .organisasjonsnummer(organisasjonsnummer)
@@ -128,8 +127,9 @@ class SykepengevedtakBuilderTest {
                 ),
             )
             .tags(listOf("IngenNyArbeidsgiverperiode"))
+            .saksbehandlerVurdering(SaksbehandlerVurdering.Innvilgelse())
+            .build()
 
-        val utkast = builder.build()
         assertTrue(utkast is Sykepengevedtak.Vedtak)
         assertEquals(
             Sykepengevedtak.Vedtak(
@@ -160,6 +160,7 @@ class SykepengevedtakBuilderTest {
                 ),
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 avslag = null,
+                saksbehandlerVurdering = SaksbehandlerVurdering.Innvilgelse().toDto(),
             ),
             utkast,
         )
@@ -167,8 +168,7 @@ class SykepengevedtakBuilderTest {
 
     @Test
     fun `Bygg vanlig vedtak - med delvis avslag`() {
-        val builder = SykepengevedtakBuilder()
-        builder
+        val utkast = SykepengevedtakBuilder()
             .fødselsnummer(fødselsnummer)
             .aktørId(aktørId)
             .organisasjonsnummer(organisasjonsnummer)
@@ -196,8 +196,8 @@ class SykepengevedtakBuilderTest {
                 SaksbehandlerVurdering.DelvisAvslag("En individuell begrunnelse for avslag")
             )
             .tags(listOf("IngenNyArbeidsgiverperiode"))
+            .build()
 
-        val utkast = builder.build()
         assertTrue(utkast is Sykepengevedtak.Vedtak)
         assertEquals(
             Sykepengevedtak.Vedtak(
@@ -221,6 +221,7 @@ class SykepengevedtakBuilderTest {
                 skjønnsfastsettingopplysninger = null,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 avslag = AvslagDto(AvslagstypeDto.DELVIS_AVSLAG, "En individuell begrunnelse for avslag"),
+                saksbehandlerVurdering = SaksbehandlerVurderingDto.DelvisAvslag("En individuell begrunnelse for avslag"),
             ),
             utkast,
         )
@@ -228,8 +229,7 @@ class SykepengevedtakBuilderTest {
 
     @Test
     fun `Bygg vanlig vedtak - sykepengegrunnlag fastsatt skjønn med avslag`() {
-        val builder = SykepengevedtakBuilder()
-        builder
+        val utkast = SykepengevedtakBuilder()
             .fødselsnummer(fødselsnummer)
             .aktørId(aktørId)
             .organisasjonsnummer(organisasjonsnummer)
@@ -268,8 +268,8 @@ class SykepengevedtakBuilderTest {
                 SaksbehandlerVurdering.Avslag("En individuell begrunnelse for avslag")
             )
             .tags(listOf("IngenNyArbeidsgiverperiode"))
+            .build()
 
-        val utkast = builder.build()
         assertTrue(utkast is Sykepengevedtak.Vedtak)
         assertEquals(
             Sykepengevedtak.Vedtak(
@@ -300,6 +300,7 @@ class SykepengevedtakBuilderTest {
                 ),
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 avslag = AvslagDto(AvslagstypeDto.AVSLAG, "En individuell begrunnelse for avslag"),
+                saksbehandlerVurdering = SaksbehandlerVurderingDto.Avslag("En individuell begrunnelse for avslag"),
             ),
             utkast,
         )
@@ -307,8 +308,7 @@ class SykepengevedtakBuilderTest {
 
     @Test
     fun `Bygg vanlig vedtak - sykepengegrunnlag fastsatt i Infotrygd`() {
-        val builder = SykepengevedtakBuilder()
-        builder
+        val utkast = SykepengevedtakBuilder()
             .fødselsnummer(fødselsnummer)
             .aktørId(aktørId)
             .organisasjonsnummer(organisasjonsnummer)
@@ -327,8 +327,9 @@ class SykepengevedtakBuilderTest {
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(I_INFOTRYGD))
             .tags(listOf("IngenNyArbeidsgiverperiode"))
+            .saksbehandlerVurdering(SaksbehandlerVurdering.Innvilgelse())
+            .build()
 
-        val utkast = builder.build()
         assertTrue(utkast is Sykepengevedtak.Vedtak)
         assertEquals(
             Sykepengevedtak.Vedtak(
@@ -352,6 +353,7 @@ class SykepengevedtakBuilderTest {
                 skjønnsfastsettingopplysninger = null,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 avslag = null,
+                saksbehandlerVurdering = SaksbehandlerVurderingDto.Innvilgelse(),
             ),
             utkast,
         )
@@ -359,8 +361,7 @@ class SykepengevedtakBuilderTest {
 
     @Test
     fun `Bygg AUU-vedtak`() {
-        val builder = SykepengevedtakBuilder()
-        builder
+        val utkast = SykepengevedtakBuilder()
             .fødselsnummer(fødselsnummer)
             .aktørId(aktørId)
             .organisasjonsnummer(organisasjonsnummer)
@@ -377,8 +378,8 @@ class SykepengevedtakBuilderTest {
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .tags(listOf("IngenNyArbeidsgiverperiode"))
+            .build()
 
-        val utkast = builder.build()
         assertTrue(utkast is Sykepengevedtak.AuuVedtak)
         assertEquals(
             Sykepengevedtak.AuuVedtak(
@@ -406,7 +407,6 @@ class SykepengevedtakBuilderTest {
     @Test
     fun `Mangel på både utbetalingId og sykepengegrunnlagsfakta medfører AUU-vedtak`() {
         val builder = SykepengevedtakBuilder()
-        builder
             .fødselsnummer(fødselsnummer)
             .aktørId(aktørId)
             .organisasjonsnummer(organisasjonsnummer)
@@ -430,7 +430,6 @@ class SykepengevedtakBuilderTest {
     @Test
     fun `Mangel på sykepengegrunnlagsfakta medfører bygging av AUU-vedtak`() {
         val builder = SykepengevedtakBuilder()
-        builder
             .fødselsnummer(fødselsnummer)
             .aktørId(aktørId)
             .organisasjonsnummer(organisasjonsnummer)
@@ -455,7 +454,6 @@ class SykepengevedtakBuilderTest {
     @Test
     fun `Mangel på utbetalingId medfører bygging av AUU-vedtak`() {
         val builder = SykepengevedtakBuilder()
-        builder
             .fødselsnummer(fødselsnummer)
             .aktørId(aktørId)
             .organisasjonsnummer(organisasjonsnummer)
@@ -480,7 +478,6 @@ class SykepengevedtakBuilderTest {
     @Test
     fun `Forventer at skjønnsfastsettingData er satt ved bygging av vedtak etter skjønn`() {
         val builder = SykepengevedtakBuilder()
-        builder
             .fødselsnummer(fødselsnummer)
             .aktørId(aktørId)
             .organisasjonsnummer(organisasjonsnummer)
@@ -504,8 +501,7 @@ class SykepengevedtakBuilderTest {
 
     @Test
     fun `Benytter ikke opplysninger fra skjønnsfastsetting selv om det er satt, ved bygging etter hovedregel`() {
-        val builder = SykepengevedtakBuilder()
-        builder
+        val utkast = SykepengevedtakBuilder()
             .fødselsnummer(fødselsnummer)
             .aktørId(aktørId)
             .organisasjonsnummer(organisasjonsnummer)
@@ -531,8 +527,9 @@ class SykepengevedtakBuilderTest {
                 Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
             )
             .tags(listOf("IngenNyArbeidsgiverperiode"))
+            .saksbehandlerVurdering(SaksbehandlerVurdering.Innvilgelse())
+            .build()
 
-        val utkast = builder.build()
         assertTrue(utkast is Sykepengevedtak.Vedtak)
         assertEquals(
             Sykepengevedtak.Vedtak(
@@ -556,6 +553,7 @@ class SykepengevedtakBuilderTest {
                 skjønnsfastsettingopplysninger = null,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 avslag = null,
+                saksbehandlerVurdering = SaksbehandlerVurderingDto.Innvilgelse(),
             ),
             utkast,
         )

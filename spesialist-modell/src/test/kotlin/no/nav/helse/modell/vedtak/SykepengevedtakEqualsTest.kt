@@ -289,7 +289,8 @@ class SykepengevedtakEqualsTest {
         sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
         utbetalingId: UUID = Companion.utbetalingId,
         skjønnsfastsettingopplysninger: SkjønnsfastsettingopplysningerDto? = null,
-        avslag: AvslagDto? = null
+        avslag: AvslagDto? = null,
+        saksbehandlerVurdering: SaksbehandlerVurderingDto? = null,
     ) = Sykepengevedtak.Vedtak(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId,
@@ -311,6 +312,7 @@ class SykepengevedtakEqualsTest {
         vedtakFattetTidspunkt = vedtakFattetTidspunkt,
         tags = tags,
         avslag = avslag,
+        saksbehandlerVurdering = saksbehandlerVurdering,
     )
 
     private fun sykepengegrunnlagsfakta(faktatype: Faktatype): Sykepengegrunnlagsfakta {
