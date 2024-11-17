@@ -73,6 +73,16 @@ class Subsumsjon(
         override fun ekstraSporing(): Map<String, List<String>> = mapOf("saksbehandler" to saksbehandler)
     }
 
+    class SporingVurdertMinimumSykdomsgrad(
+        vedtaksperioder: List<UUID>,
+        organisasjonsnummer: List<String>,
+        private val saksbehandler: List<String>,
+        private val minimumSykdomsgradId: UUID,
+    ) : Sporing(vedtaksperioder, organisasjonsnummer) {
+        override fun ekstraSporing(): Map<String, List<String>> =
+            mapOf("saksbehandler" to saksbehandler, "vurdertMinimumSykdomsgrad" to listOf(minimumSykdomsgradId.toString()))
+    }
+
     enum class Utfall {
         VILKAR_BEREGNET,
         VILKAR_OPPFYLT,

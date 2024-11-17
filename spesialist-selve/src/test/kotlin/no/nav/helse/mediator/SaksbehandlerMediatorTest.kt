@@ -765,25 +765,35 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `håndterer vurdering ok av minimum sykdomsgrad`() {
+    fun `håndterer vurdering av minimum sykdomsgrad`() {
         nyPerson(fødselsnummer = FØDSELSNUMMER, organisasjonsnummer = ORGANISASJONSNUMMER, aktørId = AKTØR_ID)
         val minimumSykdomsgrad =
             MinimumSykdomsgrad(
                 fodselsnummer = FØDSELSNUMMER,
                 aktorId = AKTØR_ID,
-                perioderVurdertOk = listOf(MinimumSykdomsgrad.Periode(
-                    fom = 1.januar,
-                    tom = 31.januar
-                )),
-                perioderVurdertIkkeOk = emptyList(),
+                perioderVurdertOk = listOf(
+                    MinimumSykdomsgrad.Periode(
+                        fom = 1.januar,
+                        tom = 15.januar
+                    ), MinimumSykdomsgrad.Periode(
+                        fom = 30.januar,
+                        tom = 31.januar
+                    )
+                ),
+                perioderVurdertIkkeOk = listOf(
+                    MinimumSykdomsgrad.Periode(
+                        fom = 16.januar,
+                        tom = 29.januar
+                    )
+                ),
                 begrunnelse = "en begrunnelse",
                 arbeidsgivere =
-                    listOf(
-                        MinimumSykdomsgrad.Arbeidsgiver(
-                            organisasjonsnummer = ORGANISASJONSNUMMER,
-                            berortVedtaksperiodeId = PERIODE.id,
-                        ),
+                listOf(
+                    MinimumSykdomsgrad.Arbeidsgiver(
+                        organisasjonsnummer = ORGANISASJONSNUMMER,
+                        berortVedtaksperiodeId = PERIODE.id,
                     ),
+                ),
                 initierendeVedtaksperiodeId = PERIODE.id,
             )
 
@@ -800,50 +810,16 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         assertEquals(SAKSBEHANDLER_EPOST, hendelse["saksbehandlerEpost"].asText())
         hendelse["perioderMedMinimumSykdomsgradVurdertOk"].first().let {
             assertEquals(1.januar, it["fom"].asLocalDate())
+            assertEquals(15.januar, it["tom"].asLocalDate())
+        }
+        hendelse["perioderMedMinimumSykdomsgradVurdertOk"].last().let {
+            assertEquals(30.januar, it["fom"].asLocalDate())
             assertEquals(31.januar, it["tom"].asLocalDate())
         }
-        assertTrue(hendelse["perioderMedMinimumSykdomsgradVurdertIkkeOk"].isEmpty)
-    }
-
-    @Test
-    fun `håndterer vurdering ikke ok av minimum sykdomsgrad`() {
-        nyPerson(fødselsnummer = FØDSELSNUMMER, organisasjonsnummer = ORGANISASJONSNUMMER, aktørId = AKTØR_ID)
-        val minimumSykdomsgrad =
-            MinimumSykdomsgrad(
-                fodselsnummer = FØDSELSNUMMER,
-                aktorId = AKTØR_ID,
-                perioderVurdertOk = emptyList(),
-                perioderVurdertIkkeOk = listOf(MinimumSykdomsgrad.Periode(
-                    fom = 1.januar,
-                    tom = 31.januar
-                )),
-                begrunnelse = "en begrunnelse",
-                arbeidsgivere =
-                    listOf(
-                        MinimumSykdomsgrad.Arbeidsgiver(
-                            organisasjonsnummer = ORGANISASJONSNUMMER,
-                            berortVedtaksperiodeId = PERIODE.id,
-                        ),
-                    ),
-                initierendeVedtaksperiodeId = PERIODE.id,
-            )
-
-        mediator.håndter(minimumSykdomsgrad, saksbehandler)
-
-        val hendelse = testRapid.inspektør.hendelser("minimum_sykdomsgrad_vurdert").first()
-
-        assertNotNull(hendelse["@id"].asText())
-        assertEquals(FØDSELSNUMMER, hendelse["fødselsnummer"].asText())
-        assertEquals(AKTØR_ID, hendelse["aktørId"].asText())
-        assertEquals(SAKSBEHANDLER_OID, hendelse["saksbehandlerOid"].asText().let { UUID.fromString(it) })
-        assertEquals(SAKSBEHANDLER_NAVN, hendelse["saksbehandlerNavn"].asText())
-        assertEquals(SAKSBEHANDLER_IDENT, hendelse["saksbehandlerIdent"].asText())
-        assertEquals(SAKSBEHANDLER_EPOST, hendelse["saksbehandlerEpost"].asText())
         hendelse["perioderMedMinimumSykdomsgradVurdertIkkeOk"].first().let {
-            assertEquals(1.januar, it["fom"].asLocalDate())
-            assertEquals(31.januar, it["tom"].asLocalDate())
+            assertEquals(16.januar, it["fom"].asLocalDate())
+            assertEquals(29.januar, it["tom"].asLocalDate())
         }
-        assertTrue(hendelse["perioderMedMinimumSykdomsgradVurdertOk"].isEmpty)
     }
 
     @Test

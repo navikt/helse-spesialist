@@ -2,6 +2,7 @@ package no.nav.helse.modell.saksbehandler.handlinger
 
 import java.util.UUID
 import no.nav.helse.modell.januar
+import no.nav.helse.modell.saksbehandler.MinimumSykdomsgradVurdertEvent
 import no.nav.helse.modell.saksbehandler.OverstyrtArbeidsforholdEvent
 import no.nav.helse.modell.saksbehandler.OverstyrtInntektOgRefusjonEvent
 import no.nav.helse.modell.saksbehandler.OverstyrtTidslinjeEvent
@@ -185,6 +186,31 @@ internal class SaksbehandlerTest {
                 skjæringstidspunkt = 1.januar,
                 overstyrteArbeidsforhold = emptyList(),
                 vedtaksperiodeId = UUID.randomUUID(),
+            )
+        )
+        assertEquals(true, observert)
+    }
+
+    @Test
+    fun `håndtering av MinimumSykdomsgrad medfører utgående event`() {
+        var observert = false
+        val observer = object : SaksbehandlerObserver {
+            override fun minimumSykdomsgradVurdert(fødselsnummer: String, event: MinimumSykdomsgradVurdertEvent) {
+                observert = true
+            }
+        }
+
+        val saksbehandler = saksbehandler()
+        saksbehandler.register(observer)
+        saksbehandler.håndter(
+            MinimumSykdomsgrad(
+                aktørId = "123",
+                fødselsnummer = "1234",
+                begrunnelse = "begrunnelse",
+                initierendeVedtaksperiodeId = UUID.randomUUID(),
+                perioderVurdertOk = emptyList(),
+                perioderVurdertIkkeOk = listOf(MinimumSykdomsgradPeriode(1.januar, 31.januar)),
+                arbeidsgivere = listOf(MinimumSykdomsgradArbeidsgiver(organisasjonsnummer = "12345", berørtVedtaksperiodeId = UUID.randomUUID())),
             )
         )
         assertEquals(true, observert)

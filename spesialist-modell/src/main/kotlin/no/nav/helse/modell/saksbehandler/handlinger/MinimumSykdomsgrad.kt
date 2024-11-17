@@ -2,10 +2,10 @@ package no.nav.helse.modell.saksbehandler.handlinger
 
 import no.nav.helse.modell.saksbehandler.MinimumSykdomsgradVurdertEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradPeriode.Companion.byggSubsumsjoner
 import no.nav.helse.modell.saksbehandler.handlinger.dto.MinimumSykdomsgradDto
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon
-import no.nav.helse.modell.vilkårsprøving.Subsumsjon.SporingSkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import java.time.LocalDate
@@ -60,31 +60,23 @@ class MinimumSykdomsgrad(
             initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,
         )
 
-    internal fun byggSubsumsjon(saksbehandlerEpost: String): Subsumsjon {
-        return Subsumsjon(
-            lovhjemmel =
-                Lovhjemmel(
-                    paragraf = "8-13",
-                    ledd = "1",
-                    lovverk = "folketrygdloven",
-                    lovverksversjon = "2019-01-01",
-                ),
+    internal fun byggSubsumsjoner(saksbehandlerEpost: String): List<Subsumsjon> {
+        return perioderVurdertOk.byggSubsumsjoner(
+            overstyringId = id,
             fødselsnummer = fødselsnummer,
-            input =
-                mapOf(
-                    "fom" to if (perioderVurdertOk.isNotEmpty()) perioderVurdertOk.first().fom else perioderVurdertIkkeOk.first().fom,
-                    "tom" to if (perioderVurdertOk.isNotEmpty()) perioderVurdertOk.first().tom else perioderVurdertIkkeOk.first().tom,
-                    "initierendeVedtaksperiode" to initierendeVedtaksperiodeId,
-                ),
-            output = emptyMap(),
-            // @TODO her må vi finne ut hva miks av ok og ikke ok skal gi, evt. om hver subperiode får sin egen subsumsjon
-            utfall = if (perioderVurdertOk.isNotEmpty()) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
-            sporing =
-                SporingSkjønnsfastsattSykepengegrunnlag(
-                    vedtaksperioder = arbeidsgivere.map { it.toDto().berørtVedtaksperiodeId },
-                    organisasjonsnummer = arbeidsgivere.map { it.toDto().organisasjonsnummer },
-                    saksbehandler = listOf(saksbehandlerEpost),
-                ),
+            saksbehandlerEpost = saksbehandlerEpost,
+            initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,
+            arbeidsgivere = arbeidsgivere,
+            avslag = false,
+        ).plus(
+            perioderVurdertIkkeOk.byggSubsumsjoner(
+                overstyringId = id,
+                fødselsnummer = fødselsnummer,
+                saksbehandlerEpost = saksbehandlerEpost,
+                initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,
+                arbeidsgivere = arbeidsgivere,
+                avslag = true,
+            ),
         )
     }
 }
@@ -104,6 +96,44 @@ class MinimumSykdomsgradPeriode(
     val fom: LocalDate,
     val tom: LocalDate,
 ) {
+    internal companion object {
+        internal fun List<MinimumSykdomsgradPeriode>.byggSubsumsjoner(
+            overstyringId: UUID,
+            fødselsnummer: String,
+            saksbehandlerEpost: String,
+            initierendeVedtaksperiodeId: UUID,
+            arbeidsgivere: List<MinimumSykdomsgradArbeidsgiver>,
+            avslag: Boolean,
+        ): List<Subsumsjon> =
+            this.map { periode ->
+                Subsumsjon(
+                    lovhjemmel =
+                        Lovhjemmel(
+                            paragraf = "8-13",
+                            ledd = "1",
+                            lovverk = "folketrygdloven",
+                            lovverksversjon = "2019-01-01",
+                        ),
+                    fødselsnummer = fødselsnummer,
+                    input =
+                        mapOf(
+                            "fom" to periode.fom,
+                            "tom" to periode.tom,
+                            "initierendeVedtaksperiode" to initierendeVedtaksperiodeId,
+                        ),
+                    output = emptyMap(),
+                    utfall = if (!avslag) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+                    sporing =
+                        Subsumsjon.SporingVurdertMinimumSykdomsgrad(
+                            vedtaksperioder = arbeidsgivere.map { it.toDto().berørtVedtaksperiodeId },
+                            organisasjonsnummer = arbeidsgivere.map { it.toDto().organisasjonsnummer },
+                            minimumSykdomsgradId = overstyringId,
+                            saksbehandler = listOf(saksbehandlerEpost),
+                        ),
+                )
+            }
+    }
+
     fun toDto() =
         MinimumSykdomsgradDto.MinimumSykdomsgradPeriodeDto(
             fom = fom,

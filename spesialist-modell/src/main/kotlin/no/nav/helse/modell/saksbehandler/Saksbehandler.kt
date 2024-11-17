@@ -59,8 +59,10 @@ class Saksbehandler(
 
     internal fun håndter(hendelse: MinimumSykdomsgrad) {
         val event = hendelse.byggEvent(oid, navn, epostadresse, ident)
-        val subsumsjonEvent = hendelse.byggSubsumsjon(this.epostadresse).byggEvent()
-        observers.forEach { it.nySubsumsjon(subsumsjonEvent.fødselsnummer, subsumsjonEvent) }
+        val subsumsjoner = hendelse.byggSubsumsjoner(this.epostadresse).map { it.byggEvent() }
+        subsumsjoner.forEach { subsumsjonEvent ->
+            observers.forEach { it.nySubsumsjon(subsumsjonEvent.fødselsnummer, subsumsjonEvent) }
+        }
         observers.forEach { it.minimumSykdomsgradVurdert(event.fødselsnummer, event) }
     }
 
