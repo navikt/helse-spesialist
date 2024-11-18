@@ -11,7 +11,7 @@ import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDto
 import no.nav.helse.spesialist.api.påvent.PåVentApiDao
-import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
+import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
@@ -169,7 +169,7 @@ data class Arbeidsgiver(
     private val oppgavehåndterer: Oppgavehåndterer,
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
     private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
-    private val risikovurderingApiDao: RisikovurderingApiDao,
+    private val risikovurderinger: Map<UUID, RisikovurderingApiDto>,
     private val varselRepository: ApiVarselRepository,
     private val oppgaveApiDao: OppgaveApiDao,
     private val fullPeriodehistorikk: Map<UUID, List<PeriodehistorikkDto>>,
@@ -203,7 +203,7 @@ data class Arbeidsgiver(
                                     periode = it,
                                     oppgavehåndterer = oppgavehåndterer,
                                     saksbehandlerhåndterer = saksbehandlerhåndterer,
-                                    risikovurderingApiDao = risikovurderingApiDao,
+                                    risikovurderinger = risikovurderinger,
                                     varselRepository = varselRepository,
                                     oppgaveApiDao = oppgaveApiDao,
                                     fullPeriodehistorikk = fullPeriodehistorikk,

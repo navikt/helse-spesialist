@@ -128,7 +128,7 @@ class PersonService(
                 tildelingApiDao = tildelingApiDao,
                 arbeidsgiverApiDao = arbeidsgiverApiDao,
                 overstyringApiDao = overstyringApiDao,
-                risikovurderingApiDao = risikovurderingApiDao,
+                risikovurderinger = risikovurderingApiDao.finnRisikovurderinger(fødselsnummer),
                 varselRepository = varselRepository,
                 oppgaveApiDao = oppgaveApiDao,
                 fullPeriodehistorikk = periodehistorikkApiDao.hentForPerson(fødselsnummer),

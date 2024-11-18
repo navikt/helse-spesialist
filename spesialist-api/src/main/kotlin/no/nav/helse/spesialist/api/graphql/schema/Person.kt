@@ -20,7 +20,7 @@ import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunn
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDto
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.påvent.PåVentApiDao
-import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
+import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
@@ -97,7 +97,7 @@ data class Person(
     private val tildelingApiDao: TildelingApiDao,
     private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
     private val overstyringApiDao: OverstyringApiDao,
-    private val risikovurderingApiDao: RisikovurderingApiDao,
+    private val risikovurderinger: Map<UUID, RisikovurderingApiDto>,
     private val varselRepository: ApiVarselRepository,
     private val oppgaveApiDao: OppgaveApiDao,
     private val notatDao: NotatApiDao,
@@ -162,7 +162,7 @@ data class Person(
                 oppgavehåndterer = oppgavehåndterer,
                 saksbehandlerhåndterer = saksbehandlerhåndterer,
                 arbeidsgiverApiDao = arbeidsgiverApiDao,
-                risikovurderingApiDao = risikovurderingApiDao,
+                risikovurderinger = risikovurderinger,
                 varselRepository = varselRepository,
                 oppgaveApiDao = oppgaveApiDao,
                 fullPeriodehistorikk = fullPeriodehistorikk,

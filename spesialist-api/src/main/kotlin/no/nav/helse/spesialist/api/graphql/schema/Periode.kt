@@ -17,7 +17,7 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.påvent.PåVentApiDao
-import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
+import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
@@ -464,7 +464,7 @@ data class BeregnetPeriode(
     private val periode: GraphQLBeregnetPeriode,
     private val oppgavehåndterer: Oppgavehåndterer,
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
-    private val risikovurderingApiDao: RisikovurderingApiDao,
+    private val risikovurderinger: Map<UUID, RisikovurderingApiDto>,
     private val varselRepository: ApiVarselRepository,
     private val oppgaveApiDao: OppgaveApiDao,
     private val fullPeriodehistorikk: Map<UUID, List<PeriodehistorikkDto>>,
@@ -675,7 +675,7 @@ data class BeregnetPeriode(
     fun vilkarsgrunnlagId(): UUID? = periode.vilkarsgrunnlagId
 
     fun risikovurdering(): Risikovurdering? =
-        risikovurderingApiDao.finnRisikovurdering(vedtaksperiodeId())?.let { vurdering ->
+        risikovurderinger[vedtaksperiodeId()]?.let { vurdering ->
             Risikovurdering(
                 funn = vurdering.funn.tilFaresignaler(),
                 kontrollertOk = vurdering.kontrollertOk.tilFaresignaler(),
