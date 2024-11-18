@@ -237,7 +237,7 @@ data class TotrinnsvurderingRetur(
     override val saksbehandlerIdent: String?,
     override val notatId: Int?,
     override val dialogRef: Int?,
-    val notattekst: String,
+    val notattekst: String?,
     val kommentarer: List<Kommentar>,
 ) : Historikkinnslag
 
@@ -528,9 +528,9 @@ data class BeregnetPeriode(
         return Triple(påVentÅrsaker, frist, notattekst)
     }
 
-    private fun mapTotrinnsvurderingReturJson(json: String): String {
+    private fun mapTotrinnsvurderingReturJson(json: String): String? {
         val node = objectMapper.readTree(json)
-        val notattekst = node["notattekst"].asText()
+        val notattekst = node["notattekst"]?.takeUnless { it.isMissingOrNull() }?.asText()
         return notattekst
     }
 

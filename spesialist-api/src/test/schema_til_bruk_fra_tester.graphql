@@ -825,7 +825,7 @@ type TotrinnsvurderingRetur implements Historikkinnslag {
     id: Int!
     kommentarer: [Kommentar!]!
     notatId: Int
-    notattekst: String!
+    notattekst: String
     saksbehandlerIdent: String
     timestamp: LocalDateTime!
     type: PeriodehistorikkType!
