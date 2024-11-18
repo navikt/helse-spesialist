@@ -194,7 +194,7 @@ internal class CommandContextTest {
     @Test
     fun `holder på meldinger`() {
         val melding = """{ "a_key": "with_a_value" }"""
-        context.publiser(melding)
+        context.publiserOld(melding)
         assertEquals(listOf(melding), observer.hendelser)
     }
 

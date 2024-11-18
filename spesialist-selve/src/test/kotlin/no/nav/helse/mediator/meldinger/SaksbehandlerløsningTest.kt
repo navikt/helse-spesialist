@@ -22,6 +22,7 @@ import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
@@ -177,9 +178,9 @@ internal class SaksbehandlerløsningTest {
         assertEquals(IDENT, godkjenning.path("saksbehandlerIdent").textValue())
         assertEquals(GODKJENTTIDSPUNKT, LocalDateTime.parse(godkjenning.path("godkjenttidspunkt").textValue()))
         assertEquals(refusjonstype, enumValueOf<Refusjonstype>(godkjenning.path("refusjontype").asText()))
-        assertTrue(godkjenning.path("årsak").isNull)
-        assertTrue(godkjenning.path("kommentar").isNull)
-        assertTrue(godkjenning.path("begrunnelser").isNull)
+        assertNull(godkjenning.get("årsak"))
+        assertNull(godkjenning.get("kommentar"))
+        assertNull(godkjenning.get("begrunnelser"))
         assertTrue(godkjenning.path("saksbehandleroverstyringer").isEmpty)
     }
 

@@ -1,9 +1,10 @@
 package no.nav.helse.mediator
 
-import no.nav.helse.kafka.behovName
-import no.nav.helse.kafka.somJsonMessage
+import no.nav.helse.kafka.message_builders.behovName
+import no.nav.helse.kafka.message_builders.somJsonMessage
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.behov.Behov
+import no.nav.helse.modell.hendelse.UtgåendeHendelse
 import no.nav.helse.rapids_rivers.MessageContext
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -14,12 +15,15 @@ internal interface UtgåendeMeldingerObserver {
         commandContextId: UUID,
     ) {}
 
+    fun hendelse(hendelse: UtgåendeHendelse) {}
+
     fun hendelse(hendelse: String) {}
 }
 
 internal class UtgåendeMeldingerMediator : CommandContextObserver {
-    private val utgåendeBehov = mutableMapOf<String, Behov>()
-    private val utgåendeHendelser = mutableListOf<String>()
+    private val behov = mutableMapOf<String, Behov>()
+    private val hendelser = mutableListOf<UtgåendeHendelse>()
+    private val utgåendeHendelserOld = mutableListOf<String>()
     private var commandContextId: UUID? = null
 
     override fun behov(
@@ -27,11 +31,15 @@ internal class UtgåendeMeldingerMediator : CommandContextObserver {
         commandContextId: UUID,
     ) {
         this.commandContextId = commandContextId
-        utgåendeBehov[behov.behovName()] = behov
+        this.behov[behov.behovName()] = behov
     }
 
     override fun hendelse(hendelse: String) {
-        utgåendeHendelser.add(hendelse)
+        utgåendeHendelserOld.add(hendelse)
+    }
+
+    override fun hendelse(hendelse: UtgåendeHendelse) {
+        hendelser.add(hendelse)
     }
 
     internal fun publiserOppsamledeMeldinger(
@@ -40,7 +48,9 @@ internal class UtgåendeMeldingerMediator : CommandContextObserver {
     ) {
         publiserHendelser(hendelse, messageContext)
         publiserBehov(hendelse, messageContext)
-        utgåendeHendelser.clear()
+        utgåendeHendelserOld.clear()
+        behov.clear()
+        hendelser.clear()
         commandContextId = null
     }
 
@@ -48,10 +58,16 @@ internal class UtgåendeMeldingerMediator : CommandContextObserver {
         hendelse: Personmelding,
         messageContext: MessageContext,
     ) {
-        utgåendeHendelser.forEach { utgåendeHendelse ->
+        utgåendeHendelserOld.forEach { utgåendeHendelse ->
             logg.info("Publiserer hendelse i forbindelse med ${hendelse.javaClass.simpleName}")
             sikkerlogg.info("Publiserer hendelse i forbindelse med ${hendelse.javaClass.simpleName}\n{}", utgåendeHendelse)
             messageContext.publish(utgåendeHendelse)
+        }
+        hendelser.forEach { utgåendeHendelse ->
+            val packet = utgåendeHendelse.somJsonMessage(hendelse.fødselsnummer()).toJson()
+            logg.info("Publiserer hendelse i forbindelse med ${hendelse.javaClass.simpleName}")
+            sikkerlogg.info("Publiserer hendelse i forbindelse med ${hendelse.javaClass.simpleName}\n{}", packet)
+            messageContext.publish(packet)
         }
     }
 
@@ -59,11 +75,11 @@ internal class UtgåendeMeldingerMediator : CommandContextObserver {
         hendelse: Personmelding,
         messageContext: MessageContext,
     ) {
-        if (utgåendeBehov.isEmpty()) return
+        if (behov.isEmpty()) return
         val contextId = checkNotNull(commandContextId) { "Kan ikke publisere behov uten commandContextId" }
-        val packet = utgåendeBehov.values.somJsonMessage(contextId, hendelse.fødselsnummer(), hendelse.id).toJson()
-        logg.info("Publiserer behov for ${utgåendeBehov.keys}")
-        sikkerlogg.info("Publiserer behov for ${utgåendeBehov.keys}\n{}", packet)
+        val packet = behov.values.somJsonMessage(contextId, hendelse.fødselsnummer(), hendelse.id).toJson()
+        logg.info("Publiserer behov for ${behov.keys}")
+        sikkerlogg.info("Publiserer behov for ${behov.keys}\n{}", packet)
         messageContext.publish(packet)
     }
 

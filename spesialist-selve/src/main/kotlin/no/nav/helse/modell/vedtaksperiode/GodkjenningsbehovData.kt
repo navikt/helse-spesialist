@@ -1,12 +1,10 @@
 package no.nav.helse.modell.vedtaksperiode
 
-import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.helse.mediator.meldinger.utgående.VedtaksperiodeAvvist
-import no.nav.helse.mediator.meldinger.utgående.VedtaksperiodeGodkjent
+import no.nav.helse.modell.hendelse.UtgåendeHendelse
+import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
-import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
 import java.time.LocalDate
@@ -36,7 +34,20 @@ data class GodkjenningsbehovData(
     private val json: String,
 ) {
     private val behov = JsonMessage(json, MessageProblems(json))
-    private lateinit var løsning: Map<String, Any>
+    private lateinit var løsning: Løsning
+
+    private data class Løsning(
+        val godkjent: Boolean,
+        val saksbehandlerIdent: String,
+        val saksbehandlerEpost: String,
+        val godkjenttidspunkt: LocalDateTime,
+        val automatiskBehandling: Boolean,
+        val årsak: String?,
+        val begrunnelser: List<String>?,
+        val kommentar: String?,
+        val saksbehandleroverstyringer: List<UUID>,
+        val refusjonstype: Refusjonstype?,
+    )
 
     private companion object {
         private const val AUTOMATISK_BEHANDLET_IDENT = "Automatisk behandlet"
@@ -155,74 +166,87 @@ data class GodkjenningsbehovData(
         utbetaling: Utbetaling,
     ) {
         løsning =
-            mapOf(
-                "Godkjenning" to
-                    mutableMapOf(
-                        "godkjent" to godkjent,
-                        "saksbehandlerIdent" to saksbehandlerIdent,
-                        "saksbehandlerEpost" to saksbehandlerEpost,
-                        "godkjenttidspunkt" to godkjenttidspunkt,
-                        "automatiskBehandling" to automatisk,
-                        "årsak" to årsak,
-                        "begrunnelser" to begrunnelser,
-                        "kommentar" to kommentar,
-                        "saksbehandleroverstyringer" to saksbehandleroverstyringer,
-                    ).apply {
-                        compute("refusjontype") { _, _ -> utbetaling.refusjonstype().name }
-                    }.toMap(),
+            Løsning(
+                godkjent = godkjent,
+                saksbehandlerIdent = saksbehandlerIdent,
+                saksbehandlerEpost = saksbehandlerEpost,
+                godkjenttidspunkt = godkjenttidspunkt,
+                automatiskBehandling = automatisk,
+                årsak = årsak,
+                begrunnelser = begrunnelser,
+                kommentar = kommentar,
+                saksbehandleroverstyringer = saksbehandleroverstyringer,
+                refusjonstype = utbetaling.refusjonstype(),
             )
-        behov["@løsning"] = løsning
+        behov["@løsning"] = løsning.toMap()
         behov["@id"] = UUID.randomUUID()
         behov["@opprettet"] = LocalDateTime.now()
     }
 
+    private fun Løsning.toMap() =
+        mapOf(
+            "Godkjenning" to
+                buildMap {
+                    put("godkjent", godkjent)
+                    put("saksbehandlerIdent", saksbehandlerIdent)
+                    put("saksbehandlerEpost", saksbehandlerEpost)
+                    put("godkjenttidspunkt", godkjenttidspunkt)
+                    put("automatiskBehandling", automatiskBehandling)
+                    if (årsak != null) put("årsak", årsak)
+                    if (begrunnelser != null) put("begrunnelser", begrunnelser)
+                    if (kommentar != null) put("kommentar", kommentar)
+                    put("saksbehandleroverstyringer", saksbehandleroverstyringer)
+                    if (refusjonstype != null) put("refusjontype", refusjonstype)
+                },
+        )
+
     internal fun lagVedtaksperiodeGodkjentManuelt(
         saksbehandler: Saksbehandlerløsning.Saksbehandler,
         beslutter: Saksbehandlerløsning.Saksbehandler?,
-    ) = VedtaksperiodeGodkjent.manueltBehandlet(
+    ) = UtgåendeHendelse.VedtaksperiodeGodkjentManuelt(
         vedtaksperiodeId = this.vedtaksperiodeId,
-        spleisBehandlingId = this.spleisBehandlingId,
+        behandlingId = this.spleisBehandlingId,
         fødselsnummer = this.fødselsnummer,
-        periodetype = periodetype,
-        saksbehandler = saksbehandler,
-        beslutter = beslutter,
+        periodetype = periodetype.name,
+        saksbehandlerIdent = saksbehandler.ident,
+        saksbehandlerEpost = saksbehandler.epostadresse,
+        beslutterIdent = beslutter?.ident,
+        beslutterEpost = beslutter?.epostadresse,
     )
 
     internal fun lagVedtaksperiodeGodkjentAutomatisk() =
-        VedtaksperiodeGodkjent.automatiskBehandlet(
+        UtgåendeHendelse.VedtaksperiodeGodkjentAutomatisk(
             vedtaksperiodeId = this.vedtaksperiodeId,
-            spleisBehandlingId = this.spleisBehandlingId,
+            behandlingId = this.spleisBehandlingId,
             fødselsnummer = this.fødselsnummer,
-            periodetype = periodetype,
-            saksbehandler =
-                Saksbehandlerløsning.Saksbehandler(
-                    ident = AUTOMATISK_BEHANDLET_IDENT,
-                    epostadresse = AUTOMATISK_BEHANDLET_EPOSTADRESSE,
-                ),
+            periodetype = periodetype.name,
         )
 
-    internal fun lagVedtaksperiodeAvvistManuelt(saksbehandler: Saksbehandlerløsning.Saksbehandler) =
-        VedtaksperiodeAvvist.manueltAvvist(
+    internal fun lagVedtaksperiodeAvvistManuelt(
+        saksbehandler: Saksbehandlerløsning.Saksbehandler,
+    ): UtgåendeHendelse.VedtaksperiodeAvvistManuelt {
+        return UtgåendeHendelse.VedtaksperiodeAvvistManuelt(
             vedtaksperiodeId = this.vedtaksperiodeId,
-            spleisBehandlingId = this.spleisBehandlingId,
+            behandlingId = this.spleisBehandlingId,
             fødselsnummer = this.fødselsnummer,
-            periodetype = periodetype,
-            saksbehandler = saksbehandler,
-            løsning = objectMapper.convertValue(løsning),
+            periodetype = periodetype.name,
+            saksbehandlerIdent = saksbehandler.ident,
+            saksbehandlerEpost = saksbehandler.epostadresse,
+            årsak = løsning.årsak,
+            begrunnelser = løsning.begrunnelser,
+            kommentar = løsning.kommentar,
         )
+    }
 
     internal fun lagVedtaksperiodeAvvistAutomatisk() =
-        VedtaksperiodeAvvist.automatiskAvvist(
+        UtgåendeHendelse.VedtaksperiodeAvvistAutomatisk(
             vedtaksperiodeId = this.vedtaksperiodeId,
-            spleisBehandlingId = this.spleisBehandlingId,
+            behandlingId = this.spleisBehandlingId,
             fødselsnummer = this.fødselsnummer,
-            periodetype = periodetype,
-            saksbehandler =
-                Saksbehandlerløsning.Saksbehandler(
-                    ident = AUTOMATISK_BEHANDLET_IDENT,
-                    epostadresse = AUTOMATISK_BEHANDLET_EPOSTADRESSE,
-                ),
-            løsning = objectMapper.convertValue(løsning),
+            periodetype = periodetype.name,
+            årsak = this.løsning.årsak,
+            begrunnelser = this.løsning.begrunnelser,
+            kommentar = this.løsning.kommentar,
         )
 
     internal fun toJson() = behov.toJson()

@@ -59,8 +59,8 @@ internal class UtgåendeMeldingerMediatorTest {
     fun `sender meldinger`() {
         val melding1 = """{ "a_key": "with_a_value" }"""
         val melding2 = """{ "a_key": "with_a_value" }"""
-        testContext.publiser(melding1)
-        testContext.publiser(melding2)
+        testContext.publiserOld(melding1)
+        testContext.publiserOld(melding2)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(testmelding, testRapid)
         assertEquals(2, testRapid.inspektør.size)
         assertEquals(objectMapper.readTree(melding1), testRapid.inspektør.message(0))

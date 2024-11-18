@@ -68,7 +68,7 @@ internal class VurderAutomatiskAvvisningTest {
         assertTrue(command.execute(context))
         verify(exactly = 1) {
             godkjenningMediator.automatiskAvvisning(
-                publiserer = any(),
+                context = context,
                 begrunnelser = listOf(forventetÅrsak),
                 utbetaling = any(),
                 godkjenningsbehov = any()

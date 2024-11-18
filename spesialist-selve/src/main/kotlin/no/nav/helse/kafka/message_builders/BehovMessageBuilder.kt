@@ -1,4 +1,4 @@
-package no.nav.helse.kafka
+package no.nav.helse.kafka.message_builders
 
 import no.nav.helse.modell.behov.Behov
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -13,7 +13,7 @@ internal fun Collection<Behov>.somJsonMessage(
         behov = this.map { behov -> behov.behovName() },
         map =
             this.associate {
-                it.behovName() to it.somJsonMessage()
+                it.behovName() to it.detaljer()
             } +
                 mapOf(
                     "fødselsnummer" to fødselsnummer,
@@ -40,20 +40,20 @@ internal fun Behov.behovName() =
         is Behov.ÅpneOppgaver -> "ÅpneOppgaver"
     }
 
-private fun Behov.somJsonMessage(): Map<String, Any> {
+private fun Behov.detaljer(): Map<String, Any> {
     return when (this) {
         is Behov.EgenAnsatt -> emptyMap()
         is Behov.Enhet -> emptyMap()
         is Behov.Fullmakt -> emptyMap()
         is Behov.Vergemål -> emptyMap()
-        is Behov.Arbeidsforhold -> detaljer()
-        is Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver -> detaljer()
-        is Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak -> detaljer()
-        is Behov.Infotrygdutbetalinger -> detaljer()
-        is Behov.InntekterForSykepengegrunnlag -> detaljer()
+        is Behov.Arbeidsforhold -> this.detaljer()
+        is Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver -> this.detaljer()
+        is Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak -> this.detaljer()
+        is Behov.Infotrygdutbetalinger -> this.detaljer()
+        is Behov.InntekterForSykepengegrunnlag -> this.detaljer()
         is Behov.Personinfo -> emptyMap()
-        is Behov.Risikovurdering -> detaljer()
-        is Behov.ÅpneOppgaver -> detaljer()
+        is Behov.Risikovurdering -> this.detaljer()
+        is Behov.ÅpneOppgaver -> this.detaljer()
     }
 }
 

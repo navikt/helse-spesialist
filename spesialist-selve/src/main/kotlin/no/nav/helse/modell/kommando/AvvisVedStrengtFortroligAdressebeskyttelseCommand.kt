@@ -27,7 +27,7 @@ internal class AvvisVedStrengtFortroligAdressebeskyttelseCommand(
         val årsaker = listOf("Adressebeskyttelse strengt fortrolig")
 
         godkjenningMediator.automatiskAvvisning(
-            publiserer = context::publiser,
+            context = context,
             begrunnelser = årsaker,
             utbetaling = utbetaling,
             godkjenningsbehov = godkjenningsbehov,

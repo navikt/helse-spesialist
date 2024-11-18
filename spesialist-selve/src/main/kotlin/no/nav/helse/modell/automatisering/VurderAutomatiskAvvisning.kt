@@ -39,7 +39,7 @@ internal class VurderAutomatiskAvvisning(
         }
 
         godkjenningMediator.automatiskAvvisning(
-            publiserer = context::publiser,
+            context,
             begrunnelser = avvisningsårsaker.toList(),
             utbetaling = utbetaling,
             godkjenningsbehov = godkjenningsbehov,

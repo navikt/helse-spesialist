@@ -6,6 +6,7 @@ import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.mediator.UtgåendeMeldingerObserver
 import no.nav.helse.modell.behov.Behov
+import no.nav.helse.modell.hendelse.UtgåendeHendelse
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -38,8 +39,12 @@ internal class CommandContext(
     /**
      * Publisere svar tilbake på rapid, typisk svar på godkjenningsbehov
      */
-    internal fun publiser(melding: String) {
+    internal fun publiserOld(melding: String) {
         observers.forEach { it.hendelse(melding) }
+    }
+
+    internal fun hendelse(hendelse: UtgåendeHendelse) {
+        observers.forEach { it.hendelse(hendelse) }
     }
 
     private fun kommandokjedetilstandEndret(kommandokjedeEndretEvent: KommandokjedeEndretEvent) {

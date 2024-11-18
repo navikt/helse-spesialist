@@ -38,12 +38,12 @@ internal class GodkjenningMediator(private val opptegnelseRepository: Opptegnels
         )
         sykefraværstilfelle.håndterGodkjent(behov.vedtaksperiodeId)
 
-        context.publiser(behov.toJson())
-        context.publiser(
+        context.publiserOld(behov.toJson())
+        context.hendelse(
             behov.lagVedtaksperiodeGodkjentManuelt(
                 saksbehandler = saksbehandler,
                 beslutter = beslutter,
-            ).toJson(),
+            ),
         )
     }
 
@@ -70,8 +70,8 @@ internal class GodkjenningMediator(private val opptegnelseRepository: Opptegnels
             saksbehandleroverstyringer = saksbehandleroverstyringer,
             utbetaling = utbetaling,
         )
-        context.publiser(behov.toJson())
-        context.publiser(behov.lagVedtaksperiodeAvvistManuelt(saksbehandler).toJson())
+        context.publiserOld(behov.toJson())
+        context.hendelse(behov.lagVedtaksperiodeAvvistManuelt(saksbehandler))
     }
 
     internal fun automatiskUtbetaling(
@@ -80,8 +80,8 @@ internal class GodkjenningMediator(private val opptegnelseRepository: Opptegnels
         utbetaling: Utbetaling,
     ) {
         behov.godkjennAutomatisk(utbetaling)
-        context.publiser(behov.toJson())
-        context.publiser(behov.lagVedtaksperiodeGodkjentAutomatisk().toJson())
+        context.publiserOld(behov.toJson())
+        context.hendelse(behov.lagVedtaksperiodeGodkjentAutomatisk())
         opptegnelseRepository.opprettOpptegnelse(
             fødselsnummer = behov.fødselsnummer,
             payload = AutomatiskBehandlingPayload(behov.id, AutomatiskBehandlingUtfall.UTBETALT),
@@ -95,7 +95,7 @@ internal class GodkjenningMediator(private val opptegnelseRepository: Opptegnels
     }
 
     internal fun automatiskAvvisning(
-        publiserer: Publiserer,
+        context: CommandContext,
         begrunnelser: List<String>,
         utbetaling: Utbetaling,
         godkjenningsbehov: GodkjenningsbehovData,
@@ -104,10 +104,8 @@ internal class GodkjenningMediator(private val opptegnelseRepository: Opptegnels
             utbetaling = utbetaling,
             begrunnelser = begrunnelser,
         )
-        publiserer.publiser(godkjenningsbehov.toJson())
-        publiserer.publiser(
-            godkjenningsbehov.lagVedtaksperiodeAvvistAutomatisk().toJson(),
-        )
+        context.publiserOld(godkjenningsbehov.toJson())
+        context.hendelse(godkjenningsbehov.lagVedtaksperiodeAvvistAutomatisk())
         opptegnelseRepository.opprettOpptegnelse(
             fødselsnummer = godkjenningsbehov.fødselsnummer,
             payload = AutomatiskBehandlingPayload(godkjenningsbehov.id, AutomatiskBehandlingUtfall.AVVIST),
@@ -121,8 +119,4 @@ internal class GodkjenningMediator(private val opptegnelseRepository: Opptegnels
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
-}
-
-fun interface Publiserer {
-    fun publiser(melding: String)
 }
