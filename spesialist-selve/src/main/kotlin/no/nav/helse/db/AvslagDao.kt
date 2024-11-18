@@ -2,6 +2,7 @@ package no.nav.helse.db
 
 import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.modell.vedtak.AvslagDto
+import no.nav.helse.modell.vedtak.AvslagstypeDto
 import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagsdata
 import java.util.UUID
@@ -115,14 +116,13 @@ class AvslagDao(queryRunner: QueryRunner) : QueryRunner by queryRunner {
                     """.trimIndent(),
                     "begrunnelseRef" to begrunnelseRef,
                 ).singleOrNull { avslag ->
-                    val vurdering = SaksbehandlerVurderingDto.VurderingDto.valueOf(avslag.string("type"))
                     val begrunnelse = avslag.string("tekst")
-                    when (vurdering) {
-                        SaksbehandlerVurderingDto.VurderingDto.AVSLAG -> SaksbehandlerVurderingDto.Avslag(begrunnelse)
-                        SaksbehandlerVurderingDto.VurderingDto.DELVIS_AVSLAG -> SaksbehandlerVurderingDto.DelvisAvslag(begrunnelse)
-                        SaksbehandlerVurderingDto.VurderingDto.INNVILGELSE -> throw RuntimeException(
-                            "Innvilgelse bør ikke forekomme før alt dette er skrevet om.",
-                        )
+                    when (enumValueOf<AvslagstypeDto>(avslag.string("type"))) {
+                        AvslagstypeDto.AVSLAG -> SaksbehandlerVurderingDto.Avslag(begrunnelse)
+                        AvslagstypeDto.DELVIS_AVSLAG ->
+                            SaksbehandlerVurderingDto.DelvisInnvilgelse(
+                                begrunnelse,
+                            )
                     }
                 }
             }
