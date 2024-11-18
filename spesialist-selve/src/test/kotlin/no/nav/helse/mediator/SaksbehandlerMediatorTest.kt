@@ -340,6 +340,28 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `legg på vent forårsaker publisering av hendelse`() {
+        val spleisBehandlingId = UUID.randomUUID()
+        nyPerson(spleisBehandlingId = spleisBehandlingId)
+        val oppgaveId = OPPGAVE_ID
+        val frist = LocalDate.now()
+        val skalTildeles = true
+        mediator.påVent(PaVentRequest.LeggPaVent(oppgaveId, saksbehandler.oid, frist, skalTildeles, "en tekst", listOf(PaVentRequest.PaVentArsak("key", "arsak"))), saksbehandler)
+        val melding = testRapid.inspektør.hendelser("lagt_på_vent").lastOrNull()
+        val årsaker = melding?.get("årsaker")?.map { it.get("key").asText() to it.get("årsak").asText() }
+        assertNotNull(melding)
+        assertEquals("lagt_på_vent", melding?.get("@event_name")?.asText())
+        assertEquals("en tekst", melding?.get("notatTekst")?.asText())
+        assertEquals(listOf("key" to "arsak"), årsaker)
+        assertEquals(spleisBehandlingId, melding?.get("behandlingId")?.asUUID())
+        assertEquals(oppgaveId, melding?.get("oppgaveId")?.asLong())
+        assertEquals(saksbehandler.oid, melding?.get("saksbehandlerOid")?.asUUID())
+        assertEquals(saksbehandler.ident, melding?.get("saksbehandlerIdent")?.asText())
+        assertEquals(frist, melding?.get("frist")?.asLocalDate())
+        assertEquals(skalTildeles, melding?.get("skalTildeles")?.asBoolean())
+    }
+
+    @Test
     fun `forsøk tildeling av oppgave når den allerede er tildelt`() {
         nyPerson()
         val oppgaveId = OPPGAVE_ID
