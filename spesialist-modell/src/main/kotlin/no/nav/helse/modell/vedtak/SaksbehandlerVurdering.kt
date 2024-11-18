@@ -2,7 +2,9 @@ package no.nav.helse.modell.vedtak
 
 import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto.VurderingDto
 
-sealed class SaksbehandlerVurdering(private val vurdering: Vurdering) {
+sealed class SaksbehandlerVurdering private constructor(
+    private val vurdering: Vurdering,
+) {
     abstract val begrunnelse: String?
 
     class Innvilgelse(private var innvilgelsesbegrunnelse: String? = null) : SaksbehandlerVurdering(Vurdering.INNVILGELSE) {
@@ -13,8 +15,8 @@ sealed class SaksbehandlerVurdering(private val vurdering: Vurdering) {
         override val begrunnelse: String get() = avslagsbegrunnelse
     }
 
-    class DelvisInnvilgelse(private var delvisInnvilgelsebegrunnelse: String) : SaksbehandlerVurdering(Vurdering.DELVIS_INNVILGELSE) {
-        override val begrunnelse: String get() = delvisInnvilgelsebegrunnelse
+    class DelvisAvslag(private var delvisAvslagsbegrunnelse: String) : SaksbehandlerVurdering(Vurdering.DELVIS_AVSLAG) {
+        override val begrunnelse: String get() = delvisAvslagsbegrunnelse
     }
 
     internal fun byggVedtak(vedtakBuilder: SykepengevedtakBuilder) {
@@ -24,7 +26,7 @@ sealed class SaksbehandlerVurdering(private val vurdering: Vurdering) {
     fun toDto() =
         when (this) {
             is Avslag -> SaksbehandlerVurderingDto.Avslag(begrunnelse)
-            is DelvisInnvilgelse -> SaksbehandlerVurderingDto.DelvisInnvilgelse(begrunnelse)
+            is DelvisAvslag -> SaksbehandlerVurderingDto.DelvisAvslag(begrunnelse)
             is Innvilgelse -> SaksbehandlerVurderingDto.Innvilgelse(begrunnelse)
         }
 
@@ -48,14 +50,14 @@ sealed class SaksbehandlerVurdering(private val vurdering: Vurdering) {
 
 enum class Vurdering {
     AVSLAG,
-    DELVIS_INNVILGELSE,
+    DELVIS_AVSLAG,
     INNVILGELSE,
     ;
 
     internal fun toDto() =
         when (this) {
             AVSLAG -> VurderingDto.AVSLAG
-            DELVIS_INNVILGELSE -> VurderingDto.DELVIS_INNVILGELSE
+            DELVIS_AVSLAG -> VurderingDto.DELVIS_AVSLAG
             INNVILGELSE -> VurderingDto.INNVILGELSE
         }
 }

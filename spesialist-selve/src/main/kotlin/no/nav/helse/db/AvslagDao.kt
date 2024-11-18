@@ -119,10 +119,7 @@ class AvslagDao(queryRunner: QueryRunner) : QueryRunner by queryRunner {
                     val begrunnelse = avslag.string("tekst")
                     when (vurdering) {
                         SaksbehandlerVurderingDto.VurderingDto.AVSLAG -> SaksbehandlerVurderingDto.Avslag(begrunnelse)
-                        SaksbehandlerVurderingDto.VurderingDto.DELVIS_INNVILGELSE ->
-                            SaksbehandlerVurderingDto.DelvisInnvilgelse(
-                                begrunnelse,
-                            )
+                        SaksbehandlerVurderingDto.VurderingDto.DELVIS_AVSLAG -> SaksbehandlerVurderingDto.DelvisAvslag(begrunnelse)
                         SaksbehandlerVurderingDto.VurderingDto.INNVILGELSE -> throw RuntimeException(
                             "Innvilgelse bør ikke forekomme før alt dette er skrevet om.",
                         )

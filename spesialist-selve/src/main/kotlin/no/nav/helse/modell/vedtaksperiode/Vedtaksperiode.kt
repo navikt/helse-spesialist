@@ -232,7 +232,7 @@ internal class Vedtaksperiode private constructor(
                     saksbehandlerVurdering?.let {
                         when (it) {
                             is SaksbehandlerVurderingDto.Avslag -> SaksbehandlerVurdering.Avslag(it.begrunnelse)
-                            is SaksbehandlerVurderingDto.DelvisInnvilgelse -> SaksbehandlerVurdering.DelvisInnvilgelse(it.begrunnelse)
+                            is SaksbehandlerVurderingDto.DelvisAvslag -> SaksbehandlerVurdering.DelvisAvslag(it.begrunnelse)
                             is SaksbehandlerVurderingDto.Innvilgelse -> SaksbehandlerVurdering.Innvilgelse(it.begrunnelse)
                         }
                     },

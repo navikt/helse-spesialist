@@ -3,7 +3,6 @@ package no.nav.helse.mediator
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.person.PersonObserver
 import no.nav.helse.modell.vedtak.AvslagstypeDto
-import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Infotrygd
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis
 import no.nav.helse.modell.vedtak.Sykepengevedtak
@@ -171,28 +170,6 @@ internal class VedtakFattetMelder(
                                         AvslagstypeDto.DELVIS_AVSLAG -> "DelvisInnvilgelse"
                                     },
                                 "begrunnelse" to sykepengevedtak.avslag!!.begrunnelse,
-                                "perioder" to
-                                    listOf(
-                                        mapOf(
-                                            "fom" to "${sykepengevedtak.fom}",
-                                            "tom" to "${sykepengevedtak.tom}",
-                                        ),
-                                    ),
-                            ),
-                        )
-                    }
-
-                    val saksbehandlerVurdering = sykepengevedtak.saksbehandlerVurdering
-                    if (saksbehandlerVurdering != null) {
-                        begrunnelser.addLast(
-                            mapOf(
-                                "type" to
-                                    when (saksbehandlerVurdering) {
-                                        is SaksbehandlerVurderingDto.Avslag -> "Avslag"
-                                        is SaksbehandlerVurderingDto.DelvisInnvilgelse -> "DelvisInnvilgelse"
-                                        is SaksbehandlerVurderingDto.Innvilgelse -> "Innvilgelse"
-                                    },
-                                "begrunnelse" to (saksbehandlerVurdering.begrunnelse ?: ""),
                                 "perioder" to
                                     listOf(
                                         mapOf(

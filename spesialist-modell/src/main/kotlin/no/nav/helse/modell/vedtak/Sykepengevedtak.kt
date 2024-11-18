@@ -183,6 +183,18 @@ enum class AvslagstypeDto {
     DELVIS_AVSLAG,
 }
 
+// data class SaksbehandlerVurderingDto(
+//    val vurdering: VurderingDto,
+//    val begrunnelse: String?,
+// )
+// {
+//    enum class VurderingDto {
+//        AVSLAG,
+//        DELVIS_AVSLAG,
+//        INNVILGELSE
+//    }
+// }
+
 sealed class SaksbehandlerVurderingDto(val vurdering: VurderingDto) {
     abstract val begrunnelse: String?
 
@@ -190,10 +202,8 @@ sealed class SaksbehandlerVurderingDto(val vurdering: VurderingDto) {
         override val begrunnelse: String get() = avslagsbegrunnelse
     }
 
-    data class DelvisInnvilgelse(private val delvisInnvilgelsebegrunnelse: String) : SaksbehandlerVurderingDto(
-        VurderingDto.DELVIS_INNVILGELSE,
-    ) {
-        override val begrunnelse: String get() = delvisInnvilgelsebegrunnelse
+    data class DelvisAvslag(private val delvisAvslagsbegrunnelse: String) : SaksbehandlerVurderingDto(VurderingDto.DELVIS_AVSLAG) {
+        override val begrunnelse: String get() = delvisAvslagsbegrunnelse
     }
 
     data class Innvilgelse(private val innvilgelsesbegrunnelse: String? = null) : SaksbehandlerVurderingDto(VurderingDto.INNVILGELSE) {
@@ -202,7 +212,7 @@ sealed class SaksbehandlerVurderingDto(val vurdering: VurderingDto) {
 
     enum class VurderingDto {
         AVSLAG,
-        DELVIS_INNVILGELSE,
+        DELVIS_AVSLAG,
         INNVILGELSE,
     }
 }
