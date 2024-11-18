@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.jackson.asLocalDate
 import com.github.navikt.tbd_libs.jackson.isMissingOrNull
 import io.ktor.utils.io.core.toByteArray
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.Toggle
@@ -30,6 +31,7 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLOppdrag
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLTidslinjeperiode
 import no.nav.helse.spleis.graphql.hentsnapshot.Sykepengedager
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -537,8 +539,20 @@ data class BeregnetPeriode(
         return notattekst
     }
 
+    private fun finnOgSammenlign(utbetalingId: UUID): List<PeriodehistorikkDto> {
+        val fraOppslag = periodehistorikkApiDao.finn(utbetalingId)
+        val fraMap = fullPeriodehistorikk[utbetalingId]
+        val oppslagOgMapGirSammeResultat = fraOppslag == fraMap
+        var melding = "Oppslag og map gir samme resultat: $oppslagOgMapGirSammeResultat"
+        if (!oppslagOgMapGirSammeResultat) {
+            melding += " - oppslag ga: $fraOppslag, ny ga $fraMap"
+        }
+        sikkerLogger.debug(melding, kv("utbetalingId", utbetalingId))
+        return fraOppslag
+    }
+
     fun historikkinnslag(): List<Historikkinnslag> =
-        (fullPeriodehistorikk[utbetaling().id] ?: periodehistorikkApiDao.finn(utbetaling().id))
+        finnOgSammenlign(utbetaling().id)
             .map {
                 when (it.type) {
                     PeriodehistorikkType.LEGG_PA_VENT -> {
@@ -788,3 +802,5 @@ private fun GraphQLOppdrag.tilSimulering(): Simulering =
 
 private fun List<JsonNode>.tilFaresignaler(): List<Faresignal> =
     map { objectMapper.readValue(it.traverse(), object : TypeReference<Faresignal>() {}) }
+
+private val sikkerLogger = LoggerFactory.getLogger("tjenestekall")
