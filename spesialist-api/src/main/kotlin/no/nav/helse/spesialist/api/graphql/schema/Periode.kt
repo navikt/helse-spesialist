@@ -331,6 +331,7 @@ interface Periode {
                 Periodetilstand.UtbetaltVenterPaEnAnnenPeriode
             }
         }
+
         GraphQLPeriodetilstand.AVVENTERINNTEKTSOPPLYSNINGER -> Periodetilstand.AvventerInntektsopplysninger
         GraphQLPeriodetilstand.TILSKJONNSFASTSETTELSE -> Periodetilstand.TilSkjonnsfastsettelse
         else -> Periodetilstand.Ukjent
@@ -563,6 +564,7 @@ data class BeregnetPeriode(
                                 },
                         )
                     }
+
                     PeriodehistorikkType.FJERN_FRA_PA_VENT ->
                         FjernetFraPaVent(
                             id = it.id,
@@ -572,6 +574,7 @@ data class BeregnetPeriode(
                             notatId = it.notatId,
                             dialogRef = it.dialogRef,
                         )
+
                     PeriodehistorikkType.TOTRINNSVURDERING_RETUR -> {
                         val notattekst = mapTotrinnsvurderingReturJson(json = it.json)
                         TotrinnsvurderingRetur(
@@ -583,17 +586,20 @@ data class BeregnetPeriode(
                             dialogRef = it.dialogRef,
                             notattekst = notattekst,
                             kommentarer =
-                                notatDao.finnKommentarer(it.dialogRef!!.toLong()).map { kommentar ->
-                                    Kommentar(
-                                        id = kommentar.id,
-                                        tekst = kommentar.tekst,
-                                        opprettet = kommentar.opprettet,
-                                        saksbehandlerident = kommentar.saksbehandlerident,
-                                        feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
-                                    )
-                                },
+                                it.dialogRef?.let { dialogRef ->
+                                    notatDao.finnKommentarer(dialogRef.toLong()).map { kommentar ->
+                                        Kommentar(
+                                            id = kommentar.id,
+                                            tekst = kommentar.tekst,
+                                            opprettet = kommentar.opprettet,
+                                            saksbehandlerident = kommentar.saksbehandlerident,
+                                            feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+                                        )
+                                    }
+                                } ?: emptyList(),
                         )
                     }
+
                     else ->
                         PeriodeHistorikkElementNy(
                             id = it.id,
