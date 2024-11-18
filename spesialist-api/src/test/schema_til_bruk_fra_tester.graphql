@@ -820,6 +820,17 @@ type Totrinnsvurdering {
     saksbehandler: UUID
 }
 
+type TotrinnsvurderingRetur implements Historikkinnslag {
+    dialogRef: Int
+    id: Int!
+    kommentarer: [Kommentar!]!
+    notatId: Int
+    notattekst: String!
+    saksbehandlerIdent: String
+    timestamp: LocalDateTime!
+    type: PeriodehistorikkType!
+}
+
 type UberegnetPeriode implements Periode {
     behandlingId: UUID!
     erForkastet: Boolean!

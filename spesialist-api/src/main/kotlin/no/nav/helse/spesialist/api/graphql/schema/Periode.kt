@@ -230,6 +230,17 @@ data class FjernetFraPaVent(
     override val dialogRef: Int?,
 ) : Historikkinnslag
 
+data class TotrinnsvurderingRetur(
+    override val id: Int,
+    override val type: PeriodehistorikkType,
+    override val timestamp: LocalDateTime,
+    override val saksbehandlerIdent: String?,
+    override val notatId: Int?,
+    override val dialogRef: Int?,
+    val notattekst: String,
+    val kommentarer: List<Kommentar>,
+) : Historikkinnslag
+
 data class PeriodeHistorikkElementNy(
     override val id: Int,
     override val type: PeriodehistorikkType,
@@ -513,8 +524,14 @@ data class BeregnetPeriode(
         val node = objectMapper.readTree(json)
         val påVentÅrsaker = node["årsaker"].map { it["årsak"].asText() }
         val frist = node["frist"]?.takeUnless { it.isMissingOrNull() }?.asLocalDate()
-        val notatTekst = node["notattekst"]?.takeUnless { it.isMissingOrNull() }?.asText()
-        return Triple(påVentÅrsaker, frist, notatTekst)
+        val notattekst = node["notattekst"]?.takeUnless { it.isMissingOrNull() }?.asText()
+        return Triple(påVentÅrsaker, frist, notattekst)
+    }
+
+    private fun mapTotrinnsvurderingReturJson(json: String): String {
+        val node = objectMapper.readTree(json)
+        val notattekst = node["notattekst"].asText()
+        return notattekst
     }
 
     fun historikkinnslag(): List<Historikkinnslag> =
@@ -523,7 +540,7 @@ data class BeregnetPeriode(
             .map {
                 when (it.type) {
                     PeriodehistorikkType.LEGG_PA_VENT -> {
-                        val (påVentÅrsaker, frist, notatTekst) = mapLagtPåVentJson(json = it.json)
+                        val (påVentÅrsaker, frist, notattekst) = mapLagtPåVentJson(json = it.json)
                         LagtPaVent(
                             id = it.id,
                             type = it.type,
@@ -533,7 +550,7 @@ data class BeregnetPeriode(
                             dialogRef = it.dialogRef,
                             arsaker = påVentÅrsaker,
                             frist = frist,
-                            notatTekst = notatTekst,
+                            notatTekst = notattekst,
                             kommentarer =
                                 notatDao.finnKommentarer(it.dialogRef!!.toLong()).map { kommentar ->
                                     Kommentar(
@@ -555,6 +572,28 @@ data class BeregnetPeriode(
                             notatId = it.notatId,
                             dialogRef = it.dialogRef,
                         )
+                    PeriodehistorikkType.TOTRINNSVURDERING_RETUR -> {
+                        val notattekst = mapTotrinnsvurderingReturJson(json = it.json)
+                        TotrinnsvurderingRetur(
+                            id = it.id,
+                            type = it.type,
+                            saksbehandlerIdent = it.saksbehandlerIdent,
+                            timestamp = it.timestamp,
+                            notatId = it.notatId,
+                            dialogRef = it.dialogRef,
+                            notattekst = notattekst,
+                            kommentarer =
+                                notatDao.finnKommentarer(it.dialogRef!!.toLong()).map { kommentar ->
+                                    Kommentar(
+                                        id = kommentar.id,
+                                        tekst = kommentar.tekst,
+                                        opprettet = kommentar.opprettet,
+                                        saksbehandlerident = kommentar.saksbehandlerident,
+                                        feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+                                    )
+                                },
+                        )
+                    }
                     else ->
                         PeriodeHistorikkElementNy(
                             id = it.id,
