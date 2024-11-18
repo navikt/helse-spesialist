@@ -4,41 +4,11 @@ import kotliquery.Row
 import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.db.MedDataSource
 import no.nav.helse.db.QueryRunner
-import java.util.UUID
 import javax.sql.DataSource
 
 class PeriodehistorikkApiDao(
     private val dataSource: DataSource,
 ) : QueryRunner by MedDataSource(dataSource) {
-    fun finn(utbetalingId: UUID) =
-        asSQL(
-            // Fiklete greier, for å unngå sequential scan. Spørringen gjøres mange ganger når GraphQL skal bygge
-            // person-dataene.
-            """
-            WITH innslag_med_utbetaling_id AS
-            (
-                SELECT id FROM periodehistorikk WHERE utbetaling_id = :utbetalingId
-            ),
-            innslag_via_selve_vedtaksperiode_generasjon AS
-            (
-                SELECT ph.id
-                FROM periodehistorikk ph
-                JOIN selve_vedtaksperiode_generasjon svg ON generasjon_id = unik_id
-                WHERE svg.utbetaling_id = :utbetaling_id
-            )
-            SELECT id, type, timestamp, notat_id, json, ident, dialog_ref, utbetaling_id, generasjon_id
-            FROM periodehistorikk
-            LEFT JOIN saksbehandler s ON saksbehandler_oid = s.oid
-            WHERE id IN
-            (
-                SELECT id FROM innslag_med_utbetaling_id
-                UNION ALL
-                SELECT id FROM innslag_via_selve_vedtaksperiode_generasjon
-            )
-            """.trimIndent(),
-            "utbetaling_id" to utbetalingId,
-        ).list { periodehistorikkDto(it) }
-
     fun hentForPerson(fødselsnummer: String) =
         asSQL(
             """
