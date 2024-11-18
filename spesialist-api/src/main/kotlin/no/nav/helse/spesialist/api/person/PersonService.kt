@@ -132,6 +132,7 @@ class PersonService(
                 varselRepository = varselRepository,
                 oppgaveApiDao = oppgaveApiDao,
                 periodehistorikkApiDao = periodehistorikkApiDao,
+                fullPeriodehistorikk = periodehistorikkApiDao.prehentForPerson(fødselsnummer),
                 notatDao = notatDao,
                 totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                 påVentApiDao = påVentApiDao,

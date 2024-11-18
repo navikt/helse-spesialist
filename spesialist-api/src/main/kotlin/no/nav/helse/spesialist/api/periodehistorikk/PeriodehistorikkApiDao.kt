@@ -39,6 +39,26 @@ class PeriodehistorikkApiDao(
             "utbetaling_id" to utbetalingId,
         ).list { periodehistorikkDto(it) }
 
+    fun prehentForPerson(fødselsnummer: String): Map<UUID, List<PeriodehistorikkDto>> {
+        return asSQL(
+            """
+            with generasjon_id_og_utbetaling_id as (
+                select svg.utbetaling_id, svg.unik_id as generasjon_id
+                from selve_vedtaksperiode_generasjon svg
+                join vedtak v on svg.vedtaksperiode_id = v.vedtaksperiode_id
+                join person p on v.person_ref = p.id
+                where p.fødselsnummer = :foedselsnummer
+            )
+            select id, type, timestamp, notat_id, json, ident, dialog_ref, utvalg.utbetaling_id, utvalg.generasjon_id
+            from generasjon_id_og_utbetaling_id utvalg
+            left join periodehistorikk ph on utvalg.utbetaling_id = ph.utbetaling_id or utvalg.generasjon_id = ph.generasjon_id
+            left join saksbehandler s on saksbehandler_oid = s.oid
+            where ph.id is not null
+            """.trimIndent(),
+            "foedselsnummer" to fødselsnummer,
+        ).list { it.uuid("utbetaling_id") to periodehistorikkDto(it) }.groupBy({ it.first }) { it.second }
+    }
+
     companion object {
         fun periodehistorikkDto(it: Row) =
             PeriodehistorikkDto(

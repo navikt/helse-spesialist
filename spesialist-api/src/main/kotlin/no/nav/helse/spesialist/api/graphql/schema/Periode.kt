@@ -15,6 +15,7 @@ import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveForPeriodevisningDto
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
@@ -468,6 +469,7 @@ data class BeregnetPeriode(
     private val varselRepository: ApiVarselRepository,
     private val oppgaveApiDao: OppgaveApiDao,
     private val periodehistorikkApiDao: PeriodehistorikkApiDao,
+    private val fullPeriodehistorikk: Map<UUID, List<PeriodehistorikkDto>>,
     private val notatDao: NotatApiDao,
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val påVentApiDao: PåVentApiDao,
@@ -536,8 +538,7 @@ data class BeregnetPeriode(
     }
 
     fun historikkinnslag(): List<Historikkinnslag> =
-        periodehistorikkApiDao
-            .finn(utbetaling().id)
+        (fullPeriodehistorikk[utbetaling().id] ?: periodehistorikkApiDao.finn(utbetaling().id))
             .map {
                 when (it.type) {
                     PeriodehistorikkType.LEGG_PA_VENT -> {

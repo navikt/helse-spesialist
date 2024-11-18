@@ -10,6 +10,7 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDto
 import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
@@ -173,6 +174,7 @@ data class Arbeidsgiver(
     private val varselRepository: ApiVarselRepository,
     private val oppgaveApiDao: OppgaveApiDao,
     private val periodehistorikkApiDao: PeriodehistorikkApiDao,
+    private val fullPeriodehistorikk: Map<UUID, List<PeriodehistorikkDto>>,
     private val notatDao: NotatApiDao,
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val påVentApiDao: PåVentApiDao,
@@ -201,18 +203,19 @@ data class Arbeidsgiver(
                                 BeregnetPeriode(
                                     orgnummer = organisasjonsnummer,
                                     periode = it,
+                                    oppgavehåndterer = oppgavehåndterer,
+                                    saksbehandlerhåndterer = saksbehandlerhåndterer,
                                     risikovurderingApiDao = risikovurderingApiDao,
                                     varselRepository = varselRepository,
                                     oppgaveApiDao = oppgaveApiDao,
                                     periodehistorikkApiDao = periodehistorikkApiDao,
+                                    fullPeriodehistorikk = fullPeriodehistorikk,
                                     notatDao = notatDao,
                                     totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                                     påVentApiDao = påVentApiDao,
                                     tilganger = tilganger,
                                     erSisteGenerasjon = index == 0,
                                     index = index,
-                                    oppgavehåndterer = oppgavehåndterer,
-                                    saksbehandlerhåndterer = saksbehandlerhåndterer,
                                 )
                             else -> throw Exception("Ukjent tidslinjeperiode")
                         }
