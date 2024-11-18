@@ -244,7 +244,7 @@ internal class VedtakFattetMelderTest {
     }
 
     @Test
-    fun `vanlig vedtak sykepengegrunnlag fastsatt etter hovedregel med delvis avslag`() {
+    fun `vanlig vedtak sykepengegrunnlag fastsatt etter hovedregel med delvis innvilgelse`() {
         val spleis =
             Sykepengevedtak.Vedtak(
                 fødselsnummer = FØDSELSNUMMER,
@@ -282,7 +282,7 @@ internal class VedtakFattetMelderTest {
                 skjønnsfastsettingopplysninger = null,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 avslag = AvslagDto(AvslagstypeDto.DELVIS_AVSLAG, "En individuell begrunnelse"),
-                saksbehandlerVurdering = SaksbehandlerVurderingDto.DelvisAvslag("En individuell begrunnelse"),
+                saksbehandlerVurdering = SaksbehandlerVurderingDto.DelvisInnvilgelse("En individuell begrunnelse"),
         )
         vedtakFattetMelder.vedtakFattet(spleis)
         vedtakFattetMelder.publiserUtgåendeMeldinger()
@@ -328,11 +328,13 @@ internal class VedtakFattetMelderTest {
             objectMapper.convertValue(event["sykepengegrunnlagsfakta"]["arbeidsgivere"]),
         )
 
-        assertEquals(1, event["begrunnelser"].size())
+        assertEquals(2, event["begrunnelser"].size())
         assertEquals(1, event["tags"].size())
         assertEquals("IngenNyArbeidsgiverperiode", event["tags"].first().asText())
         assertEquals("DelvisInnvilgelse", event["begrunnelser"][0]["type"].asText())
+        assertEquals("DelvisInnvilgelse", event["begrunnelser"][1]["type"].asText())
         assertEquals("En individuell begrunnelse", event["begrunnelser"][0]["begrunnelse"].asText())
+        assertEquals("En individuell begrunnelse", event["begrunnelser"][1]["begrunnelse"].asText())
         assertEquals(
             listOf(mapOf("fom" to fom, "tom" to tom)),
             objectMapper.convertValue<List<Map<String, LocalDate>>>(event["begrunnelser"][0]["perioder"]),
@@ -558,7 +560,7 @@ internal class VedtakFattetMelderTest {
         )
         assertEquals(13000.0, event["sykepengegrunnlagsfakta"]["skjønnsfastsatt"].asDouble())
 
-        assertEquals(4, event["begrunnelser"].size())
+        assertEquals(5, event["begrunnelser"].size())
 
         assertEquals("SkjønnsfastsattSykepengegrunnlagMal", event["begrunnelser"][0]["type"].asText())
         assertEquals("Mal", event["begrunnelser"][0]["begrunnelse"].asText())
@@ -586,6 +588,13 @@ internal class VedtakFattetMelderTest {
         assertEquals(
             listOf(mapOf("fom" to fom, "tom" to tom)),
             objectMapper.convertValue<List<Map<String, LocalDate>>>(event["begrunnelser"][3]["perioder"]),
+        )
+
+        assertEquals("Avslag", event["begrunnelser"][4]["type"].asText())
+        assertEquals("En individuell begrunnelse", event["begrunnelser"][4]["begrunnelse"].asText())
+        assertEquals(
+            listOf(mapOf("fom" to fom, "tom" to tom)),
+            objectMapper.convertValue<List<Map<String, LocalDate>>>(event["begrunnelser"][4]["perioder"]),
         )
 
         assertEquals(1, event["tags"].size())

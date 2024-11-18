@@ -193,7 +193,7 @@ class SykepengevedtakBuilderTest {
                 )
             )
             .saksbehandlerVurdering(
-                SaksbehandlerVurdering.DelvisAvslag("En individuell begrunnelse for avslag")
+                SaksbehandlerVurdering.DelvisInnvilgelse("En individuell begrunnelse for avslag")
             )
             .tags(listOf("IngenNyArbeidsgiverperiode"))
             .build()
@@ -221,7 +221,7 @@ class SykepengevedtakBuilderTest {
                 skjønnsfastsettingopplysninger = null,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 avslag = AvslagDto(AvslagstypeDto.DELVIS_AVSLAG, "En individuell begrunnelse for avslag"),
-                saksbehandlerVurdering = SaksbehandlerVurderingDto.DelvisAvslag("En individuell begrunnelse for avslag"),
+                saksbehandlerVurdering = SaksbehandlerVurderingDto.DelvisInnvilgelse("En individuell begrunnelse for avslag"),
             ),
             utkast,
         )
