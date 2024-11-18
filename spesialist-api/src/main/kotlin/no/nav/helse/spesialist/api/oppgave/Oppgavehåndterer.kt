@@ -29,6 +29,8 @@ interface Oppgavehåndterer {
 
     fun spleisBehandlingId(oppgaveId: Long): UUID
 
+    fun fødselsnummer(oppgaveId: Long): String
+
     fun oppgaver(
         saksbehandlerFraApi: SaksbehandlerFraApi,
         offset: Int,

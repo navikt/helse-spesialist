@@ -2,6 +2,7 @@ package no.nav.helse.modell.saksbehandler
 
 import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringArsak
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradPeriode
+import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import no.nav.helse.modell.vilkårsprøving.SubsumsjonEvent
 import java.time.LocalDate
 import java.util.UUID
@@ -35,6 +36,11 @@ interface SaksbehandlerObserver {
     fun utbetalingAnnullert(
         fødselsnummer: String,
         event: AnnullertUtbetalingEvent,
+    ) {}
+
+    fun lagtPåVent(
+        fødselsnummer: String,
+        event: LagtPåVentEvent,
     ) {}
 
     fun nySubsumsjon(
@@ -159,4 +165,16 @@ data class AnnullertUtbetalingEvent(
     val begrunnelser: List<String>,
     val arsaker: List<AnnulleringArsak>?,
     val kommentar: String?,
+)
+
+data class LagtPåVentEvent(
+    val fødselsnummer: String,
+    val oppgaveId: Long,
+    val behandlingId: UUID,
+    val skalTildeles: Boolean,
+    val frist: LocalDate,
+    val notatTekst: String?,
+    val årsaker: List<PåVentÅrsak>,
+    val saksbehandlerOid: UUID,
+    val saksbehandlerIdent: String,
 )

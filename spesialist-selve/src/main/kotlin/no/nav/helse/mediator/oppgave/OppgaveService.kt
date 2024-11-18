@@ -246,6 +246,8 @@ internal class OppgaveService(
 
     override fun spleisBehandlingId(oppgaveId: Long): UUID = oppgaveDao.finnSpleisBehandlingId(oppgaveId)
 
+    override fun fødselsnummer(oppgaveId: Long): String = oppgaveDao.finnFødselsnummer(oppgaveId)
+
     override fun oppgaver(
         saksbehandlerFraApi: SaksbehandlerFraApi,
         offset: Int,

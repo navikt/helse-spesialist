@@ -1,6 +1,8 @@
 package no.nav.helse.mediator.overstyring
 
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.saksbehandler.AnnullertUtbetalingEvent
+import no.nav.helse.modell.saksbehandler.LagtPåVentEvent
 import no.nav.helse.modell.saksbehandler.MinimumSykdomsgradVurdertEvent
 import no.nav.helse.modell.saksbehandler.OverstyrtArbeidsforholdEvent
 import no.nav.helse.modell.saksbehandler.OverstyrtInntektOgRefusjonEvent
@@ -9,10 +11,15 @@ import no.nav.helse.modell.saksbehandler.SaksbehandlerObserver
 import no.nav.helse.modell.saksbehandler.SkjønnsfastsattSykepengegrunnlagEvent
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
+import org.slf4j.LoggerFactory
 
 internal class Saksbehandlingsmelder(
     private val rapidsConnection: RapidsConnection,
 ) : SaksbehandlerObserver {
+    companion object {
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+    }
+
     override fun tidslinjeOverstyrt(
         fødselsnummer: String,
         event: OverstyrtTidslinjeEvent,
@@ -149,6 +156,29 @@ internal class Saksbehandlingsmelder(
                     }
                 },
             )
+        rapidsConnection.publish(fødselsnummer, jsonMessage.toJson())
+    }
+
+    override fun lagtPåVent(
+        fødselsnummer: String,
+        event: LagtPåVentEvent,
+    ) {
+        val jsonMessage =
+            JsonMessage.newMessage(
+                "lagt_på_vent",
+                mutableMapOf(
+                    "oppgaveId" to event.oppgaveId,
+                    "behandlingId" to event.behandlingId,
+                    "skalTildeles" to event.skalTildeles,
+                    "frist" to event.frist,
+                    "saksbehandlerOid" to event.saksbehandlerOid,
+                    "saksbehandlerIdent" to event.saksbehandlerIdent,
+                    "årsaker" to event.årsaker.map { mapOf("årsak" to it.årsak, "key" to it.key) },
+                ).apply {
+                    compute("notatTekst") { _, _ -> event.notatTekst }
+                },
+            )
+        sikkerlogg.info("Publiserer hendelse {}", kv("lagt_på_vent", jsonMessage.toJson()))
         rapidsConnection.publish(fødselsnummer, jsonMessage.toJson())
     }
 }

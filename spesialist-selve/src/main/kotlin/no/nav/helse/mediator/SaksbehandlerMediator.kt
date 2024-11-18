@@ -663,11 +663,13 @@ internal class SaksbehandlerMediator(
 
     private fun PaVentRequest.LeggPaVent.tilModellversjon(): LeggPåVent =
         LeggPåVent(
-            oppgaveId,
-            frist,
-            skalTildeles,
-            notatTekst,
-            årsaker.map { årsak -> PåVentÅrsak(key = årsak._key, årsak = årsak.arsak) },
+            fødselsnummer = oppgaveService.fødselsnummer(oppgaveId),
+            oppgaveId = oppgaveId,
+            behandlingId = oppgaveService.spleisBehandlingId(oppgaveId),
+            frist = frist,
+            skalTildeles = skalTildeles,
+            notatTekst = notatTekst,
+            årsaker = årsaker.map { årsak -> PåVentÅrsak(key = årsak._key, årsak = årsak.arsak) },
         )
 
     private fun PaVentRequest.FjernPaVent.tilModellversjon(): FjernPåVent = FjernPåVent(oppgaveId)
