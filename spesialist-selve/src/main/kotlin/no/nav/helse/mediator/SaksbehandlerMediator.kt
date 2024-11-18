@@ -274,6 +274,7 @@ internal class SaksbehandlerMediator(
             periodehistorikkDao.lagreMedOppgaveId(innslag, handling.oppgaveId)
             oppgaveService.leggPåVent(handling, saksbehandler)
             PåVentRepository(påVentDao).leggPåVent(saksbehandler.oid(), handling, dialogRef)
+            handling.utførAv(saksbehandler)
         } catch (e: Modellfeil) {
             throw e.tilApiversjon()
         }
