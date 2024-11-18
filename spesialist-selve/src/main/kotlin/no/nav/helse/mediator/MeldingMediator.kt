@@ -2,6 +2,7 @@ package no.nav.helse.mediator
 
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.sessionOf
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.CommandContextRepository
@@ -337,8 +338,9 @@ internal class MeldingMediator(
         err: Exception,
         message: String,
     ) {
+        val messageJson = objectMapper.writeValueAsString(message)
         logg.error("alvorlig feil: ${err.message} (se sikkerlogg for melding)", err)
-        sikkerlogg.error("alvorlig feil: ${err.message}\n\t$message", err, err.printStackTrace())
+        sikkerlogg.error("alvorlig feil: ${err.message}", kv("stack_trace", err), kv("json", messageJson))
     }
 
     internal fun mottaSøknadSendt(
