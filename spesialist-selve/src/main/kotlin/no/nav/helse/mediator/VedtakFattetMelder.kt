@@ -2,7 +2,6 @@ package no.nav.helse.mediator
 
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.person.PersonObserver
-import no.nav.helse.modell.vedtak.AvslagstypeDto
 import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Infotrygd
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis
@@ -160,26 +159,6 @@ internal class VedtakFattetMelder(
                                         ),
                                 ),
                             )
-                    }
-
-                    if (sykepengevedtak.avslag != null) {
-                        begrunnelser.addLast(
-                            mapOf(
-                                "type" to
-                                    when (sykepengevedtak.avslag!!.type) {
-                                        AvslagstypeDto.AVSLAG -> "Avslag"
-                                        AvslagstypeDto.DELVIS_AVSLAG -> "DelvisInnvilgelse"
-                                    },
-                                "begrunnelse" to sykepengevedtak.avslag!!.begrunnelse,
-                                "perioder" to
-                                    listOf(
-                                        mapOf(
-                                            "fom" to "${sykepengevedtak.fom}",
-                                            "tom" to "${sykepengevedtak.tom}",
-                                        ),
-                                    ),
-                            ),
-                        )
                     }
 
                     val saksbehandlerVurdering = sykepengevedtak.saksbehandlerVurdering
