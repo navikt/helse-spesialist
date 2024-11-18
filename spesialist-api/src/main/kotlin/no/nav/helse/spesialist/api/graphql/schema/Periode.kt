@@ -541,11 +541,11 @@ data class BeregnetPeriode(
 
     private fun finnOgSammenlign(utbetalingId: UUID): List<PeriodehistorikkDto> {
         val fraOppslag = periodehistorikkApiDao.finn(utbetalingId)
-        val fraMap = fullPeriodehistorikk[utbetalingId]
-        val oppslagOgMapGirSammeResultat = fraOppslag == fraMap
+        val fraMap = fullPeriodehistorikk[utbetalingId]?.toSet() ?: emptySet()
+        val oppslagOgMapGirSammeResultat = fraOppslag.toSet() == fraMap
         var melding = "Oppslag og map gir samme resultat: $oppslagOgMapGirSammeResultat"
         if (!oppslagOgMapGirSammeResultat) {
-            melding += " - oppslag ga: $fraOppslag, ny ga $fraMap"
+            melding += " - oppslag ga: ${fraOppslag.toSet()}, ny ga $fraMap"
         }
         sikkerLogger.debug(melding, kv("utbetalingId", utbetalingId))
         return fraOppslag
