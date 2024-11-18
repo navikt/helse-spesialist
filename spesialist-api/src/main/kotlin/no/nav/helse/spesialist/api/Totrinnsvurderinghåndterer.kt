@@ -12,7 +12,7 @@ interface Totrinnsvurderinghåndterer {
     fun totrinnsvurderingRetur(
         oppgaveId: Long,
         saksbehandlerFraApi: SaksbehandlerFraApi,
-        notat: String,
+        notattekst: String,
     )
 
     fun avventerTotrinnsvurdering(

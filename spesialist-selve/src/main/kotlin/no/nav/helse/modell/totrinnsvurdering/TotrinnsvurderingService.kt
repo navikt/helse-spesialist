@@ -35,12 +35,13 @@ class TotrinnsvurderingService(
     override fun totrinnsvurderingRetur(
         oppgaveId: Long,
         saksbehandlerFraApi: SaksbehandlerFraApi,
-        notat: String,
+        notattekst: String,
     ) {
         val dialogRef = dialogDao.lagre()
         val innslag =
             HistorikkinnslagDto.totrinnsvurderingRetur(
-                notat = NotatDto(oppgaveId, notat),
+                notattekst = notattekst,
+                notat = NotatDto(oppgaveId, notattekst),
                 saksbehandler = saksbehandlerFraApi.toDto(),
                 dialogRef = dialogRef,
             )

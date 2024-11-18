@@ -46,11 +46,18 @@ sealed interface HistorikkinnslagDto {
             AvventerTotrinnsvurdering(saksbehandler = saksbehandler, tidspunkt = LocalDateTime.now())
 
         fun totrinnsvurderingRetur(
+            notattekst: String,
             notat: NotatDto,
             saksbehandler: SaksbehandlerDto,
             dialogRef: Long,
         ): TotrinnsvurderingRetur =
-            TotrinnsvurderingRetur(notat = notat, saksbehandler = saksbehandler, tidspunkt = LocalDateTime.now(), dialogRef = dialogRef)
+            TotrinnsvurderingRetur(
+                notattekst = notattekst,
+                notat = notat,
+                saksbehandler = saksbehandler,
+                tidspunkt = LocalDateTime.now(),
+                dialogRef = dialogRef,
+            )
 
         fun totrinnsvurderingAutomatiskRetur(): TotrinnsvurderingAutomatiskRetur =
             TotrinnsvurderingAutomatiskRetur(tidspunkt = LocalDateTime.now())
@@ -118,7 +125,13 @@ data class TotrinnsvurderingRetur(
     override val saksbehandler: SaksbehandlerDto,
     override val tidspunkt: LocalDateTime,
     override val dialogRef: Long,
-) : HistorikkinnslagDto
+    val notattekst: String,
+) : HistorikkinnslagDto {
+    override fun toJson(): String =
+        mapOf(
+            "notattekst" to notattekst,
+        ).let { objectMapper.writeValueAsString(it) }
+}
 
 data class TotrinnsvurderingAutomatiskRetur(
     override val tidspunkt: LocalDateTime,

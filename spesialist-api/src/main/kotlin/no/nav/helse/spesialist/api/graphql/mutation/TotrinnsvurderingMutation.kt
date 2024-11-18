@@ -119,7 +119,7 @@ class TotrinnsvurderingMutation(
             totrinnsvurderinghåndterer.totrinnsvurderingRetur(
                 oppgaveId = oppgavereferanse.toLong(),
                 saksbehandlerFraApi = besluttendeSaksbehandler,
-                notat = notatTekst,
+                notattekst = notatTekst,
             )
 
             log.info("OppgaveId $oppgavereferanse sendt i retur")
