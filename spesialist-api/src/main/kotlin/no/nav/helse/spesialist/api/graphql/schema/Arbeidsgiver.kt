@@ -9,7 +9,6 @@ import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDto
 import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
@@ -173,7 +172,6 @@ data class Arbeidsgiver(
     private val risikovurderingApiDao: RisikovurderingApiDao,
     private val varselRepository: ApiVarselRepository,
     private val oppgaveApiDao: OppgaveApiDao,
-    private val periodehistorikkApiDao: PeriodehistorikkApiDao,
     private val fullPeriodehistorikk: Map<UUID, List<PeriodehistorikkDto>>,
     private val notatDao: NotatApiDao,
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
@@ -208,7 +206,6 @@ data class Arbeidsgiver(
                                     risikovurderingApiDao = risikovurderingApiDao,
                                     varselRepository = varselRepository,
                                     oppgaveApiDao = oppgaveApiDao,
-                                    periodehistorikkApiDao = periodehistorikkApiDao,
                                     fullPeriodehistorikk = fullPeriodehistorikk,
                                     notatDao = notatDao,
                                     totrinnsvurderingApiDao = totrinnsvurderingApiDao,

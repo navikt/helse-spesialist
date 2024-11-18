@@ -39,8 +39,8 @@ class PeriodehistorikkApiDao(
             "utbetaling_id" to utbetalingId,
         ).list { periodehistorikkDto(it) }
 
-    fun prehentForPerson(fødselsnummer: String): Map<UUID, List<PeriodehistorikkDto>> {
-        return asSQL(
+    fun hentForPerson(fødselsnummer: String) =
+        asSQL(
             """
             with generasjon_id_og_utbetaling_id as (
                 select svg.utbetaling_id, svg.unik_id as generasjon_id
@@ -57,7 +57,6 @@ class PeriodehistorikkApiDao(
             """.trimIndent(),
             "foedselsnummer" to fødselsnummer,
         ).list { it.uuid("utbetaling_id") to periodehistorikkDto(it) }.groupBy({ it.first }) { it.second }
-    }
 
     companion object {
         fun periodehistorikkDto(it: Row) =

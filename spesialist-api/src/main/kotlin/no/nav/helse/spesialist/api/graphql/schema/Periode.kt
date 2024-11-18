@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.jackson.asLocalDate
 import com.github.navikt.tbd_libs.jackson.isMissingOrNull
 import io.ktor.utils.io.core.toByteArray
-import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.Toggle
@@ -15,7 +14,6 @@ import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveForPeriodevisningDto
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.påvent.PåVentApiDao
@@ -31,7 +29,6 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLOppdrag
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLTidslinjeperiode
 import no.nav.helse.spleis.graphql.hentsnapshot.Sykepengedager
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -470,7 +467,6 @@ data class BeregnetPeriode(
     private val risikovurderingApiDao: RisikovurderingApiDao,
     private val varselRepository: ApiVarselRepository,
     private val oppgaveApiDao: OppgaveApiDao,
-    private val periodehistorikkApiDao: PeriodehistorikkApiDao,
     private val fullPeriodehistorikk: Map<UUID, List<PeriodehistorikkDto>>,
     private val notatDao: NotatApiDao,
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
@@ -539,20 +535,8 @@ data class BeregnetPeriode(
         return notattekst
     }
 
-    private fun finnOgSammenlign(utbetalingId: UUID): List<PeriodehistorikkDto> {
-        val fraOppslag = periodehistorikkApiDao.finn(utbetalingId)
-        val fraMap = fullPeriodehistorikk[utbetalingId]?.toSet() ?: emptySet()
-        val oppslagOgMapGirSammeResultat = fraOppslag.toSet() == fraMap
-        var melding = "Oppslag og map gir samme resultat: $oppslagOgMapGirSammeResultat"
-        if (!oppslagOgMapGirSammeResultat) {
-            melding += " - oppslag ga: ${fraOppslag.toSet()}, ny ga $fraMap"
-        }
-        sikkerLogger.debug(melding, kv("utbetalingId", utbetalingId))
-        return fraOppslag
-    }
-
     fun historikkinnslag(): List<Historikkinnslag> =
-        finnOgSammenlign(utbetaling().id)
+        (fullPeriodehistorikk[utbetaling().id] ?: emptyList())
             .map {
                 when (it.type) {
                     PeriodehistorikkType.LEGG_PA_VENT -> {
@@ -802,5 +786,3 @@ private fun GraphQLOppdrag.tilSimulering(): Simulering =
 
 private fun List<JsonNode>.tilFaresignaler(): List<Faresignal> =
     map { objectMapper.readValue(it.traverse(), object : TypeReference<Faresignal>() {}) }
-
-private val sikkerLogger = LoggerFactory.getLogger("tjenestekall")
