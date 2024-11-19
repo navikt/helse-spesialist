@@ -9,7 +9,6 @@ data class PeriodehistorikkDto(
     val type: PeriodehistorikkType,
     val timestamp: LocalDateTime,
     val saksbehandlerIdent: String?,
-    val notatId: Int?,
     val dialogRef: Int?,
     val json: String,
 )

@@ -35,7 +35,6 @@ class PeriodehistorikkApiDao(
                 type = PeriodehistorikkType.valueOf(it.string("type")),
                 timestamp = it.localDateTime("timestamp"),
                 saksbehandlerIdent = it.stringOrNull("ident"),
-                notatId = it.intOrNull("notat_id"),
                 dialogRef = it.longOrNull("dialog_ref")?.toInt(),
                 json = it.string("json"),
             )
