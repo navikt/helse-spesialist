@@ -25,10 +25,10 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
     ): Set<Varsel> =
         asSQL(
             """
-            SELECT svg.unik_id as generasjon_id, sv.unik_id as varsel_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv 
-                INNER JOIN behandling svg ON sv.generasjon_ref = svg.id
+            SELECT b.unik_id as generasjon_id, sv.unik_id as varsel_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv 
+                INNER JOIN behandling b ON sv.generasjon_ref = b.id
                 LEFT JOIN api_varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM api_varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
-                WHERE sv.vedtaksperiode_id = :vedtaksperiode_id AND svg.utbetaling_id = :utbetaling_id AND sv.status != :status_inaktiv; 
+                WHERE sv.vedtaksperiode_id = :vedtaksperiode_id AND b.utbetaling_id = :utbetaling_id AND sv.status != :status_inaktiv; 
             """.trimIndent(),
             "vedtaksperiode_id" to vedtaksperiodeId,
             "utbetaling_id" to utbetalingId,
@@ -40,12 +40,12 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
         utbetalingId: UUID,
     ) = asSQL(
         """
-        SELECT svg.unik_id as generasjon_id, sv.unik_id as varsel_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv 
-            INNER JOIN behandling svg ON sv.generasjon_ref = svg.id
+        SELECT b.unik_id as generasjon_id, sv.unik_id as varsel_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv 
+            INNER JOIN behandling b ON sv.generasjon_ref = b.id
             LEFT JOIN api_varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM api_varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
             WHERE sv.vedtaksperiode_id = :vedtaksperiode_id 
                 AND sv.status != :status_inaktiv 
-                AND svg.id >= (
+                AND b.id >= (
                     SELECT id FROM behandling
                     WHERE utbetaling_id = :utbetaling_id AND vedtaksperiode_id = :vedtaksperiode_id
                 ); 
@@ -58,8 +58,8 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
     internal fun finnVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<Varsel> =
         asSQL(
             """
-            SELECT svg.unik_id as generasjon_id, sv.unik_id as varsel_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv
-                 INNER JOIN behandling svg ON sv.generasjon_ref = svg.id
+            SELECT b.unik_id as generasjon_id, sv.unik_id as varsel_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv
+                 INNER JOIN behandling b ON sv.generasjon_ref = b.id
                  LEFT JOIN api_varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM api_varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
                  WHERE sv.vedtaksperiode_id = :vedtaksperiode_id AND sv.status != :status_inaktiv; 
             """.trimIndent(),
@@ -70,8 +70,8 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
     internal fun finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<Varsel> =
         asSQL(
             """
-            SELECT svg.unik_id as generasjon_id, sv.unik_id as varsel_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv
-                 INNER JOIN behandling svg ON sv.generasjon_ref = svg.id
+            SELECT b.unik_id as generasjon_id, sv.unik_id as varsel_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv
+                 INNER JOIN behandling b ON sv.generasjon_ref = b.id
                  LEFT JOIN api_varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM api_varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
                  WHERE sv.vedtaksperiode_id = :vedtaksperiode_id AND sv.status = :status_godkjent; 
             """.trimIndent(),
@@ -85,8 +85,8 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
             UPDATE selve_varsel 
             SET status = ? 
             WHERE status = ? 
-            AND generasjon_ref IN (SELECT id FROM behandling svg 
-                WHERE svg.vedtaksperiode_id IN (${vedtaksperioder.joinToString { "?" }}));
+            AND generasjon_ref IN (SELECT id FROM behandling b 
+                WHERE b.vedtaksperiode_id IN (${vedtaksperioder.joinToString { "?" }}));
             """.trimIndent(),
             GODKJENT.name,
             VURDERT.name,
@@ -113,9 +113,9 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
                 AND kode = :kode AND status NOT IN (:status_vurdert, :status_godkjent) 
                 RETURNING *
             )
-            SELECT u.unik_id as varsel_id, u.opprettet, u.kode, u.status, u.status_endret_ident, u.status_endret_tidspunkt, av.unik_id as definisjon_id, svg.unik_id as generasjon_id, av.tittel, av.forklaring, av.handling  FROM updated u 
+            SELECT u.unik_id as varsel_id, u.opprettet, u.kode, u.status, u.status_endret_ident, u.status_endret_tidspunkt, av.unik_id as definisjon_id, b.unik_id as generasjon_id, av.tittel, av.forklaring, av.handling  FROM updated u 
                 INNER JOIN api_varseldefinisjon av on u.definisjon_ref = av.id
-                INNER JOIN behandling svg on u.generasjon_ref = svg.id
+                INNER JOIN behandling b on u.generasjon_ref = b.id
             """.trimIndent(),
             "status_vurdert" to VURDERT.name,
             "status_godkjent" to GODKJENT.name,
@@ -145,9 +145,9 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
                 AND kode = :kode AND status != :status_godkjent
                 RETURNING *
             )
-            SELECT u.unik_id as varsel_id, u.opprettet, u.kode, u.status, u.status_endret_ident, u.status_endret_tidspunkt, av.unik_id as definisjon_id, svg.unik_id as generasjon_id, av.tittel, av.forklaring, av.handling  FROM updated u 
+            SELECT u.unik_id as varsel_id, u.opprettet, u.kode, u.status, u.status_endret_ident, u.status_endret_tidspunkt, av.unik_id as definisjon_id, b.unik_id as generasjon_id, av.tittel, av.forklaring, av.handling  FROM updated u 
                 INNER JOIN api_varseldefinisjon av on av.id = (SELECT id FROM api_varseldefinisjon WHERE kode = u.kode ORDER BY opprettet DESC LIMIT 1)
-                INNER JOIN behandling svg on u.generasjon_ref = svg.id
+                INNER JOIN behandling b on u.generasjon_ref = b.id
             """.trimIndent(),
             "status_aktiv" to AKTIV.name,
             "status_godkjent" to GODKJENT.name,
@@ -172,10 +172,10 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
     internal fun finnVarslerFor(generasjonId: UUID): Set<Varsel> =
         asSQL(
             """
-            SELECT sv.unik_id as varsel_id, svg.unik_id as generasjon_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv 
-                INNER JOIN behandling svg ON sv.generasjon_ref = svg.id
+            SELECT sv.unik_id as varsel_id, b.unik_id as generasjon_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv 
+                INNER JOIN behandling b ON sv.generasjon_ref = b.id
                 INNER JOIN api_varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM api_varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
-                WHERE svg.unik_id = :generasjon_id;
+                WHERE b.unik_id = :generasjon_id;
             """.trimIndent(),
             "generasjon_id" to generasjonId,
         ).list(::mapVarsel).toSet()

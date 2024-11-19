@@ -310,8 +310,8 @@ internal class PersonRepository(
         val query1 =
             """
             DELETE FROM dialog d USING periodehistorikk ph 
-            INNER JOIN behandling svg ON ph.generasjon_id = svg.unik_id
-            INNER JOIN vedtak v ON v.vedtaksperiode_id = svg.vedtaksperiode_id
+            INNER JOIN behandling b ON ph.generasjon_id = b.unik_id
+            INNER JOIN vedtak v ON v.vedtaksperiode_id = b.vedtaksperiode_id
             WHERE d.id = ph.dialog_ref AND v.person_ref = :personRef
             """.trimIndent()
 
@@ -331,7 +331,7 @@ internal class PersonRepository(
         slettGenerasjonBegrunnelseKoblinger(personRef)
         @Language("PostgreSQL")
         val query = """
-             DELETE FROM behandling svg USING vedtak v WHERE svg.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?
+             DELETE FROM behandling b USING vedtak v WHERE b.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?
         """
         run(queryOf(query, personRef).asExecute)
     }
@@ -339,7 +339,7 @@ internal class PersonRepository(
     private fun TransactionalSession.slettGenerasjonBegrunnelseKoblinger(personRef: Int) {
         @Language("PostgreSQL")
         val query = """
-             DELETE FROM generasjon_begrunnelse_kobling gbk USING vedtak v INNER JOIN behandling svg on v.vedtaksperiode_id = svg.vedtaksperiode_id WHERE gbk.generasjon_id = svg.unik_id AND v.person_ref = ?
+             DELETE FROM generasjon_begrunnelse_kobling gbk USING vedtak v INNER JOIN behandling b on v.vedtaksperiode_id = b.vedtaksperiode_id WHERE gbk.generasjon_id = b.unik_id AND v.person_ref = ?
         """
         run(queryOf(query, personRef).asExecute)
     }

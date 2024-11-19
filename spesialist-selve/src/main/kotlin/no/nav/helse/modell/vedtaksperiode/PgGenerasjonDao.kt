@@ -101,12 +101,12 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
         asSQLWithQuestionMarks(
             if (varselIder.isEmpty()) {
                 """
-                DELETE FROM selve_varsel WHERE generasjon_ref = (SELECT id FROM behandling svg WHERE svg.unik_id = ? LIMIT 1)
+                DELETE FROM selve_varsel WHERE generasjon_ref = (SELECT id FROM behandling b WHERE b.unik_id = ? LIMIT 1)
                 """.trimIndent()
             } else {
                 """
                 DELETE FROM selve_varsel 
-                WHERE generasjon_ref = (SELECT id FROM behandling svg WHERE svg.unik_id = ? LIMIT 1) 
+                WHERE generasjon_ref = (SELECT id FROM behandling b WHERE b.unik_id = ? LIMIT 1) 
                 AND selve_varsel.unik_id NOT IN (${varselIder.joinToString { "?" }})
                 """.trimIndent()
             },
@@ -149,8 +149,8 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
     internal fun finnVedtaksperiodeIderFor(fødselsnummer: String): Set<UUID> {
         return asSQL(
             """
-            SELECT svg.vedtaksperiode_id FROM behandling svg 
-            INNER JOIN vedtak v on svg.vedtaksperiode_id = v.vedtaksperiode_id
+            SELECT b.vedtaksperiode_id FROM behandling b 
+            INNER JOIN vedtak v on b.vedtaksperiode_id = v.vedtaksperiode_id
             INNER JOIN person p on p.id = v.person_ref
             WHERE fødselsnummer = :fodselsnummer
             """,

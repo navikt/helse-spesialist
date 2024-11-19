@@ -123,9 +123,9 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
                 @Language("PostgreSQL")
                 val query =
                     """
-                    SELECT COUNT(1) FROM behandling svg 
-                    INNER JOIN selve_varsel sv on svg.id = sv.generasjon_ref 
-                    WHERE svg.vedtaksperiode_id = ? AND utbetaling_id = ?
+                    SELECT COUNT(1) FROM behandling b 
+                    INNER JOIN selve_varsel sv on b.id = sv.generasjon_ref 
+                    WHERE b.vedtaksperiode_id = ? AND utbetaling_id = ?
                     """
                 session.run(queryOf(query, vedtaksperiodeId, utbetalingId).map { it.int(1) }.asSingle)
             }

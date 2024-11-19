@@ -12,12 +12,12 @@ internal class GenerasjonDao(dataSource: DataSource) : QueryRunner by MedDataSou
     internal fun gjeldendeGenerasjonFor(oppgaveId: Long): Vedtaksperiode =
         asSQL(
             """
-            SELECT svg.vedtaksperiode_id, svg.fom, svg.tom, svg.skjæringstidspunkt
+            SELECT b.vedtaksperiode_id, b.fom, b.tom, b.skjæringstidspunkt
             FROM vedtak v 
-            INNER JOIN behandling svg on v.vedtaksperiode_id = svg.vedtaksperiode_id
+            INNER JOIN behandling b on v.vedtaksperiode_id = b.vedtaksperiode_id
             JOIN oppgave o ON v.id = o.vedtak_ref
             WHERE o.id = :oppgave_id
-            ORDER BY svg.id DESC LIMIT 1;
+            ORDER BY b.id DESC LIMIT 1;
             """.trimIndent(),
             "oppgave_id" to oppgaveId,
         ).single { it.tilVedtaksperiode() }
@@ -25,14 +25,14 @@ internal class GenerasjonDao(dataSource: DataSource) : QueryRunner by MedDataSou
     internal fun gjeldendeGenerasjonerForPerson(oppgaveId: Long): Set<Vedtaksperiode> =
         asSQL(
             """
-            SELECT DISTINCT ON (svg.vedtaksperiode_id) svg.vedtaksperiode_id, svg.fom, svg.tom, svg.skjæringstidspunkt 
+            SELECT DISTINCT ON (b.vedtaksperiode_id) b.vedtaksperiode_id, b.fom, b.tom, b.skjæringstidspunkt 
             FROM vedtak v
-            INNER JOIN behandling svg on v.vedtaksperiode_id = svg.vedtaksperiode_id
+            INNER JOIN behandling b on v.vedtaksperiode_id = b.vedtaksperiode_id
             WHERE person_ref = 
                 (SELECT person_ref FROM vedtak v2
                 JOIN oppgave o on v2.id = o.vedtak_ref
                 WHERE o.id = :oppgave_id) AND v.forkastet = false
-            ORDER BY svg.vedtaksperiode_id, svg.id DESC;
+            ORDER BY b.vedtaksperiode_id, b.id DESC;
             """.trimIndent(),
             "oppgave_id" to oppgaveId,
         ).list { it.tilVedtaksperiode() }.toSet()
@@ -43,12 +43,12 @@ internal class GenerasjonDao(dataSource: DataSource) : QueryRunner by MedDataSou
     ): Vedtaksperiode =
         asSQL(
             """
-            SELECT svg.vedtaksperiode_id, svg.unik_id, svg.fom, svg.tom, svg.skjæringstidspunkt
+            SELECT b.vedtaksperiode_id, b.unik_id, b.fom, b.tom, b.skjæringstidspunkt
             FROM vedtak v 
-            INNER JOIN behandling svg on v.vedtaksperiode_id = svg.vedtaksperiode_id
+            INNER JOIN behandling b on v.vedtaksperiode_id = b.vedtaksperiode_id
             JOIN oppgave o ON v.id = o.vedtak_ref
             WHERE o.id = :oppgave_id
-            ORDER BY svg.id DESC LIMIT 1;
+            ORDER BY b.id DESC LIMIT 1;
             """.trimIndent(),
             "oppgave_id" to oppgaveId,
         ).single { it.tilVedtaksperiode(varselGetter) }
@@ -59,14 +59,14 @@ internal class GenerasjonDao(dataSource: DataSource) : QueryRunner by MedDataSou
     ): Set<Vedtaksperiode> =
         asSQL(
             """
-            SELECT DISTINCT ON (svg.vedtaksperiode_id) svg.vedtaksperiode_id, svg.unik_id, svg.fom, svg.tom, svg.skjæringstidspunkt 
+            SELECT DISTINCT ON (b.vedtaksperiode_id) b.vedtaksperiode_id, b.unik_id, b.fom, b.tom, b.skjæringstidspunkt 
             FROM vedtak v
-            INNER JOIN behandling svg on v.vedtaksperiode_id = svg.vedtaksperiode_id
+            INNER JOIN behandling b on v.vedtaksperiode_id = b.vedtaksperiode_id
             WHERE person_ref = 
                 (SELECT person_ref FROM vedtak v2
                 JOIN oppgave o on v2.id = o.vedtak_ref
                 WHERE o.id = :oppgave_id) AND v.forkastet = false
-            ORDER BY svg.vedtaksperiode_id, svg.id DESC;
+            ORDER BY b.vedtaksperiode_id, b.id DESC;
             """.trimIndent(),
             "oppgave_id" to oppgaveId,
         ).list { it.tilVedtaksperiode(varselGetter) }.toSet()

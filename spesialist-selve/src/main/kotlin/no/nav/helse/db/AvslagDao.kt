@@ -29,10 +29,10 @@ class AvslagDao(queryRunner: QueryRunner) : QueryRunner by queryRunner {
         saksbehandlerOid: UUID,
     ) = asSQL(
         """
-        SELECT v.vedtaksperiode_id, svg.id AS generasjon_id
+        SELECT v.vedtaksperiode_id, b.id AS generasjon_id
         FROM vedtak v
         INNER JOIN oppgave o on v.id = o.vedtak_ref
-        INNER JOIN behandling svg ON svg.unik_id = o.generasjon_ref
+        INNER JOIN behandling b ON b.unik_id = o.generasjon_ref
         WHERE o.id = :oppgaveId 
         """.trimIndent(),
         "oppgaveId" to oppgaveId,
@@ -53,10 +53,10 @@ class AvslagDao(queryRunner: QueryRunner) : QueryRunner by queryRunner {
         asSQL(
             """
             WITH t as ( 
-                SELECT v.vedtaksperiode_id, svg.id 
+                SELECT v.vedtaksperiode_id, b.id 
                 FROM vedtak v
                 INNER JOIN oppgave o ON v.id = o.vedtak_ref
-                INNER JOIN behandling svg ON o.generasjon_ref = svg.unik_id
+                INNER JOIN behandling b ON o.generasjon_ref = b.unik_id
                 WHERE o.id = :oppgaveId
             )
             UPDATE avslag a
@@ -136,10 +136,10 @@ class AvslagDao(queryRunner: QueryRunner) : QueryRunner by queryRunner {
         asSQL(
             """
             SELECT b.type, b.tekst, a.opprettet, s.ident, a.invalidert FROM avslag a 
-            INNER JOIN behandling svg ON a.generasjon_ref = svg.id 
+            INNER JOIN behandling beh ON a.generasjon_ref = beh.id 
             INNER JOIN begrunnelse b ON b.id = a.begrunnelse_ref
             INNER JOIN saksbehandler s ON s.oid = b.saksbehandler_ref
-            WHERE a.vedtaksperiode_id = :vedtaksperiodeId AND svg.utbetaling_id = :utbetalingId 
+            WHERE a.vedtaksperiode_id = :vedtaksperiodeId AND beh.utbetaling_id = :utbetalingId 
             ORDER BY opprettet DESC
             """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,

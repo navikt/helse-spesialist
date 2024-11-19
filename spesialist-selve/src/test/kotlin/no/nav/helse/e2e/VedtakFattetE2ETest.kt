@@ -60,7 +60,7 @@ internal class VedtakFattetE2ETest : AbstractE2ETest() {
 
     private fun assertFerdigBehandledeGenerasjoner(vedtaksperiodeId: UUID) {
         @Language("PostgreSQL")
-        val query = "SELECT 1 FROM behandling svg WHERE vedtaksperiode_id = :vedtaksperiode_id AND tilstand = '${Generasjon.VedtakFattet.navn()}'"
+        val query = "SELECT 1 FROM behandling WHERE vedtaksperiode_id = :vedtaksperiode_id AND tilstand = '${Generasjon.VedtakFattet.navn()}'"
         val antallFerdigBehandledeGenerasjoner =
             sessionOf(dataSource).use { session ->
                 session.run(queryOf(query, mapOf("vedtaksperiode_id" to vedtaksperiodeId)).map { it.int(1) }.asSingle) ?: 0

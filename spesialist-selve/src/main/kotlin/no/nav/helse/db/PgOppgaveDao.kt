@@ -195,7 +195,7 @@ class PgOppgaveDao(
         asSQL(
             """
             SELECT spleis_behandling_id FROM oppgave o
-            INNER JOIN behandling svg ON svg.unik_id = o.generasjon_ref
+            INNER JOIN behandling b ON b.unik_id = o.generasjon_ref
             WHERE o.id = :oppgaveId;              
             """,
             "oppgaveId" to oppgaveId,
@@ -562,7 +562,7 @@ class PgOppgaveDao(
                 :ferdigstiltAvOid, 
                 :vedtakRef,
                 (
-                    SELECT unik_id FROM behandling svg WHERE vedtaksperiode_id = (
+                    SELECT unik_id FROM behandling WHERE vedtaksperiode_id = (
                         SELECT vedtaksperiode_id FROM vedtak v WHERE v.id = :vedtakRef
                     ) ORDER BY id DESC LIMIT 1
                 ),

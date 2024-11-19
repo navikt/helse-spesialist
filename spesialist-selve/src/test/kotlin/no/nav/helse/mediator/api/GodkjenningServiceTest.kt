@@ -209,7 +209,7 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
     }
 
     private fun assertPeriodehistorikk(utbetalingId: UUID) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL") val query = " select * from periodehistorikk where utbetaling_id = :utbetaling_id OR generasjon_id IN (SELECT unik_id FROM behandling svg WHERE svg.utbetaling_id = :utbetaling_id)"
+        @Language("PostgreSQL") val query = " select * from periodehistorikk where utbetaling_id = :utbetaling_id OR generasjon_id IN (SELECT unik_id FROM behandling WHERE utbetaling_id = :utbetaling_id)"
         val type =
             session.run(queryOf(query, mapOf("utbetaling_id" to utbetalingId)).map { it.string("type") }.asSingle)
                 ?: fail("Fant ikke reservasjon")
