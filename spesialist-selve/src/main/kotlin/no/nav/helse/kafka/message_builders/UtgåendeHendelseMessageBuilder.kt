@@ -39,9 +39,9 @@ private fun UtgåendeHendelse.Godkjenningsbehovløsning.somBehovløsning(): Json
                 ),
         )
     return JsonMessage.newMessage(
-        mapOf("@id" to UUID.randomUUID(), "@opprettet" to LocalDateTime.now()) +
-            orginaltBehov +
-            løsning,
+        orginaltBehov +
+            løsning +
+            mapOf("@id" to UUID.randomUUID(), "@opprettet" to LocalDateTime.now()),
     )
 }
 

@@ -1,16 +1,19 @@
 package no.nav.helse.kafka.message_builders
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.hendelse.UtgåendeHendelse
 import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.objectMapper
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spesialist.test.lagEpostadresseFraFulltNavn
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagSaksbehandlerident
 import no.nav.helse.spesialist.test.lagSaksbehandlernavn
 import no.nav.helse.spesialist.test.lagTilfeldigSaksbehandlerepost
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -222,6 +225,8 @@ class UtgåendeHendelseMessageBuilderTest {
         val saksbehandlerIdent = lagSaksbehandlerident()
         val saksbehandlerEpost = lagTilfeldigSaksbehandlerepost()
         val saksbehandleroverstyringer = listOf(UUID.randomUUID(), UUID.randomUUID())
+        val `godkjenningsbehov@opprettet` = LocalDateTime.now()
+        val `godkjenningsbehov@id` = UUID.randomUUID()
         val godkjenttidspunkt = LocalDateTime.now()
         val hendelse = UtgåendeHendelse.Godkjenningsbehovløsning(
             godkjent = true,
@@ -234,7 +239,7 @@ class UtgåendeHendelseMessageBuilderTest {
             årsak = "En årsak",
             begrunnelser = listOf("En begrunnelse"),
             kommentar = "En kommentar",
-            json = """{ "@event_name": "behov" }""",
+            json = """{ "@event_name": "behov", "@opprettet": "$`godkjenningsbehov@opprettet`", "@id": "$`godkjenningsbehov@id`" }""",
         )
 
         hendelse.somJson().assertGodkjenningsBehovløsning(
@@ -249,7 +254,9 @@ class UtgåendeHendelseMessageBuilderTest {
                 "årsak" to "En årsak",
                 "begrunnelser" to listOf("En begrunnelse"),
                 "kommentar" to "En kommentar",
-            )
+            ),
+            `opprinnelig@opprettet` = `godkjenningsbehov@opprettet`,
+            `opprinnelig@id` = `godkjenningsbehov@id`
         )
     }
 
@@ -299,10 +306,12 @@ class UtgåendeHendelseMessageBuilderTest {
         assertEquals(objectMapper.valueToTree(forventedeStandardfelter + payload), jsonNode)
     }
 
-    private fun String.assertGodkjenningsBehovløsning(payload: Map<String, Any?>) {
+    private fun String.assertGodkjenningsBehovløsning(payload: Map<String, Any>, `opprinnelig@id`: UUID, `opprinnelig@opprettet`: LocalDateTime) {
         val jsonNode = objectMapper.readTree(this) as ObjectNode
         val løsningNode = objectMapper.readTree(this).get("@løsning")
         assertNotNull(løsningNode)
+        assertNotEquals(`opprinnelig@id`, jsonNode["@id"].asUUID())
+        assertNotEquals(`opprinnelig@opprettet`, jsonNode["@opprettet"].asLocalDateTime())
         assertEquals("behov", jsonNode.get("@event_name").asText())
         assertEquals(objectMapper.valueToTree(mapOf("Godkjenning" to payload)), løsningNode)
     }
