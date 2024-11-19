@@ -9,7 +9,33 @@ import no.nav.helse.db.VergemålRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.oppgave.Egenskap.*
+import no.nav.helse.modell.oppgave.Egenskap.DELVIS_REFUSJON
+import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
+import no.nav.helse.modell.oppgave.Egenskap.EN_ARBEIDSGIVER
+import no.nav.helse.modell.oppgave.Egenskap.FLERE_ARBEIDSGIVERE
+import no.nav.helse.modell.oppgave.Egenskap.FORLENGELSE
+import no.nav.helse.modell.oppgave.Egenskap.FORSTEGANGSBEHANDLING
+import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
+import no.nav.helse.modell.oppgave.Egenskap.GOSYS
+import no.nav.helse.modell.oppgave.Egenskap.HASTER
+import no.nav.helse.modell.oppgave.Egenskap.INFOTRYGDFORLENGELSE
+import no.nav.helse.modell.oppgave.Egenskap.INGEN_UTBETALING
+import no.nav.helse.modell.oppgave.Egenskap.MEDLEMSKAP
+import no.nav.helse.modell.oppgave.Egenskap.OVERGANG_FRA_IT
+import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
+import no.nav.helse.modell.oppgave.Egenskap.REVURDERING
+import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
+import no.nav.helse.modell.oppgave.Egenskap.SKJØNNSFASTSETTELSE
+import no.nav.helse.modell.oppgave.Egenskap.SPESIALSAK
+import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
+import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
+import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
+import no.nav.helse.modell.oppgave.Egenskap.TILBAKEDATERT
+import no.nav.helse.modell.oppgave.Egenskap.TILKOMMEN
+import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
+import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
+import no.nav.helse.modell.oppgave.Egenskap.UTLAND
+import no.nav.helse.modell.oppgave.Egenskap.VERGEMÅL
 import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
@@ -49,7 +75,7 @@ internal class OpprettSaksbehandleroppgave(
                 .vurderAdressebeskyttelse(fødselsnummer)
                 .vurderOppgavetype(utbetalingtype)
                 .vurderStikkprøve(vedtaksperiodeId, hendelseId)
-                .vurderVurderingsmomenter(vedtaksperiodeId)
+                .vurderVurderingsmomenter(vedtaksperiodeId, utbetalingtype)
                 .vurderVergemål(fødselsnummer)
                 .vurderEnhetUtland(fødselsnummer)
                 .vurderMottaker()
@@ -107,8 +133,11 @@ internal class OpprettSaksbehandleroppgave(
         return this
     }
 
-    private fun Set<Egenskap>.vurderVurderingsmomenter(vedtaksperiodeId: UUID): Set<Egenskap> {
-        if (!this.contains(REVURDERING) && risikovurderingRepository.kreverSupersaksbehandler(vedtaksperiodeId)) {
+    private fun Set<Egenskap>.vurderVurderingsmomenter(
+        vedtaksperiodeId: UUID,
+        utbetalingtype: Utbetalingtype,
+    ): Set<Egenskap> {
+        if (utbetalingtype != Utbetalingtype.REVURDERING && risikovurderingRepository.kreverSupersaksbehandler(vedtaksperiodeId)) {
             return this + RISK_QA
         }
         return this
