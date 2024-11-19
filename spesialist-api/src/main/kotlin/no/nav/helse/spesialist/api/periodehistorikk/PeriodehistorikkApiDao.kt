@@ -19,11 +19,11 @@ class PeriodehistorikkApiDao(
             (
                 SELECT id FROM periodehistorikk WHERE utbetaling_id = :utbetalingId
             ),
-            innslag_via_selve_vedtaksperiode_generasjon AS
+            innslag_via_behandling AS
             (
                 SELECT ph.id
                 FROM periodehistorikk ph
-                JOIN selve_vedtaksperiode_generasjon svg ON generasjon_id = unik_id
+                JOIN behandling svg ON generasjon_id = unik_id
                 WHERE svg.utbetaling_id = :utbetaling_id
             )
             SELECT id, type, timestamp, notat_id, json, ident, dialog_ref, utbetaling_id, generasjon_id
@@ -33,7 +33,7 @@ class PeriodehistorikkApiDao(
             (
                 SELECT id FROM innslag_med_utbetaling_id
                 UNION ALL
-                SELECT id FROM innslag_via_selve_vedtaksperiode_generasjon
+                SELECT id FROM innslag_via_behandling
             )
             """.trimIndent(),
             "utbetaling_id" to utbetalingId,

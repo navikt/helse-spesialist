@@ -23,7 +23,7 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
         return asSQL(
             """
             SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, spleis_behandling_id, skjæringstidspunkt, fom, tom, tilstand, tags
-            FROM selve_vedtaksperiode_generasjon 
+            FROM behandling 
             WHERE vedtaksperiode_id = :vedtaksperiode_id ORDER BY id;
         """,
             "vedtaksperiode_id" to vedtaksperiodeId,
@@ -58,7 +58,7 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
     private fun lagre(generasjonDto: GenerasjonDto) {
         asSQL(
             """
-            INSERT INTO selve_vedtaksperiode_generasjon (unik_id, vedtaksperiode_id, utbetaling_id, spleis_behandling_id, opprettet_tidspunkt, opprettet_av_hendelse, tilstand_endret_tidspunkt, tilstand_endret_av_hendelse, fom, tom, skjæringstidspunkt, tilstand, tags) 
+            INSERT INTO behandling (unik_id, vedtaksperiode_id, utbetaling_id, spleis_behandling_id, opprettet_tidspunkt, opprettet_av_hendelse, tilstand_endret_tidspunkt, tilstand_endret_av_hendelse, fom, tom, skjæringstidspunkt, tilstand, tags) 
             VALUES (:unik_id, :vedtaksperiode_id, :utbetaling_id, :spleis_behandling_id, now(), gen_random_uuid(), now(), gen_random_uuid(), :fom, :tom, :skjaeringstidspunkt, :tilstand::generasjon_tilstand, :tags::varchar[])
             ON CONFLICT (unik_id) DO UPDATE SET utbetaling_id = excluded.utbetaling_id, spleis_behandling_id = excluded.spleis_behandling_id, fom = excluded.fom, tom = excluded.tom, skjæringstidspunkt = excluded.skjæringstidspunkt, tilstand = excluded.tilstand, tags = excluded.tags
             """,
@@ -82,7 +82,7 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
         asSQL(
             """
             INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, generasjon_ref, definisjon_ref, opprettet, status_endret_ident, status_endret_tidspunkt, status) 
-            VALUES (:unik_id, :kode, :vedtaksperiode_id, (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = :generasjon_id), null, :opprettet, null, null, :status)
+            VALUES (:unik_id, :kode, :vedtaksperiode_id, (SELECT id FROM behandling WHERE unik_id = :generasjon_id), null, :opprettet, null, null, :status)
             ON CONFLICT (generasjon_ref, kode) DO UPDATE SET status = excluded.status, generasjon_ref = excluded.generasjon_ref
             """,
             "unik_id" to varselDto.id,
@@ -101,12 +101,12 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
         asSQLWithQuestionMarks(
             if (varselIder.isEmpty()) {
                 """
-                DELETE FROM selve_varsel WHERE generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon svg WHERE svg.unik_id = ? LIMIT 1)
+                DELETE FROM selve_varsel WHERE generasjon_ref = (SELECT id FROM behandling svg WHERE svg.unik_id = ? LIMIT 1)
                 """.trimIndent()
             } else {
                 """
                 DELETE FROM selve_varsel 
-                WHERE generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon svg WHERE svg.unik_id = ? LIMIT 1) 
+                WHERE generasjon_ref = (SELECT id FROM behandling svg WHERE svg.unik_id = ? LIMIT 1) 
                 AND selve_varsel.unik_id NOT IN (${varselIder.joinToString { "?" }})
                 """.trimIndent()
             },
@@ -149,7 +149,7 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
     internal fun finnVedtaksperiodeIderFor(fødselsnummer: String): Set<UUID> {
         return asSQL(
             """
-            SELECT svg.vedtaksperiode_id FROM selve_vedtaksperiode_generasjon svg 
+            SELECT svg.vedtaksperiode_id FROM behandling svg 
             INNER JOIN vedtak v on svg.vedtaksperiode_id = v.vedtaksperiode_id
             INNER JOIN person p on p.id = v.person_ref
             WHERE fødselsnummer = :fodselsnummer
@@ -164,7 +164,7 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
         return asSQL(
             """
             SELECT tilstand_endret_tidspunkt 
-            FROM selve_vedtaksperiode_generasjon 
+            FROM behandling 
             WHERE vedtaksperiode_id = :vedtaksperiodeId AND tilstand = 'VedtakFattet'
             ORDER BY tilstand_endret_tidspunkt
             LIMIT 1
@@ -179,7 +179,7 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
         return asSQL(
             """
             select min(svg.fom) as foersteFom
-            from selve_vedtaksperiode_generasjon svg
+            from behandling svg
             join vedtak v on svg.vedtaksperiode_id = v.vedtaksperiode_id
             join person p on p.id = v.person_ref
             where p.fødselsnummer = :fodselsnummer

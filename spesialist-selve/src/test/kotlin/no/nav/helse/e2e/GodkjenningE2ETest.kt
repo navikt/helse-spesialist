@@ -380,7 +380,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     ) {
         @Language("PostgreSQL")
         val query =
-            "SELECT tags, spleis_behandling_id FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = :vedtaksperiodeId;"
+            "SELECT tags, spleis_behandling_id FROM behandling WHERE vedtaksperiode_id = :vedtaksperiodeId;"
 
         val (tags, spleisBehandlingId) =
             sessionOf(dataSource).use { session ->

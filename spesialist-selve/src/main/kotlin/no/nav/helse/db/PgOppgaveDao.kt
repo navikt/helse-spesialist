@@ -195,7 +195,7 @@ class PgOppgaveDao(
         asSQL(
             """
             SELECT spleis_behandling_id FROM oppgave o
-            INNER JOIN selve_vedtaksperiode_generasjon svg ON svg.unik_id = o.generasjon_ref
+            INNER JOIN behandling svg ON svg.unik_id = o.generasjon_ref
             WHERE o.id = :oppgaveId;              
             """,
             "oppgaveId" to oppgaveId,
@@ -562,7 +562,7 @@ class PgOppgaveDao(
                 :ferdigstiltAvOid, 
                 :vedtakRef,
                 (
-                    SELECT unik_id FROM selve_vedtaksperiode_generasjon svg WHERE vedtaksperiode_id = (
+                    SELECT unik_id FROM behandling svg WHERE vedtaksperiode_id = (
                         SELECT vedtaksperiode_id FROM vedtak v WHERE v.id = :vedtakRef
                     ) ORDER BY id DESC LIMIT 1
                 ),
@@ -607,10 +607,10 @@ class PgOppgaveDao(
             WHERE person_ref=(SELECT person_ref FROM utbetaling_id WHERE utbetaling_id=:utbetalingId) AND 
                 utbetaling_id.utbetaling_id IN (
                     SELECT utbetaling_id 
-                    FROM selve_vedtaksperiode_generasjon 
+                    FROM behandling 
                     WHERE skjæringstidspunkt=(
                         SELECT skjæringstidspunkt 
-                            FROM selve_vedtaksperiode_generasjon
+                            FROM behandling
                             WHERE vedtaksperiode_id=:vedtaksperiodeId AND tilstand='VidereBehandlingAvklares'
                         ) AND tilstand='VidereBehandlingAvklares'
                     )

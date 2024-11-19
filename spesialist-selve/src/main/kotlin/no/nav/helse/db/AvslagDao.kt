@@ -32,7 +32,7 @@ class AvslagDao(queryRunner: QueryRunner) : QueryRunner by queryRunner {
         SELECT v.vedtaksperiode_id, svg.id AS generasjon_id
         FROM vedtak v
         INNER JOIN oppgave o on v.id = o.vedtak_ref
-        INNER JOIN selve_vedtaksperiode_generasjon svg ON svg.unik_id = o.generasjon_ref
+        INNER JOIN behandling svg ON svg.unik_id = o.generasjon_ref
         WHERE o.id = :oppgaveId 
         """.trimIndent(),
         "oppgaveId" to oppgaveId,
@@ -56,7 +56,7 @@ class AvslagDao(queryRunner: QueryRunner) : QueryRunner by queryRunner {
                 SELECT v.vedtaksperiode_id, svg.id 
                 FROM vedtak v
                 INNER JOIN oppgave o ON v.id = o.vedtak_ref
-                INNER JOIN selve_vedtaksperiode_generasjon svg ON o.generasjon_ref = svg.unik_id
+                INNER JOIN behandling svg ON o.generasjon_ref = svg.unik_id
                 WHERE o.id = :oppgaveId
             )
             UPDATE avslag a
@@ -136,7 +136,7 @@ class AvslagDao(queryRunner: QueryRunner) : QueryRunner by queryRunner {
         asSQL(
             """
             SELECT b.type, b.tekst, a.opprettet, s.ident, a.invalidert FROM avslag a 
-            INNER JOIN selve_vedtaksperiode_generasjon svg ON a.generasjon_ref = svg.id 
+            INNER JOIN behandling svg ON a.generasjon_ref = svg.id 
             INNER JOIN begrunnelse b ON b.id = a.begrunnelse_ref
             INNER JOIN saksbehandler s ON s.oid = b.saksbehandler_ref
             WHERE a.vedtaksperiode_id = :vedtaksperiodeId AND svg.utbetaling_id = :utbetalingId 

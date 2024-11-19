@@ -533,7 +533,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         @Language("PostgreSQL")
         val query = """
             INSERT INTO selve_varsel(unik_id, kode, vedtaksperiode_id, generasjon_ref, definisjon_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt) 
-            VALUES (?, ?, ?, (SELECT id FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? LIMIT 1), ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, (SELECT id FROM behandling WHERE vedtaksperiode_id = ? LIMIT 1), ?, ?, ?, ?, ?)
         """
         session.run(
             queryOf(
@@ -596,7 +596,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ) {
         @Language("PostgreSQL")
         val query =
-            "SELECT COUNT(1) FROM selve_varsel sv WHERE sv.generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ?) AND status = 'GODKJENT'"
+            "SELECT COUNT(1) FROM selve_varsel sv WHERE sv.generasjon_ref = (SELECT id FROM behandling WHERE vedtaksperiode_id = ?) AND status = 'GODKJENT'"
         val antall =
             sessionOf(dataSource).use { session ->
                 session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
@@ -610,7 +610,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ) {
         @Language("PostgreSQL")
         val query =
-            "SELECT COUNT(1) FROM selve_varsel sv WHERE sv.generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ?) AND status = 'AVVIST'"
+            "SELECT COUNT(1) FROM selve_varsel sv WHERE sv.generasjon_ref = (SELECT id FROM behandling WHERE vedtaksperiode_id = ?) AND status = 'AVVIST'"
         val antall =
             sessionOf(dataSource).use { session ->
                 session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)

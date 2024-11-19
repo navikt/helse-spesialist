@@ -96,7 +96,7 @@ internal class AvslagDaoTest : DatabaseIntegrationTest() {
         requireNotNull(
             sessionOf(dataSource).use { session ->
                 session.run(
-                    queryOf("SELECT id FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ?", vedtaksperiodeId)
+                    queryOf("SELECT id FROM behandling WHERE vedtaksperiode_id = ?", vedtaksperiodeId)
                         .map { it.long("id") }.asSingle
                 )
             }

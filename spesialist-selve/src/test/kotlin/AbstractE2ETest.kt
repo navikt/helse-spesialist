@@ -1206,7 +1206,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         return sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query =
-                "SELECT true FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? AND tilstand = '${Generasjon.VedtakFattet.navn()}' ORDER BY id DESC"
+                "SELECT true FROM behandling WHERE vedtaksperiode_id = ? AND tilstand = '${Generasjon.VedtakFattet.navn()}' ORDER BY id DESC"
             session.run(queryOf(query, vedtaksperiodeId).map { it.boolean(1) }.asSingle) ?: false
         }
     }

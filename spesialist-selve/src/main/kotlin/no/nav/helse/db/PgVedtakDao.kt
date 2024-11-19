@@ -56,7 +56,7 @@ class PgVedtakDao(queryRunner: QueryRunner) : VedtakDao, QueryRunner by queryRun
             """
             INSERT INTO opprinnelig_soknadsdato 
             SELECT vedtaksperiode_id, opprettet_tidspunkt
-            FROM selve_vedtaksperiode_generasjon
+            FROM behandling
             WHERE vedtaksperiode_id = :vedtaksperiode_id
             ORDER BY opprettet_tidspunkt LIMIT 1
             ON CONFLICT DO NOTHING;

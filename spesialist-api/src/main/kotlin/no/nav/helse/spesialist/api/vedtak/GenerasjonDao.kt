@@ -14,7 +14,7 @@ internal class GenerasjonDao(dataSource: DataSource) : QueryRunner by MedDataSou
             """
             SELECT svg.vedtaksperiode_id, svg.fom, svg.tom, svg.skjæringstidspunkt
             FROM vedtak v 
-            INNER JOIN selve_vedtaksperiode_generasjon svg on v.vedtaksperiode_id = svg.vedtaksperiode_id
+            INNER JOIN behandling svg on v.vedtaksperiode_id = svg.vedtaksperiode_id
             JOIN oppgave o ON v.id = o.vedtak_ref
             WHERE o.id = :oppgave_id
             ORDER BY svg.id DESC LIMIT 1;
@@ -27,7 +27,7 @@ internal class GenerasjonDao(dataSource: DataSource) : QueryRunner by MedDataSou
             """
             SELECT DISTINCT ON (svg.vedtaksperiode_id) svg.vedtaksperiode_id, svg.fom, svg.tom, svg.skjæringstidspunkt 
             FROM vedtak v
-            INNER JOIN selve_vedtaksperiode_generasjon svg on v.vedtaksperiode_id = svg.vedtaksperiode_id
+            INNER JOIN behandling svg on v.vedtaksperiode_id = svg.vedtaksperiode_id
             WHERE person_ref = 
                 (SELECT person_ref FROM vedtak v2
                 JOIN oppgave o on v2.id = o.vedtak_ref
@@ -45,7 +45,7 @@ internal class GenerasjonDao(dataSource: DataSource) : QueryRunner by MedDataSou
             """
             SELECT svg.vedtaksperiode_id, svg.unik_id, svg.fom, svg.tom, svg.skjæringstidspunkt
             FROM vedtak v 
-            INNER JOIN selve_vedtaksperiode_generasjon svg on v.vedtaksperiode_id = svg.vedtaksperiode_id
+            INNER JOIN behandling svg on v.vedtaksperiode_id = svg.vedtaksperiode_id
             JOIN oppgave o ON v.id = o.vedtak_ref
             WHERE o.id = :oppgave_id
             ORDER BY svg.id DESC LIMIT 1;
@@ -61,7 +61,7 @@ internal class GenerasjonDao(dataSource: DataSource) : QueryRunner by MedDataSou
             """
             SELECT DISTINCT ON (svg.vedtaksperiode_id) svg.vedtaksperiode_id, svg.unik_id, svg.fom, svg.tom, svg.skjæringstidspunkt 
             FROM vedtak v
-            INNER JOIN selve_vedtaksperiode_generasjon svg on v.vedtaksperiode_id = svg.vedtaksperiode_id
+            INNER JOIN behandling svg on v.vedtaksperiode_id = svg.vedtaksperiode_id
             WHERE person_ref = 
                 (SELECT person_ref FROM vedtak v2
                 JOIN oppgave o on v2.id = o.vedtak_ref
