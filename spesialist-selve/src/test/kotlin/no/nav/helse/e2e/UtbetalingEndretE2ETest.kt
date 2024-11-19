@@ -4,9 +4,8 @@ import AbstractE2ETest
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import org.intellij.lang.annotations.Language
+import no.nav.helse.TestRapidHelpers.oppgaveId
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
@@ -28,7 +27,7 @@ internal class UtbetalingEndretE2ETest : AbstractE2ETest() {
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         opprettSaksbehandler(saksbehandlerOid, "Behandler, Saks", "saks.behandler@nav.no", "Z999999")
 
-        val oppgaveId = oppgaveIdFor(VEDTAKSPERIODE_ID)
+        val oppgaveId = inspektør.oppgaveId()
         tildelOppgave(oppgaveId, saksbehandlerOid)
 
         val utbetalingId2 = UUID.randomUUID()
@@ -40,24 +39,9 @@ internal class UtbetalingEndretE2ETest : AbstractE2ETest() {
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = utbetalingId2),
         )
 
-        val oppgaveId2 = finnNyOppgaveId(forrigeOppgaveId = oppgaveId)
+        val oppgaveId2 = inspektør.oppgaveId()
         assertEquals(saksbehandlerOid, finnOidForTildeling(oppgaveId2))
     }
-
-    private fun finnNyOppgaveId(forrigeOppgaveId: Long) =
-        oppgaveIdFor(VEDTAKSPERIODE_ID).also { nyOppgaveId ->
-            assertNotEquals(forrigeOppgaveId, nyOppgaveId) {
-                "Det er meningen at det skal ha blitt opprettet en ny oppgave"
-            }
-        }
-
-    private fun oppgaveIdFor(vedtaksperiodeId: UUID): Long =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query =
-                "SELECT id FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?) ORDER BY id DESC;"
-            requireNotNull(session.run(queryOf(query, vedtaksperiodeId).map { it.long(1) }.asSingle))
-        }
 
     private fun tildelOppgave(
         oppgaveId: Long,

@@ -41,7 +41,7 @@ internal class EndretEgenAnsattStatusTest : AbstractE2ETest() {
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
 
-        val oppgaveId = inspektør.oppgaveId().toInt()
+        val oppgaveId = inspektør.oppgaveId()
         assertHarIkkeOppgaveegenskap(oppgaveId, Egenskap.EGEN_ANSATT)
 
         håndterEndretSkjermetinfo(skjermet = true)
@@ -56,7 +56,7 @@ internal class EndretEgenAnsattStatusTest : AbstractE2ETest() {
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterEndretSkjermetinfo(skjermet = true)
 
-        val oppgaveId = inspektør.oppgaveId().toInt()
+        val oppgaveId = inspektør.oppgaveId()
         assertHarOppgaveegenskap(oppgaveId, Egenskap.EGEN_ANSATT)
 
         håndterEndretSkjermetinfo(skjermet = false)

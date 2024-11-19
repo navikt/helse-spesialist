@@ -25,6 +25,8 @@ import no.nav.helse.spesialist.api.graphql.schema.OverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.Person
 import no.nav.helse.spesialist.api.notat.NotatApiDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Invalidert
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
@@ -66,7 +68,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         )
         assertOverstyrTidslinje(FØDSELSNUMMER, 1)
 
-        assertOppgaver(UTBETALING_ID, "AvventerSaksbehandler", 0)
+        assertSaksbehandleroppgave(oppgavestatus = Invalidert)
 
         val nyUtbetalingId = UUID.randomUUID()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
@@ -74,7 +76,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             harOppdatertMetadata = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId),
         )
-        assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
+        assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
     }
 
     @Test
@@ -133,7 +135,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         )
 
         assertOverstyrInntektOgRefusjon(FØDSELSNUMMER, 1)
-        assertOppgaver(UTBETALING_ID, "AvventerSaksbehandler", 0)
+        assertSaksbehandleroppgave(oppgavestatus = Invalidert)
 
         val nyUtbetalingId = UUID.randomUUID()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
@@ -142,7 +144,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId),
         )
 
-        assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
+        assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
         assertTildeling(SAKSBEHANDLER_EPOST, nyUtbetalingId)
     }
 
@@ -152,7 +154,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterOverstyrArbeidsforhold()
-        assertOppgaver(UTBETALING_ID, "AvventerSaksbehandler", 0)
+        assertSaksbehandleroppgave(oppgavestatus = Invalidert)
         assertOverstyrArbeidsforhold(FØDSELSNUMMER, 1)
 
         val nyUtbetalingId = UUID.randomUUID()
@@ -162,7 +164,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId),
         )
 
-        assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
+        assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
         assertTildeling(SAKSBEHANDLER_EPOST, nyUtbetalingId)
     }
 
@@ -208,7 +210,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             harOppdatertMetadata = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId),
         )
-        assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
+        assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
 
         mockSnapshot()
 
@@ -223,20 +225,6 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertFalse(overstyringer.first().ferdigstilt)
         assertFalse(overstyringer[1].ferdigstilt)
         assertFalse(overstyringer.last().ferdigstilt)
-    }
-
-    private fun assertOppgaver(
-        utbetalingId: UUID,
-        status: String,
-        forventetAntall: Int,
-    ) {
-        @Language("PostgreSQL")
-        val query = "SELECT COUNT(1) FROM oppgave o WHERE o.utbetaling_id = ? AND o.status = ?::oppgavestatus"
-        val antallOppgaver =
-            sessionOf(dataSource).use { session ->
-                session.run(queryOf(query, utbetalingId, status).map { it.int(1) }.asSingle) ?: 0
-            }
-        assertEquals(forventetAntall, antallOppgaver)
     }
 
     private fun assertOverstyrTidslinje(

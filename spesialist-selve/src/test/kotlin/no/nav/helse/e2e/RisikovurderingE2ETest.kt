@@ -3,7 +3,10 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.mediator.meldinger.Risikofunn
+import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
+import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -29,6 +32,7 @@ internal class RisikovurderingE2ETest : AbstractE2ETest() {
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(risikofunn = funnSomKreverRiskTilgang)
         assertOppgaveHarEgenskap("RISK_QA", VEDTAKSPERIODE_ID)
+        assertHarOppgaveegenskap(inspektør.oppgaveId(), RISK_QA)
     }
 
     @Test
@@ -36,7 +40,8 @@ internal class RisikovurderingE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(risikofunn = funnSomAlleKanBehandle)
-        assertOppgaveHarEgenskap("SØKNAD", VEDTAKSPERIODE_ID)
+        assertHarOppgaveegenskap(inspektør.oppgaveId(), SØKNAD)
+        assertHarIkkeOppgaveegenskap(inspektør.oppgaveId(), RISK_QA)
     }
 
     @Test

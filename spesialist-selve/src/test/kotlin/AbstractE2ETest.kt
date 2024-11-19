@@ -1310,7 +1310,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun assertHarOppgaveegenskap(
-        oppgaveId: Int,
+        oppgaveId: Long,
         vararg forventedeEgenskaper: Egenskap,
     ) {
         val egenskaper = hentOppgaveegenskaper(oppgaveId)
@@ -1318,14 +1318,14 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun assertHarIkkeOppgaveegenskap(
-        oppgaveId: Int,
+        oppgaveId: Long,
         vararg forventedeEgenskaper: Egenskap,
     ) {
         val egenskaper = hentOppgaveegenskaper(oppgaveId)
         assertTrue(egenskaper.none { it in forventedeEgenskaper })
     }
 
-    private fun hentOppgaveegenskaper(oppgaveId: Int): Set<Egenskap> {
+    private fun hentOppgaveegenskaper(oppgaveId: Long): Set<Egenskap> {
         @Language("PostgreSQL")
         val query = "select egenskaper from oppgave o where id = :oppgaveId"
         val egenskaper =

@@ -30,7 +30,7 @@ internal class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
         håndterRisikovurderingløsning()
 
         assertGodkjenningsbehovIkkeBesvart()
-        val oppgaveId = inspektør.oppgaveId().toInt()
+        val oppgaveId = inspektør.oppgaveId()
         assertSaksbehandleroppgave(oppgavestatus = Oppgavestatus.AvventerSaksbehandler)
         assertHarOppgaveegenskap(oppgaveId, Egenskap.TILBAKEDATERT)
 
@@ -50,7 +50,7 @@ internal class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
         håndterRisikovurderingløsning()
 
         assertGodkjenningsbehovIkkeBesvart()
-        val oppgaveId = inspektør.oppgaveId().toInt()
+        val oppgaveId = inspektør.oppgaveId()
         assertSaksbehandleroppgave(oppgavestatus = Oppgavestatus.AvventerSaksbehandler)
         assertHarOppgaveegenskap(oppgaveId, Egenskap.TILBAKEDATERT)
 
