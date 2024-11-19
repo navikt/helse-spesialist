@@ -1,13 +1,48 @@
 package no.nav.helse.kafka.message_builders
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.modell.hendelse.UtgåendeHendelse
+import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
+import java.time.LocalDateTime
+import java.util.UUID
 
 private const val AUTOMATISK_BEHANDLET_IDENT = "Automatisk behandlet"
 private const val AUTOMATISK_BEHANDLET_EPOSTADRESSE = "tbd@nav.no"
 
 internal fun UtgåendeHendelse.somJsonMessage(fødselsnummer: String): JsonMessage {
-    return JsonMessage.newMessage(eventName(), mapOf("fødselsnummer" to fødselsnummer) + detaljer())
+    return when (this) {
+        is UtgåendeHendelse.Godkjenningsbehovløsning -> somBehovløsning()
+        else -> JsonMessage.newMessage(eventName(), mapOf("fødselsnummer" to fødselsnummer) + detaljer())
+    }
+}
+
+private fun UtgåendeHendelse.Godkjenningsbehovløsning.somBehovløsning(): JsonMessage {
+    val orginaltBehov = objectMapper.readValue<Map<String, Any>>(this.json)
+    val løsning =
+        mapOf(
+            "@løsning" to
+                mapOf(
+                    "Godkjenning" to
+                        buildMap {
+                            put("godkjent", godkjent)
+                            put("saksbehandlerIdent", saksbehandlerIdent)
+                            put("saksbehandlerEpost", saksbehandlerEpost)
+                            put("godkjenttidspunkt", godkjenttidspunkt)
+                            put("automatiskBehandling", automatiskBehandling)
+                            if (årsak != null) put("årsak", årsak)
+                            if (begrunnelser != null) put("begrunnelser", begrunnelser)
+                            if (kommentar != null) put("kommentar", kommentar)
+                            put("saksbehandleroverstyringer", saksbehandleroverstyringer)
+                            put("refusjontype", refusjonstype)
+                        },
+                ),
+        )
+    return JsonMessage.newMessage(
+        mapOf("@id" to UUID.randomUUID(), "@opprettet" to LocalDateTime.now()) +
+            orginaltBehov +
+            løsning,
+    )
 }
 
 internal fun UtgåendeHendelse.eventName() =
@@ -18,6 +53,8 @@ internal fun UtgåendeHendelse.eventName() =
         is UtgåendeHendelse.VedtaksperiodeGodkjentAutomatisk,
         is UtgåendeHendelse.VedtaksperiodeGodkjentManuelt,
         -> "vedtaksperiode_godkjent"
+
+        is UtgåendeHendelse.Godkjenningsbehovløsning -> "behov"
     }
 
 private fun UtgåendeHendelse.detaljer(): Map<String, Any> {
@@ -26,6 +63,7 @@ private fun UtgåendeHendelse.detaljer(): Map<String, Any> {
         is UtgåendeHendelse.VedtaksperiodeAvvistAutomatisk -> this.detaljer()
         is UtgåendeHendelse.VedtaksperiodeGodkjentManuelt -> this.detaljer()
         is UtgåendeHendelse.VedtaksperiodeGodkjentAutomatisk -> this.detaljer()
+        is UtgåendeHendelse.Godkjenningsbehovløsning -> TODO()
     }
 }
 

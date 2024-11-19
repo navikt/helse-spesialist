@@ -1,5 +1,6 @@
 package no.nav.helse.modell.hendelse
 
+import java.time.LocalDateTime
 import java.util.UUID
 
 sealed interface UtgåendeHendelse {
@@ -41,5 +42,19 @@ sealed interface UtgåendeHendelse {
         val årsak: String?,
         val begrunnelser: List<String>?,
         val kommentar: String?,
+    ) : UtgåendeHendelse
+
+    data class Godkjenningsbehovløsning(
+        val godkjent: Boolean,
+        val saksbehandlerIdent: String,
+        val saksbehandlerEpost: String,
+        val godkjenttidspunkt: LocalDateTime,
+        val automatiskBehandling: Boolean,
+        val årsak: String?,
+        val begrunnelser: List<String>?,
+        val kommentar: String?,
+        val saksbehandleroverstyringer: List<UUID>,
+        val refusjonstype: String,
+        val json: String,
     ) : UtgåendeHendelse
 }
