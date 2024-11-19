@@ -44,10 +44,6 @@ class VurderVergemålOgFullmaktTest {
             val behov = mutableListOf<Behov>()
             val hendelser = mutableListOf<String>()
 
-            override fun hendelse(hendelse: String) {
-                hendelser.add(hendelse)
-            }
-
             override fun behov(behov: Behov, commandContextId: UUID) {
                 this.behov.add(behov)
             }

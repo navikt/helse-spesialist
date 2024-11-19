@@ -6,6 +6,7 @@ import no.nav.helse.januar
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.MeldingDao
+import no.nav.helse.modell.hendelse.UtgåendeHendelse
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -14,7 +15,6 @@ import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
-import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -54,9 +54,9 @@ internal class LøsGodkjenningsbehovTest {
     )
 
     private val observer = object : CommandContextObserver {
-        val hendelser = mutableListOf<String>()
+        val hendelser = mutableListOf<UtgåendeHendelse>()
 
-        override fun hendelse(hendelse: String) {
+        override fun hendelse(hendelse: UtgåendeHendelse) {
             this.hendelser.add(hendelse)
         }
     }
@@ -98,10 +98,11 @@ internal class LøsGodkjenningsbehovTest {
     @Test
     fun `løser godkjenningsbehovet`() {
         assertTrue(command.execute(commandContext))
-        assertNotNull(observer.hendelser
-            .map(objectMapper::readTree)
-            .filter { it["@event_name"].asText() == "behov" }
-            .firstOrNull { it["@løsning"].hasNonNull("Godkjenning") })
+        val løsning = observer
+            .hendelser
+            .filterIsInstance<UtgåendeHendelse.Godkjenningsbehovløsning>()
+            .singleOrNull()
+        assertNotNull(løsning)
     }
 
 

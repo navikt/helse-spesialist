@@ -9,6 +9,7 @@ import no.nav.helse.januar
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.KommandokjedeEndretEvent
+import no.nav.helse.modell.hendelse.UtgåendeHendelse
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
@@ -19,10 +20,10 @@ import no.nav.helse.modell.vedtaksperiode.Behandling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -92,16 +93,13 @@ internal class VurderAutomatiskInnvilgelseTest {
         assertTrue(command.execute(context))
 
         val løsning =
-            this.observatør.hendelser
-                .map(objectMapper::readTree)
-                .filter { it["@event_name"].asText() == "behov" }
-                .firstOrNull { it["@løsning"].hasNonNull("Godkjenning") }
-
-        checkNotNull(løsning)
-        val automatiskBehandling: Boolean =
-            løsning["@løsning"]["Godkjenning"]["automatiskBehandling"].booleanValue()
-
-        assertTrue(automatiskBehandling)
+            this
+                .observatør
+                .hendelser
+                .filterIsInstance<UtgåendeHendelse.Godkjenningsbehovløsning>()
+                .singleOrNull()
+        assertNotNull(løsning)
+        assertEquals(true, løsning?.automatiskBehandling)
     }
 
     @Test
@@ -112,17 +110,14 @@ internal class VurderAutomatiskInnvilgelseTest {
 
         assertTrue(command.execute(context))
 
-        val løsning =
-            this.observatør.hendelser
-                .map(objectMapper::readTree)
-                .filter { it["@event_name"].asText() == "behov" }
-                .firstOrNull { it["@løsning"].hasNonNull("Godkjenning") }
+        val løsning = this
+            .observatør
+            .hendelser
+            .filterIsInstance<UtgåendeHendelse.Godkjenningsbehovløsning>()
+            .singleOrNull()
 
-        checkNotNull(løsning)
-        val automatiskBehandling: Boolean =
-            løsning["@løsning"]["Godkjenning"]["automatiskBehandling"].booleanValue()
-
-        assertTrue(automatiskBehandling)
+        assertEquals(true, løsning?.godkjent)
+        assertEquals(true, løsning?.automatiskBehandling)
     }
 
     @Test
@@ -191,11 +186,11 @@ internal class VurderAutomatiskInnvilgelseTest {
     }
 
     private val observatør = object : CommandContextObserver {
-        val hendelser = mutableListOf<String>()
+        val hendelser = mutableListOf<UtgåendeHendelse>()
         lateinit var gjeldendeTilstand: String
             private set
 
-        override fun hendelse(hendelse: String) {
+        override fun hendelse(hendelse: UtgåendeHendelse) {
             hendelser.add(hendelse)
         }
 

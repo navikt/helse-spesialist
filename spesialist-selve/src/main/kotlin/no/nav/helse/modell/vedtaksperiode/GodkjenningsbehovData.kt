@@ -5,8 +5,6 @@ import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageProblems
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -33,8 +31,22 @@ data class GodkjenningsbehovData(
     val skjæringstidspunkt: LocalDate,
     private val json: String,
 ) {
-    private val behov = JsonMessage(json, MessageProblems(json))
     private lateinit var løsning: Løsning
+
+    fun medLøsning() =
+        UtgåendeHendelse.Godkjenningsbehovløsning(
+            godkjent = løsning.godkjent,
+            saksbehandlerIdent = løsning.saksbehandlerIdent,
+            saksbehandlerEpost = løsning.saksbehandlerEpost,
+            godkjenttidspunkt = løsning.godkjenttidspunkt,
+            automatiskBehandling = løsning.automatiskBehandling,
+            årsak = løsning.årsak,
+            begrunnelser = løsning.begrunnelser,
+            kommentar = løsning.kommentar,
+            saksbehandleroverstyringer = løsning.saksbehandleroverstyringer,
+            refusjonstype = løsning.refusjonstype.name,
+            json = json,
+        )
 
     private data class Løsning(
         val godkjent: Boolean,
@@ -46,7 +58,7 @@ data class GodkjenningsbehovData(
         val begrunnelser: List<String>?,
         val kommentar: String?,
         val saksbehandleroverstyringer: List<UUID>,
-        val refusjonstype: Refusjonstype?,
+        val refusjonstype: Refusjonstype,
     )
 
     private companion object {
@@ -178,27 +190,7 @@ data class GodkjenningsbehovData(
                 saksbehandleroverstyringer = saksbehandleroverstyringer,
                 refusjonstype = utbetaling.refusjonstype(),
             )
-        behov["@løsning"] = løsning.toMap()
-        behov["@id"] = UUID.randomUUID()
-        behov["@opprettet"] = LocalDateTime.now()
     }
-
-    private fun Løsning.toMap() =
-        mapOf(
-            "Godkjenning" to
-                buildMap {
-                    put("godkjent", godkjent)
-                    put("saksbehandlerIdent", saksbehandlerIdent)
-                    put("saksbehandlerEpost", saksbehandlerEpost)
-                    put("godkjenttidspunkt", godkjenttidspunkt)
-                    put("automatiskBehandling", automatiskBehandling)
-                    if (årsak != null) put("årsak", årsak)
-                    if (begrunnelser != null) put("begrunnelser", begrunnelser)
-                    if (kommentar != null) put("kommentar", kommentar)
-                    put("saksbehandleroverstyringer", saksbehandleroverstyringer)
-                    if (refusjonstype != null) put("refusjontype", refusjonstype)
-                },
-        )
 
     internal fun lagVedtaksperiodeGodkjentManuelt(
         saksbehandler: Saksbehandlerløsning.Saksbehandler,
@@ -248,6 +240,4 @@ data class GodkjenningsbehovData(
             begrunnelser = this.løsning.begrunnelser,
             kommentar = this.løsning.kommentar,
         )
-
-    internal fun toJson() = behov.toJson()
 }

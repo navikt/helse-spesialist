@@ -38,7 +38,7 @@ internal class GodkjenningMediator(private val opptegnelseRepository: Opptegnels
         )
         sykefraværstilfelle.håndterGodkjent(behov.vedtaksperiodeId)
 
-        context.publiserOld(behov.toJson())
+        context.hendelse(behov.medLøsning())
         context.hendelse(
             behov.lagVedtaksperiodeGodkjentManuelt(
                 saksbehandler = saksbehandler,
@@ -70,7 +70,7 @@ internal class GodkjenningMediator(private val opptegnelseRepository: Opptegnels
             saksbehandleroverstyringer = saksbehandleroverstyringer,
             utbetaling = utbetaling,
         )
-        context.publiserOld(behov.toJson())
+        context.hendelse(behov.medLøsning())
         context.hendelse(behov.lagVedtaksperiodeAvvistManuelt(saksbehandler))
     }
 
@@ -80,7 +80,7 @@ internal class GodkjenningMediator(private val opptegnelseRepository: Opptegnels
         utbetaling: Utbetaling,
     ) {
         behov.godkjennAutomatisk(utbetaling)
-        context.publiserOld(behov.toJson())
+        context.hendelse(behov.medLøsning())
         context.hendelse(behov.lagVedtaksperiodeGodkjentAutomatisk())
         opptegnelseRepository.opprettOpptegnelse(
             fødselsnummer = behov.fødselsnummer,
@@ -104,7 +104,7 @@ internal class GodkjenningMediator(private val opptegnelseRepository: Opptegnels
             utbetaling = utbetaling,
             begrunnelser = begrunnelser,
         )
-        context.publiserOld(godkjenningsbehov.toJson())
+        context.hendelse(godkjenningsbehov.medLøsning())
         context.hendelse(godkjenningsbehov.lagVedtaksperiodeAvvistAutomatisk())
         opptegnelseRepository.opprettOpptegnelse(
             fødselsnummer = godkjenningsbehov.fødselsnummer,

@@ -36,13 +36,6 @@ internal class CommandContext(
 
     internal fun id() = id
 
-    /**
-     * Publisere svar tilbake på rapid, typisk svar på godkjenningsbehov
-     */
-    internal fun publiserOld(melding: String) {
-        observers.forEach { it.hendelse(melding) }
-    }
-
     internal fun hendelse(hendelse: UtgåendeHendelse) {
         observers.forEach { it.hendelse(hendelse) }
     }

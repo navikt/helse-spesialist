@@ -7,8 +7,10 @@ import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.modell.behov.Behov
+import no.nav.helse.modell.hendelse.UtgåendeHendelse
 import no.nav.helse.modell.kommando.CommandContext.Companion.convertToUUID
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
+import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -30,15 +32,15 @@ internal class CommandContextTest {
     private val observer =
         object : CommandContextObserver {
             val behov = mutableListOf<Behov>()
-            val hendelser = mutableListOf<String>()
+            val hendelser = mutableListOf<UtgåendeHendelse>()
             val utgåendeTilstandEndringer = mutableListOf<KommandokjedeEndretEvent>()
 
             override fun behov(behov: Behov, commandContextId: UUID) {
                 this.behov.add(behov)
             }
 
-            override fun hendelse(hendelse: String) {
-                this.hendelser.add(hendelse)
+            override fun hendelse(hendelse: UtgåendeHendelse) {
+                hendelser.add(hendelse)
             }
 
             override fun tilstandEndret(event: KommandokjedeEndretEvent) {
@@ -193,9 +195,14 @@ internal class CommandContextTest {
 
     @Test
     fun `holder på meldinger`() {
-        val melding = """{ "a_key": "with_a_value" }"""
-        context.publiserOld(melding)
-        assertEquals(listOf(melding), observer.hendelser)
+        val hendelse = UtgåendeHendelse.VedtaksperiodeGodkjentAutomatisk(
+            fødselsnummer = lagFødselsnummer(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            behandlingId = UUID.randomUUID(),
+            periodetype = "FØRSTEGANGSBEHANDLING"
+        )
+        context.hendelse(hendelse)
+        assertEquals(listOf(hendelse), observer.hendelser)
     }
 
     private class TestObject1

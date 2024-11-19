@@ -1,34 +1,26 @@
 package no.nav.helse.modell
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.januar
-import java.time.LocalDateTime
-import java.util.UUID
+import no.nav.helse.modell.hendelse.UtgåendeHendelse
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.rapids_rivers.asLocalDateTime
-import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
-import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class UtbetalingsgodkjenningMessageTest {
     private companion object {
-        private val objectMapper = jacksonObjectMapper()
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .registerModule(JavaTimeModule())
 
         private const val IDENT = "Z999999"
         private const val EPOST = "test@nav.no"
@@ -59,7 +51,7 @@ internal class UtbetalingsgodkjenningMessageTest {
     fun `manuelt avvist`() {
         godkjenningsbehov.avvisManuelt(IDENT, EPOST, GODKJENTTIDSPUNKT, null, null, null, emptyList(), utbetaling)
         assertMessage { løsning ->
-            assertFalse(løsning.path("godkjent").booleanValue())
+            assertFalse(løsning.godkjent)
             assertLøsning(false, IDENT, EPOST, GODKJENTTIDSPUNKT)
         }
     }
@@ -114,7 +106,7 @@ internal class UtbetalingsgodkjenningMessageTest {
         godkjenttidspunkt: LocalDateTime? = null
     ) {
         assertMessage { løsning ->
-            assertTrue(løsning.path("godkjent").booleanValue())
+            assertTrue(løsning.godkjent)
             assertLøsning(automatisk, ident, epost, godkjenttidspunkt)
         }
     }
@@ -126,26 +118,20 @@ internal class UtbetalingsgodkjenningMessageTest {
         godkjenttidspunkt: LocalDateTime? = null
     ) {
         assertMessage { løsning ->
-            assertEquals(automatisk, løsning.path("automatiskBehandling").booleanValue())
-            assertEquals(ident, løsning.path("saksbehandlerIdent").asText())
-            assertEquals(epost, løsning.path("saksbehandlerEpost").asText())
-            assertDoesNotThrow { løsning.path("godkjenttidspunkt").asLocalDateTime() }
-            godkjenttidspunkt?.also {
-                assertEquals(
-                    godkjenttidspunkt,
-                    løsning.path("godkjenttidspunkt").asLocalDateTime()
-                )
+            assertEquals(automatisk, løsning.automatiskBehandling)
+            assertEquals(ident, løsning.saksbehandlerIdent)
+            assertEquals(epost, løsning.saksbehandlerEpost)
+            if (godkjenttidspunkt != null) {
+                assertEquals(godkjenttidspunkt, løsning.godkjenttidspunkt)
             }
-            assertTrue(løsning.path("årsak").isMissingOrNull())
-            assertTrue(løsning.path("begrunnelser").isMissingOrNull())
-            assertTrue(løsning.path("kommentar").isMissingOrNull())
+            assertNull(løsning.årsak)
+            assertNull(løsning.begrunnelser)
+            assertNull(løsning.kommentar)
         }
     }
 
-    private fun assertMessage(block: (JsonNode) -> Unit) {
-        objectMapper.readTree(godkjenningsbehov.toJson())
-            .path("@løsning")
-            .path("Godkjenning")
+    private fun assertMessage(block: (UtgåendeHendelse.Godkjenningsbehovløsning) -> Unit) {
+        godkjenningsbehov.medLøsning()
             .apply(block)
     }
 }

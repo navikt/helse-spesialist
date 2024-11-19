@@ -16,14 +16,11 @@ internal interface UtgåendeMeldingerObserver {
     ) {}
 
     fun hendelse(hendelse: UtgåendeHendelse) {}
-
-    fun hendelse(hendelse: String) {}
 }
 
 internal class UtgåendeMeldingerMediator : CommandContextObserver {
     private val behov = mutableMapOf<String, Behov>()
     private val hendelser = mutableListOf<UtgåendeHendelse>()
-    private val utgåendeHendelserOld = mutableListOf<String>()
     private var commandContextId: UUID? = null
 
     override fun behov(
@@ -32,10 +29,6 @@ internal class UtgåendeMeldingerMediator : CommandContextObserver {
     ) {
         this.commandContextId = commandContextId
         this.behov[behov.behovName()] = behov
-    }
-
-    override fun hendelse(hendelse: String) {
-        utgåendeHendelserOld.add(hendelse)
     }
 
     override fun hendelse(hendelse: UtgåendeHendelse) {
@@ -48,7 +41,6 @@ internal class UtgåendeMeldingerMediator : CommandContextObserver {
     ) {
         publiserHendelser(hendelse, messageContext)
         publiserBehov(hendelse, messageContext)
-        utgåendeHendelserOld.clear()
         behov.clear()
         hendelser.clear()
         commandContextId = null
@@ -58,11 +50,6 @@ internal class UtgåendeMeldingerMediator : CommandContextObserver {
         hendelse: Personmelding,
         messageContext: MessageContext,
     ) {
-        utgåendeHendelserOld.forEach { utgåendeHendelse ->
-            logg.info("Publiserer hendelse i forbindelse med ${hendelse.javaClass.simpleName}")
-            sikkerlogg.info("Publiserer hendelse i forbindelse med ${hendelse.javaClass.simpleName}\n{}", utgåendeHendelse)
-            messageContext.publish(utgåendeHendelse)
-        }
         hendelser.forEach { utgåendeHendelse ->
             val packet = utgåendeHendelse.somJsonMessage(hendelse.fødselsnummer()).toJson()
             logg.info("Publiserer hendelse i forbindelse med ${hendelse.javaClass.simpleName}")
