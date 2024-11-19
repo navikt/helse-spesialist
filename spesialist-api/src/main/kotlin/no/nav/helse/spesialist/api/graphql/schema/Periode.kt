@@ -204,7 +204,6 @@ sealed interface Historikkinnslag {
     val type: PeriodehistorikkType
     val timestamp: LocalDateTime
     val saksbehandlerIdent: String?
-    val notatId: Int?
     val dialogRef: Int?
 }
 
@@ -213,7 +212,6 @@ data class LagtPaVent(
     override val type: PeriodehistorikkType,
     override val timestamp: LocalDateTime,
     override val saksbehandlerIdent: String?,
-    override val notatId: Int?,
     override val dialogRef: Int?,
     val arsaker: List<String>,
     val frist: LocalDate?,
@@ -226,7 +224,6 @@ data class FjernetFraPaVent(
     override val type: PeriodehistorikkType,
     override val timestamp: LocalDateTime,
     override val saksbehandlerIdent: String?,
-    override val notatId: Int?,
     override val dialogRef: Int?,
 ) : Historikkinnslag
 
@@ -235,7 +232,6 @@ data class TotrinnsvurderingRetur(
     override val type: PeriodehistorikkType,
     override val timestamp: LocalDateTime,
     override val saksbehandlerIdent: String?,
-    override val notatId: Int?,
     override val dialogRef: Int?,
     val notattekst: String?,
     val kommentarer: List<Kommentar>,
@@ -246,7 +242,6 @@ data class PeriodeHistorikkElementNy(
     override val type: PeriodehistorikkType,
     override val timestamp: LocalDateTime,
     override val saksbehandlerIdent: String?,
-    override val notatId: Int?,
     override val dialogRef: Int?,
 ) : Historikkinnslag
 
@@ -547,7 +542,6 @@ data class BeregnetPeriode(
                             type = it.type,
                             timestamp = it.timestamp,
                             saksbehandlerIdent = it.saksbehandlerIdent,
-                            notatId = it.notatId,
                             dialogRef = it.dialogRef,
                             arsaker = påVentÅrsaker,
                             frist = frist,
@@ -571,7 +565,6 @@ data class BeregnetPeriode(
                             type = it.type,
                             timestamp = it.timestamp,
                             saksbehandlerIdent = it.saksbehandlerIdent,
-                            notatId = it.notatId,
                             dialogRef = it.dialogRef,
                         )
 
@@ -582,7 +575,6 @@ data class BeregnetPeriode(
                             type = it.type,
                             saksbehandlerIdent = it.saksbehandlerIdent,
                             timestamp = it.timestamp,
-                            notatId = it.notatId,
                             dialogRef = it.dialogRef,
                             notattekst = notattekst,
                             kommentarer =
@@ -606,7 +598,6 @@ data class BeregnetPeriode(
                             type = it.type,
                             saksbehandlerIdent = it.saksbehandlerIdent,
                             timestamp = it.timestamp,
-                            notatId = it.notatId,
                             dialogRef = it.dialogRef,
                         )
                 }
