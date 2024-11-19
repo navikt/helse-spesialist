@@ -17,7 +17,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringInntektDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringMinimumSykdomsgradDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunnlagDto
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDto
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
@@ -100,6 +100,7 @@ data class Person(
     private val risikovurderinger: Map<UUID, RisikovurderingApiDto>,
     private val varselRepository: ApiVarselRepository,
     private val oppgaveApiDao: OppgaveApiDao,
+    private val periodehistorikkApiDao: PeriodehistorikkApiDao,
     private val notatDao: NotatApiDao,
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val påVentApiDao: PåVentApiDao,
@@ -107,7 +108,6 @@ data class Person(
     private val tilganger: SaksbehandlerTilganger,
     private val oppgavehåndterer: Oppgavehåndterer,
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
-    private val fullPeriodehistorikk: Map<UUID, List<PeriodehistorikkDto>>,
 ) {
     fun versjon(): Int = snapshot.versjon
 
@@ -165,7 +165,7 @@ data class Person(
                 risikovurderinger = risikovurderinger,
                 varselRepository = varselRepository,
                 oppgaveApiDao = oppgaveApiDao,
-                fullPeriodehistorikk = fullPeriodehistorikk,
+                periodehistorikkApiDao = periodehistorikkApiDao,
                 notatDao = notatDao,
                 totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                 påVentApiDao = påVentApiDao,
