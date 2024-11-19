@@ -131,7 +131,7 @@ class PersonService(
                 risikovurderinger = risikovurderingApiDao.finnRisikovurderinger(fødselsnummer),
                 varselRepository = varselRepository,
                 oppgaveApiDao = oppgaveApiDao,
-                periodehistorikkApiDao = periodehistorikkApiDao,
+                fullPeriodehistorikk = periodehistorikkApiDao.hentForPerson(fødselsnummer),
                 notatDao = notatDao,
                 totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                 påVentApiDao = påVentApiDao,
