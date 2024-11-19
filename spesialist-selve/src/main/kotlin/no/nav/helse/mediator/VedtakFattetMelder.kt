@@ -45,7 +45,7 @@ internal class VedtakFattetMelder(
     }
 
     private fun vedtakJson(sykepengevedtak: Sykepengevedtak.Vedtak): String {
-        var begrunnelser: MutableList<Map<String, Any>> = mutableListOf()
+        val begrunnelser: MutableList<Map<String, Any>> = mutableListOf()
         val message =
             JsonMessage.newMessage(
                 "vedtak_fattet",
@@ -113,6 +113,7 @@ internal class VedtakFattetMelder(
                                     }
                                 }
                             }
+
                             is Infotrygd -> {
                                 mapOf(
                                     "fastsatt" to "IInfotrygd",
@@ -123,8 +124,8 @@ internal class VedtakFattetMelder(
                 ).apply {
                     if (sykepengevedtak.sykepengegrunnlagsfakta is Spleis.EtterSkjønn) {
                         val skjønnsfastsettingopplysninger = sykepengevedtak.skjønnsfastsettingopplysninger!!
-                        begrunnelser =
-                            mutableListOf(
+                        begrunnelser.addAll(
+                            listOf(
                                 mapOf(
                                     "type" to "SkjønnsfastsattSykepengegrunnlagMal",
                                     "begrunnelse" to skjønnsfastsettingopplysninger.begrunnelseFraMal,
@@ -158,7 +159,8 @@ internal class VedtakFattetMelder(
                                             ),
                                         ),
                                 ),
-                            )
+                            ),
+                        )
                     }
 
                     val saksbehandlerVurdering = sykepengevedtak.saksbehandlerVurdering
