@@ -70,25 +70,26 @@ internal class OpprettSaksbehandleroppgave(
         val kanAvvises = behovData.kanAvvises
 
         val egenskaper =
-            emptySet<Egenskap>()
-                .vurderEgenAnsatt(fødselsnummer)
-                .vurderAdressebeskyttelse(fødselsnummer)
-                .vurderOppgavetype(utbetalingtype)
-                .vurderStikkprøve(vedtaksperiodeId, hendelseId)
-                .vurderVurderingsmomenter(vedtaksperiodeId, utbetalingtype)
-                .vurderVergemål(fødselsnummer)
-                .vurderEnhetUtland(fødselsnummer)
-                .vurderMottaker()
-                .vurderInntektskilde(inntektskilde)
-                .vurderPeriodetype(periodetype)
-                .vurderSpesialsak(vedtaksperiodeId)
-                .vurderPåVent(vedtaksperiodeId)
-                .vurderSkjønnsfastsettelse(vedtaksperiodeId)
-                .vurderTilbakedatert(vedtaksperiodeId)
-                .vurderKunÅpenGosysOppgave(vedtaksperiodeId)
-                .vurderMedlemskap(vedtaksperiodeId)
-                .vurderHaster(vedtaksperiodeId)
-                .vurderTilkommenInntekt(behovData.tags)
+            buildSet {
+                egenAnsatt(fødselsnummer)
+                adressebeskyttelse(fødselsnummer)
+                oppgavetype(utbetalingtype)
+                stikkprøve(vedtaksperiodeId, hendelseId)
+                vurderingsmomenter(vedtaksperiodeId, utbetalingtype)
+                vergemål(fødselsnummer)
+                enhetUtland(fødselsnummer)
+                mottaker()
+                inntektskilde(inntektskilde)
+                periodetype(periodetype)
+                spesialsak(vedtaksperiodeId)
+                påVent(vedtaksperiodeId)
+                skjønnsfastsettelse(vedtaksperiodeId)
+                tilbakedatert(vedtaksperiodeId)
+                kunÅpenGosysOppgave(vedtaksperiodeId)
+                medlemskap(vedtaksperiodeId)
+                haster(vedtaksperiodeId)
+                tilkommenInntekt(behovData.tags)
+            }
 
         val behandlingId = behovData.spleisBehandlingId
         oppgaveService.nyOppgave(
@@ -104,118 +105,107 @@ internal class OpprettSaksbehandleroppgave(
         return true
     }
 
-    private fun Set<Egenskap>.vurderEgenAnsatt(fødselsnummer: String): Set<Egenskap> {
-        if (egenAnsattRepository.erEgenAnsatt(fødselsnummer) == true) return this + EGEN_ANSATT
-        return this
+    private fun MutableSet<Egenskap>.egenAnsatt(fødselsnummer: String) {
+        if (egenAnsattRepository.erEgenAnsatt(fødselsnummer) == true) add(EGEN_ANSATT)
     }
 
-    private fun Set<Egenskap>.vurderAdressebeskyttelse(fødselsnummer: String): Set<Egenskap> {
-        val adressebeskyttelse = personRepository.finnAdressebeskyttelse(fødselsnummer) ?: return this
-        return when (adressebeskyttelse) {
+    private fun MutableSet<Egenskap>.adressebeskyttelse(fødselsnummer: String) {
+        when (personRepository.finnAdressebeskyttelse(fødselsnummer)) {
             Adressebeskyttelse.StrengtFortrolig,
             Adressebeskyttelse.StrengtFortroligUtland,
-            -> this + STRENGT_FORTROLIG_ADRESSE
-            Adressebeskyttelse.Fortrolig -> this + FORTROLIG_ADRESSE
-            else -> this
+            -> add(STRENGT_FORTROLIG_ADRESSE)
+
+            Adressebeskyttelse.Fortrolig -> add(FORTROLIG_ADRESSE)
+            else -> Unit
         }
     }
 
-    private fun Set<Egenskap>.vurderOppgavetype(utbetalingtype: Utbetalingtype): Set<Egenskap> {
-        if (utbetalingtype == Utbetalingtype.REVURDERING) return this + REVURDERING
-        return this + SØKNAD
+    private fun MutableSet<Egenskap>.oppgavetype(utbetalingtype: Utbetalingtype) {
+        add(if (utbetalingtype == Utbetalingtype.REVURDERING) REVURDERING else SØKNAD)
     }
 
-    private fun Set<Egenskap>.vurderStikkprøve(
+    private fun MutableSet<Egenskap>.stikkprøve(
         vedtaksperiodeId: UUID,
         hendelseId: UUID,
-    ): Set<Egenskap> {
-        if (automatisering.erStikkprøve(vedtaksperiodeId, hendelseId)) return this + STIKKPRØVE
-        return this
+    ) {
+        if (automatisering.erStikkprøve(vedtaksperiodeId, hendelseId)) add(STIKKPRØVE)
     }
 
-    private fun Set<Egenskap>.vurderVurderingsmomenter(
+    private fun MutableSet<Egenskap>.vurderingsmomenter(
         vedtaksperiodeId: UUID,
         utbetalingtype: Utbetalingtype,
-    ): Set<Egenskap> {
-        if (utbetalingtype != Utbetalingtype.REVURDERING && risikovurderingRepository.kreverSupersaksbehandler(vedtaksperiodeId)) {
-            return this + RISK_QA
-        }
-        return this
-    }
-
-    private fun Set<Egenskap>.vurderVergemål(fødselsnummer: String): Set<Egenskap> {
-        if (vergemålRepository.harVergemål(fødselsnummer) == true) return this + VERGEMÅL
-        return this
-    }
-
-    private fun Set<Egenskap>.vurderEnhetUtland(fødselsnummer: String): Set<Egenskap> {
-        if (HentEnhetløsning.erEnhetUtland(personRepository.finnEnhetId(fødselsnummer))) return this + UTLAND
-        return this
-    }
-
-    private fun Set<Egenskap>.vurderMottaker(): Set<Egenskap> {
-        return when {
-            utbetaling.delvisRefusjon() -> this + DELVIS_REFUSJON
-            utbetaling.kunUtbetalingTilSykmeldt() -> this + UTBETALING_TIL_SYKMELDT
-            utbetaling.kunUtbetalingTilArbeidsgiver() -> this + UTBETALING_TIL_ARBEIDSGIVER
-            utbetaling.ingenUtbetaling() -> this + INGEN_UTBETALING
-            else -> this
+    ) {
+        if (
+            utbetalingtype != Utbetalingtype.REVURDERING &&
+            risikovurderingRepository.kreverSupersaksbehandler(vedtaksperiodeId)
+        ) {
+            add(RISK_QA)
         }
     }
 
-    private fun Set<Egenskap>.vurderInntektskilde(inntektskilde: Inntektskilde): Set<Egenskap> {
-        return when (inntektskilde) {
-            Inntektskilde.EN_ARBEIDSGIVER -> this + EN_ARBEIDSGIVER
-            Inntektskilde.FLERE_ARBEIDSGIVERE -> this + FLERE_ARBEIDSGIVERE
+    private fun MutableSet<Egenskap>.vergemål(fødselsnummer: String) {
+        if (vergemålRepository.harVergemål(fødselsnummer) == true) add(VERGEMÅL)
+    }
+
+    private fun MutableSet<Egenskap>.enhetUtland(fødselsnummer: String) {
+        if (HentEnhetløsning.erEnhetUtland(personRepository.finnEnhetId(fødselsnummer))) add(UTLAND)
+    }
+
+    private fun MutableSet<Egenskap>.mottaker() {
+        when {
+            utbetaling.delvisRefusjon() -> add(DELVIS_REFUSJON)
+            utbetaling.kunUtbetalingTilSykmeldt() -> add(UTBETALING_TIL_SYKMELDT)
+            utbetaling.kunUtbetalingTilArbeidsgiver() -> add(UTBETALING_TIL_ARBEIDSGIVER)
+            utbetaling.ingenUtbetaling() -> add(INGEN_UTBETALING)
+            else -> Unit
         }
     }
 
-    private fun Set<Egenskap>.vurderPeriodetype(periodetype: Periodetype): Set<Egenskap> {
-        return when (periodetype) {
-            Periodetype.FØRSTEGANGSBEHANDLING -> this + FORSTEGANGSBEHANDLING
-            Periodetype.FORLENGELSE -> this + FORLENGELSE
-            Periodetype.INFOTRYGDFORLENGELSE -> this + INFOTRYGDFORLENGELSE
-            Periodetype.OVERGANG_FRA_IT -> this + OVERGANG_FRA_IT
+    private fun MutableSet<Egenskap>.inntektskilde(inntektskilde: Inntektskilde) {
+        when (inntektskilde) {
+            Inntektskilde.EN_ARBEIDSGIVER -> add(EN_ARBEIDSGIVER)
+            Inntektskilde.FLERE_ARBEIDSGIVERE -> add(FLERE_ARBEIDSGIVERE)
         }
     }
 
-    private fun Set<Egenskap>.vurderSpesialsak(vedtaksperiodeId: UUID): Set<Egenskap> {
-        if (vedtakDao.erSpesialsak(vedtaksperiodeId)) return this + SPESIALSAK
-        return this
+    private fun MutableSet<Egenskap>.periodetype(periodetype: Periodetype) {
+        when (periodetype) {
+            Periodetype.FØRSTEGANGSBEHANDLING -> add(FORSTEGANGSBEHANDLING)
+            Periodetype.FORLENGELSE -> add(FORLENGELSE)
+            Periodetype.INFOTRYGDFORLENGELSE -> add(INFOTRYGDFORLENGELSE)
+            Periodetype.OVERGANG_FRA_IT -> add(OVERGANG_FRA_IT)
+        }
     }
 
-    private fun Set<Egenskap>.vurderPåVent(vedtaksperiodeId: UUID): Set<Egenskap> {
-        if (påVentRepository.erPåVent(vedtaksperiodeId)) return this + PÅ_VENT
-        return this
+    private fun MutableSet<Egenskap>.spesialsak(vedtaksperiodeId: UUID) {
+        if (vedtakDao.erSpesialsak(vedtaksperiodeId)) add(SPESIALSAK)
     }
 
-    private fun Set<Egenskap>.vurderSkjønnsfastsettelse(vedtaksperiodeId: UUID): Set<Egenskap> {
-        if (sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId)) return this + SKJØNNSFASTSETTELSE
-        return this
+    private fun MutableSet<Egenskap>.påVent(vedtaksperiodeId: UUID) {
+        if (påVentRepository.erPåVent(vedtaksperiodeId)) add(PÅ_VENT)
     }
 
-    private fun Set<Egenskap>.vurderTilbakedatert(vedtaksperiodeId: UUID): Set<Egenskap> {
-        if (sykefraværstilfelle.erTilbakedatert(vedtaksperiodeId)) return this + TILBAKEDATERT
-        return this
+    private fun MutableSet<Egenskap>.skjønnsfastsettelse(vedtaksperiodeId: UUID) {
+        if (sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId)) add(SKJØNNSFASTSETTELSE)
     }
 
-    private fun Set<Egenskap>.vurderKunÅpenGosysOppgave(vedtaksperiodeId: UUID): Set<Egenskap> {
-        if (sykefraværstilfelle.harKunÅpenGosysOppgave(vedtaksperiodeId)) return this + GOSYS
-        return this
+    private fun MutableSet<Egenskap>.tilbakedatert(vedtaksperiodeId: UUID) {
+        if (sykefraværstilfelle.erTilbakedatert(vedtaksperiodeId)) add(TILBAKEDATERT)
     }
 
-    private fun Set<Egenskap>.vurderMedlemskap(vedtaksperiodeId: UUID): Set<Egenskap> {
-        if (sykefraværstilfelle.harMedlemskapsvarsel(vedtaksperiodeId)) return this + MEDLEMSKAP
-        return this
+    private fun MutableSet<Egenskap>.kunÅpenGosysOppgave(vedtaksperiodeId: UUID) {
+        if (sykefraværstilfelle.harKunÅpenGosysOppgave(vedtaksperiodeId)) add(GOSYS)
     }
 
-    private fun Set<Egenskap>.vurderTilkommenInntekt(tags: List<String>): Set<Egenskap> {
-        if (tags.contains("TilkommenInntekt")) return this + TILKOMMEN
-        return this
+    private fun MutableSet<Egenskap>.medlemskap(vedtaksperiodeId: UUID) {
+        if (sykefraværstilfelle.harMedlemskapsvarsel(vedtaksperiodeId)) add(MEDLEMSKAP)
     }
 
-    private fun Set<Egenskap>.vurderHaster(vedtaksperiodeId: UUID): Set<Egenskap> {
-        if (sykefraværstilfelle.haster(vedtaksperiodeId) && utbetaling.harEndringIUtbetalingTilSykmeldt()) return this + HASTER
-        return this
+    private fun MutableSet<Egenskap>.tilkommenInntekt(tags: List<String>) {
+        if (tags.contains("TilkommenInntekt")) add(TILKOMMEN)
+    }
+
+    private fun MutableSet<Egenskap>.haster(vedtaksperiodeId: UUID) {
+        if (sykefraværstilfelle.haster(vedtaksperiodeId) && utbetaling.harEndringIUtbetalingTilSykmeldt()) add(HASTER)
     }
 }
