@@ -56,7 +56,7 @@ import java.util.UUID
 interface Oppgavefinner {
     fun oppgave(
         utbetalingId: UUID,
-        oppgaveBlock: Oppgave?.() -> Unit,
+        oppgaveBlock: Oppgave.() -> Unit,
     )
 }
 
@@ -137,7 +137,7 @@ internal class OppgaveService(
 
     override fun oppgave(
         utbetalingId: UUID,
-        oppgaveBlock: Oppgave?.() -> Unit,
+        oppgaveBlock: Oppgave.() -> Unit,
     ) {
         val oppgaveId = oppgaveDao.finnOppgaveId(utbetalingId)
         oppgaveId?.let {

@@ -1,6 +1,5 @@
 package no.nav.helse.modell.oppgave
 
-import java.util.UUID
 import no.nav.helse.mediator.oppgave.Oppgavefinner
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
@@ -14,6 +13,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class OppdaterOppgavestatusCommandTest {
 
@@ -95,7 +95,7 @@ internal class OppdaterOppgavestatusCommandTest {
     }
 
     private val oppgavehåndterer get() = object : Oppgavefinner {
-        override fun oppgave(utbetalingId: UUID, oppgaveBlock: Oppgave?.() -> Unit) {
+        override fun oppgave(utbetalingId: UUID, oppgaveBlock: Oppgave.() -> Unit) {
             oppgaveBlock(oppgave)
         }
     }
