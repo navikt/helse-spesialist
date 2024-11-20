@@ -6,6 +6,8 @@ import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.AvviksvurderingTestdata
 import no.nav.helse.GodkjenningsbehovTestdata
+import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.HelseDao.Companion.single
 import no.nav.helse.Meldingssender
 import no.nav.helse.TestRapidHelpers.behov
 import no.nav.helse.TestRapidHelpers.hendelser
@@ -1326,20 +1328,15 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     private fun hentOppgaveegenskaper(oppgaveId: Long): Set<Egenskap> {
-        @Language("PostgreSQL")
-        val query = "select egenskaper from oppgave o where id = :oppgaveId"
-        val egenskaper =
-            requireNotNull(
-                sessionOf(dataSource).use { session ->
-                    session.run(
-                        queryOf(query, mapOf("oppgaveId" to oppgaveId)).map { row ->
-                            row.array<String>("egenskaper").map<String, Egenskap>(::enumValueOf).toSet()
-                        }.asSingle,
-                    )
-                },
-            ) { "Forventer å finne en oppgave for id=$oppgaveId" }
-
-        return egenskaper
+        val egenskaper = sessionOf(dataSource).use { session ->
+            asSQL(
+                "select egenskaper from oppgave o where id = :oppgaveId",
+                "oppgaveId" to oppgaveId,
+            ).single(session) { row ->
+                row.array<String>("egenskaper").map<String, Egenskap>(::enumValueOf).toSet()
+            }
+        }
+        return requireNotNull(egenskaper) { "Forventer å finne en oppgave for id=$oppgaveId" }
     }
 
     protected fun assertSaksbehandleroppgaveBleIkkeOpprettet(vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1) {
