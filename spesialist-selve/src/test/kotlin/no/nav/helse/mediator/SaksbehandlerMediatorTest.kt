@@ -413,7 +413,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             saksbehandler,
         )
         val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
-        val historikk = periodehistorikkApiDao.hentForPerson(FNR)[UTBETALING_ID] ?: emptyList()
+        val historikk = periodehistorikkApiDao.finn(UTBETALING_ID)
         assertEquals(PeriodehistorikkType.LEGG_PA_VENT, historikk.first().type)
         assertTrue(melding["egenskaper"].map { it.asText() }.contains("PÅ_VENT"))
     }
@@ -438,7 +438,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         )
         mediator.påVent(PaVentRequest.FjernPaVent(oppgaveId), saksbehandler)
         val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
-        val historikk = periodehistorikkApiDao.hentForPerson(FNR)[UTBETALING_ID] ?: emptyList()
+        val historikk = periodehistorikkApiDao.finn(UTBETALING_ID)
         assertTrue(historikk.map { it.type }.containsAll(listOf(PeriodehistorikkType.FJERN_FRA_PA_VENT, PeriodehistorikkType.LEGG_PA_VENT)))
         assertFalse(melding["egenskaper"].map { it.asText() }.contains("PÅ_VENT"))
     }
