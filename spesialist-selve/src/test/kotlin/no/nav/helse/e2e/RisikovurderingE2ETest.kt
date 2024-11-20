@@ -1,16 +1,12 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.util.UUID
 
 internal class RisikovurderingE2ETest : AbstractE2ETest() {
 
@@ -31,7 +27,6 @@ internal class RisikovurderingE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(risikofunn = funnSomKreverRiskTilgang)
-        assertOppgaveHarEgenskap("RISK_QA", VEDTAKSPERIODE_ID)
         assertHarOppgaveegenskap(inspektør.oppgaveId(), RISK_QA)
     }
 
@@ -53,20 +48,4 @@ internal class RisikovurderingE2ETest : AbstractE2ETest() {
             assertTrue(jsonNode["Risikovurdering"]["kunRefusjon"].asBoolean())
         }
     }
-
-    private fun assertOppgaveHarEgenskap(forventet: String, vedtaksperiodeId: UUID) {
-        val egenskaper = sessionOf(dataSource).use {
-            @Language("PostgreSQL")
-            val query =
-                "SELECT egenskaper FROM oppgave JOIN vedtak on vedtak.id = vedtak_ref WHERE vedtaksperiode_id = :vedtaksperiodeId"
-            it.run(
-                queryOf(
-                    query,
-                    mapOf("vedtaksperiodeId" to vedtaksperiodeId)
-                ).map { row -> row.array<String>("egenskaper") }.asSingle
-            )
-        }
-        assertTrue(egenskaper?.contains(forventet) ?: false)
-    }
-
 }

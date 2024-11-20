@@ -21,9 +21,9 @@ internal class OppdaterOppgavestatusCommand(
                 GODKJENT_UTEN_UTBETALING,
                 UTBETALT,
                 IKKE_GODKJENT,
-                -> this.ferdigstill()
-                FORKASTET -> this.avbryt()
-                else -> {} // NOP
+                -> ferdigstill()
+                FORKASTET -> avbryt()
+                else -> Unit
             }
         }
         return true

@@ -24,7 +24,7 @@ class AnnulleringDao(
             VALUES (now(), :saksbehandler, :arsaker::varchar[], :begrunnelseRef, :arbeidsgiverFagsystemId, :personFagsystemId)
             """.trimIndent(),
             "saksbehandler" to saksbehandler.oid(),
-            "arsaker" to annulleringDto.årsaker.map { it.arsak }.somDbArray(),
+            "arsaker" to annulleringDto.årsaker.somDbArray { it.arsak },
             "begrunnelseRef" to begrunnelseId,
             "arbeidsgiverFagsystemId" to annulleringDto.arbeidsgiverFagsystemId,
             "personFagsystemId" to annulleringDto.personFagsystemId,
@@ -72,4 +72,4 @@ class AnnulleringDao(
     }
 }
 
-fun <T> Iterable<T>.somDbArray() = joinToString(prefix = "{", postfix = "}")
+fun <T> Iterable<T>.somDbArray(transform: (T) -> String) = joinToString(prefix = "{", postfix = "}", transform = transform)

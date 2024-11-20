@@ -14,8 +14,7 @@ import javax.sql.DataSource
 
 class PåVentDao(
     private val queryRunner: QueryRunner,
-) : PåVentRepository,
-    QueryRunner by queryRunner {
+) : PåVentRepository, QueryRunner by queryRunner {
     constructor(session: Session) : this(MedSession(session))
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
@@ -26,25 +25,28 @@ class PåVentDao(
         årsaker: List<PåVentÅrsak>,
         notatTekst: String? = null,
         dialogRef: Long,
-    ) = asSQL(
-        """
-        SELECT v.vedtaksperiode_id
-        FROM vedtak v
-        INNER JOIN oppgave o on v.id = o.vedtak_ref
-        WHERE o.id = :oppgaveId
-        """.trimIndent(),
-        "oppgaveId" to oppgaveId,
-    ).singleOrNull { it.uuid("vedtaksperiode_id") }.let { vedtaksperiodeId ->
+    ) {
+        val vedtaksperiodeId =
+            asSQL(
+                """
+                SELECT v.vedtaksperiode_id FROM vedtak v
+                INNER JOIN oppgave o ON v.id = o.vedtak_ref
+                WHERE o.id = :oppgaveId
+                """.trimIndent(),
+                "oppgaveId" to oppgaveId,
+            ).singleOrNull { it.uuid("vedtaksperiode_id") } ?: return
+
         asSQL(
             """
-            INSERT INTO pa_vent (vedtaksperiode_id, saksbehandler_ref, frist, dialog_ref, notattekst, årsaker) VALUES (:vedtaksperiodeId, :saksbehandlerRef, :frist, :dialogRef, :notatTekst, :arsaker::varchar[])
+            INSERT INTO pa_vent (vedtaksperiode_id, saksbehandler_ref, frist, dialog_ref, notattekst, årsaker)
+            VALUES (:vedtaksperiodeId, :saksbehandlerRef, :frist, :dialogRef, :notatTekst, :arsaker::varchar[])
             """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
             "saksbehandlerRef" to saksbehandlerOid,
             "frist" to frist,
             "dialogRef" to dialogRef,
             "notatTekst" to notatTekst,
-            "arsaker" to årsaker.map { it.årsak }.somDbArray(),
+            "arsaker" to årsaker.somDbArray { it.årsak },
         ).update()
     }
 

@@ -35,11 +35,11 @@ class TildelingDao(queryRunner: QueryRunner) : TildelingRepository, QueryRunner 
     override fun tildelingForPerson(fødselsnummer: String) =
         asSQL(
             """
-            SELECT s.epost, s.oid, s.navn FROM person
-                 RIGHT JOIN vedtak v on person.id = v.person_ref
-                 RIGHT JOIN oppgave o on v.id = o.vedtak_ref
-                 RIGHT JOIN tildeling t on o.id = t.oppgave_id_ref
-                 RIGHT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
+            SELECT s.epost, s.oid, s.navn FROM person p
+            JOIN vedtak v on p.id = v.person_ref
+            JOIN oppgave o on v.id = o.vedtak_ref
+            JOIN tildeling t on o.id = t.oppgave_id_ref
+            JOIN saksbehandler s on t.saksbehandler_ref = s.oid
             WHERE fødselsnummer = :foedselsnummer AND o.status = 'AvventerSaksbehandler'
             ORDER BY o.opprettet DESC;
             """.trimIndent(),

@@ -3,6 +3,7 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -22,7 +23,7 @@ internal class VedtakFattetE2ETest : AbstractE2ETest() {
         assertDoesNotThrow {
             håndterVedtakFattet(spleisBehandlingId = spleisBehandlingId)
         }
-        assertFerdigBehandledeGenerasjoner(VEDTAKSPERIODE_ID)
+        assertFerdigbehandletGenerasjon(VEDTAKSPERIODE_ID)
     }
 
     @Test
@@ -58,13 +59,17 @@ internal class VedtakFattetE2ETest : AbstractE2ETest() {
         assertEquals(forventetSpesialsak, erSpesialsak)
     }
 
-    private fun assertFerdigBehandledeGenerasjoner(vedtaksperiodeId: UUID) {
-        @Language("PostgreSQL")
-        val query = "SELECT 1 FROM behandling WHERE vedtaksperiode_id = :vedtaksperiode_id AND tilstand = '${Generasjon.VedtakFattet.navn()}'"
-        val antallFerdigBehandledeGenerasjoner =
-            sessionOf(dataSource).use { session ->
-                session.run(queryOf(query, mapOf("vedtaksperiode_id" to vedtaksperiodeId)).map { it.int(1) }.asSingle) ?: 0
-            }
-        assertTrue(antallFerdigBehandledeGenerasjoner > 0)
+    private fun assertFerdigbehandletGenerasjon(vedtaksperiodeId: UUID) {
+        val query = asSQL(
+            """
+            SELECT 1 FROM behandling
+            WHERE vedtaksperiode_id = :vedtaksperiode_id AND tilstand = :tilstand::generasjon_tilstand
+            """.trimIndent(),
+            "vedtaksperiode_id" to vedtaksperiodeId,
+            "tilstand" to Generasjon.VedtakFattet.navn(),
+        )
+        val behandlingenErFerdig =
+            sessionOf(dataSource, strict = true).use { it.run(query.map { true }.asSingle) ?: false }
+        assertTrue(behandlingenErFerdig)
     }
 }
