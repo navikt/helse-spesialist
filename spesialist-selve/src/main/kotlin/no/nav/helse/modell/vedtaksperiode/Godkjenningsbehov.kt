@@ -9,7 +9,6 @@ import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.db.OppgaveDao
-import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.PåVentRepository
 import no.nav.helse.db.RisikovurderingRepository
@@ -41,7 +40,6 @@ import no.nav.helse.modell.kommando.OpprettKoblingTilHendelseCommand
 import no.nav.helse.modell.kommando.OpprettKoblingTilUtbetalingCommand
 import no.nav.helse.modell.kommando.OpprettSaksbehandleroppgave
 import no.nav.helse.modell.kommando.PersisterInntektCommand
-import no.nav.helse.modell.kommando.PersisterPeriodehistorikkCommand
 import no.nav.helse.modell.kommando.PersisterVedtaksperiodetypeCommand
 import no.nav.helse.modell.kommando.VurderBehovForTotrinnskontroll
 import no.nav.helse.modell.kommando.VurderVidereBehandlingAvGodkjenningsbehov
@@ -223,7 +221,6 @@ internal class GodkjenningsbehovCommand(
     påVentRepository: PåVentRepository,
     overstyringRepository: OverstyringRepository,
     automatiseringRepository: AutomatiseringRepository,
-    periodehistorikkDao: PeriodehistorikkDao,
     oppgaveDao: OppgaveDao,
     avviksvurderingDao: AvviksvurderingDao,
     oppgaveService: OppgaveService,
@@ -350,12 +347,6 @@ internal class GodkjenningsbehovCommand(
                 totrinnsvurderingService = totrinnsvurderingService,
                 sykefraværstilfelle = sykefraværstilfelle,
                 spleisVedtaksperioder = behovData.spleisVedtaksperioder,
-            ),
-            PersisterPeriodehistorikkCommand(
-                vedtaksperiodeId = behovData.vedtaksperiodeId,
-                utbetalingId = behovData.utbetalingId,
-                periodehistorikkDao = periodehistorikkDao,
-                utbetalingRepository = utbetalingRepository,
             ),
             PersisterInntektCommand(
                 fødselsnummer = behovData.fødselsnummer,

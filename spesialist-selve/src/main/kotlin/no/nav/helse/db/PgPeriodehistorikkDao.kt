@@ -26,24 +26,10 @@ class PgPeriodehistorikkDao(
         oppgaveId: Long,
     ) {
         val generasjonId = PgOppgaveDao(queryRunner).finnGenerasjonId(oppgaveId)
-        lagreMedGenerasjonId(historikkinnslag, generasjonId)
+        lagre(historikkinnslag, generasjonId)
     }
 
-    override fun lagreMedGenerasjonId(
-        historikkinnslag: HistorikkinnslagDto,
-        generasjonId: UUID,
-    ) = when (historikkinnslag) {
-        is FjernetFraPåVent -> lagre(historikkinnslag, generasjonId)
-        is LagtPåVent -> lagre(historikkinnslag, generasjonId)
-        is TotrinnsvurderingFerdigbehandlet -> lagre(historikkinnslag, generasjonId)
-        is AvventerTotrinnsvurdering -> lagre(historikkinnslag, generasjonId)
-        is TotrinnsvurderingAutomatiskRetur -> lagre(historikkinnslag, generasjonId)
-        is TotrinnsvurderingRetur -> lagre(historikkinnslag, generasjonId)
-        is AutomatiskBehandlingStanset -> lagre(historikkinnslag, generasjonId)
-        is VedtaksperiodeReberegnet -> lagre(historikkinnslag, generasjonId)
-    }
-
-    private fun lagre(
+    override fun lagre(
         historikkinnslag: HistorikkinnslagDto,
         generasjonId: UUID,
     ) {
@@ -71,19 +57,4 @@ class PgPeriodehistorikkDao(
             is AutomatiskBehandlingStanset -> "STANS_AUTOMATISK_BEHANDLING" // TODO: Mangler å migrere typen i databasen
             is VedtaksperiodeReberegnet -> "VEDTAKSPERIODE_REBEREGNET" // TODO: Mangler å migrere typen i databasen
         }
-
-    override fun migrer(
-        tidligereUtbetalingId: UUID,
-        utbetalingId: UUID,
-    ) {
-        asSQL(
-            """
-                UPDATE periodehistorikk 
-                SET utbetaling_id = :utbetalingId
-                WHERE utbetaling_id = :tidligereUtbetalingId
-        """,
-            "utbetalingId" to utbetalingId,
-            "tidligereUtbetalingId" to tidligereUtbetalingId,
-        ).update()
-    }
 }

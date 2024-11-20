@@ -382,7 +382,6 @@ internal class Kommandofabrikk(
             påVentRepository = PåVentDao(session),
             overstyringRepository = OverstyringDao(session),
             automatiseringRepository = AutomatiseringDao(session),
-            periodehistorikkDao = PgPeriodehistorikkDao(session),
             oppgaveDao = PgOppgaveDao(session),
             avviksvurderingDao = PgAvviksvurderingDao(session),
             oppgaveService = transaksjonellOppgaveService(session),

@@ -9,13 +9,8 @@ interface PeriodehistorikkDao {
         oppgaveId: Long,
     )
 
-    fun lagreMedGenerasjonId(
+    fun lagre(
         historikkinnslag: HistorikkinnslagDto,
         generasjonId: UUID,
-    )
-
-    fun migrer(
-        tidligereUtbetalingId: UUID,
-        utbetalingId: UUID,
     )
 }
