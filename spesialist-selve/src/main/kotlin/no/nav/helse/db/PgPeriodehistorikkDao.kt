@@ -11,7 +11,6 @@ import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingAutomatiskRetur
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingFerdigbehandlet
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingRetur
 import no.nav.helse.modell.periodehistorikk.VedtaksperiodeReberegnet
-import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -33,45 +32,29 @@ class PgPeriodehistorikkDao(
     override fun lagreMedGenerasjonId(
         historikkinnslag: HistorikkinnslagDto,
         generasjonId: UUID,
-    ) {
-        when (historikkinnslag) {
-            is FjernetFraPåVent -> lagre(historikkinnslag, generasjonId)
-            is LagtPåVent -> lagre(historikkinnslag, generasjonId)
-            is TotrinnsvurderingFerdigbehandlet -> lagre(historikkinnslag, generasjonId)
-            is AvventerTotrinnsvurdering -> lagre(historikkinnslag, generasjonId)
-            is TotrinnsvurderingAutomatiskRetur -> lagre(historikkinnslag, generasjonId)
-            is TotrinnsvurderingRetur -> {
-                val notatId =
-                    PgNotatDao(queryRunner)
-                        .lagreForOppgaveId(
-                            oppgaveId = historikkinnslag.notat.oppgaveId,
-                            tekst = historikkinnslag.notat.tekst,
-                            saksbehandlerOid = historikkinnslag.saksbehandler.oid,
-                            notatType = NotatType.Retur,
-                            dialogRef = historikkinnslag.dialogRef,
-                        )?.toInt()
-                lagre(historikkinnslag, generasjonId, notatId)
-            }
-
-            is AutomatiskBehandlingStanset -> lagre(historikkinnslag, generasjonId)
-            is VedtaksperiodeReberegnet -> lagre(historikkinnslag, generasjonId)
-        }
+    ) = when (historikkinnslag) {
+        is FjernetFraPåVent -> lagre(historikkinnslag, generasjonId)
+        is LagtPåVent -> lagre(historikkinnslag, generasjonId)
+        is TotrinnsvurderingFerdigbehandlet -> lagre(historikkinnslag, generasjonId)
+        is AvventerTotrinnsvurdering -> lagre(historikkinnslag, generasjonId)
+        is TotrinnsvurderingAutomatiskRetur -> lagre(historikkinnslag, generasjonId)
+        is TotrinnsvurderingRetur -> lagre(historikkinnslag, generasjonId)
+        is AutomatiskBehandlingStanset -> lagre(historikkinnslag, generasjonId)
+        is VedtaksperiodeReberegnet -> lagre(historikkinnslag, generasjonId)
     }
 
     private fun lagre(
         historikkinnslag: HistorikkinnslagDto,
         generasjonId: UUID,
-        notatId: Int? = null,
     ) {
         asSQL(
             """
-                INSERT INTO periodehistorikk (type, saksbehandler_oid, generasjon_id, utbetaling_id, notat_id, dialog_ref, json)
-                VALUES (:type, :saksbehandler_oid, :generasjon_id, null, :notat_id, :dialog_ref, :json::json)
+                INSERT INTO periodehistorikk (type, saksbehandler_oid, generasjon_id, utbetaling_id, dialog_ref, json)
+                VALUES (:type, :saksbehandler_oid, :generasjon_id, null, :dialog_ref, :json::json)
         """,
             "type" to historikkinnslag.type(),
             "saksbehandler_oid" to historikkinnslag.saksbehandler?.oid,
             "generasjon_id" to generasjonId,
-            "notat_id" to notatId,
             "dialog_ref" to historikkinnslag.dialogRef,
             "json" to historikkinnslag.toJson(),
         ).update()

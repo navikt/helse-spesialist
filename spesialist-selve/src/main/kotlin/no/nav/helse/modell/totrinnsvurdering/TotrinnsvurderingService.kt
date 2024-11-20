@@ -5,7 +5,6 @@ import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
-import no.nav.helse.modell.periodehistorikk.NotatDto
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
@@ -41,7 +40,6 @@ class TotrinnsvurderingService(
         val innslag =
             HistorikkinnslagDto.totrinnsvurderingRetur(
                 notattekst = notattekst,
-                notat = NotatDto(oppgaveId, notattekst),
                 saksbehandler = saksbehandlerFraApi.toDto(),
                 dialogRef = dialogRef,
             )

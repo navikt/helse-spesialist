@@ -136,9 +136,9 @@ VALUES (${sequence_number}, 'UTBETALT', now(), '{}'::json, ${sequence_number}, $
 INSERT INTO totrinnsvurdering(id, vedtaksperiode_id, er_retur, saksbehandler, beslutter, utbetaling_id_ref, opprettet, oppdatert)
 VALUES (${sequence_number}, '${vedtaksperiode_id}', false, '${saksbehandler_oid}', '${saksbehandler_oid}', ${sequence_number}, now(), null);
 
-INSERT INTO periodehistorikk(id, type, timestamp, generasjon_id, saksbehandler_oid, notat_id, dialog_ref)
+INSERT INTO periodehistorikk(id, type, timestamp, generasjon_id, saksbehandler_oid, dialog_ref)
 VALUES (${sequence_number}, 'TOTRINNSVURDERING_RETUR', now(), '${generasjon_id}', '${saksbehandler_oid}',
-        ${sequence_number}, ${sequence_number});
+        ${sequence_number});
 
 INSERT INTO feilende_meldinger(id, event_name, opprettet, blob)
 VALUES (gen_random_uuid(), 'FEILENDE_TESTHENDELSE', now(), '{}'::json);

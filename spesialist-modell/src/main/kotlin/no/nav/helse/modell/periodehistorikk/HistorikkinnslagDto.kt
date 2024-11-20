@@ -9,7 +9,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 sealed interface HistorikkinnslagDto {
-    val notat: NotatDto?
     val dialogRef: Long?
     val saksbehandler: SaksbehandlerDto?
     val tidspunkt: LocalDateTime
@@ -47,13 +46,11 @@ sealed interface HistorikkinnslagDto {
 
         fun totrinnsvurderingRetur(
             notattekst: String,
-            notat: NotatDto,
             saksbehandler: SaksbehandlerDto,
             dialogRef: Long,
         ): TotrinnsvurderingRetur =
             TotrinnsvurderingRetur(
                 notattekst = notattekst,
-                notat = notat,
                 saksbehandler = saksbehandler,
                 tidspunkt = LocalDateTime.now(),
                 dialogRef = dialogRef,
@@ -68,11 +65,6 @@ sealed interface HistorikkinnslagDto {
     }
 }
 
-data class NotatDto(
-    val oppgaveId: Long,
-    val tekst: String,
-)
-
 data class LagtPåVent(
     override val saksbehandler: SaksbehandlerDto,
     override val tidspunkt: LocalDateTime,
@@ -81,8 +73,6 @@ data class LagtPåVent(
     val notattekst: String?,
     val frist: LocalDate,
 ) : HistorikkinnslagDto {
-    override val notat: NotatDto? = null
-
     override fun toJson(): String =
         mapOf(
             "årsaker" to årsaker.map { it },
@@ -100,7 +90,6 @@ data class FjernetFraPåVent(
     override val saksbehandler: SaksbehandlerDto,
     override val tidspunkt: LocalDateTime,
 ) : HistorikkinnslagDto {
-    override val notat: NotatDto? = null
     override val dialogRef: Long? = null
 }
 
@@ -108,7 +97,6 @@ data class TotrinnsvurderingFerdigbehandlet(
     override val saksbehandler: SaksbehandlerDto,
     override val tidspunkt: LocalDateTime,
 ) : HistorikkinnslagDto {
-    override val notat: NotatDto? = null
     override val dialogRef: Long? = null
 }
 
@@ -116,12 +104,10 @@ data class AvventerTotrinnsvurdering(
     override val saksbehandler: SaksbehandlerDto,
     override val tidspunkt: LocalDateTime,
 ) : HistorikkinnslagDto {
-    override val notat: NotatDto? = null
     override val dialogRef: Long? = null
 }
 
 data class TotrinnsvurderingRetur(
-    override val notat: NotatDto,
     override val saksbehandler: SaksbehandlerDto,
     override val tidspunkt: LocalDateTime,
     override val dialogRef: Long,
@@ -136,7 +122,6 @@ data class TotrinnsvurderingRetur(
 data class TotrinnsvurderingAutomatiskRetur(
     override val tidspunkt: LocalDateTime,
 ) : HistorikkinnslagDto {
-    override val notat: NotatDto? = null
     override val dialogRef: Long? = null
     override val saksbehandler: SaksbehandlerDto? = null
 }
@@ -144,7 +129,6 @@ data class TotrinnsvurderingAutomatiskRetur(
 data class AutomatiskBehandlingStanset(
     override val tidspunkt: LocalDateTime,
 ) : HistorikkinnslagDto {
-    override val notat: NotatDto? = null
     override val dialogRef: Long? = null
     override val saksbehandler: SaksbehandlerDto? = null
 }
@@ -152,7 +136,6 @@ data class AutomatiskBehandlingStanset(
 data class VedtaksperiodeReberegnet(
     override val tidspunkt: LocalDateTime,
 ) : HistorikkinnslagDto {
-    override val notat: NotatDto? = null
     override val dialogRef: Long? = null
     override val saksbehandler: SaksbehandlerDto? = null
 }
