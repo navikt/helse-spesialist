@@ -291,9 +291,9 @@ internal class PersonRepository(
         val query =
             """
             DELETE FROM periodehistorikk ph
-            USING behandling svg
-            JOIN vedtak v ON v.vedtaksperiode_id = svg.vedtaksperiode_id
-            WHERE ph.generasjon_id = svg.unik_id
+            USING behandling b
+            JOIN vedtak v ON v.vedtaksperiode_id = b.vedtaksperiode_id
+            WHERE ph.generasjon_id = b.unik_id
             AND v.person_ref = :personRef
             """.trimIndent()
         run(queryOf(query, mapOf("personRef" to personRef)).asExecute)

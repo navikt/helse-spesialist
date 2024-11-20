@@ -23,8 +23,8 @@ class PeriodehistorikkApiDao(
             (
                 SELECT ph.id
                 FROM periodehistorikk ph
-                JOIN behandling svg ON generasjon_id = unik_id
-                WHERE svg.utbetaling_id = :utbetaling_id
+                JOIN behandling b ON generasjon_id = unik_id
+                WHERE b.utbetaling_id = :utbetaling_id
             )
             SELECT id, type, timestamp, json, ident, dialog_ref, utbetaling_id, generasjon_id
             FROM periodehistorikk

@@ -178,9 +178,9 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
     internal fun førsteKjenteDag(fødselsnummer: String): LocalDate {
         return asSQL(
             """
-            select min(svg.fom) as foersteFom
-            from behandling svg
-            join vedtak v on svg.vedtaksperiode_id = v.vedtaksperiode_id
+            select min(b.fom) as foersteFom
+            from behandling b
+            join vedtak v on b.vedtaksperiode_id = v.vedtaksperiode_id
             join person p on p.id = v.person_ref
             where p.fødselsnummer = :fodselsnummer
             """,
