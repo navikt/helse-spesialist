@@ -215,7 +215,7 @@ data class LagtPaVent(
     override val dialogRef: Int?,
     val arsaker: List<String>,
     val frist: LocalDate?,
-    val notatTekst: String?,
+    val notattekst: String?,
     val kommentarer: List<Kommentar>,
 ) : Historikkinnslag
 
@@ -545,7 +545,7 @@ data class BeregnetPeriode(
                             dialogRef = it.dialogRef,
                             arsaker = påVentÅrsaker,
                             frist = frist,
-                            notatTekst = notattekst,
+                            notattekst = notattekst,
                             kommentarer =
                                 notatDao.finnKommentarer(it.dialogRef!!.toLong()).map { kommentar ->
                                     Kommentar(

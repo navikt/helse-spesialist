@@ -368,7 +368,7 @@ type LagtPaVent implements Historikkinnslag {
     frist: LocalDate
     id: Int!
     kommentarer: [Kommentar!]!
-    notatTekst: String
+    notattekst: String
     saksbehandlerIdent: String
     timestamp: LocalDateTime!
     type: PeriodehistorikkType!
