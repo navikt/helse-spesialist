@@ -10,9 +10,14 @@ import no.nav.helse.spesialist.api.graphql.schema.Personinfo
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.intellij.lang.annotations.Language
+import org.slf4j.LoggerFactory
 import javax.sql.DataSource
 
 class SnapshotApiDao(private val dataSource: DataSource) {
+    private companion object {
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+    }
+
     fun hentSnapshotMedMetadata(fødselsnummer: String): Pair<Personinfo, GraphQLPerson>? =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
@@ -56,7 +61,11 @@ class SnapshotApiDao(private val dataSource: DataSource) {
             if (versjon > tx.finnGlobalVersjon()) {
                 tx.oppdaterGlobalVersjon(versjon)
             }
-            tx.lagre(personRef, objectMapper.writeValueAsString(snapshot), versjon)
+            val snapshotJson = objectMapper.writeValueAsString(snapshot)
+            if (!snapshotJson.contains(fødselsnummer)) {
+                sikkerLogg.warn("Henter snapshot for fnr $fødselsnummer, mottar snapshot: $snapshotJson")
+            }
+            tx.lagre(personRef, snapshotJson, versjon)
         }
     }
 }
