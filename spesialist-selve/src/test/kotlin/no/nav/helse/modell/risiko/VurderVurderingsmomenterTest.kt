@@ -72,12 +72,14 @@ internal class VurderVurderingsmomenterTest {
         assertFalse(risikoCommand.execute(context))
         assertTrue(observer.behov.isNotEmpty())
 
-        assertEquals(Behov.Risikovurdering(
-            vedtaksperiodeId = testperson.vedtaksperiodeId1,
-            organisasjonsnummer = testperson.orgnummer,
-            førstegangsbehandling = true,
-            kunRefusjon = false
-        ), observer.behov.single())
+        assertEquals(
+            Behov.Risikovurdering(
+                vedtaksperiodeId = testperson.vedtaksperiodeId1,
+                organisasjonsnummer = testperson.orgnummer,
+                førstegangsbehandling = true,
+                kunRefusjon = false
+            ), observer.behov.single()
+        )
     }
 
     @Test
@@ -87,12 +89,14 @@ internal class VurderVurderingsmomenterTest {
         assertFalse(risikoCommand.resume(context))
         assertTrue(observer.behov.isNotEmpty())
 
-        assertEquals(Behov.Risikovurdering(
-            vedtaksperiodeId = testperson.vedtaksperiodeId1,
-            organisasjonsnummer = testperson.orgnummer,
-            førstegangsbehandling = true,
-            kunRefusjon = false
-        ), observer.behov.single())
+        assertEquals(
+            Behov.Risikovurdering(
+                vedtaksperiodeId = testperson.vedtaksperiodeId1,
+                organisasjonsnummer = testperson.orgnummer,
+                førstegangsbehandling = true,
+                kunRefusjon = false
+            ), observer.behov.single()
+        )
     }
 
     @Test
@@ -101,12 +105,14 @@ internal class VurderVurderingsmomenterTest {
 
         assertFalse(risikoCommand().execute(context))
 
-        assertEquals(Behov.Risikovurdering(
-            vedtaksperiodeId = testperson.vedtaksperiodeId1,
-            organisasjonsnummer = testperson.orgnummer,
-            førstegangsbehandling = true,
-            kunRefusjon = true
-        ), observer.behov.single())
+        assertEquals(
+            Behov.Risikovurdering(
+                vedtaksperiodeId = testperson.vedtaksperiodeId1,
+                organisasjonsnummer = testperson.orgnummer,
+                førstegangsbehandling = true,
+                kunRefusjon = true
+            ), observer.behov.single()
+        )
     }
 
     @Test
@@ -115,12 +121,14 @@ internal class VurderVurderingsmomenterTest {
 
         assertFalse(risikoCommand().execute(context))
 
-        assertEquals(Behov.Risikovurdering(
-            vedtaksperiodeId = testperson.vedtaksperiodeId1,
-            organisasjonsnummer = testperson.orgnummer,
-            førstegangsbehandling = true,
-            kunRefusjon = false
-        ), observer.behov.single())
+        assertEquals(
+            Behov.Risikovurdering(
+                vedtaksperiodeId = testperson.vedtaksperiodeId1,
+                organisasjonsnummer = testperson.orgnummer,
+                førstegangsbehandling = true,
+                kunRefusjon = false
+            ), observer.behov.single()
+        )
     }
 
     @Test
@@ -132,26 +140,25 @@ internal class VurderVurderingsmomenterTest {
     }
 
     @Test
-    fun `Om vi har fått løsning på en rett vedtaksperiode lagres den`() {
-        every { risikovurderingRepository.lagre(testperson.vedtaksperiodeId1, any(), any(), any(), any()) } returns
-            context.add(
-                Risikovurderingløsning(
-                    vedtaksperiodeId = testperson.vedtaksperiodeId1,
-                    opprettet = LocalDateTime.now(),
-                    kanGodkjennesAutomatisk = true,
-                    løsning =
-                        risikovurderingLøsning(
-                            funn =
-                                listOf(
-                                    Risikofunn(
-                                        kategori = listOf("test"),
-                                        beskrivelse = "test",
-                                        kreverSupersaksbehandler = false,
-                                    ),
-                                ),
+    fun `Om vi har fått løsning på rett vedtaksperiode lagres den`() {
+        every {
+            risikovurderingRepository.lagre(testperson.vedtaksperiodeId1, any(), any(), any(), any())
+        } returns context.add(
+            Risikovurderingløsning(
+                vedtaksperiodeId = testperson.vedtaksperiodeId1,
+                opprettet = LocalDateTime.now(),
+                kanGodkjennesAutomatisk = true,
+                løsning = risikovurderingLøsning(
+                    funn = listOf(
+                        Risikofunn(
+                            kategori = listOf("test"),
+                            beskrivelse = "test",
+                            kreverSupersaksbehandler = false,
                         ),
+                    ),
                 ),
-            )
+            ),
+        )
         val risikoCommand = risikoCommand()
         assertTrue(risikoCommand.execute(context))
         assertTrue(observer.behov.isEmpty())
@@ -166,28 +173,28 @@ internal class VurderVurderingsmomenterTest {
                 vedtaksperiodeId = enAnnenVedtaksperiodeId,
                 opprettet = LocalDateTime.now(),
                 kanGodkjennesAutomatisk = true,
-                løsning =
-                    risikovurderingLøsning(
-                        funn =
-                            listOf(
-                                Risikofunn(
-                                    kategori = listOf("test"),
-                                    beskrivelse = "test",
-                                    kreverSupersaksbehandler = false,
-                                ),
-                            ),
+                løsning = risikovurderingLøsning(
+                    funn = listOf(
+                        Risikofunn(
+                            kategori = listOf("test"),
+                            beskrivelse = "test",
+                            kreverSupersaksbehandler = false,
+                        ),
                     ),
+                ),
             ),
         )
         val risikoCommand = risikoCommand()
         risikoCommand.assertFalse()
         assertTrue(observer.behov.isNotEmpty())
-        assertEquals(Behov.Risikovurdering(
-            vedtaksperiodeId = testperson.vedtaksperiodeId1,
-            organisasjonsnummer = testperson.orgnummer,
-            førstegangsbehandling = true,
-            kunRefusjon = true
-        ), observer.behov.first())
+        assertEquals(
+            Behov.Risikovurdering(
+                vedtaksperiodeId = testperson.vedtaksperiodeId1,
+                organisasjonsnummer = testperson.orgnummer,
+                førstegangsbehandling = true,
+                kunRefusjon = true
+            ), observer.behov.first()
+        )
     }
 
     private fun VurderVurderingsmomenter.assertTrue() {
