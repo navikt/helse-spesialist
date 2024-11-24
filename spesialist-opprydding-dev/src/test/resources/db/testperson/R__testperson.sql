@@ -47,9 +47,8 @@ INSERT INTO vergemal(person_ref, har_vergemal, har_fremtidsfullmakter, har_fullm
 VALUES (${sequence_number}, false, false, false, now(), now());
 INSERT INTO gosysoppgaver(person_ref, antall, oppslag_feilet, opprettet)
 VALUES (${sequence_number}, 0, false, now());
-INSERT INTO risikovurdering_2021(id, vedtaksperiode_id, kan_godkjennes_automatisk, krever_supersaksbehandler, data,
-                                 opprettet)
-VALUES (${sequence_number}, '${vedtaksperiode_id}', false, false, '{}'::json, now());
+INSERT INTO risikovurdering_2021(id, vedtaksperiode_id, kan_godkjennes_automatisk, data, opprettet)
+VALUES (${sequence_number}, '${vedtaksperiode_id}', false, '{}'::json, now());
 INSERT INTO unnta_fra_automatisk_godkjenning
 VALUES (${fødselsnummer}, false, array[]::varchar[], now());
 INSERT INTO stans_automatisering
