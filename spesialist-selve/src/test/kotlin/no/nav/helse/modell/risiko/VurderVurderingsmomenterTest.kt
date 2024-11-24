@@ -134,8 +134,8 @@ internal class VurderVurderingsmomenterTest {
     @Test
     fun `Går videre hvis risikovurderingen for vedtaksperioden allerede er gjort`() {
         every { risikovurderingRepository.hentRisikovurdering(testperson.vedtaksperiodeId1) } returns mockk()
-        val risikoCommand = risikoCommand()
-        risikoCommand.assertTrue()
+        assertTrue(risikoCommand().resume(context))
+        assertTrue(risikoCommand().execute(context))
         assertTrue(observer.behov.isEmpty())
     }
 
@@ -184,27 +184,28 @@ internal class VurderVurderingsmomenterTest {
                 ),
             ),
         )
-        val risikoCommand = risikoCommand()
-        risikoCommand.assertFalse()
-        assertTrue(observer.behov.isNotEmpty())
+
+        assertFalse(risikoCommand().execute(context))
         assertEquals(
             Behov.Risikovurdering(
                 vedtaksperiodeId = testperson.vedtaksperiodeId1,
                 organisasjonsnummer = testperson.orgnummer,
                 førstegangsbehandling = true,
                 kunRefusjon = true
-            ), observer.behov.first()
+            ), observer.behov.single()
         )
-    }
 
-    private fun VurderVurderingsmomenter.assertTrue() {
-        assertTrue(resume(context))
-        assertTrue(execute(context))
-    }
+        observer.behov.clear()
 
-    private fun VurderVurderingsmomenter.assertFalse() {
-        assertFalse(resume(context))
-        assertFalse(execute(context))
+        assertFalse(risikoCommand().resume(context))
+        assertEquals(
+            Behov.Risikovurdering(
+                vedtaksperiodeId = testperson.vedtaksperiodeId1,
+                organisasjonsnummer = testperson.orgnummer,
+                førstegangsbehandling = true,
+                kunRefusjon = true
+            ), observer.behov.single()
+        )
     }
 
     private fun risikoCommand(
