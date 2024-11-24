@@ -8,6 +8,7 @@ import no.nav.helse.AvviksvurderingTestdata
 import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.HelseDao.Companion.single
+import no.nav.helse.HelseDao.Companion.update
 import no.nav.helse.Meldingssender
 import no.nav.helse.TestRapidHelpers.behov
 import no.nav.helse.TestRapidHelpers.hendelser
@@ -913,48 +914,39 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         kommentar: String? = null,
         begrunnelser: List<String> = emptyList(),
     ) {
-        fun oppgaveIdFor(vedtaksperiodeId: UUID): Long =
-            sessionOf(dataSource).use { session ->
-                @Language("PostgreSQL")
-                val query =
-                    "SELECT id FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?) ORDER BY id DESC LIMIT 1;"
-                requireNotNull(session.run(queryOf(query, vedtaksperiodeId).map { it.long(1) }.asSingle))
-            }
+        val session = sessionOf(dataSource)
+        fun oppgaveIdFor(vedtaksperiodeId: UUID): Long = asSQL(
+            "SELECT id FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId) ORDER BY id DESC LIMIT 1",
+            "vedtaksperiodeId" to vedtaksperiodeId
+        ).single(session) { it.long(1) }!!
 
-        fun godkjenningsbehovIdFor(vedtaksperiodeId: UUID): UUID =
-            sessionOf(dataSource).use { session ->
-                @Language("PostgreSQL")
-                val query =
-                    "SELECT id FROM hendelse h INNER JOIN vedtaksperiode_hendelse vh on h.id = vh.hendelse_ref WHERE vh.vedtaksperiode_id = ? AND h.type = 'GODKJENNING';"
-                requireNotNull(session.run(queryOf(query, vedtaksperiodeId).map { it.uuid("id") }.asSingle))
-            }
+        fun godkjenningsbehovIdFor(vedtaksperiodeId: UUID): UUID = asSQL(
+            "SELECT id FROM hendelse h INNER JOIN vedtaksperiode_hendelse vh on h.id = vh.hendelse_ref WHERE vh.vedtaksperiode_id = :vedtaksperiodeId AND h.type = 'GODKJENNING'",
+            "vedtaksperiodeId" to vedtaksperiodeId
+        ).single(session) { it.uuid("id") }!!
 
-        fun settOppgaveIAvventerSystem(oppgaveId: Long) {
-            @Language("PostgreSQL")
-            val query = "UPDATE oppgave SET status = 'AvventerSystem' WHERE id = ?"
-            sessionOf(dataSource).use {
-                it.run(queryOf(query, oppgaveId).asUpdate)
-            }
-        }
+        fun settOppgaveIAvventerSystem(oppgaveId: Long) = asSQL(
+            "UPDATE oppgave SET status = 'AvventerSystem' WHERE id = :oppgaveId", "oppgaveId" to oppgaveId
+        ).update(session)
 
         val oppgaveId = oppgaveIdFor(vedtaksperiodeId)
         val godkjenningsbehovId = godkjenningsbehovIdFor(vedtaksperiodeId)
         settOppgaveIAvventerSystem(oppgaveId)
-        sisteMeldingId =
-            meldingssender.sendSaksbehandlerløsning(
-                fødselsnummer,
-                oppgaveId = oppgaveId,
-                godkjenningsbehovId = godkjenningsbehovId,
-                godkjent = godkjent,
-                begrunnelser = begrunnelser,
-                kommentar = kommentar,
-            )
+        sisteMeldingId = meldingssender.sendSaksbehandlerløsning(
+            fødselsnummer,
+            oppgaveId = oppgaveId,
+            godkjenningsbehovId = godkjenningsbehovId,
+            godkjent = godkjent,
+            begrunnelser = begrunnelser,
+            kommentar = kommentar,
+        )
         if (godkjent) {
             assertUtgåendeMelding("vedtaksperiode_godkjent")
         } else {
             assertUtgåendeMelding("vedtaksperiode_avvist")
         }
         assertUtgåendeBehovløsning("Godkjenning")
+        session.close()
     }
 
     protected fun håndterAvsluttetMedVedtak(
