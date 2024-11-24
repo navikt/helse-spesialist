@@ -101,7 +101,8 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         val spleisBehandlingId = UUID.randomUUID()
         spleisOppretterNyBehandling(spleisBehandlingId = spleisBehandlingId)
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
+        håndterAktivitetsloggNyAktivitet(varselkoder = listOf("TESTKODE_42"))
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(kanGodkjennesAutomatisk = true)
         håndterSaksbehandlerløsning()
         håndterVedtakFattet(spleisBehandlingId = spleisBehandlingId)
         håndterAktivitetsloggNyAktivitet(varselkoder = listOf("RV_IM_1"))
@@ -125,7 +126,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
                     """
                     SELECT COUNT(1) FROM behandling b 
                     INNER JOIN selve_varsel sv on b.id = sv.generasjon_ref 
-                    WHERE b.vedtaksperiode_id = ? AND utbetaling_id = ?
+                    WHERE b.vedtaksperiode_id = ? AND utbetaling_id = ? AND sv.status = 'AKTIV'
                     """
                 session.run(queryOf(query, vedtaksperiodeId, utbetalingId).map { it.int(1) }.asSingle)
             }

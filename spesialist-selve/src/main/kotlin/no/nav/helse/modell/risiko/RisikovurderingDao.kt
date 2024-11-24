@@ -21,33 +21,31 @@ internal class RisikovurderingDao(session: Session) : RisikovurderingRepository,
         ).singleOrNull { it.boolean("kan_godkjennes_automatisk") }
             ?.let(Risikovurdering::restore)
 
-    override fun kreverSupersaksbehandler(vedtaksperiodeId: UUID) =
+    override fun måTilManuell(vedtaksperiodeId: UUID) =
         asSQL(
             """
-            SELECT krever_supersaksbehandler
+            SELECT kan_godkjennes_automatisk
             FROM risikovurdering_2021
             WHERE vedtaksperiode_id = :vedtaksperiodeId
             ORDER BY id DESC
             LIMIT 1
             """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
-        ).singleOrNull { it.boolean("krever_supersaksbehandler") } ?: false
+        ).singleOrNull { !it.boolean("kan_godkjennes_automatisk") } ?: true
 
     override fun lagre(
         vedtaksperiodeId: UUID,
         kanGodkjennesAutomatisk: Boolean,
-        kreverSupersaksbehandler: Boolean,
         data: JsonNode,
         opprettet: LocalDateTime,
     ) {
         asSQL(
             """
-            INSERT INTO risikovurdering_2021 (vedtaksperiode_id, kan_godkjennes_automatisk, krever_supersaksbehandler, data, opprettet)
-            VALUES (:vedtaksperiodeId, :kanGodkjennesAutomatisk, :kreverSupersaksbehandler, CAST (:data AS JSON), :opprettet);
+            INSERT INTO risikovurdering_2021 (vedtaksperiode_id, kan_godkjennes_automatisk, data, opprettet)
+            VALUES (:vedtaksperiodeId, :kanGodkjennesAutomatisk, CAST (:data AS JSON), :opprettet);
             """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
             "kanGodkjennesAutomatisk" to kanGodkjennesAutomatisk,
-            "kreverSupersaksbehandler" to kreverSupersaksbehandler,
             "data" to objectMapper.writeValueAsString(data),
             "opprettet" to opprettet,
         ).update()

@@ -48,10 +48,7 @@ internal class VurderVurderingsmomenter(
     private fun risikovurderingAlleredeGjort() = risikovurderingRepository.hentRisikovurdering(vedtaksperiodeId) != null
 
     private fun Risikovurderingløsning.leggTilVarsler() {
-        if (harArbeidsuførhetFunn()) {
-            sykefraværstilfelle.håndter(varselkode().nyttVarsel(vedtaksperiodeId))
-        }
-        if (harFaresignalerFunn()) {
+        if (!kanGodkjennesAutomatisk) {
             sykefraværstilfelle.håndter(SB_RV_1.nyttVarsel(vedtaksperiodeId))
         }
     }

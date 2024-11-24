@@ -135,10 +135,7 @@ internal class OpprettSaksbehandleroppgave(
         vedtaksperiodeId: UUID,
         utbetalingtype: Utbetalingtype,
     ) {
-        if (
-            utbetalingtype != Utbetalingtype.REVURDERING &&
-            risikovurderingRepository.kreverSupersaksbehandler(vedtaksperiodeId)
-        ) {
+        if (utbetalingtype != Utbetalingtype.REVURDERING && risikovurderingRepository.måTilManuell(vedtaksperiodeId)) {
             add(RISK_QA)
         }
     }

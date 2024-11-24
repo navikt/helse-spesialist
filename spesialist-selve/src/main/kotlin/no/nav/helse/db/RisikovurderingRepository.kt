@@ -8,12 +8,11 @@ import java.util.UUID
 interface RisikovurderingRepository {
     fun hentRisikovurdering(vedtaksperiodeId: UUID): Risikovurdering?
 
-    fun kreverSupersaksbehandler(vedtaksperiodeId: UUID): Boolean
+    fun måTilManuell(vedtaksperiodeId: UUID): Boolean
 
     fun lagre(
         vedtaksperiodeId: UUID,
         kanGodkjennesAutomatisk: Boolean,
-        kreverSupersaksbehandler: Boolean,
         data: JsonNode,
         opprettet: LocalDateTime,
     )

@@ -154,12 +154,12 @@ internal class VurderVurderingsmomenterTest {
 
     @Test
     fun `Om vi har fått løsning på rett vedtaksperiode lagres den`() {
-        every { risikovurderingRepository.lagre(testperson.vedtaksperiodeId1, any(), any(), any(), any()) } just Runs
+        every { risikovurderingRepository.lagre(testperson.vedtaksperiodeId1, any(), any(), any()) } just Runs
         context.add(
             behovløsning(
                 funn = listOf(
                     Risikofunn(
-                        kategori = listOf("test"), beskrivelse = "test", kreverSupersaksbehandler = false
+                        kategori = listOf("test"), beskrivelse = "test"
                     )
                 )
             )
@@ -167,7 +167,7 @@ internal class VurderVurderingsmomenterTest {
         val risikoCommand = risikoCommand()
         assertTrue(risikoCommand.execute(context))
         assertTrue(observer.behov.isEmpty())
-        verify(exactly = 1) { risikovurderingRepository.lagre(testperson.vedtaksperiodeId1, any(), any(), any(), any()) }
+        verify(exactly = 1) { risikovurderingRepository.lagre(testperson.vedtaksperiodeId1, any(), any(), any()) }
     }
 
     @Test
@@ -180,7 +180,6 @@ internal class VurderVurderingsmomenterTest {
                     Risikofunn(
                         kategori = listOf("test"),
                         beskrivelse = "test",
-                        kreverSupersaksbehandler = false,
                     ),
                 )
             )
@@ -211,14 +210,13 @@ internal class VurderVurderingsmomenterTest {
 
     @Test
     fun `Lager varsel om risk-svaret tilsier det`() {
-        every { risikovurderingRepository.lagre(testperson.vedtaksperiodeId1, any(), any(), any(), any()) } just Runs
+        every { risikovurderingRepository.lagre(testperson.vedtaksperiodeId1, any(), any(), any()) } just Runs
         context.add(
             behovløsning(
                 kanGodkjennesAutomatisk = false, funn = listOf(
                     Risikofunn(
                         kategori = listOf("test"),
                         beskrivelse = "test",
-                        kreverSupersaksbehandler = true,
                     ),
                 )
             )

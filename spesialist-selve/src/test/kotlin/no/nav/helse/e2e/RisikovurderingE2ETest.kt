@@ -10,23 +10,13 @@ import org.junit.jupiter.api.Test
 
 internal class RisikovurderingE2ETest : AbstractE2ETest() {
 
-    private val funnSomKreverRiskTilgang = listOf(Risikofunn(
-        kategori = listOf("8-4"),
-        beskrivelse = "ny sjekk ikke ok",
-        kreverSupersaksbehandler = true
-    ))
-
-    private val funnSomAlleKanBehandle = listOf(Risikofunn(
-        kategori = listOf("8-4"),
-        beskrivelse = "8-4 ikke ok",
-        kreverSupersaksbehandler = false
-    ))
-
     @Test
     fun `oppretter oppgave av type RISK_QA`() {
+        val riskfunn = listOf(Risikofunn(kategori = emptyList(), beskrivelse = "et faresignal"))
+
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave(risikofunn = funnSomKreverRiskTilgang)
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(risikofunn = riskfunn)
         assertHarOppgaveegenskap(inspektør.oppgaveId(), RISK_QA)
     }
 
@@ -34,7 +24,8 @@ internal class RisikovurderingE2ETest : AbstractE2ETest() {
     fun `oppretter oppgave av type SØKNAD`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave(risikofunn = funnSomAlleKanBehandle)
+        håndterAktivitetsloggNyAktivitet(varselkoder = listOf("TESTKODE_42"))
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(kanGodkjennesAutomatisk = true)
         assertHarOppgaveegenskap(inspektør.oppgaveId(), SØKNAD)
         assertHarIkkeOppgaveegenskap(inspektør.oppgaveId(), RISK_QA)
     }

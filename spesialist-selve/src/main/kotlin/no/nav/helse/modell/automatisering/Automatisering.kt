@@ -248,7 +248,7 @@ internal class Automatisering(
     ): List<String> {
         val risikovurdering =
             risikovurderingRepository.hentRisikovurdering(vedtaksperiodeId)
-                ?: validering("Mangler vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning") { false }
+                ?: validering("Mangler risikovurdering") { false }
         val unntattFraAutomatisering =
             stansAutomatiskBehandlinghåndterer.sjekkOmAutomatiseringErStanset(
                 fødselsnummer,

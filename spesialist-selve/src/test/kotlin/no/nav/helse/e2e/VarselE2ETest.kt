@@ -12,8 +12,6 @@ import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
 import no.nav.helse.modell.varsel.Varselkode.SB_IK_1
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_1
-import no.nav.helse.modell.varsel.Varselkode.SB_RV_2
-import no.nav.helse.modell.varsel.Varselkode.SB_RV_3
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -24,10 +22,9 @@ internal class VarselE2ETest : AbstractE2ETest() {
     fun `ingen varsel`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(kanGodkjennesAutomatisk = true)
         assertIngenVarsel(SB_IK_1, VEDTAKSPERIODE_ID)
         assertIngenVarsel(SB_RV_1, VEDTAKSPERIODE_ID)
-        assertIngenVarsel(SB_RV_3, VEDTAKSPERIODE_ID)
         assertIngenVarsel(SB_EX_1, VEDTAKSPERIODE_ID)
         assertIngenVarsel(SB_EX_3, VEDTAKSPERIODE_ID)
     }
@@ -36,7 +33,10 @@ internal class VarselE2ETest : AbstractE2ETest() {
     fun `varsel om faresignaler ved risikovurdering`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave(risikofunn = listOf(Risikofunn(listOf("EN_KATEGORI"), "EN_BESKRIVELSE", false)))
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
+            risikofunn = listOf(Risikofunn(listOf("EN_KATEGORI"), "EN_BESKRIVELSE")),
+            kanGodkjennesAutomatisk = false
+        )
         assertVarsel(SB_RV_1, VEDTAKSPERIODE_ID, AKTIV)
     }
 
@@ -146,37 +146,6 @@ internal class VarselE2ETest : AbstractE2ETest() {
         håndterÅpneOppgaverløsning(oppslagFeilet = true)
         assertVarsel(SB_EX_3, VEDTAKSPERIODE_ID, AKTIV)
         assertIngenVarsel(SB_EX_1, VEDTAKSPERIODE_ID)
-    }
-
-    @Test
-    fun `varsel dersom teknisk feil ved sjekk av 8-4-knappetrykk`() {
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
-            risikofunn =
-                listOf(
-                    Risikofunn(
-                        listOf("8-4", "EN_ANNEN_KATEGORI"),
-                        "Klarte ikke gjøre automatisk 8-4-vurdering p.g.a. teknisk feil. Kan godkjennes hvis alt ser greit ut.",
-                        false,
-                    ),
-                ),
-        )
-        assertVarsel(SB_RV_3, VEDTAKSPERIODE_ID, AKTIV)
-    }
-
-    @Test
-    fun `varsel ved manuell stans av automatisk behandling - 8-4`() {
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
-            risikofunn =
-                listOf(
-                    Risikofunn(listOf("8-4", "EN_ANNEN_KATEGORI"), "EN_BESKRIVELSE", false),
-                ),
-        )
-        assertIngenVarsel(SB_RV_3, VEDTAKSPERIODE_ID)
-        assertVarsel(SB_RV_2, VEDTAKSPERIODE_ID, AKTIV)
     }
 
     private fun assertVarsel(

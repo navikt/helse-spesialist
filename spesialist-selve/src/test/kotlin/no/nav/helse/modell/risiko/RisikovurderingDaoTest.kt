@@ -2,14 +2,14 @@ package no.nav.helse.modell.risiko
 
 import DatabaseIntegrationTest
 import com.fasterxml.jackson.databind.JsonNode
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class RisikovurderingDaoTest : DatabaseIntegrationTest() {
 
@@ -21,14 +21,12 @@ internal class RisikovurderingDaoTest : DatabaseIntegrationTest() {
             vedtaksperiodeId = vedtaksperiodeId,
             opprettet = LocalDate.of(2020, 9, 22).atStartOfDay(),
             kanGodkjennesAutomatisk = false,
-            kreverSupersaksbehandler = false,
             data = data
         )
 
         risikovurdering(vedtaksperiodeId).first().assertEquals(
             forventetVedtaksperiodeId = vedtaksperiodeId,
             forventetKanGodkjennesAutomatisk = false,
-            forventetKreverSupersaksbehandler = false,
             forventetData = data,
             forventetOpprettet = LocalDate.of(2020, 9, 22).atStartOfDay()
         )
@@ -42,14 +40,12 @@ internal class RisikovurderingDaoTest : DatabaseIntegrationTest() {
             vedtaksperiodeId = vedtaksperiodeId,
             opprettet = LocalDate.of(2020, 9, 22).atStartOfDay(),
             kanGodkjennesAutomatisk = false,
-            kreverSupersaksbehandler = false,
             data = data
         )
         risikovurderingDao.lagre(
             vedtaksperiodeId = vedtaksperiodeId,
             opprettet = LocalDate.of(2020, 9, 23).atStartOfDay(),
             kanGodkjennesAutomatisk = false,
-            kreverSupersaksbehandler = false,
             data = data
         )
 
@@ -58,14 +54,12 @@ internal class RisikovurderingDaoTest : DatabaseIntegrationTest() {
             it.first().assertEquals(
                 forventetVedtaksperiodeId = vedtaksperiodeId,
                 forventetKanGodkjennesAutomatisk = false,
-                forventetKreverSupersaksbehandler = false,
                 forventetData = data,
                 forventetOpprettet = LocalDate.of(2020, 9, 23).atStartOfDay()
             )
             it[1].assertEquals(
                 forventetVedtaksperiodeId = vedtaksperiodeId,
                 forventetKanGodkjennesAutomatisk = false,
-                forventetKreverSupersaksbehandler = false,
                 forventetData = data,
                 forventetOpprettet = LocalDate.of(2020, 9, 22).atStartOfDay()
             )
@@ -80,7 +74,6 @@ internal class RisikovurderingDaoTest : DatabaseIntegrationTest() {
                 RisikovurderingAssertions(
                     vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                     kanGodkjennesAutomatisk = row.boolean("kan_godkjennes_automatisk"),
-                    kreverSupersaksbehandler = row.boolean("krever_supersaksbehandler"),
                     data = objectMapper.readTree(row.string("data")),
                     opprettet = row.localDateTime("opprettet")
                 )
@@ -90,20 +83,17 @@ internal class RisikovurderingDaoTest : DatabaseIntegrationTest() {
     private class RisikovurderingAssertions(
         private val vedtaksperiodeId: UUID,
         private val kanGodkjennesAutomatisk: Boolean,
-        private val kreverSupersaksbehandler: Boolean,
         private val data: JsonNode,
         private val opprettet: LocalDateTime
     ) {
         fun assertEquals(
             forventetVedtaksperiodeId: UUID,
             forventetKanGodkjennesAutomatisk: Boolean,
-            forventetKreverSupersaksbehandler: Boolean,
             forventetData: JsonNode,
             forventetOpprettet: LocalDateTime
         ) {
             assertEquals(forventetVedtaksperiodeId, vedtaksperiodeId)
             assertEquals(forventetKanGodkjennesAutomatisk, kanGodkjennesAutomatisk)
-            assertEquals(forventetKreverSupersaksbehandler, kreverSupersaksbehandler)
             assertEquals(forventetData, data)
             assertEquals(forventetOpprettet, opprettet)
         }

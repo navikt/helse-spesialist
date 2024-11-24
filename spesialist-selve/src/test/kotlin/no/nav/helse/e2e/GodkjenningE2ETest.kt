@@ -325,6 +325,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
         // simulerer at første periode omgjøres
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
+            kanGodkjennesAutomatisk = true,
             godkjenningsbehovTestdata = GodkjenningsbehovTestdata(
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØR,
@@ -357,6 +358,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
         // simulerer at første periode omgjøres
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
+            kanGodkjennesAutomatisk = true,
             godkjenningsbehovTestdata = GodkjenningsbehovTestdata(
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØR,

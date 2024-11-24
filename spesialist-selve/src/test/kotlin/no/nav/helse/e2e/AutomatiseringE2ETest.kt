@@ -37,22 +37,6 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `fatter ikke automatisk vedtak ved 8-4 ikke oppfylt`() {
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
-            risikofunn =
-                listOf(
-                    Risikofunn(kategori = listOf("8-4"), beskrivelse = "8-4 ikke ok", kreverSupersaksbehandler = false),
-                    Risikofunn(kategori = emptyList(), beskrivelse = "faresignaler ikke ok", kreverSupersaksbehandler = false),
-                ),
-            kanGodkjennesAutomatisk = false,
-        )
-        assertGodkjenningsbehovIkkeBesvart()
-        assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
-    }
-
-    @Test
     fun `fatter ikke automatisk vedtak ved åpne oppgaver i gosys`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
@@ -84,7 +68,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             kanGodkjennesAutomatisk = false,
             risikofunn =
                 listOf(
-                    Risikofunn(kategori = emptyList(), beskrivelse = "faresignaler ikke ok", kreverSupersaksbehandler = false),
+                    Risikofunn(kategori = emptyList(), beskrivelse = "faresignaler ikke ok"),
                 ),
         )
 
@@ -109,7 +93,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
                 ),
             risikofunn =
                 listOf(
-                    Risikofunn(kategori = emptyList(), beskrivelse = "faresignaler ikke ok", kreverSupersaksbehandler = false),
+                    Risikofunn(kategori = emptyList(), beskrivelse = "faresignaler ikke ok"),
                 ),
             kanGodkjennesAutomatisk = false,
             arbeidsgiverbeløp = 1000,

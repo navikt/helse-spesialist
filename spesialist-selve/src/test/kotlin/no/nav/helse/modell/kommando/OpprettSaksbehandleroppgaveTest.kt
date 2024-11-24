@@ -96,7 +96,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter risk QA`() {
-        every { risikovurderingRepository.kreverSupersaksbehandler(VEDTAKSPERIODE_ID) } returns true
+        every { risikovurderingRepository.måTilManuell(VEDTAKSPERIODE_ID) } returns true
         assertTrue(command.execute(context))
         assertForventedeEgenskaper(SØKNAD, RISK_QA, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING)
     }
@@ -241,7 +241,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `legger ikke til egenskap RISK_QA hvis oppgaven har egenskap REVURDERING`() {
-        every { risikovurderingRepository.kreverSupersaksbehandler(VEDTAKSPERIODE_ID) } returns true
+        every { risikovurderingRepository.måTilManuell(VEDTAKSPERIODE_ID) } returns true
         assertTrue(opprettSaksbehandlerOppgaveCommand(utbetalingtype = Utbetalingtype.REVURDERING).execute(context))
 
         assertForventedeEgenskaper(REVURDERING, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING)

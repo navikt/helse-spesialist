@@ -929,9 +929,15 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             "UPDATE oppgave SET status = 'AvventerSystem' WHERE id = :oppgaveId", "oppgaveId" to oppgaveId
         ).update(session)
 
+        fun markerVarslerSomGodkjent(oppgaveId: Long) = asSQL(
+            "UPDATE selve_varsel SET status = 'GODKJENT' WHERE generasjon_ref = (SELECT b.id FROM behandling b JOIN oppgave o ON b.unik_id = o.generasjon_ref WHERE o.id = :oppgaveId)",
+            "oppgaveId" to oppgaveId
+        ).update(session)
+
         val oppgaveId = oppgaveIdFor(vedtaksperiodeId)
         val godkjenningsbehovId = godkjenningsbehovIdFor(vedtaksperiodeId)
         settOppgaveIAvventerSystem(oppgaveId)
+        markerVarslerSomGodkjent(oppgaveId)
         sisteMeldingId = meldingssender.sendSaksbehandlerløsning(
             fødselsnummer,
             oppgaveId = oppgaveId,
@@ -1308,7 +1314,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         vararg forventedeEgenskaper: Egenskap,
     ) {
         val egenskaper = hentOppgaveegenskaper(oppgaveId)
-        assertTrue(egenskaper.containsAll(forventedeEgenskaper.toList()))
+        assertTrue(egenskaper.containsAll(forventedeEgenskaper.toList())) { "Forventet å finne ${forventedeEgenskaper.toSet()} i $egenskaper" }
     }
 
     protected fun assertHarIkkeOppgaveegenskap(
@@ -1316,7 +1322,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         vararg forventedeEgenskaper: Egenskap,
     ) {
         val egenskaper = hentOppgaveegenskaper(oppgaveId)
-        assertTrue(egenskaper.none { it in forventedeEgenskaper })
+        assertTrue(egenskaper.none { it in forventedeEgenskaper }) { "Forventet at oppgaven ikke hadde egenskapen(e) ${forventedeEgenskaper.toSet()}. Egenskaper: $egenskaper" }
     }
 
     private fun hentOppgaveegenskaper(oppgaveId: Long): Set<Egenskap> {

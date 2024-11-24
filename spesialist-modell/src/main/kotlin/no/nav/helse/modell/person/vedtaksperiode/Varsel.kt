@@ -110,8 +110,6 @@ class Varsel(
                 "RV_SI_3",
                 "RV_UT_23",
                 "RV_VV_8",
-                "SB_RV_2",
-                "SB_RV_3",
             )
 
         fun List<Varsel>.forhindrerAutomatisering() = any { it.status in listOf(VURDERT, AKTIV, AVVIST) }

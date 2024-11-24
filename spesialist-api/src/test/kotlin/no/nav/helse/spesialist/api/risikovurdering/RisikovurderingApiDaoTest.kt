@@ -20,7 +20,6 @@ internal class RisikovurderingApiDaoTest: DatabaseIntegrationTest() {
         assertEquals(1, risikovurdering.funn.size)
         assertEquals(1, risikovurdering.kontrollertOk.size)
         assertEquals("En beskrivelse", risikovurdering.funn.first()["beskrivelse"].asText())
-        assertEquals(listOf("En beskrivelse"), risikovurdering.arbeidsuførhetvurdering)
         assertEquals("En annen beskrivelse", risikovurdering.kontrollertOk.first()["beskrivelse"].asText())
         assertNotNull(risikovurdering.kontrollertOk.first()["kategori"])
     }
@@ -31,25 +30,23 @@ internal class RisikovurderingApiDaoTest: DatabaseIntegrationTest() {
         val data = """
             {
                 "funn": [{
-                    "kategori": ["8-4"],
-                    "beskrivelse": "8-4 ikke ok",
-                    "kreverSupersaksbehandler": false
+                    "kategori": [],
+                    "beskrivelse": "Liten bedrift (2 ansatte)"
                 }],
                 "kontrollertOk": [{
-                    "kategori": ["arbeid"],
-                    "beskrivelse": "jobb ok"
+                    "beskrivelse": "Eierandel i selskap (0 prosent)",
+                    "kategori": ["REL"]
                 }]
             }
         """
         risikovurdering(data = data)
         val risikovurdering = requireNotNull(risikovurderingApiDao.finnRisikovurderinger(FØDSELSNUMMER)[PERIODE.id])
         risikovurdering.also { dto ->
-            assertEquals(listOf("jobb ok"), dto.kontrollertOk.map { it["beskrivelse"].asText() })
-            assertEquals(listOf("arbeid"), dto.kontrollertOk.flatMap { it["kategori"].map(JsonNode::asText) })
+            assertEquals(listOf("Eierandel i selskap (0 prosent)"), dto.kontrollertOk.map { it["beskrivelse"].asText() })
+            assertEquals(listOf("REL"), dto.kontrollertOk.flatMap { it["kategori"].map(JsonNode::asText) })
 
-            assertEquals(listOf("8-4 ikke ok"), dto.funn.map { it["beskrivelse"].asText() })
-            assertEquals(listOf("8-4"), dto.funn.flatMap { it["kategori"].map(JsonNode::asText) })
-            assertEquals(false, dto.funn.first()["kreverSupersaksbehandler"].asBoolean())
+            assertEquals(listOf("Liten bedrift (2 ansatte)"), dto.funn.map { it["beskrivelse"].asText() })
+            assertEquals(emptyList<String>(), dto.funn.flatMap { it["kategori"].map(JsonNode::asText) })
         }
     }
 
@@ -66,8 +63,8 @@ internal class RisikovurderingApiDaoTest: DatabaseIntegrationTest() {
         )
         asSQL(
             """
-            INSERT INTO risikovurdering_2021 (vedtaksperiode_id, kan_godkjennes_automatisk, krever_supersaksbehandler, data)
-            VALUES (:vedtaksperiodeId, true, false, :data::json)
+            INSERT INTO risikovurdering_2021 (vedtaksperiode_id, kan_godkjennes_automatisk, data)
+            VALUES (:vedtaksperiodeId, true, :data::json)
             """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
             "data" to data
