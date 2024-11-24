@@ -1,6 +1,8 @@
 package no.nav.helse.modell.risiko
 
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.RisikovurderingRepository
@@ -30,6 +32,17 @@ internal class VurderVurderingsmomenterTest {
 
     private companion object {
         private val testperson = TestPerson()
+
+        private fun behovløsning(
+            vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
+            kanGodkjennesAutomatisk: Boolean = true,
+            funn: List<Risikofunn>
+        ) = Risikovurderingløsning(
+            vedtaksperiodeId = vedtaksperiodeId,
+            opprettet = LocalDateTime.now(),
+            kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
+            løsning = risikovurderingLøsning(funn = funn),
+        )
 
         private fun risikovurderingLøsning(funn: List<Risikofunn>) =
             objectMapper.readTree(
@@ -141,23 +154,15 @@ internal class VurderVurderingsmomenterTest {
 
     @Test
     fun `Om vi har fått løsning på rett vedtaksperiode lagres den`() {
-        every {
-            risikovurderingRepository.lagre(testperson.vedtaksperiodeId1, any(), any(), any(), any())
-        } returns context.add(
-            Risikovurderingløsning(
-                vedtaksperiodeId = testperson.vedtaksperiodeId1,
-                opprettet = LocalDateTime.now(),
-                kanGodkjennesAutomatisk = true,
-                løsning = risikovurderingLøsning(
-                    funn = listOf(
-                        Risikofunn(
-                            kategori = listOf("test"),
-                            beskrivelse = "test",
-                            kreverSupersaksbehandler = false,
-                        ),
-                    ),
-                ),
-            ),
+        every { risikovurderingRepository.lagre(testperson.vedtaksperiodeId1, any(), any(), any(), any()) } just Runs
+        context.add(
+            behovløsning(
+                funn = listOf(
+                    Risikofunn(
+                        kategori = listOf("test"), beskrivelse = "test", kreverSupersaksbehandler = false
+                    )
+                )
+            )
         )
         val risikoCommand = risikoCommand()
         assertTrue(risikoCommand.execute(context))
@@ -166,23 +171,19 @@ internal class VurderVurderingsmomenterTest {
     }
 
     @Test
-    fun `Om vi har fått løsning på en annen vedtaksperiode etterspør vi nytt behov`() {
+    fun `Om vi har fått løsning på en annen vedtaksperiode sendes det behov`() {
         val enAnnenVedtaksperiodeId = UUID.randomUUID()
         context.add(
-            Risikovurderingløsning(
+            behovløsning(
                 vedtaksperiodeId = enAnnenVedtaksperiodeId,
-                opprettet = LocalDateTime.now(),
-                kanGodkjennesAutomatisk = true,
-                løsning = risikovurderingLøsning(
-                    funn = listOf(
-                        Risikofunn(
-                            kategori = listOf("test"),
-                            beskrivelse = "test",
-                            kreverSupersaksbehandler = false,
-                        ),
+                funn = listOf(
+                    Risikofunn(
+                        kategori = listOf("test"),
+                        beskrivelse = "test",
+                        kreverSupersaksbehandler = false,
                     ),
-                ),
-            ),
+                )
+            )
         )
 
         assertFalse(risikoCommand().execute(context))
@@ -206,6 +207,26 @@ internal class VurderVurderingsmomenterTest {
                 kunRefusjon = true
             ), observer.behov.single()
         )
+    }
+
+    @Test
+    fun `Lager varsel om risk-svaret tilsier det`() {
+        every { risikovurderingRepository.lagre(testperson.vedtaksperiodeId1, any(), any(), any(), any()) } just Runs
+        context.add(
+            behovløsning(
+                kanGodkjennesAutomatisk = false, funn = listOf(
+                    Risikofunn(
+                        kategori = listOf("test"),
+                        beskrivelse = "test",
+                        kreverSupersaksbehandler = true,
+                    ),
+                )
+            )
+        )
+
+        risikoCommand().execute(context)
+
+        assertEquals(listOf("SB_RV_1"), generasjon.toDto().varsler.map { it.varselkode })
     }
 
     private fun risikoCommand(
