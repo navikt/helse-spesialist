@@ -27,25 +27,20 @@ class AvslagDao(queryRunner: QueryRunner) : QueryRunner by queryRunner {
         oppgaveId: Long,
         avslagsdata: Avslagsdata,
         saksbehandlerOid: UUID,
-    ) = asSQL(
-        """
-        SELECT v.vedtaksperiode_id, b.id AS generasjon_id
-        FROM vedtak v
-        INNER JOIN oppgave o on v.id = o.vedtak_ref
-        INNER JOIN behandling b ON b.unik_id = o.generasjon_ref
-        WHERE o.id = :oppgaveId 
-        """.trimIndent(),
-        "oppgaveId" to oppgaveId,
-    ).singleOrNull { Pair(it.uuid("vedtaksperiode_id"), it.long("generasjon_id")) }?.let { (vedtaksperiodeId, generasjonId) ->
-        lagreBegrunnelse(avslagsdata, saksbehandlerOid).let { begrunnelseId ->
-            asSQL(
-                """
-                INSERT INTO avslag (vedtaksperiode_id, begrunnelse_ref, generasjon_ref) VALUES (:vedtaksperiodeId, :begrunnelseId, :generasjonId)
-                """.trimIndent(),
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "begrunnelseId" to begrunnelseId,
-                "generasjonId" to generasjonId,
-            ).update()
+    ) = lagreBegrunnelse(avslagsdata, saksbehandlerOid).let { begrunnelseId ->
+        asSQL(
+            """
+            INSERT INTO avslag (vedtaksperiode_id, begrunnelse_ref, generasjon_ref)
+            SELECT v.vedtaksperiode_id, :begrunnelseId, b.id
+            FROM vedtak v
+            INNER JOIN oppgave o on v.id = o.vedtak_ref
+            INNER JOIN behandling b ON b.unik_id = o.generasjon_ref
+            WHERE o.id = :oppgaveId
+            """.trimIndent(),
+            "oppgaveId" to oppgaveId,
+            "begrunnelseId" to begrunnelseId,
+        ).update().also { affectedRows ->
+            check(affectedRows == 1) { "Insert av avslag feilet ($affectedRows rader ble insertet)" }
         }
     }
 
