@@ -143,7 +143,7 @@ internal class MeldingMediator(
         val harPerson = personDao.finnPersonMedFødselsnummer(fødselsnummer) != null
         if (!harPerson) {
             sikkerlogg.warn(
-                "Ignorerer melding med event_name: {}, for fødselsnummer: {}",
+                "Ignorerer melding med event_name: {}, person med fødselsnummer {} fins ikke i databasen",
                 eventName,
                 fødselsnummer,
             )
