@@ -14,7 +14,7 @@ import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.utbetaling.Refusjonstype.DELVIS_REFUSJON
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.Behandling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -58,7 +58,7 @@ internal class SaksbehandlerløsningTest {
             sykefraværstilfelle = Sykefraværstilfelle(
                 fødselsnummer = FNR,
                 skjæringstidspunkt = 1.januar,
-                gjeldendeGenerasjoner = listOf(Generasjon(randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar))
+                gjeldendeGenerasjoner = listOf(Behandling(randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar))
             ),
             godkjent = godkjent,
             godkjenttidspunkt = GODKJENTTIDSPUNKT,

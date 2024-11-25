@@ -12,12 +12,12 @@ import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
 import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForSpleisBehandling
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForVedtaksperiode
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnSisteGenerasjonUtenSpleisBehandlingId
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.harMedlemskapsvarsel
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.harÅpenGosysOppgave
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverSkjønnsfastsettelse
+import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.finnGenerasjonForSpleisBehandling
+import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.finnGenerasjonForVedtaksperiode
+import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.finnSisteGenerasjonUtenSpleisBehandlingId
+import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.harMedlemskapsvarsel
+import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.harÅpenGosysOppgave
+import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.kreverSkjønnsfastsettelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -29,14 +29,14 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class GenerasjonTest {
+internal class BehandlingTest {
     @Test
     fun `generasjon ligger før dato`() {
-        val generasjon = Generasjon(UUID.randomUUID(), UUID.randomUUID(), 1.januar, 31.januar, 1.januar)
-        assertTrue(generasjon.tilhører(31.januar))
-        assertTrue(generasjon.tilhører(1.februar))
-        assertFalse(generasjon.tilhører(1.januar))
-        assertFalse(generasjon.tilhører(31.desember(2017)))
+        val behandling = Behandling(UUID.randomUUID(), UUID.randomUUID(), 1.januar, 31.januar, 1.januar)
+        assertTrue(behandling.tilhører(31.januar))
+        assertTrue(behandling.tilhører(1.februar))
+        assertFalse(behandling.tilhører(1.januar))
+        assertFalse(behandling.tilhører(31.desember(2017)))
     }
 
     @Test
@@ -493,16 +493,16 @@ internal class GenerasjonTest {
         val skjæringstidspunkt = 1.januar
         val utbetalingId = UUID.randomUUID()
         val spleisBehandlingId = UUID.randomUUID()
-        val generasjon = Generasjon(generasjonId, vedtaksperiodeId, fom, tom, skjæringstidspunkt)
-        generasjon.håndterNyUtbetaling(utbetalingId)
+        val behandling = Behandling(generasjonId, vedtaksperiodeId, fom, tom, skjæringstidspunkt)
+        behandling.håndterNyUtbetaling(utbetalingId)
         val tags = listOf("tag 1")
-        generasjon.oppdaterBehandlingsinformasjon(tags, spleisBehandlingId, utbetalingId)
+        behandling.oppdaterBehandlingsinformasjon(tags, spleisBehandlingId, utbetalingId)
 
         val varselId = UUID.randomUUID()
         val opprettet = LocalDateTime.now()
         val varsel = Varsel(varselId, "SB_EX_1", opprettet, vedtaksperiodeId, AKTIV)
-        generasjon.håndterNyttVarsel(varsel)
-        val dto = generasjon.toDto()
+        behandling.håndterNyttVarsel(varsel)
+        val dto = behandling.toDto()
 
         assertEquals(
             GenerasjonDto(
@@ -525,10 +525,10 @@ internal class GenerasjonTest {
 
     @Test
     fun `generasjonTilstand toDto`() {
-        assertEquals(TilstandDto.VedtakFattet, Generasjon.VedtakFattet.toDto())
-        assertEquals(TilstandDto.VidereBehandlingAvklares, Generasjon.VidereBehandlingAvklares.toDto())
-        assertEquals(TilstandDto.AvsluttetUtenVedtak, Generasjon.AvsluttetUtenVedtak.toDto())
-        assertEquals(TilstandDto.AvsluttetUtenVedtakMedVarsler, Generasjon.AvsluttetUtenVedtakMedVarsler.toDto())
+        assertEquals(TilstandDto.VedtakFattet, Behandling.VedtakFattet.toDto())
+        assertEquals(TilstandDto.VidereBehandlingAvklares, Behandling.VidereBehandlingAvklares.toDto())
+        assertEquals(TilstandDto.AvsluttetUtenVedtak, Behandling.AvsluttetUtenVedtak.toDto())
+        assertEquals(TilstandDto.AvsluttetUtenVedtakMedVarsler, Behandling.AvsluttetUtenVedtakMedVarsler.toDto())
     }
 
     private fun generasjonMedVarsel(
@@ -536,7 +536,7 @@ internal class GenerasjonTest {
         tom: LocalDate = 31.januar,
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         varselkode: String = "SB_EX_1",
-    ): Generasjon =
+    ): Behandling =
         generasjon(vedtaksperiodeId = vedtaksperiodeId, fom = fom, tom = tom).also {
             it.håndterNyttVarsel(Varsel(UUID.randomUUID(), varselkode, LocalDateTime.now(), vedtaksperiodeId))
         }
@@ -548,7 +548,7 @@ internal class GenerasjonTest {
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
         skjæringstidspunkt: LocalDate = 1.januar,
-    ) = Generasjon(
+    ) = Behandling(
         id = generasjonId,
         vedtaksperiodeId = vedtaksperiodeId,
         spleisBehandlingId = spleisBehandlingId,
@@ -557,7 +557,7 @@ internal class GenerasjonTest {
         skjæringstidspunkt = skjæringstidspunkt,
     )
 
-    private fun Generasjon.assertVarsler(
+    private fun Behandling.assertVarsler(
         forventetAntall: Int,
         status: VarselStatusDto,
         varselkode: Varselkode,
@@ -565,7 +565,7 @@ internal class GenerasjonTest {
         this.assertVarsler(forventetAntall, status, varselkode.name)
     }
 
-    private fun Generasjon.assertVarsler(
+    private fun Behandling.assertVarsler(
         forventetAntall: Int,
         status: VarselStatusDto,
         varselkode: String,
@@ -576,7 +576,7 @@ internal class GenerasjonTest {
         assertEquals(forventetAntall, varsel.size)
     }
 
-    private fun Generasjon.assertUtbetalingId(utbetalingId: UUID?) {
+    private fun Behandling.assertUtbetalingId(utbetalingId: UUID?) {
         val dto = this.toDto()
         assertEquals(utbetalingId, dto.utbetalingId)
     }

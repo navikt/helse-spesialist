@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class PgGenerasjonDaoTest : DatabaseIntegrationTest() {
+internal class PgBehandlingDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `finner liste av unike vedtaksperiodeIder med fnr`() {
         val vedtaksperiodeId1 = UUID.randomUUID()

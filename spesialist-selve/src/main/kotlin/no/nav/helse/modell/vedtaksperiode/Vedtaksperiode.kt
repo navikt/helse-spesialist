@@ -11,9 +11,9 @@ import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtak.SaksbehandlerVurdering
 import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForSpleisBehandling
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnSisteGenerasjonUtenSpleisBehandlingId
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.logg
+import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.finnGenerasjonForSpleisBehandling
+import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.finnSisteGenerasjonUtenSpleisBehandlingId
+import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.logg
 import java.time.LocalDate
 import java.util.UUID
 
@@ -21,16 +21,15 @@ internal class Vedtaksperiode private constructor(
     private val vedtaksperiodeId: UUID,
     private val organisasjonsnummer: String,
     private var forkastet: Boolean,
-    generasjoner: List<Generasjon>,
+    behandlinger: List<Behandling>,
 ) {
-    private val generasjoner = generasjoner.toMutableList()
-    private val gjeldendeGenerasjon get() = generasjoner.last()
-    private val fom get() = gjeldendeGenerasjon.fom()
-    private val tom get() = gjeldendeGenerasjon.tom()
-    private val gjeldendeUtbetalingId get() = gjeldendeGenerasjon.utbetalingId
-    internal val gjeldendeSkjæringstidspunkt get() = gjeldendeGenerasjon.skjæringstidspunkt()
-    internal val gjeldendeBehandlingId get() = gjeldendeGenerasjon.spleisBehandlingId()
-    internal val gjeldendeGenerasjonId get() = gjeldendeGenerasjon.unikId()
+    private val behandlinger = behandlinger.toMutableList()
+    private val gjeldendeBehandling get() = behandlinger.last()
+    private val fom get() = gjeldendeBehandling.fom()
+    private val tom get() = gjeldendeBehandling.tom()
+    private val gjeldendeUtbetalingId get() = gjeldendeBehandling.utbetalingId
+    internal val gjeldendeSkjæringstidspunkt get() = gjeldendeBehandling.skjæringstidspunkt()
+    internal val gjeldendeGenerasjonId get() = gjeldendeBehandling.unikId()
 
     fun vedtaksperiodeId() = vedtaksperiodeId
 
@@ -41,7 +40,7 @@ internal class Vedtaksperiode private constructor(
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             forkastet = forkastet,
-            generasjoner = generasjoner.map { it.toDto() },
+            generasjoner = behandlinger.map { it.toDto() },
         )
 
     internal fun behandleTilbakedateringGodkjent(perioder: List<Periode>) {
@@ -50,36 +49,36 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun deaktiverVarselMedKode(varselkode: String) {
-        gjeldendeGenerasjon.deaktiverVarsel(varselkode)
+        gjeldendeBehandling.deaktiverVarsel(varselkode)
     }
 
     internal fun nyttGodkjenningsbehov(spleisVedtaksperioder: List<SpleisVedtaksperiode>) {
         if (forkastet) return
         val spleisVedtaksperiode = spleisVedtaksperioder.find { it.erRelevant(vedtaksperiodeId) } ?: return
-        gjeldendeGenerasjon.håndter(this, spleisVedtaksperiode)
+        gjeldendeBehandling.håndter(this, spleisVedtaksperiode)
     }
 
     internal fun nySpleisBehandling(spleisBehandling: SpleisBehandling) {
         if (forkastet || !spleisBehandling.erRelevantFor(vedtaksperiodeId) || finnes(spleisBehandling)) return
-        nyGenerasjon(gjeldendeGenerasjon.nySpleisBehandling(spleisBehandling))
+        nyGenerasjon(gjeldendeBehandling.nySpleisBehandling(spleisBehandling))
     }
 
     internal fun utbetalingForkastet(forkastetUtbetalingId: UUID) {
         if (forkastet) return
         val utbetalingId = gjeldendeUtbetalingId
         if (utbetalingId == null || gjeldendeUtbetalingId != forkastetUtbetalingId) return
-        gjeldendeGenerasjon.håndterForkastetUtbetaling(utbetalingId)
+        gjeldendeBehandling.håndterForkastetUtbetaling(utbetalingId)
     }
 
-    internal fun nyGenerasjon(generasjon: Generasjon) {
-        generasjoner.addLast(generasjon)
+    internal fun nyGenerasjon(behandling: Behandling) {
+        behandlinger.addLast(behandling)
     }
 
     internal fun vedtakFattet(spleisBehandlingId: UUID) {
         if (forkastet) return
         // Finn den generasjonen som ble avsluttet, det kan ha blitt opprettet nye generasjoner etter at vedtak_fattet
         // ble sendt ut
-        generasjoner.finnGenerasjonForSpleisBehandling(spleisBehandlingId)?.håndterVedtakFattet() ?: logg.error(
+        behandlinger.finnGenerasjonForSpleisBehandling(spleisBehandlingId)?.håndterVedtakFattet() ?: logg.error(
             "Fant ikke generasjon for {} som kan håndtere vedtak_fattet",
             kv("spleisBehandlingId", spleisBehandlingId),
         )
@@ -93,8 +92,8 @@ internal class Vedtaksperiode private constructor(
         val sykepengevedtakBuilder = SykepengevedtakBuilder()
 
         val relevantGenerasjon =
-            generasjoner.finnGenerasjonForSpleisBehandling(avsluttetUtenVedtak.spleisBehandlingId())
-                ?: generasjoner.finnSisteGenerasjonUtenSpleisBehandlingId().also {
+            behandlinger.finnGenerasjonForSpleisBehandling(avsluttetUtenVedtak.spleisBehandlingId())
+                ?: behandlinger.finnSisteGenerasjonUtenSpleisBehandlingId().also {
                     if (it != null) {
                         logg.info(
                             "Fant ikke generasjon basert på {}, velger siste generasjon der spleisBehandlingId er null {}",
@@ -127,7 +126,7 @@ internal class Vedtaksperiode private constructor(
     internal fun nyeVarsler(nyeVarsler: List<Varsel>) {
         val varsler = nyeVarsler.filter { it.erRelevantFor(vedtaksperiodeId) }
         if (forkastet || varsler.isEmpty()) return
-        varsler.forEach { gjeldendeGenerasjon.håndterNyttVarsel(it) }
+        varsler.forEach { gjeldendeBehandling.håndterNyttVarsel(it) }
     }
 
     internal fun mottaBehandlingsinformasjon(
@@ -136,16 +135,16 @@ internal class Vedtaksperiode private constructor(
         utbetalingId: UUID,
     ) {
         if (forkastet) return
-        gjeldendeGenerasjon.oppdaterBehandlingsinformasjon(tags, spleisBehandlingId, utbetalingId)
+        gjeldendeBehandling.oppdaterBehandlingsinformasjon(tags, spleisBehandlingId, utbetalingId)
     }
 
     internal fun nyUtbetaling(utbetalingId: UUID) {
         if (forkastet) return
-        gjeldendeGenerasjon.håndterNyUtbetaling(utbetalingId)
+        gjeldendeBehandling.håndterNyUtbetaling(utbetalingId)
     }
 
-    internal fun finnGenerasjon(spleisBehandlingId: UUID): Generasjon =
-        generasjoner.find { it.spleisBehandlingId() == spleisBehandlingId }
+    internal fun finnGenerasjon(spleisBehandlingId: UUID): Behandling =
+        behandlinger.find { it.spleisBehandlingId() == spleisBehandlingId }
             ?: throw IllegalArgumentException("Forventer at generasjon med spleisBehandlingId=$spleisBehandlingId finnes")
 
     internal fun byggVedtak(vedtakBuilder: SykepengevedtakBuilder) {
@@ -153,16 +152,16 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun finnes(spleisBehandling: SpleisBehandling): Boolean =
-        generasjoner.finnGenerasjonForSpleisBehandling(spleisBehandling.spleisBehandlingId) != null
+        behandlinger.finnGenerasjonForSpleisBehandling(spleisBehandling.spleisBehandlingId) != null
 
     companion object {
         fun nyVedtaksperiode(spleisBehandling: SpleisBehandling): Vedtaksperiode =
             Vedtaksperiode(
                 vedtaksperiodeId = spleisBehandling.vedtaksperiodeId,
                 organisasjonsnummer = spleisBehandling.organisasjonsnummer,
-                generasjoner =
+                behandlinger =
                     listOf(
-                        Generasjon(
+                        Behandling(
                             id = UUID.randomUUID(),
                             vedtaksperiodeId = spleisBehandling.vedtaksperiodeId,
                             spleisBehandlingId = spleisBehandling.spleisBehandlingId,
@@ -186,21 +185,21 @@ internal class Vedtaksperiode private constructor(
                 organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
                 forkastet = forkastet,
-                generasjoner = generasjoner.map { it.tilGenerasjon() },
+                behandlinger = generasjoner.map { it.tilGenerasjon() },
             )
         }
 
         internal fun List<Vedtaksperiode>.finnGenerasjon(spleisBehandlingId: UUID): Vedtaksperiode? =
             find { vedtaksperiode ->
-                vedtaksperiode.generasjoner.any { it.spleisBehandlingId() == spleisBehandlingId }
+                vedtaksperiode.behandlinger.any { it.spleisBehandlingId() == spleisBehandlingId }
             }
 
         internal fun List<Vedtaksperiode>.relevanteFor(skjæringstidspunkt: LocalDate) =
             filter { it.gjeldendeSkjæringstidspunkt == skjæringstidspunkt }
-                .map { it.gjeldendeGenerasjon }
+                .map { it.gjeldendeBehandling }
 
-        private fun GenerasjonDto.tilGenerasjon(): Generasjon =
-            Generasjon.fraLagring(
+        private fun GenerasjonDto.tilGenerasjon(): Behandling =
+            Behandling.fraLagring(
                 id = id,
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingId = utbetalingId,
@@ -210,11 +209,11 @@ internal class Vedtaksperiode private constructor(
                 tom = tom,
                 tilstand =
                     when (tilstand) {
-                        TilstandDto.VedtakFattet -> Generasjon.VedtakFattet
-                        TilstandDto.VidereBehandlingAvklares -> Generasjon.VidereBehandlingAvklares
-                        TilstandDto.AvsluttetUtenVedtak -> Generasjon.AvsluttetUtenVedtak
-                        TilstandDto.AvsluttetUtenVedtakMedVarsler -> Generasjon.AvsluttetUtenVedtakMedVarsler
-                        TilstandDto.KlarTilBehandling -> Generasjon.KlarTilBehandling
+                        TilstandDto.VedtakFattet -> Behandling.VedtakFattet
+                        TilstandDto.VidereBehandlingAvklares -> Behandling.VidereBehandlingAvklares
+                        TilstandDto.AvsluttetUtenVedtak -> Behandling.AvsluttetUtenVedtak
+                        TilstandDto.AvsluttetUtenVedtakMedVarsler -> Behandling.AvsluttetUtenVedtakMedVarsler
+                        TilstandDto.KlarTilBehandling -> Behandling.KlarTilBehandling
                     },
                 tags = tags.toList(),
                 avslag =

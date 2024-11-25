@@ -9,7 +9,7 @@ import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.Behandling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -71,7 +71,7 @@ internal class LøsGodkjenningsbehovTest {
             sykefraværstilfelle = Sykefraværstilfelle(
                 fødselsnummer,
                 1.januar,
-                listOf(Generasjon(UUID.randomUUID(), UUID.randomUUID(), 1.januar, 31.januar, 1.januar))
+                listOf(Behandling(UUID.randomUUID(), UUID.randomUUID(), 1.januar, 31.januar, 1.januar))
             ),
             godkjent = GODKJENT,
             godkjenttidspunkt = TIDSPUNKT,

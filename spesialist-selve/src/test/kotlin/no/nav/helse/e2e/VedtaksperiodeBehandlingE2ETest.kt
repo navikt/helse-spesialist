@@ -3,13 +3,13 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.Behandling
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
+internal class VedtaksperiodeBehandlingE2ETest : AbstractE2ETest() {
     @Test
     fun `Oppretter første generasjon når vedtaksperioden blir opprettet`() {
         vedtaksløsningenMottarNySøknad()
@@ -153,7 +153,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
         val antall =
             sessionOf(dataSource).use { session ->
                 @Language("PostgreSQL")
-                val query = "SELECT COUNT(1) FROM behandling WHERE vedtaksperiode_id = ? AND tilstand = '${Generasjon.VedtakFattet.navn()}'"
+                val query = "SELECT COUNT(1) FROM behandling WHERE vedtaksperiode_id = ? AND tilstand = '${Behandling.VedtakFattet.navn()}'"
                 session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
             }
         assertEquals(

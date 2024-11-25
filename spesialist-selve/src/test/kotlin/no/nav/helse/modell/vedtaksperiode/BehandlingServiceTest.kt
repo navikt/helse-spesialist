@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-class GenerasjonServiceTest: DatabaseIntegrationTest() {
+class BehandlingServiceTest: DatabaseIntegrationTest() {
 
     private val generasjonService = GenerasjonService(dataSource)
 

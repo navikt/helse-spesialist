@@ -12,7 +12,7 @@ import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.Behandling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -288,7 +288,7 @@ internal class GodkjenningMediatorTest {
     private fun generasjon(
         id: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
-    ) = Generasjon(
+    ) = Behandling(
         id = id,
         vedtaksperiodeId = vedtaksperiodeId,
         fom = 1.januar,
@@ -296,7 +296,7 @@ internal class GodkjenningMediatorTest {
         skjæringstidspunkt = 1.januar,
     )
 
-    private fun godkjenning(generasjoner: List<Generasjon>) =
+    private fun godkjenning(generasjoner: List<Behandling>) =
         mediator.saksbehandlerUtbetaling(
             context = context,
             behov = godkjenningsbehov(fødselsnummer = fnr),

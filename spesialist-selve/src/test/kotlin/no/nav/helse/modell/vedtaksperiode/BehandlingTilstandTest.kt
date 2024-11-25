@@ -10,7 +10,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class GenerasjonTilstandTest {
+internal class BehandlingTilstandTest {
 
     @Test
     fun `Går fra MedVedtaksforslag til VidereBehandlingAvklares dersom utbetalingen blir forkastet`() {
@@ -142,15 +142,15 @@ internal class GenerasjonTilstandTest {
         generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtakMedVarsler)
     }
 
-    private fun Generasjon.assertTilstand(tilstandDto: TilstandDto) {
+    private fun Behandling.assertTilstand(tilstandDto: TilstandDto) {
         assertEquals(tilstandDto, toDto().tilstand)
     }
 
-    private fun Generasjon.assertAntallVarsler(antall: Int) {
+    private fun Behandling.assertAntallVarsler(antall: Int) {
         assertEquals(antall, toDto().varsler.size)
     }
 
-    private fun Generasjon.assertUtbetaling(utbetalingId: UUID?) {
+    private fun Behandling.assertUtbetaling(utbetalingId: UUID?) {
         assertEquals(utbetalingId, toDto().utbetalingId)
     }
 
@@ -160,7 +160,7 @@ internal class GenerasjonTilstandTest {
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
         skjæringstidspunkt: LocalDate = 1.januar,
-    ) = Generasjon(
+    ) = Behandling(
         id = generasjonId,
         vedtaksperiodeId = vedtaksperiodeId,
         fom = fom,

@@ -20,7 +20,7 @@ import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetaling.Utbetalingtype.REVURDERING
-import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.Behandling
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
@@ -176,7 +176,7 @@ internal class AutomatiseringTest {
     fun `vedtaksperiode med warnings er ikke automatiserbar`() {
         val gjeldendeGenerasjon = enGenerasjon()
         gjeldendeGenerasjon.håndterNyttVarsel(etVarsel())
-        blirManuellOppgave(generasjon = gjeldendeGenerasjon)
+        blirManuellOppgave(behandling = gjeldendeGenerasjon)
     }
 
     @Test
@@ -336,14 +336,14 @@ internal class AutomatiseringTest {
 
     private fun forsøkAutomatisering(
         periodetype: Periodetype = FORLENGELSE,
-        generasjoner: List<Generasjon> = listOf(Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)),
+        generasjoners: List<Behandling> = listOf(Behandling(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)),
         utbetaling: Utbetaling = enUtbetaling(),
     ) = automatisering.utfør(
         fødselsnummer,
         vedtaksperiodeId,
         utbetaling,
         periodetype,
-        sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, generasjoner),
+        sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, generasjoners),
         orgnummer,
     )
 
@@ -359,7 +359,7 @@ internal class AutomatiseringTest {
         skjæringstidspunkt: LocalDate = fom,
         vedtaksperiodeId: UUID = this.vedtaksperiodeId,
         generasjonId: UUID = UUID.randomUUID(),
-    ) = Generasjon(generasjonId, vedtaksperiodeId, fom, tom, skjæringstidspunkt)
+    ) = Behandling(generasjonId, vedtaksperiodeId, fom, tom, skjæringstidspunkt)
 
     private fun etVarsel(
         varselId: UUID = UUID.randomUUID(),
@@ -367,8 +367,8 @@ internal class AutomatiseringTest {
         varselkode: String = "RV_IM_1",
     ) = Varsel(varselId, varselkode, LocalDateTime.now(), vedtaksperiodeId)
 
-    private fun blirManuellOppgave(utbetaling: Utbetaling = enUtbetaling(), generasjon: Generasjon = enGenerasjon()) =
-        assertKanIkkeAutomatiseres(forsøkAutomatisering(utbetaling = utbetaling, generasjoner = listOf(generasjon)))
+    private fun blirManuellOppgave(utbetaling: Utbetaling = enUtbetaling(), behandling: Behandling = enGenerasjon()) =
+        assertKanIkkeAutomatiseres(forsøkAutomatisering(utbetaling = utbetaling, generasjoners = listOf(behandling)))
 
     private fun blirStikkprøve(utbetaling: Utbetaling = enUtbetaling(), periodetype: Periodetype = FØRSTEGANGSBEHANDLING) =
         assertStikkprøve(forsøkAutomatisering(utbetaling = utbetaling, periodetype = periodetype))
@@ -386,6 +386,6 @@ internal class AutomatiseringTest {
     private fun blirAutomatiskBehandlet(utbetaling: Utbetaling = enUtbetaling()) =
         assertKanAutomatiseres(forsøkAutomatisering(utbetaling = utbetaling))
 
-    private fun blirAutomatiskBehandletSpesialsak(utbetaling: Utbetaling = enUtbetaling(), generasjon: Generasjon = enGenerasjon()) =
-        assertSpesialsakSomKanAutomatiseres(forsøkAutomatisering(utbetaling = utbetaling, generasjoner = listOf(generasjon)))
+    private fun blirAutomatiskBehandletSpesialsak(utbetaling: Utbetaling = enUtbetaling(), behandling: Behandling = enGenerasjon()) =
+        assertSpesialsakSomKanAutomatiseres(forsøkAutomatisering(utbetaling = utbetaling, generasjoners = listOf(behandling)))
 }

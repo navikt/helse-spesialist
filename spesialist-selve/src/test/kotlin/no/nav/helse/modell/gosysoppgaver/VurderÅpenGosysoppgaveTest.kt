@@ -13,7 +13,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
-import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.Behandling
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -31,13 +31,13 @@ internal class VurderÅpenGosysoppgaveTest {
         private val VEDTAKPERIODE_ID_AG_2 = UUID.randomUUID()
     }
 
-    private val generasjonAg1 = generasjon(VEDTAKPERIODE_ID_AG_1)
-    private val generasjonAg2 = generasjon(VEDTAKPERIODE_ID_AG_2)
+    private val behandlingAg1 = generasjon(VEDTAKPERIODE_ID_AG_1)
+    private val behandlingAg2 = generasjon(VEDTAKPERIODE_ID_AG_2)
     private val skjæringstidspunkt = LocalDate.now().minusDays(17)
     private val sykefraværstilfelle = Sykefraværstilfelle(
         FNR,
         skjæringstidspunkt,
-        listOf(generasjonAg1, generasjonAg2)
+        listOf(behandlingAg1, behandlingAg2)
     )
     private val åpneGosysOppgaverRepository = mockk<ÅpneGosysOppgaverRepository>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
@@ -91,14 +91,14 @@ internal class VurderÅpenGosysoppgaveTest {
 
     @Test
     fun `Lagrer ikke varsel ved ingen åpne oppgaver og deaktiverer eventuelt eksisterende varsel`() {
-        generasjonAg1.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1))
-        generasjonAg1.inspektør {
+        behandlingAg1.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1))
+        behandlingAg1.inspektør {
             assertEquals(1, varsler.size)
         }
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
         assertTrue(command().resume(context))
         verify(exactly = 1) { åpneGosysOppgaverRepository.persisterÅpneGosysOppgaver(any()) }
-        generasjonAg1.inspektør {
+        behandlingAg1.inspektør {
             assertEquals(1, varsler.size)
             assertEquals("SB_EX_1", varsler.first().varselkode)
             assertEquals(VarselStatusDto.INAKTIV, varsler.first().status)
@@ -108,10 +108,10 @@ internal class VurderÅpenGosysoppgaveTest {
 
     @Test
     fun `Deaktiverer ikke varsel dersom oppgave er tildelt`() {
-        generasjonAg1.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1))
+        behandlingAg1.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1))
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
         assertTrue(command(harTildeltOppgave = true).resume(context))
-        generasjonAg1.inspektør {
+        behandlingAg1.inspektør {
             assertEquals(1, varsler.size)
             assertEquals("SB_EX_1", varsler.first().varselkode)
             assertEquals(VarselStatusDto.AKTIV, varsler.first().status)
@@ -131,7 +131,7 @@ internal class VurderÅpenGosysoppgaveTest {
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, null, true))
         assertTrue(command().resume(context))
         verify(exactly = 1) { åpneGosysOppgaverRepository.persisterÅpneGosysOppgaver(any()) }
-        generasjonAg1.inspektør {
+        behandlingAg1.inspektør {
             assertEquals(1, varsler.size)
             assertEquals("SB_EX_3", varsler.first().varselkode)
         }
@@ -139,7 +139,7 @@ internal class VurderÅpenGosysoppgaveTest {
 
     @Test
     fun `Legger ikke til egenskap for gosys dersom det er andre varsler på perioden`() {
-        generasjonAg1.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_4", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1))
+        behandlingAg1.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_4", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1))
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
         command().resume(context)
         verify(exactly = 0) { oppgaveService.leggTilGosysEgenskap(any()) }
@@ -147,7 +147,7 @@ internal class VurderÅpenGosysoppgaveTest {
 
     @Test
     fun `Legger ikke til egenskap for gosys dersom det er andre varsler på andre overlappende perioder`() {
-        generasjonAg2.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_4", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_2))
+        behandlingAg2.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_4", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_2))
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
         command().resume(context)
         verify(exactly = 0) { oppgaveService.leggTilGosysEgenskap(any()) }
@@ -157,23 +157,22 @@ internal class VurderÅpenGosysoppgaveTest {
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
         assertTrue(command(harTildeltOppgave).resume(context))
         verify(exactly = 1) { åpneGosysOppgaverRepository.persisterÅpneGosysOppgaver(any()) }
-        generasjonAg1.inspektør {
+        behandlingAg1.inspektør {
             assertEquals(1, varsler.size)
             assertEquals("SB_EX_1", varsler.first().varselkode)
         }
     }
 
     private fun generasjon(vedtaksperiodeId: UUID = UUID.randomUUID()) =
-        Generasjon(
+        Behandling(
             id = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
             fom = 1.januar,
             tom = 31.januar,
             skjæringstidspunkt = 1.januar,
         )
-
 }
 
-internal fun Generasjon.inspektør(block: GenerasjonDto.() -> Unit) {
+internal fun Behandling.inspektør(block: GenerasjonDto.() -> Unit) {
     this.toDto().block()
 }

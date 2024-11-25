@@ -33,7 +33,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.SENDT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.varsel.Varselkode
-import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.Behandling
 import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -1206,7 +1206,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         return sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query =
-                "SELECT true FROM behandling WHERE vedtaksperiode_id = ? AND tilstand = '${Generasjon.VedtakFattet.navn()}' ORDER BY id DESC"
+                "SELECT true FROM behandling WHERE vedtaksperiode_id = ? AND tilstand = '${Behandling.VedtakFattet.navn()}' ORDER BY id DESC"
             session.run(queryOf(query, vedtaksperiodeId).map { it.boolean(1) }.asSingle) ?: false
         }
     }

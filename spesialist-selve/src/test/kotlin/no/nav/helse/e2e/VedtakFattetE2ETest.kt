@@ -4,7 +4,7 @@ import AbstractE2ETest
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.Behandling
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -66,7 +66,7 @@ internal class VedtakFattetE2ETest : AbstractE2ETest() {
             WHERE vedtaksperiode_id = :vedtaksperiode_id AND tilstand = :tilstand::generasjon_tilstand
             """.trimIndent(),
             "vedtaksperiode_id" to vedtaksperiodeId,
-            "tilstand" to Generasjon.VedtakFattet.navn(),
+            "tilstand" to Behandling.VedtakFattet.navn(),
         )
         val behandlingenErFerdig =
             sessionOf(dataSource, strict = true).use { it.run(query.map { true }.asSingle) ?: false }

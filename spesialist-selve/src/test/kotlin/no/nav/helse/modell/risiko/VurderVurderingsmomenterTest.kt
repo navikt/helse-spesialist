@@ -15,7 +15,7 @@ import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
-import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.Behandling
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.test.TestPerson
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -56,9 +56,9 @@ internal class VurderVurderingsmomenterTest {
             ).path("@løsning").path("Risikovurdering")
     }
 
-    private val generasjon = Generasjon(UUID.randomUUID(), testperson.vedtaksperiodeId1, 1.januar, 31.januar, 1.januar)
+    private val behandling = Behandling(UUID.randomUUID(), testperson.vedtaksperiodeId1, 1.januar, 31.januar, 1.januar)
     private val sykefraværstilfelle =
-        Sykefraværstilfelle(testperson.fødselsnummer, 1.januar, listOf(generasjon))
+        Sykefraværstilfelle(testperson.fødselsnummer, 1.januar, listOf(behandling))
 
     private lateinit var context: CommandContext
 

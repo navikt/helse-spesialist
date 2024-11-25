@@ -15,7 +15,7 @@ import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.Behandling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -41,7 +41,7 @@ internal class VurderAutomatiskInnvilgelseTest {
     }
 
     private val automatisering = mockk<Automatisering>(relaxed = true)
-    private val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
+    private val behandling = Behandling(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
     private val automatiseringRepository = mockk<AutomatiseringRepository>(relaxed = true)
     private val command =
         VurderAutomatiskInnvilgelse(
@@ -53,7 +53,7 @@ internal class VurderAutomatiskInnvilgelseTest {
             sykefraværstilfelle = Sykefraværstilfelle(
                 fødselsnummer = fødselsnummer,
                 skjæringstidspunkt = 1.januar,
-                gjeldendeGenerasjoner = listOf(generasjon),
+                gjeldendeGenerasjoner = listOf(behandling),
             ),
             godkjenningsbehov = godkjenningsbehov(
                 id = hendelseId,
@@ -144,9 +144,9 @@ internal class VurderAutomatiskInnvilgelseTest {
     @Test
     fun `Godkjenner alle varsler ved automatisering som følge av spesialsak`() {
         every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatisereSpesialsak
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "RV_IT_1", LocalDateTime.now(), vedtaksperiodeId))
+        behandling.håndterNyttVarsel(Varsel(UUID.randomUUID(), "RV_IT_1", LocalDateTime.now(), vedtaksperiodeId))
         assertTrue(command.execute(context))
-        assertEquals(VarselStatusDto.GODKJENT, generasjon.toDto().varsler.single().status)
+        assertEquals(VarselStatusDto.GODKJENT, behandling.toDto().varsler.single().status)
     }
 
     @Test

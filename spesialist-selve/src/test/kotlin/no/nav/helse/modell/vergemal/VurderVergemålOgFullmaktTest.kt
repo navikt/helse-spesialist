@@ -12,7 +12,7 @@ import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.gosysoppgaver.inspektør
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
-import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.Behandling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -27,8 +27,8 @@ class VurderVergemålOgFullmaktTest {
     }
 
     private val vergemålRepository = mockk<VergemålRepository>(relaxed = true)
-    private val generasjon = Generasjon(UUID.randomUUID(), VEDTAKSPERIODE_ID, 1.januar, 31.januar, 1.januar)
-    private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(generasjon))
+    private val behandling = Behandling(UUID.randomUUID(), VEDTAKSPERIODE_ID, 1.januar, 31.januar, 1.januar)
+    private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(behandling))
 
     private val command =
         VurderVergemålOgFullmakt(
@@ -80,7 +80,7 @@ class VurderVergemålOgFullmaktTest {
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålRepository.lagre(FNR, ingenVergemål, false) }
         assertEquals(0, observer.hendelser.size)
-        generasjon.inspektør {
+        behandling.inspektør {
             assertEquals(0, varsler.size)
         }
     }
@@ -123,7 +123,7 @@ class VurderVergemålOgFullmaktTest {
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålRepository.lagre(FNR, harAlt, false) }
         assertEquals(0, observer.hendelser.size)
-        generasjon.inspektør {
+        behandling.inspektør {
             assertEquals(1, varsler.size)
         }
     }

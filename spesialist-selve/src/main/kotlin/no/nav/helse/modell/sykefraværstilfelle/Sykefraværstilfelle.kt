@@ -1,24 +1,24 @@
 package no.nav.helse.modell.sykefraværstilfelle
 
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
-import no.nav.helse.modell.vedtaksperiode.Generasjon
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.deaktiver
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.erTilbakedatert
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjonForVedtaksperiode
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.forhindrerAutomatisering
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.harKunGosysvarsel
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.harMedlemskapsvarsel
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.harÅpenGosysOppgave
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterGodkjent
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterNyttVarsel
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverSkjønnsfastsettelse
+import no.nav.helse.modell.vedtaksperiode.Behandling
+import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.deaktiver
+import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.erTilbakedatert
+import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.finnGenerasjonForVedtaksperiode
+import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.forhindrerAutomatisering
+import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.harKunGosysvarsel
+import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.harMedlemskapsvarsel
+import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.harÅpenGosysOppgave
+import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.håndterGodkjent
+import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.håndterNyttVarsel
+import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.kreverSkjønnsfastsettelse
 import java.time.LocalDate
 import java.util.UUID
 
 internal class Sykefraværstilfelle(
     private val fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
-    private val gjeldendeGenerasjoner: List<Generasjon>,
+    private val gjeldendeGenerasjoner: List<Behandling>,
 ) {
     init {
         check(gjeldendeGenerasjoner.isNotEmpty()) { "Kan ikke opprette et sykefraværstilfelle uten generasjoner" }
