@@ -110,7 +110,7 @@ class SykepengevedtakBuilder {
             )
     }
 
-    fun saksbehandlerVurderingData(vedtakBegrunnelse: VedtakBegrunnelse) =
+    fun vedtakBegrunnelseData(vedtakBegrunnelse: VedtakBegrunnelse) =
         apply {
             this.vedtakBegrunnelse = vedtakBegrunnelse.toDto()
         }

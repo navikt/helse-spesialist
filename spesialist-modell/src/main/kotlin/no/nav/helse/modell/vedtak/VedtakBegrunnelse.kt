@@ -7,7 +7,7 @@ data class VedtakBegrunnelse(
     val begrunnelse: String?,
 ) {
     internal fun byggVedtak(vedtakBuilder: SykepengevedtakBuilder) {
-        vedtakBuilder.saksbehandlerVurderingData(this)
+        vedtakBuilder.vedtakBegrunnelseData(this)
     }
 
     fun toDto() = VedtakBegrunnelseDto(utfall.toDto(), begrunnelse)

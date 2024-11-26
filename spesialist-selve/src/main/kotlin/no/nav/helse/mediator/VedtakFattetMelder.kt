@@ -163,17 +163,17 @@ internal class VedtakFattetMelder(
                         )
                     }
 
-                    val saksbehandlerVurdering = sykepengevedtak.vedtakBegrunnelse
-                    if (saksbehandlerVurdering != null) {
+                    val vedtakBegrunnelse = sykepengevedtak.vedtakBegrunnelse
+                    if (vedtakBegrunnelse != null) {
                         begrunnelser.addLast(
                             mapOf(
                                 "type" to
-                                    when (saksbehandlerVurdering.utfall) {
+                                    when (vedtakBegrunnelse.utfall) {
                                         VedtakBegrunnelseDto.UtfallDto.AVSLAG -> "Avslag"
                                         VedtakBegrunnelseDto.UtfallDto.DELVIS_INNVILGELSE -> "DelvisInnvilgelse"
                                         VedtakBegrunnelseDto.UtfallDto.INNVILGELSE -> "Innvilgelse"
                                     },
-                                "begrunnelse" to (saksbehandlerVurdering.begrunnelse ?: ""),
+                                "begrunnelse" to (vedtakBegrunnelse.begrunnelse ?: ""),
                                 "perioder" to
                                     listOf(
                                         mapOf(
