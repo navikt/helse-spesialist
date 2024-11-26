@@ -184,18 +184,11 @@ internal class SaksbehandlerMediator(
         }
 
         påVentDao.slettPåVent(oppgavereferanse)
-        avslag?.let {
-            if (it.handling == Avslagshandling.INVALIDER) {
-                vedtakBegrunnelseDao.invaliderVedtakBegrunnelse(oppgavereferanse)
-            } else {
-                vedtakBegrunnelseDao.lagreVedtakBegrunnelse(
-                    oppgaveId = oppgavereferanse,
-                    type = it.data!!.type.toVedtakBegrunnelseTypeFraDatabase(),
-                    begrunnelse = it.data!!.begrunnelse,
-                    saksbehandlerOid = saksbehandler.oid(),
-                )
-            }
-        }
+        håndterAvslag(
+            avslag = avslag,
+            oppgaveId = oppgavereferanse,
+            saksbehandlerOid = saksbehandler.oid(),
+        )
         return VedtakResultat.Ok(spleisBehandlingId)
     }
 
@@ -384,15 +377,29 @@ internal class SaksbehandlerMediator(
         saksbehandlerFraApi: SaksbehandlerFraApi,
         avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag,
     ) {
-        if (avslag.handling == Avslagshandling.INVALIDER) {
-            vedtakBegrunnelseDao.invaliderVedtakBegrunnelse(oppgaveId)
-        } else {
-            vedtakBegrunnelseDao.lagreVedtakBegrunnelse(
-                oppgaveId = oppgaveId,
-                type = avslag.data!!.type.toVedtakBegrunnelseTypeFraDatabase(),
-                begrunnelse = avslag.data!!.begrunnelse,
-                saksbehandlerOid = saksbehandlerFraApi.oid,
-            )
+        håndterAvslag(
+            avslag = avslag,
+            oppgaveId = oppgaveId,
+            saksbehandlerOid = saksbehandlerFraApi.oid,
+        )
+    }
+
+    private fun håndterAvslag(
+        avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag?,
+        oppgaveId: Long,
+        saksbehandlerOid: UUID,
+    ) {
+        if (avslag != null) {
+            if (avslag.handling == Avslagshandling.INVALIDER) {
+                vedtakBegrunnelseDao.invaliderVedtakBegrunnelse(oppgaveId = oppgaveId)
+            } else {
+                vedtakBegrunnelseDao.lagreVedtakBegrunnelse(
+                    oppgaveId = oppgaveId,
+                    type = avslag.data!!.type.toVedtakBegrunnelseTypeFraDatabase(),
+                    begrunnelse = avslag.data!!.begrunnelse,
+                    saksbehandlerOid = saksbehandlerOid,
+                )
+            }
         }
     }
 
@@ -426,18 +433,11 @@ internal class SaksbehandlerMediator(
         }
 
         påVentDao.slettPåVent(godkjenning.oppgavereferanse)
-        godkjenning.avslag?.let {
-            if (it.handling == Avslagshandling.INVALIDER) {
-                vedtakBegrunnelseDao.invaliderVedtakBegrunnelse(godkjenning.oppgavereferanse)
-            } else {
-                vedtakBegrunnelseDao.lagreVedtakBegrunnelse(
-                    oppgaveId = godkjenning.oppgavereferanse,
-                    type = it.data!!.type.toVedtakBegrunnelseTypeFraDatabase(),
-                    begrunnelse = it.data!!.begrunnelse,
-                    saksbehandlerOid = saksbehandler.oid(),
-                )
-            }
-        }
+        håndterAvslag(
+            avslag = godkjenning.avslag,
+            oppgaveId = godkjenning.oppgavereferanse,
+            saksbehandlerOid = saksbehandler.oid(),
+        )
     }
 
     override fun håndterTotrinnsvurdering(oppgavereferanse: Long) {
