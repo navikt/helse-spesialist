@@ -1,8 +1,6 @@
 package no.nav.helse.mediator
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.automatiseringsteller
-import no.nav.helse.automatiskAvvistÅrsakerTeller
 import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
@@ -12,6 +10,8 @@ import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.spesialist.api.abonnement.AutomatiskBehandlingPayload
 import no.nav.helse.spesialist.api.abonnement.AutomatiskBehandlingUtfall
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
+import no.nav.helse.tellAutomatisering
+import no.nav.helse.tellAvvistÅrsak
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
@@ -87,7 +87,7 @@ internal class GodkjenningMediator(private val opptegnelseRepository: Opptegnels
             payload = AutomatiskBehandlingPayload(behov.id, AutomatiskBehandlingUtfall.UTBETALT),
             type = OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV,
         )
-        automatiseringsteller.inc()
+        tellAutomatisering()
         sikkerLogg.info(
             "Automatisk godkjenning av vedtaksperiode ${behov.vedtaksperiodeId} for {}",
             keyValue("fødselsnummer", behov.fødselsnummer),
@@ -111,8 +111,8 @@ internal class GodkjenningMediator(private val opptegnelseRepository: Opptegnels
             payload = AutomatiskBehandlingPayload(behov.id, AutomatiskBehandlingUtfall.AVVIST),
             type = OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV,
         )
-        begrunnelser.forEach { automatiskAvvistÅrsakerTeller.labels(it).inc() }
-        automatiseringsteller.inc()
+        begrunnelser.forEach { tellAvvistÅrsak(it) }
+        tellAutomatisering()
         sikkerLogg.info("Automatisk avvisning av vedtaksperiode ${behov.vedtaksperiodeId} pga: $begrunnelser")
     }
 

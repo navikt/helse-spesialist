@@ -1,6 +1,14 @@
 package no.nav.helse.mediator
 
+// import no.nav.helse.duplikatsjekkTidsbruk
 import com.fasterxml.jackson.databind.JsonNode
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.River
+import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
+import io.micrometer.core.instrument.MeterRegistry
 import kotliquery.sessionOf
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.bootstrap.Environment
@@ -8,7 +16,6 @@ import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.db.VedtakDao
-import no.nav.helse.duplikatsjekkTidsbruk
 import no.nav.helse.kafka.AdressebeskyttelseEndretRiver
 import no.nav.helse.kafka.ArbeidsforholdLøsningRiver
 import no.nav.helse.kafka.ArbeidsgiverinformasjonLøsningRiver
@@ -64,16 +71,12 @@ import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.objectMapper
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
-import no.nav.helse.rapids_rivers.toUUID
+import no.nav.helse.registrerTidsbrukForDuplikatsjekk
 import no.nav.helse.spesialist.api.Personhåndterer
 import org.slf4j.LoggerFactory
 import java.util.UUID
 import javax.sql.DataSource
-import kotlin.time.DurationUnit.MILLISECONDS
+import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
 internal class MeldingMediator(
@@ -107,8 +110,7 @@ internal class MeldingMediator(
     private fun erDuplikat(id: UUID): Boolean {
         val (erDuplikat, tid) = measureTimedValue { meldingDuplikatkontrollDao.erBehandlet(id) }
         logg.info("Det tok ${tid.inWholeMilliseconds} ms å gjøre duplikatsjekk mot databasen")
-        duplikatsjekkTidsbruk.labels(erDuplikat.toString()).observe(tid.toDouble(MILLISECONDS))
-
+        registrerTidsbrukForDuplikatsjekk(erDuplikat, tid.toDouble(DurationUnit.MILLISECONDS))
         return erDuplikat
     }
 
@@ -117,13 +119,15 @@ internal class MeldingMediator(
             override fun onPacket(
                 packet: JsonMessage,
                 context: MessageContext,
+                metadata: MessageMetadata,
+                meterRegistry: MeterRegistry,
             ) {
                 val id = packet.id.toUUID()
                 if (erDuplikat(id)) {
                     logg.info("Ignorerer melding {} pga duplikatkontroll", id)
                     return
                 }
-                river.onPacket(packet, context)
+                river.onPacket(packet, context, metadata, meterRegistry)
             }
         }
 
@@ -200,7 +204,7 @@ internal class MeldingMediator(
             River(delegatedRapid)
                 .validate(river.validations())
                 .register(duplikatsjekkendeRiver(river))
-                .onSuccess { packet, _ ->
+                .onSuccess { packet, _, _, _ ->
                     logg.info(
                         "${river.name()} leste melding id=${packet.id}, event_name=${packet.eventName()}, meldingPasserteValidering=$meldingPasserteValidering",
                     )

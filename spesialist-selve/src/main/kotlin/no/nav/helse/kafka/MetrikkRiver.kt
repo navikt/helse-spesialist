@@ -1,18 +1,20 @@
 package no.nav.helse.kafka
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.River
-import no.nav.helse.rapids_rivers.asLocalDateTime
-import no.nav.helse.rapids_rivers.isMissingOrNull
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.River
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
+import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
+import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.registrerTidsbrukForBehov
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.temporal.ChronoUnit
 
 internal class MetrikkRiver : SpesialistRiver {
-    val log: Logger = LoggerFactory.getLogger("MetrikkRiver")
+    private val logg: Logger = LoggerFactory.getLogger("MetrikkRiver")
 
     override fun validations() =
         River.PacketValidation {
@@ -26,6 +28,8 @@ internal class MetrikkRiver : SpesialistRiver {
     override fun onPacket(
         packet: JsonMessage,
         context: MessageContext,
+        metadata: MessageMetadata,
+        meterRegistry: MeterRegistry,
     ) {
         val besvart = packet["@besvart"].asLocalDateTime()
         val opprettet = packet["system_participating_services"][0].let { it["time"].asLocalDateTime() }
@@ -41,7 +45,7 @@ internal class MetrikkRiver : SpesialistRiver {
                 ""
             }
 
-        log.info("Registrerer svartid for $behov som $delay ms.$godkjenningslog")
-        registrerTidsbrukForBehov.labels(behov.first()).observe(delay.toDouble())
+        logg.info("Registrerer svartid for $behov som $delay ms.$godkjenningslog")
+        registrerTidsbrukForBehov(behov.first(), delay.toDouble())
     }
 }
