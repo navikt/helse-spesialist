@@ -248,7 +248,7 @@ internal class PersonRepository(
 
     private fun TransactionalSession.slettAvslag(personRef: Int) {
         @Language("PostgreSQL")
-        val query = "DELETE FROM avslag WHERE vedtaksperiode_id IN (SELECT vedtaksperiode_id FROM vedtak WHERE person_ref = ?) RETURNING begrunnelse_ref"
+        val query = "DELETE FROM vedtak_begrunnelse WHERE vedtaksperiode_id IN (SELECT vedtaksperiode_id FROM vedtak WHERE person_ref = ?) RETURNING begrunnelse_ref"
         val begrunnelseRef =
             run(
                 queryOf(query, personRef)

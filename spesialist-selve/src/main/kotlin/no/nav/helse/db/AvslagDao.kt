@@ -30,7 +30,7 @@ class AvslagDao(queryRunner: QueryRunner) : QueryRunner by queryRunner {
     ) = lagreBegrunnelse(avslagsdata, saksbehandlerOid).let { begrunnelseId ->
         asSQL(
             """
-            INSERT INTO avslag (vedtaksperiode_id, begrunnelse_ref, generasjon_ref)
+            INSERT INTO vedtak_begrunnelse (vedtaksperiode_id, begrunnelse_ref, generasjon_ref)
             SELECT v.vedtaksperiode_id, :begrunnelseId, b.id
             FROM vedtak v
             INNER JOIN oppgave o on v.id = o.vedtak_ref
@@ -54,7 +54,7 @@ class AvslagDao(queryRunner: QueryRunner) : QueryRunner by queryRunner {
                 INNER JOIN behandling b ON o.generasjon_ref = b.unik_id
                 WHERE o.id = :oppgaveId
             )
-            UPDATE avslag a
+            UPDATE vedtak_begrunnelse a
             SET invalidert = true
             FROM t
             WHERE a.vedtaksperiode_id = t.vedtaksperiode_id AND a.generasjon_ref = t.id
@@ -67,7 +67,7 @@ class AvslagDao(queryRunner: QueryRunner) : QueryRunner by queryRunner {
         generasjonId: Long,
     ) = asSQL(
         """
-        SELECT begrunnelse_ref FROM avslag 
+        SELECT begrunnelse_ref FROM vedtak_begrunnelse 
         WHERE vedtaksperiode_id = :vedtaksperiodeId 
         AND generasjon_ref = :generasjonId 
         AND invalidert = false 
@@ -95,7 +95,7 @@ class AvslagDao(queryRunner: QueryRunner) : QueryRunner by queryRunner {
     ): SaksbehandlerVurderingDto? {
         return asSQL(
             """
-            SELECT begrunnelse_ref FROM avslag 
+            SELECT begrunnelse_ref FROM vedtak_begrunnelse 
             WHERE vedtaksperiode_id = :vedtaksperiodeId 
             AND generasjon_ref = :generasjonId 
             AND invalidert = false 
@@ -130,7 +130,7 @@ class AvslagDao(queryRunner: QueryRunner) : QueryRunner by queryRunner {
     ): Set<no.nav.helse.spesialist.api.graphql.schema.Avslag> =
         asSQL(
             """
-            SELECT b.type, b.tekst, a.opprettet, s.ident, a.invalidert FROM avslag a 
+            SELECT b.type, b.tekst, a.opprettet, s.ident, a.invalidert FROM vedtak_begrunnelse a 
             INNER JOIN behandling beh ON a.generasjon_ref = beh.id 
             INNER JOIN begrunnelse b ON b.id = a.begrunnelse_ref
             INNER JOIN saksbehandler s ON s.oid = b.saksbehandler_ref
