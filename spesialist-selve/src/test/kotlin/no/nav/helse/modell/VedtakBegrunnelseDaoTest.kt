@@ -4,9 +4,6 @@ import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.db.VedtakBegrunnelseDao
-import no.nav.helse.spesialist.api.graphql.mutation.Avslag
-import no.nav.helse.spesialist.api.graphql.mutation.Avslagsdata
-import no.nav.helse.spesialist.api.graphql.mutation.Avslagshandling
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -34,78 +31,62 @@ internal class VedtakBegrunnelseDaoTest : DatabaseIntegrationTest() {
 
         val generasjonId = finnGenerasjonId(vedtaksperiodeId)
 
-        val lagretAvslag = dao.finnVedtakBegrunnelse(vedtaksperiodeId, generasjonId)
-        assertNotNull(lagretAvslag)
+        val lagretVedtakBegrunnelse = dao.finnVedtakBegrunnelse(vedtaksperiodeId, generasjonId)
+        assertNotNull(lagretVedtakBegrunnelse)
     }
 
     @Test
-    fun `lagrer og finner avslag i transaksjon`() {
+    fun `lagrer og finner vedtaksbegrunnelse i transaksjon`() {
         val oid = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         nyPerson(vedtaksperiodeId = vedtaksperiodeId)
         nySaksbehandler(oid)
-        val avslag = Avslag(
-            handling = Avslagshandling.OPPRETT,
-            data = Avslagsdata(Avslagstype.AVSLAG, "En individuell begrunelse")
-        )
         dao.lagreVedtakBegrunnelse(
             oppgaveId = OPPGAVE_ID,
-            type = avslag.data!!.type.toString(),
-            begrunnelse = avslag.data!!.begrunnelse,
+            type = "AVSLAG",
+            begrunnelse = "En individuell begrunelse",
             saksbehandlerOid = oid
         )
 
         val generasjonId = finnGenerasjonId(vedtaksperiodeId)
 
-        val lagretAvslag = VedtakBegrunnelseDao(dataSource).finnVedtakBegrunnelse(vedtaksperiodeId, generasjonId)
-        assertNotNull(lagretAvslag)
+        val lagretVedtakBegrunnelse = VedtakBegrunnelseDao(dataSource).finnVedtakBegrunnelse(vedtaksperiodeId, generasjonId)
+        assertNotNull(lagretVedtakBegrunnelse)
     }
 
     @Test
-    fun `invaliderer avslag`() {
+    fun `invaliderer vedtaksbegrunnelse`() {
         val oid = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         nyPerson(vedtaksperiodeId = vedtaksperiodeId)
         nySaksbehandler(oid)
         val generasjonId = finnGenerasjonId(vedtaksperiodeId)
-        val avslag = Avslag(
-            handling = Avslagshandling.OPPRETT,
-            data = Avslagsdata(Avslagstype.AVSLAG, "En individuell begrunelse")
-        )
         dao.lagreVedtakBegrunnelse(
             oppgaveId = OPPGAVE_ID,
-            type = avslag.data!!.type.toString(),
-            begrunnelse = avslag.data!!.begrunnelse,
+            type = "AVSLAG",
+            begrunnelse = "En individuell begrunelse",
             saksbehandlerOid = oid
         )
-        dao.invaliderAvslag(OPPGAVE_ID)
-        val lagretAvslag = dao.finnVedtakBegrunnelse(VEDTAKSPERIODE, generasjonId)
-        assertNull(lagretAvslag)
+        dao.invaliderVedtakBegrunnelse(OPPGAVE_ID)
+        val lagretVedtakBegrunnelse = dao.finnVedtakBegrunnelse(VEDTAKSPERIODE, generasjonId)
+        assertNull(lagretVedtakBegrunnelse)
     }
 
     @Test
-    fun `finner alle avslag for periode`() {
+    fun `finner alle vedtaksbegrunnelser for periode`() {
         val oid = UUID.randomUUID()
         nyPerson()
         nySaksbehandler(oid)
-        val avslag = Avslag(
-            handling = Avslagshandling.OPPRETT,
-            data = Avslagsdata(Avslagstype.AVSLAG, "En individuell begrunelse")
-        )
-        val avslag2 = Avslag(
-            handling = Avslagshandling.OPPRETT,
-            data = Avslagsdata(Avslagstype.DELVIS_AVSLAG, "En individuell begrunelse delvis avslag retter skrivefeil")
-        )
         dao.lagreVedtakBegrunnelse(
             oppgaveId = OPPGAVE_ID,
-            type = avslag.data!!.type.toString(),
-            begrunnelse = avslag.data!!.begrunnelse,
+            type = "AVSLAG",
+            begrunnelse = "En individuell begrunelse",
             saksbehandlerOid = oid
         )
         dao.lagreVedtakBegrunnelse(
             oppgaveId = OPPGAVE_ID,
-            type = avslag2.data!!.type.toString(),
-            begrunnelse = avslag2.data!!.begrunnelse,
+            type = "DELVIS_AVSLAG",
+            begrunnelse = "En individuell begrunelse delvis avslag retter skrivefeil",
             saksbehandlerOid = oid
         )
 

@@ -45,7 +45,7 @@ class VedtakBegrunnelseDao(queryRunner: QueryRunner) : QueryRunner by queryRunne
         }
     }
 
-    internal fun invaliderAvslag(oppgaveId: Long) =
+    internal fun invaliderVedtakBegrunnelse(oppgaveId: Long) =
         asSQL(
             """
             WITH t as ( 

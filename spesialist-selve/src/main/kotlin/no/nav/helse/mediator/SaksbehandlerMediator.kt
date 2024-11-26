@@ -184,7 +184,7 @@ internal class SaksbehandlerMediator(
         påVentDao.slettPåVent(oppgavereferanse)
         avslag?.let {
             if (it.handling == Avslagshandling.INVALIDER) {
-                vedtakBegrunnelseDao.invaliderAvslag(oppgavereferanse)
+                vedtakBegrunnelseDao.invaliderVedtakBegrunnelse(oppgavereferanse)
             } else {
                 vedtakBegrunnelseDao.lagreVedtakBegrunnelse(
                     oppgaveId = oppgavereferanse,
@@ -367,7 +367,7 @@ internal class SaksbehandlerMediator(
         avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag,
     ) {
         if (avslag.handling == Avslagshandling.INVALIDER) {
-            vedtakBegrunnelseDao.invaliderAvslag(oppgaveId)
+            vedtakBegrunnelseDao.invaliderVedtakBegrunnelse(oppgaveId)
         } else {
             vedtakBegrunnelseDao.lagreVedtakBegrunnelse(
                 oppgaveId = oppgaveId,
@@ -410,7 +410,7 @@ internal class SaksbehandlerMediator(
         påVentDao.slettPåVent(godkjenning.oppgavereferanse)
         godkjenning.avslag?.let {
             if (it.handling == Avslagshandling.INVALIDER) {
-                vedtakBegrunnelseDao.invaliderAvslag(godkjenning.oppgavereferanse)
+                vedtakBegrunnelseDao.invaliderVedtakBegrunnelse(godkjenning.oppgavereferanse)
             } else {
                 vedtakBegrunnelseDao.lagreVedtakBegrunnelse(
                     oppgaveId = godkjenning.oppgavereferanse,
