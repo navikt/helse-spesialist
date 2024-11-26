@@ -155,4 +155,4 @@ INSERT INTO vilkarsgrunnlag_per_avviksvurdering(avviksvurdering_ref, vilkårsgru
 VALUES ('${avviksvurdering_unik_id}', gen_random_uuid());
 
 INSERT INTO begrunnelse(id, tekst, type, saksbehandler_ref) VALUES(${sequence_number} + 420, 'avslagtekst', 'AVSLAG', '${saksbehandler_oid}');
-INSERT INTO avslag(vedtaksperiode_id, begrunnelse_ref, generasjon_ref) VALUES ('${vedtaksperiode_id}', ${sequence_number} + 420, ${sequence_number})
+INSERT INTO vedtak_begrunnelse(vedtaksperiode_id, begrunnelse_ref, generasjon_ref) VALUES ('${vedtaksperiode_id}', ${sequence_number} + 420, ${sequence_number})
