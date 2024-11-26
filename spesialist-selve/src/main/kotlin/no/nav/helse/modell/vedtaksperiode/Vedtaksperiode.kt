@@ -234,10 +234,13 @@ internal class Vedtaksperiode private constructor(
                         }.toSet(),
                 saksbehandlerVurdering =
                     saksbehandlerVurdering?.let {
-                        when (it) {
-                            is SaksbehandlerVurderingDto.Avslag -> SaksbehandlerVurdering.Avslag(it.begrunnelse)
-                            is SaksbehandlerVurderingDto.DelvisInnvilgelse -> SaksbehandlerVurdering.DelvisInnvilgelse(it.begrunnelse)
-                            is SaksbehandlerVurderingDto.Innvilgelse -> SaksbehandlerVurdering.Innvilgelse(it.begrunnelse)
+                        when (it.vurdering) {
+                            SaksbehandlerVurderingDto.VurderingDto.AVSLAG -> SaksbehandlerVurdering.Avslag(it.begrunnelse)
+                            SaksbehandlerVurderingDto.VurderingDto.DELVIS_INNVILGELSE ->
+                                SaksbehandlerVurdering.DelvisInnvilgelse(
+                                    it.begrunnelse,
+                                )
+                            SaksbehandlerVurderingDto.VurderingDto.INNVILGELSE -> SaksbehandlerVurdering.Innvilgelse(it.begrunnelse)
                         }
                     },
             )

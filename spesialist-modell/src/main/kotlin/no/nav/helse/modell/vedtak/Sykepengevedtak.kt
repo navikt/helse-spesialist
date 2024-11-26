@@ -180,26 +180,23 @@ enum class AvslagstypeDto {
     DELVIS_AVSLAG,
 }
 
-sealed class SaksbehandlerVurderingDto(val vurdering: VurderingDto) {
-    abstract val begrunnelse: String?
-
-    data class Avslag(private val avslagsbegrunnelse: String) : SaksbehandlerVurderingDto(VurderingDto.AVSLAG) {
-        override val begrunnelse: String get() = avslagsbegrunnelse
-    }
-
-    data class DelvisInnvilgelse(private val delvisInnvilgelsebegrunnelse: String) : SaksbehandlerVurderingDto(
-        VurderingDto.DELVIS_INNVILGELSE,
-    ) {
-        override val begrunnelse: String get() = delvisInnvilgelsebegrunnelse
-    }
-
-    data class Innvilgelse(private val innvilgelsesbegrunnelse: String? = null) : SaksbehandlerVurderingDto(VurderingDto.INNVILGELSE) {
-        override val begrunnelse: String? get() = innvilgelsesbegrunnelse
-    }
-
+data class SaksbehandlerVurderingDto(
+    val vurdering: VurderingDto,
+    val begrunnelse: String?,
+) {
     enum class VurderingDto {
         AVSLAG,
         DELVIS_INNVILGELSE,
         INNVILGELSE,
+    }
+
+    companion object {
+        fun Innvilgelse(innvilgelsesbegrunnelse: String? = null) =
+            SaksbehandlerVurderingDto(VurderingDto.INNVILGELSE, innvilgelsesbegrunnelse)
+
+        fun Avslag(avslagsbegrunnelse: String?) = SaksbehandlerVurderingDto(VurderingDto.AVSLAG, avslagsbegrunnelse)
+
+        fun DelvisInnvilgelse(delvisInnvilgelsebegrunnelse: String?) =
+            SaksbehandlerVurderingDto(VurderingDto.DELVIS_INNVILGELSE, delvisInnvilgelsebegrunnelse)
     }
 }

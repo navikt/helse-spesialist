@@ -2,47 +2,28 @@ package no.nav.helse.modell.vedtak
 
 import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto.VurderingDto
 
-sealed class SaksbehandlerVurdering(private val vurdering: Vurdering) {
-    abstract val begrunnelse: String?
-
-    class Innvilgelse(private var innvilgelsesbegrunnelse: String? = null) : SaksbehandlerVurdering(Vurdering.INNVILGELSE) {
-        override val begrunnelse: String? get() = innvilgelsesbegrunnelse
-    }
-
-    class Avslag(private var avslagsbegrunnelse: String) : SaksbehandlerVurdering(Vurdering.AVSLAG) {
-        override val begrunnelse: String get() = avslagsbegrunnelse
-    }
-
-    class DelvisInnvilgelse(private var delvisInnvilgelsebegrunnelse: String) : SaksbehandlerVurdering(Vurdering.DELVIS_INNVILGELSE) {
-        override val begrunnelse: String get() = delvisInnvilgelsebegrunnelse
-    }
-
+data class SaksbehandlerVurdering(
+    private val vurdering: Vurdering,
+    val begrunnelse: String?,
+) {
     internal fun byggVedtak(vedtakBuilder: SykepengevedtakBuilder) {
         vedtakBuilder.saksbehandlerVurderingData(this)
     }
 
     fun toDto() =
-        when (this) {
-            is Avslag -> SaksbehandlerVurderingDto.Avslag(begrunnelse)
-            is DelvisInnvilgelse -> SaksbehandlerVurderingDto.DelvisInnvilgelse(begrunnelse)
-            is Innvilgelse -> SaksbehandlerVurderingDto.Innvilgelse(begrunnelse)
+        when (vurdering) {
+            Vurdering.AVSLAG -> SaksbehandlerVurderingDto.Avslag(begrunnelse)
+            Vurdering.DELVIS_INNVILGELSE -> SaksbehandlerVurderingDto.DelvisInnvilgelse(begrunnelse)
+            Vurdering.INNVILGELSE -> SaksbehandlerVurderingDto.Innvilgelse(begrunnelse)
         }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+    companion object {
+        fun Innvilgelse(innvilgelsesbegrunnelse: String? = null) = SaksbehandlerVurdering(Vurdering.INNVILGELSE, innvilgelsesbegrunnelse)
 
-        other as SaksbehandlerVurdering
-        if (vurdering != other.vurdering) return false
-        if (begrunnelse != other.begrunnelse) return false
+        fun Avslag(avslagsbegrunnelse: String?) = SaksbehandlerVurdering(Vurdering.AVSLAG, avslagsbegrunnelse)
 
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = vurdering.hashCode()
-        result = 31 * result + begrunnelse.hashCode()
-        return result
+        fun DelvisInnvilgelse(delvisInnvilgelsebegrunnelse: String?) =
+            SaksbehandlerVurdering(Vurdering.DELVIS_INNVILGELSE, delvisInnvilgelsebegrunnelse)
     }
 }
 

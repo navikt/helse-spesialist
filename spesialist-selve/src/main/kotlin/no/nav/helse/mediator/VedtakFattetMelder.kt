@@ -168,10 +168,10 @@ internal class VedtakFattetMelder(
                         begrunnelser.addLast(
                             mapOf(
                                 "type" to
-                                    when (saksbehandlerVurdering) {
-                                        is SaksbehandlerVurderingDto.Avslag -> "Avslag"
-                                        is SaksbehandlerVurderingDto.DelvisInnvilgelse -> "DelvisInnvilgelse"
-                                        is SaksbehandlerVurderingDto.Innvilgelse -> "Innvilgelse"
+                                    when (saksbehandlerVurdering.vurdering) {
+                                        SaksbehandlerVurderingDto.VurderingDto.AVSLAG -> "Avslag"
+                                        SaksbehandlerVurderingDto.VurderingDto.DELVIS_INNVILGELSE -> "DelvisInnvilgelse"
+                                        SaksbehandlerVurderingDto.VurderingDto.INNVILGELSE -> "Innvilgelse"
                                     },
                                 "begrunnelse" to (saksbehandlerVurdering.begrunnelse ?: ""),
                                 "perioder" to
