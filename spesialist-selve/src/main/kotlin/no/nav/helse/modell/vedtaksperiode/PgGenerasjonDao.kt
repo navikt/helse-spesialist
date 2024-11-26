@@ -3,11 +3,11 @@ package no.nav.helse.modell.vedtaksperiode
 import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.HelseDao.Companion.asSQLWithQuestionMarks
-import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.GenerasjonDao
 import no.nav.helse.db.MedDataSource
 import no.nav.helse.db.MedSession
 import no.nav.helse.db.QueryRunner
+import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import java.time.LocalDate
@@ -41,8 +41,8 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
                     tilstand = enumValueOf(row.string("tilstand")),
                     tags = row.array<String>("tags").toList(),
                     varsler = finnVarsler(generasjonRef),
-                    avslag = AvslagDao(queryRunner).finnAvslag(vedtaksperiodeId, generasjonRef),
-                    saksbehandlerVurdering = AvslagDao(queryRunner).finnVurdering(vedtaksperiodeId, generasjonRef),
+                    avslag = VedtakBegrunnelseDao(queryRunner).finnVedtakBegrunnelse(vedtaksperiodeId, generasjonRef),
+                    saksbehandlerVurdering = VedtakBegrunnelseDao(queryRunner).finnVurdering(vedtaksperiodeId, generasjonRef),
                 )
             }
     }

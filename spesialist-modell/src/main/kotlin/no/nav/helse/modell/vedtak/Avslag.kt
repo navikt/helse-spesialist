@@ -9,7 +9,7 @@ class Avslag(
     }
 
     fun toDto() =
-        AvslagDto(
+        VedtakBegrunnelseDto(
             type = type.toDto(),
             begrunnelse = begrunnelse,
         )

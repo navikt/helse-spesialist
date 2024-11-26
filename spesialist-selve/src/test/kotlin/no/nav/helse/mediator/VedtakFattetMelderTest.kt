@@ -3,7 +3,6 @@ package no.nav.helse.mediator
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.januar
-import no.nav.helse.modell.vedtak.AvslagDto
 import no.nav.helse.modell.vedtak.AvslagstypeDto
 import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingopplysningerDto
@@ -11,6 +10,7 @@ import no.nav.helse.modell.vedtak.Skjønnsfastsettingstype
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingsårsak
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtak.Sykepengevedtak
+import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -281,7 +281,7 @@ internal class VedtakFattetMelderTest {
                     ),
                 skjønnsfastsettingopplysninger = null,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                avslag = AvslagDto(AvslagstypeDto.DELVIS_AVSLAG, "En individuell begrunnelse"),
+                avslag = VedtakBegrunnelseDto(AvslagstypeDto.DELVIS_AVSLAG, "En individuell begrunnelse"),
                 saksbehandlerVurdering = SaksbehandlerVurderingDto.DelvisInnvilgelse("En individuell begrunnelse"),
         )
         vedtakFattetMelder.vedtakFattet(spleis)
@@ -509,7 +509,7 @@ internal class VedtakFattetMelderTest {
                         Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
                     ),
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                avslag = AvslagDto(AvslagstypeDto.AVSLAG, "En individuell begrunnelse"),
+                avslag = VedtakBegrunnelseDto(AvslagstypeDto.AVSLAG, "En individuell begrunnelse"),
                 saksbehandlerVurdering = SaksbehandlerVurderingDto.Avslag("En individuell begrunnelse")
             )
         vedtakFattetMelder.vedtakFattet(infotrygd)

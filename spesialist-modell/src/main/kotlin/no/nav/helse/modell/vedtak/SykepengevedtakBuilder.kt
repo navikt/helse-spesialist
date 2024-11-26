@@ -25,7 +25,7 @@ class SykepengevedtakBuilder {
     private var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta? = null
     private var skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlag? = null
     private var skjønnsfastsettingopplysninger: SkjønnsfastsettingopplysningerDto? = null
-    private var avslag: AvslagDto? = null
+    private var avslag: VedtakBegrunnelseDto? = null
     private var saksbehandlerVurdering: SaksbehandlerVurderingDto? = null // TODO: Endre denne til not null (lateinit) når avslag er erstattet av denne
     private val tags: MutableSet<String> = mutableSetOf()
     private val tagsForSykepengegrunnlagsfakta: MutableSet<String> = mutableSetOf()
@@ -121,7 +121,7 @@ class SykepengevedtakBuilder {
         begrunnelse: String,
     ) = apply {
         this.avslag =
-            AvslagDto(
+            VedtakBegrunnelseDto(
                 when (type) {
                     Avslagstype.AVSLAG -> AvslagstypeDto.AVSLAG
                     Avslagstype.DELVIS_AVSLAG -> AvslagstypeDto.DELVIS_AVSLAG

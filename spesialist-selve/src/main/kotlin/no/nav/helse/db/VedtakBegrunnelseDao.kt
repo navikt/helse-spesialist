@@ -1,33 +1,34 @@
 package no.nav.helse.db
 
 import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.modell.vedtak.AvslagDto
 import no.nav.helse.modell.vedtak.AvslagstypeDto
 import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto
-import no.nav.helse.spesialist.api.graphql.mutation.Avslagsdata
+import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto
 import java.util.UUID
 import javax.sql.DataSource
 
-class AvslagDao(queryRunner: QueryRunner) : QueryRunner by queryRunner {
+class VedtakBegrunnelseDao(queryRunner: QueryRunner) : QueryRunner by queryRunner {
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     private fun lagreBegrunnelse(
-        avslagsdata: Avslagsdata,
+        begrunnelse: String,
+        type: String,
         saksbehandlerOid: UUID,
     ) = asSQL(
         """
         INSERT INTO begrunnelse(tekst, type, saksbehandler_ref) VALUES (:tekst, :type, :saksbehandler_ref)
         """.trimIndent(),
-        "tekst" to avslagsdata.begrunnelse,
-        "type" to avslagsdata.type.toString(),
+        "tekst" to begrunnelse,
+        "type" to type,
         "saksbehandler_ref" to saksbehandlerOid,
     ).updateAndReturnGeneratedKey()
 
-    internal fun lagreAvslag(
+    internal fun lagreVedtakBegrunnelse(
         oppgaveId: Long,
-        avslagsdata: Avslagsdata,
+        type: String,
+        begrunnelse: String,
         saksbehandlerOid: UUID,
-    ) = lagreBegrunnelse(avslagsdata, saksbehandlerOid).let { begrunnelseId ->
+    ) = lagreBegrunnelse(begrunnelse, type, saksbehandlerOid).let { begrunnelseId ->
         asSQL(
             """
             INSERT INTO vedtak_begrunnelse (vedtaksperiode_id, begrunnelse_ref, generasjon_ref)
@@ -40,7 +41,7 @@ class AvslagDao(queryRunner: QueryRunner) : QueryRunner by queryRunner {
             "oppgaveId" to oppgaveId,
             "begrunnelseId" to begrunnelseId,
         ).update().also { affectedRows ->
-            check(affectedRows == 1) { "Insert av avslag feilet ($affectedRows rader ble insertet)" }
+            check(affectedRows == 1) { "Insert av vedtaksbegrunnelse feilet ($affectedRows rader ble insertet)" }
         }
     }
 
@@ -62,7 +63,7 @@ class AvslagDao(queryRunner: QueryRunner) : QueryRunner by queryRunner {
             "oppgaveId" to oppgaveId,
         ).update()
 
-    internal fun finnAvslag(
+    internal fun finnVedtakBegrunnelse(
         vedtaksperiodeId: UUID,
         generasjonId: Long,
     ) = asSQL(
@@ -82,8 +83,11 @@ class AvslagDao(queryRunner: QueryRunner) : QueryRunner by queryRunner {
                 SELECT type, tekst FROM begrunnelse WHERE id = :begrunnelseRef
                 """.trimIndent(),
                 "begrunnelseRef" to begrunnelseRef,
-            ).singleOrNull { avslag ->
-                AvslagDto(enumValueOf(avslag.string("type")), avslag.string("tekst"))
+            ).singleOrNull { vedtakBegrunnelse ->
+                VedtakBegrunnelseDto(
+                    type = enumValueOf(vedtakBegrunnelse.string("type")),
+                    begrunnelse = vedtakBegrunnelse.string("tekst"),
+                )
             }
         }
     }

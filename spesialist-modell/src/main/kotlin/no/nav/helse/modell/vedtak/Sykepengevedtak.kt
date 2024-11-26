@@ -122,7 +122,7 @@ sealed class Sykepengevedtak(
         val skjønnsfastsettingopplysninger: SkjønnsfastsettingopplysningerDto?,
         vedtakFattetTidspunkt: LocalDateTime,
         tags: Set<String>,
-        val avslag: AvslagDto?,
+        val avslag: VedtakBegrunnelseDto?,
         val saksbehandlerVurdering: SaksbehandlerVurderingDto?,
     ) : Sykepengevedtak(
             fødselsnummer,
@@ -173,7 +173,7 @@ data class SkjønnsfastsettingopplysningerDto(
     val skjønnsfastsettingsårsak: Skjønnsfastsettingsårsak,
 )
 
-data class AvslagDto(
+data class VedtakBegrunnelseDto(
     val type: AvslagstypeDto,
     val begrunnelse: String,
 )

@@ -3,13 +3,13 @@ package no.nav.helse.mediator
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.AnnulleringDao
-import no.nav.helse.db.AvslagDao
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
+import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.mediator.overstyring.Overstyringlagrer
 import no.nav.helse.mediator.overstyring.Saksbehandlingsmelder
@@ -113,7 +113,7 @@ internal class SaksbehandlerMediator(
     private val overstyringDao = OverstyringDao(dataSource)
     private val påVentDao = PåVentDao(dataSource)
     private val periodehistorikkDao: PeriodehistorikkDao = PgPeriodehistorikkDao(dataSource)
-    private val avslagDao = AvslagDao(dataSource)
+    private val vedtakBegrunnelseDao = VedtakBegrunnelseDao(dataSource)
     private val annulleringDao = AnnulleringDao(dataSource)
     private val dialogDao = PgDialogDao(dataSource)
     private val env = Environment()
@@ -184,9 +184,14 @@ internal class SaksbehandlerMediator(
         påVentDao.slettPåVent(oppgavereferanse)
         avslag?.let {
             if (it.handling == Avslagshandling.INVALIDER) {
-                avslagDao.invaliderAvslag(oppgavereferanse)
+                vedtakBegrunnelseDao.invaliderAvslag(oppgavereferanse)
             } else {
-                avslagDao.lagreAvslag(oppgavereferanse, it.data!!, saksbehandler.oid())
+                vedtakBegrunnelseDao.lagreVedtakBegrunnelse(
+                    oppgaveId = oppgavereferanse,
+                    type = it.data!!.type.toString(),
+                    begrunnelse = it.data!!.begrunnelse,
+                    saksbehandlerOid = saksbehandler.oid(),
+                )
             }
         }
         return VedtakResultat.Ok(spleisBehandlingId)
@@ -354,7 +359,7 @@ internal class SaksbehandlerMediator(
     override fun hentAvslag(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
-    ): Set<Avslag> = avslagDao.finnAlleAvslag(vedtaksperiodeId, utbetalingId)
+    ): Set<Avslag> = vedtakBegrunnelseDao.finnAlleAvslag(vedtaksperiodeId, utbetalingId)
 
     override fun håndterAvslag(
         oppgaveId: Long,
@@ -362,9 +367,14 @@ internal class SaksbehandlerMediator(
         avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag,
     ) {
         if (avslag.handling == Avslagshandling.INVALIDER) {
-            avslagDao.invaliderAvslag(oppgaveId)
+            vedtakBegrunnelseDao.invaliderAvslag(oppgaveId)
         } else {
-            avslagDao.lagreAvslag(oppgaveId, avslag.data!!, saksbehandlerFraApi.oid)
+            vedtakBegrunnelseDao.lagreVedtakBegrunnelse(
+                oppgaveId = oppgaveId,
+                type = avslag.data!!.type.toString(),
+                begrunnelse = avslag.data!!.begrunnelse,
+                saksbehandlerOid = saksbehandlerFraApi.oid,
+            )
         }
     }
 
@@ -400,9 +410,14 @@ internal class SaksbehandlerMediator(
         påVentDao.slettPåVent(godkjenning.oppgavereferanse)
         godkjenning.avslag?.let {
             if (it.handling == Avslagshandling.INVALIDER) {
-                avslagDao.invaliderAvslag(godkjenning.oppgavereferanse)
+                vedtakBegrunnelseDao.invaliderAvslag(godkjenning.oppgavereferanse)
             } else {
-                avslagDao.lagreAvslag(godkjenning.oppgavereferanse, it.data!!, saksbehandler.oid())
+                vedtakBegrunnelseDao.lagreVedtakBegrunnelse(
+                    oppgaveId = godkjenning.oppgavereferanse,
+                    type = it.data!!.type.toString(),
+                    begrunnelse = it.data!!.begrunnelse,
+                    saksbehandlerOid = saksbehandler.oid(),
+                )
             }
         }
     }

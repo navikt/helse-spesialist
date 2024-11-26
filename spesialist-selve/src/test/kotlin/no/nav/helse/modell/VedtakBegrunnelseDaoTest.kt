@@ -3,7 +3,7 @@ package no.nav.helse.modell
 import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.db.AvslagDao
+import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.spesialist.api.graphql.mutation.Avslag
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagsdata
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagshandling
@@ -15,22 +15,26 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class AvslagDaoTest : DatabaseIntegrationTest() {
+internal class VedtakBegrunnelseDaoTest : DatabaseIntegrationTest() {
 
-    private val dao = AvslagDao(dataSource)
+    private val dao = VedtakBegrunnelseDao(dataSource)
 
     @Test
-    fun `lagrer og finner avslag`() {
+    fun `lagrer og finner vedtaksbegrunnelse`() {
         val oid = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         nyPerson(vedtaksperiodeId = vedtaksperiodeId)
         nySaksbehandler(oid)
-        val avslag = Avslag(handling = Avslagshandling.OPPRETT, data = Avslagsdata(Avslagstype.AVSLAG, "En individuell begrunelse"))
-        dao.lagreAvslag(OPPGAVE_ID, avslag.data!!, oid)
+        dao.lagreVedtakBegrunnelse(
+            oppgaveId = OPPGAVE_ID,
+            type = "AVSLAG",
+            begrunnelse = "En individuell begrunelse",
+            saksbehandlerOid = oid
+        )
 
         val generasjonId = finnGenerasjonId(vedtaksperiodeId)
 
-        val lagretAvslag = dao.finnAvslag(vedtaksperiodeId, generasjonId)
+        val lagretAvslag = dao.finnVedtakBegrunnelse(vedtaksperiodeId, generasjonId)
         assertNotNull(lagretAvslag)
     }
 
@@ -40,12 +44,20 @@ internal class AvslagDaoTest : DatabaseIntegrationTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         nyPerson(vedtaksperiodeId = vedtaksperiodeId)
         nySaksbehandler(oid)
-        val avslag = Avslag(handling = Avslagshandling.OPPRETT, data = Avslagsdata(Avslagstype.AVSLAG, "En individuell begrunelse"))
-        dao.lagreAvslag(OPPGAVE_ID, avslag.data!!, oid)
+        val avslag = Avslag(
+            handling = Avslagshandling.OPPRETT,
+            data = Avslagsdata(Avslagstype.AVSLAG, "En individuell begrunelse")
+        )
+        dao.lagreVedtakBegrunnelse(
+            oppgaveId = OPPGAVE_ID,
+            type = avslag.data!!.type.toString(),
+            begrunnelse = avslag.data!!.begrunnelse,
+            saksbehandlerOid = oid
+        )
 
         val generasjonId = finnGenerasjonId(vedtaksperiodeId)
 
-        val lagretAvslag = AvslagDao(dataSource).finnAvslag(vedtaksperiodeId, generasjonId)
+        val lagretAvslag = VedtakBegrunnelseDao(dataSource).finnVedtakBegrunnelse(vedtaksperiodeId, generasjonId)
         assertNotNull(lagretAvslag)
     }
 
@@ -56,10 +68,18 @@ internal class AvslagDaoTest : DatabaseIntegrationTest() {
         nyPerson(vedtaksperiodeId = vedtaksperiodeId)
         nySaksbehandler(oid)
         val generasjonId = finnGenerasjonId(vedtaksperiodeId)
-        val avslag = Avslag(handling = Avslagshandling.OPPRETT, data = Avslagsdata(Avslagstype.AVSLAG, "En individuell begrunelse"))
-        dao.lagreAvslag(OPPGAVE_ID, avslag.data!!, oid)
+        val avslag = Avslag(
+            handling = Avslagshandling.OPPRETT,
+            data = Avslagsdata(Avslagstype.AVSLAG, "En individuell begrunelse")
+        )
+        dao.lagreVedtakBegrunnelse(
+            oppgaveId = OPPGAVE_ID,
+            type = avslag.data!!.type.toString(),
+            begrunnelse = avslag.data!!.begrunnelse,
+            saksbehandlerOid = oid
+        )
         dao.invaliderAvslag(OPPGAVE_ID)
-        val lagretAvslag = dao.finnAvslag(VEDTAKSPERIODE, generasjonId)
+        val lagretAvslag = dao.finnVedtakBegrunnelse(VEDTAKSPERIODE, generasjonId)
         assertNull(lagretAvslag)
     }
 
@@ -68,10 +88,26 @@ internal class AvslagDaoTest : DatabaseIntegrationTest() {
         val oid = UUID.randomUUID()
         nyPerson()
         nySaksbehandler(oid)
-        val avslag = Avslag(handling = Avslagshandling.OPPRETT, data = Avslagsdata(Avslagstype.AVSLAG, "En individuell begrunelse"))
-        val avslag2 = Avslag(handling = Avslagshandling.OPPRETT, data = Avslagsdata(Avslagstype.DELVIS_AVSLAG, "En individuell begrunelse delvis avslag retter skrivefeil"))
-        dao.lagreAvslag(OPPGAVE_ID, avslag.data!!, oid)
-        dao.lagreAvslag(OPPGAVE_ID, avslag2.data!!, oid)
+        val avslag = Avslag(
+            handling = Avslagshandling.OPPRETT,
+            data = Avslagsdata(Avslagstype.AVSLAG, "En individuell begrunelse")
+        )
+        val avslag2 = Avslag(
+            handling = Avslagshandling.OPPRETT,
+            data = Avslagsdata(Avslagstype.DELVIS_AVSLAG, "En individuell begrunelse delvis avslag retter skrivefeil")
+        )
+        dao.lagreVedtakBegrunnelse(
+            oppgaveId = OPPGAVE_ID,
+            type = avslag.data!!.type.toString(),
+            begrunnelse = avslag.data!!.begrunnelse,
+            saksbehandlerOid = oid
+        )
+        dao.lagreVedtakBegrunnelse(
+            oppgaveId = OPPGAVE_ID,
+            type = avslag2.data!!.type.toString(),
+            begrunnelse = avslag2.data!!.begrunnelse,
+            saksbehandlerOid = oid
+        )
 
         val lagredeAvslag: List<no.nav.helse.spesialist.api.graphql.schema.Avslag> =
             dao.finnAlleAvslag(VEDTAKSPERIODE, UTBETALING_ID).toList()
