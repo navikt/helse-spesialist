@@ -77,9 +77,9 @@ private fun UtgåendeHendelse.VedtaksperiodeAvvistAutomatisk.detaljer(): Map<Str
             ),
         )
         put("automatiskBehandling", true)
-        compute("årsak") { _, _ -> årsak }
-        compute("begrunnelser") { _, _ -> begrunnelser }
-        compute("kommentar") { _, _ -> kommentar }
+        årsak?.let { put("årsak", it) }
+        begrunnelser?.let { put("begrunnelser", it) }
+        kommentar?.let { put("kommentar", it) }
         put("periodetype", periodetype)
         put("behandlingId", behandlingId)
     }
@@ -99,9 +99,9 @@ private fun UtgåendeHendelse.VedtaksperiodeAvvistManuelt.detaljer(): Map<String
             ),
         )
         put("automatiskBehandling", false)
-        compute("årsak") { _, _ -> årsak }
-        compute("begrunnelser") { _, _ -> begrunnelser }
-        compute("kommentar") { _, _ -> kommentar }
+        årsak?.let { put("årsak", it) }
+        begrunnelser?.let { put("begrunnelser", it) }
+        kommentar?.let { put("kommentar", it) }
         put("periodetype", periodetype)
         put("behandlingId", behandlingId)
     }
