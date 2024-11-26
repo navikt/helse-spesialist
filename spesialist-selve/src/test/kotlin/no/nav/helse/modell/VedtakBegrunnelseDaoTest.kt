@@ -94,8 +94,8 @@ internal class VedtakBegrunnelseDaoTest : DatabaseIntegrationTest() {
         )
         dao.lagreVedtakBegrunnelse(
             oppgaveId = OPPGAVE_ID,
-            type = VedtakBegrunnelseTypeFraDatabase.DELVIS_AVSLAG,
-            begrunnelse = "En individuell begrunelse delvis avslag retter skrivefeil",
+            type = VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE,
+            begrunnelse = "En individuell begrunelse delvis innvilgelse retter skrivefeil",
             saksbehandlerOid = oid
         )
 
@@ -103,8 +103,8 @@ internal class VedtakBegrunnelseDaoTest : DatabaseIntegrationTest() {
 
         assertEquals(2, lagredeAvslag.size)
         with(lagredeAvslag.first()) {
-            assertEquals(VedtakBegrunnelseTypeFraDatabase.DELVIS_AVSLAG, type)
-            assertEquals("En individuell begrunelse delvis avslag retter skrivefeil", begrunnelse)
+            assertEquals(VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE, type)
+            assertEquals("En individuell begrunelse delvis innvilgelse retter skrivefeil", begrunnelse)
             assertEquals(SAKSBEHANDLER_IDENT, saksbehandlerIdent)
             assertFalse(invalidert)
         }
