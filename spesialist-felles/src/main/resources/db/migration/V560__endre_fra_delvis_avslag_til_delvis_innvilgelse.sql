@@ -1,0 +1,3 @@
+UPDATE begrunnelse
+SET type = 'DELVIS_INNVILGELSE'
+WHERE type = 'DELVIS_AVSLAG';
