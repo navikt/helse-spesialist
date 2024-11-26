@@ -5,6 +5,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
+import no.nav.helse.modell.vedtak.AvslagstypeDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -33,6 +34,10 @@ internal class VedtakBegrunnelseDaoTest : DatabaseIntegrationTest() {
 
         val lagretVedtakBegrunnelse = dao.finnVedtakBegrunnelse(vedtaksperiodeId, generasjonId)
         assertNotNull(lagretVedtakBegrunnelse)
+        with(lagretVedtakBegrunnelse!!) {
+            assertEquals(AvslagstypeDto.AVSLAG, type)
+            assertEquals("En individuell begrunelse", begrunnelse)
+        }
     }
 
     @Test
@@ -52,6 +57,10 @@ internal class VedtakBegrunnelseDaoTest : DatabaseIntegrationTest() {
 
         val lagretVedtakBegrunnelse = VedtakBegrunnelseDao(dataSource).finnVedtakBegrunnelse(vedtaksperiodeId, generasjonId)
         assertNotNull(lagretVedtakBegrunnelse)
+        with(lagretVedtakBegrunnelse!!) {
+            assertEquals(AvslagstypeDto.AVSLAG, type)
+            assertEquals("En individuell begrunelse", begrunnelse)
+        }
     }
 
     @Test
@@ -93,14 +102,18 @@ internal class VedtakBegrunnelseDaoTest : DatabaseIntegrationTest() {
         val lagredeAvslag = dao.finnAlleVedtakBegrunnelser(VEDTAKSPERIODE, UTBETALING_ID)
 
         assertEquals(2, lagredeAvslag.size)
-        assertEquals(VedtakBegrunnelseTypeFraDatabase.AVSLAG, lagredeAvslag.last().type)
-        assertEquals(VedtakBegrunnelseTypeFraDatabase.DELVIS_AVSLAG, lagredeAvslag.first().type)
-        assertEquals("En individuell begrunelse", lagredeAvslag.last().begrunnelse)
-        assertEquals("En individuell begrunelse delvis avslag retter skrivefeil", lagredeAvslag.first().begrunnelse)
-        assertEquals(SAKSBEHANDLER_IDENT, lagredeAvslag.last().saksbehandlerIdent)
-        assertEquals(SAKSBEHANDLER_IDENT, lagredeAvslag.first().saksbehandlerIdent)
-        assertFalse(lagredeAvslag.last().invalidert)
-        assertFalse(lagredeAvslag.first().invalidert)
+        with(lagredeAvslag.first()) {
+            assertEquals(VedtakBegrunnelseTypeFraDatabase.DELVIS_AVSLAG, type)
+            assertEquals("En individuell begrunelse delvis avslag retter skrivefeil", begrunnelse)
+            assertEquals(SAKSBEHANDLER_IDENT, saksbehandlerIdent)
+            assertFalse(invalidert)
+        }
+        with(lagredeAvslag.last()) {
+            assertEquals(VedtakBegrunnelseTypeFraDatabase.AVSLAG, type)
+            assertEquals("En individuell begrunelse", begrunnelse)
+            assertEquals(SAKSBEHANDLER_IDENT, saksbehandlerIdent)
+            assertFalse(invalidert)
+        }
     }
 
 
