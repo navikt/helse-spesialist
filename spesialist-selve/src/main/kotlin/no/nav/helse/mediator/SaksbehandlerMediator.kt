@@ -10,6 +10,7 @@ import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.VedtakBegrunnelseDao
+import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.mediator.overstyring.Overstyringlagrer
 import no.nav.helse.mediator.overstyring.Saksbehandlingsmelder
@@ -63,6 +64,7 @@ import no.nav.helse.spesialist.api.feilhåndtering.IkkeTilgang
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagshandling
+import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation.VedtakResultat
 import no.nav.helse.spesialist.api.graphql.schema.AnnulleringData
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
@@ -359,7 +361,20 @@ internal class SaksbehandlerMediator(
     override fun hentAvslag(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
-    ): Set<Avslag> = vedtakBegrunnelseDao.finnAlleAvslag(vedtaksperiodeId, utbetalingId)
+    ): Set<Avslag> =
+        vedtakBegrunnelseDao.finnAlleVedtakBegrunnelser(vedtaksperiodeId, utbetalingId).map {
+            Avslag(
+                type =
+                    when (it.type) {
+                        VedtakBegrunnelseTypeFraDatabase.AVSLAG -> Avslagstype.AVSLAG
+                        VedtakBegrunnelseTypeFraDatabase.DELVIS_AVSLAG -> Avslagstype.DELVIS_AVSLAG
+                    },
+                begrunnelse = it.begrunnelse,
+                opprettet = it.opprettet,
+                saksbehandlerIdent = it.saksbehandlerIdent,
+                invalidert = it.invalidert,
+            )
+        }.toSet()
 
     override fun håndterAvslag(
         oppgaveId: Long,

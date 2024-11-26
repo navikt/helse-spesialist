@@ -92,7 +92,6 @@ class VedtakBegrunnelseDao(queryRunner: QueryRunner) : QueryRunner by queryRunne
         }
     }
 
-    // TODO: Tabell avslag bør endre navn og mye av denne klassen skal skrives om når vi kommer dit
     internal fun finnVurdering(
         vedtaksperiodeId: UUID,
         generasjonId: Long,
@@ -128,28 +127,27 @@ class VedtakBegrunnelseDao(queryRunner: QueryRunner) : QueryRunner by queryRunne
         }
     }
 
-    internal fun finnAlleAvslag(
+    internal fun finnAlleVedtakBegrunnelser(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
-    ): Set<no.nav.helse.spesialist.api.graphql.schema.Avslag> =
-        asSQL(
-            """
-            SELECT b.type, b.tekst, a.opprettet, s.ident, a.invalidert FROM vedtak_begrunnelse a 
-            INNER JOIN behandling beh ON a.generasjon_ref = beh.id 
-            INNER JOIN begrunnelse b ON b.id = a.begrunnelse_ref
-            INNER JOIN saksbehandler s ON s.oid = b.saksbehandler_ref
-            WHERE a.vedtaksperiode_id = :vedtaksperiodeId AND beh.utbetaling_id = :utbetalingId 
-            ORDER BY opprettet DESC
-            """.trimIndent(),
-            "vedtaksperiodeId" to vedtaksperiodeId,
-            "utbetalingId" to utbetalingId,
-        ).list { avslag ->
-            no.nav.helse.spesialist.api.graphql.schema.Avslag(
-                enumValueOf(avslag.string("type")),
-                avslag.string("tekst"),
-                avslag.localDateTime("opprettet"),
-                avslag.string("ident"),
-                avslag.boolean("invalidert"),
-            )
-        }.toSet()
+    ) = asSQL(
+        """
+        SELECT b.type, b.tekst, a.opprettet, s.ident, a.invalidert FROM vedtak_begrunnelse a 
+        INNER JOIN behandling beh ON a.generasjon_ref = beh.id 
+        INNER JOIN begrunnelse b ON b.id = a.begrunnelse_ref
+        INNER JOIN saksbehandler s ON s.oid = b.saksbehandler_ref
+        WHERE a.vedtaksperiode_id = :vedtaksperiodeId AND beh.utbetaling_id = :utbetalingId 
+        ORDER BY opprettet DESC
+        """.trimIndent(),
+        "vedtaksperiodeId" to vedtaksperiodeId,
+        "utbetalingId" to utbetalingId,
+    ).list { avslag ->
+        VedtakBegrunnelseMedSaksbehandlerIdentFraDatabase(
+            type = enumValueOf(avslag.string("type")),
+            begrunnelse = avslag.string("tekst"),
+            opprettet = avslag.localDateTime("opprettet"),
+            saksbehandlerIdent = avslag.string("ident"),
+            invalidert = avslag.boolean("invalidert"),
+        )
+    }
 }

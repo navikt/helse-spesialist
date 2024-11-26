@@ -4,7 +4,7 @@ import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.db.VedtakBegrunnelseDao
-import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
+import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -90,12 +90,11 @@ internal class VedtakBegrunnelseDaoTest : DatabaseIntegrationTest() {
             saksbehandlerOid = oid
         )
 
-        val lagredeAvslag: List<no.nav.helse.spesialist.api.graphql.schema.Avslag> =
-            dao.finnAlleAvslag(VEDTAKSPERIODE, UTBETALING_ID).toList()
+        val lagredeAvslag = dao.finnAlleVedtakBegrunnelser(VEDTAKSPERIODE, UTBETALING_ID)
 
         assertEquals(2, lagredeAvslag.size)
-        assertEquals(Avslagstype.AVSLAG, lagredeAvslag.last().type)
-        assertEquals(Avslagstype.DELVIS_AVSLAG, lagredeAvslag.first().type)
+        assertEquals(VedtakBegrunnelseTypeFraDatabase.AVSLAG, lagredeAvslag.last().type)
+        assertEquals(VedtakBegrunnelseTypeFraDatabase.DELVIS_AVSLAG, lagredeAvslag.first().type)
         assertEquals("En individuell begrunelse", lagredeAvslag.last().begrunnelse)
         assertEquals("En individuell begrunelse delvis avslag retter skrivefeil", lagredeAvslag.first().begrunnelse)
         assertEquals(SAKSBEHANDLER_IDENT, lagredeAvslag.last().saksbehandlerIdent)
