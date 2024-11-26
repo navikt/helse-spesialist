@@ -362,19 +362,22 @@ internal class SaksbehandlerMediator(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
     ): Set<Avslag> =
-        vedtakBegrunnelseDao.finnAlleVedtakBegrunnelser(vedtaksperiodeId, utbetalingId).map {
-            Avslag(
-                type =
-                    when (it.type) {
-                        VedtakBegrunnelseTypeFraDatabase.AVSLAG -> Avslagstype.AVSLAG
-                        VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> Avslagstype.DELVIS_AVSLAG
-                    },
-                begrunnelse = it.begrunnelse,
-                opprettet = it.opprettet,
-                saksbehandlerIdent = it.saksbehandlerIdent,
-                invalidert = it.invalidert,
-            )
-        }.toSet()
+        vedtakBegrunnelseDao.finnAlleVedtakBegrunnelser(vedtaksperiodeId, utbetalingId)
+            .mapNotNull { vedtakBegrunnelse ->
+                when (vedtakBegrunnelse.type) {
+                    VedtakBegrunnelseTypeFraDatabase.AVSLAG -> Avslagstype.AVSLAG
+                    VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> Avslagstype.DELVIS_AVSLAG
+                    VedtakBegrunnelseTypeFraDatabase.INNVILGELSE -> null
+                }?.let { type ->
+                    Avslag(
+                        type = type,
+                        begrunnelse = vedtakBegrunnelse.begrunnelse,
+                        opprettet = vedtakBegrunnelse.opprettet,
+                        saksbehandlerIdent = vedtakBegrunnelse.saksbehandlerIdent,
+                        invalidert = vedtakBegrunnelse.invalidert,
+                    )
+                }
+            }.toSet()
 
     override fun håndterAvslag(
         oppgaveId: Long,

@@ -98,17 +98,29 @@ internal class VedtakBegrunnelseDaoTest : DatabaseIntegrationTest() {
             begrunnelse = "En individuell begrunelse delvis innvilgelse retter skrivefeil",
             saksbehandlerOid = oid
         )
+        dao.lagreVedtakBegrunnelse(
+            oppgaveId = OPPGAVE_ID,
+            type = VedtakBegrunnelseTypeFraDatabase.INNVILGELSE,
+            begrunnelse = "En individuell begrunelse innvilgelse beholder skrivefeil",
+            saksbehandlerOid = oid
+        )
 
         val lagredeAvslag = dao.finnAlleVedtakBegrunnelser(VEDTAKSPERIODE, UTBETALING_ID)
 
-        assertEquals(2, lagredeAvslag.size)
-        with(lagredeAvslag.first()) {
+        assertEquals(3, lagredeAvslag.size)
+        with(lagredeAvslag[0]) {
+            assertEquals(VedtakBegrunnelseTypeFraDatabase.INNVILGELSE, type)
+            assertEquals("En individuell begrunelse innvilgelse beholder skrivefeil", begrunnelse)
+            assertEquals(SAKSBEHANDLER_IDENT, saksbehandlerIdent)
+            assertFalse(invalidert)
+        }
+        with(lagredeAvslag[1]) {
             assertEquals(VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE, type)
             assertEquals("En individuell begrunelse delvis innvilgelse retter skrivefeil", begrunnelse)
             assertEquals(SAKSBEHANDLER_IDENT, saksbehandlerIdent)
             assertFalse(invalidert)
         }
-        with(lagredeAvslag.last()) {
+        with(lagredeAvslag[2]) {
             assertEquals(VedtakBegrunnelseTypeFraDatabase.AVSLAG, type)
             assertEquals("En individuell begrunelse", begrunnelse)
             assertEquals(SAKSBEHANDLER_IDENT, saksbehandlerIdent)
