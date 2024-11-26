@@ -13,7 +13,7 @@ import no.nav.helse.modell.vedtak.Sykepengevedtak
 import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto
 import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto.UtfallDto
 import no.nav.helse.objectMapper
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

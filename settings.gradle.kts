@@ -17,7 +17,7 @@ dependencyResolutionManagement {
             version("jackson", "2.18.1")
             version("tbd-libs", "2024.11.25-10.59-6f263a10")
             version("ktor", "2.3.12")
-            version("micrometer", "1.12.3")
+            version("micrometer", "1.13.3")
 
             library("rapids-and-rivers", "com.github.navikt", "rapids-and-rivers").versionRef("rapids-and-rivers")
             library("rapids-and-rivers-test", "com.github.navikt.tbd-libs", "rapids-and-rivers-test").versionRef("tbd-libs")

@@ -6,7 +6,7 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
-import io.prometheus.client.Counter
+import io.micrometer.core.instrument.Counter
 import io.prometheus.client.Histogram
 import no.nav.helse.spesialist.api.client.AccessTokenClient
 import no.nav.helse.spesialist.api.graphql.schema.Reservasjon

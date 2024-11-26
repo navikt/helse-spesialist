@@ -6,8 +6,8 @@ import io.ktor.server.application.createRouteScopedPlugin
 import io.ktor.server.plugins.callloging.processingTimeMillis
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.receive
-import io.prometheus.client.Counter
-import io.prometheus.client.Summary
+import io.micrometer.core.instrument.Counter
+import io.prometheus.metrics.core.metrics.Summary
 
 val GraphQLMetrikker =
     createRouteScopedPlugin("GraphQLMetrikker") {

@@ -7,7 +7,7 @@ import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.hendelse.UtgåendeHendelse
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.Person
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
