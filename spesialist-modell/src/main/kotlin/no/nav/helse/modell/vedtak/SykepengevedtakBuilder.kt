@@ -25,7 +25,7 @@ class SykepengevedtakBuilder {
     private var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta? = null
     private var skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlag? = null
     private var skjønnsfastsettingopplysninger: SkjønnsfastsettingopplysningerDto? = null
-    private var vedtakBegrunnelse: VedtakBegrunnelseDto? = null // TODO: Endre denne til not null (lateinit) når avslag er erstattet av denne
+    private var vedtakBegrunnelse: VedtakBegrunnelseDto? = null
     private val tags: MutableSet<String> = mutableSetOf()
     private val tagsForSykepengegrunnlagsfakta: MutableSet<String> = mutableSetOf()
 
