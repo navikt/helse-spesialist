@@ -11,38 +11,7 @@ private const val AUTOMATISK_BEHANDLET_IDENT = "Automatisk behandlet"
 private const val AUTOMATISK_BEHANDLET_EPOSTADRESSE = "tbd@nav.no"
 
 internal fun UtgåendeHendelse.somJsonMessage(fødselsnummer: String): JsonMessage {
-    return when (this) {
-        is UtgåendeHendelse.Godkjenningsbehovløsning -> somBehovløsning()
-        else -> JsonMessage.newMessage(eventName(), mapOf("fødselsnummer" to fødselsnummer) + detaljer())
-    }
-}
-
-private fun UtgåendeHendelse.Godkjenningsbehovløsning.somBehovløsning(): JsonMessage {
-    val orginaltBehov = objectMapper.readValue<Map<String, Any>>(this.json)
-    val løsning =
-        mapOf(
-            "@løsning" to
-                mapOf(
-                    "Godkjenning" to
-                        buildMap {
-                            put("godkjent", godkjent)
-                            put("saksbehandlerIdent", saksbehandlerIdent)
-                            put("saksbehandlerEpost", saksbehandlerEpost)
-                            put("godkjenttidspunkt", godkjenttidspunkt)
-                            put("automatiskBehandling", automatiskBehandling)
-                            if (årsak != null) put("årsak", årsak)
-                            if (begrunnelser != null) put("begrunnelser", begrunnelser)
-                            if (kommentar != null) put("kommentar", kommentar)
-                            put("saksbehandleroverstyringer", saksbehandleroverstyringer)
-                            put("refusjontype", refusjonstype)
-                        },
-                ),
-        )
-    return JsonMessage.newMessage(
-        orginaltBehov +
-            løsning +
-            mapOf("@id" to UUID.randomUUID(), "@opprettet" to LocalDateTime.now()),
-    )
+    return JsonMessage.newMessage(eventName(), mapOf("fødselsnummer" to fødselsnummer) + detaljer())
 }
 
 internal fun UtgåendeHendelse.eventName() =
@@ -50,6 +19,7 @@ internal fun UtgåendeHendelse.eventName() =
         is UtgåendeHendelse.VedtaksperiodeAvvistAutomatisk,
         is UtgåendeHendelse.VedtaksperiodeAvvistManuelt,
         -> "vedtaksperiode_avvist"
+
         is UtgåendeHendelse.VedtaksperiodeGodkjentAutomatisk,
         is UtgåendeHendelse.VedtaksperiodeGodkjentManuelt,
         -> "vedtaksperiode_godkjent"
@@ -63,8 +33,34 @@ private fun UtgåendeHendelse.detaljer(): Map<String, Any> {
         is UtgåendeHendelse.VedtaksperiodeAvvistAutomatisk -> this.detaljer()
         is UtgåendeHendelse.VedtaksperiodeGodkjentManuelt -> this.detaljer()
         is UtgåendeHendelse.VedtaksperiodeGodkjentAutomatisk -> this.detaljer()
-        is UtgåendeHendelse.Godkjenningsbehovløsning -> TODO()
+        is UtgåendeHendelse.Godkjenningsbehovløsning -> this.detaljer()
     }
+}
+
+private fun UtgåendeHendelse.Godkjenningsbehovløsning.detaljer(): Map<String, Any> {
+    val orginaltBehov = objectMapper.readValue<Map<String, Any>>(this.json)
+    val løsning =
+        mapOf(
+            "@løsning" to
+                mapOf(
+                    "Godkjenning" to
+                        buildMap {
+                            put("godkjent", godkjent)
+                            put("saksbehandlerIdent", saksbehandlerIdent)
+                            put("saksbehandlerEpost", saksbehandlerEpost)
+                            put("godkjenttidspunkt", godkjenttidspunkt)
+                            put("automatiskBehandling", automatiskBehandling)
+                            årsak?.let { put("årsak", it) }
+                            begrunnelser?.let { put("begrunnelser", it) }
+                            kommentar?.let { put("kommentar", it) }
+                            put("saksbehandleroverstyringer", saksbehandleroverstyringer)
+                            put("refusjontype", refusjonstype)
+                        },
+                ),
+        )
+    return orginaltBehov +
+        løsning +
+        mapOf("@id" to UUID.randomUUID(), "@opprettet" to LocalDateTime.now())
 }
 
 private fun UtgåendeHendelse.VedtaksperiodeAvvistAutomatisk.detaljer(): Map<String, Any> {
