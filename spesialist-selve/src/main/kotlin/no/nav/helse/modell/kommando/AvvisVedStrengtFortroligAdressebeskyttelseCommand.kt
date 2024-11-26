@@ -30,7 +30,7 @@ internal class AvvisVedStrengtFortroligAdressebeskyttelseCommand(
             context = context,
             begrunnelser = årsaker,
             utbetaling = utbetaling,
-            godkjenningsbehov = godkjenningsbehov,
+            behov = godkjenningsbehov,
         )
         oppgaveDao.invaliderOppgaveFor(godkjenningsbehov.fødselsnummer)
         return true

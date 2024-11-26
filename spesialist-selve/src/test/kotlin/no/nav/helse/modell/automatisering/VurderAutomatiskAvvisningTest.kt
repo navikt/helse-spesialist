@@ -71,7 +71,7 @@ internal class VurderAutomatiskAvvisningTest {
                 context = context,
                 begrunnelser = listOf(forventetÅrsak),
                 utbetaling = any(),
-                godkjenningsbehov = any()
+                behov = any()
             )
         }
     }

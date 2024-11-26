@@ -42,7 +42,7 @@ internal class VurderAutomatiskAvvisning(
             context,
             begrunnelser = avvisningsårsaker.toList(),
             utbetaling = utbetaling,
-            godkjenningsbehov = godkjenningsbehov,
+            behov = godkjenningsbehov,
         )
         logg.info("Automatisk avvisning av vedtaksperiode $vedtaksperiodeId pga:$avvisningsårsaker")
         return ferdigstill(context)

@@ -98,22 +98,22 @@ internal class GodkjenningMediator(private val opptegnelseRepository: Opptegnels
         context: CommandContext,
         begrunnelser: List<String>,
         utbetaling: Utbetaling,
-        godkjenningsbehov: GodkjenningsbehovData,
+        behov: GodkjenningsbehovData,
     ) {
-        godkjenningsbehov.avvisAutomatisk(
+        behov.avvisAutomatisk(
             utbetaling = utbetaling,
             begrunnelser = begrunnelser,
         )
-        context.hendelse(godkjenningsbehov.medLøsning())
-        context.hendelse(godkjenningsbehov.lagVedtaksperiodeAvvistAutomatisk())
+        context.hendelse(behov.medLøsning())
+        context.hendelse(behov.lagVedtaksperiodeAvvistAutomatisk())
         opptegnelseRepository.opprettOpptegnelse(
-            fødselsnummer = godkjenningsbehov.fødselsnummer,
-            payload = AutomatiskBehandlingPayload(godkjenningsbehov.id, AutomatiskBehandlingUtfall.AVVIST),
+            fødselsnummer = behov.fødselsnummer,
+            payload = AutomatiskBehandlingPayload(behov.id, AutomatiskBehandlingUtfall.AVVIST),
             type = OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV,
         )
         begrunnelser.forEach { automatiskAvvistÅrsakerTeller.labels(it).inc() }
         automatiseringsteller.inc()
-        sikkerLogg.info("Automatisk avvisning av vedtaksperiode ${godkjenningsbehov.vedtaksperiodeId} pga: $begrunnelser")
+        sikkerLogg.info("Automatisk avvisning av vedtaksperiode ${behov.vedtaksperiodeId} pga: $begrunnelser")
     }
 
     private companion object {

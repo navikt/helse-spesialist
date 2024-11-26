@@ -116,7 +116,7 @@ internal class GodkjenningMediatorTest {
         mediator.automatiskAvvisning(
             context = context,
             utbetaling = utbetaling,
-            godkjenningsbehov = godkjenningsbehov(fødselsnummer = fnr),
+            behov = godkjenningsbehov(fødselsnummer = fnr),
             begrunnelser = emptyList(),
         )
         assertNotNull(hendelserInspektør.hendelseOrNull<UtgåendeHendelse.VedtaksperiodeAvvistAutomatisk>())
@@ -128,7 +128,7 @@ internal class GodkjenningMediatorTest {
             context = context,
             begrunnelser = listOf("foo"),
             utbetaling = utbetaling,
-            godkjenningsbehov = godkjenningsbehov(fødselsnummer = fnr),
+            behov = godkjenningsbehov(fødselsnummer = fnr),
         )
         assertFerdigbehandletGodkjenningsbehovOpptegnelseOpprettet()
     }
