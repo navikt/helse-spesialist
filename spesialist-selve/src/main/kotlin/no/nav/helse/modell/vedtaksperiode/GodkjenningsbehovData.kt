@@ -214,10 +214,8 @@ data class GodkjenningsbehovData(
             periodetype = periodetype.name,
         )
 
-    internal fun lagVedtaksperiodeAvvistManuelt(
-        saksbehandler: Saksbehandlerløsning.Saksbehandler,
-    ): UtgåendeHendelse.VedtaksperiodeAvvistManuelt {
-        return UtgåendeHendelse.VedtaksperiodeAvvistManuelt(
+    internal fun lagVedtaksperiodeAvvistManuelt(saksbehandler: Saksbehandlerløsning.Saksbehandler) =
+        UtgåendeHendelse.VedtaksperiodeAvvistManuelt(
             vedtaksperiodeId = this.vedtaksperiodeId,
             behandlingId = this.spleisBehandlingId,
             fødselsnummer = this.fødselsnummer,
@@ -228,7 +226,6 @@ data class GodkjenningsbehovData(
             begrunnelser = løsning.begrunnelser,
             kommentar = løsning.kommentar,
         )
-    }
 
     internal fun lagVedtaksperiodeAvvistAutomatisk() =
         UtgåendeHendelse.VedtaksperiodeAvvistAutomatisk(
