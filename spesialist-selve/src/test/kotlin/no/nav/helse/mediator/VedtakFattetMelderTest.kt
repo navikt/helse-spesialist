@@ -3,14 +3,12 @@ package no.nav.helse.mediator
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.januar
-import no.nav.helse.modell.vedtak.AvslagstypeDto
 import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingopplysningerDto
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingstype
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingsårsak
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtak.Sykepengevedtak
-import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -97,9 +95,10 @@ internal class VedtakFattetMelderTest {
             Sykepengevedtak.Vedtak(
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØRID,
-                vedtaksperiodeId = vedtaksperiodeId,
                 organisasjonsnummer = ORGANISASJONSNUMMER,
+                vedtaksperiodeId = vedtaksperiodeId,
                 spleisBehandlingId = spleisBehandlingId,
+                utbetalingId = utbetalingId,
                 fom = fom,
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -109,15 +108,13 @@ internal class VedtakFattetMelderTest {
                 grunnlagForSykepengegrunnlagPerArbeidsgiver = mapOf(ORGANISASJONSNUMMER to 10000.0),
                 begrensning = "VURDERT_I_INFOTRYGD",
                 inntekt = 10000.0,
-                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
-                utbetalingId = utbetalingId,
                 sykepengegrunnlagsfakta =
                     Sykepengegrunnlagsfakta.Infotrygd(
                         omregnetÅrsinntekt = 10000.0,
                     ),
                 skjønnsfastsettingopplysninger = null,
+                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                avslag = null,
                 saksbehandlerVurdering = null,
             )
         vedtakFattetMelder.vedtakFattet(infotrygd)
@@ -160,9 +157,10 @@ internal class VedtakFattetMelderTest {
             Sykepengevedtak.Vedtak(
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØRID,
-                vedtaksperiodeId = vedtaksperiodeId,
                 organisasjonsnummer = ORGANISASJONSNUMMER,
+                vedtaksperiodeId = vedtaksperiodeId,
                 spleisBehandlingId = spleisBehandlingId,
+                utbetalingId = utbetalingId,
                 fom = fom,
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -172,8 +170,6 @@ internal class VedtakFattetMelderTest {
                 grunnlagForSykepengegrunnlagPerArbeidsgiver = mapOf(ORGANISASJONSNUMMER to 10000.0),
                 begrensning = "ER_IKKE_6G_BEGRENSET",
                 inntekt = 10000.0,
-                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
-                utbetalingId = utbetalingId,
                 sykepengegrunnlagsfakta =
                     Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
                         omregnetÅrsinntekt = 10000.0,
@@ -191,8 +187,8 @@ internal class VedtakFattetMelderTest {
                             ),
                     ),
                 skjønnsfastsettingopplysninger = null,
+                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                avslag = null,
                 saksbehandlerVurdering = null,
             )
         vedtakFattetMelder.vedtakFattet(infotrygd)
@@ -249,9 +245,10 @@ internal class VedtakFattetMelderTest {
             Sykepengevedtak.Vedtak(
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØRID,
-                vedtaksperiodeId = vedtaksperiodeId,
                 organisasjonsnummer = ORGANISASJONSNUMMER,
+                vedtaksperiodeId = vedtaksperiodeId,
                 spleisBehandlingId = spleisBehandlingId,
+                utbetalingId = utbetalingId,
                 fom = fom,
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -261,8 +258,6 @@ internal class VedtakFattetMelderTest {
                 grunnlagForSykepengegrunnlagPerArbeidsgiver = mapOf(ORGANISASJONSNUMMER to 10000.0),
                 begrensning = "ER_IKKE_6G_BEGRENSET",
                 inntekt = 10000.0,
-                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
-                utbetalingId = utbetalingId,
                 sykepengegrunnlagsfakta =
                     Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
                         omregnetÅrsinntekt = 10000.0,
@@ -280,8 +275,8 @@ internal class VedtakFattetMelderTest {
                             ),
                     ),
                 skjønnsfastsettingopplysninger = null,
+                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                avslag = VedtakBegrunnelseDto(AvslagstypeDto.DELVIS_AVSLAG, "En individuell begrunnelse"),
                 saksbehandlerVurdering = SaksbehandlerVurderingDto.DelvisInnvilgelse("En individuell begrunnelse"),
         )
         vedtakFattetMelder.vedtakFattet(spleis)
@@ -345,9 +340,10 @@ internal class VedtakFattetMelderTest {
             Sykepengevedtak.Vedtak(
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØRID,
-                vedtaksperiodeId = vedtaksperiodeId,
                 organisasjonsnummer = ORGANISASJONSNUMMER,
+                vedtaksperiodeId = vedtaksperiodeId,
                 spleisBehandlingId = spleisBehandlingId,
+                utbetalingId = utbetalingId,
                 fom = fom,
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -357,8 +353,6 @@ internal class VedtakFattetMelderTest {
                 grunnlagForSykepengegrunnlagPerArbeidsgiver = mapOf(ORGANISASJONSNUMMER to 10000.0),
                 begrensning = "ER_IKKE_6G_BEGRENSET",
                 inntekt = 10000.0,
-                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
-                utbetalingId = utbetalingId,
                 sykepengegrunnlagsfakta =
                     Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
                         omregnetÅrsinntekt = 10000.0,
@@ -385,8 +379,8 @@ internal class VedtakFattetMelderTest {
                     Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
                     Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
                 ),
+                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                avslag = null,
                 saksbehandlerVurdering = null,
             )
         vedtakFattetMelder.vedtakFattet(infotrygd)
@@ -468,9 +462,10 @@ internal class VedtakFattetMelderTest {
             Sykepengevedtak.Vedtak(
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØRID,
-                vedtaksperiodeId = vedtaksperiodeId,
                 organisasjonsnummer = ORGANISASJONSNUMMER,
+                vedtaksperiodeId = vedtaksperiodeId,
                 spleisBehandlingId = spleisBehandlingId,
+                utbetalingId = utbetalingId,
                 fom = fom,
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -480,8 +475,6 @@ internal class VedtakFattetMelderTest {
                 grunnlagForSykepengegrunnlagPerArbeidsgiver = mapOf(ORGANISASJONSNUMMER to 10000.0),
                 begrensning = "ER_IKKE_6G_BEGRENSET",
                 inntekt = 10000.0,
-                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
-                utbetalingId = utbetalingId,
                 sykepengegrunnlagsfakta =
                     Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
                         omregnetÅrsinntekt = 10000.0,
@@ -508,8 +501,8 @@ internal class VedtakFattetMelderTest {
                         Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
                         Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
                     ),
+                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                avslag = VedtakBegrunnelseDto(AvslagstypeDto.AVSLAG, "En individuell begrunnelse"),
                 saksbehandlerVurdering = SaksbehandlerVurderingDto.Avslag("En individuell begrunnelse")
             )
         vedtakFattetMelder.vedtakFattet(infotrygd)

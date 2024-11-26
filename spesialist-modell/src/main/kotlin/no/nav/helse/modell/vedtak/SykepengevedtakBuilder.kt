@@ -25,7 +25,6 @@ class SykepengevedtakBuilder {
     private var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta? = null
     private var skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlag? = null
     private var skjønnsfastsettingopplysninger: SkjønnsfastsettingopplysningerDto? = null
-    private var avslag: VedtakBegrunnelseDto? = null
     private var saksbehandlerVurdering: SaksbehandlerVurderingDto? = null // TODO: Endre denne til not null (lateinit) når avslag er erstattet av denne
     private val tags: MutableSet<String> = mutableSetOf()
     private val tagsForSykepengegrunnlagsfakta: MutableSet<String> = mutableSetOf()
@@ -77,11 +76,6 @@ class SykepengevedtakBuilder {
             skjønnsfastsattSykepengegrunnlag.byggVedtak(this)
         }
 
-    fun avslag(avslag: Avslag) =
-        apply {
-            avslag.byggVedtak(this)
-        }
-
     fun saksbehandlerVurdering(saksbehandlerVurdering: SaksbehandlerVurdering) =
         apply {
             saksbehandlerVurdering.byggVedtak(this)
@@ -113,20 +107,6 @@ class SykepengevedtakBuilder {
                 begrunnelseFraKonklusjon,
                 type,
                 årsak,
-            )
-    }
-
-    fun avslagData(
-        type: Avslagstype,
-        begrunnelse: String,
-    ) = apply {
-        this.avslag =
-            VedtakBegrunnelseDto(
-                when (type) {
-                    Avslagstype.AVSLAG -> AvslagstypeDto.AVSLAG
-                    Avslagstype.DELVIS_AVSLAG -> AvslagstypeDto.DELVIS_AVSLAG
-                },
-                begrunnelse,
             )
     }
 
@@ -199,7 +179,6 @@ class SykepengevedtakBuilder {
             skjønnsfastsettingopplysninger = skjønnsfastsettingopplysninger,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
             tags = tags,
-            avslag = avslag,
             saksbehandlerVurdering = saksbehandlerVurdering,
         )
     }
@@ -225,10 +204,9 @@ class SykepengevedtakBuilder {
             begrensning = begrensning,
             inntekt = inntekt,
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
-            vedtakFattetTidspunkt = vedtakFattetTidspunkt,
             skjønnsfastsettingopplysninger = null,
+            vedtakFattetTidspunkt = vedtakFattetTidspunkt,
             tags = tags,
-            avslag = avslag,
             saksbehandlerVurdering = saksbehandlerVurdering,
         )
     }

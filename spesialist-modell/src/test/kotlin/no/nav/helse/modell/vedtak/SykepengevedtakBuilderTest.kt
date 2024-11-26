@@ -71,9 +71,10 @@ class SykepengevedtakBuilderTest {
             Sykepengevedtak.Vedtak(
                 fødselsnummer = fødselsnummer,
                 aktørId = aktørId,
-                vedtaksperiodeId = vedtaksperiodeId,
                 organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
                 spleisBehandlingId = spleisBehandlingId,
+                utbetalingId = utbetalingId,
                 fom = fom,
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -83,12 +84,10 @@ class SykepengevedtakBuilderTest {
                 grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
                 begrensning = begrensning,
                 inntekt = inntekt,
-                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_HOVEDREGEL),
-                utbetalingId = utbetalingId,
                 skjønnsfastsettingopplysninger = null,
+                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                avslag = null,
                 saksbehandlerVurdering = SaksbehandlerVurdering.Innvilgelse().toDto(),
             ),
             utkast,
@@ -135,9 +134,10 @@ class SykepengevedtakBuilderTest {
             Sykepengevedtak.Vedtak(
                 fødselsnummer = fødselsnummer,
                 aktørId = aktørId,
-                vedtaksperiodeId = vedtaksperiodeId,
                 organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
                 spleisBehandlingId = spleisBehandlingId,
+                utbetalingId = utbetalingId,
                 fom = fom,
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -147,9 +147,7 @@ class SykepengevedtakBuilderTest {
                 grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
                 begrensning = begrensning,
                 inntekt = inntekt,
-                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_SKJØNN),
-                utbetalingId = utbetalingId,
                 skjønnsfastsettingopplysninger =
                 SkjønnsfastsettingopplysningerDto(
                     "Mal",
@@ -158,8 +156,8 @@ class SykepengevedtakBuilderTest {
                     Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
                     Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
                 ),
+                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                avslag = null,
                 saksbehandlerVurdering = SaksbehandlerVurdering.Innvilgelse().toDto(),
             ),
             utkast,
@@ -186,12 +184,6 @@ class SykepengevedtakBuilderTest {
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_HOVEDREGEL))
-            .avslag(
-                Avslag(
-                    Avslagstype.DELVIS_AVSLAG,
-                    "En individuell begrunnelse for avslag"
-                )
-            )
             .saksbehandlerVurdering(
                 SaksbehandlerVurdering.DelvisInnvilgelse("En individuell begrunnelse for avslag")
             )
@@ -203,9 +195,10 @@ class SykepengevedtakBuilderTest {
             Sykepengevedtak.Vedtak(
                 fødselsnummer = fødselsnummer,
                 aktørId = aktørId,
-                vedtaksperiodeId = vedtaksperiodeId,
                 organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
                 spleisBehandlingId = spleisBehandlingId,
+                utbetalingId = utbetalingId,
                 fom = fom,
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -215,12 +208,10 @@ class SykepengevedtakBuilderTest {
                 grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
                 begrensning = begrensning,
                 inntekt = inntekt,
-                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_HOVEDREGEL),
-                utbetalingId = utbetalingId,
                 skjønnsfastsettingopplysninger = null,
+                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                avslag = VedtakBegrunnelseDto(AvslagstypeDto.DELVIS_AVSLAG, "En individuell begrunnelse for avslag"),
                 saksbehandlerVurdering = SaksbehandlerVurderingDto.DelvisInnvilgelse("En individuell begrunnelse for avslag"),
             ),
             utkast,
@@ -258,12 +249,6 @@ class SykepengevedtakBuilderTest {
                     LocalDateTime.now(),
                 ),
             )
-            .avslag(
-                Avslag(
-                    Avslagstype.AVSLAG,
-                    "En individuell begrunnelse for avslag"
-                )
-            )
             .saksbehandlerVurdering(
                 SaksbehandlerVurdering.Avslag("En individuell begrunnelse for avslag")
             )
@@ -275,9 +260,10 @@ class SykepengevedtakBuilderTest {
             Sykepengevedtak.Vedtak(
                 fødselsnummer = fødselsnummer,
                 aktørId = aktørId,
-                vedtaksperiodeId = vedtaksperiodeId,
                 organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
                 spleisBehandlingId = spleisBehandlingId,
+                utbetalingId = utbetalingId,
                 fom = fom,
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -287,9 +273,7 @@ class SykepengevedtakBuilderTest {
                 grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
                 begrensning = begrensning,
                 inntekt = inntekt,
-                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_SKJØNN),
-                utbetalingId = utbetalingId,
                 skjønnsfastsettingopplysninger =
                 SkjønnsfastsettingopplysningerDto(
                     "Mal",
@@ -298,8 +282,8 @@ class SykepengevedtakBuilderTest {
                     Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
                     Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
                 ),
+                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                avslag = VedtakBegrunnelseDto(AvslagstypeDto.AVSLAG, "En individuell begrunnelse for avslag"),
                 saksbehandlerVurdering = SaksbehandlerVurderingDto.Avslag("En individuell begrunnelse for avslag"),
             ),
             utkast,
@@ -335,9 +319,10 @@ class SykepengevedtakBuilderTest {
             Sykepengevedtak.Vedtak(
                 fødselsnummer = fødselsnummer,
                 aktørId = aktørId,
-                vedtaksperiodeId = vedtaksperiodeId,
                 organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
                 spleisBehandlingId = spleisBehandlingId,
+                utbetalingId = utbetalingId,
                 fom = fom,
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -347,12 +332,10 @@ class SykepengevedtakBuilderTest {
                 grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
                 begrensning = begrensning,
                 inntekt = inntekt,
-                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(I_INFOTRYGD),
-                utbetalingId = utbetalingId,
                 skjønnsfastsettingopplysninger = null,
+                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                avslag = null,
                 saksbehandlerVurdering = SaksbehandlerVurderingDto.Innvilgelse(),
             ),
             utkast,
@@ -535,9 +518,10 @@ class SykepengevedtakBuilderTest {
             Sykepengevedtak.Vedtak(
                 fødselsnummer = fødselsnummer,
                 aktørId = aktørId,
-                vedtaksperiodeId = vedtaksperiodeId,
                 organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
                 spleisBehandlingId = spleisBehandlingId,
+                utbetalingId = utbetalingId,
                 fom = fom,
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -547,12 +531,10 @@ class SykepengevedtakBuilderTest {
                 grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
                 begrensning = begrensning,
                 inntekt = inntekt,
-                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_HOVEDREGEL),
-                utbetalingId = utbetalingId,
                 skjønnsfastsettingopplysninger = null,
+                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                avslag = null,
                 saksbehandlerVurdering = SaksbehandlerVurderingDto.Innvilgelse(),
             ),
             utkast,

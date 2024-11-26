@@ -4,9 +4,6 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
-import no.nav.helse.modell.vedtak.Avslag
-import no.nav.helse.modell.vedtak.Avslagstype
-import no.nav.helse.modell.vedtak.AvslagstypeDto
 import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtak.SaksbehandlerVurdering
 import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto
@@ -216,25 +213,6 @@ internal class Vedtaksperiode private constructor(
                         TilstandDto.KlarTilBehandling -> Behandling.KlarTilBehandling
                     },
                 tags = tags.toList(),
-                avslag =
-                    avslag?.let {
-                        Avslag(
-                            type =
-                                when (it.type) {
-                                    AvslagstypeDto.AVSLAG -> Avslagstype.AVSLAG
-                                    AvslagstypeDto.DELVIS_AVSLAG -> Avslagstype.DELVIS_AVSLAG
-                                },
-                            begrunnelse = it.begrunnelse,
-                        )
-                    },
-                saksbehandlerVurdering =
-                    saksbehandlerVurdering?.let {
-                        when (it) {
-                            is SaksbehandlerVurderingDto.Avslag -> SaksbehandlerVurdering.Avslag(it.begrunnelse)
-                            is SaksbehandlerVurderingDto.DelvisInnvilgelse -> SaksbehandlerVurdering.DelvisInnvilgelse(it.begrunnelse)
-                            is SaksbehandlerVurderingDto.Innvilgelse -> SaksbehandlerVurdering.Innvilgelse(it.begrunnelse)
-                        }
-                    },
                 varsler =
                     varsler
                         .map { varselDto ->
@@ -254,6 +232,14 @@ internal class Vedtaksperiode private constructor(
                                     },
                             )
                         }.toSet(),
+                saksbehandlerVurdering =
+                    saksbehandlerVurdering?.let {
+                        when (it) {
+                            is SaksbehandlerVurderingDto.Avslag -> SaksbehandlerVurdering.Avslag(it.begrunnelse)
+                            is SaksbehandlerVurderingDto.DelvisInnvilgelse -> SaksbehandlerVurdering.DelvisInnvilgelse(it.begrunnelse)
+                            is SaksbehandlerVurderingDto.Innvilgelse -> SaksbehandlerVurdering.Innvilgelse(it.begrunnelse)
+                        }
+                    },
             )
     }
 }

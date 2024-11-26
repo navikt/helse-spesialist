@@ -122,7 +122,6 @@ sealed class Sykepengevedtak(
         val skjønnsfastsettingopplysninger: SkjønnsfastsettingopplysningerDto?,
         vedtakFattetTidspunkt: LocalDateTime,
         tags: Set<String>,
-        val avslag: VedtakBegrunnelseDto?,
         val saksbehandlerVurdering: SaksbehandlerVurderingDto?,
     ) : Sykepengevedtak(
             fødselsnummer,
@@ -149,7 +148,6 @@ sealed class Sykepengevedtak(
                     this.utbetalingId == other.utbetalingId &&
                     this.sykepengegrunnlagsfakta == other.sykepengegrunnlagsfakta &&
                     this.skjønnsfastsettingopplysninger == other.skjønnsfastsettingopplysninger &&
-                    this.avslag == other.avslag &&
                     this.saksbehandlerVurdering == other.saksbehandlerVurdering
             )
 
@@ -158,7 +156,6 @@ sealed class Sykepengevedtak(
             result = 31 * result + utbetalingId.hashCode()
             result = 31 * result + sykepengegrunnlagsfakta.hashCode()
             result = 31 * result + skjønnsfastsettingopplysninger.hashCode()
-            result = 31 * result + avslag.hashCode()
             result = 31 * result + saksbehandlerVurdering.hashCode()
             return result
         }

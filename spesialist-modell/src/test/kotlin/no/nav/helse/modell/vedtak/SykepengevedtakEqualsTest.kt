@@ -289,14 +289,14 @@ class SykepengevedtakEqualsTest {
         sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
         utbetalingId: UUID = Companion.utbetalingId,
         skjønnsfastsettingopplysninger: SkjønnsfastsettingopplysningerDto? = null,
-        avslag: VedtakBegrunnelseDto? = null,
         saksbehandlerVurdering: SaksbehandlerVurderingDto? = null,
     ) = Sykepengevedtak.Vedtak(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId,
-        vedtaksperiodeId = vedtaksperiodeId,
         organisasjonsnummer = organisasjonsnummer,
+        vedtaksperiodeId = vedtaksperiodeId,
         spleisBehandlingId = spleisBehandlingId,
+        utbetalingId = utbetalingId,
         fom = fom,
         tom = tom,
         skjæringstidspunkt = skjæringstidspunkt,
@@ -307,11 +307,9 @@ class SykepengevedtakEqualsTest {
         begrensning = begrensning,
         inntekt = inntekt,
         sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
-        utbetalingId = utbetalingId,
         skjønnsfastsettingopplysninger = skjønnsfastsettingopplysninger,
         vedtakFattetTidspunkt = vedtakFattetTidspunkt,
         tags = tags,
-        avslag = avslag,
         saksbehandlerVurdering = saksbehandlerVurdering,
     )
 

@@ -13,7 +13,6 @@ import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVars
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmNegativtBeløp
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmTilbakedatering
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmÅpenGosysOppgave
-import no.nav.helse.modell.vedtak.Avslag
 import no.nav.helse.modell.vedtak.SaksbehandlerVurdering
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import org.slf4j.Logger
@@ -30,7 +29,6 @@ internal class Behandling private constructor(
     private var periode: Periode,
     private var tilstand: Tilstand,
     private var tags: List<String>,
-    private val avslag: Avslag?,
     private val saksbehandlerVurdering: SaksbehandlerVurdering?,
     varsler: Set<Varsel>,
 ) {
@@ -51,7 +49,6 @@ internal class Behandling private constructor(
         periode = Periode(fom, tom),
         tilstand = VidereBehandlingAvklares,
         tags = emptyList(),
-        avslag = null,
         saksbehandlerVurdering = null,
         varsler = emptySet(),
     )
@@ -84,7 +81,6 @@ internal class Behandling private constructor(
             tom = periode.tom(),
             tilstand = tilstand.toDto(),
             tags = tags,
-            avslag = avslag?.toDto(),
             saksbehandlerVurdering = saksbehandlerVurdering?.toDto(),
             varsler = varsler.map(Varsel::toDto),
         )
@@ -184,7 +180,6 @@ internal class Behandling private constructor(
         vedtakBuilder.skjæringstidspunkt(skjæringstidspunkt)
         vedtakBuilder.fom(fom())
         vedtakBuilder.tom(tom())
-        avslag?.also { vedtakBuilder.avslag(it) }
         saksbehandlerVurdering?.also { vedtakBuilder.saksbehandlerVurdering(it) }
     }
 
@@ -493,7 +488,6 @@ internal class Behandling private constructor(
             tilstand: Tilstand,
             tags: List<String>,
             varsler: Set<Varsel>,
-            avslag: Avslag?,
             saksbehandlerVurdering: SaksbehandlerVurdering?,
         ) = Behandling(
             id = id,
@@ -504,9 +498,8 @@ internal class Behandling private constructor(
             periode = Periode(fom, tom),
             tilstand = tilstand,
             tags = tags,
-            varsler = varsler,
-            avslag = avslag,
             saksbehandlerVurdering = saksbehandlerVurdering,
+            varsler = varsler,
         )
 
         internal fun List<Behandling>.håndterNyttVarsel(varsler: List<Varsel>) {

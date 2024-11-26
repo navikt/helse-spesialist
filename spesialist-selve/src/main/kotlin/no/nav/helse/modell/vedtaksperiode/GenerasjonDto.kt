@@ -2,7 +2,6 @@ package no.nav.helse.modell.vedtaksperiode
 
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto
-import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto
 import java.time.LocalDate
 import java.util.UUID
 
@@ -16,9 +15,8 @@ data class GenerasjonDto(
     val tom: LocalDate,
     val tilstand: TilstandDto,
     val tags: List<String>,
-    val varsler: List<VarselDto>,
-    val avslag: VedtakBegrunnelseDto?,
     val saksbehandlerVurdering: SaksbehandlerVurderingDto?,
+    val varsler: List<VarselDto>,
 )
 
 enum class TilstandDto {

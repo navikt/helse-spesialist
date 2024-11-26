@@ -41,9 +41,8 @@ class BehandlingServiceTest: DatabaseIntegrationTest() {
                         tom = 31.januar,
                         tilstand = TilstandDto.VidereBehandlingAvklares,
                         emptyList(),
+                        null,
                         emptyList(),
-                        null,
-                        null,
                     ),
                 )
             ),
@@ -62,9 +61,8 @@ class BehandlingServiceTest: DatabaseIntegrationTest() {
                         tom = 28.februar,
                         tilstand = TilstandDto.VidereBehandlingAvklares,
                         emptyList(),
+                        null,
                         emptyList(),
-                        null,
-                        null,
                     ),
                 )
             )

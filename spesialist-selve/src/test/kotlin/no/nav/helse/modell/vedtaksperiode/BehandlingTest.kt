@@ -515,9 +515,8 @@ internal class BehandlingTest {
                 tom,
                 TilstandDto.KlarTilBehandling,
                 tags,
+                null,
                 listOf(varsel.toDto()),
-                null,
-                null,
             ),
             dto,
         )

@@ -4,8 +4,7 @@ import DatabaseIntegrationTest
 import no.nav.helse.januar
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
-import no.nav.helse.modell.vedtak.AvslagstypeDto
-import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto
+import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
@@ -85,7 +84,6 @@ internal class PgBehandlingDaoTest : DatabaseIntegrationTest() {
             vedtaksperiodeId = vedtaksperiodeId,
             status = VarselStatusDto.AKTIV
         )
-        val avslag = VedtakBegrunnelseDto(AvslagstypeDto.AVSLAG, begrunnelse = "En begrunnelse")
         PgGenerasjonDao(dataSource).lagreGenerasjon(
             GenerasjonDto(
                 id = generasjonId,
@@ -97,9 +95,8 @@ internal class PgBehandlingDaoTest : DatabaseIntegrationTest() {
                 tom = 31.januar,
                 tilstand = TilstandDto.KlarTilBehandling,
                 tags = listOf("TAG"),
+                saksbehandlerVurdering = SaksbehandlerVurderingDto.Avslag("En begrunnelse"),
                 varsler = listOf(varsel),
-                avslag = avslag,
-                saksbehandlerVurdering = null,
             )
 
         )
@@ -116,9 +113,8 @@ internal class PgBehandlingDaoTest : DatabaseIntegrationTest() {
                 tom = 31.januar,
                 tilstand = TilstandDto.KlarTilBehandling,
                 tags = listOf("TAG"),
-                varsler = listOf(varsel),
-                avslag = null, //Lagres ikke enda
                 saksbehandlerVurdering = null,
+                varsler = listOf(varsel),
             ),
             funnet.single()
         )
