@@ -11,20 +11,20 @@ class VedtakBegrunnelseDao(queryRunner: QueryRunner) : QueryRunner by queryRunne
 
     private fun lagreBegrunnelse(
         begrunnelse: String,
-        type: String,
+        type: VedtakBegrunnelseTypeFraDatabase,
         saksbehandlerOid: UUID,
     ) = asSQL(
         """
         INSERT INTO begrunnelse(tekst, type, saksbehandler_ref) VALUES (:tekst, :type, :saksbehandler_ref)
         """.trimIndent(),
         "tekst" to begrunnelse,
-        "type" to type,
+        "type" to type.name,
         "saksbehandler_ref" to saksbehandlerOid,
     ).updateAndReturnGeneratedKey()
 
     internal fun lagreVedtakBegrunnelse(
         oppgaveId: Long,
-        type: String,
+        type: VedtakBegrunnelseTypeFraDatabase,
         begrunnelse: String,
         saksbehandlerOid: UUID,
     ) = lagreBegrunnelse(begrunnelse, type, saksbehandlerOid).let { begrunnelseId ->

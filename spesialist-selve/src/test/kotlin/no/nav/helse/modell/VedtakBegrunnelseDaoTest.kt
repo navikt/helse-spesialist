@@ -24,7 +24,7 @@ internal class VedtakBegrunnelseDaoTest : DatabaseIntegrationTest() {
         nySaksbehandler(oid)
         dao.lagreVedtakBegrunnelse(
             oppgaveId = OPPGAVE_ID,
-            type = "AVSLAG",
+            type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
             begrunnelse = "En individuell begrunelse",
             saksbehandlerOid = oid
         )
@@ -43,7 +43,7 @@ internal class VedtakBegrunnelseDaoTest : DatabaseIntegrationTest() {
         nySaksbehandler(oid)
         dao.lagreVedtakBegrunnelse(
             oppgaveId = OPPGAVE_ID,
-            type = "AVSLAG",
+            type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
             begrunnelse = "En individuell begrunelse",
             saksbehandlerOid = oid
         )
@@ -63,7 +63,7 @@ internal class VedtakBegrunnelseDaoTest : DatabaseIntegrationTest() {
         val generasjonId = finnGenerasjonId(vedtaksperiodeId)
         dao.lagreVedtakBegrunnelse(
             oppgaveId = OPPGAVE_ID,
-            type = "AVSLAG",
+            type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
             begrunnelse = "En individuell begrunelse",
             saksbehandlerOid = oid
         )
@@ -79,13 +79,13 @@ internal class VedtakBegrunnelseDaoTest : DatabaseIntegrationTest() {
         nySaksbehandler(oid)
         dao.lagreVedtakBegrunnelse(
             oppgaveId = OPPGAVE_ID,
-            type = "AVSLAG",
+            type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
             begrunnelse = "En individuell begrunelse",
             saksbehandlerOid = oid
         )
         dao.lagreVedtakBegrunnelse(
             oppgaveId = OPPGAVE_ID,
-            type = "DELVIS_AVSLAG",
+            type = VedtakBegrunnelseTypeFraDatabase.DELVIS_AVSLAG,
             begrunnelse = "En individuell begrunelse delvis avslag retter skrivefeil",
             saksbehandlerOid = oid
         )

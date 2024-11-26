@@ -190,7 +190,7 @@ internal class SaksbehandlerMediator(
             } else {
                 vedtakBegrunnelseDao.lagreVedtakBegrunnelse(
                     oppgaveId = oppgavereferanse,
-                    type = it.data!!.type.toString(),
+                    type = it.data!!.type.toVedtakBegrunnelseTypeFraDatabase(),
                     begrunnelse = it.data!!.begrunnelse,
                     saksbehandlerOid = saksbehandler.oid(),
                 )
@@ -386,7 +386,7 @@ internal class SaksbehandlerMediator(
         } else {
             vedtakBegrunnelseDao.lagreVedtakBegrunnelse(
                 oppgaveId = oppgaveId,
-                type = avslag.data!!.type.toString(),
+                type = avslag.data!!.type.toVedtakBegrunnelseTypeFraDatabase(),
                 begrunnelse = avslag.data!!.begrunnelse,
                 saksbehandlerOid = saksbehandlerFraApi.oid,
             )
@@ -429,7 +429,7 @@ internal class SaksbehandlerMediator(
             } else {
                 vedtakBegrunnelseDao.lagreVedtakBegrunnelse(
                     oppgaveId = godkjenning.oppgavereferanse,
-                    type = it.data!!.type.toString(),
+                    type = it.data!!.type.toVedtakBegrunnelseTypeFraDatabase(),
                     begrunnelse = it.data!!.begrunnelse,
                     saksbehandlerOid = saksbehandler.oid(),
                 )
@@ -720,4 +720,10 @@ internal class SaksbehandlerMediator(
     private fun OpphevStans.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.OpphevStans =
         no.nav.helse.modell.saksbehandler.handlinger
             .OpphevStans(this.fødselsnummer, this.begrunnelse)
+
+    private fun Avslagstype.toVedtakBegrunnelseTypeFraDatabase() =
+        when (this) {
+            Avslagstype.AVSLAG -> VedtakBegrunnelseTypeFraDatabase.AVSLAG
+            Avslagstype.DELVIS_AVSLAG -> VedtakBegrunnelseTypeFraDatabase.DELVIS_AVSLAG
+        }
 }
