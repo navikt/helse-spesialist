@@ -140,13 +140,13 @@ class VedtakBegrunnelseDao(queryRunner: QueryRunner) : QueryRunner by queryRunne
         """.trimIndent(),
         "vedtaksperiodeId" to vedtaksperiodeId,
         "utbetalingId" to utbetalingId,
-    ).list { avslag ->
+    ).list { vedtakBegrunnelse ->
         VedtakBegrunnelseMedSaksbehandlerIdentFraDatabase(
-            type = enumValueOf(avslag.string("type")),
-            begrunnelse = avslag.string("tekst"),
-            opprettet = avslag.localDateTime("opprettet"),
-            saksbehandlerIdent = avslag.string("ident"),
-            invalidert = avslag.boolean("invalidert"),
+            type = enumValueOf(vedtakBegrunnelse.string("type")),
+            begrunnelse = vedtakBegrunnelse.string("tekst"),
+            opprettet = vedtakBegrunnelse.localDateTime("opprettet"),
+            saksbehandlerIdent = vedtakBegrunnelse.string("ident"),
+            invalidert = vedtakBegrunnelse.boolean("invalidert"),
         )
     }
 }
