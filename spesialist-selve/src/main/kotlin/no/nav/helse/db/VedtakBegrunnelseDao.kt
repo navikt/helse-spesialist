@@ -1,9 +1,8 @@
 package no.nav.helse.db
 
 import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto
-import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto.VurderingDto
 import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto
+import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto.UtfallDto
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -66,36 +65,7 @@ class VedtakBegrunnelseDao(queryRunner: QueryRunner) : QueryRunner by queryRunne
     internal fun finnVedtakBegrunnelse(
         vedtaksperiodeId: UUID,
         generasjonId: Long,
-    ) = asSQL(
-        """
-        SELECT begrunnelse_ref FROM vedtak_begrunnelse 
-        WHERE vedtaksperiode_id = :vedtaksperiodeId 
-        AND generasjon_ref = :generasjonId 
-        AND invalidert = false 
-        ORDER BY opprettet DESC LIMIT 1
-        """.trimIndent(),
-        "vedtaksperiodeId" to vedtaksperiodeId,
-        "generasjonId" to generasjonId,
-    ).singleOrNull {
-        it.longOrNull("begrunnelse_ref")?.let { begrunnelseRef ->
-            asSQL(
-                """
-                SELECT type, tekst FROM begrunnelse WHERE id = :begrunnelseRef
-                """.trimIndent(),
-                "begrunnelseRef" to begrunnelseRef,
-            ).singleOrNull { vedtakBegrunnelse ->
-                VedtakBegrunnelseDto(
-                    type = enumValueOf(vedtakBegrunnelse.string("type")),
-                    begrunnelse = vedtakBegrunnelse.string("tekst"),
-                )
-            }
-        }
-    }
-
-    internal fun finnVurdering(
-        vedtaksperiodeId: UUID,
-        generasjonId: Long,
-    ): SaksbehandlerVurderingDto? {
+    ): VedtakBegrunnelseDto? {
         return asSQL(
             """
             SELECT begrunnelse_ref FROM vedtak_begrunnelse 
@@ -117,10 +87,10 @@ class VedtakBegrunnelseDao(queryRunner: QueryRunner) : QueryRunner by queryRunne
                     val begrunnelse = vedtakBegrunnelse.string("tekst")
                     when (enumValueOf<VedtakBegrunnelseTypeFraDatabase>(vedtakBegrunnelse.string("type"))) {
                         VedtakBegrunnelseTypeFraDatabase.AVSLAG ->
-                            SaksbehandlerVurderingDto(VurderingDto.AVSLAG, begrunnelse)
+                            VedtakBegrunnelseDto(UtfallDto.AVSLAG, begrunnelse)
 
                         VedtakBegrunnelseTypeFraDatabase.DELVIS_AVSLAG ->
-                            SaksbehandlerVurderingDto(VurderingDto.DELVIS_INNVILGELSE, begrunnelse)
+                            VedtakBegrunnelseDto(UtfallDto.DELVIS_INNVILGELSE, begrunnelse)
                     }
                 }
             }

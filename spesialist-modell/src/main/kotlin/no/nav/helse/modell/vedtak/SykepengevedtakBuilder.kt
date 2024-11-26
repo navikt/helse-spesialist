@@ -25,7 +25,7 @@ class SykepengevedtakBuilder {
     private var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta? = null
     private var skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlag? = null
     private var skjønnsfastsettingopplysninger: SkjønnsfastsettingopplysningerDto? = null
-    private var saksbehandlerVurdering: SaksbehandlerVurderingDto? = null // TODO: Endre denne til not null (lateinit) når avslag er erstattet av denne
+    private var vedtakBegrunnelse: VedtakBegrunnelseDto? = null // TODO: Endre denne til not null (lateinit) når avslag er erstattet av denne
     private val tags: MutableSet<String> = mutableSetOf()
     private val tagsForSykepengegrunnlagsfakta: MutableSet<String> = mutableSetOf()
 
@@ -76,9 +76,9 @@ class SykepengevedtakBuilder {
             skjønnsfastsattSykepengegrunnlag.byggVedtak(this)
         }
 
-    fun saksbehandlerVurdering(saksbehandlerVurdering: SaksbehandlerVurdering) =
+    fun vedtakBegrunnelse(vedtakBegrunnelse: VedtakBegrunnelse) =
         apply {
-            saksbehandlerVurdering.byggVedtak(this)
+            vedtakBegrunnelse.byggVedtak(this)
         }
 
     fun tags(tags: List<String>) =
@@ -110,9 +110,9 @@ class SykepengevedtakBuilder {
             )
     }
 
-    fun saksbehandlerVurderingData(saksbehandlerVurdering: SaksbehandlerVurdering) =
+    fun saksbehandlerVurderingData(vedtakBegrunnelse: VedtakBegrunnelse) =
         apply {
-            this.saksbehandlerVurdering = saksbehandlerVurdering.toDto()
+            this.vedtakBegrunnelse = vedtakBegrunnelse.toDto()
         }
 
     fun build(): Sykepengevedtak {
@@ -179,7 +179,7 @@ class SykepengevedtakBuilder {
             skjønnsfastsettingopplysninger = skjønnsfastsettingopplysninger,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
             tags = tags,
-            saksbehandlerVurdering = saksbehandlerVurdering,
+            vedtakBegrunnelse = vedtakBegrunnelse,
         )
     }
 
@@ -207,7 +207,7 @@ class SykepengevedtakBuilder {
             skjønnsfastsettingopplysninger = null,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
             tags = tags,
-            saksbehandlerVurdering = saksbehandlerVurdering,
+            vedtakBegrunnelse = vedtakBegrunnelse,
         )
     }
 

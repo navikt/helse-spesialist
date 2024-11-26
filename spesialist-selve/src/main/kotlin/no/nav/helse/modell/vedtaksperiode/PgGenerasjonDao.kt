@@ -40,7 +40,7 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
                     tom = row.localDate("tom"),
                     tilstand = enumValueOf(row.string("tilstand")),
                     tags = row.array<String>("tags").toList(),
-                    saksbehandlerVurdering = VedtakBegrunnelseDao(queryRunner).finnVurdering(vedtaksperiodeId, generasjonRef),
+                    vedtakBegrunnelse = VedtakBegrunnelseDao(queryRunner).finnVedtakBegrunnelse(vedtaksperiodeId, generasjonRef),
                     varsler = finnVarsler(generasjonRef),
                 )
             }

@@ -3,13 +3,13 @@ package no.nav.helse.mediator
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.januar
-import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto
-import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto.VurderingDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingopplysningerDto
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingstype
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingsårsak
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtak.Sykepengevedtak
+import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto
+import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto.UtfallDto
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -116,7 +116,7 @@ internal class VedtakFattetMelderTest {
                 skjønnsfastsettingopplysninger = null,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                saksbehandlerVurdering = null,
+                vedtakBegrunnelse = null,
             )
         vedtakFattetMelder.vedtakFattet(infotrygd)
         vedtakFattetMelder.publiserUtgåendeMeldinger()
@@ -190,7 +190,7 @@ internal class VedtakFattetMelderTest {
                 skjønnsfastsettingopplysninger = null,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                saksbehandlerVurdering = null,
+                vedtakBegrunnelse = null,
             )
         vedtakFattetMelder.vedtakFattet(infotrygd)
         vedtakFattetMelder.publiserUtgåendeMeldinger()
@@ -278,8 +278,8 @@ internal class VedtakFattetMelderTest {
                 skjønnsfastsettingopplysninger = null,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                saksbehandlerVurdering = SaksbehandlerVurderingDto(
-                    VurderingDto.DELVIS_INNVILGELSE,
+                vedtakBegrunnelse = VedtakBegrunnelseDto(
+                    UtfallDto.DELVIS_INNVILGELSE,
                     "En individuell begrunnelse"
                 ),
             )
@@ -385,7 +385,7 @@ internal class VedtakFattetMelderTest {
                 ),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                saksbehandlerVurdering = null,
+                vedtakBegrunnelse = null,
             )
         vedtakFattetMelder.vedtakFattet(infotrygd)
         vedtakFattetMelder.publiserUtgåendeMeldinger()
@@ -507,7 +507,7 @@ internal class VedtakFattetMelderTest {
                     ),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                saksbehandlerVurdering = SaksbehandlerVurderingDto(VurderingDto.AVSLAG, "En individuell begrunnelse")
+                vedtakBegrunnelse = VedtakBegrunnelseDto(UtfallDto.AVSLAG, "En individuell begrunnelse")
             )
         vedtakFattetMelder.vedtakFattet(infotrygd)
         vedtakFattetMelder.publiserUtgåendeMeldinger()

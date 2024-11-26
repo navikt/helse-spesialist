@@ -5,10 +5,10 @@ import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
-import no.nav.helse.modell.vedtak.SaksbehandlerVurdering
-import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
-import no.nav.helse.modell.vedtak.Vurdering
+import no.nav.helse.modell.vedtak.Utfall
+import no.nav.helse.modell.vedtak.VedtakBegrunnelse
+import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto
 import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.finnGenerasjonForSpleisBehandling
 import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.finnSisteGenerasjonUtenSpleisBehandlingId
 import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.logg
@@ -233,17 +233,17 @@ internal class Vedtaksperiode private constructor(
                                     },
                             )
                         }.toSet(),
-                saksbehandlerVurdering =
-                    saksbehandlerVurdering?.let {
-                        when (it.vurdering) {
-                            SaksbehandlerVurderingDto.VurderingDto.AVSLAG ->
-                                SaksbehandlerVurdering(Vurdering.AVSLAG, it.begrunnelse)
+                vedtakBegrunnelse =
+                    vedtakBegrunnelse?.let {
+                        when (it.utfall) {
+                            VedtakBegrunnelseDto.UtfallDto.AVSLAG ->
+                                VedtakBegrunnelse(Utfall.AVSLAG, it.begrunnelse)
 
-                            SaksbehandlerVurderingDto.VurderingDto.DELVIS_INNVILGELSE ->
-                                SaksbehandlerVurdering(Vurdering.DELVIS_INNVILGELSE, it.begrunnelse)
+                            VedtakBegrunnelseDto.UtfallDto.DELVIS_INNVILGELSE ->
+                                VedtakBegrunnelse(Utfall.DELVIS_INNVILGELSE, it.begrunnelse)
 
-                            SaksbehandlerVurderingDto.VurderingDto.INNVILGELSE ->
-                                SaksbehandlerVurdering(Vurdering.INNVILGELSE, it.begrunnelse)
+                            VedtakBegrunnelseDto.UtfallDto.INNVILGELSE ->
+                                VedtakBegrunnelse(Utfall.INNVILGELSE, it.begrunnelse)
                         }
                     },
             )

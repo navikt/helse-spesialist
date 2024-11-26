@@ -13,8 +13,8 @@ import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVars
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmNegativtBeløp
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmTilbakedatering
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmÅpenGosysOppgave
-import no.nav.helse.modell.vedtak.SaksbehandlerVurdering
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
+import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -29,7 +29,7 @@ internal class Behandling private constructor(
     private var periode: Periode,
     private var tilstand: Tilstand,
     private var tags: List<String>,
-    private val saksbehandlerVurdering: SaksbehandlerVurdering?,
+    private val vedtakBegrunnelse: VedtakBegrunnelse?,
     varsler: Set<Varsel>,
 ) {
     internal constructor(
@@ -49,7 +49,7 @@ internal class Behandling private constructor(
         periode = Periode(fom, tom),
         tilstand = VidereBehandlingAvklares,
         tags = emptyList(),
-        saksbehandlerVurdering = null,
+        vedtakBegrunnelse = null,
         varsler = emptySet(),
     )
 
@@ -81,7 +81,7 @@ internal class Behandling private constructor(
             tom = periode.tom(),
             tilstand = tilstand.toDto(),
             tags = tags,
-            saksbehandlerVurdering = saksbehandlerVurdering?.toDto(),
+            vedtakBegrunnelse = vedtakBegrunnelse?.toDto(),
             varsler = varsler.map(Varsel::toDto),
         )
 
@@ -180,7 +180,7 @@ internal class Behandling private constructor(
         vedtakBuilder.skjæringstidspunkt(skjæringstidspunkt)
         vedtakBuilder.fom(fom())
         vedtakBuilder.tom(tom())
-        saksbehandlerVurdering?.also { vedtakBuilder.saksbehandlerVurdering(it) }
+        vedtakBegrunnelse?.also { vedtakBuilder.vedtakBegrunnelse(it) }
     }
 
     private fun behandlingId(): UUID {
@@ -488,7 +488,7 @@ internal class Behandling private constructor(
             tilstand: Tilstand,
             tags: List<String>,
             varsler: Set<Varsel>,
-            saksbehandlerVurdering: SaksbehandlerVurdering?,
+            vedtakBegrunnelse: VedtakBegrunnelse?,
         ) = Behandling(
             id = id,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -498,7 +498,7 @@ internal class Behandling private constructor(
             periode = Periode(fom, tom),
             tilstand = tilstand,
             tags = tags,
-            saksbehandlerVurdering = saksbehandlerVurdering,
+            vedtakBegrunnelse = vedtakBegrunnelse,
             varsler = varsler,
         )
 

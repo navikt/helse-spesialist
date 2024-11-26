@@ -4,10 +4,10 @@ import no.nav.helse.modell.januar
 import no.nav.helse.modell.vedtak.Faktatype.ETTER_HOVEDREGEL
 import no.nav.helse.modell.vedtak.Faktatype.ETTER_SKJØNN
 import no.nav.helse.modell.vedtak.Faktatype.I_INFOTRYGD
-import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto.VurderingDto
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Infotrygd
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver
+import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto.UtfallDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -63,7 +63,7 @@ class SykepengevedtakBuilderTest {
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_HOVEDREGEL))
-            .saksbehandlerVurdering(SaksbehandlerVurdering(Vurdering.INNVILGELSE, null))
+            .vedtakBegrunnelse(VedtakBegrunnelse(Utfall.INNVILGELSE, null))
             .tags(listOf("IngenNyArbeidsgiverperiode"))
             .build()
 
@@ -89,7 +89,7 @@ class SykepengevedtakBuilderTest {
                 skjønnsfastsettingopplysninger = null,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                saksbehandlerVurdering = SaksbehandlerVurdering(Vurdering.INNVILGELSE, null).toDto(),
+                vedtakBegrunnelse = VedtakBegrunnelse(Utfall.INNVILGELSE, null).toDto(),
             ),
             utkast,
         )
@@ -127,7 +127,7 @@ class SykepengevedtakBuilderTest {
                 ),
             )
             .tags(listOf("IngenNyArbeidsgiverperiode"))
-            .saksbehandlerVurdering(SaksbehandlerVurdering(Vurdering.INNVILGELSE, null))
+            .vedtakBegrunnelse(VedtakBegrunnelse(Utfall.INNVILGELSE, null))
             .build()
 
         assertTrue(utkast is Sykepengevedtak.Vedtak)
@@ -159,7 +159,7 @@ class SykepengevedtakBuilderTest {
                 ),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                saksbehandlerVurdering = SaksbehandlerVurdering(Vurdering.INNVILGELSE, null).toDto(),
+                vedtakBegrunnelse = VedtakBegrunnelse(Utfall.INNVILGELSE, null).toDto(),
             ),
             utkast,
         )
@@ -185,8 +185,8 @@ class SykepengevedtakBuilderTest {
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_HOVEDREGEL))
-            .saksbehandlerVurdering(
-                SaksbehandlerVurdering(Vurdering.DELVIS_INNVILGELSE, "En individuell begrunnelse for avslag")
+            .vedtakBegrunnelse(
+                VedtakBegrunnelse(Utfall.DELVIS_INNVILGELSE, "En individuell begrunnelse for avslag")
             )
             .tags(listOf("IngenNyArbeidsgiverperiode"))
             .build()
@@ -213,8 +213,8 @@ class SykepengevedtakBuilderTest {
                 skjønnsfastsettingopplysninger = null,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                saksbehandlerVurdering = SaksbehandlerVurderingDto(
-                    VurderingDto.DELVIS_INNVILGELSE,
+                vedtakBegrunnelse = VedtakBegrunnelseDto(
+                    UtfallDto.DELVIS_INNVILGELSE,
                     "En individuell begrunnelse for avslag"
                 ),
             ),
@@ -253,8 +253,8 @@ class SykepengevedtakBuilderTest {
                     LocalDateTime.now(),
                 ),
             )
-            .saksbehandlerVurdering(
-                SaksbehandlerVurdering(Vurdering.AVSLAG, "En individuell begrunnelse for avslag")
+            .vedtakBegrunnelse(
+                VedtakBegrunnelse(Utfall.AVSLAG, "En individuell begrunnelse for avslag")
             )
             .tags(listOf("IngenNyArbeidsgiverperiode"))
             .build()
@@ -288,8 +288,8 @@ class SykepengevedtakBuilderTest {
                 ),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                saksbehandlerVurdering = SaksbehandlerVurderingDto(
-                    VurderingDto.AVSLAG,
+                vedtakBegrunnelse = VedtakBegrunnelseDto(
+                    UtfallDto.AVSLAG,
                     "En individuell begrunnelse for avslag"
                 ),
             ),
@@ -318,7 +318,7 @@ class SykepengevedtakBuilderTest {
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(I_INFOTRYGD))
             .tags(listOf("IngenNyArbeidsgiverperiode"))
-            .saksbehandlerVurdering(SaksbehandlerVurdering(Vurdering.INNVILGELSE, null))
+            .vedtakBegrunnelse(VedtakBegrunnelse(Utfall.INNVILGELSE, null))
             .build()
 
         assertTrue(utkast is Sykepengevedtak.Vedtak)
@@ -343,7 +343,7 @@ class SykepengevedtakBuilderTest {
                 skjønnsfastsettingopplysninger = null,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                saksbehandlerVurdering = SaksbehandlerVurderingDto(VurderingDto.INNVILGELSE, null),
+                vedtakBegrunnelse = VedtakBegrunnelseDto(UtfallDto.INNVILGELSE, null),
             ),
             utkast,
         )
@@ -517,7 +517,7 @@ class SykepengevedtakBuilderTest {
                 Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
             )
             .tags(listOf("IngenNyArbeidsgiverperiode"))
-            .saksbehandlerVurdering(SaksbehandlerVurdering(Vurdering.INNVILGELSE, null))
+            .vedtakBegrunnelse(VedtakBegrunnelse(Utfall.INNVILGELSE, null))
             .build()
 
         assertTrue(utkast is Sykepengevedtak.Vedtak)
@@ -542,7 +542,7 @@ class SykepengevedtakBuilderTest {
                 skjønnsfastsettingopplysninger = null,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                saksbehandlerVurdering = SaksbehandlerVurderingDto(VurderingDto.INNVILGELSE, null),
+                vedtakBegrunnelse = VedtakBegrunnelseDto(UtfallDto.INNVILGELSE, null),
             ),
             utkast,
         )

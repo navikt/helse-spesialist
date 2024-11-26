@@ -2,10 +2,10 @@ package no.nav.helse.mediator
 
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.person.PersonObserver
-import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Infotrygd
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis
 import no.nav.helse.modell.vedtak.Sykepengevedtak
+import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import org.slf4j.LoggerFactory
@@ -163,15 +163,15 @@ internal class VedtakFattetMelder(
                         )
                     }
 
-                    val saksbehandlerVurdering = sykepengevedtak.saksbehandlerVurdering
+                    val saksbehandlerVurdering = sykepengevedtak.vedtakBegrunnelse
                     if (saksbehandlerVurdering != null) {
                         begrunnelser.addLast(
                             mapOf(
                                 "type" to
-                                    when (saksbehandlerVurdering.vurdering) {
-                                        SaksbehandlerVurderingDto.VurderingDto.AVSLAG -> "Avslag"
-                                        SaksbehandlerVurderingDto.VurderingDto.DELVIS_INNVILGELSE -> "DelvisInnvilgelse"
-                                        SaksbehandlerVurderingDto.VurderingDto.INNVILGELSE -> "Innvilgelse"
+                                    when (saksbehandlerVurdering.utfall) {
+                                        VedtakBegrunnelseDto.UtfallDto.AVSLAG -> "Avslag"
+                                        VedtakBegrunnelseDto.UtfallDto.DELVIS_INNVILGELSE -> "DelvisInnvilgelse"
+                                        VedtakBegrunnelseDto.UtfallDto.INNVILGELSE -> "Innvilgelse"
                                     },
                                 "begrunnelse" to (saksbehandlerVurdering.begrunnelse ?: ""),
                                 "perioder" to

@@ -122,7 +122,7 @@ sealed class Sykepengevedtak(
         val skjønnsfastsettingopplysninger: SkjønnsfastsettingopplysningerDto?,
         vedtakFattetTidspunkt: LocalDateTime,
         tags: Set<String>,
-        val saksbehandlerVurdering: SaksbehandlerVurderingDto?,
+        val vedtakBegrunnelse: VedtakBegrunnelseDto?,
     ) : Sykepengevedtak(
             fødselsnummer,
             aktørId,
@@ -148,7 +148,7 @@ sealed class Sykepengevedtak(
                     this.utbetalingId == other.utbetalingId &&
                     this.sykepengegrunnlagsfakta == other.sykepengegrunnlagsfakta &&
                     this.skjønnsfastsettingopplysninger == other.skjønnsfastsettingopplysninger &&
-                    this.saksbehandlerVurdering == other.saksbehandlerVurdering
+                    this.vedtakBegrunnelse == other.vedtakBegrunnelse
             )
 
         override fun hashCode(): Int {
@@ -156,7 +156,7 @@ sealed class Sykepengevedtak(
             result = 31 * result + utbetalingId.hashCode()
             result = 31 * result + sykepengegrunnlagsfakta.hashCode()
             result = 31 * result + skjønnsfastsettingopplysninger.hashCode()
-            result = 31 * result + saksbehandlerVurdering.hashCode()
+            result = 31 * result + vedtakBegrunnelse.hashCode()
             return result
         }
     }
@@ -171,20 +171,10 @@ data class SkjønnsfastsettingopplysningerDto(
 )
 
 data class VedtakBegrunnelseDto(
-    val type: AvslagstypeDto,
-    val begrunnelse: String,
-)
-
-enum class AvslagstypeDto {
-    AVSLAG,
-    DELVIS_AVSLAG,
-}
-
-data class SaksbehandlerVurderingDto(
-    val vurdering: VurderingDto,
+    val utfall: UtfallDto,
     val begrunnelse: String?,
 ) {
-    enum class VurderingDto {
+    enum class UtfallDto {
         AVSLAG,
         DELVIS_INNVILGELSE,
         INNVILGELSE,

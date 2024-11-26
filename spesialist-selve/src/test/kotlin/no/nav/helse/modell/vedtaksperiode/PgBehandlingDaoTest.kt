@@ -4,8 +4,8 @@ import DatabaseIntegrationTest
 import no.nav.helse.januar
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
-import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto
-import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto.VurderingDto
+import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto
+import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto.UtfallDto
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
@@ -96,7 +96,7 @@ internal class PgBehandlingDaoTest : DatabaseIntegrationTest() {
                 tom = 31.januar,
                 tilstand = TilstandDto.KlarTilBehandling,
                 tags = listOf("TAG"),
-                saksbehandlerVurdering = SaksbehandlerVurderingDto(VurderingDto.AVSLAG, "En begrunnelse"),
+                vedtakBegrunnelse = VedtakBegrunnelseDto(UtfallDto.AVSLAG, "En begrunnelse"),
                 varsler = listOf(varsel),
             )
 
@@ -114,7 +114,7 @@ internal class PgBehandlingDaoTest : DatabaseIntegrationTest() {
                 tom = 31.januar,
                 tilstand = TilstandDto.KlarTilBehandling,
                 tags = listOf("TAG"),
-                saksbehandlerVurdering = null,
+                vedtakBegrunnelse = null,
                 varsler = listOf(varsel),
             ),
             funnet.single()
