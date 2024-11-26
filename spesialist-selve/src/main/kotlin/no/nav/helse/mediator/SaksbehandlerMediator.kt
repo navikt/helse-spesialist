@@ -367,10 +367,7 @@ internal class SaksbehandlerMediator(
                 type =
                     when (it.type) {
                         VedtakBegrunnelseTypeFraDatabase.AVSLAG -> Avslagstype.AVSLAG
-
-                        VedtakBegrunnelseTypeFraDatabase.DELVIS_AVSLAG,
-                        VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE,
-                        -> Avslagstype.DELVIS_AVSLAG
+                        VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> Avslagstype.DELVIS_AVSLAG
                     },
                 begrunnelse = it.begrunnelse,
                 opprettet = it.opprettet,

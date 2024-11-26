@@ -89,9 +89,7 @@ class VedtakBegrunnelseDao(queryRunner: QueryRunner) : QueryRunner by queryRunne
                         VedtakBegrunnelseTypeFraDatabase.AVSLAG ->
                             VedtakBegrunnelseDto(UtfallDto.AVSLAG, begrunnelse)
 
-                        VedtakBegrunnelseTypeFraDatabase.DELVIS_AVSLAG,
-                        VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE,
-                        ->
+                        VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE ->
                             VedtakBegrunnelseDto(UtfallDto.DELVIS_INNVILGELSE, begrunnelse)
                     }
                 }
