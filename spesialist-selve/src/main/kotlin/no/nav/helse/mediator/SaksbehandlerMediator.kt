@@ -94,6 +94,7 @@ import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.avvisVarsler
 import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.godkjennVarsler
 import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.harAktiveVarsler
 import no.nav.helse.spesialist.api.vedtaksperiode.ApiGenerasjonRepository
+import no.nav.helse.tell
 import org.slf4j.LoggerFactory
 import java.util.UUID
 import javax.sql.DataSource
