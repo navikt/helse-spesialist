@@ -224,7 +224,7 @@ internal class VurderVurderingsmomenterTest {
 
         risikoCommand().execute(context)
 
-        assertEquals(listOf("SB_RV_1"), generasjon.toDto().varsler.map { it.varselkode })
+        assertEquals(listOf("SB_RV_1"), behandling.toDto().varsler.map { it.varselkode })
     }
 
     private fun risikoCommand(
