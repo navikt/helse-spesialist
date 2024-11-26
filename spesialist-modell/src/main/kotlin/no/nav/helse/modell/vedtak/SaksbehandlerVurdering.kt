@@ -12,19 +12,10 @@ data class SaksbehandlerVurdering(
 
     fun toDto() =
         when (vurdering) {
-            Vurdering.AVSLAG -> SaksbehandlerVurderingDto.Avslag(begrunnelse)
-            Vurdering.DELVIS_INNVILGELSE -> SaksbehandlerVurderingDto.DelvisInnvilgelse(begrunnelse)
-            Vurdering.INNVILGELSE -> SaksbehandlerVurderingDto.Innvilgelse(begrunnelse)
+            Vurdering.AVSLAG -> SaksbehandlerVurderingDto(VurderingDto.AVSLAG, begrunnelse)
+            Vurdering.DELVIS_INNVILGELSE -> SaksbehandlerVurderingDto(VurderingDto.DELVIS_INNVILGELSE, begrunnelse)
+            Vurdering.INNVILGELSE -> SaksbehandlerVurderingDto(VurderingDto.INNVILGELSE, begrunnelse)
         }
-
-    companion object {
-        fun Innvilgelse(innvilgelsesbegrunnelse: String? = null) = SaksbehandlerVurdering(Vurdering.INNVILGELSE, innvilgelsesbegrunnelse)
-
-        fun Avslag(avslagsbegrunnelse: String?) = SaksbehandlerVurdering(Vurdering.AVSLAG, avslagsbegrunnelse)
-
-        fun DelvisInnvilgelse(delvisInnvilgelsebegrunnelse: String?) =
-            SaksbehandlerVurdering(Vurdering.DELVIS_INNVILGELSE, delvisInnvilgelsebegrunnelse)
-    }
 }
 
 enum class Vurdering {

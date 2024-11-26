@@ -189,14 +189,4 @@ data class SaksbehandlerVurderingDto(
         DELVIS_INNVILGELSE,
         INNVILGELSE,
     }
-
-    companion object {
-        fun Innvilgelse(innvilgelsesbegrunnelse: String? = null) =
-            SaksbehandlerVurderingDto(VurderingDto.INNVILGELSE, innvilgelsesbegrunnelse)
-
-        fun Avslag(avslagsbegrunnelse: String?) = SaksbehandlerVurderingDto(VurderingDto.AVSLAG, avslagsbegrunnelse)
-
-        fun DelvisInnvilgelse(delvisInnvilgelsebegrunnelse: String?) =
-            SaksbehandlerVurderingDto(VurderingDto.DELVIS_INNVILGELSE, delvisInnvilgelsebegrunnelse)
-    }
 }

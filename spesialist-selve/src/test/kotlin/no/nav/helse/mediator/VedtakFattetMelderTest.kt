@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.januar
 import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto
+import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto.VurderingDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingopplysningerDto
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingstype
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingsårsak
@@ -277,8 +278,11 @@ internal class VedtakFattetMelderTest {
                 skjønnsfastsettingopplysninger = null,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                saksbehandlerVurdering = SaksbehandlerVurderingDto.DelvisInnvilgelse("En individuell begrunnelse"),
-        )
+                saksbehandlerVurdering = SaksbehandlerVurderingDto(
+                    VurderingDto.DELVIS_INNVILGELSE,
+                    "En individuell begrunnelse"
+                ),
+            )
         vedtakFattetMelder.vedtakFattet(spleis)
         vedtakFattetMelder.publiserUtgåendeMeldinger()
         val eventer = testRapid.inspektør.meldinger()
@@ -503,7 +507,7 @@ internal class VedtakFattetMelderTest {
                     ),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                saksbehandlerVurdering = SaksbehandlerVurderingDto.Avslag("En individuell begrunnelse")
+                saksbehandlerVurdering = SaksbehandlerVurderingDto(VurderingDto.AVSLAG, "En individuell begrunnelse")
             )
         vedtakFattetMelder.vedtakFattet(infotrygd)
         vedtakFattetMelder.publiserUtgåendeMeldinger()

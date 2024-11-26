@@ -8,6 +8,7 @@ import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtak.SaksbehandlerVurdering
 import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
+import no.nav.helse.modell.vedtak.Vurdering
 import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.finnGenerasjonForSpleisBehandling
 import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.finnSisteGenerasjonUtenSpleisBehandlingId
 import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.logg
@@ -235,12 +236,14 @@ internal class Vedtaksperiode private constructor(
                 saksbehandlerVurdering =
                     saksbehandlerVurdering?.let {
                         when (it.vurdering) {
-                            SaksbehandlerVurderingDto.VurderingDto.AVSLAG -> SaksbehandlerVurdering.Avslag(it.begrunnelse)
+                            SaksbehandlerVurderingDto.VurderingDto.AVSLAG ->
+                                SaksbehandlerVurdering(Vurdering.AVSLAG, it.begrunnelse)
+
                             SaksbehandlerVurderingDto.VurderingDto.DELVIS_INNVILGELSE ->
-                                SaksbehandlerVurdering.DelvisInnvilgelse(
-                                    it.begrunnelse,
-                                )
-                            SaksbehandlerVurderingDto.VurderingDto.INNVILGELSE -> SaksbehandlerVurdering.Innvilgelse(it.begrunnelse)
+                                SaksbehandlerVurdering(Vurdering.DELVIS_INNVILGELSE, it.begrunnelse)
+
+                            SaksbehandlerVurderingDto.VurderingDto.INNVILGELSE ->
+                                SaksbehandlerVurdering(Vurdering.INNVILGELSE, it.begrunnelse)
                         }
                     },
             )

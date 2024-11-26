@@ -2,6 +2,7 @@ package no.nav.helse.db
 
 import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto
+import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto.VurderingDto
 import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto
 import java.util.UUID
 import javax.sql.DataSource
@@ -115,11 +116,11 @@ class VedtakBegrunnelseDao(queryRunner: QueryRunner) : QueryRunner by queryRunne
                 ).singleOrNull { vedtakBegrunnelse ->
                     val begrunnelse = vedtakBegrunnelse.string("tekst")
                     when (enumValueOf<VedtakBegrunnelseTypeFraDatabase>(vedtakBegrunnelse.string("type"))) {
-                        VedtakBegrunnelseTypeFraDatabase.AVSLAG -> SaksbehandlerVurderingDto.Avslag(begrunnelse)
+                        VedtakBegrunnelseTypeFraDatabase.AVSLAG ->
+                            SaksbehandlerVurderingDto(VurderingDto.AVSLAG, begrunnelse)
+
                         VedtakBegrunnelseTypeFraDatabase.DELVIS_AVSLAG ->
-                            SaksbehandlerVurderingDto.DelvisInnvilgelse(
-                                begrunnelse,
-                            )
+                            SaksbehandlerVurderingDto(VurderingDto.DELVIS_INNVILGELSE, begrunnelse)
                     }
                 }
             }

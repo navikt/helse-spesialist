@@ -4,6 +4,7 @@ import no.nav.helse.modell.januar
 import no.nav.helse.modell.vedtak.Faktatype.ETTER_HOVEDREGEL
 import no.nav.helse.modell.vedtak.Faktatype.ETTER_SKJØNN
 import no.nav.helse.modell.vedtak.Faktatype.I_INFOTRYGD
+import no.nav.helse.modell.vedtak.SaksbehandlerVurderingDto.VurderingDto
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Infotrygd
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver
@@ -62,7 +63,7 @@ class SykepengevedtakBuilderTest {
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_HOVEDREGEL))
-            .saksbehandlerVurdering(SaksbehandlerVurdering.Innvilgelse())
+            .saksbehandlerVurdering(SaksbehandlerVurdering(Vurdering.INNVILGELSE, null))
             .tags(listOf("IngenNyArbeidsgiverperiode"))
             .build()
 
@@ -88,7 +89,7 @@ class SykepengevedtakBuilderTest {
                 skjønnsfastsettingopplysninger = null,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                saksbehandlerVurdering = SaksbehandlerVurdering.Innvilgelse().toDto(),
+                saksbehandlerVurdering = SaksbehandlerVurdering(Vurdering.INNVILGELSE, null).toDto(),
             ),
             utkast,
         )
@@ -126,7 +127,7 @@ class SykepengevedtakBuilderTest {
                 ),
             )
             .tags(listOf("IngenNyArbeidsgiverperiode"))
-            .saksbehandlerVurdering(SaksbehandlerVurdering.Innvilgelse())
+            .saksbehandlerVurdering(SaksbehandlerVurdering(Vurdering.INNVILGELSE, null))
             .build()
 
         assertTrue(utkast is Sykepengevedtak.Vedtak)
@@ -158,7 +159,7 @@ class SykepengevedtakBuilderTest {
                 ),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                saksbehandlerVurdering = SaksbehandlerVurdering.Innvilgelse().toDto(),
+                saksbehandlerVurdering = SaksbehandlerVurdering(Vurdering.INNVILGELSE, null).toDto(),
             ),
             utkast,
         )
@@ -185,7 +186,7 @@ class SykepengevedtakBuilderTest {
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_HOVEDREGEL))
             .saksbehandlerVurdering(
-                SaksbehandlerVurdering.DelvisInnvilgelse("En individuell begrunnelse for avslag")
+                SaksbehandlerVurdering(Vurdering.DELVIS_INNVILGELSE, "En individuell begrunnelse for avslag")
             )
             .tags(listOf("IngenNyArbeidsgiverperiode"))
             .build()
@@ -212,7 +213,10 @@ class SykepengevedtakBuilderTest {
                 skjønnsfastsettingopplysninger = null,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                saksbehandlerVurdering = SaksbehandlerVurderingDto.DelvisInnvilgelse("En individuell begrunnelse for avslag"),
+                saksbehandlerVurdering = SaksbehandlerVurderingDto(
+                    VurderingDto.DELVIS_INNVILGELSE,
+                    "En individuell begrunnelse for avslag"
+                ),
             ),
             utkast,
         )
@@ -250,7 +254,7 @@ class SykepengevedtakBuilderTest {
                 ),
             )
             .saksbehandlerVurdering(
-                SaksbehandlerVurdering.Avslag("En individuell begrunnelse for avslag")
+                SaksbehandlerVurdering(Vurdering.AVSLAG, "En individuell begrunnelse for avslag")
             )
             .tags(listOf("IngenNyArbeidsgiverperiode"))
             .build()
@@ -284,7 +288,10 @@ class SykepengevedtakBuilderTest {
                 ),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                saksbehandlerVurdering = SaksbehandlerVurderingDto.Avslag("En individuell begrunnelse for avslag"),
+                saksbehandlerVurdering = SaksbehandlerVurderingDto(
+                    VurderingDto.AVSLAG,
+                    "En individuell begrunnelse for avslag"
+                ),
             ),
             utkast,
         )
@@ -311,7 +318,7 @@ class SykepengevedtakBuilderTest {
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(I_INFOTRYGD))
             .tags(listOf("IngenNyArbeidsgiverperiode"))
-            .saksbehandlerVurdering(SaksbehandlerVurdering.Innvilgelse())
+            .saksbehandlerVurdering(SaksbehandlerVurdering(Vurdering.INNVILGELSE, null))
             .build()
 
         assertTrue(utkast is Sykepengevedtak.Vedtak)
@@ -336,7 +343,7 @@ class SykepengevedtakBuilderTest {
                 skjønnsfastsettingopplysninger = null,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                saksbehandlerVurdering = SaksbehandlerVurderingDto.Innvilgelse(),
+                saksbehandlerVurdering = SaksbehandlerVurderingDto(VurderingDto.INNVILGELSE, null),
             ),
             utkast,
         )
@@ -510,7 +517,7 @@ class SykepengevedtakBuilderTest {
                 Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
             )
             .tags(listOf("IngenNyArbeidsgiverperiode"))
-            .saksbehandlerVurdering(SaksbehandlerVurdering.Innvilgelse())
+            .saksbehandlerVurdering(SaksbehandlerVurdering(Vurdering.INNVILGELSE, null))
             .build()
 
         assertTrue(utkast is Sykepengevedtak.Vedtak)
@@ -535,7 +542,7 @@ class SykepengevedtakBuilderTest {
                 skjønnsfastsettingopplysninger = null,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                saksbehandlerVurdering = SaksbehandlerVurderingDto.Innvilgelse(),
+                saksbehandlerVurdering = SaksbehandlerVurderingDto(VurderingDto.INNVILGELSE, null),
             ),
             utkast,
         )
