@@ -1,12 +1,12 @@
 package no.nav.helse.db
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import kotliquery.Row
 import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.objectMapper
-import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
 import java.time.LocalDate
 import java.time.LocalDateTime

@@ -1,11 +1,11 @@
 package no.nav.helse.mediator
 
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.kafka.message_builders.behovName
 import no.nav.helse.kafka.message_builders.somJsonMessage
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.hendelse.UtgåendeHendelse
-import no.nav.helse.rapids_rivers.MessageContext
 import org.slf4j.LoggerFactory
 import java.util.UUID
 

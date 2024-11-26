@@ -1,13 +1,10 @@
 package no.nav.helse
 
-import io.prometheus.client.Counter
-import io.prometheus.client.Histogram
-import io.prometheus.client.Summary
+import io.micrometer.core.instrument.Counter
 import no.nav.helse.mediator.GodkjenningsbehovUtfall
 
 internal val automatiseringsteller =
-    Counter.build("automatiseringer", "Teller antall automatiseringer")
-        .register()
+    Counter.builder("automatiseringer").description("Teller antall automatiseringer").register()
 
 internal val automatiskAvvistÅrsakerTeller =
     Counter.build(
