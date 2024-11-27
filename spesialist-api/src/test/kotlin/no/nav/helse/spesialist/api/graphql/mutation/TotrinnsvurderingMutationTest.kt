@@ -24,6 +24,23 @@ internal class TotrinnsvurderingMutationTest : AbstractGraphQLApiTest() {
     }
 
     @Test
+    fun `send oppgave til godkjenning med V2`() {
+        opprettSaksbehandler()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        val oppgaveRef = finnOppgaveIdFor(PERIODE.id)
+
+        val body = runQuery(
+            """
+            mutation TotrinnsvurderingMutation {
+                sendTilGodkjenningV2(oppgavereferanse: "$oppgaveRef", vedtakBegrunnelse: { utfall: INNVILGELSE })
+            }
+        """
+        )
+
+        assertTrue(body["data"]["sendTilGodkjenningV2"].asBoolean())
+    }
+
+    @Test
     fun `send oppgave i retur`() {
         opprettSaksbehandler()
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())

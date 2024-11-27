@@ -65,6 +65,8 @@ import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagshandling
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
+import no.nav.helse.spesialist.api.graphql.mutation.VedtakBegrunnelse
+import no.nav.helse.spesialist.api.graphql.mutation.VedtakBegrunnelseUtfall
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation.VedtakResultat
 import no.nav.helse.spesialist.api.graphql.schema.AnnulleringData
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
@@ -158,6 +160,36 @@ internal class SaksbehandlerMediator(
         avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag?,
     ): VedtakResultat {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
+        return vedtak(oppgavereferanse, saksbehandler, godkjent).also {
+            håndterAvslag(
+                avslag = avslag,
+                oppgaveId = oppgavereferanse,
+                saksbehandlerOid = saksbehandler.oid(),
+            )
+        }
+    }
+
+    override fun vedtak(
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+        oppgavereferanse: Long,
+        godkjent: Boolean,
+        vedtakBegrunnelse: VedtakBegrunnelse?,
+    ): VedtakResultat {
+        val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
+        return vedtak(oppgavereferanse, saksbehandler, godkjent).also {
+            håndterVedtakBegrunnelse(
+                vedtakBegrunnelse = vedtakBegrunnelse,
+                oppgaveId = oppgavereferanse,
+                saksbehandlerOid = saksbehandler.oid(),
+            )
+        }
+    }
+
+    private fun vedtak(
+        oppgavereferanse: Long,
+        saksbehandler: Saksbehandler,
+        godkjent: Boolean,
+    ): VedtakResultat {
         val erÅpenOppgave = oppgaveService.venterPåSaksbehandler(oppgavereferanse)
         val spleisBehandlingId = oppgaveService.spleisBehandlingId(oppgavereferanse)
         val fødselsnummer = oppgaveApiDao.finnFødselsnummer(oppgavereferanse)
@@ -184,11 +216,6 @@ internal class SaksbehandlerMediator(
         }
 
         påVentDao.slettPåVent(oppgavereferanse)
-        håndterAvslag(
-            avslag = avslag,
-            oppgaveId = oppgavereferanse,
-            saksbehandlerOid = saksbehandler.oid(),
-        )
         return VedtakResultat.Ok(spleisBehandlingId)
     }
 
@@ -384,6 +411,18 @@ internal class SaksbehandlerMediator(
         )
     }
 
+    override fun håndterVedtakBegrunnelse(
+        oppgaveId: Long,
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+        vedtakBegrunnelse: VedtakBegrunnelse,
+    ) {
+        håndterVedtakBegrunnelse(
+            vedtakBegrunnelse = vedtakBegrunnelse,
+            oppgaveId = oppgaveId,
+            saksbehandlerOid = saksbehandlerFraApi.oid,
+        )
+    }
+
     private fun håndterAvslag(
         avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag?,
         oppgaveId: Long,
@@ -397,6 +436,26 @@ internal class SaksbehandlerMediator(
                     oppgaveId = oppgaveId,
                     type = avslag.data!!.type.toVedtakBegrunnelseTypeFraDatabase(),
                     begrunnelse = avslag.data!!.begrunnelse,
+                    saksbehandlerOid = saksbehandlerOid,
+                )
+            }
+        }
+    }
+
+    private fun håndterVedtakBegrunnelse(
+        vedtakBegrunnelse: VedtakBegrunnelse?,
+        oppgaveId: Long,
+        saksbehandlerOid: UUID,
+    ) {
+        if (vedtakBegrunnelse != null) {
+            val begrunnelse = vedtakBegrunnelse.begrunnelse
+            if (begrunnelse == null) {
+                vedtakBegrunnelseDao.invaliderVedtakBegrunnelse(oppgaveId = oppgaveId)
+            } else {
+                vedtakBegrunnelseDao.lagreVedtakBegrunnelse(
+                    oppgaveId = oppgaveId,
+                    type = vedtakBegrunnelse.utfall.toVedtakBegrunnelseTypeFraDatabase(),
+                    begrunnelse = begrunnelse,
                     saksbehandlerOid = saksbehandlerOid,
                 )
             }
@@ -728,5 +787,12 @@ internal class SaksbehandlerMediator(
         when (this) {
             Avslagstype.AVSLAG -> VedtakBegrunnelseTypeFraDatabase.AVSLAG
             Avslagstype.DELVIS_AVSLAG -> VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE
+        }
+
+    private fun VedtakBegrunnelseUtfall.toVedtakBegrunnelseTypeFraDatabase() =
+        when (this) {
+            VedtakBegrunnelseUtfall.AVSLAG -> VedtakBegrunnelseTypeFraDatabase.AVSLAG
+            VedtakBegrunnelseUtfall.DELVIS_INNVILGELSE -> VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE
+            VedtakBegrunnelseUtfall.INNVILGELSE -> VedtakBegrunnelseTypeFraDatabase.INNVILGELSE
         }
 }

@@ -50,6 +50,30 @@ class VedtakMutation(
         }
 
     @Suppress("unused")
+    suspend fun fattVedtak(
+        oppgavereferanse: String,
+        env: DataFetchingEnvironment,
+        vedtakBegrunnelse: VedtakBegrunnelse,
+    ): DataFetcherResult<Boolean> =
+        withContext(Dispatchers.IO) {
+            val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
+            logg.info("Fatter vedtak for oppgave $oppgavereferanse")
+
+            when (val resultat = saksbehandlerhåndterer.vedtak(saksbehandler, oppgavereferanse.toLong(), true, vedtakBegrunnelse)) {
+                is VedtakResultat.Ok -> {
+                    val dto =
+                        GodkjenningDto(oppgavereferanse.toLong(), true, saksbehandler.ident, null, null, null, null)
+                    godkjenninghåndterer.håndter(dto, saksbehandler.epost, saksbehandler.oid)
+                    newResult<Boolean>().data(true).build()
+                }
+                is VedtakResultat.Feil -> {
+                    logg.warn("Kunne ikke innvilge vedtak: ${resultat.melding}")
+                    newResult<Boolean>().error(vedtakGraphQLError(resultat.melding, resultat.code, resultat.exception)).build()
+                }
+            }
+        }
+
+    @Suppress("unused")
     suspend fun sendTilInfotrygd(
         oppgavereferanse: String,
         arsak: String,
@@ -61,7 +85,7 @@ class VedtakMutation(
             val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
             logg.info("Sender oppgave $oppgavereferanse til Infotrygd")
 
-            when (val resultat = saksbehandlerhåndterer.vedtak(saksbehandler, oppgavereferanse.toLong(), false, null)) {
+            when (val resultat = saksbehandlerhåndterer.vedtak(saksbehandler, oppgavereferanse.toLong(), false, vedtakBegrunnelse = null)) {
                 is VedtakResultat.Ok -> {
                     val godkjenning = GodkjenningDto(oppgavereferanse.toLong(), false, saksbehandler.ident, arsak, begrunnelser, kommentar)
                     godkjenninghåndterer.håndter(godkjenning, saksbehandler.epost, saksbehandler.oid)
@@ -122,4 +146,15 @@ enum class Avslagstype {
 enum class Avslagshandling {
     OPPRETT,
     INVALIDER,
+}
+
+data class VedtakBegrunnelse(
+    val utfall: VedtakBegrunnelseUtfall,
+    val begrunnelse: String?,
+)
+
+enum class VedtakBegrunnelseUtfall {
+    AVSLAG,
+    DELVIS_INNVILGELSE,
+    INNVILGELSE,
 }
