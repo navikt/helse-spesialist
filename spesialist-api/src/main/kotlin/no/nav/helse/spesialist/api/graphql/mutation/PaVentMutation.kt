@@ -85,6 +85,42 @@ class PaVentMutation(
         }
     }
 
+    /*@Suppress("unused")
+    suspend fun oppdaterPaVentFrist(
+        oppgaveId: String,
+        notatTekst: String?,
+        frist: LocalDate,
+        tildeling: Boolean,
+        arsaker: List<PaVentRequest.PaVentArsak>,
+        env: DataFetchingEnvironment,
+    ): DataFetcherResult<PaVent?> {
+        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
+        return withContext(Dispatchers.IO) {
+            try {
+                saksbehandlerhåndterer.påVent(
+                    PaVentRequest.LeggPaVent(
+                        oppgaveId = oppgaveId.toLong(),
+                        saksbehandlerOid = saksbehandler.oid,
+                        frist = frist,
+                        skalTildeles = tildeling,
+                        notatTekst = notatTekst,
+                        årsaker = arsaker
+                    ),
+                    saksbehandler
+                )
+                newResult<PaVent?>()
+                    .data(
+                        PaVent(
+                            frist = frist,
+                            oid = saksbehandler.oid,
+                        ),
+                    ).build()
+            } catch (e: RuntimeException) {
+                newResult<PaVent?>().error(getUpdateError(oppgaveId)).build()
+            }
+        }
+    }*/
+
     private fun getUpdateError(oppgaveId: String): GraphQLError {
         val message = "Kunne ikke tildele oppgave med oppgaveId=$oppgaveId"
         sikkerlogg.error(message)

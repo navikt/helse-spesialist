@@ -262,23 +262,48 @@ internal class SaksbehandlerMediator(
         saksbehandler: Saksbehandler,
     ) {
         try {
-            val dialogRef = dialogDao.lagre()
-            val innslag =
-                HistorikkinnslagDto.lagtPåVentInnslag(
-                    notattekst = handling.notatTekst,
-                    saksbehandler = saksbehandler.toDto(),
-                    årsaker = handling.årsaker,
-                    frist = handling.frist,
-                    dialogRef = dialogRef,
-                )
-            periodehistorikkDao.lagreMedOppgaveId(innslag, handling.oppgaveId)
-            oppgaveService.leggPåVent(handling, saksbehandler)
-            PåVentRepository(påVentDao).leggPåVent(saksbehandler.oid(), handling, dialogRef)
-            saksbehandler.register(Saksbehandlingsmelder(rapidsConnection))
-            handling.utførAv(saksbehandler)
+            if (PåVentRepository(påVentDao).finnPåVent(handling)) {
+                forlengFrist(handling, saksbehandler)
+            } else {
+                val dialogRef = dialogDao.lagre()
+                val innslag =
+                    HistorikkinnslagDto.lagtPåVentInnslag(
+                        notattekst = handling.notatTekst,
+                        saksbehandler = saksbehandler.toDto(),
+                        årsaker = handling.årsaker,
+                        frist = handling.frist,
+                        dialogRef = dialogRef,
+                    )
+                periodehistorikkDao.lagreMedOppgaveId(innslag, handling.oppgaveId)
+                oppgaveService.leggPåVent(handling, saksbehandler)
+                PåVentRepository(påVentDao).leggPåVent(saksbehandler.oid(), handling, dialogRef)
+                saksbehandler.register(Saksbehandlingsmelder(rapidsConnection))
+                handling.utførAv(saksbehandler)
+            }
         } catch (e: Modellfeil) {
             throw e.tilApiversjon()
         }
+    }
+
+    private fun forlengFrist(
+        handling: LeggPåVent,
+        saksbehandler: Saksbehandler,
+    ) {
+        val dialogRef = dialogDao.lagre()
+        val innslag =
+            HistorikkinnslagDto.oppdaterPåVentFristInnslag(
+                notattekst = handling.notatTekst,
+                saksbehandler = saksbehandler.toDto(),
+                årsaker = handling.årsaker,
+                frist = handling.frist,
+                dialogRef = dialogRef,
+            )
+        periodehistorikkDao.lagreMedOppgaveId(innslag, handling.oppgaveId)
+        oppgaveService.leggPåVent(handling, saksbehandler)
+        PåVentRepository(påVentDao).fjernFraPåVent(handling.oppgaveId)
+        PåVentRepository(påVentDao).leggPåVent(saksbehandler.oid(), handling, dialogRef)
+        saksbehandler.register(Saksbehandlingsmelder(rapidsConnection))
+        handling.utførAv(saksbehandler)
     }
 
     private fun fjernFraPåVent(

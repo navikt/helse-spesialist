@@ -18,4 +18,8 @@ class PåVentRepository(
     internal fun fjernFraPåVent(oppgaveId: Long) {
         dao.slettPåVent(oppgaveId)
     }
+
+    internal fun finnPåVent(påVent: LeggPåVent): Boolean {
+        return dao.erPåVent(påVent.oppgaveId)
+    }
 }
