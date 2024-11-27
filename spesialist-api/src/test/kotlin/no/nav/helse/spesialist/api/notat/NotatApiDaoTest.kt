@@ -3,36 +3,11 @@ package no.nav.helse.spesialist.api.notat
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class NotatApiDaoTest : DatabaseIntegrationTest() {
-    @Test
-    fun `finner flere notater tilhørende samme vedtaksperiode`() {
-        // given
-        val saksbehandler_oid = opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        val vedtaksperiodeId = PERIODE.id
-        val tekster = listOf("Banan eple kake", "Eple kake banan")
-
-        // when
-        notatDao.opprettNotat(vedtaksperiodeId, tekster[0], saksbehandler_oid)
-        notatDao.opprettNotat(vedtaksperiodeId, tekster[1], saksbehandler_oid)
-
-        val notater = notatDao.finnNotater(listOf(vedtaksperiodeId))
-
-        // then
-        assertEquals(1, notater.size)
-        assertEquals(2, notater[vedtaksperiodeId]?.size)
-
-        assertNotEquals(notater[vedtaksperiodeId]?.get(0)?.tekst, notater[vedtaksperiodeId]?.get(1)?.tekst)
-        notater[vedtaksperiodeId]?.forEach { notat ->
-            assertEquals(saksbehandler_oid, notat.saksbehandlerOid)
-            assertTrue(tekster.contains(notat.tekst))
-        }
-    }
 
     @Test
     fun `notater defaulter til type Generelt`() {
@@ -42,9 +17,9 @@ internal class NotatApiDaoTest : DatabaseIntegrationTest() {
 
         notatDao.opprettNotat(vedtaksperiodeId, "tekst", oid)
 
-        val notater = notatDao.finnNotater(listOf(vedtaksperiodeId))
+        val notater = notatDao.finnNotater(vedtaksperiodeId)
 
-        assertEquals(NotatType.Generelt, notater[vedtaksperiodeId]?.get(0)?.type)
+        assertEquals(NotatType.Generelt, notater[0].type)
     }
 
     @Test
@@ -84,14 +59,14 @@ internal class NotatApiDaoTest : DatabaseIntegrationTest() {
         val vedtaksperiodeId = PERIODE.id
 
         notatDao.opprettNotat(vedtaksperiodeId, "tekst", oid)
-        val notater = notatDao.finnNotater(listOf(vedtaksperiodeId))
+        val notater = notatDao.finnNotater(vedtaksperiodeId)
 
-        val notatId = notater[vedtaksperiodeId]?.get(0)!!.id
+        val notatId = notater[0].id
         notatDao.feilregistrerNotat(notatId)
 
-        val feilregistrerteNotater = notatDao.finnNotater(listOf(vedtaksperiodeId))
+        val feilregistrerteNotater = notatDao.finnNotater(vedtaksperiodeId)
 
-        assertTrue(feilregistrerteNotater[vedtaksperiodeId]?.get(0)!!.feilregistrert)
-        assertNotNull(feilregistrerteNotater[vedtaksperiodeId]?.get(0)!!.feilregistrert_tidspunkt)
+        assertTrue(feilregistrerteNotater[0].feilregistrert)
+        assertNotNull(feilregistrerteNotater[0].feilregistrert_tidspunkt)
     }
 }

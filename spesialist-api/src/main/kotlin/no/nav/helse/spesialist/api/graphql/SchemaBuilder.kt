@@ -29,7 +29,6 @@ import no.nav.helse.spesialist.api.graphql.mutation.VarselMutation
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQuery
 import no.nav.helse.spesialist.api.graphql.query.DokumentQuery
-import no.nav.helse.spesialist.api.graphql.query.NotatQuery
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQuery
 import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQuery
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
@@ -125,9 +124,6 @@ internal class SchemaBuilder(
                         BehandlingsstatistikkQuery(
                             behandlingsstatistikkMediator = behandlingsstatistikkMediator,
                         ),
-                    ),
-                    TopLevelObject(
-                        NotatQuery(notatDao = notatDao),
                     ),
                     TopLevelObject(
                         OpptegnelseQuery(

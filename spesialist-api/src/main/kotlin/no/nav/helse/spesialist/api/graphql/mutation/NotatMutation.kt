@@ -4,12 +4,12 @@ import com.expediagroup.graphql.server.operations.Mutation
 import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
-import no.nav.helse.spesialist.api.graphql.query.tilKommentar
-import no.nav.helse.spesialist.api.graphql.query.tilNotat
 import no.nav.helse.spesialist.api.graphql.schema.Kommentar
 import no.nav.helse.spesialist.api.graphql.schema.Notat
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
+import no.nav.helse.spesialist.api.notat.KommentarDto
 import no.nav.helse.spesialist.api.notat.NotatApiDao
+import no.nav.helse.spesialist.api.notat.NotatDto
 import java.util.UUID
 
 class NotatMutation(
@@ -109,4 +109,30 @@ class NotatMutation(
             .message("Kunne ikke opprette notat for vedtaksperiode med id $id")
             .extensions(mapOf("code" to 500))
             .build()
+
+    private fun tilNotat(notat: NotatDto) =
+        Notat(
+            id = notat.id,
+            dialogRef = notat.dialogRef,
+            tekst = notat.tekst,
+            opprettet = notat.opprettet,
+            saksbehandlerOid = notat.saksbehandlerOid,
+            saksbehandlerNavn = notat.saksbehandlerNavn,
+            saksbehandlerEpost = notat.saksbehandlerEpost,
+            saksbehandlerIdent = notat.saksbehandlerIdent,
+            vedtaksperiodeId = notat.vedtaksperiodeId,
+            feilregistrert = notat.feilregistrert,
+            feilregistrert_tidspunkt = notat.feilregistrert_tidspunkt,
+            type = notat.type,
+            kommentarer = notat.kommentarer.map(::tilKommentar),
+        )
+
+    private fun tilKommentar(kommentar: KommentarDto) =
+        Kommentar(
+            id = kommentar.id,
+            tekst = kommentar.tekst,
+            opprettet = kommentar.opprettet,
+            saksbehandlerident = kommentar.saksbehandlerident,
+            feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+        )
 }

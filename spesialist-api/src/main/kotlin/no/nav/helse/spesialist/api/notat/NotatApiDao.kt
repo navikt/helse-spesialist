@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.api.notat
 
 import kotliquery.Row
 import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.HelseDao.Companion.asSQLWithQuestionMarks
 import no.nav.helse.db.MedDataSource
 import no.nav.helse.db.QueryRunner
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
@@ -65,18 +64,6 @@ class NotatApiDao(
             """.trimIndent(),
             "vedtaksperiode_id" to vedtaksperiodeId,
         ).list { mapNotatDto(it) }
-
-    // PåVent-notater og Retur-notater lagres nå i periodehistorikk, og skal ikke være med til speil som en del av notater
-    fun finnNotater(vedtaksperiodeIds: List<UUID>): Map<UUID, List<NotatDto>> =
-        asSQLWithQuestionMarks(
-            """
-            SELECT * FROM notat n
-            JOIN saksbehandler s on s.oid = n.saksbehandler_oid
-            WHERE vedtaksperiode_id in (${vedtaksperiodeIds.joinToString { "?" }})
-            AND type not in ('PaaVent', 'Retur');
-            """.trimIndent(),
-            *vedtaksperiodeIds.toTypedArray(),
-        ).list { mapNotatDto(it) }.groupBy { it.vedtaksperiodeId }
 
     fun feilregistrerNotat(notatId: Int): NotatDto? =
         asSQL(

@@ -384,6 +384,7 @@ type MinimumSykdomsgradOverstyring implements Overstyring {
 
 type Mutation {
     annuller(annullering: AnnulleringDataInput!): Boolean!
+    fattVedtak(oppgavereferanse: String!, vedtakBegrunnelse: VedtakBegrunnelseInput!): Boolean!
     feilregistrerKommentar(id: Int!): Kommentar
     feilregistrerKommentarV2(id: Int!): Kommentar
     feilregistrerNotat(id: Int!): Notat
@@ -403,6 +404,7 @@ type Mutation {
     overstyrInntektOgRefusjon(overstyring: InntektOgRefusjonOverstyringInput!): Boolean!
     sendIRetur(notatTekst: String!, oppgavereferanse: String!): Boolean!
     sendTilGodkjenning(avslag: AvslagInput, oppgavereferanse: String!): Boolean!
+    sendTilGodkjenningV2(oppgavereferanse: String!, vedtakBegrunnelse: VedtakBegrunnelseInput!): Boolean!
     sendTilInfotrygd(arsak: String!, begrunnelser: [String!]!, kommentar: String, oppgavereferanse: String!): Boolean!
     settVarselstatus(definisjonIdString: String, generasjonIdString: String!, ident: String!, varselkode: String!): VarselDTO!
     skjonnsfastsettSykepengegrunnlag(skjonnsfastsettelse: SkjonnsfastsettelseInput!): Boolean!
@@ -422,11 +424,6 @@ type Notat {
     tekst: String!
     type: NotatType!
     vedtaksperiodeId: UUID!
-}
-
-type Notater {
-    id: UUID!
-    notater: [Notat!]!
 }
 
 type NyttInntektsforholdPeriode {
@@ -586,7 +583,6 @@ type Query {
     behandlingsstatistikk: Behandlingsstatistikk!
     hentInntektsmelding(dokumentId: String!, fnr: String!): DokumentInntektsmelding
     hentSoknad(dokumentId: String!, fnr: String!): Soknad!
-    notater(forPerioder: [String!]!): [Notater!]!
     oppgaveFeed(filtrering: FiltreringInput!, limit: Int!, offset: Int!, sortering: [OppgavesorteringInput!]!): OppgaverTilBehandling!
     opptegnelser(sekvensId: Int): [Opptegnelse!]!
     person(aktorId: String, fnr: String): Person
@@ -1292,6 +1288,12 @@ enum Varselstatus {
     VURDERT
 }
 
+enum VedtakBegrunnelseUtfall {
+    AVSLAG
+    DELVIS_INNVILGELSE
+    INNVILGELSE
+}
+
 enum Vilkarsgrunnlagtype {
     INFOTRYGD
     SPLEIS
@@ -1477,4 +1479,9 @@ input TidslinjeOverstyringInput {
     fodselsnummer: String!
     organisasjonsnummer: String!
     vedtaksperiodeId: UUID!
+}
+
+input VedtakBegrunnelseInput {
+    begrunnelse: String
+    utfall: VedtakBegrunnelseUtfall!
 }
