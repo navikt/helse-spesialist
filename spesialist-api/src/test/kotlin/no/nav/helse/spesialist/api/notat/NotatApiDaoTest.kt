@@ -78,19 +78,6 @@ internal class NotatApiDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `lagre påvent-notat`() {
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        val oid = opprettSaksbehandler()
-        val vedtaksperiodeId = PERIODE.id
-
-        notatDao.opprettNotat(vedtaksperiodeId, "tekst", oid, NotatType.PaaVent)
-
-        val notater = notatDao.finnNotater(listOf(vedtaksperiodeId))
-
-        assertEquals(NotatType.PaaVent, notater[vedtaksperiodeId]?.get(0)?.type)
-    }
-
-    @Test
     fun `feilregistrer notat`() {
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         val oid = opprettSaksbehandler()

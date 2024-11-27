@@ -54,22 +54,26 @@ class NotatApiDao(
             "saksbehandlerident" to saksbehandlerident,
         ).singleOrNull { mapKommentarDto(it) }
 
+    // PåVent-notater og Retur-notater lagres nå i periodehistorikk, og skal ikke være med til speil som en del av notater
     fun finnNotater(vedtaksperiodeId: UUID): List<NotatDto> =
         asSQL(
             """ 
             SELECT * FROM notat n
             JOIN saksbehandler s on s.oid = n.saksbehandler_oid
-            WHERE n.vedtaksperiode_id = :vedtaksperiode_id::uuid;
+            WHERE n.vedtaksperiode_id = :vedtaksperiode_id::uuid
+            AND type not in ('PaaVent', 'Retur');
             """.trimIndent(),
             "vedtaksperiode_id" to vedtaksperiodeId,
         ).list { mapNotatDto(it) }
 
+    // PåVent-notater og Retur-notater lagres nå i periodehistorikk, og skal ikke være med til speil som en del av notater
     fun finnNotater(vedtaksperiodeIds: List<UUID>): Map<UUID, List<NotatDto>> =
         asSQLWithQuestionMarks(
             """
             SELECT * FROM notat n
             JOIN saksbehandler s on s.oid = n.saksbehandler_oid
             WHERE vedtaksperiode_id in (${vedtaksperiodeIds.joinToString { "?" }})
+            AND type not in ('PaaVent', 'Retur');
             """.trimIndent(),
             *vedtaksperiodeIds.toTypedArray(),
         ).list { mapNotatDto(it) }.groupBy { it.vedtaksperiodeId }
