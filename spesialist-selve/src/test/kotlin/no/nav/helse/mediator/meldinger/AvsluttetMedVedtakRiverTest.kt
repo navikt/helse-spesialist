@@ -14,7 +14,7 @@ import no.nav.helse.modell.vilkårsprøving.InnrapportertInntektDto
 import no.nav.helse.modell.vilkårsprøving.InntektDto
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntektDto
 import no.nav.helse.modell.vilkårsprøving.SammenligningsgrunnlagDto
-import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
+import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

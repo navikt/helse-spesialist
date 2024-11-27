@@ -1,9 +1,9 @@
 package no.nav.helse.kafka.message_builders
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.helse.modell.hendelse.UtgåendeHendelse
 import no.nav.helse.objectMapper
+import no.nav.helse.rapids_rivers.JsonMessage
 import java.time.LocalDateTime
 import java.util.UUID
 

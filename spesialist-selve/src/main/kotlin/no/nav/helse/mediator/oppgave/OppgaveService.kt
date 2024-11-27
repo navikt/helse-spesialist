@@ -1,6 +1,5 @@
 package no.nav.helse.mediator.oppgave
 
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import kotliquery.TransactionalSession
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.db.EgenskapForDatabase
@@ -37,6 +36,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDto
+import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper

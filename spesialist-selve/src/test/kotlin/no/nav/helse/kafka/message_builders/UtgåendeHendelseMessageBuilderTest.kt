@@ -1,12 +1,12 @@
 package no.nav.helse.kafka.message_builders
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.hendelse.UtgåendeHendelse
 import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.objectMapper
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spesialist.test.lagEpostadresseFraFulltNavn
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagSaksbehandlerident

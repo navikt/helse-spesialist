@@ -1,15 +1,13 @@
 package no.nav.helse.kafka
 
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers.River
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
-import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
-import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.asLocalDateTime
+import no.nav.helse.rapids_rivers.isMissingOrNull
 import org.slf4j.LoggerFactory
 
 internal class ÅpneGosysOppgaverLøsningRiver(
@@ -31,8 +29,6 @@ internal class ÅpneGosysOppgaverLøsningRiver(
     override fun onPacket(
         packet: JsonMessage,
         context: MessageContext,
-        metadata: MessageMetadata,
-        meterRegistry: MeterRegistry,
     ) {
         sikkerLogg.info("Mottok melding ÅpneOppgaverMessage:\n{}", packet.toJson())
         val opprettet = packet["@opprettet"].asLocalDateTime()

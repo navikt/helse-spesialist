@@ -1,13 +1,13 @@
 package no.nav.helse.mediator.oppgave
 
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.mediator.oppgave.OppgaveMapper.mapTilString
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
 import no.nav.helse.modell.oppgave.OppgaveDto
 import no.nav.helse.modell.oppgave.OppgaveObserver
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.RapidsConnection
 import java.util.UUID
 
 internal class Oppgavemelder(
