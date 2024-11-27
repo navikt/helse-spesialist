@@ -10,15 +10,14 @@ class VedtakBegrunnelseDao(queryRunner: QueryRunner) : QueryRunner by queryRunne
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     private fun lagreBegrunnelse(
-        begrunnelse: String,
-        type: VedtakBegrunnelseTypeFraDatabase,
+        vedtakBegrunnelse: VedtakBegrunnelseFraDatabase,
         saksbehandlerOid: UUID,
     ) = asSQL(
         """
         INSERT INTO begrunnelse(tekst, type, saksbehandler_ref) VALUES (:tekst, :type, :saksbehandler_ref)
         """.trimIndent(),
-        "tekst" to begrunnelse,
-        "type" to type.name,
+        "tekst" to vedtakBegrunnelse.tekst,
+        "type" to vedtakBegrunnelse.type.name,
         "saksbehandler_ref" to saksbehandlerOid,
     ).updateAndReturnGeneratedKey()
 
@@ -27,7 +26,13 @@ class VedtakBegrunnelseDao(queryRunner: QueryRunner) : QueryRunner by queryRunne
         type: VedtakBegrunnelseTypeFraDatabase,
         begrunnelse: String,
         saksbehandlerOid: UUID,
-    ) = lagreBegrunnelse(begrunnelse, type, saksbehandlerOid).let { begrunnelseId ->
+    ) = lagreVedtakBegrunnelse(oppgaveId, VedtakBegrunnelseFraDatabase(type, begrunnelse), saksbehandlerOid)
+
+    internal fun lagreVedtakBegrunnelse(
+        oppgaveId: Long,
+        vedtakBegrunnelse: VedtakBegrunnelseFraDatabase,
+        saksbehandlerOid: UUID,
+    ) = lagreBegrunnelse(vedtakBegrunnelse, saksbehandlerOid).let { begrunnelseId ->
         asSQL(
             """
             INSERT INTO vedtak_begrunnelse (vedtaksperiode_id, begrunnelse_ref, generasjon_ref)
@@ -65,40 +70,50 @@ class VedtakBegrunnelseDao(queryRunner: QueryRunner) : QueryRunner by queryRunne
     internal fun finnVedtakBegrunnelse(
         vedtaksperiodeId: UUID,
         generasjonId: Long,
-    ): VedtakBegrunnelseDto? {
-        return asSQL(
+    ): VedtakBegrunnelseDto? =
+        asSQL(
             """
-            SELECT begrunnelse_ref FROM vedtak_begrunnelse 
-            WHERE vedtaksperiode_id = :vedtaksperiodeId 
-            AND generasjon_ref = :generasjonId 
-            AND invalidert = false 
-            ORDER BY opprettet DESC LIMIT 1
+            SELECT b.type, b.tekst FROM vedtak_begrunnelse AS vb, begrunnelse AS b
+            WHERE vb.vedtaksperiode_id = :vedtaksperiodeId 
+            AND vb.generasjon_ref = :generasjonId 
+            AND vb.invalidert = false 
+            AND b.id = vb.begrunnelse_ref
+            ORDER BY vb.opprettet DESC LIMIT 1
             """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
             "generasjonId" to generasjonId,
-        ).singleOrNull {
-            it.longOrNull("begrunnelse_ref")?.let { begrunnelseRef ->
-                asSQL(
-                    """
-                    SELECT type, tekst FROM begrunnelse WHERE id = :begrunnelseRef
-                    """.trimIndent(),
-                    "begrunnelseRef" to begrunnelseRef,
-                ).singleOrNull { vedtakBegrunnelse ->
-                    val begrunnelse = vedtakBegrunnelse.string("tekst")
-                    when (enumValueOf<VedtakBegrunnelseTypeFraDatabase>(vedtakBegrunnelse.string("type"))) {
-                        VedtakBegrunnelseTypeFraDatabase.AVSLAG ->
-                            VedtakBegrunnelseDto(UtfallDto.AVSLAG, begrunnelse)
-
-                        VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE ->
-                            VedtakBegrunnelseDto(UtfallDto.DELVIS_INNVILGELSE, begrunnelse)
-
-                        VedtakBegrunnelseTypeFraDatabase.INNVILGELSE ->
-                            VedtakBegrunnelseDto(UtfallDto.INNVILGELSE, begrunnelse)
-                    }
-                }
-            }
+        ).singleOrNull { vedtakBegrunnelse ->
+            val begrunnelse = vedtakBegrunnelse.string("tekst")
+            val type = enumValueOf<VedtakBegrunnelseTypeFraDatabase>(vedtakBegrunnelse.string("type"))
+            VedtakBegrunnelseDto(utfall = type.toDto(), begrunnelse = begrunnelse)
         }
-    }
+
+    internal fun finnVedtakBegrunnelse(oppgaveId: Long): VedtakBegrunnelseFraDatabase? =
+        asSQL(
+            """
+            SELECT b.type, b.tekst FROM begrunnelse AS b, vedtak_begrunnelse AS vb, oppgave AS o, behandling AS bh, vedtak AS v
+            WHERE b.id = vb.begrunnelse_ref
+            AND vb.invalidert = false 
+            AND vb.vedtaksperiode_id = v.vedtaksperiode_id
+            AND v.id = o.vedtak_ref
+            AND vb.generasjon_ref = bh.id 
+            AND bh.unik_id = o.generasjon_ref
+            AND o.id = :oppgaveId
+            ORDER BY vb.opprettet DESC LIMIT 1
+            """.trimIndent(),
+            "oppgaveId" to oppgaveId,
+        ).singleOrNull { begrunnelse ->
+            val tekst = begrunnelse.string("tekst")
+            val type = enumValueOf<VedtakBegrunnelseTypeFraDatabase>(begrunnelse.string("type"))
+            VedtakBegrunnelseFraDatabase(type = type, tekst = tekst)
+        }
+
+    private fun VedtakBegrunnelseTypeFraDatabase.toDto() =
+        when (this) {
+            VedtakBegrunnelseTypeFraDatabase.AVSLAG -> UtfallDto.AVSLAG
+            VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> UtfallDto.DELVIS_INNVILGELSE
+            VedtakBegrunnelseTypeFraDatabase.INNVILGELSE -> UtfallDto.INNVILGELSE
+        }
 
     internal fun finnAlleVedtakBegrunnelser(
         vedtaksperiodeId: UUID,

@@ -10,6 +10,7 @@ import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.VedtakBegrunnelseDao
+import no.nav.helse.db.VedtakBegrunnelseFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.mediator.overstyring.Overstyringlagrer
@@ -448,14 +449,21 @@ internal class SaksbehandlerMediator(
         saksbehandlerOid: UUID,
     ) {
         if (vedtakBegrunnelse != null) {
-            val begrunnelse = vedtakBegrunnelse.begrunnelse
-            if (begrunnelse == null) {
+            val oppdatertBegrunnelse =
+                VedtakBegrunnelseFraDatabase(
+                    type = vedtakBegrunnelse.utfall.toDatabaseType(),
+                    tekst = vedtakBegrunnelse.begrunnelse.orEmpty(),
+                )
+            val eksisterendeBegrunnelse = vedtakBegrunnelseDao.finnVedtakBegrunnelse(oppgaveId = oppgaveId)
+            val erEndret = eksisterendeBegrunnelse != oppdatertBegrunnelse
+            val erNy = eksisterendeBegrunnelse == null
+            if (!erNy && erEndret) {
                 vedtakBegrunnelseDao.invaliderVedtakBegrunnelse(oppgaveId = oppgaveId)
-            } else {
+            }
+            if (erNy || erEndret) {
                 vedtakBegrunnelseDao.lagreVedtakBegrunnelse(
                     oppgaveId = oppgaveId,
-                    type = vedtakBegrunnelse.utfall.toVedtakBegrunnelseTypeFraDatabase(),
-                    begrunnelse = begrunnelse,
+                    vedtakBegrunnelse = oppdatertBegrunnelse,
                     saksbehandlerOid = saksbehandlerOid,
                 )
             }
@@ -789,7 +797,7 @@ internal class SaksbehandlerMediator(
             Avslagstype.DELVIS_AVSLAG -> VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE
         }
 
-    private fun VedtakBegrunnelseUtfall.toVedtakBegrunnelseTypeFraDatabase() =
+    private fun VedtakBegrunnelseUtfall.toDatabaseType() =
         when (this) {
             VedtakBegrunnelseUtfall.AVSLAG -> VedtakBegrunnelseTypeFraDatabase.AVSLAG
             VedtakBegrunnelseUtfall.DELVIS_INNVILGELSE -> VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE

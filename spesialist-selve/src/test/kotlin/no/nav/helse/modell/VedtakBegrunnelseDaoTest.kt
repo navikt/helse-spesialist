@@ -64,6 +64,27 @@ internal class VedtakBegrunnelseDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `lagrer og finner vedtaksbegrunnelse basert på oppgaveid`() {
+        val oid = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
+        nySaksbehandler(oid)
+        dao.lagreVedtakBegrunnelse(
+            oppgaveId = OPPGAVE_ID,
+            type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
+            begrunnelse = "En individuell begrunelse",
+            saksbehandlerOid = oid
+        )
+
+        val lagretVedtakBegrunnelse = dao.finnVedtakBegrunnelse(OPPGAVE_ID)
+        assertNotNull(lagretVedtakBegrunnelse)
+        with(lagretVedtakBegrunnelse!!) {
+            assertEquals(VedtakBegrunnelseTypeFraDatabase.AVSLAG, type)
+            assertEquals("En individuell begrunelse", tekst)
+        }
+    }
+
+    @Test
     fun `invaliderer vedtaksbegrunnelse`() {
         val oid = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
