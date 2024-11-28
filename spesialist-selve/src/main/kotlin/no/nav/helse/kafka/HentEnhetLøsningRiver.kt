@@ -16,11 +16,16 @@ internal class HentEnhetLøsningRiver(
 ) : SpesialistRiver {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
+    override fun preconditions(): River.PacketValidation {
+        return River.PacketValidation {
+            it.requireValue("@event_name", "behov")
+            it.requireValue("@final", true)
+            it.requireAll("@behov", listOf("HentEnhet"))
+        }
+    }
+
     override fun validations() =
         River.PacketValidation {
-            it.demandValue("@event_name", "behov")
-            it.demandValue("@final", true)
-            it.demandAll("@behov", listOf("HentEnhet"))
             it.requireKey("@id", "contextId", "hendelseId", "@løsning.HentEnhet")
         }
 

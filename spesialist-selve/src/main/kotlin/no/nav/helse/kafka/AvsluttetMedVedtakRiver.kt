@@ -16,9 +16,14 @@ internal class AvsluttetMedVedtakRiver(
     private val mediator: MeldingMediator,
     private val avviksvurderingDao: AvviksvurderingDao,
 ) : SpesialistRiver {
+    override fun preconditions(): River.PacketValidation {
+        return River.PacketValidation {
+            it.requireValue("@event_name", "avsluttet_med_vedtak")
+        }
+    }
+
     override fun validations() =
         River.PacketValidation {
-            it.demandValue("@event_name", "avsluttet_med_vedtak")
             it.requireKey("@id", "fødselsnummer", "vedtaksperiodeId", "organisasjonsnummer")
             it.requireKey("fom", "tom", "skjæringstidspunkt")
             it.requireArray("hendelser")

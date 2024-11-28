@@ -21,9 +21,14 @@ internal class UtbetalingEndretRiver(
 ) : SpesialistRiver {
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
+    override fun preconditions(): River.PacketValidation {
+        return River.PacketValidation {
+            it.requireValue("@event_name", "utbetaling_endret")
+        }
+    }
+
     override fun validations() =
         River.PacketValidation {
-            it.demandValue("@event_name", "utbetaling_endret")
             it.requireKey("@id", "fødselsnummer", "organisasjonsnummer", "utbetalingId", "type")
             // disse brukes i Hendelsefabrikk for å lagre oppdrag i db
             it.requireKey("arbeidsgiverOppdrag.fagsystemId", "personOppdrag.fagsystemId")

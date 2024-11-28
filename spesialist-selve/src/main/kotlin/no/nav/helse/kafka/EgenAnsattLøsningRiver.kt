@@ -16,14 +16,17 @@ internal class EgenAnsattLøsningRiver(
 ) : SpesialistRiver {
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
+    override fun preconditions(): River.PacketValidation {
+        return River.PacketValidation {
+            it.requireValue("@event_name", "behov")
+            it.requireValue("@final", true)
+            it.requireAll("@behov", listOf("EgenAnsatt"))
+            it.requireKey("fødselsnummer", "hendelseId", "contextId")
+        }
+    }
+
     override fun validations() =
         River.PacketValidation {
-            it.demandValue("@event_name", "behov")
-            it.demandValue("@final", true)
-            it.demandAll("@behov", listOf("EgenAnsatt"))
-            it.demandKey("fødselsnummer")
-            it.demandKey("hendelseId")
-            it.demandKey("contextId")
             it.requireKey("@id")
             it.require("@opprettet") { message -> message.asLocalDateTime() }
             it.requireKey("@løsning.EgenAnsatt")

@@ -16,9 +16,14 @@ internal class OverstyringIgangsattRiver(
 ) : SpesialistRiver {
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
+    override fun preconditions(): River.PacketValidation {
+        return River.PacketValidation {
+            it.requireValue("@event_name", "overstyring_igangsatt")
+        }
+    }
+
     override fun validations() =
         River.PacketValidation {
-            it.demandValue("@event_name", "overstyring_igangsatt")
             it.requireKey("kilde")
             it.requireArray("berørtePerioder") {
                 requireKey("vedtaksperiodeId")

@@ -16,9 +16,14 @@ internal class EndretSkjermetinfoRiver(
 ) : SpesialistRiver {
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
+    override fun preconditions(): River.PacketValidation {
+        return River.PacketValidation {
+            it.requireValue("@event_name", EVENT_NAME)
+        }
+    }
+
     override fun validations() =
         River.PacketValidation {
-            it.demandValue("@event_name", EVENT_NAME)
             it.requireKey("@id", "fødselsnummer", "skjermet", "@opprettet")
         }
 

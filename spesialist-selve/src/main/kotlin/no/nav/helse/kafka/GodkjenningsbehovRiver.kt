@@ -18,11 +18,16 @@ internal class GodkjenningsbehovRiver(
 ) : SpesialistRiver {
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
+    override fun preconditions(): River.PacketValidation {
+        return River.PacketValidation {
+            it.requireAll("@behov", listOf("Godkjenning"))
+            it.requireValue("behandletAvSpinnvill", true)
+            it.forbid("@løsning")
+        }
+    }
+
     override fun validations() =
         River.PacketValidation {
-            it.demandAll("@behov", listOf("Godkjenning"))
-            it.demandValue("behandletAvSpinnvill", true)
-            it.rejectKey("@løsning")
             it.requireKey(
                 "@id",
                 "fødselsnummer",

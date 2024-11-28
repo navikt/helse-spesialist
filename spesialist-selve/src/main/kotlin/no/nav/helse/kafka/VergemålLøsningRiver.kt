@@ -17,14 +17,17 @@ internal class VergemålLøsningRiver(
 ) : SpesialistRiver {
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
+    override fun preconditions(): River.PacketValidation {
+        return River.PacketValidation {
+            it.requireValue("@event_name", "behov")
+            it.requireValue("@final", true)
+            it.requireAll("@behov", listOf("Vergemål"))
+            it.requireKey("fødselsnummer", "hendelseId", "contextId")
+        }
+    }
+
     override fun validations() =
         River.PacketValidation {
-            it.demandValue("@event_name", "behov")
-            it.demandValue("@final", true)
-            it.demandAll("@behov", listOf("Vergemål"))
-            it.demandKey("hendelseId")
-            it.demandKey("contextId")
-            it.demandKey("fødselsnummer")
             it.requireKey("@id")
             it.require("@opprettet") { node -> node.asLocalDateTime() }
             it.requireKey("@løsning.Vergemål")

@@ -17,16 +17,20 @@ internal class VurderingsmomenterLøsningRiver(
 ) : SpesialistRiver {
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
+    override fun preconditions(): River.PacketValidation {
+        return River.PacketValidation {
+            it.requireValue("@event_name", "behov")
+            it.requireValue("@final", true)
+            it.requireAll("@behov", listOf("Risikovurdering"))
+            it.requireKey("contextId", "hendelseId")
+        }
+    }
+
     override fun validations() =
         River.PacketValidation {
             it.requireKey("@id")
-            it.demandValue("@event_name", "behov")
-            it.demandValue("@final", true)
-            it.demandAll("@behov", listOf("Risikovurdering"))
             it.require("@opprettet") { message -> message.asLocalDateTime() }
             it.require("Risikovurdering.vedtaksperiodeId") { message -> UUID.fromString(message.asText()) }
-            it.demandKey("contextId")
-            it.demandKey("hendelseId")
             it.requireKey("@løsning.Risikovurdering")
             it.requireKey(
                 "@løsning.Risikovurdering.kanGodkjennesAutomatisk",
