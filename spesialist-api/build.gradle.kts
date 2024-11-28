@@ -20,7 +20,7 @@ dependencies {
     implementation(libs.ktor.micrometer)
     implementation(libs.micrometer.prometheus)
 
-    api(libs.bundles.ktor.server)
+    implementation(libs.bundles.ktor.server)
     implementation(libs.bundles.ktor.client)
 
     testImplementation(testFixtures(project(":spesialist-felles")))
