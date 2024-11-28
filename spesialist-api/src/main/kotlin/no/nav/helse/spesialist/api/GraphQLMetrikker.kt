@@ -23,7 +23,7 @@ val GraphQLMetrikker =
                 val elapsed = call.processingTimeMillis()
                 graphQLResponstider
                     .withRegistry(registry)
-                    .withTags(operationName)
+                    .withTag("operationName", operationName)
                     .record(elapsed.toDouble())
             }
         }
