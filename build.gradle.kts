@@ -1,5 +1,4 @@
 val junitJupiterVersion = "5.10.2"
-val ktorVersion = "2.3.12"
 val jvmTargetVersion = "21"
 val graphqlKotlinVersion = "8.1.0"
 val logbackSyslog4jVersion = "1.0.0"
@@ -46,8 +45,6 @@ allprojects {
     }
 
     dependencies {
-        implementation("io.ktor:ktor-server-cio:$ktorVersion")
-        implementation("io.ktor:ktor-server-websockets:$ktorVersion")
         implementation("org.postgresql:postgresql:$postgresqlVersion")
         implementation("com.papertrailapp:logback-syslog4j:$logbackSyslog4jVersion") // August, 2014
         {
@@ -57,8 +54,6 @@ allprojects {
         implementation("org.flywaydb:flyway-core:$flywayCoreVersion")
         implementation("org.flywaydb:flyway-database-postgresql:$flywayCoreVersion")
         implementation("com.github.seratch:kotliquery:$kotliqueryVersion")
-        implementation("io.ktor:ktor-client-cio:$ktorVersion")
-        implementation("io.ktor:ktor-client-apache:$ktorVersion")
 
         constraints {
             implementation("io.netty:netty-all:4.1.108.final") {
@@ -71,18 +66,6 @@ allprojects {
                 because("com.expediagroup:graphql-kotlin-ktor-server:8.1.0 -> 4.27.1 har en sårbarhet")
             }
         }
-        implementation("io.ktor:ktor-client-jackson:$ktorVersion") {
-            exclude(group = "com.fasterxml.jackson.core")
-            exclude(group = "com.fasterxml.jackson.module")
-        }
-        implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
-        implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
-        implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
-        implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
-
-        implementation("io.ktor:ktor-server-auth-jwt:$ktorVersion") {
-            exclude(group = "junit")
-        }
 
         implementation("com.expediagroup:graphql-kotlin-client:$graphqlKotlinVersion")
         implementation("com.expediagroup:graphql-kotlin-client-jackson:$graphqlKotlinVersion") {
@@ -92,15 +75,8 @@ allprojects {
         implementation("com.expediagroup:graphql-kotlin-ktor-client:$graphqlKotlinVersion") {
             exclude("com.expediagroup:graphql-kotlin-client-serialization")
         }
-        implementation("io.ktor:ktor-server-cors:$ktorVersion")
-        implementation("io.ktor:ktor-server-call-id:$ktorVersion")
-
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
         testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
-        testImplementation("io.ktor:ktor-client-mock-jvm:$ktorVersion")
-        testImplementation("io.ktor:ktor-server-test-host:$ktorVersion") {
-            exclude(group = "junit")
-        }
         testImplementation("io.mockk:mockk:$mockkVersion")
     }
 }
