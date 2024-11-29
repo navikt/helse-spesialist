@@ -7,15 +7,7 @@ import io.ktor.server.plugins.callloging.processingTimeMillis
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.receive
 import io.micrometer.core.instrument.Counter
-import io.micrometer.core.instrument.DistributionSummary
-import io.micrometer.core.instrument.Metrics
-import io.micrometer.prometheusmetrics.PrometheusConfig
-import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
-
-private val meterRegistry =
-    PrometheusMeterRegistry(PrometheusConfig.DEFAULT).also {
-        Metrics.globalRegistry.add(it)
-    }
+import io.prometheus.metrics.core.metrics.Summary
 
 val GraphQLMetrikker =
     createRouteScopedPlugin("GraphQLMetrikker") {
@@ -24,18 +16,20 @@ val GraphQLMetrikker =
             if (call.request.httpMethod == HttpMethod.Get) return@onCallRespond
             (call.receive<JsonNode>()["operationName"]?.textValue() ?: "ukjent").let { operationName ->
                 val elapsed = call.processingTimeMillis()
-                graphQLResponstider.tags(operationName).register(meterRegistry).record(elapsed.toDouble())
+                graphQLResponstider.labels(operationName).observe(elapsed.toDouble())
             }
         }
     }
 
 private val graphQLResponstider =
-    DistributionSummary
-        .builder("graphql_responstider")
-        .description("Måler responstider for GraphQL-kall")
+    Summary
+        .build("graphql_responstider", "Måler responstider for GraphQL-kall")
+        .labelNames("operationName")
+        .register()
 
 internal val auditLogTeller =
     Counter
-        .builder("auditlog_total")
-        .description("Teller antall auditlogginnslag")
-        .register(meterRegistry)
+        .build()
+        .name("auditlog_total")
+        .help("Teller antall auditlogginnslag")
+        .register()

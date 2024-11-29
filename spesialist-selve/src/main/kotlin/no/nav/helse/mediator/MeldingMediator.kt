@@ -71,12 +71,10 @@ import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.objectMapper
-import no.nav.helse.registrerTidsbrukForDuplikatsjekk
 import no.nav.helse.spesialist.api.Personhåndterer
 import org.slf4j.LoggerFactory
 import java.util.UUID
 import javax.sql.DataSource
-import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
 internal class MeldingMediator(
@@ -110,7 +108,8 @@ internal class MeldingMediator(
     private fun erDuplikat(id: UUID): Boolean {
         val (erDuplikat, tid) = measureTimedValue { meldingDuplikatkontrollDao.erBehandlet(id) }
         logg.info("Det tok ${tid.inWholeMilliseconds} ms å gjøre duplikatsjekk mot databasen")
-        registrerTidsbrukForDuplikatsjekk(erDuplikat, tid.toDouble(DurationUnit.MILLISECONDS))
+//        duplikatsjekkTidsbruk.labels(erDuplikat.toString()).observe(tid.toDouble(MILLISECONDS))
+
         return erDuplikat
     }
 
