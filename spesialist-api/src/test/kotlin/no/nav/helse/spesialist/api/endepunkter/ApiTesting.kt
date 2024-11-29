@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.api.endepunkter
 
 import io.ktor.client.HttpClient
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ClientContentNegotiation
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.auth.authenticate
@@ -14,7 +14,7 @@ import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.JwtStub
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.objectMapper
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ServerContentNegotiation
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
 
 internal class ApiTesting(
     private val jwtStub: JwtStub = JwtStub(),
@@ -24,7 +24,7 @@ internal class ApiTesting(
     private val issuer = "https://jwt-provider-domain"
 
     private fun TestApplicationBuilder.setUpApplication() {
-        install(ServerContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
+        install(ContentNegotiationServer) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
         val azureConfig =
             AzureConfig(
                 clientId = clientId,
@@ -43,7 +43,7 @@ internal class ApiTesting(
     private fun ApplicationTestBuilder.httpClient() =
         createClient {
             expectSuccess = false
-            install(ClientContentNegotiation) {
+            install(ContentNegotiation) {
                 register(ContentType.Application.Json, JacksonConverter(objectMapper))
             }
         }

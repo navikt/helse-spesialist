@@ -3,6 +3,7 @@ import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLIntrospectSchemaTask
 
 val testcontainersVersion = "1.20.2"
 val graphQLKotlinVersion = "8.1.0"
+val ktorVersion = "2.3.12"
 
 plugins {
     id("com.expediagroup.graphql") version "8.1.0"
@@ -10,22 +11,19 @@ plugins {
 
 dependencies {
     api("com.nimbusds:nimbus-jose-jwt:9.37.3")
+    api("io.ktor:ktor-server-double-receive:$ktorVersion")
     implementation(project(":spesialist-felles"))
     implementation("com.expediagroup:graphql-kotlin-ktor-server:$graphQLKotlinVersion")
 
     implementation(libs.bundles.logging)
     implementation(libs.jackson.datatype)
     implementation(libs.jackson.helpers)
-
     implementation(libs.ktor.micrometer)
-    implementation(libs.micrometer.prometheus)
-
-    api(libs.bundles.ktor.server)
-    implementation(libs.bundles.ktor.client)
+    api(libs.micrometer.prometheus)
 
     testImplementation(testFixtures(project(":spesialist-felles")))
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
-    testImplementation(libs.bundles.ktor.server.test)
+    testImplementation("io.ktor:ktor-server-netty:$ktorVersion")
 }
 
 val graphqlDir = "${project.projectDir}/src/main/resources/graphql"

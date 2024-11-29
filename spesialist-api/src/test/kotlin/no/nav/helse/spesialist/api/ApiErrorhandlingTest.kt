@@ -6,10 +6,9 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.routing.get
 import io.ktor.server.testing.testApplication
-import no.nav.helse.spesialist.api.bootstrap.configureStatusPages
+import no.nav.helse.spesialist.api.bootstrap.installErrorHandling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -18,9 +17,7 @@ class ApiErrorhandlingTest {
     fun `vi logger ikke ut fnr i url om en request bobler helt opp`() {
         testApplication {
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
-            install(StatusPages) {
-                configureStatusPages()
-            }
+            this.application { installErrorHandling() }
 
             routing {
                 get("/dummy/{fnr}") {
