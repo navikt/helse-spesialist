@@ -12,7 +12,10 @@ import io.micrometer.core.instrument.Metrics
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 
-private val registry = Metrics.globalRegistry.add(PrometheusMeterRegistry(PrometheusConfig.DEFAULT))
+private val meterRegistry =
+    PrometheusMeterRegistry(PrometheusConfig.DEFAULT).also {
+        Metrics.globalRegistry.add(it)
+    }
 
 val GraphQLMetrikker =
     createRouteScopedPlugin("GraphQLMetrikker") {
@@ -21,10 +24,7 @@ val GraphQLMetrikker =
             if (call.request.httpMethod == HttpMethod.Get) return@onCallRespond
             (call.receive<JsonNode>()["operationName"]?.textValue() ?: "ukjent").let { operationName ->
                 val elapsed = call.processingTimeMillis()
-                graphQLResponstider
-                    .withRegistry(registry)
-                    .withTags(operationName)
-                    .record(elapsed.toDouble())
+                graphQLResponstider.tags(operationName).register(meterRegistry).record(elapsed.toDouble())
             }
         }
     }
@@ -38,4 +38,4 @@ internal val auditLogTeller =
     Counter
         .builder("auditlog_total")
         .description("Teller antall auditlogginnslag")
-        .register(registry)
+        .register(meterRegistry)
