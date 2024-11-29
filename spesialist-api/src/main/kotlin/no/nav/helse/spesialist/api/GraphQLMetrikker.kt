@@ -1,10 +1,8 @@
 package no.nav.helse.spesialist.api
 
 import com.fasterxml.jackson.databind.JsonNode
-import io.ktor.http.HttpMethod
 import io.ktor.server.application.createRouteScopedPlugin
 import io.ktor.server.plugins.calllogging.processingTimeMillis
-import io.ktor.server.request.httpMethod
 import io.ktor.server.request.receive
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.DistributionSummary
@@ -17,15 +15,12 @@ private val registry = Metrics.globalRegistry.add(PrometheusMeterRegistry(Promet
 val GraphQLMetrikker =
     createRouteScopedPlugin("GraphQLMetrikker") {
         onCallRespond { call ->
-            // call.receive<JsonNode> gjør at ktor ikke klarer å serve GraphQLPlayground-htmlen...
-            if (call.request.httpMethod == HttpMethod.Get) return@onCallRespond
-            (call.receive<JsonNode>()["operationName"]?.textValue() ?: "ukjent").let { operationName ->
-                val elapsed = call.processingTimeMillis()
-                graphQLResponstider
-                    .withRegistry(registry)
-                    .withTag("operationName", operationName)
-                    .record(elapsed.toDouble())
-            }
+            val operationName = call.receive<JsonNode>()["operationName"]?.textValue() ?: "ukjent"
+            val elapsed = call.processingTimeMillis()
+            graphQLResponstider
+                .withRegistry(registry)
+                .withTag("operationName", operationName)
+                .record(elapsed.toDouble())
         }
     }
 
