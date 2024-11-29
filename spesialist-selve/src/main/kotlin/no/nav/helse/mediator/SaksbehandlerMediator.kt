@@ -222,10 +222,20 @@ internal class SaksbehandlerMediator(
             val perioderTilBehandling = generasjonRepository.perioderTilBehandling(oppgavereferanse)
             if (perioderTilBehandling.harAktiveVarsler()) return VedtakResultat.Feil.HarAktiveVarsler(oppgavereferanse)
 
-            perioderTilBehandling.godkjennVarsler(fødselsnummer, spleisBehandlingId, saksbehandler.ident(), this::vurderVarsel)
+            perioderTilBehandling.godkjennVarsler(
+                fødselsnummer = fødselsnummer,
+                behandlingId = spleisBehandlingId,
+                ident = saksbehandler.ident(),
+                godkjenner = this::vurderVarsel,
+            )
         } else {
             val periodeTilGodkjenning = generasjonRepository.periodeTilGodkjenning(oppgavereferanse)
-            periodeTilGodkjenning.avvisVarsler(fødselsnummer, spleisBehandlingId, saksbehandler.ident(), this::vurderVarsel)
+            periodeTilGodkjenning.avvisVarsler(
+                fødselsnummer = fødselsnummer,
+                behandlingId = spleisBehandlingId,
+                ident = saksbehandler.ident(),
+                godkjenner = this::vurderVarsel,
+            )
         }
 
         påVentDao.slettPåVent(oppgavereferanse)
@@ -486,7 +496,11 @@ internal class SaksbehandlerMediator(
     override fun hentAnnullering(
         arbeidsgiverFagsystemId: String,
         personFagsystemId: String,
-    ): no.nav.helse.spesialist.api.graphql.schema.Annullering? = annulleringDao.finnAnnullering(arbeidsgiverFagsystemId, personFagsystemId)
+    ): no.nav.helse.spesialist.api.graphql.schema.Annullering? =
+        annulleringDao.finnAnnullering(
+            arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
+            personFagsystemId = personFagsystemId,
+        )
 
     override fun håndter(
         godkjenning: GodkjenningDto,

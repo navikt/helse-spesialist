@@ -36,15 +36,33 @@ class VedtakMutation(
             val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
             logg.info("Fatter vedtak for oppgave $oppgavereferanse")
 
-            when (val resultat = saksbehandlerhåndterer.vedtak(saksbehandler, oppgavereferanse.toLong(), true, avslag)) {
+            val resultat =
+                saksbehandlerhåndterer.vedtak(
+                    saksbehandlerFraApi = saksbehandler,
+                    oppgavereferanse = oppgavereferanse.toLong(),
+                    godkjent = true,
+                    avslag = avslag,
+                )
+            when (resultat) {
                 is VedtakResultat.Ok -> {
-                    val dto = GodkjenningDto(oppgavereferanse.toLong(), true, saksbehandler.ident, null, null, null, avslag)
+                    val dto =
+                        GodkjenningDto(
+                            oppgavereferanse = oppgavereferanse.toLong(),
+                            godkjent = true,
+                            saksbehandlerIdent = saksbehandler.ident,
+                            årsak = null,
+                            begrunnelser = null,
+                            kommentar = null,
+                            avslag = avslag,
+                        )
                     godkjenninghåndterer.håndter(dto, saksbehandler.epost, saksbehandler.oid)
                     newResult<Boolean>().data(true).build()
                 }
+
                 is VedtakResultat.Feil -> {
                     logg.warn("Kunne ikke innvilge vedtak: ${resultat.melding}")
-                    newResult<Boolean>().error(vedtakGraphQLError(resultat.melding, resultat.code, resultat.exception)).build()
+                    newResult<Boolean>().error(vedtakGraphQLError(resultat.melding, resultat.code, resultat.exception))
+                        .build()
                 }
             }
         }
@@ -137,18 +155,31 @@ class VedtakMutation(
         data class Ok(val spleisBehandlingId: UUID) : VedtakResultat
 
         sealed class Feil(val melding: String, val code: Int, val exception: Exception?) : VedtakResultat {
-            class IkkeÅpenOppgave : Feil("Oppgaven er ikke åpen.", 500, IkkeÅpenOppgave("Oppgaven er ikke åpen.", 500))
+            class IkkeÅpenOppgave : Feil(
+                melding = "Oppgaven er ikke åpen.",
+                code = 500,
+                exception = IkkeÅpenOppgave("Oppgaven er ikke åpen.", 500),
+            )
 
-            class HarAktiveVarsler(oppgavereferanse: Long) : Feil("Har aktive varsler", 400, ManglerVurderingAvVarsler(oppgavereferanse))
+            class HarAktiveVarsler(oppgavereferanse: Long) : Feil(
+                melding = "Har aktive varsler",
+                code = 400,
+                exception = ManglerVurderingAvVarsler(oppgavereferanse),
+            )
 
-            sealed class BeslutterFeil(melding: String, code: Int, exception: Exception?) : Feil(melding, code, exception) {
+            sealed class BeslutterFeil(melding: String, code: Int, exception: Exception?) :
+                Feil(melding, code, exception) {
                 class TrengerBeslutterRolle : BeslutterFeil(
-                    "Saksbehandler trenger beslutter-rolle for å kunne utbetale beslutteroppgaver",
-                    401,
-                    null,
+                    melding = "Saksbehandler trenger beslutter-rolle for å kunne utbetale beslutteroppgaver",
+                    code = 401,
+                    exception = null,
                 )
 
-                class KanIkkeBeslutteEgenOppgave : BeslutterFeil("Kan ikke beslutte egne oppgaver.", 401, null)
+                class KanIkkeBeslutteEgenOppgave : BeslutterFeil(
+                    melding = "Kan ikke beslutte egne oppgaver.",
+                    code = 401,
+                    exception = null,
+                )
             }
         }
     }
