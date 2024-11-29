@@ -8,9 +8,19 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
+import io.ktor.server.plugins.callid.CallId
+import io.ktor.server.plugins.calllogging.CallLogging
+import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.request.path
 import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import no.nav.helse.bootstrap.Environment
@@ -18,12 +28,14 @@ import no.nav.helse.bootstrap.SpesialistApp
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
+import no.nav.helse.spesialist.api.bootstrap.configureStatusPages
 import no.nav.helse.spesialist.api.graphql.schema.Reservasjon
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
 import no.nav.helse.spleis.graphql.HentSnapshot
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.flywaydb.core.Flyway
+import org.slf4j.event.Level
 import org.testcontainers.containers.PostgreSQLContainer
 import java.util.UUID
 
@@ -47,12 +59,12 @@ object LocalApp {
             issuerId = issuerId,
             audience = clientId,
             claims =
-            mapOf(
-                "preferred_username" to "saksbehandler@nav.no",
-                "oid" to "${UUID.randomUUID()}",
-                "name" to "En Saksbehandler",
-                "NAVident" to "X123456",
-            ),
+                mapOf(
+                    "preferred_username" to "saksbehandler@nav.no",
+                    "oid" to "${UUID.randomUUID()}",
+                    "name" to "En Saksbehandler",
+                    "NAVident" to "X123456",
+                ),
         ).serialize().also {
             println("OAuth2-token:")
             println(it)
@@ -81,11 +93,23 @@ object LocalApp {
 
     private val server =
         embeddedServer(CIO, port = 4321) {
+            install(CallLogging) {
+                level = Level.DEBUG
+                filter { call -> call.request.path().startsWith("/") }
+            }
+            install(CallId) {
+                header(HttpHeaders.XRequestId)
+                generate { UUID.randomUUID().toString() }
+            }
+            install(StatusPages) {
+                configureStatusPages()
+            }
             spesialistApp.ktorApp(this)
             routing {
                 get("/local-token") {
                     return@get call.respond(message = token)
                 }
+                playground()
             }
         }
 
@@ -190,3 +214,16 @@ private val database =
                 .migrate()
         }
     }
+
+private fun Route.playground() {
+    get("playground") {
+        call.respondText(buildPlaygroundHtml(), ContentType.Text.Html)
+    }
+}
+
+private fun buildPlaygroundHtml() = Application::class.java.classLoader
+    .getResource("graphql-playground.html")
+    ?.readText()
+    ?.replace("\${graphQLEndpoint}", "graphql")
+    ?.replace("\${subscriptionsEndpoint}", "subscriptions")
+    ?: throw IllegalStateException("graphql-playground.html cannot be found in the classpath")
