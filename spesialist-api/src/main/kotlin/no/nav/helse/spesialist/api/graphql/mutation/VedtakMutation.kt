@@ -182,11 +182,6 @@ enum class Avslagshandling {
     INVALIDER,
 }
 
-data class VedtakBegrunnelse(
-    val utfall: VedtakUtfall,
-    val begrunnelse: String?,
-)
-
 enum class VedtakUtfall {
     AVSLAG,
     DELVIS_INNVILGELSE,
