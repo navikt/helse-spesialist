@@ -3,7 +3,6 @@ package no.nav.helse
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.Metrics
-import io.micrometer.core.instrument.Timer
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.helse.mediator.GodkjenningsbehovUtfall
@@ -13,7 +12,6 @@ import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtInntektOgRefusjon
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
-import java.time.Duration
 
 private val registry = Metrics.globalRegistry.add(PrometheusMeterRegistry(PrometheusConfig.DEFAULT))
 private val automatiseringsteller =
@@ -37,12 +35,10 @@ private val tidsbrukForHendelseMetrikkBuilder =
         .description("Måler hvor lang tid en command bruker på å kjøre i ms")
 
 private val godkjenningsbehovUtfallMetrikkBuilder =
-    Timer
+    DistributionSummary
         .builder("godkjenningsbehov_utfall")
         .description("Måler hvor raskt godkjenningsbehov behandles, fordelt på utfallet")
-        .publishPercentileHistogram()
-        .minimumExpectedValue(Duration.ofMillis(500))
-        .maximumExpectedValue(Duration.ofSeconds(30))
+        .serviceLevelObjectives(500.0, 1000.0, 1500.0, 2000.0, 2500.0, 3000.0, 3500.0, 4000.0, 4500.0, 5000.0, 6000.0, 10_000.0, 30_000.0)
 
 private val tidsbrukForBehovMetrikkBuilder =
     DistributionSummary
@@ -90,7 +86,7 @@ internal fun registrerTidsbrukForGodkjenningsbehov(
 ) = godkjenningsbehovUtfallMetrikkBuilder
     .withRegistry(registry)
     .withTag("utfall", utfall.name)
-    .record(Duration.ofMillis(tidBruktMs.toLong()))
+    .record(tidBruktMs.toDouble())
 
 internal fun tellAvvistÅrsak(årsak: String) =
     automatiskAvvistÅrsakerTellerBuilder
