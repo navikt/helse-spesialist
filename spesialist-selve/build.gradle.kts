@@ -17,6 +17,7 @@ dependencies {
 
     testImplementation(testFixtures(project(":spesialist-felles")))
     testImplementation(libs.rapids.and.rivers.test)
+    testImplementation(libs.bundles.ktor.server)
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
     testImplementation("no.nav.security:mock-oauth2-server:$mockOAuth2ServerVersion")
 }
