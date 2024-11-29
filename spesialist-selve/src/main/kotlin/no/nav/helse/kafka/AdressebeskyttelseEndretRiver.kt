@@ -11,13 +11,9 @@ import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 internal class AdressebeskyttelseEndretRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    override fun preconditions() =
-        River.PacketValidation {
-            it.requireValue("@event_name", "adressebeskyttelse_endret")
-        }
-
     override fun validations() =
         River.PacketValidation {
+            it.demandValue("@event_name", "adressebeskyttelse_endret")
             it.requireKey("@id", "fødselsnummer")
         }
 

@@ -22,17 +22,12 @@ internal class PersoninfoløsningRiver(
 ) : SpesialistRiver {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
-            it.requireValue("@event_name", "behov")
-            it.requireValue("@final", true)
-            it.requireAll("@behov", listOf("HentPersoninfoV2"))
-            it.require("@løsning.HentPersoninfoV2") { node -> require(node.isObject) }
-        }
-    }
-
     override fun validations() =
         River.PacketValidation {
+            it.demandValue("@event_name", "behov")
+            it.demandValue("@final", true)
+            it.demandAll("@behov", listOf("HentPersoninfoV2"))
+            it.demand("@løsning.HentPersoninfoV2") { require(it.isObject) }
             it.requireKey("@id", "contextId", "hendelseId")
             it.requireKey(
                 "@løsning.HentPersoninfoV2.fornavn",
@@ -75,17 +70,12 @@ internal class FlerePersoninfoRiver(
 ) : SpesialistRiver {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
-            it.requireValue("@event_name", "behov")
-            it.requireValue("@final", true)
-            it.requireAll("@behov", listOf("HentPersoninfoV2"))
-            it.require("@løsning.HentPersoninfoV2") { node -> require(node.isArray) }
-        }
-    }
-
     override fun validations() =
         River.PacketValidation {
+            it.demandValue("@event_name", "behov")
+            it.demandValue("@final", true)
+            it.demandAll("@behov", listOf("HentPersoninfoV2"))
+            it.demand("@løsning.HentPersoninfoV2") { require(it.isArray) }
             it.requireKey("@id", "contextId", "hendelseId")
             it.requireArray("@løsning.HentPersoninfoV2") {
                 requireKey("ident", "fornavn", "etternavn", "fødselsdato", "kjønn", "adressebeskyttelse")

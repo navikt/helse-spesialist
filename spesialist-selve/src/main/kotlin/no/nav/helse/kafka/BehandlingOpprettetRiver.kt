@@ -11,15 +11,10 @@ import no.nav.helse.modell.vedtaksperiode.BehandlingOpprettet
 internal class BehandlingOpprettetRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
-            it.requireValue("@event_name", "behandling_opprettet")
-            it.forbidValues("organisasjonsnummer", listOf("ARBEIDSLEDIG", "SELVSTENDIG", "FRILANS"))
-        }
-    }
-
     override fun validations() =
         River.PacketValidation {
+            it.demandValue("@event_name", "behandling_opprettet")
+            it.rejectValues("organisasjonsnummer", listOf("ARBEIDSLEDIG", "SELVSTENDIG", "FRILANS"))
             it.requireKey(
                 "@id",
                 "vedtaksperiodeId",

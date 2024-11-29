@@ -20,17 +20,13 @@ internal class InntektLøsningRiver(
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
     private val behov = "InntekterForSykepengegrunnlag"
 
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
-            it.requireValue("@event_name", "behov")
-            it.requireValue("@final", true)
-            it.requireAll("@behov", listOf(behov))
-            it.requireKey("contextId", "hendelseId")
-        }
-    }
-
     override fun validations() =
         River.PacketValidation {
+            it.demandValue("@event_name", "behov")
+            it.demandValue("@final", true)
+            it.demandAll("@behov", listOf(behov))
+            it.demandKey("contextId")
+            it.demandKey("hendelseId")
             it.requireKey("@id")
             it.requireArray("@løsning.$behov") {
                 require("årMåned", JsonNode::asYearMonth)

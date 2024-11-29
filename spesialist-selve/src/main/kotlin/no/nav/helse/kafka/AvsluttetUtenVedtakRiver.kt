@@ -14,14 +14,9 @@ import org.slf4j.LoggerFactory
 internal class AvsluttetUtenVedtakRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
-            it.requireValue("@event_name", "avsluttet_uten_vedtak")
-        }
-    }
-
     override fun validations() =
         River.PacketValidation {
+            it.demandValue("@event_name", "avsluttet_uten_vedtak")
             it.requireKey("@id", "fødselsnummer", "vedtaksperiodeId", "organisasjonsnummer")
             it.requireKey("fom", "tom", "skjæringstidspunkt", "behandlingId")
             it.requireArray("hendelser")

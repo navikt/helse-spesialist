@@ -22,14 +22,9 @@ internal class VedtaksperiodeForkastetRiver(
         private fun uuid(jsonNode: JsonNode): UUID = UUID.fromString(jsonNode.asText())
     }
 
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
-            it.requireValue("@event_name", "vedtaksperiode_forkastet")
-        }
-    }
-
     override fun validations() =
         River.PacketValidation {
+            it.demandValue("@event_name", "vedtaksperiode_forkastet")
             it.require("@id", Companion::uuid)
             it.require("vedtaksperiodeId", Companion::uuid)
             it.requireKey("fødselsnummer")

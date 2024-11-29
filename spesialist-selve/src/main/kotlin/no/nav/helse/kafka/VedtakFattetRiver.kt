@@ -18,14 +18,9 @@ internal class VedtakFattetRiver(
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
     }
 
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
-            it.requireValue("@event_name", "vedtak_fattet")
-        }
-    }
-
     override fun validations() =
         River.PacketValidation {
+            it.demandValue("@event_name", "vedtak_fattet")
             it.requireKey("@id", "fødselsnummer", "vedtaksperiodeId", "behandlingId")
         }
 

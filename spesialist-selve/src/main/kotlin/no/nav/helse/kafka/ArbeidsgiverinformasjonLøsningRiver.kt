@@ -17,16 +17,11 @@ internal class ArbeidsgiverinformasjonLøsningRiver(
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
     private val behov = "Arbeidsgiverinformasjon"
 
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
-            it.requireValue("@event_name", "behov")
-            it.requireValue("@final", true)
-            it.requireAll("@behov", listOf(behov))
-        }
-    }
-
     override fun validations() =
         River.PacketValidation {
+            it.demandValue("@event_name", "behov")
+            it.demandValue("@final", true)
+            it.demandAll("@behov", listOf(behov))
             it.requireKey("contextId", "hendelseId", "@id")
             it.requireKey("@løsning.$behov")
         }

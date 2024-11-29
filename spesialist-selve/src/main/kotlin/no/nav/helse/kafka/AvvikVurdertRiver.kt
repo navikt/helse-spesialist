@@ -20,14 +20,9 @@ internal class AvvikVurdertRiver(
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
     }
 
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
-            it.requireValue("@event_name", "avvik_vurdert")
-        }
-    }
-
     override fun validations() =
         River.PacketValidation {
+            it.demandValue("@event_name", "avvik_vurdert")
             it.requireKey("@id", "fødselsnummer", "skjæringstidspunkt", "vedtaksperiodeId")
             it.interestedIn("avviksvurdering.vilkårsgrunnlagId")
             it.requireKey(

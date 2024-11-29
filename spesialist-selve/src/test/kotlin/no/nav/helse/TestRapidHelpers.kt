@@ -133,10 +133,6 @@ object TestRapidHelpers {
 }
 
 internal fun TestRapid.medRivers(vararg river: SpesialistRiver): TestRapid {
-    river.forEach { River(this)
-        .precondition(it.preconditions())
-        .validate(it.validations())
-        .register(it)
-    }
+    river.forEach { River(this).validate(it.validations()).register(it) }
     return this
 }

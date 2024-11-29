@@ -13,14 +13,9 @@ import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 internal class TilbakedateringBehandletRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
-            it.requireValue("@event_name", "tilbakedatering_behandlet")
-        }
-    }
-
     override fun validations() =
         River.PacketValidation {
+            it.demandValue("@event_name", "tilbakedatering_behandlet")
             it.requireKey("@opprettet")
             it.requireKey("@id")
             it.requireKey("fødselsnummer")

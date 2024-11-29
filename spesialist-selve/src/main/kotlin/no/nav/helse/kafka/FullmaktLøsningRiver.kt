@@ -21,17 +21,14 @@ internal class FullmaktLøsningRiver(
 ) : SpesialistRiver {
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
-            it.requireValue("@event_name", "behov")
-            it.requireValue("@final", true)
-            it.requireAll("@behov", listOf("Fullmakt"))
-            it.requireKey("fødselsnummer", "contextId", "hendelseId")
-        }
-    }
-
     override fun validations() =
         River.PacketValidation {
+            it.demandValue("@event_name", "behov")
+            it.demandValue("@final", true)
+            it.demandAll("@behov", listOf("Fullmakt"))
+            it.demandKey("contextId")
+            it.demandKey("hendelseId")
+            it.demandKey("fødselsnummer")
             it.requireKey("@id")
             it.require("@opprettet") { node -> node.asLocalDateTime() }
             it.requireArray("@løsning.Fullmakt") {

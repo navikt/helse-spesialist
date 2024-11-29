@@ -202,7 +202,6 @@ internal class MeldingMediator(
             )
         rivers.forEach { river ->
             River(delegatedRapid)
-                .precondition(river.preconditions())
                 .validate(river.validations())
                 .register(duplikatsjekkendeRiver(river))
                 .onSuccess { packet, _, _, _ ->

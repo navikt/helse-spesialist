@@ -16,16 +16,15 @@ internal class DokumentRiver(
 ) : SpesialistRiver {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
-            it.requireValue("@event_name", "hent-dokument")
-            it.requireKey("@løsning.dokument")
-        }
-    }
-
     override fun validations() =
         River.PacketValidation {
-            it.requireKey("@id", "fødselsnummer", "dokumentId")
+            it.demandValue("@event_name", "hent-dokument")
+            it.demandKey("@løsning.dokument")
+            it.requireKey(
+                "@id",
+                "fødselsnummer",
+                "dokumentId",
+            )
         }
 
     override fun onError(

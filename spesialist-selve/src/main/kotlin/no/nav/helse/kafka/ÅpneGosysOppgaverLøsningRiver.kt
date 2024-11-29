@@ -17,16 +17,11 @@ internal class ÅpneGosysOppgaverLøsningRiver(
 ) : SpesialistRiver {
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
-            it.requireValue("@event_name", "behov")
-            it.requireValue("@final", true)
-            it.requireAll("@behov", listOf("ÅpneOppgaver"))
-        }
-    }
-
     override fun validations() =
         River.PacketValidation {
+            it.demandValue("@event_name", "behov")
+            it.demandValue("@final", true)
+            it.demandAll("@behov", listOf("ÅpneOppgaver"))
             it.require("@opprettet") { message -> message.asLocalDateTime() }
             it.requireKey("@id", "contextId", "hendelseId", "fødselsnummer")
             it.require("@løsning.ÅpneOppgaver.antall") {}

@@ -16,14 +16,9 @@ internal class OppdaterPersondataRiver(
 ) : SpesialistRiver {
     private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
-            it.requireValue("@event_name", "oppdater_persondata")
-        }
-    }
-
     override fun validations() =
         River.PacketValidation {
+            it.demandValue("@event_name", "oppdater_persondata")
             it.requireKey("@id", "fødselsnummer")
         }
 
