@@ -1,9 +1,6 @@
 package no.nav.helse
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import io.micrometer.core.instrument.Metrics
-import io.micrometer.prometheusmetrics.PrometheusConfig
-import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.bootstrap.SpesialistApp
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -72,17 +69,10 @@ internal class RapidApp(env: Map<String, String>) {
     }
 
     init {
-        val prometheusMeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
-        Metrics.globalRegistry.add(prometheusMeterRegistry)
-
         rapidsConnection =
-            RapidApplication.create(
-                env = env,
-                meterRegistry = prometheusMeterRegistry,
-                builder = {
-                    withKtorModule(spesialistApp.ktorApp())
-                },
-            )
+            RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
+                spesialistApp.ktorApp(this)
+            }.build()
     }
 
     fun start() = spesialistApp.start()

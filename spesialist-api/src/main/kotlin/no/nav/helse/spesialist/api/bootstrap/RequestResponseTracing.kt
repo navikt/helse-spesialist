@@ -9,7 +9,7 @@ import io.ktor.server.plugins.callid.callId
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.uri
 import io.ktor.server.response.ApplicationSendPipeline
-import io.micrometer.core.instrument.Counter
+import io.prometheus.client.Counter
 import io.prometheus.client.Histogram
 import org.slf4j.Logger
 

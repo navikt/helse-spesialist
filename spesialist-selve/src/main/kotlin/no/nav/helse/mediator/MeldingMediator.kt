@@ -1,6 +1,5 @@
 package no.nav.helse.mediator
 
-// import no.nav.helse.duplikatsjekkTidsbruk
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
@@ -16,6 +15,7 @@ import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.db.VedtakDao
+import no.nav.helse.duplikatsjekkTidsbruk
 import no.nav.helse.kafka.AdressebeskyttelseEndretRiver
 import no.nav.helse.kafka.ArbeidsforholdLøsningRiver
 import no.nav.helse.kafka.ArbeidsgiverinformasjonLøsningRiver
@@ -75,6 +75,7 @@ import no.nav.helse.spesialist.api.Personhåndterer
 import org.slf4j.LoggerFactory
 import java.util.UUID
 import javax.sql.DataSource
+import kotlin.time.DurationUnit.MILLISECONDS
 import kotlin.time.measureTimedValue
 
 internal class MeldingMediator(
@@ -108,7 +109,7 @@ internal class MeldingMediator(
     private fun erDuplikat(id: UUID): Boolean {
         val (erDuplikat, tid) = measureTimedValue { meldingDuplikatkontrollDao.erBehandlet(id) }
         logg.info("Det tok ${tid.inWholeMilliseconds} ms å gjøre duplikatsjekk mot databasen")
-//        duplikatsjekkTidsbruk.labels(erDuplikat.toString()).observe(tid.toDouble(MILLISECONDS))
+        duplikatsjekkTidsbruk.labels(erDuplikat.toString()).observe(tid.toDouble(MILLISECONDS))
 
         return erDuplikat
     }

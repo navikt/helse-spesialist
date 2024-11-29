@@ -3,7 +3,7 @@ package no.nav.helse.mediator
 import kotliquery.TransactionalSession
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.person.Person
-import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
+import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test

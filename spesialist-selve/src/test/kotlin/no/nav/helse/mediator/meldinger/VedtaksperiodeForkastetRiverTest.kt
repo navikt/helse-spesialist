@@ -8,7 +8,7 @@ import no.nav.helse.kafka.VedtaksperiodeForkastetRiver
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
-import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
+import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

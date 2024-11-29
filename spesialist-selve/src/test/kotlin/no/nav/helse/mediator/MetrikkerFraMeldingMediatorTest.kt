@@ -1,23 +1,22 @@
 package no.nav.helse.mediator
 
-import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
-import io.micrometer.prometheusmetrics.PrometheusConfig
-import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import io.mockk.every
 import io.mockk.mockk
+import io.prometheus.client.CollectorRegistry
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.Meldingssender
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.modell.person.SøknadSendtCommand
+import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.test.lagFødselsnummer
-import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
     private val fødselsnummer = lagFødselsnummer()
 
     private val testRapid = TestRapid()
-    private val metrikker = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+    private val metrikker = CollectorRegistry.defaultRegistry
 
     private val kommandofabrikk = mockk<Kommandofabrikk>(relaxed = true)
     private val meldingssender = Meldingssender(testRapid)
@@ -47,9 +46,8 @@ internal class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
         meldingssender.sendSøknadSendt("aktørId", fødselsnummer, "organisasjonsnummer")
 
         val innslag =
-            metrikker.scrape("text/plain", setOf("command_tidsbruk_count"))//, arrayOf("command"), arrayOf("SøknadSendtCommand"))
+            metrikker.getSampleValue("command_tidsbruk_count", arrayOf("command"), arrayOf("SøknadSendtCommand"))
         // Siden metrikker er globale vil tallet variere avhengig av hvor mange tester som ble kjørt
-        assertNotNull(innslag)
-        println(innslag)
+        assertTrue(innslag > 0)
     }
 }

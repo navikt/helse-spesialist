@@ -2,11 +2,9 @@ package no.nav.helse.mediator
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
-import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
-import io.micrometer.core.instrument.MeterRegistry
+import no.nav.helse.rapids_rivers.MessageProblems
+import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -52,13 +50,7 @@ internal class DelegatedRapidTest : River.PacketListener {
         order.add("SHOULD_PROCESS")
         return true
     }
-
-    override fun onPacket(
-        packet: JsonMessage,
-        context: MessageContext,
-        metadata: MessageMetadata,
-        meterRegistry: MeterRegistry
-    ) {
+    override fun onPacket(packet: JsonMessage, context: MessageContext) {
         order.add("PACKET")
     }
 

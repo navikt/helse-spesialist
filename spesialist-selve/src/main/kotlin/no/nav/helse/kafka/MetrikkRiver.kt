@@ -8,7 +8,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
-// import no.nav.helse.registrerTidsbrukForBehov
+import no.nav.helse.registrerTidsbrukForBehov
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.temporal.ChronoUnit
@@ -46,6 +46,6 @@ internal class MetrikkRiver : SpesialistRiver {
             }
 
         log.info("Registrerer svartid for $behov som $delay ms.$godkjenningslog")
-//        registrerTidsbrukForBehov.labels(behov.first()).observe(delay.toDouble())
+        registrerTidsbrukForBehov.labels(behov.first()).observe(delay.toDouble())
     }
 }

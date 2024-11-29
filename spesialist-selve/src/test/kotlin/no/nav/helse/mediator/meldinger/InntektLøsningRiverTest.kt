@@ -6,7 +6,7 @@ import io.mockk.verify
 import no.nav.helse.kafka.InntektLøsningRiver
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
-import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
+import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.test.TestPerson
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

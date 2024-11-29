@@ -1,6 +1,7 @@
 package no.nav.helse.bootstrap
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
+import io.ktor.server.application.Application
 import no.nav.helse.DataSourceBuilder
 import no.nav.helse.Gruppekontroll
 import no.nav.helse.db.BehandlingsstatistikkDao
@@ -215,5 +216,7 @@ class SpesialistApp(
         dataSource.close()
     }
 
-    fun ktorApp() = bootstrap.ktorApp(azureConfig, env)
+    fun ktorApp(application: Application) {
+        bootstrap.ktorApp(application, azureConfig, env)
+    }
 }
