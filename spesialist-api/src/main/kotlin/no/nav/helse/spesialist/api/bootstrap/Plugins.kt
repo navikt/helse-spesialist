@@ -1,12 +1,9 @@
 package no.nav.helse.spesialist.api.bootstrap
 
-import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.install
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.doublereceive.DoubleReceive
 import io.ktor.server.plugins.statuspages.StatusPagesConfig
 import io.ktor.server.request.httpMethod
@@ -15,7 +12,6 @@ import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.websocket.WebSockets
 import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil
-import no.nav.helse.spesialist.api.objectMapper
 import org.slf4j.LoggerFactory
 
 private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -24,7 +20,6 @@ private val logg = LoggerFactory.getLogger("SpesialistApp")
 internal fun Application.installPlugins() {
     install(WebSockets)
     install(DoubleReceive)
-    install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
     requestResponseTracing(sikkerlogg)
 }
 
