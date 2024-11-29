@@ -41,7 +41,6 @@ dependencyResolutionManagement {
             library("ktor-server-call-id", "io.ktor", "ktor-server-call-id").versionRef("ktor")
             library("ktor-server-auth", "io.ktor", "ktor-server-auth").versionRef("ktor")
             library("ktor-server-auth-jwt", "io.ktor", "ktor-server-auth-jwt").versionRef("ktor")
-            library("ktor-server-websockets", "io.ktor", "ktor-server-websockets").versionRef("ktor")
 
             library("ktor-server-test-host", "io.ktor", "ktor-server-test-host").versionRef("ktor")
 
@@ -62,7 +61,6 @@ dependencyResolutionManagement {
                     "ktor-server-call-id",
                     "ktor-server-auth",
                     "ktor-server-auth-jwt",
-                    "ktor-server-websockets",
                 ),
             )
             bundle(
