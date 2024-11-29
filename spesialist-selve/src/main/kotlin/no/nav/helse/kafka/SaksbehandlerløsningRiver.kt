@@ -17,9 +17,14 @@ internal class SaksbehandlerløsningRiver(
 ) : SpesialistRiver {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
+    override fun preconditions(): River.PacketValidation {
+        return River.PacketValidation {
+            it.requireValue("@event_name", "saksbehandler_løsning")
+        }
+    }
+
     override fun validations() =
         River.PacketValidation {
-            it.demandValue("@event_name", "saksbehandler_løsning")
             it.requireKey("@id", "fødselsnummer", "oppgaveId", "hendelseId")
             it.requireKey("godkjent", "saksbehandlerident", "saksbehandleroid", "saksbehandlerepost")
             it.require("godkjenttidspunkt", JsonNode::asLocalDateTime)

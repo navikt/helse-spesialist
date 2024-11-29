@@ -15,9 +15,14 @@ internal class GosysOppgaveEndretRiver(
 ) : SpesialistRiver {
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
+    override fun preconditions(): River.PacketValidation {
+        return River.PacketValidation {
+            it.requireValue("@event_name", "gosys_oppgave_endret")
+        }
+    }
+
     override fun validations() =
         River.PacketValidation {
-            it.demandValue("@event_name", "gosys_oppgave_endret")
             it.requireKey("@id", "@opprettet", "fødselsnummer")
         }
 

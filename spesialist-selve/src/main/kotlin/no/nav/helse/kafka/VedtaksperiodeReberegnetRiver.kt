@@ -11,11 +11,16 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
 internal class VedtaksperiodeReberegnetRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
+    override fun preconditions(): River.PacketValidation {
+        return River.PacketValidation {
+            it.requireValue("@event_name", "vedtaksperiode_endret")
+            it.require("forrigeTilstand") { node -> check(node.asText().startsWith("AVVENTER_GODKJENNING")) }
+            it.forbidValues("gjeldendeTilstand", listOf("AVSLUTTET", "TIL_UTBETALING", "TIL_INFOTRYGD"))
+        }
+    }
+
     override fun validations() =
         River.PacketValidation {
-            it.demandValue("@event_name", "vedtaksperiode_endret")
-            it.demand("forrigeTilstand") { node -> check(node.asText().startsWith("AVVENTER_GODKJENNING")) }
-            it.rejectValues("gjeldendeTilstand", listOf("AVSLUTTET", "TIL_UTBETALING", "TIL_INFOTRYGD"))
             it.requireKey(
                 "@id",
                 "fødselsnummer",

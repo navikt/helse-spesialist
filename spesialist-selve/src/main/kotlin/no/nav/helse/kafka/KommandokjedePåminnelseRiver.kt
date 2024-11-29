@@ -20,9 +20,14 @@ internal class KommandokjedePåminnelseRiver(
         private val logg: Logger = LoggerFactory.getLogger(this::class.java)
     }
 
+    override fun preconditions(): River.PacketValidation {
+        return River.PacketValidation {
+            it.requireValue("@event_name", "kommandokjede_påminnelse")
+        }
+    }
+
     override fun validations() =
         River.PacketValidation {
-            it.demandValue("@event_name", "kommandokjede_påminnelse")
             it.requireKey("@id", "commandContextId", "meldingId")
         }
 

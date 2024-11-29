@@ -19,9 +19,14 @@ internal class VarseldefinisjonRiver(
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
     }
 
+    override fun preconditions(): River.PacketValidation {
+        return River.PacketValidation {
+            it.requireValue("@event_name", "varselkode_ny_definisjon")
+        }
+    }
+
     override fun validations() =
         River.PacketValidation {
-            it.demandValue("@event_name", "varselkode_ny_definisjon")
             it.requireKey("@id")
             it.requireKey("varselkode")
             it.requireKey("gjeldende_definisjon")

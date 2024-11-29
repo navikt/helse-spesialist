@@ -16,10 +16,15 @@ import java.time.temporal.ChronoUnit
 internal class MetrikkRiver : SpesialistRiver {
     private val logg: Logger = LoggerFactory.getLogger("MetrikkRiver")
 
+    override fun preconditions(): River.PacketValidation {
+        return River.PacketValidation {
+            it.requireValue("@event_name", "behov")
+            it.requireValue("@final", true)
+        }
+    }
+
     override fun validations() =
         River.PacketValidation {
-            it.demandValue("@event_name", "behov")
-            it.demandValue("@final", true)
             it.requireKey("@besvart", "@behov", "system_participating_services")
             it.interestedIn("@løsning.Godkjenning.godkjent")
             it.interestedIn("@løsning.Godkjenning.automatiskBehandling")

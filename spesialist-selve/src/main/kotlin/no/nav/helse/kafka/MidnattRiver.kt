@@ -18,9 +18,14 @@ internal class MidnattRiver(
         private val logg = LoggerFactory.getLogger(this::class.java)
     }
 
+    override fun preconditions(): River.PacketValidation {
+        return River.PacketValidation {
+            it.requireAny("@event_name", listOf("midnatt", "slett_gamle_dokumenter_spesialist"))
+        }
+    }
+
     override fun validations() =
         River.PacketValidation {
-            it.demandAny("@event_name", listOf("midnatt", "slett_gamle_dokumenter_spesialist"))
             it.requireKey("@id")
         }
 

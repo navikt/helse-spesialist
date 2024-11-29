@@ -16,9 +16,14 @@ import org.slf4j.LoggerFactory
 internal class NyeVarslerRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
+    override fun preconditions(): River.PacketValidation {
+        return River.PacketValidation {
+            it.requireAny("@event_name", listOf("aktivitetslogg_ny_aktivitet", "nye_varsler"))
+        }
+    }
+
     override fun validations() =
         River.PacketValidation {
-            it.demandAny("@event_name", listOf("aktivitetslogg_ny_aktivitet", "nye_varsler"))
             it.requireKey("@id", "fødselsnummer")
             it.require("@opprettet") { message -> message.asLocalDateTime() }
             it.require("aktiviteter", inneholderVarslerParser)
