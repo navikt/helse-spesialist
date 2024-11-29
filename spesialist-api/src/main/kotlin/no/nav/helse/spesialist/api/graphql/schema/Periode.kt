@@ -715,6 +715,12 @@ data class BeregnetPeriode(
 
     fun avslag(): List<Avslag> = saksbehandlerhåndterer.hentAvslag(periode.vedtaksperiodeId, periode.utbetaling.id).toList()
 
+    fun vedtakBegrunnelser(): List<VedtakBegrunnelse> =
+        saksbehandlerhåndterer.hentVedtakBegrunnelser(
+            periode.vedtaksperiodeId,
+            periode.utbetaling.id,
+        )
+
     fun annullering(): Annullering? =
         if (erSisteGenerasjon) {
             saksbehandlerhåndterer.hentAnnullering(

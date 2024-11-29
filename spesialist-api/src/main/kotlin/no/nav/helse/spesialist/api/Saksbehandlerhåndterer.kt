@@ -6,6 +6,7 @@ import no.nav.helse.spesialist.api.graphql.schema.Annullering
 import no.nav.helse.spesialist.api.graphql.schema.Avslag
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
 import no.nav.helse.spesialist.api.graphql.schema.PaVentRequest
+import no.nav.helse.spesialist.api.graphql.schema.VedtakBegrunnelse
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
@@ -68,6 +69,11 @@ interface Saksbehandlerhåndterer {
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
     ): Set<Avslag>
+
+    fun hentVedtakBegrunnelser(
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+    ): List<VedtakBegrunnelse>
 
     fun håndterAvslag(
         oppgaveId: Long,

@@ -7,6 +7,7 @@ import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
+import no.nav.helse.spesialist.api.graphql.mutation.VedtakUtfall
 import no.nav.helse.spesialist.api.notat.NotatApiDao
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
@@ -79,6 +80,13 @@ data class Avslag(
     val opprettet: LocalDateTime,
     val saksbehandlerIdent: String,
     val invalidert: Boolean,
+)
+
+data class VedtakBegrunnelse(
+    val utfall: VedtakUtfall,
+    val begrunnelse: String?,
+    val opprettet: LocalDateTime,
+    val saksbehandlerIdent: String,
 )
 
 data class Annullering(

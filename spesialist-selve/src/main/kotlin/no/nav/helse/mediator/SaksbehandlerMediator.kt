@@ -80,6 +80,7 @@ import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse.Skjonnsfas
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.OMREGNET_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.RAPPORTERT_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
+import no.nav.helse.spesialist.api.graphql.schema.VedtakBegrunnelse
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
@@ -421,6 +422,25 @@ internal class SaksbehandlerMediator(
                     )
                 }
             }.toSet()
+
+    override fun hentVedtakBegrunnelser(
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+    ): List<VedtakBegrunnelse> =
+        vedtakBegrunnelseDao.finnAlleVedtakBegrunnelser(vedtaksperiodeId, utbetalingId)
+            .map { vedtakBegrunnelse ->
+                VedtakBegrunnelse(
+                    utfall =
+                        when (vedtakBegrunnelse.type) {
+                            VedtakBegrunnelseTypeFraDatabase.AVSLAG -> VedtakUtfall.AVSLAG
+                            VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> VedtakUtfall.DELVIS_INNVILGELSE
+                            VedtakBegrunnelseTypeFraDatabase.INNVILGELSE -> VedtakUtfall.INNVILGELSE
+                        },
+                    begrunnelse = vedtakBegrunnelse.begrunnelse,
+                    opprettet = vedtakBegrunnelse.opprettet,
+                    saksbehandlerIdent = vedtakBegrunnelse.saksbehandlerIdent,
+                )
+            }
 
     override fun håndterAvslag(
         oppgaveId: Long,
