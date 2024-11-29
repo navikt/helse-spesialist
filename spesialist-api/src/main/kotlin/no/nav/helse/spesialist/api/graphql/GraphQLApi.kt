@@ -2,16 +2,11 @@ package no.nav.helse.spesialist.api.graphql
 
 import com.expediagroup.graphql.server.execution.GraphQLServer
 import graphql.GraphQL
-import io.ktor.http.ContentType
 import io.ktor.server.application.Application
-import io.ktor.server.application.call
-import io.ktor.server.application.install
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.ApplicationRequest
 import io.ktor.server.response.respond
-import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
@@ -123,7 +118,6 @@ fun Application.graphQLApi(
             authenticate("oidc") {
                 install(GraphQLMetrikker)
                 queryHandler(server)
-                playground()
             }
         }
     }
@@ -150,16 +144,3 @@ internal fun Route.queryHandler(server: GraphQLServer<ApplicationRequest>) {
 private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
 private fun tidBrukt(start: Long): Duration = Duration.ofNanos(System.nanoTime() - start)
-
-private fun Route.playground() {
-    get("playground") {
-        call.respondText(buildPlaygroundHtml("graphql", "subscriptions"), ContentType.Text.Html)
-    }
-}
-
-private fun buildPlaygroundHtml(
-    graphQLEndpoint: String,
-    subscriptionsEndpoint: String,
-) = Application::class.java.classLoader.getResource("graphql-playground.html")?.readText()
-    ?.replace("\${graphQLEndpoint}", graphQLEndpoint)?.replace("\${subscriptionsEndpoint}", subscriptionsEndpoint)
-    ?: throw IllegalStateException("graphql-playground.html cannot be found in the classpath")
