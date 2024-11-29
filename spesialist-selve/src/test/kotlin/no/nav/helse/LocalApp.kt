@@ -81,7 +81,7 @@ object LocalApp {
 
     private val server =
         embeddedServer(CIO, port = 4321) {
-            spesialistApp.ktorApp()
+            spesialistApp.ktorApp(this)
             routing {
                 get("/local-token") {
                     return@get call.respond(message = token)

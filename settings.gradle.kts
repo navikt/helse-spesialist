@@ -16,7 +16,7 @@ dependencyResolutionManagement {
             version("logstash", "8.0")
             version("jackson", "2.18.1")
             version("tbd-libs", "2024.11.25-10.59-6f263a10")
-            version("ktor", "3.0.0")
+            version("ktor", "3.0.1")
             version("micrometer", "1.13.3")
 
             library("rapids-and-rivers", "com.github.navikt", "rapids-and-rivers").versionRef("rapids-and-rivers")
@@ -31,6 +31,8 @@ dependencyResolutionManagement {
 
             library("ktor-micrometer", "io.ktor", "ktor-server-metrics-micrometer").versionRef("ktor")
             library("micrometer-prometheus", "io.micrometer", "micrometer-registry-prometheus").versionRef("micrometer")
+
+            library("ktor-serialization-jackson", "io.ktor", "ktor-serialization-jackson").versionRef("ktor")
 
             library("ktor-server-double-receive", "io.ktor", "ktor-server-double-receive").versionRef("ktor")
             library("ktor-server-cio", "io.ktor", "ktor-server-cio").versionRef("ktor")
@@ -57,6 +59,7 @@ dependencyResolutionManagement {
                     "ktor-server-cio",
                     "ktor-server-double-receive",
                     "ktor-server-content-negotiation",
+                    "ktor-serialization-jackson",
                     "ktor-server-status-pages",
                     "ktor-server-call-logging",
                     "ktor-server-call-id",
@@ -72,7 +75,7 @@ dependencyResolutionManagement {
 
             bundle(
                 "ktor-client",
-                listOf("ktor-client-core", "ktor-client-apache", "ktor-client-content-negotiation"),
+                listOf("ktor-client-core", "ktor-client-apache", "ktor-client-content-negotiation", "ktor-serialization-jackson"),
             )
         }
     }
