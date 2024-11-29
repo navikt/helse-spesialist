@@ -19,10 +19,15 @@ internal class SøknadSendtArbeidsledigRiver(
     private val logg = LoggerFactory.getLogger(this::class.java)
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
+    override fun preconditions(): River.PacketValidation {
+        return River.PacketValidation {
+            it.requireValue("@event_name", "sendt_søknad_arbeidsledig")
+            it.requireKey("tidligereArbeidsgiverOrgnummer")
+        }
+    }
+
     override fun validations() =
         River.PacketValidation {
-            it.demandAny("@event_name", listOf("sendt_søknad_arbeidsledig"))
-            it.demandKey("tidligereArbeidsgiverOrgnummer")
             it.forbid("arbeidsgiver.orgnummer")
             it.requireKey(
                 "@id",

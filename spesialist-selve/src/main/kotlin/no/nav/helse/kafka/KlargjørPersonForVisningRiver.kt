@@ -16,9 +16,14 @@ internal class KlargjørPersonForVisningRiver(
 ) : SpesialistRiver {
     private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
+    override fun preconditions(): River.PacketValidation {
+        return River.PacketValidation {
+            it.requireValue("@event_name", "klargjør_person_for_visning")
+        }
+    }
+
     override fun validations() =
         River.PacketValidation {
-            it.demandValue("@event_name", "klargjør_person_for_visning")
             it.requireKey("@id", "fødselsnummer")
         }
 

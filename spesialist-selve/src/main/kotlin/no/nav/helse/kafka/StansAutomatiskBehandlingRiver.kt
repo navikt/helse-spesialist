@@ -18,9 +18,14 @@ internal class StansAutomatiskBehandlingRiver(
 ) : SpesialistRiver {
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
+    override fun preconditions(): River.PacketValidation {
+        return River.PacketValidation {
+            it.requireValue("@event_name", "stans_automatisk_behandling")
+        }
+    }
+
     override fun validations() =
         River.PacketValidation {
-            it.demandValue("@event_name", "stans_automatisk_behandling")
             it.requireKey("@id")
             it.requireKey("fødselsnummer")
             it.requireKey("status")
