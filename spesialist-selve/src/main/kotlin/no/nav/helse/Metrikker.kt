@@ -40,9 +40,7 @@ private val godkjenningsbehovUtfallMetrikkBuilder =
     Timer
         .builder("godkjenningsbehov_utfall")
         .description("Måler hvor raskt godkjenningsbehov behandles, fordelt på utfallet")
-        .publishPercentileHistogram()
-        .minimumExpectedValue(Duration.ofMillis(500))
-        .maximumExpectedValue(Duration.ofSeconds(30))
+        .publishPercentiles(500.0, 1000.0, 1500.0, 2000.0, 2500.0, 3000.0, 3500.0, 4000.0, 4500.0, 5000.0, 6000.0, 10_000.0, 30_000.0) // TODO: Dette er feil, dette er ikke persentiler
 
 private val tidsbrukForBehovMetrikkBuilder =
     DistributionSummary
@@ -95,7 +93,7 @@ internal fun registrerTidsbrukForGodkjenningsbehov(
 internal fun tellAvvistÅrsak(årsak: String) =
     automatiskAvvistÅrsakerTellerBuilder
         .withRegistry(registry)
-        .withTag("årsak", årsak)
+        .withTags(årsak)
         .increment()
 
 internal fun tellAutomatisering() {
