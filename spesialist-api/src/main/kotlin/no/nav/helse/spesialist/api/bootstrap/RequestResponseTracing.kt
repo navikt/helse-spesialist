@@ -9,34 +9,39 @@ import io.ktor.server.plugins.callid.callId
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.uri
 import io.ktor.server.response.ApplicationSendPipeline
-import io.prometheus.client.Counter
-import io.prometheus.client.Histogram
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.Metrics
+import io.micrometer.core.instrument.Timer
+import io.micrometer.prometheusmetrics.PrometheusConfig
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
+import kotlinx.coroutines.runBlocking
 import org.slf4j.Logger
+
+private val meterRegistry = Metrics.globalRegistry.add(PrometheusMeterRegistry(PrometheusConfig.DEFAULT))
 
 private val ignoredPaths = listOf("/metrics", "/isalive", "/isready")
 
 internal fun Application.requestResponseTracing(logger: Logger) {
     val httpRequestCounter =
-        Counter.build(
-            "http_requests_total",
-            "Counts the http requests",
-        )
-            .labelNames("method", "code")
-            .register()
+        Counter
+            .builder("http_requests_total")
+            .description("Counts the http requests")
+            .tags("method", "code")
 
     val httpRequestDuration =
-        Histogram.build(
-            "http_request_duration_seconds",
-            "Distribution of http request duration",
-        )
-            .register()
+        Timer
+            .builder("http_request_duration_seconds")
+            .description("Distribution of http request duration")
+            .register(meterRegistry)
 
     intercept(ApplicationCallPipeline.Monitoring) {
         try {
             if (call.request.uri in ignoredPaths) return@intercept proceed()
             logger.info("incoming callId=${call.callId} method=${call.request.httpMethod.value} uri=${call.request.uri}")
-            httpRequestDuration.startTimer().use {
-                proceed()
+            httpRequestDuration.wrap {
+                runBlocking {
+                    proceed()
+                }
             }
         } catch (err: Throwable) {
             logger.error("exception thrown during processing: ${err.message} callId=${call.callId} ", err)
@@ -58,6 +63,9 @@ internal fun Application.requestResponseTracing(logger: Logger) {
 
         if (call.request.uri in ignoredPaths) return@intercept
         logger.info("responding with status=${status.value} callId=${call.callId} ")
-        httpRequestCounter.labels(call.request.httpMethod.value, "${status.value}").inc()
+        httpRequestCounter
+            .withRegistry(meterRegistry)
+            .withTag(call.request.httpMethod.value, "${status.value}")
+            .increment()
     }
 }

@@ -19,7 +19,7 @@ dependencies {
     implementation(libs.jackson.datatype)
     implementation(libs.jackson.helpers)
     implementation(libs.ktor.micrometer)
-    implementation(libs.micrometer.prometheus)
+    api(libs.micrometer.prometheus)
 
     testImplementation(testFixtures(project(":spesialist-felles")))
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")

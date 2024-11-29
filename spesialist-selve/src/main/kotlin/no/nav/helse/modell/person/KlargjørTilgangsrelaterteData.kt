@@ -1,6 +1,7 @@
 package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import kotliquery.TransactionalSession
 import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.OpptegnelseRepository
@@ -14,7 +15,6 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterPersonCommand.OppdaterEnhetCommand
 import no.nav.helse.modell.kommando.OppdaterPersoninfoCommand
 import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
-import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType.PERSON_KLAR_TIL_BEHANDLING
 import no.nav.helse.spesialist.api.abonnement.PersonKlarTilVisning
 import java.util.UUID

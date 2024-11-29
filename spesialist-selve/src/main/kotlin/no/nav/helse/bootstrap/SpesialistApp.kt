@@ -1,6 +1,6 @@
 package no.nav.helse.bootstrap
 
-import io.ktor.server.application.Application
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.DataSourceBuilder
 import no.nav.helse.Gruppekontroll
 import no.nav.helse.db.BehandlingsstatistikkDao
@@ -31,7 +31,6 @@ import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.dokument.PgDokumentDao
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.bootstrap.ApiAvhengigheter
 import no.nav.helse.spesialist.api.bootstrap.Bootstrap
@@ -216,7 +215,5 @@ class SpesialistApp(
         dataSource.close()
     }
 
-    fun ktorApp(application: Application) {
-        bootstrap.ktorApp(application, azureConfig, env)
-    }
+    fun ktorApp() = bootstrap.ktorApp(azureConfig, env)
 }
