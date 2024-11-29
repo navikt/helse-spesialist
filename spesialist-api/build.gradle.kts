@@ -21,7 +21,7 @@ dependencies {
     implementation(libs.micrometer.prometheus)
 
     implementation(libs.bundles.ktor.server)
-    api(libs.bundles.ktor.client)
+    implementation(libs.bundles.ktor.client)
 
     testImplementation(testFixtures(project(":spesialist-felles")))
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
