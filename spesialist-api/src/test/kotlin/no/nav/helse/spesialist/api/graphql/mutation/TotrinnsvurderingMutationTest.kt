@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -32,12 +33,14 @@ internal class TotrinnsvurderingMutationTest : AbstractGraphQLApiTest() {
         val body = runQuery(
             """
             mutation TotrinnsvurderingMutation {
-                sendTilGodkjenningV2(oppgavereferanse: "$oppgaveRef", vedtakBegrunnelse: { utfall: INNVILGELSE })
+                sendTilGodkjenningV2(oppgavereferanse: "$oppgaveRef", vedtakUtfall: INNVILGELSE)
             }
         """
         )
 
-        assertTrue(body["data"]["sendTilGodkjenningV2"].asBoolean())
+        assertEquals(true, body.get("data")?.get("sendTilGodkjenningV2")?.asBoolean()) {
+            "Uventet respons: $body"
+        }
     }
 
     @Test

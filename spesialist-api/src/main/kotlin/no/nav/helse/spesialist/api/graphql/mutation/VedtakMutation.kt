@@ -53,22 +53,41 @@ class VedtakMutation(
     suspend fun fattVedtak(
         oppgavereferanse: String,
         env: DataFetchingEnvironment,
-        vedtakBegrunnelse: VedtakBegrunnelse,
+        utfall: VedtakUtfall,
+        begrunnelse: String? = null,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
             val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
             logg.info("Fatter vedtak for oppgave $oppgavereferanse")
 
-            when (val resultat = saksbehandlerhåndterer.vedtak(saksbehandler, oppgavereferanse.toLong(), true, vedtakBegrunnelse)) {
+            val resultat =
+                saksbehandlerhåndterer.vedtak(
+                    saksbehandlerFraApi = saksbehandler,
+                    oppgavereferanse = oppgavereferanse.toLong(),
+                    godkjent = true,
+                    utfall = utfall,
+                    begrunnelse = begrunnelse,
+                )
+            when (resultat) {
                 is VedtakResultat.Ok -> {
                     val dto =
-                        GodkjenningDto(oppgavereferanse.toLong(), true, saksbehandler.ident, null, null, null, null)
+                        GodkjenningDto(
+                            oppgavereferanse = oppgavereferanse.toLong(),
+                            godkjent = true,
+                            saksbehandlerIdent = saksbehandler.ident,
+                            årsak = null,
+                            begrunnelser = null,
+                            kommentar = null,
+                            avslag = null,
+                        )
                     godkjenninghåndterer.håndter(dto, saksbehandler.epost, saksbehandler.oid)
                     newResult<Boolean>().data(true).build()
                 }
+
                 is VedtakResultat.Feil -> {
                     logg.warn("Kunne ikke innvilge vedtak: ${resultat.melding}")
-                    newResult<Boolean>().error(vedtakGraphQLError(resultat.melding, resultat.code, resultat.exception)).build()
+                    newResult<Boolean>().error(vedtakGraphQLError(resultat.melding, resultat.code, resultat.exception))
+                        .build()
                 }
             }
         }
@@ -85,16 +104,31 @@ class VedtakMutation(
             val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
             logg.info("Sender oppgave $oppgavereferanse til Infotrygd")
 
-            when (val resultat = saksbehandlerhåndterer.vedtak(saksbehandler, oppgavereferanse.toLong(), false, vedtakBegrunnelse = null)) {
+            val resultat =
+                saksbehandlerhåndterer.infotrygdVedtak(
+                    saksbehandlerFraApi = saksbehandler,
+                    oppgavereferanse = oppgavereferanse.toLong(),
+                    godkjent = false,
+                )
+            when (resultat) {
                 is VedtakResultat.Ok -> {
-                    val godkjenning = GodkjenningDto(oppgavereferanse.toLong(), false, saksbehandler.ident, arsak, begrunnelser, kommentar)
+                    val godkjenning =
+                        GodkjenningDto(
+                            oppgavereferanse = oppgavereferanse.toLong(),
+                            godkjent = false,
+                            saksbehandlerIdent = saksbehandler.ident,
+                            årsak = arsak,
+                            begrunnelser = begrunnelser,
+                            kommentar = kommentar,
+                        )
                     godkjenninghåndterer.håndter(godkjenning, saksbehandler.epost, saksbehandler.oid)
                     newResult<Boolean>().data(true).build()
                 }
 
                 is VedtakResultat.Feil -> {
                     logg.warn("Kunne ikke sende oppgave til Infotrygd: ${resultat.melding}")
-                    newResult<Boolean>().error(vedtakGraphQLError(resultat.melding, resultat.code, resultat.exception)).build()
+                    newResult<Boolean>().error(vedtakGraphQLError(resultat.melding, resultat.code, resultat.exception))
+                        .build()
                 }
             }
         }
@@ -149,11 +183,11 @@ enum class Avslagshandling {
 }
 
 data class VedtakBegrunnelse(
-    val utfall: VedtakBegrunnelseUtfall,
+    val utfall: VedtakUtfall,
     val begrunnelse: String?,
 )
 
-enum class VedtakBegrunnelseUtfall {
+enum class VedtakUtfall {
     AVSLAG,
     DELVIS_INNVILGELSE,
     INNVILGELSE,

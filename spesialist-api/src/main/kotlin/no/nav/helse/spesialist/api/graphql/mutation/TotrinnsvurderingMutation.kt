@@ -98,7 +98,8 @@ class TotrinnsvurderingMutation(
     @Suppress("unused")
     suspend fun sendTilGodkjenningV2(
         oppgavereferanse: String,
-        vedtakBegrunnelse: VedtakBegrunnelse,
+        vedtakUtfall: VedtakUtfall,
+        vedtakBegrunnelse: String? = null,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
@@ -131,7 +132,12 @@ class TotrinnsvurderingMutation(
             }
 
             try {
-                saksbehandlerhåndterer.håndterVedtakBegrunnelse(oppgavereferanse.toLong(), behandlendeSaksbehandler, vedtakBegrunnelse)
+                saksbehandlerhåndterer.håndterVedtakBegrunnelse(
+                    oppgaveId = oppgavereferanse.toLong(),
+                    saksbehandlerFraApi = behandlendeSaksbehandler,
+                    utfall = vedtakUtfall,
+                    begrunnelse = vedtakBegrunnelse,
+                )
                 oppgavehåndterer.sendTilBeslutter(oppgavereferanse.toLong(), behandlendeSaksbehandler)
                 saksbehandlerhåndterer.påVent(
                     PaVentRequest.FjernPaVentUtenHistorikkinnslag(oppgavereferanse.toLong()),

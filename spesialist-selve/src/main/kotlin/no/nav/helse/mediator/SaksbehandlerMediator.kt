@@ -66,9 +66,8 @@ import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagshandling
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
-import no.nav.helse.spesialist.api.graphql.mutation.VedtakBegrunnelse
-import no.nav.helse.spesialist.api.graphql.mutation.VedtakBegrunnelseUtfall
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation.VedtakResultat
+import no.nav.helse.spesialist.api.graphql.mutation.VedtakUtfall
 import no.nav.helse.spesialist.api.graphql.schema.AnnulleringData
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.Avslag
@@ -174,17 +173,30 @@ internal class SaksbehandlerMediator(
         saksbehandlerFraApi: SaksbehandlerFraApi,
         oppgavereferanse: Long,
         godkjent: Boolean,
-        vedtakBegrunnelse: VedtakBegrunnelse?,
+        utfall: VedtakUtfall,
+        begrunnelse: String?,
     ): VedtakResultat {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         return vedtak(oppgavereferanse, saksbehandler, godkjent).also {
             håndterVedtakBegrunnelse(
-                vedtakBegrunnelse = vedtakBegrunnelse,
+                utfall = utfall,
+                begrunnelse = begrunnelse,
                 oppgaveId = oppgavereferanse,
                 saksbehandlerOid = saksbehandler.oid(),
             )
         }
     }
+
+    override fun infotrygdVedtak(
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+        oppgavereferanse: Long,
+        godkjent: Boolean,
+    ): VedtakResultat =
+        vedtak(
+            oppgavereferanse,
+            saksbehandlerFraApi.tilSaksbehandler(),
+            godkjent,
+        )
 
     private fun vedtak(
         oppgavereferanse: Long,
@@ -415,10 +427,12 @@ internal class SaksbehandlerMediator(
     override fun håndterVedtakBegrunnelse(
         oppgaveId: Long,
         saksbehandlerFraApi: SaksbehandlerFraApi,
-        vedtakBegrunnelse: VedtakBegrunnelse,
+        utfall: VedtakUtfall,
+        begrunnelse: String?,
     ) {
         håndterVedtakBegrunnelse(
-            vedtakBegrunnelse = vedtakBegrunnelse,
+            utfall = utfall,
+            begrunnelse = begrunnelse,
             oppgaveId = oppgaveId,
             saksbehandlerOid = saksbehandlerFraApi.oid,
         )
@@ -444,29 +458,28 @@ internal class SaksbehandlerMediator(
     }
 
     private fun håndterVedtakBegrunnelse(
-        vedtakBegrunnelse: VedtakBegrunnelse?,
+        utfall: VedtakUtfall,
+        begrunnelse: String?,
         oppgaveId: Long,
         saksbehandlerOid: UUID,
     ) {
-        if (vedtakBegrunnelse != null) {
-            val oppdatertBegrunnelse =
-                VedtakBegrunnelseFraDatabase(
-                    type = vedtakBegrunnelse.utfall.toDatabaseType(),
-                    tekst = vedtakBegrunnelse.begrunnelse.orEmpty(),
-                )
-            val eksisterendeBegrunnelse = vedtakBegrunnelseDao.finnVedtakBegrunnelse(oppgaveId = oppgaveId)
-            val erEndret = eksisterendeBegrunnelse != oppdatertBegrunnelse
-            val erNy = eksisterendeBegrunnelse == null
-            if (!erNy && erEndret) {
-                vedtakBegrunnelseDao.invaliderVedtakBegrunnelse(oppgaveId = oppgaveId)
-            }
-            if (erNy || erEndret) {
-                vedtakBegrunnelseDao.lagreVedtakBegrunnelse(
-                    oppgaveId = oppgaveId,
-                    vedtakBegrunnelse = oppdatertBegrunnelse,
-                    saksbehandlerOid = saksbehandlerOid,
-                )
-            }
+        val oppdatertBegrunnelse =
+            VedtakBegrunnelseFraDatabase(
+                type = utfall.toDatabaseType(),
+                tekst = begrunnelse.orEmpty(),
+            )
+        val eksisterendeBegrunnelse = vedtakBegrunnelseDao.finnVedtakBegrunnelse(oppgaveId = oppgaveId)
+        val erEndret = eksisterendeBegrunnelse != oppdatertBegrunnelse
+        val erNy = eksisterendeBegrunnelse == null
+        if (!erNy && erEndret) {
+            vedtakBegrunnelseDao.invaliderVedtakBegrunnelse(oppgaveId = oppgaveId)
+        }
+        if (erNy || erEndret) {
+            vedtakBegrunnelseDao.lagreVedtakBegrunnelse(
+                oppgaveId = oppgaveId,
+                vedtakBegrunnelse = oppdatertBegrunnelse,
+                saksbehandlerOid = saksbehandlerOid,
+            )
         }
     }
 
@@ -797,10 +810,10 @@ internal class SaksbehandlerMediator(
             Avslagstype.DELVIS_AVSLAG -> VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE
         }
 
-    private fun VedtakBegrunnelseUtfall.toDatabaseType() =
+    private fun VedtakUtfall.toDatabaseType() =
         when (this) {
-            VedtakBegrunnelseUtfall.AVSLAG -> VedtakBegrunnelseTypeFraDatabase.AVSLAG
-            VedtakBegrunnelseUtfall.DELVIS_INNVILGELSE -> VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE
-            VedtakBegrunnelseUtfall.INNVILGELSE -> VedtakBegrunnelseTypeFraDatabase.INNVILGELSE
+            VedtakUtfall.AVSLAG -> VedtakBegrunnelseTypeFraDatabase.AVSLAG
+            VedtakUtfall.DELVIS_INNVILGELSE -> VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE
+            VedtakUtfall.INNVILGELSE -> VedtakBegrunnelseTypeFraDatabase.INNVILGELSE
         }
 }

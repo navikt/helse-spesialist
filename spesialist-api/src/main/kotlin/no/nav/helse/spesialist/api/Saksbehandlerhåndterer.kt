@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.api
 
-import no.nav.helse.spesialist.api.graphql.mutation.VedtakBegrunnelse
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation
+import no.nav.helse.spesialist.api.graphql.mutation.VedtakUtfall
 import no.nav.helse.spesialist.api.graphql.schema.Annullering
 import no.nav.helse.spesialist.api.graphql.schema.Avslag
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
@@ -23,7 +23,14 @@ interface Saksbehandlerhåndterer {
         saksbehandlerFraApi: SaksbehandlerFraApi,
         oppgavereferanse: Long,
         godkjent: Boolean,
-        vedtakBegrunnelse: VedtakBegrunnelse?,
+        utfall: VedtakUtfall,
+        begrunnelse: String?,
+    ): VedtakMutation.VedtakResultat
+
+    fun infotrygdVedtak(
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+        oppgavereferanse: Long,
+        godkjent: Boolean,
     ): VedtakMutation.VedtakResultat
 
     fun håndter(
@@ -71,7 +78,8 @@ interface Saksbehandlerhåndterer {
     fun håndterVedtakBegrunnelse(
         oppgaveId: Long,
         saksbehandlerFraApi: SaksbehandlerFraApi,
-        vedtakBegrunnelse: VedtakBegrunnelse,
+        utfall: VedtakUtfall,
+        begrunnelse: String?,
     )
 
     fun hentAnnullering(
