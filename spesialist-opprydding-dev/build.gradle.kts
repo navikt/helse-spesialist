@@ -17,6 +17,7 @@ dependencies {
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion") {
         exclude("com.fasterxml.jackson.core")
     }
+    testImplementation(libs.rapids.and.rivers.test)
 }
 
 tasks {

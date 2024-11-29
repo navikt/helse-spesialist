@@ -6,13 +6,31 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
-import io.prometheus.client.Counter
-import io.prometheus.client.Histogram
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.Metrics
+import io.micrometer.core.instrument.Timer
+import io.micrometer.prometheusmetrics.PrometheusConfig
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
+import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.api.client.AccessTokenClient
 import no.nav.helse.spesialist.api.graphql.schema.Reservasjon
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
+
+private val registry = Metrics.globalRegistry.add(PrometheusMeterRegistry(PrometheusConfig.DEFAULT))
+
+private val responstidReservasjonsstatus =
+    Timer
+        .builder("responstid_hent_reservasjonsstatus")
+        .description("Responstid for kall til digdir-krr-proxy")
+        .register(registry)
+
+private val statusEtterKallReservasjonsstatusBuilder =
+    Counter
+        .builder("status_kall_hent_reservasjonsstatus")
+        .description("Status på kall til digdir-krr-proxy, success eller failure")
+        .tags("status")
 
 interface ReservasjonClient {
     suspend fun hentReservasjonsstatus(fnr: String): Reservasjon?
@@ -27,44 +45,34 @@ class KRRClient(
     private val logg: Logger = LoggerFactory.getLogger(this.javaClass)
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
-    companion object {
-        private val responstidReservasjonsstatus: Histogram =
-            Histogram
-                .build()
-                .name("responstid_hent_reservasjonsstatus")
-                .help("Responstid for kall til digdir-krr-proxy")
-                .register()
-        private val statusEtterKallReservasjonsstatus: Counter =
-            Counter
-                .build()
-                .name("status_kall_hent_reservasjonsstatus")
-                .help("Status på kall til digdir-krr-proxy, success eller failure")
-                .labelNames("status")
-                .register()
-    }
-
     override suspend fun hentReservasjonsstatus(fnr: String): Reservasjon? {
-        val timer = responstidReservasjonsstatus.startTimer()
-        try {
-            val accessToken = accessTokenClient.hentAccessToken(scope)
-            val callId = UUID.randomUUID().toString()
+        responstidReservasjonsstatus.recordCallable {
+            return@recordCallable runBlocking {
+                try {
+                    val accessToken = accessTokenClient.hentAccessToken(scope)
+                    val callId = UUID.randomUUID().toString()
 
-            val reservasjon =
-                httpClient
-                    .get("$apiUrl/rest/v1/person") {
-                        header("Authorization", "Bearer $accessToken")
-                        header("Nav-Personident", fnr)
-                        header("Nav-Call-Id", callId)
-                        accept(ContentType.Application.Json)
-                    }.body<Reservasjon>()
-            statusEtterKallReservasjonsstatus.labels("success").inc()
-            return reservasjon
-        } catch (e: Exception) {
-            statusEtterKallReservasjonsstatus.labels("failure").inc()
-            logg.warn("Feil under kall til Kontakt- og reservasjonsregisteret")
-            sikkerLogg.warn("Feil under kall til Kontakt- og reservasjonsregisteret", e)
-        } finally {
-            timer.observeDuration()
+                    val reservasjon =
+                        httpClient
+                            .get("$apiUrl/rest/v1/person") {
+                                header("Authorization", "Bearer $accessToken")
+                                header("Nav-Personident", fnr)
+                                header("Nav-Call-Id", callId)
+                                accept(ContentType.Application.Json)
+                            }.body<Reservasjon>()
+
+                    statusEtterKallReservasjonsstatusBuilder
+                        .withRegistry(registry)
+                        .withTag("status", "success")
+                    return@runBlocking reservasjon
+                } catch (e: Exception) {
+                    statusEtterKallReservasjonsstatusBuilder
+                        .withRegistry(registry)
+                        .withTag("status", "failure")
+                    logg.warn("Feil under kall til Kontakt- og reservasjonsregisteret")
+                    sikkerLogg.warn("Feil under kall til Kontakt- og reservasjonsregisteret", e)
+                }
+            }
         }
 
         return null

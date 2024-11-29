@@ -47,11 +47,10 @@ class Bootstrap(
     private val vergemålApiDao = VergemålApiDao(dataSource)
 
     fun ktorApp(
-        application: Application,
         azureConfig: AzureConfig,
         env: Environment,
-    ) {
-        application.apply {
+    ): Application.() -> Unit =
+        {
             installPlugins()
             azureAdAppAuthentication(azureConfig, env)
             graphQLApi(
@@ -89,5 +88,4 @@ class Bootstrap(
                 debugMinneApi()
             }
         }
-    }
 }

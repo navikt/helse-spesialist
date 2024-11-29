@@ -210,7 +210,7 @@ class PersonQuery(
         fantIkkePersonErrorMsg: String?,
     ) {
         val saksbehandlerIdent = graphQLContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER).ident
-        auditLogTeller.inc()
+        auditLogTeller.increment()
 
         if (harTilgang == false) {
             auditLog.warn(

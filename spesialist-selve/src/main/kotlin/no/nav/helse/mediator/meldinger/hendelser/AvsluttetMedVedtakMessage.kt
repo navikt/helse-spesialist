@@ -2,6 +2,9 @@ package no.nav.helse.mediator.meldinger.hendelser
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import kotliquery.TransactionalSession
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.Kommandostarter
@@ -14,9 +17,6 @@ import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetMedVedtak
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering.Companion.finnRiktigAvviksvurdering
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering.Companion.gjenopprett
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntektDto
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.asLocalDate
-import no.nav.helse.rapids_rivers.asLocalDateTime
 import java.util.UUID
 
 internal class AvsluttetMedVedtakMessage(

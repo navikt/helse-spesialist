@@ -1,5 +1,7 @@
 package no.nav.helse.mediator.overstyring
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.saksbehandler.AnnullertUtbetalingEvent
 import no.nav.helse.modell.saksbehandler.LagtPåVentEvent
@@ -9,8 +11,6 @@ import no.nav.helse.modell.saksbehandler.OverstyrtInntektOgRefusjonEvent
 import no.nav.helse.modell.saksbehandler.OverstyrtTidslinjeEvent
 import no.nav.helse.modell.saksbehandler.SaksbehandlerObserver
 import no.nav.helse.modell.saksbehandler.SkjønnsfastsattSykepengegrunnlagEvent
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
 internal class Saksbehandlingsmelder(

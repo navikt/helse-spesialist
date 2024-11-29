@@ -1,5 +1,6 @@
 package no.nav.helse.modell
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.db.MedDataSource
@@ -50,7 +51,6 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.objectMapper
-import no.nav.helse.rapids_rivers.asLocalDate
 import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource

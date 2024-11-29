@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.spyk
@@ -9,7 +10,6 @@ import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.objectMapper
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -50,15 +50,15 @@ internal class NyeVarslerRiverTest {
         val rapid = TestRapid().medRivers(riverSpy)
 
         rapid.sendTestMessage(melding(FNR, "VARSEL", "INFO", "VARSEL"))
-        verify(exactly = 1) { riverSpy.onPacket(any(), any()) }
+        verify(exactly = 1) { riverSpy.onPacket(any(), any(), any(), any()) }
         clearMocks(riverSpy)
 
         rapid.sendTestMessage(melding(FNR, "INFO", "INFO"))
-        verify(exactly = 0) { riverSpy.onPacket(any(), any()) }
+        verify(exactly = 0) { riverSpy.onPacket(any(), any(), any(), any()) }
         clearMocks(riverSpy)
 
         rapid.sendTestMessage(melding(FNR, "VARSEL"))
-        verify(exactly = 1) { riverSpy.onPacket(any(), any()) }
+        verify(exactly = 1) { riverSpy.onPacket(any(), any(), any(), any()) }
     }
 
     private fun melding(fødselsnummer: String, vararg nivåer: String) = mapOf(
