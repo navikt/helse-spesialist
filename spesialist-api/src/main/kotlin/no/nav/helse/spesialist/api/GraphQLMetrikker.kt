@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.api
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.http.HttpMethod
 import io.ktor.server.application.createRouteScopedPlugin
-import io.ktor.server.plugins.callloging.processingTimeMillis
+import io.ktor.server.plugins.calllogging.processingTimeMillis
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.receive
 import io.micrometer.core.instrument.Counter

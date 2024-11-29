@@ -16,7 +16,7 @@ dependencyResolutionManagement {
             version("logstash", "8.0")
             version("jackson", "2.18.1")
             version("tbd-libs", "2024.11.25-10.59-6f263a10")
-            version("ktor", "2.3.12")
+            version("ktor", "3.0.0")
             version("micrometer", "1.13.3")
 
             library("rapids-and-rivers", "com.github.navikt", "rapids-and-rivers").versionRef("rapids-and-rivers")
@@ -32,7 +32,48 @@ dependencyResolutionManagement {
             library("ktor-micrometer", "io.ktor", "ktor-server-metrics-micrometer").versionRef("ktor")
             library("micrometer-prometheus", "io.micrometer", "micrometer-registry-prometheus").versionRef("micrometer")
 
+            library("ktor-server-double-receive", "io.ktor", "ktor-server-double-receive").versionRef("ktor")
+            library("ktor-server-cio", "io.ktor", "ktor-server-cio").versionRef("ktor")
+            library("ktor-server-content-negotiation", "io.ktor", "ktor-server-content-negotiation").versionRef("ktor")
+            library("ktor-server-status-pages", "io.ktor", "ktor-server-status-pages").versionRef("ktor")
+            library("ktor-server-core", "io.ktor", "ktor-server-core").versionRef("ktor")
+            library("ktor-server-call-logging", "io.ktor", "ktor-server-call-logging").versionRef("ktor")
+            library("ktor-server-call-id", "io.ktor", "ktor-server-call-id").versionRef("ktor")
+            library("ktor-server-auth", "io.ktor", "ktor-server-auth").versionRef("ktor")
+            library("ktor-server-auth-jwt", "io.ktor", "ktor-server-auth-jwt").versionRef("ktor")
+            library("ktor-server-websockets", "io.ktor", "ktor-server-websockets").versionRef("ktor")
+
+            library("ktor-server-test-host", "io.ktor", "ktor-server-test-host").versionRef("ktor")
+
+            library("ktor-client-core", "io.ktor", "ktor-client-core").versionRef("ktor")
+            library("ktor-client-apache", "io.ktor", "ktor-client-apache").versionRef("ktor")
+            library("ktor-client-content-negotiation", "io.ktor", "ktor-client-content-negotiation").versionRef("ktor")
+
             bundle("logging", listOf("logback", "logstash"))
+            bundle(
+                "ktor-server",
+                listOf(
+                    "ktor-server-core",
+                    "ktor-server-cio",
+                    "ktor-server-double-receive",
+                    "ktor-server-content-negotiation",
+                    "ktor-server-status-pages",
+                    "ktor-server-call-logging",
+                    "ktor-server-call-id",
+                    "ktor-server-auth",
+                    "ktor-server-auth-jwt",
+                    "ktor-server-websockets",
+                ),
+            )
+            bundle(
+                "ktor-server-test",
+                listOf("ktor-server-test-host"),
+            )
+
+            bundle(
+                "ktor-client",
+                listOf("ktor-client-core", "ktor-client-apache", "ktor-client-content-negotiation"),
+            )
         }
     }
 }
