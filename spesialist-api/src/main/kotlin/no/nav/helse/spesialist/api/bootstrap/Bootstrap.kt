@@ -47,45 +47,45 @@ class Bootstrap(
     private val vergemålApiDao = VergemålApiDao(dataSource)
 
     fun ktorApp(
+        application: Application,
         azureConfig: AzureConfig,
         env: Environment,
-    ): Application.() -> Unit =
-        {
-            installPlugins()
-            azureAdAppAuthentication(azureConfig, env)
-            graphQLApi(
-                personApiDao = personApiDao,
-                egenAnsattApiDao = egenAnsattApiDao,
-                tildelingApiDao = tildelingApiDao,
-                arbeidsgiverApiDao = arbeidsgiverApiDao,
-                overstyringApiDao = overstyringApiDao,
-                risikovurderingApiDao = risikovurderingApiDao,
-                varselRepository = apiVarselRepository,
-                oppgaveApiDao = oppgaveApiDao,
-                periodehistorikkApiDao = periodehistorikkApiDao,
-                notatDao = notatApiDao,
-                totrinnsvurderingApiDao = totrinnsvurderingApiDao,
-                påVentApiDao = påVentApiDao,
-                vergemålApiDao = vergemålApiDao,
-                reservasjonClient = reservasjonClient,
-                avviksvurderinghenter = avhengigheter.avviksvurderinghenter,
-                skjermedePersonerGruppeId = tilgangsgrupper.skjermedePersonerGruppeId,
-                kode7Saksbehandlergruppe = tilgangsgrupper.kode7GruppeId,
-                beslutterGruppeId = tilgangsgrupper.beslutterGruppeId,
-                snapshotService = SnapshotService(snapshotApiDao, avhengigheter.snapshotClient),
-                behandlingsstatistikkMediator = avhengigheter.behandlingstatistikk,
-                saksbehandlerhåndterer = avhengigheter.saksbehandlerhåndtererProvider(),
-                oppgavehåndterer = avhengigheter.oppgavehåndtererProvider(),
-                totrinnsvurderinghåndterer = avhengigheter.totrinnsvurderinghåndterer(),
-                godkjenninghåndterer = avhengigheter.godkjenninghåndtererProvider(),
-                personhåndterer = avhengigheter.personhåndtererProvider(),
-                dokumenthåndterer = avhengigheter.dokumenthåndtererProvider(),
-                stansAutomatiskBehandlinghåndterer = avhengigheter.stansAutomatiskBehandlinghåndterer(),
-            )
+    ) = application.apply {
+        installPlugins()
+        azureAdAppAuthentication(azureConfig, env)
+        graphQLApi(
+            personApiDao = personApiDao,
+            egenAnsattApiDao = egenAnsattApiDao,
+            tildelingApiDao = tildelingApiDao,
+            arbeidsgiverApiDao = arbeidsgiverApiDao,
+            overstyringApiDao = overstyringApiDao,
+            risikovurderingApiDao = risikovurderingApiDao,
+            varselRepository = apiVarselRepository,
+            oppgaveApiDao = oppgaveApiDao,
+            periodehistorikkApiDao = periodehistorikkApiDao,
+            notatDao = notatApiDao,
+            totrinnsvurderingApiDao = totrinnsvurderingApiDao,
+            påVentApiDao = påVentApiDao,
+            vergemålApiDao = vergemålApiDao,
+            reservasjonClient = reservasjonClient,
+            avviksvurderinghenter = avhengigheter.avviksvurderinghenter,
+            skjermedePersonerGruppeId = tilgangsgrupper.skjermedePersonerGruppeId,
+            kode7Saksbehandlergruppe = tilgangsgrupper.kode7GruppeId,
+            beslutterGruppeId = tilgangsgrupper.beslutterGruppeId,
+            snapshotService = SnapshotService(snapshotApiDao, avhengigheter.snapshotClient),
+            behandlingsstatistikkMediator = avhengigheter.behandlingstatistikk,
+            saksbehandlerhåndterer = avhengigheter.saksbehandlerhåndtererProvider(),
+            oppgavehåndterer = avhengigheter.oppgavehåndtererProvider(),
+            totrinnsvurderinghåndterer = avhengigheter.totrinnsvurderinghåndterer(),
+            godkjenninghåndterer = avhengigheter.godkjenninghåndtererProvider(),
+            personhåndterer = avhengigheter.personhåndtererProvider(),
+            dokumenthåndterer = avhengigheter.dokumenthåndtererProvider(),
+            stansAutomatiskBehandlinghåndterer = avhengigheter.stansAutomatiskBehandlinghåndterer(),
+        )
 
-            routing {
-                webSocketsApi()
-                debugMinneApi()
-            }
+        routing {
+            webSocketsApi()
+            debugMinneApi()
         }
+    }
 }
