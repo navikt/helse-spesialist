@@ -1,18 +1,18 @@
 package no.nav.helse.mediator
 
 import com.fasterxml.jackson.module.kotlin.convertValue
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.modell.vilkårsprøving.SubsumsjonEvent
 import no.nav.helse.objectMapper
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
-import java.util.UUID
 
 class SubsumsjonsmelderTest {
 

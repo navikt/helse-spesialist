@@ -1,9 +1,7 @@
 package no.nav.helse.mediator
 
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import io.micrometer.core.instrument.MeterRegistry
+import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.RapidsConnection
 
 internal class DelegatedRapid(
     private val rapidsConnection: RapidsConnection,
@@ -23,12 +21,10 @@ internal class DelegatedRapid(
     override fun onMessage(
         message: String,
         context: MessageContext,
-        metadata: MessageMetadata,
-        metrics: MeterRegistry,
     ) {
         try {
             beforeRiversAction()
-            if (skalBehandleMelding(message)) notifyMessage(message, context, metadata, metrics)
+            if (skalBehandleMelding(message)) notifyMessage(message, context)
             afterRiversAction(message)
         } catch (err: Exception) {
             errorAction(err, message)

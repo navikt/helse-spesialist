@@ -1,16 +1,14 @@
 package no.nav.helse.kafka
 
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers.River
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
-import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMelding
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.MessageProblems
+import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.slf4j.LoggerFactory
 
 internal class StansAutomatiskBehandlingRiver(
@@ -32,7 +30,6 @@ internal class StansAutomatiskBehandlingRiver(
     override fun onError(
         problems: MessageProblems,
         context: MessageContext,
-        metadata: MessageMetadata,
     ) {
         sikkerlogg.error("Forstod ikke stoppknapp-melding:\n${problems.toExtendedReport()}")
     }
@@ -40,8 +37,6 @@ internal class StansAutomatiskBehandlingRiver(
     override fun onPacket(
         packet: JsonMessage,
         context: MessageContext,
-        metadata: MessageMetadata,
-        meterRegistry: MeterRegistry,
     ) {
         sikkerlogg.info("Mottok melding stans_automatisk_behandling:\n{}", packet.toJson())
 

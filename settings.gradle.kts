@@ -11,16 +11,15 @@ include(
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
-            version("rapids-and-rivers", "2024112511071732529266.253c42b70448")
+            version("rapids-and-rivers", "2024022311041708682651.01821651ed22")
             version("logback", "1.5.7")
             version("logstash", "8.0")
             version("jackson", "2.18.1")
-            version("tbd-libs", "2024.11.25-10.59-6f263a10")
+            version("tbd-libs", "2024.11.08-08.30-f5ffe5d3")
             version("ktor", "2.3.12")
             version("micrometer", "1.12.3")
 
             library("rapids-and-rivers", "com.github.navikt", "rapids-and-rivers").versionRef("rapids-and-rivers")
-            library("rapids-and-rivers-test", "com.github.navikt.tbd-libs", "rapids-and-rivers-test").versionRef("tbd-libs")
 
             library("logback", "ch.qos.logback", "logback-classic").versionRef("logback")
             library("logstash", "net.logstash.logback", "logstash-logback-encoder").versionRef("logstash")

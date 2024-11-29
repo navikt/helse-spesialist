@@ -3,9 +3,9 @@ package no.nav.helse
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.micrometer.core.instrument.Clock
-import io.micrometer.prometheusmetrics.PrometheusConfig
-import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
-import io.prometheus.metrics.model.registry.PrometheusRegistry
+import io.micrometer.prometheus.PrometheusConfig
+import io.micrometer.prometheus.PrometheusMeterRegistry
+import io.prometheus.client.CollectorRegistry
 import no.nav.helse.bootstrap.Environment
 import org.flywaydb.core.Flyway
 import java.time.Duration
@@ -41,7 +41,7 @@ internal class DataSourceBuilder(env: Environment) {
             metricRegistry =
                 PrometheusMeterRegistry(
                     PrometheusConfig.DEFAULT,
-                    PrometheusRegistry.defaultRegistry,
+                    CollectorRegistry.defaultRegistry,
                     Clock.SYSTEM,
                 )
         }

@@ -1,6 +1,5 @@
 package no.nav.helse.mediator.meldinger
 
-import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
@@ -9,6 +8,7 @@ import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.hendelser.AvvikVurdertMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.rapids_rivers.toUUID
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach

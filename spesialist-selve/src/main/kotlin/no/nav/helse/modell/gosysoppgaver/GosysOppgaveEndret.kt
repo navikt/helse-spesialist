@@ -1,7 +1,6 @@
 package no.nav.helse.modell.gosysoppgaver
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import kotliquery.TransactionalSession
 import no.nav.helse.db.AutomatiseringRepository
 import no.nav.helse.db.OppgaveDao
@@ -21,6 +20,7 @@ import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
+import no.nav.helse.rapids_rivers.JsonMessage
 import java.util.UUID
 
 internal class GosysOppgaveEndret private constructor(

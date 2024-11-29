@@ -1,8 +1,6 @@
 package no.nav.helse.modell.kommando
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import kotliquery.TransactionalSession
 import no.nav.helse.db.AutomatiseringRepository
 import no.nav.helse.mediator.GodkjenningMediator
@@ -19,6 +17,8 @@ import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Periode
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.asLocalDate
 import java.util.UUID
 
 internal class TilbakedateringBehandlet private constructor(
