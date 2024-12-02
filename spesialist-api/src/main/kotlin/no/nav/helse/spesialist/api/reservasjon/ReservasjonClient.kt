@@ -11,7 +11,6 @@ import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.Timer
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
-import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.api.client.AccessTokenClient
 import no.nav.helse.spesialist.api.graphql.schema.Reservasjon
 import org.slf4j.Logger
@@ -46,35 +45,30 @@ class KRRClient(
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
     override suspend fun hentReservasjonsstatus(fnr: String): Reservasjon? {
-        responstidReservasjonsstatus.recordCallable {
-            return@recordCallable runBlocking {
-                try {
-                    val accessToken = accessTokenClient.hentAccessToken(scope)
-                    val callId = UUID.randomUUID().toString()
+        return try {
+            val accessToken = accessTokenClient.hentAccessToken(scope)
+            val callId = UUID.randomUUID().toString()
 
-                    val reservasjon =
-                        httpClient
-                            .get("$apiUrl/rest/v1/person") {
-                                header("Authorization", "Bearer $accessToken")
-                                header("Nav-Personident", fnr)
-                                header("Nav-Call-Id", callId)
-                                accept(ContentType.Application.Json)
-                            }.body<Reservasjon>()
+            val reservasjon =
+                httpClient
+                    .get("$apiUrl/rest/v1/person") {
+                        header("Authorization", "Bearer $accessToken")
+                        header("Nav-Personident", fnr)
+                        header("Nav-Call-Id", callId)
+                        accept(ContentType.Application.Json)
+                    }.body<Reservasjon>()
 
-                    statusEtterKallReservasjonsstatusBuilder
-                        .withRegistry(registry)
-                        .withTag("status", "success")
-                    return@runBlocking reservasjon
-                } catch (e: Exception) {
-                    statusEtterKallReservasjonsstatusBuilder
-                        .withRegistry(registry)
-                        .withTag("status", "failure")
-                    logg.warn("Feil under kall til Kontakt- og reservasjonsregisteret")
-                    sikkerLogg.warn("Feil under kall til Kontakt- og reservasjonsregisteret", e)
-                }
-            }
+            statusEtterKallReservasjonsstatusBuilder
+                .withRegistry(registry)
+                .withTag("status", "success")
+            reservasjon
+        } catch (e: Exception) {
+            statusEtterKallReservasjonsstatusBuilder
+                .withRegistry(registry)
+                .withTag("status", "failure")
+            logg.warn("Feil under kall til Kontakt- og reservasjonsregisteret")
+            sikkerLogg.warn("Feil under kall til Kontakt- og reservasjonsregisteret", e)
+            null
         }
-
-        return null
     }
 }
