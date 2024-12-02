@@ -172,25 +172,19 @@ private val tilgangsgrupper =
         }
     }
 
-private val gruppekontroll =
-    object : Gruppekontroll {
-        override suspend fun erIGrupper(
-            oid: UUID,
-            gruppeIder: List<UUID>,
-        ): Boolean {
-            return true
-        }
-    }
+private val gruppekontroll = object : Gruppekontroll {
+    override suspend fun erIGrupper(oid: UUID, gruppeIder: List<UUID>) = true
+}
 
 private val database =
     object {
         private val postgres =
             PostgreSQLContainer<Nothing>("postgres:14").apply {
                 withReuse(true)
-                withLabel("app-navn", "spesialist")
+                withLabel("app-navn", "spesialist-localapp")
                 start()
 
-                println("Database: jdbc:postgresql://localhost:$firstMappedPort/test startet opp, credentials: test og test")
+                println("Database localapp: jdbc:postgresql://localhost:$firstMappedPort/test startet opp, credentials: test og test")
             }
 
         val envvars =
@@ -207,7 +201,7 @@ private val database =
                 jdbcUrl = postgres.jdbcUrl
                 username = postgres.username
                 password = postgres.password
-                maximumPoolSize = 100
+                maximumPoolSize = 5
                 connectionTimeout = 500
                 initializationFailTimeout = 5000
             })
