@@ -60,14 +60,14 @@ class KRRClient(
                         accept(ContentType.Application.Json)
                     }.body<Reservasjon>()
 
-            statusEtterKallReservasjonsstatusBuilder
-                .withRegistry(registry)
-                .withTag("status", "success")
+//            statusEtterKallReservasjonsstatusBuilder
+//                .withRegistry(registry)
+//                .withTag("status", "success")
             reservasjon
         } catch (e: Exception) {
-            statusEtterKallReservasjonsstatusBuilder
-                .withRegistry(registry)
-                .withTag("status", "failure")
+//            statusEtterKallReservasjonsstatusBuilder
+//                .withRegistry(registry)
+//                .withTag("status", "failure")
             logg.warn("Feil under kall til Kontakt- og reservasjonsregisteret")
             sikkerLogg.warn("Feil under kall til Kontakt- og reservasjonsregisteret", e)
             null
