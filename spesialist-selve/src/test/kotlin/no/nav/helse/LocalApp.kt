@@ -40,7 +40,7 @@ object LocalApp {
     @Suppress("JoinDeclarationAndAssignment")
     private lateinit var testRapid: TestRapid
 
-    private val mockOAuth2Server = MockOAuth2Server()
+    private val mockOAuth2Server = MockOAuth2Server().also(MockOAuth2Server::start)
     private val clientId = "en-client-id"
     private val issuerId = "LocalTestIssuer"
     private val token =
