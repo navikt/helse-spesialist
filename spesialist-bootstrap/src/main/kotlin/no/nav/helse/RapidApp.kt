@@ -47,7 +47,7 @@ internal class RapidApp(env: Map<String, String>) {
         )
     private val reservasjonClient =
         KRRClient(
-            httpClient = httpClient(1_000, 1_000, 2_000),
+            httpClient = httpClient(5_000, 5_000, 5_000),
             accessTokenClient = accessTokenClient,
             apiUrl = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_API_URL"),
             scope = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE"),
