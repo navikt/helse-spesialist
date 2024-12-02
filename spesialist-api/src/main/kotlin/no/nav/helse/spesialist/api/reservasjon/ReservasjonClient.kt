@@ -46,9 +46,11 @@ class KRRClient(
 
     override suspend fun hentReservasjonsstatus(fnr: String): Reservasjon? {
         return try {
+            logg.debug("Henter accessToken")
             val accessToken = accessTokenClient.hentAccessToken(scope)
             val callId = UUID.randomUUID().toString()
 
+            logg.debug("Henter reservasjon fra $apiUrl/rest/v1/person, callId=$callId")
             val reservasjon =
                 httpClient
                     .get("$apiUrl/rest/v1/person") {
