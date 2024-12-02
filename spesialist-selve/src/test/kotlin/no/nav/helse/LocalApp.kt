@@ -137,7 +137,7 @@ private val snapshotClient =
 
         override fun hentSnapshot(fnr: String): GraphQLClientResponse<HentSnapshot.Result> {
             return serializer.deserialize(
-                rawResponse = "",
+                rawResponse = "{}",
                 responseType = HentSnapshot(variables = HentSnapshot.Variables(fnr = fnr)).responseType(),
             )
         }
