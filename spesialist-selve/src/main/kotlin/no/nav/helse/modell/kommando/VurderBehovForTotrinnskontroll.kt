@@ -28,17 +28,7 @@ internal class VurderBehovForTotrinnskontroll(
         val kreverTotrinnsvurdering = sykefraværstilfelle.harMedlemskapsvarsel(vedtaksperiodeId)
         val vedtaksperiodeHarFerdigstiltOppgave = oppgaveService.harFerdigstiltOppgave(vedtaksperiodeId)
         val overstyringer = finnOverstyringerMedType()
-        val overstyringerFunnetMedNyttOppslag = finnOverstyringer(overstyringer)
-        if (overstyringer.isEmpty() && overstyringerFunnetMedNyttOppslag.isNotEmpty()) {
-            sikkerlogg.info(
-                "Fant overstyring(-er) kun ved nytt oppslag. Skulle perioden gått til totrinns?",
-                kv("fødselsnummer", fødselsnummer),
-                kv("kreverTotrinnsvurdering", kreverTotrinnsvurdering),
-                kv("vedtaksperiodeHarFerdigstiltOppgave", vedtaksperiodeHarFerdigstiltOppgave),
-                kv("vedtaksperiodeId", vedtaksperiodeId),
-                kv("berørteVedtaksperioder", spleisVedtaksperioder.map { it.vedtaksperiodeId }),
-            )
-        }
+        sjekkMotNyttOppslag(overstyringer, kreverTotrinnsvurdering, vedtaksperiodeHarFerdigstiltOppgave)
 
         if ((kreverTotrinnsvurdering && !vedtaksperiodeHarFerdigstiltOppgave) || overstyringer.isNotEmpty()) {
             logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
@@ -59,19 +49,42 @@ internal class VurderBehovForTotrinnskontroll(
         return true
     }
 
-    private fun finnOverstyringer(overstyringer: List<OverstyringType>): List<OverstyringType> {
-        val spleisVedtaksperiodeIder = spleisVedtaksperioder.map { it.vedtaksperiodeId }
-        val vedtaksperiodeOverstyringtyper = overstyringRepository.finnOverstyringerMedTypeForVedtaksperioder(spleisVedtaksperiodeIder)
-
-        if (overstyringer.isEmpty() && vedtaksperiodeOverstyringtyper.isEmpty()) return vedtaksperiodeOverstyringtyper
-
-        if (overstyringer.toSet() == vedtaksperiodeOverstyringtyper.toSet()) {
-            logg.info("Finne overstyringer. Gammel og ny metode fant samme overstyring(er)")
-        } else {
-            logg.info("Finne overstyringer. Gammel fant: $overstyringer, ny fant: $vedtaksperiodeOverstyringtyper")
+    private fun sjekkMotNyttOppslag(
+        overstyringer: List<OverstyringType>,
+        kreverTotrinnsvurdering: Boolean,
+        vedtaksperiodeHarFerdigstiltOppgave: Boolean,
+    ) {
+        val overstyringerFunnetMedNyttOppslag = finnOverstyringerNyttOppslag()
+        loggDiffMellomOverstyringstyper(overstyringer, overstyringerFunnetMedNyttOppslag)
+        if (overstyringer.isEmpty() && overstyringerFunnetMedNyttOppslag.isNotEmpty()) {
+            sikkerlogg.info(
+                "Fant overstyring(-er) kun ved nytt oppslag. Skulle perioden gått til totrinns?",
+                kv("fødselsnummer", fødselsnummer),
+                kv("kreverTotrinnsvurdering", kreverTotrinnsvurdering),
+                kv("vedtaksperiodeHarFerdigstiltOppgave", vedtaksperiodeHarFerdigstiltOppgave),
+                kv("vedtaksperiodeId", vedtaksperiodeId),
+                kv("berørteVedtaksperioder", spleisVedtaksperioder.map { it.vedtaksperiodeId }),
+            )
         }
-        return vedtaksperiodeOverstyringtyper
     }
+
+    private fun finnOverstyringerNyttOppslag(): List<OverstyringType> {
+        val spleisVedtaksperiodeIder = spleisVedtaksperioder.map { it.vedtaksperiodeId }
+        return overstyringRepository.finnOverstyringerMedTypeForVedtaksperioder(spleisVedtaksperiodeIder)
+    }
+
+    private fun loggDiffMellomOverstyringstyper(
+        overstyringer: List<OverstyringType>,
+        vedtaksperiodeOverstyringtyper: List<OverstyringType>,
+    ): Unit =
+        when {
+            overstyringer.isEmpty() && vedtaksperiodeOverstyringtyper.isEmpty() -> Unit
+            overstyringer.toSet() == vedtaksperiodeOverstyringtyper.toSet() ->
+                logg.info("Finne overstyringer. Gammel og ny metode fant samme overstyring(er)")
+
+            else ->
+                logg.info("Finne overstyringer. Gammel fant: $overstyringer, ny fant: $vedtaksperiodeOverstyringtyper")
+        }
 
     // Overstyringer og Revurderinger
     private fun finnOverstyringerMedType(): List<OverstyringType> {
