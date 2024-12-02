@@ -23,10 +23,10 @@ spec:
       path: /stop
   resources:
     limits:
-      memory: 512Mi
+      memory: 640Mi
     requests:
-      cpu: 50m
-      memory: 128Mi
+      cpu: 20m
+      memory: 512Mi
   replicas:
     disableAutoScaling: true
   observability:
