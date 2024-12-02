@@ -26,6 +26,15 @@ class MinimumSykdomsgradMutation(private val saksbehandlerhåndterer: Saksbehand
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
             val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
+            if (minimumSykdomsgrad.perioderVurdertOk.isEmpty() && minimumSykdomsgrad.perioderVurdertIkkeOk.isEmpty()) {
+                return@withContext DataFetcherResult.newResult<Boolean>()
+                    .error(
+                        GraphqlErrorException.newErrorException().message("Mangler vurderte perioder")
+                            .extensions(mapOf("code" to 400)).build(),
+                    )
+                    .build()
+            }
+
             try {
                 withContext(Dispatchers.IO) {
                     saksbehandlerhåndterer.håndter(minimumSykdomsgrad, saksbehandler)
