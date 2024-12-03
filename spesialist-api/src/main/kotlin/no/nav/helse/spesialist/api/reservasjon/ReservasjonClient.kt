@@ -8,6 +8,7 @@ import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import io.micrometer.core.instrument.Tag
 import io.micrometer.core.instrument.Timer
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
@@ -29,7 +30,7 @@ private val statusEtterKallReservasjonsstatusBuilder =
     Counter
         .builder("status_kall_hent_reservasjonsstatus")
         .description("Status på kall til digdir-krr-proxy, success eller failure")
-        .tags("status")
+        .tags(listOf(Tag.of("status", "success"), Tag.of("status", "failure")))
 
 interface ReservasjonClient {
     suspend fun hentReservasjonsstatus(fnr: String): Reservasjon?
@@ -60,14 +61,14 @@ class KRRClient(
                         accept(ContentType.Application.Json)
                     }.body<Reservasjon>()
 
-//            statusEtterKallReservasjonsstatusBuilder
-//                .withRegistry(registry)
-//                .withTag("status", "success")
+            statusEtterKallReservasjonsstatusBuilder
+                .withRegistry(registry)
+                .withTag("status", "success")
             reservasjon
         } catch (e: Exception) {
-//            statusEtterKallReservasjonsstatusBuilder
-//                .withRegistry(registry)
-//                .withTag("status", "failure")
+            statusEtterKallReservasjonsstatusBuilder
+                .withRegistry(registry)
+                .withTag("status", "failure")
             logg.warn("Feil under kall til Kontakt- og reservasjonsregisteret")
             sikkerLogg.warn("Feil under kall til Kontakt- og reservasjonsregisteret", e)
             null
