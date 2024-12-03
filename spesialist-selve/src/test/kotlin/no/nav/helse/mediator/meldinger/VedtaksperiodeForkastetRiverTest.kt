@@ -1,14 +1,12 @@
 package no.nav.helse.mediator.meldinger
 
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.kafka.VedtaksperiodeForkastetRiver
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
-import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -18,7 +16,6 @@ internal class VedtaksperiodeForkastetRiverTest {
 
     private val mediator = mockk<MeldingMediator>(relaxed = true)
     private val rapid = TestRapid().medRivers(VedtaksperiodeForkastetRiver(mediator))
-    private val mapper = jacksonObjectMapper()
 
     @Test
     fun `tar imot forkastet-message`() {
@@ -35,14 +32,4 @@ internal class VedtaksperiodeForkastetRiverTest {
             )
         }
     }
-
-    @Test
-    fun `ignorerer ugyldig message`() {
-        rapid.sendTestMessage(
-            Testmeldingfabrikk.lagVedtaksperiodeForkastet("aktørId", "fnr").let { mapper.readTree(it) as ObjectNode }
-                .put("vedtaksperiodeId", "dette er ikke en UUID").toString()
-        )
-        verify(exactly = 0) { mediator.mottaMelding(any(), any()) }
-    }
-
 }

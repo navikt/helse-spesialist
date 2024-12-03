@@ -9,13 +9,10 @@ import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
-import org.slf4j.LoggerFactory
 
 internal class EgenAnsattLøsningRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-
     override fun preconditions(): River.PacketValidation {
         return River.PacketValidation {
             it.requireValue("@event_name", "behov")
@@ -38,7 +35,6 @@ internal class EgenAnsattLøsningRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        sikkerLogg.info("Mottok melding EgenAnsatt:\n{}", packet.toJson())
         val opprettet = packet["@opprettet"].asLocalDateTime()
         val contextId = packet["contextId"].asUUID()
         val hendelseId = packet["hendelseId"].asUUID()

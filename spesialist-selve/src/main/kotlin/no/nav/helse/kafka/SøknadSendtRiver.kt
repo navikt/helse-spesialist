@@ -4,7 +4,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import io.micrometer.core.instrument.MeterRegistry
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.MeldingMediator
@@ -29,14 +28,6 @@ internal class SøknadSendtRiver(
         River.PacketValidation {
             it.requireKey("@id", "fnr", "aktorId", "arbeidsgiver.orgnummer")
         }
-
-    override fun onError(
-        problems: MessageProblems,
-        context: MessageContext,
-        metadata: MessageMetadata,
-    ) {
-        sikkerLogg.error("Forstod ikke SøknadSendt:\n${problems.toExtendedReport()}")
-    }
 
     override fun onPacket(
         packet: JsonMessage,

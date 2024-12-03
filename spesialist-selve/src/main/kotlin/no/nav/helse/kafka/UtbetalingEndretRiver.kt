@@ -7,20 +7,15 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.Companion.values
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 internal class UtbetalingEndretRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
-
     override fun preconditions(): River.PacketValidation {
         return River.PacketValidation {
             it.requireValue("@event_name", "utbetaling_endret")
@@ -53,14 +48,6 @@ internal class UtbetalingEndretRiver(
             it.requireAny("gjeldendeStatus", Utbetalingsstatus.gyldigeStatuser.values())
             it.require("@opprettet", JsonNode::asLocalDateTime)
         }
-
-    override fun onError(
-        problems: MessageProblems,
-        context: MessageContext,
-        metadata: MessageMetadata,
-    ) {
-        sikkerLogg.error("Forstod ikke utbetaling_endret:\n${problems.toExtendedReport()}")
-    }
 
     override fun onPacket(
         packet: JsonMessage,

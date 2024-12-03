@@ -10,13 +10,10 @@ import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
-import org.slf4j.LoggerFactory
 
 internal class ÅpneGosysOppgaverLøsningRiver(
     private val meldingMediator: MeldingMediator,
 ) : SpesialistRiver {
-    private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-
     override fun preconditions(): River.PacketValidation {
         return River.PacketValidation {
             it.requireValue("@event_name", "behov")
@@ -39,26 +36,17 @@ internal class ÅpneGosysOppgaverLøsningRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        sikkerLogg.info("Mottok melding ÅpneOppgaverMessage:\n{}", packet.toJson())
-        val opprettet = packet["@opprettet"].asLocalDateTime()
-        val contextId = packet["contextId"].asUUID()
-        val hendelseId = packet["hendelseId"].asUUID()
-        val fødselsnummer = packet["fødselsnummer"].asText()
-
-        val antall = packet["@løsning.ÅpneOppgaver.antall"].takeUnless { it.isMissingOrNull() }?.asInt()
-        val oppslagFeilet = packet["@løsning.ÅpneOppgaver.oppslagFeilet"].asBoolean()
-
         val åpneGosysOppgaver =
             ÅpneGosysOppgaverløsning(
-                opprettet = opprettet,
-                fødselsnummer = fødselsnummer,
-                antall = antall,
-                oppslagFeilet = oppslagFeilet,
+                opprettet = packet["@opprettet"].asLocalDateTime(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+                antall = packet["@løsning.ÅpneOppgaver.antall"].takeUnless { it.isMissingOrNull() }?.asInt(),
+                oppslagFeilet = packet["@løsning.ÅpneOppgaver.oppslagFeilet"].asBoolean(),
             )
 
         meldingMediator.løsning(
-            hendelseId = hendelseId,
-            contextId = contextId,
+            hendelseId = packet["hendelseId"].asUUID(),
+            contextId = packet["contextId"].asUUID(),
             behovId = packet["@id"].asUUID(),
             løsning = åpneGosysOppgaver,
             context = context,

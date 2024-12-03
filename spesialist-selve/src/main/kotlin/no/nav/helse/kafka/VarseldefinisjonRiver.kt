@@ -4,7 +4,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import io.micrometer.core.instrument.MeterRegistry
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.MeldingMediator
@@ -39,14 +38,6 @@ internal class VarseldefinisjonRiver(
             )
             it.interestedIn("gjeldende_definisjon.forklaring", "gjeldende_definisjon.handling")
         }
-
-    override fun onError(
-        problems: MessageProblems,
-        context: MessageContext,
-        metadata: MessageMetadata,
-    ) {
-        sikkerlogg.error("Forstod ikke varselkode_ny_definisjon:\n${problems.toExtendedReport()}")
-    }
 
     override fun onPacket(
         packet: JsonMessage,

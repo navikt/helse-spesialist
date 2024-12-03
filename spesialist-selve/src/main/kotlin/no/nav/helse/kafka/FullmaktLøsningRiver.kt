@@ -19,7 +19,7 @@ import java.time.LocalDate
 internal class FullmaktLøsningRiver(
     private val meldingMediator: MeldingMediator,
 ) : SpesialistRiver {
-    private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+    private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
     override fun preconditions(): River.PacketValidation {
         return River.PacketValidation {
@@ -45,7 +45,7 @@ internal class FullmaktLøsningRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        sikkerLogg.info("Mottok melding Fullmakt:\n{}", packet.toJson())
+        sikkerlogg.info("Mottok melding Fullmakt:\n{}", packet.toJson())
         val contextId = packet["contextId"].asUUID()
         val hendelseId = packet["hendelseId"].asUUID()
 

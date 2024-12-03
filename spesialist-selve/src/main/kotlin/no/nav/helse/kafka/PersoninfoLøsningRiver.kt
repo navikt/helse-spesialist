@@ -7,7 +7,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
@@ -15,13 +14,10 @@ import no.nav.helse.modell.person.HentPersoninfoløsning
 import no.nav.helse.modell.person.HentPersoninfoløsninger
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.typer.Kjønn
-import org.slf4j.LoggerFactory
 
 internal class PersoninfoløsningRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
-
     override fun preconditions(): River.PacketValidation {
         return River.PacketValidation {
             it.requireValue("@event_name", "behov")
@@ -44,14 +40,6 @@ internal class PersoninfoløsningRiver(
             it.interestedIn("@løsning.HentPersoninfoV2.mellomnavn")
         }
 
-    override fun onError(
-        problems: MessageProblems,
-        context: MessageContext,
-        metadata: MessageMetadata,
-    ) {
-        sikkerLog.error("forstod ikke HentPersoninfoV2 (enkel):\n${problems.toExtendedReport()}")
-    }
-
     override fun onPacket(
         packet: JsonMessage,
         context: MessageContext,
@@ -73,8 +61,6 @@ internal class PersoninfoløsningRiver(
 internal class FlerePersoninfoRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
-
     override fun preconditions(): River.PacketValidation {
         return River.PacketValidation {
             it.requireValue("@event_name", "behov")
@@ -92,14 +78,6 @@ internal class FlerePersoninfoRiver(
                 interestedIn("mellomnavn")
             }
         }
-
-    override fun onError(
-        problems: MessageProblems,
-        context: MessageContext,
-        metadata: MessageMetadata,
-    ) {
-        sikkerLog.error("forstod ikke HentPersoninfoV2 (flere):\n${problems.toExtendedReport()}")
-    }
 
     override fun onPacket(
         packet: JsonMessage,

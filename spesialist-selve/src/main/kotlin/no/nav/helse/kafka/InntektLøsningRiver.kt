@@ -6,25 +6,20 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers.asYearMonth
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.mediator.meldinger.løsninger.Inntektløsning
-import org.slf4j.LoggerFactory
 
 internal class InntektLøsningRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
-    private val behov = "InntekterForSykepengegrunnlag"
-
     override fun preconditions(): River.PacketValidation {
         return River.PacketValidation {
             it.requireValue("@event_name", "behov")
             it.requireValue("@final", true)
-            it.requireAll("@behov", listOf(behov))
+            it.requireAll("@behov", listOf("InntekterForSykepengegrunnlag"))
             it.requireKey("contextId", "hendelseId")
         }
     }
@@ -32,7 +27,7 @@ internal class InntektLøsningRiver(
     override fun validations() =
         River.PacketValidation {
             it.requireKey("@id")
-            it.requireArray("@løsning.$behov") {
+            it.requireArray("@løsning.InntekterForSykepengegrunnlag") {
                 require("årMåned", JsonNode::asYearMonth)
                 requireArray("inntektsliste") {
                     requireKey("beløp")
@@ -40,14 +35,6 @@ internal class InntektLøsningRiver(
                 }
             }
         }
-
-    override fun onError(
-        problems: MessageProblems,
-        context: MessageContext,
-        metadata: MessageMetadata,
-    ) {
-        sikkerLog.error("forstod ikke Inntekter:\n${problems.toExtendedReport()}")
-    }
 
     override fun onPacket(
         packet: JsonMessage,
@@ -60,7 +47,7 @@ internal class InntektLøsningRiver(
 
         val inntektsløsning =
             Inntektløsning(
-                packet["@løsning.$behov"].map { løsning ->
+                packet["@løsning.InntekterForSykepengegrunnlag"].map { løsning ->
                     Inntekter(
                         løsning["årMåned"].asYearMonth(),
                         løsning["inntektsliste"].map {

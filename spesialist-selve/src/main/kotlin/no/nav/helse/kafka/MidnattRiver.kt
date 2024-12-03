@@ -4,7 +4,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import io.micrometer.core.instrument.MeterRegistry
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.MeldingMediator
@@ -29,14 +28,6 @@ internal class MidnattRiver(
             it.requireKey("@id")
         }
 
-    override fun onError(
-        problems: MessageProblems,
-        context: MessageContext,
-        metadata: MessageMetadata,
-    ) {
-        logg.error("Forstod ikke midnatt:\n${problems.toExtendedReport()}")
-    }
-
     override fun onPacket(
         packet: JsonMessage,
         context: MessageContext,
@@ -44,7 +35,7 @@ internal class MidnattRiver(
         meterRegistry: MeterRegistry,
     ) {
         val hendelseId = packet["@id"].asUUID()
-        logg.info("Mottok melding midnatt , {}", kv("hendelseId", hendelseId))
+        logg.info("Mottok melding midnatt, {}", kv("hendelseId", hendelseId))
 
         val antallSlettet = mediator.slettGamleDokumenter()
         logg.info("Slettet $antallSlettet dokumenter")

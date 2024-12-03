@@ -7,11 +7,9 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
-import org.slf4j.LoggerFactory
 
 internal class NyeVarslerRiver(
     private val mediator: MeldingMediator,
@@ -19,6 +17,7 @@ internal class NyeVarslerRiver(
     override fun preconditions(): River.PacketValidation {
         return River.PacketValidation {
             it.requireAny("@event_name", listOf("aktivitetslogg_ny_aktivitet", "nye_varsler"))
+            it.require("aktiviteter", inneholderVarslerParser)
         }
     }
 
@@ -26,7 +25,6 @@ internal class NyeVarslerRiver(
         River.PacketValidation {
             it.requireKey("@id", "fødselsnummer")
             it.require("@opprettet") { message -> message.asLocalDateTime() }
-            it.require("aktiviteter", inneholderVarslerParser)
             it.requireArray("aktiviteter") {
                 requireKey("melding", "nivå", "id")
                 require("tidsstempel", JsonNode::asLocalDateTime)
@@ -47,17 +45,5 @@ internal class NyeVarslerRiver(
         meterRegistry: MeterRegistry,
     ) {
         mediator.mottaMelding(NyeVarsler(packet), context)
-    }
-
-    override fun onError(
-        problems: MessageProblems,
-        context: MessageContext,
-        metadata: MessageMetadata,
-    ) {
-        logger.debug("Behandler ikke melding fordi: {}", problems)
-    }
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(NyeVarslerRiver::class.java)
     }
 }

@@ -4,13 +4,10 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 internal class AvsluttetMedVedtakRiver(
     private val mediator: MeldingMediator,
@@ -62,14 +59,6 @@ internal class AvsluttetMedVedtakRiver(
             }
         }
 
-    override fun onError(
-        problems: MessageProblems,
-        context: MessageContext,
-        metadata: MessageMetadata,
-    ) {
-        sikkerlogg.error("Forstod ikke avsluttet_med_vedtak:\n${problems.toExtendedReport()}")
-    }
-
     override fun onPacket(
         packet: JsonMessage,
         context: MessageContext,
@@ -77,9 +66,5 @@ internal class AvsluttetMedVedtakRiver(
         meterRegistry: MeterRegistry,
     ) {
         mediator.mottaMelding(AvsluttetMedVedtakMessage(packet, avviksvurderingDao), context)
-    }
-
-    private companion object {
-        private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
     }
 }

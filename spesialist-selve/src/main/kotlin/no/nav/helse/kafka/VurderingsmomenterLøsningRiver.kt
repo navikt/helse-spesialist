@@ -9,14 +9,11 @@ import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
-import org.slf4j.LoggerFactory
 import java.util.UUID
 
 internal class VurderingsmomenterLøsningRiver(
     private val meldingMediator: MeldingMediator,
 ) : SpesialistRiver {
-    private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-
     override fun preconditions(): River.PacketValidation {
         return River.PacketValidation {
             it.requireValue("@event_name", "behov")
@@ -45,26 +42,19 @@ internal class VurderingsmomenterLøsningRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        sikkerLogg.info("Mottok melding RisikovurderingMessage:\n{}", packet.toJson())
-        val opprettet = packet["@opprettet"].asLocalDateTime()
-        val vedtaksperiodeId = packet["Risikovurdering.vedtaksperiodeId"].asUUID()
-        val contextId = packet["contextId"].asUUID()
-        val hendelseId = packet["hendelseId"].asUUID()
-
         val løsning = packet["@løsning.Risikovurdering"]
-        val kanGodkjennesAutomatisk = løsning["kanGodkjennesAutomatisk"].asBoolean()
 
         val risikovurdering =
             Risikovurderingløsning(
-                vedtaksperiodeId = vedtaksperiodeId,
-                opprettet = opprettet,
-                kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
+                vedtaksperiodeId = packet["Risikovurdering.vedtaksperiodeId"].asUUID(),
+                opprettet = packet["@opprettet"].asLocalDateTime(),
+                kanGodkjennesAutomatisk = løsning["kanGodkjennesAutomatisk"].asBoolean(),
                 løsning = løsning,
             )
 
         meldingMediator.løsning(
-            hendelseId = hendelseId,
-            contextId = contextId,
+            hendelseId = packet["hendelseId"].asUUID(),
+            contextId = packet["contextId"].asUUID(),
             behovId = packet["@id"].asUUID(),
             løsning = risikovurdering,
             context = context,

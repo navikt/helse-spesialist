@@ -7,7 +7,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
@@ -17,14 +16,13 @@ import org.slf4j.LoggerFactory
 internal class ArbeidsforholdLøsningRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
-    private val behov = "Arbeidsforhold"
+    private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
     override fun preconditions(): River.PacketValidation {
         return River.PacketValidation {
             it.requireValue("@event_name", "behov")
             it.requireValue("@final", true)
-            it.requireAll("@behov", listOf(behov))
+            it.requireAll("@behov", listOf("Arbeidsforhold"))
         }
     }
 
@@ -34,17 +32,9 @@ internal class ArbeidsforholdLøsningRiver(
                 "contextId",
                 "hendelseId",
                 "@id",
-                "@løsning.$behov",
+                "@løsning.Arbeidsforhold",
             )
         }
-
-    override fun onError(
-        problems: MessageProblems,
-        context: MessageContext,
-        metadata: MessageMetadata,
-    ) {
-        sikkerLog.error("forstod ikke $behov:\n${problems.toExtendedReport()}")
-    }
 
     override fun onPacket(
         packet: JsonMessage,
@@ -64,10 +54,10 @@ internal class ArbeidsforholdLøsningRiver(
     }
 
     private fun JsonMessage.toArbeidsforholdløsninger(): Arbeidsforholdløsning {
-        val løsninger = this["@løsning.$behov"].map(::toArbeidsforholdløsning)
+        val løsninger = this["@løsning.Arbeidsforhold"].map(::toArbeidsforholdløsning)
 
         if (løsninger.isEmpty()) {
-            sikkerLog.info("Ingen arbeidsforhold i løsningen.\n${this.toJson()}")
+            sikkerlogg.info("Ingen arbeidsforhold i løsningen.\n${this.toJson()}")
         }
         return Arbeidsforholdløsning(løsninger)
     }

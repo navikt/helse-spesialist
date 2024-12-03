@@ -10,13 +10,10 @@ import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
 import no.nav.helse.modell.vergemal.VergemålOgFremtidsfullmakt
-import org.slf4j.LoggerFactory
 
 internal class VergemålLøsningRiver(
     private val meldingMediator: MeldingMediator,
 ) : SpesialistRiver {
-    private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-
     override fun preconditions(): River.PacketValidation {
         return River.PacketValidation {
             it.requireValue("@event_name", "behov")
@@ -39,18 +36,12 @@ internal class VergemålLøsningRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        sikkerLogg.info("Mottok melding Vergemål:\n{}", packet.toJson())
-        val contextId = packet["contextId"].asUUID()
-        val hendelseId = packet["hendelseId"].asUUID()
-
         val vergemålNode = packet["@løsning.Vergemål"]
-        val harVergemål = !vergemålNode["vergemål"].isEmpty
-        val harFremtidsfullmakter = !vergemålNode["fremtidsfullmakter"].isEmpty
 
         val vergemålOgFremtidsfullmakt =
             VergemålOgFremtidsfullmakt(
-                harVergemål = harVergemål,
-                harFremtidsfullmakter = harFremtidsfullmakter,
+                harVergemål = !vergemålNode["vergemål"].isEmpty,
+                harFremtidsfullmakter = !vergemålNode["fremtidsfullmakter"].isEmpty,
             )
 
         val vergemålLøsning =
@@ -59,8 +50,8 @@ internal class VergemålLøsningRiver(
             )
 
         meldingMediator.løsning(
-            hendelseId = hendelseId,
-            contextId = contextId,
+            hendelseId = packet["hendelseId"].asUUID(),
+            contextId = packet["contextId"].asUUID(),
             behovId = packet["@id"].asUUID(),
             løsning = vergemålLøsning,
             context = context,

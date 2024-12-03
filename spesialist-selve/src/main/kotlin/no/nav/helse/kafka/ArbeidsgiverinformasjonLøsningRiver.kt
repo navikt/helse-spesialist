@@ -4,40 +4,27 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.arbeidsgiver.Arbeidsgiverinformasjonløsning
-import org.slf4j.LoggerFactory
 
 internal class ArbeidsgiverinformasjonLøsningRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
-    private val behov = "Arbeidsgiverinformasjon"
-
     override fun preconditions(): River.PacketValidation {
         return River.PacketValidation {
             it.requireValue("@event_name", "behov")
             it.requireValue("@final", true)
-            it.requireAll("@behov", listOf(behov))
+            it.requireAll("@behov", listOf("Arbeidsgiverinformasjon"))
         }
     }
 
     override fun validations() =
         River.PacketValidation {
             it.requireKey("contextId", "hendelseId", "@id")
-            it.requireKey("@løsning.$behov")
+            it.requireKey("@løsning.Arbeidsgiverinformasjon")
         }
-
-    override fun onError(
-        problems: MessageProblems,
-        context: MessageContext,
-        metadata: MessageMetadata,
-    ) {
-        sikkerLog.error("forstod ikke $behov:\n${problems.toExtendedReport()}")
-    }
 
     override fun onPacket(
         packet: JsonMessage,
@@ -47,7 +34,7 @@ internal class ArbeidsgiverinformasjonLøsningRiver(
     ) {
         val hendelseId = packet["hendelseId"].asUUID()
         val contextId = packet["contextId"].asUUID()
-        val løsning = packet["@løsning.$behov"]
+        val løsning = packet["@løsning.Arbeidsgiverinformasjon"]
         mediator.løsning(
             hendelseId,
             contextId,

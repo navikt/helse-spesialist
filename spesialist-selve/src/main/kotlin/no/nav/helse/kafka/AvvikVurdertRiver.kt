@@ -5,21 +5,12 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
-import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.MeldingMediator
-import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.hendelser.AvvikVurdertMessage
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 internal class AvvikVurdertRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    private companion object {
-        private val logg = LoggerFactory.getLogger(this::class.java)
-        private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
-    }
-
     override fun preconditions(): River.PacketValidation {
         return River.PacketValidation {
             it.requireValue("@event_name", "avvik_vurdert")
@@ -62,16 +53,6 @@ internal class AvvikVurdertRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        val hendelseId = packet["@id"].asUUID()
-        logg.info(
-            "Mottok avvik_vurdert for {}",
-            kv("hendelseId", hendelseId),
-        )
-        sikkerlogg.info(
-            "Mottok avvik_vurdert med {}, {}",
-            kv("hendelseId", hendelseId),
-            kv("hendelse", packet.toJson()),
-        )
         mediator.mottaMelding(AvvikVurdertMessage(packet), context)
     }
 }
