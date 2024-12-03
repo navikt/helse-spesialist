@@ -219,6 +219,18 @@ data class LagtPaVent(
     val kommentarer: List<Kommentar>,
 ) : Historikkinnslag
 
+data class OppdaterPaVentFrist(
+    override val id: Int,
+    override val type: PeriodehistorikkType,
+    override val timestamp: LocalDateTime,
+    override val saksbehandlerIdent: String?,
+    override val dialogRef: Int?,
+    val arsaker: List<String>,
+    val frist: LocalDate?,
+    val notattekst: String?,
+    val kommentarer: List<Kommentar>,
+) : Historikkinnslag
+
 data class FjernetFraPaVent(
     override val id: Int,
     override val type: PeriodehistorikkType,
@@ -538,6 +550,29 @@ data class BeregnetPeriode(
                     PeriodehistorikkType.LEGG_PA_VENT -> {
                         val (påVentÅrsaker, frist, notattekst) = mapLagtPåVentJson(json = it.json)
                         LagtPaVent(
+                            id = it.id,
+                            type = it.type,
+                            timestamp = it.timestamp,
+                            saksbehandlerIdent = it.saksbehandlerIdent,
+                            dialogRef = it.dialogRef,
+                            arsaker = påVentÅrsaker,
+                            frist = frist,
+                            notattekst = notattekst,
+                            kommentarer =
+                                notatDao.finnKommentarer(it.dialogRef!!.toLong()).map { kommentar ->
+                                    Kommentar(
+                                        id = kommentar.id,
+                                        tekst = kommentar.tekst,
+                                        opprettet = kommentar.opprettet,
+                                        saksbehandlerident = kommentar.saksbehandlerident,
+                                        feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+                                    )
+                                },
+                        )
+                    }
+                    PeriodehistorikkType.OPPDATER_PA_VENT_FRIST -> {
+                        val (påVentÅrsaker, frist, notattekst) = mapLagtPåVentJson(json = it.json)
+                        OppdaterPaVentFrist(
                             id = it.id,
                             type = it.type,
                             timestamp = it.timestamp,

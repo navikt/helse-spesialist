@@ -4,6 +4,7 @@ import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.saksbehandler.handlinger.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad
+import no.nav.helse.modell.saksbehandler.handlinger.OppdaterPåVentFrist
 import no.nav.helse.modell.saksbehandler.handlinger.OpphevStans
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtInntektOgRefusjon
@@ -73,6 +74,11 @@ class Saksbehandler(
     }
 
     internal fun håndter(hendelse: LeggPåVent) {
+        val event = hendelse.byggEvent(oid, ident)
+        observers.forEach { it.lagtPåVent(event.fødselsnummer, event) }
+    }
+
+    internal fun håndter(hendelse: OppdaterPåVentFrist) {
         val event = hendelse.byggEvent(oid, ident)
         observers.forEach { it.lagtPåVent(event.fødselsnummer, event) }
     }

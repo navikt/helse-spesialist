@@ -41,6 +41,38 @@ class LeggPåVent(
         )
 }
 
+class OppdaterPåVentFrist(
+    oppgaveId: Long,
+    val fødselsnummer: String,
+    val frist: LocalDate,
+    val behandlingId: UUID,
+    val skalTildeles: Boolean,
+    val notatTekst: String?,
+    val årsaker: List<PåVentÅrsak>,
+) : PåVent(oppgaveId) {
+    override fun loggnavn(): String = "oppdater_på_vent_frist"
+
+    override fun utførAv(saksbehandler: Saksbehandler) {
+        saksbehandler.håndter(this)
+    }
+
+    internal fun byggEvent(
+        oid: UUID,
+        ident: String,
+    ): LagtPåVentEvent =
+        LagtPåVentEvent(
+            fødselsnummer = fødselsnummer,
+            oppgaveId = oppgaveId,
+            behandlingId = behandlingId,
+            skalTildeles = skalTildeles,
+            frist = frist,
+            notatTekst = notatTekst,
+            årsaker = årsaker,
+            saksbehandlerOid = oid,
+            saksbehandlerIdent = ident,
+        )
+}
+
 class FjernPåVent(
     oppgaveId: Long,
 ) : PåVent(oppgaveId) {

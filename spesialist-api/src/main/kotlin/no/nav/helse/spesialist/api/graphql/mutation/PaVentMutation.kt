@@ -10,6 +10,7 @@ import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
+import no.nav.helse.spesialist.api.feilhåndtering.FinnerIkkeLagtPåVent
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
@@ -85,7 +86,7 @@ class PaVentMutation(
         }
     }
 
-    /*@Suppress("unused")
+    @Suppress("unused")
     suspend fun oppdaterPaVentFrist(
         oppgaveId: String,
         notatTekst: String?,
@@ -98,15 +99,15 @@ class PaVentMutation(
         return withContext(Dispatchers.IO) {
             try {
                 saksbehandlerhåndterer.påVent(
-                    PaVentRequest.LeggPaVent(
+                    PaVentRequest.OppdaterPaVentFrist(
                         oppgaveId = oppgaveId.toLong(),
                         saksbehandlerOid = saksbehandler.oid,
                         frist = frist,
                         skalTildeles = tildeling,
                         notatTekst = notatTekst,
-                        årsaker = arsaker
+                        årsaker = arsaker,
                     ),
-                    saksbehandler
+                    saksbehandler,
                 )
                 newResult<PaVent?>()
                     .data(
@@ -117,9 +118,11 @@ class PaVentMutation(
                     ).build()
             } catch (e: RuntimeException) {
                 newResult<PaVent?>().error(getUpdateError(oppgaveId)).build()
+            } catch (e: FinnerIkkeLagtPåVent) {
+                newResult<PaVent>().error(getUpdateError(oppgaveId)).build()
             }
         }
-    }*/
+    }
 
     private fun getUpdateError(oppgaveId: String): GraphQLError {
         val message = "Kunne ikke tildele oppgave med oppgaveId=$oppgaveId"

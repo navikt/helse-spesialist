@@ -21,14 +21,14 @@ sealed interface PaVentRequest {
         val oppgaveId: Long,
     ) : PaVentRequest
 
-    /*data class OppdaterPaVentFrist(
+    data class OppdaterPaVentFrist(
         val oppgaveId: Long,
         val saksbehandlerOid: UUID,
         val frist: LocalDate,
         val skalTildeles: Boolean,
         val notatTekst: String?,
         val årsaker: List<PaVentArsak>,
-    ) : PaVentRequest*/
+    ) : PaVentRequest
 
     data class PaVentArsak(
         val _key: String,

@@ -18,4 +18,6 @@ class OppgaveKreverVurderingAvToSaksbehandlere(val oppgaveId: Long) : Modellfeil
 
 class ManglerTilgang(val oid: UUID, val oppgaveId: Long) : Modellfeil()
 
+class FinnerIkkePåVent(val oppgaveId: Long) : Modellfeil()
+
 class AlleredeAnnullert(val handling: Annullering) : Modellfeil()
