@@ -38,6 +38,22 @@ sealed interface HistorikkinnslagDto {
                 tidspunkt = LocalDateTime.now(),
             )
 
+        fun oppdaterPåVentFristInnslag(
+            notattekst: String?,
+            saksbehandler: SaksbehandlerDto,
+            årsaker: List<PåVentÅrsak>,
+            frist: LocalDate,
+            dialogRef: Long,
+        ): OppdaterPåVentFrist =
+            OppdaterPåVentFrist(
+                notattekst = notattekst,
+                saksbehandler = saksbehandler,
+                årsaker = årsaker,
+                tidspunkt = LocalDateTime.now(),
+                frist = frist,
+                dialogRef = dialogRef,
+            )
+
         fun totrinnsvurderingFerdigbehandletInnslag(saksbehandler: SaksbehandlerDto): TotrinnsvurderingFerdigbehandlet =
             TotrinnsvurderingFerdigbehandlet(saksbehandler = saksbehandler, tidspunkt = LocalDateTime.now())
 
@@ -91,6 +107,22 @@ data class FjernetFraPåVent(
     override val tidspunkt: LocalDateTime,
 ) : HistorikkinnslagDto {
     override val dialogRef: Long? = null
+}
+
+data class OppdaterPåVentFrist(
+    override val saksbehandler: SaksbehandlerDto,
+    override val tidspunkt: LocalDateTime,
+    override val dialogRef: Long,
+    val årsaker: List<PåVentÅrsak>,
+    val notattekst: String?,
+    val frist: LocalDate,
+) : HistorikkinnslagDto {
+    override fun toJson(): String =
+        mapOf(
+            "årsaker" to årsaker.map { it },
+            "frist" to frist,
+            "notattekst" to notattekst,
+        ).let { objectMapper.writeValueAsString(it) }
 }
 
 data class TotrinnsvurderingFerdigbehandlet(

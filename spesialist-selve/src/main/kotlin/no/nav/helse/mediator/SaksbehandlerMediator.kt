@@ -20,6 +20,7 @@ import no.nav.helse.mediator.overstyring.Saksbehandlingsmelder
 import no.nav.helse.mediator.påvent.PåVentRepository
 import no.nav.helse.mediator.saksbehandler.SaksbehandlerLagrer
 import no.nav.helse.modell.AlleredeAnnullert
+import no.nav.helse.modell.FinnerIkkePåVent
 import no.nav.helse.modell.ManglerTilgang
 import no.nav.helse.modell.Modellfeil
 import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
@@ -41,6 +42,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.Handling
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradPeriode
+import no.nav.helse.modell.saksbehandler.handlinger.OppdaterPåVentFrist
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
@@ -60,6 +62,7 @@ import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
+import no.nav.helse.spesialist.api.feilhåndtering.FinnerIkkeLagtPåVent
 import no.nav.helse.spesialist.api.feilhåndtering.IkkeTilgang
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
@@ -267,6 +270,8 @@ internal class SaksbehandlerMediator(
                     fjernFraPåVentUtenHistorikkinnslag(
                         modellhandling,
                     )
+
+                is OppdaterPåVentFrist -> oppdaterFristPåVent(modellhandling, saksbehandler)
             }
             sikkerlogg.info(
                 "Handling ${modellhandling.loggnavn()} utført på oppgave ${modellhandling.oppgaveId} på vegne av saksbehandler $saksbehandler",
@@ -330,6 +335,29 @@ internal class SaksbehandlerMediator(
         } catch (e: Modellfeil) {
             throw e.tilApiversjon()
         }
+    }
+
+    private fun oppdaterFristPåVent(
+        handling: OppdaterPåVentFrist,
+        saksbehandler: Saksbehandler,
+    ) {
+        if (!påVentDao.erPåVent(handling.oppgaveId)) throw FinnerIkkeLagtPåVent(handling.oppgaveId)
+
+        val dialogRef = dialogDao.lagre()
+        val innslag =
+            HistorikkinnslagDto.oppdaterPåVentFristInnslag(
+                notattekst = handling.notatTekst,
+                saksbehandler = saksbehandler.toDto(),
+                årsaker = handling.årsaker,
+                frist = handling.frist,
+                dialogRef = dialogRef,
+            )
+        periodehistorikkDao.lagreMedOppgaveId(innslag, handling.oppgaveId)
+        oppgaveService.oppdaterPåVentFrist(handling, saksbehandler)
+        PåVentRepository(påVentDao).oppdaterFrist(saksbehandler.oid(), handling, dialogRef)
+
+        saksbehandler.register(Saksbehandlingsmelder(rapidsConnection))
+        handling.utførAv(saksbehandler)
     }
 
     private fun fjernFraPåVent(
@@ -629,6 +657,8 @@ internal class SaksbehandlerMediator(
                 is AlleredeAnnullert ->
                     no.nav.helse.spesialist.api.feilhåndtering
                         .AlleredeAnnullert(handling.toDto().vedtaksperiodeId)
+
+                is FinnerIkkePåVent -> FinnerIkkeLagtPåVent(oppgaveId)
             }
     }
 
@@ -654,6 +684,7 @@ internal class SaksbehandlerMediator(
             is PaVentRequest.LeggPaVent -> this.tilModellversjon()
             is PaVentRequest.FjernPaVent -> this.tilModellversjon()
             is PaVentRequest.FjernPaVentUtenHistorikkinnslag -> this.tilModellversjon()
+            is PaVentRequest.OppdaterPaVentFrist -> this.tilModellversjon()
         }
 
     private fun ArbeidsforholdOverstyringHandling.tilModellversjon(): OverstyrtArbeidsforhold =
@@ -820,6 +851,18 @@ internal class SaksbehandlerMediator(
             notatTekst = notatTekst,
             årsaker = årsaker.map { årsak -> PåVentÅrsak(key = årsak._key, årsak = årsak.arsak) },
         )
+
+    private fun PaVentRequest.OppdaterPaVentFrist.tilModellversjon(): OppdaterPåVentFrist {
+        return OppdaterPåVentFrist(
+            fødselsnummer = oppgaveService.fødselsnummer(oppgaveId),
+            oppgaveId = oppgaveId,
+            behandlingId = oppgaveService.spleisBehandlingId(oppgaveId),
+            frist = frist,
+            skalTildeles = skalTildeles,
+            notatTekst = notatTekst,
+            årsaker = årsaker.map { årsak -> PåVentÅrsak(key = årsak._key, årsak = årsak.arsak) },
+        )
+    }
 
     private fun PaVentRequest.FjernPaVent.tilModellversjon(): FjernPåVent = FjernPåVent(oppgaveId)
 

@@ -395,6 +395,7 @@ type Mutation {
     leggTilKommentar(dialogRef: Int!, saksbehandlerident: String!, tekst: String!): Kommentar
     leggTilNotat(saksbehandlerOid: String!, tekst: String!, type: NotatType!, vedtaksperiodeId: String!): Notat
     minimumSykdomsgrad(minimumSykdomsgrad: MinimumSykdomsgradInput!): Boolean!
+    oppdaterPaVentFrist(arsaker: [PaVentArsakInput!]!, frist: LocalDate!, notatTekst: String, oppgaveId: String!, tildeling: Boolean!): PaVent
     oppdaterPerson(fodselsnummer: String!): Boolean!
     opphevStans(begrunnelse: String!, fodselsnummer: String!): Boolean!
     opprettAbonnement(personidentifikator: String!): Boolean!
@@ -441,6 +442,18 @@ type OmregnetArsinntekt {
     inntektFraAOrdningen: [InntektFraAOrdningen!]
     kilde: Inntektskilde!
     manedsbelop: Float!
+}
+
+type OppdaterPaVentFrist implements Historikkinnslag {
+    arsaker: [String!]!
+    dialogRef: Int
+    frist: LocalDate
+    id: Int!
+    kommentarer: [Kommentar!]!
+    notattekst: String
+    saksbehandlerIdent: String
+    timestamp: LocalDateTime!
+    type: PeriodehistorikkType!
 }
 
 type OppgaveForPeriodevisning {
@@ -1128,6 +1141,7 @@ enum Periodehandling {
 enum PeriodehistorikkType {
     FJERN_FRA_PA_VENT
     LEGG_PA_VENT
+    OPPDATER_PA_VENT_FRIST
     STANS_AUTOMATISK_BEHANDLING
     TOTRINNSVURDERING_ATTESTERT
     TOTRINNSVURDERING_RETUR

@@ -2,6 +2,7 @@ package no.nav.helse.mediator.påvent
 
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
+import no.nav.helse.modell.saksbehandler.handlinger.OppdaterPåVentFrist
 import java.util.UUID
 
 class PåVentRepository(
@@ -17,5 +18,20 @@ class PåVentRepository(
 
     internal fun fjernFraPåVent(oppgaveId: Long) {
         dao.slettPåVent(oppgaveId)
+    }
+
+    internal fun oppdaterFrist(
+        saksbehandlerOid: UUID,
+        påVentFrist: OppdaterPåVentFrist,
+        dialogRef: Long,
+    ) {
+        dao.oppdaterPåVent(
+            påVentFrist.oppgaveId,
+            saksbehandlerOid,
+            påVentFrist.frist,
+            påVentFrist.årsaker,
+            påVentFrist.notatTekst,
+            dialogRef,
+        )
     }
 }

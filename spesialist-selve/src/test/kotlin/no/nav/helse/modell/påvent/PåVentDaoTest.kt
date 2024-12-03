@@ -42,6 +42,37 @@ internal class PåVentDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `lagre påvent med årsaker - oppdatere frist`() {
+        nyPerson()
+        val frist = LocalDate.now().plusDays(10)
+        påVentDao.lagrePåVent(
+            OPPGAVE_ID,
+            SAKSBEHANDLER_OID,
+            frist,
+            listOf(PåVentÅrsak("key1", "årsak1"), PåVentÅrsak("key2", "årsak2")),
+            "Et notat",
+            1L,
+        )
+        val påVent = påvent()
+        assertEquals(1, påVent.size)
+        påVent.first().assertEquals(VEDTAKSPERIODE, SAKSBEHANDLER_OID, frist, listOf("årsak1", "årsak2"), "Et notat")
+
+        val nyFrist = frist.plusDays(10)
+        påVentDao.oppdaterPåVent(
+            OPPGAVE_ID,
+            SAKSBEHANDLER_OID,
+            nyFrist,
+            listOf(PåVentÅrsak("key1", "årsak1")),
+            "Et nytt notat",
+            2L,
+        )
+
+        val påVentNyFrist = påvent()
+        assertEquals(1, påVentNyFrist.size)
+        påVentNyFrist.first().assertEquals(VEDTAKSPERIODE, SAKSBEHANDLER_OID, nyFrist, listOf("årsak1"), "Et nytt notat")
+    }
+
+    @Test
     fun `slett påvent`() {
         nyPerson()
         val frist = LocalDate.now().plusDays(21)

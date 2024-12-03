@@ -34,6 +34,7 @@ import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
+import no.nav.helse.modell.saksbehandler.handlinger.OppdaterPåVentFrist
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDto
@@ -183,6 +184,15 @@ internal class OppgaveService(
     ) {
         oppgave(handling.oppgaveId) {
             this.leggPåVent(handling.skalTildeles, saksbehandler)
+        }
+    }
+
+    internal fun oppdaterPåVentFrist(
+        handling: OppdaterPåVentFrist,
+        saksbehandler: Saksbehandler,
+    ) {
+        oppgave(handling.oppgaveId) {
+            this.oppdaterPåVentFrist(handling.skalTildeles, saksbehandler)
         }
     }
 

@@ -10,6 +10,7 @@ import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
+import no.nav.helse.spesialist.api.feilhåndtering.FinnerIkkeLagtPåVent
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
@@ -81,6 +82,44 @@ class PaVentMutation(
                 newResult<Boolean>().data(false).build()
             } catch (e: OppgaveTildeltNoenAndre) {
                 newResult<Boolean>().data(false).build()
+            }
+        }
+    }
+
+    @Suppress("unused")
+    suspend fun oppdaterPaVentFrist(
+        oppgaveId: String,
+        notatTekst: String?,
+        frist: LocalDate,
+        tildeling: Boolean,
+        arsaker: List<PaVentRequest.PaVentArsak>,
+        env: DataFetchingEnvironment,
+    ): DataFetcherResult<PaVent?> {
+        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
+        return withContext(Dispatchers.IO) {
+            try {
+                saksbehandlerhåndterer.påVent(
+                    PaVentRequest.OppdaterPaVentFrist(
+                        oppgaveId = oppgaveId.toLong(),
+                        saksbehandlerOid = saksbehandler.oid,
+                        frist = frist,
+                        skalTildeles = tildeling,
+                        notatTekst = notatTekst,
+                        årsaker = arsaker,
+                    ),
+                    saksbehandler,
+                )
+                newResult<PaVent?>()
+                    .data(
+                        PaVent(
+                            frist = frist,
+                            oid = saksbehandler.oid,
+                        ),
+                    ).build()
+            } catch (e: RuntimeException) {
+                newResult<PaVent?>().error(getUpdateError(oppgaveId)).build()
+            } catch (e: FinnerIkkeLagtPåVent) {
+                newResult<PaVent>().error(getUpdateError(oppgaveId)).build()
             }
         }
     }

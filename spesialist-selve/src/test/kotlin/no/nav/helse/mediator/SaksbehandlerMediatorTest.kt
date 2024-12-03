@@ -264,7 +264,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `håndterer på vent`() {
+    fun `håndterer at på vent blir fjernet ved godkjenning`() {
         val vedtaksperiodeId = UUID.randomUUID()
         nyPerson(vedtaksperiodeId = vedtaksperiodeId)
         påVentDao.lagrePåVent(oppgaveId, saksbehandler.oid, LocalDate.now(), emptyList(), null, 1L)
@@ -362,6 +362,35 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `oppdatering av påVent frist forårsaker publisering av hendelse`() {
+        val spleisBehandlingId = UUID.randomUUID()
+        nyPerson(spleisBehandlingId = spleisBehandlingId)
+        val oppgaveId = OPPGAVE_ID
+        val frist = LocalDate.now()
+        val skalTildeles = true
+        mediator.påVent(PaVentRequest.LeggPaVent(oppgaveId, saksbehandler.oid, frist, skalTildeles, "en tekst", listOf(PaVentRequest.PaVentArsak("key", "arsak"))), saksbehandler)
+        val melding1 = testRapid.inspektør.hendelser("lagt_på_vent").lastOrNull()
+        assertEquals("lagt_på_vent", melding1?.get("@event_name")?.asText())
+
+        val nyFrist = LocalDate.now().plusDays(5)
+        mediator.påVent(PaVentRequest.OppdaterPaVentFrist(oppgaveId, saksbehandler.oid, nyFrist, skalTildeles, "en ny tekst", listOf(PaVentRequest.PaVentArsak("key", "arsak"))), saksbehandler)
+
+
+        val melding2 = testRapid.inspektør.hendelser("lagt_på_vent").lastOrNull()
+        val årsaker = melding2?.get("årsaker")?.map { it.get("key").asText() to it.get("årsak").asText() }
+        assertNotNull(melding2)
+        assertEquals("lagt_på_vent", melding2?.get("@event_name")?.asText())
+        assertEquals("en ny tekst", melding2?.get("notatTekst")?.asText())
+        assertEquals(listOf("key" to "arsak"), årsaker)
+        assertEquals(spleisBehandlingId, melding2?.get("behandlingId")?.asUUID())
+        assertEquals(oppgaveId, melding2?.get("oppgaveId")?.asLong())
+        assertEquals(saksbehandler.oid, melding2?.get("saksbehandlerOid")?.asUUID())
+        assertEquals(saksbehandler.ident, melding2?.get("saksbehandlerIdent")?.asText())
+        assertEquals(nyFrist, melding2?.get("frist")?.asLocalDate())
+        assertEquals(skalTildeles, melding2?.get("skalTildeles")?.asBoolean())
+    }
+
+    @Test
     fun `forsøk tildeling av oppgave når den allerede er tildelt`() {
         nyPerson()
         val oppgaveId = OPPGAVE_ID
@@ -416,6 +445,48 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         val historikk = periodehistorikkApiDao.finn(UTBETALING_ID)
         assertEquals(PeriodehistorikkType.LEGG_PA_VENT, historikk.first().type)
         assertTrue(melding["egenskaper"].map { it.asText() }.contains("PÅ_VENT"))
+    }
+
+    @Test
+    fun `oppdater på vent frist`() {
+        nyPerson()
+        val oppgaveId = OPPGAVE_ID
+        mediator.påVent(
+            PaVentRequest.LeggPaVent(
+                oppgaveId,
+                saksbehandler.oid,
+                LocalDate.now().plusDays(10),
+                true,
+                "notat tekst",
+                listOf(
+                    PaVentRequest.PaVentArsak("key", "arsak"),
+                    PaVentRequest.PaVentArsak("key2", "arsak2"),
+                ),
+            ),
+            saksbehandler,
+        )
+        val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
+        val historikk = periodehistorikkApiDao.finn(UTBETALING_ID)
+        assertEquals(PeriodehistorikkType.LEGG_PA_VENT, historikk.first().type)
+        assertTrue(melding["egenskaper"].map { it.asText() }.contains("PÅ_VENT"))
+
+        mediator.påVent(
+            PaVentRequest.OppdaterPaVentFrist(
+                oppgaveId,
+                saksbehandler.oid,
+                LocalDate.now().plusDays(20),
+                true,
+                "ny notat tekst",
+                listOf(
+                    PaVentRequest.PaVentArsak("key", "arsak"),
+                ),
+            ),
+            saksbehandler,
+        )
+        val melding2 = testRapid.inspektør.hendelser("lagt_på_vent").last()
+        val historikk2 = periodehistorikkApiDao.finn(UTBETALING_ID)
+        assertEquals(PeriodehistorikkType.OPPDATER_PA_VENT_FRIST, historikk2.last().type)
+        assertEquals("ny notat tekst", melding2["notatTekst"].asText())
     }
 
     @Test

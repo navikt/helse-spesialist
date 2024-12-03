@@ -150,6 +150,18 @@ class Oppgave private constructor(
         oppgaveEndret()
     }
 
+    fun oppdaterPåVentFrist(
+        skalTildeles: Boolean,
+        saksbehandler: Saksbehandler,
+    ) {
+        if (this.tildeltTil != saksbehandler && skalTildeles) {
+            tildel(saksbehandler)
+        }
+        if (this.tildeltTil != null && !skalTildeles) {
+            avmeld(saksbehandler)
+        }
+    }
+
     fun fjernFraPåVent() {
         egenskaper.remove(PÅ_VENT)
         oppgaveEndret()
