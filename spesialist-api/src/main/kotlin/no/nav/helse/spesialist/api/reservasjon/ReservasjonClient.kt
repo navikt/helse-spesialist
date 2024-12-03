@@ -46,6 +46,7 @@ class KRRClient(
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
     override suspend fun hentReservasjonsstatus(fnr: String): Reservasjon? {
+        val sample = Timer.start(registry)
         return try {
             logg.debug("Henter accessToken")
             val accessToken = accessTokenClient.hentAccessToken(scope)
@@ -72,6 +73,8 @@ class KRRClient(
             logg.warn("Feil under kall til Kontakt- og reservasjonsregisteret")
             sikkerLogg.warn("Feil under kall til Kontakt- og reservasjonsregisteret", e)
             null
+        } finally {
+            sample.stop(responstidReservasjonsstatus)
         }
     }
 }
