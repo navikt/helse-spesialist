@@ -27,7 +27,6 @@ internal class PersonRepository(
                 it.slettAvslag(personId)
                 it.slettReserverPerson(personId)
                 it.slettOpptegnelse(personId)
-                it.slettDialog(personId)
                 it.slettPåVent(personId)
                 it.slettPeriodehistorikk(personId)
                 it.slettTotrinnsvurdering(personId)
@@ -290,11 +289,14 @@ internal class PersonRepository(
         @Language("PostgreSQL")
         val query =
             """
-            DELETE FROM periodehistorikk ph
-            USING behandling b
-            JOIN vedtak v ON v.vedtaksperiode_id = b.vedtaksperiode_id
-            WHERE ph.generasjon_id = b.unik_id
-            AND v.person_ref = :personRef
+            WITH slettet_rad AS (
+                DELETE FROM periodehistorikk ph
+                USING behandling b
+                JOIN vedtak v ON v.vedtaksperiode_id = b.vedtaksperiode_id
+                WHERE ph.generasjon_id = b.unik_id
+                AND v.person_ref = :personRef returning dialog_ref
+            )
+            DELETE FROM dialog USING slettet_rad sr WHERE id = sr.dialog_ref
             """.trimIndent()
         run(queryOf(query, mapOf("personRef" to personRef)).asExecute)
     }
@@ -303,28 +305,6 @@ internal class PersonRepository(
         @Language("PostgreSQL")
         val query = "DELETE FROM pa_vent pv USING vedtak v WHERE pv.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?"
         run(queryOf(query, personRef).asExecute)
-    }
-
-    private fun TransactionalSession.slettDialog(personRef: Int) {
-        @Language("PostgreSQL")
-        val query1 =
-            """
-            DELETE FROM dialog d USING periodehistorikk ph 
-            INNER JOIN behandling b ON ph.generasjon_id = b.unik_id
-            INNER JOIN vedtak v ON v.vedtaksperiode_id = b.vedtaksperiode_id
-            WHERE d.id = ph.dialog_ref AND v.person_ref = :personRef
-            """.trimIndent()
-
-        @Language("PostgreSQL")
-        val query2 =
-            """
-            DELETE FROM dialog d USING notat n 
-            INNER JOIN vedtak v ON v.vedtaksperiode_id = n.vedtaksperiode_id
-            WHERE d.id = n.dialog_ref AND v.person_ref = :personRef
-            """.trimIndent()
-
-        run(queryOf(query1, mapOf("personRef" to personRef)).asExecute)
-        run(queryOf(query2, mapOf("personRef" to personRef)).asExecute)
     }
 
     private fun TransactionalSession.slettVedtaksperiodegenerasjoner(personRef: Int) {
@@ -375,8 +355,14 @@ internal class PersonRepository(
 
     private fun TransactionalSession.slettNotat(personRef: Int) {
         @Language("PostgreSQL")
-        val query = "DELETE FROM notat WHERE vedtaksperiode_id IN (SELECT vedtaksperiode_id FROM vedtak WHERE person_ref = ?)"
-        run(queryOf(query, personRef).asExecute)
+        val query =
+            """
+            WITH slettet_rad AS (
+                DELETE FROM notat WHERE vedtaksperiode_id IN (SELECT vedtaksperiode_id FROM vedtak WHERE person_ref = :personRef) returning dialog_ref
+            )
+            DELETE FROM dialog USING slettet_rad sr WHERE id = sr.dialog_ref
+            """.trimIndent()
+        run(queryOf(query, mapOf("personRef" to personRef)).asExecute)
     }
 
     private fun TransactionalSession.slettAutomatiseringProblem(personRef: Int) {

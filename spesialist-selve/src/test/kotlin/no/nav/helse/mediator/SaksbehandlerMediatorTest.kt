@@ -3,6 +3,7 @@ package no.nav.helse.mediator
 import DatabaseIntegrationTest
 import TilgangskontrollForTestHarIkkeTilgang
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.TestRapidHelpers.hendelser
@@ -14,7 +15,6 @@ import no.nav.helse.januar
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
-import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
@@ -267,7 +267,8 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     fun `håndterer at på vent blir fjernet ved godkjenning`() {
         val vedtaksperiodeId = UUID.randomUUID()
         nyPerson(vedtaksperiodeId = vedtaksperiodeId)
-        påVentDao.lagrePåVent(oppgaveId, saksbehandler.oid, LocalDate.now(), emptyList(), null, 1L)
+        val dialogId = dialogDao.lagre()
+        påVentDao.lagrePåVent(oppgaveId, saksbehandler.oid, LocalDate.now(), emptyList(), null, dialogId)
         assertDoesNotThrow {
             mediator.håndter(godkjenning(oppgaveId, true), UUID.randomUUID(), saksbehandler)
         }

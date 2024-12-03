@@ -18,7 +18,8 @@ internal class PåVentDaoTest : DatabaseIntegrationTest() {
     fun `lagre påvent`() {
         nyPerson()
         val frist = LocalDate.now().plusDays(21)
-        påVentDao.lagrePåVent(OPPGAVE_ID, SAKSBEHANDLER_OID, frist, emptyList(), null, 1L)
+        val dialogId = dialogDao.lagre()
+        påVentDao.lagrePåVent(OPPGAVE_ID, SAKSBEHANDLER_OID, frist, emptyList(), null, dialogId)
         val påVent = påvent()
         assertEquals(1, påVent.size)
         påVent.first().assertEquals(VEDTAKSPERIODE, SAKSBEHANDLER_OID, frist, emptyList(), null)
@@ -28,13 +29,14 @@ internal class PåVentDaoTest : DatabaseIntegrationTest() {
     fun `lagre påvent med årsaker`() {
         nyPerson()
         val frist = LocalDate.now().plusDays(21)
+        val dialogId = dialogDao.lagre()
         påVentDao.lagrePåVent(
             OPPGAVE_ID,
             SAKSBEHANDLER_OID,
             frist,
             listOf(PåVentÅrsak("key1", "årsak1"), PåVentÅrsak("key2", "årsak2")),
             "Et notat",
-            1L,
+            dialogId,
         )
         val påVent = påvent()
         assertEquals(1, påVent.size)
@@ -45,26 +47,28 @@ internal class PåVentDaoTest : DatabaseIntegrationTest() {
     fun `lagre påvent med årsaker - oppdatere frist`() {
         nyPerson()
         val frist = LocalDate.now().plusDays(10)
+        val dialogId1 = dialogDao.lagre()
         påVentDao.lagrePåVent(
             OPPGAVE_ID,
             SAKSBEHANDLER_OID,
             frist,
             listOf(PåVentÅrsak("key1", "årsak1"), PåVentÅrsak("key2", "årsak2")),
             "Et notat",
-            1L,
+            dialogId1,
         )
         val påVent = påvent()
         assertEquals(1, påVent.size)
         påVent.first().assertEquals(VEDTAKSPERIODE, SAKSBEHANDLER_OID, frist, listOf("årsak1", "årsak2"), "Et notat")
 
         val nyFrist = frist.plusDays(10)
+        val dialogId2 = dialogDao.lagre()
         påVentDao.oppdaterPåVent(
             OPPGAVE_ID,
             SAKSBEHANDLER_OID,
             nyFrist,
             listOf(PåVentÅrsak("key1", "årsak1")),
             "Et nytt notat",
-            2L,
+            dialogId2,
         )
 
         val påVentNyFrist = påvent()
@@ -76,7 +80,8 @@ internal class PåVentDaoTest : DatabaseIntegrationTest() {
     fun `slett påvent`() {
         nyPerson()
         val frist = LocalDate.now().plusDays(21)
-        påVentDao.lagrePåVent(oppgaveId, SAKSBEHANDLER_OID, frist, emptyList(), null, 1L)
+        val dialogId = dialogDao.lagre()
+        påVentDao.lagrePåVent(oppgaveId, SAKSBEHANDLER_OID, frist, emptyList(), null, dialogId)
         val påVent = påvent()
         assertEquals(1, påVent.size)
         påVentDao.slettPåVent(oppgaveId)
@@ -88,7 +93,8 @@ internal class PåVentDaoTest : DatabaseIntegrationTest() {
     fun `finnes påvent`() {
         nyPerson()
         val frist = LocalDate.now().plusDays(21)
-        påVentDao.lagrePåVent(OPPGAVE_ID, SAKSBEHANDLER_OID, frist, emptyList(), null, 1L)
+        val dialogId = dialogDao.lagre()
+        påVentDao.lagrePåVent(OPPGAVE_ID, SAKSBEHANDLER_OID, frist, emptyList(), null, dialogId)
         val erPåVent = påVentDao.erPåVent(VEDTAKSPERIODE)
         assertTrue(erPåVent)
     }

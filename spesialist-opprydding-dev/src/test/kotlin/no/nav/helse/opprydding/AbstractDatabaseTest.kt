@@ -88,6 +88,7 @@ internal abstract class AbstractDatabaseTest {
             .placeholders(
                 mapOf(
                     "sequence_number" to sequenceNumber.toString(),
+                    "periodehistorikk_dialog_id" to Random.nextInt(1000, 99999).toString(),
                     "saksbehandler_oid" to UUID.randomUUID().toString(),
                     "hendelse_id" to UUID.randomUUID().toString(),
                     "fødselsnummer" to fødselsnummer,
@@ -138,7 +139,7 @@ internal abstract class AbstractDatabaseTest {
         tabeller.forEach { tabellnavn ->
             val expectedRowCount =
                 when (tabellnavn) {
-                    in listOf("oppdrag", "utbetalingslinje") -> numRows * 2
+                    in listOf("oppdrag", "utbetalingslinje", "dialog") -> numRows * 2
                     in listOf("begrunnelse") -> numRows * 4
                     else -> numRows
                 }
