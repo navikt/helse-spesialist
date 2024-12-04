@@ -1,5 +1,5 @@
 val graphQLKotlinVersion = "8.1.0"
-val testcontainersVersion = "1.20.2"
+val testcontainersVersion = "1.20.4"
 val mockOAuth2ServerVersion = "2.1.9"
 
 plugins {
@@ -20,4 +20,5 @@ dependencies {
     testImplementation(libs.bundles.ktor.server)
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
     testImplementation("no.nav.security:mock-oauth2-server:$mockOAuth2ServerVersion")
+    api("org.testcontainers:kafka:$testcontainersVersion")
 }
