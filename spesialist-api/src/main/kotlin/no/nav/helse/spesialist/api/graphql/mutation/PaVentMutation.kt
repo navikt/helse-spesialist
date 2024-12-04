@@ -7,6 +7,7 @@ import graphql.execution.DataFetcherResult
 import graphql.execution.DataFetcherResult.newResult
 import graphql.schema.DataFetchingEnvironment
 import io.ktor.http.HttpStatusCode
+import io.ktor.util.logging.error
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
@@ -63,6 +64,7 @@ class PaVentMutation(
             } catch (e: OppgaveTildeltNoenAndre) {
                 newResult<PaVent?>().error(tildeltNoenAndreError(e)).build()
             } catch (e: RuntimeException) {
+                sikkerlogg.error(e)
                 newResult<PaVent?>().error(getUpdateError(oppgaveId)).build()
             }
         }
@@ -79,8 +81,10 @@ class PaVentMutation(
                 saksbehandlerhåndterer.påVent(PaVentRequest.FjernPaVent(oppgaveId.toLong()), saksbehandler)
                 newResult<Boolean?>().data(true).build()
             } catch (e: OppgaveIkkeTildelt) {
+                e.logger()
                 newResult<Boolean>().data(false).build()
             } catch (e: OppgaveTildeltNoenAndre) {
+                e.logger()
                 newResult<Boolean>().data(false).build()
             }
         }
@@ -116,10 +120,12 @@ class PaVentMutation(
                             oid = saksbehandler.oid,
                         ),
                     ).build()
-            } catch (e: RuntimeException) {
-                newResult<PaVent?>().error(getUpdateError(oppgaveId)).build()
             } catch (e: FinnerIkkeLagtPåVent) {
+                e.logger()
                 newResult<PaVent>().error(getUpdateError(oppgaveId)).build()
+            } catch (e: RuntimeException) {
+                sikkerlogg.error(e)
+                newResult<PaVent?>().error(getUpdateError(oppgaveId)).build()
             }
         }
     }
