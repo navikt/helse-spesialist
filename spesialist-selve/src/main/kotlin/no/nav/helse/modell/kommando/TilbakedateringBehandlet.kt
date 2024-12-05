@@ -1,13 +1,11 @@
 package no.nav.helse.modell.kommando
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import kotliquery.TransactionalSession
 import no.nav.helse.db.AutomatiseringRepository
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
-import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
@@ -21,21 +19,12 @@ import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Periode
 import java.util.UUID
 
-internal class TilbakedateringBehandlet private constructor(
+internal class TilbakedateringBehandlet(
     override val id: UUID,
     private val fødselsnummer: String,
     val perioder: List<Periode>,
     private val json: String,
 ) : Personmelding {
-    internal constructor(packet: JsonMessage) : this(
-        id = packet["@id"].asUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        perioder =
-            packet["perioder"].map {
-                Periode(it["fom"].asLocalDate(), it["tom"].asLocalDate())
-            },
-        json = packet.toJson(),
-    )
     internal constructor(jsonNode: JsonNode) : this(
         id = UUID.fromString(jsonNode["@id"].asText()),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
