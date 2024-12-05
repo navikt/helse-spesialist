@@ -186,7 +186,7 @@ internal class MeldingMediator(
                 GosysOppgaveEndretRiver(this),
                 TilbakedateringBehandletRiver(this),
                 EndretSkjermetinfoRiver(this),
-                DokumentRiver(dokumentDao),
+                DokumentRiver(this),
                 VedtakFattetRiver(this),
                 NyeVarslerRiver(this),
                 AvvikVurdertRiver(this),
@@ -275,6 +275,14 @@ internal class MeldingMediator(
         if (varseldefinisjonDto.avviklet) {
             varselRepository.avvikleVarsel(varseldefinisjonDto)
         }
+    }
+
+    internal fun mottaDokument(
+        fødselsnummer: String,
+        dokumentId: UUID,
+        dokument: JsonNode,
+    ) {
+        dokumentDao.lagre(fødselsnummer, dokumentId, dokument)
     }
 
     fun slettGamleDokumenter(): Int = dokumentDao.slettGamleDokumenter()

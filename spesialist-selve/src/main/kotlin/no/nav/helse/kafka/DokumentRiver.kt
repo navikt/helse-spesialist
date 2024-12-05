@@ -6,12 +6,12 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
 import net.logstash.logback.argument.StructuredArguments
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.modell.dokument.DokumentDao
 import org.slf4j.LoggerFactory
 
 internal class DokumentRiver(
-    private val dokumentDao: DokumentDao,
+    private val meldingMediator: MeldingMediator,
 ) : SpesialistRiver {
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
@@ -43,6 +43,6 @@ internal class DokumentRiver(
             StructuredArguments.kv("dokumentId", dokumentId),
         )
 
-        dokumentDao.lagre(fødselsnummer, dokumentId, dokument)
+        meldingMediator.mottaDokument(fødselsnummer, dokumentId, dokument)
     }
 }
