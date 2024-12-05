@@ -485,7 +485,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             saksbehandler,
         )
         val melding2 = testRapid.inspektør.hendelser("lagt_på_vent").last()
-        val historikk2 = periodehistorikkApiDao.finn(UTBETALING_ID)
+        val historikk2 = periodehistorikkApiDao.finn(UTBETALING_ID).sortedBy { it.id }
         assertEquals(PeriodehistorikkType.OPPDATER_PA_VENT_FRIST, historikk2.last().type)
         assertEquals("ny notat tekst", melding2["notatTekst"].asText())
     }
