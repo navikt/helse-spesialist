@@ -1,7 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import kotliquery.TransactionalSession
@@ -66,7 +65,7 @@ data class SpleisVedtaksperiode(
     internal fun erRelevant(vedtaksperiodeId: UUID): Boolean = this.vedtaksperiodeId == vedtaksperiodeId
 }
 
-internal class Godkjenningsbehov private constructor(
+internal class Godkjenningsbehov(
     override val id: UUID,
     private val fødselsnummer: String,
     val organisasjonsnummer: String,
@@ -125,43 +124,6 @@ internal class Godkjenningsbehov private constructor(
             skjæringstidspunkt = skjæringstidspunkt,
             json = json,
         )
-
-    internal constructor(packet: JsonMessage) : this(
-        id = packet["@id"].asUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        organisasjonsnummer = packet["organisasjonsnummer"].asText(),
-        periodeFom = LocalDate.parse(packet["Godkjenning.periodeFom"].asText()),
-        periodeTom = LocalDate.parse(packet["Godkjenning.periodeTom"].asText()),
-        skjæringstidspunkt = LocalDate.parse(packet["Godkjenning.skjæringstidspunkt"].asText()),
-        vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
-        avviksvurderingId =
-            packet["avviksvurderingId"].takeUnless { it.isMissingOrNull() }
-                ?.let { UUID.fromString(it.asText()) },
-        vilkårsgrunnlagId = packet["Godkjenning.vilkårsgrunnlagId"].asUUID(),
-        spleisVedtaksperioder =
-            packet["Godkjenning.perioderMedSammeSkjæringstidspunkt"].map { periodeNode ->
-                SpleisVedtaksperiode(
-                    vedtaksperiodeId = periodeNode["vedtaksperiodeId"].asUUID(),
-                    spleisBehandlingId = periodeNode["behandlingId"].asUUID(),
-                    fom = periodeNode["fom"].asLocalDate(),
-                    tom = periodeNode["tom"].asLocalDate(),
-                    skjæringstidspunkt = packet["Godkjenning.skjæringstidspunkt"].asLocalDate(),
-                )
-            },
-        spleisBehandlingId = packet["Godkjenning.behandlingId"].asUUID(),
-        tags = packet["Godkjenning.tags"].map { it.asText() },
-        utbetalingId = packet["utbetalingId"].asUUID(),
-        periodetype = Periodetype.valueOf(packet["Godkjenning.periodetype"].asText()),
-        førstegangsbehandling = packet["Godkjenning.førstegangsbehandling"].asBoolean(),
-        utbetalingtype = Utbetalingtype.valueOf(packet["Godkjenning.utbetalingtype"].asText()),
-        inntektskilde = Inntektskilde.valueOf(packet["Godkjenning.inntektskilde"].asText()),
-        orgnummereMedRelevanteArbeidsforhold =
-            packet["Godkjenning.orgnummereMedRelevanteArbeidsforhold"]
-                .takeUnless(JsonNode::isMissingOrNull)
-                ?.map { it.asText() } ?: emptyList(),
-        kanAvvises = packet["Godkjenning.kanAvvises"].asBoolean(),
-        json = packet.toJson(),
-    )
 
     internal constructor(jsonNode: JsonNode) : this(
         id = UUID.fromString(jsonNode.path("@id").asText()),

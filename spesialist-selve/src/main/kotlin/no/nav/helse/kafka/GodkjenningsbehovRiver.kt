@@ -1,14 +1,23 @@
 package no.nav.helse.kafka
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetaling.Utbetalingtype.Companion.values
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.SpleisVedtaksperiode
+import java.time.LocalDate
+import java.util.UUID
 
 internal class GodkjenningsbehovRiver(
     private val mediator: MeldingMediator,
@@ -56,6 +65,47 @@ internal class GodkjenningsbehovRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        mediator.mottaMelding(Godkjenningsbehov(packet), context)
+        mediator.mottaMelding(
+            Godkjenningsbehov(
+                id = packet["@id"].asUUID(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+                organisasjonsnummer = packet["organisasjonsnummer"].asText(),
+                periodeFom = LocalDate.parse(packet["Godkjenning.periodeFom"].asText()),
+                periodeTom = LocalDate.parse(packet["Godkjenning.periodeTom"].asText()),
+                skjæringstidspunkt = LocalDate.parse(packet["Godkjenning.skjæringstidspunkt"].asText()),
+                vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
+                avviksvurderingId =
+                    packet["avviksvurderingId"].takeUnless { it.isMissingOrNull() }
+                        ?.let { UUID.fromString(it.asText()) },
+                vilkårsgrunnlagId = packet["Godkjenning.vilkårsgrunnlagId"].asUUID(),
+                spleisVedtaksperioder = spleisvedtaksperioder(packet),
+                spleisBehandlingId = packet["Godkjenning.behandlingId"].asUUID(),
+                tags = packet["Godkjenning.tags"].map { it.asText() },
+                utbetalingId = packet["utbetalingId"].asUUID(),
+                periodetype = Periodetype.valueOf(packet["Godkjenning.periodetype"].asText()),
+                førstegangsbehandling = packet["Godkjenning.førstegangsbehandling"].asBoolean(),
+                utbetalingtype = Utbetalingtype.valueOf(packet["Godkjenning.utbetalingtype"].asText()),
+                inntektskilde = Inntektskilde.valueOf(packet["Godkjenning.inntektskilde"].asText()),
+                orgnummereMedRelevanteArbeidsforhold =
+                    packet["Godkjenning.orgnummereMedRelevanteArbeidsforhold"]
+                        .takeUnless(JsonNode::isMissingOrNull)
+                        ?.map { it.asText() } ?: emptyList(),
+                kanAvvises = packet["Godkjenning.kanAvvises"].asBoolean(),
+                json = packet.toJson(),
+            ),
+            context,
+        )
+    }
+
+    private fun spleisvedtaksperioder(packet: JsonMessage): List<SpleisVedtaksperiode> {
+        return packet["Godkjenning.perioderMedSammeSkjæringstidspunkt"].map { periodeNode ->
+            SpleisVedtaksperiode(
+                vedtaksperiodeId = periodeNode["vedtaksperiodeId"].asUUID(),
+                spleisBehandlingId = periodeNode["behandlingId"].asUUID(),
+                fom = periodeNode["fom"].asLocalDate(),
+                tom = periodeNode["tom"].asLocalDate(),
+                skjæringstidspunkt = packet["Godkjenning.skjæringstidspunkt"].asLocalDate(),
+            )
+        }
     }
 }
