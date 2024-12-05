@@ -2,10 +2,12 @@ package no.nav.helse.kafka
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -40,6 +42,15 @@ internal class EndretSkjermetinfoRiver(
             return
         }
 
-        meldingMediator.mottaMelding(EndretEgenAnsattStatus(packet), context)
+        meldingMediator.mottaMelding(
+            EndretEgenAnsattStatus(
+                id = packet["@id"].asUUID(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+                erEgenAnsatt = packet["skjermet"].asBoolean(),
+                opprettet = packet["@opprettet"].asLocalDateTime(),
+                json = packet.toJson(),
+            ),
+            context,
+        )
     }
 }
