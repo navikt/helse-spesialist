@@ -1,7 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import kotliquery.TransactionalSession
 import no.nav.helse.mediator.Kommandostarter
@@ -21,7 +20,7 @@ data class SpleisBehandling(
     internal fun erRelevantFor(vedtaksperiodeId: UUID) = this.vedtaksperiodeId == vedtaksperiodeId
 }
 
-internal class BehandlingOpprettet private constructor(
+internal class BehandlingOpprettet(
     override val id: UUID,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
@@ -31,16 +30,6 @@ internal class BehandlingOpprettet private constructor(
     private val tom: LocalDate,
     private val json: String,
 ) : Vedtaksperiodemelding {
-    internal constructor(packet: JsonMessage) : this(
-        id = packet["@id"].asUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        organisasjonsnummer = packet["organisasjonsnummer"].asText(),
-        vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
-        spleisBehandlingId = packet["behandlingId"].asUUID(),
-        fom = packet["fom"].asLocalDate(),
-        tom = packet["tom"].asLocalDate(),
-        json = packet.toJson(),
-    )
     internal constructor(jsonNode: JsonNode) : this(
         id = jsonNode["@id"].asUUID(),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
