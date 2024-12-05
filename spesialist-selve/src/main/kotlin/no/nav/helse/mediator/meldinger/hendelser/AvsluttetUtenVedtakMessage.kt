@@ -1,7 +1,6 @@
 package no.nav.helse.mediator.meldinger.hendelser
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import kotliquery.TransactionalSession
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
@@ -10,7 +9,7 @@ import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import java.util.UUID
 
-internal class AvsluttetUtenVedtakMessage private constructor(
+internal class AvsluttetUtenVedtakMessage(
     override val id: UUID,
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
@@ -25,15 +24,6 @@ internal class AvsluttetUtenVedtakMessage private constructor(
         spleisBehandlingId = UUID.fromString(jsonNode["behandlingId"].asText()),
         hendelser = jsonNode["hendelser"].map { it.asUUID() },
         json = jsonNode.toString(),
-    )
-
-    internal constructor(packet: JsonMessage) : this(
-        id = packet["@id"].asUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
-        spleisBehandlingId = packet["behandlingId"].asUUID(),
-        hendelser = packet["hendelser"].map { it.asUUID() },
-        json = packet.toJson(),
     )
 
     private val avsluttetUtenVedtak get() =
