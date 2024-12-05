@@ -6,7 +6,9 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
+import java.util.UUID
 
 internal class OverstyringIgangsattRiver(
     private val mediator: MeldingMediator,
@@ -33,6 +35,15 @@ internal class OverstyringIgangsattRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        mediator.mottaMelding(OverstyringIgangsatt(packet), context)
+        mediator.mottaMelding(
+            OverstyringIgangsatt(
+                id = packet["@id"].asUUID(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+                kilde = packet["kilde"].asUUID(),
+                berørteVedtaksperiodeIder = packet["berørtePerioder"].map { UUID.fromString(it["vedtaksperiodeId"].asText()) },
+                json = packet.toJson(),
+            ),
+            context,
+        )
     }
 }
