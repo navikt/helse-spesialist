@@ -1,13 +1,11 @@
 package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import kotliquery.TransactionalSession
 import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.Kommandostarter
-import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.egenansatt.KontrollerEgenAnsattstatus
 import no.nav.helse.modell.kommando.Command
@@ -19,17 +17,11 @@ import no.nav.helse.spesialist.api.abonnement.OpptegnelseType.PERSON_KLAR_TIL_BE
 import no.nav.helse.spesialist.api.abonnement.PersonKlarTilVisning
 import java.util.UUID
 
-internal class KlargjørTilgangsrelaterteData private constructor(
+internal class KlargjørTilgangsrelaterteData(
     override val id: UUID,
     private val fødselsnummer: String,
     private val json: String,
 ) : Personmelding {
-    internal constructor(packet: JsonMessage) : this(
-        id = packet["@id"].asUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        json = packet.toJson(),
-    )
-
     internal constructor(jsonNode: JsonNode) : this(
         id = UUID.fromString(jsonNode["@id"].asText()),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
