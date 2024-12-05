@@ -9,6 +9,8 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.mediator.asUUID
+import no.nav.helse.modell.utbetaling.LagreOppdragCommand
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.Companion.values
@@ -55,6 +57,32 @@ internal class UtbetalingEndretRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        mediator.mottaMelding(UtbetalingEndret(packet), context)
+        mediator.mottaMelding(
+            UtbetalingEndret(
+                id = packet["@id"].asUUID(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+                organisasjonsnummer = packet["organisasjonsnummer"].asText(),
+                utbetalingId = packet["utbetalingId"].asUUID(),
+                type = packet["type"].asText(),
+                gjeldendeStatus = Utbetalingsstatus.valueOf(packet["gjeldendeStatus"].asText()),
+                opprettet = packet["@opprettet"].asLocalDateTime(),
+                arbeidsgiverbeløp = packet["arbeidsgiverOppdrag"]["nettoBeløp"].asInt(),
+                personbeløp = packet["personOppdrag"]["nettoBeløp"].asInt(),
+                arbeidsgiverOppdrag = tilOppdrag(packet["arbeidsgiverOppdrag"], packet["organisasjonsnummer"].asText()),
+                personOppdrag = tilOppdrag(packet["personOppdrag"], packet["fødselsnummer"].asText()),
+                json = packet.toJson(),
+            ),
+            context,
+        )
+    }
+
+    private companion object {
+        private fun tilOppdrag(
+            jsonNode: JsonNode,
+            mottaker: String,
+        ) = LagreOppdragCommand.Oppdrag(
+            fagsystemId = jsonNode.path("fagsystemId").asText(),
+            mottaker = jsonNode.path("mottaker").takeIf(JsonNode::isTextual)?.asText() ?: mottaker,
+        )
     }
 }

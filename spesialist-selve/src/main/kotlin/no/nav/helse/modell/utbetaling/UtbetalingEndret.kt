@@ -1,7 +1,6 @@
 package no.nav.helse.modell.utbetaling
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import kotliquery.TransactionalSession
 import no.nav.helse.db.OppgaveDao
@@ -10,7 +9,6 @@ import no.nav.helse.db.ReservasjonRepository
 import no.nav.helse.db.TildelingRepository
 import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.mediator.Kommandostarter
-import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.Command
@@ -22,7 +20,7 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class UtbetalingEndret private constructor(
+internal class UtbetalingEndret(
     override val id: UUID,
     private val fødselsnummer: String,
     val organisasjonsnummer: String,
@@ -36,21 +34,6 @@ internal class UtbetalingEndret private constructor(
     val personOppdrag: LagreOppdragCommand.Oppdrag,
     private val json: String,
 ) : Personmelding {
-    internal constructor(packet: JsonMessage) : this(
-        id = packet["@id"].asUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        organisasjonsnummer = packet["organisasjonsnummer"].asText(),
-        utbetalingId = packet["utbetalingId"].asUUID(),
-        type = packet["type"].asText(),
-        gjeldendeStatus = Utbetalingsstatus.valueOf(packet["gjeldendeStatus"].asText()),
-        opprettet = packet["@opprettet"].asLocalDateTime(),
-        arbeidsgiverbeløp = packet["arbeidsgiverOppdrag"]["nettoBeløp"].asInt(),
-        personbeløp = packet["personOppdrag"]["nettoBeløp"].asInt(),
-        arbeidsgiverOppdrag = tilOppdrag(packet["arbeidsgiverOppdrag"], packet["organisasjonsnummer"].asText()),
-        personOppdrag = tilOppdrag(packet["personOppdrag"], packet["fødselsnummer"].asText()),
-        json = packet.toJson(),
-    )
-
     internal constructor(jsonNode: JsonNode) : this(
         id = UUID.fromString(jsonNode["@id"].asText()),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
