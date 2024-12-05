@@ -1,12 +1,10 @@
 package no.nav.helse.modell.vedtaksperiode.vedtak
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import kotliquery.TransactionalSession
 import no.nav.helse.mediator.Kommandostarter
-import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.person.Person
 import java.time.LocalDateTime
@@ -16,7 +14,7 @@ import java.util.UUID
  * Behandler input til godkjenningsbehov fra saksbehandler som har blitt lagt på rapid-en av API-biten av spesialist.
  */
 
-internal class Saksbehandlerløsning private constructor(
+internal class Saksbehandlerløsning(
     override val id: UUID,
     val oppgaveId: Long,
     val godkjenningsbehovhendelseId: UUID,
@@ -33,36 +31,6 @@ internal class Saksbehandlerløsning private constructor(
     val beslutter: Saksbehandler?,
     private val json: String,
 ) : Personmelding {
-    internal constructor(packet: JsonMessage) : this(
-        id = packet["@id"].asUUID(),
-        oppgaveId = packet["oppgaveId"].asLong(),
-        godkjenningsbehovhendelseId = packet["hendelseId"].asUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        godkjent = packet["godkjent"].asBoolean(),
-        ident = packet["saksbehandlerident"].asText(),
-        epostadresse = packet["saksbehandlerepost"].asText(),
-        godkjenttidspunkt = packet["godkjenttidspunkt"].asLocalDateTime(),
-        årsak = packet["årsak"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
-        begrunnelser = packet["begrunnelser"].takeUnless(JsonNode::isMissingOrNull)?.map(JsonNode::asText),
-        kommentar = packet["kommentar"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
-        saksbehandler =
-            Saksbehandler(
-                packet["saksbehandler.ident"].asText(),
-                packet["saksbehandler.epostadresse"].asText(),
-            ),
-        beslutter =
-            packet["beslutter"].takeUnless(JsonNode::isMissingOrNull)?.let {
-                Saksbehandler(
-                    packet["beslutter.ident"].asText(),
-                    packet["beslutter.epostadresse"].asText(),
-                )
-            },
-        saksbehandleroverstyringer =
-            packet["saksbehandleroverstyringer"].takeUnless(JsonNode::isMissingOrNull)?.map {
-                UUID.fromString(it.asText())
-            } ?: emptyList(),
-        json = packet.toJson(),
-    )
     internal constructor(jsonNode: JsonNode) : this(
         id = UUID.fromString(jsonNode["@id"].asText()),
         oppgaveId = jsonNode["oppgaveId"].asLong(),
