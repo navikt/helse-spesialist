@@ -1,7 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode.vedtak
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import kotliquery.TransactionalSession
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.mediator.Kommandostarter
@@ -10,20 +9,13 @@ import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.person.Person
 import java.util.UUID
 
-internal class VedtakFattet private constructor(
+internal class VedtakFattet(
     override val id: UUID,
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
     private val json: String,
     private val spleisBehandlingId: UUID,
 ) : Vedtaksperiodemelding {
-    internal constructor(packet: JsonMessage) : this(
-        id = packet["@id"].asUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
-        spleisBehandlingId = packet["behandlingId"].asUUID(),
-        json = packet.toJson(),
-    )
     internal constructor(jsonNode: JsonNode) : this(
         id = UUID.fromString(jsonNode["@id"].asText()),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
