@@ -6,6 +6,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 
 internal class GosysOppgaveEndretRiver(
@@ -28,6 +29,13 @@ internal class GosysOppgaveEndretRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        mediator.mottaMelding(GosysOppgaveEndret(packet), context)
+        mediator.mottaMelding(
+            GosysOppgaveEndret(
+                id = packet["@id"].asUUID(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+                json = packet.toJson(),
+            ),
+            context,
+        )
     }
 }
