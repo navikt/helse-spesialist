@@ -44,6 +44,15 @@ internal class SøknadSendtRiver(
             keyValue("hendelseId", packet["@id"].asUUID()),
             keyValue("hendelse", packet.toJson()),
         )
-        mediator.mottaSøknadSendt(SøknadSendt.søknadSendt(packet), context)
+        mediator.mottaSøknadSendt(søknadSendt(packet), context)
     }
+
+    private fun søknadSendt(packet: JsonMessage) =
+        SøknadSendt(
+            id = packet["@id"].asUUID(),
+            fødselsnummer = packet["fnr"].asText(),
+            aktørId = packet["aktorId"].asText(),
+            organisasjonsnummer = packet["arbeidsgiver.orgnummer"].asText(),
+            json = packet.toJson(),
+        )
 }

@@ -1,12 +1,10 @@
 package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import kotliquery.TransactionalSession
 import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.Kommandostarter
-import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
@@ -14,7 +12,7 @@ import no.nav.helse.modell.kommando.OpprettMinimalArbeidsgiverCommand
 import no.nav.helse.modell.kommando.OpprettMinimalPersonCommand
 import java.util.UUID
 
-internal class SøknadSendt private constructor(
+internal class SøknadSendt(
     override val id: UUID,
     private val fødselsnummer: String,
     val aktørId: String,
@@ -40,26 +38,6 @@ internal class SøknadSendt private constructor(
     ) {
         // Ikke i bruk, SøknadSendt har egen sti inn da det muligens ikke finnes noen person enda
         // På sikt ønsker vi kanskje å opprette personen dersom den ikke finnes enda, og da kan denne tas i bruk
-    }
-
-    internal companion object {
-        fun søknadSendt(packet: JsonMessage) =
-            SøknadSendt(
-                id = packet["@id"].asUUID(),
-                fødselsnummer = packet["fnr"].asText(),
-                aktørId = packet["aktorId"].asText(),
-                organisasjonsnummer = packet["arbeidsgiver.orgnummer"].asText(),
-                json = packet.toJson(),
-            )
-
-        fun søknadSendtArbeidsledig(packet: JsonMessage) =
-            SøknadSendt(
-                id = packet["@id"].asUUID(),
-                fødselsnummer = packet["fnr"].asText(),
-                aktørId = packet["aktorId"].asText(),
-                organisasjonsnummer = packet["tidligereArbeidsgiverOrgnummer"].asText(),
-                json = packet.toJson(),
-            )
     }
 }
 

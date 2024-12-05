@@ -50,6 +50,15 @@ internal class SøknadSendtArbeidsledigRiver(
             keyValue("hendelseId", packet["@id"].asUUID()),
             keyValue("hendelse", packet.toJson()),
         )
-        mediator.mottaSøknadSendt(SøknadSendt.søknadSendtArbeidsledig(packet), context)
+        mediator.mottaSøknadSendt(søknadSendtArbeidsledig(packet), context)
     }
+
+    private fun søknadSendtArbeidsledig(packet: JsonMessage) =
+        SøknadSendt(
+            id = packet["@id"].asUUID(),
+            fødselsnummer = packet["fnr"].asText(),
+            aktørId = packet["aktorId"].asText(),
+            organisasjonsnummer = packet["tidligereArbeidsgiverOrgnummer"].asText(),
+            json = packet.toJson(),
+        )
 }
