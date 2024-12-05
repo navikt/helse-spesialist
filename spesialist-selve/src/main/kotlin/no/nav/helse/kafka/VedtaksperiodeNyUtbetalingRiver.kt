@@ -6,6 +6,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
 
 internal class VedtaksperiodeNyUtbetalingRiver(
@@ -28,6 +29,15 @@ internal class VedtaksperiodeNyUtbetalingRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        mediator.mottaMelding(VedtaksperiodeNyUtbetaling(packet), context)
+        mediator.mottaMelding(
+            VedtaksperiodeNyUtbetaling(
+                id = packet["@id"].asUUID(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+                vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
+                utbetalingId = packet["utbetalingId"].asUUID(),
+                json = packet.toJson(),
+            ),
+            context,
+        )
     }
 }
