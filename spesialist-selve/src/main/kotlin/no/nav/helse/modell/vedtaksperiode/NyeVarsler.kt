@@ -1,7 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import kotliquery.TransactionalSession
 import no.nav.helse.mediator.Kommandostarter
@@ -11,18 +10,12 @@ import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import java.util.UUID
 
-internal class NyeVarsler private constructor(
+internal class NyeVarsler(
     override val id: UUID,
     private val fødselsnummer: String,
     internal val varsler: List<Varsel>,
     private val json: String,
 ) : Personmelding {
-    internal constructor(packet: JsonMessage) : this(
-        id = packet["@id"].asUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        varsler = packet["aktiviteter"].varsler(),
-        json = packet.toJson(),
-    )
     internal constructor(jsonNode: JsonNode) : this(
         id = UUID.fromString(jsonNode["@id"].asText()),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
@@ -40,7 +33,7 @@ internal class NyeVarsler private constructor(
         transactionalSession: TransactionalSession,
     ) = person.nyeVarsler(varsler)
 
-    companion object {
+    private companion object {
         private fun JsonNode.varsler(): List<Varsel> =
             filter { it["nivå"].asText() == "VARSEL" && it["varselkode"]?.asText() != null }
                 .filter { it["kontekster"].any { kontekst -> kontekst["konteksttype"].asText() == "Vedtaksperiode" } }

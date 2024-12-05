@@ -9,6 +9,8 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.mediator.asUUID
+import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 
 internal class NyeVarslerRiver(
@@ -44,6 +46,32 @@ internal class NyeVarslerRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        mediator.mottaMelding(NyeVarsler(packet), context)
+        mediator.mottaMelding(
+            NyeVarsler(
+                id = packet["@id"].asUUID(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+                varsler = packet["aktiviteter"].varsler(),
+                json = packet.toJson(),
+            ),
+            context,
+        )
+    }
+
+    private companion object {
+        private fun JsonNode.varsler(): List<Varsel> =
+            filter { it["nivå"].asText() == "VARSEL" && it["varselkode"]?.asText() != null }
+                .filter { it["kontekster"].any { kontekst -> kontekst["konteksttype"].asText() == "Vedtaksperiode" } }
+                .map { jsonNode ->
+                    val vedtaksperiodeId =
+                        jsonNode["kontekster"]
+                            .find { it["konteksttype"].asText() == "Vedtaksperiode" }!!["kontekstmap"]["vedtaksperiodeId"]
+                            .asUUID()
+                    Varsel(
+                        jsonNode["id"].asUUID(),
+                        jsonNode["varselkode"].asText(),
+                        jsonNode["tidsstempel"].asLocalDateTime(),
+                        vedtaksperiodeId,
+                    )
+                }
     }
 }
