@@ -6,6 +6,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 
 internal class AdressebeskyttelseEndretRiver(
@@ -27,6 +28,14 @@ internal class AdressebeskyttelseEndretRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        mediator.mottaMelding(melding = AdressebeskyttelseEndret(packet), messageContext = context)
+        mediator.mottaMelding(
+            melding =
+                AdressebeskyttelseEndret(
+                    id = packet["@id"].asUUID(),
+                    fødselsnummer = packet["fødselsnummer"].asText(),
+                    json = packet.toJson(),
+                ),
+            messageContext = context,
+        )
     }
 }

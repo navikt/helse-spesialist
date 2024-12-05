@@ -1,7 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import kotliquery.TransactionalSession
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PersonRepository
@@ -17,17 +16,11 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import java.util.UUID
 
-internal class AdressebeskyttelseEndret private constructor(
+internal class AdressebeskyttelseEndret(
     override val id: UUID,
     private val fødselsnummer: String,
     private val json: String,
 ) : Personmelding {
-    internal constructor(packet: JsonMessage) : this(
-        id = packet["@id"].asUUID(),
-        fødselsnummer = packet["fødselsnummer"].asText(),
-        json = packet.toJson(),
-    )
-
     internal constructor(jsonNode: JsonNode) : this(
         id = jsonNode["@id"].asUUID(),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
