@@ -5,7 +5,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
-import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto.UtfallDto
+import no.nav.helse.modell.vedtak.Utfall
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -35,7 +35,7 @@ internal class VedtakBegrunnelseDaoTest : DatabaseIntegrationTest() {
         val lagretVedtakBegrunnelse = dao.finnVedtakBegrunnelse(vedtaksperiodeId, generasjonId)
         assertNotNull(lagretVedtakBegrunnelse)
         with(lagretVedtakBegrunnelse!!) {
-            assertEquals(UtfallDto.AVSLAG, utfall)
+            assertEquals(Utfall.AVSLAG, utfall)
             assertEquals("En individuell begrunelse", begrunnelse)
         }
     }
@@ -58,7 +58,7 @@ internal class VedtakBegrunnelseDaoTest : DatabaseIntegrationTest() {
         val lagretVedtakBegrunnelse = VedtakBegrunnelseDao(dataSource).finnVedtakBegrunnelse(vedtaksperiodeId, generasjonId)
         assertNotNull(lagretVedtakBegrunnelse)
         with(lagretVedtakBegrunnelse!!) {
-            assertEquals(UtfallDto.AVSLAG, utfall)
+            assertEquals(Utfall.AVSLAG, utfall)
             assertEquals("En individuell begrunelse", begrunnelse)
         }
     }

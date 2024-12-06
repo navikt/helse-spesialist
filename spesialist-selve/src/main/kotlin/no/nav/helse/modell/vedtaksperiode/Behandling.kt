@@ -81,7 +81,7 @@ internal class Behandling private constructor(
             tom = periode.tom(),
             tilstand = tilstand.toDto(),
             tags = tags,
-            vedtakBegrunnelse = vedtakBegrunnelse?.toDto(),
+            vedtakBegrunnelse = vedtakBegrunnelse,
             varsler = varsler.map(Varsel::toDto),
         )
 

@@ -4,7 +4,6 @@ import no.nav.helse.modell.januar
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Infotrygd
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis
 import no.nav.helse.modell.vedtak.Sykepengevedtak.VedtakMedSkjønnsvurdering
-import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto.UtfallDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -85,7 +84,7 @@ class SykepengevedtakBuilderTest {
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta<Spleis.EtterHovedregel>(),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                vedtakBegrunnelse = VedtakBegrunnelse(Utfall.INNVILGELSE, null).toDto(),
+                vedtakBegrunnelse = VedtakBegrunnelse(Utfall.INNVILGELSE, null),
             ),
             utkast,
         )
@@ -155,7 +154,7 @@ class SykepengevedtakBuilderTest {
                     ),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                vedtakBegrunnelse = VedtakBegrunnelse(Utfall.INNVILGELSE, null).toDto(),
+                vedtakBegrunnelse = VedtakBegrunnelse(Utfall.INNVILGELSE, null),
             ),
             utkast,
         )
@@ -208,8 +207,8 @@ class SykepengevedtakBuilderTest {
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta<Spleis.EtterHovedregel>(),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                vedtakBegrunnelse = VedtakBegrunnelseDto(
-                    UtfallDto.DELVIS_INNVILGELSE,
+                vedtakBegrunnelse = VedtakBegrunnelse(
+                    Utfall.DELVIS_INNVILGELSE,
                     "En individuell begrunnelse for avslag"
                 ),
             ),
@@ -282,8 +281,8 @@ class SykepengevedtakBuilderTest {
                 ),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                vedtakBegrunnelse = VedtakBegrunnelseDto(
-                    UtfallDto.AVSLAG,
+                vedtakBegrunnelse = VedtakBegrunnelse(
+                    Utfall.AVSLAG,
                     "En individuell begrunnelse for avslag"
                 ),
             ),
@@ -336,7 +335,7 @@ class SykepengevedtakBuilderTest {
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta<Infotrygd>(),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                vedtakBegrunnelse = VedtakBegrunnelseDto(UtfallDto.INNVILGELSE, null),
+                vedtakBegrunnelse = VedtakBegrunnelse(Utfall.INNVILGELSE, null),
             ),
             utkast,
         )
@@ -533,7 +532,7 @@ class SykepengevedtakBuilderTest {
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta<Spleis.EtterHovedregel>(),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                vedtakBegrunnelse = VedtakBegrunnelseDto(UtfallDto.INNVILGELSE, null),
+                vedtakBegrunnelse = VedtakBegrunnelse(Utfall.INNVILGELSE, null),
             ),
             utkast,
         )

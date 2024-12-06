@@ -1,8 +1,8 @@
 package no.nav.helse.db
 
 import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto
-import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto.UtfallDto
+import no.nav.helse.modell.vedtak.Utfall
+import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -70,7 +70,7 @@ class VedtakBegrunnelseDao(queryRunner: QueryRunner) : QueryRunner by queryRunne
     internal fun finnVedtakBegrunnelse(
         vedtaksperiodeId: UUID,
         generasjonId: Long,
-    ): VedtakBegrunnelseDto? =
+    ): VedtakBegrunnelse? =
         asSQL(
             """
             SELECT b.type, b.tekst FROM vedtak_begrunnelse AS vb, begrunnelse AS b
@@ -85,7 +85,7 @@ class VedtakBegrunnelseDao(queryRunner: QueryRunner) : QueryRunner by queryRunne
         ).singleOrNull { vedtakBegrunnelse ->
             val begrunnelse = vedtakBegrunnelse.string("tekst")
             val type = enumValueOf<VedtakBegrunnelseTypeFraDatabase>(vedtakBegrunnelse.string("type"))
-            VedtakBegrunnelseDto(utfall = type.toDto(), begrunnelse = begrunnelse)
+            VedtakBegrunnelse(utfall = type.toDomain(), begrunnelse = begrunnelse)
         }
 
     internal fun finnVedtakBegrunnelse(oppgaveId: Long): VedtakBegrunnelseFraDatabase? =
@@ -108,11 +108,11 @@ class VedtakBegrunnelseDao(queryRunner: QueryRunner) : QueryRunner by queryRunne
             VedtakBegrunnelseFraDatabase(type = type, tekst = tekst)
         }
 
-    private fun VedtakBegrunnelseTypeFraDatabase.toDto() =
+    private fun VedtakBegrunnelseTypeFraDatabase.toDomain() =
         when (this) {
-            VedtakBegrunnelseTypeFraDatabase.AVSLAG -> UtfallDto.AVSLAG
-            VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> UtfallDto.DELVIS_INNVILGELSE
-            VedtakBegrunnelseTypeFraDatabase.INNVILGELSE -> UtfallDto.INNVILGELSE
+            VedtakBegrunnelseTypeFraDatabase.AVSLAG -> Utfall.AVSLAG
+            VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> Utfall.DELVIS_INNVILGELSE
+            VedtakBegrunnelseTypeFraDatabase.INNVILGELSE -> Utfall.INNVILGELSE
         }
 
     internal fun finnAlleVedtakBegrunnelser(

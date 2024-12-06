@@ -26,7 +26,7 @@ class SykepengevedtakBuilder {
     private var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta? = null
     private var skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlag? = null
     private var skjønnsfastsettingopplysninger: VedtakMedSkjønnsvurdering.SkjønnsfastsettingopplysningerDto? = null
-    private var vedtakBegrunnelse: VedtakBegrunnelseDto? = null
+    private var vedtakBegrunnelse: VedtakBegrunnelse? = null
     private val tags: MutableSet<String> = mutableSetOf()
     private val tagsForSykepengegrunnlagsfakta: MutableSet<String> = mutableSetOf()
 
@@ -113,7 +113,7 @@ class SykepengevedtakBuilder {
 
     fun vedtakBegrunnelseData(vedtakBegrunnelse: VedtakBegrunnelse) =
         apply {
-            this.vedtakBegrunnelse = vedtakBegrunnelse.toDto()
+            this.vedtakBegrunnelse = vedtakBegrunnelse
         }
 
     fun build(): Sykepengevedtak {

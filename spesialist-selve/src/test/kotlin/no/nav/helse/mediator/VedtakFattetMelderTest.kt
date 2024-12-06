@@ -11,8 +11,8 @@ import no.nav.helse.modell.vedtak.Skjønnsfastsettingsårsak
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtak.Sykepengevedtak
 import no.nav.helse.modell.vedtak.Sykepengevedtak.VedtakMedSkjønnsvurdering
-import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto
-import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto.UtfallDto
+import no.nav.helse.modell.vedtak.Utfall
+import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -275,8 +275,8 @@ internal class VedtakFattetMelderTest {
                     ),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                vedtakBegrunnelse = VedtakBegrunnelseDto(
-                    UtfallDto.DELVIS_INNVILGELSE,
+                vedtakBegrunnelse = VedtakBegrunnelse(
+                    Utfall.DELVIS_INNVILGELSE,
                     "En individuell begrunnelse"
                 ),
             )
@@ -504,7 +504,7 @@ internal class VedtakFattetMelderTest {
                     ),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                vedtakBegrunnelse = VedtakBegrunnelseDto(UtfallDto.AVSLAG, "En individuell begrunnelse")
+                vedtakBegrunnelse = VedtakBegrunnelse(Utfall.AVSLAG, "En individuell begrunnelse")
             )
         vedtakFattetMelder.vedtakFattet(infotrygd)
         vedtakFattetMelder.publiserUtgåendeMeldinger()

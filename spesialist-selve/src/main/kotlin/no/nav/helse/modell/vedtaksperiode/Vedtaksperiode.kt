@@ -6,9 +6,6 @@ import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
-import no.nav.helse.modell.vedtak.Utfall
-import no.nav.helse.modell.vedtak.VedtakBegrunnelse
-import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto
 import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.finnGenerasjonForSpleisBehandling
 import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.finnSisteGenerasjonUtenSpleisBehandlingId
 import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.logg
@@ -233,19 +230,7 @@ internal class Vedtaksperiode private constructor(
                                     },
                             )
                         }.toSet(),
-                vedtakBegrunnelse =
-                    vedtakBegrunnelse?.let {
-                        when (it.utfall) {
-                            VedtakBegrunnelseDto.UtfallDto.AVSLAG ->
-                                VedtakBegrunnelse(Utfall.AVSLAG, it.begrunnelse)
-
-                            VedtakBegrunnelseDto.UtfallDto.DELVIS_INNVILGELSE ->
-                                VedtakBegrunnelse(Utfall.DELVIS_INNVILGELSE, it.begrunnelse)
-
-                            VedtakBegrunnelseDto.UtfallDto.INNVILGELSE ->
-                                VedtakBegrunnelse(Utfall.INNVILGELSE, it.begrunnelse)
-                        }
-                    },
+                vedtakBegrunnelse = vedtakBegrunnelse,
             )
     }
 }

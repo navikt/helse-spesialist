@@ -60,7 +60,7 @@ sealed interface Sykepengevedtak {
         val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta.Spleis.EtterHovedregel,
         override val vedtakFattetTidspunkt: LocalDateTime,
         override val tags: Set<String>,
-        val vedtakBegrunnelse: VedtakBegrunnelseDto?,
+        val vedtakBegrunnelse: VedtakBegrunnelse?,
     ) : Sykepengevedtak
 
     data class VedtakMedSkjønnsvurdering(
@@ -83,7 +83,7 @@ sealed interface Sykepengevedtak {
         val skjønnsfastsettingopplysninger: SkjønnsfastsettingopplysningerDto,
         override val vedtakFattetTidspunkt: LocalDateTime,
         override val tags: Set<String>,
-        val vedtakBegrunnelse: VedtakBegrunnelseDto?,
+        val vedtakBegrunnelse: VedtakBegrunnelse?,
     ) : Sykepengevedtak {
         data class SkjønnsfastsettingopplysningerDto(
             val begrunnelseFraMal: String,
@@ -113,17 +113,6 @@ sealed interface Sykepengevedtak {
         val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta.Infotrygd,
         override val vedtakFattetTidspunkt: LocalDateTime,
         override val tags: Set<String>,
-        val vedtakBegrunnelse: VedtakBegrunnelseDto?,
+        val vedtakBegrunnelse: VedtakBegrunnelse?,
     ) : Sykepengevedtak
-}
-
-data class VedtakBegrunnelseDto(
-    val utfall: UtfallDto,
-    val begrunnelse: String?,
-) {
-    enum class UtfallDto {
-        AVSLAG,
-        DELVIS_INNVILGELSE,
-        INNVILGELSE,
-    }
 }

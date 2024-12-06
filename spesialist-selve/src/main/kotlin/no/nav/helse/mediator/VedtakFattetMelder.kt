@@ -5,7 +5,8 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.person.PersonObserver
 import no.nav.helse.modell.vedtak.Sykepengevedtak
-import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto
+import no.nav.helse.modell.vedtak.Utfall
+import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 import org.slf4j.LoggerFactory
 
 internal class VedtakFattetMelder(
@@ -214,7 +215,7 @@ internal class VedtakFattetMelder(
     }
 
     private fun List<Map<String, Any>>.supplerMedIndividuellBegrunnelse(
-        vedtakBegrunnelse: VedtakBegrunnelseDto?,
+        vedtakBegrunnelse: VedtakBegrunnelse?,
         sykepengevedtak: Sykepengevedtak,
     ): List<Map<String, Any>> {
         if (vedtakBegrunnelse == null) return this
@@ -222,9 +223,9 @@ internal class VedtakFattetMelder(
             mapOf(
                 "type" to
                     when (vedtakBegrunnelse.utfall) {
-                        VedtakBegrunnelseDto.UtfallDto.AVSLAG -> "Avslag"
-                        VedtakBegrunnelseDto.UtfallDto.DELVIS_INNVILGELSE -> "DelvisInnvilgelse"
-                        VedtakBegrunnelseDto.UtfallDto.INNVILGELSE -> "Innvilgelse"
+                        Utfall.AVSLAG -> "Avslag"
+                        Utfall.DELVIS_INNVILGELSE -> "DelvisInnvilgelse"
+                        Utfall.INNVILGELSE -> "Innvilgelse"
                     },
                 "begrunnelse" to (vedtakBegrunnelse.begrunnelse ?: ""),
                 "perioder" to
