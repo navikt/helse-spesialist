@@ -91,24 +91,6 @@ class PaVentMutation(
     }
 
     @Suppress("unused")
-    suspend fun oppdaterPaVentFrist(
-        oppgaveId: String,
-        notatTekst: String?,
-        frist: LocalDate,
-        tildeling: Boolean,
-        arsaker: List<PaVentRequest.PaVentArsak>,
-        env: DataFetchingEnvironment,
-    ): DataFetcherResult<PaVent?> =
-        endrePaVent(
-            oppgaveId = oppgaveId,
-            notatTekst = notatTekst,
-            frist = frist,
-            tildeling = tildeling,
-            arsaker = arsaker,
-            env = env,
-        )
-
-    @Suppress("unused")
     suspend fun endrePaVent(
         oppgaveId: String,
         notatTekst: String?,
