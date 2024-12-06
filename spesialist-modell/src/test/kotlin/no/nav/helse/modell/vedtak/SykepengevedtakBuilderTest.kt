@@ -1,12 +1,8 @@
 package no.nav.helse.modell.vedtak
 
 import no.nav.helse.modell.januar
-import no.nav.helse.modell.vedtak.Faktatype.ETTER_HOVEDREGEL
-import no.nav.helse.modell.vedtak.Faktatype.ETTER_SKJØNN
-import no.nav.helse.modell.vedtak.Faktatype.I_INFOTRYGD
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Infotrygd
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis
-import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver
 import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto.UtfallDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -62,7 +58,7 @@ class SykepengevedtakBuilderTest {
             .begrensning(begrensning)
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
-            .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_HOVEDREGEL))
+            .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta<Spleis.EtterHovedregel>())
             .vedtakBegrunnelse(VedtakBegrunnelse(Utfall.INNVILGELSE, null))
             .tags(listOf("IngenNyArbeidsgiverperiode"))
             .build()
@@ -85,7 +81,7 @@ class SykepengevedtakBuilderTest {
                 grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
                 begrensning = begrensning,
                 inntekt = inntekt,
-                sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_HOVEDREGEL),
+                sykepengegrunnlagsfakta = sykepengegrunnlagsfakta<Spleis.EtterHovedregel>(),
                 skjønnsfastsettingopplysninger = null,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
@@ -114,7 +110,7 @@ class SykepengevedtakBuilderTest {
             .begrensning(begrensning)
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
-            .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_SKJØNN))
+            .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta<Spleis.EtterSkjønn>())
             .skjønnsfastsattSykepengegrunnlag(
                 SkjønnsfastsattSykepengegrunnlag(
                     Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
@@ -148,7 +144,7 @@ class SykepengevedtakBuilderTest {
                 grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
                 begrensning = begrensning,
                 inntekt = inntekt,
-                sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_SKJØNN),
+                sykepengegrunnlagsfakta = sykepengegrunnlagsfakta<Spleis.EtterSkjønn>(),
                 skjønnsfastsettingopplysninger =
                 SkjønnsfastsettingopplysningerDto(
                     "Mal",
@@ -184,7 +180,7 @@ class SykepengevedtakBuilderTest {
             .begrensning(begrensning)
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
-            .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_HOVEDREGEL))
+            .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta<Spleis.EtterHovedregel>())
             .vedtakBegrunnelse(
                 VedtakBegrunnelse(Utfall.DELVIS_INNVILGELSE, "En individuell begrunnelse for avslag")
             )
@@ -209,7 +205,7 @@ class SykepengevedtakBuilderTest {
                 grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
                 begrensning = begrensning,
                 inntekt = inntekt,
-                sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_HOVEDREGEL),
+                sykepengegrunnlagsfakta = sykepengegrunnlagsfakta<Spleis.EtterHovedregel>(),
                 skjønnsfastsettingopplysninger = null,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
@@ -241,7 +237,7 @@ class SykepengevedtakBuilderTest {
             .begrensning(begrensning)
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
-            .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_SKJØNN))
+            .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta<Spleis.EtterSkjønn>())
             .skjønnsfastsattSykepengegrunnlag(
                 SkjønnsfastsattSykepengegrunnlag(
                     Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
@@ -277,7 +273,7 @@ class SykepengevedtakBuilderTest {
                 grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
                 begrensning = begrensning,
                 inntekt = inntekt,
-                sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_SKJØNN),
+                sykepengegrunnlagsfakta = sykepengegrunnlagsfakta<Spleis.EtterSkjønn>(),
                 skjønnsfastsettingopplysninger =
                 SkjønnsfastsettingopplysningerDto(
                     "Mal",
@@ -316,14 +312,14 @@ class SykepengevedtakBuilderTest {
             .begrensning(begrensning)
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
-            .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(I_INFOTRYGD))
+            .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta<Infotrygd>())
             .tags(listOf("IngenNyArbeidsgiverperiode"))
             .vedtakBegrunnelse(VedtakBegrunnelse(Utfall.INNVILGELSE, null))
             .build()
 
-        assertTrue(utkast is Sykepengevedtak.Vedtak)
+        assertTrue(utkast is Sykepengevedtak.VedtakMedOpphavIInfotrygd)
         assertEquals(
-            Sykepengevedtak.Vedtak(
+            Sykepengevedtak.VedtakMedOpphavIInfotrygd(
                 fødselsnummer = fødselsnummer,
                 aktørId = aktørId,
                 organisasjonsnummer = organisasjonsnummer,
@@ -339,8 +335,7 @@ class SykepengevedtakBuilderTest {
                 grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
                 begrensning = begrensning,
                 inntekt = inntekt,
-                sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(I_INFOTRYGD),
-                skjønnsfastsettingopplysninger = null,
+                sykepengegrunnlagsfakta = sykepengegrunnlagsfakta<Infotrygd>(),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 vedtakBegrunnelse = VedtakBegrunnelseDto(UtfallDto.INNVILGELSE, null),
@@ -459,7 +454,6 @@ class SykepengevedtakBuilderTest {
             .begrensning(begrensning)
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
-            .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_HOVEDREGEL))
             .tags(listOf("IngenNyArbeidsgiverperiode"))
 
         assertTrue(builder.build() is Sykepengevedtak.AuuVedtak)
@@ -483,7 +477,7 @@ class SykepengevedtakBuilderTest {
             .begrensning(begrensning)
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
-            .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_SKJØNN))
+            .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta<Spleis.EtterSkjønn>())
             .tags(listOf("IngenNyArbeidsgiverperiode"))
 
         assertThrows<IllegalStateException> { builder.build() }
@@ -508,7 +502,7 @@ class SykepengevedtakBuilderTest {
             .begrensning(begrensning)
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
-            .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_HOVEDREGEL))
+            .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta<Spleis.EtterHovedregel>())
             .skjønnsfastsettingData(
                 "Fritekst",
                 "Mal",
@@ -538,7 +532,7 @@ class SykepengevedtakBuilderTest {
                 grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
                 begrensning = begrensning,
                 inntekt = inntekt,
-                sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_HOVEDREGEL),
+                sykepengegrunnlagsfakta = sykepengegrunnlagsfakta<Spleis.EtterHovedregel>(),
                 skjønnsfastsettingopplysninger = null,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
@@ -548,9 +542,9 @@ class SykepengevedtakBuilderTest {
         )
     }
 
-    private fun sykepengegrunnlagsfakta(faktatype: Faktatype): Sykepengegrunnlagsfakta {
-        return when (faktatype) {
-            ETTER_SKJØNN ->
+    private inline fun <reified T: Sykepengegrunnlagsfakta> sykepengegrunnlagsfakta(): T {
+        return when (T::class) {
+            Spleis.EtterSkjønn::class ->
                 Spleis.EtterSkjønn(
                     omregnetÅrsinntekt = omregnetÅrsinntekt,
                     innrapportertÅrsinntekt = innrapportertÅrsinntekt,
@@ -560,12 +554,12 @@ class SykepengevedtakBuilderTest {
                     tags = mutableSetOf(),
                     arbeidsgivere =
                     listOf(
-                        Arbeidsgiver.EtterSkjønn(organisasjonsnummer, 300000.0, 300000.0, 325000.0),
-                        Arbeidsgiver.EtterSkjønn("987654321", 300000.0, 300000.0, 325000.0),
+                        Spleis.Arbeidsgiver.EtterSkjønn(organisasjonsnummer, 300000.0, 300000.0, 325000.0),
+                        Spleis.Arbeidsgiver.EtterSkjønn("987654321", 300000.0, 300000.0, 325000.0),
                     ),
                 )
 
-            ETTER_HOVEDREGEL ->
+            Spleis.EtterHovedregel::class ->
                 Spleis.EtterHovedregel(
                     omregnetÅrsinntekt = omregnetÅrsinntekt,
                     innrapportertÅrsinntekt = innrapportertÅrsinntekt,
@@ -574,15 +568,17 @@ class SykepengevedtakBuilderTest {
                     tags = mutableSetOf(),
                     arbeidsgivere =
                     listOf(
-                        Arbeidsgiver.EtterHovedregel(organisasjonsnummer, 300000.0, 300000.0),
-                        Arbeidsgiver.EtterHovedregel("987654321", 300000.0, 300000.0),
+                        Spleis.Arbeidsgiver.EtterHovedregel(organisasjonsnummer, 300000.0, 300000.0),
+                        Spleis.Arbeidsgiver.EtterHovedregel("987654321", 300000.0, 300000.0),
                     ),
                 )
 
-            I_INFOTRYGD ->
+            Infotrygd::class ->
                 Infotrygd(
                     omregnetÅrsinntekt = omregnetÅrsinntekt,
                 )
-        }
+
+            else -> throw IllegalArgumentException("Støtter ikke type ${T::class.simpleName}")
+        } as T
     }
 }

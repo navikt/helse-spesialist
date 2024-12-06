@@ -141,19 +141,20 @@ class SykepengevedtakBuilder {
         )
     }
 
-    private fun buildVedtak(): Sykepengevedtak.Vedtak {
+    private fun buildVedtak(): Sykepengevedtak {
         val sykepengegrunnlagsfakta =
             requireNotNull(sykepengegrunnlagsfakta) { "Forventer å finne sykepengegrunnlagsfakta ved bygging av vedtak" }
         val utbetalingId = requireNotNull(utbetalingId) { "Forventer å finne utbetalingId ved bygging av vedtak" }
-        if (sykepengegrunnlagsfakta is Sykepengegrunnlagsfakta.Spleis.EtterSkjønn) {
-            return buildVedtakEtterSkjønn(sykepengegrunnlagsfakta, utbetalingId)
+        return when (sykepengegrunnlagsfakta) {
+            is Sykepengegrunnlagsfakta.Infotrygd -> buildVedtakMedOpphavIInfotrygd(utbetalingId, sykepengegrunnlagsfakta)
+            is Sykepengegrunnlagsfakta.Spleis.EtterHovedregel -> buildVedtak(utbetalingId, sykepengegrunnlagsfakta)
+            is Sykepengegrunnlagsfakta.Spleis.EtterSkjønn -> buildVedtakEtterSkjønn(utbetalingId, sykepengegrunnlagsfakta)
         }
-        return buildVedtak(sykepengegrunnlagsfakta, utbetalingId)
     }
 
     private fun buildVedtakEtterSkjønn(
-        sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
         utbetalingId: UUID,
+        sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta.Spleis,
     ): Sykepengevedtak.Vedtak {
         checkNotNull(skjønnsfastsettingopplysninger) {
             "Forventer å finne opplysninger fra saksbehandler ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn"
@@ -184,8 +185,8 @@ class SykepengevedtakBuilder {
     }
 
     private fun buildVedtak(
-        sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
         utbetalingId: UUID,
+        sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta.Spleis,
     ): Sykepengevedtak.Vedtak {
         return Sykepengevedtak.Vedtak(
             fødselsnummer = fødselsnummer,
@@ -205,6 +206,33 @@ class SykepengevedtakBuilder {
             inntekt = inntekt,
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
             skjønnsfastsettingopplysninger = null,
+            vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags,
+            vedtakBegrunnelse = vedtakBegrunnelse,
+        )
+    }
+
+    private fun buildVedtakMedOpphavIInfotrygd(
+        utbetalingId: UUID,
+        sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta.Infotrygd,
+    ): Sykepengevedtak.VedtakMedOpphavIInfotrygd {
+        return Sykepengevedtak.VedtakMedOpphavIInfotrygd(
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            spleisBehandlingId = spleisBehandlingId,
+            utbetalingId = utbetalingId,
+            fom = fom,
+            tom = tom,
+            skjæringstidspunkt = skjæringstidspunkt,
+            hendelser = hendelser,
+            sykepengegrunnlag = sykepengegrunnlag,
+            grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag,
+            grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
+            begrensning = begrensning,
+            inntekt = inntekt,
+            sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
             tags = tags,
             vedtakBegrunnelse = vedtakBegrunnelse,

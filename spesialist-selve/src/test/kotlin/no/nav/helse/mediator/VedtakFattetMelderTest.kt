@@ -91,9 +91,9 @@ internal class VedtakFattetMelderTest {
     }
 
     @Test
-    fun `vanlig vedtak sykepengegrunnlag fastsatt i infotrygd`() {
+    fun `vedtak med opphav i infotrygd`() {
         val infotrygd =
-            Sykepengevedtak.Vedtak(
+            Sykepengevedtak.VedtakMedOpphavIInfotrygd(
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØRID,
                 organisasjonsnummer = ORGANISASJONSNUMMER,
@@ -113,7 +113,6 @@ internal class VedtakFattetMelderTest {
                     Sykepengegrunnlagsfakta.Infotrygd(
                         omregnetÅrsinntekt = 10000.0,
                     ),
-                skjønnsfastsettingopplysninger = null,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 vedtakBegrunnelse = null,
