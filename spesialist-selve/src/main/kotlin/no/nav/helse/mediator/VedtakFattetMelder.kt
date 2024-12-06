@@ -7,8 +7,9 @@ import no.nav.helse.modell.person.PersonObserver
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Infotrygd
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis
 import no.nav.helse.modell.vedtak.Sykepengevedtak
-import org.slf4j.LoggerFactory
 import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto
+import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
+import org.slf4j.LoggerFactory
 
 internal class VedtakFattetMelder(
     private val messageContext: MessageContext,
@@ -44,6 +45,15 @@ internal class VedtakFattetMelder(
         this.sykepengevedtak.add(sykepengevedtak)
     }
 
+    private fun Avviksvurdering.innrapportertÅrsinntektFor(organisasjonsnummer: String): Double {
+        return this
+            .sammenligningsgrunnlag
+            .innrapporterteInntekter
+            .filter { it.arbeidsgiverreferanse == organisasjonsnummer }
+            .flatMap { it.inntekter }
+            .sumOf { it.beløp }
+    }
+
     private fun vedtakJson(sykepengevedtak: Sykepengevedtak.Vedtak): String {
         val begrunnelser: MutableList<Map<String, Any>> = mutableListOf()
         val message =
@@ -71,10 +81,11 @@ internal class VedtakFattetMelder(
                         when (sykepengevedtak.sykepengegrunnlagsfakta) {
                             is Spleis -> {
                                 val sykepengegrunnlagsfakta = (sykepengevedtak.sykepengegrunnlagsfakta as Spleis)
+                                val avviksvurdering = sykepengevedtak.avviksvurdering
                                 mutableMapOf(
                                     "omregnetÅrsinntekt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
-                                    "innrapportertÅrsinntekt" to sykepengegrunnlagsfakta.innrapportertÅrsinntekt,
-                                    "avviksprosent" to sykepengegrunnlagsfakta.avviksprosent,
+                                    "innrapportertÅrsinntekt" to avviksvurdering.sammenligningsgrunnlag.totalbeløp,
+                                    "avviksprosent" to avviksvurdering.avviksprosent,
                                     "6G" to sykepengegrunnlagsfakta.seksG,
                                     "tags" to sykepengegrunnlagsfakta.tags,
                                     "arbeidsgivere" to
@@ -82,7 +93,7 @@ internal class VedtakFattetMelder(
                                             mutableMapOf(
                                                 "arbeidsgiver" to it.organisasjonsnummer,
                                                 "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
-                                                "innrapportertÅrsinntekt" to it.innrapportertÅrsinntekt,
+                                                "innrapportertÅrsinntekt" to avviksvurdering.innrapportertÅrsinntektFor(it.organisasjonsnummer),
                                             ).apply {
                                                 if (it is Spleis.Arbeidsgiver.EtterSkjønn) {
                                                     put(

@@ -12,7 +12,6 @@ import io.micrometer.core.instrument.MeterRegistry
 import kotliquery.sessionOf
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.bootstrap.Environment
-import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.db.VedtakDao
@@ -89,7 +88,6 @@ internal class MeldingMediator(
     private val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao = MeldingDuplikatkontrollDao(dataSource),
     private val kommandofabrikk: Kommandofabrikk,
     private val dokumentDao: DokumentDao = PgDokumentDao(dataSource),
-    avviksvurderingDao: AvviksvurderingDao,
     private val varselRepository: VarselRepository = VarselRepository(dataSource),
     private val personService: PersonService = PersonService(dataSource),
     private val poisonPills: PoisonPills,
@@ -193,7 +191,7 @@ internal class MeldingMediator(
                 VarseldefinisjonRiver(this),
                 VedtaksperiodeNyUtbetalingRiver(this),
                 MetrikkRiver(),
-                AvsluttetMedVedtakRiver(this, avviksvurderingDao),
+                AvsluttetMedVedtakRiver(this),
                 AvsluttetUtenVedtakRiver(this),
                 MidnattRiver(this),
                 BehandlingOpprettetRiver(this),

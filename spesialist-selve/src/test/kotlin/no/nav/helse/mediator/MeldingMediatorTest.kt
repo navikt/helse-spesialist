@@ -1,15 +1,14 @@
 package no.nav.helse.mediator
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.TestRapidHelpers.meldinger
-import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.varsel.Varselkode
-import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -21,7 +20,6 @@ import java.util.UUID
 internal class MeldingMediatorTest : AbstractDatabaseTest() {
     private val testRapid = TestRapid()
 
-    private val avviksvurderingDao = mockk<AvviksvurderingDao>()
     private val kommandofabrikk = mockk<Kommandofabrikk>(relaxed = true)
 
     private val meldingMediator =
@@ -29,7 +27,6 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
             dataSource = dataSource,
             rapidsConnection = testRapid,
             kommandofabrikk = kommandofabrikk,
-            avviksvurderingDao = avviksvurderingDao,
             poisonPills = PoisonPills(emptyMap())
         )
 

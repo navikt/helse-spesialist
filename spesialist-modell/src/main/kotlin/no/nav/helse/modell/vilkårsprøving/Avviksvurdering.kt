@@ -6,14 +6,14 @@ import java.time.YearMonth
 import java.util.UUID
 
 class Avviksvurdering private constructor(
-    private val unikId: UUID,
-    private val vilkårsgrunnlagId: UUID?,
-    private val fødselsnummer: String,
-    private val skjæringstidspunkt: LocalDate,
-    private val opprettet: LocalDateTime,
-    private val avviksprosent: Double,
-    private val sammenligningsgrunnlag: Sammenligningsgrunnlag,
-    private val beregningsgrunnlag: Beregningsgrunnlag,
+    val unikId: UUID,
+    val vilkårsgrunnlagId: UUID?,
+    val fødselsnummer: String,
+    val skjæringstidspunkt: LocalDate,
+    val opprettet: LocalDateTime,
+    val avviksprosent: Double,
+    val sammenligningsgrunnlag: Sammenligningsgrunnlag,
+    val beregningsgrunnlag: Beregningsgrunnlag,
 ) {
     companion object {
         fun List<Avviksvurdering>.finnRiktigAvviksvurdering(skjæringstidspunkt: LocalDate) =
@@ -73,9 +73,9 @@ class Avviksvurdering private constructor(
     }
 }
 
-internal class Sammenligningsgrunnlag private constructor(
-    private val totalbeløp: Double,
-    private val innrapporterteInntekter: List<InnrapportertInntekt>,
+class Sammenligningsgrunnlag private constructor(
+    val totalbeløp: Double,
+    val innrapporterteInntekter: List<InnrapportertInntekt>,
 ) {
     internal fun toDto(): SammenligningsgrunnlagDto {
         return SammenligningsgrunnlagDto(
@@ -105,9 +105,9 @@ internal class Sammenligningsgrunnlag private constructor(
     }
 }
 
-internal class InnrapportertInntekt private constructor(
-    private val arbeidsgiverreferanse: String,
-    private val inntekter: List<Inntekt>,
+class InnrapportertInntekt private constructor(
+    val arbeidsgiverreferanse: String,
+    val inntekter: List<Inntekt>,
 ) {
     internal fun toDto() =
         InnrapportertInntektDto(
@@ -137,9 +137,9 @@ internal class InnrapportertInntekt private constructor(
     }
 }
 
-internal class Inntekt private constructor(
-    private val årMåned: YearMonth,
-    private val beløp: Double,
+class Inntekt private constructor(
+    val årMåned: YearMonth,
+    val beløp: Double,
 ) {
     internal fun toDto() = InntektDto(årMåned = årMåned, beløp = beløp)
 
@@ -163,9 +163,9 @@ internal class Inntekt private constructor(
     }
 }
 
-internal class Beregningsgrunnlag private constructor(
-    private val totalbeløp: Double,
-    private val omregnedeÅrsinntekter: List<OmregnetÅrsinntekt>,
+class Beregningsgrunnlag private constructor(
+    val totalbeløp: Double,
+    val omregnedeÅrsinntekter: List<OmregnetÅrsinntekt>,
 ) {
     internal fun toDto() =
         BeregningsgrunnlagDto(
@@ -198,9 +198,9 @@ internal class Beregningsgrunnlag private constructor(
     }
 }
 
-internal class OmregnetÅrsinntekt private constructor(
-    private val arbeidsgiverreferanse: String,
-    private val beløp: Double,
+class OmregnetÅrsinntekt private constructor(
+    val arbeidsgiverreferanse: String,
+    val beløp: Double,
 ) {
     internal fun toDto() = OmregnetÅrsinntektDto(arbeidsgiverreferanse = arbeidsgiverreferanse, beløp = beløp)
 

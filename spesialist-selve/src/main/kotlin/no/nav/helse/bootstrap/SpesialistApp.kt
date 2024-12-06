@@ -73,7 +73,6 @@ class SpesialistApp(
     private val dialogDao = PgDialogDao(dataSource)
     private val totrinnsvurderingDao = PgTotrinnsvurderingDao(dataSource)
     private val dokumentDao = PgDokumentDao(dataSource)
-    private val avviksvurderingDao = PgAvviksvurderingDao(dataSource)
     private val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(dataSource)
 
     private lateinit var meldingMediator: MeldingMediator
@@ -175,7 +174,6 @@ class SpesialistApp(
                 dataSource = dataSource,
                 rapidsConnection = rapidsConnection,
                 kommandofabrikk = kommandofabrikk,
-                avviksvurderingDao = avviksvurderingDao,
                 poisonPills = PoisonPillDao(dataSource).poisonPills(),
             )
         saksbehandlerMediator =

@@ -1,5 +1,6 @@
 package no.nav.helse.modell.vedtak
 
+import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -123,6 +124,7 @@ sealed class Sykepengevedtak(
         vedtakFattetTidspunkt: LocalDateTime,
         tags: Set<String>,
         val vedtakBegrunnelse: VedtakBegrunnelseDto?,
+        val avviksvurdering: Avviksvurdering,
     ) : Sykepengevedtak(
             fødselsnummer,
             aktørId,

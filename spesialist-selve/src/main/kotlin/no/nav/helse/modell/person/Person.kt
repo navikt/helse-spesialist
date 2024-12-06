@@ -18,6 +18,7 @@ import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.relevanteFor
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetMedVedtak
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
+import no.nav.helse.modell.vilkårsprøving.Avviksvurdering.Companion.finnRiktigAvviksvurdering
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -92,6 +93,10 @@ class Person private constructor(
 
         skjønnsfastsattSykepengegrunnlag?.also {
             vedtakBuilder.skjønnsfastsattSykepengegrunnlag(it)
+        }
+        val avviksvurdering = avviksvurderinger.finnRiktigAvviksvurdering(generasjon.skjæringstidspunkt())
+        avviksvurdering?.also {
+            vedtakBuilder.avviksvurdering(it)
         }
         vedtaksperiode.byggVedtak(vedtakBuilder)
         generasjon.byggVedtak(vedtakBuilder)

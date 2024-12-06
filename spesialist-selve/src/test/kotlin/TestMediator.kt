@@ -1,6 +1,5 @@
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.db.OpptegnelseDao
-import no.nav.helse.db.PgAvviksvurderingDao
 import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgNotatDao
 import no.nav.helse.db.PgOppgaveDao
@@ -39,7 +38,6 @@ internal class TestMediator(
     private val totrinnsvurderingDao = PgTotrinnsvurderingDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
-    private val avviksvurderingDao = PgAvviksvurderingDao(dataSource)
     private val notatDao = PgNotatDao(dataSource)
     private val dialogDao = PgDialogDao(dataSource)
 
@@ -113,7 +111,6 @@ internal class TestMediator(
             dataSource = dataSource,
             rapidsConnection = testRapid,
             kommandofabrikk = kommandofabrikk,
-            avviksvurderingDao = avviksvurderingDao,
             poisonPills = PoisonPills(emptyMap()),
         )
     }

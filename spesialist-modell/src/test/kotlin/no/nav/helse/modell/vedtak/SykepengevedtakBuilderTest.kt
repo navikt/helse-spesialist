@@ -8,11 +8,19 @@ import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Infotrygd
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver
 import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto.UtfallDto
+import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
+import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
+import no.nav.helse.modell.vilkårsprøving.BeregningsgrunnlagDto
+import no.nav.helse.modell.vilkårsprøving.InnrapportertInntektDto
+import no.nav.helse.modell.vilkårsprøving.InntektDto
+import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntektDto
+import no.nav.helse.modell.vilkårsprøving.SammenligningsgrunnlagDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 
 class SykepengevedtakBuilderTest {
@@ -65,6 +73,7 @@ class SykepengevedtakBuilderTest {
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_HOVEDREGEL))
             .vedtakBegrunnelse(VedtakBegrunnelse(Utfall.INNVILGELSE, null))
             .tags(listOf("IngenNyArbeidsgiverperiode"))
+            .avviksvurdering(avviksvurdering())
             .build()
 
         assertTrue(utkast is Sykepengevedtak.Vedtak)
@@ -90,6 +99,7 @@ class SykepengevedtakBuilderTest {
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 vedtakBegrunnelse = VedtakBegrunnelse(Utfall.INNVILGELSE, null).toDto(),
+                avviksvurdering = avviksvurdering()
             ),
             utkast,
         )
@@ -128,6 +138,7 @@ class SykepengevedtakBuilderTest {
             )
             .tags(listOf("IngenNyArbeidsgiverperiode"))
             .vedtakBegrunnelse(VedtakBegrunnelse(Utfall.INNVILGELSE, null))
+            .avviksvurdering(avviksvurdering())
             .build()
 
         assertTrue(utkast is Sykepengevedtak.Vedtak)
@@ -160,6 +171,7 @@ class SykepengevedtakBuilderTest {
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 vedtakBegrunnelse = VedtakBegrunnelse(Utfall.INNVILGELSE, null).toDto(),
+                avviksvurdering = avviksvurdering()
             ),
             utkast,
         )
@@ -189,6 +201,7 @@ class SykepengevedtakBuilderTest {
                 VedtakBegrunnelse(Utfall.DELVIS_INNVILGELSE, "En individuell begrunnelse for avslag")
             )
             .tags(listOf("IngenNyArbeidsgiverperiode"))
+            .avviksvurdering(avviksvurdering())
             .build()
 
         assertTrue(utkast is Sykepengevedtak.Vedtak)
@@ -217,6 +230,7 @@ class SykepengevedtakBuilderTest {
                     UtfallDto.DELVIS_INNVILGELSE,
                     "En individuell begrunnelse for avslag"
                 ),
+                avviksvurdering = avviksvurdering()
             ),
             utkast,
         )
@@ -257,6 +271,7 @@ class SykepengevedtakBuilderTest {
                 VedtakBegrunnelse(Utfall.AVSLAG, "En individuell begrunnelse for avslag")
             )
             .tags(listOf("IngenNyArbeidsgiverperiode"))
+            .avviksvurdering(avviksvurdering())
             .build()
 
         assertTrue(utkast is Sykepengevedtak.Vedtak)
@@ -292,6 +307,7 @@ class SykepengevedtakBuilderTest {
                     UtfallDto.AVSLAG,
                     "En individuell begrunnelse for avslag"
                 ),
+                avviksvurdering = avviksvurdering(),
             ),
             utkast,
         )
@@ -319,6 +335,7 @@ class SykepengevedtakBuilderTest {
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(I_INFOTRYGD))
             .tags(listOf("IngenNyArbeidsgiverperiode"))
             .vedtakBegrunnelse(VedtakBegrunnelse(Utfall.INNVILGELSE, null))
+            .avviksvurdering(avviksvurdering())
             .build()
 
         assertTrue(utkast is Sykepengevedtak.Vedtak)
@@ -344,6 +361,7 @@ class SykepengevedtakBuilderTest {
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 vedtakBegrunnelse = VedtakBegrunnelseDto(UtfallDto.INNVILGELSE, null),
+                avviksvurdering = avviksvurdering(),
             ),
             utkast,
         )
@@ -484,6 +502,7 @@ class SykepengevedtakBuilderTest {
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_SKJØNN))
+            .avviksvurdering(avviksvurdering())
             .tags(listOf("IngenNyArbeidsgiverperiode"))
 
         assertThrows<IllegalStateException> { builder.build() }
@@ -518,6 +537,7 @@ class SykepengevedtakBuilderTest {
             )
             .tags(listOf("IngenNyArbeidsgiverperiode"))
             .vedtakBegrunnelse(VedtakBegrunnelse(Utfall.INNVILGELSE, null))
+            .avviksvurdering(avviksvurdering())
             .build()
 
         assertTrue(utkast is Sykepengevedtak.Vedtak)
@@ -543,8 +563,44 @@ class SykepengevedtakBuilderTest {
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 vedtakBegrunnelse = VedtakBegrunnelseDto(UtfallDto.INNVILGELSE, null),
+                avviksvurdering = avviksvurdering()
             ),
             utkast,
+        )
+    }
+
+    private fun avviksvurdering(): Avviksvurdering {
+        val from = YearMonth.from(skjæringstidspunkt.minusMonths(1))
+        val to = YearMonth.from(skjæringstidspunkt.minusMonths(13))
+        val yearMonthList = generateSequence(from) {
+            if (it > to) it.minusMonths(1) else null
+        }.toList()
+        return Avviksvurdering.gjenopprett(
+            AvviksvurderingDto(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                fødselsnummer,
+                skjæringstidspunkt,
+                LocalDateTime.now(),
+                avviksprosent,
+                SammenligningsgrunnlagDto(
+                    innrapportertÅrsinntekt,
+                    listOf(
+                        InnrapportertInntektDto(
+                            organisasjonsnummer,
+                            yearMonthList.map {
+                                InntektDto(it, innrapportertÅrsinntekt / 12)
+                            }
+                        )
+                    )
+                ),
+                BeregningsgrunnlagDto(
+                    totalbeløp = innrapportertÅrsinntekt,
+                    omregnedeÅrsinntekter = yearMonthList.subList(0, 3).map {
+                        OmregnetÅrsinntektDto(organisasjonsnummer, innrapportertÅrsinntekt/12)
+                    }
+                )
+            )
         )
     }
 
@@ -553,29 +609,25 @@ class SykepengevedtakBuilderTest {
             ETTER_SKJØNN ->
                 Spleis.EtterSkjønn(
                     omregnetÅrsinntekt = omregnetÅrsinntekt,
-                    innrapportertÅrsinntekt = innrapportertÅrsinntekt,
-                    avviksprosent = avviksprosent,
                     seksG = seksG2023,
                     skjønnsfastsatt = 650000.0,
                     tags = mutableSetOf(),
                     arbeidsgivere =
                     listOf(
-                        Arbeidsgiver.EtterSkjønn(organisasjonsnummer, 300000.0, 300000.0, 325000.0),
-                        Arbeidsgiver.EtterSkjønn("987654321", 300000.0, 300000.0, 325000.0),
+                        Arbeidsgiver.EtterSkjønn(organisasjonsnummer, 300000.0, 325000.0),
+                        Arbeidsgiver.EtterSkjønn("987654321", 300000.0, 325000.0),
                     ),
                 )
 
             ETTER_HOVEDREGEL ->
                 Spleis.EtterHovedregel(
                     omregnetÅrsinntekt = omregnetÅrsinntekt,
-                    innrapportertÅrsinntekt = innrapportertÅrsinntekt,
-                    avviksprosent = avviksprosent,
                     seksG = seksG2023,
                     tags = mutableSetOf(),
                     arbeidsgivere =
                     listOf(
-                        Arbeidsgiver.EtterHovedregel(organisasjonsnummer, 300000.0, 300000.0),
-                        Arbeidsgiver.EtterHovedregel("987654321", 300000.0, 300000.0),
+                        Arbeidsgiver.EtterHovedregel(organisasjonsnummer, 300000.0),
+                        Arbeidsgiver.EtterHovedregel("987654321", 300000.0),
                     ),
                 )
 
