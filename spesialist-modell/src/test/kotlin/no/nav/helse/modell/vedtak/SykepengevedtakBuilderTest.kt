@@ -365,9 +365,9 @@ class SykepengevedtakBuilderTest {
             .tags(listOf("IngenNyArbeidsgiverperiode"))
             .build()
 
-        assertTrue(utkast is Sykepengevedtak.AuuVedtak)
+        assertTrue(utkast is Sykepengevedtak.IkkeRealitetsbehandlet)
         assertEquals(
-            Sykepengevedtak.AuuVedtak(
+            Sykepengevedtak.IkkeRealitetsbehandlet(
                 fødselsnummer = fødselsnummer,
                 aktørId = aktørId,
                 vedtaksperiodeId = vedtaksperiodeId,
@@ -409,7 +409,7 @@ class SykepengevedtakBuilderTest {
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .tags(listOf("IngenNyArbeidsgiverperiode"))
 
-        assertTrue(builder.build() is Sykepengevedtak.AuuVedtak)
+        assertTrue(builder.build() is Sykepengevedtak.IkkeRealitetsbehandlet)
     }
 
     @Test
@@ -433,7 +433,7 @@ class SykepengevedtakBuilderTest {
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .tags(listOf("IngenNyArbeidsgiverperiode"))
 
-        assertTrue(builder.build() is Sykepengevedtak.AuuVedtak)
+        assertTrue(builder.build() is Sykepengevedtak.IkkeRealitetsbehandlet)
     }
 
     @Test
@@ -456,7 +456,7 @@ class SykepengevedtakBuilderTest {
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .tags(listOf("IngenNyArbeidsgiverperiode"))
 
-        assertTrue(builder.build() is Sykepengevedtak.AuuVedtak)
+        assertTrue(builder.build() is Sykepengevedtak.IkkeRealitetsbehandlet)
     }
 
     @Test

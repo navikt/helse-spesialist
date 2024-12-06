@@ -40,8 +40,8 @@ internal class VedtakFattetMelderTest {
 
     @Test
     fun auuVedtak() {
-        val auuVedtak =
-            Sykepengevedtak.AuuVedtak(
+        val ikkeRealitetsbehandlet =
+            Sykepengevedtak.IkkeRealitetsbehandlet(
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØRID,
                 vedtaksperiodeId = vedtaksperiodeId,
@@ -59,7 +59,7 @@ internal class VedtakFattetMelderTest {
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
             )
-        vedtakFattetMelder.vedtakFattet(auuVedtak)
+        vedtakFattetMelder.vedtakFattet(ikkeRealitetsbehandlet)
         vedtakFattetMelder.publiserUtgåendeMeldinger()
         val eventer = testRapid.inspektør.meldinger()
 

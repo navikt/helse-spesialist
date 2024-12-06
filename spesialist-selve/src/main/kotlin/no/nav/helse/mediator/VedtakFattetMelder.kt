@@ -25,7 +25,7 @@ internal class VedtakFattetMelder(
         val sykepengevedtak = sykepengevedtak.single()
         val json =
             when (sykepengevedtak) {
-                is Sykepengevedtak.AuuVedtak -> auuVedtakJson(sykepengevedtak)
+                is Sykepengevedtak.IkkeRealitetsbehandlet -> auuVedtakJson(sykepengevedtak)
                 is Sykepengevedtak.Vedtak -> vedtakJson(sykepengevedtak)
                 is Sykepengevedtak.VedtakMedOpphavIInfotrygd -> vedtakMedOpphavIInfotrygdJson(sykepengevedtak)
             }
@@ -239,7 +239,7 @@ internal class VedtakFattetMelder(
         return message.toJson()
     }
 
-    private fun auuVedtakJson(sykepengevedtak: Sykepengevedtak.AuuVedtak): String {
+    private fun auuVedtakJson(sykepengevedtak: Sykepengevedtak.IkkeRealitetsbehandlet): String {
         val message =
             JsonMessage.newMessage(
                 "vedtak_fattet",

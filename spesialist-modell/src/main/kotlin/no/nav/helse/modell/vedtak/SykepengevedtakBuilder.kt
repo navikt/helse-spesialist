@@ -117,11 +117,11 @@ class SykepengevedtakBuilder {
 
     fun build(): Sykepengevedtak {
         if (utbetalingId != null && sykepengegrunnlagsfakta != null) return buildVedtak()
-        return buildAuuVedtak()
+        return buildIkkeRealitetsbehandlet()
     }
 
-    private fun buildAuuVedtak(): Sykepengevedtak.AuuVedtak {
-        return Sykepengevedtak.AuuVedtak(
+    private fun buildIkkeRealitetsbehandlet(): Sykepengevedtak.IkkeRealitetsbehandlet {
+        return Sykepengevedtak.IkkeRealitetsbehandlet(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             vedtaksperiodeId = vedtaksperiodeId,

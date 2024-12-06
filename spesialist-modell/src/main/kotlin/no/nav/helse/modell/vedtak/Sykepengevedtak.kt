@@ -22,7 +22,7 @@ sealed interface Sykepengevedtak {
     val vedtakFattetTidspunkt: LocalDateTime
     val tags: Set<String>
 
-    data class AuuVedtak(
+    data class IkkeRealitetsbehandlet(
         override val fødselsnummer: String,
         override val aktørId: String,
         override val vedtaksperiodeId: UUID,
