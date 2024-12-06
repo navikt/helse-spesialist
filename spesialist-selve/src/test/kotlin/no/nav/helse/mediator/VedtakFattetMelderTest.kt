@@ -3,17 +3,17 @@ package no.nav.helse.mediator
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.januar
-import no.nav.helse.modell.vedtak.SkjønnsfastsettingopplysningerDto
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingstype
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingsårsak
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtak.Sykepengevedtak
+import no.nav.helse.modell.vedtak.Sykepengevedtak.VedtakMedSkjønnsvurdering
 import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto
 import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto.UtfallDto
 import no.nav.helse.objectMapper
-import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -186,7 +186,6 @@ internal class VedtakFattetMelderTest {
                                 ),
                             ),
                     ),
-                skjønnsfastsettingopplysninger = null,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 vedtakBegrunnelse = null,
@@ -274,7 +273,6 @@ internal class VedtakFattetMelderTest {
                                 ),
                             ),
                     ),
-                skjønnsfastsettingopplysninger = null,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 vedtakBegrunnelse = VedtakBegrunnelseDto(
@@ -340,7 +338,7 @@ internal class VedtakFattetMelderTest {
     @Test
     fun `vanlig vedtak sykepengegrunnlag fastsatt etter skjønn`() {
         val infotrygd =
-            Sykepengevedtak.Vedtak(
+            VedtakMedSkjønnsvurdering(
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØRID,
                 organisasjonsnummer = ORGANISASJONSNUMMER,
@@ -375,13 +373,13 @@ internal class VedtakFattetMelderTest {
                         skjønnsfastsatt = 13000.0,
                     ),
                 skjønnsfastsettingopplysninger =
-                SkjønnsfastsettingopplysningerDto(
-                    "Mal",
-                    "Fritekst",
-                    "Konklusjon",
-                    Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
-                    Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
-                ),
+                    VedtakMedSkjønnsvurdering.SkjønnsfastsettingopplysningerDto(
+                        "Mal",
+                        "Fritekst",
+                        "Konklusjon",
+                        Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
+                        Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
+                    ),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 vedtakBegrunnelse = null,
@@ -462,7 +460,7 @@ internal class VedtakFattetMelderTest {
     @Test
     fun `vanlig vedtak sykepengegrunnlag fastsatt etter skjønn med avslag`() {
         val infotrygd =
-            Sykepengevedtak.Vedtak(
+            VedtakMedSkjønnsvurdering(
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØRID,
                 organisasjonsnummer = ORGANISASJONSNUMMER,
@@ -497,7 +495,7 @@ internal class VedtakFattetMelderTest {
                         skjønnsfastsatt = 13000.0,
                     ),
                 skjønnsfastsettingopplysninger =
-                    SkjønnsfastsettingopplysningerDto(
+                    VedtakMedSkjønnsvurdering.SkjønnsfastsettingopplysningerDto(
                         "Mal",
                         "Fritekst",
                         "Konklusjon",

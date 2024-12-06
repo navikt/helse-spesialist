@@ -3,6 +3,7 @@ package no.nav.helse.modell.vedtak
 import no.nav.helse.modell.januar
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Infotrygd
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis
+import no.nav.helse.modell.vedtak.Sykepengevedtak.VedtakMedSkjønnsvurdering
 import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto.UtfallDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -82,7 +83,6 @@ class SykepengevedtakBuilderTest {
                 begrensning = begrensning,
                 inntekt = inntekt,
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta<Spleis.EtterHovedregel>(),
-                skjønnsfastsettingopplysninger = null,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 vedtakBegrunnelse = VedtakBegrunnelse(Utfall.INNVILGELSE, null).toDto(),
@@ -126,9 +126,9 @@ class SykepengevedtakBuilderTest {
             .vedtakBegrunnelse(VedtakBegrunnelse(Utfall.INNVILGELSE, null))
             .build()
 
-        assertTrue(utkast is Sykepengevedtak.Vedtak)
+        assertTrue(utkast is VedtakMedSkjønnsvurdering)
         assertEquals(
-            Sykepengevedtak.Vedtak(
+            VedtakMedSkjønnsvurdering(
                 fødselsnummer = fødselsnummer,
                 aktørId = aktørId,
                 organisasjonsnummer = organisasjonsnummer,
@@ -146,13 +146,13 @@ class SykepengevedtakBuilderTest {
                 inntekt = inntekt,
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta<Spleis.EtterSkjønn>(),
                 skjønnsfastsettingopplysninger =
-                SkjønnsfastsettingopplysningerDto(
-                    "Mal",
-                    "Fritekst",
-                    "Konklusjon",
-                    Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
-                    Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
-                ),
+                    VedtakMedSkjønnsvurdering.SkjønnsfastsettingopplysningerDto(
+                        "Mal",
+                        "Fritekst",
+                        "Konklusjon",
+                        Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
+                        Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
+                    ),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 vedtakBegrunnelse = VedtakBegrunnelse(Utfall.INNVILGELSE, null).toDto(),
@@ -206,7 +206,6 @@ class SykepengevedtakBuilderTest {
                 begrensning = begrensning,
                 inntekt = inntekt,
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta<Spleis.EtterHovedregel>(),
-                skjønnsfastsettingopplysninger = null,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 vedtakBegrunnelse = VedtakBegrunnelseDto(
@@ -255,9 +254,9 @@ class SykepengevedtakBuilderTest {
             .tags(listOf("IngenNyArbeidsgiverperiode"))
             .build()
 
-        assertTrue(utkast is Sykepengevedtak.Vedtak)
+        assertTrue(utkast is VedtakMedSkjønnsvurdering)
         assertEquals(
-            Sykepengevedtak.Vedtak(
+            VedtakMedSkjønnsvurdering(
                 fødselsnummer = fødselsnummer,
                 aktørId = aktørId,
                 organisasjonsnummer = organisasjonsnummer,
@@ -274,8 +273,7 @@ class SykepengevedtakBuilderTest {
                 begrensning = begrensning,
                 inntekt = inntekt,
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta<Spleis.EtterSkjønn>(),
-                skjønnsfastsettingopplysninger =
-                SkjønnsfastsettingopplysningerDto(
+                skjønnsfastsettingopplysninger = VedtakMedSkjønnsvurdering.SkjønnsfastsettingopplysningerDto(
                     "Mal",
                     "Fritekst",
                     "Konklusjon",
@@ -533,7 +531,6 @@ class SykepengevedtakBuilderTest {
                 begrensning = begrensning,
                 inntekt = inntekt,
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta<Spleis.EtterHovedregel>(),
-                skjønnsfastsettingopplysninger = null,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 vedtakBegrunnelse = VedtakBegrunnelseDto(UtfallDto.INNVILGELSE, null),

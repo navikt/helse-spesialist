@@ -1,5 +1,6 @@
 package no.nav.helse.modell.vedtak
 
+import no.nav.helse.modell.vedtak.Sykepengevedtak.VedtakMedSkjønnsvurdering
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -24,7 +25,7 @@ class SykepengevedtakBuilder {
     private var utbetalingId: UUID? = null
     private var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta? = null
     private var skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlag? = null
-    private var skjønnsfastsettingopplysninger: SkjønnsfastsettingopplysningerDto? = null
+    private var skjønnsfastsettingopplysninger: VedtakMedSkjønnsvurdering.SkjønnsfastsettingopplysningerDto? = null
     private var vedtakBegrunnelse: VedtakBegrunnelseDto? = null
     private val tags: MutableSet<String> = mutableSetOf()
     private val tagsForSykepengegrunnlagsfakta: MutableSet<String> = mutableSetOf()
@@ -101,7 +102,7 @@ class SykepengevedtakBuilder {
         årsak: Skjønnsfastsettingsårsak,
     ) = apply {
         this.skjønnsfastsettingopplysninger =
-            SkjønnsfastsettingopplysningerDto(
+            VedtakMedSkjønnsvurdering.SkjønnsfastsettingopplysningerDto(
                 begrunnelseFraMal,
                 begrunnelseFraFritekst,
                 begrunnelseFraKonklusjon,
@@ -154,13 +155,14 @@ class SykepengevedtakBuilder {
 
     private fun buildVedtakEtterSkjønn(
         utbetalingId: UUID,
-        sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta.Spleis,
-    ): Sykepengevedtak.Vedtak {
-        checkNotNull(skjønnsfastsettingopplysninger) {
-            "Forventer å finne opplysninger fra saksbehandler ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn"
-        }
+        sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta.Spleis.EtterSkjønn,
+    ): VedtakMedSkjønnsvurdering {
+        val skjønnsfastsettingopplysninger =
+            checkNotNull(skjønnsfastsettingopplysninger) {
+                "Forventer å finne opplysninger fra saksbehandler ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn"
+            }
 
-        return Sykepengevedtak.Vedtak(
+        return VedtakMedSkjønnsvurdering(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             organisasjonsnummer = organisasjonsnummer,
@@ -186,7 +188,7 @@ class SykepengevedtakBuilder {
 
     private fun buildVedtak(
         utbetalingId: UUID,
-        sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta.Spleis,
+        sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta.Spleis.EtterHovedregel,
     ): Sykepengevedtak.Vedtak {
         return Sykepengevedtak.Vedtak(
             fødselsnummer = fødselsnummer,
@@ -205,7 +207,6 @@ class SykepengevedtakBuilder {
             begrensning = begrensning,
             inntekt = inntekt,
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
-            skjønnsfastsettingopplysninger = null,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
             tags = tags,
             vedtakBegrunnelse = vedtakBegrunnelse,

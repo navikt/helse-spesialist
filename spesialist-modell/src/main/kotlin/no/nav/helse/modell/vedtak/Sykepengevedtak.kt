@@ -57,12 +57,42 @@ sealed interface Sykepengevedtak {
         override val grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>,
         override val begrensning: String,
         override val inntekt: Double,
-        val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta.Spleis,
-        val skjønnsfastsettingopplysninger: SkjønnsfastsettingopplysningerDto?,
+        val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta.Spleis.EtterHovedregel,
         override val vedtakFattetTidspunkt: LocalDateTime,
         override val tags: Set<String>,
         val vedtakBegrunnelse: VedtakBegrunnelseDto?,
     ) : Sykepengevedtak
+
+    data class VedtakMedSkjønnsvurdering(
+        override val fødselsnummer: String,
+        override val aktørId: String,
+        override val organisasjonsnummer: String,
+        override val vedtaksperiodeId: UUID,
+        override val spleisBehandlingId: UUID,
+        val utbetalingId: UUID,
+        override val fom: LocalDate,
+        override val tom: LocalDate,
+        override val skjæringstidspunkt: LocalDate,
+        override val hendelser: List<UUID>,
+        override val sykepengegrunnlag: Double,
+        override val grunnlagForSykepengegrunnlag: Double,
+        override val grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>,
+        override val begrensning: String,
+        override val inntekt: Double,
+        val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta.Spleis.EtterSkjønn,
+        val skjønnsfastsettingopplysninger: SkjønnsfastsettingopplysningerDto,
+        override val vedtakFattetTidspunkt: LocalDateTime,
+        override val tags: Set<String>,
+        val vedtakBegrunnelse: VedtakBegrunnelseDto?,
+    ) : Sykepengevedtak {
+        data class SkjønnsfastsettingopplysningerDto(
+            val begrunnelseFraMal: String,
+            val begrunnelseFraFritekst: String,
+            val begrunnelseFraKonklusjon: String,
+            val skjønnsfastsettingtype: Skjønnsfastsettingstype,
+            val skjønnsfastsettingsårsak: Skjønnsfastsettingsårsak,
+        )
+    }
 
     data class VedtakMedOpphavIInfotrygd(
         override val fødselsnummer: String,
@@ -86,14 +116,6 @@ sealed interface Sykepengevedtak {
         val vedtakBegrunnelse: VedtakBegrunnelseDto?,
     ) : Sykepengevedtak
 }
-
-data class SkjønnsfastsettingopplysningerDto(
-    val begrunnelseFraMal: String,
-    val begrunnelseFraFritekst: String,
-    val begrunnelseFraKonklusjon: String,
-    val skjønnsfastsettingtype: Skjønnsfastsettingstype,
-    val skjønnsfastsettingsårsak: Skjønnsfastsettingsårsak,
-)
 
 data class VedtakBegrunnelseDto(
     val utfall: UtfallDto,

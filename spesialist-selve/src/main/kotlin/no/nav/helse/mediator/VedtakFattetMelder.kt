@@ -4,7 +4,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.person.PersonObserver
-import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis
 import no.nav.helse.modell.vedtak.Sykepengevedtak
 import no.nav.helse.modell.vedtak.VedtakBegrunnelseDto
 import org.slf4j.LoggerFactory
@@ -28,6 +27,7 @@ internal class VedtakFattetMelder(
                 is Sykepengevedtak.IkkeRealitetsbehandlet -> auuVedtakJson(sykepengevedtak)
                 is Sykepengevedtak.Vedtak -> vedtakJson(sykepengevedtak)
                 is Sykepengevedtak.VedtakMedOpphavIInfotrygd -> vedtakMedOpphavIInfotrygdJson(sykepengevedtak)
+                is Sykepengevedtak.VedtakMedSkjønnsvurdering -> vedtakMedSkjønnsvurderingJson(sykepengevedtak)
             }
         logg.info("Publiserer vedtak_fattet for {}", kv("vedtaksperiodeId", sykepengevedtak.vedtaksperiodeId))
         sikkerLogg.info(
@@ -45,7 +45,9 @@ internal class VedtakFattetMelder(
     }
 
     private fun vedtakJson(sykepengevedtak: Sykepengevedtak.Vedtak): String {
-        val begrunnelser: MutableList<Map<String, Any>> = mutableListOf()
+        val begrunnelser: List<Map<String, Any>> =
+            emptyList<Map<String, Any>>()
+                .supplerMedIndividuellBegrunnelse(sykepengevedtak.vedtakBegrunnelse, sykepengevedtak)
         val sykepengegrunnlagsfakta = sykepengevedtak.sykepengegrunnlagsfakta
         val message =
             JsonMessage.newMessage(
@@ -81,108 +83,76 @@ internal class VedtakFattetMelder(
                                         "arbeidsgiver" to it.organisasjonsnummer,
                                         "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
                                         "innrapportertÅrsinntekt" to it.innrapportertÅrsinntekt,
-                                    ).apply {
-                                        if (it is Spleis.Arbeidsgiver.EtterSkjønn) {
-                                            put(
-                                                "skjønnsfastsatt",
-                                                it.skjønnsfastsatt,
-                                            )
-                                        }
-                                    }
+                                    )
                                 },
-                        ).apply {
-                            when (sykepengegrunnlagsfakta) {
-                                is Spleis.EtterHovedregel -> put("fastsatt", "EtterHovedregel")
-                                is Spleis.EtterSkjønn -> {
-                                    put("fastsatt", "EtterSkjønn")
-                                    put(
-                                        "skjønnsfastsettingtype",
-                                        checkNotNull(sykepengevedtak.skjønnsfastsettingopplysninger?.skjønnsfastsettingtype),
-                                    )
-                                    put(
-                                        "skjønnsfastsettingårsak",
-                                        checkNotNull(sykepengevedtak.skjønnsfastsettingopplysninger?.skjønnsfastsettingsårsak),
-                                    )
-                                    put(
-                                        "skjønnsfastsatt",
-                                        (sykepengevedtak.sykepengegrunnlagsfakta as Spleis.EtterSkjønn).skjønnsfastsatt,
-                                    )
-                                }
-                            }
-                        },
-                ).apply {
-                    if (sykepengevedtak.sykepengegrunnlagsfakta is Spleis.EtterSkjønn) {
-                        val skjønnsfastsettingopplysninger = sykepengevedtak.skjønnsfastsettingopplysninger!!
-                        begrunnelser.addAll(
-                            listOf(
-                                mapOf(
-                                    "type" to "SkjønnsfastsattSykepengegrunnlagMal",
-                                    "begrunnelse" to skjønnsfastsettingopplysninger.begrunnelseFraMal,
-                                    "perioder" to
-                                        listOf(
-                                            mapOf(
-                                                "fom" to "${sykepengevedtak.fom}",
-                                                "tom" to "${sykepengevedtak.tom}",
-                                            ),
-                                        ),
-                                ),
-                                mapOf(
-                                    "type" to "SkjønnsfastsattSykepengegrunnlagFritekst",
-                                    "begrunnelse" to skjønnsfastsettingopplysninger.begrunnelseFraFritekst,
-                                    "perioder" to
-                                        listOf(
-                                            mapOf(
-                                                "fom" to "${sykepengevedtak.fom}",
-                                                "tom" to "${sykepengevedtak.tom}",
-                                            ),
-                                        ),
-                                ),
-                                mapOf(
-                                    "type" to "SkjønnsfastsattSykepengegrunnlagKonklusjon",
-                                    "begrunnelse" to skjønnsfastsettingopplysninger.begrunnelseFraKonklusjon,
-                                    "perioder" to
-                                        listOf(
-                                            mapOf(
-                                                "fom" to "${sykepengevedtak.fom}",
-                                                "tom" to "${sykepengevedtak.tom}",
-                                            ),
-                                        ),
-                                ),
-                            ),
-                        )
-                    }
+                            "fastsatt" to "EtterHovedregel",
+                        ),
+                    "begrunnelser" to begrunnelser,
+                ),
+            )
 
-                    val vedtakBegrunnelse = sykepengevedtak.vedtakBegrunnelse
-                    if (vedtakBegrunnelse != null) {
-                        begrunnelser.addLast(
-                            mapOf(
-                                "type" to
-                                    when (vedtakBegrunnelse.utfall) {
-                                        VedtakBegrunnelseDto.UtfallDto.AVSLAG -> "Avslag"
-                                        VedtakBegrunnelseDto.UtfallDto.DELVIS_INNVILGELSE -> "DelvisInnvilgelse"
-                                        VedtakBegrunnelseDto.UtfallDto.INNVILGELSE -> "Innvilgelse"
-                                    },
-                                "begrunnelse" to (vedtakBegrunnelse.begrunnelse ?: ""),
-                                "perioder" to
-                                    listOf(
-                                        mapOf(
-                                            "fom" to "${sykepengevedtak.fom}",
-                                            "tom" to "${sykepengevedtak.tom}",
-                                        ),
-                                    ),
-                            ),
-                        )
-                    }
+        return message.toJson()
+    }
 
-                    put("begrunnelser", begrunnelser)
-                },
+    private fun vedtakMedSkjønnsvurderingJson(sykepengevedtak: Sykepengevedtak.VedtakMedSkjønnsvurdering): String {
+        val begrunnelser: List<Map<String, Any>> =
+            emptyList<Map<String, Any>>()
+                .supplerMedSkjønnsfastsettingsbegrunnelse(sykepengevedtak.skjønnsfastsettingopplysninger, sykepengevedtak)
+                .supplerMedIndividuellBegrunnelse(sykepengevedtak.vedtakBegrunnelse, sykepengevedtak)
+        val sykepengegrunnlagsfakta = sykepengevedtak.sykepengegrunnlagsfakta
+        val message =
+            JsonMessage.newMessage(
+                "vedtak_fattet",
+                mutableMapOf(
+                    "fødselsnummer" to sykepengevedtak.fødselsnummer,
+                    "aktørId" to sykepengevedtak.aktørId,
+                    "vedtaksperiodeId" to "${sykepengevedtak.vedtaksperiodeId}",
+                    "behandlingId" to "${sykepengevedtak.spleisBehandlingId}",
+                    "organisasjonsnummer" to sykepengevedtak.organisasjonsnummer,
+                    "fom" to "${sykepengevedtak.fom}",
+                    "tom" to "${sykepengevedtak.tom}",
+                    "skjæringstidspunkt" to "${sykepengevedtak.skjæringstidspunkt}",
+                    "hendelser" to sykepengevedtak.hendelser,
+                    "sykepengegrunnlag" to sykepengevedtak.sykepengegrunnlag,
+                    "grunnlagForSykepengegrunnlag" to sykepengevedtak.grunnlagForSykepengegrunnlag,
+                    "grunnlagForSykepengegrunnlagPerArbeidsgiver" to sykepengevedtak.grunnlagForSykepengegrunnlagPerArbeidsgiver,
+                    "begrensning" to sykepengevedtak.begrensning,
+                    "inntekt" to sykepengevedtak.inntekt,
+                    "vedtakFattetTidspunkt" to "${sykepengevedtak.vedtakFattetTidspunkt}",
+                    "utbetalingId" to "${sykepengevedtak.utbetalingId}",
+                    "tags" to sykepengevedtak.tags,
+                    "sykepengegrunnlagsfakta" to
+                        mutableMapOf(
+                            "omregnetÅrsinntekt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
+                            "innrapportertÅrsinntekt" to sykepengegrunnlagsfakta.innrapportertÅrsinntekt,
+                            "avviksprosent" to sykepengegrunnlagsfakta.avviksprosent,
+                            "6G" to sykepengegrunnlagsfakta.seksG,
+                            "tags" to sykepengegrunnlagsfakta.tags,
+                            "arbeidsgivere" to
+                                sykepengegrunnlagsfakta.arbeidsgivere.map {
+                                    mutableMapOf(
+                                        "arbeidsgiver" to it.organisasjonsnummer,
+                                        "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
+                                        "innrapportertÅrsinntekt" to it.innrapportertÅrsinntekt,
+                                        "skjønnsfastsatt" to it.skjønnsfastsatt,
+                                    )
+                                },
+                            "fastsatt" to "EtterSkjønn",
+                            "skjønnsfastsettingtype" to sykepengevedtak.skjønnsfastsettingopplysninger.skjønnsfastsettingtype,
+                            "skjønnsfastsettingårsak" to sykepengevedtak.skjønnsfastsettingopplysninger.skjønnsfastsettingsårsak,
+                            "skjønnsfastsatt" to sykepengevedtak.sykepengegrunnlagsfakta.skjønnsfastsatt,
+                        ),
+                    "begrunnelser" to begrunnelser,
+                ),
             )
 
         return message.toJson()
     }
 
     private fun vedtakMedOpphavIInfotrygdJson(sykepengevedtak: Sykepengevedtak.VedtakMedOpphavIInfotrygd): String {
-        val begrunnelser: MutableList<Map<String, Any>> = mutableListOf()
+        val begrunnelser: List<Map<String, Any>> =
+            emptyList<Map<String, Any>>()
+                .supplerMedIndividuellBegrunnelse(sykepengevedtak.vedtakBegrunnelse, sykepengevedtak)
         val message =
             JsonMessage.newMessage(
                 "vedtak_fattet",
@@ -209,31 +179,8 @@ internal class VedtakFattetMelder(
                             "fastsatt" to "IInfotrygd",
                             "omregnetÅrsinntekt" to sykepengevedtak.sykepengegrunnlagsfakta.omregnetÅrsinntekt,
                         ),
-                ).apply {
-                    val vedtakBegrunnelse = sykepengevedtak.vedtakBegrunnelse
-                    if (vedtakBegrunnelse != null) {
-                        begrunnelser.addLast(
-                            mapOf(
-                                "type" to
-                                    when (vedtakBegrunnelse.utfall) {
-                                        VedtakBegrunnelseDto.UtfallDto.AVSLAG -> "Avslag"
-                                        VedtakBegrunnelseDto.UtfallDto.DELVIS_INNVILGELSE -> "DelvisInnvilgelse"
-                                        VedtakBegrunnelseDto.UtfallDto.INNVILGELSE -> "Innvilgelse"
-                                    },
-                                "begrunnelse" to (vedtakBegrunnelse.begrunnelse ?: ""),
-                                "perioder" to
-                                    listOf(
-                                        mapOf(
-                                            "fom" to "${sykepengevedtak.fom}",
-                                            "tom" to "${sykepengevedtak.tom}",
-                                        ),
-                                    ),
-                            ),
-                        )
-                    }
-
-                    put("begrunnelser", begrunnelser)
-                },
+                    "begrunnelser" to begrunnelser,
+                ),
             )
 
         return message.toJson()
@@ -264,5 +211,71 @@ internal class VedtakFattetMelder(
                 ),
             )
         return message.toJson()
+    }
+
+    private fun List<Map<String, Any>>.supplerMedIndividuellBegrunnelse(
+        vedtakBegrunnelse: VedtakBegrunnelseDto?,
+        sykepengevedtak: Sykepengevedtak,
+    ): List<Map<String, Any>> {
+        if (vedtakBegrunnelse == null) return this
+        return this +
+            mapOf(
+                "type" to
+                    when (vedtakBegrunnelse.utfall) {
+                        VedtakBegrunnelseDto.UtfallDto.AVSLAG -> "Avslag"
+                        VedtakBegrunnelseDto.UtfallDto.DELVIS_INNVILGELSE -> "DelvisInnvilgelse"
+                        VedtakBegrunnelseDto.UtfallDto.INNVILGELSE -> "Innvilgelse"
+                    },
+                "begrunnelse" to (vedtakBegrunnelse.begrunnelse ?: ""),
+                "perioder" to
+                    listOf(
+                        mapOf(
+                            "fom" to "${sykepengevedtak.fom}",
+                            "tom" to "${sykepengevedtak.tom}",
+                        ),
+                    ),
+            )
+    }
+
+    private fun List<Map<String, Any>>.supplerMedSkjønnsfastsettingsbegrunnelse(
+        skjønnsfastsettingopplysninger: Sykepengevedtak.VedtakMedSkjønnsvurdering.SkjønnsfastsettingopplysningerDto,
+        sykepengevedtak: Sykepengevedtak,
+    ): List<Map<String, Any>> {
+        return this +
+            listOf(
+                mapOf(
+                    "type" to "SkjønnsfastsattSykepengegrunnlagMal",
+                    "begrunnelse" to skjønnsfastsettingopplysninger.begrunnelseFraMal,
+                    "perioder" to
+                        listOf(
+                            mapOf(
+                                "fom" to "${sykepengevedtak.fom}",
+                                "tom" to "${sykepengevedtak.tom}",
+                            ),
+                        ),
+                ),
+                mapOf(
+                    "type" to "SkjønnsfastsattSykepengegrunnlagFritekst",
+                    "begrunnelse" to skjønnsfastsettingopplysninger.begrunnelseFraFritekst,
+                    "perioder" to
+                        listOf(
+                            mapOf(
+                                "fom" to "${sykepengevedtak.fom}",
+                                "tom" to "${sykepengevedtak.tom}",
+                            ),
+                        ),
+                ),
+                mapOf(
+                    "type" to "SkjønnsfastsattSykepengegrunnlagKonklusjon",
+                    "begrunnelse" to skjønnsfastsettingopplysninger.begrunnelseFraKonklusjon,
+                    "perioder" to
+                        listOf(
+                            mapOf(
+                                "fom" to "${sykepengevedtak.fom}",
+                                "tom" to "${sykepengevedtak.tom}",
+                            ),
+                        ),
+                ),
+            )
     }
 }
