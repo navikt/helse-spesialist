@@ -154,11 +154,12 @@ class Oppgave private constructor(
         skalVæreTildeltSaksbehandler: Boolean,
         saksbehandler: Saksbehandler,
     ) {
-        if (this.tildeltTil != saksbehandler && skalVæreTildeltSaksbehandler) {
+        if (tildeltTil == saksbehandler) {
+            if (!skalVæreTildeltSaksbehandler) {
+                avmeld(saksbehandler)
+            }
+        } else if (skalVæreTildeltSaksbehandler) {
             tildel(saksbehandler)
-        }
-        if (this.tildeltTil != null && !skalVæreTildeltSaksbehandler) {
-            avmeld(saksbehandler)
         }
     }
 
