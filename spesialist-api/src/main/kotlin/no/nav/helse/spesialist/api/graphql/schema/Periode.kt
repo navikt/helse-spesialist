@@ -231,6 +231,18 @@ data class OppdaterPaVentFrist(
     val kommentarer: List<Kommentar>,
 ) : Historikkinnslag
 
+data class EndrePaVent(
+    override val id: Int,
+    override val type: PeriodehistorikkType,
+    override val timestamp: LocalDateTime,
+    override val saksbehandlerIdent: String?,
+    override val dialogRef: Int?,
+    val arsaker: List<String>,
+    val frist: LocalDate?,
+    val notattekst: String?,
+    val kommentarer: List<Kommentar>,
+) : Historikkinnslag
+
 data class FjernetFraPaVent(
     override val id: Int,
     override val type: PeriodehistorikkType,
@@ -545,76 +557,22 @@ data class BeregnetPeriode(
     fun historikkinnslag(): List<Historikkinnslag> =
         periodehistorikkApiDao
             .finn(utbetaling().id)
-            .map {
+            .flatMap {
                 when (it.type) {
                     PeriodehistorikkType.LEGG_PA_VENT -> {
                         val (påVentÅrsaker, frist, notattekst) = mapLagtPåVentJson(json = it.json)
-                        LagtPaVent(
-                            id = it.id,
-                            type = it.type,
-                            timestamp = it.timestamp,
-                            saksbehandlerIdent = it.saksbehandlerIdent,
-                            dialogRef = it.dialogRef,
-                            arsaker = påVentÅrsaker,
-                            frist = frist,
-                            notattekst = notattekst,
-                            kommentarer =
-                                notatDao.finnKommentarer(it.dialogRef!!.toLong()).map { kommentar ->
-                                    Kommentar(
-                                        id = kommentar.id,
-                                        tekst = kommentar.tekst,
-                                        opprettet = kommentar.opprettet,
-                                        saksbehandlerident = kommentar.saksbehandlerident,
-                                        feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
-                                    )
-                                },
-                        )
-                    }
-                    PeriodehistorikkType.ENDRE_PA_VENT -> {
-                        val (påVentÅrsaker, frist, notattekst) = mapLagtPåVentJson(json = it.json)
-                        OppdaterPaVentFrist(
-                            id = it.id,
-                            type = it.type,
-                            timestamp = it.timestamp,
-                            saksbehandlerIdent = it.saksbehandlerIdent,
-                            dialogRef = it.dialogRef,
-                            arsaker = påVentÅrsaker,
-                            frist = frist,
-                            notattekst = notattekst,
-                            kommentarer =
-                                notatDao.finnKommentarer(it.dialogRef!!.toLong()).map { kommentar ->
-                                    Kommentar(
-                                        id = kommentar.id,
-                                        tekst = kommentar.tekst,
-                                        opprettet = kommentar.opprettet,
-                                        saksbehandlerident = kommentar.saksbehandlerident,
-                                        feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
-                                    )
-                                },
-                        )
-                    }
-
-                    PeriodehistorikkType.FJERN_FRA_PA_VENT ->
-                        FjernetFraPaVent(
-                            id = it.id,
-                            type = it.type,
-                            timestamp = it.timestamp,
-                            saksbehandlerIdent = it.saksbehandlerIdent,
-                            dialogRef = it.dialogRef,
-                        )
-
-                    PeriodehistorikkType.TOTRINNSVURDERING_RETUR -> {
-                        val notattekst = mapTotrinnsvurderingReturJson(json = it.json)
-                        TotrinnsvurderingRetur(
-                            id = it.id,
-                            type = it.type,
-                            saksbehandlerIdent = it.saksbehandlerIdent,
-                            timestamp = it.timestamp,
-                            dialogRef = it.dialogRef,
-                            notattekst = notattekst,
-                            kommentarer =
-                                it.dialogRef?.let { dialogRef ->
-                                    notatDao.finnKommentarer(dialogRef.toLong()).map { kommentar ->
+                        listOf(
+                            LagtPaVent(
+                                id = it.id,
+                                type = it.type,
+                                timestamp = it.timestamp,
+                                saksbehandlerIdent = it.saksbehandlerIdent,
+                                dialogRef = it.dialogRef,
+                                arsaker = påVentÅrsaker,
+                                frist = frist,
+                                notattekst = notattekst,
+                                kommentarer =
+                                    notatDao.finnKommentarer(it.dialogRef!!.toLong()).map { kommentar ->
                                         Kommentar(
                                             id = kommentar.id,
                                             tekst = kommentar.tekst,
@@ -622,18 +580,102 @@ data class BeregnetPeriode(
                                             saksbehandlerident = kommentar.saksbehandlerident,
                                             feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
                                         )
-                                    }
-                                } ?: emptyList(),
+                                    },
+                            ),
+                        )
+                    }
+                    PeriodehistorikkType.ENDRE_PA_VENT -> {
+                        val (påVentÅrsaker, frist, notattekst) = mapLagtPåVentJson(json = it.json)
+                        listOf(
+                            OppdaterPaVentFrist(
+                                id = it.id,
+                                type = it.type,
+                                timestamp = it.timestamp,
+                                saksbehandlerIdent = it.saksbehandlerIdent,
+                                dialogRef = it.dialogRef,
+                                arsaker = påVentÅrsaker,
+                                frist = frist,
+                                notattekst = notattekst,
+                                kommentarer =
+                                    notatDao.finnKommentarer(it.dialogRef!!.toLong()).map { kommentar ->
+                                        Kommentar(
+                                            id = kommentar.id,
+                                            tekst = kommentar.tekst,
+                                            opprettet = kommentar.opprettet,
+                                            saksbehandlerident = kommentar.saksbehandlerident,
+                                            feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+                                        )
+                                    },
+                            ),
+                            EndrePaVent(
+                                id = it.id,
+                                type = it.type,
+                                timestamp = it.timestamp,
+                                saksbehandlerIdent = it.saksbehandlerIdent,
+                                dialogRef = it.dialogRef,
+                                arsaker = påVentÅrsaker,
+                                frist = frist,
+                                notattekst = notattekst,
+                                kommentarer =
+                                    notatDao.finnKommentarer(it.dialogRef!!.toLong()).map { kommentar ->
+                                        Kommentar(
+                                            id = kommentar.id,
+                                            tekst = kommentar.tekst,
+                                            opprettet = kommentar.opprettet,
+                                            saksbehandlerident = kommentar.saksbehandlerident,
+                                            feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+                                        )
+                                    },
+                            ),
+                        )
+                    }
+
+                    PeriodehistorikkType.FJERN_FRA_PA_VENT ->
+                        listOf(
+                            FjernetFraPaVent(
+                                id = it.id,
+                                type = it.type,
+                                timestamp = it.timestamp,
+                                saksbehandlerIdent = it.saksbehandlerIdent,
+                                dialogRef = it.dialogRef,
+                            ),
+                        )
+
+                    PeriodehistorikkType.TOTRINNSVURDERING_RETUR -> {
+                        val notattekst = mapTotrinnsvurderingReturJson(json = it.json)
+                        listOf(
+                            TotrinnsvurderingRetur(
+                                id = it.id,
+                                type = it.type,
+                                saksbehandlerIdent = it.saksbehandlerIdent,
+                                timestamp = it.timestamp,
+                                dialogRef = it.dialogRef,
+                                notattekst = notattekst,
+                                kommentarer =
+                                    it.dialogRef?.let { dialogRef ->
+                                        notatDao.finnKommentarer(dialogRef.toLong()).map { kommentar ->
+                                            Kommentar(
+                                                id = kommentar.id,
+                                                tekst = kommentar.tekst,
+                                                opprettet = kommentar.opprettet,
+                                                saksbehandlerident = kommentar.saksbehandlerident,
+                                                feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+                                            )
+                                        }
+                                    } ?: emptyList(),
+                            ),
                         )
                     }
 
                     else ->
-                        PeriodeHistorikkElementNy(
-                            id = it.id,
-                            type = it.type,
-                            saksbehandlerIdent = it.saksbehandlerIdent,
-                            timestamp = it.timestamp,
-                            dialogRef = it.dialogRef,
+                        listOf(
+                            PeriodeHistorikkElementNy(
+                                id = it.id,
+                                type = it.type,
+                                saksbehandlerIdent = it.saksbehandlerIdent,
+                                timestamp = it.timestamp,
+                                dialogRef = it.dialogRef,
+                            ),
                         )
                 }
             }
