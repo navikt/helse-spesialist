@@ -95,21 +95,18 @@ class PåVentDao(
         notatTekst: String? = null,
         dialogRef: Long,
     ) {
-        val vedtaksperiodeId =
-            asSQL(
-                """
-                SELECT v.vedtaksperiode_id FROM vedtak v
-                INNER JOIN oppgave o ON v.id = o.vedtak_ref
-                WHERE o.id = :oppgaveId
-                """.trimIndent(),
-                "oppgaveId" to oppgaveId,
-            ).singleOrNull { it.uuid("vedtaksperiode_id") } ?: return
-
         asSQL(
             """
-            UPDATE pa_vent SET (frist, dialog_ref, saksbehandler_ref, notattekst, årsaker) = ( :frist, :dialogRef, :saksbehandlerRef, :notatTekst, :arsaker::varchar[]) where vedtaksperiode_id = :vedtaksperiodeId
+            UPDATE pa_vent SET
+              (frist, dialog_ref, saksbehandler_ref, notattekst, årsaker) =
+              ( :frist, :dialogRef, :saksbehandlerRef, :notatTekst, :arsaker::varchar[])
+              where vedtaksperiode_id = (
+                SELECT v.vedtaksperiode_id FROM vedtak v, oppgave o
+                  WHERE v.id = o.vedtak_ref
+                  AND o.id = :oppgaveId
+              )
             """.trimIndent(),
-            "vedtaksperiodeId" to vedtaksperiodeId,
+            "oppgaveId" to oppgaveId,
             "saksbehandlerRef" to saksbehandlerOid,
             "frist" to frist,
             "dialogRef" to dialogRef,
