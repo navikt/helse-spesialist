@@ -38,14 +38,14 @@ sealed interface HistorikkinnslagDto {
                 tidspunkt = LocalDateTime.now(),
             )
 
-        fun oppdaterPåVentFristInnslag(
+        fun endrePåVentInnslag(
             notattekst: String?,
             saksbehandler: SaksbehandlerDto,
             årsaker: List<PåVentÅrsak>,
             frist: LocalDate,
             dialogRef: Long,
-        ): OppdaterPåVentFrist =
-            OppdaterPåVentFrist(
+        ): EndrePåVent =
+            EndrePåVent(
                 notattekst = notattekst,
                 saksbehandler = saksbehandler,
                 årsaker = årsaker,
@@ -109,7 +109,7 @@ data class FjernetFraPåVent(
     override val dialogRef: Long? = null
 }
 
-data class OppdaterPåVentFrist(
+data class EndrePåVent(
     override val saksbehandler: SaksbehandlerDto,
     override val tidspunkt: LocalDateTime,
     override val dialogRef: Long,

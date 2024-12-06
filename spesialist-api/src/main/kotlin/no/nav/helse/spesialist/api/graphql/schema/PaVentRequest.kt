@@ -21,7 +21,7 @@ sealed interface PaVentRequest {
         val oppgaveId: Long,
     ) : PaVentRequest
 
-    data class OppdaterPaVentFrist(
+    data class EndrePaVent(
         val oppgaveId: Long,
         val saksbehandlerOid: UUID,
         val frist: LocalDate,

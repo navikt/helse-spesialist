@@ -41,7 +41,7 @@ class LeggPåVent(
         )
 }
 
-class OppdaterPåVentFrist(
+class EndrePåVent(
     oppgaveId: Long,
     val fødselsnummer: String,
     val frist: LocalDate,
@@ -50,7 +50,7 @@ class OppdaterPåVentFrist(
     val notatTekst: String?,
     val årsaker: List<PåVentÅrsak>,
 ) : PåVent(oppgaveId) {
-    override fun loggnavn(): String = "oppdater_på_vent_frist"
+    override fun loggnavn(): String = "endre_på_vent"
 
     override fun utførAv(saksbehandler: Saksbehandler) {
         saksbehandler.håndter(this)

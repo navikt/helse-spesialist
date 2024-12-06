@@ -36,13 +36,13 @@ import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
 import no.nav.helse.modell.saksbehandler.handlinger.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringArsak
 import no.nav.helse.modell.saksbehandler.handlinger.Arbeidsforhold
+import no.nav.helse.modell.saksbehandler.handlinger.EndrePåVent
 import no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.FjernPåVentUtenHistorikkinnslag
 import no.nav.helse.modell.saksbehandler.handlinger.Handling
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradPeriode
-import no.nav.helse.modell.saksbehandler.handlinger.OppdaterPåVentFrist
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
@@ -271,7 +271,7 @@ internal class SaksbehandlerMediator(
                         modellhandling,
                     )
 
-                is OppdaterPåVentFrist -> oppdaterFristPåVent(modellhandling, saksbehandler)
+                is EndrePåVent -> endrePåVent(modellhandling, saksbehandler)
             }
             sikkerlogg.info(
                 "Handling ${modellhandling.loggnavn()} utført på oppgave ${modellhandling.oppgaveId} på vegne av saksbehandler $saksbehandler",
@@ -337,15 +337,15 @@ internal class SaksbehandlerMediator(
         }
     }
 
-    private fun oppdaterFristPåVent(
-        handling: OppdaterPåVentFrist,
+    private fun endrePåVent(
+        handling: EndrePåVent,
         saksbehandler: Saksbehandler,
     ) {
         if (!påVentDao.erPåVent(handling.oppgaveId)) throw FinnerIkkeLagtPåVent(handling.oppgaveId)
 
         val dialogRef = dialogDao.lagre()
         val innslag =
-            HistorikkinnslagDto.oppdaterPåVentFristInnslag(
+            HistorikkinnslagDto.endrePåVentInnslag(
                 notattekst = handling.notatTekst,
                 saksbehandler = saksbehandler.toDto(),
                 årsaker = handling.årsaker,
@@ -353,8 +353,8 @@ internal class SaksbehandlerMediator(
                 dialogRef = dialogRef,
             )
         periodehistorikkDao.lagreMedOppgaveId(innslag, handling.oppgaveId)
-        oppgaveService.oppdaterPåVentFrist(handling, saksbehandler)
-        PåVentRepository(påVentDao).oppdaterFrist(saksbehandler.oid(), handling, dialogRef)
+        oppgaveService.endrePåVent(handling, saksbehandler)
+        PåVentRepository(påVentDao).endrePåVent(saksbehandler.oid(), handling, dialogRef)
 
         saksbehandler.register(Saksbehandlingsmelder(rapidsConnection))
         handling.utførAv(saksbehandler)
@@ -684,7 +684,7 @@ internal class SaksbehandlerMediator(
             is PaVentRequest.LeggPaVent -> this.tilModellversjon()
             is PaVentRequest.FjernPaVent -> this.tilModellversjon()
             is PaVentRequest.FjernPaVentUtenHistorikkinnslag -> this.tilModellversjon()
-            is PaVentRequest.OppdaterPaVentFrist -> this.tilModellversjon()
+            is PaVentRequest.EndrePaVent -> this.tilModellversjon()
         }
 
     private fun ArbeidsforholdOverstyringHandling.tilModellversjon(): OverstyrtArbeidsforhold =
@@ -852,8 +852,8 @@ internal class SaksbehandlerMediator(
             årsaker = årsaker.map { årsak -> PåVentÅrsak(key = årsak._key, årsak = årsak.arsak) },
         )
 
-    private fun PaVentRequest.OppdaterPaVentFrist.tilModellversjon(): OppdaterPåVentFrist {
-        return OppdaterPåVentFrist(
+    private fun PaVentRequest.EndrePaVent.tilModellversjon(): EndrePåVent {
+        return EndrePåVent(
             fødselsnummer = oppgaveService.fødselsnummer(oppgaveId),
             oppgaveId = oppgaveId,
             behandlingId = oppgaveService.spleisBehandlingId(oppgaveId),

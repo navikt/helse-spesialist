@@ -219,7 +219,7 @@ data class LagtPaVent(
     val kommentarer: List<Kommentar>,
 ) : Historikkinnslag
 
-data class OppdaterPaVentFrist(
+data class EndrePaVent(
     override val id: Int,
     override val type: PeriodehistorikkType,
     override val timestamp: LocalDateTime,
@@ -570,9 +570,9 @@ data class BeregnetPeriode(
                                 },
                         )
                     }
-                    PeriodehistorikkType.OPPDATER_PA_VENT_FRIST -> {
+                    PeriodehistorikkType.ENDRE_PA_VENT -> {
                         val (påVentÅrsaker, frist, notattekst) = mapLagtPåVentJson(json = it.json)
-                        OppdaterPaVentFrist(
+                        EndrePaVent(
                             id = it.id,
                             type = it.type,
                             timestamp = it.timestamp,

@@ -363,7 +363,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `oppdatering av påVent frist forårsaker publisering av hendelse`() {
+    fun `endring av påVent forårsaker publisering av hendelse`() {
         val spleisBehandlingId = UUID.randomUUID()
         nyPerson(spleisBehandlingId = spleisBehandlingId)
         val oppgaveId = OPPGAVE_ID
@@ -374,7 +374,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         assertEquals("lagt_på_vent", melding1?.get("@event_name")?.asText())
 
         val nyFrist = LocalDate.now().plusDays(5)
-        mediator.påVent(PaVentRequest.OppdaterPaVentFrist(oppgaveId, saksbehandler.oid, nyFrist, skalTildeles, "en ny tekst", listOf(PaVentRequest.PaVentArsak("key", "arsak"))), saksbehandler)
+        mediator.påVent(PaVentRequest.EndrePaVent(oppgaveId, saksbehandler.oid, nyFrist, skalTildeles, "en ny tekst", listOf(PaVentRequest.PaVentArsak("key", "arsak"))), saksbehandler)
 
 
         val melding2 = testRapid.inspektør.hendelser("lagt_på_vent").lastOrNull()
@@ -449,7 +449,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `oppdater på vent frist`() {
+    fun `endre på vent`() {
         nyPerson()
         val oppgaveId = OPPGAVE_ID
         mediator.påVent(
@@ -472,7 +472,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         assertTrue(melding["egenskaper"].map { it.asText() }.contains("PÅ_VENT"))
 
         mediator.påVent(
-            PaVentRequest.OppdaterPaVentFrist(
+            PaVentRequest.EndrePaVent(
                 oppgaveId,
                 saksbehandler.oid,
                 LocalDate.now().plusDays(20),
@@ -486,7 +486,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         )
         val melding2 = testRapid.inspektør.hendelser("lagt_på_vent").last()
         val historikk2 = periodehistorikkApiDao.finn(UTBETALING_ID).sortedBy { it.id }
-        assertEquals(PeriodehistorikkType.OPPDATER_PA_VENT_FRIST, historikk2.last().type)
+        assertEquals(PeriodehistorikkType.ENDRE_PA_VENT, historikk2.last().type)
         assertEquals("ny notat tekst", melding2["notatTekst"].asText())
     }
 

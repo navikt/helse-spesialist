@@ -150,14 +150,14 @@ class Oppgave private constructor(
         oppgaveEndret()
     }
 
-    fun oppdaterPåVentFrist(
-        skalTildeles: Boolean,
+    fun endrePåVent(
+        skalVæreTildeltSaksbehandler: Boolean,
         saksbehandler: Saksbehandler,
     ) {
-        if (this.tildeltTil != saksbehandler && skalTildeles) {
+        if (this.tildeltTil != saksbehandler && skalVæreTildeltSaksbehandler) {
             tildel(saksbehandler)
         }
-        if (this.tildeltTil != null && !skalTildeles) {
+        if (this.tildeltTil != null && !skalVæreTildeltSaksbehandler) {
             avmeld(saksbehandler)
         }
     }
