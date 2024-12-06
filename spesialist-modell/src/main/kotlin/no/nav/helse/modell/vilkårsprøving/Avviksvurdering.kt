@@ -5,15 +5,15 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
-class Avviksvurdering private constructor(
-    private val unikId: UUID,
-    private val vilkårsgrunnlagId: UUID?,
-    private val fødselsnummer: String,
-    private val skjæringstidspunkt: LocalDate,
-    private val opprettet: LocalDateTime,
-    private val avviksprosent: Double,
-    private val sammenligningsgrunnlag: Sammenligningsgrunnlag,
-    private val beregningsgrunnlag: Beregningsgrunnlag,
+data class Avviksvurdering(
+    val unikId: UUID,
+    val vilkårsgrunnlagId: UUID?,
+    val fødselsnummer: String,
+    val skjæringstidspunkt: LocalDate,
+    val opprettet: LocalDateTime,
+    val avviksprosent: Double,
+    val sammenligningsgrunnlag: Sammenligningsgrunnlag,
+    val beregningsgrunnlag: Beregningsgrunnlag,
 ) {
     companion object {
         fun List<Avviksvurdering>.finnRiktigAvviksvurdering(skjæringstidspunkt: LocalDate) =
@@ -46,54 +46,17 @@ class Avviksvurdering private constructor(
             sammenligningsgrunnlag = sammenligningsgrunnlag.toDto(),
             beregningsgrunnlag = beregningsgrunnlag.toDto(),
         )
-
-    override fun equals(other: Any?): Boolean =
-        this === other || (
-            other is Avviksvurdering &&
-                javaClass == other.javaClass &&
-                unikId == other.unikId &&
-                vilkårsgrunnlagId == other.vilkårsgrunnlagId &&
-                fødselsnummer == other.fødselsnummer &&
-                skjæringstidspunkt == other.skjæringstidspunkt &&
-                opprettet.withNano(0) == other.opprettet.withNano(0) &&
-                avviksprosent == other.avviksprosent &&
-                sammenligningsgrunnlag == other.sammenligningsgrunnlag &&
-                beregningsgrunnlag == other.beregningsgrunnlag
-        )
-
-    override fun hashCode(): Int {
-        var result = unikId.hashCode()
-        result = 31 * result + vilkårsgrunnlagId.hashCode()
-        result = 31 * result + fødselsnummer.hashCode()
-        result = 31 * result + skjæringstidspunkt.hashCode()
-        result = 31 * result + avviksprosent.hashCode()
-        result = 31 * result + sammenligningsgrunnlag.hashCode()
-        result = 31 * result + beregningsgrunnlag.hashCode()
-        return result
-    }
 }
 
-internal class Sammenligningsgrunnlag private constructor(
-    private val totalbeløp: Double,
-    private val innrapporterteInntekter: List<InnrapportertInntekt>,
+data class Sammenligningsgrunnlag(
+    val totalbeløp: Double,
+    val innrapporterteInntekter: List<InnrapportertInntekt>,
 ) {
     internal fun toDto(): SammenligningsgrunnlagDto {
         return SammenligningsgrunnlagDto(
             totalbeløp = totalbeløp,
             innrapporterteInntekter = innrapporterteInntekter.map { it.toDto() },
         )
-    }
-
-    override fun equals(other: Any?): Boolean =
-        this === other || (
-            other is Sammenligningsgrunnlag &&
-                totalbeløp == other.totalbeløp && innrapporterteInntekter == other.innrapporterteInntekter
-        )
-
-    override fun hashCode(): Int {
-        var result = totalbeløp.hashCode()
-        result = 31 * result + innrapporterteInntekter.hashCode()
-        return result
     }
 
     internal companion object {
@@ -105,28 +68,15 @@ internal class Sammenligningsgrunnlag private constructor(
     }
 }
 
-internal class InnrapportertInntekt private constructor(
-    private val arbeidsgiverreferanse: String,
-    private val inntekter: List<Inntekt>,
+data class InnrapportertInntekt(
+    val arbeidsgiverreferanse: String,
+    val inntekter: List<Inntekt>,
 ) {
     internal fun toDto() =
         InnrapportertInntektDto(
             arbeidsgiverreferanse = arbeidsgiverreferanse,
             inntekter = inntekter.map { it.toDto() },
         )
-
-    override fun equals(other: Any?): Boolean =
-        this === other || (
-            other is InnrapportertInntekt &&
-                arbeidsgiverreferanse == other.arbeidsgiverreferanse &&
-                inntekter == other.inntekter
-        )
-
-    override fun hashCode(): Int {
-        var result = arbeidsgiverreferanse.hashCode()
-        result = 31 * result + inntekter.hashCode()
-        return result
-    }
 
     internal companion object {
         internal fun gjenopprett(innrapportertInntektDto: InnrapportertInntektDto) =
@@ -137,22 +87,11 @@ internal class InnrapportertInntekt private constructor(
     }
 }
 
-internal class Inntekt private constructor(
-    private val årMåned: YearMonth,
-    private val beløp: Double,
+data class Inntekt(
+    val årMåned: YearMonth,
+    val beløp: Double,
 ) {
     internal fun toDto() = InntektDto(årMåned = årMåned, beløp = beløp)
-
-    override fun equals(other: Any?) =
-        this === other || (
-            other is Inntekt && årMåned == other.årMåned && beløp == other.beløp
-        )
-
-    override fun hashCode(): Int {
-        var result = årMåned.hashCode()
-        result = 31 * result + beløp.hashCode()
-        return result
-    }
 
     internal companion object {
         internal fun gjenopprett(inntektDto: InntektDto) =
@@ -163,28 +102,15 @@ internal class Inntekt private constructor(
     }
 }
 
-internal class Beregningsgrunnlag private constructor(
-    private val totalbeløp: Double,
-    private val omregnedeÅrsinntekter: List<OmregnetÅrsinntekt>,
+data class Beregningsgrunnlag(
+    val totalbeløp: Double,
+    val omregnedeÅrsinntekter: List<OmregnetÅrsinntekt>,
 ) {
     internal fun toDto() =
         BeregningsgrunnlagDto(
             totalbeløp = totalbeløp,
             omregnedeÅrsinntekter = omregnedeÅrsinntekter.map { it.toDto() },
         )
-
-    override fun equals(other: Any?) =
-        this === other || (
-            other is Beregningsgrunnlag &&
-                totalbeløp == other.totalbeløp &&
-                omregnedeÅrsinntekter == other.omregnedeÅrsinntekter
-        )
-
-    override fun hashCode(): Int {
-        var result = totalbeløp.hashCode()
-        result = 31 * result + omregnedeÅrsinntekter.hashCode()
-        return result
-    }
 
     internal companion object {
         internal fun gjenopprett(beregningsgrunnlagDto: BeregningsgrunnlagDto) =
@@ -198,24 +124,11 @@ internal class Beregningsgrunnlag private constructor(
     }
 }
 
-internal class OmregnetÅrsinntekt private constructor(
-    private val arbeidsgiverreferanse: String,
-    private val beløp: Double,
+data class OmregnetÅrsinntekt(
+    val arbeidsgiverreferanse: String,
+    val beløp: Double,
 ) {
     internal fun toDto() = OmregnetÅrsinntektDto(arbeidsgiverreferanse = arbeidsgiverreferanse, beløp = beløp)
-
-    override fun equals(other: Any?) =
-        this === other || (
-            other is OmregnetÅrsinntekt &&
-                other.arbeidsgiverreferanse == arbeidsgiverreferanse &&
-                beløp == other.beløp
-        )
-
-    override fun hashCode(): Int {
-        var result = arbeidsgiverreferanse.hashCode()
-        result = 31 * result + beløp.hashCode()
-        return result
-    }
 
     internal companion object {
         internal fun gjenopprett(omregnetÅrsinntektDto: OmregnetÅrsinntektDto) =
