@@ -208,6 +208,7 @@ type BeregnetPeriode implements Periode {
     totrinnsvurdering: Totrinnsvurdering
     utbetaling: Utbetaling!
     varsler: [VarselDTO!]!
+    vedtakBegrunnelser: [VedtakBegrunnelse!]!
     vedtaksperiodeId: UUID!
     vilkarsgrunnlagId: UUID
 }
@@ -249,6 +250,18 @@ type DokumentInntektsmelding {
     opphoerAvNaturalytelser: [OpphoerAvNaturalytelse!]
     refusjon: Refusjon
     virksomhetsnummer: String
+}
+
+type EndrePaVent implements Historikkinnslag {
+    arsaker: [String!]!
+    dialogRef: Int
+    frist: LocalDate
+    id: Int!
+    kommentarer: [Kommentar!]!
+    notattekst: String
+    saksbehandlerIdent: String
+    timestamp: LocalDateTime!
+    type: PeriodehistorikkType!
 }
 
 type EndringIRefusjon {
@@ -384,7 +397,8 @@ type MinimumSykdomsgradOverstyring implements Overstyring {
 
 type Mutation {
     annuller(annullering: AnnulleringDataInput!): Boolean!
-    fattVedtak(oppgavereferanse: String!, vedtakBegrunnelse: VedtakBegrunnelseInput!): Boolean!
+    endrePaVent(arsaker: [PaVentArsakInput!]!, frist: LocalDate!, notatTekst: String, oppgaveId: String!, tildeling: Boolean!): PaVent
+    fattVedtak(begrunnelse: String, oppgavereferanse: String!, utfall: VedtakUtfall!): Boolean!
     feilregistrerKommentar(id: Int!): Kommentar
     feilregistrerKommentarV2(id: Int!): Kommentar
     feilregistrerNotat(id: Int!): Notat
@@ -405,7 +419,7 @@ type Mutation {
     overstyrInntektOgRefusjon(overstyring: InntektOgRefusjonOverstyringInput!): Boolean!
     sendIRetur(notatTekst: String!, oppgavereferanse: String!): Boolean!
     sendTilGodkjenning(avslag: AvslagInput, oppgavereferanse: String!): Boolean!
-    sendTilGodkjenningV2(oppgavereferanse: String!, vedtakBegrunnelse: VedtakBegrunnelseInput!): Boolean!
+    sendTilGodkjenningV2(oppgavereferanse: String!, vedtakBegrunnelse: String, vedtakUtfall: VedtakUtfall!): Boolean!
     sendTilInfotrygd(arsak: String!, begrunnelser: [String!]!, kommentar: String, oppgavereferanse: String!): Boolean!
     settVarselstatus(definisjonIdString: String, generasjonIdString: String!, ident: String!, varselkode: String!): VarselDTO!
     skjonnsfastsettSykepengegrunnlag(skjonnsfastsettelse: SkjonnsfastsettelseInput!): Boolean!
@@ -442,18 +456,6 @@ type OmregnetArsinntekt {
     inntektFraAOrdningen: [InntektFraAOrdningen!]
     kilde: Inntektskilde!
     manedsbelop: Float!
-}
-
-type OppdaterPaVentFrist implements Historikkinnslag {
-    arsaker: [String!]!
-    dialogRef: Int
-    frist: LocalDate
-    id: Int!
-    kommentarer: [Kommentar!]!
-    notattekst: String
-    saksbehandlerIdent: String
-    timestamp: LocalDateTime!
-    type: PeriodehistorikkType!
 }
 
 type OppgaveForPeriodevisning {
@@ -898,6 +900,13 @@ type VarselvurderingDTO {
     tidsstempel: LocalDateTime!
 }
 
+type VedtakBegrunnelse {
+    begrunnelse: String
+    opprettet: LocalDateTime!
+    saksbehandlerIdent: String!
+    utfall: VedtakUtfall!
+}
+
 type VilkarsgrunnlagInfotrygd implements Vilkarsgrunnlag {
     arbeidsgiverrefusjoner: [Arbeidsgiverrefusjon!]!
     id: UUID!
@@ -1139,9 +1148,9 @@ enum Periodehandling {
 }
 
 enum PeriodehistorikkType {
+    ENDRE_PA_VENT
     FJERN_FRA_PA_VENT
     LEGG_PA_VENT
-    OPPDATER_PA_VENT_FRIST
     STANS_AUTOMATISK_BEHANDLING
     TOTRINNSVURDERING_ATTESTERT
     TOTRINNSVURDERING_RETUR
@@ -1302,7 +1311,7 @@ enum Varselstatus {
     VURDERT
 }
 
-enum VedtakBegrunnelseUtfall {
+enum VedtakUtfall {
     AVSLAG
     DELVIS_INNVILGELSE
     INNVILGELSE
@@ -1493,9 +1502,4 @@ input TidslinjeOverstyringInput {
     fodselsnummer: String!
     organisasjonsnummer: String!
     vedtaksperiodeId: UUID!
-}
-
-input VedtakBegrunnelseInput {
-    begrunnelse: String
-    utfall: VedtakBegrunnelseUtfall!
 }
