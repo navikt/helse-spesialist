@@ -25,7 +25,7 @@ class SykepengevedtakBuilder {
     private var utbetalingId: UUID? = null
     private var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta? = null
     private var skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlag? = null
-    private var skjønnsfastsettingopplysninger: VedtakMedSkjønnsvurdering.SkjønnsfastsettingopplysningerDto? = null
+    private var skjønnsfastsettingopplysninger: VedtakMedSkjønnsvurdering.Skjønnsfastsettingopplysninger? = null
     private var vedtakBegrunnelse: VedtakBegrunnelse? = null
     private val tags: MutableSet<String> = mutableSetOf()
     private val tagsForSykepengegrunnlagsfakta: MutableSet<String> = mutableSetOf()
@@ -102,7 +102,7 @@ class SykepengevedtakBuilder {
         årsak: Skjønnsfastsettingsårsak,
     ) = apply {
         this.skjønnsfastsettingopplysninger =
-            VedtakMedSkjønnsvurdering.SkjønnsfastsettingopplysningerDto(
+            VedtakMedSkjønnsvurdering.Skjønnsfastsettingopplysninger(
                 begrunnelseFraMal,
                 begrunnelseFraFritekst,
                 begrunnelseFraKonklusjon,

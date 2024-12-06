@@ -373,7 +373,7 @@ internal class VedtakFattetMelderTest {
                         skjønnsfastsatt = 13000.0,
                     ),
                 skjønnsfastsettingopplysninger =
-                    VedtakMedSkjønnsvurdering.SkjønnsfastsettingopplysningerDto(
+                    VedtakMedSkjønnsvurdering.Skjønnsfastsettingopplysninger(
                         "Mal",
                         "Fritekst",
                         "Konklusjon",
@@ -495,7 +495,7 @@ internal class VedtakFattetMelderTest {
                         skjønnsfastsatt = 13000.0,
                     ),
                 skjønnsfastsettingopplysninger =
-                    VedtakMedSkjønnsvurdering.SkjønnsfastsettingopplysningerDto(
+                    VedtakMedSkjønnsvurdering.Skjønnsfastsettingopplysninger(
                         "Mal",
                         "Fritekst",
                         "Konklusjon",

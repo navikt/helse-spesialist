@@ -80,12 +80,12 @@ sealed interface Sykepengevedtak {
         override val begrensning: String,
         override val inntekt: Double,
         val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta.Spleis.EtterSkjønn,
-        val skjønnsfastsettingopplysninger: SkjønnsfastsettingopplysningerDto,
+        val skjønnsfastsettingopplysninger: Skjønnsfastsettingopplysninger,
         override val vedtakFattetTidspunkt: LocalDateTime,
         override val tags: Set<String>,
         val vedtakBegrunnelse: VedtakBegrunnelse?,
     ) : Sykepengevedtak {
-        data class SkjønnsfastsettingopplysningerDto(
+        data class Skjønnsfastsettingopplysninger(
             val begrunnelseFraMal: String,
             val begrunnelseFraFritekst: String,
             val begrunnelseFraKonklusjon: String,

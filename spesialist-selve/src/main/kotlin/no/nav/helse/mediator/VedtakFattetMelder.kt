@@ -239,7 +239,7 @@ internal class VedtakFattetMelder(
     }
 
     private fun List<Map<String, Any>>.supplerMedSkjønnsfastsettingsbegrunnelse(
-        skjønnsfastsettingopplysninger: Sykepengevedtak.VedtakMedSkjønnsvurdering.SkjønnsfastsettingopplysningerDto,
+        skjønnsfastsettingopplysninger: Sykepengevedtak.VedtakMedSkjønnsvurdering.Skjønnsfastsettingopplysninger,
         sykepengevedtak: Sykepengevedtak,
     ): List<Map<String, Any>> {
         return this +

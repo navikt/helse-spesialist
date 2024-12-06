@@ -145,7 +145,7 @@ class SykepengevedtakBuilderTest {
                 inntekt = inntekt,
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta<Spleis.EtterSkjønn>(),
                 skjønnsfastsettingopplysninger =
-                    VedtakMedSkjønnsvurdering.SkjønnsfastsettingopplysningerDto(
+                    VedtakMedSkjønnsvurdering.Skjønnsfastsettingopplysninger(
                         "Mal",
                         "Fritekst",
                         "Konklusjon",
@@ -272,7 +272,7 @@ class SykepengevedtakBuilderTest {
                 begrensning = begrensning,
                 inntekt = inntekt,
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta<Spleis.EtterSkjønn>(),
-                skjønnsfastsettingopplysninger = VedtakMedSkjønnsvurdering.SkjønnsfastsettingopplysningerDto(
+                skjønnsfastsettingopplysninger = VedtakMedSkjønnsvurdering.Skjønnsfastsettingopplysninger(
                     "Mal",
                     "Fritekst",
                     "Konklusjon",
