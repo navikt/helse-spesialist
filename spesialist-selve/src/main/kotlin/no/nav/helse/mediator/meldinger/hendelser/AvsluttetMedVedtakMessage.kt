@@ -3,8 +3,10 @@ package no.nav.helse.mediator.meldinger.hendelser
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import kotliquery.TransactionalSession
+import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
@@ -12,15 +14,20 @@ import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.vedtak.Faktatype
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetMedVedtak
+import no.nav.helse.modell.vilkårsprøving.Avviksvurdering.Companion.finnRiktigAvviksvurdering
+import no.nav.helse.modell.vilkårsprøving.Avviksvurdering.Companion.gjenopprett
+import no.nav.helse.modell.vilkårsprøving.InnrapportertInntektDto
 import java.util.UUID
 
 internal class AvsluttetMedVedtakMessage(
     private val packet: JsonMessage,
+    private val avviksvurderingDao: AvviksvurderingDao,
 ) : Vedtaksperiodemelding {
     private val fødselsnummer = packet["fødselsnummer"].asText()
     private val vedtakFattetTidspunkt = packet["vedtakFattetTidspunkt"].asLocalDateTime()
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID()
     private val spleisBehandlingId = packet["behandlingId"].asUUID()
+    private val skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate()
     private val hendelser = packet["hendelser"].map { it.asUUID() }
     private val sykepengegrunnlag = packet["sykepengegrunnlag"].asDouble()
     private val grunnlagForSykepengegrunnlag = packet["grunnlagForSykepengegrunnlag"].asDouble()
@@ -78,10 +85,17 @@ internal class AvsluttetMedVedtakMessage(
             )
         }
 
+        val avviksvurderingDto = finnAvviksvurdering().toDto()
+        val innrapportertÅrsinntekt = avviksvurderingDto.sammenligningsgrunnlag.totalbeløp
+        val avviksprosent = avviksvurderingDto.avviksprosent
+        val innrapporterteInntekter = avviksvurderingDto.sammenligningsgrunnlag.innrapporterteInntekter
+
         return when (faktatype) {
             Faktatype.ETTER_SKJØNN ->
                 Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
                     omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta.omregnetÅrsinntekt"].asDouble(),
+                    innrapportertÅrsinntekt = innrapportertÅrsinntekt,
+                    avviksprosent = avviksprosent,
                     seksG = packet["sykepengegrunnlagsfakta.6G"].asDouble(),
                     skjønnsfastsatt = packet["sykepengegrunnlagsfakta.skjønnsfastsatt"].asDouble(),
                     tags = mutableSetOf(),
@@ -91,6 +105,7 @@ internal class AvsluttetMedVedtakMessage(
                             Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
                                 organisasjonsnummer = organisasjonsnummer,
                                 omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
+                                innrapportertÅrsinntekt = innrapporterteInntekter(organisasjonsnummer, innrapporterteInntekter),
                                 skjønnsfastsatt = arbeidsgiver["skjønnsfastsatt"].asDouble(),
                             )
                         },
@@ -99,6 +114,8 @@ internal class AvsluttetMedVedtakMessage(
             Faktatype.ETTER_HOVEDREGEL ->
                 Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
                     omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta.omregnetÅrsinntekt"].asDouble(),
+                    innrapportertÅrsinntekt = innrapportertÅrsinntekt,
+                    avviksprosent = avviksprosent,
                     seksG = packet["sykepengegrunnlagsfakta.6G"].asDouble(),
                     tags = mutableSetOf(),
                     arbeidsgivere =
@@ -107,6 +124,7 @@ internal class AvsluttetMedVedtakMessage(
                             Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
                                 organisasjonsnummer = organisasjonsnummer,
                                 omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
+                                innrapportertÅrsinntekt = innrapporterteInntekter(organisasjonsnummer, innrapporterteInntekter),
                             )
                         },
                 )
@@ -114,4 +132,20 @@ internal class AvsluttetMedVedtakMessage(
             else -> error("Her vet vi ikke hva som har skjedd. Feil i kompilatoren?")
         }
     }
+
+    private fun finnAvviksvurdering() =
+        checkNotNull(
+            avviksvurderingDao.finnAvviksvurderinger(fødselsnummer).gjenopprett().finnRiktigAvviksvurdering(skjæringstidspunkt),
+        ) {
+            "Forventet å finne avviksvurdering for behandlingId=$spleisBehandlingId og skjæringstidspunkt $skjæringstidspunkt"
+        }
+
+    private fun innrapporterteInntekter(
+        arbeidsgiverreferanse: String,
+        innrapportertInntekter: List<InnrapportertInntektDto>,
+    ): Double =
+        innrapportertInntekter
+            .filter { it.arbeidsgiverreferanse == arbeidsgiverreferanse }
+            .flatMap { it.inntekter }
+            .sumOf { it.beløp }
 }

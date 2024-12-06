@@ -1,6 +1,5 @@
 package no.nav.helse.modell.vedtak
 
-import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -25,7 +24,6 @@ class SykepengevedtakBuilder {
     private var utbetalingId: UUID? = null
     private var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta? = null
     private var skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlag? = null
-    private var avviksvurdering: Avviksvurdering? = null
     private var skjønnsfastsettingopplysninger: SkjønnsfastsettingopplysningerDto? = null
     private var vedtakBegrunnelse: VedtakBegrunnelseDto? = null
     private val tags: MutableSet<String> = mutableSetOf()
@@ -76,11 +74,6 @@ class SykepengevedtakBuilder {
         apply {
             this.skjønnsfastsattSykepengegrunnlag = skjønnsfastsattSykepengegrunnlag
             skjønnsfastsattSykepengegrunnlag.byggVedtak(this)
-        }
-
-    fun avviksvurdering(avviksvurdering: Avviksvurdering) =
-        apply {
-            this.avviksvurdering = avviksvurdering
         }
 
     fun vedtakBegrunnelse(vedtakBegrunnelse: VedtakBegrunnelse) =
@@ -152,17 +145,15 @@ class SykepengevedtakBuilder {
         val sykepengegrunnlagsfakta =
             requireNotNull(sykepengegrunnlagsfakta) { "Forventer å finne sykepengegrunnlagsfakta ved bygging av vedtak" }
         val utbetalingId = requireNotNull(utbetalingId) { "Forventer å finne utbetalingId ved bygging av vedtak" }
-        val avviksvurdering = requireNotNull(avviksvurdering) { "Forventer å finne avviksvurdering ved bygging av vedtak" }
         if (sykepengegrunnlagsfakta is Sykepengegrunnlagsfakta.Spleis.EtterSkjønn) {
-            return buildVedtakEtterSkjønn(sykepengegrunnlagsfakta, utbetalingId, avviksvurdering)
+            return buildVedtakEtterSkjønn(sykepengegrunnlagsfakta, utbetalingId)
         }
-        return buildVedtak(sykepengegrunnlagsfakta, utbetalingId, avviksvurdering)
+        return buildVedtak(sykepengegrunnlagsfakta, utbetalingId)
     }
 
     private fun buildVedtakEtterSkjønn(
         sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
         utbetalingId: UUID,
-        avviksvurdering: Avviksvurdering,
     ): Sykepengevedtak.Vedtak {
         checkNotNull(skjønnsfastsettingopplysninger) {
             "Forventer å finne opplysninger fra saksbehandler ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn"
@@ -189,14 +180,12 @@ class SykepengevedtakBuilder {
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
             tags = tags,
             vedtakBegrunnelse = vedtakBegrunnelse,
-            avviksvurdering = avviksvurdering,
         )
     }
 
     private fun buildVedtak(
         sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
         utbetalingId: UUID,
-        avviksvurdering: Avviksvurdering,
     ): Sykepengevedtak.Vedtak {
         return Sykepengevedtak.Vedtak(
             fødselsnummer = fødselsnummer,
@@ -219,7 +208,6 @@ class SykepengevedtakBuilder {
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
             tags = tags,
             vedtakBegrunnelse = vedtakBegrunnelse,
-            avviksvurdering = avviksvurdering,
         )
     }
 

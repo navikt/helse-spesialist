@@ -1,19 +1,11 @@
 package no.nav.helse.modell.vedtak
 
 import no.nav.helse.modell.januar
-import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
-import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
-import no.nav.helse.modell.vilkårsprøving.BeregningsgrunnlagDto
-import no.nav.helse.modell.vilkårsprøving.InnrapportertInntektDto
-import no.nav.helse.modell.vilkårsprøving.InntektDto
-import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntektDto
-import no.nav.helse.modell.vilkårsprøving.SammenligningsgrunnlagDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.UUID
 
 class SykepengevedtakEqualsTest {
@@ -319,7 +311,6 @@ class SykepengevedtakEqualsTest {
         vedtakFattetTidspunkt = vedtakFattetTidspunkt,
         tags = tags,
         vedtakBegrunnelse = vedtakBegrunnelse,
-        avviksvurdering = avviksvurdering()
     )
 
     private fun sykepengegrunnlagsfakta(faktatype: Faktatype): Sykepengegrunnlagsfakta {
@@ -327,29 +318,29 @@ class SykepengevedtakEqualsTest {
             Faktatype.ETTER_SKJØNN ->
                 Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
                     omregnetÅrsinntekt = omregnetÅrsinntekt,
+                    innrapportertÅrsinntekt = innrapportertÅrsinntekt,
+                    avviksprosent = avviksprosent,
                     seksG = seksG2023,
                     skjønnsfastsatt = 650000.0,
                     tags = mutableSetOf(),
                     arbeidsgivere =
                         listOf(
-                            Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
-                                organisasjonsnummer,
-                                300000.0,
-                                325000.0
-                            ),
-                            Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn("987654321", 300000.0, 325000.0),
+                            Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(organisasjonsnummer, 300000.0, 300000.0, 325000.0),
+                            Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn("987654321", 300000.0, 300000.0, 325000.0),
                         ),
                 )
 
             Faktatype.ETTER_HOVEDREGEL ->
                 Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
                     omregnetÅrsinntekt = omregnetÅrsinntekt,
+                    innrapportertÅrsinntekt = innrapportertÅrsinntekt,
+                    avviksprosent = avviksprosent,
                     seksG = seksG2023,
                     tags = mutableSetOf(),
                     arbeidsgivere =
                         listOf(
-                            Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(organisasjonsnummer, 300000.0),
-                            Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel("987654321", 300000.0),
+                            Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(organisasjonsnummer, 300000.0, 300000.0),
+                            Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel("987654321", 300000.0, 300000.0),
                         ),
                 )
 
@@ -359,40 +350,4 @@ class SykepengevedtakEqualsTest {
                 )
         }
     }
-
-    private fun avviksvurdering(): Avviksvurdering {
-        val from = YearMonth.from(skjæringstidspunkt.minusMonths(1))
-        val to = YearMonth.from(skjæringstidspunkt.minusMonths(13))
-        val yearMonthList = generateSequence(from) {
-            if (it > to) it.minusMonths(1) else null
-        }.toList()
-        return Avviksvurdering.gjenopprett(
-            AvviksvurderingDto(
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                fødselsnummer,
-                skjæringstidspunkt,
-                LocalDateTime.now(),
-                avviksprosent,
-                SammenligningsgrunnlagDto(
-                    innrapportertÅrsinntekt,
-                    listOf(
-                        InnrapportertInntektDto(
-                            organisasjonsnummer,
-                            yearMonthList.map {
-                                InntektDto(it, innrapportertÅrsinntekt / 12)
-                            }
-                        )
-                    )
-                ),
-                BeregningsgrunnlagDto(
-                    totalbeløp = innrapportertÅrsinntekt,
-                    omregnedeÅrsinntekter = yearMonthList.subList(0, 3).map {
-                        OmregnetÅrsinntektDto(organisasjonsnummer, innrapportertÅrsinntekt/12)
-                    }
-                )
-            )
-        )
-    }
-
 }

@@ -17,6 +17,8 @@ sealed class Sykepengegrunnlagsfakta(
 
     sealed class Spleis(
         omregnetÅrsinntekt: Double,
+        val innrapportertÅrsinntekt: Double,
+        val avviksprosent: Double,
         val seksG: Double,
         val tags: MutableSet<String>,
         val arbeidsgivere: List<Arbeidsgiver>,
@@ -30,6 +32,8 @@ sealed class Sykepengegrunnlagsfakta(
             this === other || (
                 super.equals(other) &&
                     other is Spleis &&
+                    innrapportertÅrsinntekt == other.innrapportertÅrsinntekt &&
+                    avviksprosent == other.avviksprosent &&
                     seksG == other.seksG &&
                     tags == other.tags &&
                     arbeidsgivere == other.arbeidsgivere
@@ -37,6 +41,8 @@ sealed class Sykepengegrunnlagsfakta(
 
         override fun hashCode(): Int {
             var result = super.hashCode()
+            result = 31 * result + innrapportertÅrsinntekt.hashCode()
+            result = 31 * result + avviksprosent.hashCode()
             result = 31 * result + seksG.hashCode()
             result = 31 * result + tags.hashCode()
             result = 31 * result + arbeidsgivere.hashCode()
@@ -45,12 +51,16 @@ sealed class Sykepengegrunnlagsfakta(
 
         class EtterSkjønn(
             omregnetÅrsinntekt: Double,
+            innrapportertÅrsinntekt: Double,
+            avviksprosent: Double,
             seksG: Double,
             val skjønnsfastsatt: Double,
             tags: MutableSet<String>,
             arbeidsgivere: List<Arbeidsgiver.EtterSkjønn>,
         ) : Spleis(
                 omregnetÅrsinntekt,
+                innrapportertÅrsinntekt,
+                avviksprosent,
                 seksG,
                 tags,
                 arbeidsgivere,
@@ -72,11 +82,15 @@ sealed class Sykepengegrunnlagsfakta(
         @Suppress("EqualsOrHashCode")
         class EtterHovedregel(
             omregnetÅrsinntekt: Double,
+            innrapportertÅrsinntekt: Double,
+            avviksprosent: Double,
             seksG: Double,
             tags: MutableSet<String>,
             arbeidsgivere: List<Arbeidsgiver.EtterHovedregel>,
         ) : Spleis(
                 omregnetÅrsinntekt,
+                innrapportertÅrsinntekt,
+                avviksprosent,
                 seksG,
                 tags,
                 arbeidsgivere,
@@ -87,25 +101,29 @@ sealed class Sykepengegrunnlagsfakta(
         sealed class Arbeidsgiver(
             val organisasjonsnummer: String,
             val omregnetÅrsinntekt: Double,
+            val innrapportertÅrsinntekt: Double,
         ) {
             override fun equals(other: Any?): Boolean =
                 this === other || (
                     other is Arbeidsgiver &&
                         organisasjonsnummer == other.organisasjonsnummer &&
-                        omregnetÅrsinntekt == other.omregnetÅrsinntekt
+                        omregnetÅrsinntekt == other.omregnetÅrsinntekt &&
+                        innrapportertÅrsinntekt == other.innrapportertÅrsinntekt
                 )
 
             override fun hashCode(): Int {
                 var result = organisasjonsnummer.hashCode()
                 result = 31 * result + omregnetÅrsinntekt.hashCode()
+                result = 31 * result + innrapportertÅrsinntekt.hashCode()
                 return result
             }
 
             class EtterSkjønn(
                 organisasjonsnummer: String,
                 omregnetÅrsinntekt: Double,
+                innrapportertÅrsinntekt: Double,
                 val skjønnsfastsatt: Double,
-            ) : Arbeidsgiver(organisasjonsnummer, omregnetÅrsinntekt) {
+            ) : Arbeidsgiver(organisasjonsnummer, omregnetÅrsinntekt, innrapportertÅrsinntekt) {
                 override fun equals(other: Any?) =
                     this === other || (
                         super.equals(other) &&
@@ -124,7 +142,8 @@ sealed class Sykepengegrunnlagsfakta(
             class EtterHovedregel(
                 organisasjonsnummer: String,
                 omregnetÅrsinntekt: Double,
-            ) : Arbeidsgiver(organisasjonsnummer, omregnetÅrsinntekt) {
+                innrapportertÅrsinntekt: Double,
+            ) : Arbeidsgiver(organisasjonsnummer, omregnetÅrsinntekt, innrapportertÅrsinntekt) {
                 override fun equals(other: Any?) = this === other || (super.equals(other) && other is EtterHovedregel)
             }
         }
