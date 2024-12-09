@@ -4,11 +4,15 @@ import no.nav.helse.modell.januar
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Infotrygd
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis
 import no.nav.helse.modell.vedtak.Sykepengevedtak.VedtakMedSkjønnsvurdering
+import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
+import no.nav.helse.modell.vilkårsprøving.Inntekt
+import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 
 class SykepengevedtakBuilderTest {
@@ -60,6 +64,8 @@ class SykepengevedtakBuilderTest {
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta<Spleis.EtterHovedregel>())
             .vedtakBegrunnelse(VedtakBegrunnelse(Utfall.INNVILGELSE, null))
+            .avviksprosent(avviksprosent)
+            .sammenligningsgrunnlag(sammenligningsgrunnlag(innrapportertÅrsinntekt, organisasjonsnummer))
             .tags(listOf("IngenNyArbeidsgiverperiode"))
             .build()
 
@@ -85,6 +91,8 @@ class SykepengevedtakBuilderTest {
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 vedtakBegrunnelse = VedtakBegrunnelse(Utfall.INNVILGELSE, null),
+                avviksprosent = avviksprosent,
+                sammenligningsgrunnlag = sammenligningsgrunnlag(innrapportertÅrsinntekt, organisasjonsnummer),
             ),
             utkast,
         )
@@ -109,6 +117,8 @@ class SykepengevedtakBuilderTest {
             .begrensning(begrensning)
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
+            .avviksprosent(avviksprosent)
+            .sammenligningsgrunnlag(sammenligningsgrunnlag(innrapportertÅrsinntekt, organisasjonsnummer))
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta<Spleis.EtterSkjønn>())
             .skjønnsfastsattSykepengegrunnlag(
                 SkjønnsfastsattSykepengegrunnlag(
@@ -155,6 +165,8 @@ class SykepengevedtakBuilderTest {
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 vedtakBegrunnelse = VedtakBegrunnelse(Utfall.INNVILGELSE, null),
+                avviksprosent = avviksprosent,
+                sammenligningsgrunnlag = sammenligningsgrunnlag(innrapportertÅrsinntekt, organisasjonsnummer),
             ),
             utkast,
         )
@@ -179,6 +191,8 @@ class SykepengevedtakBuilderTest {
             .begrensning(begrensning)
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
+            .avviksprosent(avviksprosent)
+            .sammenligningsgrunnlag(sammenligningsgrunnlag(innrapportertÅrsinntekt, organisasjonsnummer))
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta<Spleis.EtterHovedregel>())
             .vedtakBegrunnelse(
                 VedtakBegrunnelse(Utfall.DELVIS_INNVILGELSE, "En individuell begrunnelse for avslag")
@@ -211,6 +225,8 @@ class SykepengevedtakBuilderTest {
                     Utfall.DELVIS_INNVILGELSE,
                     "En individuell begrunnelse for avslag"
                 ),
+                avviksprosent = avviksprosent,
+                sammenligningsgrunnlag = sammenligningsgrunnlag(innrapportertÅrsinntekt, organisasjonsnummer),
             ),
             utkast,
         )
@@ -235,6 +251,8 @@ class SykepengevedtakBuilderTest {
             .begrensning(begrensning)
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
+            .avviksprosent(avviksprosent)
+            .sammenligningsgrunnlag(sammenligningsgrunnlag(innrapportertÅrsinntekt, organisasjonsnummer))
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta<Spleis.EtterSkjønn>())
             .skjønnsfastsattSykepengegrunnlag(
                 SkjønnsfastsattSykepengegrunnlag(
@@ -285,6 +303,8 @@ class SykepengevedtakBuilderTest {
                     Utfall.AVSLAG,
                     "En individuell begrunnelse for avslag"
                 ),
+                avviksprosent = avviksprosent,
+                sammenligningsgrunnlag = sammenligningsgrunnlag(innrapportertÅrsinntekt, organisasjonsnummer),
             ),
             utkast,
         )
@@ -474,6 +494,8 @@ class SykepengevedtakBuilderTest {
             .begrensning(begrensning)
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
+            .avviksprosent(avviksprosent)
+            .sammenligningsgrunnlag(sammenligningsgrunnlag(innrapportertÅrsinntekt, organisasjonsnummer))
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta<Spleis.EtterSkjønn>())
             .tags(listOf("IngenNyArbeidsgiverperiode"))
 
@@ -500,6 +522,8 @@ class SykepengevedtakBuilderTest {
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta<Spleis.EtterHovedregel>())
+            .avviksprosent(avviksprosent)
+            .sammenligningsgrunnlag(sammenligningsgrunnlag(innrapportertÅrsinntekt, organisasjonsnummer))
             .skjønnsfastsettingData(
                 "Fritekst",
                 "Mal",
@@ -533,8 +557,31 @@ class SykepengevedtakBuilderTest {
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 vedtakBegrunnelse = VedtakBegrunnelse(Utfall.INNVILGELSE, null),
+                avviksprosent = avviksprosent,
+                sammenligningsgrunnlag = sammenligningsgrunnlag(innrapportertÅrsinntekt, organisasjonsnummer),
             ),
             utkast,
+        )
+    }
+
+    private fun sammenligningsgrunnlag(
+        totalbeløp: Double,
+        vararg arbeidsgivere: String
+    ): Sammenligningsgrunnlag {
+        val start = YearMonth.from(skjæringstidspunkt.minusMonths(1))
+        val end = YearMonth.from(skjæringstidspunkt.minusMonths(13))
+        val måneder = generateSequence(start) {
+            if (it > end) it.minusMonths(1) else null
+        }.toList()
+        return Sammenligningsgrunnlag(
+            totalbeløp = totalbeløp,
+            innrapporterteInntekter = arbeidsgivere.map { arbeidsgiverreferanse ->
+                val arbeidsgiverandel = totalbeløp / arbeidsgivere.size
+                val inntekter = måneder.map {
+                    Inntekt(it, arbeidsgiverandel/måneder.size)
+                }
+                InnrapportertInntekt(arbeidsgiverreferanse, inntekter)
+            }
         )
     }
 
@@ -543,29 +590,25 @@ class SykepengevedtakBuilderTest {
             Spleis.EtterSkjønn::class ->
                 Spleis.EtterSkjønn(
                     omregnetÅrsinntekt = omregnetÅrsinntekt,
-                    innrapportertÅrsinntekt = innrapportertÅrsinntekt,
-                    avviksprosent = avviksprosent,
                     seksG = seksG2023,
                     skjønnsfastsatt = 650000.0,
                     tags = mutableSetOf(),
                     arbeidsgivere =
                     listOf(
-                        Spleis.Arbeidsgiver.EtterSkjønn(organisasjonsnummer, 300000.0, 300000.0, 325000.0),
-                        Spleis.Arbeidsgiver.EtterSkjønn("987654321", 300000.0, 300000.0, 325000.0),
+                        Spleis.Arbeidsgiver.EtterSkjønn(organisasjonsnummer, 300000.0, 325000.0),
+                        Spleis.Arbeidsgiver.EtterSkjønn("987654321", 300000.0, 325000.0),
                     ),
                 )
 
             Spleis.EtterHovedregel::class ->
                 Spleis.EtterHovedregel(
                     omregnetÅrsinntekt = omregnetÅrsinntekt,
-                    innrapportertÅrsinntekt = innrapportertÅrsinntekt,
-                    avviksprosent = avviksprosent,
                     seksG = seksG2023,
                     tags = mutableSetOf(),
                     arbeidsgivere =
                     listOf(
-                        Spleis.Arbeidsgiver.EtterHovedregel(organisasjonsnummer, 300000.0, 300000.0),
-                        Spleis.Arbeidsgiver.EtterHovedregel("987654321", 300000.0, 300000.0),
+                        Spleis.Arbeidsgiver.EtterHovedregel(organisasjonsnummer, 300000.0),
+                        Spleis.Arbeidsgiver.EtterHovedregel("987654321", 300000.0),
                     ),
                 )
 

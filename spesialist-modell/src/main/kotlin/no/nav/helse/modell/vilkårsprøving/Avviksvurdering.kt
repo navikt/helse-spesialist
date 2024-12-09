@@ -52,6 +52,14 @@ data class Sammenligningsgrunnlag(
     val totalbeløp: Double,
     val innrapporterteInntekter: List<InnrapportertInntekt>,
 ) {
+    private fun relevanteInntekterFor(arbeidsgiverreferanse: String) =
+        innrapporterteInntekter.filter { it.arbeidsgiverreferanse == arbeidsgiverreferanse }
+
+    fun innrapportertÅrsinntektFor(arbeidsgiverreferanse: String) =
+        relevanteInntekterFor(arbeidsgiverreferanse).flatMap {
+            it.inntekter
+        }.sumOf { it.beløp }
+
     internal fun toDto(): SammenligningsgrunnlagDto {
         return SammenligningsgrunnlagDto(
             totalbeløp = totalbeløp,

@@ -5,13 +5,11 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
-import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
 
 internal class AvsluttetMedVedtakRiver(
     private val mediator: MeldingMediator,
-    private val avviksvurderingDao: AvviksvurderingDao,
 ) : SpesialistRiver {
     override fun preconditions(): River.PacketValidation {
         return River.PacketValidation {
@@ -65,6 +63,6 @@ internal class AvsluttetMedVedtakRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        mediator.mottaMelding(AvsluttetMedVedtakMessage(packet, avviksvurderingDao), context)
+        mediator.mottaMelding(AvsluttetMedVedtakMessage(packet), context)
     }
 }

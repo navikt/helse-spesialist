@@ -1,5 +1,6 @@
 package no.nav.helse.modell.vedtak
 
+import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -41,6 +42,12 @@ sealed interface Sykepengevedtak {
         override val tags: Set<String>,
     ) : Sykepengevedtak
 
+    sealed interface VedtakMedOpphavISpleis : Sykepengevedtak {
+        val avviksprosent: Double
+        val sammenligningsgrunnlag: Sammenligningsgrunnlag
+        val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta.Spleis
+    }
+
     data class Vedtak(
         override val fødselsnummer: String,
         override val aktørId: String,
@@ -57,11 +64,13 @@ sealed interface Sykepengevedtak {
         override val grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>,
         override val begrensning: String,
         override val inntekt: Double,
-        val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta.Spleis.EtterHovedregel,
+        override val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta.Spleis.EtterHovedregel,
         override val vedtakFattetTidspunkt: LocalDateTime,
         override val tags: Set<String>,
         val vedtakBegrunnelse: VedtakBegrunnelse?,
-    ) : Sykepengevedtak
+        override val avviksprosent: Double,
+        override val sammenligningsgrunnlag: Sammenligningsgrunnlag,
+    ) : VedtakMedOpphavISpleis
 
     data class VedtakMedSkjønnsvurdering(
         override val fødselsnummer: String,
@@ -79,12 +88,14 @@ sealed interface Sykepengevedtak {
         override val grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>,
         override val begrensning: String,
         override val inntekt: Double,
-        val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta.Spleis.EtterSkjønn,
+        override val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta.Spleis.EtterSkjønn,
         val skjønnsfastsettingopplysninger: Skjønnsfastsettingopplysninger,
         override val vedtakFattetTidspunkt: LocalDateTime,
         override val tags: Set<String>,
         val vedtakBegrunnelse: VedtakBegrunnelse?,
-    ) : Sykepengevedtak {
+        override val avviksprosent: Double,
+        override val sammenligningsgrunnlag: Sammenligningsgrunnlag,
+    ) : VedtakMedOpphavISpleis {
         data class Skjønnsfastsettingopplysninger(
             val begrunnelseFraMal: String,
             val begrunnelseFraFritekst: String,

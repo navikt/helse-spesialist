@@ -46,10 +46,13 @@ internal class VedtakFattetMelder(
     }
 
     private fun vedtakJson(sykepengevedtak: Sykepengevedtak.Vedtak): String {
+        val sykepengegrunnlagsfakta = sykepengevedtak.sykepengegrunnlagsfakta
+        val sammenligningsgrunnlag = sykepengevedtak.sammenligningsgrunnlag
+
         val begrunnelser: List<Map<String, Any>> =
             emptyList<Map<String, Any>>()
                 .supplerMedIndividuellBegrunnelse(sykepengevedtak.vedtakBegrunnelse, sykepengevedtak)
-        val sykepengegrunnlagsfakta = sykepengevedtak.sykepengegrunnlagsfakta
+
         val message =
             JsonMessage.newMessage(
                 "vedtak_fattet",
@@ -74,8 +77,8 @@ internal class VedtakFattetMelder(
                     "sykepengegrunnlagsfakta" to
                         mutableMapOf(
                             "omregnetÅrsinntekt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
-                            "innrapportertÅrsinntekt" to sykepengegrunnlagsfakta.innrapportertÅrsinntekt,
-                            "avviksprosent" to sykepengegrunnlagsfakta.avviksprosent,
+                            "innrapportertÅrsinntekt" to sammenligningsgrunnlag.totalbeløp,
+                            "avviksprosent" to sykepengevedtak.avviksprosent,
                             "6G" to sykepengegrunnlagsfakta.seksG,
                             "tags" to sykepengegrunnlagsfakta.tags,
                             "arbeidsgivere" to
@@ -83,7 +86,7 @@ internal class VedtakFattetMelder(
                                     mutableMapOf(
                                         "arbeidsgiver" to it.organisasjonsnummer,
                                         "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
-                                        "innrapportertÅrsinntekt" to it.innrapportertÅrsinntekt,
+                                        "innrapportertÅrsinntekt" to sammenligningsgrunnlag.innrapportertÅrsinntektFor(it.organisasjonsnummer),
                                     )
                                 },
                             "fastsatt" to "EtterHovedregel",
@@ -96,11 +99,13 @@ internal class VedtakFattetMelder(
     }
 
     private fun vedtakMedSkjønnsvurderingJson(sykepengevedtak: Sykepengevedtak.VedtakMedSkjønnsvurdering): String {
+        val skjønnsfastsettingopplysninger = sykepengevedtak.skjønnsfastsettingopplysninger
+        val sykepengegrunnlagsfakta = sykepengevedtak.sykepengegrunnlagsfakta
+        val sammenligningsgrunnlag = sykepengevedtak.sammenligningsgrunnlag
         val begrunnelser: List<Map<String, Any>> =
             emptyList<Map<String, Any>>()
-                .supplerMedSkjønnsfastsettingsbegrunnelse(sykepengevedtak.skjønnsfastsettingopplysninger, sykepengevedtak)
+                .supplerMedSkjønnsfastsettingsbegrunnelse(skjønnsfastsettingopplysninger, sykepengevedtak)
                 .supplerMedIndividuellBegrunnelse(sykepengevedtak.vedtakBegrunnelse, sykepengevedtak)
-        val sykepengegrunnlagsfakta = sykepengevedtak.sykepengegrunnlagsfakta
         val message =
             JsonMessage.newMessage(
                 "vedtak_fattet",
@@ -125,8 +130,8 @@ internal class VedtakFattetMelder(
                     "sykepengegrunnlagsfakta" to
                         mutableMapOf(
                             "omregnetÅrsinntekt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
-                            "innrapportertÅrsinntekt" to sykepengegrunnlagsfakta.innrapportertÅrsinntekt,
-                            "avviksprosent" to sykepengegrunnlagsfakta.avviksprosent,
+                            "innrapportertÅrsinntekt" to sammenligningsgrunnlag.totalbeløp,
+                            "avviksprosent" to sykepengevedtak.avviksprosent,
                             "6G" to sykepengegrunnlagsfakta.seksG,
                             "tags" to sykepengegrunnlagsfakta.tags,
                             "arbeidsgivere" to
@@ -134,14 +139,14 @@ internal class VedtakFattetMelder(
                                     mutableMapOf(
                                         "arbeidsgiver" to it.organisasjonsnummer,
                                         "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
-                                        "innrapportertÅrsinntekt" to it.innrapportertÅrsinntekt,
+                                        "innrapportertÅrsinntekt" to sammenligningsgrunnlag.innrapportertÅrsinntektFor(it.organisasjonsnummer),
                                         "skjønnsfastsatt" to it.skjønnsfastsatt,
                                     )
                                 },
                             "fastsatt" to "EtterSkjønn",
-                            "skjønnsfastsettingtype" to sykepengevedtak.skjønnsfastsettingopplysninger.skjønnsfastsettingtype,
-                            "skjønnsfastsettingårsak" to sykepengevedtak.skjønnsfastsettingopplysninger.skjønnsfastsettingsårsak,
-                            "skjønnsfastsatt" to sykepengevedtak.sykepengegrunnlagsfakta.skjønnsfastsatt,
+                            "skjønnsfastsettingtype" to skjønnsfastsettingopplysninger.skjønnsfastsettingtype,
+                            "skjønnsfastsettingårsak" to skjønnsfastsettingopplysninger.skjønnsfastsettingsårsak,
+                            "skjønnsfastsatt" to sykepengegrunnlagsfakta.skjønnsfastsatt,
                         ),
                     "begrunnelser" to begrunnelser,
                 ),

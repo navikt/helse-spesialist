@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -14,7 +15,6 @@ import no.nav.helse.modell.vilkårsprøving.InnrapportertInntektDto
 import no.nav.helse.modell.vilkårsprøving.InntektDto
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntektDto
 import no.nav.helse.modell.vilkårsprøving.SammenligningsgrunnlagDto
-import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -26,7 +26,7 @@ internal class AvsluttetMedVedtakRiverTest {
     private val mediator = mockk<MeldingMediator>(relaxed = true)
     private val avviksvurderingDao = mockk<AvviksvurderingDao>(relaxed = true)
     private val testRapid =
-        TestRapid().medRivers(AvsluttetMedVedtakRiver(mediator, avviksvurderingDao))
+        TestRapid().medRivers(AvsluttetMedVedtakRiver(mediator))
 
     @Test
     fun `Leser inn utkast_til_vedtak-event`() {

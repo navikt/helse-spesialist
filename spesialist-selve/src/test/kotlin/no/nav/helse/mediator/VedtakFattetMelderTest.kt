@@ -13,11 +13,15 @@ import no.nav.helse.modell.vedtak.Sykepengevedtak
 import no.nav.helse.modell.vedtak.Sykepengevedtak.VedtakMedSkjønnsvurdering
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vedtak.VedtakBegrunnelse
+import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
+import no.nav.helse.modell.vilkårsprøving.Inntekt
+import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 
 internal class VedtakFattetMelderTest {
@@ -173,8 +177,6 @@ internal class VedtakFattetMelderTest {
                 sykepengegrunnlagsfakta =
                     Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
                         omregnetÅrsinntekt = 10000.0,
-                        innrapportertÅrsinntekt = 10000.0,
-                        avviksprosent = 0.0,
                         seksG = 711720.0,
                         tags = mutableSetOf(),
                         arbeidsgivere =
@@ -182,14 +184,15 @@ internal class VedtakFattetMelderTest {
                                 Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
                                     organisasjonsnummer = ORGANISASJONSNUMMER,
                                     omregnetÅrsinntekt = 10000.0,
-                                    innrapportertÅrsinntekt = 10000.0,
                                 ),
                             ),
                     ),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 vedtakBegrunnelse = null,
-            )
+                avviksprosent = 0.0,
+                sammenligningsgrunnlag = sammenligningsgrunnlag(10000.0, ORGANISASJONSNUMMER),
+                )
         vedtakFattetMelder.vedtakFattet(infotrygd)
         vedtakFattetMelder.publiserUtgåendeMeldinger()
         val eventer = testRapid.inspektør.meldinger()
@@ -260,8 +263,6 @@ internal class VedtakFattetMelderTest {
                 sykepengegrunnlagsfakta =
                     Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
                         omregnetÅrsinntekt = 10000.0,
-                        innrapportertÅrsinntekt = 10000.0,
-                        avviksprosent = 0.0,
                         seksG = 711720.0,
                         tags = mutableSetOf(),
                         arbeidsgivere =
@@ -269,7 +270,6 @@ internal class VedtakFattetMelderTest {
                                 Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
                                     organisasjonsnummer = ORGANISASJONSNUMMER,
                                     omregnetÅrsinntekt = 10000.0,
-                                    innrapportertÅrsinntekt = 10000.0,
                                 ),
                             ),
                     ),
@@ -279,6 +279,8 @@ internal class VedtakFattetMelderTest {
                     Utfall.DELVIS_INNVILGELSE,
                     "En individuell begrunnelse"
                 ),
+                avviksprosent = 0.0,
+                sammenligningsgrunnlag = sammenligningsgrunnlag(10000.0, ORGANISASJONSNUMMER),
             )
         vedtakFattetMelder.vedtakFattet(spleis)
         vedtakFattetMelder.publiserUtgåendeMeldinger()
@@ -357,8 +359,6 @@ internal class VedtakFattetMelderTest {
                 sykepengegrunnlagsfakta =
                     Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
                         omregnetÅrsinntekt = 10000.0,
-                        innrapportertÅrsinntekt = 13000.0,
-                        avviksprosent = 30.0,
                         seksG = 711720.0,
                         tags = mutableSetOf(),
                         arbeidsgivere =
@@ -367,7 +367,6 @@ internal class VedtakFattetMelderTest {
                                     organisasjonsnummer = ORGANISASJONSNUMMER,
                                     omregnetÅrsinntekt = 10000.0,
                                     skjønnsfastsatt = 13000.0,
-                                    innrapportertÅrsinntekt = 13000.0,
                                 ),
                             ),
                         skjønnsfastsatt = 13000.0,
@@ -383,6 +382,8 @@ internal class VedtakFattetMelderTest {
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 vedtakBegrunnelse = null,
+                avviksprosent = 30.0,
+                sammenligningsgrunnlag = sammenligningsgrunnlag(12000.0, ORGANISASJONSNUMMER),
             )
         vedtakFattetMelder.vedtakFattet(infotrygd)
         vedtakFattetMelder.publiserUtgåendeMeldinger()
@@ -413,7 +414,7 @@ internal class VedtakFattetMelderTest {
         assertEquals(utbetalingId.toString(), event["utbetalingId"].asText())
         assertEquals("EtterSkjønn", event["sykepengegrunnlagsfakta"]["fastsatt"].asText())
         assertEquals(10000.0, event["sykepengegrunnlagsfakta"]["omregnetÅrsinntekt"].asDouble())
-        assertEquals(13000.0, event["sykepengegrunnlagsfakta"]["innrapportertÅrsinntekt"].asDouble())
+        assertEquals(12000.0, event["sykepengegrunnlagsfakta"]["innrapportertÅrsinntekt"].asDouble())
         assertEquals(30.0, event["sykepengegrunnlagsfakta"]["avviksprosent"].asDouble())
         assertEquals(711720.0, event["sykepengegrunnlagsfakta"]["6G"].asDouble())
         assertEquals(emptyList<String>(), objectMapper.convertValue(event["sykepengegrunnlagsfakta"]["tags"]))
@@ -422,7 +423,7 @@ internal class VedtakFattetMelderTest {
                 mapOf(
                     "arbeidsgiver" to ORGANISASJONSNUMMER,
                     "omregnetÅrsinntekt" to 10000.0,
-                    "innrapportertÅrsinntekt" to 13000.0,
+                    "innrapportertÅrsinntekt" to 12000.0,
                     "skjønnsfastsatt" to 13000.0,
                 ),
             ),
@@ -479,8 +480,6 @@ internal class VedtakFattetMelderTest {
                 sykepengegrunnlagsfakta =
                     Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
                         omregnetÅrsinntekt = 10000.0,
-                        innrapportertÅrsinntekt = 13000.0,
-                        avviksprosent = 30.0,
                         seksG = 711720.0,
                         tags = mutableSetOf(),
                         arbeidsgivere =
@@ -489,7 +488,6 @@ internal class VedtakFattetMelderTest {
                                 organisasjonsnummer = ORGANISASJONSNUMMER,
                                 omregnetÅrsinntekt = 10000.0,
                                 skjønnsfastsatt = 13000.0,
-                                innrapportertÅrsinntekt = 13000.0,
                             ),
                         ),
                         skjønnsfastsatt = 13000.0,
@@ -504,7 +502,9 @@ internal class VedtakFattetMelderTest {
                     ),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                vedtakBegrunnelse = VedtakBegrunnelse(Utfall.AVSLAG, "En individuell begrunnelse")
+                vedtakBegrunnelse = VedtakBegrunnelse(Utfall.AVSLAG, "En individuell begrunnelse"),
+                avviksprosent = 30.0,
+                sammenligningsgrunnlag = sammenligningsgrunnlag(13000.0, ORGANISASJONSNUMMER),
             )
         vedtakFattetMelder.vedtakFattet(infotrygd)
         vedtakFattetMelder.publiserUtgåendeMeldinger()
@@ -584,5 +584,18 @@ internal class VedtakFattetMelderTest {
 
         assertEquals(1, event["tags"].size())
         assertEquals("IngenNyArbeidsgiverperiode", event["tags"].first().asText())
+    }
+
+    private fun sammenligningsgrunnlag(
+        totalbeløp: Double,
+        arbeidsgiver: String
+    ): Sammenligningsgrunnlag {
+        val yearMonth = YearMonth.from(skjæringstidspunkt.minusMonths(1))
+        return Sammenligningsgrunnlag(
+            totalbeløp = totalbeløp,
+            innrapporterteInntekter = listOf(
+                InnrapportertInntekt(arbeidsgiver, listOf(Inntekt(yearMonth, totalbeløp)))
+            )
+        )
     }
 }
