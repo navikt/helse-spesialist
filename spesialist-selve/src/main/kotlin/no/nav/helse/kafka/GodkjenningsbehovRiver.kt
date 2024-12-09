@@ -15,7 +15,9 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype.Companion.values
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SpleisVedtaksperiode
+import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
 import java.time.LocalDate
 import java.util.UUID
 
@@ -51,6 +53,10 @@ internal class GodkjenningsbehovRiver(
                 "Godkjenning.behandlingId",
                 "Godkjenning.tags",
             )
+            it.requireArray("Godkjenning.sykepengegrunnlagsfakta.arbeidsgivere") {
+                requireKey("arbeidsgiver", "omregnetÅrsinntekt", "inntektskilde")
+                interestedIn("skjønnsfastsatt")
+            }
             it.requireArray("Godkjenning.perioderMedSammeSkjæringstidspunkt") {
                 requireKey("vedtaksperiodeId", "behandlingId", "fom", "tom")
             }
@@ -90,6 +96,18 @@ internal class GodkjenningsbehovRiver(
                     packet["Godkjenning.orgnummereMedRelevanteArbeidsforhold"]
                         .takeUnless(JsonNode::isMissingOrNull)
                         ?.map { it.asText() } ?: emptyList(),
+                spleisSykepengegrunnlagsfakta =
+                    SpleisSykepengegrunnlagsfakta(
+                        arbeidsgivere =
+                            packet["Godkjenning.sykepengegrunnlagsfakta.arbeidsgivere"].map {
+                                SykepengegrunnlagsArbeidsgiver(
+                                    arbeidsgiver = it["arbeidsgiver"].asText(),
+                                    omregnetÅrsinntekt = it["omregnetÅrsinntekt"].asDouble(),
+                                    inntektskilde = it["inntektskilde"].asText(),
+                                    skjønnsfastsatt = it["skjønnsfastsatt"]?.asDouble(),
+                                )
+                            },
+                    ),
                 kanAvvises = packet["Godkjenning.kanAvvises"].asBoolean(),
                 json = packet.toJson(),
             ),

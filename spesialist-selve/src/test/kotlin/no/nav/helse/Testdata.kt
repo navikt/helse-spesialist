@@ -3,6 +3,7 @@ package no.nav.helse
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.spleis.graphql.HentSnapshot
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
@@ -133,6 +134,9 @@ internal data class GodkjenningsbehovTestdata(
     val vilkårsgrunnlagId: UUID = UUID.randomUUID(),
     val spleisBehandlingId: UUID = UUID.randomUUID(),
     val tags: List<String> = emptyList(),
+    val spleisSykepengegrunnlagsfakta: SpleisSykepengegrunnlagsfakta = SpleisSykepengegrunnlagsfakta(
+        arbeidsgivere = emptyList()
+    ),
 )
 
 internal data class AvviksvurderingTestdata(

@@ -40,7 +40,7 @@ internal fun Behov.behovName() =
         is Behov.ÅpneOppgaver -> "ÅpneOppgaver"
     }
 
-private fun Behov.detaljer(): Map<String, Any> {
+private fun Behov.detaljer(): Map<String, Any?> {
     return when (this) {
         is Behov.EgenAnsatt -> emptyMap()
         is Behov.Enhet -> emptyMap()
@@ -90,12 +90,13 @@ private fun Behov.InntekterForSykepengegrunnlag.detaljer(): Map<String, Any> {
     )
 }
 
-private fun Behov.Risikovurdering.detaljer(): Map<String, Any> {
+private fun Behov.Risikovurdering.detaljer(): Map<String, Any?> {
     return mapOf(
         "vedtaksperiodeId" to vedtaksperiodeId,
         "organisasjonsnummer" to organisasjonsnummer,
         "førstegangsbehandling" to førstegangsbehandling,
         "kunRefusjon" to kunRefusjon,
+        "inntekt" to inntekt,
     )
 }
 

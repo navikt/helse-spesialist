@@ -288,7 +288,16 @@ internal object Testmeldingfabrikk {
                             "vedtaksperiodeId" to "$vedtaksperiodeId",
                             "behandlingId" to "$spleisBehandlingId"
                         )
-                    )
+                    ),
+                    "sykepengegrunnlagsfakta" to mapOf(
+                        "arbeidsgivere" to listOf(
+                            mapOf(
+                                "arbeidsgiver" to organisasjonsnummer,
+                                "omregnetÅrsinntekt" to 123456.7,
+                                "inntektskilde" to "Arbeidsgiver"
+                            )
+                        )
+                    ),
                 ),
             ).apply {
                 if (avviksvurderingId != null) {
@@ -887,6 +896,10 @@ internal object Testmeldingfabrikk {
                     "organisasjonsnummer" to organisasjonsnummer,
                     "førstegangsbehandling" to Periodetype.FORLENGELSE,
                     "kunRefusjon" to true,
+                    "inntekt" to mapOf(
+                        "omregnetÅrsinntekt" to "123456.7",
+                        "inntektskilde" to "Arbeidsgiver"
+                    )
                 ),
                 "@løsning" to mapOf(
                     "Risikovurdering" to mapOf(

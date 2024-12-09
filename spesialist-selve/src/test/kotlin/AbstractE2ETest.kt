@@ -37,6 +37,8 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.vedtaksperiode.Behandling
 import no.nav.helse.modell.vedtaksperiode.Periode
+import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
+import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Lovhjemmel
@@ -80,15 +82,26 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     val VEDTAKSPERIODE_ID_2 = testperson.vedtaksperiodeId2
     val UTBETALING_ID = testperson.utbetalingId1
     private val behandlinger = mutableMapOf<UUID, MutableList<UUID>>()
-    protected val godkjenningsbehovTestdata get() =
-        GodkjenningsbehovTestdata(
-            fødselsnummer = FØDSELSNUMMER,
-            aktørId = AKTØR,
-            organisasjonsnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            utbetalingId = UTBETALING_ID,
-            spleisBehandlingId = behandlinger.getValue(VEDTAKSPERIODE_ID).last(),
-        )
+    protected val godkjenningsbehovTestdata
+        get() =
+            GodkjenningsbehovTestdata(
+                fødselsnummer = FØDSELSNUMMER,
+                aktørId = AKTØR,
+                organisasjonsnummer = ORGNR,
+                vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                utbetalingId = UTBETALING_ID,
+                spleisBehandlingId = behandlinger.getValue(VEDTAKSPERIODE_ID).last(),
+                spleisSykepengegrunnlagsfakta = SpleisSykepengegrunnlagsfakta(
+                    arbeidsgivere = listOf(
+                        SykepengegrunnlagsArbeidsgiver(
+                            arbeidsgiver = ORGNR,
+                            omregnetÅrsinntekt = 123456.7,
+                            inntektskilde = "Arbeidsgiver",
+                            skjønnsfastsatt = null,
+                        )
+                    )
+                ),
+            )
     private val avviksvurderingTestdata = AvviksvurderingTestdata()
     internal lateinit var utbetalingId: UUID
         private set
@@ -712,6 +725,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             !godkjenningsbehovTestdata.orgnummereMedRelevanteArbeidsforhold.all {
                 it in alleArbeidsforhold
             } -> assertEtterspurteBehov("Arbeidsgiverinformasjon")
+
             else -> assertEtterspurteBehov("Vergemål", "Fullmakt")
         }
     }
@@ -857,7 +871,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         oppslagFeilet: Boolean = false,
     ) {
         assertEtterspurteBehov("ÅpneOppgaver")
-        sisteMeldingId = meldingssender.sendÅpneGosysOppgaverløsning(aktørId, fødselsnummer, antallÅpneOppgaverIGosys, oppslagFeilet)
+        sisteMeldingId =
+            meldingssender.sendÅpneGosysOppgaverløsning(aktørId, fødselsnummer, antallÅpneOppgaverIGosys, oppslagFeilet)
     }
 
     protected fun håndterRisikovurderingløsning(
@@ -1015,7 +1030,13 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         spleisBehandlingId: UUID = UUID.randomUUID(),
     ) {
         if (this::utbetalingId.isInitialized) håndterUtbetalingUtbetalt(aktørId, fødselsnummer, organisasjonsnummer)
-        sisteMeldingId = meldingssender.sendVedtakFattet(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId, spleisBehandlingId)
+        sisteMeldingId = meldingssender.sendVedtakFattet(
+            aktørId,
+            fødselsnummer,
+            organisasjonsnummer,
+            vedtaksperiodeId,
+            spleisBehandlingId
+        )
     }
 
     protected fun håndterAdressebeskyttelseEndret(
@@ -1093,7 +1114,14 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
         dager: List<OverstyringDag> =
             listOf(
-                OverstyringDag(1.januar(1970), Dagtype.Feriedag.toString(), Dagtype.Sykedag.toString(), null, 100, null),
+                OverstyringDag(
+                    1.januar(1970),
+                    Dagtype.Feriedag.toString(),
+                    Dagtype.Sykedag.toString(),
+                    null,
+                    100,
+                    null
+                ),
             ),
     ) {
         håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "overstyr_tidslinje") {
@@ -1134,7 +1162,13 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     ) {
         håndterOverstyring(aktørId, fødselsnummer, ORGNR, "overstyr_inntekt_og_refusjon") {
             val handling =
-                InntektOgRefusjonOverstyring(aktørId, fødselsnummer, skjæringstidspunkt, arbeidsgivere, vedtaksperiodeId)
+                InntektOgRefusjonOverstyring(
+                    aktørId,
+                    fødselsnummer,
+                    skjæringstidspunkt,
+                    arbeidsgivere,
+                    vedtaksperiodeId
+                )
             testMediator.håndter(handling, saksbehandler)
         }
     }
@@ -1636,16 +1670,16 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected fun mockSnapshot(fødselsnummer: String = FØDSELSNUMMER) {
         every { snapshotClient.hentSnapshot(fødselsnummer) } returns
-            snapshot(
-                versjon = 1,
-                fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
-                aktørId = godkjenningsbehovTestdata.aktørId,
-                organisasjonsnummer = godkjenningsbehovTestdata.organisasjonsnummer,
-                vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
-                utbetalingId = godkjenningsbehovTestdata.utbetalingId,
-                arbeidsgiverbeløp = 0,
-                personbeløp = 0,
-            )
+                snapshot(
+                    versjon = 1,
+                    fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
+                    aktørId = godkjenningsbehovTestdata.aktørId,
+                    organisasjonsnummer = godkjenningsbehovTestdata.organisasjonsnummer,
+                    vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
+                    utbetalingId = godkjenningsbehovTestdata.utbetalingId,
+                    arbeidsgiverbeløp = 0,
+                    personbeløp = 0,
+                )
     }
 
     protected enum class Kommandokjedetilstand {

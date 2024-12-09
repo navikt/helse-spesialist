@@ -4,9 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.kafka.message_builders.somJsonMessage
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.behov.Behov
+import no.nav.helse.modell.behov.InntektTilRisk
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
@@ -54,7 +55,10 @@ class BehovMessageBuilderTest {
     fun `Arbeidsforhold-behov`() {
         val organisasjonsnummer = lagOrganisasjonsnummer()
         val behov = Behov.Arbeidsforhold(fødselsnummer, organisasjonsnummer).somJson()
-        behov.assertBehov("Arbeidsforhold", mapOf("organisasjonsnummer" to organisasjonsnummer, "fødselsnummer" to fødselsnummer))
+        behov.assertBehov(
+            "Arbeidsforhold",
+            mapOf("organisasjonsnummer" to organisasjonsnummer, "fødselsnummer" to fødselsnummer)
+        )
     }
 
     @Test
@@ -62,7 +66,10 @@ class BehovMessageBuilderTest {
         val beregningStart = YearMonth.now().minusMonths(1)
         val beregningSlutt = YearMonth.now()
         val behov = Behov.InntekterForSykepengegrunnlag(beregningStart, beregningSlutt).somJson()
-        behov.assertBehov("InntekterForSykepengegrunnlag", mapOf("beregningStart" to beregningStart, "beregningSlutt" to beregningSlutt))
+        behov.assertBehov(
+            "InntekterForSykepengegrunnlag",
+            mapOf("beregningStart" to beregningStart, "beregningSlutt" to beregningSlutt)
+        )
     }
 
     @Test
@@ -73,9 +80,25 @@ class BehovMessageBuilderTest {
             vedtaksperiodeId = vedtaksperiodeId,
             organisasjonsnummer = organisasjonsnummer,
             førstegangsbehandling = true,
-            kunRefusjon = false
+            kunRefusjon = false,
+            inntekt = InntektTilRisk(
+                omregnetÅrsinntekt = 123456.7,
+                inntektskilde = "Arbeidsgiver"
+            )
         ).somJson()
-        behov.assertBehov("Risikovurdering", mapOf("vedtaksperiodeId" to vedtaksperiodeId, "organisasjonsnummer" to organisasjonsnummer, "førstegangsbehandling" to true, "kunRefusjon" to false))
+        behov.assertBehov(
+            "Risikovurdering",
+            mapOf(
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "organisasjonsnummer" to organisasjonsnummer,
+                "førstegangsbehandling" to true,
+                "kunRefusjon" to false,
+                "inntekt" to mapOf(
+                    "omregnetÅrsinntekt" to 123456.7,
+                    "inntektskilde" to "Arbeidsgiver",
+                )
+            )
+        )
     }
 
     @Test

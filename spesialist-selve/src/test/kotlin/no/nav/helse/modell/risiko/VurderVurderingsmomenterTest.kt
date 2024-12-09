@@ -12,10 +12,13 @@ import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
 import no.nav.helse.modell.behov.Behov
+import no.nav.helse.modell.behov.InntektTilRisk
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.Behandling
+import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
+import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.test.TestPerson
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -90,7 +93,8 @@ internal class VurderVurderingsmomenterTest {
                 vedtaksperiodeId = testperson.vedtaksperiodeId1,
                 organisasjonsnummer = testperson.orgnummer,
                 førstegangsbehandling = true,
-                kunRefusjon = false
+                kunRefusjon = false,
+                inntekt = inntekt()
             ), observer.behov.single()
         )
     }
@@ -107,7 +111,8 @@ internal class VurderVurderingsmomenterTest {
                 vedtaksperiodeId = testperson.vedtaksperiodeId1,
                 organisasjonsnummer = testperson.orgnummer,
                 førstegangsbehandling = true,
-                kunRefusjon = false
+                kunRefusjon = false,
+                inntekt = inntekt()
             ), observer.behov.single()
         )
     }
@@ -123,7 +128,8 @@ internal class VurderVurderingsmomenterTest {
                 vedtaksperiodeId = testperson.vedtaksperiodeId1,
                 organisasjonsnummer = testperson.orgnummer,
                 førstegangsbehandling = true,
-                kunRefusjon = true
+                kunRefusjon = true,
+                inntekt = inntekt()
             ), observer.behov.single()
         )
     }
@@ -139,7 +145,8 @@ internal class VurderVurderingsmomenterTest {
                 vedtaksperiodeId = testperson.vedtaksperiodeId1,
                 organisasjonsnummer = testperson.orgnummer,
                 førstegangsbehandling = true,
-                kunRefusjon = false
+                kunRefusjon = false,
+                inntekt = inntekt()
             ), observer.behov.single()
         )
     }
@@ -191,7 +198,8 @@ internal class VurderVurderingsmomenterTest {
                 vedtaksperiodeId = testperson.vedtaksperiodeId1,
                 organisasjonsnummer = testperson.orgnummer,
                 førstegangsbehandling = true,
-                kunRefusjon = true
+                kunRefusjon = true,
+                inntekt = inntekt()
             ), observer.behov.single()
         )
 
@@ -203,7 +211,8 @@ internal class VurderVurderingsmomenterTest {
                 vedtaksperiodeId = testperson.vedtaksperiodeId1,
                 organisasjonsnummer = testperson.orgnummer,
                 førstegangsbehandling = true,
-                kunRefusjon = true
+                kunRefusjon = true,
+                inntekt = inntekt()
             ), observer.behov.single()
         )
     }
@@ -239,5 +248,11 @@ internal class VurderVurderingsmomenterTest {
         førstegangsbehandling = førstegangsbehandling,
         sykefraværstilfelle = sykefraværstilfelle,
         utbetaling = utbetalingMock,
+        spleisSykepengegrunnlangsfakta = SpleisSykepengegrunnlagsfakta(listOf( SykepengegrunnlagsArbeidsgiver(omregnetÅrsinntekt = 123456.7, arbeidsgiver = testperson.orgnummer, inntektskilde = "Arbeidsgiver", skjønnsfastsatt = null)),)
+    )
+
+    private fun inntekt() = InntektTilRisk(
+        omregnetÅrsinntekt = 123456.7,
+        inntektskilde = "Arbeidsgiver"
     )
 }

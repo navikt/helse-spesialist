@@ -15,6 +15,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -114,6 +115,7 @@ internal class VurderAutomatiskAvvisningTest {
         kanAvvises: Boolean = true,
         inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
         andreInntektskilder: List<String> = emptyList(),
+        spleisSykepengegrunnlagsfakta: SpleisSykepengegrunnlagsfakta = SpleisSykepengegrunnlagsfakta(emptyList()),
         json: String = "{}"
     ) = GodkjenningsbehovData(
         id = id,
@@ -135,6 +137,7 @@ internal class VurderAutomatiskAvvisningTest {
         inntektskilde = inntektskilde,
         orgnummereMedRelevanteArbeidsforhold = andreInntektskilder,
         skjæringstidspunkt = skjæringstidspunkt,
+        spleisSykepengegrunnlagsfakta = spleisSykepengegrunnlagsfakta,
         json = json,
     )
 

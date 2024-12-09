@@ -45,6 +45,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.OVERGANG_FRA_IT
+import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
@@ -310,6 +311,7 @@ internal class OpprettSaksbehandleroppgaveTest {
             inntektskilde = inntektskilde,
             orgnummereMedRelevanteArbeidsforhold = emptyList(),
             skjæringstidspunkt = 1.januar,
+            spleisSykepengegrunnlagsfakta = SpleisSykepengegrunnlagsfakta(emptyList()),
             json = "{}"
         )
     )

@@ -34,5 +34,11 @@ sealed interface Behov {
         val organisasjonsnummer: String,
         val førstegangsbehandling: Boolean,
         val kunRefusjon: Boolean,
+        val inntekt: InntektTilRisk?,
     ) : Behov
 }
+
+data class InntektTilRisk(
+    val omregnetÅrsinntekt: Double,
+    val inntektskilde: String,
+)

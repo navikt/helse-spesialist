@@ -14,6 +14,8 @@ import no.nav.helse.modell.vedtaksperiode.Behandling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
+import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
@@ -146,6 +148,16 @@ internal class LøsGodkjenningsbehovTest {
         inntektskilde = inntektskilde,
         orgnummereMedRelevanteArbeidsforhold = andreInntektskilder,
         skjæringstidspunkt = skjæringstidspunkt,
+        spleisSykepengegrunnlagsfakta = SpleisSykepengegrunnlagsfakta(
+            arbeidsgivere = listOf(
+                SykepengegrunnlagsArbeidsgiver(
+                    arbeidsgiver = organisasjonsnummer,
+                    omregnetÅrsinntekt = 123456.7,
+                    inntektskilde = "Arbeidsgiver",
+                    skjønnsfastsatt = null,
+                )
+            )
+        ),
         json = json,
     )
 }

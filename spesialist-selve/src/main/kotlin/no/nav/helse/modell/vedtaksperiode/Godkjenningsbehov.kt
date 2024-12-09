@@ -65,6 +65,17 @@ data class SpleisVedtaksperiode(
     internal fun erRelevant(vedtaksperiodeId: UUID): Boolean = this.vedtaksperiodeId == vedtaksperiodeId
 }
 
+data class SpleisSykepengegrunnlagsfakta(
+    val arbeidsgivere: List<SykepengegrunnlagsArbeidsgiver>,
+)
+
+data class SykepengegrunnlagsArbeidsgiver(
+    val arbeidsgiver: String,
+    val omregnetÅrsinntekt: Double,
+    val inntektskilde: String,
+    val skjønnsfastsatt: Double?,
+)
+
 internal class Godkjenningsbehov(
     override val id: UUID,
     private val fødselsnummer: String,
@@ -85,6 +96,7 @@ internal class Godkjenningsbehov(
     val inntektskilde: Inntektskilde,
     val orgnummereMedRelevanteArbeidsforhold: List<String>,
     val skjæringstidspunkt: LocalDate,
+    val spleisSykepengegrunnlagsfakta: SpleisSykepengegrunnlagsfakta,
     private val json: String,
 ) : Vedtaksperiodemelding {
     override fun fødselsnummer() = fødselsnummer
@@ -120,6 +132,7 @@ internal class Godkjenningsbehov(
             utbetalingtype = utbetalingtype,
             kanAvvises = kanAvvises,
             inntektskilde = inntektskilde,
+            spleisSykepengegrunnlagsfakta = spleisSykepengegrunnlagsfakta,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
             skjæringstidspunkt = skjæringstidspunkt,
             json = json,
@@ -154,6 +167,18 @@ internal class Godkjenningsbehov(
         førstegangsbehandling = jsonNode.path("Godkjenning").path("førstegangsbehandling").asBoolean(),
         utbetalingtype = Utbetalingtype.valueOf(jsonNode.path("Godkjenning").path("utbetalingtype").asText()),
         inntektskilde = Inntektskilde.valueOf(jsonNode.path("Godkjenning").path("inntektskilde").asText()),
+        spleisSykepengegrunnlagsfakta =
+            SpleisSykepengegrunnlagsfakta(
+                arbeidsgivere =
+                    jsonNode.path("Godkjenning").path("sykepengegrunnlagsfakta").path("arbeidsgivere").map {
+                        SykepengegrunnlagsArbeidsgiver(
+                            arbeidsgiver = it["arbeidsgiver"].asText(),
+                            omregnetÅrsinntekt = it["omregnetÅrsinntekt"].asDouble(),
+                            inntektskilde = it["inntektskilde"].asText(),
+                            skjønnsfastsatt = it["skjønnsfastsatt"]?.asDouble(),
+                        )
+                    },
+            ),
         orgnummereMedRelevanteArbeidsforhold =
             jsonNode
                 .path("Godkjenning")
@@ -270,6 +295,7 @@ internal class GodkjenningsbehovCommand(
                 førstegangsbehandling = behovData.førstegangsbehandling,
                 sykefraværstilfelle = sykefraværstilfelle,
                 utbetaling = utbetaling,
+                spleisSykepengegrunnlangsfakta = behovData.spleisSykepengegrunnlagsfakta,
             ),
             VurderAutomatiskAvvisning(
                 personRepository = personRepository,

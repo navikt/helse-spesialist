@@ -16,6 +16,7 @@ import no.nav.helse.modell.vedtaksperiode.Behandling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.test.lagFødselsnummer
@@ -37,7 +38,7 @@ internal class GodkjenningMediatorTest {
         object : CommandContextObserver {
             private val hendelser = mutableListOf<UtgåendeHendelse>()
 
-            inline fun <reified T: UtgåendeHendelse> hendelseOrNull() = hendelser.singleOrNull { it is T }
+            inline fun <reified T : UtgåendeHendelse> hendelseOrNull() = hendelser.singleOrNull { it is T }
 
             override fun hendelse(hendelse: UtgåendeHendelse) {
                 hendelser.add(hendelse)
@@ -260,27 +261,29 @@ internal class GodkjenningMediatorTest {
         kanAvvises: Boolean = true,
         inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
         andreInntektskilder: List<String> = emptyList(),
+        spleisSykepengegrunnlagsfakta: SpleisSykepengegrunnlagsfakta = SpleisSykepengegrunnlagsfakta(emptyList()),
         json: String = "{}"
     ) = GodkjenningsbehovData(
-            id = id,
-            fødselsnummer = fødselsnummer,
+        id = id,
+        fødselsnummer = fødselsnummer,
         organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            spleisVedtaksperioder = emptyList(),
-            utbetalingId = utbetalingId,
-            spleisBehandlingId = spleisBehandlingId,
-            avviksvurderingId = avviksvurderingId,
-            vilkårsgrunnlagId = vilkårsgrunnlagId,
-            tags = tags.toList(),
-            periodeFom = fom,
-            periodeTom = tom,
-            periodetype = periodetype,
-            førstegangsbehandling = førstegangsbehandling,
-            utbetalingtype = utbetalingtype,
-            kanAvvises = kanAvvises,
-            inntektskilde = inntektskilde,
-            orgnummereMedRelevanteArbeidsforhold = andreInntektskilder,
-            skjæringstidspunkt = skjæringstidspunkt,
-            json = json,
+        vedtaksperiodeId = vedtaksperiodeId,
+        spleisVedtaksperioder = emptyList(),
+        utbetalingId = utbetalingId,
+        spleisBehandlingId = spleisBehandlingId,
+        avviksvurderingId = avviksvurderingId,
+        vilkårsgrunnlagId = vilkårsgrunnlagId,
+        tags = tags.toList(),
+        periodeFom = fom,
+        periodeTom = tom,
+        periodetype = periodetype,
+        førstegangsbehandling = førstegangsbehandling,
+        utbetalingtype = utbetalingtype,
+        kanAvvises = kanAvvises,
+        inntektskilde = inntektskilde,
+        orgnummereMedRelevanteArbeidsforhold = andreInntektskilder,
+        skjæringstidspunkt = skjæringstidspunkt,
+        spleisSykepengegrunnlagsfakta = spleisSykepengegrunnlagsfakta,
+        json = json,
     )
 }

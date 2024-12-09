@@ -5,6 +5,7 @@ import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -37,6 +38,17 @@ internal class RisikovurderingE2ETest : AbstractE2ETest() {
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         assertInnholdIBehov(behov = "Risikovurdering") { jsonNode ->
             assertTrue(jsonNode["Risikovurdering"]["kunRefusjon"].asBoolean())
+        }
+    }
+
+    @Test
+    fun `sender med inntekt`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
+        assertInnholdIBehov(behov = "Risikovurdering") { jsonNode ->
+            assertEquals("Arbeidsgiver", jsonNode["Risikovurdering"]["inntekt"]["inntektskilde"].asText())
+            assertEquals(123456.7, jsonNode["Risikovurdering"]["inntekt"]["omregnetÅrsinntekt"].asDouble())
         }
     }
 }

@@ -3,11 +3,13 @@ package no.nav.helse.modell.risiko
 import no.nav.helse.db.RisikovurderingRepository
 import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
 import no.nav.helse.modell.behov.Behov
+import no.nav.helse.modell.behov.InntektTilRisk
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_1
+import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -18,6 +20,7 @@ internal class VurderVurderingsmomenter(
     private val førstegangsbehandling: Boolean,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val utbetaling: Utbetaling,
+    private val spleisSykepengegrunnlangsfakta: SpleisSykepengegrunnlagsfakta,
 ) : Command {
     override fun execute(context: CommandContext) = behandle(context)
 
@@ -31,10 +34,18 @@ internal class VurderVurderingsmomenter(
             logg.info("Trenger risikovurdering av vedtaksperiode $vedtaksperiodeId")
             context.behov(
                 Behov.Risikovurdering(
-                    vedtaksperiodeId,
-                    organisasjonsnummer,
-                    førstegangsbehandling,
-                    !utbetaling.harEndringIUtbetalingTilSykmeldt(),
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    organisasjonsnummer = organisasjonsnummer,
+                    førstegangsbehandling = førstegangsbehandling,
+                    kunRefusjon = !utbetaling.harEndringIUtbetalingTilSykmeldt(),
+                    inntekt =
+                        spleisSykepengegrunnlangsfakta.arbeidsgivere.find { it.arbeidsgiver == organisasjonsnummer }?.let {
+                                sykepengegrunnlagsArbeidsgiver ->
+                            InntektTilRisk(
+                                omregnetÅrsinntekt = sykepengegrunnlagsArbeidsgiver.omregnetÅrsinntekt,
+                                inntektskilde = sykepengegrunnlagsArbeidsgiver.inntektskilde,
+                            )
+                        },
                 ),
             )
             return false
