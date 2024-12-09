@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-class CommandContextTilstandMediatorTest {
-    private val mediator = CommandContextTilstandMediator()
+class KommandokjedeTilstandsendringTest {
+    private val mediator = UtgåendeMeldingerMediator()
     private val testRapid = TestRapid()
     private val testmelding = object: Personmelding {
         override fun behandle(person: Person, kommandostarter: Kommandostarter, transactionalSession: TransactionalSession) {}
@@ -26,7 +26,7 @@ class CommandContextTilstandMediatorTest {
         val hendelseId = UUID.randomUUID()
         val event = KommandokjedeEndretEvent.Ferdig(navn, contextId, hendelseId)
         mediator.tilstandEndret(event)
-        mediator.publiserTilstandsendringer(testmelding, testRapid)
+        mediator.publiserOppsamledeMeldinger(testmelding, testRapid)
         val melding = testRapid.inspektør.message(0)
         assertEquals("kommandokjede_ferdigstilt", melding["@event_name"].asText())
         assertEquals(contextId, melding["commandContextId"].asUUID())
@@ -41,7 +41,7 @@ class CommandContextTilstandMediatorTest {
         val hendelseId = UUID.randomUUID()
         val event = KommandokjedeEndretEvent.Suspendert(navn, listOf(1, 2, 3), contextId, hendelseId)
         mediator.tilstandEndret(event)
-        mediator.publiserTilstandsendringer(testmelding, testRapid)
+        mediator.publiserOppsamledeMeldinger(testmelding, testRapid)
         val melding = testRapid.inspektør.message(0)
         assertEquals("kommandokjede_suspendert", melding["@event_name"].asText())
         assertEquals(contextId, melding["commandContextId"].asUUID())
@@ -56,7 +56,7 @@ class CommandContextTilstandMediatorTest {
         val hendelseId = UUID.randomUUID()
         val event = KommandokjedeEndretEvent.Avbrutt(contextId, hendelseId)
         mediator.tilstandEndret(event)
-        mediator.publiserTilstandsendringer(testmelding, testRapid)
+        mediator.publiserOppsamledeMeldinger(testmelding, testRapid)
         val melding = testRapid.inspektør.message(0)
         assertEquals("kommandokjede_avbrutt", melding["@event_name"].asText())
         assertEquals(contextId, melding["commandContextId"].asUUID())

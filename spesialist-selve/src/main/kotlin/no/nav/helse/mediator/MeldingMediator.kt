@@ -367,9 +367,9 @@ internal class MeldingMediator(
             logg.info("Melding SøknadSendt mottatt")
             sikkerlogg.info("Melding SøknadSendt mottatt:\n${melding.toJson()}")
             meldingDao.lagre(melding)
-            val commandContextTilstandMediator = CommandContextTilstandMediator()
-            kommandofabrikk.iverksettSøknadSendt(melding, commandContextTilstandMediator)
-            commandContextTilstandMediator.publiserTilstandsendringer(melding, messageContext)
+            val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
+            kommandofabrikk.iverksettSøknadSendt(melding, utgåendeMeldingerMediator)
+            utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, messageContext)
             logg.info("Melding SøknadSendt lest")
             sikkerlogg.info("Melding SøknadSendt lest")
         }
@@ -430,7 +430,6 @@ internal class MeldingMediator(
     ) {
         val meldingnavn = requireNotNull(melding::class.simpleName)
         val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
-        val commandContextTilstandMediator = CommandContextTilstandMediator()
         try {
             personService.brukPersonHvisFinnes(melding.fødselsnummer()) {
                 this.nyObserver(utgåendeMeldingerMediator)
@@ -440,7 +439,7 @@ internal class MeldingMediator(
                     session.transaction { transactionalSession ->
                         val kommandostarter =
                             kommandofabrikk.lagKommandostarter(
-                                setOf(utgåendeMeldingerMediator, commandContextTilstandMediator),
+                                setOf(utgåendeMeldingerMediator),
                                 commandContext(CommandContextDao(transactionalSession)),
                                 transactionalSession,
                             )
@@ -453,7 +452,6 @@ internal class MeldingMediator(
         } catch (e: Exception) {
             throw RuntimeException("Feil ved behandling av melding $meldingnavn", e)
         } finally {
-            commandContextTilstandMediator.publiserTilstandsendringer(melding, messageContext)
             logg.info("Melding $meldingnavn lest")
             sikkerlogg.info("Melding $meldingnavn lest")
         }

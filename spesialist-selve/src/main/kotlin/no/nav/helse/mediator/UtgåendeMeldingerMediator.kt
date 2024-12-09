@@ -1,5 +1,6 @@
 package no.nav.helse.mediator
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.kafka.message_builders.behovName
@@ -25,6 +26,7 @@ internal class UtgåendeMeldingerMediator : CommandContextObserver {
     private val behov = mutableMapOf<String, Behov>()
     private val hendelser = mutableListOf<UtgåendeHendelse>()
     private val sykepengevedtak = mutableListOf<Sykepengevedtak>()
+    private val kommandokjedetilstandsendringer = mutableListOf<KommandokjedeEndretEvent>()
     private var commandContextId: UUID? = null
 
     override fun behov(
@@ -43,6 +45,10 @@ internal class UtgåendeMeldingerMediator : CommandContextObserver {
         this.sykepengevedtak.add(sykepengevedtak)
     }
 
+    override fun tilstandEndret(event: KommandokjedeEndretEvent) {
+        kommandokjedetilstandsendringer.add(event)
+    }
+
     internal fun publiserOppsamledeMeldinger(
         hendelse: Personmelding,
         messageContext: MessageContext,
@@ -50,6 +56,8 @@ internal class UtgåendeMeldingerMediator : CommandContextObserver {
         publiserHendelser(hendelse, messageContext)
         publiserBehov(hendelse, messageContext)
         publiserVedtak(messageContext)
+        publiserTilstandsendringer(hendelse, messageContext)
+        kommandokjedetilstandsendringer.clear()
         sykepengevedtak.clear()
         behov.clear()
         hendelser.clear()
@@ -94,6 +102,23 @@ internal class UtgåendeMeldingerMediator : CommandContextObserver {
         logg.info("Publiserer behov for ${behov.keys}")
         sikkerlogg.info("Publiserer behov for ${behov.keys}\n{}", packet)
         messageContext.publish(packet)
+    }
+
+    private fun publiserTilstandsendringer(
+        hendelse: Personmelding,
+        messageContext: MessageContext,
+    ) {
+        kommandokjedetilstandsendringer.forEach { event ->
+            val message = JsonMessage.newMessage(event.eventName, event.detaljer()).toJson()
+            logg.info(
+                "Publiserer CommandContext tilstandendring i forbindelse med ${hendelse.javaClass.simpleName}, ny tilstand: ${event::class.simpleName}",
+            )
+            sikkerlogg.info(
+                "Publiserer CommandContext tilstandendring i forbindelse med ${hendelse.javaClass.simpleName}, ny tilstand: $${event::class.simpleName}\n{}",
+                kommandokjedetilstandsendringer,
+            )
+            messageContext.publish(message)
+        }
     }
 
     private companion object {
