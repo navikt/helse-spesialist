@@ -121,7 +121,7 @@ class Person private constructor(
         sykepengevedtakBuilder
             .aktørId(aktørId)
             .fødselsnummer(fødselsnummer)
-        observers.forEach { it.vedtakFattet(sykepengevedtakBuilder.build()) }
+        observers.forEach { it.sykepengevedtak(sykepengevedtakBuilder.build()) }
     }
 
     fun nySpleisBehandling(spleisBehandling: SpleisBehandling) {
@@ -176,7 +176,7 @@ class Person private constructor(
         vedtakBuilder.aktørId(aktørId)
     }
 
-    private fun fattVedtak(vedtak: Sykepengevedtak) = observers.forEach { it.vedtakFattet(vedtak) }
+    private fun fattVedtak(vedtak: Sykepengevedtak) = observers.forEach { it.sykepengevedtak(vedtak) }
 
     companion object {
         private val logg = LoggerFactory.getLogger(this::class.java)

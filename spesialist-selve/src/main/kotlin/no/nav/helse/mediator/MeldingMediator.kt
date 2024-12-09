@@ -1,6 +1,5 @@
 package no.nav.helse.mediator
 
-// import no.nav.helse.duplikatsjekkTidsbruk
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
@@ -432,10 +431,9 @@ internal class MeldingMediator(
         val meldingnavn = requireNotNull(melding::class.simpleName)
         val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
         val commandContextTilstandMediator = CommandContextTilstandMediator()
-        val vedtakFattetMelder = VedtakFattetMelder(messageContext)
         try {
             personService.brukPersonHvisFinnes(melding.fødselsnummer()) {
-                this.nyObserver(vedtakFattetMelder)
+                this.nyObserver(utgåendeMeldingerMediator)
                 logg.info("Personen finnes i databasen, behandler melding $meldingnavn")
                 sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")
                 sessionOf(dataSource, returnGeneratedKey = true).use { session ->
@@ -451,7 +449,6 @@ internal class MeldingMediator(
                 }
             }
             if (melding is VedtakFattet) melding.doFinally(vedtakDao) // Midlertidig frem til spesialsak ikke er en ting lenger
-            vedtakFattetMelder.publiserUtgåendeMeldinger()
             utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, messageContext)
         } catch (e: Exception) {
             throw RuntimeException("Feil ved behandling av melding $meldingnavn", e)

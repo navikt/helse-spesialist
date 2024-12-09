@@ -1,15 +1,18 @@
 package no.nav.helse.mediator
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.kafka.message_builders.behovName
 import no.nav.helse.kafka.message_builders.somJsonMessage
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.hendelse.UtgåendeHendelse
+import no.nav.helse.modell.person.PersonObserver
+import no.nav.helse.modell.vedtak.Sykepengevedtak
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-internal interface UtgåendeMeldingerObserver {
+internal interface UtgåendeMeldingerObserver : PersonObserver {
     fun behov(
         behov: Behov,
         commandContextId: UUID,
@@ -21,6 +24,7 @@ internal interface UtgåendeMeldingerObserver {
 internal class UtgåendeMeldingerMediator : CommandContextObserver {
     private val behov = mutableMapOf<String, Behov>()
     private val hendelser = mutableListOf<UtgåendeHendelse>()
+    private val sykepengevedtak = mutableListOf<Sykepengevedtak>()
     private var commandContextId: UUID? = null
 
     override fun behov(
@@ -35,12 +39,18 @@ internal class UtgåendeMeldingerMediator : CommandContextObserver {
         hendelser.add(hendelse)
     }
 
+    override fun sykepengevedtak(sykepengevedtak: Sykepengevedtak) {
+        this.sykepengevedtak.add(sykepengevedtak)
+    }
+
     internal fun publiserOppsamledeMeldinger(
         hendelse: Personmelding,
         messageContext: MessageContext,
     ) {
         publiserHendelser(hendelse, messageContext)
         publiserBehov(hendelse, messageContext)
+        publiserVedtak(messageContext)
+        sykepengevedtak.clear()
         behov.clear()
         hendelser.clear()
         commandContextId = null
@@ -56,6 +66,22 @@ internal class UtgåendeMeldingerMediator : CommandContextObserver {
             sikkerlogg.info("Publiserer hendelse i forbindelse med ${hendelse.javaClass.simpleName}\n{}", packet)
             messageContext.publish(packet)
         }
+    }
+
+    private fun publiserVedtak(messageContext: MessageContext) {
+        if (sykepengevedtak.isEmpty()) return
+        check(sykepengevedtak.size == 1) { "Forventer å publisere kun ett vedtak" }
+        val sykepengevedtak = sykepengevedtak.single()
+        val json = sykepengevedtak.somJsonMessage()
+        logg.info("Publiserer vedtak_fattet for {}", kv("vedtaksperiodeId", sykepengevedtak.vedtaksperiodeId))
+        sikkerlogg.info(
+            "Publiserer vedtak_fattet for {}, {}, {}",
+            kv("fødselsnummer", sykepengevedtak.fødselsnummer),
+            kv("organisasjonsnummer", sykepengevedtak.organisasjonsnummer),
+            kv("vedtaksperiodeId", sykepengevedtak.vedtaksperiodeId),
+        )
+        messageContext.publish(json)
+        this.sykepengevedtak.clear()
     }
 
     private fun publiserBehov(

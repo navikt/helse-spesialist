@@ -4,8 +4,11 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
+import kotliquery.TransactionalSession
 import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.januar
+import no.nav.helse.mediator.meldinger.Personmelding
+import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingstype
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingsårsak
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
@@ -24,9 +27,9 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
-internal class VedtakFattetMelderTest {
+internal class PubliserSykepengevedtakTest {
     private val testRapid = TestRapid()
-    private val vedtakFattetMelder = VedtakFattetMelder(testRapid)
+    private val vedtakFattetMelder = UtgåendeMeldingerMediator()
 
     private companion object {
         private const val FØDSELSNUMMER = "12345678910"
@@ -40,6 +43,21 @@ internal class VedtakFattetMelderTest {
         private val skjæringstidspunkt = 1.januar
         private val hendelser = listOf(UUID.randomUUID())
         private val vedtakFattetTidspunkt = LocalDateTime.now()
+    }
+
+    private val personmelding = object: Personmelding {
+        override fun behandle(
+            person: Person,
+            kommandostarter: Kommandostarter,
+            transactionalSession: TransactionalSession
+        ) {}
+
+        override fun fødselsnummer(): String = FØDSELSNUMMER
+
+        override val id: UUID = UUID.randomUUID()
+
+        override fun toJson(): String = "{}"
+
     }
 
     @Test
@@ -63,8 +81,8 @@ internal class VedtakFattetMelderTest {
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
             )
-        vedtakFattetMelder.vedtakFattet(ikkeRealitetsbehandlet)
-        vedtakFattetMelder.publiserUtgåendeMeldinger()
+        vedtakFattetMelder.sykepengevedtak(ikkeRealitetsbehandlet)
+        vedtakFattetMelder.publiserOppsamledeMeldinger(personmelding, testRapid)
         val eventer = testRapid.inspektør.meldinger()
 
         assertEquals(1, eventer.size)
@@ -121,8 +139,8 @@ internal class VedtakFattetMelderTest {
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 vedtakBegrunnelse = null,
             )
-        vedtakFattetMelder.vedtakFattet(infotrygd)
-        vedtakFattetMelder.publiserUtgåendeMeldinger()
+        vedtakFattetMelder.sykepengevedtak(infotrygd)
+        vedtakFattetMelder.publiserOppsamledeMeldinger(personmelding, testRapid)
         val eventer = testRapid.inspektør.meldinger()
 
         assertEquals(1, eventer.size)
@@ -193,8 +211,8 @@ internal class VedtakFattetMelderTest {
                 avviksprosent = 0.0,
                 sammenligningsgrunnlag = sammenligningsgrunnlag(10000.0, ORGANISASJONSNUMMER),
                 )
-        vedtakFattetMelder.vedtakFattet(infotrygd)
-        vedtakFattetMelder.publiserUtgåendeMeldinger()
+        vedtakFattetMelder.sykepengevedtak(infotrygd)
+        vedtakFattetMelder.publiserOppsamledeMeldinger(personmelding, testRapid)
         val eventer = testRapid.inspektør.meldinger()
 
         assertEquals(1, eventer.size)
@@ -282,8 +300,8 @@ internal class VedtakFattetMelderTest {
                 avviksprosent = 0.0,
                 sammenligningsgrunnlag = sammenligningsgrunnlag(10000.0, ORGANISASJONSNUMMER),
             )
-        vedtakFattetMelder.vedtakFattet(spleis)
-        vedtakFattetMelder.publiserUtgåendeMeldinger()
+        vedtakFattetMelder.sykepengevedtak(spleis)
+        vedtakFattetMelder.publiserOppsamledeMeldinger(personmelding, testRapid)
         val eventer = testRapid.inspektør.meldinger()
 
         assertEquals(1, eventer.size)
@@ -385,8 +403,8 @@ internal class VedtakFattetMelderTest {
                 avviksprosent = 30.0,
                 sammenligningsgrunnlag = sammenligningsgrunnlag(12000.0, ORGANISASJONSNUMMER),
             )
-        vedtakFattetMelder.vedtakFattet(infotrygd)
-        vedtakFattetMelder.publiserUtgåendeMeldinger()
+        vedtakFattetMelder.sykepengevedtak(infotrygd)
+        vedtakFattetMelder.publiserOppsamledeMeldinger(personmelding, testRapid)
         val eventer = testRapid.inspektør.meldinger()
 
         assertEquals(1, eventer.size)
@@ -506,8 +524,8 @@ internal class VedtakFattetMelderTest {
                 avviksprosent = 30.0,
                 sammenligningsgrunnlag = sammenligningsgrunnlag(13000.0, ORGANISASJONSNUMMER),
             )
-        vedtakFattetMelder.vedtakFattet(infotrygd)
-        vedtakFattetMelder.publiserUtgåendeMeldinger()
+        vedtakFattetMelder.sykepengevedtak(infotrygd)
+        vedtakFattetMelder.publiserOppsamledeMeldinger(personmelding, testRapid)
         val eventer = testRapid.inspektør.meldinger()
 
         assertEquals(1, eventer.size)
