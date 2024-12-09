@@ -170,14 +170,14 @@ internal class Godkjenningsbehov(
         spleisSykepengegrunnlagsfakta =
             SpleisSykepengegrunnlagsfakta(
                 arbeidsgivere =
-                    jsonNode.path("Godkjenning").path("sykepengegrunnlagsfakta").path("arbeidsgivere").map {
+                    jsonNode.path("Godkjenning").get("sykepengegrunnlagsfakta")?.get("arbeidsgivere")?.map {
                         SykepengegrunnlagsArbeidsgiver(
                             arbeidsgiver = it["arbeidsgiver"].asText(),
                             omregnetÅrsinntekt = it["omregnetÅrsinntekt"].asDouble(),
                             inntektskilde = it["inntektskilde"].asText(),
                             skjønnsfastsatt = it["skjønnsfastsatt"]?.asDouble(),
                         )
-                    },
+                    } ?: emptyList(),
             ),
         orgnummereMedRelevanteArbeidsforhold =
             jsonNode
