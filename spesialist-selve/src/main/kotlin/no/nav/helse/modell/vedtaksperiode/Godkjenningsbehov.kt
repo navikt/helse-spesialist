@@ -171,7 +171,7 @@ internal class Godkjenningsbehov(
             SpleisSykepengegrunnlagsfakta(
                 arbeidsgivere =
                     jsonNode.path("Godkjenning").get("sykepengegrunnlagsfakta")?.get("arbeidsgivere")?.mapNotNull {
-                        if (it["inntektskilde"].isMissingOrNull()) return@mapNotNull null
+                        if (it.get("inntektskilde") == null) return@mapNotNull null
                         SykepengegrunnlagsArbeidsgiver(
                             arbeidsgiver = it["arbeidsgiver"].asText(),
                             omregnetÅrsinntekt = it["omregnetÅrsinntekt"].asDouble(),
