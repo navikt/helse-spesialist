@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.kafka.GodkjenningsbehovRiver
@@ -9,7 +10,8 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
+import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
+import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -57,27 +59,157 @@ internal class GodkjenningsbehovRiverTest {
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
                 avviksvurderingId = avviksvurderingId,
                 periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-                utbetalingtype = Utbetalingtype.UTBETALING
+                utbetalingtype = Utbetalingtype.UTBETALING,
             )
         )
-        verify(exactly = 1) { mediator.mottaMelding(
-            melding = withArg<Godkjenningsbehov> {
-                assertEquals(HENDELSE, it.id)
-                assertEquals(FNR, it.fødselsnummer())
-                assertEquals(VEDTAKSPERIODE, it.vedtaksperiodeId())
-                assertEquals(ORGNR, it.organisasjonsnummer)
-                assertEquals(FOM, it.periodeFom)
-                assertEquals(TOM, it.periodeTom)
-                assertEquals(FOM, it.skjæringstidspunkt)
-                assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, it.inntektskilde)
-                assertEquals(relevanteArbeidsforhold, it.orgnummereMedRelevanteArbeidsforhold)
-                assertEquals(true, it.kanAvvises)
-                assertEquals(true, it.førstegangsbehandling)
-                assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, it.periodetype)
-                assertEquals(Utbetalingtype.UTBETALING, it.utbetalingtype)
-            },
-            messageContext = any()
-        ) }
+        verify(exactly = 1) {
+            mediator.mottaMelding(
+                melding = withArg<Godkjenningsbehov> {
+                    assertEquals(HENDELSE, it.id)
+                    assertEquals(FNR, it.fødselsnummer())
+                    assertEquals(VEDTAKSPERIODE, it.vedtaksperiodeId())
+                    assertEquals(ORGNR, it.organisasjonsnummer)
+                    assertEquals(FOM, it.periodeFom)
+                    assertEquals(TOM, it.periodeTom)
+                    assertEquals(FOM, it.skjæringstidspunkt)
+                    assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, it.inntektskilde)
+                    assertEquals(relevanteArbeidsforhold, it.orgnummereMedRelevanteArbeidsforhold)
+                    assertEquals(true, it.kanAvvises)
+                    assertEquals(true, it.førstegangsbehandling)
+                    assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, it.periodetype)
+                    assertEquals(Utbetalingtype.UTBETALING, it.utbetalingtype)
+                    assertEquals(
+                        SpleisSykepengegrunnlagsfakta(
+                            arbeidsgivere = listOf(
+                                SykepengegrunnlagsArbeidsgiver(
+                                    arbeidsgiver = ORGNR,
+                                    omregnetÅrsinntekt = 123456.7,
+                                    inntektskilde = "Arbeidsgiver",
+                                    skjønnsfastsatt = null,
+                                )
+                            )
+                        ), it.spleisSykepengegrunnlagsfakta
+                    )
+                },
+                messageContext = any()
+            )
+        }
+    }
+
+    @Test
+    fun `leser Godkjenningbehov fastsatt etter skjønn`() {
+        val relevanteArbeidsforhold = listOf(ORGNR)
+        val vilkårsgrunnlagId = UUID.randomUUID()
+        val avviksvurderingId = UUID.randomUUID()
+        val skjønnsfastsatt = 1000.0
+        testRapid.sendTestMessage(
+            Testmeldingfabrikk.lagGodkjenningsbehov(
+                aktørId = AKTØR,
+                fødselsnummer = FNR,
+                vedtaksperiodeId = VEDTAKSPERIODE,
+                utbetalingId = UTBETALING_ID,
+                organisasjonsnummer = ORGNR,
+                periodeFom = FOM,
+                periodeTom = TOM,
+                skjæringstidspunkt = FOM,
+                inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE,
+                orgnummereMedRelevanteArbeidsforhold = relevanteArbeidsforhold,
+                id = HENDELSE,
+                kanAvvises = true,
+                førstegangsbehandling = true,
+                vilkårsgrunnlagId = vilkårsgrunnlagId,
+                avviksvurderingId = avviksvurderingId,
+                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+                utbetalingtype = Utbetalingtype.UTBETALING,
+                fastsatt = "EtterSkjønn",
+                skjønnsfastsatt = skjønnsfastsatt,
+            )
+        )
+        verify(exactly = 1) {
+            mediator.mottaMelding(
+                melding = withArg<Godkjenningsbehov> {
+                    assertEquals(HENDELSE, it.id)
+                    assertEquals(FNR, it.fødselsnummer())
+                    assertEquals(VEDTAKSPERIODE, it.vedtaksperiodeId())
+                    assertEquals(ORGNR, it.organisasjonsnummer)
+                    assertEquals(FOM, it.periodeFom)
+                    assertEquals(TOM, it.periodeTom)
+                    assertEquals(FOM, it.skjæringstidspunkt)
+                    assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, it.inntektskilde)
+                    assertEquals(relevanteArbeidsforhold, it.orgnummereMedRelevanteArbeidsforhold)
+                    assertEquals(true, it.kanAvvises)
+                    assertEquals(true, it.førstegangsbehandling)
+                    assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, it.periodetype)
+                    assertEquals(Utbetalingtype.UTBETALING, it.utbetalingtype)
+                    assertEquals(
+                        SpleisSykepengegrunnlagsfakta(
+                            arbeidsgivere = listOf(
+                                SykepengegrunnlagsArbeidsgiver(
+                                    arbeidsgiver = ORGNR,
+                                    omregnetÅrsinntekt = 123456.7,
+                                    inntektskilde = "Arbeidsgiver",
+                                    skjønnsfastsatt = skjønnsfastsatt,
+                                )
+                            )
+                        ), it.spleisSykepengegrunnlagsfakta
+                    )
+                },
+                messageContext = any()
+            )
+        }
+    }
+
+    @Test
+    fun `leser Godkjenningbehov fastsatt i Infortrygd`() {
+        val relevanteArbeidsforhold = listOf(ORGNR)
+        val vilkårsgrunnlagId = UUID.randomUUID()
+        val avviksvurderingId = UUID.randomUUID()
+        testRapid.sendTestMessage(
+            Testmeldingfabrikk.lagGodkjenningsbehov(
+                aktørId = AKTØR,
+                fødselsnummer = FNR,
+                vedtaksperiodeId = VEDTAKSPERIODE,
+                utbetalingId = UTBETALING_ID,
+                organisasjonsnummer = ORGNR,
+                periodeFom = FOM,
+                periodeTom = TOM,
+                skjæringstidspunkt = FOM,
+                inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE,
+                orgnummereMedRelevanteArbeidsforhold = relevanteArbeidsforhold,
+                id = HENDELSE,
+                kanAvvises = true,
+                førstegangsbehandling = true,
+                vilkårsgrunnlagId = vilkårsgrunnlagId,
+                avviksvurderingId = avviksvurderingId,
+                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+                utbetalingtype = Utbetalingtype.UTBETALING,
+                fastsatt = "IInfotrygd"
+            )
+        )
+        verify(exactly = 1) {
+            mediator.mottaMelding(
+                melding = withArg<Godkjenningsbehov> {
+                    assertEquals(HENDELSE, it.id)
+                    assertEquals(FNR, it.fødselsnummer())
+                    assertEquals(VEDTAKSPERIODE, it.vedtaksperiodeId())
+                    assertEquals(ORGNR, it.organisasjonsnummer)
+                    assertEquals(FOM, it.periodeFom)
+                    assertEquals(TOM, it.periodeTom)
+                    assertEquals(FOM, it.skjæringstidspunkt)
+                    assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, it.inntektskilde)
+                    assertEquals(relevanteArbeidsforhold, it.orgnummereMedRelevanteArbeidsforhold)
+                    assertEquals(true, it.kanAvvises)
+                    assertEquals(true, it.førstegangsbehandling)
+                    assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, it.periodetype)
+                    assertEquals(Utbetalingtype.UTBETALING, it.utbetalingtype)
+                    assertEquals(
+                        SpleisSykepengegrunnlagsfakta(arbeidsgivere = emptyList()),
+                        it.spleisSykepengegrunnlagsfakta
+                    )
+                },
+                messageContext = any()
+            )
+        }
     }
 
     @Test

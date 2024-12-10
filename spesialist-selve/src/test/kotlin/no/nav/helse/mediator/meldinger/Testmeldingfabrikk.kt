@@ -258,6 +258,8 @@ internal object Testmeldingfabrikk {
         avviksvurderingId: UUID? = UUID.randomUUID(),
         spleisBehandlingId: UUID = UUID.randomUUID(),
         tags: List<String> = emptyList(),
+        fastsatt: String = "EtterHovedregel",
+        skjønnsfastsatt: Double? = null,
     ) =
         nyHendelse(
             id, "behov",
@@ -290,12 +292,17 @@ internal object Testmeldingfabrikk {
                         )
                     ),
                     "sykepengegrunnlagsfakta" to mapOf(
+                        "fastsatt" to fastsatt,
                         "arbeidsgivere" to listOf(
-                            mapOf(
+                            mutableMapOf(
                                 "arbeidsgiver" to organisasjonsnummer,
                                 "omregnetÅrsinntekt" to 123456.7,
-                                "inntektskilde" to "Arbeidsgiver"
-                            )
+                                "inntektskilde" to "Arbeidsgiver",
+                            ).apply {
+                                if (skjønnsfastsatt != null) {
+                                    put("skjønnsfastsatt", skjønnsfastsatt)
+                                }
+                            }
                         )
                     ),
                 ),

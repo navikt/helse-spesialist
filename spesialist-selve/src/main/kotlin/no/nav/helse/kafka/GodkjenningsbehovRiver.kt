@@ -53,9 +53,26 @@ internal class GodkjenningsbehovRiver(
                 "Godkjenning.behandlingId",
                 "Godkjenning.tags",
             )
-            it.requireArray("Godkjenning.sykepengegrunnlagsfakta.arbeidsgivere") {
-                requireKey("arbeidsgiver", "omregnetÅrsinntekt", "inntektskilde")
-                interestedIn("skjønnsfastsatt")
+            it.requireAny(
+                "Godkjenning.sykepengegrunnlagsfakta.fastsatt",
+                listOf("EtterHovedregel", "IInfotrygd", "EtterSkjønn"),
+            )
+            it.require("Godkjenning.sykepengegrunnlagsfakta.fastsatt") { fastsattNode ->
+                when (fastsattNode.asText()) {
+                    "EtterHovedregel" -> {
+                        it.requireArray("Godkjenning.sykepengegrunnlagsfakta.arbeidsgivere") {
+                            requireKey("arbeidsgiver", "omregnetÅrsinntekt", "inntektskilde")
+                        }
+                    }
+
+                    "EtterSkjønn" -> {
+                        it.requireArray("Godkjenning.sykepengegrunnlagsfakta.arbeidsgivere") {
+                            requireKey("arbeidsgiver", "omregnetÅrsinntekt", "inntektskilde", "skjønnsfastsatt")
+                        }
+                    }
+
+                    else -> {}
+                }
             }
             it.requireArray("Godkjenning.perioderMedSammeSkjæringstidspunkt") {
                 requireKey("vedtaksperiodeId", "behandlingId", "fom", "tom")
@@ -96,18 +113,7 @@ internal class GodkjenningsbehovRiver(
                     packet["Godkjenning.orgnummereMedRelevanteArbeidsforhold"]
                         .takeUnless(JsonNode::isMissingOrNull)
                         ?.map { it.asText() } ?: emptyList(),
-                spleisSykepengegrunnlagsfakta =
-                    SpleisSykepengegrunnlagsfakta(
-                        arbeidsgivere =
-                            packet["Godkjenning.sykepengegrunnlagsfakta.arbeidsgivere"].map {
-                                SykepengegrunnlagsArbeidsgiver(
-                                    arbeidsgiver = it["arbeidsgiver"].asText(),
-                                    omregnetÅrsinntekt = it["omregnetÅrsinntekt"].asDouble(),
-                                    inntektskilde = it["inntektskilde"].asText(),
-                                    skjønnsfastsatt = it["skjønnsfastsatt"]?.asDouble(),
-                                )
-                            },
-                    ),
+                spleisSykepengegrunnlagsfakta = spleisSykepengegrunnlagsfakta(packet),
                 kanAvvises = packet["Godkjenning.kanAvvises"].asBoolean(),
                 json = packet.toJson(),
             ),
@@ -123,6 +129,26 @@ internal class GodkjenningsbehovRiver(
                 fom = periodeNode["fom"].asLocalDate(),
                 tom = periodeNode["tom"].asLocalDate(),
                 skjæringstidspunkt = packet["Godkjenning.skjæringstidspunkt"].asLocalDate(),
+            )
+        }
+    }
+
+    private fun spleisSykepengegrunnlagsfakta(packet: JsonMessage): SpleisSykepengegrunnlagsfakta {
+        when (packet["Godkjenning.sykepengegrunnlagsfakta.fastsatt"].asText()) {
+            "IInfotrygd" -> return SpleisSykepengegrunnlagsfakta(
+                arbeidsgivere = emptyList(),
+            )
+
+            else -> return SpleisSykepengegrunnlagsfakta(
+                arbeidsgivere =
+                    packet["Godkjenning.sykepengegrunnlagsfakta.arbeidsgivere"].map {
+                        SykepengegrunnlagsArbeidsgiver(
+                            arbeidsgiver = it["arbeidsgiver"].asText(),
+                            omregnetÅrsinntekt = it["omregnetÅrsinntekt"].asDouble(),
+                            inntektskilde = it["inntektskilde"].asText(),
+                            skjønnsfastsatt = it["skjønnsfastsatt"]?.asDouble(),
+                        )
+                    },
             )
         }
     }
