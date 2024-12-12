@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
-internal class MetrikkRiverTest {
+internal class BehovtidsbrukMetrikkRiverTest {
 
-    val rapid = TestRapid().medRivers(MetrikkRiver())
+    val rapid = TestRapid().medRivers(BehovtidsbrukMetrikkRiver())
 
     @Test
     fun `sanity check`() {

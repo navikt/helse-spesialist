@@ -21,6 +21,7 @@ import no.nav.helse.kafka.AvsluttetMedVedtakRiver
 import no.nav.helse.kafka.AvsluttetUtenVedtakRiver
 import no.nav.helse.kafka.AvvikVurdertRiver
 import no.nav.helse.kafka.BehandlingOpprettetRiver
+import no.nav.helse.kafka.BehovtidsbrukMetrikkRiver
 import no.nav.helse.kafka.DokumentRiver
 import no.nav.helse.kafka.EgenAnsattLøsningRiver
 import no.nav.helse.kafka.EndretSkjermetinfoRiver
@@ -33,7 +34,6 @@ import no.nav.helse.kafka.InfotrygdutbetalingerLøsningRiver
 import no.nav.helse.kafka.InntektLøsningRiver
 import no.nav.helse.kafka.KlargjørPersonForVisningRiver
 import no.nav.helse.kafka.KommandokjedePåminnelseRiver
-import no.nav.helse.kafka.MetrikkRiver
 import no.nav.helse.kafka.MidnattRiver
 import no.nav.helse.kafka.NyeVarslerRiver
 import no.nav.helse.kafka.OppdaterPersondataRiver
@@ -189,7 +189,7 @@ internal class MeldingMediator(
                 AvvikVurdertRiver(this),
                 VarseldefinisjonRiver(this),
                 VedtaksperiodeNyUtbetalingRiver(this),
-                MetrikkRiver(),
+                BehovtidsbrukMetrikkRiver(),
                 AvsluttetMedVedtakRiver(this),
                 AvsluttetUtenVedtakRiver(this),
                 MidnattRiver(this),
