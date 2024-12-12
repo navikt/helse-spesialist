@@ -20,6 +20,7 @@ import no.nav.helse.modell.oppgave.Egenskap.GOSYS
 import no.nav.helse.modell.oppgave.Egenskap.HASTER
 import no.nav.helse.modell.oppgave.Egenskap.INFOTRYGDFORLENGELSE
 import no.nav.helse.modell.oppgave.Egenskap.INGEN_UTBETALING
+import no.nav.helse.modell.oppgave.Egenskap.MANGLER_IM
 import no.nav.helse.modell.oppgave.Egenskap.MEDLEMSKAP
 import no.nav.helse.modell.oppgave.Egenskap.OVERGANG_FRA_IT
 import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
@@ -86,6 +87,7 @@ internal class OpprettSaksbehandleroppgave(
                 skjønnsfastsettelse(vedtaksperiodeId)
                 tilbakedatert(vedtaksperiodeId)
                 kunÅpenGosysOppgave(vedtaksperiodeId)
+                manglerIM(vedtaksperiodeId)
                 medlemskap(vedtaksperiodeId)
                 haster(vedtaksperiodeId)
                 tilkommenInntekt(behovData.tags)
@@ -196,6 +198,10 @@ internal class OpprettSaksbehandleroppgave(
 
     private fun MutableSet<Egenskap>.medlemskap(vedtaksperiodeId: UUID) {
         if (sykefraværstilfelle.harMedlemskapsvarsel(vedtaksperiodeId)) add(MEDLEMSKAP)
+    }
+
+    private fun MutableSet<Egenskap>.manglerIM(vedtaksperiodeId: UUID) {
+        if (sykefraværstilfelle.harVarselOmManglendeInntektsmelding(vedtaksperiodeId)) add(MANGLER_IM)
     }
 
     private fun MutableSet<Egenskap>.tilkommenInntekt(tags: List<String>) {

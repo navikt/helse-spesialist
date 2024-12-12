@@ -49,6 +49,7 @@ enum class Egenskap {
     PA_VENT,
     TILBAKEDATERT,
     GOSYS,
+    MANGLER_IM,
     MEDLEMSKAP,
     TILKOMMEN,
 }

@@ -192,6 +192,7 @@ internal object OppgaveMapper {
             Egenskap.PÅ_VENT -> EgenskapForApi.PA_VENT
             Egenskap.TILBAKEDATERT -> EgenskapForApi.TILBAKEDATERT
             Egenskap.GOSYS -> EgenskapForApi.GOSYS
+            Egenskap.MANGLER_IM -> EgenskapForApi.MANGLER_IM
             Egenskap.MEDLEMSKAP -> EgenskapForApi.MEDLEMSKAP
             Egenskap.TILKOMMEN -> EgenskapForApi.TILKOMMEN
         }
@@ -235,6 +236,7 @@ internal object OppgaveMapper {
             EgenskapForDatabase.PÅ_VENT -> Egenskap.PÅ_VENT
             EgenskapForDatabase.TILBAKEDATERT -> Egenskap.TILBAKEDATERT
             EgenskapForDatabase.GOSYS -> Egenskap.GOSYS
+            EgenskapForDatabase.MANGLER_IM -> Egenskap.MANGLER_IM
             EgenskapForDatabase.MEDLEMSKAP -> Egenskap.MEDLEMSKAP
             EgenskapForDatabase.TILKOMMEN -> Egenskap.TILKOMMEN
         }
@@ -270,6 +272,7 @@ internal object OppgaveMapper {
             EgenskapDto.PÅ_VENT -> "PÅ_VENT"
             EgenskapDto.TILBAKEDATERT -> "TILBAKEDATERT"
             EgenskapDto.GOSYS -> "GOSYS"
+            EgenskapDto.MANGLER_IM -> "MANGLER_IM"
             EgenskapDto.MEDLEMSKAP -> "MEDLEMSKAP"
             EgenskapDto.TILKOMMEN -> "TILKOMMEN"
         }
@@ -305,6 +308,7 @@ internal object OppgaveMapper {
             EgenskapForDatabase.PÅ_VENT -> EgenskapDto.PÅ_VENT
             EgenskapForDatabase.TILBAKEDATERT -> EgenskapDto.TILBAKEDATERT
             EgenskapForDatabase.GOSYS -> EgenskapDto.GOSYS
+            EgenskapForDatabase.MANGLER_IM -> EgenskapDto.MANGLER_IM
             EgenskapForDatabase.MEDLEMSKAP -> EgenskapDto.MEDLEMSKAP
             EgenskapForDatabase.TILKOMMEN -> EgenskapDto.TILKOMMEN
         }
@@ -338,6 +342,7 @@ internal object OppgaveMapper {
             EgenskapForApi.PA_VENT -> EgenskapForDatabase.PÅ_VENT
             EgenskapForApi.TILBAKEDATERT -> EgenskapForDatabase.TILBAKEDATERT
             EgenskapForApi.GOSYS -> EgenskapForDatabase.GOSYS
+            EgenskapForApi.MANGLER_IM -> EgenskapForDatabase.MANGLER_IM
             EgenskapForApi.MEDLEMSKAP -> EgenskapForDatabase.MEDLEMSKAP
             EgenskapForApi.TILKOMMEN -> EgenskapForDatabase.TILKOMMEN
         }
@@ -370,6 +375,7 @@ internal object OppgaveMapper {
             EgenskapDto.PÅ_VENT -> EgenskapForDatabase.PÅ_VENT
             EgenskapDto.TILBAKEDATERT -> EgenskapForDatabase.TILBAKEDATERT
             EgenskapDto.GOSYS -> EgenskapForDatabase.GOSYS
+            EgenskapDto.MANGLER_IM -> EgenskapForDatabase.MANGLER_IM
             EgenskapDto.MEDLEMSKAP -> EgenskapForDatabase.MEDLEMSKAP
             EgenskapDto.VERGEMÅL -> EgenskapForDatabase.VERGEMÅL
             EgenskapDto.TILKOMMEN -> EgenskapForDatabase.TILKOMMEN

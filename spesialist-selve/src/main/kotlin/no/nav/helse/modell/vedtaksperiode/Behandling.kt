@@ -93,6 +93,8 @@ internal class Behandling private constructor(
 
     internal fun harKunGosysvarsel() = varsler.size == 1 && varsler.single().erGosysvarsel()
 
+    internal fun harVarselOmManglendeInntektsmelding() = varsler.any { it.erVarselOmManglendeInntektsmelding() }
+
     internal fun håndter(
         vedtaksperiode: Vedtaksperiode,
         spleisVedtaksperiode: SpleisVedtaksperiode,
@@ -526,6 +528,11 @@ internal class Behandling private constructor(
                     it.tilhører(behandling.periode.tom())
                 }.filter { it.varsler.isNotEmpty() }
                 .all { it.harKunGosysvarsel() }
+
+        internal fun List<Behandling>.harVarselOmManglendeInntektsmelding(behandling: Behandling): Boolean =
+            filter { it.tilhører(behandling.periode.tom()) }
+                .filter { it.varsler.isNotEmpty() }
+                .any { it.harVarselOmManglendeInntektsmelding() }
 
         internal fun List<Behandling>.harMedlemskapsvarsel(vedtaksperiodeId: UUID): Boolean =
             overlapperMedEllerTidligereEnn(vedtaksperiodeId).any {

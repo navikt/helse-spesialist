@@ -27,6 +27,7 @@ enum class EgenskapDto {
     PÅ_VENT,
     TILBAKEDATERT,
     GOSYS,
+    MANGLER_IM,
     MEDLEMSKAP,
     VERGEMÅL,
     TILKOMMEN,
@@ -61,6 +62,7 @@ enum class EgenskapDto {
                 Egenskap.PÅ_VENT -> PÅ_VENT
                 Egenskap.TILBAKEDATERT -> TILBAKEDATERT
                 Egenskap.GOSYS -> GOSYS
+                Egenskap.MANGLER_IM -> MANGLER_IM
                 Egenskap.MEDLEMSKAP -> MEDLEMSKAP
                 Egenskap.VERGEMÅL -> VERGEMÅL
                 Egenskap.TILKOMMEN -> TILKOMMEN
@@ -95,6 +97,7 @@ enum class EgenskapDto {
                 PÅ_VENT -> Egenskap.PÅ_VENT
                 TILBAKEDATERT -> Egenskap.TILBAKEDATERT
                 GOSYS -> Egenskap.GOSYS
+                MANGLER_IM -> Egenskap.MANGLER_IM
                 MEDLEMSKAP -> Egenskap.MEDLEMSKAP
                 VERGEMÅL -> Egenskap.VERGEMÅL
                 TILKOMMEN -> Egenskap.TILKOMMEN

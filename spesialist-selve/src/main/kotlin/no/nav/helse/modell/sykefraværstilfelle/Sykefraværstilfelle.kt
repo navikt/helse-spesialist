@@ -8,6 +8,7 @@ import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.finnGenerasjonFor
 import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.harKunGosysvarsel
 import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.harMedlemskapsvarsel
+import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.harVarselOmManglendeInntektsmelding
 import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.harÅpenGosysOppgave
 import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.håndterGodkjent
 import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.håndterNyttVarsel
@@ -47,6 +48,13 @@ internal class Sykefraværstilfelle(
             gjeldendeGenerasjoner.finnGenerasjonForVedtaksperiode(vedtaksperiodeId)
                 ?: throw IllegalStateException("Sykefraværstilfellet må inneholde generasjon for vedtaksperiodeId=$vedtaksperiodeId")
         return gjeldendeGenerasjoner.harKunGosysvarsel(generasjonForPeriode)
+    }
+
+    internal fun harVarselOmManglendeInntektsmelding(vedtaksperiodeId: UUID): Boolean {
+        val generasjonForPeriode =
+            gjeldendeGenerasjoner.finnGenerasjonForVedtaksperiode(vedtaksperiodeId)
+                ?: throw IllegalStateException("Sykefraværstilfellet må inneholde generasjon for vedtaksperiodeId=$vedtaksperiodeId")
+        return gjeldendeGenerasjoner.harVarselOmManglendeInntektsmelding(generasjonForPeriode)
     }
 
     internal fun håndter(varsel: Varsel) {
