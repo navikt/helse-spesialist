@@ -12,6 +12,8 @@ import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtInntektOgRefusjon
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
 
 private val registry = Metrics.globalRegistry.add(PrometheusMeterRegistry(PrometheusConfig.DEFAULT))
 private val automatiseringsteller =
@@ -66,11 +68,11 @@ internal fun registrerTidsbrukForDuplikatsjekk(
 
 internal fun registrerTidsbrukForBehov(
     behov: String,
-    tid: Double,
+    tid: Duration,
 ) = tidsbrukForBehovMetrikkBuilder
     .withRegistry(registry)
     .withTag("behov", behov)
-    .record(tid)
+    .record(tid.toDouble(DurationUnit.MILLISECONDS))
 
 internal fun registrerTidsbrukForHendelse(
     command: String,
