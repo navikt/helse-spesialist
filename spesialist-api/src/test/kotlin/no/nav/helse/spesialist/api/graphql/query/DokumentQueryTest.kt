@@ -1,5 +1,7 @@
 package no.nav.helse.spesialist.api.graphql.query
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.NullNode
 import io.mockk.every
 import io.mockk.verify
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
@@ -175,7 +177,7 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
         assertEquals("2018-01-31", hentetSoknadsperioder["tom"].asText())
         assertEquals(100, hentetSoknadsperioder["grad"].asInt())
         assertEquals(100, hentetSoknadsperioder["sykmeldingsgrad"].asInt())
-        assertTrue(hentetSoknadsperioder["faktiskGrad"].isNull)
+        assertNullNode(hentetSoknadsperioder["faktiskGrad"])
         val spørsmål = dokument["sporsmal"]
         assertEquals(0, spørsmål.size())
         assertTrue(spørsmål.none { it["tag"].asText() == "BEKREFT_OPPLYSNINGER" })
@@ -314,26 +316,29 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
         }
 
         assertEquals(17, dokument.size())
-        assertTrue(dokument["bruttoUtbetalt"].isNull)
+        assertNullNode(dokument["bruttoUtbetalt"])
         assertEquals(35000.0, dokument["beregnetInntekt"].asDouble())
         assertEquals("2023-08-01", dokument["foersteFravaersdag"].asText())
         assertEquals(0.0, dokument["refusjon"]["beloepPrMnd"].asDouble())
-        assertTrue(dokument["refusjon"]["opphoersdato"].isNull)
-        assertTrue(dokument["endringIRefusjoner"].isEmpty)
-        assertTrue(dokument["opphoerAvNaturalytelser"].isEmpty)
-        assertTrue(dokument["gjenopptakelseNaturalytelser"].isEmpty)
+        assertNullNode(dokument["refusjon"]["opphoersdato"])
+        assertEmptyNode(dokument["endringIRefusjoner"])
+        assertEmptyNode(dokument["opphoerAvNaturalytelser"])
+        assertEmptyNode(dokument["gjenopptakelseNaturalytelser"])
         assertEquals("2023-08-01", dokument["arbeidsgiverperioder"].first()["fom"].asText())
         assertEquals("2023-08-16", dokument["arbeidsgiverperioder"].first()["tom"].asText())
-        assertTrue(dokument["ferieperioder"].isEmpty)
+        assertEmptyNode(dokument["ferieperioder"])
         assertEquals("2023-08-01", dokument["foersteFravaersdag"].asText())
-        assertTrue(dokument["naerRelasjon"].isNull)
+        assertNullNode(dokument["naerRelasjon"])
         assertEquals("MUSKULØS VALS", dokument["innsenderFulltNavn"].asText())
         assertEquals("12345678", dokument["innsenderTelefon"].asText())
         assertEquals("Tariffendring", dokument["inntektEndringAarsak"]["aarsak"].asText())
-        assertTrue(dokument["inntektEndringAarsak"]["perioder"].isNull)
+        assertNullNode(dokument["inntektEndringAarsak"]["perioder"])
         assertEquals("2023-08-08", dokument["inntektEndringAarsak"]["gjelderFra"].asText())
         assertEquals("2023-09-12", dokument["inntektEndringAarsak"]["bleKjent"].asText())
     }
+
+    private fun assertNullNode(node: JsonNode) = assertEquals(NullNode::class, node::class) { "Expected node to be null, but it was: $node"}
+    private fun assertEmptyNode(node: JsonNode) = assertEquals(0, node.size()) { "Expected node to contain 0 children/elements, but it contained: $node"}
 
     @Language("JSON")
     private fun søknadJsonMedNeiSvar(arbeidGjenopptatt: String, sykmeldingSkrevet: String) = """{
