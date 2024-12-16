@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api
 
-import com.expediagroup.graphql.server.execution.GraphQLRequestHandler
 import com.expediagroup.graphql.server.execution.GraphQLServer
 import com.fasterxml.jackson.databind.JsonNode
 import graphql.GraphQL
@@ -12,7 +11,6 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import io.ktor.server.application.install
 import io.ktor.server.plugins.doublereceive.DoubleReceive
 import io.ktor.server.request.ApplicationRequest
 import io.ktor.server.routing.route
@@ -29,6 +27,7 @@ import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkS
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.endepunkter.ApiTesting
 import no.nav.helse.spesialist.api.graphql.ContextFactory
+import no.nav.helse.spesialist.api.graphql.LoggingGraphQLRequestHandler
 import no.nav.helse.spesialist.api.graphql.RequestParser
 import no.nav.helse.spesialist.api.graphql.SchemaBuilder
 import no.nav.helse.spesialist.api.graphql.queryHandler
@@ -117,7 +116,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                     beslutterGruppeId,
                 ),
             requestHandler =
-                GraphQLRequestHandler(
+                LoggingGraphQLRequestHandler(
                     GraphQL.newGraphQL(schema).build(),
                 ),
         )
@@ -237,7 +236,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                             UUID.randomUUID(),
                         ),
                     requestHandler =
-                        GraphQLRequestHandler(
+                        LoggingGraphQLRequestHandler(
                             GraphQL.newGraphQL(schemaBuilder.build()).build(),
                         ),
                 )

@@ -1,7 +1,9 @@
 package no.nav.helse.spesialist.api.graphql
 
 import com.expediagroup.graphql.server.execution.GraphQLRequestHandler
+import com.expediagroup.graphql.server.types.GraphQLBatchResponse
 import com.expediagroup.graphql.server.types.GraphQLRequest
+import com.expediagroup.graphql.server.types.GraphQLResponse
 import com.expediagroup.graphql.server.types.GraphQLServerRequest
 import com.expediagroup.graphql.server.types.GraphQLServerResponse
 import graphql.GraphQL
@@ -27,6 +29,15 @@ class LoggingGraphQLRequestHandler(graphQL: GraphQL) : GraphQLRequestHandler(gra
                 }
             }
         }
-        return super.executeRequest(graphQLRequest, graphQLContext)
+        val response = super.executeRequest(graphQLRequest, graphQLContext)
+        when (response) {
+            is GraphQLResponse<*> -> {
+                val errors = response.errors
+                if (!errors.isNullOrEmpty()) sikkerLogg.warn("GraphQL-respons inneholder feil: ${errors.joinToString()}")
+            }
+            // Vi bruker ikke batch-operasjoner per nå
+            is GraphQLBatchResponse -> Unit
+        }
+        return response
     }
 }
