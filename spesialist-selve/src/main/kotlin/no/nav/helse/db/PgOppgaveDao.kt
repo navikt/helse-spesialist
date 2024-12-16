@@ -469,6 +469,7 @@ class PgOppgaveDao(
                          FROM totrinnsvurdering
                          INNER JOIN utbetaling_id ui on ui.id = utbetaling_id_ref
                          WHERE utbetaling_id_ref IS NOT NULL
+                         AND saksbehandler = :oid
                          ORDER BY vedtaksperiode_id, totrinnsvurdering.id DESC
                      ) ttv ON ttv.vedtaksperiode_id = v.vedtaksperiode_id AND ttv.utbetaling_id = o.utbetaling_id
             WHERE (ttv.saksbehandler = :oid OR o.ferdigstilt_av_oid = :oid) AND (o.status in ('Ferdigstilt', 'AvventerSystem'))
