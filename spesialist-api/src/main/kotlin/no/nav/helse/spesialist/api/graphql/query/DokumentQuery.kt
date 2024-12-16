@@ -2,7 +2,8 @@ package no.nav.helse.spesialist.api.graphql.query
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.jackson.asLocalDate
-import com.github.navikt.tbd_libs.jackson.asLocalDateTime
+import com.github.navikt.tbd_libs.jackson.asLocalDateOrNull
+import com.github.navikt.tbd_libs.jackson.asLocalDateTimeOrNull
 import com.github.navikt.tbd_libs.jackson.isMissingOrNull
 import graphql.GraphQLError
 import graphql.GraphqlErrorException
@@ -125,96 +126,80 @@ class DokumentQuery(
 
     private fun JsonNode.tilInntektsmelding(): DokumentInntektsmelding {
         return DokumentInntektsmelding(
-            arbeidsforholdId =
-                this.path("arbeidsforholdId")
-                    .takeUnless { it.isMissingOrNull() }?.asText(),
-            virksomhetsnummer =
-                this.path("virksomhetsnummer")
-                    .takeUnless { it.isMissingOrNull() }?.asText(),
-            begrunnelseForReduksjonEllerIkkeUtbetalt =
-                this.path("begrunnelseForReduksjonEllerIkkeUtbetalt")
-                    .takeUnless { it.isMissingOrNull() }?.asText(),
-            bruttoUtbetalt = this.path("bruttoUtbetalt").takeUnless { it.isMissingOrNull() }?.asDouble(),
-            beregnetInntekt = this.path("beregnetInntekt").takeUnless { it.isMissingOrNull() }?.asDouble(),
+            arbeidsforholdId = getIfNotNull("arbeidsforholdId")?.asText(),
+            virksomhetsnummer = getIfNotNull("virksomhetsnummer")?.asText(),
+            begrunnelseForReduksjonEllerIkkeUtbetalt = getIfNotNull("begrunnelseForReduksjonEllerIkkeUtbetalt")?.asText(),
+            bruttoUtbetalt = getIfNotNull("bruttoUtbetalt")?.asDouble(),
+            beregnetInntekt = getIfNotNull("beregnetInntekt")?.asDouble(),
             refusjon =
-                this.path("refusjon").takeUnless { it.isMissingOrNull() }?.let { refusjon ->
+                getIfNotNull("refusjon")?.let { refusjon ->
                     Refusjon(
-                        beloepPrMnd = refusjon["beloepPrMnd"].takeUnless { it.isMissingOrNull() }?.asDouble(),
-                        opphoersdato = refusjon["opphoersdato"].takeUnless { it.isMissingOrNull() }?.asLocalDate(),
+                        beloepPrMnd = refusjon.getIfNotNull("beloepPrMnd")?.asDouble(),
+                        opphoersdato = refusjon.getIfNotNull("opphoersdato")?.asLocalDate(),
                     )
                 },
             endringIRefusjoner =
-                this.path("endringIRefusjoner").takeUnless { it.isMissingOrNull() }
-                    ?.map { endringIRefusjon ->
-                        EndringIRefusjon(
-                            endringsdato =
-                                endringIRefusjon["endringsdato"].takeUnless { it.isMissingOrNull() }?.asLocalDate(),
-                            beloep = endringIRefusjon["beloep"].takeUnless { it.isMissingOrNull() }?.asDouble(),
-                        )
-                    },
-            opphoerAvNaturalytelser =
-                this.path("opphoerAvNaturalytelser").takeUnless { it.isMissingOrNull() }
-                    ?.map { opphørAvNaturalytelse ->
-                        OpphoerAvNaturalytelse(
-                            opphørAvNaturalytelse["naturalytelse"].takeUnless { it.isMissingOrNull() }
-                                ?.asText()?.tilNaturalytelse(),
-                            fom = opphørAvNaturalytelse["fom"].takeUnless { it.isMissingOrNull() }?.asLocalDate(),
-                            beloepPrMnd =
-                                opphørAvNaturalytelse["beloepPrMnd"].takeUnless { it.isMissingOrNull() }
-                                    ?.asDouble(),
-                        )
-                    },
-            gjenopptakelseNaturalytelser =
-                this.path("gjenopptakelseNaturalytelser").takeUnless { it.isMissingOrNull() }
-                    ?.map { gjenopptakelseNaturalytelse ->
-                        GjenopptakelseNaturalytelse(
-                            gjenopptakelseNaturalytelse["naturalytelse"].takeUnless { it.isMissingOrNull() }
-                                ?.asText()?.tilNaturalytelse(),
-                            fom = gjenopptakelseNaturalytelse["fom"].takeUnless { it.isMissingOrNull() }?.asLocalDate(),
-                            beloepPrMnd =
-                                gjenopptakelseNaturalytelse["beloepPrMnd"].takeUnless { it.isMissingOrNull() }
-                                    ?.asDouble(),
-                        )
-                    },
-            arbeidsgiverperioder =
-                this.path("arbeidsgiverperioder").takeUnless { it.isMissingOrNull() }
-                    ?.map { arbeidsgiverperiode ->
-                        IMPeriode(
-                            fom = arbeidsgiverperiode["fom"].takeUnless { it.isMissingOrNull() }?.asLocalDate(),
-                            tom = arbeidsgiverperiode["tom"].takeUnless { it.isMissingOrNull() }?.asLocalDate(),
-                        )
-                    },
-            ferieperioder =
-                this.path("ferieperioder").takeUnless { it.isMissingOrNull() }?.map { ferieperiode ->
-                    IMPeriode(
-                        fom = ferieperiode["fom"].takeUnless { it.isMissingOrNull() }?.asLocalDate(),
-                        tom = ferieperiode["tom"].takeUnless { it.isMissingOrNull() }?.asLocalDate(),
+                getIfNotNull("endringIRefusjoner")?.map { endringIRefusjon ->
+                    EndringIRefusjon(
+                        endringsdato = endringIRefusjon.getIfNotNull("endringsdato")?.asLocalDate(),
+                        beloep = endringIRefusjon.getIfNotNull("beloep")?.asDouble(),
                     )
                 },
-            foersteFravaersdag = this.path("foersteFravaersdag").takeUnless { it.isMissingOrNull() }?.asLocalDate(),
-            naerRelasjon = this.path("naerRelasjon").takeUnless { it.isMissingOrNull() }?.asBoolean(),
-            innsenderFulltNavn = this.path("innsenderFulltNavn").takeUnless { it.isMissingOrNull() }?.asText(),
-            innsenderTelefon = this.path("innsenderTelefon").takeUnless { it.isMissingOrNull() }?.asText(),
+            opphoerAvNaturalytelser =
+                getIfNotNull("opphoerAvNaturalytelser")?.map { opphørAvNaturalytelse ->
+                    OpphoerAvNaturalytelse(
+                        naturalytelse = opphørAvNaturalytelse.getIfNotNull("naturalytelse")?.asText()?.tilNaturalytelse(),
+                        fom = opphørAvNaturalytelse.getIfNotNull("fom")?.asLocalDate(),
+                        beloepPrMnd = opphørAvNaturalytelse.getIfNotNull("beloepPrMnd")?.asDouble(),
+                    )
+                },
+            gjenopptakelseNaturalytelser =
+                getIfNotNull("gjenopptakelseNaturalytelser")?.map { gjenopptakelseNaturalytelse ->
+                    GjenopptakelseNaturalytelse(
+                        naturalytelse =
+                            gjenopptakelseNaturalytelse.getIfNotNull("naturalytelse")?.asText()
+                                ?.tilNaturalytelse(),
+                        fom = gjenopptakelseNaturalytelse.getIfNotNull("fom")?.asLocalDate(),
+                        beloepPrMnd = gjenopptakelseNaturalytelse.getIfNotNull("beloepPrMnd")?.asDouble(),
+                    )
+                },
+            arbeidsgiverperioder =
+                getIfNotNull("arbeidsgiverperioder")?.map { arbeidsgiverperiode ->
+                    IMPeriode(
+                        fom = arbeidsgiverperiode.getIfNotNull("fom")?.asLocalDate(),
+                        tom = arbeidsgiverperiode.getIfNotNull("tom")?.asLocalDate(),
+                    )
+                },
+            ferieperioder =
+                getIfNotNull("ferieperioder")?.map { ferieperiode ->
+                    IMPeriode(
+                        fom = ferieperiode.getIfNotNull("fom")?.asLocalDate(),
+                        tom = ferieperiode.getIfNotNull("tom")?.asLocalDate(),
+                    )
+                },
+            foersteFravaersdag = getIfNotNull("foersteFravaersdag")?.asLocalDate(),
+            naerRelasjon = getIfNotNull("naerRelasjon")?.asBoolean(),
+            innsenderFulltNavn = getIfNotNull("innsenderFulltNavn")?.asText(),
+            innsenderTelefon = getIfNotNull("innsenderTelefon")?.asText(),
             inntektEndringAarsak =
-                this.path("inntektEndringAarsak").takeUnless { it.isMissingOrNull() }?.let { endringAarsak ->
+                getIfNotNull("inntektEndringAarsak")?.let { endringAarsak ->
                     InntektEndringAarsak(
-                        aarsak = endringAarsak["aarsak"].asText(),
-                        perioder =
-                            endringAarsak["perioder"].takeUnless { it.isMissingOrNull() }?.map { periode ->
-                                IMPeriode(
-                                    fom = periode["fom"].takeUnless { it.isMissingOrNull() }?.asLocalDate(),
-                                    tom = periode["tom"].takeUnless { it.isMissingOrNull() }?.asLocalDate(),
-                                )
-                            },
-                        gjelderFra = endringAarsak["gjelderFra"].takeUnless { it.isMissingOrNull() }?.asLocalDate(),
-                        bleKjent = endringAarsak["bleKjent"].takeUnless { it.isMissingOrNull() }?.asLocalDate(),
+                        endringAarsak.get("aarsak").asText(),
+                        endringAarsak.getIfNotNull("perioder")?.map { periode ->
+                            IMPeriode(
+                                fom = periode.getIfNotNull("fom")?.asLocalDate(),
+                                tom = periode.getIfNotNull("tom")?.asLocalDate(),
+                            )
+                        },
+                        endringAarsak.getIfNotNull("gjelderFra")?.asLocalDate(),
+                        endringAarsak.getIfNotNull("bleKjent")?.asLocalDate(),
                     )
                 },
             avsenderSystem =
-                this.path("avsenderSystem").takeUnless { it.isMissingOrNull() }?.let { avsenderSystem ->
+                getIfNotNull("avsenderSystem")?.let { avsenderSystem ->
                     AvsenderSystem(
-                        navn = avsenderSystem["navn"].takeUnless { it.isMissingOrNull() }?.asText(),
-                        versjon = avsenderSystem["versjon"].takeUnless { it.isMissingOrNull() }?.asText(),
+                        navn = avsenderSystem.getIfNotNull("navn")?.asText(),
+                        versjon = avsenderSystem.getIfNotNull("versjon")?.asText(),
                     )
                 },
         )
@@ -252,16 +237,12 @@ class DokumentQuery(
     }
 
     private fun JsonNode.tilSøknad(): Soknad {
-        val type = this.path("type").takeUnless { it.isMissingOrNull() }?.asText()?.tilSoknadstype()
-        val arbeidGjenopptatt = this.path("arbeidGjenopptatt").takeUnless { it.isMissingOrNull() }?.asLocalDate()
-        val sykmeldingSkrevet = this.path("sykmeldingSkrevet").takeUnless { it.isMissingOrNull() }?.asLocalDateTime()
-        val egenmeldingsdagerFraSykmelding =
-            this.path("egenmeldingsdagerFraSykmelding").takeUnless { it.isMissingOrNull() }?.map { it.asLocalDate() }
-        val soknadsperioder =
-            this.path("soknadsperioder").takeUnless { it.isMissingOrNull() }?.map { it.tilSøknadsperioder() }
-        val sporsmal =
-            this.path("sporsmal").takeUnless { it.isMissingOrNull() }?.map { it.tilSpørsmål() }
-                ?.filter { it.skalVises() }
+        val type = getIfNotNull("type")?.asText()?.tilSoknadstype()
+        val arbeidGjenopptatt = getIfNotNull("arbeidGjenopptatt")?.asLocalDateOrNull()
+        val sykmeldingSkrevet = getIfNotNull("sykmeldingSkrevet")?.asLocalDateTimeOrNull()
+        val egenmeldingsdagerFraSykmelding = getIfNotNull("egenmeldingsdagerFraSykmelding")?.map { it.asLocalDate() }
+        val soknadsperioder = getIfNotNull("soknadsperioder")?.map { it.tilSøknadsperioder() }
+        val sporsmal = getIfNotNull("sporsmal")?.map { it.tilSpørsmål() }?.filter { it.skalVises() }
         return Soknad(
             type = type,
             arbeidGjenopptatt = arbeidGjenopptatt,
@@ -294,28 +275,26 @@ class DokumentQuery(
 
     private fun JsonNode.tilSøknadsperioder(): Soknadsperioder {
         return Soknadsperioder(
-            fom = this.path("fom").asLocalDate(),
-            tom = this.path("tom").asLocalDate(),
-            grad = this.path("grad").takeUnless { it.isMissingOrNull() }?.asInt(),
-            sykmeldingsgrad = this.path("sykmeldingsgrad").takeUnless { it.isMissingOrNull() }?.asInt(),
-            faktiskGrad = this.path("faktiskGrad").takeUnless { it.isMissingOrNull() }?.asInt(),
+            fom = get("fom").asLocalDate(),
+            tom = get("tom").asLocalDate(),
+            grad = getIfNotNull("grad")?.asInt(),
+            sykmeldingsgrad = getIfNotNull("sykmeldingsgrad")?.asInt(),
+            faktiskGrad = getIfNotNull("faktiskGrad")?.asInt(),
         )
     }
 
     private fun JsonNode.tilSpørsmål(): Sporsmal {
-        val svar = this.path("svar").takeUnless { it.isMissingOrNull() }?.map { it.tilSvar() }
+        val svar = getIfNotNull("svar")?.map { Svar(it.getIfNotNull("verdi")?.asText()) }
         val kriterieForVisningAvUndersporsmal =
-            this.path("kriterieForVisningAvUndersporsmal").takeUnless { it.isMissingOrNull() }?.asText()
-                ?.tilVisningskriterium()
+            getIfNotNull("kriterieForVisningAvUndersporsmal")?.asText()?.tilVisningskriterium()
         val undersporsmal =
-            this.path("undersporsmal").takeUnless { it.isMissingOrNull() }?.map { it.tilSpørsmål() }
-                ?.filter { it.skalVises(rotnivå = false) }
+            getIfNotNull("undersporsmal")?.map { it.tilSpørsmål() }?.filter { it.skalVises(rotnivå = false) }
 
         return Sporsmal(
-            tag = this.path("tag").takeUnless { it.isMissingOrNull() }?.asText(),
-            sporsmalstekst = this.path("sporsmalstekst").takeUnless { it.isMissingOrNull() }?.asText(),
-            undertekst = this.path("undertekst").takeUnless { it.isMissingOrNull() }?.asText(),
-            svartype = this.path("svartype").takeUnless { it.isMissingOrNull() }?.asText()?.tilSvartype(),
+            tag = getIfNotNull("tag")?.asText(),
+            sporsmalstekst = getIfNotNull("sporsmalstekst")?.asText(),
+            undertekst = getIfNotNull("undertekst")?.asText(),
+            svartype = getIfNotNull("svartype")?.asText()?.tilSvartype(),
             svar = svar,
             undersporsmal = undersporsmal,
             kriterieForVisningAvUndersporsmal = kriterieForVisningAvUndersporsmal,
@@ -339,12 +318,6 @@ class DokumentQuery(
             (this.kriterieForVisningAvUndersporsmal == null || this.kriterieForVisningAvUndersporsmal.name == this.svar?.firstOrNull()?.verdi) && harUnderspørsmål
 
         return harTagSomSkalVises && (kriterieForVisningAvUndersporsmalOppfylt || (førsteSvar != null && !svartNeiPåRotnivå))
-    }
-
-    private fun JsonNode.tilSvar(): Svar {
-        return Svar(
-            verdi = this.path("verdi").takeUnless { it.isMissingOrNull() }?.asText(),
-        )
     }
 
     private fun String.tilSvartype(): Svartype {
@@ -398,6 +371,8 @@ class DokumentQuery(
         }
     }
 }
+
+private fun JsonNode.getIfNotNull(key: String) = get(key).takeUnless { it.isMissingOrNull() }
 
 enum class DokumentType {
     SØKNAD,
