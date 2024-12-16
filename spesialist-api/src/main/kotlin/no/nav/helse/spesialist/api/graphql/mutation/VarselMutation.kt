@@ -23,7 +23,7 @@ class VarselMutation(private val varselRepository: ApiVarselRepository) : Mutati
         varselkode: String,
         ident: String,
         definisjonIdString: String? = null,
-    ): DataFetcherResult<VarselDTO> =
+    ): DataFetcherResult<VarselDTO?> =
         withContext(Dispatchers.IO) {
             val generasjonId = UUID.fromString(generasjonIdString)
 
@@ -53,12 +53,12 @@ class VarselMutation(private val varselRepository: ApiVarselRepository) : Mutati
             }
         }
 
-    private fun varselError(error: GraphQLError): DataFetcherResult<VarselDTO> = newResult<VarselDTO>().error(error).build()
+    private fun varselError(error: GraphQLError): DataFetcherResult<VarselDTO?> = newResult<VarselDTO>().error(error).build()
 
     private fun VarselDTO?.graphQlResult(
         varselkode: String,
         generasjonId: UUID,
-    ): DataFetcherResult<VarselDTO> =
+    ): DataFetcherResult<VarselDTO?> =
         this?.let { newResult<VarselDTO>().data(it).build() }
             ?: varselError(getUpdateError(varselkode, generasjonId))
 
