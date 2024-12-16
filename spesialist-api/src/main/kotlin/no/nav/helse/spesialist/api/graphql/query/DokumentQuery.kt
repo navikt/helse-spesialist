@@ -45,7 +45,7 @@ class DokumentQuery(
         fnr: String,
         dokumentId: String,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Soknad> {
+    ): DataFetcherResult<Soknad?> {
         if (isForbidden(fnr, env)) {
             return DataFetcherResult.newResult<Soknad?>().error(getForbiddenError(fnr)).build()
         }
