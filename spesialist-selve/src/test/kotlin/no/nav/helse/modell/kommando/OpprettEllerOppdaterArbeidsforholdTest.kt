@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 class OpprettEllerOppdaterArbeidsforholdTest {
@@ -92,7 +93,7 @@ class OpprettEllerOppdaterArbeidsforholdTest {
 
     @Test
     fun `oppdaterer arbeidsforhold`() {
-        arbeidsforholdFinnes(enKomplettArbeidsforholdDto(oppdatert = LocalDate.now().minusYears(1)))
+        arbeidsforholdFinnes(enKomplettArbeidsforholdDto(oppdatert = LocalDateTime.now().minusYears(1)))
         val command = enCommand()
         assertFalse(command.execute(context))
         assertTrue(observer.behov.isNotEmpty())
@@ -165,7 +166,7 @@ class OpprettEllerOppdaterArbeidsforholdTest {
         sluttdato: LocalDate? = SLUTTDATO,
         stillingstittel: String = STILLINGSTITTEL,
         stillingsprosent: Int = STILLINGSPROSENT,
-        oppdatert: LocalDate = LocalDate.now()
+        oppdatert: LocalDateTime = LocalDateTime.now()
     ) = KomplettArbeidsforholdDto(
         fødselsnummer = fødselsnummer,
         organisasjonsnummer = organisasjonsnummer,

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 internal class ArbeidsforholdDaoTest : DatabaseIntegrationTest() {
     private companion object {
@@ -100,7 +101,7 @@ internal class ArbeidsforholdDaoTest : DatabaseIntegrationTest() {
     fun `finner sist oppdatert`() {
         arbeidsforholdDao.upsertArbeidsforhold(FNR, ORGNUMMER, listOf(enKomplettArbeidsforholdDto()))
         arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER).first().also {
-            assertTrue(it.oppdatert > LocalDate.now().minusDays(10))
+            assertTrue(it.oppdatert > LocalDateTime.now().minusDays(10))
         }
     }
 
@@ -145,7 +146,7 @@ internal class ArbeidsforholdDaoTest : DatabaseIntegrationTest() {
         sluttdato: LocalDate? = SLUTTDATO,
         stillingstittel: String = STILLINGSTITTEL,
         stillingsprosent: Int = STILLINGSPROSENT,
-        oppdatert: LocalDate = LocalDate.now()
+        oppdatert: LocalDateTime = LocalDateTime.now()
     ) = KomplettArbeidsforholdDto(
         fødselsnummer = fødselsnummer,
         organisasjonsnummer = organisasjonsnummer,

@@ -15,7 +15,7 @@ internal class ArbeidsforholdDao(
         organisasjonsnummer: String,
     ) = asSQL(
         """
-        SELECT startdato, sluttdato, stillingstittel, stillingsprosent
+        SELECT startdato, sluttdato, stillingstittel, stillingsprosent, oppdatert
         FROM arbeidsforhold
         WHERE person_ref = (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer)
           AND arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE organisasjonsnummer = :organisasjonsnummer);
@@ -30,6 +30,7 @@ internal class ArbeidsforholdDao(
             sluttdato = row.localDateOrNull("sluttdato"),
             stillingsprosent = row.int("stillingsprosent"),
             stillingstittel = row.string("stillingstittel"),
+            oppdatert = row.localDateTime("oppdatert"),
         )
     }
 

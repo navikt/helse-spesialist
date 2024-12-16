@@ -1,6 +1,7 @@
 package no.nav.helse.modell
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 open class ArbeidsforholdDto(
     val fødselsnummer: String,
@@ -14,7 +15,7 @@ class KomplettArbeidsforholdDto(
     val sluttdato: LocalDate?,
     val stillingstittel: String,
     val stillingsprosent: Int,
-    val oppdatert: LocalDate = LocalDate.now(),
+    val oppdatert: LocalDateTime = LocalDateTime.now(),
     fødselsnummer: String,
     organisasjonsnummer: String,
 ) : ArbeidsforholdDto(
@@ -22,7 +23,7 @@ class KomplettArbeidsforholdDto(
         organisasjonsnummer,
     ) {
     override fun måOppdateres(): Boolean {
-        return oppdatert <= LocalDate.now().minusDays(1)
+        return oppdatert <= LocalDateTime.now().minusDays(1)
     }
 
     override fun equals(other: Any?): Boolean =
@@ -35,7 +36,7 @@ class KomplettArbeidsforholdDto(
                 sluttdato == other.sluttdato &&
                 stillingstittel.equals(other.stillingstittel) &&
                 stillingsprosent.equals(other.stillingsprosent) &&
-                oppdatert.equals(other.oppdatert)
+                oppdatert.withNano(0) == other.oppdatert.withNano(0)
 
         )
 
@@ -46,7 +47,7 @@ class KomplettArbeidsforholdDto(
         sluttdato?.also { result = 31 * result + sluttdato.hashCode() }
         result = 31 * result + stillingstittel.hashCode()
         result = 31 * result + stillingsprosent.hashCode()
-        result = 31 * result + oppdatert.hashCode()
+        result = 31 * result + oppdatert.withNano(0).hashCode()
         return result
     }
 }
