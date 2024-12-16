@@ -10,7 +10,6 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -158,28 +157,6 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         assertEquals(ORGNUMMER, vedtakDao.finnOrganisasjonsnummer(VEDTAKSPERIODE))
     }
 
-    @Test
-    fun spesialsak() {
-        nyPerson()
-        opprettSpesialsak(VEDTAKSPERIODE)
-        assertTrue(vedtakDao.erSpesialsak(VEDTAKSPERIODE))
-    }
-
-    @Test
-    fun `ikke spesialsak`() {
-        nyPerson()
-        assertFalse(vedtakDao.erSpesialsak(VEDTAKSPERIODE))
-    }
-
-    @Test
-    fun `sett spesialsak ferdigbehandlet`() {
-        nyPerson()
-        opprettSpesialsak(VEDTAKSPERIODE)
-        assertTrue(vedtakDao.erSpesialsak(VEDTAKSPERIODE))
-        vedtakDao.spesialsakFerdigbehandlet(VEDTAKSPERIODE)
-        assertFalse(vedtakDao.erSpesialsak(VEDTAKSPERIODE))
-    }
-
     private fun finnVedtaksperiodetype(vedtaksperiodeId: UUID): Periodetype {
         return sessionOf(dataSource).use {
             it.run(
@@ -196,12 +173,4 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
                     .map { row -> row.uuid("vedtaksperiode_id") }.asSingle,
             )
         }
-
-    private fun opprettSpesialsak(vedtaksperiodeId: UUID) {
-        @Language("PostgreSQL")
-        val query = """INSERT INTO spesialsak(vedtaksperiode_id) VALUES(?)"""
-        sessionOf(dataSource).use {
-            it.run(queryOf(query, vedtaksperiodeId).asExecute)
-        }
-    }
 }

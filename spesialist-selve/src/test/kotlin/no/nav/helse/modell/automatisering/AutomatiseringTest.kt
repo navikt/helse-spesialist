@@ -1,13 +1,10 @@
 package no.nav.helse.modell.automatisering
 
-import ToggleHelpers.disable
-import ToggleHelpers.enable
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.januar
 import no.nav.helse.modell.MeldingDao
-import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -34,7 +31,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.parallel.ResourceLock
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -105,7 +101,6 @@ internal class AutomatiseringTest {
 
     @BeforeEach
     fun setupDefaultTilHappyCase() {
-        every { vedtakDaoMock.erSpesialsak(vedtaksperiodeId) } returns false
         every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(true)
         every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
         every { åpneGosysOppgaverDaoMock.antallÅpneOppgaver(any()) } returns 0
@@ -133,38 +128,6 @@ internal class AutomatiseringTest {
         } returns LocalDateTime.now().minusMonths(6).plusDays(1)
         stikkprøveFullRefusjonEnArbeidsgiver = false
         stikkprøveUtsEnArbeidsgiverForlengelse = false
-    }
-
-    @Test
-    @ResourceLock("Toggle_AutomatiserSpesialsak")
-    fun `går automatisk hvis det er spesialsak og ikke noen svartelistede varsler og ingen utbetaling og toggle er på`() {
-        Toggle.AutomatiserSpesialsak.enable()
-        every { vedtakDaoMock.erSpesialsak(vedtaksperiodeId) } returns true
-        every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(false)
-        every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
-        every { åpneGosysOppgaverDaoMock.antallÅpneOppgaver(any()) } returns 1
-        every { vergemålDaoMock.harVergemål(fødselsnummer) } returns true
-        val gjeldendeGenerasjon = enGenerasjon()
-        gjeldendeGenerasjon.håndterNyttVarsel(etVarsel())
-        val utbetaling = enUtbetaling(arbeidsgiverbeløp = 0, personbeløp = 0)
-        blirAutomatiskBehandletSpesialsak(utbetaling, gjeldendeGenerasjon)
-        Toggle.AutomatiserSpesialsak.disable()
-    }
-
-    @Test
-    @ResourceLock("Toggle_AutomatiserSpesialsak")
-    fun `går ikke automatisk hvis det er spesialsak og ikke noen svartelistede varsler og ingen utbetaling og toggle er av`() {
-        Toggle.AutomatiserSpesialsak.disable()
-        every { vedtakDaoMock.erSpesialsak(vedtaksperiodeId) } returns true
-        every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(false)
-        every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
-        every { åpneGosysOppgaverDaoMock.antallÅpneOppgaver(any()) } returns 1
-        every { vergemålDaoMock.harVergemål(fødselsnummer) } returns true
-        val gjeldendeGenerasjon = enGenerasjon()
-        gjeldendeGenerasjon.håndterNyttVarsel(etVarsel())
-        val utbetaling = enUtbetaling(arbeidsgiverbeløp = 0, personbeløp = 0)
-        blirManuellOppgave(utbetaling, gjeldendeGenerasjon)
-        Toggle.AutomatiserSpesialsak.enable()
     }
 
     @Test
@@ -330,10 +293,6 @@ internal class AutomatiseringTest {
         assertTrue(resultat is Automatiseringsresultat.KanAutomatiseres, "Expected ${Automatiseringsresultat.KanAutomatiseres::class.simpleName}, got ${resultat::class.simpleName}")
     }
 
-    private fun assertSpesialsakSomKanAutomatiseres(resultat: Automatiseringsresultat) {
-        assertTrue(resultat is Automatiseringsresultat.KanAutomatisereSpesialsak, "Expected ${Automatiseringsresultat.KanAutomatisereSpesialsak::class.simpleName}, got ${resultat::class.simpleName}")
-    }
-
     private fun forsøkAutomatisering(
         periodetype: Periodetype = FORLENGELSE,
         generasjoners: List<Behandling> = listOf(Behandling(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)),
@@ -386,6 +345,4 @@ internal class AutomatiseringTest {
     private fun blirAutomatiskBehandlet(utbetaling: Utbetaling = enUtbetaling()) =
         assertKanAutomatiseres(forsøkAutomatisering(utbetaling = utbetaling))
 
-    private fun blirAutomatiskBehandletSpesialsak(utbetaling: Utbetaling = enUtbetaling(), behandling: Behandling = enGenerasjon()) =
-        assertSpesialsakSomKanAutomatiseres(forsøkAutomatisering(utbetaling = utbetaling, generasjoners = listOf(behandling)))
 }

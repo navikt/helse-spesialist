@@ -65,14 +65,6 @@ class PgVedtakDao(queryRunner: QueryRunner) : VedtakDao, QueryRunner by queryRun
         ).update()
     }
 
-    override fun spesialsakFerdigbehandlet(vedtaksperiodeId: UUID): Int {
-        return asSQL(
-            """UPDATE spesialsak SET ferdigbehandlet = true WHERE vedtaksperiode_id = :vedtaksperiode_id""",
-            "vedtaksperiode_id" to vedtaksperiodeId,
-        )
-            .update()
-    }
-
     override fun leggTilVedtaksperiodetype(
         vedtaksperiodeId: UUID,
         type: Periodetype,
@@ -88,13 +80,6 @@ class PgVedtakDao(queryRunner: QueryRunner) : VedtakDao, QueryRunner by queryRun
             "inntektskilde" to inntektskilde.name,
             "vedtak_ref" to vedtakRef,
         ).update()
-    }
-
-    override fun erSpesialsak(vedtaksperiodeId: UUID): Boolean {
-        return asSQL("""SELECT true FROM spesialsak WHERE vedtaksperiode_id = :vedtaksperiode_id AND ferdigbehandlet = false""", "vedtaksperiode_id" to vedtaksperiodeId)
-            .singleOrNull {
-                it.boolean(1)
-            } ?: false
     }
 
     override fun erAutomatiskGodkjent(utbetalingId: UUID) =

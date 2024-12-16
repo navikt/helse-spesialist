@@ -12,8 +12,6 @@ interface VedtakDao {
         inntektskilde: Inntektskilde,
     )
 
-    fun erSpesialsak(vedtaksperiodeId: UUID): Boolean
-
     fun erAutomatiskGodkjent(utbetalingId: UUID): Boolean
 
     fun opprettKobling(
@@ -33,6 +31,4 @@ interface VedtakDao {
     )
 
     fun lagreOpprinneligSøknadsdato(vedtaksperiodeId: UUID)
-
-    fun spesialsakFerdigbehandlet(vedtaksperiodeId: UUID): Int
 }

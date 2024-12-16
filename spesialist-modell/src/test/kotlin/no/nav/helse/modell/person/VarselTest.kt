@@ -4,7 +4,6 @@ import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.finnEksisterendeVarsel
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderMedlemskapsvarsel
-import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderSvartelistedeVarsler
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmNegativtBeløp
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
@@ -15,7 +14,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
-import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -129,36 +127,10 @@ internal class VarselTest {
         assertFalse(listOf(varsel).inneholderVarselOmNegativtBeløp())
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = ["RV_IT_3", "RV_SI_3", "RV_UT_23", "RV_VV_8"])
-    fun `inneholder svartelistet varsel`(varselkode: String) {
-        val varsel = nyttVarsel(status = Varsel.Status.AKTIV, kode = varselkode)
-        assertTrue(listOf(varsel).inneholderSvartelistedeVarsler())
-    }
-
-    @ParameterizedTest
-    @EnumSource(value = Varsel.Status::class)
-    fun `inneholder svartelistet varsel uavhengig av status`(status: Varsel.Status) {
-        val varsel = nyttVarsel(status = status, kode = "RV_IT_3")
-        assertTrue(listOf(varsel).inneholderSvartelistedeVarsler())
-    }
-
     @Test
     fun `inneholder varsel om negativt beløp`() {
         val varsel = nyttVarsel(status = Varsel.Status.AKTIV, kode = "RV_UT_23")
         assertTrue(listOf(varsel).inneholderVarselOmNegativtBeløp())
-    }
-
-    @Test
-    fun `godkjenn spesialsakvarsel`() {
-        val varselId = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val varsel = nyttVarsel(varselId = varselId, vedtaksperiodeId = vedtaksperiodeId, status = Varsel.Status.AKTIV, kode = "RV_UT_23")
-        varsel.godkjennSpesialsakvarsel()
-        val godkjentVarsel = varsel.toDto()
-        assertEquals(varselId, godkjentVarsel.id)
-        assertEquals("RV_UT_23", godkjentVarsel.varselkode)
-        assertEquals(vedtaksperiodeId, godkjentVarsel.vedtaksperiodeId)
     }
 
     @Test

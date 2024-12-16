@@ -1,7 +1,6 @@
 package no.nav.helse.modell.automatisering
 
 import kotliquery.TransactionalSession
-import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.db.AutomatiseringRepository
 import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.GenerasjonDao
@@ -16,7 +15,6 @@ import no.nav.helse.db.ÅpneGosysOppgaverRepository
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.MeldingDao.OverstyringIgangsattKorrigertSøknad
-import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.automatisering.Automatisering.AutomatiserKorrigertSøknadResultat.SkyldesKorrigertSøknad
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
@@ -107,10 +105,6 @@ internal class Automatisering(
         val erUTS = utbetaling.harEndringIUtbetalingTilSykmeldt()
         val flereArbeidsgivere = vedtakDao.finnInntektskilde(vedtaksperiodeId) == Inntektskilde.FLERE_ARBEIDSGIVERE
         val erFørstegangsbehandling = periodetype == FØRSTEGANGSBEHANDLING
-
-        if (Toggle.AutomatiserSpesialsak.enabled && erSpesialsakSomKanAutomatiseres(sykefraværstilfelle, utbetaling, vedtaksperiodeId)) {
-            return Automatiseringsresultat.KanAutomatisereSpesialsak
-        }
 
         if (problemer.isNotEmpty()) return Automatiseringsresultat.KanIkkeAutomatiseres(problemer)
 
@@ -291,28 +285,6 @@ internal class Automatisering(
         override fun erAautomatiserbar() = automatiserbar()
 
         override fun error() = error
-    }
-
-    private fun erSpesialsakSomKanAutomatiseres(
-        sykefraværstilfelle: Sykefraværstilfelle,
-        utbetaling: Utbetaling,
-        vedtaksperiodeId: UUID,
-    ): Boolean {
-        val erSpesialsak = vedtakDao.erSpesialsak(vedtaksperiodeId)
-        val kanAutomatiseres = sykefraværstilfelle.spesialsakSomKanAutomatiseres(vedtaksperiodeId)
-        val ingenUtbetaling = utbetaling.ingenUtbetaling()
-
-        if (erSpesialsak) {
-            sikkerLogg.info(
-                "vedtaksperiode med {} er spesialsak, {}, {}, {}",
-                kv("vedtaksperiodeId", vedtaksperiodeId),
-                kv("kanAutomatiseres", kanAutomatiseres),
-                kv("ingenUtbetaling", ingenUtbetaling),
-                kv("blirAutomatiskGodkjent", kanAutomatiseres && ingenUtbetaling),
-            )
-        }
-
-        return erSpesialsak && kanAutomatiseres && ingenUtbetaling
     }
 
     private class AutomatiserRevurderinger(

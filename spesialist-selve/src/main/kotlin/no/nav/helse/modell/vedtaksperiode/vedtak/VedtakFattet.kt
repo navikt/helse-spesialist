@@ -2,7 +2,6 @@ package no.nav.helse.modell.vedtaksperiode.vedtak
 
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.TransactionalSession
-import no.nav.helse.db.VedtakDao
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
@@ -31,10 +30,6 @@ internal class VedtakFattet(
     internal fun spleisBehandlingId() = spleisBehandlingId
 
     override fun toJson(): String = json
-
-    internal fun doFinally(vedtakDao: VedtakDao) {
-        if (vedtakDao.erSpesialsak(vedtaksperiodeId)) vedtakDao.spesialsakFerdigbehandlet(vedtaksperiodeId)
-    }
 
     override fun behandle(
         person: Person,

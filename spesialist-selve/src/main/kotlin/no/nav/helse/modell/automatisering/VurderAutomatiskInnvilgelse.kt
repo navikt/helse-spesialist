@@ -64,12 +64,6 @@ internal class VurderAutomatiskInnvilgelse(
                 )
                 stikkprøve()
             }
-            is Automatiseringsresultat.KanAutomatisereSpesialsak -> {
-                utfallslogger("Automatiserer spesialsak med {} ({})")
-                sykefraværstilfelle.automatiskGodkjennSpesialsakvarsler(vedtaksperiodeId)
-                automatiserSaksbehandling(context)
-                return ferdigstill(context)
-            }
             is Automatiseringsresultat.KanAutomatiseres -> {
                 utfallslogger("Automatiserer {} ({})")
                 automatiserSaksbehandling(context)

@@ -4,7 +4,6 @@ import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.PåVentRepository
 import no.nav.helse.db.RisikovurderingRepository
-import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
@@ -27,7 +26,6 @@ import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
 import no.nav.helse.modell.oppgave.Egenskap.REVURDERING
 import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
 import no.nav.helse.modell.oppgave.Egenskap.SKJØNNSFASTSETTELSE
-import no.nav.helse.modell.oppgave.Egenskap.SPESIALSAK
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
@@ -58,7 +56,6 @@ internal class OpprettSaksbehandleroppgave(
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val utbetaling: Utbetaling,
     private val vergemålRepository: VergemålRepository,
-    private val vedtakDao: VedtakDao,
     private val påVentRepository: PåVentRepository,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
@@ -82,7 +79,6 @@ internal class OpprettSaksbehandleroppgave(
                 mottaker()
                 inntektskilde(inntektskilde)
                 periodetype(periodetype)
-                spesialsak(vedtaksperiodeId)
                 påVent(vedtaksperiodeId)
                 skjønnsfastsettelse(vedtaksperiodeId)
                 tilbakedatert(vedtaksperiodeId)
@@ -174,10 +170,6 @@ internal class OpprettSaksbehandleroppgave(
             Periodetype.INFOTRYGDFORLENGELSE -> add(INFOTRYGDFORLENGELSE)
             Periodetype.OVERGANG_FRA_IT -> add(OVERGANG_FRA_IT)
         }
-    }
-
-    private fun MutableSet<Egenskap>.spesialsak(vedtaksperiodeId: UUID) {
-        if (vedtakDao.erSpesialsak(vedtaksperiodeId)) add(SPESIALSAK)
     }
 
     private fun MutableSet<Egenskap>.påVent(vedtaksperiodeId: UUID) {

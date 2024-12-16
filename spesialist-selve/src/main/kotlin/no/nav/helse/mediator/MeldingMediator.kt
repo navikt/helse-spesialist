@@ -12,8 +12,6 @@ import kotliquery.sessionOf
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.CommandContextRepository
-import no.nav.helse.db.PgVedtakDao
-import no.nav.helse.db.VedtakDao
 import no.nav.helse.kafka.AdressebeskyttelseEndretRiver
 import no.nav.helse.kafka.ArbeidsforholdLøsningRiver
 import no.nav.helse.kafka.ArbeidsgiverinformasjonLøsningRiver
@@ -67,7 +65,6 @@ import no.nav.helse.modell.person.PersonService
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
-import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.objectMapper
 import no.nav.helse.registrerTidsbrukForDuplikatsjekk
 import no.nav.helse.spesialist.api.Personhåndterer
@@ -80,7 +77,6 @@ import kotlin.time.measureTimedValue
 internal class MeldingMediator(
     private val dataSource: DataSource,
     private val rapidsConnection: RapidsConnection,
-    private val vedtakDao: VedtakDao = PgVedtakDao(dataSource),
     private val personDao: PersonDao = PersonDao(dataSource),
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
     private val meldingDao: MeldingDao = MeldingDao(dataSource),
@@ -447,7 +443,6 @@ internal class MeldingMediator(
                     }
                 }
             }
-            if (melding is VedtakFattet) melding.doFinally(vedtakDao) // Midlertidig frem til spesialsak ikke er en ting lenger
             utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, messageContext)
         } catch (e: Exception) {
             throw RuntimeException("Feil ved behandling av melding $meldingnavn", e)

@@ -8,7 +8,6 @@ import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.PåVentRepository
 import no.nav.helse.db.RisikovurderingRepository
-import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålRepository
 import no.nav.helse.januar
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -26,7 +25,6 @@ import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
 import no.nav.helse.modell.oppgave.Egenskap.REVURDERING
 import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
 import no.nav.helse.modell.oppgave.Egenskap.SKJØNNSFASTSETTELSE
-import no.nav.helse.modell.oppgave.Egenskap.SPESIALSAK
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
@@ -70,7 +68,6 @@ internal class OpprettSaksbehandleroppgaveTest {
     private val egenAnsattRepository = mockk<EgenAnsattRepository>(relaxed = true)
     private val vergemålRepository = mockk<VergemålRepository>(relaxed = true)
     private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
-    private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val påVentRepository = mockk<PåVentRepository>(relaxed = true)
 
     private val command get() = opprettSaksbehandlerOppgaveCommand()
@@ -195,14 +192,6 @@ internal class OpprettSaksbehandleroppgaveTest {
     }
 
     @Test
-    fun `oppretter oppgave med egenskap spesialsak`() {
-        every { vedtakDao.erSpesialsak(VEDTAKSPERIODE_ID) } returns true
-        assertTrue(command.execute(context))
-
-        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, SPESIALSAK)
-    }
-
-    @Test
     fun `oppretter oppgave med egenskap UTLAND`() {
         every { personRepository.finnEnhetId(FNR) } returns "0393"
         assertTrue(command.execute(context))
@@ -280,17 +269,6 @@ internal class OpprettSaksbehandleroppgaveTest {
         kanAvvises: Boolean = true,
         tags: List<String> = emptyList()
     ) = OpprettSaksbehandleroppgave(
-        oppgaveService = oppgaveService,
-        automatisering = automatisering,
-        personRepository = personRepository,
-        risikovurderingRepository = risikovurderingRepository,
-        egenAnsattRepository = egenAnsattRepository,
-        utbetalingtype = utbetalingtype,
-        sykefraværstilfelle = sykefraværstilfelle,
-        utbetaling = utbetaling,
-        vergemålRepository = vergemålRepository,
-        vedtakDao = vedtakDao,
-        påVentRepository = påVentRepository,
         behovData = GodkjenningsbehovData(
             id = HENDELSE_ID,
             fødselsnummer = FNR,
@@ -313,6 +291,16 @@ internal class OpprettSaksbehandleroppgaveTest {
             skjæringstidspunkt = 1.januar,
             spleisSykepengegrunnlagsfakta = SpleisSykepengegrunnlagsfakta(emptyList()),
             json = "{}"
-        )
+        ),
+        oppgaveService = oppgaveService,
+        automatisering = automatisering,
+        personRepository = personRepository,
+        risikovurderingRepository = risikovurderingRepository,
+        egenAnsattRepository = egenAnsattRepository,
+        utbetalingtype = utbetalingtype,
+        sykefraværstilfelle = sykefraværstilfelle,
+        utbetaling = utbetaling,
+        vergemålRepository = vergemålRepository,
+        påVentRepository = påVentRepository
     )
 }

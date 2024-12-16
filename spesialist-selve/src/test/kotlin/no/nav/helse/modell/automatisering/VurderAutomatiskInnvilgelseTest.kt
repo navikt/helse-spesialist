@@ -11,8 +11,6 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.modell.hendelse.UtgåendeHendelse
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.person.vedtaksperiode.Varsel
-import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -29,7 +27,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 
 internal class VurderAutomatiskInnvilgelseTest {
@@ -104,45 +101,11 @@ internal class VurderAutomatiskInnvilgelseTest {
     }
 
     @Test
-    fun `publiserer godkjenningsmelding ved automatisk godkjent spesialsak`() {
-        every {
-            automatisering.utfør(any(), any(), any(), any(), any(), any())
-        } returns Automatiseringsresultat.KanAutomatisereSpesialsak
-
-        assertTrue(command.execute(context))
-
-        val løsning = this
-            .observatør
-            .hendelser
-            .filterIsInstance<UtgåendeHendelse.Godkjenningsbehovløsning>()
-            .singleOrNull()
-
-        assertEquals(true, løsning?.godkjent)
-        assertEquals(true, løsning?.automatiskBehandling)
-    }
-
-    @Test
     fun `automatiserer når resultat er at perioden kan automatiseres`() {
         every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
         assertTrue(command.execute(context))
         verify(exactly = 1) { automatiseringRepository.automatisert(vedtaksperiodeId, hendelseId, utbetalingId) }
         verify(exactly = 0) { automatiseringRepository.manuellSaksbehandling(any(), any(), any(), any()) }
-    }
-
-    @Test
-    fun `automatiserer når resultat er at perioden er spesialsak som kan automatiseres`() {
-        every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatisereSpesialsak
-        assertTrue(command.execute(context))
-        verify(exactly = 1) { automatiseringRepository.automatisert(any(), any(), any()) }
-        verify(exactly = 0) { automatiseringRepository.manuellSaksbehandling(any(), any(), any(), any()) }
-    }
-
-    @Test
-    fun `Godkjenner alle varsler ved automatisering som følge av spesialsak`() {
-        every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatisereSpesialsak
-        behandling.håndterNyttVarsel(Varsel(UUID.randomUUID(), "RV_IT_1", LocalDateTime.now(), vedtaksperiodeId))
-        assertTrue(command.execute(context))
-        assertEquals(VarselStatusDto.GODKJENT, behandling.toDto().varsler.single().status)
     }
 
     @Test

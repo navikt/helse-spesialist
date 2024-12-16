@@ -325,7 +325,6 @@ internal class GodkjenningsbehovCommand(
                 sykefraværstilfelle = sykefraværstilfelle,
                 utbetaling = utbetaling,
                 vergemålRepository = vergemålRepository,
-                vedtakDao = vedtakDao,
                 påVentRepository = påVentRepository,
             ),
             VurderBehovForTotrinnskontroll(

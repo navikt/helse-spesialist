@@ -2,7 +2,6 @@ package no.nav.helse.modell.person.vedtaksperiode
 
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AKTIV
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AVVIST
-import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.GODKJENT
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.INAKTIV
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.VURDERT
 import java.time.LocalDateTime
@@ -78,11 +77,6 @@ class Varsel(
 
     fun erRelevantFor(vedtaksperiodeId: UUID): Boolean = this.vedtaksperiodeId == vedtaksperiodeId
 
-    fun godkjennSpesialsakvarsel() {
-        if (status == GODKJENT) return
-        status = GODKJENT
-    }
-
     companion object {
         fun List<Varsel>.finnEksisterendeVarsel(varsel: Varsel): Varsel? = find { it.varselkode == varsel.varselkode }
 
@@ -99,20 +93,6 @@ class Varsel(
         fun List<Varsel>.inneholderVarselOmTilbakedatering(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_SØ_3" }
 
         fun List<Varsel>.inneholderVarselOmÅpenGosysOppgave(): Boolean = any { it.status == AKTIV && it.varselkode == "SB_EX_1" }
-
-        fun List<Varsel>.inneholderSvartelistedeVarsler(): Boolean = any { it.varselkode in neiVarsler }
-
-        fun List<Varsel>.automatiskGodkjennSpesialsakvarsler() {
-            forEach { it.godkjennSpesialsakvarsel() }
-        }
-
-        private val neiVarsler =
-            listOf(
-                "RV_IT_3",
-                "RV_SI_3",
-                "RV_UT_23",
-                "RV_VV_8",
-            )
 
         fun List<Varsel>.forhindrerAutomatisering() = any { it.status in listOf(VURDERT, AKTIV, AVVIST) }
     }

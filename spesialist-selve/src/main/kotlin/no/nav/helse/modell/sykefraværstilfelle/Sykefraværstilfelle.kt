@@ -61,18 +61,6 @@ internal class Sykefraværstilfelle(
         gjeldendeGenerasjoner.håndterNyttVarsel(listOf(varsel))
     }
 
-    internal fun spesialsakSomKanAutomatiseres(vedtaksperiodeId: UUID): Boolean {
-        val generasjon = gjeldendeGenerasjoner.finnGenerasjonForVedtaksperiode(vedtaksperiodeId) ?: return false
-        return generasjon.erSpesialsakSomKanAutomatiseres()
-    }
-
-    internal fun automatiskGodkjennSpesialsakvarsler(vedtaksperiodeId: UUID) {
-        val generasjon =
-            gjeldendeGenerasjoner.finnGenerasjonForVedtaksperiode(vedtaksperiodeId)
-                ?: throw IllegalStateException("Forventer å finne generasjon for perioden")
-        generasjon.automatiskGodkjennSpesialsakvarsler()
-    }
-
     internal fun deaktiver(varsel: Varsel) {
         gjeldendeGenerasjoner.deaktiver(varsel)
     }
