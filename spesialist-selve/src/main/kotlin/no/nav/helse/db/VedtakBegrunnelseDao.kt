@@ -59,10 +59,10 @@ class VedtakBegrunnelseDao(queryRunner: QueryRunner) : QueryRunner by queryRunne
                 INNER JOIN behandling b ON o.generasjon_ref = b.unik_id
                 WHERE o.id = :oppgaveId
             )
-            UPDATE vedtak_begrunnelse a
+            UPDATE vedtak_begrunnelse vb
             SET invalidert = true
             FROM t
-            WHERE a.vedtaksperiode_id = t.vedtaksperiode_id AND a.generasjon_ref = t.id
+            WHERE vb.vedtaksperiode_id = t.vedtaksperiode_id AND vb.generasjon_ref = t.id
             """.trimIndent(),
             "oppgaveId" to oppgaveId,
         ).update()
@@ -120,11 +120,11 @@ class VedtakBegrunnelseDao(queryRunner: QueryRunner) : QueryRunner by queryRunne
         utbetalingId: UUID,
     ) = asSQL(
         """
-        SELECT b.type, b.tekst, a.opprettet, s.ident, a.invalidert FROM vedtak_begrunnelse a 
-        INNER JOIN behandling beh ON a.generasjon_ref = beh.id 
-        INNER JOIN begrunnelse b ON b.id = a.begrunnelse_ref
+        SELECT b.type, b.tekst, vb.opprettet, s.ident, vb.invalidert FROM vedtak_begrunnelse vb
+        INNER JOIN behandling beh ON vb.generasjon_ref = beh.id 
+        INNER JOIN begrunnelse b ON b.id = vb.begrunnelse_ref
         INNER JOIN saksbehandler s ON s.oid = b.saksbehandler_ref
-        WHERE a.vedtaksperiode_id = :vedtaksperiodeId AND beh.utbetaling_id = :utbetalingId 
+        WHERE vb.vedtaksperiode_id = :vedtaksperiodeId AND beh.utbetaling_id = :utbetalingId 
         ORDER BY opprettet DESC
         """.trimIndent(),
         "vedtaksperiodeId" to vedtaksperiodeId,
