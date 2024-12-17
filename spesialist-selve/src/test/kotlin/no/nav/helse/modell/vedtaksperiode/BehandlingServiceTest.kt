@@ -6,6 +6,7 @@ import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.modell.person.vedtaksperiode.GenerasjonDto
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
+import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer

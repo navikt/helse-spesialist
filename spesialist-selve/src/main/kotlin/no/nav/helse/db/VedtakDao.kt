@@ -1,8 +1,8 @@
 package no.nav.helse.db
 
+import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
 import java.util.UUID
 
 interface VedtakDao {

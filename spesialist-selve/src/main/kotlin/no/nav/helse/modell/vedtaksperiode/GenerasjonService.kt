@@ -4,6 +4,7 @@ import kotliquery.TransactionalSession
 import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.modell.person.vedtaksperiode.GenerasjonDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
+import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import org.slf4j.LoggerFactory
 import java.util.UUID
 import javax.sql.DataSource
