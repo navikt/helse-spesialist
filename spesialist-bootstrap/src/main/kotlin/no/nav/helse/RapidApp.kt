@@ -17,8 +17,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import java.net.URI
 
 fun main() {
-    val applicationBuilder = RapidApp(System.getenv())
-    applicationBuilder.start()
+    RapidApp(System.getenv())
 }
 
 internal class RapidApp(env: Map<String, String>) {
@@ -81,7 +80,6 @@ internal class RapidApp(env: Map<String, String>) {
                     withKtorModule(spesialistApp::ktorApp)
                 },
             )
+        spesialistApp.start(rapidsConnection)
     }
-
-    fun start() = spesialistApp.start(rapidsConnection)
 }
