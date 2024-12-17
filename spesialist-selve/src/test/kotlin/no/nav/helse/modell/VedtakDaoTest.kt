@@ -5,7 +5,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.januar
-import no.nav.helse.modell.person.vedtaksperiode.GenerasjonDto
+import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
@@ -32,9 +32,9 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
                                 organisasjonsnummer = ORGNUMMER,
                                 vedtaksperiodeId = VEDTAKSPERIODE,
                                 forkastet = false,
-                                generasjoner =
+                                behandlinger =
                                     listOf(
-                                        GenerasjonDto(
+                                        BehandlingDto(
                                             id = UUID.randomUUID(),
                                             vedtaksperiodeId = VEDTAKSPERIODE,
                                             utbetalingId = null,
@@ -77,9 +77,9 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
                                 organisasjonsnummer = ORGNUMMER,
                                 vedtaksperiodeId = VEDTAKSPERIODE,
                                 forkastet = true,
-                                generasjoner =
+                                behandlinger =
                                     listOf(
-                                        GenerasjonDto(
+                                        BehandlingDto(
                                             id = UUID.randomUUID(),
                                             vedtaksperiodeId = VEDTAKSPERIODE,
                                             utbetalingId = null,

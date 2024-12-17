@@ -6,5 +6,5 @@ data class VedtaksperiodeDto(
     val organisasjonsnummer: String,
     val vedtaksperiodeId: UUID,
     val forkastet: Boolean,
-    val generasjoner: List<GenerasjonDto>,
+    val behandlinger: List<BehandlingDto>,
 )

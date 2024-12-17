@@ -8,7 +8,7 @@ import no.nav.helse.db.MedDataSource
 import no.nav.helse.db.MedSession
 import no.nav.helse.db.QueryRunner
 import no.nav.helse.db.VedtakBegrunnelseDao
-import no.nav.helse.modell.person.vedtaksperiode.GenerasjonDto
+import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import java.time.LocalDate
@@ -20,7 +20,7 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
     constructor(session: Session) : this(MedSession(session))
 
-    internal fun finnGenerasjoner(vedtaksperiodeId: UUID): List<GenerasjonDto> {
+    internal fun finnGenerasjoner(vedtaksperiodeId: UUID): List<BehandlingDto> {
         return asSQL(
             """
             SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, spleis_behandling_id, skjæringstidspunkt, fom, tom, tilstand, tags
@@ -31,7 +31,7 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
         )
             .list { row ->
                 val generasjonRef = row.long("id")
-                GenerasjonDto(
+                BehandlingDto(
                     id = row.uuid("unik_id"),
                     vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                     utbetalingId = row.uuidOrNull("utbetaling_id"),
@@ -47,30 +47,30 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
             }
     }
 
-    internal fun lagreGenerasjon(generasjonDto: GenerasjonDto) {
-        lagre(generasjonDto)
-        slettVarsler(generasjonDto.id, generasjonDto.varsler.map { it.id })
-        generasjonDto.varsler.forEach { varselDto ->
-            lagre(varselDto, generasjonDto.vedtaksperiodeId, generasjonDto.id)
+    internal fun lagreGenerasjon(behandlingDto: BehandlingDto) {
+        lagre(behandlingDto)
+        slettVarsler(behandlingDto.id, behandlingDto.varsler.map { it.id })
+        behandlingDto.varsler.forEach { varselDto ->
+            lagre(varselDto, behandlingDto.vedtaksperiodeId, behandlingDto.id)
         }
     }
 
-    private fun lagre(generasjonDto: GenerasjonDto) {
+    private fun lagre(behandlingDto: BehandlingDto) {
         asSQL(
             """
             INSERT INTO behandling (unik_id, vedtaksperiode_id, utbetaling_id, spleis_behandling_id, opprettet_tidspunkt, opprettet_av_hendelse, tilstand_endret_tidspunkt, tilstand_endret_av_hendelse, fom, tom, skjæringstidspunkt, tilstand, tags) 
             VALUES (:unik_id, :vedtaksperiode_id, :utbetaling_id, :spleis_behandling_id, now(), gen_random_uuid(), now(), gen_random_uuid(), :fom, :tom, :skjaeringstidspunkt, :tilstand::generasjon_tilstand, :tags::varchar[])
             ON CONFLICT (unik_id) DO UPDATE SET utbetaling_id = excluded.utbetaling_id, spleis_behandling_id = excluded.spleis_behandling_id, fom = excluded.fom, tom = excluded.tom, skjæringstidspunkt = excluded.skjæringstidspunkt, tilstand = excluded.tilstand, tags = excluded.tags
             """,
-            "unik_id" to generasjonDto.id,
-            "vedtaksperiode_id" to generasjonDto.vedtaksperiodeId,
-            "utbetaling_id" to generasjonDto.utbetalingId,
-            "spleis_behandling_id" to generasjonDto.spleisBehandlingId,
-            "fom" to generasjonDto.fom,
-            "tom" to generasjonDto.tom,
-            "skjaeringstidspunkt" to generasjonDto.skjæringstidspunkt,
-            "tilstand" to generasjonDto.tilstand.name,
-            "tags" to generasjonDto.tags.joinToString(prefix = "{", postfix = "}"),
+            "unik_id" to behandlingDto.id,
+            "vedtaksperiode_id" to behandlingDto.vedtaksperiodeId,
+            "utbetaling_id" to behandlingDto.utbetalingId,
+            "spleis_behandling_id" to behandlingDto.spleisBehandlingId,
+            "fom" to behandlingDto.fom,
+            "tom" to behandlingDto.tom,
+            "skjaeringstidspunkt" to behandlingDto.skjæringstidspunkt,
+            "tilstand" to behandlingDto.tilstand.name,
+            "tags" to behandlingDto.tags.joinToString(prefix = "{", postfix = "}"),
         ).update()
     }
 

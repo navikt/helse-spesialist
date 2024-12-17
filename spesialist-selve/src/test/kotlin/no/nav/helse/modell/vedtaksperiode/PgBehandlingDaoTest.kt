@@ -2,7 +2,7 @@ package no.nav.helse.modell.vedtaksperiode
 
 import DatabaseIntegrationTest
 import no.nav.helse.januar
-import no.nav.helse.modell.person.vedtaksperiode.GenerasjonDto
+import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
@@ -88,7 +88,7 @@ internal class PgBehandlingDaoTest : DatabaseIntegrationTest() {
             status = VarselStatusDto.AKTIV
         )
         PgGenerasjonDao(dataSource).lagreGenerasjon(
-            GenerasjonDto(
+            BehandlingDto(
                 id = generasjonId,
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingId = utbetalingId,
@@ -106,7 +106,7 @@ internal class PgBehandlingDaoTest : DatabaseIntegrationTest() {
         val funnet = PgGenerasjonDao(dataSource).finnGenerasjoner(vedtaksperiodeId)
         assertEquals(1, funnet.size)
         assertEquals(
-            GenerasjonDto(
+            BehandlingDto(
                 id = generasjonId,
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingId = utbetalingId,

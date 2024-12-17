@@ -2,7 +2,7 @@ package no.nav.helse.modell.vedtaksperiode
 
 import kotliquery.TransactionalSession
 import no.nav.helse.db.PgVedtakDao
-import no.nav.helse.modell.person.vedtaksperiode.GenerasjonDto
+import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import org.slf4j.LoggerFactory
@@ -11,7 +11,7 @@ import javax.sql.DataSource
 
 internal class GenerasjonService(dataSource: DataSource) {
     private val pgGenerasjonDao = PgGenerasjonDao(dataSource)
-    private val hentedeGenerasjoner: MutableMap<UUID, List<GenerasjonDto>> = mutableMapOf()
+    private val hentedeGenerasjoner: MutableMap<UUID, List<BehandlingDto>> = mutableMapOf()
 
     private val sikkerLogger = LoggerFactory.getLogger("tjenestekall")
 
@@ -28,11 +28,11 @@ internal class GenerasjonService(dataSource: DataSource) {
 
     private fun TransactionalSession.finnVedtaksperiode(vedtaksperiodeId: UUID): VedtaksperiodeDto {
         return PgVedtakDao(this).finnVedtaksperiode(vedtaksperiodeId)
-            ?.copy(generasjoner = finnGenerasjoner(vedtaksperiodeId))
+            ?.copy(behandlinger = finnGenerasjoner(vedtaksperiodeId))
             ?: throw IllegalStateException("Forventer å finne vedtaksperiode for vedtaksperiodeId=$vedtaksperiodeId")
     }
 
-    private fun TransactionalSession.finnGenerasjoner(vedtaksperiodeId: UUID): List<GenerasjonDto> {
+    private fun TransactionalSession.finnGenerasjoner(vedtaksperiodeId: UUID): List<BehandlingDto> {
         return PgGenerasjonDao(this).finnGenerasjoner(vedtaksperiodeId).also { hentedeGenerasjoner[vedtaksperiodeId] = it }
     }
 
@@ -43,7 +43,7 @@ internal class GenerasjonService(dataSource: DataSource) {
         PgVedtakDao(this).lagreVedtaksperiode(fødselsnummer, vedtaksperiode)
         loggDiffMellomHentetOgSkalLagres(vedtaksperiode)
         hentedeGenerasjoner.remove(vedtaksperiode.vedtaksperiodeId)
-        vedtaksperiode.generasjoner.forEach { generasjonDto ->
+        vedtaksperiode.behandlinger.forEach { generasjonDto ->
             PgGenerasjonDao(this).lagreGenerasjon(generasjonDto)
         }
         PgVedtakDao(this).lagreOpprinneligSøknadsdato(vedtaksperiode.vedtaksperiodeId)
@@ -53,7 +53,7 @@ internal class GenerasjonService(dataSource: DataSource) {
         val hentedeGenerasjonerForPeriode = hentedeGenerasjoner[vedtaksperiode.vedtaksperiodeId] ?: return
         val antallHentet = hentedeGenerasjonerForPeriode.size
         if (antallHentet == 0) return
-        val generasjonerForLagring = vedtaksperiode.generasjoner
+        val generasjonerForLagring = vedtaksperiode.behandlinger
         val antallNå = generasjonerForLagring.size
         val builder =
             StringBuilder().appendLine(
@@ -88,8 +88,8 @@ internal class GenerasjonService(dataSource: DataSource) {
     }
 
     private fun StringBuilder.diffMellomToGenerasjoner(
-        hentet: GenerasjonDto,
-        skalLagres: GenerasjonDto,
+        hentet: BehandlingDto,
+        skalLagres: BehandlingDto,
     ) {
         appendLine("               forrige - skal lagres")
         appendLine("   utbetaling: ${hentet.utbetalingId} - ${skalLagres.utbetalingId}")

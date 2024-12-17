@@ -56,7 +56,7 @@ internal class SaksbehandlerløsningTest {
             sykefraværstilfelle = Sykefraværstilfelle(
                 fødselsnummer = FNR,
                 skjæringstidspunkt = 1.januar,
-                gjeldendeGenerasjoner = listOf(Behandling(randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar))
+                gjeldendeBehandlinger = listOf(Behandling(randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar))
             ),
             godkjent = godkjent,
             godkjenttidspunkt = GODKJENTTIDSPUNKT,

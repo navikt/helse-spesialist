@@ -52,7 +52,7 @@ internal class VurderAutomatiskInnvilgelseTest {
             sykefraværstilfelle = Sykefraværstilfelle(
                 fødselsnummer = fødselsnummer,
                 skjæringstidspunkt = 1.januar,
-                gjeldendeGenerasjoner = listOf(behandling),
+                gjeldendeBehandlinger = listOf(behandling),
             ),
             godkjenningsbehov = godkjenningsbehov(
                 id = hendelseId,

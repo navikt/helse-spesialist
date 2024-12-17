@@ -15,7 +15,7 @@ import no.nav.helse.modell.vedtak.Sykepengevedtak
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.flyttEventueltAvviksvarselTil
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
-import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.finnGenerasjon
+import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.finnBehandling
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.relevanteFor
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering.Companion.finnRiktigAvviksvurdering
@@ -84,23 +84,23 @@ class Person private constructor(
     internal fun fattVedtak(avsluttetMedVedtak: AvsluttetMedVedtak) {
         val vedtakBuilder = SykepengevedtakBuilder()
         val vedtaksperiode = vedtaksperiode(avsluttetMedVedtak.spleisBehandlingId)
-        val generasjon = vedtaksperiode.finnGenerasjon(avsluttetMedVedtak.spleisBehandlingId)
+        val behandling = vedtaksperiode.finnBehandling(avsluttetMedVedtak.spleisBehandlingId)
 
-        avviksvurderinger.finnRiktigAvviksvurdering(generasjon.skjæringstidspunkt())?.also {
+        avviksvurderinger.finnRiktigAvviksvurdering(behandling.skjæringstidspunkt())?.also {
             vedtakBuilder.sammenligningsgrunnlag(it.sammenligningsgrunnlag)
             vedtakBuilder.avviksprosent(it.avviksprosent)
         }
 
         val skjønnsfastsattSykepengegrunnlag =
             skjønnsfastsatteSykepengegrunnlag
-                .relevanteFor(generasjon.skjæringstidspunkt())
+                .relevanteFor(behandling.skjæringstidspunkt())
                 .lastOrNull()
 
         skjønnsfastsattSykepengegrunnlag?.also {
             vedtakBuilder.skjønnsfastsattSykepengegrunnlag(it)
         }
         vedtaksperiode.byggVedtak(vedtakBuilder)
-        generasjon.byggVedtak(vedtakBuilder)
+        behandling.byggVedtak(vedtakBuilder)
         avsluttetMedVedtak.byggVedtak(vedtakBuilder)
         byggVedtak(vedtakBuilder)
 
@@ -137,19 +137,19 @@ class Person private constructor(
     }
 
     internal fun vedtaksperiode(spleisBehandlingId: UUID): Vedtaksperiode {
-        return vedtaksperioder.finnGenerasjon(spleisBehandlingId)
-            ?: throw IllegalStateException("Generasjon med spleisBehandlingId=$spleisBehandlingId finnes ikke")
+        return vedtaksperioder.finnBehandling(spleisBehandlingId)
+            ?: throw IllegalStateException("Behandling med spleisBehandlingId=$spleisBehandlingId finnes ikke")
     }
 
     internal fun sykefraværstilfelle(vedtaksperiodeId: UUID): Sykefraværstilfelle {
         val skjæringstidspunkt =
             vedtaksperiodeOrNull(vedtaksperiodeId)?.gjeldendeSkjæringstidspunkt
                 ?: throw IllegalStateException("Forventer å finne vedtaksperiode med id=$vedtaksperiodeId")
-        val gjeldendeGenerasjoner = vedtaksperioder.relevanteFor(skjæringstidspunkt)
+        val gjeldendeBehandlinger = vedtaksperioder.relevanteFor(skjæringstidspunkt)
         return Sykefraværstilfelle(
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
-            gjeldendeGenerasjoner = gjeldendeGenerasjoner,
+            gjeldendeBehandlinger = gjeldendeBehandlinger,
         )
     }
 
@@ -197,7 +197,7 @@ class Person private constructor(
                             organisasjonsnummer = it.organisasjonsnummer,
                             vedtaksperiodeId = it.vedtaksperiodeId,
                             forkastet = it.forkastet,
-                            generasjoner = it.generasjoner,
+                            behandlinger = it.behandlinger,
                         )
                     },
                 avviksvurderinger = avviksvurderinger.map { Avviksvurdering.gjenopprett(it) },

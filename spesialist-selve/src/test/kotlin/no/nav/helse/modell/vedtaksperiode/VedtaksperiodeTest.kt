@@ -25,7 +25,7 @@ class VedtaksperiodeTest {
 
         vedtaksperiode.nySpleisBehandling(nySpleisBehandling(annenVedtaksperiodeId))
 
-        val antallGenerasjoner = vedtaksperiode.toDto().generasjoner.size
+        val antallGenerasjoner = vedtaksperiode.toDto().behandlinger.size
         assertEquals(1, antallGenerasjoner) // Det har ikke blitt opprettet noen ny generasjon for denne vedtaksperioden
     }
 
@@ -36,7 +36,7 @@ class VedtaksperiodeTest {
 
         vedtaksperiode.nySpleisBehandling(nySpleisBehandling(vedtaksperiodeId))
 
-        val generasjoner = vedtaksperiode.toDto().generasjoner
+        val generasjoner = vedtaksperiode.toDto().behandlinger
         assertEquals(TilstandDto.VidereBehandlingAvklares, generasjoner.first().tilstand) // tilstand på tidligere generasjon er ikke avgjørende for om vi oppretter generasjon
         assertEquals(2, generasjoner.size) // Det har ikke blitt opprettet noen ny generasjon for denne vedtaksperioden
     }
@@ -46,7 +46,7 @@ class VedtaksperiodeTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
         vedtaksperiode.nyeVarsler(listOf(nyttVarsel(vedtaksperiodeId)))
-        val gjeldendeGenerasjon = vedtaksperiode.toDto().generasjoner.single()
+        val gjeldendeGenerasjon = vedtaksperiode.toDto().behandlinger.single()
         assertEquals(1, gjeldendeGenerasjon.varsler.size)
     }
 
@@ -55,7 +55,7 @@ class VedtaksperiodeTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
         vedtaksperiode.nyeVarsler(listOf(nyttVarsel(UUID.randomUUID())))
-        val gjeldendeGenerasjon = vedtaksperiode.toDto().generasjoner.single()
+        val gjeldendeGenerasjon = vedtaksperiode.toDto().behandlinger.single()
         assertEquals(0, gjeldendeGenerasjon.varsler.size)
     }
 
@@ -67,7 +67,7 @@ class VedtaksperiodeTest {
         vedtaksperiode.nyUtbetaling(UUID.randomUUID())
         vedtaksperiode.vedtakFattet(spleisBehandlingId)
         vedtaksperiode.nySpleisBehandling(nySpleisBehandling(vedtaksperiodeId))
-        val generasjoner = vedtaksperiode.toDto().generasjoner
+        val generasjoner = vedtaksperiode.toDto().behandlinger
         val nyGjeldendeGenerasjon = generasjoner.last()
         assertEquals(TilstandDto.VidereBehandlingAvklares, nyGjeldendeGenerasjon.tilstand)
         assertEquals(2, generasjoner.size)
@@ -83,7 +83,7 @@ class VedtaksperiodeTest {
             avsluttetUtenVedtak = AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), spleisBehandlingId),
         )
         vedtaksperiode.nySpleisBehandling(nySpleisBehandling(vedtaksperiodeId))
-        val generasjoner = vedtaksperiode.toDto().generasjoner
+        val generasjoner = vedtaksperiode.toDto().behandlinger
         val nyGjeldendeGenerasjon = generasjoner.last()
         assertEquals(TilstandDto.VidereBehandlingAvklares, nyGjeldendeGenerasjon.tilstand)
         assertEquals(2, generasjoner.size)
@@ -94,7 +94,7 @@ class VedtaksperiodeTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
         val dto = vedtaksperiode.toDto()
-        assertNotNull(dto.generasjoner.single().spleisBehandlingId)
+        assertNotNull(dto.behandlinger.single().spleisBehandlingId)
     }
 
     @Test
@@ -106,10 +106,10 @@ class VedtaksperiodeTest {
             listOf(SpleisVedtaksperiode(vedtaksperiodeId, UUID.randomUUID(), 1.februar, 28.februar, 1.februar)),
         )
         val dto = vedtaksperiode.toDto()
-        assertEquals(1, dto.generasjoner.size)
-        assertEquals(1.februar, dto.generasjoner.single().fom)
-        assertEquals(28.februar, dto.generasjoner.single().tom)
-        assertEquals(1.februar, dto.generasjoner.single().skjæringstidspunkt)
+        assertEquals(1, dto.behandlinger.size)
+        assertEquals(1.februar, dto.behandlinger.single().fom)
+        assertEquals(28.februar, dto.behandlinger.single().tom)
+        assertEquals(1.februar, dto.behandlinger.single().skjæringstidspunkt)
     }
 
     @Test
@@ -120,10 +120,10 @@ class VedtaksperiodeTest {
             listOf(SpleisVedtaksperiode(vedtaksperiodeId, UUID.randomUUID(), 1.februar, 28.februar, 1.februar)),
         )
         val dto = vedtaksperiode.toDto()
-        assertEquals(1, dto.generasjoner.size)
-        assertEquals(1.februar, dto.generasjoner.single().fom)
-        assertEquals(28.februar, dto.generasjoner.single().tom)
-        assertEquals(1.februar, dto.generasjoner.single().skjæringstidspunkt)
+        assertEquals(1, dto.behandlinger.size)
+        assertEquals(1.februar, dto.behandlinger.single().fom)
+        assertEquals(28.februar, dto.behandlinger.single().tom)
+        assertEquals(1.februar, dto.behandlinger.single().skjæringstidspunkt)
     }
 
     @Test
@@ -137,7 +137,7 @@ class VedtaksperiodeTest {
             listOf(SpleisVedtaksperiode(vedtaksperiodeId, spleisBehandlingId, 1.januar, 31.januar, 1.januar)),
         )
         val dto = vedtaksperiode.toDto()
-        assertEquals(1, dto.generasjoner.size)
+        assertEquals(1, dto.behandlinger.size)
     }
 
     @Test
@@ -150,7 +150,7 @@ class VedtaksperiodeTest {
             listOf(SpleisVedtaksperiode(vedtaksperiodeId, spleisBehandlingId, 1.januar, 31.januar, 1.januar)),
         )
         val dto = vedtaksperiode.toDto()
-        assertEquals(1, dto.generasjoner.size)
+        assertEquals(1, dto.behandlinger.size)
     }
 
     @Test
@@ -165,8 +165,8 @@ class VedtaksperiodeTest {
             listOf(SpleisVedtaksperiode(vedtaksperiodeId, spleisBehandlingId, 1.januar, 31.januar, 1.januar)),
         )
         val dto = vedtaksperiode.toDto()
-        assertEquals(1, dto.generasjoner.size)
-        assertEquals(TilstandDto.AvsluttetUtenVedtakMedVarsler, dto.generasjoner[0].tilstand)
+        assertEquals(1, dto.behandlinger.size)
+        assertEquals(TilstandDto.AvsluttetUtenVedtakMedVarsler, dto.behandlinger[0].tilstand)
     }
 
     @Test

@@ -2,7 +2,7 @@ package no.nav.helse.modell.vedtaksperiode
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.modell.person.vedtaksperiode.GenerasjonDto
+import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
@@ -73,8 +73,8 @@ internal class Behandling private constructor(
 
     internal fun tom() = periode.tom()
 
-    internal fun toDto(): GenerasjonDto =
-        GenerasjonDto(
+    internal fun toDto(): BehandlingDto =
+        BehandlingDto(
             id = id,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
@@ -125,7 +125,7 @@ internal class Behandling private constructor(
         val eksisterendeVarsel = varsler.finnEksisterendeVarsel(varsel) ?: return nyttVarsel(varsel)
         if (varsel.erVarselOmAvvik() && varsler.inneholderVarselOmAvvik()) {
             varsler.remove(eksisterendeVarsel)
-            logg.info("Slettet eksisterende varsel ({}) for generasjon med id {}", varsel.toString(), id)
+            logg.info("Slettet eksisterende varsel ({}) for behandling med id {}", varsel.toString(), id)
             nyttVarsel(varsel)
         }
         if (eksisterendeVarsel.erAktiv()) return
@@ -229,9 +229,9 @@ internal class Behandling private constructor(
         behandling.varsler.addAll(aktiveVarsler)
         if (aktiveVarsler.isNotEmpty()) {
             sikkerlogg.info(
-                "Flytter ${aktiveVarsler.size} varsler fra {} til {}. Gammel generasjon har {}",
-                kv("gammel_generasjon", this.id),
-                kv("ny_generasjon", behandling.id),
+                "Flytter ${aktiveVarsler.size} varsler fra {} til {}. Gammel behandling har {}",
+                kv("gammel_behandling", this.id),
+                kv("ny_behandling", behandling.id),
                 kv("utbetalingId", this.utbetalingId),
             )
         }
@@ -301,7 +301,7 @@ internal class Behandling private constructor(
             sikkerlogg.error(
                 "Mottatt ny utbetaling med {} for {} i {}",
                 keyValue("utbetalingId", utbetalingId),
-                keyValue("generasjon", behandling),
+                keyValue("behandling", behandling),
                 keyValue("tilstand", this::class.simpleName),
             )
             logg.error(
@@ -317,13 +317,13 @@ internal class Behandling private constructor(
         ) {
             logg.error(
                 "{} er i {}. Utbetaling med {} forsøkt forkastet",
-                keyValue("Generasjon", behandling),
+                keyValue("Behandling", behandling),
                 keyValue("tilstand", this::class.simpleName),
                 keyValue("utbetalingId", utbetalingId),
             )
             sikkerlogg.error(
                 "{} er i {}. Utbetaling med {} forsøkt forkastet",
-                keyValue("Generasjon", behandling),
+                keyValue("Behandling", behandling),
                 keyValue("tilstand", this::class.simpleName),
                 keyValue("utbetalingId", utbetalingId),
             )
@@ -366,7 +366,7 @@ internal class Behandling private constructor(
         ) {
             check(
                 behandling.utbetalingId == null,
-            ) { "Mottatt avsluttet_uten_vedtak på generasjon som har utbetaling. Det gir ingen mening." }
+            ) { "Mottatt avsluttet_uten_vedtak på behandling som har utbetaling. Det gir ingen mening." }
             val nesteTilstand =
                 when {
                     behandling.varsler.isNotEmpty() -> AvsluttetUtenVedtakMedVarsler
@@ -438,7 +438,7 @@ internal class Behandling private constructor(
         override fun vedtakFattet(behandling: Behandling) {}
     }
 
-    override fun toString(): String = "generasjonId=$id, vedtaksperiodeId=$vedtaksperiodeId"
+    override fun toString(): String = "spesialistBehandlingId=$id, vedtaksperiodeId=$vedtaksperiodeId"
 
     override fun equals(other: Any?): Boolean =
         this === other ||
@@ -469,13 +469,13 @@ internal class Behandling private constructor(
         val logg: Logger = LoggerFactory.getLogger(Behandling::class.java)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-        internal fun List<Behandling>.finnGenerasjonForVedtaksperiode(vedtaksperiodeId: UUID): Behandling? =
+        internal fun List<Behandling>.finnBehandlingForVedtaksperiode(vedtaksperiodeId: UUID): Behandling? =
             this.find { it.vedtaksperiodeId == vedtaksperiodeId }
 
-        internal fun List<Behandling>.finnGenerasjonForSpleisBehandling(spleisBehandlingId: UUID): Behandling? =
+        internal fun List<Behandling>.finnBehandlingForSpleisBehandling(spleisBehandlingId: UUID): Behandling? =
             this.find { it.spleisBehandlingId == spleisBehandlingId }
 
-        internal fun List<Behandling>.finnSisteGenerasjonUtenSpleisBehandlingId(): Behandling? =
+        internal fun List<Behandling>.finnSisteBehandlingUtenSpleisBehandlingId(): Behandling? =
             this.lastOrNull { it.spleisBehandlingId == null }
 
         internal fun fraLagring(
@@ -504,8 +504,8 @@ internal class Behandling private constructor(
         )
 
         internal fun List<Behandling>.håndterNyttVarsel(varsler: List<Varsel>) {
-            forEach { generasjon ->
-                varsler.forEach { generasjon.håndterNyttVarsel(it) }
+            forEach { behandling ->
+                varsler.forEach { behandling.håndterNyttVarsel(it) }
             }
         }
 
@@ -558,22 +558,22 @@ internal class Behandling private constructor(
         }
 
         internal fun List<Behandling>.flyttEventueltAvviksvarselTil(vedtaksperiodeId: UUID) {
-            val generasjonForPeriodeTilGodkjenning =
-                finnGenerasjonForVedtaksperiode(vedtaksperiodeId) ?: run {
-                    logg.warn("Finner ikke generasjon for vedtaksperiode $vedtaksperiodeId, sjekker ikke om avviksvarsel skal flyttes")
+            val behandlingForPeriodeTilGodkjenning =
+                finnBehandlingForVedtaksperiode(vedtaksperiodeId) ?: run {
+                    logg.warn("Finner ikke behandling for vedtaksperiode $vedtaksperiodeId, sjekker ikke om avviksvarsel skal flyttes")
                     return
                 }
             val varsel =
                 filterNot {
-                    it == generasjonForPeriodeTilGodkjenning
+                    it == behandlingForPeriodeTilGodkjenning
                 }.flatMap { it.varsler }.find { it.erVarselOmAvvik() && it.erAktiv() } ?: return
 
-            val generasjonMedVarsel = first { generasjon -> generasjon.varsler.contains(varsel) }
+            val behandlingMedVarsel = first { behandling -> behandling.varsler.contains(varsel) }
             logg.info(
-                "Flytter et ikke-vurdert avviksvarsel fra vedtaksperiode ${generasjonMedVarsel.vedtaksperiodeId} til vedtaksperiode $vedtaksperiodeId",
+                "Flytter et ikke-vurdert avviksvarsel fra vedtaksperiode ${behandlingMedVarsel.vedtaksperiodeId} til vedtaksperiode $vedtaksperiodeId",
             )
-            generasjonMedVarsel.varsler.remove(varsel)
-            generasjonForPeriodeTilGodkjenning.varsler.add(varsel)
+            behandlingMedVarsel.varsler.remove(varsel)
+            behandlingForPeriodeTilGodkjenning.varsler.add(varsel)
         }
 
         internal fun List<Behandling>.håndterGodkjent(vedtaksperiodeId: UUID) {

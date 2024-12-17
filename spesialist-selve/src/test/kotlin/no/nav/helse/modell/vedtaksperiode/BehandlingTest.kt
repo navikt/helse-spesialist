@@ -4,7 +4,7 @@ import io.mockk.mockk
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.januar
-import no.nav.helse.modell.person.vedtaksperiode.GenerasjonDto
+import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
@@ -15,9 +15,9 @@ import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
 import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
-import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.finnGenerasjonForSpleisBehandling
-import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.finnGenerasjonForVedtaksperiode
-import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.finnSisteGenerasjonUtenSpleisBehandlingId
+import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.finnBehandlingForSpleisBehandling
+import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.finnBehandlingForVedtaksperiode
+import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.finnSisteBehandlingUtenSpleisBehandlingId
 import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.harMedlemskapsvarsel
 import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.harÅpenGosysOppgave
 import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.kreverSkjønnsfastsettelse
@@ -258,7 +258,7 @@ internal class BehandlingTest {
         val generasjonV1 = generasjon(vedtaksperiodeId = vedtaksperiodeId1)
         val generasjonV2 = generasjon(vedtaksperiodeId = vedtaksperiodeId2)
 
-        assertNotNull(listOf(generasjonV1, generasjonV2).finnGenerasjonForVedtaksperiode(vedtaksperiodeId1))
+        assertNotNull(listOf(generasjonV1, generasjonV2).finnBehandlingForVedtaksperiode(vedtaksperiodeId1))
     }
 
     @Test
@@ -271,8 +271,8 @@ internal class BehandlingTest {
                 generasjon(spleisBehandlingId = UUID.randomUUID()),
                 generasjon(spleisBehandlingId = null),
             )
-        assertEquals(generasjonDetSøkesEtter, generasjoner.finnGenerasjonForSpleisBehandling(spleisBehandlingId))
-        assertNull(generasjoner.finnGenerasjonForSpleisBehandling(UUID.randomUUID()))
+        assertEquals(generasjonDetSøkesEtter, generasjoner.finnBehandlingForSpleisBehandling(spleisBehandlingId))
+        assertNull(generasjoner.finnBehandlingForSpleisBehandling(UUID.randomUUID()))
     }
 
     @Test
@@ -284,17 +284,17 @@ internal class BehandlingTest {
                 generasjonMedBehandlingIdNull,
                 generasjon(spleisBehandlingId = UUID.randomUUID()),
             )
-        assertEquals(generasjonMedBehandlingIdNull, generasjoner.finnSisteGenerasjonUtenSpleisBehandlingId())
+        assertEquals(generasjonMedBehandlingIdNull, generasjoner.finnSisteBehandlingUtenSpleisBehandlingId())
 
         val nyGenerasjonMedBehandlingIdNull = generasjon(spleisBehandlingId = null)
         generasjoner.add(nyGenerasjonMedBehandlingIdNull)
-        assertEquals(nyGenerasjonMedBehandlingIdNull, generasjoner.finnSisteGenerasjonUtenSpleisBehandlingId())
+        assertEquals(nyGenerasjonMedBehandlingIdNull, generasjoner.finnSisteBehandlingUtenSpleisBehandlingId())
     }
 
     @Test
     fun `finner ikke generasjon`() {
         val generasjonV1 = generasjon()
-        assertNull(listOf(generasjonV1).finnGenerasjonForVedtaksperiode(UUID.randomUUID()))
+        assertNull(listOf(generasjonV1).finnBehandlingForVedtaksperiode(UUID.randomUUID()))
     }
 
     @Test
@@ -508,7 +508,7 @@ internal class BehandlingTest {
         val dto = behandling.toDto()
 
         assertEquals(
-            GenerasjonDto(
+            BehandlingDto(
                 generasjonId,
                 vedtaksperiodeId,
                 utbetalingId,

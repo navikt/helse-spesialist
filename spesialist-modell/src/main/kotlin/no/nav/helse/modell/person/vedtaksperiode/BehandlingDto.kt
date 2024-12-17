@@ -4,7 +4,7 @@ import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 import java.time.LocalDate
 import java.util.UUID
 
-data class GenerasjonDto(
+data class BehandlingDto(
     val id: UUID,
     val vedtaksperiodeId: UUID,
     val utbetalingId: UUID?,

@@ -27,7 +27,7 @@ class PgVedtakDao(queryRunner: QueryRunner) : VedtakDao, QueryRunner by queryRun
                 organisasjonsnummer = it.long("organisasjonsnummer").toString(),
                 vedtaksperiodeId = it.uuid("vedtaksperiode_id"),
                 forkastet = it.boolean("forkastet"),
-                generasjoner = emptyList(),
+                behandlinger = emptyList(),
             )
         }
     }
@@ -45,8 +45,8 @@ class PgVedtakDao(queryRunner: QueryRunner) : VedtakDao, QueryRunner by queryRun
             "fodselsnummer" to fødselsnummer,
             "organisasjonsnummer" to vedtaksperiodeDto.organisasjonsnummer,
             "vedtaksperiode_id" to vedtaksperiodeDto.vedtaksperiodeId,
-            "fom" to vedtaksperiodeDto.generasjoner.last().fom,
-            "tom" to vedtaksperiodeDto.generasjoner.last().tom,
+            "fom" to vedtaksperiodeDto.behandlinger.last().fom,
+            "tom" to vedtaksperiodeDto.behandlinger.last().tom,
             "forkastet" to vedtaksperiodeDto.forkastet,
         ).update()
     }
