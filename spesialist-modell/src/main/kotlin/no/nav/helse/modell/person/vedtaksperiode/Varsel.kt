@@ -36,23 +36,23 @@ class Varsel(
 
     fun toDto(): VarselDto = VarselDto(id, varselkode, opprettet, vedtaksperiodeId, status.toDto())
 
-    fun erAktiv(): Boolean = this.status == AKTIV
+    internal fun erAktiv(): Boolean = this.status == AKTIV
 
-    fun erVarselOmAvvik(): Boolean = this.varselkode == "RV_IV_2"
+    internal fun erVarselOmAvvik(): Boolean = this.varselkode == "RV_IV_2"
 
-    fun reaktiver() {
+    internal fun reaktiver() {
         if (status != INAKTIV) return
         this.status = AKTIV
     }
 
-    fun deaktiver() {
+    internal fun deaktiver() {
         if (status != AKTIV) return
         this.status = INAKTIV
     }
 
-    fun erGosysvarsel() = varselkode == "SB_EX_1"
+    internal fun erGosysvarsel() = varselkode == "SB_EX_1"
 
-    fun erVarselOmManglendeInntektsmelding() = varselkode == "RV_IV_10"
+    internal fun erVarselOmManglendeInntektsmelding() = varselkode == "RV_IV_10"
 
     override fun toString(): String = "varselkode=$varselkode, vedtaksperiodeId=$vedtaksperiodeId, status=${status.name}"
 
@@ -75,25 +75,25 @@ class Varsel(
         return result
     }
 
-    fun erRelevantFor(vedtaksperiodeId: UUID): Boolean = this.vedtaksperiodeId == vedtaksperiodeId
+    internal fun erRelevantFor(vedtaksperiodeId: UUID): Boolean = this.vedtaksperiodeId == vedtaksperiodeId
 
     companion object {
-        fun List<Varsel>.finnEksisterendeVarsel(varsel: Varsel): Varsel? = find { it.varselkode == varsel.varselkode }
+        internal fun List<Varsel>.finnEksisterendeVarsel(varsel: Varsel): Varsel? = find { it.varselkode == varsel.varselkode }
 
-        fun List<Varsel>.finnEksisterendeVarsel(varselkode: String): Varsel? = find { it.varselkode == varselkode }
+        internal fun List<Varsel>.finnEksisterendeVarsel(varselkode: String): Varsel? = find { it.varselkode == varselkode }
 
-        fun List<Varsel>.inneholderMedlemskapsvarsel(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_MV_1" }
+        internal fun List<Varsel>.inneholderMedlemskapsvarsel(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_MV_1" }
 
-        fun List<Varsel>.inneholderVarselOmNegativtBeløp(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_UT_23" }
+        internal fun List<Varsel>.inneholderVarselOmNegativtBeløp(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_UT_23" }
 
-        fun List<Varsel>.inneholderAktivtVarselOmAvvik(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_IV_2" }
+        internal fun List<Varsel>.inneholderAktivtVarselOmAvvik(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_IV_2" }
 
-        fun List<Varsel>.inneholderVarselOmAvvik(): Boolean = any { it.varselkode == "RV_IV_2" }
+        internal fun List<Varsel>.inneholderVarselOmAvvik(): Boolean = any { it.varselkode == "RV_IV_2" }
 
-        fun List<Varsel>.inneholderVarselOmTilbakedatering(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_SØ_3" }
+        internal fun List<Varsel>.inneholderVarselOmTilbakedatering(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_SØ_3" }
 
-        fun List<Varsel>.inneholderVarselOmÅpenGosysOppgave(): Boolean = any { it.status == AKTIV && it.varselkode == "SB_EX_1" }
+        internal fun List<Varsel>.inneholderVarselOmÅpenGosysOppgave(): Boolean = any { it.status == AKTIV && it.varselkode == "SB_EX_1" }
 
-        fun List<Varsel>.forhindrerAutomatisering() = any { it.status in listOf(VURDERT, AKTIV, AVVIST) }
+        internal fun List<Varsel>.forhindrerAutomatisering() = any { it.status in listOf(VURDERT, AKTIV, AVVIST) }
     }
 }
