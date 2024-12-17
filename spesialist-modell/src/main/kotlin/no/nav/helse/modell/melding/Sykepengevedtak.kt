@@ -1,4 +1,4 @@
-package no.nav.helse.modell.hendelse
+package no.nav.helse.modell.melding
 
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingstype
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingsårsak

@@ -3,7 +3,12 @@ package no.nav.helse.kafka.message_builders
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.modell.hendelse.UtgåendeHendelse
+import no.nav.helse.modell.melding.Godkjenningsbehovløsning
+import no.nav.helse.modell.melding.UtgåendeHendelse
+import no.nav.helse.modell.melding.VedtaksperiodeAvvistAutomatisk
+import no.nav.helse.modell.melding.VedtaksperiodeAvvistManuelt
+import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
+import no.nav.helse.modell.melding.VedtaksperiodeGodkjentManuelt
 import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.objectMapper
@@ -32,7 +37,7 @@ class UtgåendeHendelseMessageBuilderTest {
 
     @Test
     fun `VedtaksperiodeGodkjentManuelt-hendelse uten beslutter`() {
-        val hendelse = UtgåendeHendelse.VedtaksperiodeGodkjentManuelt(
+        val hendelse = VedtaksperiodeGodkjentManuelt(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
@@ -63,7 +68,7 @@ class UtgåendeHendelseMessageBuilderTest {
 
     @Test
     fun `VedtaksperiodeGodkjentManuelt-hendelse med beslutter`() {
-        val hendelse = UtgåendeHendelse.VedtaksperiodeGodkjentManuelt(
+        val hendelse = VedtaksperiodeGodkjentManuelt(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
@@ -98,7 +103,7 @@ class UtgåendeHendelseMessageBuilderTest {
 
     @Test
     fun `VedtaksperiodeAvvistManuelt-hendelse`() {
-        val hendelse = UtgåendeHendelse.VedtaksperiodeAvvistManuelt(
+        val hendelse = VedtaksperiodeAvvistManuelt(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
@@ -133,7 +138,7 @@ class UtgåendeHendelseMessageBuilderTest {
 
     @Test
     fun `VedtaksperiodeAvvistManuelt-hendelse uten årsak, kommentar, begrunnelser`() {
-        val hendelse = UtgåendeHendelse.VedtaksperiodeAvvistManuelt(
+        val hendelse = VedtaksperiodeAvvistManuelt(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
@@ -165,7 +170,7 @@ class UtgåendeHendelseMessageBuilderTest {
 
     @Test
     fun `VedtaksperiodeGodkjentAutomatisk-hendelse`() {
-        val hendelse = UtgåendeHendelse.VedtaksperiodeGodkjentAutomatisk(
+        val hendelse = VedtaksperiodeGodkjentAutomatisk(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
@@ -192,7 +197,7 @@ class UtgåendeHendelseMessageBuilderTest {
 
     @Test
     fun `VedtaksperiodeAvvistAutomatisk-hendelse`() {
-        val hendelse = UtgåendeHendelse.VedtaksperiodeAvvistAutomatisk(
+        val hendelse = VedtaksperiodeAvvistAutomatisk(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
@@ -228,7 +233,7 @@ class UtgåendeHendelseMessageBuilderTest {
         val `godkjenningsbehov@opprettet` = LocalDateTime.now()
         val `godkjenningsbehov@id` = UUID.randomUUID()
         val godkjenttidspunkt = LocalDateTime.now()
-        val hendelse = UtgåendeHendelse.Godkjenningsbehovløsning(
+        val hendelse = Godkjenningsbehovløsning(
             godkjent = true,
             automatiskBehandling = false,
             godkjenttidspunkt = godkjenttidspunkt,
@@ -262,7 +267,7 @@ class UtgåendeHendelseMessageBuilderTest {
 
     @Test
     fun `VedtaksperiodeAvvistAutomatisk-hendelse med årsak, kommentar, begrunnelser`() {
-        val hendelse = UtgåendeHendelse.VedtaksperiodeAvvistAutomatisk(
+        val hendelse = VedtaksperiodeAvvistAutomatisk(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,

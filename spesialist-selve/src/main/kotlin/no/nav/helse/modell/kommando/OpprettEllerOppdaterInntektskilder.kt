@@ -5,7 +5,7 @@ import no.nav.helse.modell.Inntektskilde
 import no.nav.helse.modell.Inntektskildetype
 import no.nav.helse.modell.KomplettInntektskilde
 import no.nav.helse.modell.arbeidsgiver.Arbeidsgiverinformasjonløsning
-import no.nav.helse.modell.behov.Behov
+import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.HentPersoninfoløsninger
 import org.slf4j.LoggerFactory
 

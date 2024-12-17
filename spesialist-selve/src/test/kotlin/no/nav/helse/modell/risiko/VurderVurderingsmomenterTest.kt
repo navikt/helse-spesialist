@@ -11,8 +11,8 @@ import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
-import no.nav.helse.modell.behov.Behov
-import no.nav.helse.modell.behov.InntektTilRisk
+import no.nav.helse.modell.melding.Behov
+import no.nav.helse.modell.melding.InntektTilRisk
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling

@@ -1,7 +1,7 @@
 package no.nav.helse.modell
 
 import no.nav.helse.januar
-import no.nav.helse.modell.hendelse.UtgåendeHendelse
+import no.nav.helse.modell.melding.Godkjenningsbehovløsning
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
@@ -133,7 +133,7 @@ internal class UtbetalingsgodkjenningMessageTest {
         }
     }
 
-    private fun assertMessage(block: (UtgåendeHendelse.Godkjenningsbehovløsning) -> Unit) {
+    private fun assertMessage(block: (Godkjenningsbehovløsning) -> Unit) {
         godkjenningsbehov.medLøsning()
             .apply(block)
     }

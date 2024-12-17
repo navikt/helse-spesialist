@@ -5,8 +5,8 @@ import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.mediator.UtgåendeMeldingerObserver
-import no.nav.helse.modell.behov.Behov
-import no.nav.helse.modell.hendelse.UtgåendeHendelse
+import no.nav.helse.modell.melding.Behov
+import no.nav.helse.modell.melding.UtgåendeHendelse
 import org.slf4j.LoggerFactory
 import java.util.UUID
 

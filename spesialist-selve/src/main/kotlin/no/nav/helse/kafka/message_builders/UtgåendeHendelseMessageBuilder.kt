@@ -2,8 +2,13 @@ package no.nav.helse.kafka.message_builders
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import no.nav.helse.modell.hendelse.Sykepengevedtak
-import no.nav.helse.modell.hendelse.UtgåendeHendelse
+import no.nav.helse.modell.melding.Godkjenningsbehovløsning
+import no.nav.helse.modell.melding.Sykepengevedtak
+import no.nav.helse.modell.melding.UtgåendeHendelse
+import no.nav.helse.modell.melding.VedtaksperiodeAvvistAutomatisk
+import no.nav.helse.modell.melding.VedtaksperiodeAvvistManuelt
+import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
+import no.nav.helse.modell.melding.VedtaksperiodeGodkjentManuelt
 import no.nav.helse.objectMapper
 import java.time.LocalDateTime
 import java.util.UUID
@@ -17,30 +22,30 @@ internal fun UtgåendeHendelse.somJsonMessage(fødselsnummer: String): JsonMessa
 
 internal fun UtgåendeHendelse.eventName() =
     when (this) {
-        is UtgåendeHendelse.VedtaksperiodeAvvistAutomatisk,
-        is UtgåendeHendelse.VedtaksperiodeAvvistManuelt,
+        is VedtaksperiodeAvvistAutomatisk,
+        is VedtaksperiodeAvvistManuelt,
         -> "vedtaksperiode_avvist"
 
-        is UtgåendeHendelse.VedtaksperiodeGodkjentAutomatisk,
-        is UtgåendeHendelse.VedtaksperiodeGodkjentManuelt,
+        is VedtaksperiodeGodkjentAutomatisk,
+        is VedtaksperiodeGodkjentManuelt,
         -> "vedtaksperiode_godkjent"
 
-        is UtgåendeHendelse.Godkjenningsbehovløsning -> "behov"
+        is Godkjenningsbehovløsning -> "behov"
         is Sykepengevedtak -> "vedtak_fattet"
     }
 
 private fun UtgåendeHendelse.detaljer(): Map<String, Any> {
     return when (this) {
-        is UtgåendeHendelse.VedtaksperiodeAvvistManuelt -> this.detaljer()
-        is UtgåendeHendelse.VedtaksperiodeAvvistAutomatisk -> this.detaljer()
-        is UtgåendeHendelse.VedtaksperiodeGodkjentManuelt -> this.detaljer()
-        is UtgåendeHendelse.VedtaksperiodeGodkjentAutomatisk -> this.detaljer()
-        is UtgåendeHendelse.Godkjenningsbehovløsning -> this.detaljer()
+        is VedtaksperiodeAvvistManuelt -> this.detaljer()
+        is VedtaksperiodeAvvistAutomatisk -> this.detaljer()
+        is VedtaksperiodeGodkjentManuelt -> this.detaljer()
+        is VedtaksperiodeGodkjentAutomatisk -> this.detaljer()
+        is Godkjenningsbehovløsning -> this.detaljer()
         is Sykepengevedtak -> this.detaljer()
     }
 }
 
-private fun UtgåendeHendelse.Godkjenningsbehovløsning.detaljer(): Map<String, Any> {
+private fun Godkjenningsbehovløsning.detaljer(): Map<String, Any> {
     val orginaltBehov = objectMapper.readValue<Map<String, Any>>(this.json)
     val løsning =
         mapOf(
@@ -66,7 +71,7 @@ private fun UtgåendeHendelse.Godkjenningsbehovløsning.detaljer(): Map<String, 
         mapOf("@id" to UUID.randomUUID(), "@opprettet" to LocalDateTime.now())
 }
 
-private fun UtgåendeHendelse.VedtaksperiodeAvvistAutomatisk.detaljer(): Map<String, Any> {
+private fun VedtaksperiodeAvvistAutomatisk.detaljer(): Map<String, Any> {
     return buildMap {
         put("fødselsnummer", fødselsnummer)
         put("vedtaksperiodeId", vedtaksperiodeId)
@@ -88,7 +93,7 @@ private fun UtgåendeHendelse.VedtaksperiodeAvvistAutomatisk.detaljer(): Map<Str
     }
 }
 
-private fun UtgåendeHendelse.VedtaksperiodeAvvistManuelt.detaljer(): Map<String, Any> {
+private fun VedtaksperiodeAvvistManuelt.detaljer(): Map<String, Any> {
     return buildMap {
         put("fødselsnummer", fødselsnummer)
         put("vedtaksperiodeId", vedtaksperiodeId)
@@ -110,7 +115,7 @@ private fun UtgåendeHendelse.VedtaksperiodeAvvistManuelt.detaljer(): Map<String
     }
 }
 
-private fun UtgåendeHendelse.VedtaksperiodeGodkjentAutomatisk.detaljer(): Map<String, Any> {
+private fun VedtaksperiodeGodkjentAutomatisk.detaljer(): Map<String, Any> {
     return mapOf(
         "fødselsnummer" to fødselsnummer,
         "vedtaksperiodeId" to vedtaksperiodeId,
@@ -127,7 +132,7 @@ private fun UtgåendeHendelse.VedtaksperiodeGodkjentAutomatisk.detaljer(): Map<S
     )
 }
 
-private fun UtgåendeHendelse.VedtaksperiodeGodkjentManuelt.detaljer(): Map<String, Any> {
+private fun VedtaksperiodeGodkjentManuelt.detaljer(): Map<String, Any> {
     return buildMap {
         put("fødselsnummer", fødselsnummer)
         put("vedtaksperiodeId", vedtaksperiodeId)

@@ -6,10 +6,11 @@ import io.mockk.verify
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.KommandokjedeEndretEvent
-import no.nav.helse.modell.behov.Behov
-import no.nav.helse.modell.hendelse.UtgåendeHendelse
+import no.nav.helse.modell.melding.Behov
+import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.kommando.CommandContext.Companion.convertToUUID
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
+import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -195,7 +196,7 @@ internal class CommandContextTest {
 
     @Test
     fun `holder på meldinger`() {
-        val hendelse = UtgåendeHendelse.VedtaksperiodeGodkjentAutomatisk(
+        val hendelse = VedtaksperiodeGodkjentAutomatisk(
             fødselsnummer = lagFødselsnummer(),
             vedtaksperiodeId = UUID.randomUUID(),
             behandlingId = UUID.randomUUID(),

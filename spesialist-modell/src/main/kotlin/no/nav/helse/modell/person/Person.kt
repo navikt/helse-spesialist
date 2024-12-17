@@ -1,7 +1,7 @@
 package no.nav.helse.modell.person
 
 import no.nav.helse.modell.Meldingslogg
-import no.nav.helse.modell.hendelse.Sykepengevedtak
+import no.nav.helse.modell.melding.Sykepengevedtak
 import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.flyttEventueltAvviksvarselTil
 import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling

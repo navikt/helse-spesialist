@@ -2,7 +2,7 @@ package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.meldinger.løsninger.Inntektløsning
-import no.nav.helse.modell.behov.Behov
+import no.nav.helse.modell.melding.Behov
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth

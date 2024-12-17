@@ -9,8 +9,9 @@ import no.nav.helse.januar
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.KommandokjedeEndretEvent
-import no.nav.helse.modell.hendelse.UtgåendeHendelse
+import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.melding.Godkjenningsbehovløsning
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -94,7 +95,7 @@ internal class VurderAutomatiskInnvilgelseTest {
             this
                 .observatør
                 .hendelser
-                .filterIsInstance<UtgåendeHendelse.Godkjenningsbehovløsning>()
+                .filterIsInstance<Godkjenningsbehovløsning>()
                 .singleOrNull()
         assertNotNull(løsning)
         assertEquals(true, løsning?.automatiskBehandling)

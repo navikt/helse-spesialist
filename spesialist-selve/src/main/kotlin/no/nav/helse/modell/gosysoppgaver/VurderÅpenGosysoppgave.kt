@@ -4,9 +4,9 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.db.ÅpneGosysOppgaverRepository
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import org.slf4j.LoggerFactory
 import java.time.LocalDate

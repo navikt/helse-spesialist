@@ -1,4 +1,4 @@
-package no.nav.helse.modell.behov
+package no.nav.helse.modell.melding
 
 import java.time.LocalDate
 import java.time.YearMonth

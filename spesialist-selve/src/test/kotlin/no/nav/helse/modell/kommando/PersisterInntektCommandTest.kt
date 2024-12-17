@@ -8,7 +8,7 @@ import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.mediator.meldinger.løsninger.Inntektløsning
-import no.nav.helse.modell.behov.Behov
+import no.nav.helse.modell.melding.Behov
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach

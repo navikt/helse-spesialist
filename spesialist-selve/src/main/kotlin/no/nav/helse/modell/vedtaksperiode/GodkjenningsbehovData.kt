@@ -1,6 +1,10 @@
 package no.nav.helse.modell.vedtaksperiode
 
-import no.nav.helse.modell.hendelse.UtgåendeHendelse
+import no.nav.helse.modell.melding.Godkjenningsbehovløsning
+import no.nav.helse.modell.melding.VedtaksperiodeAvvistAutomatisk
+import no.nav.helse.modell.melding.VedtaksperiodeAvvistManuelt
+import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
+import no.nav.helse.modell.melding.VedtaksperiodeGodkjentManuelt
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.utbetaling.Utbetaling
@@ -36,7 +40,7 @@ data class GodkjenningsbehovData(
     private lateinit var løsning: Løsning
 
     fun medLøsning() =
-        UtgåendeHendelse.Godkjenningsbehovløsning(
+        Godkjenningsbehovløsning(
             godkjent = løsning.godkjent,
             saksbehandlerIdent = løsning.saksbehandlerIdent,
             saksbehandlerEpost = løsning.saksbehandlerEpost,
@@ -197,7 +201,7 @@ data class GodkjenningsbehovData(
     internal fun lagVedtaksperiodeGodkjentManuelt(
         saksbehandler: Saksbehandlerløsning.Saksbehandler,
         beslutter: Saksbehandlerløsning.Saksbehandler?,
-    ) = UtgåendeHendelse.VedtaksperiodeGodkjentManuelt(
+    ) = VedtaksperiodeGodkjentManuelt(
         vedtaksperiodeId = this.vedtaksperiodeId,
         behandlingId = this.spleisBehandlingId,
         fødselsnummer = this.fødselsnummer,
@@ -209,7 +213,7 @@ data class GodkjenningsbehovData(
     )
 
     internal fun lagVedtaksperiodeGodkjentAutomatisk() =
-        UtgåendeHendelse.VedtaksperiodeGodkjentAutomatisk(
+        VedtaksperiodeGodkjentAutomatisk(
             vedtaksperiodeId = this.vedtaksperiodeId,
             behandlingId = this.spleisBehandlingId,
             fødselsnummer = this.fødselsnummer,
@@ -217,7 +221,7 @@ data class GodkjenningsbehovData(
         )
 
     internal fun lagVedtaksperiodeAvvistManuelt(saksbehandler: Saksbehandlerløsning.Saksbehandler) =
-        UtgåendeHendelse.VedtaksperiodeAvvistManuelt(
+        VedtaksperiodeAvvistManuelt(
             vedtaksperiodeId = this.vedtaksperiodeId,
             behandlingId = this.spleisBehandlingId,
             fødselsnummer = this.fødselsnummer,
@@ -230,7 +234,7 @@ data class GodkjenningsbehovData(
         )
 
     internal fun lagVedtaksperiodeAvvistAutomatisk() =
-        UtgåendeHendelse.VedtaksperiodeAvvistAutomatisk(
+        VedtaksperiodeAvvistAutomatisk(
             vedtaksperiodeId = this.vedtaksperiodeId,
             behandlingId = this.spleisBehandlingId,
             fødselsnummer = this.fødselsnummer,

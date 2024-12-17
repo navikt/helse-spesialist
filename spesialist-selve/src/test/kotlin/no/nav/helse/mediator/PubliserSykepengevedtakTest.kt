@@ -12,8 +12,8 @@ import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingstype
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingsårsak
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
-import no.nav.helse.modell.hendelse.Sykepengevedtak
-import no.nav.helse.modell.hendelse.Sykepengevedtak.VedtakMedSkjønnsvurdering
+import no.nav.helse.modell.melding.Sykepengevedtak
+import no.nav.helse.modell.melding.Sykepengevedtak.VedtakMedSkjønnsvurdering
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt

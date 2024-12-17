@@ -3,8 +3,8 @@ package no.nav.helse
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.kafka.message_builders.somJsonMessage
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.modell.behov.Behov
-import no.nav.helse.modell.behov.InntektTilRisk
+import no.nav.helse.modell.melding.Behov
+import no.nav.helse.modell.melding.InntektTilRisk
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertEquals

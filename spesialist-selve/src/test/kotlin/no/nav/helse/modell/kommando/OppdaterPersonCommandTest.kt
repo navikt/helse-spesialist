@@ -6,7 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.CommandContextObserver
-import no.nav.helse.modell.behov.Behov
+import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerløsning
 import no.nav.helse.modell.person.HentPersoninfoløsning
@@ -77,7 +77,8 @@ internal class OppdaterPersonCommandTest {
         utdatertUtbetalinger()
         assertFalse(command.execute(context))
         assertTrue(observer.behov.isNotEmpty())
-        assertEquals(listOf(Behov.Infotrygdutbetalinger(
+        assertEquals(listOf(
+            Behov.Infotrygdutbetalinger(
             fom = førsteKjenteDagFinner().minusYears(3),
             tom = LocalDate.now()
         )), observer.behov.toList())

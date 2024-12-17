@@ -6,7 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
-import no.nav.helse.modell.behov.Behov
+import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.kommando.CommandContext
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse

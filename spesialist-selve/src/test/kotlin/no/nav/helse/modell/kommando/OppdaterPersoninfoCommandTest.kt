@@ -6,7 +6,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.CommandContextObserver
-import no.nav.helse.modell.behov.Behov
+import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.HentPersoninfoløsning
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.typer.Kjønn

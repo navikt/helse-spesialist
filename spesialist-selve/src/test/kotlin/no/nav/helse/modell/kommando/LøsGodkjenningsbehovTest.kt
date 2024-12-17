@@ -6,7 +6,8 @@ import no.nav.helse.januar
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.MeldingDao
-import no.nav.helse.modell.hendelse.UtgåendeHendelse
+import no.nav.helse.modell.melding.Godkjenningsbehovløsning
+import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -102,7 +103,7 @@ internal class LøsGodkjenningsbehovTest {
         assertTrue(command.execute(commandContext))
         val løsning = observer
             .hendelser
-            .filterIsInstance<UtgåendeHendelse.Godkjenningsbehovløsning>()
+            .filterIsInstance<Godkjenningsbehovløsning>()
             .singleOrNull()
         assertNotNull(løsning)
     }

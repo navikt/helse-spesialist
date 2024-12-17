@@ -1,6 +1,6 @@
 package no.nav.helse.modell
 
-import no.nav.helse.modell.hendelse.UtgåendeHendelse
+import no.nav.helse.modell.melding.UtgåendeHendelse
 
 class Meldingslogg {
     private val logg: MutableList<UtgåendeHendelse> = mutableListOf()

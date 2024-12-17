@@ -1,10 +1,10 @@
 package no.nav.helse.modell.vedtak
 
-import no.nav.helse.modell.hendelse.Sykepengevedtak
+import no.nav.helse.modell.melding.Sykepengevedtak
 import no.nav.helse.modell.januar
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Infotrygd
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis
-import no.nav.helse.modell.hendelse.Sykepengevedtak.VedtakMedSkjønnsvurdering
+import no.nav.helse.modell.melding.Sykepengevedtak.VedtakMedSkjønnsvurdering
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.modell.vilkårsprøving.Inntekt
 import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag

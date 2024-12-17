@@ -4,9 +4,10 @@ import io.mockk.mockk
 import no.nav.helse.januar
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.modell.hendelse.UtgåendeHendelse
+import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.LøsGodkjenningsbehov
+import no.nav.helse.modell.melding.Godkjenningsbehovløsning
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.utbetaling.Refusjonstype.DELVIS_REFUSJON
@@ -90,9 +91,9 @@ internal class SaksbehandlerløsningTest {
         val  saksbehandleroverstyringer = listOf(randomUUID(), randomUUID())
         val saksbehandlerløsning = saksbehandlerløsning(true, saksbehandleroverstyringer)
         assertTrue(saksbehandlerløsning.execute(context))
-        val løsning = observer.hendelser.singleOrNull { it is UtgåendeHendelse.Godkjenningsbehovløsning }
+        val løsning = observer.hendelser.singleOrNull { it is Godkjenningsbehovløsning }
         assertNotNull(løsning)
-        check(løsning is UtgåendeHendelse.Godkjenningsbehovløsning)
+        check(løsning is Godkjenningsbehovløsning)
 
         assertEquals(saksbehandleroverstyringer, løsning.saksbehandleroverstyringer)
     }
@@ -162,7 +163,7 @@ internal class SaksbehandlerløsningTest {
     }
 
     private fun assertLøsning(godkjent: Boolean, refusjonstype: Refusjonstype) {
-        val løsning = observer.hendelser.filterIsInstance<UtgåendeHendelse.Godkjenningsbehovløsning>().singleOrNull()
+        val løsning = observer.hendelser.filterIsInstance<Godkjenningsbehovløsning>().singleOrNull()
         assertNotNull(løsning)
         assertEquals(godkjent, løsning?.godkjent)
         assertEquals(refusjonstype.name, løsning?.refusjonstype)

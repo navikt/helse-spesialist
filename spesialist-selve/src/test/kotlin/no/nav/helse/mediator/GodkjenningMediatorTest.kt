@@ -6,8 +6,12 @@ import io.mockk.verify
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.januar
 import no.nav.helse.modell.gosysoppgaver.inspektør
-import no.nav.helse.modell.hendelse.UtgåendeHendelse
+import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.melding.VedtaksperiodeAvvistAutomatisk
+import no.nav.helse.modell.melding.VedtaksperiodeAvvistManuelt
+import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
+import no.nav.helse.modell.melding.VedtaksperiodeGodkjentManuelt
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
@@ -81,7 +85,7 @@ internal class GodkjenningMediatorTest {
             sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, listOf(generasjon())),
             utbetaling = utbetaling,
         )
-        assertNotNull(hendelserInspektør.hendelseOrNull<UtgåendeHendelse.VedtaksperiodeGodkjentManuelt>())
+        assertNotNull(hendelserInspektør.hendelseOrNull<VedtaksperiodeGodkjentManuelt>())
     }
 
     @Test
@@ -99,7 +103,7 @@ internal class GodkjenningMediatorTest {
             begrunnelser = null,
             kommentar = null
         )
-        assertNotNull(hendelserInspektør.hendelseOrNull<UtgåendeHendelse.VedtaksperiodeAvvistManuelt>())
+        assertNotNull(hendelserInspektør.hendelseOrNull<VedtaksperiodeAvvistManuelt>())
     }
 
     @Test
@@ -109,7 +113,7 @@ internal class GodkjenningMediatorTest {
             behov = godkjenningsbehov(fødselsnummer = fnr),
             utbetaling = utbetaling
         )
-        assertNotNull(hendelserInspektør.hendelseOrNull<UtgåendeHendelse.VedtaksperiodeGodkjentAutomatisk>())
+        assertNotNull(hendelserInspektør.hendelseOrNull<VedtaksperiodeGodkjentAutomatisk>())
     }
 
     @Test
@@ -120,7 +124,7 @@ internal class GodkjenningMediatorTest {
             behov = godkjenningsbehov(fødselsnummer = fnr),
             begrunnelser = emptyList(),
         )
-        assertNotNull(hendelserInspektør.hendelseOrNull<UtgåendeHendelse.VedtaksperiodeAvvistAutomatisk>())
+        assertNotNull(hendelserInspektør.hendelseOrNull<VedtaksperiodeAvvistAutomatisk>())
     }
 
     @Test

@@ -5,8 +5,8 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.kafka.message_builders.behovName
 import no.nav.helse.kafka.message_builders.somJsonMessage
 import no.nav.helse.mediator.meldinger.Personmelding
-import no.nav.helse.modell.behov.Behov
-import no.nav.helse.modell.hendelse.UtgåendeHendelse
+import no.nav.helse.modell.melding.Behov
+import no.nav.helse.modell.melding.UtgåendeHendelse
 import org.slf4j.LoggerFactory
 import java.util.UUID
 

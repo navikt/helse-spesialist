@@ -1,7 +1,7 @@
 package no.nav.helse.modell.vedtak
 
-import no.nav.helse.modell.hendelse.Sykepengevedtak
-import no.nav.helse.modell.hendelse.Sykepengevedtak.VedtakMedSkjønnsvurdering
+import no.nav.helse.modell.melding.Sykepengevedtak
+import no.nav.helse.modell.melding.Sykepengevedtak.VedtakMedSkjønnsvurdering
 import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
 import java.time.LocalDate
 import java.time.LocalDateTime

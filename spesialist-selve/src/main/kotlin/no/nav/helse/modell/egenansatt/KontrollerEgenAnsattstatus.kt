@@ -2,9 +2,9 @@ package no.nav.helse.modell.egenansatt
 
 import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
-import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.melding.Behov
 import org.slf4j.LoggerFactory
 
 internal class KontrollerEgenAnsattstatus(

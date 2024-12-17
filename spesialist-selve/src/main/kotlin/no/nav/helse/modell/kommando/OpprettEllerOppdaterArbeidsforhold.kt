@@ -3,7 +3,7 @@ package no.nav.helse.modell.kommando
 import no.nav.helse.db.ArbeidsforholdRepository
 import no.nav.helse.modell.ArbeidsforholdDto
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
-import no.nav.helse.modell.behov.Behov
+import no.nav.helse.modell.melding.Behov
 import org.slf4j.LoggerFactory
 
 internal class OpprettEllerOppdaterArbeidsforhold(

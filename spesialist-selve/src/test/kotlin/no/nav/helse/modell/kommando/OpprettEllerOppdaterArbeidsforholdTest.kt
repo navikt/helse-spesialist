@@ -4,7 +4,7 @@ import no.nav.helse.db.ArbeidsforholdRepository
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.modell.KomplettArbeidsforholdDto
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
-import no.nav.helse.modell.behov.Behov
+import no.nav.helse.modell.melding.Behov
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue

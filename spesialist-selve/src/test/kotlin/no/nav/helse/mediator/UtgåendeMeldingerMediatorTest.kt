@@ -3,11 +3,11 @@ package no.nav.helse.mediator
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import kotliquery.TransactionalSession
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
-import no.nav.helse.modell.behov.Behov
-import no.nav.helse.modell.hendelse.UtgåendeHendelse
+import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.Person
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
+import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -57,13 +57,13 @@ internal class UtgåendeMeldingerMediatorTest {
 
     @Test
     fun `sender meldinger`() {
-        val hendelse1 = UtgåendeHendelse.VedtaksperiodeGodkjentAutomatisk(
+        val hendelse1 = VedtaksperiodeGodkjentAutomatisk(
             fødselsnummer = lagFødselsnummer(),
             vedtaksperiodeId = UUID.randomUUID(),
             behandlingId = UUID.randomUUID(),
             periodetype = "FØRSTEGANGSBEHANDLING"
         )
-        val hendelse2 = UtgåendeHendelse.VedtaksperiodeGodkjentAutomatisk(
+        val hendelse2 = VedtaksperiodeGodkjentAutomatisk(
             fødselsnummer = lagFødselsnummer(),
             vedtaksperiodeId = UUID.randomUUID(),
             behandlingId = UUID.randomUUID(),

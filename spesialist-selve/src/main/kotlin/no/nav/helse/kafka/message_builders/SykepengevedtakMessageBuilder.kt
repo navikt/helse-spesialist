@@ -1,6 +1,6 @@
 package no.nav.helse.kafka.message_builders
 
-import no.nav.helse.modell.hendelse.Sykepengevedtak
+import no.nav.helse.modell.melding.Sykepengevedtak
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 
