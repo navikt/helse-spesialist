@@ -12,7 +12,7 @@ import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
-import no.nav.helse.modell.person.vedtaksperiode.Sykefraværstilfelle
+import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import org.junit.jupiter.api.Assertions.assertEquals

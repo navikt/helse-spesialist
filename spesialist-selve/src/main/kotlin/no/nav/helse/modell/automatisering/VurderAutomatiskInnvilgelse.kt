@@ -7,7 +7,7 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
-import no.nav.helse.modell.person.vedtaksperiode.Sykefraværstilfelle
+import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import org.slf4j.LoggerFactory

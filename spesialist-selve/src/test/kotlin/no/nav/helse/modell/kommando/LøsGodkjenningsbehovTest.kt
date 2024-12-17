@@ -7,7 +7,7 @@ import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.hendelse.UtgåendeHendelse
-import no.nav.helse.modell.person.vedtaksperiode.Sykefraværstilfelle
+import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.person.vedtaksperiode.Behandling

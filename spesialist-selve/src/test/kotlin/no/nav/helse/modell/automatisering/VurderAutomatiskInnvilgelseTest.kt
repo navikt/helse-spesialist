@@ -11,7 +11,7 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.modell.hendelse.UtgåendeHendelse
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.person.vedtaksperiode.Sykefraværstilfelle
+import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.person.vedtaksperiode.Behandling

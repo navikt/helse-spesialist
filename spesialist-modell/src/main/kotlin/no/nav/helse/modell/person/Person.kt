@@ -4,7 +4,6 @@ import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.flyttEvent
 import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
-import no.nav.helse.modell.person.vedtaksperiode.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode.Companion.finnBehandling

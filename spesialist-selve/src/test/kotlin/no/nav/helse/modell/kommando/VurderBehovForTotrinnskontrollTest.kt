@@ -8,7 +8,7 @@ import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
-import no.nav.helse.modell.person.vedtaksperiode.Sykefraværstilfelle
+import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.modell.person.vedtaksperiode.Behandling

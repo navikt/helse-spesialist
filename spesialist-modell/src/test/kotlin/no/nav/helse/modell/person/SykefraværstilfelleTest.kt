@@ -1,11 +1,10 @@
-package no.nav.helse.modell.sykefraværstilfelle
+package no.nav.helse.modell.person
 
-import no.nav.helse.februar
-import no.nav.helse.januar
-import no.nav.helse.modell.person.vedtaksperiode.Varsel
+import no.nav.helse.modell.februar
+import no.nav.helse.modell.januar
 import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.forhindrerAutomatisering
-import no.nav.helse.modell.person.vedtaksperiode.Sykefraværstilfelle
+import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

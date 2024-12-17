@@ -4,7 +4,7 @@ import no.nav.helse.db.PersonRepository
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.HentEnhetløsning
-import no.nav.helse.modell.person.vedtaksperiode.Sykefraværstilfelle
+import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import org.slf4j.LoggerFactory
 import java.util.UUID

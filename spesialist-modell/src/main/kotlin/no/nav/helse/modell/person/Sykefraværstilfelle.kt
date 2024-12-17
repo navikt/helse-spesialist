@@ -1,5 +1,6 @@
-package no.nav.helse.modell.person.vedtaksperiode
+package no.nav.helse.modell.person
 
+import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.deaktiver
 import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.erTilbakedatert
 import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.finnBehandlingForVedtaksperiode
@@ -11,6 +12,7 @@ import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.harÅpenGo
 import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.håndterGodkjent
 import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.håndterNyttVarsel
 import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.kreverSkjønnsfastsettelse
+import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import java.time.LocalDate
 import java.util.UUID
 

@@ -14,7 +14,7 @@ import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
 import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.behov.InntektTilRisk
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.person.vedtaksperiode.Sykefraværstilfelle
+import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
