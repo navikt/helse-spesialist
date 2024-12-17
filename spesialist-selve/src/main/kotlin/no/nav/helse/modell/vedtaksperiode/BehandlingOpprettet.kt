@@ -7,18 +7,9 @@ import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.person.Person
+import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import java.time.LocalDate
 import java.util.UUID
-
-data class SpleisBehandling(
-    val organisasjonsnummer: String,
-    val vedtaksperiodeId: UUID,
-    val spleisBehandlingId: UUID,
-    val fom: LocalDate,
-    val tom: LocalDate,
-) {
-    internal fun erRelevantFor(vedtaksperiodeId: UUID) = this.vedtaksperiodeId == vedtaksperiodeId
-}
 
 internal class BehandlingOpprettet(
     override val id: UUID,

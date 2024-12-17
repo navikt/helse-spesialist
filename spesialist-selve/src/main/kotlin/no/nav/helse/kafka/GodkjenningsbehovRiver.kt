@@ -10,13 +10,13 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
+import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetaling.Utbetalingtype.Companion.values
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
-import no.nav.helse.modell.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
 import java.time.LocalDate
 import java.util.UUID

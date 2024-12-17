@@ -12,7 +12,7 @@ import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.modell.vedtaksperiode.Behandling
-import no.nav.helse.modell.vedtaksperiode.SpleisVedtaksperiode
+import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach

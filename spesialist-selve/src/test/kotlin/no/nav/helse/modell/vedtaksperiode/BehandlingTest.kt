@@ -4,6 +4,7 @@ import io.mockk.mockk
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.januar
+import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AKTIV
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.VURDERT

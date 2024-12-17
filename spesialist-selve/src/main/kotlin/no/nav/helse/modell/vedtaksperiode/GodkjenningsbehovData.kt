@@ -1,6 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import no.nav.helse.modell.hendelse.UtgåendeHendelse
+import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype

@@ -46,6 +46,7 @@ import no.nav.helse.modell.kommando.PersisterVedtaksperiodetypeCommand
 import no.nav.helse.modell.kommando.VurderBehovForTotrinnskontroll
 import no.nav.helse.modell.kommando.VurderVidereBehandlingAvGodkjenningsbehov
 import no.nav.helse.modell.person.Person
+import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.risiko.VurderVurderingsmomenter
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.modell.utbetaling.Utbetaling
@@ -54,16 +55,6 @@ import no.nav.helse.modell.varsel.VurderEnhetUtland
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
 import java.time.LocalDate
 import java.util.UUID
-
-data class SpleisVedtaksperiode(
-    val vedtaksperiodeId: UUID,
-    val spleisBehandlingId: UUID,
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val skjæringstidspunkt: LocalDate,
-) {
-    internal fun erRelevant(vedtaksperiodeId: UUID): Boolean = this.vedtaksperiodeId == vedtaksperiodeId
-}
 
 data class SpleisSykepengegrunnlagsfakta(
     val arbeidsgivere: List<SykepengegrunnlagsArbeidsgiver>,

@@ -3,9 +3,9 @@ package no.nav.helse.modell.kommando
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.db.overstyring.OverstyringRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
+import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
-import no.nav.helse.modell.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.slf4j.LoggerFactory
 import java.util.UUID

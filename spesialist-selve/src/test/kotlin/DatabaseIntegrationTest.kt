@@ -49,7 +49,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
-import no.nav.helse.modell.vedtaksperiode.SpleisBehandling
+import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
