@@ -9,7 +9,7 @@ import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
-import no.nav.helse.modell.vedtaksperiode.Periode
+import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.objectMapper
 import java.time.LocalDate

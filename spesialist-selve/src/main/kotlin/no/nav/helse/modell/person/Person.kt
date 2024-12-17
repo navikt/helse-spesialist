@@ -1,5 +1,6 @@
 package no.nav.helse.modell.person
 
+import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
@@ -11,7 +12,6 @@ import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.modell.vedtak.Sykepengevedtak
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.flyttEventueltAvviksvarselTil
-import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.finnGenerasjon
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.relevanteFor

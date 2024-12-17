@@ -13,10 +13,10 @@ import no.nav.helse.modell.automatisering.SettTidligereAutomatiseringInaktivComm
 import no.nav.helse.modell.automatisering.VurderAutomatiskInnvilgelse
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.person.Person
+import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
-import no.nav.helse.modell.vedtaksperiode.Periode
 import java.util.UUID
 
 internal class TilbakedateringBehandlet(

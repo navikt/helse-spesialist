@@ -2,7 +2,8 @@ package no.nav.helse.modell.vedtaksperiode
 
 import no.nav.helse.februar
 import no.nav.helse.januar
-import no.nav.helse.modell.vedtaksperiode.Periode.Companion.til
+import no.nav.helse.modell.person.vedtaksperiode.Periode
+import no.nav.helse.modell.person.vedtaksperiode.Periode.Companion.til
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals

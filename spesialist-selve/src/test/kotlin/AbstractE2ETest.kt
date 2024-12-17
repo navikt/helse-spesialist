@@ -36,7 +36,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.SENDT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.vedtaksperiode.Behandling
-import no.nav.helse.modell.vedtaksperiode.Periode
+import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling

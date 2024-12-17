@@ -1,4 +1,4 @@
-package no.nav.helse.modell.vedtaksperiode
+package no.nav.helse.modell.person.vedtaksperiode
 
 import java.time.LocalDate
 
@@ -10,9 +10,9 @@ class Periode(
         require(fom <= tom) { "Fom kan ikke være etter tom" }
     }
 
-    internal fun fom() = fom
+    fun fom() = fom
 
-    internal fun tom() = tom
+    fun tom() = tom
 
     override fun equals(other: Any?): Boolean =
         this === other || (
@@ -22,7 +22,7 @@ class Periode(
                 tom == other.tom
         )
 
-    internal fun overlapperMed(other: Periode) = this.overlapper(other) || other.overlapper(this)
+    fun overlapperMed(other: Periode) = this.overlapper(other) || other.overlapper(this)
 
     private fun overlapper(other: Periode) = other.fom in fom..tom || other.tom in fom..tom
 
@@ -36,7 +36,7 @@ class Periode(
         return "Periode(fom=$fom, tom=$tom)"
     }
 
-    internal companion object {
-        internal infix fun LocalDate.til(other: LocalDate) = Periode(this, other)
+    companion object {
+        infix fun LocalDate.til(other: LocalDate) = Periode(this, other)
     }
 }

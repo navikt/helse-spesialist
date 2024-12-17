@@ -8,7 +8,7 @@ import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
-import no.nav.helse.modell.vedtaksperiode.Periode
+import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions

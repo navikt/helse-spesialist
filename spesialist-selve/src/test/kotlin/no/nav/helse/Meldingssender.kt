@@ -11,7 +11,7 @@ import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
-import no.nav.helse.modell.vedtaksperiode.Periode
+import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals

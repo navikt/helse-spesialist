@@ -2,6 +2,7 @@ package no.nav.helse.modell.vedtaksperiode
 
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.person.Person
+import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
