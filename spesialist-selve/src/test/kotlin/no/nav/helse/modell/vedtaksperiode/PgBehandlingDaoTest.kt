@@ -2,6 +2,8 @@ package no.nav.helse.modell.vedtaksperiode
 
 import DatabaseIntegrationTest
 import no.nav.helse.januar
+import no.nav.helse.modell.person.vedtaksperiode.GenerasjonDto
+import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import no.nav.helse.modell.vedtak.Utfall

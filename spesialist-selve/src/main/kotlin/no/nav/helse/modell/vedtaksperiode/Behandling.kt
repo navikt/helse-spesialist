@@ -2,9 +2,11 @@ package no.nav.helse.modell.vedtaksperiode
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.helse.modell.person.vedtaksperiode.GenerasjonDto
 import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
+import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.finnEksisterendeVarsel
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.forhindrerAutomatisering

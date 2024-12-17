@@ -8,6 +8,7 @@ import no.nav.helse.db.MedDataSource
 import no.nav.helse.db.MedSession
 import no.nav.helse.db.QueryRunner
 import no.nav.helse.db.VedtakBegrunnelseDao
+import no.nav.helse.modell.person.vedtaksperiode.GenerasjonDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import java.time.LocalDate

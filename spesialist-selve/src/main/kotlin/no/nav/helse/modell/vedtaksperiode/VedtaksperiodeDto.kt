@@ -1,5 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
+import no.nav.helse.modell.person.vedtaksperiode.GenerasjonDto
 import java.util.UUID
 
 enum class Periodetype {

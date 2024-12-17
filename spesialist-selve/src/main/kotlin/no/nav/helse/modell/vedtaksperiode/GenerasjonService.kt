@@ -2,6 +2,7 @@ package no.nav.helse.modell.vedtaksperiode
 
 import kotliquery.TransactionalSession
 import no.nav.helse.db.PgVedtakDao
+import no.nav.helse.modell.person.vedtaksperiode.GenerasjonDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import org.slf4j.LoggerFactory
 import java.util.UUID

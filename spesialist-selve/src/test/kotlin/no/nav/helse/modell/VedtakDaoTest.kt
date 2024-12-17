@@ -5,10 +5,10 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.januar
-import no.nav.helse.modell.vedtaksperiode.GenerasjonDto
+import no.nav.helse.modell.person.vedtaksperiode.GenerasjonDto
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vedtaksperiode.TilstandDto
+import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse

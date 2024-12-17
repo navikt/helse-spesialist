@@ -1,6 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import no.nav.helse.januar
+import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
