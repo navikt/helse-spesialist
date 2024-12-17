@@ -1,5 +1,6 @@
 package no.nav.helse.modell
 
+import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -8,7 +9,7 @@ import java.util.UUID
 class MeldingsloggTest {
 
     @Test
-    fun `kan legge til og hente ut meldinger fra meldingsloggen`() {
+    fun `kan legge til og hente ut hendelser fra meldingsloggen`() {
         val logg = Meldingslogg()
         val hendelse = VedtaksperiodeGodkjentAutomatisk(
             fødselsnummer = lagFødselsnummer(),
@@ -16,8 +17,19 @@ class MeldingsloggTest {
             behandlingId = UUID.randomUUID(),
             periodetype = "FORLENGELSE"
         )
-        logg.nyHendelse(hendelse)
+        logg.nyMelding(hendelse)
+        assertEquals(0, logg.behov().size)
         assertEquals(1, logg.hendelser().size)
         assertEquals(hendelse, logg.hendelser().single())
+    }
+
+    @Test
+    fun `kan legge til og hente ut behov fra meldingsloggen`() {
+        val logg = Meldingslogg()
+        val behov = Behov.Vergemål
+        logg.nyMelding(behov)
+        assertEquals(0, logg.hendelser().size)
+        assertEquals(1, logg.behov().size)
+        assertEquals(behov, logg.behov().single())
     }
 }

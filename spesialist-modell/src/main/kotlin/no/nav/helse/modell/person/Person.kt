@@ -117,7 +117,7 @@ class Person private constructor(
         sykepengevedtakBuilder
             .aktørId(aktørId)
             .fødselsnummer(fødselsnummer)
-        meldingslogg.nyHendelse(sykepengevedtakBuilder.build())
+        meldingslogg.nyMelding(sykepengevedtakBuilder.build())
     }
 
     fun nySpleisBehandling(spleisBehandling: SpleisBehandling) {
@@ -172,7 +172,7 @@ class Person private constructor(
         vedtakBuilder.aktørId(aktørId)
     }
 
-    private fun fattVedtak(vedtak: Sykepengevedtak) = meldingslogg.nyHendelse(vedtak)
+    private fun fattVedtak(vedtak: Sykepengevedtak) = meldingslogg.nyMelding(vedtak)
 
     companion object {
         private val logg = LoggerFactory.getLogger(this::class.java)

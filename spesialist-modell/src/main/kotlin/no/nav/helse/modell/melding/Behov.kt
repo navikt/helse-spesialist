@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
-sealed interface Behov {
+sealed interface Behov : UtgåendeMelding {
     data object Vergemål : Behov
 
     data object Fullmakt : Behov
