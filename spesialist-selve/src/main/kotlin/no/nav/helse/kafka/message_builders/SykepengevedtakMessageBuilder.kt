@@ -1,19 +1,18 @@
 package no.nav.helse.kafka.message_builders
 
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.helse.modell.hendelse.Sykepengevedtak
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 
-internal fun Sykepengevedtak.somJsonMessage() =
+internal fun Sykepengevedtak.detaljer(): Map<String, Any> =
     when (this) {
-        is Sykepengevedtak.IkkeRealitetsbehandlet -> auuVedtakJson()
-        is Sykepengevedtak.VedtakMedOpphavIInfotrygd -> vedtakMedOpphavIInfotrygdJson()
-        is Sykepengevedtak.Vedtak -> vedtakJson()
-        is Sykepengevedtak.VedtakMedSkjønnsvurdering -> vedtakMedSkjønnsvurderingJson()
+        is Sykepengevedtak.IkkeRealitetsbehandlet -> auuVedtakdetaljer()
+        is Sykepengevedtak.VedtakMedOpphavIInfotrygd -> vedtakMedOpphavIInfotrygddetaljer()
+        is Sykepengevedtak.Vedtak -> vedtakdetaljer()
+        is Sykepengevedtak.VedtakMedSkjønnsvurdering -> vedtakMedSkjønnsvurderingdetaljer()
     }
 
-private fun Sykepengevedtak.Vedtak.vedtakJson(): String {
+private fun Sykepengevedtak.Vedtak.vedtakdetaljer(): Map<String, Any> {
     val sykepengegrunnlagsfakta = sykepengegrunnlagsfakta
     val sammenligningsgrunnlag = sammenligningsgrunnlag
 
@@ -21,52 +20,46 @@ private fun Sykepengevedtak.Vedtak.vedtakJson(): String {
         emptyList<Map<String, Any>>()
             .supplerMedIndividuellBegrunnelse(vedtakBegrunnelse, this)
 
-    val message =
-        JsonMessage.newMessage(
-            "vedtak_fattet",
-            mutableMapOf(
-                "fødselsnummer" to fødselsnummer,
-                "aktørId" to aktørId,
-                "vedtaksperiodeId" to "$vedtaksperiodeId",
-                "behandlingId" to "$spleisBehandlingId",
-                "organisasjonsnummer" to organisasjonsnummer,
-                "fom" to "$fom",
-                "tom" to "$tom",
-                "skjæringstidspunkt" to "$skjæringstidspunkt",
-                "hendelser" to hendelser,
-                "sykepengegrunnlag" to sykepengegrunnlag,
-                "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag,
-                "grunnlagForSykepengegrunnlagPerArbeidsgiver" to grunnlagForSykepengegrunnlagPerArbeidsgiver,
-                "begrensning" to begrensning,
-                "inntekt" to inntekt,
-                "vedtakFattetTidspunkt" to "$vedtakFattetTidspunkt",
-                "utbetalingId" to "$utbetalingId",
-                "tags" to tags,
-                "sykepengegrunnlagsfakta" to
-                    mutableMapOf(
-                        "omregnetÅrsinntekt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
-                        "innrapportertÅrsinntekt" to sammenligningsgrunnlag.totalbeløp,
-                        "avviksprosent" to avviksprosent,
-                        "6G" to sykepengegrunnlagsfakta.seksG,
-                        "tags" to sykepengegrunnlagsfakta.tags,
-                        "arbeidsgivere" to
-                            sykepengegrunnlagsfakta.arbeidsgivere.map {
-                                mutableMapOf(
-                                    "arbeidsgiver" to it.organisasjonsnummer,
-                                    "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
-                                    "innrapportertÅrsinntekt" to sammenligningsgrunnlag.innrapportertÅrsinntektFor(it.organisasjonsnummer),
-                                )
-                            },
-                        "fastsatt" to "EtterHovedregel",
-                    ),
-                "begrunnelser" to begrunnelser,
+    return mapOf(
+        "fødselsnummer" to fødselsnummer,
+        "aktørId" to aktørId,
+        "vedtaksperiodeId" to "$vedtaksperiodeId",
+        "behandlingId" to "$spleisBehandlingId",
+        "organisasjonsnummer" to organisasjonsnummer,
+        "fom" to "$fom",
+        "tom" to "$tom",
+        "skjæringstidspunkt" to "$skjæringstidspunkt",
+        "hendelser" to hendelser,
+        "sykepengegrunnlag" to sykepengegrunnlag,
+        "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag,
+        "grunnlagForSykepengegrunnlagPerArbeidsgiver" to grunnlagForSykepengegrunnlagPerArbeidsgiver,
+        "begrensning" to begrensning,
+        "inntekt" to inntekt,
+        "vedtakFattetTidspunkt" to "$vedtakFattetTidspunkt",
+        "utbetalingId" to "$utbetalingId",
+        "tags" to tags,
+        "sykepengegrunnlagsfakta" to
+            mapOf(
+                "omregnetÅrsinntekt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
+                "innrapportertÅrsinntekt" to sammenligningsgrunnlag.totalbeløp,
+                "avviksprosent" to avviksprosent,
+                "6G" to sykepengegrunnlagsfakta.seksG,
+                "tags" to sykepengegrunnlagsfakta.tags,
+                "arbeidsgivere" to
+                    sykepengegrunnlagsfakta.arbeidsgivere.map {
+                        mapOf(
+                            "arbeidsgiver" to it.organisasjonsnummer,
+                            "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
+                            "innrapportertÅrsinntekt" to sammenligningsgrunnlag.innrapportertÅrsinntektFor(it.organisasjonsnummer),
+                        )
+                    },
+                "fastsatt" to "EtterHovedregel",
             ),
-        )
-
-    return message.toJson()
+        "begrunnelser" to begrunnelser,
+    )
 }
 
-private fun Sykepengevedtak.VedtakMedSkjønnsvurdering.vedtakMedSkjønnsvurderingJson(): String {
+private fun Sykepengevedtak.VedtakMedSkjønnsvurdering.vedtakMedSkjønnsvurderingdetaljer(): Map<String, Any> {
     val skjønnsfastsettingopplysninger = skjønnsfastsettingopplysninger
     val sykepengegrunnlagsfakta = sykepengegrunnlagsfakta
     val sammenligningsgrunnlag = sammenligningsgrunnlag
@@ -74,117 +67,101 @@ private fun Sykepengevedtak.VedtakMedSkjønnsvurdering.vedtakMedSkjønnsvurderin
         emptyList<Map<String, Any>>()
             .supplerMedSkjønnsfastsettingsbegrunnelse(skjønnsfastsettingopplysninger, this)
             .supplerMedIndividuellBegrunnelse(vedtakBegrunnelse, this)
-    val message =
-        JsonMessage.newMessage(
-            "vedtak_fattet",
-            mutableMapOf(
-                "fødselsnummer" to fødselsnummer,
-                "aktørId" to aktørId,
-                "vedtaksperiodeId" to "$vedtaksperiodeId",
-                "behandlingId" to "$spleisBehandlingId",
-                "organisasjonsnummer" to organisasjonsnummer,
-                "fom" to "$fom",
-                "tom" to "$tom",
-                "skjæringstidspunkt" to "$skjæringstidspunkt",
-                "hendelser" to hendelser,
-                "sykepengegrunnlag" to sykepengegrunnlag,
-                "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag,
-                "grunnlagForSykepengegrunnlagPerArbeidsgiver" to grunnlagForSykepengegrunnlagPerArbeidsgiver,
-                "begrensning" to begrensning,
-                "inntekt" to inntekt,
-                "vedtakFattetTidspunkt" to "$vedtakFattetTidspunkt",
-                "utbetalingId" to "$utbetalingId",
-                "tags" to tags,
-                "sykepengegrunnlagsfakta" to
-                    mutableMapOf(
-                        "omregnetÅrsinntekt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
-                        "innrapportertÅrsinntekt" to sammenligningsgrunnlag.totalbeløp,
-                        "avviksprosent" to avviksprosent,
-                        "6G" to sykepengegrunnlagsfakta.seksG,
-                        "tags" to sykepengegrunnlagsfakta.tags,
-                        "arbeidsgivere" to
-                            sykepengegrunnlagsfakta.arbeidsgivere.map {
-                                mutableMapOf(
-                                    "arbeidsgiver" to it.organisasjonsnummer,
-                                    "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
-                                    "innrapportertÅrsinntekt" to sammenligningsgrunnlag.innrapportertÅrsinntektFor(it.organisasjonsnummer),
-                                    "skjønnsfastsatt" to it.skjønnsfastsatt,
-                                )
-                            },
-                        "fastsatt" to "EtterSkjønn",
-                        "skjønnsfastsettingtype" to skjønnsfastsettingopplysninger.skjønnsfastsettingtype,
-                        "skjønnsfastsettingårsak" to skjønnsfastsettingopplysninger.skjønnsfastsettingsårsak,
-                        "skjønnsfastsatt" to sykepengegrunnlagsfakta.skjønnsfastsatt,
-                    ),
-                "begrunnelser" to begrunnelser,
-            ),
-        )
 
-    return message.toJson()
+    return mapOf(
+        "fødselsnummer" to fødselsnummer,
+        "aktørId" to aktørId,
+        "vedtaksperiodeId" to "$vedtaksperiodeId",
+        "behandlingId" to "$spleisBehandlingId",
+        "organisasjonsnummer" to organisasjonsnummer,
+        "fom" to "$fom",
+        "tom" to "$tom",
+        "skjæringstidspunkt" to "$skjæringstidspunkt",
+        "hendelser" to hendelser,
+        "sykepengegrunnlag" to sykepengegrunnlag,
+        "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag,
+        "grunnlagForSykepengegrunnlagPerArbeidsgiver" to grunnlagForSykepengegrunnlagPerArbeidsgiver,
+        "begrensning" to begrensning,
+        "inntekt" to inntekt,
+        "vedtakFattetTidspunkt" to "$vedtakFattetTidspunkt",
+        "utbetalingId" to "$utbetalingId",
+        "tags" to tags,
+        "sykepengegrunnlagsfakta" to
+            mapOf(
+                "omregnetÅrsinntekt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
+                "innrapportertÅrsinntekt" to sammenligningsgrunnlag.totalbeløp,
+                "avviksprosent" to avviksprosent,
+                "6G" to sykepengegrunnlagsfakta.seksG,
+                "tags" to sykepengegrunnlagsfakta.tags,
+                "arbeidsgivere" to
+                    sykepengegrunnlagsfakta.arbeidsgivere.map {
+                        mapOf(
+                            "arbeidsgiver" to it.organisasjonsnummer,
+                            "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
+                            "innrapportertÅrsinntekt" to sammenligningsgrunnlag.innrapportertÅrsinntektFor(it.organisasjonsnummer),
+                            "skjønnsfastsatt" to it.skjønnsfastsatt,
+                        )
+                    },
+                "fastsatt" to "EtterSkjønn",
+                "skjønnsfastsettingtype" to skjønnsfastsettingopplysninger.skjønnsfastsettingtype,
+                "skjønnsfastsettingårsak" to skjønnsfastsettingopplysninger.skjønnsfastsettingsårsak,
+                "skjønnsfastsatt" to sykepengegrunnlagsfakta.skjønnsfastsatt,
+            ),
+        "begrunnelser" to begrunnelser,
+    )
 }
 
-private fun Sykepengevedtak.VedtakMedOpphavIInfotrygd.vedtakMedOpphavIInfotrygdJson(): String {
+private fun Sykepengevedtak.VedtakMedOpphavIInfotrygd.vedtakMedOpphavIInfotrygddetaljer(): Map<String, Any> {
     val begrunnelser: List<Map<String, Any>> =
         emptyList<Map<String, Any>>()
             .supplerMedIndividuellBegrunnelse(vedtakBegrunnelse, this)
-    val message =
-        JsonMessage.newMessage(
-            "vedtak_fattet",
-            mutableMapOf(
-                "fødselsnummer" to fødselsnummer,
-                "aktørId" to aktørId,
-                "vedtaksperiodeId" to "$vedtaksperiodeId",
-                "behandlingId" to "$spleisBehandlingId",
-                "organisasjonsnummer" to organisasjonsnummer,
-                "fom" to "$fom",
-                "tom" to "$tom",
-                "skjæringstidspunkt" to "$skjæringstidspunkt",
-                "hendelser" to hendelser,
-                "sykepengegrunnlag" to sykepengegrunnlag,
-                "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag,
-                "grunnlagForSykepengegrunnlagPerArbeidsgiver" to grunnlagForSykepengegrunnlagPerArbeidsgiver,
-                "begrensning" to begrensning,
-                "inntekt" to inntekt,
-                "vedtakFattetTidspunkt" to "$vedtakFattetTidspunkt",
-                "utbetalingId" to "$utbetalingId",
-                "tags" to tags,
-                "sykepengegrunnlagsfakta" to
-                    mapOf(
-                        "fastsatt" to "IInfotrygd",
-                        "omregnetÅrsinntekt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
-                    ),
-                "begrunnelser" to begrunnelser,
+    return mapOf(
+        "fødselsnummer" to fødselsnummer,
+        "aktørId" to aktørId,
+        "vedtaksperiodeId" to "$vedtaksperiodeId",
+        "behandlingId" to "$spleisBehandlingId",
+        "organisasjonsnummer" to organisasjonsnummer,
+        "fom" to "$fom",
+        "tom" to "$tom",
+        "skjæringstidspunkt" to "$skjæringstidspunkt",
+        "hendelser" to hendelser,
+        "sykepengegrunnlag" to sykepengegrunnlag,
+        "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag,
+        "grunnlagForSykepengegrunnlagPerArbeidsgiver" to grunnlagForSykepengegrunnlagPerArbeidsgiver,
+        "begrensning" to begrensning,
+        "inntekt" to inntekt,
+        "vedtakFattetTidspunkt" to "$vedtakFattetTidspunkt",
+        "utbetalingId" to "$utbetalingId",
+        "tags" to tags,
+        "sykepengegrunnlagsfakta" to
+            mapOf(
+                "fastsatt" to "IInfotrygd",
+                "omregnetÅrsinntekt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
             ),
-        )
-
-    return message.toJson()
+        "begrunnelser" to begrunnelser,
+    )
 }
 
-private fun Sykepengevedtak.IkkeRealitetsbehandlet.auuVedtakJson(): String {
-    val message =
-        JsonMessage.newMessage(
-            "vedtak_fattet",
-            mapOf(
-                "fødselsnummer" to fødselsnummer,
-                "aktørId" to aktørId,
-                "vedtaksperiodeId" to "$vedtaksperiodeId",
-                "behandlingId" to "$spleisBehandlingId",
-                "organisasjonsnummer" to organisasjonsnummer,
-                "fom" to "$fom",
-                "tom" to "$tom",
-                "skjæringstidspunkt" to "$skjæringstidspunkt",
-                "hendelser" to hendelser,
-                "sykepengegrunnlag" to sykepengegrunnlag,
-                "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag,
-                "grunnlagForSykepengegrunnlagPerArbeidsgiver" to grunnlagForSykepengegrunnlagPerArbeidsgiver,
-                "begrensning" to begrensning,
-                "inntekt" to inntekt,
-                "vedtakFattetTidspunkt" to "$vedtakFattetTidspunkt",
-                "begrunnelser" to emptyList<Map<String, Any>>(),
-                "tags" to tags,
-            ),
-        )
-    return message.toJson()
+private fun Sykepengevedtak.IkkeRealitetsbehandlet.auuVedtakdetaljer(): Map<String, Any> {
+    return mapOf(
+        "fødselsnummer" to fødselsnummer,
+        "aktørId" to aktørId,
+        "vedtaksperiodeId" to "$vedtaksperiodeId",
+        "behandlingId" to "$spleisBehandlingId",
+        "organisasjonsnummer" to organisasjonsnummer,
+        "fom" to "$fom",
+        "tom" to "$tom",
+        "skjæringstidspunkt" to "$skjæringstidspunkt",
+        "hendelser" to hendelser,
+        "sykepengegrunnlag" to sykepengegrunnlag,
+        "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag,
+        "grunnlagForSykepengegrunnlagPerArbeidsgiver" to grunnlagForSykepengegrunnlagPerArbeidsgiver,
+        "begrensning" to begrensning,
+        "inntekt" to inntekt,
+        "vedtakFattetTidspunkt" to "$vedtakFattetTidspunkt",
+        "begrunnelser" to emptyList<Map<String, Any>>(),
+        "tags" to tags,
+    )
 }
 
 private fun List<Map<String, Any>>.supplerMedIndividuellBegrunnelse(

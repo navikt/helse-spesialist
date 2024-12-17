@@ -81,7 +81,7 @@ internal class PubliserSykepengevedtakTest {
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
             )
-        vedtakFattetMelder.sykepengevedtak(ikkeRealitetsbehandlet)
+        vedtakFattetMelder.hendelse(ikkeRealitetsbehandlet)
         vedtakFattetMelder.publiserOppsamledeMeldinger(personmelding, testRapid)
         val eventer = testRapid.inspektør.meldinger()
 
@@ -139,7 +139,7 @@ internal class PubliserSykepengevedtakTest {
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 vedtakBegrunnelse = null,
             )
-        vedtakFattetMelder.sykepengevedtak(infotrygd)
+        vedtakFattetMelder.hendelse(infotrygd)
         vedtakFattetMelder.publiserOppsamledeMeldinger(personmelding, testRapid)
         val eventer = testRapid.inspektør.meldinger()
 
@@ -211,7 +211,7 @@ internal class PubliserSykepengevedtakTest {
                 avviksprosent = 0.0,
                 sammenligningsgrunnlag = sammenligningsgrunnlag(10000.0, ORGANISASJONSNUMMER),
                 )
-        vedtakFattetMelder.sykepengevedtak(infotrygd)
+        vedtakFattetMelder.hendelse(infotrygd)
         vedtakFattetMelder.publiserOppsamledeMeldinger(personmelding, testRapid)
         val eventer = testRapid.inspektør.meldinger()
 
@@ -300,7 +300,7 @@ internal class PubliserSykepengevedtakTest {
                 avviksprosent = 0.0,
                 sammenligningsgrunnlag = sammenligningsgrunnlag(10000.0, ORGANISASJONSNUMMER),
             )
-        vedtakFattetMelder.sykepengevedtak(spleis)
+        vedtakFattetMelder.hendelse(spleis)
         vedtakFattetMelder.publiserOppsamledeMeldinger(personmelding, testRapid)
         val eventer = testRapid.inspektør.meldinger()
 
@@ -403,7 +403,7 @@ internal class PubliserSykepengevedtakTest {
                 avviksprosent = 30.0,
                 sammenligningsgrunnlag = sammenligningsgrunnlag(12000.0, ORGANISASJONSNUMMER),
             )
-        vedtakFattetMelder.sykepengevedtak(infotrygd)
+        vedtakFattetMelder.hendelse(infotrygd)
         vedtakFattetMelder.publiserOppsamledeMeldinger(personmelding, testRapid)
         val eventer = testRapid.inspektør.meldinger()
 
@@ -524,7 +524,7 @@ internal class PubliserSykepengevedtakTest {
                 avviksprosent = 30.0,
                 sammenligningsgrunnlag = sammenligningsgrunnlag(13000.0, ORGANISASJONSNUMMER),
             )
-        vedtakFattetMelder.sykepengevedtak(infotrygd)
+        vedtakFattetMelder.hendelse(infotrygd)
         vedtakFattetMelder.publiserOppsamledeMeldinger(personmelding, testRapid)
         val eventer = testRapid.inspektør.meldinger()
 

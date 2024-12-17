@@ -2,6 +2,7 @@ package no.nav.helse.kafka.message_builders
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import no.nav.helse.modell.hendelse.Sykepengevedtak
 import no.nav.helse.modell.hendelse.UtgåendeHendelse
 import no.nav.helse.objectMapper
 import java.time.LocalDateTime
@@ -25,6 +26,7 @@ internal fun UtgåendeHendelse.eventName() =
         -> "vedtaksperiode_godkjent"
 
         is UtgåendeHendelse.Godkjenningsbehovløsning -> "behov"
+        is Sykepengevedtak -> "vedtak_fattet"
     }
 
 private fun UtgåendeHendelse.detaljer(): Map<String, Any> {
@@ -34,6 +36,7 @@ private fun UtgåendeHendelse.detaljer(): Map<String, Any> {
         is UtgåendeHendelse.VedtaksperiodeGodkjentManuelt -> this.detaljer()
         is UtgåendeHendelse.VedtaksperiodeGodkjentAutomatisk -> this.detaljer()
         is UtgåendeHendelse.Godkjenningsbehovløsning -> this.detaljer()
+        is Sykepengevedtak -> this.detaljer()
     }
 }
 

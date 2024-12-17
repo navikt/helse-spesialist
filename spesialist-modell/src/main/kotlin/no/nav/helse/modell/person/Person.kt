@@ -1,6 +1,8 @@
 package no.nav.helse.modell.person
 
+import no.nav.helse.modell.Hendelselogg
 import no.nav.helse.modell.hendelse.Sykepengevedtak
+import no.nav.helse.modell.hendelse.UtgåendeHendelse
 import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.flyttEventueltAvviksvarselTil
 import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
@@ -31,11 +33,9 @@ class Person private constructor(
     private val avviksvurderinger: List<Avviksvurdering>,
 ) {
     private val vedtaksperioder = vedtaksperioder.toMutableList()
-    private val observers = mutableSetOf<PersonObserver>()
+    private val hendelselogg = Hendelselogg()
 
-    fun nyObserver(observer: PersonObserver) {
-        observers.add(observer)
-    }
+    fun logg(): List<UtgåendeHendelse> = hendelselogg.hendelser()
 
     fun toDto() =
         PersonDto(
@@ -118,7 +118,7 @@ class Person private constructor(
         sykepengevedtakBuilder
             .aktørId(aktørId)
             .fødselsnummer(fødselsnummer)
-        observers.forEach { it.sykepengevedtak(sykepengevedtakBuilder.build()) }
+        hendelselogg.nyHendelse(sykepengevedtakBuilder.build())
     }
 
     fun nySpleisBehandling(spleisBehandling: SpleisBehandling) {
@@ -173,7 +173,7 @@ class Person private constructor(
         vedtakBuilder.aktørId(aktørId)
     }
 
-    private fun fattVedtak(vedtak: Sykepengevedtak) = observers.forEach { it.sykepengevedtak(vedtak) }
+    private fun fattVedtak(vedtak: Sykepengevedtak) = hendelselogg.nyHendelse(vedtak)
 
     companion object {
         private val logg = LoggerFactory.getLogger(this::class.java)
