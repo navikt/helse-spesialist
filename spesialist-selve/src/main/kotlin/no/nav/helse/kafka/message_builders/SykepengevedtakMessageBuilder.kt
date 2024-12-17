@@ -1,7 +1,7 @@
 package no.nav.helse.kafka.message_builders
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import no.nav.helse.modell.vedtak.Sykepengevedtak
+import no.nav.helse.modell.hendelse.Sykepengevedtak
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 

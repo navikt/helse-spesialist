@@ -7,9 +7,9 @@ import no.nav.helse.kafka.message_builders.behovName
 import no.nav.helse.kafka.message_builders.somJsonMessage
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.behov.Behov
+import no.nav.helse.modell.hendelse.Sykepengevedtak
 import no.nav.helse.modell.hendelse.UtgåendeHendelse
 import no.nav.helse.modell.person.PersonObserver
-import no.nav.helse.modell.vedtak.Sykepengevedtak
 import org.slf4j.LoggerFactory
 import java.util.UUID
 

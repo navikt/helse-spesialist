@@ -1,5 +1,9 @@
-package no.nav.helse.modell.vedtak
+package no.nav.helse.modell.hendelse
 
+import no.nav.helse.modell.vedtak.Skjønnsfastsettingstype
+import no.nav.helse.modell.vedtak.Skjønnsfastsettingsårsak
+import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
+import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
 import java.time.LocalDate
 import java.time.LocalDateTime

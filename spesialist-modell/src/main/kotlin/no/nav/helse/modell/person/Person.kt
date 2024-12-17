@@ -1,5 +1,6 @@
 package no.nav.helse.modell.person
 
+import no.nav.helse.modell.hendelse.Sykepengevedtak
 import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.flyttEventueltAvviksvarselTil
 import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
@@ -14,7 +15,6 @@ import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag.Companion.relevanteFor
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
-import no.nav.helse.modell.vedtak.Sykepengevedtak
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering.Companion.finnRiktigAvviksvurdering
