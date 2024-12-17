@@ -33,7 +33,8 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
             } catch (e: Exception) {
                 val kunneIkkeOverstyreError = kunneIkkeOverstyreError("dager")
                 logg.error(kunneIkkeOverstyreError.message, e)
-                return@withContext DataFetcherResult.newResult<Boolean>().error(kunneIkkeOverstyreError).build()
+                return@withContext DataFetcherResult.newResult<Boolean>().error(kunneIkkeOverstyreError).data(false)
+                    .build()
             }
             DataFetcherResult.newResult<Boolean>().data(true).build()
         }
@@ -51,7 +52,7 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
                 val kunneIkkeOverstyreError = kunneIkkeOverstyreError("inntekt og refusjon")
                 logg.error(kunneIkkeOverstyreError.message, e)
                 return@withContext DataFetcherResult.newResult<Boolean>()
-                    .error(kunneIkkeOverstyreError).build()
+                    .error(kunneIkkeOverstyreError).data(false).build()
             }
             DataFetcherResult.newResult<Boolean>().data(true).build()
         }
@@ -68,7 +69,7 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
             } catch (e: Exception) {
                 val kunneIkkeOverstyreError = kunneIkkeOverstyreError("arbeidsforhold")
                 logg.error(kunneIkkeOverstyreError.message, e)
-                return@withContext DataFetcherResult.newResult<Boolean>().error(kunneIkkeOverstyreError)
+                return@withContext DataFetcherResult.newResult<Boolean>().error(kunneIkkeOverstyreError).data(false)
                     .build()
             }
             DataFetcherResult.newResult<Boolean>().data(true).build()

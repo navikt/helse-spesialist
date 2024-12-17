@@ -62,7 +62,7 @@ class VedtakMutation(
                 is VedtakResultat.Feil -> {
                     logg.warn("Kunne ikke innvilge vedtak: ${resultat.melding}")
                     newResult<Boolean>().error(vedtakGraphQLError(resultat.melding, resultat.code, resultat.exception))
-                        .build()
+                        .data(false).build()
                 }
             }
         }
@@ -105,7 +105,7 @@ class VedtakMutation(
                 is VedtakResultat.Feil -> {
                     logg.warn("Kunne ikke innvilge vedtak: ${resultat.melding}")
                     newResult<Boolean>().error(vedtakGraphQLError(resultat.melding, resultat.code, resultat.exception))
-                        .build()
+                        .data(false).build()
                 }
             }
         }
@@ -146,7 +146,7 @@ class VedtakMutation(
                 is VedtakResultat.Feil -> {
                     logg.warn("Kunne ikke sende oppgave til Infotrygd: ${resultat.melding}")
                     newResult<Boolean>().error(vedtakGraphQLError(resultat.melding, resultat.code, resultat.exception))
-                        .build()
+                        .data(false).build()
                 }
             }
         }

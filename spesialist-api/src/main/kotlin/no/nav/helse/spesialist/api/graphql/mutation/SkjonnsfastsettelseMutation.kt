@@ -33,6 +33,7 @@ class SkjonnsfastsettelseMutation(private val saksbehandlerhåndterer: Saksbehan
                 logg.error(kunneIkkeSkjønnsfastsetteSykepengegrunnlagError.message, e)
                 return@withContext DataFetcherResult.newResult<Boolean>()
                     .error(kunneIkkeSkjønnsfastsetteSykepengegrunnlagError)
+                    .data(false)
                     .build()
             }
             DataFetcherResult.newResult<Boolean>().data(true).build()

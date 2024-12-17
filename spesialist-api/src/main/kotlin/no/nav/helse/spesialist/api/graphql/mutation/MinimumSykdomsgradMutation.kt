@@ -32,6 +32,7 @@ class MinimumSykdomsgradMutation(private val saksbehandlerhåndterer: Saksbehand
                         GraphqlErrorException.newErrorException().message("Mangler vurderte perioder")
                             .extensions(mapOf("code" to 400)).build(),
                     )
+                    .data(false)
                     .build()
             }
 
@@ -44,6 +45,7 @@ class MinimumSykdomsgradMutation(private val saksbehandlerhåndterer: Saksbehand
                 logg.error(kunneIkkeVurdereMinimumSykdomsgradError.message, e)
                 return@withContext DataFetcherResult.newResult<Boolean>()
                     .error(kunneIkkeVurdereMinimumSykdomsgradError)
+                    .data(false)
                     .build()
             }
             DataFetcherResult.newResult<Boolean>().data(true).build()
