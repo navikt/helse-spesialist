@@ -9,7 +9,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-sealed interface Sykepengevedtak {
+sealed interface Sykepengevedtak : UtgåendeHendelse {
     val fødselsnummer: String
     val aktørId: String
     val vedtaksperiodeId: UUID
