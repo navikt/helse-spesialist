@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
 import com.expediagroup.graphql.server.operations.Mutation
-import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
@@ -31,10 +30,9 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
             try {
                 withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(overstyring, saksbehandler) }
             } catch (e: Exception) {
-                val kunneIkkeOverstyreError = kunneIkkeOverstyreError("dager")
-                logg.error(kunneIkkeOverstyreError.message, e)
-                return@withContext DataFetcherResult.newResult<Boolean>().error(kunneIkkeOverstyreError).data(false)
-                    .build()
+                val feilmelding = "Kunne ikke overstyre dager"
+                logg.error(feilmelding, e)
+                return@withContext lagFeilrespons(feilmelding)
             }
             DataFetcherResult.newResult<Boolean>().data(true).build()
         }
@@ -49,10 +47,9 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
             try {
                 withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(overstyring, saksbehandler) }
             } catch (e: Exception) {
-                val kunneIkkeOverstyreError = kunneIkkeOverstyreError("inntekt og refusjon")
-                logg.error(kunneIkkeOverstyreError.message, e)
-                return@withContext DataFetcherResult.newResult<Boolean>()
-                    .error(kunneIkkeOverstyreError).data(false).build()
+                val feilmelding = "Kunne ikke overstyre inntekt og refusjon"
+                logg.error(feilmelding, e)
+                return@withContext lagFeilrespons(feilmelding)
             }
             DataFetcherResult.newResult<Boolean>().data(true).build()
         }
@@ -67,15 +64,15 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
             try {
                 withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(overstyring, saksbehandler) }
             } catch (e: Exception) {
-                val kunneIkkeOverstyreError = kunneIkkeOverstyreError("arbeidsforhold")
-                logg.error(kunneIkkeOverstyreError.message, e)
-                return@withContext DataFetcherResult.newResult<Boolean>().error(kunneIkkeOverstyreError).data(false)
-                    .build()
+                val feilmelding = "Kunne ikke overstyre arbeidsforhold"
+                logg.error(feilmelding, e)
+                return@withContext lagFeilrespons(feilmelding)
             }
             DataFetcherResult.newResult<Boolean>().data(true).build()
         }
 
-    private fun kunneIkkeOverstyreError(overstyring: String): GraphQLError =
-        GraphqlErrorException.newErrorException().message("Kunne ikke overstyre $overstyring")
-            .extensions(mapOf("code" to 500)).build()
+    private fun lagFeilrespons(feilmelding: String): DataFetcherResult<Boolean> =
+        DataFetcherResult.newResult<Boolean>().error(
+            GraphqlErrorException.newErrorException().message(feilmelding).extensions(mapOf("code" to 500)).build(),
+        ).data(false).build()
 }
