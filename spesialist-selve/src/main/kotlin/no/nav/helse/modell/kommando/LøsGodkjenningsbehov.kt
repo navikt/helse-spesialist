@@ -1,7 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
+import no.nav.helse.modell.person.vedtaksperiode.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning

@@ -1,8 +1,6 @@
-package no.nav.helse.modell.vedtaksperiode
+package no.nav.helse.modell.person.vedtaksperiode
 
-import no.nav.helse.januar
-import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
-import no.nav.helse.modell.person.vedtaksperiode.Varsel
+import no.nav.helse.modell.januar
 import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import org.junit.jupiter.api.Assertions.assertEquals

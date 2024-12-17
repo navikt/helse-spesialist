@@ -3,7 +3,7 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.modell.vedtaksperiode.Behandling
+import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

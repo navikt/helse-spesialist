@@ -36,7 +36,7 @@ import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.oppgave.Egenskap.UTLAND
 import no.nav.helse.modell.oppgave.Egenskap.VERGEMÅL
 import no.nav.helse.modell.person.HentEnhetløsning
-import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
+import no.nav.helse.modell.person.vedtaksperiode.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData

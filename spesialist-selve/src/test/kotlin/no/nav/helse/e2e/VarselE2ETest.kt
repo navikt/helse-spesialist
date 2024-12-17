@@ -7,11 +7,11 @@ import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AKTIV
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.INAKTIV
-import no.nav.helse.modell.varsel.Varselkode
-import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
-import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
-import no.nav.helse.modell.varsel.Varselkode.SB_IK_1
-import no.nav.helse.modell.varsel.Varselkode.SB_RV_1
+import no.nav.helse.modell.person.vedtaksperiode.Varselkode
+import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_1
+import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_3
+import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_IK_1
+import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_RV_1
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

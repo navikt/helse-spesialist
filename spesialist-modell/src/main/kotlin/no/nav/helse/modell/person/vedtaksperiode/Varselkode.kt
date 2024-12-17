@@ -1,6 +1,5 @@
-package no.nav.helse.modell.varsel
+package no.nav.helse.modell.person.vedtaksperiode
 
-import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -45,7 +44,7 @@ enum class Varselkode(
         require(this.name.matches(regex)) { "Ugyldig varselkode-format: ${this.name}" }
     }
 
-    internal fun nyttVarsel(vedtaksperiodeId: UUID): Varsel {
+    fun nyttVarsel(vedtaksperiodeId: UUID): Varsel {
         return Varsel(UUID.randomUUID(), this.name, LocalDateTime.now(), vedtaksperiodeId)
     }
 

@@ -11,8 +11,8 @@ import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
 import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.gosysoppgaver.inspektør
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
-import no.nav.helse.modell.vedtaksperiode.Behandling
+import no.nav.helse.modell.person.vedtaksperiode.Sykefraværstilfelle
+import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue

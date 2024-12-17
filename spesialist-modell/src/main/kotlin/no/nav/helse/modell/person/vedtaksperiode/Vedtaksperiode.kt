@@ -1,24 +1,16 @@
-package no.nav.helse.modell.vedtaksperiode
+package no.nav.helse.modell.person.vedtaksperiode
 
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.person.Person
-import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
-import no.nav.helse.modell.person.vedtaksperiode.Periode
-import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
-import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
-import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
-import no.nav.helse.modell.person.vedtaksperiode.Varsel
-import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
-import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
+import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.finnBehandlingForSpleisBehandling
+import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.finnSisteBehandlingUtenSpleisBehandlingId
+import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.logg
 import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
-import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.finnBehandlingForSpleisBehandling
-import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.finnSisteBehandlingUtenSpleisBehandlingId
-import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.logg
 import java.time.LocalDate
 import java.util.UUID
 
-internal class Vedtaksperiode private constructor(
+class Vedtaksperiode private constructor(
     private val vedtaksperiodeId: UUID,
     private val organisasjonsnummer: String,
     private var forkastet: Boolean,
@@ -30,7 +22,7 @@ internal class Vedtaksperiode private constructor(
     private val tom get() = gjeldendeBehandling.tom()
     private val gjeldendeUtbetalingId get() = gjeldendeBehandling.utbetalingId
     internal val gjeldendeSkjæringstidspunkt get() = gjeldendeBehandling.skjæringstidspunkt()
-    internal val gjeldendeBehandlingId get() = gjeldendeBehandling.unikId()
+    val gjeldendeBehandlingId get() = gjeldendeBehandling.unikId()
 
     fun vedtaksperiodeId() = vedtaksperiodeId
 

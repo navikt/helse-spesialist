@@ -7,7 +7,7 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
+import no.nav.helse.modell.person.vedtaksperiode.Sykefraværstilfelle
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID

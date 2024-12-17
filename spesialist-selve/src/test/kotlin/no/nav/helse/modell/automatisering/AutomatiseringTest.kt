@@ -13,11 +13,11 @@ import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.risiko.Risikovurdering
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
-import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
+import no.nav.helse.modell.person.vedtaksperiode.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetaling.Utbetalingtype.REVURDERING
-import no.nav.helse.modell.vedtaksperiode.Behandling
+import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE

@@ -34,8 +34,8 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.SENDT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
-import no.nav.helse.modell.varsel.Varselkode
-import no.nav.helse.modell.vedtaksperiode.Behandling
+import no.nav.helse.modell.person.vedtaksperiode.Varselkode
+import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver

@@ -2,7 +2,7 @@ package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
-import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
+import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
 
 internal class VedtaksperiodeReberegnetPeriodehistorikk(
     private val vedtaksperiode: Vedtaksperiode,

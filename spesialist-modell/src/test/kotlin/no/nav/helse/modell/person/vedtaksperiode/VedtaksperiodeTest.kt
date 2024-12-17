@@ -1,12 +1,8 @@
-package no.nav.helse.modell.vedtaksperiode
+package no.nav.helse.modell.person.vedtaksperiode
 
 import io.mockk.mockk
-import no.nav.helse.februar
-import no.nav.helse.januar
-import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
-import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
-import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
-import no.nav.helse.modell.person.vedtaksperiode.Varsel
+import no.nav.helse.modell.februar
+import no.nav.helse.modell.januar
 import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull

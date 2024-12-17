@@ -3,7 +3,7 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.modell.vedtaksperiode.Behandling
+import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow

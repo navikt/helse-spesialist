@@ -6,9 +6,9 @@ import no.nav.helse.modell.behov.Behov
 import no.nav.helse.modell.behov.InntektTilRisk
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
+import no.nav.helse.modell.person.vedtaksperiode.Sykefraværstilfelle
+import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_RV_1
 import no.nav.helse.modell.utbetaling.Utbetaling
-import no.nav.helse.modell.varsel.Varselkode.SB_RV_1
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import org.slf4j.LoggerFactory
 import java.util.UUID

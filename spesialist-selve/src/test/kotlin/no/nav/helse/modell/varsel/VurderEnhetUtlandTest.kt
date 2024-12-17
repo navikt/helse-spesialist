@@ -8,7 +8,7 @@ import io.mockk.verify
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
-import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
+import no.nav.helse.modell.person.vedtaksperiode.Sykefraværstilfelle
 import no.nav.helse.modell.vergemal.VergemålDao
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue

@@ -3,9 +3,9 @@ package no.nav.helse.mediator.meldinger.løsninger
 import no.nav.helse.db.ÅpneGosysOppgaverRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
-import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
-import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
-import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
+import no.nav.helse.modell.person.vedtaksperiode.Sykefraværstilfelle
+import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_1
+import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_3
 import java.time.LocalDateTime
 import java.util.UUID
 

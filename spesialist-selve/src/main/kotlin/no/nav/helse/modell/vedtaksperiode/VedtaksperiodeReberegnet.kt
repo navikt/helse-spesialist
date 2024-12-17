@@ -16,6 +16,7 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.ReserverPersonHvisTildeltCommand
 import no.nav.helse.modell.kommando.VedtaksperiodeReberegnetPeriodehistorikk
 import no.nav.helse.modell.person.Person
+import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import java.util.UUID
 

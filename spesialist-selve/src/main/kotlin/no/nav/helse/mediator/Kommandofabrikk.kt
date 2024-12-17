@@ -45,6 +45,7 @@ import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.SøknadSendtCommand
+import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
@@ -56,7 +57,6 @@ import no.nav.helse.modell.utbetaling.UtbetalingEndretCommand
 import no.nav.helse.modell.vedtaksperiode.GenerasjonService
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovCommand
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
-import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastetCommand
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling

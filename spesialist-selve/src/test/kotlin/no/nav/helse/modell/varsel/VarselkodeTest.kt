@@ -1,6 +1,7 @@
 package no.nav.helse.modell.varsel
 
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
+import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource

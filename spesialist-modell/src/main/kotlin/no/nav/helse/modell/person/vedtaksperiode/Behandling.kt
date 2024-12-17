@@ -1,13 +1,7 @@
-package no.nav.helse.modell.vedtaksperiode
+package no.nav.helse.modell.person.vedtaksperiode
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
-import no.nav.helse.modell.person.vedtaksperiode.Periode
-import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
-import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
-import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
-import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.finnEksisterendeVarsel
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderAktivtVarselOmAvvik
@@ -23,7 +17,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
 
-internal class Behandling private constructor(
+class Behandling private constructor(
     private val id: UUID,
     private val vedtaksperiodeId: UUID,
     utbetalingId: UUID?,
@@ -35,7 +29,7 @@ internal class Behandling private constructor(
     private val vedtakBegrunnelse: VedtakBegrunnelse?,
     varsler: Set<Varsel>,
 ) {
-    internal constructor(
+    constructor(
         id: UUID,
         vedtaksperiodeId: UUID,
         fom: LocalDate,
@@ -73,7 +67,7 @@ internal class Behandling private constructor(
 
     internal fun tom() = periode.tom()
 
-    internal fun toDto(): BehandlingDto =
+    fun toDto(): BehandlingDto =
         BehandlingDto(
             id = id,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -111,7 +105,7 @@ internal class Behandling private constructor(
         this.spleisBehandlingId = spleisVedtaksperiode.spleisBehandlingId
     }
 
-    internal fun håndterNyUtbetaling(utbetalingId: UUID) {
+    fun håndterNyUtbetaling(utbetalingId: UUID) {
         tilstand.nyUtbetaling(this, utbetalingId)
     }
 
@@ -120,7 +114,7 @@ internal class Behandling private constructor(
         tilstand.invaliderUtbetaling(this, utbetalingId)
     }
 
-    internal fun håndterNyttVarsel(varsel: Varsel) {
+    fun håndterNyttVarsel(varsel: Varsel) {
         if (!varsel.erRelevantFor(vedtaksperiodeId)) return
         val eksisterendeVarsel = varsler.finnEksisterendeVarsel(varsel) ?: return nyttVarsel(varsel)
         if (varsel.erVarselOmAvvik() && varsler.inneholderVarselOmAvvik()) {
@@ -413,7 +407,7 @@ internal class Behandling private constructor(
         }
     }
 
-    internal data object VedtakFattet : Tilstand {
+    data object VedtakFattet : Tilstand {
         override fun navn(): String = "VedtakFattet"
     }
 
@@ -465,7 +459,7 @@ internal class Behandling private constructor(
         return result
     }
 
-    internal companion object {
+    companion object {
         val logg: Logger = LoggerFactory.getLogger(Behandling::class.java)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
@@ -509,7 +503,7 @@ internal class Behandling private constructor(
             }
         }
 
-        internal fun List<Behandling>.forhindrerAutomatisering(tilOgMed: LocalDate): Boolean =
+        fun List<Behandling>.forhindrerAutomatisering(tilOgMed: LocalDate): Boolean =
             this
                 .filter {
                     it.tilhører(tilOgMed)

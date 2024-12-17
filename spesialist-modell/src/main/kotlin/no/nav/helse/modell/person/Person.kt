@@ -1,11 +1,15 @@
 package no.nav.helse.modell.person
 
+import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.flyttEventueltAvviksvarselTil
 import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
+import no.nav.helse.modell.person.vedtaksperiode.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
+import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
+import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode.Companion.finnBehandling
+import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode.Companion.relevanteFor
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
-import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.vedtak.AvsluttetMedVedtak
 import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
@@ -13,10 +17,6 @@ import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag.Companion.re
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.modell.vedtak.Sykepengevedtak
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
-import no.nav.helse.modell.vedtaksperiode.Behandling.Companion.flyttEventueltAvviksvarselTil
-import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
-import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.finnBehandling
-import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.relevanteFor
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering.Companion.finnRiktigAvviksvurdering
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
@@ -34,9 +34,7 @@ class Person private constructor(
     private val vedtaksperioder = vedtaksperioder.toMutableList()
     private val observers = mutableSetOf<PersonObserver>()
 
-    internal fun aktørId() = aktørId
-
-    internal fun nyObserver(observer: PersonObserver) {
+    fun nyObserver(observer: PersonObserver) {
         observers.add(observer)
     }
 
@@ -73,7 +71,7 @@ class Person private constructor(
         vedtaksperiodeOrNull(vedtaksperiodeId)?.mottaBehandlingsinformasjon(tags, spleisBehandlingId, utbetalingId)
     }
 
-    internal fun vedtakFattet(
+    fun vedtakFattet(
         vedtaksperiodeId: UUID,
         spleisBehandlingId: UUID,
     ) {
@@ -81,7 +79,7 @@ class Person private constructor(
             ?.vedtakFattet(spleisBehandlingId)
     }
 
-    internal fun fattVedtak(avsluttetMedVedtak: AvsluttetMedVedtak) {
+    fun fattVedtak(avsluttetMedVedtak: AvsluttetMedVedtak) {
         val vedtakBuilder = SykepengevedtakBuilder()
         val vedtaksperiode = vedtaksperiode(avsluttetMedVedtak.spleisBehandlingId)
         val behandling = vedtaksperiode.finnBehandling(avsluttetMedVedtak.spleisBehandlingId)
@@ -107,12 +105,12 @@ class Person private constructor(
         fattVedtak(vedtakBuilder.build())
     }
 
-    internal fun avsluttetUtenVedtak(avsluttetUtenVedtak: AvsluttetUtenVedtak) {
+    fun avsluttetUtenVedtak(avsluttetUtenVedtak: AvsluttetUtenVedtak) {
         vedtaksperiodeOrNull(avsluttetUtenVedtak.vedtaksperiodeId())
             ?.avsluttetUtenVedtak(this, avsluttetUtenVedtak)
     }
 
-    internal fun vedtaksperiodeForkastet(vedtaksperiodeId: UUID) {
+    fun vedtaksperiodeForkastet(vedtaksperiodeId: UUID) {
         vedtaksperioder.find { it.vedtaksperiodeId() == vedtaksperiodeId }
             ?.vedtaksperiodeForkastet()
     }
@@ -131,17 +129,17 @@ class Person private constructor(
             ?: vedtaksperioder.add(Vedtaksperiode.nyVedtaksperiode(spleisBehandling))
     }
 
-    internal fun vedtaksperiodeOrNull(vedtaksperiodeId: UUID): Vedtaksperiode? {
+    fun vedtaksperiodeOrNull(vedtaksperiodeId: UUID): Vedtaksperiode? {
         return vedtaksperioder.find { it.vedtaksperiodeId() == vedtaksperiodeId }
             ?: logg.warn("Vedtaksperiode med id={} finnes ikke", vedtaksperiodeId).let { return null }
     }
 
-    internal fun vedtaksperiode(spleisBehandlingId: UUID): Vedtaksperiode {
+    private fun vedtaksperiode(spleisBehandlingId: UUID): Vedtaksperiode {
         return vedtaksperioder.finnBehandling(spleisBehandlingId)
             ?: throw IllegalStateException("Behandling med spleisBehandlingId=$spleisBehandlingId finnes ikke")
     }
 
-    internal fun sykefraværstilfelle(vedtaksperiodeId: UUID): Sykefraværstilfelle {
+    fun sykefraværstilfelle(vedtaksperiodeId: UUID): Sykefraværstilfelle {
         val skjæringstidspunkt =
             vedtaksperiodeOrNull(vedtaksperiodeId)?.gjeldendeSkjæringstidspunkt
                 ?: throw IllegalStateException("Forventer å finne vedtaksperiode med id=$vedtaksperiodeId")
@@ -153,17 +151,17 @@ class Person private constructor(
         )
     }
 
-    internal fun nyeVarsler(varsler: List<Varsel>) {
+    fun nyeVarsler(varsler: List<Varsel>) {
         vedtaksperioder.forEach { it.nyeVarsler(varsler) }
     }
 
-    internal fun utbetalingForkastet(utbetalingId: UUID) {
+    fun utbetalingForkastet(utbetalingId: UUID) {
         vedtaksperioder.forEach {
             it.utbetalingForkastet(utbetalingId)
         }
     }
 
-    internal fun nyUtbetalingForVedtaksperiode(
+    fun nyUtbetalingForVedtaksperiode(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
     ) {

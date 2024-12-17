@@ -8,7 +8,7 @@ import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.modell.varsel.Varseldefinisjon
-import no.nav.helse.modell.varsel.Varselkode
+import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
