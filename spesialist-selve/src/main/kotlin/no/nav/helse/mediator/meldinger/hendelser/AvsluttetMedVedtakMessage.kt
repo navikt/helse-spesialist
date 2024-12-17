@@ -4,8 +4,8 @@ import kotliquery.TransactionalSession
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.person.Person
+import no.nav.helse.modell.vedtak.AvsluttetMedVedtak
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
-import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetMedVedtak
 import java.time.LocalDateTime
 import java.util.UUID
 
