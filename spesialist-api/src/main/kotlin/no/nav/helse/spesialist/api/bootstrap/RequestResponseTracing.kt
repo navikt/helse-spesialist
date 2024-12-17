@@ -42,7 +42,7 @@ internal fun Application.requestResponseTracing(logger: Logger) {
                 runBlocking {
                     proceed()
                 }
-            }
+            }.run()
         } catch (err: Throwable) {
             logger.error("exception thrown during processing: ${err.message} callId=${call.callId} ", err)
             throw err
