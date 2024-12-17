@@ -6,13 +6,11 @@ import no.nav.helse.kafka.message_builders.behovName
 import no.nav.helse.kafka.message_builders.somJsonMessage
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.behov.Behov
-import no.nav.helse.modell.hendelse.Sykepengevedtak
 import no.nav.helse.modell.hendelse.UtgåendeHendelse
-import no.nav.helse.modell.person.PersonObserver
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-internal interface UtgåendeMeldingerObserver : PersonObserver {
+internal interface UtgåendeMeldingerObserver {
     fun behov(
         behov: Behov,
         commandContextId: UUID,
@@ -37,10 +35,6 @@ internal class UtgåendeMeldingerMediator : CommandContextObserver {
 
     override fun hendelse(hendelse: UtgåendeHendelse) {
         hendelser.add(hendelse)
-    }
-
-    override fun sykepengevedtak(sykepengevedtak: Sykepengevedtak) {
-        hendelser.add(sykepengevedtak)
     }
 
     override fun tilstandEndret(event: KommandokjedeEndretEvent) {

@@ -29,7 +29,7 @@ import java.util.UUID
 
 internal class PubliserSykepengevedtakTest {
     private val testRapid = TestRapid()
-    private val vedtakFattetMelder = UtgåendeMeldingerMediator()
+    private val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
 
     private companion object {
         private const val FØDSELSNUMMER = "12345678910"
@@ -81,8 +81,8 @@ internal class PubliserSykepengevedtakTest {
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
             )
-        vedtakFattetMelder.sykepengevedtak(ikkeRealitetsbehandlet)
-        vedtakFattetMelder.publiserOppsamledeMeldinger(personmelding, testRapid)
+        utgåendeMeldingerMediator.hendelse(ikkeRealitetsbehandlet)
+        utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, testRapid)
         val eventer = testRapid.inspektør.meldinger()
 
         assertEquals(1, eventer.size)
@@ -139,8 +139,8 @@ internal class PubliserSykepengevedtakTest {
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 vedtakBegrunnelse = null,
             )
-        vedtakFattetMelder.sykepengevedtak(infotrygd)
-        vedtakFattetMelder.publiserOppsamledeMeldinger(personmelding, testRapid)
+        utgåendeMeldingerMediator.hendelse(infotrygd)
+        utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, testRapid)
         val eventer = testRapid.inspektør.meldinger()
 
         assertEquals(1, eventer.size)
@@ -211,8 +211,8 @@ internal class PubliserSykepengevedtakTest {
                 avviksprosent = 0.0,
                 sammenligningsgrunnlag = sammenligningsgrunnlag(10000.0, ORGANISASJONSNUMMER),
                 )
-        vedtakFattetMelder.sykepengevedtak(infotrygd)
-        vedtakFattetMelder.publiserOppsamledeMeldinger(personmelding, testRapid)
+        utgåendeMeldingerMediator.hendelse(infotrygd)
+        utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, testRapid)
         val eventer = testRapid.inspektør.meldinger()
 
         assertEquals(1, eventer.size)
@@ -300,8 +300,8 @@ internal class PubliserSykepengevedtakTest {
                 avviksprosent = 0.0,
                 sammenligningsgrunnlag = sammenligningsgrunnlag(10000.0, ORGANISASJONSNUMMER),
             )
-        vedtakFattetMelder.sykepengevedtak(spleis)
-        vedtakFattetMelder.publiserOppsamledeMeldinger(personmelding, testRapid)
+        utgåendeMeldingerMediator.hendelse(spleis)
+        utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, testRapid)
         val eventer = testRapid.inspektør.meldinger()
 
         assertEquals(1, eventer.size)
@@ -403,8 +403,8 @@ internal class PubliserSykepengevedtakTest {
                 avviksprosent = 30.0,
                 sammenligningsgrunnlag = sammenligningsgrunnlag(12000.0, ORGANISASJONSNUMMER),
             )
-        vedtakFattetMelder.sykepengevedtak(infotrygd)
-        vedtakFattetMelder.publiserOppsamledeMeldinger(personmelding, testRapid)
+        utgåendeMeldingerMediator.hendelse(infotrygd)
+        utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, testRapid)
         val eventer = testRapid.inspektør.meldinger()
 
         assertEquals(1, eventer.size)
@@ -524,8 +524,8 @@ internal class PubliserSykepengevedtakTest {
                 avviksprosent = 30.0,
                 sammenligningsgrunnlag = sammenligningsgrunnlag(13000.0, ORGANISASJONSNUMMER),
             )
-        vedtakFattetMelder.sykepengevedtak(infotrygd)
-        vedtakFattetMelder.publiserOppsamledeMeldinger(personmelding, testRapid)
+        utgåendeMeldingerMediator.hendelse(infotrygd)
+        utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, testRapid)
         val eventer = testRapid.inspektør.meldinger()
 
         assertEquals(1, eventer.size)

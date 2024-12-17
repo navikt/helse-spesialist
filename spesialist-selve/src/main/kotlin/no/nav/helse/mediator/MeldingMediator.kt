@@ -428,7 +428,6 @@ internal class MeldingMediator(
         val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
         try {
             personService.brukPersonHvisFinnes(melding.fødselsnummer()) {
-                this.nyObserver(utgåendeMeldingerMediator)
                 logg.info("Personen finnes i databasen, behandler melding $meldingnavn")
                 sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")
                 sessionOf(dataSource, returnGeneratedKey = true).use { session ->
@@ -442,6 +441,7 @@ internal class MeldingMediator(
                         melding.behandle(this, kommandostarter, transactionalSession)
                     }
                 }
+                utgåendeMeldinger().forEach(utgåendeMeldingerMediator::hendelse)
             }
             utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, messageContext)
         } catch (e: Exception) {
