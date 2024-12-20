@@ -11,7 +11,7 @@ include(
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
-            version("rapids-and-rivers", "2024112911471732877250.f6df6f41226b")
+            version("rapids-and-rivers", "2024121811541734519284.92481d65a0e7")
             version("logback", "1.5.7")
             version("logstash", "8.0")
             version("jackson", "2.18.1")
