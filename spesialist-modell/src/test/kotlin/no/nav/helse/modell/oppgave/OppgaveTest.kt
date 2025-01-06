@@ -160,7 +160,7 @@ internal class OppgaveTest {
     }
 
     @ParameterizedTest
-    @EnumSource(names = ["EGEN_ANSATT", "FORTROLIG_ADRESSE", "BESLUTTER", "SPESIALSAK", "STRENGT_FORTROLIG_ADRESSE"])
+    @EnumSource(names = ["EGEN_ANSATT", "FORTROLIG_ADRESSE", "BESLUTTER", "STRENGT_FORTROLIG_ADRESSE"])
     fun `Forsøker tildeling ved reservasjon ved manglende tilgang`(egenskap: Egenskap) {
         val oppgave = nyOppgave(egenskap)
         assertThrows<ManglerTilgang> {
@@ -174,7 +174,7 @@ internal class OppgaveTest {
     }
 
     @ParameterizedTest
-    @EnumSource(names = ["EGEN_ANSATT", "FORTROLIG_ADRESSE", "BESLUTTER", "SPESIALSAK", "STRENGT_FORTROLIG_ADRESSE", "STIKKPRØVE"])
+    @EnumSource(names = ["EGEN_ANSATT", "FORTROLIG_ADRESSE", "BESLUTTER", "STRENGT_FORTROLIG_ADRESSE", "STIKKPRØVE"])
     fun `Forsøker tildeling ved manglende tilgang`(egenskap: Egenskap) {
         val oppgave = nyOppgave(egenskap)
         assertThrows<ManglerTilgang> {

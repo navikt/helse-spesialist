@@ -6,7 +6,6 @@ import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
 import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
 import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
-import no.nav.helse.modell.oppgave.Egenskap.SPESIALSAK
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
@@ -32,7 +31,6 @@ abstract class MicrosoftTilgangskontroll(private val tilgangsgrupper: Tilgangsgr
                 STRENGT_FORTROLIG_ADRESSE -> UUID.randomUUID() // Ingen skal ha tilgang til disse i Speil foreløpig
                 BESLUTTER -> tilgangsgrupper.beslutterGruppeId
                 STIKKPRØVE -> tilgangsgrupper.stikkprøveGruppeId
-                SPESIALSAK -> tilgangsgrupper.spesialsakGruppeId
                 else -> throw IllegalArgumentException("Egenskap $egenskap er ikke støttet som tilgangsstyrt egenskap")
             }
         }

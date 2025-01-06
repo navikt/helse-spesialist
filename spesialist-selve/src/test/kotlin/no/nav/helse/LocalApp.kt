@@ -155,7 +155,6 @@ private val tilgangsgrupper =
         override val beslutterGruppeId: UUID = UUID.randomUUID()
         override val skjermedePersonerGruppeId: UUID = UUID.randomUUID()
         override val stikkprøveGruppeId: UUID = UUID.randomUUID()
-        override val spesialsakGruppeId: UUID = UUID.randomUUID()
 
         override fun gruppeId(gruppe: Gruppe): UUID {
             return when (gruppe) {
@@ -163,7 +162,6 @@ private val tilgangsgrupper =
                 Gruppe.BESLUTTER -> beslutterGruppeId
                 Gruppe.SKJERMEDE -> skjermedePersonerGruppeId
                 Gruppe.STIKKPRØVE -> stikkprøveGruppeId
-                Gruppe.SPESIALSAK -> spesialsakGruppeId
             }
         }
     }

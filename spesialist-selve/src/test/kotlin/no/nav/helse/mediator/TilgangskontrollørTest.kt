@@ -6,7 +6,6 @@ import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
 import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
 import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
-import no.nav.helse.modell.oppgave.Egenskap.SPESIALSAK
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
@@ -70,13 +69,6 @@ class TilgangskontrollørTest {
         val saksbehandlerOid = UUID.randomUUID()
         tilgangskontrollørForReservasjon.harTilgangTil(saksbehandlerOid, listOf(STIKKPRØVE))
         assertEquals(listOf(idForGruppe(Gruppe.STIKKPRØVE)), forespørsler[saksbehandlerOid])
-    }
-
-    @Test
-    fun `Mapper SPESIALSAK til gruppeId for spesialsak`() {
-        val saksbehandlerOid = UUID.randomUUID()
-        tilgangskontrollørForReservasjon.harTilgangTil(saksbehandlerOid, listOf(SPESIALSAK))
-        assertEquals(listOf(idForGruppe(Gruppe.SPESIALSAK)), forespørsler[saksbehandlerOid])
     }
 
     @Test

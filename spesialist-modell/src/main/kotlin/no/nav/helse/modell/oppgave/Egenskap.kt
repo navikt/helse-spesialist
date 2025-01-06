@@ -17,7 +17,7 @@ enum class Egenskap(
     STRENGT_FORTROLIG_ADRESSE(tilgangsstyrt = true),
     EGEN_ANSATT(tilgangsstyrt = true),
     BESLUTTER(kategori = Status, tilgangsstyrt = true),
-    SPESIALSAK(tilgangsstyrt = true),
+    SPESIALSAK,
     REVURDERING(kategori = Oppgavetype),
     SØKNAD(kategori = Oppgavetype),
     STIKKPRØVE(tilgangsstyrt = true),
