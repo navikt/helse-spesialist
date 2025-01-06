@@ -453,7 +453,7 @@ class PgOppgaveDao(
     ): List<BehandletOppgaveFraDatabaseForVisning> =
         asSQL(
             """
-            SELECT 
+            SELECT
                 o.id as oppgave_id,
                 p.aktør_id,
                 o.egenskaper,
@@ -465,14 +465,13 @@ class PgOppgaveDao(
                 INNER JOIN vedtak v ON o.vedtak_ref = v.id
                 INNER JOIN person p ON v.person_ref = p.id
                 INNER JOIN person_info pi ON p.info_ref = pi.id
-                LEFT JOIN (SELECT DISTINCT ON (vedtaksperiode_id) vedtaksperiode_id, saksbehandler, utbetaling_id
+                LEFT JOIN (SELECT DISTINCT ON (vedtaksperiode_id) utbetaling_id
                          FROM totrinnsvurdering
-                         INNER JOIN utbetaling_id ui on ui.id = utbetaling_id_ref
-                         WHERE utbetaling_id_ref IS NOT NULL
-                         AND saksbehandler = :oid
-                         ORDER BY vedtaksperiode_id, totrinnsvurdering.id DESC
-                     ) ttv ON ttv.vedtaksperiode_id = v.vedtaksperiode_id AND ttv.utbetaling_id = o.utbetaling_id
-            WHERE (ttv.saksbehandler = :oid OR o.ferdigstilt_av_oid = :oid) AND (o.status in ('Ferdigstilt', 'AvventerSystem'))
+                         INNER JOIN utbetaling_id ui ON ui.id = utbetaling_id_ref
+                         WHERE saksbehandler = :oid AND totrinnsvurdering.oppdatert::date = :fom::date
+                     ) ttv ON ttv.utbetaling_id = o.utbetaling_id
+            WHERE (ttv.utbetaling_id IS NOT NULL OR o.ferdigstilt_av_oid = :oid)
+                AND (o.status in ('Ferdigstilt', 'AvventerSystem'))
                 AND o.oppdatert::date = :fom::date
             ORDER BY o.oppdatert
             OFFSET :offset
