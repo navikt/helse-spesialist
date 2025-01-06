@@ -112,8 +112,6 @@ spec:
       value: api://prod-gcp.tbd.spleis-api/.default
     - name: SAKSBEHANDLERE_MED_TILGANG_TIL_STIKKPROVER
       value: e382880a-e12f-4d56-a92e-2283d7da43af
-    - name: SAKSBEHANDLERE_MED_TILGANG_TIL_SPESIALSAKER
-      value: 39c09f12-4a2f-44da-ab6a-ac43d680294c
     - name: STIKKPROEVER_UTS_FLERE_AG_FGB_DIVISOR #Kan settes til 1 for å slå av automatisering
       value: "200"
     - name: STIKKPROEVER_UTS_FLERE_AG_FORLENGELSE_DIVISOR

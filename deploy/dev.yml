@@ -98,8 +98,6 @@ spec:
       value: f787f900-6697-440d-a086-d5bb56e26a9c
     - name: SAKSBEHANDLERE_MED_TILGANG_TIL_STIKKPROVER
       value: f787f900-6697-440d-a086-d5bb56e26a9c
-    - name: SAKSBEHANDLERE_MED_TILGANG_TIL_SPESIALSAKER
-      value: f787f900-6697-440d-a086-d5bb56e26a9c
     - name: SPLEIS_CLIENT_ID
       value: api://dev-gcp.tbd.spleis-api/.default
     - name: SPLEIS_API_URL
