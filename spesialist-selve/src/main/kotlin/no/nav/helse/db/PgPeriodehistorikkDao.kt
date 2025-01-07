@@ -12,6 +12,7 @@ import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingAutomatiskRetur
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingFerdigbehandlet
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingRetur
 import no.nav.helse.modell.periodehistorikk.VedtaksperiodeReberegnet
+import no.nav.helse.objectMapper
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -43,7 +44,7 @@ class PgPeriodehistorikkDao(
             "saksbehandler_oid" to historikkinnslag.saksbehandler?.oid,
             "generasjon_id" to generasjonId,
             "dialog_ref" to historikkinnslag.dialogRef,
-            "json" to historikkinnslag.toJson(),
+            "json" to historikkinnslag.detaljer().let { objectMapper.writeValueAsString(it) },
         ).update()
     }
 

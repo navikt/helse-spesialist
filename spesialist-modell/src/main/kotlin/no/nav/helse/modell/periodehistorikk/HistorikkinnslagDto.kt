@@ -1,8 +1,5 @@
 package no.nav.helse.modell.periodehistorikk
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import java.time.LocalDate
@@ -13,7 +10,7 @@ sealed interface HistorikkinnslagDto {
     val saksbehandler: SaksbehandlerDto?
     val tidspunkt: LocalDateTime
 
-    fun toJson(): String = "{}"
+    fun detaljer(): Map<String, Any?> = emptyMap()
 
     companion object {
         fun lagtPåVentInnslag(
@@ -89,18 +86,13 @@ data class LagtPåVent(
     val notattekst: String?,
     val frist: LocalDate,
 ) : HistorikkinnslagDto {
-    override fun toJson(): String =
+    override fun detaljer(): Map<String, Any?> =
         mapOf(
             "årsaker" to årsaker.map { it },
             "frist" to frist,
             "notattekst" to notattekst,
-        ).let { objectMapper.writeValueAsString(it) }
+        )
 }
-
-private val objectMapper =
-    jacksonObjectMapper()
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        .registerModule(JavaTimeModule())
 
 data class FjernetFraPåVent(
     override val saksbehandler: SaksbehandlerDto,
@@ -117,12 +109,12 @@ data class EndrePåVent(
     val notattekst: String?,
     val frist: LocalDate,
 ) : HistorikkinnslagDto {
-    override fun toJson(): String =
+    override fun detaljer(): Map<String, Any?> =
         mapOf(
             "årsaker" to årsaker.map { it },
             "frist" to frist,
             "notattekst" to notattekst,
-        ).let { objectMapper.writeValueAsString(it) }
+        )
 }
 
 data class TotrinnsvurderingFerdigbehandlet(
@@ -145,10 +137,10 @@ data class TotrinnsvurderingRetur(
     override val dialogRef: Long,
     val notattekst: String,
 ) : HistorikkinnslagDto {
-    override fun toJson(): String =
+    override fun detaljer(): Map<String, Any?> =
         mapOf(
             "notattekst" to notattekst,
-        ).let { objectMapper.writeValueAsString(it) }
+        )
 }
 
 data class TotrinnsvurderingAutomatiskRetur(
