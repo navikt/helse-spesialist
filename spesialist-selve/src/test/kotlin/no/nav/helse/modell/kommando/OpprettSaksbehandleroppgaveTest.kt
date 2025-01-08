@@ -4,12 +4,12 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.Testdata.godkjenningsbehovData
 import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.PåVentRepository
 import no.nav.helse.db.RisikovurderingRepository
 import no.nav.helse.db.VergemålRepository
-import no.nav.helse.januar
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.oppgave.Egenskap
@@ -36,17 +36,14 @@ import no.nav.helse.modell.oppgave.Egenskap.UTLAND
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.OVERGANG_FRA_IT
-import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.test.lagFødselsnummer
-import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -269,28 +266,17 @@ internal class OpprettSaksbehandleroppgaveTest {
         kanAvvises: Boolean = true,
         tags: List<String> = emptyList()
     ) = OpprettSaksbehandleroppgave(
-        behovData = GodkjenningsbehovData(
+        behovData = godkjenningsbehovData(
             id = HENDELSE_ID,
             fødselsnummer = FNR,
-            organisasjonsnummer = lagOrganisasjonsnummer(),
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            spleisVedtaksperioder = emptyList(),
-            utbetalingId = UTBETALING_ID,
             spleisBehandlingId = BEHANDLING_ID,
-            avviksvurderingId = UUID.randomUUID(),
-            vilkårsgrunnlagId = UUID.randomUUID(),
-            tags = tags,
-            periodeFom = 1.januar,
-            periodeTom = 31.januar,
+            utbetalingId = UTBETALING_ID,
+            inntektskilde = inntektskilde,
             periodetype = periodetype,
-            førstegangsbehandling = true,
             utbetalingtype = utbetalingtype,
             kanAvvises = kanAvvises,
-            inntektskilde = inntektskilde,
-            orgnummereMedRelevanteArbeidsforhold = emptyList(),
-            skjæringstidspunkt = 1.januar,
-            spleisSykepengegrunnlagsfakta = SpleisSykepengegrunnlagsfakta(emptyList()),
-            json = "{}"
+            tags = tags
         ),
         oppgaveService = oppgaveService,
         automatisering = automatisering,

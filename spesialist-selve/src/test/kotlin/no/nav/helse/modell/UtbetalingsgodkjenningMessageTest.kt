@@ -1,22 +1,16 @@
 package no.nav.helse.modell
 
-import no.nav.helse.januar
+import no.nav.helse.Testdata.godkjenningsbehovData
 import no.nav.helse.modell.melding.Godkjenningsbehovløsning
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
-import no.nav.helse.modell.vedtaksperiode.Inntektskilde
-import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
-import no.nav.helse.spesialist.test.lagFødselsnummer
-import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -33,7 +27,7 @@ internal class UtbetalingsgodkjenningMessageTest {
 
     @BeforeEach
     fun setup() {
-        godkjenningsbehov = godkjenningsbehov()
+        godkjenningsbehov = godkjenningsbehovData()
     }
 
     @Test
@@ -56,51 +50,6 @@ internal class UtbetalingsgodkjenningMessageTest {
             assertLøsning(false, IDENT, EPOST, GODKJENTTIDSPUNKT)
         }
     }
-
-    private fun godkjenningsbehov(
-        id: UUID = UUID.randomUUID(),
-        fødselsnummer: String = lagFødselsnummer(),
-        organisasjonsnummer: String = lagOrganisasjonsnummer(),
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        utbetalingId: UUID = UUID.randomUUID(),
-        spleisBehandlingId: UUID = UUID.randomUUID(),
-        avviksvurderingId: UUID = UUID.randomUUID(),
-        vilkårsgrunnlagId: UUID = UUID.randomUUID(),
-        fom: LocalDate = 1.januar,
-        tom: LocalDate = 31.januar,
-        skjæringstidspunkt: LocalDate = fom,
-        tags: Set<String> = emptySet(),
-        periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-        førstegangsbehandling: Boolean = periodetype == Periodetype.FØRSTEGANGSBEHANDLING,
-        utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
-        kanAvvises: Boolean = true,
-        inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
-        andreInntektskilder: List<String> = emptyList(),
-        spleisSykepengegrunnlagsfakta: SpleisSykepengegrunnlagsfakta = SpleisSykepengegrunnlagsfakta(emptyList()),
-        json: String = "{}"
-    ) = GodkjenningsbehovData(
-        id = id,
-        fødselsnummer = fødselsnummer,
-        organisasjonsnummer = organisasjonsnummer,
-        vedtaksperiodeId = vedtaksperiodeId,
-        spleisVedtaksperioder = emptyList(),
-        utbetalingId = utbetalingId,
-        spleisBehandlingId = spleisBehandlingId,
-        avviksvurderingId = avviksvurderingId,
-        vilkårsgrunnlagId = vilkårsgrunnlagId,
-        tags = tags.toList(),
-        periodeFom = fom,
-        periodeTom = tom,
-        periodetype = periodetype,
-        førstegangsbehandling = førstegangsbehandling,
-        utbetalingtype = utbetalingtype,
-        kanAvvises = kanAvvises,
-        inntektskilde = inntektskilde,
-        orgnummereMedRelevanteArbeidsforhold = andreInntektskilder,
-        skjæringstidspunkt = skjæringstidspunkt,
-        spleisSykepengegrunnlagsfakta = spleisSykepengegrunnlagsfakta,
-        json = json,
-    )
 
     private fun assertGodkjent(
         automatisk: Boolean,

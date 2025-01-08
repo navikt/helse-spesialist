@@ -3,35 +3,29 @@ package no.nav.helse.mediator
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.Testdata.godkjenningsbehovData
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.januar
 import no.nav.helse.modell.gosysoppgaver.inspektør
-import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.melding.VedtaksperiodeAvvistAutomatisk
 import no.nav.helse.modell.melding.VedtaksperiodeAvvistManuelt
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentManuelt
-import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.Sykefraværstilfelle
+import no.nav.helse.modell.person.vedtaksperiode.Behandling
+import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.person.vedtaksperiode.Behandling
-import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
-import no.nav.helse.modell.vedtaksperiode.Inntektskilde
-import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
-import no.nav.helse.spesialist.test.lagFødselsnummer
-import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.test.lagSaksbehandlerident
 import no.nav.helse.spesialist.test.lagTilfeldigSaksbehandlerepost
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -75,7 +69,7 @@ internal class GodkjenningMediatorTest {
     fun `godkjent saksbehandlerløsning medfører VedtaksperiodeGodkjentManuelt`() {
         mediator.saksbehandlerUtbetaling(
             context = context,
-            behov = godkjenningsbehov(),
+            behov = godkjenningsbehovData(),
             saksbehandlerIdent = lagSaksbehandlerident(),
             saksbehandlerEpost = lagTilfeldigSaksbehandlerepost(),
             saksbehandler = saksbehandler,
@@ -92,7 +86,7 @@ internal class GodkjenningMediatorTest {
     fun `avvist saksbehandlerløsning medfører VedtaksperiodeAvvistManuelt`() {
         mediator.saksbehandlerAvvisning(
             context = context,
-            behov = godkjenningsbehov(),
+            behov = godkjenningsbehovData(),
             saksbehandlerIdent = lagSaksbehandlerident(),
             saksbehandlerEpost = lagTilfeldigSaksbehandlerepost(),
             saksbehandler = saksbehandler,
@@ -110,7 +104,7 @@ internal class GodkjenningMediatorTest {
     fun `automatisk godkjenning medfører VedtaksperiodeGodkjentAutomatisk`() {
         mediator.automatiskUtbetaling(
             context = context,
-            behov = godkjenningsbehov(fødselsnummer = fnr),
+            behov = godkjenningsbehovData(fødselsnummer = fnr),
             utbetaling = utbetaling
         )
         assertNotNull(hendelserInspektør.hendelseOrNull<VedtaksperiodeGodkjentAutomatisk>())
@@ -121,7 +115,7 @@ internal class GodkjenningMediatorTest {
         mediator.automatiskAvvisning(
             context = context,
             utbetaling = utbetaling,
-            behov = godkjenningsbehov(fødselsnummer = fnr),
+            behov = godkjenningsbehovData(fødselsnummer = fnr),
             begrunnelser = emptyList(),
         )
         assertNotNull(hendelserInspektør.hendelseOrNull<VedtaksperiodeAvvistAutomatisk>())
@@ -133,7 +127,7 @@ internal class GodkjenningMediatorTest {
             context = context,
             begrunnelser = listOf("foo"),
             utbetaling = utbetaling,
-            behov = godkjenningsbehov(fødselsnummer = fnr),
+            behov = godkjenningsbehovData(fødselsnummer = fnr),
         )
         assertFerdigbehandletGodkjenningsbehovOpptegnelseOpprettet()
     }
@@ -142,7 +136,7 @@ internal class GodkjenningMediatorTest {
     fun `automatisk utbetaling skal opprette opptegnelse`() {
         mediator.automatiskUtbetaling(
             context = context,
-            behov = godkjenningsbehov(fødselsnummer = fnr),
+            behov = godkjenningsbehovData(fødselsnummer = fnr),
             utbetaling = utbetaling
         )
         assertFerdigbehandletGodkjenningsbehovOpptegnelseOpprettet()
@@ -152,7 +146,7 @@ internal class GodkjenningMediatorTest {
     fun `saksbehandler utbetaling skal ikke opprette opptegnelse`() {
         mediator.saksbehandlerUtbetaling(
             context = context,
-            behov = godkjenningsbehov(fødselsnummer = fnr),
+            behov = godkjenningsbehovData(fødselsnummer = fnr),
             saksbehandlerIdent = "1",
             saksbehandlerEpost = "2@nav.no",
             saksbehandler = saksbehandler,
@@ -169,7 +163,7 @@ internal class GodkjenningMediatorTest {
     fun `saksbehandler avvisning skal ikke opprette opptegnelse`() {
         mediator.saksbehandlerAvvisning(
             context = context,
-            behov = godkjenningsbehov(fødselsnummer = fnr),
+            behov = godkjenningsbehovData(fødselsnummer = fnr),
             saksbehandlerIdent = "1",
             saksbehandlerEpost = "2@nav.no",
             saksbehandler = saksbehandler,
@@ -221,7 +215,7 @@ internal class GodkjenningMediatorTest {
     private fun godkjenning(generasjoner: List<Behandling>) =
         mediator.saksbehandlerUtbetaling(
             context = context,
-            behov = godkjenningsbehov(fødselsnummer = fnr),
+            behov = godkjenningsbehovData(fødselsnummer = fnr),
             saksbehandlerIdent = "Z000000",
             saksbehandlerEpost = "saksbehandler@nav.no",
             saksbehandler = saksbehandler,
@@ -245,49 +239,4 @@ internal class GodkjenningMediatorTest {
     private companion object {
         const val fnr = "12341231221"
     }
-
-    private fun godkjenningsbehov(
-        id: UUID = UUID.randomUUID(),
-        fødselsnummer: String = lagFødselsnummer(),
-        organisasjonsnummer: String = lagOrganisasjonsnummer(),
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        utbetalingId: UUID = UUID.randomUUID(),
-        spleisBehandlingId: UUID = UUID.randomUUID(),
-        avviksvurderingId: UUID = UUID.randomUUID(),
-        vilkårsgrunnlagId: UUID = UUID.randomUUID(),
-        fom: LocalDate = 1.januar,
-        tom: LocalDate = 31.januar,
-        skjæringstidspunkt: LocalDate = fom,
-        tags: Set<String> = emptySet(),
-        periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-        førstegangsbehandling: Boolean = periodetype == Periodetype.FØRSTEGANGSBEHANDLING,
-        utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
-        kanAvvises: Boolean = true,
-        inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
-        andreInntektskilder: List<String> = emptyList(),
-        spleisSykepengegrunnlagsfakta: SpleisSykepengegrunnlagsfakta = SpleisSykepengegrunnlagsfakta(emptyList()),
-        json: String = "{}"
-    ) = GodkjenningsbehovData(
-        id = id,
-        fødselsnummer = fødselsnummer,
-        organisasjonsnummer = organisasjonsnummer,
-        vedtaksperiodeId = vedtaksperiodeId,
-        spleisVedtaksperioder = emptyList(),
-        utbetalingId = utbetalingId,
-        spleisBehandlingId = spleisBehandlingId,
-        avviksvurderingId = avviksvurderingId,
-        vilkårsgrunnlagId = vilkårsgrunnlagId,
-        tags = tags.toList(),
-        periodeFom = fom,
-        periodeTom = tom,
-        periodetype = periodetype,
-        førstegangsbehandling = førstegangsbehandling,
-        utbetalingtype = utbetalingtype,
-        kanAvvises = kanAvvises,
-        inntektskilde = inntektskilde,
-        orgnummereMedRelevanteArbeidsforhold = andreInntektskilder,
-        skjæringstidspunkt = skjæringstidspunkt,
-        spleisSykepengegrunnlagsfakta = spleisSykepengegrunnlagsfakta,
-        json = json,
-    )
 }

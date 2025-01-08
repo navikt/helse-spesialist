@@ -1,31 +1,25 @@
 package no.nav.helse.mediator.meldinger
 
 import io.mockk.mockk
+import no.nav.helse.Testdata.godkjenningsbehovData
 import no.nav.helse.januar
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.LøsGodkjenningsbehov
 import no.nav.helse.modell.melding.Godkjenningsbehovløsning
+import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.person.Sykefraværstilfelle
+import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.utbetaling.Refusjonstype.DELVIS_REFUSJON
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.person.vedtaksperiode.Behandling
-import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
-import no.nav.helse.modell.vedtaksperiode.Inntektskilde
-import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
-import no.nav.helse.spesialist.test.lagFødselsnummer
-import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import java.util.UUID.randomUUID
@@ -70,7 +64,7 @@ internal class SaksbehandlerløsningTest {
             saksbehandler = saksbehandler,
             beslutter = beslutter,
             godkjenningMediator = GodkjenningMediator(mockk()),
-            godkjenningsbehovData = godkjenningsbehov(
+            godkjenningsbehovData = godkjenningsbehovData(
                 id = GODKJENNINGSBEHOV_ID,
                 fødselsnummer = FNR,
                 vedtaksperiodeId = vedtaksperiodeId,
@@ -104,51 +98,6 @@ internal class SaksbehandlerløsningTest {
         assertTrue(saksbehandlerløsning.execute(context))
         assertLøsning(false, DELVIS_REFUSJON)
     }
-
-    private fun godkjenningsbehov(
-        id: UUID = randomUUID(),
-        fødselsnummer: String = lagFødselsnummer(),
-        organisasjonsnummer: String = lagOrganisasjonsnummer(),
-        vedtaksperiodeId: UUID = randomUUID(),
-        utbetalingId: UUID = randomUUID(),
-        spleisBehandlingId: UUID = randomUUID(),
-        avviksvurderingId: UUID = randomUUID(),
-        vilkårsgrunnlagId: UUID = randomUUID(),
-        fom: LocalDate = 1.januar,
-        tom: LocalDate = 31.januar,
-        skjæringstidspunkt: LocalDate = fom,
-        tags: Set<String> = emptySet(),
-        periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-        førstegangsbehandling: Boolean = periodetype == Periodetype.FØRSTEGANGSBEHANDLING,
-        utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
-        kanAvvises: Boolean = true,
-        inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
-        andreInntektskilder: List<String> = emptyList(),
-        spleisSykepengegrunnlagsfakta: SpleisSykepengegrunnlagsfakta = SpleisSykepengegrunnlagsfakta(emptyList()),
-        json: String = "{}"
-    ): GodkjenningsbehovData = GodkjenningsbehovData(
-        id = id,
-        fødselsnummer = fødselsnummer,
-        organisasjonsnummer = organisasjonsnummer,
-        vedtaksperiodeId = vedtaksperiodeId,
-        spleisVedtaksperioder = emptyList(),
-        utbetalingId = utbetalingId,
-        spleisBehandlingId = spleisBehandlingId,
-        avviksvurderingId = avviksvurderingId,
-        vilkårsgrunnlagId = vilkårsgrunnlagId,
-        tags = tags.toList(),
-        periodeFom = fom,
-        periodeTom = tom,
-        periodetype = periodetype,
-        førstegangsbehandling = førstegangsbehandling,
-        utbetalingtype = utbetalingtype,
-        kanAvvises = kanAvvises,
-        inntektskilde = inntektskilde,
-        orgnummereMedRelevanteArbeidsforhold = andreInntektskilder,
-        skjæringstidspunkt = skjæringstidspunkt,
-        spleisSykepengegrunnlagsfakta = spleisSykepengegrunnlagsfakta,
-        json = json,
-    )
 
     private val observer = object : CommandContextObserver {
         val hendelser = mutableListOf<UtgåendeHendelse>()
