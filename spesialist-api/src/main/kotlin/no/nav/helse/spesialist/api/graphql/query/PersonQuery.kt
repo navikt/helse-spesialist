@@ -92,6 +92,7 @@ class PersonQuery(
                 result.auditlogg(env, fødselsnummer)
                 result.tilGraphqlError(fødselsnummer)
             }
+
             is FetchPersonResult.Ok -> {
                 auditLog(env.graphQlContext, fødselsnummer, true, null)
                 DataFetcherResult.newResult<Person?>().data(result.person).build()
@@ -104,7 +105,14 @@ class PersonQuery(
         fødselsnummer: String,
     ) {
         when (this) {
-            is FetchPersonResult.Feil.IkkeFunnet -> auditLog(env.graphQlContext, fødselsnummer, true, notFoundError(fødselsnummer).message)
+            is FetchPersonResult.Feil.IkkeFunnet ->
+                auditLog(
+                    env.graphQlContext,
+                    fødselsnummer,
+                    true,
+                    notFoundError(fødselsnummer).message,
+                )
+
             is FetchPersonResult.Feil.IkkeKlarTilVisning -> auditLog(env.graphQlContext, fødselsnummer, false, null)
             is FetchPersonResult.Feil.ManglerTilgang -> auditLog(env.graphQlContext, fødselsnummer, false, null)
             is FetchPersonResult.Feil.UgyldigSnapshot ->
@@ -140,7 +148,11 @@ class PersonQuery(
         aktørId: String?,
     ): Inputvalidering {
         if (fødselsnummer != null) {
-            if (personoppslagService.finnesPersonMedFødselsnummer(fødselsnummer)) return Inputvalidering.Ok(fødselsnummer)
+            if (personoppslagService.finnesPersonMedFødselsnummer(fødselsnummer)) {
+                return Inputvalidering.Ok(
+                    fødselsnummer,
+                )
+            }
             return UgyldigInput.UkjentFødselsnummer(fødselsnummer, notFoundError(fødselsnummer))
         }
         if (aktørId == null) return UgyldigInput.ParametreMangler(getBadRequestError("Requesten mangler både fødselsnummer og aktorId"))
@@ -153,7 +165,12 @@ class PersonQuery(
         val fødselsnumre = personoppslagService.fødselsnumreKnyttetTil(aktørId)
 
         if (fødselsnumre.harIngenFødselsnumre()) return UgyldigInput.UkjentAktørId(aktørId, notFoundError(aktørId))
-        if (fødselsnumre.harFlereFødselsnumre()) return UgyldigInput.HarFlereFødselsnumre(aktørId, getFlereFødselsnumreError(fødselsnumre))
+        if (fødselsnumre.harFlereFødselsnumre()) {
+            return UgyldigInput.HarFlereFødselsnumre(
+                aktørId,
+                getFlereFødselsnumreError(fødselsnumre),
+            )
+        }
 
         return Inputvalidering.Ok(fødselsnumre.single())
     }

@@ -42,7 +42,7 @@ class OverstyringApiDao(
                         hendelseId = overstyringRow.uuid("hendelse_ref"),
                         fødselsnummer = overstyringRow.string("fødselsnummer"),
                         organisasjonsnummer = overstyringRow.string("organisasjonsnummer"),
-                        vedtaksperiodeId = overstyringRow.uuidOrNull("vedtaksperiode_id"),
+                        vedtaksperiodeId = overstyringRow.uuid("vedtaksperiode_id"),
                         begrunnelse = overstyringRow.string("begrunnelse"),
                         timestamp = overstyringRow.localDateTime("tidspunkt"),
                         saksbehandlerNavn = overstyringRow.string("navn"),
@@ -75,7 +75,7 @@ class OverstyringApiDao(
         @Language("PostgreSQL")
         val finnOverstyringQuery = """
             SELECT o.id, o.tidspunkt, o.person_ref, o.hendelse_ref, o.saksbehandler_ref, o.ekstern_hendelse_id, 
-            o.ferdigstilt, oi.*, p.fødselsnummer, a.organisasjonsnummer, s.navn, s.ident FROM overstyring o
+            o.ferdigstilt, oi.*, p.fødselsnummer, a.organisasjonsnummer, s.navn, s.ident, o.vedtaksperiode_id FROM overstyring o
                 INNER JOIN overstyring_inntekt oi ON o.id = oi.overstyring_ref
                 INNER JOIN person p ON p.id = o.person_ref
                 INNER JOIN arbeidsgiver a ON a.id = oi.arbeidsgiver_ref
@@ -108,6 +108,7 @@ class OverstyringApiDao(
                         fom = overstyringRow.localDateOrNull("fom"),
                         tom = overstyringRow.localDateOrNull("tom"),
                         ferdigstilt = overstyringRow.boolean("ferdigstilt"),
+                        vedtaksperiodeId = overstyringRow.uuid("vedtaksperiode_id"),
                     )
                 }.asList,
         )
@@ -119,7 +120,7 @@ class OverstyringApiDao(
         @Language("PostgreSQL")
         val finnSkjønnsfastsettingQuery = """
                 SELECT o.id, o.tidspunkt, o.person_ref, o.hendelse_ref, o.saksbehandler_ref, o.ekstern_hendelse_id, 
-                o.ferdigstilt, ss.arsak, ss.type, ssa.arlig, ssa.fra_arlig, ss.skjaeringstidspunkt, 
+                o.ferdigstilt, o.vedtaksperiode_id, ss.arsak, ss.type, ssa.arlig, ssa.fra_arlig, ss.skjaeringstidspunkt, 
                 b1.tekst as fritekst, b2.tekst as mal, b3.tekst as konklusjon, p.fødselsnummer, a.organisasjonsnummer, s.navn, s.ident FROM overstyring o
                     INNER JOIN skjonnsfastsetting_sykepengegrunnlag ss ON o.id = ss.overstyring_ref
                     INNER JOIN skjonnsfastsetting_sykepengegrunnlag_arbeidsgiver ssa ON ssa.skjonnsfastsetting_sykepengegrunnlag_ref = ss.id
@@ -143,6 +144,7 @@ class OverstyringApiDao(
                         saksbehandlerIdent = overstyringRow.stringOrNull("ident"),
                         skjæringstidspunkt = overstyringRow.localDate("skjaeringstidspunkt"),
                         ferdigstilt = overstyringRow.boolean("ferdigstilt"),
+                        vedtaksperiodeId = overstyringRow.uuid("vedtaksperiode_id"),
                         årlig = overstyringRow.double("arlig"),
                         fraÅrlig = overstyringRow.doubleOrNull("fra_arlig"),
                         årsak = overstyringRow.string("arsak"),
@@ -180,10 +182,15 @@ class OverstyringApiDao(
                         FROM overstyring_minimum_sykdomsgrad_periode 
                         WHERE overstyring_minimum_sykdomsgrad_ref = ?
                     """
-                    val perioderVurdertOk = mutableListOf<OverstyringMinimumSykdomsgradDto.OverstyringMinimumSykdomsgradPeriodeDto>()
-                    val perioderVurdertIkkeOk = mutableListOf<OverstyringMinimumSykdomsgradDto.OverstyringMinimumSykdomsgradPeriodeDto>()
+                    val perioderVurdertOk =
+                        mutableListOf<OverstyringMinimumSykdomsgradDto.OverstyringMinimumSykdomsgradPeriodeDto>()
+                    val perioderVurdertIkkeOk =
+                        mutableListOf<OverstyringMinimumSykdomsgradDto.OverstyringMinimumSykdomsgradPeriodeDto>()
                     this.run(
-                        queryOf(finnPerioder, overstyringRow.long("overstyring_minimum_sykdomsgrad_ref")).map { vurdertPeriode ->
+                        queryOf(
+                            finnPerioder,
+                            overstyringRow.long("overstyring_minimum_sykdomsgrad_ref"),
+                        ).map { vurdertPeriode ->
                             val periode =
                                 OverstyringMinimumSykdomsgradDto.OverstyringMinimumSykdomsgradPeriodeDto(
                                     fom = vurdertPeriode.localDate("fom"),
@@ -204,6 +211,7 @@ class OverstyringApiDao(
                         saksbehandlerNavn = overstyringRow.string("navn"),
                         saksbehandlerIdent = overstyringRow.stringOrNull("ident"),
                         ferdigstilt = overstyringRow.boolean("ferdigstilt"),
+                        vedtaksperiodeId = overstyringRow.uuid("vedtaksperiode_id"),
                         perioderVurdertOk = perioderVurdertOk,
                         perioderVurdertIkkeOk = perioderVurdertIkkeOk,
                         begrunnelse = overstyringRow.string("begrunnelse"),
@@ -217,7 +225,7 @@ class OverstyringApiDao(
         @Language("PostgreSQL")
         val finnOverstyringQuery = """
                 SELECT o.id, o.tidspunkt, o.person_ref, o.hendelse_ref, o.saksbehandler_ref, o.ekstern_hendelse_id, 
-                o.ferdigstilt, oa.*, p.fødselsnummer, a.organisasjonsnummer, s.navn, s.ident FROM overstyring o 
+                o.ferdigstilt, oa.*, p.fødselsnummer, a.organisasjonsnummer, o.vedtaksperiode_id, s.navn, s.ident FROM overstyring o 
                     INNER JOIN overstyring_arbeidsforhold oa ON o.id = oa.overstyring_ref
                     INNER JOIN person p ON p.id = o.person_ref
                     INNER JOIN arbeidsgiver a ON a.id = oa.arbeidsgiver_ref
@@ -239,6 +247,7 @@ class OverstyringApiDao(
                         deaktivert = overstyringRow.boolean("deaktivert"),
                         skjæringstidspunkt = overstyringRow.localDate("skjaeringstidspunkt"),
                         ferdigstilt = overstyringRow.boolean("ferdigstilt"),
+                        vedtaksperiodeId = overstyringRow.uuid("vedtaksperiode_id"),
                     )
                 }.asList,
         )

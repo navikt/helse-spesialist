@@ -32,6 +32,9 @@ sealed interface OverstyringDto {
     val saksbehandlerNavn: String
     val saksbehandlerIdent: String?
 
+    val vedtaksperiodeId: UUID
+    val ferdigstilt: Boolean
+
     fun relevantFor(organisasjonsnummer: String) = organisasjonsnummer == this.organisasjonsnummer
 }
 
@@ -44,8 +47,8 @@ data class OverstyringTidslinjeDto(
     override val saksbehandlerNavn: String,
     override val saksbehandlerIdent: String?,
     val overstyrteDager: List<OverstyringDagDto>,
-    val ferdigstilt: Boolean,
-    val vedtaksperiodeId: UUID?,
+    override val ferdigstilt: Boolean,
+    override val vedtaksperiodeId: UUID,
 ) : OverstyringDto
 
 data class OverstyringDagDto(
@@ -72,7 +75,8 @@ data class OverstyringInntektDto(
     val fraRefusjonsopplysninger: List<Refusjonselement>?,
     val fom: LocalDate?,
     val tom: LocalDate?,
-    val ferdigstilt: Boolean,
+    override val ferdigstilt: Boolean,
+    override val vedtaksperiodeId: UUID,
 ) : OverstyringDto {
     data class Refusjonselement(
         val fom: LocalDate,
@@ -91,8 +95,10 @@ data class OverstyringMinimumSykdomsgradDto(
     val perioderVurdertOk: List<OverstyringMinimumSykdomsgradPeriodeDto>,
     val perioderVurdertIkkeOk: List<OverstyringMinimumSykdomsgradPeriodeDto>,
     val begrunnelse: String,
+    @Deprecated("Bruk vedtaksperiodeId i stedet")
     val initierendeVedtaksperiodeId: UUID,
-    val ferdigstilt: Boolean,
+    override val ferdigstilt: Boolean,
+    override val vedtaksperiodeId: UUID,
 ) : OverstyringDto {
     data class OverstyringMinimumSykdomsgradPeriodeDto(
         val fom: LocalDate,
@@ -114,7 +120,7 @@ data class SkjønnsfastsettingSykepengegrunnlagDto(
     override val saksbehandlerNavn: String,
     override val saksbehandlerIdent: String?,
     val skjæringstidspunkt: LocalDate,
-    val ferdigstilt: Boolean,
+    override val ferdigstilt: Boolean,
     val årlig: Double,
     val fraÅrlig: Double?,
     val årsak: String,
@@ -123,6 +129,7 @@ data class SkjønnsfastsettingSykepengegrunnlagDto(
     val begrunnelseMal: String?,
     val begrunnelseFritekst: String?,
     val begrunnelseKonklusjon: String?,
+    override val vedtaksperiodeId: UUID,
 ) : OverstyringDto
 
 data class OverstyringArbeidsforholdDto(
@@ -136,5 +143,6 @@ data class OverstyringArbeidsforholdDto(
     override val saksbehandlerIdent: String?,
     val deaktivert: Boolean,
     val skjæringstidspunkt: LocalDate,
-    val ferdigstilt: Boolean,
+    override val ferdigstilt: Boolean,
+    override val vedtaksperiodeId: UUID,
 ) : OverstyringDto
