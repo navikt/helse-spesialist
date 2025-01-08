@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
+import com.expediagroup.graphql.generator.annotations.GraphQLDeprecated
 import io.ktor.utils.io.core.toByteArray
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
@@ -43,6 +44,7 @@ interface Overstyring {
     val timestamp: LocalDateTime
     val saksbehandler: Saksbehandler
     val ferdigstilt: Boolean
+    val vedtaksperiodeId: UUID
 }
 
 data class Dagoverstyring(
@@ -52,6 +54,7 @@ data class Dagoverstyring(
     override val ferdigstilt: Boolean,
     val dager: List<OverstyrtDag>,
     val begrunnelse: String,
+    override val vedtaksperiodeId: UUID,
 ) : Overstyring {
     data class OverstyrtDag(
         val dato: LocalDate,
@@ -68,6 +71,7 @@ data class Inntektoverstyring(
     override val saksbehandler: Saksbehandler,
     override val ferdigstilt: Boolean,
     val inntekt: OverstyrtInntekt,
+    override val vedtaksperiodeId: UUID,
 ) : Overstyring {
     data class OverstyrtInntekt(
         val forklaring: String,
@@ -92,11 +96,13 @@ data class MinimumSykdomsgradOverstyring(
     override val saksbehandler: Saksbehandler,
     override val ferdigstilt: Boolean,
     val minimumSykdomsgrad: OverstyrtMinimumSykdomsgrad,
+    override val vedtaksperiodeId: UUID,
 ) : Overstyring {
     data class OverstyrtMinimumSykdomsgrad(
         val perioderVurdertOk: List<OverstyrtMinimumSykdomsgradPeriode>,
         val perioderVurdertIkkeOk: List<OverstyrtMinimumSykdomsgradPeriode>,
         val begrunnelse: String,
+        @GraphQLDeprecated("Bruk vedtaksperiodeId i stedet")
         val initierendeVedtaksperiodeId: UUID,
     )
 
@@ -112,6 +118,7 @@ data class Sykepengegrunnlagskjonnsfastsetting(
     override val saksbehandler: Saksbehandler,
     override val ferdigstilt: Boolean,
     val skjonnsfastsatt: SkjonnsfastsattSykepengegrunnlag,
+    override val vedtaksperiodeId: UUID,
 ) : Overstyring {
     data class SkjonnsfastsattSykepengegrunnlag(
         val arsak: String,
@@ -135,6 +142,7 @@ data class Arbeidsforholdoverstyring(
     val skjaeringstidspunkt: LocalDate,
     val forklaring: String,
     val begrunnelse: String,
+    override val vedtaksperiodeId: UUID,
 ) : Overstyring
 
 data class GhostPeriode(

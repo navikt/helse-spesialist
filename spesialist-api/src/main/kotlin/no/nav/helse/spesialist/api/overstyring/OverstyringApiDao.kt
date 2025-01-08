@@ -210,12 +210,11 @@ class OverstyringApiDao(
                         timestamp = overstyringRow.localDateTime("tidspunkt"),
                         saksbehandlerNavn = overstyringRow.string("navn"),
                         saksbehandlerIdent = overstyringRow.stringOrNull("ident"),
-                        ferdigstilt = overstyringRow.boolean("ferdigstilt"),
-                        vedtaksperiodeId = overstyringRow.uuid("vedtaksperiode_id"),
                         perioderVurdertOk = perioderVurdertOk,
                         perioderVurdertIkkeOk = perioderVurdertIkkeOk,
                         begrunnelse = overstyringRow.string("begrunnelse"),
-                        initierendeVedtaksperiodeId = overstyringRow.uuid("vedtaksperiode_id"),
+                        ferdigstilt = overstyringRow.boolean("ferdigstilt"),
+                        vedtaksperiodeId = overstyringRow.uuid("vedtaksperiode_id"),
                     )
                 }.asList,
         )

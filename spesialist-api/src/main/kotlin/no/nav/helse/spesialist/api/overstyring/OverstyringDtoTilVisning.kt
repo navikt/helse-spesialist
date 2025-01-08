@@ -95,8 +95,6 @@ data class OverstyringMinimumSykdomsgradDto(
     val perioderVurdertOk: List<OverstyringMinimumSykdomsgradPeriodeDto>,
     val perioderVurdertIkkeOk: List<OverstyringMinimumSykdomsgradPeriodeDto>,
     val begrunnelse: String,
-    @Deprecated("Bruk vedtaksperiodeId i stedet")
-    val initierendeVedtaksperiodeId: UUID,
     override val ferdigstilt: Boolean,
     override val vedtaksperiodeId: UUID,
 ) : OverstyringDto {

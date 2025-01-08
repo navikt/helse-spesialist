@@ -249,6 +249,7 @@ private fun OverstyringTidslinjeDto.tilDagoverstyring() =
                 )
             },
         ferdigstilt = ferdigstilt,
+        vedtaksperiodeId = vedtaksperiodeId,
     )
 
 private fun OverstyringInntektDto.tilInntektoverstyring() =
@@ -285,6 +286,7 @@ private fun OverstyringInntektDto.tilInntektoverstyring() =
                     } ?: emptyList(),
             ),
         ferdigstilt = ferdigstilt,
+        vedtaksperiodeId = vedtaksperiodeId,
     )
 
 private fun OverstyringArbeidsforholdDto.tilArbeidsforholdoverstyring() =
@@ -301,6 +303,7 @@ private fun OverstyringArbeidsforholdDto.tilArbeidsforholdoverstyring() =
         skjaeringstidspunkt = skjæringstidspunkt,
         forklaring = forklaring,
         ferdigstilt = ferdigstilt,
+        vedtaksperiodeId = vedtaksperiodeId,
     )
 
 private fun SkjønnsfastsettingSykepengegrunnlagDto.tilSykepengegrunnlagSkjønnsfastsetting() =
@@ -325,6 +328,7 @@ private fun SkjønnsfastsettingSykepengegrunnlagDto.tilSykepengegrunnlagSkjønns
                 skjaeringstidspunkt = skjæringstidspunkt,
             ),
         ferdigstilt = ferdigstilt,
+        vedtaksperiodeId = vedtaksperiodeId,
     )
 
 private fun OverstyringMinimumSykdomsgradDto.tilMinimumSykdomsgradOverstyring() =
@@ -353,7 +357,8 @@ private fun OverstyringMinimumSykdomsgradDto.tilMinimumSykdomsgradOverstyring() 
                         )
                     },
                 begrunnelse = begrunnelse,
-                initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,
+                initierendeVedtaksperiodeId = vedtaksperiodeId,
             ),
         ferdigstilt = ferdigstilt,
+        vedtaksperiodeId = vedtaksperiodeId,
     )
