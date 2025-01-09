@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.jackson.asLocalDate
 import com.github.navikt.tbd_libs.jackson.isMissingOrNull
 import io.ktor.utils.io.core.toByteArray
-import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.Toggle
 import no.nav.helse.spesialist.api.notat.NotatApiDao
@@ -478,7 +477,6 @@ data class BeregnetPeriode(
     private val notatDao: NotatApiDao,
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val påVentApiDao: PåVentApiDao,
-    private val tilganger: SaksbehandlerTilganger,
     private val erSisteGenerasjon: Boolean,
     private val index: Int,
 ) : Periode {

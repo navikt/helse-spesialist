@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.api.graphql.schema
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDeprecated
 import io.ktor.utils.io.core.toByteArray
-import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.notat.NotatApiDao
@@ -184,7 +183,6 @@ data class Arbeidsgiver(
     private val notatDao: NotatApiDao,
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val påVentApiDao: PåVentApiDao,
-    private val tilganger: SaksbehandlerTilganger,
     private val overstyringer: List<Overstyring>,
 ) {
     fun generasjoner(): List<Generasjon> =
@@ -218,7 +216,6 @@ data class Arbeidsgiver(
                                     notatDao = notatDao,
                                     totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                                     påVentApiDao = påVentApiDao,
-                                    tilganger = tilganger,
                                     erSisteGenerasjon = index == 0,
                                     index = index,
                                 )

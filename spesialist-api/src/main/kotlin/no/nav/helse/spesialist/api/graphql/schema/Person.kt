@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.api.graphql.schema
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
-import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
@@ -113,7 +112,6 @@ data class Person(
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val påVentApiDao: PåVentApiDao,
     private val avviksvurderinghenter: Avviksvurderinghenter,
-    private val tilganger: SaksbehandlerTilganger,
     private val oppgavehåndterer: Oppgavehåndterer,
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
 ) {
@@ -177,7 +175,6 @@ data class Person(
                 notatDao = notatDao,
                 totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                 påVentApiDao = påVentApiDao,
-                tilganger = tilganger,
                 overstyringer =
                     overstyringer
                         .filter { it.relevantFor(arbeidsgiver.organisasjonsnummer) }

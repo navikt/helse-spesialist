@@ -105,13 +105,12 @@ class PersonService(
                 is HentSnapshotResult.Ok -> snapshotResult.snapshot
             }
 
-        return person(fødselsnummer, snapshot, tilganger, reservasjon)
+        return person(fødselsnummer, snapshot, reservasjon)
     }
 
     private suspend fun person(
         fødselsnummer: String,
         snapshot: Pair<Personinfo, GraphQLPerson>,
-        tilganger: SaksbehandlerTilganger,
         reservasjon: Deferred<Reservasjon?>,
     ): FetchPersonResult.Ok {
         val (personinfo, personSnapshot) = snapshot
@@ -136,7 +135,6 @@ class PersonService(
                 totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                 påVentApiDao = påVentApiDao,
                 avviksvurderinghenter = avviksvurderinghenter,
-                tilganger = tilganger,
                 oppgavehåndterer = oppgavehåndterer,
                 saksbehandlerhåndterer = saksbehandlerhåndterer,
             ),
