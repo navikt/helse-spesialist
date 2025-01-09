@@ -1,29 +1,29 @@
 package no.nav.helse.spesialist.api.endepunkter
 
 import io.ktor.client.HttpClient
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ClientContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.auth.authenticate
 import io.ktor.server.routing.Route
 import io.ktor.server.testing.ApplicationTestBuilder
-import io.ktor.server.testing.TestApplicationBuilder
 import io.ktor.server.testing.testApplication
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.JwtStub
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.objectMapper
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ClientContentNegotiation
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ServerContentNegotiation
 
 internal class ApiTesting(
     private val jwtStub: JwtStub = JwtStub(),
-    private val build: Route.() -> Unit,
+    private val applicationBuilder: ApplicationTestBuilder.() -> Unit,
+    private val routeBuilder: Route.() -> Unit,
 ) {
     private val clientId = "client_id"
     private val issuer = "https://jwt-provider-domain"
 
-    private fun TestApplicationBuilder.setUpApplication() {
+    private fun ApplicationTestBuilder.setUpApplication() {
         install(ServerContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
         val azureConfig =
             AzureConfig(
@@ -35,8 +35,9 @@ internal class ApiTesting(
         application {
             azureAdAppAuthentication(azureConfig, Environment())
         }
+        applicationBuilder(this)
         routing {
-            authenticate("oidc", build = build)
+            authenticate("oidc", build = routeBuilder)
         }
     }
 

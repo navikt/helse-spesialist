@@ -1,9 +1,5 @@
 package no.nav.helse.spesialist.api.graphql
 
-import com.expediagroup.graphql.generator.SchemaGeneratorConfig
-import com.expediagroup.graphql.generator.TopLevelObject
-import com.expediagroup.graphql.generator.toSchema
-import graphql.schema.GraphQLSchema
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
@@ -49,150 +45,101 @@ import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vergemål.VergemålApiDao
 
 internal class SchemaBuilder(
-    private val personApiDao: PersonApiDao,
-    private val egenAnsattApiDao: EgenAnsattApiDao,
-    private val tildelingApiDao: TildelingApiDao,
-    private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
-    private val overstyringApiDao: OverstyringApiDao,
-    private val risikovurderingApiDao: RisikovurderingApiDao,
-    private val varselRepository: ApiVarselRepository,
-    private val oppgaveApiDao: OppgaveApiDao,
-    private val periodehistorikkApiDao: PeriodehistorikkApiDao,
-    private val påVentApiDao: PåVentApiDao,
-    private val vergemålApiDao: VergemålApiDao,
-    private val snapshotService: SnapshotService,
-    private val notatDao: NotatApiDao,
-    private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
-    private val reservasjonClient: ReservasjonClient,
-    private val avviksvurderinghenter: Avviksvurderinghenter,
-    private val behandlingsstatistikkMediator: IBehandlingsstatistikkService,
-    private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
-    private val oppgavehåndterer: Oppgavehåndterer,
-    private val totrinnsvurderinghåndterer: Totrinnsvurderinghåndterer,
-    private val godkjenninghåndterer: Godkjenninghåndterer,
-    private val personhåndterer: Personhåndterer,
-    private val dokumenthåndterer: Dokumenthåndterer,
-    private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
+    personApiDao: PersonApiDao,
+    egenAnsattApiDao: EgenAnsattApiDao,
+    tildelingApiDao: TildelingApiDao,
+    arbeidsgiverApiDao: ArbeidsgiverApiDao,
+    overstyringApiDao: OverstyringApiDao,
+    risikovurderingApiDao: RisikovurderingApiDao,
+    varselRepository: ApiVarselRepository,
+    oppgaveApiDao: OppgaveApiDao,
+    periodehistorikkApiDao: PeriodehistorikkApiDao,
+    påVentApiDao: PåVentApiDao,
+    vergemålApiDao: VergemålApiDao,
+    snapshotService: SnapshotService,
+    notatDao: NotatApiDao,
+    totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
+    reservasjonClient: ReservasjonClient,
+    avviksvurderinghenter: Avviksvurderinghenter,
+    behandlingsstatistikkMediator: IBehandlingsstatistikkService,
+    saksbehandlerhåndterer: Saksbehandlerhåndterer,
+    oppgavehåndterer: Oppgavehåndterer,
+    totrinnsvurderinghåndterer: Totrinnsvurderinghåndterer,
+    godkjenninghåndterer: Godkjenninghåndterer,
+    personhåndterer: Personhåndterer,
+    dokumenthåndterer: Dokumenthåndterer,
+    stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
 ) {
-    fun build(): GraphQLSchema {
-        val schemaConfig =
-            SchemaGeneratorConfig(
-                supportedPackages =
-                    listOf(
-                        "no.nav.helse.spesialist.api.graphql",
-                        "no.nav.helse.spleis.graphql",
+    val queries =
+        listOf(
+            PersonQuery(
+                personoppslagService =
+                    PersonService(
+                        personApiDao = personApiDao,
+                        egenAnsattApiDao = egenAnsattApiDao,
+                        tildelingApiDao = tildelingApiDao,
+                        arbeidsgiverApiDao = arbeidsgiverApiDao,
+                        overstyringApiDao = overstyringApiDao,
+                        risikovurderingApiDao = risikovurderingApiDao,
+                        varselRepository = varselRepository,
+                        oppgaveApiDao = oppgaveApiDao,
+                        periodehistorikkApiDao = periodehistorikkApiDao,
+                        notatDao = notatDao,
+                        totrinnsvurderingApiDao = totrinnsvurderingApiDao,
+                        påVentApiDao = påVentApiDao,
+                        vergemålApiDao = vergemålApiDao,
+                        snapshotService = snapshotService,
+                        reservasjonClient = reservasjonClient,
+                        oppgavehåndterer = oppgavehåndterer,
+                        saksbehandlerhåndterer = saksbehandlerhåndterer,
+                        avviksvurderinghenter = avviksvurderinghenter,
+                        personhåndterer = personhåndterer,
+                        stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
                     ),
-                hooks = schemaGeneratorHooks,
-            )
-        return toSchema(
-            config = schemaConfig,
-            queries =
-                listOf(
-                    TopLevelObject(
-                        PersonQuery(
-                            personoppslagService =
-                                PersonService(
-                                    personApiDao = personApiDao,
-                                    egenAnsattApiDao = egenAnsattApiDao,
-                                    tildelingApiDao = tildelingApiDao,
-                                    arbeidsgiverApiDao = arbeidsgiverApiDao,
-                                    overstyringApiDao = overstyringApiDao,
-                                    risikovurderingApiDao = risikovurderingApiDao,
-                                    varselRepository = varselRepository,
-                                    oppgaveApiDao = oppgaveApiDao,
-                                    periodehistorikkApiDao = periodehistorikkApiDao,
-                                    notatDao = notatDao,
-                                    totrinnsvurderingApiDao = totrinnsvurderingApiDao,
-                                    påVentApiDao = påVentApiDao,
-                                    vergemålApiDao = vergemålApiDao,
-                                    snapshotService = snapshotService,
-                                    reservasjonClient = reservasjonClient,
-                                    oppgavehåndterer = oppgavehåndterer,
-                                    saksbehandlerhåndterer = saksbehandlerhåndterer,
-                                    avviksvurderinghenter = avviksvurderinghenter,
-                                    personhåndterer = personhåndterer,
-                                    stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
-                                ),
-                        ),
-                    ),
-                    TopLevelObject(
-                        OppgaverQuery(
-                            oppgavehåndterer = oppgavehåndterer,
-                        ),
-                    ),
-                    TopLevelObject(
-                        BehandlingsstatistikkQuery(
-                            behandlingsstatistikkMediator = behandlingsstatistikkMediator,
-                        ),
-                    ),
-                    TopLevelObject(
-                        OpptegnelseQuery(
-                            saksbehandlerhåndterer = saksbehandlerhåndterer,
-                        ),
-                    ),
-                    TopLevelObject(
-                        DokumentQuery(
-                            personApiDao = personApiDao,
-                            egenAnsattApiDao = egenAnsattApiDao,
-                            dokumenthåndterer = dokumenthåndterer,
-                        ),
-                    ),
-                ),
-            mutations =
-                listOf(
-                    TopLevelObject(
-                        NotatMutation(notatDao = notatDao),
-                    ),
-                    TopLevelObject(
-                        VarselMutation(varselRepository = varselRepository),
-                    ),
-                    TopLevelObject(
-                        TildelingMutation(saksbehandlerhåndterer = saksbehandlerhåndterer),
-                    ),
-                    TopLevelObject(
-                        OpptegnelseMutation(saksbehandlerhåndterer = saksbehandlerhåndterer),
-                    ),
-                    TopLevelObject(
-                        OverstyringMutation(saksbehandlerhåndterer = saksbehandlerhåndterer),
-                    ),
-                    TopLevelObject(
-                        SkjonnsfastsettelseMutation(saksbehandlerhåndterer = saksbehandlerhåndterer),
-                    ),
-                    TopLevelObject(
-                        MinimumSykdomsgradMutation(saksbehandlerhåndterer = saksbehandlerhåndterer),
-                    ),
-                    TopLevelObject(
-                        TotrinnsvurderingMutation(
-                            saksbehandlerhåndterer = saksbehandlerhåndterer,
-                            oppgavehåndterer = oppgavehåndterer,
-                            totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
-                        ),
-                    ),
-                    TopLevelObject(
-                        VedtakMutation(
-                            saksbehandlerhåndterer = saksbehandlerhåndterer,
-                            godkjenninghåndterer = godkjenninghåndterer,
-                        ),
-                    ),
-                    TopLevelObject(
-                        PersonMutation(
-                            personhåndterer = personhåndterer,
-                        ),
-                    ),
-                    TopLevelObject(
-                        AnnulleringMutation(
-                            saksbehandlerhåndterer = saksbehandlerhåndterer,
-                        ),
-                    ),
-                    TopLevelObject(
-                        PaVentMutation(
-                            saksbehandlerhåndterer = saksbehandlerhåndterer,
-                        ),
-                    ),
-                    TopLevelObject(
-                        OpphevStansMutation(saksbehandlerhåndterer = saksbehandlerhåndterer),
-                    ),
-                ),
+            ),
+            OppgaverQuery(
+                oppgavehåndterer = oppgavehåndterer,
+            ),
+            BehandlingsstatistikkQuery(
+                behandlingsstatistikkMediator = behandlingsstatistikkMediator,
+            ),
+            OpptegnelseQuery(
+                saksbehandlerhåndterer = saksbehandlerhåndterer,
+            ),
+            DokumentQuery(
+                personApiDao = personApiDao,
+                egenAnsattApiDao = egenAnsattApiDao,
+                dokumenthåndterer = dokumenthåndterer,
+            ),
         )
-    }
+
+    val mutations =
+        listOf(
+            NotatMutation(notatDao = notatDao),
+            VarselMutation(varselRepository = varselRepository),
+            TildelingMutation(saksbehandlerhåndterer = saksbehandlerhåndterer),
+            OpptegnelseMutation(saksbehandlerhåndterer = saksbehandlerhåndterer),
+            OverstyringMutation(saksbehandlerhåndterer = saksbehandlerhåndterer),
+            SkjonnsfastsettelseMutation(saksbehandlerhåndterer = saksbehandlerhåndterer),
+            MinimumSykdomsgradMutation(saksbehandlerhåndterer = saksbehandlerhåndterer),
+            TotrinnsvurderingMutation(
+                saksbehandlerhåndterer = saksbehandlerhåndterer,
+                oppgavehåndterer = oppgavehåndterer,
+                totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
+            ),
+            VedtakMutation(
+                saksbehandlerhåndterer = saksbehandlerhåndterer,
+                godkjenninghåndterer = godkjenninghåndterer,
+            ),
+            PersonMutation(
+                personhåndterer = personhåndterer,
+            ),
+            AnnulleringMutation(
+                saksbehandlerhåndterer = saksbehandlerhåndterer,
+            ),
+            PaVentMutation(
+                saksbehandlerhåndterer = saksbehandlerhåndterer,
+            ),
+            OpphevStansMutation(saksbehandlerhåndterer = saksbehandlerhåndterer),
+        )
 }

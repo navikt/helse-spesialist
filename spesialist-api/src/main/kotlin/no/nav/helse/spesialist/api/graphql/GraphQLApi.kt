@@ -1,8 +1,9 @@
 package no.nav.helse.spesialist.api.graphql
 
 import com.expediagroup.graphql.server.execution.GraphQLServer
-import graphql.GraphQL
+import com.expediagroup.graphql.server.ktor.GraphQL
 import io.ktor.server.application.Application
+import io.ktor.server.application.install
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.ApplicationRequest
 import io.ktor.server.response.respond
@@ -13,6 +14,7 @@ import io.ktor.server.routing.routing
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
+import no.nav.helse.spesialist.api.GraphQLCallLogging
 import no.nav.helse.spesialist.api.GraphQLMetrikker
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
@@ -70,7 +72,7 @@ fun Application.graphQLApi(
     dokumenthåndterer: Dokumenthåndterer,
     stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
 ) {
-    val schema =
+    val schemaBuilder =
         SchemaBuilder(
             personApiDao = personApiDao,
             egenAnsattApiDao = egenAnsattApiDao,
@@ -96,36 +98,46 @@ fun Application.graphQLApi(
             personhåndterer = personhåndterer,
             dokumenthåndterer = dokumenthåndterer,
             stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
-        ).build()
-
-    val server =
-        GraphQLServer(
-            requestParser = RequestParser(),
-            contextFactory =
-                ContextFactory(
-                    kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
-                    skjermedePersonerSaksbehandlergruppe = skjermedePersonerGruppeId,
-                    beslutterSaksbehandlergruppe = beslutterGruppeId,
-                ),
-            requestHandler =
-                LoggingGraphQLRequestHandler(
-                    GraphQL.newGraphQL(schema).build(),
-                ),
         )
+
+    val graphQL =
+        install(GraphQL) {
+            server {
+                requestParser = RequestParser()
+                contextFactory =
+                    ContextFactory(
+                        kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
+                        skjermedePersonerSaksbehandlergruppe = skjermedePersonerGruppeId,
+                        beslutterSaksbehandlergruppe = beslutterGruppeId,
+                    )
+            }
+            schema {
+                packages =
+                    listOf(
+                        "no.nav.helse.spesialist.api.graphql",
+                        "no.nav.helse.spleis.graphql",
+                    )
+                queries = schemaBuilder.queries
+                mutations = schemaBuilder.mutations
+                hooks = schemaGeneratorHooks
+            }
+        }
 
     routing {
         route("graphql") {
             authenticate("oidc") {
                 install(GraphQLMetrikker)
-                queryHandler(server)
+                install(GraphQLCallLogging)
+                queryHandler(graphQL.server)
             }
         }
     }
 }
 
+// TODO Erstatt denne med å bruke graphQLPostRoute() i routingen
+//  Per nå feiler det med ClassNotFoundException: io.ktor.server.routing.RoutingKt
 internal fun Route.queryHandler(server: GraphQLServer<ApplicationRequest>) {
     post {
-        sikkerLogg.trace("Starter behandling av graphql-kall")
         val start = System.nanoTime()
         val result = server.execute(call.request)
         val tidslogging = "Kall behandlet etter ${tidBrukt(start).toMillis()} ms"

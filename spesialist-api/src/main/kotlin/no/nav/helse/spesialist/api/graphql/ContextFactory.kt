@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.api.graphql
 
 import com.expediagroup.graphql.generator.extensions.toGraphQLContext
-import com.expediagroup.graphql.server.execution.GraphQLContextFactory
+import com.expediagroup.graphql.server.ktor.KtorGraphQLContextFactory
 import graphql.GraphQLContext
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
@@ -25,7 +25,7 @@ class ContextFactory(
     private val kode7Saksbehandlergruppe: UUID,
     private val skjermedePersonerSaksbehandlergruppe: UUID,
     private val beslutterSaksbehandlergruppe: UUID,
-) : GraphQLContextFactory<ApplicationRequest> {
+) : KtorGraphQLContextFactory() {
     override suspend fun generateContext(request: ApplicationRequest): GraphQLContext {
         val principal =
             request.call.principal<JWTPrincipal>() ?: run {
