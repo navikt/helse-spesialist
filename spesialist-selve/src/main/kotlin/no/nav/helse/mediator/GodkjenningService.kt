@@ -14,7 +14,7 @@ import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.toDto
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.overstyring.OverstyringDao
-import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
+import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
@@ -105,7 +105,7 @@ internal class GodkjenningService(
             if (totrinnsvurdering?.erBeslutteroppgave() == true && godkjenningDTO.godkjent) {
                 val beslutter = totrinnsvurdering.beslutter?.let { saksbehandlerRepository.finnSaksbehandler(it)?.toDto() }
                 checkNotNull(beslutter) { "Forventer at beslutter er satt" }
-                val innslag = HistorikkinnslagDto.totrinnsvurderingFerdigbehandletInnslag(beslutter)
+                val innslag = Historikkinnslag.totrinnsvurderingFerdigbehandletInnslag(beslutter)
                 periodehistorikkDao.lagreMedOppgaveId(innslag, godkjenningDTO.oppgavereferanse)
             }
         }

@@ -4,7 +4,7 @@ import no.nav.helse.db.DialogDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.TotrinnsvurderingDao
-import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
+import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
@@ -26,7 +26,7 @@ class TotrinnsvurderingService(
     fun settAutomatiskRetur(vedtaksperiodeId: UUID) {
         oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)?.let {
             totrinnsvurderingDao.settErRetur(vedtaksperiodeId)
-            val innslag = HistorikkinnslagDto.totrinnsvurderingAutomatiskRetur()
+            val innslag = Historikkinnslag.totrinnsvurderingAutomatiskRetur()
             periodehistorikkDao.lagreMedOppgaveId(innslag, it)
         }
     }
@@ -38,7 +38,7 @@ class TotrinnsvurderingService(
     ) {
         val dialogRef = dialogDao.lagre()
         val innslag =
-            HistorikkinnslagDto.totrinnsvurderingRetur(
+            Historikkinnslag.totrinnsvurderingRetur(
                 notattekst = notattekst,
                 saksbehandler = saksbehandlerFraApi.toDto(),
                 dialogRef = dialogRef,
@@ -50,7 +50,7 @@ class TotrinnsvurderingService(
         oppgaveId: Long,
         saksbehandlerFraApi: SaksbehandlerFraApi,
     ) {
-        val innslag = HistorikkinnslagDto.avventerTotrinnsvurdering(saksbehandlerFraApi.toDto())
+        val innslag = Historikkinnslag.avventerTotrinnsvurdering(saksbehandlerFraApi.toDto())
         periodehistorikkDao.lagreMedOppgaveId(innslag, oppgaveId)
     }
 

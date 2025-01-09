@@ -29,7 +29,7 @@ import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
 import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.overstyring.OverstyringDao
-import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
+import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
@@ -320,7 +320,7 @@ internal class SaksbehandlerMediator(
         try {
             val dialogRef = dialogDao.lagre()
             val innslag =
-                HistorikkinnslagDto.lagtPåVentInnslag(
+                Historikkinnslag.lagtPåVentInnslag(
                     notattekst = handling.notatTekst,
                     saksbehandler = saksbehandler.toDto(),
                     årsaker = handling.årsaker,
@@ -345,7 +345,7 @@ internal class SaksbehandlerMediator(
 
         val dialogRef = dialogDao.lagre()
         val innslag =
-            HistorikkinnslagDto.endrePåVentInnslag(
+            Historikkinnslag.endrePåVentInnslag(
                 notattekst = handling.notatTekst,
                 saksbehandler = saksbehandler.toDto(),
                 årsaker = handling.årsaker,
@@ -369,7 +369,7 @@ internal class SaksbehandlerMediator(
             return
         }
         try {
-            val innslag = HistorikkinnslagDto.fjernetFraPåVentInnslag(saksbehandler.toDto())
+            val innslag = Historikkinnslag.fjernetFraPåVentInnslag(saksbehandler.toDto())
             periodehistorikkDao.lagreMedOppgaveId(innslag, handling.oppgaveId)
             oppgaveService.fjernFraPåVent(handling.oppgaveId)
             PåVentRepository(påVentDao).fjernFraPåVent(handling.oppgaveId)

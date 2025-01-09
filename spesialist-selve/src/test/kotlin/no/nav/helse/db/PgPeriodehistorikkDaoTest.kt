@@ -1,7 +1,7 @@
 package no.nav.helse.db
 
 import DatabaseIntegrationTest
-import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
+import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -16,7 +16,7 @@ class PgPeriodehistorikkDaoTest : DatabaseIntegrationTest() {
         opprettOppgave()
 
         val saksbehandler = SaksbehandlerDto(SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_IDENT)
-        val historikkinnslag = HistorikkinnslagDto.fjernetFraPåVentInnslag(saksbehandler)
+        val historikkinnslag = Historikkinnslag.fjernetFraPåVentInnslag(saksbehandler)
 
         historikkinnslagRepository.lagreMedOppgaveId(historikkinnslag, oppgaveId)
         val result = periodehistorikkApiDao.finn(UTBETALING_ID)

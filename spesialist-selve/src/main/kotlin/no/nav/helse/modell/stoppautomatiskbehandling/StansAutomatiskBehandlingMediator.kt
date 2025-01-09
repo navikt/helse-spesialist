@@ -13,7 +13,7 @@ import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
 import no.nav.helse.db.StansAutomatiskBehandlingRepository
 import no.nav.helse.mediator.Subsumsjonsmelder
-import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
+import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.Personhandling
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.AKTIVITETSKRAV
@@ -95,7 +95,7 @@ internal class StansAutomatiskBehandlingMediator(
     private fun lagrePeriodehistorikk(fødselsnummer: String) {
         val oppgaveId = oppgaveDao.finnOppgaveId(fødselsnummer)
         if (oppgaveId != null) {
-            val innslag = HistorikkinnslagDto.automatiskBehandlingStanset()
+            val innslag = Historikkinnslag.automatiskBehandlingStanset()
             periodehistorikkDao.lagreMedOppgaveId(innslag, oppgaveId)
         } else {
             sikkerlogg.info("Fant ikke oppgave for $fødselsnummer. Fikk ikke lagret historikkinnslag om stans av automatisk behandling")

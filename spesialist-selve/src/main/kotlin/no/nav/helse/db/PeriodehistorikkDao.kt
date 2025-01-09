@@ -1,16 +1,16 @@
 package no.nav.helse.db
 
-import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
+import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import java.util.UUID
 
 interface PeriodehistorikkDao {
     fun lagreMedOppgaveId(
-        historikkinnslag: HistorikkinnslagDto,
+        historikkinnslag: Historikkinnslag,
         oppgaveId: Long,
     )
 
     fun lagre(
-        historikkinnslag: HistorikkinnslagDto,
+        historikkinnslag: Historikkinnslag,
         generasjonId: UUID,
     )
 }

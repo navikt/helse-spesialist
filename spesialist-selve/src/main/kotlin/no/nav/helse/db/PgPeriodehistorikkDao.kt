@@ -6,7 +6,7 @@ import no.nav.helse.modell.periodehistorikk.AutomatiskBehandlingStanset
 import no.nav.helse.modell.periodehistorikk.AvventerTotrinnsvurdering
 import no.nav.helse.modell.periodehistorikk.EndrePåVent
 import no.nav.helse.modell.periodehistorikk.FjernetFraPåVent
-import no.nav.helse.modell.periodehistorikk.HistorikkinnslagDto
+import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.periodehistorikk.LagtPåVent
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingAutomatiskRetur
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingFerdigbehandlet
@@ -24,7 +24,7 @@ class PgPeriodehistorikkDao(
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun lagreMedOppgaveId(
-        historikkinnslag: HistorikkinnslagDto,
+        historikkinnslag: Historikkinnslag,
         oppgaveId: Long,
     ) {
         val generasjonId = PgOppgaveDao(queryRunner).finnGenerasjonId(oppgaveId)
@@ -32,7 +32,7 @@ class PgPeriodehistorikkDao(
     }
 
     override fun lagre(
-        historikkinnslag: HistorikkinnslagDto,
+        historikkinnslag: Historikkinnslag,
         generasjonId: UUID,
     ) {
         asSQL(
@@ -48,7 +48,7 @@ class PgPeriodehistorikkDao(
         ).update()
     }
 
-    private fun HistorikkinnslagDto.type() =
+    private fun Historikkinnslag.type() =
         when (this) {
             is LagtPåVent -> "LEGG_PA_VENT"
             is FjernetFraPåVent -> "FJERN_FRA_PA_VENT" // TODO: Mangler å migrere typen i databasen
