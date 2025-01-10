@@ -56,9 +56,9 @@ internal class VurderBehovForTotrinnskontroll(
     ) {
         val overstyringerFunnetMedNyttOppslag = finnOverstyringerNyttOppslag()
         loggDiffMellomOverstyringstyper(overstyringer, overstyringerFunnetMedNyttOppslag)
-        if (overstyringer.isEmpty() && overstyringerFunnetMedNyttOppslag.isNotEmpty()) {
+        if (overstyringerFunnetMedNyttOppslag.isEmpty() && overstyringer.isNotEmpty()) {
             sikkerlogg.info(
-                "Fant overstyring(-er) kun ved nytt oppslag. Skulle perioden gått til totrinns?",
+                "Gammelt oppslag fant overstyring(-er) som nytt oppslag ikke fant. Skulle perioden gått til totrinns?",
                 kv("fødselsnummer", fødselsnummer),
                 kv("kreverTotrinnsvurdering", kreverTotrinnsvurdering),
                 kv("vedtaksperiodeHarFerdigstiltOppgave", vedtaksperiodeHarFerdigstiltOppgave),
