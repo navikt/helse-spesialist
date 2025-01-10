@@ -24,7 +24,6 @@ import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.notat.NotatApiDao
-import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
@@ -139,20 +138,13 @@ fun Application.graphQLApi(
 internal fun Route.queryHandler(server: GraphQLServer<ApplicationRequest>) {
     post {
         val start = System.nanoTime()
-        val result = server.execute(call.request)
-        val tidslogging = "Kall behandlet etter ${tidBrukt(start).toMillis()} ms"
 
-        if (result != null) {
-            sikkerLogg.trace("$tidslogging, starter mapping")
-            val json = objectMapper.writeValueAsString(result)
-            sikkerLogg.trace("Respons mappet etter ${tidBrukt(start).toMillis()} ms")
-            call.respond(json)
-        } else {
-            sikkerLogg.trace("$tidslogging, men noe gikk galt")
-        }
+        val result = server.execute(call.request)
+
+        val tidBrukt = Duration.ofNanos(System.nanoTime() - start)
+        sikkerLogg.trace("Kall behandlet etter ${tidBrukt.toMillis()} ms")
+        call.respond(result ?: throw RuntimeException("Kall mot GraphQL server feilet"))
     }
 }
 
 private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
-
-private fun tidBrukt(start: Long): Duration = Duration.ofNanos(System.nanoTime() - start)
