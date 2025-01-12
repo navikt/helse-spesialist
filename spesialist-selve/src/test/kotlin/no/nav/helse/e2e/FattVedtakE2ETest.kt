@@ -11,6 +11,8 @@ import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.januar
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.api.graphql.schema.Lovhjemmel
+import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -82,6 +84,25 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         assertEquals("SkjønnsfastsattSykepengegrunnlagFritekst", sisteHendelse["begrunnelser"][1]["type"].asText())
         assertEquals("SkjønnsfastsattSykepengegrunnlagKonklusjon", sisteHendelse["begrunnelser"][2]["type"].asText())
         assertEquals("EtterSkjønn", sisteHendelse["sykepengegrunnlagsfakta"]["fastsatt"].asText())
+    }
+
+    @Test
+    fun `Velger nyeste skjønnsmessig fastsettelse`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
+        håndterSkjønnsfastsattSykepengegrunnlag(arbeidsgivere = listOf(lagSkjønnsfastsettelse("første tekst")))
+        håndterSkjønnsfastsattSykepengegrunnlag(arbeidsgivere = listOf(lagSkjønnsfastsettelse("andre tekst")))
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
+            harRisikovurdering = true,
+            harOppdatertMetadata = true,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID())
+        )
+        håndterSaksbehandlerløsning()
+        håndterAvsluttetMedVedtak(fastsattType = "EtterSkjønn")
+
+        val vedtakFattetMelding = inspektør.meldinger().last { it["@event_name"].asText() == "vedtak_fattet" }
+        assertEquals("andre tekst", vedtakFattetMelding["begrunnelser"][1]["begrunnelse"].asText())
     }
 
     @Test
@@ -202,5 +223,25 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         val sykepengegrunnlagsfakta = sisteHendelse["sykepengegrunnlagsfakta"]
         assertTrue(sykepengegrunnlagsfakta["tags"].isEmpty)
     }
+
+    private fun lagSkjønnsfastsettelse(begrunnelseFritekst: String) =
+        Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver(
+            organisasjonsnummer = testperson.orgnummer,
+            arlig = 1.0,
+            fraArlig = 1.0,
+            arsak = "årsak",
+            type = Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.OMREGNET_ARSINNTEKT,
+            begrunnelseMal = "begrunnelseMal",
+            begrunnelseKonklusjon = "begrunnelseKonklusjon",
+            begrunnelseFritekst = begrunnelseFritekst,
+            lovhjemmel = Lovhjemmel(
+                paragraf = "paragraf",
+                ledd = "ledd",
+                bokstav = "bokstav",
+                lovverk = "folketrygdloven",
+                lovverksversjon = "",
+            ),
+            initierendeVedtaksperiodeId = testperson.vedtaksperiodeId1.toString(),
+        )
 
 }
