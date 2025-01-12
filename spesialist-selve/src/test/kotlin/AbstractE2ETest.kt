@@ -18,6 +18,7 @@ import no.nav.helse.TestRapidHelpers.løsning
 import no.nav.helse.TestRapidHelpers.løsningOrNull
 import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.TestRapidHelpers.sisteBehov
+import no.nav.helse.Testdata
 import no.nav.helse.Testdata.snapshot
 import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Risikofunn
@@ -27,6 +28,9 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemå
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.person.vedtaksperiode.Behandling
+import no.nav.helse.modell.person.vedtaksperiode.Periode
+import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.modell.saksbehandler.OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiverEvent.OverstyrtRefusjonselementEvent
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
@@ -34,9 +38,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.SENDT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
-import no.nav.helse.modell.person.vedtaksperiode.Varselkode
-import no.nav.helse.modell.person.vedtaksperiode.Behandling
-import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
@@ -1070,28 +1071,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
         skjæringstidspunkt: LocalDate = 1.januar,
-        arbeidsgivere: List<Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver> =
-            listOf(
-                Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver(
-                    organisasjonsnummer = organisasjonsnummer,
-                    arlig = 1.0,
-                    fraArlig = 1.0,
-                    arsak = "årsak",
-                    type = Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.OMREGNET_ARSINNTEKT,
-                    begrunnelseMal = "begrunnelseMal",
-                    begrunnelseKonklusjon = "begrunnelseKonklusjon",
-                    begrunnelseFritekst = "begrunnelseFritekst",
-                    lovhjemmel =
-                        Lovhjemmel(
-                            paragraf = "paragraf",
-                            ledd = "ledd",
-                            bokstav = "bokstav",
-                            lovverk = "folketrygdloven",
-                            lovverksversjon = "",
-                        ),
-                    initierendeVedtaksperiodeId = vedtaksperiodeId.toString(),
-                ),
-            ),
+        arbeidsgivere: List<Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver> = listOf(Testdata.skjønnsvurdering()),
     ) {
         håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "skjønnsmessig_fastsettelse") {
             val handling =

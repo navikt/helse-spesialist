@@ -8,11 +8,10 @@ import no.nav.helse.AvviksvurderingTestdata
 import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.TestRapidHelpers.meldinger
+import no.nav.helse.Testdata.skjønnsvurdering
 import no.nav.helse.januar
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.objectMapper
-import no.nav.helse.spesialist.api.graphql.schema.Lovhjemmel
-import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -91,8 +90,12 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
-        håndterSkjønnsfastsattSykepengegrunnlag(arbeidsgivere = listOf(lagSkjønnsfastsettelse("første tekst")))
-        håndterSkjønnsfastsattSykepengegrunnlag(arbeidsgivere = listOf(lagSkjønnsfastsettelse("andre tekst")))
+        håndterSkjønnsfastsattSykepengegrunnlag(
+            arbeidsgivere = listOf(skjønnsvurdering().copy(begrunnelseFritekst = "første tekst"))
+        )
+        håndterSkjønnsfastsattSykepengegrunnlag(
+            arbeidsgivere = listOf(skjønnsvurdering().copy(begrunnelseFritekst = "andre tekst"))
+        )
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harRisikovurdering = true,
             harOppdatertMetadata = true,
@@ -223,25 +226,4 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         val sykepengegrunnlagsfakta = sisteHendelse["sykepengegrunnlagsfakta"]
         assertTrue(sykepengegrunnlagsfakta["tags"].isEmpty)
     }
-
-    private fun lagSkjønnsfastsettelse(begrunnelseFritekst: String) =
-        Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver(
-            organisasjonsnummer = testperson.orgnummer,
-            arlig = 1.0,
-            fraArlig = 1.0,
-            arsak = "årsak",
-            type = Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.OMREGNET_ARSINNTEKT,
-            begrunnelseMal = "begrunnelseMal",
-            begrunnelseKonklusjon = "begrunnelseKonklusjon",
-            begrunnelseFritekst = begrunnelseFritekst,
-            lovhjemmel = Lovhjemmel(
-                paragraf = "paragraf",
-                ledd = "ledd",
-                bokstav = "bokstav",
-                lovverk = "folketrygdloven",
-                lovverksversjon = "",
-            ),
-            initierendeVedtaksperiodeId = testperson.vedtaksperiodeId1.toString(),
-        )
-
 }

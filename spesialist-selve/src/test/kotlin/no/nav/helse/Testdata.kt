@@ -7,6 +7,8 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
+import no.nav.helse.spesialist.api.graphql.schema.Lovhjemmel
+import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
@@ -166,6 +168,26 @@ object Testdata {
             json = json,
         )
     }
+
+    internal fun skjønnsvurdering() = Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver(
+        organisasjonsnummer = testperson.orgnummer,
+        arlig = 1.0,
+        fraArlig = 1.0,
+        arsak = "årsak",
+        type = Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.OMREGNET_ARSINNTEKT,
+        begrunnelseMal = "begrunnelseMal",
+        begrunnelseKonklusjon = "begrunnelseKonklusjon",
+        begrunnelseFritekst = "begrunnelseFritekst",
+        lovhjemmel = Lovhjemmel(
+            paragraf = "paragraf",
+            ledd = "ledd",
+            bokstav = "bokstav",
+            lovverk = "folketrygdloven",
+            lovverksversjon = "",
+        ),
+        initierendeVedtaksperiodeId = testperson.vedtaksperiodeId1.toString(),
+    )
+
 }
 
 internal data class GodkjenningsbehovTestdata(
