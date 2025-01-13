@@ -1,18 +1,23 @@
 package no.nav.helse.modell.arbeidsforhold
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.kafka.ArbeidsforholdLøsningRiver
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
-import no.nav.helse.kafka.ArbeidsforholdLøsningRiver
 import no.nav.helse.modell.KomplettArbeidsforholdDto
-import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.parallel.Execution
+import org.junit.jupiter.api.parallel.ExecutionMode
 import java.time.LocalDate
 import java.util.UUID
 
+@Execution(ExecutionMode.SAME_THREAD)
+@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 internal class ArbeidsforholdløsningTest {
     private companion object {
         private const val ORGNR = "123456789"
