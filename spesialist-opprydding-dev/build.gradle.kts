@@ -9,12 +9,16 @@ repositories {
 
 dependencies {
     implementation("com.google.cloud.sql:postgres-socket-factory:$cloudSqlVersion")
-    implementation("org.postgresql:postgresql:$postgresqlVersion")
     implementation(libs.rapids.and.rivers)
+    implementation(libs.postgres)
+    implementation(libs.kotliquery)
+    implementation(libs.hikari)
 
     testImplementation(project(":spesialist-felles"))
     testImplementation(libs.testcontainers.postgresql)
     testImplementation(libs.rapids.and.rivers.test)
+    testImplementation(libs.flyway.core)
+    testImplementation(libs.flyway.pg)
 }
 
 tasks {

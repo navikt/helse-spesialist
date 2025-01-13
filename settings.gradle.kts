@@ -19,9 +19,19 @@ dependencyResolutionManagement {
             version("ktor", "3.0.1")
             version("micrometer", "1.13.3")
             version("testcontainers", "1.20.4")
+            version("kotliquery", "1.9.0")
+            version("flyway", "10.9.0")
+            version("hikari", "5.1.0")
+            version("postgres", "42.7.3")
 
             library("rapids-and-rivers", "com.github.navikt", "rapids-and-rivers").versionRef("rapids-and-rivers")
             library("rapids-and-rivers-test", "com.github.navikt.tbd-libs", "rapids-and-rivers-test").versionRef("tbd-libs")
+
+            library("kotliquery", "com.github.seratch", "kotliquery").versionRef("kotliquery")
+            library("flyway-pg", "org.flywaydb", "flyway-database-postgresql").versionRef("flyway")
+            library("flyway-core", "org.flywaydb", "flyway-core").versionRef("flyway")
+            library("hikari", "com.zaxxer", "HikariCP").versionRef("hikari")
+            library("postgres", "org.postgresql", "postgresql").versionRef("postgres")
 
             library("logback", "ch.qos.logback", "logback-classic").versionRef("logback")
             library("logstash", "net.logstash.logback", "logstash-logback-encoder").versionRef("logstash")
@@ -80,6 +90,17 @@ dependencyResolutionManagement {
             bundle(
                 "ktor-client",
                 listOf("ktor-client-core", "ktor-client-apache", "ktor-client-content-negotiation", "ktor-serialization-jackson"),
+            )
+
+            bundle(
+                "db",
+                listOf(
+                    "flyway-core",
+                    "flyway-pg",
+                    "kotliquery",
+                    "hikari",
+                    "postgres",
+                ),
             )
         }
     }

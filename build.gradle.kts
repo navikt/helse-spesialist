@@ -2,11 +2,7 @@ val junitJupiterVersion = "5.10.2"
 val jvmTargetVersion = "21"
 val graphqlKotlinVersion = "8.1.0"
 val logbackSyslog4jVersion = "1.0.0"
-val hikariCPVersion = "5.1.0"
-val flywayCoreVersion = "10.9.0"
-val kotliqueryVersion = "1.9.0"
 val mockkVersion = "1.13.10"
-val postgresqlVersion = "42.7.3"
 
 plugins {
     kotlin("jvm") version "2.0.20"
@@ -45,15 +41,10 @@ allprojects {
     }
 
     dependencies {
-        implementation("org.postgresql:postgresql:$postgresqlVersion")
         implementation("com.papertrailapp:logback-syslog4j:$logbackSyslog4jVersion") // August, 2014
         {
             exclude(group = "ch.qos.logback")
         }
-        implementation("com.zaxxer:HikariCP:$hikariCPVersion")
-        implementation("org.flywaydb:flyway-core:$flywayCoreVersion")
-        implementation("org.flywaydb:flyway-database-postgresql:$flywayCoreVersion")
-        implementation("com.github.seratch:kotliquery:$kotliqueryVersion")
 
         constraints {
             implementation("io.netty:netty-all:4.1.108.final") {
