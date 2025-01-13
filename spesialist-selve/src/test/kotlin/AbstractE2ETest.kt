@@ -240,7 +240,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
         godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
-        spesialistBehandlerGodkjenningsbehovTilOgMedUtbetalingsfilter(
+        spesialistBehandlerGodkjenningsbehovFremTilEgenAnsatt(
             regelverksvarsler,
             harOppdatertMetadata = harOppdatertMetadata,
             enhet = enhet,
@@ -274,7 +274,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         håndterVergemålOgFullmaktløsning(fullmakter = fullmakter)
     }
 
-    protected fun spesialistBehandlerGodkjenningsbehovTilOgMedUtbetalingsfilter(
+    protected fun spesialistBehandlerGodkjenningsbehovFremTilEgenAnsatt(
         regelverksvarsler: List<String> = emptyList(),
         harOppdatertMetadata: Boolean = false,
         enhet: String = enhetsnummerOslo,

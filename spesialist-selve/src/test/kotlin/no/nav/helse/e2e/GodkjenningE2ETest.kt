@@ -256,7 +256,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     fun `avbryter saksbehandling og avvise godkjenning pga vergemål`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovTilOgMedUtbetalingsfilter()
+        spesialistBehandlerGodkjenningsbehovFremTilEgenAnsatt()
         håndterEgenansattløsning(erEgenAnsatt = true)
         håndterVergemålOgFullmaktløsning(vergemål = listOf(VergemålJson.Vergemål(voksen)))
         håndterÅpneOppgaverløsning()
