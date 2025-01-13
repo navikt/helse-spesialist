@@ -1,6 +1,5 @@
 package no.nav.helse.mediator.api
 
-import AbstractIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus

@@ -1,6 +1,6 @@
 package no.nav.helse.modell.egenansatt
 
-import DatabaseIntegrationTest
+import no.nav.helse.DatabaseIntegrationTest
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach

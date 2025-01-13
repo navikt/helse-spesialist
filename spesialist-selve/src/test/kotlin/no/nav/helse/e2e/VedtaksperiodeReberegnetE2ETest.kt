@@ -1,10 +1,9 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETest
-import AbstractE2ETest.Kommandokjedetilstand.AVBRUTT
-import AbstractE2ETest.Kommandokjedetilstand.FERDIG
-import AbstractE2ETest.Kommandokjedetilstand.NY
-import AbstractE2ETest.Kommandokjedetilstand.SUSPENDERT
+import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.AVBRUTT
+import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.FERDIG
+import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.NY
+import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.SUSPENDERT
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow

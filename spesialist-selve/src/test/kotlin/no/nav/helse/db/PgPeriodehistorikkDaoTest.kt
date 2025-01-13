@@ -1,6 +1,6 @@
 package no.nav.helse.db
 
-import DatabaseIntegrationTest
+import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import org.junit.jupiter.api.Assertions.assertEquals

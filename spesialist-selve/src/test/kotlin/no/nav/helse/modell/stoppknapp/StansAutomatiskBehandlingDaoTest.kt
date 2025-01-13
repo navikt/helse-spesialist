@@ -1,6 +1,6 @@
 package no.nav.helse.modell.stoppknapp
 
-import DatabaseIntegrationTest
+import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMelding
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.AKTIVITETSKRAV
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.MEDISINSK_VILKAR

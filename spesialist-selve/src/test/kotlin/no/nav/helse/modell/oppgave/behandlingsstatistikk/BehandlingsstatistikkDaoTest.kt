@@ -1,6 +1,6 @@
 package no.nav.helse.modell.oppgave.behandlingsstatistikk
 
-import DatabaseIntegrationTest
+import no.nav.helse.DatabaseIntegrationTest
 import java.time.LocalDate
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.modell.utbetaling.Utbetalingtype

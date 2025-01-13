@@ -1,6 +1,6 @@
 package no.nav.helse.db
 
-import DatabaseIntegrationTest
+import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.db.EgenskapForDatabase.BESLUTTER
 import no.nav.helse.db.EgenskapForDatabase.DELVIS_REFUSJON
 import no.nav.helse.db.EgenskapForDatabase.EN_ARBEIDSGIVER

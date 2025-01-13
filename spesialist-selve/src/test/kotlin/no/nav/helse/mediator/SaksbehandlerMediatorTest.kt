@@ -1,7 +1,7 @@
 package no.nav.helse.mediator
 
-import DatabaseIntegrationTest
-import TilgangskontrollForTestHarIkkeTilgang
+import no.nav.helse.DatabaseIntegrationTest
+import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import kotliquery.queryOf
@@ -10,8 +10,8 @@ import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.februar
-import no.nav.helse.januar
+import no.nav.helse.util.februar
+import no.nav.helse.util.januar
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
@@ -44,7 +44,7 @@ import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
-import no.nav.helse.testEnv
+import no.nav.helse.util.testEnv
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse

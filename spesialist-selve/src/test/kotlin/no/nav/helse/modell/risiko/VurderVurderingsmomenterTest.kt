@@ -6,7 +6,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.RisikovurderingRepository
-import no.nav.helse.januar
+import no.nav.helse.util.januar
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk

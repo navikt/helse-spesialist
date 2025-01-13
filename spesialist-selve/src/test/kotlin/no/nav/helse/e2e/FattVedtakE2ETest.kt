@@ -1,6 +1,5 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETest
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
@@ -9,9 +8,9 @@ import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.Testdata.skjønnsvurdering
-import no.nav.helse.januar
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.objectMapper
+import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue

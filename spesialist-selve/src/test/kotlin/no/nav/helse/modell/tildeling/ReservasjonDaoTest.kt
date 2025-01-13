@@ -1,6 +1,6 @@
 package no.nav.helse.modell.tildeling
 
-import DatabaseIntegrationTest
+import no.nav.helse.DatabaseIntegrationTest
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.queryOf
 import kotliquery.sessionOf

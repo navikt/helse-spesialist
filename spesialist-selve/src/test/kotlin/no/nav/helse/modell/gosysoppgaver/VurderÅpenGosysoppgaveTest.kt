@@ -4,7 +4,7 @@ import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.ÅpneGosysOppgaverRepository
-import no.nav.helse.januar
+import no.nav.helse.util.januar
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.mediator.oppgave.OppgaveService

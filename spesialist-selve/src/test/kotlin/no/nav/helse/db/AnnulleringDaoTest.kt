@@ -1,7 +1,7 @@
 package no.nav.helse.db
 
-import DatabaseIntegrationTest
-import TilgangskontrollForTestHarIkkeTilgang
+import no.nav.helse.DatabaseIntegrationTest
+import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringArsak
 import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringDto

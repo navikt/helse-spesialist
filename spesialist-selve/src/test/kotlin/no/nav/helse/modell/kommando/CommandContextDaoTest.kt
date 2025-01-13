@@ -1,6 +1,6 @@
 package no.nav.helse.modell.kommando
 
-import DatabaseIntegrationTest
+import no.nav.helse.DatabaseIntegrationTest
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf

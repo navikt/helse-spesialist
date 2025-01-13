@@ -1,3 +1,5 @@
+package no.nav.helse.e2e
+
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
@@ -12,6 +14,7 @@ import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.HelseDao.Companion.single
 import no.nav.helse.HelseDao.Companion.update
 import no.nav.helse.Meldingssender
+import no.nav.helse.TestMediator
 import no.nav.helse.TestRapidHelpers.behov
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.TestRapidHelpers.løsning
@@ -20,7 +23,6 @@ import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.TestRapidHelpers.sisteBehov
 import no.nav.helse.Testdata
 import no.nav.helse.Testdata.snapshot
-import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
@@ -56,6 +58,7 @@ import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.test.TestPerson
+import no.nav.helse.util.januar
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull

@@ -1,6 +1,5 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETest
 import graphql.schema.DataFetchingEnvironment
 import io.mockk.every
 import io.mockk.mockk
@@ -8,7 +7,7 @@ import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.TestRapidHelpers.siste
-import no.nav.helse.januar
+import no.nav.helse.util.januar
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao

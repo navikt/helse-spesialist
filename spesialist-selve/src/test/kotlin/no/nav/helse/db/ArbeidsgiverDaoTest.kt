@@ -1,6 +1,6 @@
 package no.nav.helse.db
 
-import DatabaseIntegrationTest
+import no.nav.helse.DatabaseIntegrationTest
 import kotliquery.sessionOf
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test

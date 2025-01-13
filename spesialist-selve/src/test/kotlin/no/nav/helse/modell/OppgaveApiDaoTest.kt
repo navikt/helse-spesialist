@@ -1,6 +1,6 @@
 package no.nav.helse.modell
 
-import DatabaseIntegrationTest
+import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.CommandContextDao
 import no.nav.helse.modell.kommando.TestMelding

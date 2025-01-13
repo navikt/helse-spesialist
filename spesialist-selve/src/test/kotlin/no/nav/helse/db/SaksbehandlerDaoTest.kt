@@ -1,6 +1,6 @@
 package no.nav.helse.db
 
-import DatabaseIntegrationTest
+import no.nav.helse.DatabaseIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test

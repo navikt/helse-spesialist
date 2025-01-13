@@ -1,6 +1,5 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETest
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.Risikofunn

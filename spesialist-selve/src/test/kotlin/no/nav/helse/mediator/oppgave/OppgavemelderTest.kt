@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.oppgave
 
-import TilgangskontrollForTestHarIkkeTilgang
+import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD

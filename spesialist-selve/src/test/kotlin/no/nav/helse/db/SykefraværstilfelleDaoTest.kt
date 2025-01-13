@@ -1,13 +1,13 @@
 package no.nav.helse.db
 
-import DatabaseIntegrationTest
+import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.db.overstyring.LovhjemmelForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsattArbeidsgiverForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsattSykepengegrunnlagForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsettingstypeForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsettingstypeForDatabase.OMREGNET_ÅRSINNTEKT
 import no.nav.helse.db.overstyring.SkjønnsfastsettingstypeForDatabase.RAPPORTERT_ÅRSINNTEKT
-import no.nav.helse.januar
+import no.nav.helse.util.januar
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingstypeDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingsårsakDto

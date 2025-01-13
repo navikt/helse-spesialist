@@ -1,6 +1,6 @@
 package no.nav.helse.mediator
 
-import TilgangskontrollForTestHarIkkeTilgang
+import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.clearMocks
 import io.mockk.every
@@ -20,7 +20,7 @@ import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TildelingRepository
 import no.nav.helse.db.TotrinnsvurderingDao
-import no.nav.helse.idForGruppe
+import no.nav.helse.util.idForGruppe
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.TestMelding
 import no.nav.helse.modell.oppgave.Egenskap
@@ -44,7 +44,7 @@ import no.nav.helse.spesialist.test.lagEpostadresseFraFulltNavn
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagSaksbehandlerident
 import no.nav.helse.spesialist.test.lagSaksbehandlernavn
-import no.nav.helse.testEnv
+import no.nav.helse.util.testEnv
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -371,7 +371,9 @@ internal class OppgaveServiceTest {
                     påVent = true,
                 ),
             )
-        val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(idForGruppe(it)) })
+        val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(
+            idForGruppe(it)
+        ) })
         val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), Filtrering())
         assertEquals(1, oppgaver.oppgaver.size)
         val oppgave = oppgaver.oppgaver.single()
@@ -416,7 +418,9 @@ internal class OppgaveServiceTest {
                     egenskaper = egenskaper,
                 ),
             )
-        val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(idForGruppe(it)) })
+        val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(
+            idForGruppe(it)
+        ) })
         val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), Filtrering())
         val oppgave = oppgaver.oppgaver.single()
         assertEquals(egenskap.oppgavetype(), oppgave.oppgavetype)
@@ -444,7 +448,9 @@ internal class OppgaveServiceTest {
                     egenskaper = egenskaper,
                 ),
             )
-        val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(idForGruppe(it)) })
+        val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(
+            idForGruppe(it)
+        ) })
         val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), Filtrering())
         val oppgave = oppgaver.oppgaver.single()
         assertEquals(egenskap.periodetype(), oppgave.periodetype)
@@ -475,7 +481,9 @@ internal class OppgaveServiceTest {
                     egenskaper = egenskaper,
                 ),
             )
-        val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(idForGruppe(it)) })
+        val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(
+            idForGruppe(it)
+        ) })
         val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), Filtrering())
         val oppgave = oppgaver.oppgaver.single()
         assertEquals(egenskap.mottaker(), oppgave.mottaker)
@@ -508,7 +516,9 @@ internal class OppgaveServiceTest {
                     egenskaper = egenskaper,
                 ),
             )
-        val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(idForGruppe(it)) })
+        val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(
+            idForGruppe(it)
+        ) })
         val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), Filtrering())
         val oppgave = oppgaver.oppgaver.single()
         assertEquals(egenskap.antallArbeidsforhold(), oppgave.antallArbeidsforhold)

@@ -1,9 +1,8 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETest
-import AbstractE2ETest.Kommandokjedetilstand.AVBRUTT
-import AbstractE2ETest.Kommandokjedetilstand.NY
-import AbstractE2ETest.Kommandokjedetilstand.SUSPENDERT
+import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.AVBRUTT
+import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.NY
+import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.SUSPENDERT
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.junit.jupiter.api.Assertions.assertEquals

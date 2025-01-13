@@ -1,9 +1,9 @@
 package no.nav.helse.modell.vedtaksperiode
 
-import DatabaseIntegrationTest
+import no.nav.helse.DatabaseIntegrationTest
 import kotliquery.sessionOf
-import no.nav.helse.februar
-import no.nav.helse.januar
+import no.nav.helse.util.februar
+import no.nav.helse.util.januar
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto

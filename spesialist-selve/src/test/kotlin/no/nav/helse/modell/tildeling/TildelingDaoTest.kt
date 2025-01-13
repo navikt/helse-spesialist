@@ -1,6 +1,6 @@
 package no.nav.helse.modell.tildeling
 
-import DatabaseIntegrationTest
+import no.nav.helse.DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.junit.jupiter.api.Assertions.assertEquals

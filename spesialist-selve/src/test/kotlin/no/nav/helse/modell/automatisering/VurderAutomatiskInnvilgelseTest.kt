@@ -6,7 +6,7 @@ import io.mockk.verify
 import no.nav.helse.Testdata.godkjenningsbehovData
 import no.nav.helse.db.AutomatiseringRepository
 import no.nav.helse.db.CommandContextRepository
-import no.nav.helse.januar
+import no.nav.helse.util.januar
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.KommandokjedeEndretEvent

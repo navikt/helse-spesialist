@@ -4,8 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.overstyring.OverstyringRepository
-import no.nav.helse.februar
-import no.nav.helse.januar
+import no.nav.helse.util.februar
+import no.nav.helse.util.januar
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.Sykefraværstilfelle

@@ -1,6 +1,6 @@
 package no.nav.helse.modell.dokument
 
-import DatabaseIntegrationTest
+import no.nav.helse.DatabaseIntegrationTest
 import com.fasterxml.jackson.databind.JsonNode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull

@@ -1,6 +1,5 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETest
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf

@@ -1,6 +1,6 @@
 package no.nav.helse.mediator
 
-import AbstractE2ETest
+import no.nav.helse.e2e.AbstractE2ETest
 import kotliquery.sessionOf
 import no.nav.helse.TestRapidHelpers.contextId
 import org.junit.jupiter.api.AfterEach

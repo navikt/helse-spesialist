@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.oppgave
 
-import TilgangskontrollForTestHarIkkeTilgang
+import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.db.AntallOppgaverFraDatabase
 import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase

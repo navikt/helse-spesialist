@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.Testdata.godkjenningsbehovData
 import no.nav.helse.db.OpptegnelseDao
-import no.nav.helse.januar
+import no.nav.helse.util.januar
 import no.nav.helse.modell.gosysoppgaver.inspektør
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.UtgåendeHendelse

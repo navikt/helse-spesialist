@@ -1,6 +1,6 @@
 package no.nav.helse.modell.stoppautomatiskbehandling
 
-import TilgangskontrollForTestHarIkkeTilgang
+import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import com.fasterxml.jackson.module.kotlin.convertValue
 import io.mockk.every
 import io.mockk.mockk

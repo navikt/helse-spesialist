@@ -1,7 +1,7 @@
 package no.nav.helse.mediator.oppgave
 
-import DatabaseIntegrationTest
-import TilgangskontrollForTestHarIkkeTilgang
+import no.nav.helse.DatabaseIntegrationTest
+import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify

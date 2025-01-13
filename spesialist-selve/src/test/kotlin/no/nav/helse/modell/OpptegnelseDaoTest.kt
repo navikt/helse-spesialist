@@ -1,6 +1,6 @@
 package no.nav.helse.modell
 
-import DatabaseIntegrationTest
+import no.nav.helse.DatabaseIntegrationTest
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload

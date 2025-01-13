@@ -3,7 +3,7 @@ package no.nav.helse.modell.automatisering
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.helse.db.PgVedtakDao
-import no.nav.helse.januar
+import no.nav.helse.util.januar
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao

@@ -6,7 +6,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import kotliquery.TransactionalSession
 import no.nav.helse.TestRapidHelpers.meldinger
-import no.nav.helse.januar
+import no.nav.helse.util.januar
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingstype

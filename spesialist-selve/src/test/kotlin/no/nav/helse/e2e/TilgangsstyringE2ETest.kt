@@ -1,6 +1,5 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETest
 import graphql.GraphQLError
 import graphql.schema.DataFetchingEnvironment
 import io.mockk.every

@@ -1,6 +1,5 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETest
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse.Fortrolig
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse.StrengtFortrolig
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse.StrengtFortroligUtland

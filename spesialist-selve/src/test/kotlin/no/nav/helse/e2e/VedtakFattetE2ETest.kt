@@ -1,6 +1,5 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETest
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.modell.person.vedtaksperiode.Behandling

@@ -1,6 +1,6 @@
 package no.nav.helse.modell.varsel
 
-import DatabaseIntegrationTest
+import no.nav.helse.DatabaseIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach

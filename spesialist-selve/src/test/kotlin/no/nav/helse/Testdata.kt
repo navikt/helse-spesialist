@@ -26,6 +26,7 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPeriodevilkar
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetaling
 import no.nav.helse.spleis.graphql.hentsnapshot.Sykepengedager
+import no.nav.helse.util.januar
 import java.time.LocalDate
 import java.util.UUID
 

@@ -1,6 +1,6 @@
 package no.nav.helse.modell.risiko
 
-import DatabaseIntegrationTest
+import no.nav.helse.DatabaseIntegrationTest
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.queryOf
 import kotliquery.sessionOf

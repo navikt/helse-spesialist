@@ -1,6 +1,6 @@
 package no.nav.helse.modell
 
-import DatabaseIntegrationTest
+import no.nav.helse.DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.db.VedtakBegrunnelseDao

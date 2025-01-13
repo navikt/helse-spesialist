@@ -1,7 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode
 
-import DatabaseIntegrationTest
-import no.nav.helse.januar
+import no.nav.helse.DatabaseIntegrationTest
+import no.nav.helse.util.januar
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto

@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.saksbehandler
 
-import TilgangskontrollForTestHarIkkeTilgang
+import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.SaksbehandlerDao

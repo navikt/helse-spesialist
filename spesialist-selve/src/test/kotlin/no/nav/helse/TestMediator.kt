@@ -1,3 +1,5 @@
+package no.nav.helse
+
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgDialogDao
@@ -23,7 +25,8 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
-import no.nav.helse.testEnv
+import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
+import no.nav.helse.util.testEnv
 import java.util.UUID
 import javax.sql.DataSource
 

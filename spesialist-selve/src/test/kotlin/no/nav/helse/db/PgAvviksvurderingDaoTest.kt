@@ -1,9 +1,9 @@
 package no.nav.helse.db
 
-import DatabaseIntegrationTest
+import no.nav.helse.DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.januar
+import no.nav.helse.util.januar
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
 import no.nav.helse.modell.vilkårsprøving.BeregningsgrunnlagDto
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntektDto

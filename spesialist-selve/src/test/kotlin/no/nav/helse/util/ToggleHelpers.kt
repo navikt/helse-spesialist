@@ -1,3 +1,5 @@
+package no.nav.helse.util
+
 import no.nav.helse.modell.Toggle
 
 internal object ToggleHelpers {

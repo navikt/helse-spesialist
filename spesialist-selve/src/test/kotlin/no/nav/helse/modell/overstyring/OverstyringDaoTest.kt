@@ -1,6 +1,6 @@
 package no.nav.helse.modell.overstyring
 
-import DatabaseIntegrationTest
+import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.db.overstyring.ArbeidsforholdForDatabase
 import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.overstyring.LovhjemmelForDatabase
@@ -14,7 +14,7 @@ import no.nav.helse.db.overstyring.RefusjonselementForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsattArbeidsgiverForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsattSykepengegrunnlagForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsettingstypeForDatabase
-import no.nav.helse.januar
+import no.nav.helse.util.januar
 import no.nav.helse.modell.InntektskildetypeDto.ORDINÆR
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.spesialist.api.overstyring.Dagtype

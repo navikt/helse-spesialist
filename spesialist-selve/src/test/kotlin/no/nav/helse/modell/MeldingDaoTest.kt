@@ -1,6 +1,6 @@
 package no.nav.helse.modell
 
-import DatabaseIntegrationTest
+import no.nav.helse.DatabaseIntegrationTest
 import io.mockk.every
 import io.mockk.mockk
 import kotliquery.queryOf
