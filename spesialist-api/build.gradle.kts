@@ -1,7 +1,6 @@
 import com.expediagroup.graphql.plugin.gradle.config.GraphQLScalar
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLIntrospectSchemaTask
 
-val testcontainersVersion = "1.20.2"
 val graphQLKotlinVersion = "8.2.1"
 
 plugins {
@@ -24,7 +23,7 @@ dependencies {
     implementation(libs.bundles.ktor.client)
 
     testImplementation(testFixtures(project(":spesialist-felles")))
-    testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
+    testImplementation(libs.testcontainers.postgresql)
     testImplementation(libs.bundles.ktor.server.test)
 }
 

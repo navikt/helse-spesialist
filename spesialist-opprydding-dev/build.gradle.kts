@@ -1,4 +1,3 @@
-val testcontainersVersion = "1.20.2"
 val cloudSqlVersion = "1.16.0"
 val postgresqlVersion = "42.7.3"
 
@@ -14,9 +13,7 @@ dependencies {
     implementation(libs.rapids.and.rivers)
 
     testImplementation(project(":spesialist-felles"))
-    testImplementation("org.testcontainers:postgresql:$testcontainersVersion") {
-        exclude("com.fasterxml.jackson.core")
-    }
+    testImplementation(libs.testcontainers.postgresql)
     testImplementation(libs.rapids.and.rivers.test)
 }
 

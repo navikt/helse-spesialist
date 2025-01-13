@@ -18,6 +18,7 @@ dependencyResolutionManagement {
             version("tbd-libs", "2024.11.25-10.59-6f263a10")
             version("ktor", "3.0.1")
             version("micrometer", "1.13.3")
+            version("testcontainers", "1.20.4")
 
             library("rapids-and-rivers", "com.github.navikt", "rapids-and-rivers").versionRef("rapids-and-rivers")
             library("rapids-and-rivers-test", "com.github.navikt.tbd-libs", "rapids-and-rivers-test").versionRef("tbd-libs")
@@ -50,6 +51,9 @@ dependencyResolutionManagement {
             library("ktor-client-core", "io.ktor", "ktor-client-core").versionRef("ktor")
             library("ktor-client-apache", "io.ktor", "ktor-client-apache").versionRef("ktor")
             library("ktor-client-content-negotiation", "io.ktor", "ktor-client-content-negotiation").versionRef("ktor")
+
+            library("testcontainers-kafka", "org.testcontainers", "kafka").versionRef("testcontainers")
+            library("testcontainers-postgresql", "org.testcontainers", "postgresql").versionRef("testcontainers")
 
             bundle("logging", listOf("logback", "logstash"))
             bundle(
