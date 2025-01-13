@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.api.risikovurdering
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -61,14 +60,14 @@ internal class RisikovurderingApiDaoTest: DatabaseIntegrationTest() {
             opprettArbeidsgiver(),
             periode = Periode(vedtaksperiodeId, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31))
         )
-        asSQL(
+        dbQuery.update(
             """
             INSERT INTO risikovurdering_2021 (vedtaksperiode_id, kan_godkjennes_automatisk, data)
             VALUES (:vedtaksperiodeId, true, :data::json)
             """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
             "data" to data
-        ).update()
+        )
     }
 
     @Language("JSON")

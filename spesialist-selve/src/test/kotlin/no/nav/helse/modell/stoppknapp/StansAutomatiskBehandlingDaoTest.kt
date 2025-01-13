@@ -58,18 +58,17 @@ internal class StansAutomatiskBehandlingDaoTest : DatabaseIntegrationTest() {
     private inline fun <reified T> data(
         fnr: String,
         kolonne: String,
-    ): T =
-        query(
-            "select $kolonne from stans_automatisering where fødselsnummer = :fnr",
-            "fnr" to fnr,
-        ).single { row ->
-            when (T::class) {
-                Set::class -> row.array<String>(1).toSet() as T
-                Boolean::class -> row.boolean(1) as T
-                LocalDateTime::class -> row.localDateTime(1) as T
-                String::class -> row.string(1) as T
+    ): T = dbQuery.single(
+        "select $kolonne from stans_automatisering where fødselsnummer = :fnr",
+        "fnr" to fnr,
+    ) { row ->
+        when (T::class) {
+            Set::class -> row.array<String>(1).toSet() as T
+            Boolean::class -> row.boolean(1) as T
+            LocalDateTime::class -> row.localDateTime(1) as T
+            String::class -> row.string(1) as T
 
-                else -> error("Mangler mapping for ${T::class}")
-            }
-        }!!
+            else -> error("Mangler mapping for ${T::class}")
+        }
+    }!!
 }

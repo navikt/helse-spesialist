@@ -1,7 +1,6 @@
 package no.nav.helse.modell.oppgave.behandlingsstatistikk
 
 import no.nav.helse.DatabaseIntegrationTest
-import java.time.LocalDate
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -13,6 +12,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Isolated
+import java.time.LocalDate
 
 @Isolated
 internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
@@ -21,7 +21,7 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
 
     @BeforeEach
     fun tømTabeller() {
-        query("truncate oppgave, automatisering, annullert_av_saksbehandler, totrinnsvurdering cascade").execute()
+        dbQuery.execute("truncate oppgave, automatisering, annullert_av_saksbehandler, totrinnsvurdering cascade")
     }
 
     @Test

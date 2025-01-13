@@ -125,11 +125,10 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
         beløp: Int,
         utbetalingId: UUID,
     ) {
-        val arbeidsgiverbeløp =
-            query(
-                "SELECT arbeidsgiverbeløp FROM utbetaling_id WHERE utbetaling_id = :utbetalingId",
-                "utbetalingId" to utbetalingId,
-            ).single { it.intOrNull("arbeidsgiverbeløp") }
+        val arbeidsgiverbeløp = dbQuery.single(
+            "SELECT arbeidsgiverbeløp FROM utbetaling_id WHERE utbetaling_id = :utbetalingId",
+            "utbetalingId" to utbetalingId,
+        ) { it.intOrNull("arbeidsgiverbeløp") }
         assertEquals(beløp, arbeidsgiverbeløp)
     }
 
@@ -137,11 +136,10 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
         beløp: Int,
         utbetalingId: UUID,
     ) {
-        val personbeløp =
-            query(
-                "SELECT personbeløp FROM utbetaling_id WHERE utbetaling_id = :utbetalingId",
-                "utbetalingId" to utbetalingId,
-            ).single { it.intOrNull("personbeløp") }
+        val personbeløp = dbQuery.single(
+            "SELECT personbeløp FROM utbetaling_id WHERE utbetaling_id = :utbetalingId",
+            "utbetalingId" to utbetalingId,
+        ) { it.intOrNull("personbeløp") }
         assertEquals(beløp, personbeløp)
     }
 }

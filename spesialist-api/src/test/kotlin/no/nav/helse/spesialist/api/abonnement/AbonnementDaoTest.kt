@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.abonnement
 
-import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
@@ -71,34 +70,36 @@ internal class AbonnementDaoTest : DatabaseIntegrationTest() {
         }
     }
 
-    private fun settSekvensnummer(saksbehandlerId: UUID, sekvensnummer: Int) = asSQL(
+    private fun settSekvensnummer(saksbehandlerId: UUID, sekvensnummer: Int) = dbQuery.update(
         """
             insert into saksbehandler_opptegnelse_sekvensnummer
             values ('$saksbehandlerId', $sekvensnummer)
         """.trimIndent()
-    ).update()
+    )
 
-    private fun lagOpptegnelse(personRef: Long, eksisterendeSekvensnummer: Int) = asSQL(
+    private fun lagOpptegnelse(personRef: Long, eksisterendeSekvensnummer: Int) = dbQuery.update(
         """
             insert into opptegnelse
             values (:person_id, :sekvensnummer, '{"innhold": "noe oppdateringsrelatert"}', 'en eller annen opptegnelsestype')
         """.trimIndent(), "person_id" to personRef, "sekvensnummer" to eksisterendeSekvensnummer
-    ).update()
+    )
 
-    private fun finnSekvensnummer(saksbehandlerId: UUID) = asSQL(
+    private fun finnSekvensnummer(saksbehandlerId: UUID) = dbQuery.single(
         """
             select siste_sekvensnummer
             from saksbehandler_opptegnelse_sekvensnummer
             where saksbehandler_id = :saksbehandlerId
-        """.trimIndent(), "saksbehandlerId" to saksbehandlerId
-    ).single { it.intOrNull("siste_sekvensnummer") }
+        """.trimIndent(),
+        "saksbehandlerId" to saksbehandlerId
+    ) { it.intOrNull("siste_sekvensnummer") }
 
-    private fun finnPersonerSaksbehandlerAbonnererPå(saksbehandlerId: UUID) = asSQL(
+    private fun finnPersonerSaksbehandlerAbonnererPå(saksbehandlerId: UUID) = dbQuery.list(
         """
             select aktør_id
             from abonnement_for_opptegnelse
             join person p on abonnement_for_opptegnelse.person_id = p.id
             where saksbehandler_id = :saksbehandlerId
-        """.trimIndent(), "saksbehandlerId" to saksbehandlerId
-    ).list { it.string("aktør_id") }
+        """.trimIndent(),
+        "saksbehandlerId" to saksbehandlerId
+    ) { it.string("aktør_id") }
 }

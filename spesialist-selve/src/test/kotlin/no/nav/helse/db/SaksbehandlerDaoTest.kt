@@ -42,27 +42,28 @@ internal class SaksbehandlerDaoTest : DatabaseIntegrationTest() {
         assertSisteTidspunkt(tidspunkt, SAKSBEHANDLER_OID)
     }
 
-    private fun assertSaksbehandler(skalFinnesIDatabasen: Boolean, oid: UUID, navn: String, epost: String, ident: String) {
-        val erLagret = query(
+    private fun assertSaksbehandler(
+        skalFinnesIDatabasen: Boolean, oid: UUID, navn: String, epost: String, ident: String
+    ) {
+        val erLagret = dbQuery.single(
             """
             SELECT 1 FROM saksbehandler
             WHERE oid = :oid AND navn = :navn AND epost = :epost AND ident = :ident
             """.trimIndent(), "oid" to oid, "navn" to navn, "epost" to epost, "ident" to ident
-        ).single { true } ?: false
+        ) { true } ?: false
 
         assertEquals(skalFinnesIDatabasen, erLagret)
     }
 
     private fun assertSisteTidspunkt(forventetSisteTidspunkt: LocalDateTime?, oid: UUID) {
-        val tidspunktFraDb = query(
+        val tidspunktFraDb = dbQuery.single(
             """
             SELECT siste_handling_utført_tidspunkt FROM saksbehandler WHERE oid = :oid
             """.trimIndent(), "oid" to oid
-        ).single { it.localDateTimeOrNull(1) }
+        ) { it.localDateTimeOrNull(1) }
 
         if (forventetSisteTidspunkt != null) assertEquals(
-            forventetSisteTidspunkt.truncatedTo(ChronoUnit.MILLIS),
-            tidspunktFraDb?.truncatedTo(ChronoUnit.MILLIS)
+            forventetSisteTidspunkt.truncatedTo(ChronoUnit.MILLIS), tidspunktFraDb?.truncatedTo(ChronoUnit.MILLIS)
         )
         else assertNull(tidspunktFraDb)
     }

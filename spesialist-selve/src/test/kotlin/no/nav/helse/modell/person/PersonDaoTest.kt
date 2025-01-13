@@ -1,11 +1,10 @@
 package no.nav.helse.modell.person
 
-import no.nav.helse.DatabaseIntegrationTest
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
@@ -276,17 +275,17 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
         }
 
     private fun leggInnPersonIKlargjøringstabellen(fødselsnummer: String) {
-        asSQL(
+        dbQuery.update(
             "insert into person_klargjores (fødselsnummer, opprettet) values (:foedselsnummer, :opprettet)",
             "foedselsnummer" to fødselsnummer,
             "opprettet" to now()
-        ).update()
+        )
     }
 
-    private fun personFinnesIKlargjøringstabellen(fødselsnummer: String) = asSQL(
+    private fun personFinnesIKlargjøringstabellen(fødselsnummer: String) = dbQuery.single(
         "select 1 from person_klargjores where fødselsnummer = :foedselsnummer",
         "foedselsnummer" to fødselsnummer
-    ).single { true } ?: false
+    ) { true } ?: false
 
     private class Person(
         private val fødselsnummer: String,

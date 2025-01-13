@@ -1,10 +1,7 @@
 package no.nav.helse.db
 
 import no.nav.helse.DatabaseIntegrationTest
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -314,23 +311,22 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         assertNull(totrinnsvurderingDao.hentAktiv(1L))
     }
 
-    private fun totrinnsvurdering(vedtaksperiodeId: UUID = VEDTAKSPERIODE) = sessionOf(dataSource, strict = true).use {
-        @Language("postgresql")
-        val query = "SELECT * FROM totrinnsvurdering WHERE vedtaksperiode_id = :vedtaksperiodeId"
-        it.run(queryOf(query, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).map { row ->
-            TotrinnsvurderingOld(
-                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                erRetur = row.boolean("er_retur"),
-                saksbehandler = row.uuidOrNull("saksbehandler"),
-                beslutter = row.uuidOrNull("beslutter"),
-                utbetalingIdRef = row.longOrNull("utbetaling_id_ref"),
-                opprettet = row.localDateTime("opprettet"),
-                oppdatert = row.localDateTimeOrNull("oppdatert")
-            )
-        }.asSingle)
+    private fun totrinnsvurdering(vedtaksperiodeId: UUID = VEDTAKSPERIODE) = dbQuery.single(
+        "SELECT * FROM totrinnsvurdering WHERE vedtaksperiode_id = :vedtaksperiodeId",
+        "vedtaksperiodeId" to vedtaksperiodeId
+    ) { row ->
+        TotrinnsvurderingOld(
+            vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+            erRetur = row.boolean("er_retur"),
+            saksbehandler = row.uuidOrNull("saksbehandler"),
+            beslutter = row.uuidOrNull("beslutter"),
+            utbetalingIdRef = row.longOrNull("utbetaling_id_ref"),
+            opprettet = row.localDateTime("opprettet"),
+            oppdatert = row.localDateTimeOrNull("oppdatert")
+        )
     }
 
-    private fun settSaksbehandler(oppgaveId: Long, saksbehandlerOid: UUID) = query(
+    private fun settSaksbehandler(oppgaveId: Long, saksbehandlerOid: UUID) = dbQuery.update(
         """
            UPDATE totrinnsvurdering SET saksbehandler = :saksbehandlerOid, oppdatert = now()
            WHERE vedtaksperiode_id = (
@@ -343,17 +339,17 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
            )
            AND utbetaling_id_ref IS null
         """.trimIndent(), "oppgaveId" to oppgaveId, "saksbehandlerOid" to saksbehandlerOid
-    ).execute()
+    )
 
-    private fun settBeslutter(vedtaksperiodeId: UUID, saksbehandlerOid: UUID) = query(
+    private fun settBeslutter(vedtaksperiodeId: UUID, saksbehandlerOid: UUID) = dbQuery.update(
         """
            UPDATE totrinnsvurdering SET beslutter = :saksbehandlerOid, oppdatert = now()
            WHERE vedtaksperiode_id = :vedtaksperiodeId
            AND utbetaling_id_ref IS null
         """.trimIndent(), "vedtaksperiodeId" to vedtaksperiodeId, "saksbehandlerOid" to saksbehandlerOid
-    ).execute()
+    )
 
-    private fun settErRetur(oppgaveId: Long) = query(
+    private fun settErRetur(oppgaveId: Long) = dbQuery.update(
         """
            UPDATE totrinnsvurdering SET er_retur = true, oppdatert = now()
            WHERE vedtaksperiode_id = (
@@ -365,18 +361,17 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
                LIMIT 1
            )
            AND utbetaling_id_ref IS null
-        """.trimIndent(), "oppgaveId" to oppgaveId).execute()
+        """.trimIndent(), "oppgaveId" to oppgaveId)
 
-    private fun settHåndtertRetur(vedtaksperiodeId: UUID) = query(
+    private fun settHåndtertRetur(vedtaksperiodeId: UUID) = dbQuery.update(
         """
            UPDATE totrinnsvurdering SET er_retur = false, oppdatert = now()
            WHERE vedtaksperiode_id = :vedtaksperiodeId
            AND utbetaling_id_ref IS null
         """.trimIndent(), "vedtaksperiodeId" to vedtaksperiodeId
-    ).execute()
+    )
 
-
-    private fun settHåndtertRetur(oppgaveId: Long) = query(
+    private fun settHåndtertRetur(oppgaveId: Long) = dbQuery.update(
         """
            UPDATE totrinnsvurdering SET er_retur = false, oppdatert = now()
            WHERE vedtaksperiode_id = (
@@ -388,5 +383,5 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
                LIMIT 1
            )
            AND utbetaling_id_ref IS null
-        """.trimIndent(), "oppgaveId" to oppgaveId).execute()
+        """.trimIndent(), "oppgaveId" to oppgaveId)
 }

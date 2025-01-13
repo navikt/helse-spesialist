@@ -16,7 +16,7 @@ internal class DefinisjonDaoTest: DatabaseIntegrationTest() {
 
     @BeforeEach
     fun tømTabeller() {
-        query("truncate selve_varsel, api_varseldefinisjon").execute()
+        dbQuery.execute("truncate selve_varsel, api_varseldefinisjon")
     }
 
     @Test
@@ -106,7 +106,7 @@ internal class DefinisjonDaoTest: DatabaseIntegrationTest() {
     }
 
     private fun alleDefinisjoner(): List<Varseldefinisjon> =
-        query("SELECT * FROM api_varseldefinisjon").list {
+        dbQuery.list("SELECT * FROM api_varseldefinisjon") {
             Varseldefinisjon(
                 id = it.uuid("unik_id"),
                 varselkode = it.string("kode"),

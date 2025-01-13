@@ -1,7 +1,7 @@
 package no.nav.helse.modell.dokument
 
-import no.nav.helse.DatabaseIntegrationTest
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.DatabaseIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -75,13 +75,13 @@ internal class PgDokumentDaoTest : DatabaseIntegrationTest() {
         fødselsnummer: String,
         dokumentId: UUID,
         dokument: JsonNode,
-    ) = query(
+    ) = dbQuery.single(
         """
-            SELECT id FROM person WHERE fødselsnummer = :fodselsnummer
+        SELECT id FROM person WHERE fødselsnummer = :fodselsnummer
         """.trimIndent(), "fodselsnummer" to fødselsnummer
-    ).single { it.int("id") }?.let { personId ->
-        query(
-        """
+    ) { it.int("id") }?.let { personId ->
+        dbQuery.update(
+            """
             INSERT INTO dokumenter (dokument_id, person_ref, dokument, opprettet)
             VALUES (
                 :dokumentId,
@@ -89,11 +89,11 @@ internal class PgDokumentDaoTest : DatabaseIntegrationTest() {
                 :dokument::json,
                 :opprettet
             )
-        """.trimIndent(),
+            """.trimIndent(),
             "dokumentId" to dokumentId,
             "personId" to personId,
             "dokument" to objectMapper.writeValueAsString(dokument),
             "opprettet" to opprettet
-        ).update()
+        )
     }
 }

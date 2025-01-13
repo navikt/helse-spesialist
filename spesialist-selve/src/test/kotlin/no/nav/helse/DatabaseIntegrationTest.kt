@@ -2,15 +2,13 @@ package no.nav.helse
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import kotliquery.Query
-import kotliquery.Row
-import kotliquery.action.QueryAction
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.HelseDao.Companion.updateAndReturnGeneratedKey
 import no.nav.helse.db.AnnulleringDao
 import no.nav.helse.db.BehandlingsstatistikkDao
+import no.nav.helse.db.DbQuery
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.PgDialogDao
@@ -37,6 +35,7 @@ import no.nav.helse.modell.kommando.TestMelding
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.PersonService
+import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
@@ -47,7 +46,6 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
-import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
@@ -61,7 +59,7 @@ import no.nav.helse.spesialist.typer.Kjønn
 import no.nav.helse.util.januar
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Random
@@ -69,6 +67,7 @@ import java.util.UUID
 import kotlin.random.Random.Default.nextLong
 
 abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
+    protected val dbQuery = DbQuery(dataSource)
     private val testperson = TestPerson()
     protected open val HENDELSE_ID: UUID = UUID.randomUUID()
 
@@ -579,7 +578,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun settSaksbehandler(
         vedtaksperiodeId: UUID,
         saksbehandlerOid: UUID,
-    ) = query(
+    ) = dbQuery.update(
         """
         UPDATE totrinnsvurdering
         SET saksbehandler = :saksbehandlerOid, oppdatert = now()
@@ -587,7 +586,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         """.trimIndent(),
         "vedtaksperiodeId" to vedtaksperiodeId,
         "saksbehandlerOid" to saksbehandlerOid,
-    ).execute()
+    )
 
     protected fun assertGodkjenteVarsler(
         vedtaksperiodeId: UUID,
@@ -600,7 +599,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             sessionOf(dataSource).use { session ->
                 session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
             }
-        Assertions.assertEquals(forventetAntall, antall)
+        assertEquals(forventetAntall, antall)
     }
 
     protected fun assertAvvisteVarsler(
@@ -614,7 +613,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             sessionOf(dataSource).use { session ->
                 session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
             }
-        Assertions.assertEquals(forventetAntall, antall)
+        assertEquals(forventetAntall, antall)
     }
 
     protected data class Periode(
@@ -623,18 +622,4 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val tom: LocalDate,
     )
 
-    protected fun query(
-        @Language("postgresql") query: String,
-        vararg params: Pair<String, Any?>,
-    ) = queryOf(query, params.toMap())
-
-    protected fun <T> Query.single(mapper: (Row) -> T?) = map(mapper).asSingle.runInSession()
-
-    protected fun <T> Query.list(mapper: (Row) -> T?) = map(mapper).asList.runInSession()
-
-    protected fun Query.update() = asUpdate.runInSession()
-
-    protected fun Query.execute() = asExecute.runInSession()
-
-    private fun <T> QueryAction<T>.runInSession() = sessionOf(dataSource).use(::runWithSession)
 }

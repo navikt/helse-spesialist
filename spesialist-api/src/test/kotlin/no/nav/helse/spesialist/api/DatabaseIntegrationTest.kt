@@ -4,11 +4,9 @@ import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import io.ktor.utils.io.core.use
 import io.mockk.every
 import io.mockk.mockk
-import kotliquery.Query
-import kotliquery.Row
-import kotliquery.action.QueryAction
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.db.DbQuery
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao.Inntekter
 import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
@@ -73,6 +71,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
+    protected val dbQuery = DbQuery(dataSource)
     private val NAVN = Navn(lagFornavn(), lagFornavn(), lagEtternavn())
     private val ENHET = Enhet(101, "Halden")
     protected val PERIODE = Periode(UUID.randomUUID(), LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
@@ -1006,12 +1005,4 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val ident: String,
         val epost: String,
     )
-
-    protected fun Query.update() = asUpdate.runInSession()
-
-    protected fun <T> Query.single(mapper: (Row) -> T?) = map(mapper).asSingle.runInSession()
-
-    protected fun <T> Query.list(mapper: (Row) -> T?) = map(mapper).asList.runInSession()
-
-    private fun <T> QueryAction<T>.runInSession() = sessionOf(dataSource).use(::runWithSession)
 }

@@ -6,6 +6,8 @@ import kotliquery.Row
 import kotliquery.Session
 import kotliquery.action.QueryAction
 import kotliquery.sessionOf
+import no.nav.helse.HelseDao.Companion.asSQL
+import org.intellij.lang.annotations.Language
 import java.sql.Array
 import javax.sql.DataSource
 
@@ -81,4 +83,38 @@ class MedDataSource(private val dataSource: DataSource) : QueryRunner {
     ): Array {
         throw UnsupportedOperationException("Dette har vi ikke støtte for...")
     }
+}
+
+class DbQuery(private val dataSource: DataSource) {
+    private fun <T> run(
+        returnGeneratedKey: Boolean = false,
+        block: () -> QueryAction<T>,
+    ) = sessionOf(dataSource, returnGeneratedKey = returnGeneratedKey).use { block().runWithSession(it) }
+
+    fun <T> single(
+        @Language("PostgreSQL") sql: String,
+        vararg params: Pair<String, Any?>,
+        mapper: (Row) -> T?,
+    ) = run { asSQL(sql, *params).map(mapper).asSingle }
+
+    fun <T> list(
+        @Language("PostgreSQL") sql: String,
+        vararg params: Pair<String, Any?>,
+        mapper: (Row) -> T?,
+    ) = run { asSQL(sql, *params).map(mapper).asList }
+
+    fun update(
+        @Language("PostgreSQL") sql: String,
+        vararg params: Pair<String, Any?>,
+    ) = run { asSQL(sql, *params).asUpdate }
+
+    fun updateAndReturnGeneratedKey(
+        @Language("PostgreSQL") sql: String,
+        vararg params: Pair<String, Any?>,
+    ) = run(returnGeneratedKey = true) { asSQL(sql, *params).asUpdateAndReturnGeneratedKey }
+
+    fun execute(
+        @Language("PostgreSQL") sql: String,
+        vararg params: Pair<String, Any?>,
+    ) = run { asSQL(sql, *params).asExecute }
 }

@@ -52,7 +52,7 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
     fun setupDaoTest() {
         godkjenningsbehov(TESTHENDELSE.id)
         CommandContext(CONTEXT_ID).opprett(CommandContextDao(dataSource), TESTHENDELSE.id)
-        query("truncate oppgave restart identity cascade").execute()
+        dbQuery.execute("truncate oppgave restart identity cascade")
     }
 
     @Test
@@ -1632,15 +1632,15 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
         oppgaveId: Long,
         forventetStatus: Oppgave.Tilstand,
     ) {
-        val status = query("SELECT * FROM oppgave where id = :id", "id" to oppgaveId).single { it.string("status") }
+        val status = dbQuery.single("SELECT * FROM oppgave where id = :id", "id" to oppgaveId) { it.string("status") }
         assertEquals(forventetStatus.toString(), status)
     }
 
     private fun oppgave(vedtaksperiodeId: UUID = VEDTAKSPERIODE) =
-        query(
+        dbQuery.list(
             "SELECT o.* FROM oppgave o JOIN vedtak v on o.vedtak_ref = v.id WHERE v.vedtaksperiode_id = :vedtaksperiodeId ORDER BY id DESC",
             "vedtaksperiodeId" to vedtaksperiodeId,
-        ).list { row ->
+        ) { row ->
             OppgaveAssertions(
                 oppdatert = row.localDate("oppdatert"),
                 egenskaper = row.array<String>("egenskaper").toList(),

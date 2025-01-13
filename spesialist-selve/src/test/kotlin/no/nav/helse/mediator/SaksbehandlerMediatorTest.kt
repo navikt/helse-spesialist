@@ -1,17 +1,12 @@
 package no.nav.helse.mediator
 
-import no.nav.helse.DatabaseIntegrationTest
-import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
-import kotliquery.queryOf
-import kotliquery.sessionOf
+import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.util.februar
-import no.nav.helse.util.januar
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
@@ -44,8 +39,10 @@ import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
+import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
+import no.nav.helse.util.februar
+import no.nav.helse.util.januar
 import no.nav.helse.util.testEnv
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -925,38 +922,28 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
     private fun assertStansOpphevet(fødselsnummer: String) {
         val status =
-            query(
+            dbQuery.single(
                 "select status from stans_automatisering where fødselsnummer = :fnr",
                 "fnr" to fødselsnummer,
-            ).single { it.string(1) }
+            ) { it.string(1) }
         assertEquals("NORMAL", status)
     }
 
     private fun finnOverstyringId(fødselsnummer: String): UUID? {
-        @Language("PostgreSQL")
-        val query =
-            " select ekstern_hendelse_id from overstyring where person_ref = (select id from person where fødselsnummer = :fodselsnummer) "
-
-        return sessionOf(dataSource).use {
-            it.run(
-                queryOf(
-                    query,
-                    mapOf("fodselsnummer" to fødselsnummer),
-                ).map { it.uuid("ekstern_hendelse_id") }.asSingle,
-            )
-        }
+        return dbQuery.single(
+            "select ekstern_hendelse_id from overstyring where person_ref = (select id from person where fødselsnummer = :fodselsnummer)",
+            "fodselsnummer" to fødselsnummer
+        ) { it.uuid("ekstern_hendelse_id") }
     }
 
     private fun assertOppgave(
         oppgaveId: Long,
         forventetStatus: String,
     ) {
-        @Language("PostgreSQL")
-        val query = "SELECT status FROM oppgave WHERE id = ?"
-        val status =
-            sessionOf(dataSource).use { session ->
-                session.run(queryOf(query, oppgaveId).map { it.string(1) }.asSingle)
-            }
+        val status = dbQuery.single(
+            "SELECT status FROM oppgave WHERE id = :oppgaveId",
+            "oppgaveId" to oppgaveId
+        ) { it.string(1) }
         assertEquals(forventetStatus, status)
     }
 
