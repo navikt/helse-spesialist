@@ -28,14 +28,14 @@ internal class AdressebeskyttelseEndretRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        mediator.mottaMelding(
+        mediator.mottaMeldingNy(
             melding =
                 AdressebeskyttelseEndret(
                     id = packet["@id"].asUUID(),
                     fødselsnummer = packet["fødselsnummer"].asText(),
                     json = packet.toJson(),
                 ),
-            messageContext = context,
+            publiserer = MessageContextMeldingPubliserer(context),
         )
     }
 }

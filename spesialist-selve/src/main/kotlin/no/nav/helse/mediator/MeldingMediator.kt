@@ -10,6 +10,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
 import kotliquery.sessionOf
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.kafka.AdressebeskyttelseEndretRiver
@@ -32,6 +33,7 @@ import no.nav.helse.kafka.InfotrygdutbetalingerLøsningRiver
 import no.nav.helse.kafka.InntektLøsningRiver
 import no.nav.helse.kafka.KlargjørPersonForVisningRiver
 import no.nav.helse.kafka.KommandokjedePåminnelseRiver
+import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.kafka.MidnattRiver
 import no.nav.helse.kafka.NyeVarslerRiver
 import no.nav.helse.kafka.OppdaterPersondataRiver
@@ -375,6 +377,13 @@ internal class MeldingMediator(
         melding: Personmelding,
         messageContext: MessageContext,
     ) {
+        mottaMeldingNy(melding, MessageContextMeldingPubliserer(messageContext))
+    }
+
+    internal fun mottaMeldingNy(
+        melding: Personmelding,
+        publiserer: MeldingPubliserer,
+    ) {
         val meldingnavn = requireNotNull(melding::class.simpleName)
         withMDC(
             mutableMapOf(
@@ -387,7 +396,7 @@ internal class MeldingMediator(
             logg.info("Melding $meldingnavn mottatt")
             sikkerlogg.info("Melding $meldingnavn mottatt:\n${melding.toJson()}")
             meldingDao.lagre(melding)
-            behandleMelding(melding, messageContext)
+            behandleMelding(melding, publiserer)
         }
     }
 
@@ -405,7 +414,7 @@ internal class MeldingMediator(
         ) {
             logg.info("Melding $meldingnavn gjenopptatt")
             sikkerlogg.info("Melding $meldingnavn gjenopptatt:\n${melding.toJson()}")
-            behandleMelding(melding, messageContext) { commandContext }
+            behandleMelding(melding, MessageContextMeldingPubliserer(messageContext)) { commandContext }
         }
     }
 
@@ -413,15 +422,15 @@ internal class MeldingMediator(
     // bildet når vi gjenopptar kommandokjeder
     private fun behandleMelding(
         melding: Personmelding,
-        messageContext: MessageContext,
+        publiserer: MeldingPubliserer,
     ) {
-        behandleMelding(melding, messageContext) { it.nyContext(melding.id) }
+        behandleMelding(melding, publiserer) { it.nyContext(melding.id) }
     }
 
     // Denne kalles både ved oppstart av en kommandokjede og ved gjenopptak etter svar på behov
     private fun behandleMelding(
         melding: Personmelding,
-        messageContext: MessageContext,
+        publiserer: MeldingPubliserer,
         commandContext: (CommandContextRepository) -> CommandContext,
     ) {
         val meldingnavn = requireNotNull(melding::class.simpleName)
@@ -443,7 +452,7 @@ internal class MeldingMediator(
                 }
                 utgåendeMeldinger().forEach(utgåendeMeldingerMediator::hendelse)
             }
-            utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, messageContext)
+            utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, publiserer)
         } catch (e: Exception) {
             throw RuntimeException("Feil ved behandling av melding $meldingnavn", e)
         } finally {

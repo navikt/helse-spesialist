@@ -1,11 +1,11 @@
 package no.nav.helse.mediator.meldinger
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.kafka.AdressebeskyttelseEndretRiver
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
-import no.nav.helse.kafka.AdressebeskyttelseEndretRiver
-import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
@@ -22,6 +22,6 @@ class AdressebeskyttelseEndretRiverTest {
     @Test
     fun `leser adressebeskyttelse endret event`() {
         testRapid.sendTestMessage(Testmeldingfabrikk.lagAdressebeskyttelseEndret(AKTØR, FNR, HENDELSE_ID))
-        verify(exactly = 1) { mediator.mottaMelding(any<AdressebeskyttelseEndret>(), any()) }
+        verify(exactly = 1) { mediator.mottaMeldingNy(any<AdressebeskyttelseEndret>(), any()) }
     }
 }
