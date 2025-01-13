@@ -159,8 +159,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         opprettOpprinneligSøknadsdato(periode)
         return dbQuery.updateAndReturnGeneratedKey(
             """
-            INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, forkastet)
-            VALUES(:id, :fom, :tom, :arbeidsgiverId, :personId, :forkastet)
+            INSERT INTO vedtak (vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, forkastet)
+            VALUES (:id, :fom, :tom, :arbeidsgiverId, :personId, :forkastet)
             """.trimMargin(),
             "id" to periode.id,
             "fom" to periode.fom,
@@ -178,7 +178,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ): Long = requireNotNull(
         dbQuery.updateAndReturnGeneratedKey(
             """
-            INSERT INTO api_varseldefinisjon(unik_id, kode, tittel, forklaring, handling, opprettet) 
+            INSERT INTO api_varseldefinisjon (unik_id, kode, tittel, forklaring, handling, opprettet) 
             VALUES (:definisjonId, :kode, :tittel, null, null, :opprettet)
             """.trimIndent(),
             "definisjonId" to definisjonId,
@@ -198,7 +198,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ): Long = requireNotNull(
         dbQuery.updateAndReturnGeneratedKey(
             """
-            INSERT INTO behandling(vedtaksperiode_id, unik_id, utbetaling_id, opprettet_av_hendelse, tilstand_endret_tidspunkt, tilstand_endret_av_hendelse, tilstand, fom, tom, skjæringstidspunkt) 
+            INSERT INTO behandling (vedtaksperiode_id, unik_id, utbetaling_id, opprettet_av_hendelse, tilstand_endret_tidspunkt, tilstand_endret_av_hendelse, tilstand, fom, tom, skjæringstidspunkt) 
             VALUES (:vedtaksperiodeId, :generasjonId, :utbetalingId, :opprettetAvHendelse, :tilstandEndretTidspunkt, :tilstandEndretAvHendelse, 'VidereBehandlingAvklares', :fom, :tom, :skjaeringstidspunkt)
             """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
@@ -233,7 +233,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         endretTidspunkt: LocalDateTime? = LocalDateTime.now(),
     ) = dbQuery.update(
         """
-        INSERT INTO selve_varsel(unik_id, kode, vedtaksperiode_id, generasjon_ref, definisjon_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt) 
+        INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, generasjon_ref, definisjon_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt) 
         VALUES (:id, :kode, :vedtaksperiodeId, :generasjonRef, :definisjonRef, :opprettet, :status, :ident, :endretTidspunkt)
         """.trimIndent(),
         "id" to id,
@@ -265,7 +265,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         inntektskilde: Inntektskilde,
         vedtakRef: Long,
     ) = dbQuery.update(
-        "INSERT INTO saksbehandleroppgavetype(type, vedtak_ref, inntektskilde) VALUES (:type, :vedtakRef, :inntektskilde)",
+        "INSERT INTO saksbehandleroppgavetype (type, vedtak_ref, inntektskilde) VALUES (:type, :vedtakRef, :inntektskilde)",
         "type" to type.toString(),
         "vedtakRef" to vedtakRef,
         "inntektskilde" to inntektskilde.toString()
@@ -281,7 +281,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         "vedtakRef" to vedtakRef,
     )
 
-    protected fun opprettDialog() = dbQuery.updateAndReturnGeneratedKey("INSERT INTO dialog(opprettet) VALUES (now())")
+    protected fun opprettDialog() = dbQuery.updateAndReturnGeneratedKey("INSERT INTO dialog (opprettet) VALUES (now())")
 
     protected fun opprettNotat(
         tekst: String = "Et notat",
@@ -290,7 +290,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         dialogRef: Long = opprettDialog()!!,
     ) = dbQuery.updateAndReturnGeneratedKey(
         """
-        INSERT INTO notat(tekst, saksbehandler_oid, vedtaksperiode_id, type, dialog_ref)
+        INSERT INTO notat (tekst, saksbehandler_oid, vedtaksperiode_id, type, dialog_ref)
         VALUES (:tekst, :oid, :vedtaksperiodeId, CAST(:type as notattype), :dialogRef)
         """.trimIndent(),
         "tekst" to tekst,
@@ -305,7 +305,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         saksbehandlerIdent: String = SAKSBEHANDLER.ident,
         dialogRef: Long = opprettDialog()!!,
     ) = dbQuery.updateAndReturnGeneratedKey(
-        "INSERT INTO kommentarer(tekst, saksbehandlerident, dialog_ref) VALUES (:tekst, :ident, :dialogRef)",
+        "INSERT INTO kommentarer (tekst, saksbehandlerident, dialog_ref) VALUES (:tekst, :ident, :dialogRef)",
         "tekst" to tekst,
         "ident" to saksbehandlerIdent,
         "dialogRef" to dialogRef,
@@ -371,7 +371,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         frist: LocalDate = LocalDate.now().plusDays(21),
         saksbehandlerOid: UUID = SAKSBEHANDLER.oid,
     ) = dbQuery.update(
-        "INSERT INTO pa_vent(vedtaksperiode_id, frist, saksbehandler_ref) VALUES(:vedtaksperiodeId, :frist, :oid)",
+        "INSERT INTO pa_vent (vedtaksperiode_id, frist, saksbehandler_ref) VALUES (:vedtaksperiodeId, :frist, :oid)",
         "vedtaksperiodeId" to vedtaksperiodeId,
         "frist" to frist,
         "oid" to saksbehandlerOid,
@@ -384,8 +384,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     private fun opprettPersoninfo(adressebeskyttelse: Adressebeskyttelse) = dbQuery.updateAndReturnGeneratedKey(
         """
-        INSERT INTO person_info(fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse)
-        VALUES(:fornavn, :mellomnavn, :etternavn, :foedselsdato::date, :kjoenn::person_kjonn, :adressebeskyttelse)
+        INSERT INTO person_info (fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse)
+        VALUES (:fornavn, :mellomnavn, :etternavn, :foedselsdato::date, :kjoenn::person_kjonn, :adressebeskyttelse)
         """.trimIndent(),
         "fornavn" to NAVN.fornavn,
         "mellomnavn" to NAVN.mellomnavn,
@@ -438,7 +438,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         personId: Long,
         erEgenAnsatt: Boolean,
     ) = dbQuery.update(
-        "INSERT INTO egen_ansatt VALUES(:personId, :erEgenAnsatt, now())",
+        "INSERT INTO egen_ansatt VALUES (:personId, :erEgenAnsatt, now())",
         "personId" to personId,
         "erEgenAnsatt" to erEgenAnsatt,
     )
@@ -453,8 +453,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         return requireNotNull(
             dbQuery.updateAndReturnGeneratedKey(
                 """
-                INSERT INTO arbeidsgiver(organisasjonsnummer, navn_ref, bransjer_ref)
-                VALUES(:organisasjonsnummer, :navnId, :bransjeId) ON CONFLICT DO NOTHING
+                INSERT INTO arbeidsgiver (organisasjonsnummer, navn_ref, bransjer_ref)
+                VALUES (:organisasjonsnummer, :navnId, :bransjeId) ON CONFLICT DO NOTHING
                 """.trimIndent(),
                 "organisasjonsnummer" to organisasjonsnummer,
                 "navnId" to navnId,
@@ -476,7 +476,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         ident: String = SAKSBEHANDLER.ident,
     ): UUID {
         dbQuery.update(
-            "INSERT INTO saksbehandler(oid, navn, epost, ident) VALUES (:oid, :navn, :epost, :ident)",
+            "INSERT INTO saksbehandler (oid, navn, epost, ident) VALUES (:oid, :navn, :epost, :ident)",
             "oid" to oid,
             "navn" to navn,
             "epost" to epost,
@@ -502,7 +502,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     )
 
     private fun opprettBransjer(bransjer: List<String>) = dbQuery.updateAndReturnGeneratedKey(
-        "INSERT INTO arbeidsgiver_bransjer(bransjer) VALUES (:bransjer::json)",
+        "INSERT INTO arbeidsgiver_bransjer (bransjer) VALUES (:bransjer::json)",
         "bransjer" to objectMapper.writeValueAsString(bransjer),
     )
 
@@ -511,7 +511,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     )
 
     private fun opprettInfotrygdutbetalinger() = dbQuery.updateAndReturnGeneratedKey(
-        "INSERT INTO infotrygdutbetalinger(data) VALUES('[]')"
+        "INSERT INTO infotrygdutbetalinger (data) VALUES ('[]')"
     )
 
     private fun opprettOppgave(

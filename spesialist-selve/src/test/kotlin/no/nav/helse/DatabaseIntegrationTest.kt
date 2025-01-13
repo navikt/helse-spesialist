@@ -2,10 +2,7 @@ package no.nav.helse
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.HelseDao.Companion.updateAndReturnGeneratedKey
 import no.nav.helse.db.AnnulleringDao
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.DbQuery
@@ -57,7 +54,6 @@ import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.spesialist.typer.Kjønn
 import no.nav.helse.util.januar
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate
@@ -188,16 +184,12 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         type: String,
         json: String = """{"fødselsnummer": "$fødselsnummer"}""",
     ) {
-        sessionOf(dataSource).use {
-            it.run(
-                queryOf(
-                    "INSERT INTO hendelse(id, data, type) VALUES(?, ?::json, ?)",
-                    hendelseId,
-                    json,
-                    type,
-                ).asExecute,
-            )
-        }
+        dbQuery.update(
+            "INSERT INTO hendelse (id, data, type) VALUES (:hendelseId, :json::json, :type)",
+            "hendelseId" to hendelseId,
+            "json" to json,
+            "type" to type,
+        )
     }
 
     protected fun nyttAutomatiseringsinnslag(automatisert: Boolean) {
@@ -256,11 +248,11 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ) {
         opprettSaksbehandler(saksbehandlerOid, navn = navn, epost = SAKSBEHANDLER_EPOST, ident = SAKSBEHANDLER_IDENT)
         oppgaveDao.updateOppgave(oppgaveId, oppgavestatus = "AvventerSaksbehandler", egenskaper = egenskaper)
-        @Language("PostgreSQL")
-        val query = "INSERT INTO tildeling(saksbehandler_ref, oppgave_id_ref) VALUES (?, ?)"
-        return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, saksbehandlerOid, oppgaveId).asExecute)
-        }
+        dbQuery.update(
+            "INSERT INTO tildeling (saksbehandler_ref, oppgave_id_ref) VALUES (:oid, :oppgaveId)",
+            "oid" to saksbehandlerOid,
+            "oppgaveId" to oppgaveId
+        )
     }
 
     protected fun leggOppgavePåVent(
@@ -309,22 +301,18 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         fødselsdato: LocalDate,
         kjønn: Kjønn,
         adressebeskyttelse: Adressebeskyttelse,
-    ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-        requireNotNull(
-            asSQL(
-                """
-                INSERT INTO person_info(fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse)
-                VALUES(:fornavn, :mellomnavn, :etternavn, :foedselsdato, CAST(:kjonn as person_kjonn), :adressebeskyttelse);
-                """.trimIndent(),
-                "fornavn" to fornavn,
-                "mellomnavn" to mellomnavn,
-                "etternavn" to etternavn,
-                "foedselsdato" to fødselsdato,
-                "kjonn" to kjønn.name,
-                "adressebeskyttelse" to adressebeskyttelse.name,
-            ).updateAndReturnGeneratedKey(session),
-        )
-    }
+    ) = dbQuery.updateAndReturnGeneratedKey(
+        """
+        INSERT INTO person_info (fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse)
+        VALUES (:fornavn, :mellomnavn, :etternavn, :foedselsdato, CAST(:kjoenn as person_kjonn), :adressebeskyttelse);
+        """.trimIndent(),
+        "fornavn" to fornavn,
+        "mellomnavn" to mellomnavn,
+        "etternavn" to etternavn,
+        "foedselsdato" to fødselsdato,
+        "kjoenn" to kjønn.name,
+        "adressebeskyttelse" to adressebeskyttelse.name,
+    ).let(::requireNotNull)
 
     protected fun opprettSaksbehandler(
         saksbehandlerOID: UUID = SAKSBEHANDLER_OID,
@@ -527,53 +515,35 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         definisjonRef: Long? = null,
         status: String,
         endretTidspunkt: LocalDateTime? = LocalDateTime.now(),
-    ) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val query = """
-            INSERT INTO selve_varsel(unik_id, kode, vedtaksperiode_id, generasjon_ref, definisjon_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt) 
-            VALUES (?, ?, ?, (SELECT id FROM behandling WHERE vedtaksperiode_id = ? LIMIT 1), ?, ?, ?, ?, ?)
+    ) = dbQuery.update(
         """
-        session.run(
-            queryOf(
-                query,
-                id,
-                kode,
-                vedtaksperiodeId,
-                vedtaksperiodeId,
-                definisjonRef,
-                LocalDateTime.now(),
-                status,
-                if (endretTidspunkt != null) "EN_IDENT" else null,
-                endretTidspunkt,
-            ).asExecute,
-        )
-    }
+        INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, generasjon_ref, definisjon_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt) 
+        VALUES (:id, :kode, :vedtaksperiodeId, (SELECT id FROM behandling WHERE vedtaksperiode_id = :vedtaksperiodeId LIMIT 1), :definisjonRef, :opprettet, :status, :ident, :tidspunkt)
+        """.trimIndent(),
+        "id" to id,
+        "kode" to kode,
+        "vedtaksperiodeId" to vedtaksperiodeId,
+        "definisjonRef" to definisjonRef,
+        "opprettet" to LocalDateTime.now(),
+        "status" to status,
+        "ident" to if (endretTidspunkt != null) "EN_IDENT" else null,
+        "tidspunkt" to endretTidspunkt,
+    )
 
     protected fun opprettVarseldefinisjon(
         tittel: String = "EN_TITTEL",
         kode: String = "EN_KODE",
         definisjonId: UUID = UUID.randomUUID(),
-    ): Long =
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            @Language("PostgreSQL")
-            val query = """
-            INSERT INTO api_varseldefinisjon(unik_id, kode, tittel, forklaring, handling, opprettet) 
-            VALUES (?, ?, ?, ?, ?, ?)    
+    ): Long = dbQuery.updateAndReturnGeneratedKey(
         """
-            requireNotNull(
-                session.run(
-                    queryOf(
-                        query,
-                        definisjonId,
-                        kode,
-                        tittel,
-                        null,
-                        null,
-                        LocalDateTime.now(),
-                    ).asUpdateAndReturnGeneratedKey,
-                ),
-            )
-        }
+        INSERT INTO api_varseldefinisjon(unik_id, kode, tittel, forklaring, handling, opprettet) 
+        VALUES (:definisjonId, :kode, :tittel, null, null, :opprettet)    
+        """.trimIndent(),
+        "definisjonId" to definisjonId,
+        "kode" to kode,
+        "tittel" to tittel,
+        "opprettet" to LocalDateTime.now(),
+    ).let(::requireNotNull)
 
     protected fun settSaksbehandler(
         vedtaksperiodeId: UUID,
@@ -592,13 +562,13 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID,
         forventetAntall: Int,
     ) {
-        @Language("PostgreSQL")
-        val query =
-            "SELECT COUNT(1) FROM selve_varsel sv WHERE sv.generasjon_ref = (SELECT id FROM behandling WHERE vedtaksperiode_id = ?) AND status = 'GODKJENT'"
-        val antall =
-            sessionOf(dataSource).use { session ->
-                session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
-            }
+        val antall = dbQuery.single(
+            """
+            SELECT COUNT(1) FROM selve_varsel sv
+            WHERE sv.generasjon_ref = ( SELECT id FROM behandling WHERE vedtaksperiode_id = :vedtaksperiodeId )
+             AND status = 'GODKJENT'
+            """.trimIndent(), "vedtaksperiodeId" to vedtaksperiodeId
+        ) { it.int(1) }
         assertEquals(forventetAntall, antall)
     }
 
@@ -606,13 +576,14 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID,
         forventetAntall: Int,
     ) {
-        @Language("PostgreSQL")
-        val query =
-            "SELECT COUNT(1) FROM selve_varsel sv WHERE sv.generasjon_ref = (SELECT id FROM behandling WHERE vedtaksperiode_id = ?) AND status = 'AVVIST'"
-        val antall =
-            sessionOf(dataSource).use { session ->
-                session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
-            }
+        val antall = dbQuery.single(
+            """
+            SELECT COUNT(1) FROM selve_varsel sv
+            WHERE sv.generasjon_ref = ( SELECT id FROM behandling WHERE vedtaksperiode_id = :vedtaksperiodeId )
+             AND status = 'AVVIST'
+             """.trimIndent(),
+            "vedtaksperiodeId" to vedtaksperiodeId
+        ) { it.int(1) }
         assertEquals(forventetAntall, antall)
     }
 
