@@ -1,11 +1,8 @@
 package no.nav.helse.spesialist.api
 
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
-import io.ktor.utils.io.core.use
 import io.mockk.every
 import io.mockk.mockk
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.db.DbQuery
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao.Inntekter
@@ -64,7 +61,6 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLTidslinjeperiode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUberegnetPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetaling
 import no.nav.helse.spleis.graphql.hentsnapshot.Sykepengedager
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -132,43 +128,25 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     private fun opprettGenerasjon(
         periode: Periode,
         skjæringstidspunkt: LocalDate = periode.fom,
-    ) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val statement =
-            "INSERT INTO behandling (unik_id, vedtaksperiode_id, opprettet_av_hendelse, tilstand, fom, tom, skjæringstidspunkt) VALUES (:unik_id, :vedtaksperiode_id, :hendelse_id, 'VidereBehandlingAvklares',:fom, :tom, :skjaeringstidspunkt)"
-        requireNotNull(
-            session.run(
-                queryOf(
-                    statement,
-                    mapOf(
-                        "unik_id" to UUID.randomUUID(),
-                        "vedtaksperiode_id" to periode.id,
-                        "hendelse_id" to UUID.randomUUID(),
-                        "fom" to periode.fom,
-                        "tom" to periode.tom,
-                        "skjaeringstidspunkt" to skjæringstidspunkt,
-                    ),
-                ).asUpdate,
-            ),
+    ) = requireNotNull(
+        dbQuery.update(
+            """
+            INSERT INTO behandling (unik_id, vedtaksperiode_id, opprettet_av_hendelse, tilstand, fom, tom, skjæringstidspunkt)
+            VALUES (:unik_id, :vedtaksperiode_id, :hendelse_id, 'VidereBehandlingAvklares',:fom, :tom, :skjaeringstidspunkt)
+            """.trimIndent(),
+            "unik_id" to UUID.randomUUID(),
+            "vedtaksperiode_id" to periode.id,
+            "hendelse_id" to UUID.randomUUID(),
+            "fom" to periode.fom,
+            "tom" to periode.tom,
+            "skjaeringstidspunkt" to skjæringstidspunkt,
         )
-    }
+    )
 
-    private fun opprettOpprinneligSøknadsdato(periode: Periode) =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val statement =
-                "INSERT INTO opprinnelig_soknadsdato VALUES (:vedtaksperiode_id, now())"
-            requireNotNull(
-                session.run(
-                    queryOf(
-                        statement,
-                        mapOf(
-                            "vedtaksperiode_id" to periode.id,
-                        ),
-                    ).asUpdate,
-                ),
-            )
-        }
+    private fun opprettOpprinneligSøknadsdato(periode: Periode) = dbQuery.update(
+        "INSERT INTO opprinnelig_soknadsdato VALUES (:vedtaksperiode_id, now())",
+        "vedtaksperiode_id" to periode.id,
+    )
 
     protected fun opprettVedtak(
         personId: Long,
@@ -176,53 +154,39 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         periode: Periode = PERIODE,
         skjæringstidspunkt: LocalDate = periode.fom,
         forkastet: Boolean = false,
-    ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+    ): Long {
         opprettGenerasjon(periode, skjæringstidspunkt)
         opprettOpprinneligSøknadsdato(periode)
-
-        @Language("PostgreSQL")
-        val statement =
-            "INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, forkastet) VALUES(?, ?, ?, ?, ?, ?)"
-        requireNotNull(
-            session.run(
-                queryOf(
-                    statement,
-                    periode.id,
-                    periode.fom,
-                    periode.tom,
-                    arbeidsgiverId,
-                    personId,
-                    forkastet,
-                ).asUpdateAndReturnGeneratedKey,
-            ),
-        )
+        return dbQuery.updateAndReturnGeneratedKey(
+            """
+            INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, forkastet)
+            VALUES(:id, :fom, :tom, :arbeidsgiverId, :personId, :forkastet)
+            """.trimMargin(),
+            "id" to periode.id,
+            "fom" to periode.fom,
+            "tom" to periode.tom,
+            "arbeidsgiverId" to arbeidsgiverId,
+            "personId" to personId,
+            "forkastet" to forkastet,
+        )!!
     }
 
     protected fun opprettVarseldefinisjon(
         tittel: String = "EN_TITTEL",
         kode: String = "EN_KODE",
         definisjonId: UUID = UUID.randomUUID(),
-    ): Long =
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            @Language("PostgreSQL")
-            val query = """
+    ): Long = requireNotNull(
+        dbQuery.updateAndReturnGeneratedKey(
+            """
             INSERT INTO api_varseldefinisjon(unik_id, kode, tittel, forklaring, handling, opprettet) 
-            VALUES (?, ?, ?, ?, ?, ?)    
-        """
-            requireNotNull(
-                session.run(
-                    queryOf(
-                        query,
-                        definisjonId,
-                        kode,
-                        tittel,
-                        null,
-                        null,
-                        LocalDateTime.now(),
-                    ).asUpdateAndReturnGeneratedKey,
-                ),
-            )
-        }
+            VALUES (:definisjonId, :kode, :tittel, null, null, :opprettet)
+            """.trimIndent(),
+            "definisjonId" to definisjonId,
+            "kode" to kode,
+            "tittel" to tittel,
+            "opprettet" to LocalDateTime.now(),
+        ),
+    )
 
     protected fun nyGenerasjon(
         vedtaksperiodeId: UUID = UUID.randomUUID(),
@@ -231,30 +195,23 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         periode: Periode = PERIODE,
         tilstandEndretTidspunkt: LocalDateTime? = null,
         skjæringstidspunkt: LocalDate = periode.fom,
-    ): Long =
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            @Language("PostgreSQL")
-            val query = """
+    ): Long = requireNotNull(
+        dbQuery.updateAndReturnGeneratedKey(
+            """
             INSERT INTO behandling(vedtaksperiode_id, unik_id, utbetaling_id, opprettet_av_hendelse, tilstand_endret_tidspunkt, tilstand_endret_av_hendelse, tilstand, fom, tom, skjæringstidspunkt) 
-            VALUES (?, ?, ?, ?, ?, ?, 'VidereBehandlingAvklares', ?, ?, ?)
-        """
-            return requireNotNull(
-                session.run(
-                    queryOf(
-                        query,
-                        vedtaksperiodeId,
-                        generasjonId,
-                        utbetalingId,
-                        UUID.randomUUID(),
-                        tilstandEndretTidspunkt,
-                        UUID.randomUUID(),
-                        periode.fom,
-                        periode.tom,
-                        skjæringstidspunkt,
-                    ).asUpdateAndReturnGeneratedKey,
-                ),
-            )
-        }
+            VALUES (:vedtaksperiodeId, :generasjonId, :utbetalingId, :opprettetAvHendelse, :tilstandEndretTidspunkt, :tilstandEndretAvHendelse, 'VidereBehandlingAvklares', :fom, :tom, :skjaeringstidspunkt)
+            """.trimIndent(),
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            "generasjonId" to generasjonId,
+            "utbetalingId" to utbetalingId,
+            "opprettetAvHendelse" to UUID.randomUUID(),
+            "tilstandEndretTidspunkt" to tilstandEndretTidspunkt,
+            "tilstandEndretAvHendelse" to UUID.randomUUID(),
+            "fom" to periode.fom,
+            "tom" to periode.tom,
+            "skjaeringstidspunkt" to skjæringstidspunkt,
+        )
+    )
 
     protected fun nyttVarsel(
         id: UUID = UUID.randomUUID(),
@@ -274,27 +231,21 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         definisjonRef: Long? = null,
         status: String,
         endretTidspunkt: LocalDateTime? = LocalDateTime.now(),
-    ) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val query = """
-            INSERT INTO selve_varsel(unik_id, kode, vedtaksperiode_id, generasjon_ref, definisjon_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) = dbQuery.update(
         """
-        session.run(
-            queryOf(
-                query,
-                id,
-                kode,
-                vedtaksperiodeId,
-                generasjonRef,
-                definisjonRef,
-                opprettet,
-                status,
-                if (endretTidspunkt != null) "EN_IDENT" else null,
-                endretTidspunkt,
-            ).asExecute,
-        )
-    }
+        INSERT INTO selve_varsel(unik_id, kode, vedtaksperiode_id, generasjon_ref, definisjon_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt) 
+        VALUES (:id, :kode, :vedtaksperiodeId, :generasjonRef, :definisjonRef, :opprettet, :status, :ident, :endretTidspunkt)
+        """.trimIndent(),
+        "id" to id,
+        "kode" to kode,
+        "vedtaksperiodeId" to vedtaksperiodeId,
+        "generasjonRef" to generasjonRef,
+        "definisjonRef" to definisjonRef,
+        "opprettet" to opprettet,
+        "status" to status,
+        "ident" to if (endretTidspunkt != null) "EN_IDENT" else null,
+        "endretTidspunkt" to endretTidspunkt,
+    )
 
     protected fun klargjørVedtak(
         vedtakId: Long,
@@ -313,73 +264,52 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         type: Periodetype,
         inntektskilde: Inntektskilde,
         vedtakRef: Long,
-    ) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val statement = "INSERT INTO saksbehandleroppgavetype(type, vedtak_ref, inntektskilde) VALUES (?, ?, ?)"
-        session.run(queryOf(statement, type.toString(), vedtakRef, inntektskilde.toString()).asUpdate)
-    }
+    ) = dbQuery.update(
+        "INSERT INTO saksbehandleroppgavetype(type, vedtak_ref, inntektskilde) VALUES (:type, :vedtakRef, :inntektskilde)",
+        "type" to type.toString(),
+        "vedtakRef" to vedtakRef,
+        "inntektskilde" to inntektskilde.toString()
+    )
 
-    protected fun ferdigstillOppgave(vedtakRef: Long) {
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val statement =
-                """
-                UPDATE oppgave SET ferdigstilt_av = ?, ferdigstilt_av_oid = ?, status = 'Ferdigstilt', oppdatert = now()
-                WHERE oppgave.vedtak_ref = ?
-                """.trimIndent()
-            session.run(queryOf(statement, SAKSBEHANDLER.ident, SAKSBEHANDLER.oid, vedtakRef).asUpdate)
-        }
-    }
+    protected fun ferdigstillOppgave(vedtakRef: Long) = dbQuery.update(
+        """
+        UPDATE oppgave SET ferdigstilt_av = :ident, ferdigstilt_av_oid = :oid, status = 'Ferdigstilt', oppdatert = now()
+        WHERE oppgave.vedtak_ref = :vedtakRef
+        """.trimIndent(),
+        "ident" to SAKSBEHANDLER.ident,
+        "oid" to SAKSBEHANDLER.oid,
+        "vedtakRef" to vedtakRef,
+    )
 
-    protected fun opprettDialog() =
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            @Language("PostgreSQL")
-            val statement =
-                "INSERT INTO dialog(opprettet) VALUES (now())"
-            session.run(
-                queryOf(
-                    statement,
-                ).asUpdateAndReturnGeneratedKey,
-            )
-        }
+    protected fun opprettDialog() = dbQuery.updateAndReturnGeneratedKey("INSERT INTO dialog(opprettet) VALUES (now())")
 
     protected fun opprettNotat(
         tekst: String = "Et notat",
         saksbehandlerOid: UUID = SAKSBEHANDLER.oid,
         vedtaksperiodeId: UUID = PERIODE.id,
         dialogRef: Long = opprettDialog()!!,
-    ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-        @Language("PostgreSQL")
-        val statement =
-            "INSERT INTO notat(tekst, saksbehandler_oid, vedtaksperiode_id, type, dialog_ref) VALUES (?, ?, ?, CAST(? as notattype), ?)"
-        session.run(
-            queryOf(
-                statement,
-                tekst,
-                saksbehandlerOid,
-                vedtaksperiodeId,
-                NotatType.Generelt.name,
-                dialogRef,
-            ).asUpdateAndReturnGeneratedKey,
-        )
-    }
+    ) = dbQuery.updateAndReturnGeneratedKey(
+        """
+        INSERT INTO notat(tekst, saksbehandler_oid, vedtaksperiode_id, type, dialog_ref)
+        VALUES (:tekst, :oid, :vedtaksperiodeId, CAST(:type as notattype), :dialogRef)
+        """.trimIndent(),
+        "tekst" to tekst,
+        "oid" to saksbehandlerOid,
+        "vedtaksperiodeId" to vedtaksperiodeId,
+        "type" to NotatType.Generelt.name,
+        "dialogRef" to dialogRef,
+    )
 
     protected fun opprettKommentar(
         tekst: String = "En kommentar",
         saksbehandlerIdent: String = SAKSBEHANDLER.ident,
         dialogRef: Long = opprettDialog()!!,
-    ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-        @Language("PostgreSQL")
-        val statement = "INSERT INTO kommentarer(tekst, saksbehandlerident, dialog_ref) VALUES (?, ?, ?)"
-        session.run(
-            queryOf(
-                statement,
-                tekst,
-                saksbehandlerIdent,
-                dialogRef,
-            ).asUpdateAndReturnGeneratedKey,
-        )
-    }
+    ) = dbQuery.updateAndReturnGeneratedKey(
+        "INSERT INTO kommentarer(tekst, saksbehandlerident, dialog_ref) VALUES (:tekst, :ident, :dialogRef)",
+        "tekst" to tekst,
+        "ident" to saksbehandlerIdent,
+        "dialogRef" to dialogRef,
+    )
 
     protected fun opprettPersonOld(
         fødselsnummer: String = FØDSELSNUMMER,
@@ -422,85 +352,55 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         personinfoid: Long?,
         bostedId: Int?,
         infotrygdutbetalingerid: Long?,
-    ): Long {
-        @Language("PostgreSQL")
-        val statement =
+    ) = requireNotNull(
+        dbQuery.updateAndReturnGeneratedKey(
             """
             INSERT INTO person (fødselsnummer, aktør_id, info_ref, enhet_ref, infotrygdutbetalinger_ref)
             VALUES (:foedselsnummer, :aktoerId, :personinfoId, :enhetId, :infotrygdutbetalingerId)
-            """.trimIndent()
-        val personId =
-            requireNotNull(
-                sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-                    session.run(
-                        queryOf(
-                            statement,
-                            mapOf(
-                                "foedselsnummer" to fødselsnummer,
-                                "aktoerId" to aktørId,
-                                "personinfoId" to personinfoid,
-                                "enhetId" to bostedId,
-                                "infotrygdutbetalingerId" to infotrygdutbetalingerid,
-                            ),
-                        ).asUpdateAndReturnGeneratedKey,
-                    )
-                },
-            )
-        return personId
-    }
+            """.trimIndent(),
+            "foedselsnummer" to fødselsnummer,
+            "aktoerId" to aktørId,
+            "personinfoId" to personinfoid,
+            "enhetId" to bostedId,
+            "infotrygdutbetalingerId" to infotrygdutbetalingerid,
+        )
+    )
 
     protected fun opprettPåVent(
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         frist: LocalDate = LocalDate.now().plusDays(21),
         saksbehandlerOid: UUID = SAKSBEHANDLER.oid,
-    ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-        @Language("PostgreSQL")
-        val statement =
-            "INSERT INTO pa_vent(vedtaksperiode_id, frist, saksbehandler_ref) VALUES(?, ?, ?)"
-        session.run(
-            queryOf(
-                statement,
-                vedtaksperiodeId,
-                frist,
-                saksbehandlerOid,
-            ).asUpdate,
-        )
-    }
+    ) = dbQuery.update(
+        "INSERT INTO pa_vent(vedtaksperiode_id, frist, saksbehandler_ref) VALUES(:vedtaksperiodeId, :frist, :oid)",
+        "vedtaksperiodeId" to vedtaksperiodeId,
+        "frist" to frist,
+        "oid" to saksbehandlerOid,
+    )
 
     protected fun oppdaterPersoninfo(adressebeskyttelse: Adressebeskyttelse) {
         val personinfoId = opprettPersoninfo(adressebeskyttelse)
         oppdaterPersonpekere(FØDSELSNUMMER, personinfoId)
     }
 
-    private fun opprettPersoninfo(adressebeskyttelse: Adressebeskyttelse) =
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            val (fornavn, mellomnavn, etternavn) = NAVN
-
-            @Language("PostgreSQL")
-            val statement =
-                "INSERT INTO person_info(fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse) VALUES(?, ?, ?, ?::date, ?::person_kjonn, ?)"
-            requireNotNull(
-                session.run(
-                    queryOf(
-                        statement,
-                        fornavn,
-                        mellomnavn,
-                        etternavn,
-                        LocalDate.of(1970, 1, 1),
-                        "Ukjent",
-                        adressebeskyttelse.name,
-                    ).asUpdateAndReturnGeneratedKey,
-                ),
-            )
-        }
+    private fun opprettPersoninfo(adressebeskyttelse: Adressebeskyttelse) = dbQuery.updateAndReturnGeneratedKey(
+        """
+        INSERT INTO person_info(fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse)
+        VALUES(:fornavn, :mellomnavn, :etternavn, :foedselsdato::date, :kjoenn::person_kjonn, :adressebeskyttelse)
+        """.trimIndent(),
+        "fornavn" to NAVN.fornavn,
+        "mellomnavn" to NAVN.mellomnavn,
+        "etternavn" to NAVN.etternavn,
+        "foedselsdato" to LocalDate.of(1970, 1, 1),
+        "kjoenn" to "Ukjent",
+        "adressebeskyttelse" to adressebeskyttelse.name,
+    )
 
     private fun oppdaterPersonpekere(
         fødselsnummer: String,
         personinfoId: Long? = null,
         infotrygdutbetalingerId: Long? = null,
     ) {
-        @Language("PostgreSQL")
-        val query =
+        dbQuery.update(
             """
             update person
             set info_ref=:personinfoId,
@@ -515,83 +415,59 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                         when (:harInfotrygdutbetalingerRef is not null) then now()
                     END
                 )
-            where fødselsnummer=:fodselsnummer
-            """.trimIndent()
-
-        sessionOf(dataSource).use {
-            it.run(
-                queryOf(
-                    query,
-                    mapOf(
-                        "personinfoId" to personinfoId,
-                        "harPersoninfoId" to (personinfoId != null),
-                        "infotrygdutbetalingerRef" to infotrygdutbetalingerId,
-                        "harInfotrygdutbetalingerRef" to (infotrygdutbetalingerId != null),
-                        "fodselsnummer" to fødselsnummer,
-                    ),
-                ).asUpdate,
-            )
-        }
+            where fødselsnummer = :foedselsnummer
+            """.trimIndent(),
+            "personinfoId" to personinfoId,
+            "harPersoninfoId" to (personinfoId != null),
+            "infotrygdutbetalingerRef" to infotrygdutbetalingerId,
+            "harInfotrygdutbetalingerRef" to (infotrygdutbetalingerId != null),
+            "foedselsnummer" to fødselsnummer,
+        )
     }
 
     protected fun oppdaterEnhet(
         personId: Long,
         enhetNr: Int,
-    ) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val query =
-            "update person set enhet_ref = :enhetNr, enhet_ref_oppdatert = now() where id = :personId"
-        session.run(
-            queryOf(
-                query,
-                mapOf(
-                    "enhetNr" to enhetNr,
-                    "personId" to personId,
-                ),
-            ).asUpdate,
-        )
-    }
+    ) = dbQuery.update(
+        "update person set enhet_ref = :enhetNr, enhet_ref_oppdatert = now() where id = :personId",
+        "enhetNr" to enhetNr,
+        "personId" to personId,
+    )
 
     protected fun opprettEgenAnsatt(
         personId: Long,
         erEgenAnsatt: Boolean,
-    ) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val statement =
-            "INSERT INTO egen_ansatt VALUES($personId, $erEgenAnsatt, now())"
-        requireNotNull(session.run(queryOf(statement).asUpdate))
-    }
+    ) = dbQuery.update(
+        "INSERT INTO egen_ansatt VALUES(:personId, :erEgenAnsatt, now())",
+        "personId" to personId,
+        "erEgenAnsatt" to erEgenAnsatt,
+    )
 
     protected fun opprettArbeidsgiver(
         organisasjonsnummer: String = ORGANISASJONSNUMMER,
         bransjer: List<String> = emptyList(),
-    ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-        val bransjeid = opprettBransjer(bransjer)
-        val navnid = opprettArbeidsgivernavn()
+    ): Long {
+        val bransjeId = opprettBransjer(bransjer)
+        val navnId = opprettArbeidsgivernavn()
 
-        @Language("PostgreSQL")
-        val statement =
-            "INSERT INTO arbeidsgiver(organisasjonsnummer, navn_ref, bransjer_ref) VALUES(?, ?, ?) ON CONFLICT DO NOTHING"
-        requireNotNull(
-            session.run(
-                queryOf(
-                    statement,
-                    organisasjonsnummer,
-                    navnid,
-                    bransjeid,
-                ).asUpdateAndReturnGeneratedKey,
-            ),
+        return requireNotNull(
+            dbQuery.updateAndReturnGeneratedKey(
+                """
+                INSERT INTO arbeidsgiver(organisasjonsnummer, navn_ref, bransjer_ref)
+                VALUES(:organisasjonsnummer, :navnId, :bransjeId) ON CONFLICT DO NOTHING
+                """.trimIndent(),
+                "organisasjonsnummer" to organisasjonsnummer,
+                "navnId" to navnId,
+                "bransjeId" to bransjeId,
+            )
         )
     }
 
-    private fun finnArbeidsgiverId(): Int =
-        requireNotNull(
-            sessionOf(dataSource).use { session ->
-                @Language("PostgreSQL")
-                val statement = "SELECT id FROM arbeidsgiver WHERE organisasjonsnummer = ?"
-                session.run(queryOf(statement, ORGANISASJONSNUMMER).map { it.int("id") }.asSingle)
-            },
-        )
+    private fun finnArbeidsgiverId(): Int = requireNotNull(
+        dbQuery.single(
+            "SELECT id FROM arbeidsgiver WHERE organisasjonsnummer = :organisasjonsnummer",
+            "organisasjonsnummer" to ORGANISASJONSNUMMER
+        ) { it.int("id") })
 
     protected fun opprettSaksbehandler(
         oid: UUID = SAKSBEHANDLER.oid,
@@ -599,63 +475,44 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         epost: String = SAKSBEHANDLER.epost,
         ident: String = SAKSBEHANDLER.ident,
     ): UUID {
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val statement = "INSERT INTO saksbehandler(oid, navn, epost, ident) VALUES (?, ?, ?, ?)"
-            session.run(queryOf(statement, oid, navn, epost, ident).asUpdate)
-        }
+        dbQuery.update(
+            "INSERT INTO saksbehandler(oid, navn, epost, ident) VALUES (:oid, :navn, :epost, :ident)",
+            "oid" to oid,
+            "navn" to navn,
+            "epost" to epost,
+            "ident" to ident
+        )
         return oid
     }
 
     protected fun opprettArbeidsforhold(
-        personid: Long,
-        arbeidsgiverid: Long,
-    ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-        @Language("PostgreSQL")
-        val statement =
-            "INSERT INTO arbeidsforhold(person_ref, arbeidsgiver_ref, startdato, sluttdato, stillingstittel, stillingsprosent) VALUES(?, ?, ?, ?, ?, ?)"
-        requireNotNull(
-            session.run(
-                queryOf(
-                    statement,
-                    personid,
-                    arbeidsgiverid,
-                    ARBEIDSFORHOLD.start,
-                    ARBEIDSFORHOLD.slutt,
-                    ARBEIDSFORHOLD.tittel,
-                    ARBEIDSFORHOLD.prosent,
-                ).asUpdateAndReturnGeneratedKey,
-            ),
-        )
-    }
+        personId: Long,
+        arbeidsgiverId: Long,
+    ) = dbQuery.updateAndReturnGeneratedKey(
+        """
+        INSERT INTO arbeidsforhold (person_ref, arbeidsgiver_ref, startdato, sluttdato, stillingstittel, stillingsprosent)
+        VALUES (:personId, :arbeidsgiverId, :startdato, :sluttdato, :tittel, :prosent)
+        """.trimIndent(),
+        "personId" to personId,
+        "arbeidsgiverId" to arbeidsgiverId,
+        "startdato" to ARBEIDSFORHOLD.start,
+        "sluttdato" to ARBEIDSFORHOLD.slutt,
+        "tittel" to ARBEIDSFORHOLD.tittel,
+        "prosent" to ARBEIDSFORHOLD.prosent,
+    )
 
-    private fun opprettBransjer(bransjer: List<String>) =
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            @Language("PostgreSQL")
-            val statement = "INSERT INTO arbeidsgiver_bransjer(bransjer) VALUES(?)"
-            requireNotNull(
-                session.run(
-                    queryOf(
-                        statement,
-                        objectMapper.writeValueAsString(bransjer),
-                    ).asUpdateAndReturnGeneratedKey,
-                ),
-            )
-        }
+    private fun opprettBransjer(bransjer: List<String>) = dbQuery.updateAndReturnGeneratedKey(
+        "INSERT INTO arbeidsgiver_bransjer(bransjer) VALUES (:bransjer::json)",
+        "bransjer" to objectMapper.writeValueAsString(bransjer),
+    )
 
-    private fun opprettArbeidsgivernavn() =
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            @Language("PostgreSQL")
-            val statement = "INSERT INTO arbeidsgiver_navn(navn) VALUES(?)"
-            requireNotNull(session.run(queryOf(statement, ARBEIDSGIVER_NAVN).asUpdateAndReturnGeneratedKey))
-        }
+    private fun opprettArbeidsgivernavn() = dbQuery.updateAndReturnGeneratedKey(
+        "INSERT INTO arbeidsgiver_navn (navn) VALUES (:arbeidsgivernavn)", "arbeidsgivernavn" to ARBEIDSGIVER_NAVN
+    )
 
-    private fun opprettInfotrygdutbetalinger() =
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            @Language("PostgreSQL")
-            val statement = "INSERT INTO infotrygdutbetalinger(data) VALUES('[]')"
-            requireNotNull(session.run(queryOf(statement).asUpdateAndReturnGeneratedKey))
-        }
+    private fun opprettInfotrygdutbetalinger() = dbQuery.updateAndReturnGeneratedKey(
+        "INSERT INTO infotrygdutbetalinger(data) VALUES('[]')"
+    )
 
     private fun opprettOppgave(
         status: Oppgavestatus = Oppgavestatus.AvventerSaksbehandler,
@@ -665,42 +522,32 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         kanAvvises: Boolean = true,
     ): Long {
         val commandContextId = UUID.randomUUID()
-        return requireNotNull(
-            sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-                @Language("PostgreSQL")
-                val statement =
-                    "INSERT INTO oppgave(utbetaling_id, opprettet, oppdatert, status, vedtak_ref, command_context_id, kan_avvises) VALUES(?, ?, now(), CAST(? as oppgavestatus), ?, ?, ?)"
-                session.run(
-                    queryOf(
-                        statement,
-                        utbetalingId,
-                        opprettet,
-                        status.name,
-                        vedtakRef,
-                        commandContextId,
-                        kanAvvises,
-                    ).asUpdateAndReturnGeneratedKey,
-                )
-            },
+        val oppgaveId = dbQuery.updateAndReturnGeneratedKey(
+            """
+            INSERT INTO oppgave (utbetaling_id, opprettet, oppdatert, status, vedtak_ref, command_context_id, kan_avvises)
+            VALUES (:utbetalingId, :opprettet, now(), CAST(:status as oppgavestatus), :vedtakRef, :contextId, :kanAvvises)
+            """.trimIndent(),
+            "utbetalingId" to utbetalingId,
+            "opprettet" to opprettet,
+            "status" to status.name,
+            "vedtakRef" to vedtakRef,
+            "contextId" to commandContextId,
+            "kanAvvises" to kanAvvises,
         )
+        return requireNotNull(oppgaveId)
     }
 
     private fun opprettHendelse(
         hendelseId: UUID,
         fødselsnummer: String = FØDSELSNUMMER,
-    ) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val statement = """
-            INSERT INTO hendelse(id, data, type)
-            VALUES (:hendelseId, '{"fødselsnummer": "$fødselsnummer"}', 'type')
+    ) = dbQuery.update(
         """
-        session.run(
-            queryOf(
-                statement,
-                mapOf("hendelseId" to hendelseId),
-            ).asUpdate,
-        )
-    }
+        INSERT INTO hendelse (id, data, type)
+        VALUES (:hendelseId, :data::json, 'type')
+        """.trimIndent(),
+        "hendelseId" to hendelseId,
+        "data" to """ { "fødselsnummer": "$fødselsnummer" } """
+    )
 
     private fun opprettAutomatisering(
         automatisert: Boolean,
@@ -708,65 +555,40 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID,
         hendelseId: UUID,
         utbetalingId: UUID = UUID.randomUUID(),
-    ) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val statement = """
-                INSERT INTO automatisering (vedtaksperiode_ref, hendelse_ref, automatisert, stikkprøve, utbetaling_id)
-                VALUES ((SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId), :hendelseId, :automatisert, :stikkproeve, :utbetalingId);
-            """
-        session.run(
-            queryOf(
-                statement,
-                mapOf(
-                    "vedtaksperiodeId" to vedtaksperiodeId,
-                    "hendelseId" to hendelseId,
-                    "automatisert" to automatisert,
-                    "stikkproeve" to stikkprøve,
-                    "utbetalingId" to utbetalingId,
-                ),
-            ).asUpdate,
-        )
-    }
+    ) = dbQuery.update(
+        """
+        INSERT INTO automatisering (vedtaksperiode_ref, hendelse_ref, automatisert, stikkprøve, utbetaling_id)
+        VALUES ((SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId), :hendelseId, :automatisert, :stikkproeve, :utbetalingId);
+        """.trimIndent(),
+        "vedtaksperiodeId" to vedtaksperiodeId,
+        "hendelseId" to hendelseId,
+        "automatisert" to automatisert,
+        "stikkproeve" to stikkprøve,
+        "utbetalingId" to utbetalingId,
+    )
 
     protected fun opprettInntekt(
         personId: Long,
         skjæringstidspunkt: LocalDate,
         inntekter: List<Inntekter>,
-    ) = sessionOf(dataSource).use { session ->
-        session.transaction { transaction ->
-            @Language("PostgreSQL")
-            val query = """
-                        INSERT INTO inntekt (person_ref, skjaeringstidspunkt, inntekter)
-                        VALUES (:person_ref, :skjaeringstidspunkt, :inntekter::json)
-                    """
-            transaction.run(
-                queryOf(
-                    query,
-                    mapOf(
-                        "person_ref" to personId,
-                        "skjaeringstidspunkt" to skjæringstidspunkt,
-                        "inntekter" to objectMapper.writeValueAsString(inntekter),
-                    ),
-                ).asExecute,
-            )
-        }
-    }
+    ) = dbQuery.update(
+        """
+        INSERT INTO inntekt (person_ref, skjaeringstidspunkt, inntekter)
+        VALUES (:person_ref, :skjaeringstidspunkt, :inntekter::json)
+        """.trimIndent(),
+        "person_ref" to personId,
+        "skjaeringstidspunkt" to skjæringstidspunkt,
+        "inntekter" to objectMapper.writeValueAsString(inntekter),
+        )
 
     protected fun tildelOppgave(
         oppgaveRef: Long,
         saksbehandlerOid: UUID,
-    ) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val statement =
-            "INSERT INTO tildeling(saksbehandler_ref, oppgave_id_ref) VALUES(?, ?)"
-        session.run(
-            queryOf(
-                statement,
-                saksbehandlerOid,
-                oppgaveRef,
-            ).asUpdate,
-        )
-    }
+    ) = dbQuery.update(
+        "INSERT INTO tildeling (saksbehandler_ref, oppgave_id_ref) VALUES (:oid, :oppgaveRef)",
+        "oid" to saksbehandlerOid,
+        "oppgaveRef" to oppgaveRef,
+    )
 
     open fun mockSnapshot(
         fødselsnummer: String = FØDSELSNUMMER,
@@ -950,30 +772,17 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         generasjonRef: Long,
         forventetAntall: Int,
     ) {
-        @Language("PostgreSQL")
-        val query =
-            "SELECT COUNT(1) FROM selve_varsel sv WHERE sv.generasjon_ref = ? AND status = 'GODKJENT'"
-        val antall =
-            sessionOf(dataSource).use { session ->
-                session.run(queryOf(query, generasjonRef).map { it.int(1) }.asSingle)
-            }
+        val antall = dbQuery.single(
+            "SELECT COUNT(1) FROM selve_varsel sv WHERE sv.generasjon_ref = :generasjonRef AND status = 'GODKJENT'",
+            "generasjonRef" to generasjonRef
+        ) { it.int(1) }
         assertEquals(forventetAntall, antall)
     }
 
-    protected fun finnOppgaveIdFor(vedtaksperiodeId: UUID): Long =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query =
-                "SELECT o.id FROM oppgave o JOIN vedtak v ON v.id = o.vedtak_ref WHERE v.vedtaksperiode_id = :vedtaksperiode_id;"
-            return requireNotNull(
-                session.run(
-                    queryOf(
-                        query,
-                        mapOf("vedtaksperiode_id" to vedtaksperiodeId),
-                    ).map { it.long("id") }.asSingle,
-                ),
-            )
-        }
+    protected fun finnOppgaveIdFor(vedtaksperiodeId: UUID): Long = dbQuery.single(
+        "SELECT o.id FROM oppgave o JOIN vedtak v ON v.id = o.vedtak_ref WHERE v.vedtaksperiode_id = :vedtaksperiode_id;",
+        "vedtaksperiode_id" to vedtaksperiodeId
+    ) { it.long("id") }.let(::requireNotNull)
 
     protected data class Navn(
         val fornavn: String,
