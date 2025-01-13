@@ -16,7 +16,7 @@ import java.util.UUID
 private const val AUTOMATISK_BEHANDLET_IDENT = "Automatisk behandlet"
 private const val AUTOMATISK_BEHANDLET_EPOSTADRESSE = "tbd@nav.no"
 
-internal fun UtgåendeHendelse.somJsonMessage(fødselsnummer: String): JsonMessage {
+fun UtgåendeHendelse.somJsonMessage(fødselsnummer: String): JsonMessage {
     return JsonMessage.newMessage(eventName(), mapOf("fødselsnummer" to fødselsnummer) + detaljer())
 }
 

@@ -102,7 +102,7 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 import javax.sql.DataSource
 
-internal class SaksbehandlerMediator(
+class SaksbehandlerMediator(
     dataSource: DataSource,
     private val versjonAvKode: String,
     private val rapidsConnection: RapidsConnection,

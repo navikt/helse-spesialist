@@ -11,7 +11,7 @@ import org.flywaydb.core.Flyway
 import java.time.Duration
 import javax.sql.DataSource
 
-internal class DataSourceBuilder(env: Environment) {
+class DataSourceBuilder(env: Environment) {
     private val databaseHost: String = requireNotNull(env["DATABASE_HOST"]) { "host må settes" }
     private val databasePort: String = requireNotNull(env["DATABASE_PORT"]) { "port må settes" }
     private val databaseName: String = requireNotNull(env["DATABASE_DATABASE"]) { "databasenavn må settes" }
@@ -63,11 +63,11 @@ internal class DataSourceBuilder(env: Environment) {
             .load()
             .migrate()
 
-    internal fun getDataSource(): HikariDataSource {
+    fun getDataSource(): HikariDataSource {
         return HikariDataSource(hikariConfig)
     }
 
-    internal fun migrate() {
+    fun migrate() {
         val dataSource = HikariDataSource(hikariMigrationConfig)
         dataSource.use {
             runMigration(it)

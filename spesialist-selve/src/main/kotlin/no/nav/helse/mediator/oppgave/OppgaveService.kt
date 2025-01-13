@@ -61,7 +61,7 @@ interface Oppgavefinner {
     )
 }
 
-internal class OppgaveService(
+class OppgaveService(
     private val oppgaveDao: OppgaveDao,
     private val tildelingRepository: TildelingRepository,
     private val reservasjonRepository: ReservasjonRepository,

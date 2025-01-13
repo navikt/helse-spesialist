@@ -67,7 +67,7 @@ data class SykepengegrunnlagsArbeidsgiver(
     val skjønnsfastsatt: Double?,
 )
 
-internal class Godkjenningsbehov(
+class Godkjenningsbehov(
     override val id: UUID,
     private val fødselsnummer: String,
     val organisasjonsnummer: String,

@@ -17,7 +17,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.sql.DataSource
 
-internal class PersonDao(
+class PersonDao(
     queryRunner: QueryRunner,
 ) : PersonRepository, QueryRunner by queryRunner {
     constructor(session: Session) : this(MedSession(session))

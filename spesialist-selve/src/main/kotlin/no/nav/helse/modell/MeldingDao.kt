@@ -55,7 +55,7 @@ import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 
-internal class MeldingDao(queryRunner: QueryRunner) : MeldingRepository, QueryRunner by queryRunner {
+class MeldingDao(queryRunner: QueryRunner) : MeldingRepository, QueryRunner by queryRunner {
     constructor(session: Session) : this(MedSession(session))
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
@@ -145,13 +145,13 @@ internal class MeldingDao(queryRunner: QueryRunner) : MeldingRepository, QueryRu
             }
         }
 
-    internal data class OverstyringIgangsattKorrigertSøknad(
+    data class OverstyringIgangsattKorrigertSøknad(
         val periodeForEndringFom: LocalDate,
         val meldingId: String,
         val berørtePerioder: List<BerørtPeriode>,
     )
 
-    internal data class BerørtPeriode(
+    data class BerørtPeriode(
         val vedtaksperiodeId: UUID,
         val periodeFom: LocalDate,
         val orgnummer: String,

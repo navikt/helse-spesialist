@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 import javax.sql.DataSource
 
-internal class GenerasjonService(dataSource: DataSource) {
+class GenerasjonService(dataSource: DataSource) {
     private val pgGenerasjonDao = PgGenerasjonDao(dataSource)
     private val hentedeGenerasjoner: MutableMap<UUID, List<BehandlingDto>> = mutableMapOf()
 

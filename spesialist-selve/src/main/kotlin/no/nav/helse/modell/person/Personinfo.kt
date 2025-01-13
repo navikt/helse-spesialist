@@ -5,11 +5,11 @@ import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
 
-internal class HentPersoninfoløsninger(private val løsninger: List<HentPersoninfoløsning>) {
+class HentPersoninfoløsninger(private val løsninger: List<HentPersoninfoløsning>) {
     internal fun relevantLøsning(ident: String) = løsninger.find { it.ident == ident }
 }
 
-internal class HentPersoninfoløsning(
+class HentPersoninfoløsning(
     val ident: String,
     private val fornavn: String,
     private val mellomnavn: String?,

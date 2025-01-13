@@ -76,7 +76,7 @@ import javax.sql.DataSource
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
-internal class MeldingMediator(
+class MeldingMediator(
     private val dataSource: DataSource,
     private val rapidsConnection: RapidsConnection,
     private val personDao: PersonDao = PersonDao(dataSource),

@@ -1,6 +1,6 @@
 package no.nav.helse.modell.kommando
 
-internal interface Command {
+interface Command {
     fun execute(context: CommandContext): Boolean
 
     fun resume(context: CommandContext) = true

@@ -2,7 +2,7 @@ package no.nav.helse.modell.varsel
 
 import javax.sql.DataSource
 
-internal class VarselRepository(dataSource: DataSource) {
+class VarselRepository(dataSource: DataSource) {
     private val varselDao = PgVarselDao(dataSource)
     private val definisjonDao = DefinisjonDao(dataSource)
 

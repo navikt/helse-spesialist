@@ -12,7 +12,7 @@ import no.nav.helse.modell.kommando.OpprettMinimalArbeidsgiverCommand
 import no.nav.helse.modell.kommando.OpprettMinimalPersonCommand
 import java.util.UUID
 
-internal class SøknadSendt(
+class SøknadSendt(
     override val id: UUID,
     private val fødselsnummer: String,
     val aktørId: String,
@@ -41,7 +41,7 @@ internal class SøknadSendt(
     }
 }
 
-internal class SøknadSendtCommand(
+class SøknadSendtCommand(
     fødselsnummer: String,
     aktørId: String,
     organisasjonsnummer: String,

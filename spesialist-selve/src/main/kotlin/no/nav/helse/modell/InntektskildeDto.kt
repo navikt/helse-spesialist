@@ -2,7 +2,7 @@ package no.nav.helse.modell
 
 import java.time.LocalDate
 
-internal enum class InntektskildetypeDto {
+enum class InntektskildetypeDto {
     ORDINÆR,
     ENKELTPERSONFORETAK,
     ;
@@ -15,7 +15,7 @@ internal enum class InntektskildetypeDto {
     }
 }
 
-internal sealed interface InntektskildeDto {
+sealed interface InntektskildeDto {
     val identifikator: String
     val type: InntektskildetypeDto
 

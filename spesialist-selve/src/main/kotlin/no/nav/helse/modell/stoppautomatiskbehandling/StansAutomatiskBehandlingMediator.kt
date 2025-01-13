@@ -32,7 +32,7 @@ import no.nav.helse.spesialist.api.graphql.schema.UnntattFraAutomatiskGodkjennin
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-internal class StansAutomatiskBehandlingMediator(
+class StansAutomatiskBehandlingMediator(
     private val stansAutomatiskBehandlingRepository: StansAutomatiskBehandlingRepository,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val oppgaveDao: OppgaveDao,

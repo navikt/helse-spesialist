@@ -6,7 +6,7 @@ import org.intellij.lang.annotations.Language
 import java.util.UUID
 import javax.sql.DataSource
 
-internal class MeldingDuplikatkontrollDao(private val dataSource: DataSource) {
+class MeldingDuplikatkontrollDao(private val dataSource: DataSource) {
     internal fun lagre(
         meldingId: UUID,
         type: String,

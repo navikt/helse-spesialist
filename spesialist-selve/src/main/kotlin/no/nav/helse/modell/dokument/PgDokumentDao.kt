@@ -8,7 +8,7 @@ import no.nav.helse.objectMapper
 import java.util.UUID
 import javax.sql.DataSource
 
-internal interface DokumentDao {
+interface DokumentDao {
     fun lagre(
         fødselsnummer: String,
         dokumentId: UUID,
@@ -23,7 +23,7 @@ internal interface DokumentDao {
     fun slettGamleDokumenter(): Int
 }
 
-internal class PgDokumentDao(queryRunner: QueryRunner) : DokumentDao, QueryRunner by queryRunner {
+class PgDokumentDao(queryRunner: QueryRunner) : DokumentDao, QueryRunner by queryRunner {
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun lagre(

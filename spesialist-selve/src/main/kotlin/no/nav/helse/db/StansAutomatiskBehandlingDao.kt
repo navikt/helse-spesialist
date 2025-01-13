@@ -6,7 +6,7 @@ import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMe
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak
 import javax.sql.DataSource
 
-internal class StansAutomatiskBehandlingDao(queryRunner: QueryRunner) :
+class StansAutomatiskBehandlingDao(queryRunner: QueryRunner) :
     StansAutomatiskBehandlingRepository, QueryRunner by queryRunner {
     constructor(session: Session) : this(MedSession(session))
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))

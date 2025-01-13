@@ -4,6 +4,9 @@ plugins {
 
 group = "no.nav.helse"
 
+val testcontainersVersion = "1.20.4"
+val mockOAuth2ServerVersion = "2.1.9"
+
 repositories {
     mavenCentral()
 }
@@ -13,6 +16,10 @@ dependencies {
     implementation(project(":spesialist-api"))
     implementation(project(":spesialist-felles"))
     implementation(libs.rapids.and.rivers)
+
+    testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
+    testImplementation("no.nav.security:mock-oauth2-server:$mockOAuth2ServerVersion")
+    api("org.testcontainers:kafka:$testcontainersVersion")
 }
 
 kotlin {

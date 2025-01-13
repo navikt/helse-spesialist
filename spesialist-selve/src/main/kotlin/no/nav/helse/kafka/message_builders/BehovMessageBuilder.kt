@@ -4,7 +4,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.helse.modell.melding.Behov
 import java.util.UUID
 
-internal fun Collection<Behov>.somJsonMessage(
+fun Collection<Behov>.somJsonMessage(
     contextId: UUID,
     fødselsnummer: String,
     hendelseId: UUID,

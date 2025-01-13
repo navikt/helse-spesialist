@@ -4,8 +4,8 @@ import no.nav.helse.HelseDao
 import no.nav.helse.mediator.meldinger.PoisonPills
 import javax.sql.DataSource
 
-internal class PoisonPillDao(dataSource: DataSource) : HelseDao(dataSource) {
-    internal fun poisonPills(): PoisonPills {
+class PoisonPillDao(dataSource: DataSource) : HelseDao(dataSource) {
+    fun poisonPills(): PoisonPills {
         val lagredeVerdier =
             asSQL("SELECT identifikator, feltnavn FROM poison_pill")
                 .list {

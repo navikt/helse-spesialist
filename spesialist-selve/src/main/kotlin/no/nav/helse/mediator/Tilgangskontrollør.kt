@@ -36,7 +36,7 @@ abstract class MicrosoftTilgangskontroll(private val tilgangsgrupper: Tilgangsgr
         }
 }
 
-internal class TilgangskontrollørForReservasjon(
+class TilgangskontrollørForReservasjon(
     private val gruppekontroll: Gruppekontroll,
     tilgangsgrupper: Tilgangsgrupper,
 ) : MicrosoftTilgangskontroll(tilgangsgrupper) {

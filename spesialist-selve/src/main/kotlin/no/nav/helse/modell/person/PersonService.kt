@@ -8,7 +8,7 @@ import no.nav.helse.db.SykefraværstilfelleDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonService
 import javax.sql.DataSource
 
-internal class PersonService(
+class PersonService(
     private val dataSource: DataSource,
 ) {
     private val generasjonService = GenerasjonService(dataSource)

@@ -1,9 +1,8 @@
-package no.nav.helse.bootstrap
+package no.nav.helse
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.ktor.server.application.Application
-import no.nav.helse.DataSourceBuilder
-import no.nav.helse.Gruppekontroll
+import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgAvviksvurderingDao
@@ -78,7 +77,8 @@ class SpesialistApp(
     private lateinit var dokumentMediator: DokumentMediator
     private lateinit var subsumsjonsmelder: Subsumsjonsmelder
 
-    private val behandlingsstatistikkService = BehandlingsstatistikkService(behandlingsstatistikkDao = behandlingsstatistikkDao)
+    private val behandlingsstatistikkService =
+        BehandlingsstatistikkService(behandlingsstatistikkDao = behandlingsstatistikkDao)
     private val godkjenningMediator = GodkjenningMediator(opptegnelseDao)
     private val stansAutomatiskBehandlingMediator =
         StansAutomatiskBehandlingMediator(

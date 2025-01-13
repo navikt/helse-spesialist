@@ -311,9 +311,9 @@ internal class Automatisering(
     ) = automatiseringRepository.plukketUtTilStikkprøve(vedtaksperiodeId, hendelseId)
 }
 
-internal typealias PlukkTilManuell<String> = (String?) -> Boolean
+typealias PlukkTilManuell<String> = (String?) -> Boolean
 
-internal interface Stikkprøver {
+interface Stikkprøver {
     fun utsFlereArbeidsgivereFørstegangsbehandling(): Boolean
 
     fun utsFlereArbeidsgivereForlengelse(): Boolean

@@ -7,7 +7,7 @@ import no.nav.helse.modell.person.Person
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class StansAutomatiskBehandlingMelding(
+class StansAutomatiskBehandlingMelding(
     override val id: UUID,
     private val fødselsnummer: String,
     val kilde: String,

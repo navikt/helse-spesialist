@@ -16,7 +16,7 @@ import no.nav.helse.modell.kommando.CommandContextDao.CommandContextTilstand.SUS
 import java.util.UUID
 import javax.sql.DataSource
 
-internal class CommandContextDao(
+class CommandContextDao(
     queryRunner: QueryRunner,
 ) : CommandContextRepository, QueryRunner by queryRunner {
     constructor(session: Session) : this(MedSession(session))

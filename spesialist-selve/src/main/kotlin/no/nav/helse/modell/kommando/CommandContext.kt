@@ -10,7 +10,7 @@ import no.nav.helse.modell.melding.UtgåendeHendelse
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-internal class CommandContext(
+class CommandContext(
     private val id: UUID,
     sti: List<Int> = emptyList(),
     private val hash: UUID? = null,

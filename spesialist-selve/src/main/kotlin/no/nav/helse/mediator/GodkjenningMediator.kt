@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class GodkjenningMediator(private val opptegnelseRepository: OpptegnelseRepository) {
+class GodkjenningMediator(private val opptegnelseRepository: OpptegnelseRepository) {
     internal fun saksbehandlerUtbetaling(
         context: CommandContext,
         behov: GodkjenningsbehovData,

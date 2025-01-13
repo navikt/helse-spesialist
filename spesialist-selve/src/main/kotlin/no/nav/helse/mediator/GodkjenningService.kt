@@ -25,7 +25,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-internal class GodkjenningService(
+class GodkjenningService(
     private val dataSource: DataSource,
     private val oppgaveDao: OppgaveDao = PgOppgaveDao(dataSource),
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),

@@ -7,7 +7,7 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import java.util.UUID
 import javax.sql.DataSource
 
-internal class PgTotrinnsvurderingDao(
+class PgTotrinnsvurderingDao(
     queryRunner: QueryRunner,
 ) : TotrinnsvurderingDao, QueryRunner by queryRunner {
     constructor(session: Session) : this(MedSession(session))

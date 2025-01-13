@@ -74,7 +74,7 @@ import javax.sql.DataSource
 
 internal typealias Kommandostarter = Personmelding.(Kommandofabrikk.() -> Command?) -> Unit
 
-internal class Kommandofabrikk(
+class Kommandofabrikk(
     private val dataSource: DataSource,
     oppgaveService: () -> OppgaveService,
     private val godkjenningMediator: GodkjenningMediator,

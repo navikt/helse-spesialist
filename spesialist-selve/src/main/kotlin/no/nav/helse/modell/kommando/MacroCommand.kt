@@ -2,7 +2,7 @@ package no.nav.helse.modell.kommando
 
 import org.slf4j.LoggerFactory
 
-internal abstract class MacroCommand : Command {
+abstract class MacroCommand : Command {
     private var currentIndex: Int = 0
     private val historikk: MutableList<Command> = mutableListOf()
     protected abstract val commands: List<Command>

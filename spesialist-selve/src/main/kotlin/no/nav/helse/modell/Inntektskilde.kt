@@ -5,12 +5,12 @@ import no.nav.helse.modell.person.HentPersoninfoløsning
 import no.nav.helse.modell.person.HentPersoninfoløsninger
 import java.time.LocalDate
 
-internal enum class Inntektskildetype {
+enum class Inntektskildetype {
     ORDINÆR,
     ENKELTPERSONFORETAK,
 }
 
-internal sealed class Inntektskilde {
+sealed class Inntektskilde {
     internal companion object {
         private const val BRANSJE_PRIVATPERSON = "Privatperson"
         internal val BEST_ETTER_DATO = LocalDate.now().minusDays(14)

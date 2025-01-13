@@ -1,5 +1,4 @@
 val graphQLKotlinVersion = "8.2.1"
-val mockOAuth2ServerVersion = "2.1.9"
 
 plugins {
     kotlin("plugin.serialization") version "2.0.20"
@@ -12,13 +11,11 @@ dependencies {
     api(libs.bundles.db)
     implementation(project(":spesialist-felles"))
     implementation(project(":spesialist-api"))
-    implementation(project(":spesialist-modell"))
+    api(project(":spesialist-modell"))
 
     testImplementation(testFixtures(project(":spesialist-felles")))
     testImplementation(libs.rapids.and.rivers.test)
     testImplementation(libs.bundles.ktor.server)
     testImplementation("com.expediagroup:graphql-kotlin-ktor-server:$graphQLKotlinVersion")
     testImplementation(libs.testcontainers.postgresql)
-    testImplementation("no.nav.security:mock-oauth2-server:$mockOAuth2ServerVersion")
-    api(libs.testcontainers.kafka)
 }

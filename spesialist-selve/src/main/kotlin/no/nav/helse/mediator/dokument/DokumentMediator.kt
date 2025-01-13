@@ -13,7 +13,7 @@ import no.nav.helse.spesialist.api.Dokumenthåndterer
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-internal class DokumentMediator(
+class DokumentMediator(
     private val dokumentDao: DokumentDao,
     private val rapidsConnection: RapidsConnection,
     private val retries: Int = 50,
