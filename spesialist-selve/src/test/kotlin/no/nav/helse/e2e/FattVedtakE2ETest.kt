@@ -85,6 +85,11 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         assertEquals("EtterSkjønn", sisteHendelse["sykepengegrunnlagsfakta"]["fastsatt"].asText())
     }
 
+    /*
+    Denne testen er litt wonky, fordi den tester et case som i virkelighetens verden involverer en spouting fra oss
+    utviklere. Testriggen støtter ikke å sende inn et frittstående godkjenningsbehov (tilsvarende når spleis har blitt
+    påminnet), så vi må kjøre fyll "reberegningsløype".
+     */
     @Test
     fun `Velger nyeste skjønnsmessig fastsettelse`() {
         vedtaksløsningenMottarNySøknad()
@@ -93,20 +98,19 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         håndterSkjønnsfastsattSykepengegrunnlag(
             arbeidsgivere = listOf(skjønnsvurdering().copy(begrunnelseFritekst = "første tekst"))
         )
-        val IdNyUtbetaling = UUID.randomUUID()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harRisikovurdering = true,
             harOppdatertMetadata = true,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = IdNyUtbetaling)
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID())
         )
         håndterSkjønnsfastsattSykepengegrunnlag(
             arbeidsgivere = listOf(skjønnsvurdering().copy(begrunnelseFritekst = "andre tekst"))
         )
-        // Spleis sender ikke nytt godkjenningsbehov per nå, i prod er det utviklerne som spouter påminnelse
+        // Skulle ha vært et frittstående (påminnet) godkjenningsbehov
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harRisikovurdering = true,
             harOppdatertMetadata = true,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = IdNyUtbetaling)
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID())
         )
         håndterSaksbehandlerløsning()
         håndterAvsluttetMedVedtak(fastsattType = "EtterSkjønn")
