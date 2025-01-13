@@ -1,7 +1,7 @@
 package no.nav.helse.e2e
 
-import java.util.UUID
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class NyeVarslerE2ETest : AbstractE2ETest() {
 

@@ -9,7 +9,7 @@ import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetUtenVedtakMessage
 
-internal class AvsluttetUtenVedtakRiver(
+class AvsluttetUtenVedtakRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
     override fun preconditions(): River.PacketValidation {

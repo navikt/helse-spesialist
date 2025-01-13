@@ -21,7 +21,7 @@ import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
 import java.time.LocalDate
 import java.util.UUID
 
-internal class GodkjenningsbehovRiver(
+class GodkjenningsbehovRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
     override fun preconditions(): River.PacketValidation {

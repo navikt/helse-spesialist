@@ -1,8 +1,8 @@
 package no.nav.helse.mediator
 
-import no.nav.helse.e2e.AbstractE2ETest
 import kotliquery.sessionOf
 import no.nav.helse.TestRapidHelpers.contextId
+import no.nav.helse.e2e.AbstractE2ETest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue

@@ -16,7 +16,7 @@ import no.nav.helse.mediator.meldinger.løsninger.isSameOrBefore
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
-internal class FullmaktLøsningRiver(
+class FullmaktLøsningRiver(
     private val meldingMediator: MeldingMediator,
 ) : SpesialistRiver {
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")

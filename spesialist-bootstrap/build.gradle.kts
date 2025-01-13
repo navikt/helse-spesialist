@@ -12,9 +12,10 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":spesialist-selve"))
-    implementation(project(":spesialist-api"))
-    implementation(project(":spesialist-felles"))
+    api(project(":spesialist-kafka"))
+    api(project(":spesialist-selve"))
+    api(project(":spesialist-api"))
+    api(project(":spesialist-felles"))
     implementation(libs.rapids.and.rivers)
 
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")

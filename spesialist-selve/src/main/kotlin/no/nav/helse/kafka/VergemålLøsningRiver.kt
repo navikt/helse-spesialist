@@ -11,7 +11,7 @@ import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
 import no.nav.helse.modell.vergemal.VergemålOgFremtidsfullmakt
 
-internal class VergemålLøsningRiver(
+class VergemålLøsningRiver(
     private val meldingMediator: MeldingMediator,
 ) : SpesialistRiver {
     override fun preconditions(): River.PacketValidation {

@@ -5,7 +5,9 @@ include(
     "spesialist-selve",
     "spesialist-opprydding-dev",
     "spesialist-modell",
+    "spesialist-kafka",
     "spesialist-bootstrap",
+    "spesialist-e2e-tests",
 )
 
 dependencyResolutionManagement {

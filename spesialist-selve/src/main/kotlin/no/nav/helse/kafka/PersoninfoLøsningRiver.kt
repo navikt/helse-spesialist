@@ -15,7 +15,7 @@ import no.nav.helse.modell.person.HentPersoninfoløsninger
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.typer.Kjønn
 
-internal class PersoninfoløsningRiver(
+class PersoninfoløsningRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
     override fun preconditions(): River.PacketValidation {
@@ -58,7 +58,7 @@ internal class PersoninfoløsningRiver(
     }
 }
 
-internal class FlerePersoninfoRiver(
+class FlerePersoninfoRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
     override fun preconditions(): River.PacketValidation {

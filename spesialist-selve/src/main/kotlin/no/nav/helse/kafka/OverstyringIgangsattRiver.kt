@@ -10,7 +10,7 @@ import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import java.util.UUID
 
-internal class OverstyringIgangsattRiver(
+class OverstyringIgangsattRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
     override fun preconditions(): River.PacketValidation {

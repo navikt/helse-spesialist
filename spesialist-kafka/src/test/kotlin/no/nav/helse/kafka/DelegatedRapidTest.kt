@@ -1,4 +1,4 @@
-package no.nav.helse.mediator
+package no.nav.helse.kafka
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River

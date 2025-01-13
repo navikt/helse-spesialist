@@ -12,7 +12,7 @@ import no.nav.helse.modell.person.SøknadSendt
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-internal class SøknadSendtRiver(
+class SøknadSendtRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
     private val logg = LoggerFactory.getLogger(this::class.java)

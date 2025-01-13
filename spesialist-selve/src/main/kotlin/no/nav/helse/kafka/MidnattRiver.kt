@@ -10,7 +10,7 @@ import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import org.slf4j.LoggerFactory
 
-internal class MidnattRiver(
+class MidnattRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
     private companion object {

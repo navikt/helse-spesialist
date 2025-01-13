@@ -15,7 +15,7 @@ import no.nav.helse.mediator.meldinger.hendelser.VarseldefinisjonMessage
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-internal class VarseldefinisjonRiver(
+class VarseldefinisjonRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
     private companion object {

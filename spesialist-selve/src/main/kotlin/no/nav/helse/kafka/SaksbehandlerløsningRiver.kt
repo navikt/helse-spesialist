@@ -14,7 +14,7 @@ import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning.Saksbehandler
 import java.util.UUID
 
-internal class SaksbehandlerløsningRiver(
+class SaksbehandlerløsningRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
     override fun preconditions(): River.PacketValidation {

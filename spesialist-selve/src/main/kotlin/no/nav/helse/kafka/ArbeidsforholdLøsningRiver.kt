@@ -13,7 +13,7 @@ import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import org.slf4j.LoggerFactory
 
-internal class ArbeidsforholdLøsningRiver(
+class ArbeidsforholdLøsningRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")

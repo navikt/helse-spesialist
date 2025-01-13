@@ -10,7 +10,7 @@ dependencies {
     implementation(libs.rapids.and.rivers)
     api(libs.bundles.db)
     implementation(project(":spesialist-felles"))
-    implementation(project(":spesialist-api"))
+    api(project(":spesialist-api"))
     api(project(":spesialist-modell"))
 
     testImplementation(testFixtures(project(":spesialist-felles")))

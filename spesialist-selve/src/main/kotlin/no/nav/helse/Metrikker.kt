@@ -64,7 +64,7 @@ private val overstyringstellerBuilder =
         .tags("opplysningstype", "type")
         .withRegistry(registry)
 
-internal fun registrerTidsbrukForDuplikatsjekk(
+fun registrerTidsbrukForDuplikatsjekk(
     erDuplikat: Boolean,
     tid: Double,
 ) = duplikatsjekkTidsbrukMetrikkBuilder

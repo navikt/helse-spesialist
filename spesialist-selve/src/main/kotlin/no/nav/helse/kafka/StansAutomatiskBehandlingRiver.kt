@@ -11,7 +11,7 @@ import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMelding
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak
 
-internal class StansAutomatiskBehandlingRiver(
+class StansAutomatiskBehandlingRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
     override fun preconditions(): River.PacketValidation {

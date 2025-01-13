@@ -13,7 +13,7 @@ import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 
-internal class NyeVarslerRiver(
+class NyeVarslerRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
     override fun preconditions(): River.PacketValidation {

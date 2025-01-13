@@ -9,7 +9,7 @@ import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
 
-internal class VedtaksperiodeNyUtbetalingRiver(
+class VedtaksperiodeNyUtbetalingRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
     override fun preconditions(): River.PacketValidation {

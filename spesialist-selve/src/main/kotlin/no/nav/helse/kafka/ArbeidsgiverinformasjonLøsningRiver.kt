@@ -9,7 +9,7 @@ import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.arbeidsgiver.Arbeidsgiverinformasjonløsning
 
-internal class ArbeidsgiverinformasjonLøsningRiver(
+class ArbeidsgiverinformasjonLøsningRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
     override fun preconditions(): River.PacketValidation {

@@ -10,7 +10,7 @@ import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import org.slf4j.LoggerFactory
 
-internal class DokumentRiver(
+class DokumentRiver(
     private val meldingMediator: MeldingMediator,
 ) : SpesialistRiver {
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")

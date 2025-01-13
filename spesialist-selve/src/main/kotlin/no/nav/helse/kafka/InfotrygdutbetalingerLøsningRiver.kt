@@ -11,7 +11,7 @@ import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerløsning
 import org.slf4j.LoggerFactory
 
-internal class InfotrygdutbetalingerLøsningRiver(
+class InfotrygdutbetalingerLøsningRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")

@@ -16,6 +16,7 @@ import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.TildelingDao
+import no.nav.helse.kafka.RiverSetup
 import no.nav.helse.mediator.BehandlingsstatistikkService
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.GodkjenningService
@@ -173,6 +174,7 @@ class SpesialistApp(
                 kommandofabrikk = kommandofabrikk,
                 poisonPills = PoisonPillDao(dataSource).poisonPills(),
             )
+        RiverSetup(dataSource, rapidsConnection, meldingMediator).setUp()
         saksbehandlerMediator =
             SaksbehandlerMediator(
                 dataSource = dataSource,

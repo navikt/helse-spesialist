@@ -12,7 +12,7 @@ import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-internal class EndretSkjermetinfoRiver(
+class EndretSkjermetinfoRiver(
     private val meldingMediator: MeldingMediator,
 ) : SpesialistRiver {
     private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")

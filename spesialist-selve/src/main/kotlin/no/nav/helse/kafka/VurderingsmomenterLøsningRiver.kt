@@ -11,7 +11,7 @@ import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
 import java.util.UUID
 
-internal class VurderingsmomenterLøsningRiver(
+class VurderingsmomenterLøsningRiver(
     private val meldingMediator: MeldingMediator,
 ) : SpesialistRiver {
     override fun preconditions(): River.PacketValidation {

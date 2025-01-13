@@ -13,7 +13,7 @@ import no.nav.helse.modell.person.vedtaksperiode.Periode
 
 // I skrivende stund er det kun meldinger der tilbakedateringen er godkjent som
 // kommer til Spesialist, dvs. sendes på rapiden. Andre meldinger filtreres ut i sparkel-appen
-internal class TilbakedateringBehandletRiver(
+class TilbakedateringBehandletRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
     override fun preconditions(): River.PacketValidation {

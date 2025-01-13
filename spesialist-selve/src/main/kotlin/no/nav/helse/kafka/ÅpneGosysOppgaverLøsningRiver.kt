@@ -11,7 +11,7 @@ import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 
-internal class ÅpneGosysOppgaverLøsningRiver(
+class ÅpneGosysOppgaverLøsningRiver(
     private val meldingMediator: MeldingMediator,
 ) : SpesialistRiver {
     override fun preconditions(): River.PacketValidation {

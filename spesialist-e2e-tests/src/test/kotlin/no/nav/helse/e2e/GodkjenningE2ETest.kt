@@ -1,13 +1,12 @@
 package no.nav.helse.e2e
 
+import kotliquery.queryOf
+import kotliquery.sessionOf
+import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.AVBRUTT
 import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.FERDIG
 import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.NY
 import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.SUSPENDERT
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import no.nav.helse.GodkjenningsbehovTestdata
-import no.nav.helse.util.januar
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.VergemålType.mindreaarig
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.VergemålType.voksen
@@ -15,6 +14,7 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSystem
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.test.lagFødselsnummer
+import no.nav.helse.util.januar
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

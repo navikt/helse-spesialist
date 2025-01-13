@@ -12,7 +12,7 @@ import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.mediator.meldinger.løsninger.Inntektløsning
 
-internal class InntektLøsningRiver(
+class InntektLøsningRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
     override fun preconditions(): River.PacketValidation {

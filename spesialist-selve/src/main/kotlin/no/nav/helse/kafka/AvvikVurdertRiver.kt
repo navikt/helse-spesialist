@@ -19,7 +19,7 @@ import no.nav.helse.modell.vilkårsprøving.InntektDto
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntektDto
 import no.nav.helse.modell.vilkårsprøving.SammenligningsgrunnlagDto
 
-internal class AvvikVurdertRiver(
+class AvvikVurdertRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
     override fun preconditions(): River.PacketValidation {

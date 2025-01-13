@@ -2,57 +2,14 @@ package no.nav.helse.mediator
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers.River
-import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import io.micrometer.core.instrument.MeterRegistry
 import kotliquery.sessionOf
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.CommandContextRepository
-import no.nav.helse.kafka.AdressebeskyttelseEndretRiver
-import no.nav.helse.kafka.ArbeidsforholdLøsningRiver
-import no.nav.helse.kafka.ArbeidsgiverinformasjonLøsningRiver
-import no.nav.helse.kafka.AvsluttetMedVedtakRiver
-import no.nav.helse.kafka.AvsluttetUtenVedtakRiver
-import no.nav.helse.kafka.AvvikVurdertRiver
-import no.nav.helse.kafka.BehandlingOpprettetRiver
-import no.nav.helse.kafka.BehovtidsbrukMetrikkRiver
-import no.nav.helse.kafka.DokumentRiver
-import no.nav.helse.kafka.EgenAnsattLøsningRiver
-import no.nav.helse.kafka.EndretSkjermetinfoRiver
-import no.nav.helse.kafka.FlerePersoninfoRiver
-import no.nav.helse.kafka.FullmaktLøsningRiver
-import no.nav.helse.kafka.GodkjenningsbehovRiver
-import no.nav.helse.kafka.GosysOppgaveEndretRiver
-import no.nav.helse.kafka.HentEnhetLøsningRiver
-import no.nav.helse.kafka.InfotrygdutbetalingerLøsningRiver
-import no.nav.helse.kafka.InntektLøsningRiver
-import no.nav.helse.kafka.KlargjørPersonForVisningRiver
-import no.nav.helse.kafka.KommandokjedePåminnelseRiver
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
-import no.nav.helse.kafka.MidnattRiver
-import no.nav.helse.kafka.NyeVarslerRiver
-import no.nav.helse.kafka.OppdaterPersondataRiver
-import no.nav.helse.kafka.OverstyringIgangsattRiver
-import no.nav.helse.kafka.PersoninfoløsningRiver
-import no.nav.helse.kafka.SaksbehandlerløsningRiver
-import no.nav.helse.kafka.StansAutomatiskBehandlingRiver
-import no.nav.helse.kafka.SøknadSendtArbeidsledigRiver
-import no.nav.helse.kafka.SøknadSendtRiver
-import no.nav.helse.kafka.TilbakedateringBehandletRiver
-import no.nav.helse.kafka.UtbetalingEndretRiver
-import no.nav.helse.kafka.VarseldefinisjonRiver
-import no.nav.helse.kafka.VedtakFattetRiver
-import no.nav.helse.kafka.VedtaksperiodeForkastetRiver
-import no.nav.helse.kafka.VedtaksperiodeNyUtbetalingRiver
-import no.nav.helse.kafka.VedtaksperiodeReberegnetRiver
-import no.nav.helse.kafka.VergemålLøsningRiver
-import no.nav.helse.kafka.VurderingsmomenterLøsningRiver
-import no.nav.helse.kafka.ÅpneGosysOppgaverLøsningRiver
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
@@ -68,13 +25,10 @@ import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.objectMapper
-import no.nav.helse.registrerTidsbrukForDuplikatsjekk
 import no.nav.helse.spesialist.api.Personhåndterer
 import org.slf4j.LoggerFactory
 import java.util.UUID
 import javax.sql.DataSource
-import kotlin.time.DurationUnit
-import kotlin.time.measureTimedValue
 
 class MeldingMediator(
     private val dataSource: DataSource,
@@ -95,36 +49,12 @@ class MeldingMediator(
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    private fun skalBehandleMelding(melding: String): Boolean {
+    fun skalBehandleMelding(melding: String): Boolean {
         val jsonNode = objectMapper.readTree(melding)
         if (poisonPills.erPoisonPill(jsonNode)) return false
         if (env.erProd) return true
         return skalBehandleMeldingIDev(jsonNode)
     }
-
-    private fun erDuplikat(id: UUID): Boolean {
-        val (erDuplikat, tid) = measureTimedValue { meldingDuplikatkontrollDao.erBehandlet(id) }
-        logg.info("Det tok ${tid.inWholeMilliseconds} ms å gjøre duplikatsjekk mot databasen")
-        registrerTidsbrukForDuplikatsjekk(erDuplikat, tid.toDouble(DurationUnit.MILLISECONDS))
-        return erDuplikat
-    }
-
-    private fun duplikatsjekkendeRiver(river: River.PacketListener) =
-        object : River.PacketListener by river {
-            override fun onPacket(
-                packet: JsonMessage,
-                context: MessageContext,
-                metadata: MessageMetadata,
-                meterRegistry: MeterRegistry,
-            ) {
-                val id = packet.id.toUUID()
-                if (erDuplikat(id)) {
-                    logg.info("Ignorerer melding {} pga duplikatkontroll", id)
-                    return
-                }
-                river.onPacket(packet, context, metadata, meterRegistry)
-            }
-        }
 
     private fun skalBehandleMeldingIDev(jsonNode: JsonNode): Boolean {
         val eventName = jsonNode["@event_name"]?.asText()
@@ -150,65 +80,6 @@ class MeldingMediator(
         return harPerson
     }
 
-    init {
-        val delegatedRapid =
-            DelegatedRapid(rapidsConnection, ::nullstillTilstand, ::skalBehandleMelding, ::fortsett, ::errorHandler)
-        val rivers =
-            setOf(
-                GodkjenningsbehovRiver(this),
-                SøknadSendtRiver(this),
-                SøknadSendtArbeidsledigRiver(this),
-                PersoninfoløsningRiver(this),
-                FlerePersoninfoRiver(this),
-                HentEnhetLøsningRiver(this),
-                InfotrygdutbetalingerLøsningRiver(this),
-                SaksbehandlerløsningRiver(this),
-                ArbeidsgiverinformasjonLøsningRiver(this),
-                ArbeidsforholdLøsningRiver(this),
-                VedtaksperiodeForkastetRiver(this),
-                AdressebeskyttelseEndretRiver(this),
-                OverstyringIgangsattRiver(this),
-                EgenAnsattLøsningRiver(this),
-                VergemålLøsningRiver(this),
-                FullmaktLøsningRiver(this),
-                ÅpneGosysOppgaverLøsningRiver(this),
-                VurderingsmomenterLøsningRiver(this),
-                InntektLøsningRiver(this),
-                OppdaterPersondataRiver(this),
-                KlargjørPersonForVisningRiver(this),
-                UtbetalingEndretRiver(this),
-                VedtaksperiodeReberegnetRiver(this),
-                GosysOppgaveEndretRiver(this),
-                TilbakedateringBehandletRiver(this),
-                EndretSkjermetinfoRiver(this),
-                DokumentRiver(this),
-                VedtakFattetRiver(this),
-                NyeVarslerRiver(this),
-                AvvikVurdertRiver(this),
-                VarseldefinisjonRiver(this),
-                VedtaksperiodeNyUtbetalingRiver(this),
-                BehovtidsbrukMetrikkRiver(),
-                AvsluttetMedVedtakRiver(this),
-                AvsluttetUtenVedtakRiver(this),
-                MidnattRiver(this),
-                BehandlingOpprettetRiver(this),
-                KommandokjedePåminnelseRiver(this),
-                StansAutomatiskBehandlingRiver(this),
-            )
-        rivers.forEach { river ->
-            River(delegatedRapid)
-                .precondition(river.preconditions())
-                .validate(river.validations())
-                .register(duplikatsjekkendeRiver(river))
-                .onSuccess { packet, _, _, _ ->
-                    logg.info(
-                        "${river.name()} leste melding id=${packet.id}, event_name=${packet.eventName()}, meldingPasserteValidering=$meldingPasserteValidering",
-                    )
-                    meldingPasserteValidering = true
-                }
-        }
-    }
-
     private fun JsonMessage.eventName() =
         run {
             interestedIn("@event_name")
@@ -216,7 +87,7 @@ class MeldingMediator(
         }
 
     private var løsninger: Løsninger? = null
-    private var meldingPasserteValidering = false
+    var meldingPasserteValidering = false
 
     // samler opp løsninger
     fun løsning(
@@ -282,7 +153,7 @@ class MeldingMediator(
 
     fun slettGamleDokumenter(): Int = dokumentDao.slettGamleDokumenter()
 
-    private fun nullstillTilstand() {
+    fun nullstillTilstand() {
         løsninger = null
         meldingPasserteValidering = false
     }
@@ -325,7 +196,7 @@ class MeldingMediator(
         }
 
     // fortsetter en command (resume) med oppsamlet løsninger
-    private fun fortsett(message: String) {
+    fun fortsett(message: String) {
         val jsonNode = objectMapper.readTree(message)
         løsninger?.fortsett(this, jsonNode)
         if (meldingPasserteValidering) {
@@ -342,7 +213,7 @@ class MeldingMediator(
         }
     }
 
-    private fun errorHandler(
+    fun errorHandler(
         err: Exception,
         message: String,
     ) {

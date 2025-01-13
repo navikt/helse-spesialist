@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory
 import java.time.Duration
 import kotlin.time.toKotlinDuration
 
-internal class BehovtidsbrukMetrikkRiver : SpesialistRiver {
+class BehovtidsbrukMetrikkRiver : SpesialistRiver {
     private val logg: Logger = LoggerFactory.getLogger("MetrikkRiver")
 
     override fun preconditions(): River.PacketValidation {
