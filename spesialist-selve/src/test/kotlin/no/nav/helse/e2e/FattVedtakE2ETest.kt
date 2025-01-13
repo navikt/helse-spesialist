@@ -93,13 +93,20 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         håndterSkjønnsfastsattSykepengegrunnlag(
             arbeidsgivere = listOf(skjønnsvurdering().copy(begrunnelseFritekst = "første tekst"))
         )
-        håndterSkjønnsfastsattSykepengegrunnlag(
-            arbeidsgivere = listOf(skjønnsvurdering().copy(begrunnelseFritekst = "andre tekst"))
-        )
+        val IdNyUtbetaling = UUID.randomUUID()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harRisikovurdering = true,
             harOppdatertMetadata = true,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID())
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = IdNyUtbetaling)
+        )
+        håndterSkjønnsfastsattSykepengegrunnlag(
+            arbeidsgivere = listOf(skjønnsvurdering().copy(begrunnelseFritekst = "andre tekst"))
+        )
+        // Spleis sender ikke nytt godkjenningsbehov per nå, i prod er det utviklerne som spouter påminnelse
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
+            harRisikovurdering = true,
+            harOppdatertMetadata = true,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = IdNyUtbetaling)
         )
         håndterSaksbehandlerløsning()
         håndterAvsluttetMedVedtak(fastsattType = "EtterSkjønn")
