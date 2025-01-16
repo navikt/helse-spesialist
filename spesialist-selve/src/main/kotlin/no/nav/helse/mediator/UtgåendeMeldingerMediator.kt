@@ -1,8 +1,6 @@
 package no.nav.helse.mediator
 
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.MeldingPubliserer
-import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.kafka.message_builders.behovName
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.melding.Behov
@@ -39,13 +37,6 @@ class UtgåendeMeldingerMediator : CommandContextObserver {
 
     override fun tilstandEndret(event: KommandokjedeEndretEvent) {
         kommandokjedetilstandsendringer.add(event)
-    }
-
-    fun publiserOppsamledeMeldinger(
-        hendelse: Personmelding,
-        messageContext: MessageContext,
-    ) {
-        publiserOppsamledeMeldinger(hendelse, MessageContextMeldingPubliserer(messageContext))
     }
 
     fun publiserOppsamledeMeldinger(

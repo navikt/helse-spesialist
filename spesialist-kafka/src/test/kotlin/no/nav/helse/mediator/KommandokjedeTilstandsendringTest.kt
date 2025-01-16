@@ -2,6 +2,7 @@ package no.nav.helse.mediator
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import kotliquery.TransactionalSession
+import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.person.Person
 import no.nav.helse.spesialist.test.lagFødselsnummer
@@ -12,6 +13,7 @@ import java.util.UUID
 class KommandokjedeTilstandsendringTest {
     private val mediator = UtgåendeMeldingerMediator()
     private val testRapid = TestRapid()
+    private val publiserer = MessageContextMeldingPubliserer(testRapid)
     private val testmelding = object: Personmelding {
         override fun behandle(person: Person, kommandostarter: Kommandostarter, transactionalSession: TransactionalSession) {}
         override fun fødselsnummer(): String = lagFødselsnummer()
@@ -26,7 +28,7 @@ class KommandokjedeTilstandsendringTest {
         val hendelseId = UUID.randomUUID()
         val event = KommandokjedeEndretEvent.Ferdig(navn, contextId, hendelseId)
         mediator.tilstandEndret(event)
-        mediator.publiserOppsamledeMeldinger(testmelding, testRapid)
+        mediator.publiserOppsamledeMeldinger(testmelding, publiserer)
         val melding = testRapid.inspektør.message(0)
         assertEquals("kommandokjede_ferdigstilt", melding["@event_name"].asText())
         assertEquals(contextId, melding["commandContextId"].asUUID())
@@ -41,7 +43,7 @@ class KommandokjedeTilstandsendringTest {
         val hendelseId = UUID.randomUUID()
         val event = KommandokjedeEndretEvent.Suspendert(navn, listOf(1, 2, 3), contextId, hendelseId)
         mediator.tilstandEndret(event)
-        mediator.publiserOppsamledeMeldinger(testmelding, testRapid)
+        mediator.publiserOppsamledeMeldinger(testmelding, publiserer)
         val melding = testRapid.inspektør.message(0)
         assertEquals("kommandokjede_suspendert", melding["@event_name"].asText())
         assertEquals(contextId, melding["commandContextId"].asUUID())
@@ -56,7 +58,7 @@ class KommandokjedeTilstandsendringTest {
         val hendelseId = UUID.randomUUID()
         val event = KommandokjedeEndretEvent.Avbrutt(contextId, hendelseId)
         mediator.tilstandEndret(event)
-        mediator.publiserOppsamledeMeldinger(testmelding, testRapid)
+        mediator.publiserOppsamledeMeldinger(testmelding, publiserer)
         val melding = testRapid.inspektør.message(0)
         assertEquals("kommandokjede_avbrutt", melding["@event_name"].asText())
         assertEquals(contextId, melding["commandContextId"].asUUID())

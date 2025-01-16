@@ -6,6 +6,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import kotliquery.TransactionalSession
 import no.nav.helse.TestRapidHelpers.meldinger
+import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.melding.Sykepengevedtak
 import no.nav.helse.modell.melding.Sykepengevedtak.VedtakMedSkjønnsvurdering
@@ -29,6 +30,7 @@ import java.util.UUID
 
 internal class PubliserSykepengevedtakTest {
     private val testRapid = TestRapid()
+    private val publiserer = MessageContextMeldingPubliserer(testRapid)
     private val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
 
     private companion object {
@@ -82,7 +84,7 @@ internal class PubliserSykepengevedtakTest {
                 tags = setOf("IngenNyArbeidsgiverperiode"),
             )
         utgåendeMeldingerMediator.hendelse(ikkeRealitetsbehandlet)
-        utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, testRapid)
+        utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
         val eventer = testRapid.inspektør.meldinger()
 
         assertEquals(1, eventer.size)
@@ -140,7 +142,7 @@ internal class PubliserSykepengevedtakTest {
                 vedtakBegrunnelse = null,
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
-        utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, testRapid)
+        utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
         val eventer = testRapid.inspektør.meldinger()
 
         assertEquals(1, eventer.size)
@@ -212,7 +214,7 @@ internal class PubliserSykepengevedtakTest {
                 sammenligningsgrunnlag = sammenligningsgrunnlag(10000.0, ORGANISASJONSNUMMER),
                 )
         utgåendeMeldingerMediator.hendelse(infotrygd)
-        utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, testRapid)
+        utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
         val eventer = testRapid.inspektør.meldinger()
 
         assertEquals(1, eventer.size)
@@ -301,7 +303,7 @@ internal class PubliserSykepengevedtakTest {
                 sammenligningsgrunnlag = sammenligningsgrunnlag(10000.0, ORGANISASJONSNUMMER),
             )
         utgåendeMeldingerMediator.hendelse(spleis)
-        utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, testRapid)
+        utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
         val eventer = testRapid.inspektør.meldinger()
 
         assertEquals(1, eventer.size)
@@ -404,7 +406,7 @@ internal class PubliserSykepengevedtakTest {
                 sammenligningsgrunnlag = sammenligningsgrunnlag(12000.0, ORGANISASJONSNUMMER),
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
-        utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, testRapid)
+        utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
         val eventer = testRapid.inspektør.meldinger()
 
         assertEquals(1, eventer.size)
@@ -525,7 +527,7 @@ internal class PubliserSykepengevedtakTest {
                 sammenligningsgrunnlag = sammenligningsgrunnlag(13000.0, ORGANISASJONSNUMMER),
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
-        utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, testRapid)
+        utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
         val eventer = testRapid.inspektør.meldinger()
 
         assertEquals(1, eventer.size)
