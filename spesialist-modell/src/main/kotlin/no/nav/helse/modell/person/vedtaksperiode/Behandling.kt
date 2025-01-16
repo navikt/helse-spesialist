@@ -310,13 +310,13 @@ class Behandling private constructor(
             utbetalingId: UUID,
         ) {
             logg.error(
-                "{} er i {}. Utbetaling med {} forsøkt forkastet",
+                "Utbetaling med {} ble forsøkt forkastet, men det støttes ikke for {} som er i {}.",
                 keyValue("Behandling", behandling),
                 keyValue("tilstand", this::class.simpleName),
                 keyValue("utbetalingId", utbetalingId),
             )
             sikkerlogg.error(
-                "{} er i {}. Utbetaling med {} forsøkt forkastet",
+                "Utbetaling med {} ble forsøkt forkastet, men det støttes ikke for {} som er i {}.",
                 keyValue("Behandling", behandling),
                 keyValue("tilstand", this::class.simpleName),
                 keyValue("utbetalingId", utbetalingId),
