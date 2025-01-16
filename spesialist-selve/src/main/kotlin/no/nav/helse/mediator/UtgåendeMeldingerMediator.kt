@@ -59,7 +59,7 @@ class UtgåendeMeldingerMediator : CommandContextObserver {
             publiserer.publiser(
                 fødselsnummer = hendelse.fødselsnummer(),
                 hendelse = utgåendeHendelse,
-                hendelseNavn = hendelse.javaClass.simpleName,
+                årsak = hendelse.javaClass.simpleName,
             )
         }
     }

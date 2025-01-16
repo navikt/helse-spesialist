@@ -1,8 +1,6 @@
 package no.nav.helse.mediator
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import kotliquery.sessionOf
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.MeldingPubliserer
@@ -17,6 +15,8 @@ import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.modell.dokument.PgDokumentDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.CommandContextDao
+import no.nav.helse.modell.melding.KlargjørPersonForVisning
+import no.nav.helse.modell.melding.OppdaterPersondata
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.PersonService
 import no.nav.helse.modell.person.SøknadSendt
@@ -30,7 +30,7 @@ import javax.sql.DataSource
 
 class MeldingMediator(
     private val dataSource: DataSource,
-    private val rapidsConnection: RapidsConnection,
+    private val publiserer: MeldingPubliserer,
     private val personDao: PersonDao = PersonDao(dataSource),
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
     private val meldingDao: MeldingDao = MeldingDao(dataSource),
@@ -87,7 +87,7 @@ class MeldingMediator(
         contextId: UUID,
         behovId: UUID,
         løsning: Any,
-        publiserer: MeldingPubliserer,
+        kontekstbasertPubliserer: MeldingPubliserer,
     ) {
         withMDC(
             mapOf(
@@ -96,7 +96,7 @@ class MeldingMediator(
                 "opprinneligMeldingId" to "$hendelseId",
             ),
         ) {
-            løsninger(publiserer, hendelseId, contextId)?.also { it.add(hendelseId, contextId, løsning) }
+            løsninger(kontekstbasertPubliserer, hendelseId, contextId)?.also { it.add(hendelseId, contextId, løsning) }
                 ?: logg.info(
                     "mottok løsning som ikke kunne brukes fordi kommandoen ikke lengre er suspendert, eller fordi hendelsen er ukjent",
                 )
@@ -108,7 +108,7 @@ class MeldingMediator(
         contextId: UUID,
         hendelseId: UUID,
         påminnelse: Any,
-        publiserer: MeldingPubliserer,
+        kontekstbasertPubliserer: MeldingPubliserer,
     ) {
         withMDC(
             mapOf(
@@ -117,7 +117,7 @@ class MeldingMediator(
                 "meldingId" to "$meldingId",
             ),
         ) {
-            påminnelse(publiserer, hendelseId, contextId)?.also {
+            påminnelse(kontekstbasertPubliserer, hendelseId, contextId)?.also {
                 it.add(hendelseId, contextId, påminnelse)
                 it.fortsett(this)
             }
@@ -151,7 +151,7 @@ class MeldingMediator(
     }
 
     private fun løsninger(
-        publiserer: MeldingPubliserer,
+        kontekstbasertPubliserer: MeldingPubliserer,
         meldingId: UUID,
         contextId: UUID,
     ): Løsninger? {
@@ -162,12 +162,12 @@ class MeldingMediator(
                     return null
                 }
             val melding = finnMelding(meldingId) ?: return null
-            Løsninger(publiserer, melding, contextId, commandContext).also { løsninger = it }
+            Løsninger(kontekstbasertPubliserer, melding, contextId, commandContext).also { løsninger = it }
         }
     }
 
     private fun påminnelse(
-        publiserer: MeldingPubliserer,
+        kontekstbasertPubliserer: MeldingPubliserer,
         meldingId: UUID,
         contextId: UUID,
     ): Påminnelse? {
@@ -178,7 +178,7 @@ class MeldingMediator(
             }
         val melding = finnMelding(meldingId) ?: return null
 
-        return Påminnelse(publiserer, melding, contextId, commandContext)
+        return Påminnelse(kontekstbasertPubliserer, melding, contextId, commandContext)
     }
 
     private fun finnMelding(meldingId: UUID): Personmelding? =
@@ -216,7 +216,7 @@ class MeldingMediator(
 
     fun mottaSøknadSendt(
         melding: SøknadSendt,
-        publiserer: MeldingPubliserer,
+        kontekstbasertPubliserer: MeldingPubliserer,
     ) {
         val meldingnavn = requireNotNull(melding::class.simpleName)
         withMDC(
@@ -230,7 +230,7 @@ class MeldingMediator(
             meldingDao.lagre(melding)
             val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
             kommandofabrikk.iverksettSøknadSendt(melding, utgåendeMeldingerMediator)
-            utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, publiserer)
+            utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, kontekstbasertPubliserer)
             logg.info("Melding SøknadSendt lest")
             sikkerlogg.info("Melding SøknadSendt lest")
         }
@@ -238,7 +238,7 @@ class MeldingMediator(
 
     fun mottaMelding(
         melding: Personmelding,
-        publiserer: MeldingPubliserer,
+        kontekstbasertPubliserer: MeldingPubliserer,
     ) {
         val meldingnavn = requireNotNull(melding::class.simpleName)
         withMDC(
@@ -252,14 +252,14 @@ class MeldingMediator(
             logg.info("Melding $meldingnavn mottatt")
             sikkerlogg.info("Melding $meldingnavn mottatt:\n${melding.toJson()}")
             meldingDao.lagre(melding)
-            behandleMelding(melding, publiserer)
+            behandleMelding(melding, kontekstbasertPubliserer)
         }
     }
 
     private fun gjenopptaMelding(
         melding: Personmelding,
         commandContext: CommandContext,
-        publiserer: MeldingPubliserer,
+        kontekstbasertPubliserer: MeldingPubliserer,
     ) {
         val meldingnavn = requireNotNull(melding::class.simpleName)
         withMDC(
@@ -270,7 +270,7 @@ class MeldingMediator(
         ) {
             logg.info("Melding $meldingnavn gjenopptatt")
             sikkerlogg.info("Melding $meldingnavn gjenopptatt:\n${melding.toJson()}")
-            behandleMelding(melding, publiserer) { commandContext }
+            behandleMelding(melding, kontekstbasertPubliserer) { commandContext }
         }
     }
 
@@ -278,15 +278,15 @@ class MeldingMediator(
     // bildet når vi gjenopptar kommandokjeder
     private fun behandleMelding(
         melding: Personmelding,
-        publiserer: MeldingPubliserer,
+        kontekstbasertPubliserer: MeldingPubliserer,
     ) {
-        behandleMelding(melding, publiserer) { it.nyContext(melding.id) }
+        behandleMelding(melding, kontekstbasertPubliserer) { it.nyContext(melding.id) }
     }
 
     // Denne kalles både ved oppstart av en kommandokjede og ved gjenopptak etter svar på behov
     private fun behandleMelding(
         melding: Personmelding,
-        publiserer: MeldingPubliserer,
+        kontekstbasertPubliserer: MeldingPubliserer,
         commandContext: (CommandContextRepository) -> CommandContext,
     ) {
         val meldingnavn = requireNotNull(melding::class.simpleName)
@@ -308,7 +308,7 @@ class MeldingMediator(
                 }
                 utgåendeMeldinger().forEach(utgåendeMeldingerMediator::hendelse)
             }
-            utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, publiserer)
+            utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, kontekstbasertPubliserer)
         } catch (e: Exception) {
             throw RuntimeException("Feil ved behandling av melding $meldingnavn", e)
         } finally {
@@ -318,7 +318,7 @@ class MeldingMediator(
     }
 
     private class Løsninger(
-        private val publiserer: MeldingPubliserer,
+        private val kontekstbasertPubliserer: MeldingPubliserer,
         private val melding: Personmelding,
         private val contextId: UUID,
         private val commandContext: CommandContext,
@@ -342,12 +342,12 @@ class MeldingMediator(
                 logg.info(it)
                 sikkerlogg.info("$it\nInnkommende melding:\n\t$jsonNode")
             }
-            mediator.gjenopptaMelding(melding, commandContext, publiserer)
+            mediator.gjenopptaMelding(melding, commandContext, kontekstbasertPubliserer)
         }
     }
 
     private class Påminnelse(
-        private val publiserer: MeldingPubliserer,
+        private val kontekstbasertPubliserer: MeldingPubliserer,
         private val melding: Personmelding,
         private val contextId: UUID,
         private val commandContext: CommandContext,
@@ -364,23 +364,15 @@ class MeldingMediator(
 
         fun fortsett(mediator: MeldingMediator) {
             logg.info("fortsetter utførelse av kommandokontekst som følge av påminnelse")
-            mediator.gjenopptaMelding(melding, commandContext, publiserer)
+            mediator.gjenopptaMelding(melding, commandContext, kontekstbasertPubliserer)
         }
     }
 
     override fun oppdaterSnapshot(fødselsnummer: String) {
-        val event =
-            JsonMessage
-                .newMessage("oppdater_persondata", mapOf("fødselsnummer" to fødselsnummer))
-                .toJson()
-        rapidsConnection.publish(fødselsnummer, event)
+        publiserer.publiser(fødselsnummer, OppdaterPersondata, "oppdaterSnapshot")
     }
 
     override fun klargjørPersonForVisning(fødselsnummer: String) {
-        val event =
-            JsonMessage
-                .newMessage("klargjør_person_for_visning", mapOf("fødselsnummer" to fødselsnummer))
-                .toJson()
-        rapidsConnection.publish(fødselsnummer, event)
+        publiserer.publiser(fødselsnummer, KlargjørPersonForVisning, "klargjørPersonForVisning")
     }
 }

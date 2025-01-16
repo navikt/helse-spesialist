@@ -53,7 +53,7 @@ class PersoninfoløsningRiver(
             contextId = contextId,
             behovId = packet["@id"].asUUID(),
             løsning = parsePersoninfo(packet["@løsning.HentPersoninfoV2"]),
-            publiserer = MessageContextMeldingPubliserer(context),
+            kontekstbasertPubliserer = MessageContextMeldingPubliserer(context),
         )
     }
 }
@@ -99,7 +99,7 @@ class FlerePersoninfoRiver(
                         )
                     },
                 ),
-            publiserer = MessageContextMeldingPubliserer(context),
+            kontekstbasertPubliserer = MessageContextMeldingPubliserer(context),
         )
     }
 }

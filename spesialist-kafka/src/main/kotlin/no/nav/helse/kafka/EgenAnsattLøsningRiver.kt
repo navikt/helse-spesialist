@@ -54,7 +54,7 @@ class EgenAnsattLøsningRiver(
             contextId = contextId,
             behovId = packet["@id"].asUUID(),
             løsning = egenAnsattløsning,
-            publiserer = MessageContextMeldingPubliserer(context = context),
+            kontekstbasertPubliserer = MessageContextMeldingPubliserer(context = context),
         )
     }
 }

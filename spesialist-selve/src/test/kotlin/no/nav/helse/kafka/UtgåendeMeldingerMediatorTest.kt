@@ -31,7 +31,7 @@ internal class UtgåendeMeldingerMediatorTest {
         var antallMeldinger: Int = 0
             private set
 
-        override fun publiser(fødselsnummer: String, hendelse: UtgåendeHendelse, hendelseNavn: String) {
+        override fun publiser(fødselsnummer: String, hendelse: UtgåendeHendelse, årsak: String) {
             antallMeldinger++
         }
 

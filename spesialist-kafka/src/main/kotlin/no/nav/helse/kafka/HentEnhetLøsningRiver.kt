@@ -38,7 +38,7 @@ class HentEnhetLøsningRiver(
             contextId = contextId,
             behovId = packet["@id"].asUUID(),
             løsning = HentEnhetløsning(packet["@løsning.HentEnhet"].asText()),
-            publiserer = MessageContextMeldingPubliserer(context),
+            kontekstbasertPubliserer = MessageContextMeldingPubliserer(context),
         )
     }
 }

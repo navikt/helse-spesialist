@@ -41,7 +41,7 @@ class KommandokjedePåminnelseRiver(
             contextId = kommandokjede.commandContextId,
             hendelseId = kommandokjede.meldingId,
             påminnelse = kommandokjede,
-            publiserer = MessageContextMeldingPubliserer(context),
+            kontekstbasertPubliserer = MessageContextMeldingPubliserer(context),
         )
     }
 }

@@ -9,7 +9,7 @@ interface MeldingPubliserer {
     fun publiser(
         fødselsnummer: String,
         hendelse: UtgåendeHendelse,
-        hendelseNavn: String,
+        årsak: String,
     )
 
     fun publiser(

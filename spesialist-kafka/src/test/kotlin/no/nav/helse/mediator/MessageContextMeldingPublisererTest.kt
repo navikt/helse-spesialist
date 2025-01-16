@@ -60,7 +60,7 @@ internal class MessageContextMeldingPublisererTest {
         meldingPubliserer.publiser(
             fødselsnummer = fødselsnummer,
             hendelse = utgåendeHendelse,
-            hendelseNavn = hendelseNavn,
+            årsak = hendelseNavn,
         )
 
         assertEquals("vedtaksperiode_godkjent", testRapid.inspektør.field(0, "@event_name").asText())

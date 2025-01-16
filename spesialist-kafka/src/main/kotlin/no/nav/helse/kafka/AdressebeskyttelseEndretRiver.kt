@@ -35,7 +35,7 @@ class AdressebeskyttelseEndretRiver(
                     fødselsnummer = packet["fødselsnummer"].asText(),
                     json = packet.toJson(),
                 ),
-            publiserer = MessageContextMeldingPubliserer(context),
+            kontekstbasertPubliserer = MessageContextMeldingPubliserer(context),
         )
     }
 }

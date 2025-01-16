@@ -49,7 +49,7 @@ class ArbeidsforholdLøsningRiver(
             contextId = contextId,
             behovId = packet["@id"].asUUID(),
             løsning = packet.toArbeidsforholdløsninger(),
-            publiserer = MessageContextMeldingPubliserer(context = context),
+            kontekstbasertPubliserer = MessageContextMeldingPubliserer(context = context),
         )
     }
 

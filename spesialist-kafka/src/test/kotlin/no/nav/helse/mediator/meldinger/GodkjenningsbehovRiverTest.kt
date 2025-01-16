@@ -91,7 +91,7 @@ internal class GodkjenningsbehovRiverTest {
                         ), it.spleisSykepengegrunnlagsfakta
                     )
                 },
-                publiserer = any()
+                kontekstbasertPubliserer = any()
             )
         }
     }
@@ -154,7 +154,7 @@ internal class GodkjenningsbehovRiverTest {
                         ), it.spleisSykepengegrunnlagsfakta
                     )
                 },
-                publiserer = any()
+                kontekstbasertPubliserer = any()
             )
         }
     }
@@ -207,7 +207,7 @@ internal class GodkjenningsbehovRiverTest {
                         it.spleisSykepengegrunnlagsfakta
                     )
                 },
-                publiserer = any()
+                kontekstbasertPubliserer = any()
             )
         }
     }
@@ -234,7 +234,7 @@ internal class GodkjenningsbehovRiverTest {
         verify(exactly = 0) {
             mediator.mottaMelding(
                 melding = any(),
-                publiserer = any(),
+                kontekstbasertPubliserer = any(),
             )
         }
     }

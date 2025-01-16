@@ -3,6 +3,8 @@ package no.nav.helse.kafka.message_builders
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.helse.modell.melding.Godkjenningsbehovløsning
+import no.nav.helse.modell.melding.KlargjørPersonForVisning
+import no.nav.helse.modell.melding.OppdaterPersondata
 import no.nav.helse.modell.melding.Sykepengevedtak
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.melding.VedtaksperiodeAvvistAutomatisk
@@ -32,6 +34,8 @@ internal fun UtgåendeHendelse.eventName() =
 
         is Godkjenningsbehovløsning -> "behov"
         is Sykepengevedtak -> "vedtak_fattet"
+        is KlargjørPersonForVisning -> "klargjør_person_for_visning"
+        is OppdaterPersondata -> "oppdater_persondata"
     }
 
 private fun UtgåendeHendelse.detaljer(): Map<String, Any> {
@@ -42,6 +46,8 @@ private fun UtgåendeHendelse.detaljer(): Map<String, Any> {
         is VedtaksperiodeGodkjentAutomatisk -> this.detaljer()
         is Godkjenningsbehovløsning -> this.detaljer()
         is Sykepengevedtak -> this.detaljer()
+        is KlargjørPersonForVisning -> emptyMap()
+        is OppdaterPersondata -> emptyMap()
     }
 }
 

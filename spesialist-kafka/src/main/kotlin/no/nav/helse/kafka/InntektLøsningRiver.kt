@@ -65,7 +65,7 @@ class InntektLøsningRiver(
             contextId = contextId,
             behovId = packet["@id"].asUUID(),
             løsning = inntektsløsning,
-            publiserer = MessageContextMeldingPubliserer(context),
+            kontekstbasertPubliserer = MessageContextMeldingPubliserer(context),
         )
     }
 }

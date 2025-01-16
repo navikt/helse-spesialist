@@ -46,7 +46,7 @@ class SøknadSendtRiver(
         )
         mediator.mottaSøknadSendt(
             melding = søknadSendt(packet),
-            publiserer = MessageContextMeldingPubliserer(context),
+            kontekstbasertPubliserer = MessageContextMeldingPubliserer(context),
         )
     }
 

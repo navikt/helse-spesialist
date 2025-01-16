@@ -52,7 +52,7 @@ class SøknadSendtArbeidsledigRiver(
         )
         mediator.mottaSøknadSendt(
             melding = søknadSendtArbeidsledig(packet),
-            publiserer = MessageContextMeldingPubliserer(context),
+            kontekstbasertPubliserer = MessageContextMeldingPubliserer(context),
         )
     }
 

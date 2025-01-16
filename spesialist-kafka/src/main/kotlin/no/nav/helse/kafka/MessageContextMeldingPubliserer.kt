@@ -15,11 +15,11 @@ class MessageContextMeldingPubliserer(private val context: MessageContext) : Mel
     override fun publiser(
         fødselsnummer: String,
         hendelse: UtgåendeHendelse,
-        hendelseNavn: String,
+        årsak: String,
     ) {
         val packet = hendelse.somJsonMessage(fødselsnummer).toJson()
-        logg.info("Publiserer hendelse i forbindelse med $hendelseNavn")
-        sikkerlogg.info("Publiserer hendelse i forbindelse med $hendelseNavn\n{}", packet)
+        logg.info("Publiserer hendelse på grunn av $årsak")
+        sikkerlogg.info("Publiserer hendelse på grunn av $årsak\n{}", packet)
         context.publish(packet)
     }
 

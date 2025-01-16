@@ -48,7 +48,7 @@ class InfotrygdutbetalingerLøsningRiver(
             contextId = contextId,
             behovId = packet["@id"].asUUID(),
             løsning = HentInfotrygdutbetalingerløsning(packet["@løsning.HentInfotrygdutbetalinger"]),
-            publiserer = MessageContextMeldingPubliserer(context),
+            kontekstbasertPubliserer = MessageContextMeldingPubliserer(context),
         )
     }
 }

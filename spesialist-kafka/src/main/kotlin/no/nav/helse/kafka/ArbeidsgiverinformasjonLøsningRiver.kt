@@ -49,7 +49,7 @@ class ArbeidsgiverinformasjonLøsningRiver(
                         )
                     },
                 ),
-            publiserer = MessageContextMeldingPubliserer(context),
+            kontekstbasertPubliserer = MessageContextMeldingPubliserer(context),
         )
     }
 }

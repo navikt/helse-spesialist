@@ -11,6 +11,7 @@ import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.TildelingDao
+import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.kafka.RiverSetup
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandofabrikk
@@ -113,7 +114,7 @@ internal class TestMediator(
     init {
         val meldingMediator = MeldingMediator(
             dataSource = dataSource,
-            rapidsConnection = testRapid,
+            publiserer = MessageContextMeldingPubliserer(testRapid),
             kommandofabrikk = kommandofabrikk,
             poisonPills = PoisonPills(emptyMap()),
         )

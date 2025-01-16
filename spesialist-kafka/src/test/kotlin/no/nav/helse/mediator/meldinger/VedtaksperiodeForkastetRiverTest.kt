@@ -28,7 +28,7 @@ internal class VedtaksperiodeForkastetRiverTest {
                     assertEquals(fødselsnummer, it.fødselsnummer())
                     assertEquals(vedtaksperiodeId, it.vedtaksperiodeId())
                 },
-                publiserer = any()
+                kontekstbasertPubliserer = any()
             )
         }
     }
