@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class LøsGodkjenningsbehov(
+class LøsGodkjenningsbehov(
     private val utbetaling: Utbetaling,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val godkjent: Boolean,

@@ -14,7 +14,7 @@ import java.util.UUID
  * Behandler input til godkjenningsbehov fra saksbehandler som har blitt lagt på rapid-en av API-biten av spesialist.
  */
 
-internal class Saksbehandlerløsning(
+class Saksbehandlerløsning(
     override val id: UUID,
     val oppgaveId: Long,
     val godkjenningsbehovhendelseId: UUID,
@@ -62,7 +62,7 @@ internal class Saksbehandlerløsning(
         json = jsonNode.toString(),
     )
 
-    internal data class Saksbehandler(
+    data class Saksbehandler(
         val ident: String,
         val epostadresse: String,
     )

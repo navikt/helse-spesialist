@@ -54,7 +54,7 @@ class Utbetaling(
     }
 }
 
-internal enum class Refusjonstype {
+enum class Refusjonstype {
     FULL_REFUSJON,
     INGEN_REFUSJON,
     DELVIS_REFUSJON,

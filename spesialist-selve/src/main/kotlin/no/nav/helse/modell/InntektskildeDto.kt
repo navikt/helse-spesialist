@@ -43,7 +43,7 @@ sealed interface InntektskildeDto {
     }
 }
 
-internal data class KomplettInntektskildeDto(
+data class KomplettInntektskildeDto(
     override val identifikator: String,
     override val type: InntektskildetypeDto,
     val navn: String,

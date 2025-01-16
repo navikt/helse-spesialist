@@ -11,7 +11,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class AvvikVurdertMessage(
+class AvvikVurdertMessage(
     override val id: UUID,
     private val unikId: UUID,
     private val vilkårsgrunnlagId: UUID?,

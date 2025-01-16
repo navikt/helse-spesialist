@@ -16,7 +16,7 @@ import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import java.util.UUID
 
-internal class VedtaksperiodeForkastet(
+class VedtaksperiodeForkastet(
     override val id: UUID,
     private val vedtaksperiodeId: UUID,
     private val fødselsnummer: String,
@@ -45,7 +45,7 @@ internal class VedtaksperiodeForkastet(
     override fun toJson() = json
 }
 
-internal class VedtaksperiodeForkastetCommand(
+class VedtaksperiodeForkastetCommand(
     val fødselsnummer: String,
     val vedtaksperiodeId: UUID,
     val id: UUID,

@@ -9,7 +9,7 @@ dependencies {
     api("com.nimbusds:nimbus-jose-jwt:9.37.3")
     implementation(libs.rapids.and.rivers)
     api(libs.bundles.db)
-    implementation(project(":spesialist-felles"))
+    api(project(":spesialist-felles"))
     api(project(":spesialist-api"))
     api(project(":spesialist-modell"))
 

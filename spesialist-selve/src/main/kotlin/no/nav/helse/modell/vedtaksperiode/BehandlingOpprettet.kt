@@ -11,7 +11,7 @@ import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import java.time.LocalDate
 import java.util.UUID
 
-internal class BehandlingOpprettet(
+class BehandlingOpprettet(
     override val id: UUID,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,

@@ -2,7 +2,7 @@ package no.nav.helse.mediator.meldinger.løsninger
 
 import java.time.LocalDate
 
-internal class Fullmaktløsning(
+class Fullmaktløsning(
     val harFullmakt: Boolean,
 )
 

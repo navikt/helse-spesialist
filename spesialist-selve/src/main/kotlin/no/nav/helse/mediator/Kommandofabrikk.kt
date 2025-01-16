@@ -72,7 +72,7 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 import javax.sql.DataSource
 
-internal typealias Kommandostarter = Personmelding.(Kommandofabrikk.() -> Command?) -> Unit
+typealias Kommandostarter = Personmelding.(Kommandofabrikk.() -> Command?) -> Unit
 
 class Kommandofabrikk(
     private val dataSource: DataSource,

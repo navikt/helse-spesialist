@@ -17,7 +17,7 @@ import no.nav.helse.spesialist.api.abonnement.OpptegnelseType.PERSON_KLAR_TIL_BE
 import no.nav.helse.spesialist.api.abonnement.PersonKlarTilVisning
 import java.util.UUID
 
-internal class KlargjørTilgangsrelaterteData(
+class KlargjørTilgangsrelaterteData(
     override val id: UUID,
     private val fødselsnummer: String,
     private val json: String,

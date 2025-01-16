@@ -3,7 +3,7 @@ package no.nav.helse.mediator.meldinger.løsninger
 import no.nav.helse.db.EgenAnsattRepository
 import java.time.LocalDateTime
 
-internal class EgenAnsattløsning(
+class EgenAnsattløsning(
     private val opprettet: LocalDateTime,
     private val fødselsnummer: String,
     private val erEgenAnsatt: Boolean,

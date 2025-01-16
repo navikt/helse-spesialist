@@ -20,7 +20,7 @@ class CommandContext(
     private var tidligFerdigstilt = false
     private val observers = mutableSetOf<CommandContextObserver>()
 
-    internal fun nyObserver(observer: CommandContextObserver) {
+    fun nyObserver(observer: CommandContextObserver) {
         observers.add(observer)
     }
 

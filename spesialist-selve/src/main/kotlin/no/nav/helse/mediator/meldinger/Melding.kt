@@ -21,6 +21,6 @@ interface Personmelding : Melding {
     fun fødselsnummer(): String
 }
 
-internal interface Vedtaksperiodemelding : Personmelding {
+interface Vedtaksperiodemelding : Personmelding {
     fun vedtaksperiodeId(): UUID
 }

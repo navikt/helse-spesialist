@@ -13,7 +13,7 @@ import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class EndretEgenAnsattStatus(
+class EndretEgenAnsattStatus(
     override val id: UUID,
     private val fødselsnummer: String,
     val erEgenAnsatt: Boolean,

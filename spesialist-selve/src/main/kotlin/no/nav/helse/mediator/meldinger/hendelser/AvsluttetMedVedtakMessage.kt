@@ -9,7 +9,7 @@ import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class AvsluttetMedVedtakMessage(
+class AvsluttetMedVedtakMessage(
     override val id: UUID,
     private val fødselsnummer: String,
     private val vedtakFattetTidspunkt: LocalDateTime,

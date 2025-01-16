@@ -8,7 +8,7 @@ import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.NyInntektskildeDto
 
-internal class InntektskilderDao(
+class InntektskilderDao(
     private val session: Session,
 ) : InntektskilderRepository {
     private val arbeidsgiverDao = ArbeidsgiverDao(session)

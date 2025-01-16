@@ -134,7 +134,7 @@ class PgVedtakDao(queryRunner: QueryRunner) : VedtakDao, QueryRunner by queryRun
             }
     }
 
-    internal fun finnVedtakId(vedtaksperiodeId: UUID): Long? {
+    fun finnVedtakId(vedtaksperiodeId: UUID): Long? {
         return asSQL("SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId", "vedtaksperiodeId" to vedtaksperiodeId)
             .singleOrNull {
                 it.long("id")

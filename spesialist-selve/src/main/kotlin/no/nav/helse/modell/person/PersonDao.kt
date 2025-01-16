@@ -325,7 +325,7 @@ class PersonDao(
             "foedselsnummer" to fødselsnummer,
         ).singleOrNull { it.longOrNull("infotrygdutbetalinger_ref") }
 
-    internal fun insertPerson(
+    fun insertPerson(
         fødselsnummer: String,
         aktørId: String,
         personinfoId: Long,

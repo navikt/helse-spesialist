@@ -20,7 +20,7 @@ import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import java.util.UUID
 
-internal class VedtaksperiodeReberegnet(
+class VedtaksperiodeReberegnet(
     override val id: UUID,
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,

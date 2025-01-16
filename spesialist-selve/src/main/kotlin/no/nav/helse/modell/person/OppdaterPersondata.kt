@@ -15,7 +15,7 @@ import no.nav.helse.spesialist.api.abonnement.PersonOppdatertPayload
 import java.time.LocalDate
 import java.util.UUID
 
-internal class OppdaterPersondata(
+class OppdaterPersondata(
     override val id: UUID,
     private val fødselsnummer: String,
     private val json: String,

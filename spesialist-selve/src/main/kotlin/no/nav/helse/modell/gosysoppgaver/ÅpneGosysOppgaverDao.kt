@@ -6,7 +6,7 @@ import no.nav.helse.db.MedSession
 import no.nav.helse.db.QueryRunner
 import no.nav.helse.db.ÅpneGosysOppgaverRepository
 
-internal class ÅpneGosysOppgaverDao(session: Session) : ÅpneGosysOppgaverRepository, QueryRunner by MedSession(session) {
+class ÅpneGosysOppgaverDao(session: Session) : ÅpneGosysOppgaverRepository, QueryRunner by MedSession(session) {
     override fun persisterÅpneGosysOppgaver(åpneGosysOppgaver: ÅpneGosysOppgaverDto) {
         asSQL(
             """

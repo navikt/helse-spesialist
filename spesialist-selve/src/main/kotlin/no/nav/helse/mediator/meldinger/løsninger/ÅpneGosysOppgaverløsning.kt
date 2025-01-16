@@ -9,7 +9,7 @@ import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_3
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class ÅpneGosysOppgaverløsning(
+class ÅpneGosysOppgaverløsning(
     private val opprettet: LocalDateTime,
     private val fødselsnummer: String,
     private val antall: Int?,

@@ -1,5 +1,5 @@
 package no.nav.helse.mediator
 
-internal interface CommandContextObserver : UtgåendeMeldingerObserver {
+interface CommandContextObserver : UtgåendeMeldingerObserver {
     fun tilstandEndret(event: KommandokjedeEndretEvent) {}
 }

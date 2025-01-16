@@ -10,7 +10,7 @@ import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import java.util.UUID
 
-internal class NyeVarsler(
+class NyeVarsler(
     override val id: UUID,
     private val fødselsnummer: String,
     internal val varsler: List<Varsel>,

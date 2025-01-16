@@ -3,7 +3,7 @@ package no.nav.helse.modell.varsel
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class Varseldefinisjon(
+class Varseldefinisjon(
     private val id: UUID,
     private val varselkode: String,
     private val tittel: String,

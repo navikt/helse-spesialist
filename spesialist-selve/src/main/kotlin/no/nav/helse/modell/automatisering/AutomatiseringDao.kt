@@ -9,7 +9,7 @@ import no.nav.helse.HelseDao.Companion.update
 import no.nav.helse.db.AutomatiseringRepository
 import java.util.UUID
 
-internal class AutomatiseringDao(val session: Session) : AutomatiseringRepository {
+class AutomatiseringDao(val session: Session) : AutomatiseringRepository {
     override fun settAutomatiseringInaktiv(
         vedtaksperiodeId: UUID,
         hendelseId: UUID,

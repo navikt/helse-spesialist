@@ -5,7 +5,7 @@ import no.nav.helse.modell.varsel.Varseldefinisjon
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class VarseldefinisjonMessage(
+class VarseldefinisjonMessage(
     private val id: UUID,
     private val varselkode: String,
     private val tittel: String,
@@ -16,7 +16,7 @@ internal class VarseldefinisjonMessage(
 ) {
     private val varseldefinisjon get() = Varseldefinisjon(id, varselkode, tittel, forklaring, handling, avviklet, opprettet)
 
-    internal fun sendInnTil(mediator: MeldingMediator) {
+    fun sendInnTil(mediator: MeldingMediator) {
         mediator.håndter(varseldefinisjon)
     }
 }

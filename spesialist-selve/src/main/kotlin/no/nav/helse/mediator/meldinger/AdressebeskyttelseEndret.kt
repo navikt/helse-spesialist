@@ -16,7 +16,7 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import java.util.UUID
 
-internal class AdressebeskyttelseEndret(
+class AdressebeskyttelseEndret(
     override val id: UUID,
     private val fødselsnummer: String,
     private val json: String,

@@ -135,7 +135,7 @@ class MeldingMediator(
         }
     }
 
-    internal fun håndter(varseldefinisjon: Varseldefinisjon) {
+    fun håndter(varseldefinisjon: Varseldefinisjon) {
         val varseldefinisjonDto = varseldefinisjon.toDto()
         varselRepository.lagreDefinisjon(varseldefinisjonDto)
         if (varseldefinisjonDto.avviklet) {
@@ -143,7 +143,7 @@ class MeldingMediator(
         }
     }
 
-    internal fun mottaDokument(
+    fun mottaDokument(
         fødselsnummer: String,
         dokumentId: UUID,
         dokument: JsonNode,
@@ -222,7 +222,7 @@ class MeldingMediator(
         sikkerlogg.error("alvorlig feil: ${err.message}", kv("stack_trace", err), kv("json", messageJson))
     }
 
-    internal fun mottaSøknadSendt(
+    fun mottaSøknadSendt(
         melding: SøknadSendt,
         messageContext: MessageContext,
     ) {
@@ -244,14 +244,14 @@ class MeldingMediator(
         }
     }
 
-    internal fun mottaMelding(
+    fun mottaMelding(
         melding: Personmelding,
         messageContext: MessageContext,
     ) {
         mottaMeldingNy(melding, MessageContextMeldingPubliserer(messageContext))
     }
 
-    internal fun mottaMeldingNy(
+    fun mottaMeldingNy(
         melding: Personmelding,
         publiserer: MeldingPubliserer,
     ) {

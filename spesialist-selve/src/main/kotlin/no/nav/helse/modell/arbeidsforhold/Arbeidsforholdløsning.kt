@@ -14,7 +14,7 @@ class Arbeidsforholdløsning(
         val stillingsprosent: Int,
     )
 
-    internal fun upsert(
+    fun upsert(
         arbeidsforholdRepository: ArbeidsforholdRepository,
         fødselsnummer: String,
         organisasjonsnummer: String,

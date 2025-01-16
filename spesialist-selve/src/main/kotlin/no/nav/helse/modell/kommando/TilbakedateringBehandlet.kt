@@ -19,7 +19,7 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import java.util.UUID
 
-internal class TilbakedateringBehandlet(
+class TilbakedateringBehandlet(
     override val id: UUID,
     private val fødselsnummer: String,
     val perioder: List<Periode>,

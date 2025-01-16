@@ -10,7 +10,7 @@ import no.nav.helse.objectMapper
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class RisikovurderingDao(session: Session) : RisikovurderingRepository, QueryRunner by MedSession(session) {
+class RisikovurderingDao(session: Session) : RisikovurderingRepository, QueryRunner by MedSession(session) {
     override fun hentRisikovurdering(vedtaksperiodeId: UUID) =
         asSQL(
             """

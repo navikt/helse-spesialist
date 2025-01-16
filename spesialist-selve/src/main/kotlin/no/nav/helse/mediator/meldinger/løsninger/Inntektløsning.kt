@@ -4,10 +4,10 @@ import no.nav.helse.db.PersonRepository
 import java.time.LocalDate
 import java.time.YearMonth
 
-internal class Inntektløsning(
+class Inntektløsning(
     private val inntekter: List<Inntekter>,
 ) {
-    internal fun lagre(
+    fun lagre(
         personRepository: PersonRepository,
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate,

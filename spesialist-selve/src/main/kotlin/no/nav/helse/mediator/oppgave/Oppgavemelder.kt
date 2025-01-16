@@ -10,7 +10,7 @@ import no.nav.helse.modell.oppgave.OppgaveObserver
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import java.util.UUID
 
-internal class Oppgavemelder(
+class Oppgavemelder(
     private val fødselsnummer: String,
     private val rapidsConnection: RapidsConnection,
 ) : OppgaveObserver {

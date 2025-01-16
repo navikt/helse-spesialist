@@ -7,7 +7,7 @@ import no.nav.helse.HelseDao.Companion.update
 import no.nav.helse.db.ArbeidsforholdRepository
 import no.nav.helse.modell.KomplettArbeidsforholdDto
 
-internal class ArbeidsforholdDao(
+class ArbeidsforholdDao(
     private val session: Session,
 ) : ArbeidsforholdRepository {
     override fun findArbeidsforhold(

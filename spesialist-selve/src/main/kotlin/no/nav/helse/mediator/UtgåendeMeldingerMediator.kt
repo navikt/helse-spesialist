@@ -9,7 +9,7 @@ import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import java.util.UUID
 
-internal interface UtgåendeMeldingerObserver {
+interface UtgåendeMeldingerObserver {
     fun behov(
         behov: Behov,
         commandContextId: UUID,
@@ -19,7 +19,7 @@ internal interface UtgåendeMeldingerObserver {
     fun hendelse(hendelse: UtgåendeHendelse) {}
 }
 
-internal class UtgåendeMeldingerMediator : CommandContextObserver {
+class UtgåendeMeldingerMediator : CommandContextObserver {
     private val behov = mutableMapOf<String, Behov>()
     private val hendelser = mutableListOf<UtgåendeHendelse>()
     private val kommandokjedetilstandsendringer = mutableListOf<KommandokjedeEndretEvent>()
@@ -41,7 +41,7 @@ internal class UtgåendeMeldingerMediator : CommandContextObserver {
         kommandokjedetilstandsendringer.add(event)
     }
 
-    internal fun publiserOppsamledeMeldinger(
+    fun publiserOppsamledeMeldinger(
         hendelse: Personmelding,
         messageContext: MessageContext,
     ) {

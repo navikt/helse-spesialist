@@ -7,7 +7,7 @@ import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.person.Person
 import java.util.UUID
 
-internal class OverstyringIgangsatt(
+class OverstyringIgangsatt(
     override val id: UUID,
     private val fødselsnummer: String,
     val kilde: UUID,

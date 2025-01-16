@@ -2,7 +2,7 @@ package no.nav.helse.db
 
 import no.nav.helse.modell.KomplettArbeidsforholdDto
 
-internal interface ArbeidsforholdRepository {
+interface ArbeidsforholdRepository {
     fun findArbeidsforhold(
         fødselsnummer: String,
         organisasjonsnummer: String,

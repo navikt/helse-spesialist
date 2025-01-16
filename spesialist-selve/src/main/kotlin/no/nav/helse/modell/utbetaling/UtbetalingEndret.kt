@@ -20,7 +20,7 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class UtbetalingEndret(
+class UtbetalingEndret(
     override val id: UUID,
     private val fødselsnummer: String,
     val organisasjonsnummer: String,

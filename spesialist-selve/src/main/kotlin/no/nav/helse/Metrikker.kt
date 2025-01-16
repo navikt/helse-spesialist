@@ -71,7 +71,7 @@ fun registrerTidsbrukForDuplikatsjekk(
     .withTag("var_duplikat", erDuplikat.toString())
     .record(tid)
 
-internal fun registrerTidsbrukForBehov(
+fun registrerTidsbrukForBehov(
     behov: String,
     tid: Duration,
 ) = tidsbrukForBehovMetrikkBuilder

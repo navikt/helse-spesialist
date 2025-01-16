@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class LagreOppdragCommand(
+class LagreOppdragCommand(
     private val fødselsnummer: String,
     private val orgnummer: String,
     private val utbetalingId: UUID,
@@ -34,7 +34,7 @@ internal class LagreOppdragCommand(
         private val log = LoggerFactory.getLogger(LagreOppdragCommand::class.java)
     }
 
-    internal class Oppdrag(
+    class Oppdrag(
         private val fagsystemId: String,
         private val mottaker: String,
     ) {

@@ -9,7 +9,7 @@ import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import java.util.UUID
 
-internal class AvsluttetUtenVedtakMessage(
+class AvsluttetUtenVedtakMessage(
     override val id: UUID,
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,

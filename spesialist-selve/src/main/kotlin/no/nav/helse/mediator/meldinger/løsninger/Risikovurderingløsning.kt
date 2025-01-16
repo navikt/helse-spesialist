@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class Risikovurderingløsning(
+class Risikovurderingløsning(
     private val vedtaksperiodeId: UUID,
     private val opprettet: LocalDateTime,
     val kanGodkjennesAutomatisk: Boolean,

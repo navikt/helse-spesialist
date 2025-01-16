@@ -11,7 +11,7 @@ import no.nav.helse.modell.kommando.OpprettKoblingTilUtbetalingCommand
 import no.nav.helse.modell.person.Person
 import java.util.UUID
 
-internal class VedtaksperiodeNyUtbetaling(
+class VedtaksperiodeNyUtbetaling(
     override val id: UUID,
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,

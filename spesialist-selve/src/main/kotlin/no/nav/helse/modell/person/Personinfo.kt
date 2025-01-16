@@ -20,7 +20,7 @@ class HentPersoninfoløsning(
 ) {
     internal fun navn() = listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ")
 
-    internal fun oppdater(
+    fun oppdater(
         personRepository: PersonRepository,
         fødselsnummer: String,
     ) = personRepository.upsertPersoninfo(

@@ -60,7 +60,7 @@ class StansAutomatiskBehandlingMediator(
             )
     }
 
-    internal fun håndter(
+    fun håndter(
         handling: Personhandling,
         saksbehandler: Saksbehandler,
     ) {
@@ -68,7 +68,7 @@ class StansAutomatiskBehandlingMediator(
         lagreNotat(handling.gjelderFødselsnummer(), handling.begrunnelse(), saksbehandler.oid())
     }
 
-    internal fun håndter(melding: StansAutomatiskBehandlingMelding) {
+    fun håndter(melding: StansAutomatiskBehandlingMelding) {
         stansAutomatiskBehandlingRepository.lagreFraISyfo(melding)
         lagrePeriodehistorikk(melding.fødselsnummer())
     }
