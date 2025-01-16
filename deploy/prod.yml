@@ -28,8 +28,8 @@ spec:
       maxSurge: 100%
       maxUnavailable: 0
   replicas:
-    min: 8
-    max: 8
+    min: 1
+    max: 1
     scalingStrategy:
       kafka:
         topic: tbd.rapid.v1
