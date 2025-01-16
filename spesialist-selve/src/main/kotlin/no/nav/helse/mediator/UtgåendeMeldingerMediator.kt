@@ -48,7 +48,7 @@ class UtgåendeMeldingerMediator : CommandContextObserver {
         publiserOppsamledeMeldinger(hendelse, MessageContextMeldingPubliserer(messageContext))
     }
 
-    internal fun publiserOppsamledeMeldinger(
+    fun publiserOppsamledeMeldinger(
         hendelse: Personmelding,
         publiserer: MeldingPubliserer,
     ) {

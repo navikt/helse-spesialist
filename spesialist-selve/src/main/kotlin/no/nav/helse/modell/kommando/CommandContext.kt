@@ -28,7 +28,7 @@ class CommandContext(
         observers.remove(observer)
     }
 
-    internal fun behov(behov: Behov) {
+    fun behov(behov: Behov) {
         observers.forEach {
             it.behov(behov = behov, commandContextId = id)
         }
@@ -36,7 +36,7 @@ class CommandContext(
 
     internal fun id() = id
 
-    internal fun hendelse(hendelse: UtgåendeHendelse) {
+    fun hendelse(hendelse: UtgåendeHendelse) {
         observers.forEach { it.hendelse(hendelse) }
     }
 

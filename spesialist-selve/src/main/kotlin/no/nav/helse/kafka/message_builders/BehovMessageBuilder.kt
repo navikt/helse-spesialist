@@ -23,7 +23,7 @@ fun Collection<Behov>.somJsonMessage(
     )
 }
 
-internal fun Behov.behovName() =
+fun Behov.behovName() =
     when (this) {
         is Behov.Arbeidsforhold -> "Arbeidsforhold"
         is Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver -> "Arbeidsgiverinformasjon"

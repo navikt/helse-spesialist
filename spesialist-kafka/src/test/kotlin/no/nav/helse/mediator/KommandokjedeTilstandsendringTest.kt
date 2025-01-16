@@ -1,11 +1,11 @@
 package no.nav.helse.mediator
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import kotliquery.TransactionalSession
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.person.Person
-import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.spesialist.test.lagFødselsnummer
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
