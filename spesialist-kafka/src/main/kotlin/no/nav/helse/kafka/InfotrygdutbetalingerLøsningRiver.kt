@@ -44,11 +44,11 @@ class InfotrygdutbetalingerLøsningRiver(
             kv("contextId", contextId),
         )
         mediator.løsning(
-            hendelseId,
-            contextId,
-            packet["@id"].asUUID(),
-            HentInfotrygdutbetalingerløsning(packet["@løsning.HentInfotrygdutbetalinger"]),
-            context,
+            hendelseId = hendelseId,
+            contextId = contextId,
+            behovId = packet["@id"].asUUID(),
+            løsning = HentInfotrygdutbetalingerløsning(packet["@løsning.HentInfotrygdutbetalinger"]),
+            publiserer = MessageContextMeldingPubliserer(context),
         )
     }
 }

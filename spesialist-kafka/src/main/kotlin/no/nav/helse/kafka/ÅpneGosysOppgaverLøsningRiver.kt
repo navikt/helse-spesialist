@@ -49,7 +49,7 @@ class ÅpneGosysOppgaverLøsningRiver(
             contextId = packet["contextId"].asUUID(),
             behovId = packet["@id"].asUUID(),
             løsning = åpneGosysOppgaver,
-            context = context,
+            publiserer = MessageContextMeldingPubliserer(context = context),
         )
     }
 }

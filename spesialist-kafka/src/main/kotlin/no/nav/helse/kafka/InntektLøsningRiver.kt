@@ -60,6 +60,12 @@ class InntektLøsningRiver(
                 },
             )
 
-        mediator.løsning(hendelseId, contextId, packet["@id"].asUUID(), inntektsløsning, context)
+        mediator.løsning(
+            hendelseId = hendelseId,
+            contextId = contextId,
+            behovId = packet["@id"].asUUID(),
+            løsning = inntektsløsning,
+            publiserer = MessageContextMeldingPubliserer(context),
+        )
     }
 }

@@ -66,7 +66,7 @@ class FullmaktLøsningRiver(
             contextId = contextId,
             behovId = packet["@id"].asUUID(),
             løsning = fullmaktløsning,
-            context = context,
+            publiserer = MessageContextMeldingPubliserer(context = context),
         )
     }
 }

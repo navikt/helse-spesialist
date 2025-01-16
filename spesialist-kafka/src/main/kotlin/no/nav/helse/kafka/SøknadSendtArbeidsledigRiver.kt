@@ -50,7 +50,10 @@ class SøknadSendtArbeidsledigRiver(
             keyValue("hendelseId", packet["@id"].asUUID()),
             keyValue("hendelse", packet.toJson()),
         )
-        mediator.mottaSøknadSendt(søknadSendtArbeidsledig(packet), context)
+        mediator.mottaSøknadSendt(
+            melding = søknadSendtArbeidsledig(packet),
+            publiserer = MessageContextMeldingPubliserer(context),
+        )
     }
 
     private fun søknadSendtArbeidsledig(packet: JsonMessage) =

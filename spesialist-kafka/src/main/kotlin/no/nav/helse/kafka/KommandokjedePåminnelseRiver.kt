@@ -37,11 +37,11 @@ class KommandokjedePåminnelseRiver(
             )
 
         mediator.påminnelse(
-            meldingId,
-            kommandokjede.commandContextId,
-            kommandokjede.meldingId,
-            kommandokjede,
-            context,
+            meldingId = meldingId,
+            contextId = kommandokjede.commandContextId,
+            hendelseId = kommandokjede.meldingId,
+            påminnelse = kommandokjede,
+            publiserer = MessageContextMeldingPubliserer(context),
         )
     }
 }

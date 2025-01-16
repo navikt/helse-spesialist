@@ -57,7 +57,7 @@ class VurderingsmomenterLøsningRiver(
             contextId = packet["contextId"].asUUID(),
             behovId = packet["@id"].asUUID(),
             løsning = risikovurdering,
-            context = context,
+            publiserer = MessageContextMeldingPubliserer(context = context),
         )
     }
 }

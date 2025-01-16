@@ -54,7 +54,7 @@ class VergemålLøsningRiver(
             contextId = packet["contextId"].asUUID(),
             behovId = packet["@id"].asUUID(),
             løsning = vergemålLøsning,
-            context = context,
+            publiserer = MessageContextMeldingPubliserer(context = context),
         )
     }
 }

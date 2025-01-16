@@ -36,19 +36,20 @@ class ArbeidsgiverinformasjonLøsningRiver(
         val contextId = packet["contextId"].asUUID()
         val løsning = packet["@løsning.Arbeidsgiverinformasjon"]
         mediator.løsning(
-            hendelseId,
-            contextId,
-            packet["@id"].asUUID(),
-            Arbeidsgiverinformasjonløsning(
-                løsning.map { arbeidsgiver ->
-                    Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(
-                        orgnummer = arbeidsgiver.path("orgnummer").asText(),
-                        navn = arbeidsgiver.path("navn").asText(),
-                        bransjer = arbeidsgiver.path("bransjer").map { it.asText() },
-                    )
-                },
-            ),
-            context,
+            hendelseId = hendelseId,
+            contextId = contextId,
+            behovId = packet["@id"].asUUID(),
+            løsning =
+                Arbeidsgiverinformasjonløsning(
+                    løsning.map { arbeidsgiver ->
+                        Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(
+                            orgnummer = arbeidsgiver.path("orgnummer").asText(),
+                            navn = arbeidsgiver.path("navn").asText(),
+                            bransjer = arbeidsgiver.path("bransjer").map { it.asText() },
+                        )
+                    },
+                ),
+            publiserer = MessageContextMeldingPubliserer(context),
         )
     }
 }

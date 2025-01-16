@@ -49,11 +49,11 @@ class PersoninfoløsningRiver(
         val hendelseId = packet["hendelseId"].asUUID()
         val contextId = packet["contextId"].asUUID()
         mediator.løsning(
-            hendelseId,
-            contextId,
-            packet["@id"].asUUID(),
-            parsePersoninfo(packet["@løsning.HentPersoninfoV2"]),
-            context,
+            hendelseId = hendelseId,
+            contextId = contextId,
+            behovId = packet["@id"].asUUID(),
+            løsning = parsePersoninfo(packet["@løsning.HentPersoninfoV2"]),
+            publiserer = MessageContextMeldingPubliserer(context),
         )
     }
 }
@@ -88,17 +88,18 @@ class FlerePersoninfoRiver(
         val hendelseId = packet["hendelseId"].asUUID()
         val contextId = packet["contextId"].asUUID()
         mediator.løsning(
-            hendelseId,
-            contextId,
-            packet["@id"].asUUID(),
-            HentPersoninfoløsninger(
-                packet["@løsning.HentPersoninfoV2"].map {
-                    parsePersoninfo(
-                        it,
-                    )
-                },
-            ),
-            context,
+            hendelseId = hendelseId,
+            contextId = contextId,
+            behovId = packet["@id"].asUUID(),
+            løsning =
+                HentPersoninfoløsninger(
+                    packet["@løsning.HentPersoninfoV2"].map {
+                        parsePersoninfo(
+                            it,
+                        )
+                    },
+                ),
+            publiserer = MessageContextMeldingPubliserer(context),
         )
     }
 }

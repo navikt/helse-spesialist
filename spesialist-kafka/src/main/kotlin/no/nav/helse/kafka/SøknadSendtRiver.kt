@@ -44,7 +44,10 @@ class SøknadSendtRiver(
             keyValue("hendelseId", packet["@id"].asUUID()),
             keyValue("hendelse", packet.toJson()),
         )
-        mediator.mottaSøknadSendt(søknadSendt(packet), context)
+        mediator.mottaSøknadSendt(
+            melding = søknadSendt(packet),
+            publiserer = MessageContextMeldingPubliserer(context),
+        )
     }
 
     private fun søknadSendt(packet: JsonMessage) =

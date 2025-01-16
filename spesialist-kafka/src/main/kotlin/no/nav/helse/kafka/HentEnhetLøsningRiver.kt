@@ -34,11 +34,11 @@ class HentEnhetLøsningRiver(
         val hendelseId = packet["hendelseId"].asUUID()
         val contextId = packet["contextId"].asUUID()
         mediator.løsning(
-            hendelseId,
-            contextId,
-            packet["@id"].asUUID(),
-            HentEnhetløsning(packet["@løsning.HentEnhet"].asText()),
-            context,
+            hendelseId = hendelseId,
+            contextId = contextId,
+            behovId = packet["@id"].asUUID(),
+            løsning = HentEnhetløsning(packet["@løsning.HentEnhet"].asText()),
+            publiserer = MessageContextMeldingPubliserer(context),
         )
     }
 }
