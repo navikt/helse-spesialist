@@ -80,12 +80,6 @@ class MeldingMediator(
         return harPerson
     }
 
-    private fun JsonMessage.eventName() =
-        run {
-            interestedIn("@event_name")
-            get("@event_name").textValue() ?: "ukjent"
-        }
-
     private var løsninger: Løsninger? = null
     var meldingPasserteValidering = false
 
