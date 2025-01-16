@@ -117,7 +117,7 @@ class GodkjenningsbehovRiver(
                 kanAvvises = packet["Godkjenning.kanAvvises"].asBoolean(),
                 json = packet.toJson(),
             ),
-            context,
+            MessageContextMeldingPubliserer(context),
         )
     }
 

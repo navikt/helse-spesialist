@@ -38,7 +38,7 @@ class VedtaksperiodeForkastetRiver(
                 packet["fødselsnummer"].asText(),
                 json = packet.toJson(),
             ),
-            context,
+            MessageContextMeldingPubliserer(context),
         )
     }
 }

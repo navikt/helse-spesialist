@@ -35,7 +35,7 @@ class OppdaterPersondataRiver(
                 fødselsnummer = packet["fødselsnummer"].asText(),
                 json = packet.toJson(),
             ),
-            context,
+            MessageContextMeldingPubliserer(context),
         )
     }
 }

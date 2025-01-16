@@ -89,7 +89,7 @@ class AvsluttetMedVedtakRiver(
                     sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(packet, faktatype(packet)),
                     json = packet.toJson(),
                 ),
-            messageContext = context,
+            publiserer = MessageContextMeldingPubliserer(context),
         )
     }
 

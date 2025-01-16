@@ -54,7 +54,7 @@ class StansAutomatiskBehandlingRiver(
                 json = packet.toJson(),
                 kilde = "ISYFO",
             ),
-            context,
+            MessageContextMeldingPubliserer(context),
         )
     }
 }

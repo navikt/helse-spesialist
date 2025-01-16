@@ -31,7 +31,7 @@ class AvsluttetUtenVedtakRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        mediator.mottaMelding(packet.hendelse(), context)
+        mediator.mottaMelding(packet.hendelse(), MessageContextMeldingPubliserer(context))
     }
 
     private fun JsonMessage.hendelse() =

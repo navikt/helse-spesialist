@@ -246,13 +246,6 @@ class MeldingMediator(
 
     fun mottaMelding(
         melding: Personmelding,
-        messageContext: MessageContext,
-    ) {
-        mottaMeldingNy(melding, MessageContextMeldingPubliserer(messageContext))
-    }
-
-    fun mottaMeldingNy(
-        melding: Personmelding,
         publiserer: MeldingPubliserer,
     ) {
         val meldingnavn = requireNotNull(melding::class.simpleName)

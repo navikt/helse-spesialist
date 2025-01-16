@@ -68,11 +68,15 @@ class UtbetalingEndretRiver(
                 opprettet = packet["@opprettet"].asLocalDateTime(),
                 arbeidsgiverbeløp = packet["arbeidsgiverOppdrag"]["nettoBeløp"].asInt(),
                 personbeløp = packet["personOppdrag"]["nettoBeløp"].asInt(),
-                arbeidsgiverOppdrag = tilOppdrag(packet["arbeidsgiverOppdrag"], packet["organisasjonsnummer"].asText()),
+                arbeidsgiverOppdrag =
+                    tilOppdrag(
+                        packet["arbeidsgiverOppdrag"],
+                        packet["organisasjonsnummer"].asText(),
+                    ),
                 personOppdrag = tilOppdrag(packet["personOppdrag"], packet["fødselsnummer"].asText()),
                 json = packet.toJson(),
             ),
-            context,
+            MessageContextMeldingPubliserer(context),
         )
     }
 

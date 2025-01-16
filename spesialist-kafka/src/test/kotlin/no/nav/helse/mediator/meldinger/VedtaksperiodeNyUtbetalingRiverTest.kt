@@ -45,7 +45,7 @@ internal class VedtaksperiodeNyUtbetalingRiverTest {
                         assertEquals(testperson.vedtaksperiodeId1, it.vedtaksperiodeId())
                         assertEquals(testperson.utbetalingId1, it.utbetalingId)
                     },
-                messageContext = any(),
+                publiserer = any(),
             )
         }
     }

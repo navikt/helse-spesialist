@@ -53,7 +53,7 @@ class NyeVarslerRiver(
                 varsler = packet["aktiviteter"].varsler(),
                 json = packet.toJson(),
             ),
-            context,
+            MessageContextMeldingPubliserer(context),
         )
     }
 

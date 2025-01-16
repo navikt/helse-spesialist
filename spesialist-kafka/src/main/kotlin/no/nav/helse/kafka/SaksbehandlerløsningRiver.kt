@@ -70,7 +70,7 @@ class SaksbehandlerløsningRiver(
                     } ?: emptyList(),
                 json = packet.toJson(),
             ),
-            context,
+            MessageContextMeldingPubliserer(context),
         )
     }
 }

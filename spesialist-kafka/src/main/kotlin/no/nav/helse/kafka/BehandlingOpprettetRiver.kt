@@ -49,7 +49,7 @@ class BehandlingOpprettetRiver(
                 tom = packet["tom"].asLocalDate(),
                 json = packet.toJson(),
             ),
-            context,
+            MessageContextMeldingPubliserer(context),
         )
     }
 }

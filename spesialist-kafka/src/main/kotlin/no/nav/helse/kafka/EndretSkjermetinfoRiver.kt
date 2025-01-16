@@ -50,7 +50,7 @@ class EndretSkjermetinfoRiver(
                 opprettet = packet["@opprettet"].asLocalDateTime(),
                 json = packet.toJson(),
             ),
-            context,
+            MessageContextMeldingPubliserer(context),
         )
     }
 }

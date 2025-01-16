@@ -67,7 +67,9 @@ class AvvikVurdertRiver(
         mediator.mottaMelding(
             AvvikVurdertMessage(
                 unikId = packet["avviksvurdering.id"].asUUID(),
-                vilkårsgrunnlagId = packet["avviksvurdering.vilkårsgrunnlagId"].takeUnless { it.isMissingOrNull() }?.asUUID(),
+                vilkårsgrunnlagId =
+                    packet["avviksvurdering.vilkårsgrunnlagId"].takeUnless { it.isMissingOrNull() }
+                        ?.asUUID(),
                 fødselsnummer = packet["fødselsnummer"].asText(),
                 vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
                 skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate(),
@@ -78,7 +80,7 @@ class AvvikVurdertRiver(
                 id = packet["@id"].asUUID(),
                 json = packet.toJson(),
             ),
-            context,
+            MessageContextMeldingPubliserer(context),
         )
     }
 

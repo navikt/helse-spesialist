@@ -28,7 +28,7 @@ class AdressebeskyttelseEndretRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        mediator.mottaMeldingNy(
+        mediator.mottaMelding(
             melding =
                 AdressebeskyttelseEndret(
                     id = packet["@id"].asUUID(),

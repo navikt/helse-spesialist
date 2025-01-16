@@ -42,7 +42,7 @@ class VedtaksperiodeReberegnetRiver(
                 vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
                 json = packet.toJson(),
             ),
-            context,
+            MessageContextMeldingPubliserer(context),
         )
     }
 }

@@ -37,7 +37,7 @@ class VedtaksperiodeNyUtbetalingRiver(
                 utbetalingId = packet["utbetalingId"].asUUID(),
                 json = packet.toJson(),
             ),
-            context,
+            MessageContextMeldingPubliserer(context),
         )
     }
 }

@@ -37,7 +37,7 @@ class VedtakFattetRiver(
                 spleisBehandlingId = packet["behandlingId"].asUUID(),
                 json = packet.toJson(),
             ),
-            context,
+            MessageContextMeldingPubliserer(context),
         )
     }
 }

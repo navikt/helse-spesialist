@@ -49,7 +49,7 @@ class TilbakedateringBehandletRiver(
                     },
                 json = packet.toJson(),
             ),
-            context,
+            MessageContextMeldingPubliserer(context),
         )
     }
 }
