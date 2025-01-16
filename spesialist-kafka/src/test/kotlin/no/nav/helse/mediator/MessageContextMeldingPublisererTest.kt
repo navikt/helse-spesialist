@@ -3,7 +3,6 @@ package no.nav.helse.mediator
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
-import no.nav.helse.kafka.message_builders.behovName
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
 import no.nav.helse.spesialist.test.lagFødselsnummer
@@ -33,7 +32,7 @@ internal class MessageContextMeldingPublisererTest {
             hendelseId = hendelseId,
             commandContextId = contextId,
             fødselsnummer = fødselsnummer,
-            behov = mapOf(behov.behovName() to behov)
+            behov = listOf(behov)
         )
 
         assertTrue(!testRapid.inspektør.field(0, "@behov").isMissingOrNull())

@@ -1,10 +1,10 @@
-package no.nav.helse
+package no.nav.helse.kafka.message_builders
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.kafka.message_builders.somJsonMessage
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.InntektTilRisk
+import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import no.nav.helse.util.januar

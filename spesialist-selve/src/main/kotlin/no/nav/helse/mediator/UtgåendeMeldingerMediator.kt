@@ -1,7 +1,6 @@
 package no.nav.helse.mediator
 
 import no.nav.helse.MeldingPubliserer
-import no.nav.helse.kafka.message_builders.behovName
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.UtgåendeHendelse
@@ -18,7 +17,7 @@ interface UtgåendeMeldingerObserver {
 }
 
 class UtgåendeMeldingerMediator : CommandContextObserver {
-    private val behov = mutableMapOf<String, Behov>()
+    private val behov = mutableListOf<Behov>()
     private val hendelser = mutableListOf<UtgåendeHendelse>()
     private val kommandokjedetilstandsendringer = mutableListOf<KommandokjedeEndretEvent>()
     private var commandContextId: UUID? = null
@@ -28,7 +27,7 @@ class UtgåendeMeldingerMediator : CommandContextObserver {
         commandContextId: UUID,
     ) {
         this.commandContextId = commandContextId
-        this.behov[behov.behovName()] = behov
+        this.behov.add(behov)
     }
 
     override fun hendelse(hendelse: UtgåendeHendelse) {

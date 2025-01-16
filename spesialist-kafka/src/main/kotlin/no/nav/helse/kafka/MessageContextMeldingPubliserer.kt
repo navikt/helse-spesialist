@@ -3,6 +3,7 @@ package no.nav.helse.kafka
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.MeldingPubliserer
+import no.nav.helse.kafka.message_builders.behovName
 import no.nav.helse.kafka.message_builders.somJsonMessage
 import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.modell.melding.Behov
@@ -26,11 +27,12 @@ class MessageContextMeldingPubliserer(private val context: MessageContext) : Mel
         hendelseId: UUID,
         commandContextId: UUID,
         fødselsnummer: String,
-        behov: Map<String, Behov>,
+        behov: List<Behov>,
     ) {
-        val packet = behov.values.somJsonMessage(commandContextId, fødselsnummer, hendelseId).toJson()
-        logg.info("Publiserer behov for ${behov.keys}")
-        sikkerlogg.info("Publiserer behov for ${behov.keys}\n{}", packet)
+        val packet = behov.somJsonMessage(commandContextId, fødselsnummer, hendelseId).toJson()
+        val behovNames = behov.map(Behov::behovName)
+        logg.info("Publiserer behov for $behovNames")
+        sikkerlogg.info("Publiserer behov for $behovNames\n{}", packet)
         context.publish(packet)
     }
 

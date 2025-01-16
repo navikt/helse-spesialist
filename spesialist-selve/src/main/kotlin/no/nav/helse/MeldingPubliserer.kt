@@ -16,7 +16,7 @@ interface MeldingPubliserer {
         hendelseId: UUID,
         commandContextId: UUID,
         fødselsnummer: String,
-        behov: Map<String, Behov>,
+        behov: List<Behov>,
     )
 
     fun publiser(
