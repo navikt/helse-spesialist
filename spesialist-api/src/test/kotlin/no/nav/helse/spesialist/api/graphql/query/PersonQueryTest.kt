@@ -11,6 +11,7 @@ import com.fasterxml.jackson.module.kotlin.treeToValue
 import graphql.GraphQLException
 import io.mockk.every
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
+import no.nav.helse.spesialist.api.DatabaseIntegrationTest.Periode.Companion.til
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
 import no.nav.helse.spesialist.api.graphql.schema.Avslag
 import no.nav.helse.spesialist.api.graphql.schema.Handling
@@ -27,7 +28,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.ResourceLock
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -177,8 +177,8 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     fun `Uberegnet periode tilstøtende en periode med oppgave tar med seg varsler`() {
         val personRef = opprettPerson()
         val arbeidsgiverRef = opprettArbeidsgiver()
-        val uberegnetPeriode = periode("2023-01-02", "2023-01-03")
-        val periodeMedOppgave = periode("2023-01-04", "2023-01-05")
+        val uberegnetPeriode = 2.januar(2023) til 3.januar(2023)
+        val periodeMedOppgave = 4.januar(2023) til 5.januar(2023)
         opprettVedtaksperiode(personRef, arbeidsgiverRef, periode = periodeMedOppgave, skjæringstidspunkt = 2.januar)
         opprettVedtak(personRef, arbeidsgiverRef, periode = uberegnetPeriode, skjæringstidspunkt = 2.januar)
         val generasjonId = UUID.randomUUID()
@@ -226,8 +226,8 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val snapshotGenerasjonId2 = UUID.randomUUID()
         val personRef = opprettPerson()
         val arbeidsgiverRef = opprettArbeidsgiver()
-        val uberegnetPeriode = periode("2023-01-02", "2023-01-03")
-        val periodeMedOppgave = periode("2023-01-04", "2023-01-05")
+        val uberegnetPeriode = 2.januar(2023) til 3.januar(2023)
+        val periodeMedOppgave = 4.januar(2023) til 5.januar(2023)
         opprettVedtaksperiode(personRef, arbeidsgiverRef, periode = periodeMedOppgave, skjæringstidspunkt = 2.januar)
         opprettVedtak(personRef, arbeidsgiverRef, periode = uberegnetPeriode, skjæringstidspunkt = 2.januar)
         val generasjonId1 = UUID.randomUUID()
@@ -269,8 +269,8 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     fun `inkluderer handlinger`() {
         val personRef = opprettPerson()
         val arbeidsgiverRef = opprettArbeidsgiver()
-        val periode1 = periode("2023-01-01", "2023-01-23")
-        val periode2 = periode("2023-01-24", "2023-01-31")
+        val periode1 = 1.januar(2023) til 23.januar(2023)
+        val periode2 = 24.januar(2023) til 31.januar(2023)
         val vedtakId = opprettVedtaksperiode(personRef, arbeidsgiverRef, periode = periode1)
         ferdigstillOppgave(vedtakId)
         opprettVedtaksperiode(personRef, arbeidsgiverRef, periode = periode2)
@@ -444,17 +444,6 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         """,
             group,
         )
-
-    private fun periode(
-        fom: String,
-        tom: String,
-    ): Periode {
-        return Periode(
-            UUID.randomUUID(),
-            LocalDate.parse(fom),
-            LocalDate.parse(tom),
-        )
-    }
 
     private fun JsonNode.plukkUtPeriodeMed(vedtaksperiodeId: UUID): PersonQueryTestPeriode {
         val jsonNode = this["data"]["person"]["arbeidsgivere"].first()["generasjoner"].first()["perioder"]
