@@ -4,6 +4,35 @@
 ## Beskrivelse
 Backend for saksbehandling av sykepengesøknader
 
+## Moduler
+
+Spesialist er inndelt i moduler etter lag i en onion architecture:
+
+![Lagdeling - Onionarkitektur](lagdeling-onionarkitektur.svg)
+
+Alle lag på samme nivå har kun avhengighet og kjennskap til lag på nivå innenfor seg selv. De har ikke kjennskap til lag
+på samme nivå, eller nivåer utenfor.
+
+Modulene er:
+
+- **e2e-tests** - Integrasjonstester som sjekker detaljer i resultat av forskjellige typer ekstern input til Spesialist.
+  Simulerer konsumenter i så stor grad som mulig. Er avhengig av en ferdigsammensydd applikasjon fordi den tester den
+  satt i system. Tester er black box med unntak av verifisering av forventet resultat (lagring i databaser, nye
+  meldinger publisert, JSON-svar via HTTP, etc.).
+- **bootstrap** - Instansiering av alle implementasjoner av hvert interface (dependency injection). Sørger for at
+  applikasjonen starter med riktig oppsett, og syr sådan sammen alle lagene til noe kjørbart.
+- **kafka** - Integrasjon med Rapids and Rivers. All kunnskap om eksterne meldinger med syntaks. Serialisering /
+  deserialisering av meldinger fra/til JSON
+- **api** - GraphQL-schema og implementasjon av det. Eventuelle andre HTTP-baserte endepunkt (f.eks. REST API).
+  Eksponerer egne typer og ikke direkte domenemodeller.
+- **db** - Faktisk integrasjon med og oppsett av databaser, med kunnskap om tabeller, kolonner og format. Mapper til og
+  fra domeneobjekter, eller DTO-er.
+- **application** - Interfaces for de abstrakte tingene infrastrukturslagene tar seg av med implementasjoner, f.eks.
+  mulighet til å publisere hendelser og Repositories for å lagre/hente domeneobjekter. Kommando-oppsettet ligger også
+  her. Inneholder også koordineringen ved én operasjon som medfører en serie av operasjoner på domeneobjekter.
+- **domain** - Det innerste laget som inneholder en modell av domenet applikasjonen representerer og så mange
+  forretningsregler som mulig. Inneholder også tester som representerer regler i domenet.
+
 ## Komme i gang
 
 ### Gradleoppsett
