@@ -16,7 +16,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class DokumentQueryTest : AbstractGraphQLApiTest() {
-    override val useGraphQLServerWithSeparateMocks = true
 
     @Test
     fun `Får 400 dersom man gjør oppslag uten dokumentId`() {

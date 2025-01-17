@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class TildelingMutationTest : AbstractGraphQLApiTest() {
-    override val useGraphQLServerWithSeparateMocks = true
 
     @Test
     fun `oppretter tildeling`() {

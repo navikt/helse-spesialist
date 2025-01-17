@@ -50,8 +50,6 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     private val avviksvurderinghenter = mockk<Avviksvurderinghenter>(relaxed = true)
     private val stansAutomatiskBehandlinghåndterer = mockk<StansAutomatiskBehandlinghåndterer>(relaxed = true)
 
-    protected open val useGraphQLServerWithSeparateMocks: Boolean = false
-
     private val apiTesting = ApiTesting(
         jwtStub,
         applicationBuilder = {
