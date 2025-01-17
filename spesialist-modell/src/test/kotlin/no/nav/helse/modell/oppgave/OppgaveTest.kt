@@ -576,7 +576,7 @@ internal class OppgaveTest {
                 vedtaksperiodeId = vedtaksperiodeId,
                 behandlingId = UUID.randomUUID(),
                 utbetalingId = utbetalingId,
-                hendelseId = UUID.randomUUID(),
+                godkjenningsbehovId = UUID.randomUUID(),
                 kanAvvises = true,
                 egenskaper = EgenskapDto.entries,
                 totrinnsvurdering =

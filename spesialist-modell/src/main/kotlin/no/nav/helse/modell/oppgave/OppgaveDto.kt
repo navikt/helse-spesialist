@@ -10,7 +10,7 @@ data class OppgaveDto(
     val vedtaksperiodeId: UUID,
     val behandlingId: UUID,
     val utbetalingId: UUID,
-    val hendelseId: UUID,
+    val godkjenningsbehovId: UUID,
     val kanAvvises: Boolean,
     val egenskaper: List<EgenskapDto>,
     val totrinnsvurdering: TotrinnsvurderingDto?,

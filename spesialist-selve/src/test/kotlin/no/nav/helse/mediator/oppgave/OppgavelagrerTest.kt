@@ -24,11 +24,11 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
     private val OPPGAVETYPE = SØKNAD
     private val VEDTAKSPERIODE_ID = UUID.randomUUID()
     private val BEHANDLING_ID = UUID.randomUUID()
-    override val UTBETALING_ID = UUID.randomUUID()
+    override val UTBETALING_ID: UUID = UUID.randomUUID()
     override val SAKSBEHANDLER_IDENT = "Z999999"
     override val SAKSBEHANDLER_EPOST = "saksbehandler@nav.no"
     override val SAKSBEHANDLER_NAVN = "Hen Saksbehandler"
-    override val SAKSBEHANDLER_OID = UUID.randomUUID()
+    override val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()
     private val BESLUTTER_OID = UUID.randomUUID()
     override var OPPGAVE_ID = Random.nextLong()
     private val saksbehandler =
@@ -51,8 +51,7 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
     private val TOTRINNSVURDERING_OPPRETTET = LocalDateTime.now()
     private val TOTRINNSVURDERING_OPPDATERT = LocalDateTime.now()
 
-    private val CONTEXT_ID = UUID.randomUUID()
-    override val HENDELSE_ID = UUID.randomUUID()
+    override val HENDELSE_ID: UUID = UUID.randomUUID()
 
     private val tildelingRepository = mockk<TildelingRepository>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
@@ -67,16 +66,15 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
         val oppgave = nyOppgave()
         val oppgavelagrer = Oppgavelagrer(tildelingRepository)
 
-        oppgavelagrer.lagre(oppgaveService, oppgave.toDto(), CONTEXT_ID)
+        oppgavelagrer.lagre(oppgaveService, oppgave.toDto())
         verify(exactly = 1) {
             oppgaveService.opprett(
                 id = OPPGAVE_ID,
-                contextId = CONTEXT_ID,
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
                 behandlingId = BEHANDLING_ID,
                 utbetalingId = UTBETALING_ID,
                 egenskaper = listOf(EgenskapForDatabase.SØKNAD),
-                hendelseId = HENDELSE_ID,
+                godkjenningsbehovId = HENDELSE_ID,
                 kanAvvises = true,
             )
         }
@@ -100,16 +98,15 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
         val oppgave = nyOppgave(medTotrinnsvurdering = false)
         val oppgavelagrer = Oppgavelagrer(tildelingRepository)
 
-        oppgavelagrer.lagre(oppgaveService, oppgave.toDto(), CONTEXT_ID)
+        oppgavelagrer.lagre(oppgaveService, oppgave.toDto())
         verify(exactly = 1) {
             oppgaveService.opprett(
                 id = OPPGAVE_ID,
-                contextId = CONTEXT_ID,
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
                 behandlingId = BEHANDLING_ID,
                 utbetalingId = UTBETALING_ID,
                 egenskaper = listOf(EgenskapForDatabase.SØKNAD),
-                hendelseId = HENDELSE_ID,
+                godkjenningsbehovId = HENDELSE_ID,
                 kanAvvises = true,
             )
         }
@@ -122,16 +119,15 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
         val oppgave = nyOppgave(medTotrinnsvurdering = true)
         val oppgavelagrer = Oppgavelagrer(tildelingRepository)
 
-        oppgavelagrer.lagre(oppgaveService, oppgave.toDto(), CONTEXT_ID)
+        oppgavelagrer.lagre(oppgaveService, oppgave.toDto())
         verify(exactly = 1) {
             oppgaveService.opprett(
                 id = OPPGAVE_ID,
-                contextId = CONTEXT_ID,
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
                 behandlingId = BEHANDLING_ID,
                 utbetalingId = UTBETALING_ID,
                 egenskaper = listOf(EgenskapForDatabase.SØKNAD),
-                hendelseId = HENDELSE_ID,
+                godkjenningsbehovId = HENDELSE_ID,
                 kanAvvises = true,
             )
         }
@@ -157,16 +153,15 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
         oppgave.forsøkTildelingVedReservasjon(saksbehandler)
         val oppgavelagrer = Oppgavelagrer(tildelingRepository)
 
-        oppgavelagrer.lagre(oppgaveService, oppgave.toDto(), CONTEXT_ID)
+        oppgavelagrer.lagre(oppgaveService, oppgave.toDto())
         verify(exactly = 1) {
             oppgaveService.opprett(
                 id = OPPGAVE_ID,
-                contextId = CONTEXT_ID,
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
                 behandlingId = BEHANDLING_ID,
                 utbetalingId = UTBETALING_ID,
                 egenskaper = listOf(EgenskapForDatabase.SØKNAD),
-                hendelseId = HENDELSE_ID,
+                godkjenningsbehovId = HENDELSE_ID,
                 kanAvvises = true,
             )
         }
@@ -180,16 +175,15 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
         oppgave.forsøkTildelingVedReservasjon(saksbehandler)
         val oppgavelagrer = Oppgavelagrer(tildelingRepository)
 
-        oppgavelagrer.lagre(oppgaveService, oppgave.toDto(), CONTEXT_ID)
+        oppgavelagrer.lagre(oppgaveService, oppgave.toDto())
         verify(exactly = 1) {
             oppgaveService.opprett(
                 id = OPPGAVE_ID,
-                contextId = CONTEXT_ID,
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
                 behandlingId = BEHANDLING_ID,
                 utbetalingId = UTBETALING_ID,
                 egenskaper = listOf(EgenskapForDatabase.SØKNAD),
-                hendelseId = HENDELSE_ID,
+                godkjenningsbehovId = HENDELSE_ID,
                 kanAvvises = true,
             )
         }

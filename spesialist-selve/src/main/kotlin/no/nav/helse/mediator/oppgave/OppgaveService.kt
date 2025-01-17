@@ -90,7 +90,6 @@ class OppgaveService(
 
     internal fun nyOppgave(
         fødselsnummer: String,
-        contextId: UUID,
         vedtaksperiodeId: UUID,
         behandlingId: UUID,
         utbetalingId: UUID,
@@ -115,7 +114,7 @@ class OppgaveService(
         oppgave.register(oppgavemelder)
         oppgavemelder.oppgaveOpprettet(oppgave)
         tildelVedReservasjon(fødselsnummer, oppgave)
-        Oppgavelagrer(tildelingRepository).lagre(this, oppgave.toDto(), contextId)
+        Oppgavelagrer(tildelingRepository).lagre(this, oppgave.toDto())
     }
 
     fun <T> oppgave(
@@ -384,18 +383,17 @@ class OppgaveService(
 
     internal fun opprett(
         id: Long,
-        contextId: UUID,
         vedtaksperiodeId: UUID,
         behandlingId: UUID,
         utbetalingId: UUID,
         egenskaper: List<EgenskapForDatabase>,
-        hendelseId: UUID,
+        godkjenningsbehovId: UUID,
         kanAvvises: Boolean,
     ) {
-        oppgaveDao.opprettOppgave(id, contextId, hendelseId, egenskaper, vedtaksperiodeId, behandlingId, utbetalingId, kanAvvises)
+        oppgaveDao.opprettOppgave(id, godkjenningsbehovId, egenskaper, vedtaksperiodeId, behandlingId, utbetalingId, kanAvvises)
         opptegnelseRepository.opprettOpptegnelse(
             oppgaveDao.finnFødselsnummer(id),
-            GodkjenningsbehovPayload(hendelseId),
+            GodkjenningsbehovPayload(godkjenningsbehovId),
             OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE,
         )
     }

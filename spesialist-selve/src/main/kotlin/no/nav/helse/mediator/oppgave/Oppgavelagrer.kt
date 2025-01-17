@@ -3,22 +3,19 @@ package no.nav.helse.mediator.oppgave
 import no.nav.helse.db.TildelingRepository
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilDatabaseversjon
 import no.nav.helse.modell.oppgave.OppgaveDto
-import java.util.UUID
 
 class Oppgavelagrer(private val tildelingRepository: TildelingRepository) {
     internal fun lagre(
         oppgaveService: OppgaveService,
         oppgaveDto: OppgaveDto,
-        contextId: UUID,
     ) {
         oppgaveService.opprett(
             id = oppgaveDto.id,
-            contextId = contextId,
             vedtaksperiodeId = oppgaveDto.vedtaksperiodeId,
             behandlingId = oppgaveDto.behandlingId,
             utbetalingId = oppgaveDto.utbetalingId,
             egenskaper = oppgaveDto.egenskaper.map { it.tilDatabaseversjon() },
-            hendelseId = oppgaveDto.hendelseId,
+            godkjenningsbehovId = oppgaveDto.godkjenningsbehovId,
             kanAvvises = oppgaveDto.kanAvvises,
         )
         oppdaterTildeling(oppgaveDto)

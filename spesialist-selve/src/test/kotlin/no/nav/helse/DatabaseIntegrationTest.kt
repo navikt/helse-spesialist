@@ -389,7 +389,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         OPPGAVE_ID = oppgaveId
         oppgaveDao.opprettOppgave(
             id = oppgaveId,
-            commandContextId = contextId,
             godkjenningsbehovId = godkjenningsbehovId,
             egenskaper = egenskaper,
             vedtaksperiodeId = vedtaksperiodeId,

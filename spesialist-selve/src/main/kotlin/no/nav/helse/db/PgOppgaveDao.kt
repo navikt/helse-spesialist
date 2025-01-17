@@ -43,7 +43,7 @@ class PgOppgaveDao(
     override fun finnOppgave(id: Long): OppgaveFraDatabase? =
         asSQL(
             """
-            SELECT o.egenskaper, o.status, v.vedtaksperiode_id, o.behandling_id, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id, s.navn, s.epost, s.ident, s.oid, o.kan_avvises
+            SELECT o.egenskaper, o.status, v.vedtaksperiode_id, o.behandling_id, o.hendelse_id_godkjenningsbehov, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id, s.navn, s.epost, s.ident, s.oid, o.kan_avvises
             FROM oppgave o
             INNER JOIN vedtak v on o.vedtak_ref = v.id
             LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
@@ -62,10 +62,10 @@ class PgOppgaveDao(
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                 behandlingId = row.uuid("behandling_id"),
                 utbetalingId = row.uuid("utbetaling_id"),
-                hendelseId = finnHendelseId(id),
+                godkjenningsbehovId = row.uuid("hendelse_id_godkjenningsbehov"),
                 kanAvvises = row.boolean("kan_avvises"),
                 ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
-                ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString),
+                ferdigstiltAvOid = row.uuidOrNull("ferdigstilt_av_oid"),
                 tildelt =
                     row.uuidOrNull("oid")?.let {
                         SaksbehandlerFraDatabase(
@@ -144,14 +144,10 @@ class PgOppgaveDao(
 
     override fun finnHendelseId(id: Long): UUID =
         asSQL(
-            """
-            SELECT DISTINCT hendelse_id
-            FROM command_context
-            WHERE context_id = (SELECT command_context_id FROM oppgave WHERE id = :oppgaveId); 
-            """,
+            "SELECT hendelse_id_godkjenningsbehov FROM oppgave WHERE id = :oppgaveId",
             "oppgaveId" to id,
         ).single {
-            it.uuid("hendelse_id")
+            it.uuid("hendelse_id_godkjenningsbehov")
         }
 
     override fun invaliderOppgaveFor(fødselsnummer: String) {
@@ -209,7 +205,7 @@ class PgOppgaveDao(
             SELECT v.vedtaksperiode_id, v.fom, v.tom, o.utbetaling_id, h.id AS hendelseId, h.data AS godkjenningbehovJson, s.type as periodetype
             FROM vedtak v
             INNER JOIN oppgave o ON o.vedtak_ref = v.id
-            INNER JOIN hendelse h ON h.id = (SELECT hendelse_id FROM command_context WHERE context_id = o.command_context_id LIMIT 1)
+            INNER JOIN hendelse h ON h.id = o.hendelse_id_godkjenningsbehov
             INNER JOIN saksbehandleroppgavetype s ON s.vedtak_ref = v.id
             WHERE o.id = :oppgaveId
             """,
@@ -538,7 +534,6 @@ class PgOppgaveDao(
 
     override fun opprettOppgave(
         id: Long,
-        commandContextId: UUID,
         godkjenningsbehovId: UUID,
         egenskaper: List<EgenskapForDatabase>,
         vedtaksperiodeId: UUID,
@@ -554,7 +549,7 @@ class PgOppgaveDao(
 
         asSQL(
             """
-            INSERT INTO oppgave (id, oppdatert, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, generasjon_ref, behandling_id, command_context_id, hendelse_id_godkjenningsbehov, utbetaling_id, mottaker, egenskaper, kan_avvises) 
+            INSERT INTO oppgave (id, oppdatert, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, generasjon_ref, behandling_id, hendelse_id_godkjenningsbehov, utbetaling_id, mottaker, egenskaper, kan_avvises) 
             SELECT
                 :id,
                 :oppdatert,
@@ -568,7 +563,6 @@ class PgOppgaveDao(
                     ) ORDER BY id DESC LIMIT 1
                 ),
                 :behandlingId,
-                :commandContextId,
                 :godkjenningsbehovId,
                 :utbetalingId,
                 CAST(:mottaker as mottakertype),
@@ -589,7 +583,6 @@ class PgOppgaveDao(
             "ferdigstiltAvOid" to null,
             "vedtakRef" to vedtakRef,
             "behandlingId" to behandlingId,
-            "commandContextId" to commandContextId,
             "godkjenningsbehovId" to godkjenningsbehovId,
             "utbetalingId" to utbetalingId,
             "mottaker" to mottaker?.name,

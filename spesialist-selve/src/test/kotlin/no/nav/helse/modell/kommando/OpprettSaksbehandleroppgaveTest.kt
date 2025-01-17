@@ -249,7 +249,6 @@ internal class OpprettSaksbehandleroppgaveTest {
     private fun assertForventedeEgenskaper(vararg egenskaper: Egenskap, kanAvvises: Boolean = true) {
         verify(exactly = 1) { oppgaveService.nyOppgave(
             FNR,
-            contextId,
             VEDTAKSPERIODE_ID,
             BEHANDLING_ID,
             UTBETALING_ID,

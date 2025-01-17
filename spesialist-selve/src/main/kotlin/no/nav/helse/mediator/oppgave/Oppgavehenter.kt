@@ -30,7 +30,7 @@ class Oppgavehenter(
                 vedtaksperiodeId = oppgave.vedtaksperiodeId,
                 behandlingId = oppgave.behandlingId,
                 utbetalingId = oppgave.utbetalingId,
-                hendelseId = oppgave.hendelseId,
+                godkjenningsbehovId = oppgave.godkjenningsbehovId,
                 kanAvvises = oppgave.kanAvvises,
                 egenskaper = oppgave.egenskaper.map { it.toDto() },
                 totrinnsvurdering =

@@ -92,7 +92,6 @@ internal class OpprettSaksbehandleroppgave(
         val behandlingId = behovData.spleisBehandlingId
         oppgaveService.nyOppgave(
             fødselsnummer = fødselsnummer,
-            contextId = context.id(),
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             utbetalingId = utbetalingId,

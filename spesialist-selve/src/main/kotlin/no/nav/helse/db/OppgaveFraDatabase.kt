@@ -11,7 +11,7 @@ data class OppgaveFraDatabase(
     val vedtaksperiodeId: UUID,
     val behandlingId: UUID,
     val utbetalingId: UUID,
-    val hendelseId: UUID,
+    val godkjenningsbehovId: UUID,
     val kanAvvises: Boolean,
     val ferdigstiltAvIdent: String? = null,
     val ferdigstiltAvOid: UUID? = null,

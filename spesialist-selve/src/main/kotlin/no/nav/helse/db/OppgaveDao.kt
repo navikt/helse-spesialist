@@ -62,7 +62,6 @@ interface OppgaveDao {
 
     fun opprettOppgave(
         id: Long,
-        commandContextId: UUID,
         godkjenningsbehovId: UUID,
         egenskaper: List<EgenskapForDatabase>,
         vedtaksperiodeId: UUID,

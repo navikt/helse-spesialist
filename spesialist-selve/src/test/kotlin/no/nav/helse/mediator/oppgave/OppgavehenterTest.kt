@@ -105,7 +105,7 @@ class OppgavehenterTest {
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
                 behandlingId = BEHANDLING_ID,
                 utbetalingId = UTBETALING_ID,
-                hendelseId = HENDELSE_ID,
+                godkjenningsbehovId = HENDELSE_ID,
                 kanAvvises = KAN_AVVISES,
                 ferdigstiltAvIdent = SAKSBEHANDLER_IDENT,
                 ferdigstiltAvOid = SAKSBEHANDLER_OID,
@@ -165,7 +165,6 @@ class OppgavehenterTest {
 
         override fun opprettOppgave(
             id: Long,
-            commandContextId: UUID,
             godkjenningsbehovId: UUID,
             egenskaper: List<EgenskapForDatabase>,
             vedtaksperiodeId: UUID,

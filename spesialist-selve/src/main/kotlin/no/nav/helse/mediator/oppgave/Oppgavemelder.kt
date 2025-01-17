@@ -34,8 +34,8 @@ class Oppgavemelder(
             JsonMessage.newMessage(
                 eventName,
                 mutableMapOf(
-                    "@forårsaket_av" to mapOf("id" to oppgavemelding.hendelseId),
-                    "hendelseId" to oppgavemelding.hendelseId,
+                    "@forårsaket_av" to mapOf("id" to oppgavemelding.godkjenningsbehovId),
+                    "hendelseId" to oppgavemelding.godkjenningsbehovId,
                     "oppgaveId" to oppgavemelding.oppgaveId,
                     "tilstand" to oppgavemelding.tilstand,
                     "fødselsnummer" to fødselsnummer,
@@ -53,7 +53,7 @@ private class OppgaveForKafkaBygger {
     fun bygg(oppgave: Oppgave): Oppgavemelding {
         val dto = oppgave.toDto()
         return Oppgavemelding(
-            hendelseId = dto.hendelseId,
+            godkjenningsbehovId = dto.godkjenningsbehovId,
             oppgaveId = dto.id,
             behandlingId = dto.behandlingId,
             tilstand = mapTilstand(dto.tilstand),
@@ -64,7 +64,7 @@ private class OppgaveForKafkaBygger {
     }
 
     data class Oppgavemelding(
-        val hendelseId: UUID,
+        val godkjenningsbehovId: UUID,
         val oppgaveId: Long,
         val behandlingId: UUID,
         val tilstand: String,

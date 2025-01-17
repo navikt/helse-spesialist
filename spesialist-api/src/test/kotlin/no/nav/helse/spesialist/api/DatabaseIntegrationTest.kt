@@ -487,17 +487,16 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         opprettet: LocalDateTime = LocalDateTime.now(),
         kanAvvises: Boolean = true,
     ): Long {
-        val commandContextId = UUID.randomUUID()
         val oppgaveId = dbQuery.updateAndReturnGeneratedKey(
             """
-            INSERT INTO oppgave (utbetaling_id, opprettet, oppdatert, status, vedtak_ref, command_context_id, kan_avvises)
-            VALUES (:utbetalingId, :opprettet, now(), CAST(:status as oppgavestatus), :vedtakRef, :contextId, :kanAvvises)
+            INSERT INTO oppgave (utbetaling_id, opprettet, oppdatert, status, vedtak_ref, hendelse_id_godkjenningsbehov, kan_avvises)
+            VALUES (:utbetalingId, :opprettet, now(), CAST(:status as oppgavestatus), :vedtakRef, :godkjenningsbehovId, :kanAvvises)
             """.trimIndent(),
             "utbetalingId" to utbetalingId,
             "opprettet" to opprettet,
             "status" to status.name,
             "vedtakRef" to vedtakRef,
-            "contextId" to commandContextId,
+            "godkjenningsbehovId" to UUID.randomUUID(),
             "kanAvvises" to kanAvvises,
         )
         return requireNotNull(oppgaveId)

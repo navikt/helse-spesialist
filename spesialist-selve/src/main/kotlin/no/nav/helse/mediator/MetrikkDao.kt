@@ -40,8 +40,9 @@ class MetrikkDao(private val session: Session) {
             asSQL(
                 """
             select distinct 1
-            from oppgave
-            where command_context_id = :contextId
+            from oppgave o
+            join command_context cc on o.hendelse_id_godkjenningsbehov = cc.hendelse_id
+            where cc.context_id = :contextId
             """,
                 "contextId" to contextId,
             ).single(session) { true } ?: false

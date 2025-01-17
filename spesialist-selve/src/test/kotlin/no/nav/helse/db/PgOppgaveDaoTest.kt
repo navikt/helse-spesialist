@@ -68,7 +68,8 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID)
+        val godkjenningsbehovId = UUID.randomUUID()
+        opprettOppgave(contextId = CONTEXT_ID, godkjenningsbehovId = godkjenningsbehovId)
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(
             LocalDate.now(),
@@ -78,7 +79,7 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
             null,
             null,
             vedtakId,
-            CONTEXT_ID,
+            godkjenningsbehovId,
         )
     }
 
@@ -109,7 +110,8 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
 
         opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID)
+        val godkjenningsbehovId = UUID.randomUUID()
+        opprettOppgave(contextId = CONTEXT_ID, godkjenningsbehovId = godkjenningsbehovId)
         val vedtakIdPåOppgave = vedtakId
 
         val vedtaksperiodeId = UUID.randomUUID()
@@ -132,7 +134,7 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
             null,
             null,
             vedtakIdPåOppgave,
-            CONTEXT_ID,
+            godkjenningsbehovId,
         )
     }
 
@@ -162,7 +164,8 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID, egenskaper = listOf(EGENSKAP, RISK_QA, PÅ_VENT))
+        val godkjenningsbehovId = UUID.randomUUID()
+        opprettOppgave(contextId = CONTEXT_ID, egenskaper = listOf(EGENSKAP, RISK_QA, PÅ_VENT), godkjenningsbehovId = godkjenningsbehovId)
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(
             LocalDate.now(),
@@ -172,7 +175,7 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
             null,
             null,
             vedtakId,
-            CONTEXT_ID,
+            godkjenningsbehovId,
         )
     }
 
@@ -181,7 +184,8 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID, kanAvvises = false)
+        val godkjenningsbehovId = UUID.randomUUID()
+        opprettOppgave(contextId = CONTEXT_ID, kanAvvises = false, godkjenningsbehovId = godkjenningsbehovId)
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(
             LocalDate.now(),
@@ -191,7 +195,7 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
             null,
             null,
             vedtakId,
-            CONTEXT_ID,
+            godkjenningsbehovId,
         )
     }
 
@@ -200,7 +204,8 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
         opprettPerson(adressebeskyttelse = Adressebeskyttelse.Fortrolig)
         opprettArbeidsgiver()
         opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID, egenskaper = listOf(FORTROLIG_ADRESSE))
+        val godkjenningsbehovId = UUID.randomUUID()
+        opprettOppgave(contextId = CONTEXT_ID, egenskaper = listOf(FORTROLIG_ADRESSE), godkjenningsbehovId = godkjenningsbehovId)
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(
             LocalDate.now(),
@@ -210,7 +215,7 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
             null,
             null,
             vedtakId,
-            CONTEXT_ID,
+            godkjenningsbehovId,
         )
     }
 
@@ -267,7 +272,7 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
                 vedtaksperiodeId = VEDTAKSPERIODE,
                 behandlingId = behandlingId,
                 utbetalingId = UTBETALING_ID,
-                hendelseId = hendelseId,
+                godkjenningsbehovId = hendelseId,
                 kanAvvises = true,
             ),
             oppgave,
@@ -288,7 +293,7 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
                 vedtaksperiodeId = VEDTAKSPERIODE,
                 behandlingId = behandlingId,
                 utbetalingId = UTBETALING_ID,
-                hendelseId = hendelseId,
+                godkjenningsbehovId = hendelseId,
                 kanAvvises = true,
             ),
             oppgave,
@@ -1409,7 +1414,8 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID)
+        val godkjenningsbehovId = UUID.randomUUID()
+        opprettOppgave(contextId = CONTEXT_ID, godkjenningsbehovId = godkjenningsbehovId)
         oppgaveDao.updateOppgave(oppgaveId, nyStatus, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, listOf(EGENSKAP, RISK_QA))
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(
@@ -1420,7 +1426,7 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
             SAKSBEHANDLER_EPOST,
             SAKSBEHANDLER_OID,
             vedtakId,
-            CONTEXT_ID,
+            godkjenningsbehovId,
         )
     }
 
@@ -1638,7 +1644,12 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
 
     private fun oppgave(vedtaksperiodeId: UUID = VEDTAKSPERIODE) =
         dbQuery.list(
-            "SELECT o.* FROM oppgave o JOIN vedtak v on o.vedtak_ref = v.id WHERE v.vedtaksperiode_id = :vedtaksperiodeId ORDER BY id DESC",
+            """
+            SELECT o.* FROM oppgave o
+            JOIN vedtak v ON o.vedtak_ref = v.id
+            WHERE v.vedtaksperiode_id = :vedtaksperiodeId
+            ORDER BY id DESC
+            """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
         ) { row ->
             OppgaveAssertions(
@@ -1647,9 +1658,9 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
                 status = row.string("status"),
                 kanAvvises = row.boolean("kan_avvises"),
                 ferdigstiltAv = row.stringOrNull("ferdigstilt_av"),
-                ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString),
+                ferdigstiltAvOid = row.uuidOrNull("ferdigstilt_av_oid"),
                 vedtakRef = row.longOrNull("vedtak_ref"),
-                commandContextId = row.stringOrNull("command_context_id")?.let(UUID::fromString),
+                godkjenningsbehovId = row.uuid("hendelse_id_godkjenningsbehov"),
             )
         }
 
@@ -1661,7 +1672,7 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
         private val ferdigstiltAv: String?,
         private val ferdigstiltAvOid: UUID?,
         private val vedtakRef: Long?,
-        private val commandContextId: UUID?,
+        private val godkjenningsbehovId: UUID?,
     ) {
         fun assertEquals(
             forventetOppdatert: LocalDate,
@@ -1671,7 +1682,7 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
             forventetFerdigstilAv: String?,
             forventetFerdigstilAvOid: UUID?,
             forventetVedtakRef: Long?,
-            forventetCommandContextId: UUID,
+            forventetGodkjenningsbehovId: UUID,
         ) {
             assertEquals(forventetOppdatert, oppdatert)
             assertEquals(forventetEgenskaper, egenskaper)
@@ -1680,7 +1691,7 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
             assertEquals(forventetFerdigstilAv, ferdigstiltAv)
             assertEquals(forventetFerdigstilAvOid, ferdigstiltAvOid)
             assertEquals(forventetVedtakRef, vedtakRef)
-            assertEquals(forventetCommandContextId, commandContextId)
+            assertEquals(forventetGodkjenningsbehovId, godkjenningsbehovId)
         }
     }
 }
