@@ -799,7 +799,12 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val id: UUID,
         val fom: LocalDate,
         val tom: LocalDate,
-    )
+    ) {
+        companion object {
+            infix fun LocalDate.til(tom: LocalDate) =
+                Periode(UUID.randomUUID(), this, tom)
+        }
+    }
 
     protected data class Arbeidsforhold(
         val start: LocalDate,
