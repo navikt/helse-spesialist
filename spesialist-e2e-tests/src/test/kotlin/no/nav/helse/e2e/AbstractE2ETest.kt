@@ -1209,15 +1209,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertEquals(forventetAntall, antall)
     }
 
-    protected fun assertFeilendeMeldinger(
-        forventetAntall: Int,
-        hendelseId: UUID,
-    ) {
-        val antall =
-            dbQuery.single("SELECT COUNT(1) FROM feilende_meldinger WHERE id = :id", "id" to hendelseId) { it.int(1) }
-        assertEquals(forventetAntall, antall)
-    }
-
     protected fun assertKommandokjedetilstander(
         hendelseId: UUID,
         vararg forventedeTilstander: Kommandokjedetilstand,

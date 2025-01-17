@@ -116,7 +116,6 @@ internal abstract class AbstractDatabaseTest {
                 "enhet",
                 "global_snapshot_versjon",
                 "saksbehandler",
-                "feilende_meldinger",
                 "arbeidsgiver",
                 "arbeidsgiver_bransjer",
                 "arbeidsgiver_navn",

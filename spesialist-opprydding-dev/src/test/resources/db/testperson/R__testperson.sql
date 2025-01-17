@@ -140,9 +140,6 @@ INSERT INTO periodehistorikk(id, type, timestamp, generasjon_id, saksbehandler_o
 VALUES (${sequence_number}, 'TOTRINNSVURDERING_RETUR', now(), '${generasjon_id}', '${saksbehandler_oid}',
         ${periodehistorikk_dialog_id});
 
-INSERT INTO feilende_meldinger(id, event_name, opprettet, blob)
-VALUES (gen_random_uuid(), 'FEILENDE_TESTHENDELSE', now(), '{}'::json);
-
 INSERT INTO oppgave_behandling_kobling(oppgave_id, behandling_id)
 VALUES (${sequence_number}, gen_random_uuid());
 
