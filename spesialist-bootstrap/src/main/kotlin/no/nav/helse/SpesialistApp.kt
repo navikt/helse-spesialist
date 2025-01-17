@@ -156,6 +156,7 @@ class SpesialistApp(
 
     fun start(rapidsConnection: RapidsConnection) {
         rapidsConnection.register(this)
+        val meldingPubliserer = MessageContextMeldingPubliserer(rapidsConnection)
         oppgaveService =
             OppgaveService(
                 oppgaveDao = oppgaveDao,
@@ -171,7 +172,7 @@ class SpesialistApp(
         meldingMediator =
             MeldingMediator(
                 dataSource = dataSource,
-                publiserer = MessageContextMeldingPubliserer(rapidsConnection),
+                publiserer = meldingPubliserer,
                 kommandofabrikk = kommandofabrikk,
                 poisonPills = PoisonPillDao(dataSource).poisonPills(),
             )
@@ -190,9 +191,10 @@ class SpesialistApp(
         godkjenningService =
             GodkjenningService(
                 dataSource = dataSource,
-                rapidsConnection = rapidsConnection,
+                publiserer = meldingPubliserer,
                 oppgaveService = oppgaveService,
                 saksbehandlerRepository = saksbehandlerDao,
+                tilgangskontroll = tilgangskontrollørForReservasjon,
             )
         subsumsjonsmelder = Subsumsjonsmelder(versjonAvKode, rapidsConnection)
 

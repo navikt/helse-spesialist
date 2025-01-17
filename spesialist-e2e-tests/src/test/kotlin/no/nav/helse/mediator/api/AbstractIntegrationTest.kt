@@ -12,6 +12,7 @@ import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.e2e.AbstractE2ETest
+import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.GodkjenningService
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -52,7 +53,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
             dataSource = dataSource,
             oppgaveDao = oppgaveDao,
             overstyringDao = OverstyringDao(dataSource),
-            rapidsConnection = testRapid,
+            publiserer = MessageContextMeldingPubliserer(testRapid),
             oppgaveService = oppgaveService,
             reservasjonDao = reservasjonDao,
             saksbehandlerRepository = saksbehandlerDao,
@@ -63,6 +64,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
                     historikkinnslagRepository,
                     PgDialogDao(dataSource),
                 ),
+            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
         )
 
     protected fun sisteOppgaveId() = testRapid.inspektør.oppgaveId()

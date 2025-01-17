@@ -1,8 +1,7 @@
 package no.nav.helse.mediator
 
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import net.logstash.logback.argument.StructuredArguments
+import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PgDialogDao
@@ -13,8 +12,11 @@ import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.toDto
 import no.nav.helse.mediator.oppgave.OppgaveService
+import no.nav.helse.modell.melding.Saksbehandlerløsning
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
+import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
@@ -29,7 +31,7 @@ class GodkjenningService(
     private val dataSource: DataSource,
     private val oppgaveDao: OppgaveDao = PgOppgaveDao(dataSource),
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
-    private val rapidsConnection: RapidsConnection,
+    private val publiserer: MeldingPubliserer,
     private val oppgaveService: OppgaveService,
     private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
     private val periodehistorikkDao: PeriodehistorikkDao = PgPeriodehistorikkDao(dataSource),
@@ -41,9 +43,9 @@ class GodkjenningService(
             periodehistorikkDao,
             PgDialogDao(dataSource),
         ),
+    private val tilgangskontroll: Tilgangskontroll,
 ) : Godkjenninghåndterer {
     private companion object {
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
         private val logg = LoggerFactory.getLogger(GodkjenningService::class.java)
     }
 
@@ -57,45 +59,28 @@ class GodkjenningService(
         val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(godkjenningDTO.oppgavereferanse)
         val totrinnsvurdering = totrinnsvurderingService.hentAktiv(vedtaksperiodeId)
         val reserverPersonOid: UUID = totrinnsvurdering?.saksbehandler ?: oid
-        val saksbehandleroverstyringer = overstyringDao.finnAktiveOverstyringer(vedtaksperiodeId)
-        val saksbehandlerJson = saksbehandler(godkjenningDTO, totrinnsvurdering, oid)
-        val beslutterJson = beslutter(godkjenningDTO, totrinnsvurdering)
-        val godkjenningMessage =
-            JsonMessage
-                .newMessage(
-                    "saksbehandler_løsning",
-                    mutableMapOf(
-                        "@forårsaket_av" to
-                            mapOf(
-                                "event_name" to "behov",
-                                "behov" to "Godkjenning",
-                                "id" to hendelseId,
-                            ),
-                        "fødselsnummer" to fødselsnummer,
-                        "oppgaveId" to godkjenningDTO.oppgavereferanse,
-                        "hendelseId" to hendelseId,
-                        "godkjent" to godkjenningDTO.godkjent,
-                        "saksbehandlerident" to godkjenningDTO.saksbehandlerIdent,
-                        "saksbehandleroid" to oid,
-                        "saksbehandlerepost" to epost,
-                        "godkjenttidspunkt" to LocalDateTime.now(),
-                        "saksbehandleroverstyringer" to saksbehandleroverstyringer,
-                        "saksbehandler" to saksbehandlerJson,
-                    ).apply {
-                        godkjenningDTO.årsak?.let { put("årsak", it) }
-                        godkjenningDTO.begrunnelser?.let { put("begrunnelser", it) }
-                        godkjenningDTO.kommentar?.let { put("kommentar", it) }
-                        compute("beslutter") { _, _ -> beslutterJson }
-                    },
-                ).also {
-                    sikkerlogg.info("Publiserer saksbehandler-løsning: ${it.toJson()}")
-                }
+        val saksbehandlerløsning =
+            Saksbehandlerløsning(
+                godkjenningsbehovId = hendelseId,
+                oppgaveId = godkjenningDTO.oppgavereferanse,
+                godkjent = godkjenningDTO.godkjent,
+                saksbehandlerIdent = godkjenningDTO.saksbehandlerIdent,
+                saksbehandlerOid = oid,
+                saksbehandlerEpost = epost,
+                godkjenttidspunkt = LocalDateTime.now(),
+                saksbehandleroverstyringer = overstyringDao.finnAktiveOverstyringer(vedtaksperiodeId),
+                saksbehandler = saksbehandler(godkjenningDTO, totrinnsvurdering, oid),
+                årsak = godkjenningDTO.årsak,
+                begrunnelser = godkjenningDTO.begrunnelser,
+                kommentar = godkjenningDTO.kommentar,
+                beslutter = beslutter(godkjenningDTO, totrinnsvurdering),
+            )
         logg.info(
             "Publiserer saksbehandler-løsning for {}, {}",
             StructuredArguments.keyValue("oppgaveId", godkjenningDTO.oppgavereferanse),
             StructuredArguments.keyValue("hendelseId", hendelseId),
         )
-        rapidsConnection.publish(fødselsnummer, godkjenningMessage.toJson())
+        publiserer.publiser(fødselsnummer, saksbehandlerløsning, "saksbehandlergodkjenning")
 
         reserverPerson(reserverPersonOid, fødselsnummer)
         oppgaveService.oppgave(godkjenningDTO.oppgavereferanse) {
@@ -103,7 +88,8 @@ class GodkjenningService(
             overstyringDao.ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId)
 
             if (totrinnsvurdering?.erBeslutteroppgave() == true && godkjenningDTO.godkjent) {
-                val beslutter = totrinnsvurdering.beslutter?.let { saksbehandlerRepository.finnSaksbehandler(it)?.toDto() }
+                val beslutter =
+                    totrinnsvurdering.beslutter?.let { saksbehandlerRepository.finnSaksbehandler(it)?.toDto() }
                 checkNotNull(beslutter) { "Forventer at beslutter er satt" }
                 val innslag = Historikkinnslag.totrinnsvurderingFerdigbehandletInnslag(beslutter)
                 periodehistorikkDao.lagreMedOppgaveId(innslag, godkjenningDTO.oppgavereferanse)
@@ -115,7 +101,7 @@ class GodkjenningService(
         godkjenningDTO: GodkjenningDto,
         totrinnsvurdering: TotrinnsvurderingOld?,
         oid: UUID,
-    ): Map<String, String> =
+    ): Saksbehandler =
         when {
             !godkjenningDTO.godkjent -> saksbehandlerForJson(oid)
             totrinnsvurdering == null -> saksbehandlerForJson(oid)
@@ -131,7 +117,7 @@ class GodkjenningService(
     private fun beslutter(
         godkjenningDTO: GodkjenningDto,
         totrinnsvurdering: TotrinnsvurderingOld?,
-    ): Map<String, String>? =
+    ): Saksbehandler? =
         when {
             !godkjenningDTO.godkjent -> null
             totrinnsvurdering == null -> null
@@ -144,16 +130,10 @@ class GodkjenningService(
             }
         }
 
-    private fun saksbehandlerForJson(oid: UUID): Map<String, String> {
-        val saksbehandler =
-            requireNotNull(
-                saksbehandlerRepository.finnSaksbehandler(oid),
-            ) { "Finner ikke saksbehandleren i databasen. Det gir ikke noen mening" }
-        return mapOf(
-            "ident" to saksbehandler.ident,
-            "epostadresse" to saksbehandler.epostadresse,
-        )
-    }
+    private fun saksbehandlerForJson(oid: UUID): Saksbehandler =
+        requireNotNull(
+            saksbehandlerRepository.finnSaksbehandler(oid, tilgangskontroll),
+        ) { "Finner ikke saksbehandleren i databasen. Det gir ikke noen mening" }
 
     private fun reserverPerson(
         oid: UUID,
@@ -162,7 +142,7 @@ class GodkjenningService(
         try {
             reservasjonDao.reserverPerson(oid, fødselsnummer)
         } catch (e: SQLException) {
-            logg.warn("Kunne ikke reservere person")
+            logg.warn("Kunne ikke reservere person", e)
         }
     }
 }

@@ -5,6 +5,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.helse.modell.melding.Godkjenningsbehovløsning
 import no.nav.helse.modell.melding.KlargjørPersonForVisning
 import no.nav.helse.modell.melding.OppdaterPersondata
+import no.nav.helse.modell.melding.Saksbehandlerløsning
 import no.nav.helse.modell.melding.Sykepengevedtak
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.melding.VedtaksperiodeAvvistAutomatisk
@@ -36,6 +37,7 @@ internal fun UtgåendeHendelse.eventName() =
         is Sykepengevedtak -> "vedtak_fattet"
         is KlargjørPersonForVisning -> "klargjør_person_for_visning"
         is OppdaterPersondata -> "oppdater_persondata"
+        is Saksbehandlerløsning -> "saksbehandler_løsning"
     }
 
 private fun UtgåendeHendelse.detaljer(): Map<String, Any> {
@@ -48,6 +50,7 @@ private fun UtgåendeHendelse.detaljer(): Map<String, Any> {
         is Sykepengevedtak -> this.detaljer()
         is KlargjørPersonForVisning -> emptyMap()
         is OppdaterPersondata -> emptyMap()
+        is Saksbehandlerløsning -> this.detaljer()
     }
 }
 
@@ -165,3 +168,36 @@ private fun VedtaksperiodeGodkjentManuelt.detaljer(): Map<String, Any> {
         put("behandlingId", behandlingId)
     }
 }
+
+private fun Saksbehandlerløsning.detaljer(): Map<String, Any> =
+    listOfNotNull(
+        "@forårsaket_av" to
+            mapOf(
+                "event_name" to "behov",
+                "behov" to "Godkjenning",
+                "id" to godkjenningsbehovId,
+            ),
+        "oppgaveId" to oppgaveId,
+        "hendelseId" to godkjenningsbehovId,
+        "godkjent" to godkjent,
+        "saksbehandlerident" to saksbehandlerIdent,
+        "saksbehandleroid" to saksbehandlerOid,
+        "saksbehandlerepost" to saksbehandlerEpost,
+        "godkjenttidspunkt" to godkjenttidspunkt,
+        "saksbehandleroverstyringer" to saksbehandleroverstyringer,
+        "saksbehandler" to
+            mapOf(
+                "ident" to saksbehandler.ident(),
+                "epostadresse" to saksbehandler.epostadresse(),
+            ),
+        årsak?.let { "årsak" to it },
+        begrunnelser?.let { "begrunnelser" to it },
+        kommentar?.let { "kommentar" to it },
+        beslutter?.let {
+            "beslutter" to
+                mapOf(
+                    "ident" to it.ident(),
+                    "epostadresse" to it.epostadresse(),
+                )
+        },
+    ).toMap()

@@ -2,6 +2,8 @@ package no.nav.helse.db
 
 import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
@@ -53,4 +55,18 @@ class SaksbehandlerDao(private val queryRunner: QueryRunner) : SaksbehandlerRepo
                     ident = row.string("ident"),
                 )
             }
+
+    override fun finnSaksbehandler(
+        oid: UUID,
+        tilgangskontroll: Tilgangskontroll,
+    ) = asSQL("SELECT * FROM saksbehandler WHERE oid = :oid LIMIT 1", "oid" to oid)
+        .singleOrNull { row ->
+            Saksbehandler(
+                epostadresse = row.string("epost"),
+                oid = row.uuid("oid"),
+                navn = row.string("navn"),
+                ident = row.string("ident"),
+                tilgangskontroll = tilgangskontroll,
+            )
+        }
 }

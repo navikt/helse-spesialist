@@ -1,24 +1,20 @@
 package no.nav.helse.mediator.oppgave
 
-import no.nav.helse.db.AntallOppgaverFraDatabase
-import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OppgaveFraDatabase
-import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
-import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.EgenskapDto
 import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
 import no.nav.helse.modell.oppgave.OppgaveDto
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
+import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -41,7 +37,12 @@ class OppgavehenterTest {
         private const val SAKSBEHANDLER_NAVN = "Saksbehandler"
         private val SAKSBEHANDLER_OID = UUID.randomUUID()
         private val BESLUTTER_OID = UUID.randomUUID()
-        private val TILDELT_TIL = SaksbehandlerFraDatabase(SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_IDENT)
+        private val TILDELT_TIL = SaksbehandlerFraDatabase(
+            epostadresse = SAKSBEHANDLER_EPOST,
+            oid = SAKSBEHANDLER_OID,
+            navn = SAKSBEHANDLER_NAVN,
+            ident = SAKSBEHANDLER_IDENT
+        )
         private const val PÅ_VENT = false
         private const val ER_RETUR = false
         private const val KAN_AVVISES = true
@@ -51,7 +52,12 @@ class OppgavehenterTest {
 
     @Test
     fun `konverter fra OppgaveFraDatabase til Oppgave`() {
-        val oppgavehenter = Oppgavehenter(oppgaveRepository(), totrinnsvurderingRepository(), saksbehandlerRepository, TilgangskontrollForTestHarIkkeTilgang)
+        val oppgavehenter = Oppgavehenter(
+            oppgaveDao = oppgaveRepository(),
+            totrinnsvurderingDao = totrinnsvurderingRepository(),
+            saksbehandlerRepository = saksbehandlerRepository,
+            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang
+        )
         val oppgave = oppgavehenter.oppgave(OPPGAVE_ID).toDto()
         assertEquals(OPPGAVE_ID, oppgave.id)
         assertEquals(OppgaveDto.TilstandDto.AvventerSaksbehandler, oppgave.tilstand)
@@ -76,7 +82,12 @@ class OppgavehenterTest {
             oppdatert = TOTRINNSVURDERING_OPPDATERT,
         )
 
-        val oppgavehenter = Oppgavehenter(oppgaveRepository(), totrinnsvurderingRepository(totrinnsvurdering), saksbehandlerRepository, TilgangskontrollForTestHarIkkeTilgang)
+        val oppgavehenter = Oppgavehenter(
+            oppgaveDao = oppgaveRepository(),
+            totrinnsvurderingDao = totrinnsvurderingRepository(totrinnsvurdering),
+            saksbehandlerRepository = saksbehandlerRepository,
+            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang
+        )
         val oppgave = oppgavehenter.oppgave(OPPGAVE_ID).toDto()
         assertEquals(OPPGAVE_ID, oppgave.id)
         assertEquals(OppgaveDto.TilstandDto.AvventerSaksbehandler, oppgave.tilstand)
@@ -97,48 +108,33 @@ class OppgavehenterTest {
     }
 
     private fun oppgaveRepository(oppgaveegenskaper: List<EgenskapForDatabase> = listOf(TYPE)) = object : OppgaveDao {
-        override fun finnOppgave(id: Long): OppgaveFraDatabase {
-            return OppgaveFraDatabase(
-                id = OPPGAVE_ID,
-                egenskaper = oppgaveegenskaper,
-                status = STATUS,
-                vedtaksperiodeId = VEDTAKSPERIODE_ID,
-                behandlingId = BEHANDLING_ID,
-                utbetalingId = UTBETALING_ID,
-                godkjenningsbehovId = HENDELSE_ID,
-                kanAvvises = KAN_AVVISES,
-                ferdigstiltAvIdent = SAKSBEHANDLER_IDENT,
-                ferdigstiltAvOid = SAKSBEHANDLER_OID,
-                tildelt = TILDELT_TIL,
-            )
-        }
+        override fun finnOppgave(id: Long) = OppgaveFraDatabase(
+            id = OPPGAVE_ID,
+            egenskaper = oppgaveegenskaper,
+            status = STATUS,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            behandlingId = BEHANDLING_ID,
+            utbetalingId = UTBETALING_ID,
+            godkjenningsbehovId = HENDELSE_ID,
+            kanAvvises = KAN_AVVISES,
+            ferdigstiltAvIdent = SAKSBEHANDLER_IDENT,
+            ferdigstiltAvOid = SAKSBEHANDLER_OID,
+            tildelt = TILDELT_TIL,
+        )
 
-        override fun finnOppgaveIdUansettStatus(fødselsnummer: String): Long =  throw UnsupportedOperationException()
-
-        override fun finnGenerasjonId(oppgaveId: Long): UUID = throw UnsupportedOperationException()
-
-        override fun oppgaveDataForAutomatisering(oppgaveId: Long): OppgaveDataForAutomatisering =  throw UnsupportedOperationException()
-
-        override fun finnHendelseId(id: Long): UUID = UUID.randomUUID()
-
-        override fun finnOppgaveId(fødselsnummer: String): Long = throw UnsupportedOperationException()
-
-        override fun finnVedtaksperiodeId(fødselsnummer: String): UUID = throw UnsupportedOperationException()
-        override fun finnVedtaksperiodeId(oppgaveId: Long): UUID = throw UnsupportedOperationException()
-        override fun harGyldigOppgave(utbetalingId: UUID): Boolean = throw UnsupportedOperationException()
-
-        override fun invaliderOppgaveFor(fødselsnummer: String) {
-            throw UnsupportedOperationException()
-        }
-
-        override fun finnOppgaveId(utbetalingId: UUID): Long = throw UnsupportedOperationException()
-
-        override fun reserverNesteId(): Long = throw UnsupportedOperationException()
-
-        override fun venterPåSaksbehandler(oppgaveId: Long): Boolean = throw UnsupportedOperationException()
-
-        override fun finnSpleisBehandlingId(oppgaveId: Long): UUID = throw UnsupportedOperationException()
-
+        override fun finnOppgaveIdUansettStatus(fødselsnummer: String) = error("Not implemented in test")
+        override fun finnGenerasjonId(oppgaveId: Long) = error("Not implemented in test")
+        override fun oppgaveDataForAutomatisering(oppgaveId: Long) = error("Not implemented in test")
+        override fun finnHendelseId(id: Long) = UUID.randomUUID()
+        override fun finnOppgaveId(fødselsnummer: String) = error("Not implemented in test")
+        override fun finnVedtaksperiodeId(fødselsnummer: String) = error("Not implemented in test")
+        override fun finnVedtaksperiodeId(oppgaveId: Long) = error("Not implemented in test")
+        override fun harGyldigOppgave(utbetalingId: UUID) = error("Not implemented in test")
+        override fun invaliderOppgaveFor(fødselsnummer: String) = error("Not implemented in test")
+        override fun finnOppgaveId(utbetalingId: UUID) = error("Not implemented in test")
+        override fun reserverNesteId() = error("Not implemented in test")
+        override fun venterPåSaksbehandler(oppgaveId: Long) = error("Not implemented in test")
+        override fun finnSpleisBehandlingId(oppgaveId: Long) = error("Not implemented in test")
         override fun finnOppgaverForVisning(
             ekskluderEgenskaper: List<String>,
             saksbehandlerOid: UUID,
@@ -149,20 +145,14 @@ class OppgavehenterTest {
             egneSaker: Boolean,
             tildelt: Boolean?,
             grupperteFiltrerteEgenskaper: Map<Egenskap.Kategori, List<EgenskapForDatabase>>?
-        ): List<OppgaveFraDatabaseForVisning> = throw UnsupportedOperationException()
+        ) = error("Not implemented in test")
 
-        override fun finnAntallOppgaver(saksbehandlerOid: UUID): AntallOppgaverFraDatabase = throw UnsupportedOperationException()
+        override fun finnAntallOppgaver(saksbehandlerOid: UUID) = error("Not implemented in test")
+        override fun finnBehandledeOppgaver(behandletAvOid: UUID, offset: Int, limit: Int) =
+            error("Not implemented in test")
 
-        override fun finnBehandledeOppgaver(
-            behandletAvOid: UUID,
-            offset: Int,
-            limit: Int
-        ): List<BehandletOppgaveFraDatabaseForVisning> = throw UnsupportedOperationException()
-
-        override fun finnEgenskaper(vedtaksperiodeId: UUID, utbetalingId: UUID): Set<EgenskapForDatabase> = throw UnsupportedOperationException()
-
-        override fun finnIdForAktivOppgave(vedtaksperiodeId: UUID): Long = throw UnsupportedOperationException()
-
+        override fun finnEgenskaper(vedtaksperiodeId: UUID, utbetalingId: UUID) = error("Not implemented in test")
+        override fun finnIdForAktivOppgave(vedtaksperiodeId: UUID) = error("Not implemented in test")
         override fun opprettOppgave(
             id: Long,
             godkjenningsbehovId: UUID,
@@ -171,43 +161,61 @@ class OppgavehenterTest {
             behandlingId: UUID,
             utbetalingId: UUID,
             kanAvvises: Boolean
-        ) = throw UnsupportedOperationException()
+        ) = error("Not implemented in test")
 
-        override fun finnFødselsnummer(oppgaveId: Long): String = throw UnsupportedOperationException()
-
+        override fun finnFødselsnummer(oppgaveId: Long) = error("Not implemented in test")
         override fun updateOppgave(
             oppgaveId: Long,
             oppgavestatus: String,
             ferdigstiltAv: String?,
             oid: UUID?,
             egenskaper: List<EgenskapForDatabase>
-        ): Int = throw UnsupportedOperationException()
+        ) = error("Not implemented in test")
 
-        override fun harFerdigstiltOppgave(vedtaksperiodeId: UUID): Boolean = throw UnsupportedOperationException()
-        override fun oppdaterPekerTilGodkjenningsbehov(godkjenningsbehovId: UUID, utbetalingId: UUID) {
-            throw UnsupportedOperationException()
-        }
+        override fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) = error("Not implemented in test")
+        override fun oppdaterPekerTilGodkjenningsbehov(godkjenningsbehovId: UUID, utbetalingId: UUID) =
+            error("Not implemented in test")
     }
 
     private fun totrinnsvurderingRepository(
         totrinnsvurdering: TotrinnsvurderingFraDatabase? = null
     ) = object : TotrinnsvurderingDao {
-        override fun hentAktivTotrinnsvurdering(oppgaveId: Long): TotrinnsvurderingFraDatabase? = totrinnsvurdering
+        override fun hentAktivTotrinnsvurdering(oppgaveId: Long) = totrinnsvurdering
         override fun oppdater(totrinnsvurderingFraDatabase: TotrinnsvurderingFraDatabase) {}
-        override fun settBeslutter(oppgaveId: Long, saksbehandlerOid: UUID) = TODO("Not yet implemented")
-        override fun settErRetur(vedtaksperiodeId: UUID) = TODO("Not yet implemented")
-        override fun opprett(vedtaksperiodeId: UUID): TotrinnsvurderingOld = TODO("Not yet implemented")
-        override fun hentAktiv(oppgaveId: Long): TotrinnsvurderingOld = TODO("Not yet implemented")
-        override fun hentAktiv(vedtaksperiodeId: UUID): TotrinnsvurderingOld = TODO("Not yet implemented")
-        override fun ferdigstill(vedtaksperiodeId: UUID) = TODO("Not yet implemented") }
+        override fun settBeslutter(oppgaveId: Long, saksbehandlerOid: UUID) = error("Not implemented in test")
+        override fun settErRetur(vedtaksperiodeId: UUID) = error("Not implemented in test")
+        override fun opprett(vedtaksperiodeId: UUID) = error("Not implemented in test")
+        override fun hentAktiv(oppgaveId: Long) = error("Not implemented in test")
+        override fun hentAktiv(vedtaksperiodeId: UUID) = error("Not implemented in test")
+        override fun ferdigstill(vedtaksperiodeId: UUID) = error("Not implemented in test")
+    }
 
     private val saksbehandlerRepository = object : SaksbehandlerRepository {
         val saksbehandlere = mapOf(
-            SAKSBEHANDLER_OID to SaksbehandlerFraDatabase(SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_IDENT),
-            BESLUTTER_OID to SaksbehandlerFraDatabase(SAKSBEHANDLER_EPOST, BESLUTTER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_IDENT),
+            SAKSBEHANDLER_OID to SaksbehandlerFraDatabase(
+                epostadresse = SAKSBEHANDLER_EPOST,
+                oid = SAKSBEHANDLER_OID,
+                navn = SAKSBEHANDLER_NAVN,
+                ident = SAKSBEHANDLER_IDENT
+            ),
+            BESLUTTER_OID to SaksbehandlerFraDatabase(
+                epostadresse = SAKSBEHANDLER_EPOST,
+                oid = BESLUTTER_OID,
+                navn = SAKSBEHANDLER_NAVN,
+                ident = SAKSBEHANDLER_IDENT
+            ),
         )
-        override fun finnSaksbehandler(oid: UUID): SaksbehandlerFraDatabase? {
-            return saksbehandlere[oid]
+
+        override fun finnSaksbehandler(oid: UUID) = saksbehandlere[oid]
+
+        override fun finnSaksbehandler(oid: UUID, tilgangskontroll: Tilgangskontroll) = saksbehandlere[oid]?.let {
+            Saksbehandler(
+                epostadresse = it.epostadresse,
+                oid = it.oid,
+                navn = it.navn,
+                ident = it.ident,
+                tilgangskontroll = tilgangskontroll
+            )
         }
     }
 
