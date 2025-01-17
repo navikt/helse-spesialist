@@ -48,9 +48,11 @@ internal class GraphQLApiTest : AbstractGraphQLApiTest() {
         assertEquals(30000.0, refusjonsopplysning["belop"].asDouble())
 
     }
+
     @Test
     fun `beriker vilkårsgrunnlag med data fra avviksvurdering`() {
-        mockSnapshot(avviksprosent = 26.0)
+        mockSnapshot()
+        mockAvviksvurdering(avviksprosent = 26.0)
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 
         val body = runQuery(
@@ -113,9 +115,11 @@ internal class GraphQLApiTest : AbstractGraphQLApiTest() {
         assertEquals(YearMonth.from(1.april), inntekt2_4["maned"].asYearMonth())
         assertEquals(1500.0, inntekt2_4["sum"].asDouble())
     }
+
     @Test
     fun `henter sykepengegrunnlagsgrense`() {
         mockSnapshot()
+        mockAvviksvurdering()
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 
         val body = runQuery(
@@ -151,7 +155,8 @@ internal class GraphQLApiTest : AbstractGraphQLApiTest() {
     fun `Nan avviksprosent gir error`() = ugyldigAvvikprosent(Double.NaN)
 
     private fun ugyldigAvvikprosent(avviksprosent: Double) {
-        mockSnapshot(avviksprosent = avviksprosent)
+        mockSnapshot()
+        mockAvviksvurdering(avviksprosent = avviksprosent)
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 
         val body = runQuery(

@@ -12,6 +12,11 @@ import graphql.GraphQLException
 import io.mockk.every
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest.Periode.Companion.til
+import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettBeregnetPeriode
+import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotArbeidsgiver
+import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotGenerasjon
+import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotHendelse
+import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettUberegnetPeriode
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
 import no.nav.helse.spesialist.api.graphql.schema.Avslag
 import no.nav.helse.spesialist.api.graphql.schema.Handling
@@ -204,7 +209,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val graphQLUberegnetPeriode = opprettUberegnetPeriode(2.januar(2023), 3.januar(2023), uberegnetPeriode.id)
         val graphQLperiodeMedOppgave = opprettBeregnetPeriode(4.januar(2023), 5.januar(2023), periodeMedOppgave.id)
         val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLUberegnetPeriode, graphQLperiodeMedOppgave))
-        val arbeidsgiver = opprettSnapshotArbeidsgiver(listOf(snapshotGenerasjon))
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
         opprettVarseldefinisjon()
         nyttVarsel(vedtaksperiodeId = uberegnetPeriode.id, generasjonRef = generasjonRef, status = "AKTIV")
@@ -221,7 +226,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val uberegnetPeriode = opprettUberegnetPeriode(2.januar(2023), 3.januar(2023), vedtaksperiodeId)
         val beregnetPeriode = opprettBeregnetPeriode(5.januar(2023), 6.januar(2023), PERIODE.id)
         val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(beregnetPeriode, uberegnetPeriode))
-        val arbeidsgiver = opprettSnapshotArbeidsgiver(listOf(snapshotGenerasjon))
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         opprettVarseldefinisjon()
@@ -264,7 +269,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
             opprettSnapshotGenerasjon(listOf(graphQLUberegnetPeriode, graphQLperiodeMedOppgave), snapshotGenerasjonId1)
         val snapshotGenerasjon2 =
             opprettSnapshotGenerasjon(listOf(graphQLUberegnetPeriode, graphQLperiodeMedOppgave), snapshotGenerasjonId2)
-        val arbeidsgiver = opprettSnapshotArbeidsgiver(listOf(snapshotGenerasjon1, snapshotGenerasjon2))
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon1, snapshotGenerasjon2))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
         opprettVarseldefinisjon()
         nyttVarsel(vedtaksperiodeId = uberegnetPeriode.id, generasjonRef = generasjonRef1, status = "AKTIV")
@@ -289,7 +294,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val førstePeriode = periode1.tilBeregnetPeriode().copy(periodetilstand = GraphQLPeriodetilstand.UTBETALT)
         val andrePeriode = periode2.tilBeregnetPeriode()
         val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(førstePeriode, andrePeriode))
-        val arbeidsgiver = opprettSnapshotArbeidsgiver(listOf(snapshotGenerasjon))
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
 
         val body = runPersonQuery()
@@ -314,7 +319,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val (id, fom, tom) = PERIODE
         val graphQLperiodeMedOppgave = opprettBeregnetPeriode(fom, tom, id)
         val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
-        val arbeidsgiver = opprettSnapshotArbeidsgiver(listOf(snapshotGenerasjon))
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
 
         val body = runPersonQuery()
@@ -334,7 +339,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val graphQLHendelse = opprettSnapshotHendelse(eksternDokumentId)
         val graphQLperiodeMedOppgave = opprettBeregnetPeriode(fom, tom, id, hendelser = listOf(graphQLHendelse))
         val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
-        val arbeidsgiver = opprettSnapshotArbeidsgiver(listOf(snapshotGenerasjon))
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
 
         val body = runPersonQuery(null)
@@ -366,7 +371,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         opprettVedtaksperiode(personRef, arbeidsgiverRef)
         val graphQLperiodeMedOppgave = opprettBeregnetPeriode(4.januar(2023), 5.januar(2023), PERIODE.id)
         val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave), snapshotGenerasjonId1)
-        val arbeidsgiver = opprettSnapshotArbeidsgiver(listOf(snapshotGenerasjon))
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
 
         val body = runPersonQuery(null)
@@ -385,7 +390,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val (id, fom, tom) = PERIODE
         val graphQLperiodeMedOppgave = opprettBeregnetPeriode(fom, tom, id)
         val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
-        val arbeidsgiver = opprettSnapshotArbeidsgiver(listOf(snapshotGenerasjon))
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
 
         val body = runPersonQuery()

@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api
 
+import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import com.expediagroup.graphql.server.ktor.GraphQL
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.call.body
@@ -25,12 +26,21 @@ import no.nav.helse.spesialist.api.avviksvurdering.Sammenligningsgrunnlag
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.endepunkter.ApiTesting
 import no.nav.helse.spesialist.api.graphql.ContextFactory
+import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.graphQLSpleisVilkarsgrunnlag
+import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettBeregnetPeriode
+import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotArbeidsgiver
+import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotGenerasjon
 import no.nav.helse.spesialist.api.graphql.RequestParser
 import no.nav.helse.spesialist.api.graphql.SchemaBuilder
 import no.nav.helse.spesialist.api.graphql.queryHandler
 import no.nav.helse.spesialist.api.graphql.schemaGeneratorHooks
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
+import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
+import no.nav.helse.spesialist.api.snapshot.SnapshotClient
+import no.nav.helse.spesialist.api.snapshot.SnapshotService
+import no.nav.helse.spleis.graphql.HentSnapshot
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiver
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.intellij.lang.annotations.Language
 import java.time.YearMonth
 import java.util.UUID
@@ -49,6 +59,10 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     protected val dokumenthåndterer = mockk<Dokumenthåndterer>(relaxed = true)
     private val avviksvurderinghenter = mockk<Avviksvurderinghenter>(relaxed = true)
     private val stansAutomatiskBehandlinghåndterer = mockk<StansAutomatiskBehandlinghåndterer>(relaxed = true)
+
+    protected val snapshotClient = mockk<SnapshotClient>(relaxed = true)
+    private val snapshotApiDao = SnapshotApiDao(dataSource)
+    private val snapshotService = SnapshotService(snapshotApiDao, snapshotClient)
 
     private val apiTesting = ApiTesting(
         jwtStub,
@@ -113,12 +127,44 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
         }
     }
 
-    override fun mockSnapshot(
-        fødselsnummer: String,
-        avviksprosent: Double,
-        arbeidsgivere: List<GraphQLArbeidsgiver>,
+    fun mockSnapshot(
+        fødselsnummer: String = FØDSELSNUMMER,
+        arbeidsgivere: List<GraphQLArbeidsgiver> = listOf(defaultArbeidsgivere()),
     ) {
-        super.mockSnapshot(fødselsnummer, avviksprosent, arbeidsgivere)
+        val respons = object : GraphQLClientResponse<HentSnapshot.Result> {
+            override val data = HentSnapshot.Result(snapshot(fødselsnummer, arbeidsgivere))
+        }
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns respons
+    }
+
+    private fun snapshot(
+        fødselsnummer: String = FØDSELSNUMMER,
+        arbeidsgivere: List<GraphQLArbeidsgiver>,
+    ): GraphQLPerson {
+        val vilkårsgrunnlag = graphQLSpleisVilkarsgrunnlag(ORGANISASJONSNUMMER)
+
+        return GraphQLPerson(
+            aktorId = AKTØRID,
+            arbeidsgivere = arbeidsgivere,
+            dodsdato = null,
+            fodselsnummer = fødselsnummer,
+            versjon = 1,
+            vilkarsgrunnlag = listOf(vilkårsgrunnlag),
+        )
+    }
+
+    private fun defaultArbeidsgivere(): GraphQLArbeidsgiver {
+        val periodeMedOppgave = Periode(UUID.randomUUID(), 1.januar, 25.januar)
+        val graphQLperiodeMedOppgave = opprettBeregnetPeriode(4.januar(2023), 5.januar(2023), periodeMedOppgave.id)
+        val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon))
+        return arbeidsgiver
+    }
+
+    fun mockAvviksvurdering(
+        fødselsnummer: String = FØDSELSNUMMER,
+        avviksprosent: Double = 0.0,
+    ) {
         every { avviksvurderinghenter.hentAvviksvurdering(any()) } returns
             Avviksvurdering(
                 unikId = avviksvurderingId,
