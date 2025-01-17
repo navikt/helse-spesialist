@@ -126,7 +126,7 @@ class PersonDao(
         kjønn: Kjønn,
         adressebeskyttelse: Adressebeskyttelse,
     ) {
-        finnPersonInfoRef(fødselsnummer)
+        finnPersoninfoRef(fødselsnummer)
             ?.also {
                 updatePersonInfo(
                     it,
@@ -149,12 +149,6 @@ class PersonDao(
                 fødselsnummer,
             )
     }
-
-    private fun finnPersonInfoRef(fødselsnummer: String) =
-        asSQL(
-            "SELECT info_ref FROM person WHERE fødselsnummer = :foedselsnummer",
-            "foedselsnummer" to fødselsnummer,
-        ).singleOrNull { it.longOrNull("info_ref") }
 
     private fun updatePersonInfo(
         id: Long,
@@ -229,7 +223,7 @@ class PersonDao(
         skjæringstidspunkt: LocalDate,
     ) = asSQL(
         """
-        SELECT * FROM inntekt 
+        SELECT inntekter FROM inntekt 
         WHERE person_ref = (SELECT id FROM person WHERE fødselsnummer = :foedselsnummer)
         AND skjaeringstidspunkt = :skjaeringstidspunkt;
         """.trimIndent(),
@@ -241,7 +235,7 @@ class PersonDao(
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate,
         inntekter: List<Inntekter>,
-    ) = finnPersonRef(fødselsnummer)?.also {
+    ) = finnPersonMedFødselsnummer(fødselsnummer)?.also {
         asSQL(
             """
             INSERT INTO inntekt (person_ref, skjaeringstidspunkt, inntekter)
@@ -252,12 +246,6 @@ class PersonDao(
             "inntekter" to objectMapper.writeValueAsString(inntekter),
         ).update()
     }
-
-    private fun finnPersonRef(fødselsnummer: String) =
-        asSQL(
-            "SELECT id FROM person WHERE fødselsnummer = :foedselsnummer",
-            "foedselsnummer" to fødselsnummer,
-        ).singleOrNull { it.longOrNull("id") }
 
     override fun upsertInfotrygdutbetalinger(
         fødselsnummer: String,

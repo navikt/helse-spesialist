@@ -78,10 +78,10 @@ class MeldingDao(queryRunner: QueryRunner) : MeldingRepository, QueryRunner by q
     override fun finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId: UUID): Int =
         asSQL(
             """
-                SELECT count(1) AS antall
-                FROM automatisering_korrigert_soknad aks
-                WHERE vedtaksperiode_id = :vedtaksperiodeId
-                """,
+            SELECT count(1) AS antall
+            FROM automatisering_korrigert_soknad aks
+            WHERE vedtaksperiode_id = :vedtaksperiodeId
+            """,
             "vedtaksperiodeId" to vedtaksperiodeId,
         ).single { it.int("antall") }
 
@@ -167,7 +167,7 @@ class MeldingDao(queryRunner: QueryRunner) : MeldingRepository, QueryRunner by q
 
     override fun finn(id: UUID): Personmelding? =
         asSQL(
-            """SELECT type,data FROM hendelse WHERE id = :id """,
+            "SELECT type, data FROM hendelse WHERE id = :id",
             "id" to id,
         ).singleOrNull { fraMeldingtype(enumValueOf(it.string("type")), it.string("data")) }
 

@@ -139,7 +139,7 @@ class CommandContextDao(
             where context_id = :contextId
             """.trimIndent(),
             "contextId" to contextId,
-        ).singleOrNull { it.int("tid_brukt_ms") }!! // Kan bruke !! fordi mappingen thrower hvis spørringen ikke fant noe
+        ).single { it.int("tid_brukt_ms") }
 
     fun finnSuspendert(contextId: UUID) =
         finnSiste(contextId)?.takeIf { it.first == SUSPENDERT }?.let { (_, dto, hash) ->

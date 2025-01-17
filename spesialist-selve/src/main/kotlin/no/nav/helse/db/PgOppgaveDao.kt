@@ -99,6 +99,8 @@ class PgOppgaveDao(
             SELECT o.id as oppgaveId
             FROM oppgave o WHERE o.utbetaling_id = :utbetaling_id
             AND o.status NOT IN ('Invalidert'::oppgavestatus, 'Ferdigstilt'::oppgavestatus)
+            ORDER BY o.id DESC
+            LIMIT 1
             """,
             "utbetaling_id" to utbetalingId,
         ).singleOrNull {
@@ -108,7 +110,7 @@ class PgOppgaveDao(
     override fun finnVedtaksperiodeId(fødselsnummer: String): UUID =
         asSQL(
             """
-             SELECT v.vedtaksperiode_id as vedtaksperiode_id
+            SELECT v.vedtaksperiode_id
             FROM oppgave o
                      JOIN vedtak v ON v.id = o.vedtak_ref
                      JOIN person p ON v.person_ref = p.id
@@ -134,13 +136,11 @@ class PgOppgaveDao(
     override fun harGyldigOppgave(utbetalingId: UUID) =
         asSQL(
             """
-                SELECT COUNT(1) AS oppgave_count FROM oppgave
-                WHERE utbetaling_id = :utbetalingId AND status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus, 'Ferdigstilt'::oppgavestatus)
-                """,
+            SELECT COUNT(1) AS oppgave_count FROM oppgave
+            WHERE utbetaling_id = :utbetalingId AND status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus, 'Ferdigstilt'::oppgavestatus)
+            """,
             "utbetalingId" to utbetalingId,
-        ).single {
-            it.int("oppgave_count")
-        } > 0
+        ).single { it.int("oppgave_count") } > 0
 
     override fun finnHendelseId(id: Long): UUID =
         asSQL(

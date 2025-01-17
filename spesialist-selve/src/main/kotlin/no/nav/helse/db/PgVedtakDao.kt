@@ -16,10 +16,11 @@ class PgVedtakDao(queryRunner: QueryRunner) : VedtakDao, QueryRunner by queryRun
         return asSQL(
             """
             SELECT 
-            vedtaksperiode_id,
-            (SELECT organisasjonsnummer FROM arbeidsgiver WHERE id = arbeidsgiver_ref),
-            forkastet
-            from vedtak WHERE vedtaksperiode_id = :vedtaksperiode_id
+                vedtaksperiode_id,
+                (SELECT organisasjonsnummer FROM arbeidsgiver WHERE id = arbeidsgiver_ref),
+                forkastet
+            FROM vedtak
+            WHERE vedtaksperiode_id = :vedtaksperiode_id
             """,
             "vedtaksperiode_id" to vedtaksperiodeId,
         ).singleOrNull {
@@ -116,7 +117,7 @@ class PgVedtakDao(queryRunner: QueryRunner) : VedtakDao, QueryRunner by queryRun
             SELECT organisasjonsnummer FROM arbeidsgiver a
             INNER JOIN vedtak v ON a.id = v.arbeidsgiver_ref
             WHERE v.vedtaksperiode_id = :vedtaksperiodeId
-        """,
+            """,
             "vedtaksperiodeId" to vedtaksperiodeId,
         )
             .singleOrNull {

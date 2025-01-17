@@ -11,13 +11,13 @@ import javax.sql.DataSource
 class DefinisjonDao(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource) {
     internal fun definisjonFor(definisjonId: UUID) =
         asSQL(
-            "SELECT * FROM api_varseldefinisjon WHERE unik_id = :definisjonId",
+            "SELECT * FROM api_varseldefinisjon WHERE unik_id = :definisjonId LIMIT 1",
             "definisjonId" to definisjonId,
         ).single { it.mapToDefinisjon() }.let(::checkNotNull)
 
     internal fun sisteDefinisjonFor(varselkode: String) =
         asSQL(
-            "SELECT * FROM api_varseldefinisjon WHERE kode = :varselKode ORDER BY opprettet DESC",
+            "SELECT * FROM api_varseldefinisjon WHERE kode = :varselKode ORDER BY opprettet DESC LIMIT 1",
             "varselKode" to varselkode,
         ).single { it.mapToDefinisjon() }.let(::checkNotNull)
 
