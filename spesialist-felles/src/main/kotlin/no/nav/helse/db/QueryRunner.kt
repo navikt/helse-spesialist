@@ -89,7 +89,7 @@ class DbQuery(private val dataSource: DataSource) {
     private fun <T> run(
         returnGeneratedKey: Boolean = false,
         block: () -> QueryAction<T>,
-    ) = sessionOf(dataSource, returnGeneratedKey = returnGeneratedKey).use { block().runWithSession(it) }
+    ) = sessionOf(dataSource, returnGeneratedKey = returnGeneratedKey, strict = true).use { block().runWithSession(it) }
 
     fun <T> single(
         @Language("PostgreSQL") sql: String,

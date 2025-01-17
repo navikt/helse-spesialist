@@ -5,14 +5,9 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.every
 import io.mockk.mockk
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.AvviksvurderingTestdata
 import no.nav.helse.GodkjenningsbehovTestdata
-import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.HelseDao.Companion.single
-import no.nav.helse.HelseDao.Companion.update
 import no.nav.helse.Meldingssender
 import no.nav.helse.TestMediator
 import no.nav.helse.TestRapidHelpers.behov
@@ -23,6 +18,7 @@ import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.TestRapidHelpers.sisteBehov
 import no.nav.helse.Testdata
 import no.nav.helse.Testdata.snapshot
+import no.nav.helse.db.DbQuery
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
@@ -60,7 +56,6 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.util.januar
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -72,6 +67,7 @@ import java.util.UUID
 
 internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val testperson = TestPerson().also { println("Bruker testdata: $it") }
+    private val dbQuery = DbQuery(dataSource)
 
     val FØDSELSNUMMER = testperson.fødselsnummer
     val ORGNR =
@@ -144,37 +140,24 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     // som bør være felles
     protected val __ikke_bruk_denne get() = testRapid
 
-    private fun opprettSaksbehandler() {
-        sessionOf(dataSource).use {
-            @Language("PostgreSQL")
-            val query =
-                """
-                INSERT INTO saksbehandler
-                VALUES (:oid, :navn, :epost, :ident)
-                ON CONFLICT (oid) DO NOTHING
-                """.trimIndent()
-            it.run(
-                queryOf(
-                    query,
-                    mapOf(
-                        "oid" to SAKSBEHANDLER_OID,
-                        "navn" to SAKSBEHANDLER_NAVN,
-                        "epost" to SAKSBEHANDLER_EPOST,
-                        "ident" to SAKSBEHANDLER_IDENT,
-                    ),
-                ).asUpdate,
-            )
-        }
-    }
+    private fun opprettSaksbehandler() = dbQuery.update(
+        """
+        INSERT INTO saksbehandler
+        VALUES (:oid, :navn, :epost, :ident)
+        ON CONFLICT (oid) DO NOTHING
+        """.trimIndent(),
+        "oid" to SAKSBEHANDLER_OID,
+        "navn" to SAKSBEHANDLER_NAVN,
+        "epost" to SAKSBEHANDLER_EPOST,
+        "ident" to SAKSBEHANDLER_IDENT,
+    )
 
     protected fun Int.oppgave(vedtaksperiodeId: UUID): Long {
         require(this > 0) { "Forventet oppgaveId for vedtaksperiodeId=$vedtaksperiodeId må være større enn 0" }
-        @Language("PostgreSQL")
-        val query = "SELECT id FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?)"
-        val oppgaveIder =
-            sessionOf(dataSource).use { session ->
-                session.run(queryOf(query, vedtaksperiodeId).map { it.long("id") }.asList)
-            }
+        val oppgaveIder = dbQuery.list(
+            "SELECT id FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)",
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        ) { it.long("id") }
         assertTrue(oppgaveIder.size >= this) {
             "Forventer at det finnes minimum $this antall oppgaver for vedtaksperiodeId=$vedtaksperiodeId. Fant ${oppgaveIder.size} oppgaver."
         }
@@ -647,19 +630,18 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         saksbehandler_epost: String,
     ) {
-        @Suppress("SqlResolve")
-        fun fagsystemidFor(
-            utbetalingId: UUID,
-            tilArbeidsgiver: Boolean,
-        ): String {
+        fun fagsystemidFor(utbetalingId: UUID, tilArbeidsgiver: Boolean): String {
             val fagsystemidtype = if (tilArbeidsgiver) "arbeidsgiver" else "person"
-            return sessionOf(dataSource).use { session ->
-                @Language("PostgreSQL")
-                val query =
-                    "SELECT fagsystem_id FROM utbetaling_id ui INNER JOIN oppdrag o on o.id = ui.${fagsystemidtype}_fagsystem_id_ref WHERE ui.utbetaling_id = ?"
-                requireNotNull(session.run(queryOf(query, utbetalingId).map { it.string("fagsystem_id") }.asSingle)) {
-                    "Forventet å finne med ${fagsystemidtype}FagsystemId for utbetalingId=$utbetalingId"
-                }
+            val fagsystemId = dbQuery.single(
+                """
+                SELECT fagsystem_id FROM utbetaling_id ui
+                INNER JOIN oppdrag o ON o.id = ui.${fagsystemidtype}_fagsystem_id_ref
+                WHERE ui.utbetaling_id = :utbetalingId
+                """.trimIndent(),
+                "utbetalingId" to utbetalingId,
+            ) { it.string("fagsystem_id") }
+            return requireNotNull(fagsystemId) {
+                "Forventet å finne med ${fagsystemidtype}FagsystemId for utbetalingId=$utbetalingId"
             }
         }
 
@@ -713,11 +695,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
         val alleArbeidsforhold =
-            sessionOf(dataSource).use { session ->
-                @Language("PostgreSQL")
-                val query = "SELECT a.organisasjonsnummer FROM arbeidsgiver a"
-                session.run(queryOf(query).map { it.string("organisasjonsnummer") }.asList)
-            }
+            dbQuery.list("SELECT a.organisasjonsnummer FROM arbeidsgiver a") { it.string("organisasjonsnummer") }
         håndterGodkjenningsbehovUtenValidering(
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
@@ -905,26 +883,16 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         varselkode: String,
         saksbehandlerIdent: String = SAKSBEHANDLER_IDENT,
     ) {
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query =
-                """
-                UPDATE selve_varsel 
-                SET status = 'VURDERT', status_endret_ident = :ident, status_endret_tidspunkt = now()
-                WHERE vedtaksperiode_id = :vedtaksperiodeId
-                    AND kode = :varselkode
-                """.trimIndent()
-            session.run(
-                queryOf(
-                    query,
-                    mapOf(
-                        "vedtaksperiodeId" to vedtaksperiodeId,
-                        "varselkode" to varselkode,
-                        "ident" to saksbehandlerIdent,
-                    ),
-                ).asUpdate,
-            )
-        }
+        dbQuery.update(
+            """
+            UPDATE selve_varsel 
+            SET status = 'VURDERT', status_endret_ident = :ident, status_endret_tidspunkt = now()
+            WHERE vedtaksperiode_id = :vedtaksperiodeId AND kode = :varselkode
+            """.trimIndent(),
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            "varselkode" to varselkode,
+            "ident" to saksbehandlerIdent,
+        )
     }
 
     protected fun håndterSaksbehandlerløsning(
@@ -934,25 +902,24 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         kommentar: String? = null,
         begrunnelser: List<String> = emptyList(),
     ) {
-        val session = sessionOf(dataSource)
-        fun oppgaveIdFor(vedtaksperiodeId: UUID): Long = asSQL(
+        fun oppgaveIdFor(vedtaksperiodeId: UUID): Long = dbQuery.single(
             "SELECT id FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId) ORDER BY id DESC LIMIT 1",
-            "vedtaksperiodeId" to vedtaksperiodeId
-        ).single(session) { it.long(1) }!!
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        ) { it.long(1) }!!
 
-        fun godkjenningsbehovIdFor(vedtaksperiodeId: UUID): UUID = asSQL(
-            "SELECT id FROM hendelse h INNER JOIN vedtaksperiode_hendelse vh on h.id = vh.hendelse_ref WHERE vh.vedtaksperiode_id = :vedtaksperiodeId AND h.type = 'GODKJENNING'",
-            "vedtaksperiodeId" to vedtaksperiodeId
-        ).single(session) { it.uuid("id") }!!
+        fun godkjenningsbehovIdFor(vedtaksperiodeId: UUID): UUID = dbQuery.single(
+            "SELECT id FROM hendelse h INNER JOIN vedtaksperiode_hendelse vh on h.id = vh.hendelse_ref WHERE vh.vedtaksperiode_id = :vedtaksperiodeId AND h.type = 'GODKJENNING' LIMIT 1",
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        ) { it.uuid("id") }!!
 
-        fun settOppgaveIAvventerSystem(oppgaveId: Long) = asSQL(
+        fun settOppgaveIAvventerSystem(oppgaveId: Long) = dbQuery.update(
             "UPDATE oppgave SET status = 'AvventerSystem' WHERE id = :oppgaveId", "oppgaveId" to oppgaveId
-        ).update(session)
+        )
 
-        fun markerVarslerSomGodkjent(oppgaveId: Long) = asSQL(
+        fun markerVarslerSomGodkjent(oppgaveId: Long) = dbQuery.update(
             "UPDATE selve_varsel SET status = 'GODKJENT' WHERE generasjon_ref = (SELECT b.id FROM behandling b JOIN oppgave o ON b.unik_id = o.generasjon_ref WHERE o.id = :oppgaveId)",
-            "oppgaveId" to oppgaveId
-        ).update(session)
+            "oppgaveId" to oppgaveId,
+        )
 
         val oppgaveId = oppgaveIdFor(vedtaksperiodeId)
         val godkjenningsbehovId = godkjenningsbehovIdFor(vedtaksperiodeId)
@@ -972,7 +939,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             assertUtgåendeMelding("vedtaksperiode_avvist")
         }
         assertUtgåendeBehovløsning("Godkjenning")
-        session.close()
     }
 
     protected fun håndterAvsluttetMedVedtak(
@@ -1151,7 +1117,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     fødselsnummer,
                     skjæringstidspunkt,
                     arbeidsgivere,
-                    vedtaksperiodeId
+                    vedtaksperiodeId,
                 )
             testMediator.håndter(handling, saksbehandler)
         }
@@ -1220,26 +1186,26 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             )
     }
 
-    private fun erRevurdering(vedtaksperiodeId: UUID): Boolean {
-        return sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query =
-                "SELECT true FROM behandling WHERE vedtaksperiode_id = ? AND tilstand = '${Behandling.VedtakFattet.navn()}' ORDER BY id DESC"
-            session.run(queryOf(query, vedtaksperiodeId).map { it.boolean(1) }.asSingle) ?: false
-        }
-    }
+    private fun erRevurdering(vedtaksperiodeId: UUID) = dbQuery.single(
+        """
+        SELECT 1 FROM behandling
+        WHERE vedtaksperiode_id = :vedtaksperiodeId AND tilstand = '${Behandling.VedtakFattet.navn()}'
+        """.trimIndent(),
+        "vedtaksperiodeId" to vedtaksperiodeId,
+    ) { true } ?: false
 
     protected fun assertUtbetalinger(
         utbetalingId: UUID,
         forventetAntall: Int,
     ) {
-        @Language("PostgreSQL")
-        val query =
-            "SELECT COUNT(1) FROM utbetaling_id ui INNER JOIN utbetaling u on ui.id = u.utbetaling_id_ref WHERE ui.utbetaling_id = ?"
-        val antall =
-            sessionOf(dataSource).use {
-                it.run(queryOf(query, utbetalingId).map { it.int(1) }.asSingle)
-            }
+        val antall = dbQuery.single(
+            """
+            SELECT COUNT(1) FROM utbetaling_id ui
+            INNER JOIN utbetaling u ON ui.id = u.utbetaling_id_ref
+            WHERE ui.utbetaling_id = :utbetalingId
+            """.trimIndent(),
+            "utbetalingId" to utbetalingId,
+        ) { it.int(1) }
         assertEquals(forventetAntall, antall)
     }
 
@@ -1247,12 +1213,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         forventetAntall: Int,
         hendelseId: UUID,
     ) {
-        @Language("PostgreSQL")
-        val query = "SELECT COUNT(1) FROM feilende_meldinger WHERE id = :id"
         val antall =
-            sessionOf(dataSource).use { session ->
-                session.run(queryOf(query, mapOf("id" to hendelseId)).map { it.int(1) }.asSingle)
-            }
+            dbQuery.single("SELECT COUNT(1) FROM feilende_meldinger WHERE id = :id", "id" to hendelseId) { it.int(1) }
         assertEquals(forventetAntall, antall)
     }
 
@@ -1260,14 +1222,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         hendelseId: UUID,
         vararg forventedeTilstander: Kommandokjedetilstand,
     ) {
-        @Language("PostgreSQL")
-        val query = "SELECT tilstand FROM command_context WHERE hendelse_id = ? ORDER BY id"
-        val tilstander =
-            sessionOf(dataSource).use { session ->
-                session.run(
-                    queryOf(query, hendelseId).map { it.string("tilstand") }.asList,
-                )
-            }
+        val tilstander = dbQuery.list(
+            "SELECT tilstand FROM command_context WHERE hendelse_id = :hendelseId ORDER BY id",
+            "hendelseId" to hendelseId,
+        ) { it.string("tilstand") }
         assertEquals(forventedeTilstander.map { it.name }.toList(), tilstander)
     }
 
@@ -1312,18 +1270,15 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
         oppgavestatus: Oppgavestatus,
     ) {
-        @Language("PostgreSQL")
-        val query =
-            "SELECT status FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?) ORDER by id DESC"
-        val sisteOppgavestatus =
-            sessionOf(dataSource).use { session ->
-                session.run(
-                    queryOf(
-                        query,
-                        vedtaksperiodeId,
-                    ).map { enumValueOf<Oppgavestatus>(it.string("status")) }.asSingle,
-                )
-            }
+        val sisteOppgavestatus = dbQuery.single(
+            """
+            SELECT status FROM oppgave
+            WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
+            ORDER by id DESC
+            LIMIT 1
+            """.trimIndent(),
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        ) { enumValueOf<Oppgavestatus>(it.string("status")) }
         assertEquals(oppgavestatus, sisteOppgavestatus)
     }
 
@@ -1344,24 +1299,22 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     private fun hentOppgaveegenskaper(oppgaveId: Long): Set<Egenskap> {
-        val egenskaper = sessionOf(dataSource).use { session ->
-            asSQL(
-                "select egenskaper from oppgave o where id = :oppgaveId",
-                "oppgaveId" to oppgaveId,
-            ).single(session) { row ->
-                row.array<String>("egenskaper").map<String, Egenskap>(::enumValueOf).toSet()
-            }
-        }
+        val egenskaper = dbQuery.single(
+            "select egenskaper from oppgave where id = :oppgaveId",
+            "oppgaveId" to oppgaveId,
+        ) { it.array<String>("egenskaper").map<String, Egenskap>(::enumValueOf).toSet() }
         return requireNotNull(egenskaper) { "Forventer å finne en oppgave for id=$oppgaveId" }
     }
 
     protected fun assertSaksbehandleroppgaveBleIkkeOpprettet(vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1) {
-        @Language("PostgreSQL")
-        val query = "SELECT 1 FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?)"
-        val antallOppgaver =
-            sessionOf(dataSource).use { session ->
-                session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asList)
-            }
+        val antallOppgaver = dbQuery.list(
+            """
+            SELECT 1 FROM oppgave
+            JOIN vedtak v ON v.id = oppgave.vedtak_ref
+            WHERE vedtaksperiode_id = :vedtaksperiodeId
+            """.trimIndent(),
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        ) { it.int(1) }
         assertEquals(0, antallOppgaver.size)
     }
 
@@ -1369,12 +1322,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID,
         forventetAntall: Int,
     ) {
-        val antall =
-            sessionOf(dataSource).use { session ->
-                @Language("PostgreSQL")
-                val query = "SELECT COUNT(1) FROM selve_varsel WHERE vedtaksperiode_id = ?"
-                session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
-            }
+        val antall = dbQuery.single(
+            "SELECT COUNT(1) FROM selve_varsel WHERE vedtaksperiode_id = :vedtaksperiodeId",
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        ) { it.int(1) }
         assertEquals(forventetAntall, antall)
     }
 
@@ -1382,13 +1333,14 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID,
         varselkode: String,
     ) {
-        val antall =
-            sessionOf(dataSource).use { session ->
-                @Language("PostgreSQL")
-                val query =
-                    "SELECT COUNT(1) FROM selve_varsel WHERE vedtaksperiode_id = ? AND kode = ? AND status = 'GODKJENT'"
-                session.run(queryOf(query, vedtaksperiodeId, varselkode).map { it.int(1) }.asSingle)
-            }
+        val antall = dbQuery.single(
+            """
+            SELECT COUNT(1) FROM selve_varsel
+            WHERE vedtaksperiode_id = :vedtaksperiodeId AND kode = :varselkode AND status = 'GODKJENT'
+            """.trimIndent(),
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            "varselkode" to varselkode,
+        ) { it.int(1) }
         assertEquals(1, antall)
     }
 
@@ -1396,13 +1348,11 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID,
         varselkode: String,
     ) {
-        val antall =
-            sessionOf(dataSource).use { session ->
-                @Language("PostgreSQL")
-                val query =
-                    "SELECT COUNT(1) FROM selve_varsel WHERE vedtaksperiode_id = ? AND kode = ?"
-                session.run(queryOf(query, vedtaksperiodeId, varselkode).map { it.int(1) }.asSingle)
-            }
+        val antall = dbQuery.single(
+            "SELECT COUNT(1) FROM selve_varsel WHERE vedtaksperiode_id = :vedtaksperiodeId AND kode = :varselkode",
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            "varselkode" to varselkode,
+        ) { it.int(1) }
         assertEquals(1, antall)
     }
 
@@ -1529,93 +1479,60 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun assertTotrinnsvurdering(oppgaveId: Long) {
-        @Language("PostgreSQL")
-        val query =
+        val erToTrinnsvurdering = dbQuery.single(
             """
             SELECT 1 FROM totrinnsvurdering
             INNER JOIN vedtak v on totrinnsvurdering.vedtaksperiode_id = v.vedtaksperiode_id
             INNER JOIN oppgave o on v.id = o.vedtak_ref
-            WHERE o.id = ?
+            WHERE o.id = :oppgaveId
             AND utbetaling_id_ref IS NULL
-            """.trimIndent()
-        val erToTrinnsvurdering =
-            sessionOf(dataSource).use { session ->
-                session.run(queryOf(query, oppgaveId).map { it.boolean(1) }.asSingle)
-            } ?: throw IllegalStateException("Finner ikke oppgave med id $oppgaveId")
+            """.trimIndent(),
+            "oppgaveId" to oppgaveId,
+        ) { it.boolean(1) } ?: throw IllegalStateException("Finner ikke oppgave med id $oppgaveId")
         assertTrue(erToTrinnsvurdering) {
             "Forventer at oppgaveId=$oppgaveId krever totrinnsvurdering"
         }
     }
 
-    internal fun erFerdigstilt(godkjenningsbehovId: UUID): Boolean {
-        @Language("PostgreSQL")
-        val query = "SELECT tilstand FROM command_context WHERE hendelse_id = ? ORDER by id DESC LIMIT 1"
-        return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, godkjenningsbehovId).map { it.string("tilstand") }.asSingle) == "FERDIG"
-        }
-    }
+    internal fun erFerdigstilt(godkjenningsbehovId: UUID) = dbQuery.single(
+        "SELECT tilstand FROM command_context WHERE hendelse_id = :godkjenningsbehovId ORDER by id DESC LIMIT 1",
+        "godkjenningsbehovId" to godkjenningsbehovId,
+    ) { it.string("tilstand") } == "FERDIG"
 
-    internal fun commandContextId(godkjenningsbehovId: UUID): UUID {
-        @Language("PostgreSQL")
-        val query = "SELECT context_id FROM command_context WHERE hendelse_id = ? ORDER by id DESC LIMIT 1"
-        return sessionOf(dataSource).use { session ->
-            requireNotNull(
-                session.run(queryOf(query, godkjenningsbehovId).map { it.uuid("context_id") }.asSingle),
-            )
-        }
-    }
+    internal fun commandContextId(godkjenningsbehovId: UUID) = dbQuery.single(
+        "SELECT context_id FROM command_context WHERE hendelse_id = :godkjenningsbehovId ORDER by id DESC LIMIT 1",
+        "godkjenningsbehovId" to godkjenningsbehovId,
+    ) { it.uuid("context_id") }.let(::requireNotNull)
 
     private fun finnbeløp(type: String): Int? {
-        @Suppress("SqlResolve")
-        @Language("PostgreSQL")
-        val query = "SELECT ${type}beløp FROM utbetaling_id WHERE utbetaling_id = ?"
-        return sessionOf(dataSource).use {
-            it.run(queryOf(query, utbetalingId).map { it.intOrNull("${type}beløp") }.asSingle)
-        }
+        return dbQuery.single(
+            "SELECT ${type}beløp FROM utbetaling_id WHERE utbetaling_id = :utbetalingId", "utbetalingId" to utbetalingId
+        ) { it.intOrNull("${type}beløp") }
     }
 
     protected fun person(
         fødselsnummer: String,
         aktørId: String,
-    ): Int {
-        return sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = "SELECT COUNT(*) FROM person WHERE fødselsnummer = ? AND aktør_id = ?"
-            requireNotNull(
-                session.run(queryOf(query, fødselsnummer, aktørId).map { row -> row.int(1) }.asSingle),
-            )
-        }
-    }
+    ) = dbQuery.single(
+        "SELECT COUNT(*) FROM person WHERE fødselsnummer = :foedselsnummer AND aktør_id = :aktoerId",
+        "foedselsnummer" to fødselsnummer,
+        "aktoerId" to aktørId,
+    ) { it.int(1) }.let(::requireNotNull)
 
-    protected fun arbeidsgiver(organisasjonsnummer: String): Int {
-        return sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = "SELECT COUNT(*) FROM arbeidsgiver WHERE organisasjonsnummer = ?"
-            requireNotNull(
-                session.run(queryOf(query, organisasjonsnummer).map { row -> row.int(1) }.asSingle),
-            )
-        }
-    }
+    protected fun arbeidsgiver(organisasjonsnummer: String) = dbQuery.single(
+        "SELECT COUNT(*) FROM arbeidsgiver WHERE organisasjonsnummer = :organisasjonsnummer",
+        "organisasjonsnummer" to organisasjonsnummer,
+    ) { row -> row.int(1) }.let(::requireNotNull)
 
-    protected fun vedtak(vedtaksperiodeId: UUID): Int {
-        return sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = "SELECT COUNT(*) FROM vedtak WHERE vedtaksperiode_id = ?"
-            requireNotNull(
-                session.run(queryOf(query, vedtaksperiodeId).map { row -> row.int(1) }.asSingle),
-            )
-        }
-    }
+    private fun vedtak(vedtaksperiodeId: UUID) = dbQuery.single(
+        "SELECT COUNT(*) FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId",
+        "vedtaksperiodeId" to vedtaksperiodeId,
+    ) { it.int(1) }.let(::requireNotNull)
 
-    private fun forkastedeVedtak(vedtaksperiodeId: UUID): Int {
-        return sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = "SELECT COUNT(*) FROM vedtak WHERE vedtaksperiode_id = ? AND forkastet = TRUE"
-            requireNotNull(
-                session.run(queryOf(query, vedtaksperiodeId).map { row -> row.int(1) }.asSingle),
-            )
-        }
-    }
+    private fun forkastedeVedtak(vedtaksperiodeId: UUID) = dbQuery.single(
+        "SELECT COUNT(*) FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId AND forkastet = TRUE",
+        "vedtaksperiodeId" to vedtaksperiodeId,
+    ) { it.int(1) }.let(::requireNotNull)
 
     private fun List<OverstyringRefusjonselement>.byggRefusjonselementEvent() =
         this.map {
@@ -1633,23 +1550,20 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     private fun lagVarseldefinisjon(varselkode: String) {
-        @Language("PostgreSQL")
-        val query =
-            "INSERT INTO api_varseldefinisjon(unik_id, kode, tittel, forklaring, handling, avviklet, opprettet) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (unik_id) DO NOTHING"
-        sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(
-                    query,
-                    UUID.nameUUIDFromBytes(varselkode.toByteArray()),
-                    varselkode,
-                    "En tittel for varselkode=$varselkode",
-                    "En forklaring for varselkode=$varselkode",
-                    "En handling for varselkode=$varselkode",
-                    false,
-                    LocalDateTime.now(),
-                ).asUpdate,
-            )
-        }
+        dbQuery.update(
+            """
+            INSERT INTO api_varseldefinisjon (unik_id, kode, tittel, forklaring, handling, avviklet, opprettet)
+            VALUES (:unikId, :varselkode, :tittel, :forklaring, :handling, :avviklet, :opprettet)
+            ON CONFLICT (unik_id) DO NOTHING
+            """.trimIndent(),
+            "unikId" to UUID.nameUUIDFromBytes(varselkode.toByteArray()),
+            "varselkode" to varselkode,
+            "tittel" to "En tittel for varselkode=$varselkode",
+            "forklaring" to "En forklaring for varselkode=$varselkode",
+            "handling" to "En handling for varselkode=$varselkode",
+            "avviklet" to false,
+            "opprettet" to LocalDateTime.now(),
+        )
     }
 
     protected fun mockSnapshot(fødselsnummer: String = FØDSELSNUMMER) {
