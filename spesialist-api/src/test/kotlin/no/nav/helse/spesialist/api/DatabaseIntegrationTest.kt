@@ -590,10 +590,18 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         "oppgaveRef" to oppgaveRef,
     )
 
+    private fun defaultArbeidsgivere(): GraphQLArbeidsgiver {
+        val periodeMedOppgave = Periode(UUID.randomUUID(), 1.januar, 25.januar)
+        val graphQLperiodeMedOppgave = opprettBeregnetPeriode(4.januar(2023), 5.januar(2023), periodeMedOppgave.id)
+        val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(listOf(snapshotGenerasjon))
+        return arbeidsgiver
+    }
+
     open fun mockSnapshot(
         fødselsnummer: String = FØDSELSNUMMER,
         avviksprosent: Double = 0.0,
-        arbeidsgivere: List<GraphQLArbeidsgiver> = emptyList(),
+        arbeidsgivere: List<GraphQLArbeidsgiver> = listOf(defaultArbeidsgivere()),
     ) {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns
             object :
@@ -604,7 +612,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     private fun snapshot(
         fødselsnummer: String = FØDSELSNUMMER,
-        arbeidsgivere: List<GraphQLArbeidsgiver> = emptyList(),
+        arbeidsgivere: List<GraphQLArbeidsgiver>,
     ): GraphQLPerson {
         val vilkårsgrunnlag =
             GraphQLSpleisVilkarsgrunnlag(

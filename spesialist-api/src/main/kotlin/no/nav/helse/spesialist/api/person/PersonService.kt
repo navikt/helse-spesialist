@@ -158,6 +158,9 @@ class PersonService(
                 sikkerlogg.error("feilet under henting av snapshot for {}", keyValue("fnr", fødselsnummer), e)
                 return HentSnapshotResult.Feil.Ugyldig
             } ?: return HentSnapshotResult.Feil.IkkeFunnet
+        if (snapshot.second.arbeidsgivere.isEmpty()) {
+            return HentSnapshotResult.Feil.IkkeFunnet
+        }
         return HentSnapshotResult.Ok(snapshot)
     }
 }

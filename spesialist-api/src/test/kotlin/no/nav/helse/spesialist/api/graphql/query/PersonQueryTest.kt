@@ -84,6 +84,18 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
 
     @Test
     @ResourceLock("auditlogg-lytter")
+    fun `får 404-feil når personen ikke har noen arbeidsgivere`() {
+        val logglytter = Logglytter()
+        mockSnapshot(arbeidsgivere = emptyList())
+
+        val body = runQuery("""{ person(aktorId: "$AKTØRID") { aktorId } }""")
+
+        assertEquals(404, body["errors"].first()["extensions"]["code"].asInt())
+        logglytter.assertBleLogget("suid=${SAKSBEHANDLER.ident} duid=$AKTØRID operation=PersonQuery msg=Finner ikke data for person med identifikator $AKTØRID", Level.WARN)
+    }
+
+    @Test
+    @ResourceLock("auditlogg-lytter")
     fun `får 400-feil når det mangler både fødselsnummer og aktørId`() {
         val logglytter = Logglytter()
         val body = runQuery("""{ person(fnr: null, aktorId: null) { aktorId } }""")
