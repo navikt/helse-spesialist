@@ -38,7 +38,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Gradle build
-        run: ./gradlew :spesialist-bootstrap:build # alle modulene vil bli bygget fordi bootstrap avhenger av dem
+        run: ./gradlew build
         env:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
