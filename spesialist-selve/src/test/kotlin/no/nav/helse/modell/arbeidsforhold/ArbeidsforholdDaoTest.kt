@@ -1,9 +1,9 @@
 package no.nav.helse.modell.arbeidsforhold
 
 import no.nav.helse.DatabaseIntegrationTest
+import no.nav.helse.modell.KomplettArbeidsforholdDto
 import no.nav.helse.util.april
 import no.nav.helse.util.januar
-import no.nav.helse.modell.KomplettArbeidsforholdDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -114,10 +114,11 @@ internal class ArbeidsforholdDaoTest : DatabaseIntegrationTest() {
             )
         )
 
-        løsninger.upsert(arbeidsforholdDao, FNR, ORGNUMMER)
+        val now = LocalDateTime.now()
+        løsninger.upsert(arbeidsforholdDao, FNR, ORGNUMMER, now)
         val arbeidsforhold = arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER)
 
-        løsninger.upsert(arbeidsforholdDao, FNR, ORGNUMMER)
+        løsninger.upsert(arbeidsforholdDao, FNR, ORGNUMMER, now)
         assertEquals(arbeidsforhold, arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER))
     }
 

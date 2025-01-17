@@ -455,8 +455,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         arbeidsgiverId: Long,
     ) = dbQuery.updateAndReturnGeneratedKey(
         """
-        INSERT INTO arbeidsforhold (person_ref, arbeidsgiver_ref, startdato, sluttdato, stillingstittel, stillingsprosent)
-        VALUES (:personId, :arbeidsgiverId, :startdato, :sluttdato, :tittel, :prosent)
+        INSERT INTO arbeidsforhold (person_ref, arbeidsgiver_ref, startdato, sluttdato, stillingstittel, stillingsprosent, oppdatert)
+        VALUES (:personId, :arbeidsgiverId, :startdato, :sluttdato, :tittel, :prosent, :oppdatert)
         """.trimIndent(),
         "personId" to personId,
         "arbeidsgiverId" to arbeidsgiverId,
@@ -464,6 +464,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         "sluttdato" to ARBEIDSFORHOLD.slutt,
         "tittel" to ARBEIDSFORHOLD.tittel,
         "prosent" to ARBEIDSFORHOLD.prosent,
+        "oppdatert" to LocalDateTime.now(),
     )
 
     private fun opprettBransjer(bransjer: List<String>) = dbQuery.updateAndReturnGeneratedKey(

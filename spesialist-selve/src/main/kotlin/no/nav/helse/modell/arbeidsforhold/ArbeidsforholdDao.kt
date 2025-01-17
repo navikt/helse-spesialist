@@ -46,11 +46,11 @@ class ArbeidsforholdDao(
     private fun insertArbeidsforhold(arbeidsforholdDto: KomplettArbeidsforholdDto) {
         asSQL(
             """
-            INSERT INTO arbeidsforhold(person_ref, arbeidsgiver_ref, startdato, sluttdato, stillingstittel, stillingsprosent)
-            VALUES(
+            INSERT INTO arbeidsforhold (person_ref, arbeidsgiver_ref, startdato, sluttdato, stillingstittel, stillingsprosent, oppdatert)
+            VALUES (
                 (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer),
                 (SELECT id FROM arbeidsgiver WHERE organisasjonsnummer = :organisasjonsnummer),
-                :startdato, :sluttdato, :stillingstittel, :stillingsprosent
+                :startdato, :sluttdato, :stillingstittel, :stillingsprosent, :oppdatert
             );
             """.trimIndent(),
             "fodselsnummer" to arbeidsforholdDto.fødselsnummer,
@@ -59,6 +59,7 @@ class ArbeidsforholdDao(
             "sluttdato" to arbeidsforholdDto.sluttdato,
             "stillingstittel" to arbeidsforholdDto.stillingstittel,
             "stillingsprosent" to arbeidsforholdDto.stillingsprosent,
+            "oppdatert" to arbeidsforholdDto.oppdatert,
         ).update(session)
     }
 

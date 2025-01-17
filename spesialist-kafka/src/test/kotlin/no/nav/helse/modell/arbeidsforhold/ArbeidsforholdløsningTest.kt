@@ -14,6 +14,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.parallel.Execution
 import org.junit.jupiter.api.parallel.ExecutionMode
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Execution(ExecutionMode.SAME_THREAD)
@@ -77,6 +78,7 @@ internal class ArbeidsforholdløsningTest {
 
     @Test
     fun `oppretter løsning`() {
+        val now = LocalDateTime.now()
         val arbeidsforhold = Arbeidsforholdløsning(
             listOf(
                 Arbeidsforholdløsning.Løsning(
@@ -87,7 +89,7 @@ internal class ArbeidsforholdløsningTest {
                 )
             )
         )
-        arbeidsforhold.upsert(dao, FØDSELSNUMMER, ORGNR)
+        arbeidsforhold.upsert(dao, FØDSELSNUMMER, ORGNR, now)
         verify(exactly = 1) {
             dao.upsertArbeidsforhold(
                 FØDSELSNUMMER, ORGNR,
@@ -98,7 +100,8 @@ internal class ArbeidsforholdløsningTest {
                         startdato = STARTDATO,
                         sluttdato = SLUTTDATO,
                         stillingstittel = STILLINGSTITTEL,
-                        stillingsprosent = STILLINGSPROSENT
+                        stillingsprosent = STILLINGSPROSENT,
+                        oppdatert = now,
                     )
                 )
             )
@@ -115,8 +118,9 @@ internal class ArbeidsforholdløsningTest {
                 STILLINGSPROSENT
             )
         )
+        val now = LocalDateTime.now()
         val arbeidsforholdløsning = Arbeidsforholdløsning(arbeidsforhold)
-        arbeidsforholdløsning.upsert(dao, FØDSELSNUMMER, ORGNR)
+        arbeidsforholdløsning.upsert(dao, FØDSELSNUMMER, ORGNR, now)
         verify(exactly = 1) {
             dao.upsertArbeidsforhold(
                 fødselsnummer = FØDSELSNUMMER,
@@ -128,7 +132,8 @@ internal class ArbeidsforholdløsningTest {
                         startdato = it.startdato,
                         sluttdato = it.sluttdato,
                         stillingstittel = it.stillingstittel,
-                        stillingsprosent = it.stillingsprosent
+                        stillingsprosent = it.stillingsprosent,
+                        oppdatert = now,
                     )
                 }
             )

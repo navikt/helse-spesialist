@@ -2,6 +2,7 @@ package no.nav.helse.modell
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 open class ArbeidsforholdDto(
     val fødselsnummer: String,
@@ -27,18 +28,15 @@ class KomplettArbeidsforholdDto(
     }
 
     override fun equals(other: Any?): Boolean =
-        this === other || (
-            other is KomplettArbeidsforholdDto &&
-                javaClass == other.javaClass &&
-                fødselsnummer.equals(other.fødselsnummer) &&
-                organisasjonsnummer.equals(other.organisasjonsnummer) &&
-                startdato.equals(other.startdato) &&
-                sluttdato == other.sluttdato &&
-                stillingstittel.equals(other.stillingstittel) &&
-                stillingsprosent.equals(other.stillingsprosent) &&
-                oppdatert.withNano(0) == other.oppdatert.withNano(0)
-
-        )
+        this === other || other is KomplettArbeidsforholdDto &&
+            javaClass == other.javaClass &&
+            fødselsnummer == other.fødselsnummer &&
+            organisasjonsnummer == other.organisasjonsnummer &&
+            startdato == other.startdato &&
+            sluttdato == other.sluttdato &&
+            stillingstittel == other.stillingstittel &&
+            stillingsprosent == other.stillingsprosent &&
+            oppdatert.truncatedTo(ChronoUnit.MILLIS) == other.oppdatert.truncatedTo(ChronoUnit.MILLIS)
 
     override fun hashCode(): Int {
         var result = fødselsnummer.hashCode()
@@ -47,7 +45,7 @@ class KomplettArbeidsforholdDto(
         sluttdato?.also { result = 31 * result + sluttdato.hashCode() }
         result = 31 * result + stillingstittel.hashCode()
         result = 31 * result + stillingsprosent.hashCode()
-        result = 31 * result + oppdatert.withNano(0).hashCode()
+        result = 31 * result + oppdatert.truncatedTo(ChronoUnit.MILLIS).hashCode()
         return result
     }
 }
