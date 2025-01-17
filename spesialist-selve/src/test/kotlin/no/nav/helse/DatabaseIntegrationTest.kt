@@ -209,7 +209,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         utbetalingId: UUID = UTBETALING_ID,
         contextId: UUID = UUID.randomUUID(),
-        hendelseId: UUID = UUID.randomUUID(),
+        godkjenningsbehovId: UUID = UUID.randomUUID(),
         spleisBehandlingId: UUID = UUID.randomUUID(),
         oppgaveEgenskaper: List<EgenskapForDatabase> = listOf(EGENSKAP),
     ) {
@@ -228,7 +228,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             contextId = contextId,
             vedtaksperiodeId = vedtaksperiodeId,
             egenskaper = oppgaveEgenskaper,
-            hendelseId = hendelseId,
+            godkjenningsbehovId = godkjenningsbehovId,
             behandlingId = spleisBehandlingId,
         )
     }
@@ -381,15 +381,16 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         kanAvvises: Boolean = true,
         utbetalingId: UUID = UTBETALING_ID,
         behandlingId: UUID = UUID.randomUUID(),
-        hendelseId: UUID = UUID.randomUUID(),
+        godkjenningsbehovId: UUID = UUID.randomUUID(),
     ) {
-        val hendelse = testhendelse(hendelseId = hendelseId)
+        val hendelse = testhendelse(hendelseId = godkjenningsbehovId)
         opprettCommandContext(hendelse, contextId)
         oppgaveId = nextLong()
         OPPGAVE_ID = oppgaveId
         oppgaveDao.opprettOppgave(
             id = oppgaveId,
             commandContextId = contextId,
+            godkjenningsbehovId = godkjenningsbehovId,
             egenskaper = egenskaper,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,

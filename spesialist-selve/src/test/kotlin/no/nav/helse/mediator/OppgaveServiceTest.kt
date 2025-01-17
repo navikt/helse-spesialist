@@ -1,7 +1,7 @@
 package no.nav.helse.mediator
 
-import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import com.fasterxml.jackson.databind.JsonNode
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -20,13 +20,11 @@ import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TildelingRepository
 import no.nav.helse.db.TotrinnsvurderingDao
-import no.nav.helse.util.idForGruppe
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.TestMelding
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
-import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
@@ -44,6 +42,8 @@ import no.nav.helse.spesialist.test.lagEpostadresseFraFulltNavn
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagSaksbehandlerident
 import no.nav.helse.spesialist.test.lagSaksbehandlernavn
+import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
+import no.nav.helse.util.idForGruppe
 import no.nav.helse.util.testEnv
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -160,6 +160,7 @@ internal class OppgaveServiceTest {
             oppgaveDao.opprettOppgave(
                 id = oppgaveId,
                 commandContextId = COMMAND_CONTEXT_ID,
+                godkjenningsbehovId = HENDELSE_ID,
                 egenskaper = listOf(EGENSKAP_SØKNAD),
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
                 behandlingId = BEHANDLING_ID,

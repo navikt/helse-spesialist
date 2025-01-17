@@ -392,7 +392,7 @@ class OppgaveService(
         hendelseId: UUID,
         kanAvvises: Boolean,
     ) {
-        oppgaveDao.opprettOppgave(id, contextId, egenskaper, vedtaksperiodeId, behandlingId, utbetalingId, kanAvvises)
+        oppgaveDao.opprettOppgave(id, contextId, hendelseId, egenskaper, vedtaksperiodeId, behandlingId, utbetalingId, kanAvvises)
         opptegnelseRepository.opprettOpptegnelse(
             oppgaveDao.finnFødselsnummer(id),
             GodkjenningsbehovPayload(hendelseId),

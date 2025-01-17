@@ -52,6 +52,7 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
         oppgaveDao.opprettOppgave(
             id = oppgaveId,
             commandContextId = UUID.randomUUID(),
+            godkjenningsbehovId = HENDELSE_ID,
             egenskaper = listOf(EGENSKAP),
             vedtaksperiodeId = VEDTAKSPERIODE,
             behandlingId = UUID.randomUUID(),

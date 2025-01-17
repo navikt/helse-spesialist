@@ -539,6 +539,7 @@ class PgOppgaveDao(
     override fun opprettOppgave(
         id: Long,
         commandContextId: UUID,
+        godkjenningsbehovId: UUID,
         egenskaper: List<EgenskapForDatabase>,
         vedtaksperiodeId: UUID,
         behandlingId: UUID,
@@ -553,7 +554,7 @@ class PgOppgaveDao(
 
         asSQL(
             """
-            INSERT INTO oppgave (id, oppdatert, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, generasjon_ref, behandling_id, command_context_id, utbetaling_id, mottaker, egenskaper, kan_avvises) 
+            INSERT INTO oppgave (id, oppdatert, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, generasjon_ref, behandling_id, command_context_id, hendelse_id_godkjenningsbehov, utbetaling_id, mottaker, egenskaper, kan_avvises) 
             SELECT
                 :id,
                 :oppdatert,
@@ -568,6 +569,7 @@ class PgOppgaveDao(
                 ),
                 :behandlingId,
                 :commandContextId,
+                :godkjenningsbehovId,
                 :utbetalingId,
                 CAST(:mottaker as mottakertype),
                 CAST(:egenskaper as varchar[]),
@@ -588,6 +590,7 @@ class PgOppgaveDao(
             "vedtakRef" to vedtakRef,
             "behandlingId" to behandlingId,
             "commandContextId" to commandContextId,
+            "godkjenningsbehovId" to godkjenningsbehovId,
             "utbetalingId" to utbetalingId,
             "mottaker" to mottaker?.name,
             "egenskaper" to egenskaper.joinToString(prefix = "{", postfix = "}"),

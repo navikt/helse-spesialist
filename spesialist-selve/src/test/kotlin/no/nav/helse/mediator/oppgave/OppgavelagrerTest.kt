@@ -1,10 +1,9 @@
 package no.nav.helse.mediator.oppgave
 
-import no.nav.helse.DatabaseIntegrationTest
-import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.TildelingRepository
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
@@ -14,6 +13,7 @@ import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDto
+import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
