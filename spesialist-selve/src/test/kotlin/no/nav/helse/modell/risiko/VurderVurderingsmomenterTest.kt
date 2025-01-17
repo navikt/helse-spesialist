@@ -17,6 +17,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.person.vedtaksperiode.Behandling
+import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
 import no.nav.helse.objectMapper
@@ -248,7 +249,12 @@ internal class VurderVurderingsmomenterTest {
         førstegangsbehandling = førstegangsbehandling,
         sykefraværstilfelle = sykefraværstilfelle,
         utbetaling = utbetalingMock,
-        spleisSykepengegrunnlangsfakta = SpleisSykepengegrunnlagsfakta(listOf( SykepengegrunnlagsArbeidsgiver(omregnetÅrsinntekt = 123456.7, arbeidsgiver = testperson.orgnummer, inntektskilde = "Arbeidsgiver", skjønnsfastsatt = null)),)
+        spleisSykepengegrunnlangsfakta = SpleisSykepengegrunnlagsfakta(listOf( SykepengegrunnlagsArbeidsgiver(
+            omregnetÅrsinntekt = 123456.7,
+            arbeidsgiver = testperson.orgnummer,
+            inntektskilde = Inntektsopplysningkilde.Arbeidsgiver,
+            skjønnsfastsatt = null
+        )),)
     )
 
     private fun inntekt() = InntektTilRisk(

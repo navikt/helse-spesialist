@@ -10,6 +10,7 @@ import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
 import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
+import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
 import org.slf4j.LoggerFactory
 
 internal class VurderAutomatiskAvvisning(
@@ -23,12 +24,19 @@ internal class VurderAutomatiskAvvisning(
         val fødselsnummer = godkjenningsbehov.fødselsnummer
         val vedtaksperiodeId = godkjenningsbehov.vedtaksperiodeId
 
+        val stoppesForManglendeIM =
+            godkjenningsbehov.spleisSykepengegrunnlagsfakta.arbeidsgivere.find { it.arbeidsgiver == godkjenningsbehov.organisasjonsnummer }
+                ?.let {
+                    it.inntektskilde == Inntektsopplysningkilde.AOrdningen &&
+                        !(fødselsnummer.length == 11 && (29..31).contains(fødselsnummer.take(2).toInt()))
+                } ?: false
+
         val tilhørerEnhetUtland = HentEnhetløsning.erEnhetUtland(personRepository.finnEnhetId(fødselsnummer))
         val underVergemål = vergemålRepository.harVergemål(fødselsnummer) ?: false
 
-        if (!(tilhørerEnhetUtland || underVergemål)) return true
+        if (!(tilhørerEnhetUtland || underVergemål || stoppesForManglendeIM)) return true
 
-        val avvisningsårsaker = årsaker(tilhørerEnhetUtland, underVergemål)
+        val avvisningsårsaker = årsaker(tilhørerEnhetUtland, underVergemål, stoppesForManglendeIM)
         if (!godkjenningsbehov.kanAvvises) {
             logg.info(
                 "Avviser ikke {} som har $avvisningsårsaker, fordi: {}",
@@ -51,9 +59,11 @@ internal class VurderAutomatiskAvvisning(
     private fun årsaker(
         tilhørerEnhetUtland: Boolean,
         underVergemål: Boolean,
+        manglerIM: Boolean,
     ) = mutableListOf<String>().apply {
         if (tilhørerEnhetUtland) add("Utland")
         if (underVergemål) add("Vergemål")
+        if (manglerIM) add("Mangler inntektsmelding")
     }
 
     private companion object {

@@ -43,7 +43,7 @@ internal class VurderVurderingsmomenter(
                                 sykepengegrunnlagsArbeidsgiver ->
                             InntektTilRisk(
                                 omregnetÅrsinntekt = sykepengegrunnlagsArbeidsgiver.omregnetÅrsinntekt,
-                                inntektskilde = sykepengegrunnlagsArbeidsgiver.inntektskilde,
+                                inntektskilde = sykepengegrunnlagsArbeidsgiver.inntektskilde.name,
                             )
                         },
                 ),

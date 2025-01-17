@@ -12,6 +12,7 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -41,6 +42,21 @@ internal class VurderAutomatiskAvvisningTest {
     fun `skal ikke avvise ved vergemål dersom perioden ikke kan avvises`() {
         every { vergemålRepository.harVergemål(fødselsnummer) } returns true
         assertIkkeAvvisning(lagCommand(kanAvvises = false))
+    }
+
+    @Test
+    fun `skal avvise dersom IM mangler`() {
+        assertAvvisning(lagCommand(fødselsnummer = "01111111111", kanAvvises = true, inntektsopplysningkilde = Inntektsopplysningkilde.AOrdningen), "Mangler inntektsmelding")
+    }
+
+    @Test
+    fun `skal ikke avvise dersom IM er mottatt`() {
+        assertIkkeAvvisning(lagCommand(fødselsnummer = "01111111111", kanAvvises = true, inntektsopplysningkilde = Inntektsopplysningkilde.Arbeidsgiver))
+    }
+
+    @Test
+    fun `skal ikke avvise dersom IM mangler, men fødselsdato treffer toggle`() {
+        assertIkkeAvvisning(lagCommand(fødselsnummer = "29111111111", kanAvvises = true, inntektsopplysningkilde = Inntektsopplysningkilde.AOrdningen))
     }
 
     @Test
@@ -78,6 +94,7 @@ internal class VurderAutomatiskAvvisningTest {
     private fun lagCommand(
         kanAvvises: Boolean = true,
         fødselsnummer: String = "12345678910",
+        inntektsopplysningkilde: Inntektsopplysningkilde = Inntektsopplysningkilde.Arbeidsgiver,
     ) = VurderAutomatiskAvvisning(
         personRepository = personRepository,
         vergemålRepository = vergemålRepository,
@@ -85,7 +102,8 @@ internal class VurderAutomatiskAvvisningTest {
         utbetaling = Utbetaling(utbetalingId, 1000, 1000, Utbetalingtype.UTBETALING),
         godkjenningsbehov = godkjenningsbehovData(
             fødselsnummer = fødselsnummer,
-            kanAvvises = kanAvvises
+            kanAvvises = kanAvvises,
+            inntektsopplysningkilde = inntektsopplysningkilde,
         )
     )
 

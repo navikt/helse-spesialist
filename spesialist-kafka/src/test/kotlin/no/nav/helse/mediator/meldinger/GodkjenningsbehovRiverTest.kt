@@ -9,6 +9,7 @@ import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
@@ -84,7 +85,7 @@ internal class GodkjenningsbehovRiverTest {
                                 SykepengegrunnlagsArbeidsgiver(
                                     arbeidsgiver = ORGNR,
                                     omregnetÅrsinntekt = 123456.7,
-                                    inntektskilde = "Arbeidsgiver",
+                                    inntektskilde = Inntektsopplysningkilde.Arbeidsgiver,
                                     skjønnsfastsatt = null,
                                 )
                             )
@@ -147,7 +148,7 @@ internal class GodkjenningsbehovRiverTest {
                                 SykepengegrunnlagsArbeidsgiver(
                                     arbeidsgiver = ORGNR,
                                     omregnetÅrsinntekt = 123456.7,
-                                    inntektskilde = "Arbeidsgiver",
+                                    inntektskilde = Inntektsopplysningkilde.Arbeidsgiver,
                                     skjønnsfastsatt = skjønnsfastsatt,
                                 )
                             )

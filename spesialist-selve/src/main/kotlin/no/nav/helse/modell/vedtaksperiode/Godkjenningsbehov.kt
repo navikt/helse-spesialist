@@ -63,9 +63,15 @@ data class SpleisSykepengegrunnlagsfakta(
 data class SykepengegrunnlagsArbeidsgiver(
     val arbeidsgiver: String,
     val omregnetÅrsinntekt: Double,
-    val inntektskilde: String,
+    val inntektskilde: Inntektsopplysningkilde,
     val skjønnsfastsatt: Double?,
 )
+
+enum class Inntektsopplysningkilde {
+    Arbeidsgiver,
+    AOrdningen,
+    Saksbehandler,
+}
 
 class Godkjenningsbehov(
     override val id: UUID,
@@ -166,7 +172,7 @@ class Godkjenningsbehov(
                         SykepengegrunnlagsArbeidsgiver(
                             arbeidsgiver = it["arbeidsgiver"].asText(),
                             omregnetÅrsinntekt = it["omregnetÅrsinntekt"].asDouble(),
-                            inntektskilde = it["inntektskilde"].asText(),
+                            inntektskilde = Inntektsopplysningkilde.valueOf(it["inntektskilde"].asText()),
                             skjønnsfastsatt = it["skjønnsfastsatt"]?.asDouble(),
                         )
                     } ?: emptyList(),

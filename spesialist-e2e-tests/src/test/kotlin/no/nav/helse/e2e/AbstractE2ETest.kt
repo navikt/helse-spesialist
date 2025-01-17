@@ -40,6 +40,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.SENDT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
+import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
@@ -100,7 +101,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                         SykepengegrunnlagsArbeidsgiver(
                             arbeidsgiver = ORGNR,
                             omregnetÅrsinntekt = 123456.7,
-                            inntektskilde = "Arbeidsgiver",
+                            inntektskilde = Inntektsopplysningkilde.Arbeidsgiver,
                             skjønnsfastsatt = null,
                         )
                     )

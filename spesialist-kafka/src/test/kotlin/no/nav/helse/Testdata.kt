@@ -4,6 +4,7 @@ import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import no.nav.helse.modell.utbetaling.Utbetalingtype.UTBETALING
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
@@ -161,7 +162,7 @@ object Testdata {
                     SykepengegrunnlagsArbeidsgiver(
                         arbeidsgiver = organisasjonsnummer,
                         omregnetÅrsinntekt = 123456.7,
-                        inntektskilde = "Arbeidsgiver",
+                        inntektskilde = Inntektsopplysningkilde.Arbeidsgiver,
                         skjønnsfastsatt = null
                     )
                 )

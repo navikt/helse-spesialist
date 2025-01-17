@@ -15,6 +15,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetaling.Utbetalingtype.Companion.values
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
@@ -145,7 +146,7 @@ class GodkjenningsbehovRiver(
                         SykepengegrunnlagsArbeidsgiver(
                             arbeidsgiver = it["arbeidsgiver"].asText(),
                             omregnetÅrsinntekt = it["omregnetÅrsinntekt"].asDouble(),
-                            inntektskilde = it["inntektskilde"].asText(),
+                            inntektskilde = Inntektsopplysningkilde.valueOf(it["inntektskilde"].asText()),
                             skjønnsfastsatt = it["skjønnsfastsatt"]?.asDouble(),
                         )
                     },

@@ -4,6 +4,7 @@ import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import no.nav.helse.modell.utbetaling.Utbetalingtype.UTBETALING
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
@@ -134,6 +135,7 @@ object Testdata {
         utbetalingtype: no.nav.helse.modell.utbetaling.Utbetalingtype = UTBETALING,
         kanAvvises: Boolean = true,
         inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+        inntektsopplysningkilde: Inntektsopplysningkilde = Inntektsopplysningkilde.Arbeidsgiver,
         json: String = "{}",
     ): GodkjenningsbehovData {
         return GodkjenningsbehovData(
@@ -161,7 +163,7 @@ object Testdata {
                     SykepengegrunnlagsArbeidsgiver(
                         arbeidsgiver = organisasjonsnummer,
                         omregnetÅrsinntekt = 123456.7,
-                        inntektskilde = "Arbeidsgiver",
+                        inntektskilde = inntektsopplysningkilde,
                         skjønnsfastsatt = null
                     )
                 )
