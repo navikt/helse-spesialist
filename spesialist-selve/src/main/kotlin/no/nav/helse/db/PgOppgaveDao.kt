@@ -49,7 +49,7 @@ class PgOppgaveDao(
             LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
             LEFT JOIN saksbehandler s on s.oid = t.saksbehandler_ref
             WHERE o.id = :oppgaveId
-            ORDER BY o.id DESC LIMIT 1            
+            ORDER BY o.id DESC LIMIT 1
             """,
             "oppgaveId" to id,
         ).singleOrNull { row ->
@@ -86,7 +86,7 @@ class PgOppgaveDao(
             JOIN vedtak v ON v.id = o.vedtak_ref
             JOIN person p ON v.person_ref = p.id
             WHERE o.status = 'AvventerSaksbehandler'::oppgavestatus
-                AND p.fødselsnummer = :fodselsnummer;                
+                AND p.fødselsnummer = :fodselsnummer;
             """,
             "fodselsnummer" to fødselsnummer,
         ).singleOrNull {
@@ -145,9 +145,9 @@ class PgOppgaveDao(
     override fun finnHendelseId(id: Long): UUID =
         asSQL(
             """
-            SELECT DISTINCT hendelse_id 
-            FROM command_context 
-            WHERE context_id = (SELECT command_context_id FROM oppgave WHERE id = :oppgaveId);            
+            SELECT DISTINCT hendelse_id
+            FROM command_context
+            WHERE context_id = (SELECT command_context_id FROM oppgave WHERE id = :oppgaveId); 
             """,
             "oppgaveId" to id,
         ).single {
@@ -164,7 +164,7 @@ class PgOppgaveDao(
             JOIN person p on v.person_ref = p.id
             WHERE p.fødselsnummer = :fodselsnummer
             and o.id = o2.id
-            AND o.status = 'AvventerSaksbehandler'::oppgavestatus;             
+            AND o.status = 'AvventerSaksbehandler'::oppgavestatus; 
             """,
             "fodselsnummer" to fødselsnummer,
         ).update()
@@ -173,7 +173,7 @@ class PgOppgaveDao(
     override fun reserverNesteId(): Long =
         asSQL(
             """
-            SELECT nextval(pg_get_serial_sequence('oppgave', 'id')) as neste_id              
+            SELECT nextval(pg_get_serial_sequence('oppgave', 'id')) as neste_id 
             """,
         ).single {
             it.long("neste_id")
@@ -184,7 +184,7 @@ class PgOppgaveDao(
             """
             SELECT EXISTS (
                 SELECT 1 FROM oppgave WHERE id=:oppgaveId AND status IN('AvventerSaksbehandler'::oppgavestatus)
-            )              
+            ) 
             """,
             "oppgaveId" to oppgaveId,
         ).single {
@@ -196,7 +196,7 @@ class PgOppgaveDao(
             """
             SELECT spleis_behandling_id FROM oppgave o
             INNER JOIN behandling b ON b.unik_id = o.generasjon_ref
-            WHERE o.id = :oppgaveId;              
+            WHERE o.id = :oppgaveId; 
             """,
             "oppgaveId" to oppgaveId,
         ).single {
@@ -211,7 +211,7 @@ class PgOppgaveDao(
             INNER JOIN oppgave o ON o.vedtak_ref = v.id
             INNER JOIN hendelse h ON h.id = (SELECT hendelse_id FROM command_context WHERE context_id = o.command_context_id LIMIT 1)
             INNER JOIN saksbehandleroppgavetype s ON s.vedtak_ref = v.id
-            WHERE o.id = :oppgaveId 
+            WHERE o.id = :oppgaveId
             """,
             "oppgaveId" to oppgaveId,
         ).singleOrNull { row ->
@@ -253,10 +253,10 @@ class PgOppgaveDao(
         return asSQL(
             """
             SELECT
-                o.id as oppgave_id, 
+                o.id as oppgave_id,
                 p.aktør_id,
-                v.vedtaksperiode_id, 
-                pi.fornavn, pi.mellomnavn, pi.etternavn, 
+                v.vedtaksperiode_id,
+                pi.fornavn, pi.mellomnavn, pi.etternavn,
                 o.egenskaper,
                 s.oid, s.ident, s.epost, s.navn,
                 o.opprettet,
@@ -288,8 +288,8 @@ class PgOppgaveDao(
                 AND (:ingen_statustype_egenskaper OR egenskaper && ARRAY[$statusEgenskaper]::varchar[]) -- egenskaper saksbehandler har filtrert på
                 AND NOT (egenskaper && ARRAY[$egenskaperSomSkalEkskluderes]::varchar[]) -- egenskaper saksbehandler ikke har tilgang til
                 AND NOT (egenskaper && ARRAY['BESLUTTER']::varchar[] AND ttv.saksbehandler = :oid) -- hvis oppgaven er sendt til beslutter og saksbehandler var den som sendte
-                AND 
-                    CASE 
+                AND
+                    CASE
                         WHEN :egne_saker_pa_vent THEN t.saksbehandler_ref = :oid AND ('PÅ_VENT' = ANY(o.egenskaper))
                         WHEN :egne_saker THEN t.saksbehandler_ref = :oid AND NOT ('PÅ_VENT' = ANY(o.egenskaper))
                         ELSE true
@@ -384,13 +384,13 @@ class PgOppgaveDao(
     override fun finnAntallOppgaver(saksbehandlerOid: UUID): AntallOppgaverFraDatabase =
         asSQL(
             """
-            SELECT 
+            SELECT
                 count(*) FILTER ( WHERE NOT o.egenskaper @> ARRAY['PÅ_VENT']::varchar[] ) AS antall_mine_saker,
                 count(*) FILTER ( WHERE o.egenskaper @> ARRAY['PÅ_VENT']::varchar[] ) AS antall_mine_saker_på_vent
-            from oppgave o 
+            from oppgave o
                 LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
             WHERE o.status = 'AvventerSaksbehandler'
-                AND t.saksbehandler_ref = :oid              
+                AND t.saksbehandler_ref = :oid 
             """,
             "oid" to saksbehandlerOid,
         ).singleOrNull { row ->
@@ -513,7 +513,7 @@ class PgOppgaveDao(
             WHERE v.vedtaksperiode_id = :vedtaksperiodeId
             AND o.utbetaling_id = :utbetalingId
             ORDER BY o.opprettet DESC
-            LIMIT 1            
+            LIMIT 1 
             """,
             "vedtaksperiodeId" to vedtaksperiodeId,
             "utbetalingId" to utbetalingId,
@@ -553,13 +553,13 @@ class PgOppgaveDao(
 
         asSQL(
             """
-            INSERT INTO oppgave(id, oppdatert, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, generasjon_ref, behandling_id, command_context_id, utbetaling_id, mottaker, egenskaper, kan_avvises)      
-            SELECT 
-                :id, 
-                :oppdatert, 
-                CAST(:oppgavestatus as oppgavestatus), 
-                :ferdigstiltAv, 
-                :ferdigstiltAvOid, 
+            INSERT INTO oppgave (id, oppdatert, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, generasjon_ref, behandling_id, command_context_id, utbetaling_id, mottaker, egenskaper, kan_avvises) 
+            SELECT
+                :id,
+                :oppdatert,
+                CAST(:oppgavestatus as oppgavestatus),
+                :ferdigstiltAv,
+                :ferdigstiltAvOid,
                 :vedtakRef,
                 (
                     SELECT unik_id FROM behandling WHERE vedtaksperiode_id = (
@@ -567,16 +567,16 @@ class PgOppgaveDao(
                     ) ORDER BY id DESC LIMIT 1
                 ),
                 :behandlingId,
-                :commandContextId, 
+                :commandContextId,
                 :utbetalingId,
-                CAST(:mottaker as mottakertype), 
-                CAST(:egenskaper as varchar[]), 
+                CAST(:mottaker as mottakertype),
+                CAST(:egenskaper as varchar[]),
                 :kanAvvises
             WHERE
                 NOT EXISTS(
                     SELECT 1 FROM oppgave o
                         LEFT JOIN vedtak v on v.id = o.vedtak_ref
-                        WHERE o.status='AvventerSaksbehandler'::oppgavestatus 
+                        WHERE o.status='AvventerSaksbehandler'::oppgavestatus
                             AND v.person_ref=:personRef
                 )
             """,
@@ -603,13 +603,13 @@ class PgOppgaveDao(
         asSQL(
             """
             SELECT SUM(ABS(arbeidsgiverbeløp)) as sumArbeidsgiverbeløp, SUM(ABS(personbeløp)) as sumPersonbeløp
-            FROM utbetaling_id 
-            WHERE person_ref=(SELECT person_ref FROM utbetaling_id WHERE utbetaling_id=:utbetalingId) AND 
+            FROM utbetaling_id
+            WHERE person_ref=(SELECT person_ref FROM utbetaling_id WHERE utbetaling_id=:utbetalingId) AND
                 utbetaling_id.utbetaling_id IN (
-                    SELECT utbetaling_id 
-                    FROM behandling 
+                    SELECT utbetaling_id
+                    FROM behandling
                     WHERE skjæringstidspunkt=(
-                        SELECT skjæringstidspunkt 
+                        SELECT skjæringstidspunkt
                             FROM behandling
                             WHERE vedtaksperiode_id=:vedtaksperiodeId AND tilstand='VidereBehandlingAvklares'
                         ) AND tilstand='VidereBehandlingAvklares'
@@ -653,7 +653,7 @@ class PgOppgaveDao(
     private fun vedtakRef(vedtaksperiodeId: UUID): Long =
         asSQL(
             """
-            SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId;  
+            SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId;
             """,
             "vedtaksperiodeId" to vedtaksperiodeId,
         ).single {
