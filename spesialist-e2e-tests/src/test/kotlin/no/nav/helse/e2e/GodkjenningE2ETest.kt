@@ -1,7 +1,5 @@
 package no.nav.helse.e2e
 
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.db.DbQuery
@@ -18,7 +16,6 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSystem
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.util.januar
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -413,17 +410,10 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         forventedeTags: List<String>,
         forventetSpleisBehandlingId: UUID,
     ) {
-        @Language("PostgreSQL")
-        val query =
-            "SELECT tags, spleis_behandling_id FROM behandling WHERE vedtaksperiode_id = :vedtaksperiodeId;"
-
-        val (tags, spleisBehandlingId) =
-            sessionOf(dataSource).use { session ->
-                session.run(
-                    queryOf(query, mapOf("vedtaksperiodeId" to vedtaksperiodeId))
-                        .map { it.array<String>("tags").toList() to it.uuid("spleis_behandling_id") }.asSingle,
-                )
-            }!!
+        val (tags, spleisBehandlingId) = dbQuery.single(
+            "SELECT tags, spleis_behandling_id FROM behandling WHERE vedtaksperiode_id = :vedtaksperiodeId",
+            "vedtaksperiodeId" to vedtaksperiodeId
+        ) { it.array<String>("tags").toList() to it.uuid("spleis_behandling_id") }!!
 
         assertEquals(forventedeTags, tags)
         assertEquals(forventetSpleisBehandlingId, spleisBehandlingId)
