@@ -25,6 +25,8 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
             return ferdigstill(context)
         }
         if (oppgaveDao.harGyldigOppgave(utbetalingId) || vedtakDao.erAutomatiskGodkjent(utbetalingId)) {
+            oppgaveDao.oppdaterPekerTilGodkjenningsbehov(meldingId, utbetalingId)
+            sikkerlogg.info("Oppdaterte peker til godkjenningsbehov for oppgave med utbetalingId=$utbetalingId til id=$meldingId")
             sikkerlogg.info(
                 "vedtaksperiodeId=${commandData.vedtaksperiodeId} med utbetalingId=$utbetalingId har gyldig oppgave eller er automatisk godkjent. Ignorerer godkjenningsbehov med id=$meldingId",
             )

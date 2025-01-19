@@ -81,4 +81,9 @@ interface OppgaveDao {
     ): Int
 
     fun harFerdigstiltOppgave(vedtaksperiodeId: UUID): Boolean
+
+    fun oppdaterPekerTilGodkjenningsbehov(
+        godkjenningsbehovId: UUID,
+        utbetalingId: UUID,
+    )
 }

@@ -3,6 +3,8 @@ package no.nav.helse.e2e
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.GodkjenningsbehovTestdata
+import no.nav.helse.TestRapidHelpers.oppgaveId
+import no.nav.helse.db.DbQuery
 import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.AVBRUTT
 import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.FERDIG
 import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.NY
@@ -10,6 +12,7 @@ import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.SUSPENDERT
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.VergemålType.mindreaarig
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.VergemålType.voksen
+import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSystem
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
@@ -25,6 +28,8 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     private companion object {
         private const val ENHET_UTLAND = "0393"
     }
+
+    private val dbQuery = DbQuery(dataSource)
 
     @Test
     fun `oppretter vedtak ved godkjenningsbehov`() {
@@ -373,6 +378,35 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertVarsel(vedtaksperiodeId2, "RV_IV_2")
         assertVarsler(vedtaksperiodeId2, 1)
     }
+
+    @Test
+    fun `oppdaterer oppgavens peker til godkjenningsbehov ved mottak av nytt godkjenningsbehov`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
+        val gammelTag = "GAMMEL_KJEDELIG_TAG"
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(tags = listOf(gammelTag))
+        )
+        val oppgaveId = inspektør.oppgaveId()
+        val godkjenningsbehovData = finnGodkjenningsbehovJson(oppgaveId).let { it["Godkjenning"] }
+        check(godkjenningsbehovData["tags"].first().asText() == gammelTag)
+
+        val nyTag = "NY_OG_BANEBRYTENDE_TAG"
+        håndterGodkjenningsbehovUtenValidering(
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(tags = listOf(nyTag))
+        )
+        val oppdaterteGodkjenningsbehovData = finnGodkjenningsbehovJson(oppgaveId).let { it["Godkjenning"] }
+        assertEquals(setOf(nyTag), oppdaterteGodkjenningsbehovData["tags"].map { it.asText() }.toSet())
+    }
+
+    private fun finnGodkjenningsbehovJson(oppgaveId: Long) = dbQuery.single(
+        """
+        select h.data from hendelse h
+        join oppgave o on h.id = o.hendelse_id_godkjenningsbehov
+        where o.id = :oppgaveId
+        """.trimIndent(),
+        "oppgaveId" to oppgaveId
+    ) { it.string("data") }.let { objectMapper.readTree(it) }
 
     private fun assertBehandlingsinformasjon(
         vedtaksperiodeId: UUID,

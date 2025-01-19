@@ -430,6 +430,21 @@ class PgOppgaveDao(
             "oppgaveId" to oppgaveId,
         ).update()
 
+    override fun oppdaterPekerTilGodkjenningsbehov(
+        godkjenningsbehovId: UUID,
+        utbetalingId: UUID,
+    ) {
+        asSQL(
+            """
+            update oppgave
+            set hendelse_id_godkjenningsbehov = :godkjenningsbehovId
+            where utbetaling_id = :utbetalingId
+            """.trimIndent(),
+            "godkjenningsbehovId" to godkjenningsbehovId,
+            "utbetalingId" to utbetalingId,
+        ).update()
+    }
+
     override fun harFerdigstiltOppgave(vedtaksperiodeId: UUID): Boolean =
         asSQL(
             """
