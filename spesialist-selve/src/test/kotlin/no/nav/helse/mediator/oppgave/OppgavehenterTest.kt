@@ -1,17 +1,16 @@
 package no.nav.helse.mediator.oppgave
 
-import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.db.AntallOppgaverFraDatabase
 import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
+import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
-import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.SaksbehandlerRepository
-import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.db.TotrinnsvurderingDao
+import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.EgenskapDto
@@ -20,6 +19,7 @@ import no.nav.helse.modell.oppgave.OppgaveDto
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
+import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -184,6 +184,9 @@ class OppgavehenterTest {
         ): Int = throw UnsupportedOperationException()
 
         override fun harFerdigstiltOppgave(vedtaksperiodeId: UUID): Boolean = throw UnsupportedOperationException()
+        override fun oppdaterPekerTilGodkjenningsbehov(godkjenningsbehovId: UUID, utbetalingId: UUID) {
+            throw UnsupportedOperationException()
+        }
     }
 
     private fun totrinnsvurderingRepository(
