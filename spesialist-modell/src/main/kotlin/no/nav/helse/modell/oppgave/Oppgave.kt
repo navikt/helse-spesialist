@@ -25,18 +25,18 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class Oppgave private constructor(
-    private val id: Long,
-    private var tilstand: Tilstand,
+    val id: Long,
+    var tilstand: Tilstand,
     private val vedtaksperiodeId: UUID,
-    private val behandlingId: UUID,
+    val behandlingId: UUID,
     private val utbetalingId: UUID,
-    private val godkjenningsbehovId: UUID,
+    val godkjenningsbehovId: UUID,
     private val kanAvvises: Boolean,
-    private val totrinnsvurdering: Totrinnsvurdering?,
+    val totrinnsvurdering: Totrinnsvurdering?,
     private var ferdigstiltAvIdent: String? = null,
     private var ferdigstiltAvOid: UUID? = null,
-    private val egenskaper: MutableSet<Egenskap> = mutableSetOf(),
-    private var tildeltTil: Saksbehandler? = null,
+    val egenskaper: MutableSet<Egenskap> = mutableSetOf(),
+    var tildeltTil: Saksbehandler? = null,
 ) {
     private val observers = mutableListOf<OppgaveObserver>()
 
@@ -44,7 +44,7 @@ class Oppgave private constructor(
         observers.add(observer)
     }
 
-    internal fun forsøkTildeling(saksbehandler: Saksbehandler) {
+    fun forsøkTildeling(saksbehandler: Saksbehandler) {
         logg.info("Oppgave med {} forsøkes tildelt av saksbehandler.", kv("oppgaveId", id))
         val tildelt = tildeltTil
         if (tildelt != null && tildelt != saksbehandler) {

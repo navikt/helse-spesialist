@@ -45,6 +45,7 @@ internal class TestMediator(
     private val tildelingDao = TildelingDao(dataSource)
     private val notatDao = PgNotatDao(dataSource)
     private val dialogDao = PgDialogDao(dataSource)
+    private val meldingPubliserer = MessageContextMeldingPubliserer(testRapid)
 
     private val stansAutomatiskBehandlingMediator =
         StansAutomatiskBehandlingMediator(
@@ -65,7 +66,7 @@ internal class TestMediator(
             opptegnelseRepository = opptegnelseDao,
             totrinnsvurderingDao = totrinnsvurderingDao,
             saksbehandlerRepository = saksbehandlerDao,
-            rapidsConnection = testRapid,
+            meldingPubliserer = meldingPubliserer,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = tilgangsgrupper,
         )
@@ -111,10 +112,11 @@ internal class TestMediator(
             stikkprøver = stikkprøver,
         )
 
+
     init {
         val meldingMediator = MeldingMediator(
             dataSource = dataSource,
-            publiserer = MessageContextMeldingPubliserer(testRapid),
+            publiserer = meldingPubliserer,
             kommandofabrikk = kommandofabrikk,
             poisonPills = PoisonPills(emptyMap()),
         )

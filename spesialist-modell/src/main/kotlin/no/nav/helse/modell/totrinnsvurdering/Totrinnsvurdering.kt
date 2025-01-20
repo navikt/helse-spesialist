@@ -14,7 +14,7 @@ class Totrinnsvurdering(
     private val vedtaksperiodeId: UUID,
     private var erRetur: Boolean,
     private var saksbehandler: Saksbehandler?,
-    private var beslutter: Saksbehandler?,
+    var beslutter: Saksbehandler?,
     private var utbetalingId: UUID?,
     private val opprettet: LocalDateTime,
     private var oppdatert: LocalDateTime?,

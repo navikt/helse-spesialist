@@ -13,8 +13,8 @@ import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegru
 import java.util.UUID
 
 class Saksbehandler(
-    private val epostadresse: String,
-    private val oid: UUID,
+    val epostadresse: String,
+    val oid: UUID,
     private val navn: String,
     private val ident: String,
     private val tilgangskontroll: Tilgangskontroll,

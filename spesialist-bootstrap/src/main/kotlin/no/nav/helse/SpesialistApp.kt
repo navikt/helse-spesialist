@@ -165,7 +165,7 @@ class SpesialistApp(
                 opptegnelseRepository = opptegnelseDao,
                 totrinnsvurderingDao = totrinnsvurderingDao,
                 saksbehandlerRepository = saksbehandlerDao,
-                rapidsConnection = rapidsConnection,
+                meldingPubliserer = meldingPubliserer,
                 tilgangskontroll = tilgangskontrollørForReservasjon,
                 tilgangsgrupper = tilgangsgrupper,
             )

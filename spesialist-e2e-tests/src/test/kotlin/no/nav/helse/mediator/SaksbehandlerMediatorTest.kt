@@ -3,10 +3,12 @@ package no.nav.helse.mediator
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.DatabaseIntegrationTest
+import no.nav.helse.MeldingPubliserer
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.TildelingDao
+import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
@@ -58,6 +60,7 @@ import kotlin.random.Random
 internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private val tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
     private val testRapid = TestRapid()
+    private val meldingPubliserer: MeldingPubliserer = MessageContextMeldingPubliserer(testRapid)
     private val tildelingDbDao = TildelingDao(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val saksbehandlerRepository = SaksbehandlerDao(dataSource)
@@ -77,7 +80,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             opptegnelseDao,
             totrinnsvurderingDao,
             saksbehandlerRepository,
-            testRapid,
+            meldingPubliserer,
             TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper,
         )

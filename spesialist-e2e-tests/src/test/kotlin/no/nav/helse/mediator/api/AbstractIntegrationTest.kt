@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.api
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
+import no.nav.helse.MeldingPubliserer
 import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.db.OpptegnelseDao
@@ -29,6 +30,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 // et annet opplegg for å teste samspillet mellom API og selve/mediator/modell
 internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     protected val testRapid = __ikke_bruk_denne
+    private val meldingPubliserer: MeldingPubliserer = MessageContextMeldingPubliserer(testRapid)
     protected val oppgaveDao = PgOppgaveDao(dataSource)
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val historikkinnslagRepository = PgPeriodehistorikkDao(dataSource)
@@ -43,7 +45,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
             opptegnelseRepository = OpptegnelseDao(dataSource),
             totrinnsvurderingDao = totrinnsvurderingDao,
             saksbehandlerRepository = SaksbehandlerDao(dataSource),
-            rapidsConnection = testRapid,
+            meldingPubliserer = meldingPubliserer,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = SpeilTilgangsgrupper(testEnv),
         )

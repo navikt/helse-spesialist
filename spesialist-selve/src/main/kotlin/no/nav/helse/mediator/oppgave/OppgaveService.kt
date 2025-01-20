@@ -1,8 +1,8 @@
 package no.nav.helse.mediator.oppgave
 
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import kotliquery.TransactionalSession
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OppgavesorteringForDatabase
@@ -68,7 +68,7 @@ class OppgaveService(
     private val opptegnelseRepository: OpptegnelseRepository,
     private val totrinnsvurderingDao: TotrinnsvurderingDao,
     private val saksbehandlerRepository: SaksbehandlerRepository,
-    private val rapidsConnection: RapidsConnection,
+    private val meldingPubliserer: MeldingPubliserer,
     private val tilgangskontroll: Tilgangskontroll,
     private val tilgangsgrupper: Tilgangsgrupper,
 ) : Oppgavehåndterer, Oppgavefinner {
@@ -83,7 +83,7 @@ class OppgaveService(
             opptegnelseRepository = OpptegnelseDao(transactionalSession),
             totrinnsvurderingDao = PgTotrinnsvurderingDao(transactionalSession),
             saksbehandlerRepository = SaksbehandlerDao(transactionalSession),
-            rapidsConnection = rapidsConnection,
+            meldingPubliserer = meldingPubliserer,
             tilgangskontroll = tilgangskontroll,
             tilgangsgrupper = tilgangsgrupper,
         )
@@ -100,7 +100,7 @@ class OppgaveService(
         logg.info("Oppretter saksbehandleroppgave")
         sikkerlogg.info("Oppretter saksbehandleroppgave for {}", kv("fødselsnummer", fødselsnummer))
         val nesteId = oppgaveDao.reserverNesteId()
-        val oppgavemelder = Oppgavemelder(fødselsnummer, rapidsConnection)
+        val oppgavemelder = Oppgavemelder(fødselsnummer, meldingPubliserer)
         val oppgave =
             nyOppgave(
                 id = nesteId,
@@ -129,7 +129,7 @@ class OppgaveService(
                 tilgangskontroll,
             ).oppgave(id)
         val fødselsnummer = oppgaveDao.finnFødselsnummer(id)
-        oppgave.register(Oppgavemelder(fødselsnummer, rapidsConnection))
+        oppgave.register(Oppgavemelder(fødselsnummer, meldingPubliserer))
         val returverdi = oppgaveBlock(oppgave)
         Oppgavelagrer(tildelingRepository).oppdater(this@OppgaveService, oppgave.toDto())
         return returverdi

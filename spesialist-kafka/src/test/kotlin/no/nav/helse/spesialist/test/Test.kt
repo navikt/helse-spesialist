@@ -1,5 +1,7 @@
 package no.nav.helse.spesialist.test
 
+import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
 import java.util.UUID
@@ -48,6 +50,19 @@ fun lagSaksbehandlerident() = ('A'..'Z').random() + "${nextInt(from = 100_000, u
 fun lagSaksbehandlernavn() = "${lagFornavn()} ${lagEtternavn()}"
 fun lagEpostadresseFraFulltNavn(navn: String) = navn.split(" ").joinToString(".").lowercase() + "@nav.no"
 fun lagTilfeldigSaksbehandlerepost() = lagEpostadresseFraFulltNavn(lagSaksbehandlernavn())
+fun lagSaksbehandler(
+    navn: String = lagSaksbehandlernavn(),
+    epostadresse: String = lagEpostadresseFraFulltNavn(navn),
+    oid: UUID = UUID.randomUUID(),
+    ident: String = lagSaksbehandlerident(),
+    tilgangskontroll: Tilgangskontroll = Tilgangskontroll { _, _ -> true },
+) = Saksbehandler(
+    epostadresse = epostadresse,
+    oid = oid,
+    navn = navn,
+    ident = ident,
+    tilgangskontroll = tilgangskontroll
+)
 
 fun fødselsdato(): LocalDate {
     val end = LocalDate.now().minusYears(18)

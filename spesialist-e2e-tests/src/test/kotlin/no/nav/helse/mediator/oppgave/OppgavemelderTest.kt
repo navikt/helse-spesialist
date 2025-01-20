@@ -1,7 +1,9 @@
 package no.nav.helse.mediator.oppgave
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
+import no.nav.helse.MeldingPubliserer
 import no.nav.helse.TestRapidHelpers.meldinger
+import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
@@ -27,13 +29,14 @@ class OppgavemelderTest {
     }
 
     private val testRapid = TestRapid()
+    private val meldingPubliserer: MeldingPubliserer = MessageContextMeldingPubliserer(testRapid)
     private val saksbehandler = saksbehandler("saksbehandler@nav.no")
     private val beslutter = saksbehandler("beslutter@nav.no")
 
     @Test
     fun `bygg kafkamelding`() {
         val oppgave = nyOppgave()
-        oppgave.register(Oppgavemelder(FNR, testRapid))
+        oppgave.register(Oppgavemelder(FNR, meldingPubliserer))
         oppgave.avventerSystem("IDENT", UUID.randomUUID())
         val meldinger = testRapid.inspektør.meldinger()
         assertEquals(1, meldinger.size)
@@ -55,7 +58,7 @@ class OppgavemelderTest {
     fun `bygg kafkamelding med saksbehandler og beslutter`() {
         val oppgave = nyOppgave(totrinnsvurdering = totrinnsvurdering(beslutter))
         oppgave.forsøkTildelingVedReservasjon(saksbehandler = saksbehandler)
-        oppgave.register(Oppgavemelder(FNR, testRapid))
+        oppgave.register(Oppgavemelder(FNR, meldingPubliserer))
         oppgave.avventerSystem("IDENT", UUID.randomUUID())
         val meldinger = testRapid.inspektør.meldinger()
         assertEquals(1, meldinger.size)
