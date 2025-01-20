@@ -1,27 +1,20 @@
 package no.nav.helse.mediator.dokument
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import net.logstash.logback.argument.StructuredArguments
+import no.nav.helse.MeldingPubliserer
 import no.nav.helse.modell.dokument.DokumentDao
+import no.nav.helse.modell.melding.HentDokument
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.Dokumenthåndterer
-import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class DokumentMediator(
     private val dokumentDao: DokumentDao,
-    private val rapidsConnection: RapidsConnection,
+    private val publiserer: MeldingPubliserer,
     private val retries: Int = 50,
 ) : Dokumenthåndterer {
-    private companion object {
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-    }
-
     override fun håndter(
         fødselsnummer: String,
         dokumentId: UUID,
@@ -29,7 +22,7 @@ class DokumentMediator(
     ): JsonNode {
         return dokumentDao.hent(fødselsnummer, dokumentId).let { dokument ->
             val erTom = dokument?.size() == 0
-            val error = dokument?.path("error")?.takeUnless { it.isMissingOrNull() }?.asInt()
+            val error = dokument?.path("error")?.takeUnless { it.isMissingNode || it.isNull }?.asInt()
             if (dokument == null || erTom || (error != null && error != 404)) {
                 sendHentDokument(fødselsnummer, dokumentId, dokumentType)
 
@@ -70,20 +63,10 @@ class DokumentMediator(
         dokumentId: UUID,
         dokumentType: String,
     ) {
-        val message =
-            JsonMessage.newMessage(
-                "hent-dokument",
-                mapOf(
-                    "fødselsnummer" to fødselsnummer,
-                    "dokumentId" to dokumentId,
-                    "dokumentType" to dokumentType,
-                ),
-            )
-        sikkerlogg.info(
-            "Publiserer hent-dokument med {}, {}",
-            StructuredArguments.kv("dokumentId", dokumentId),
-            StructuredArguments.kv("dokumentType", dokumentType),
+        publiserer.publiser(
+            fødselsnummer = fødselsnummer,
+            hendelse = HentDokument(dokumentId = dokumentId, dokumentType = dokumentType),
+            årsak = "forespørsel om $dokumentType fra saksbehandler",
         )
-        rapidsConnection.publish(fødselsnummer, message.toJson())
     }
 }

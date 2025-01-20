@@ -4,12 +4,15 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.modell.melding.Behov
+import no.nav.helse.modell.melding.HentDokument
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -91,4 +94,25 @@ internal class MessageContextMeldingPublisererTest {
         assertDoesNotThrow { UUID.fromString(testRapid.inspektør.field(0, "@id").asText()) }
         assertDoesNotThrow { LocalDateTime.parse(testRapid.inspektør.field(0, "@opprettet").asText()) }
     }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["SØKNAD", "INNTEKTSMELDING"])
+    fun `publiserer HentDokument med forventet format`(dokumentType: String) {
+        val dokumentId = UUID.randomUUID()
+        val årsak = "JUnit"
+
+        meldingPubliserer.publiser(
+            fødselsnummer = fødselsnummer,
+            hendelse = HentDokument(dokumentId = dokumentId, dokumentType = dokumentType),
+            årsak = årsak,
+        )
+
+        assertEquals(1, testRapid.inspektør.size)
+        testRapid.inspektør.message(0).let {
+            assertEquals("hent-dokument", it["@event_name"].asText())
+            assertEquals(dokumentId, UUID.fromString(it["dokumentId"].asText()))
+            assertEquals(dokumentType, it["dokumentType"].asText())
+        }
+    }
+
 }

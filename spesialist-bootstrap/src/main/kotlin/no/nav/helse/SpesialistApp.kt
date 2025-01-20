@@ -187,7 +187,7 @@ class SpesialistApp(
                 stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
                 totrinnsvurderingService = totrinnsvurderingService,
             )
-        dokumentMediator = DokumentMediator(dokumentDao, rapidsConnection)
+        dokumentMediator = DokumentMediator(dokumentDao, meldingPubliserer)
         godkjenningService =
             GodkjenningService(
                 dataSource = dataSource,
