@@ -1,6 +1,6 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
-import no.nav.helse.modell.saksbehandler.OverstyrtInntektOgRefusjonEvent
+import no.nav.helse.modell.melding.OverstyrtInntektOgRefusjonEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtArbeidsgiverDto
 import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtInntektOgRefusjonDto

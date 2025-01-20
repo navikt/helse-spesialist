@@ -136,7 +136,7 @@ class SaksbehandlerMediator(
         val modellhandling = handlingFraApi.tilModellversjon()
         SaksbehandlerLagrer(saksbehandlerDao).lagre(saksbehandler)
         tell(modellhandling)
-        saksbehandler.register(Saksbehandlingsmelder(rapidsConnection))
+        saksbehandler.register(Saksbehandlingsmelder(meldingPubliserer))
         saksbehandler.register(Subsumsjonsmelder(versjonAvKode, meldingPubliserer))
         val handlingId = UUID.randomUUID()
 
@@ -332,7 +332,7 @@ class SaksbehandlerMediator(
             periodehistorikkDao.lagreMedOppgaveId(innslag, handling.oppgaveId)
             oppgaveService.leggPåVent(handling, saksbehandler)
             PåVentRepository(påVentDao).leggPåVent(saksbehandler.oid(), handling, dialogRef)
-            saksbehandler.register(Saksbehandlingsmelder(rapidsConnection))
+            saksbehandler.register(Saksbehandlingsmelder(meldingPubliserer))
             handling.utførAv(saksbehandler)
         } catch (e: Modellfeil) {
             throw e.tilApiversjon()
@@ -358,7 +358,7 @@ class SaksbehandlerMediator(
         oppgaveService.endrePåVent(handling, saksbehandler)
         PåVentRepository(påVentDao).endrePåVent(saksbehandler.oid(), handling, dialogRef)
 
-        saksbehandler.register(Saksbehandlingsmelder(rapidsConnection))
+        saksbehandler.register(Saksbehandlingsmelder(meldingPubliserer))
         handling.utførAv(saksbehandler)
     }
 

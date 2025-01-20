@@ -1,6 +1,6 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
-import no.nav.helse.modell.saksbehandler.LagtPåVentEvent
+import no.nav.helse.modell.melding.LagtPåVentEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import java.time.LocalDate
 import java.util.UUID

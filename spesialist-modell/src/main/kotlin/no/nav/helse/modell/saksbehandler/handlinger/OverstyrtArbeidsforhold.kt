@@ -1,6 +1,6 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
-import no.nav.helse.modell.saksbehandler.OverstyrtArbeidsforholdEvent
+import no.nav.helse.modell.melding.OverstyrtArbeidsforholdEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.dto.ArbeidsforholdDto
 import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtArbeidsforholdDto

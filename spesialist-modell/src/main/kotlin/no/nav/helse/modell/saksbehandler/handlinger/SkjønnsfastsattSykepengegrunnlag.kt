@@ -1,7 +1,7 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
+import no.nav.helse.modell.melding.SkjønnsfastsattSykepengegrunnlagEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.modell.saksbehandler.SkjønnsfastsattSykepengegrunnlagEvent
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver.Companion.byggSubsumsjon
 import no.nav.helse.modell.saksbehandler.handlinger.dto.SkjønnsfastsattArbeidsgiverDto
 import no.nav.helse.modell.saksbehandler.handlinger.dto.SkjønnsfastsattSykepengegrunnlagDto

@@ -1,6 +1,6 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
-import no.nav.helse.modell.saksbehandler.AnnullertUtbetalingEvent
+import no.nav.helse.modell.melding.AnnullertUtbetalingEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import java.util.UUID
 

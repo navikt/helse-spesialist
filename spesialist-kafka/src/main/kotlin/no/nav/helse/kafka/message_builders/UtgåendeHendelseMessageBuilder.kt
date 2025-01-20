@@ -2,13 +2,20 @@ package no.nav.helse.kafka.message_builders
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import no.nav.helse.modell.melding.AnnullertUtbetalingEvent
 import no.nav.helse.modell.melding.Godkjenningsbehovløsning
 import no.nav.helse.modell.melding.HentDokument
 import no.nav.helse.modell.melding.KlargjørPersonForVisning
+import no.nav.helse.modell.melding.LagtPåVentEvent
+import no.nav.helse.modell.melding.MinimumSykdomsgradVurdertEvent
 import no.nav.helse.modell.melding.OppdaterPersondata
 import no.nav.helse.modell.melding.OppgaveOppdatert
 import no.nav.helse.modell.melding.OppgaveOpprettet
+import no.nav.helse.modell.melding.OverstyrtArbeidsforholdEvent
+import no.nav.helse.modell.melding.OverstyrtInntektOgRefusjonEvent
+import no.nav.helse.modell.melding.OverstyrtTidslinjeEvent
 import no.nav.helse.modell.melding.Saksbehandlerløsning
+import no.nav.helse.modell.melding.SkjønnsfastsattSykepengegrunnlagEvent
 import no.nav.helse.modell.melding.Sykepengevedtak
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.melding.VedtaksperiodeAvvistAutomatisk
@@ -50,6 +57,13 @@ internal fun UtgåendeHendelse.eventName() =
         is HentDokument -> "hent-dokument"
         is OppgaveOpprettet -> "oppgave_opprettet"
         is OppgaveOppdatert -> "oppgave_oppdatert"
+        is AnnullertUtbetalingEvent -> "annullering"
+        is LagtPåVentEvent -> "lagt_på_vent"
+        is MinimumSykdomsgradVurdertEvent -> "minimum_sykdomsgrad_vurdert"
+        is OverstyrtArbeidsforholdEvent -> "overstyr_arbeidsforhold"
+        is OverstyrtInntektOgRefusjonEvent -> "overstyr_inntekt_og_refusjon"
+        is OverstyrtTidslinjeEvent -> "overstyr_tidslinje"
+        is SkjønnsfastsattSykepengegrunnlagEvent -> "skjønnsmessig_fastsettelse"
     }
 
 private fun UtgåendeHendelse.detaljer(): Map<String, Any> {
@@ -66,6 +80,13 @@ private fun UtgåendeHendelse.detaljer(): Map<String, Any> {
         is HentDokument -> this.detaljer()
         is OppgaveOpprettet -> this.detaljer()
         is OppgaveOppdatert -> this.detaljer()
+        is AnnullertUtbetalingEvent -> this.detaljer()
+        is LagtPåVentEvent -> this.detaljer()
+        is MinimumSykdomsgradVurdertEvent -> this.detaljer()
+        is OverstyrtArbeidsforholdEvent -> this.detaljer()
+        is OverstyrtInntektOgRefusjonEvent -> this.detaljer()
+        is OverstyrtTidslinjeEvent -> this.detaljer()
+        is SkjønnsfastsattSykepengegrunnlagEvent -> this.detaljer()
     }
 }
 
@@ -290,3 +311,91 @@ private fun Oppgave.toDetaljer(): Map<String, Any> =
                 )
         },
     ).toMap()
+
+private fun AnnullertUtbetalingEvent.detaljer(): Map<String, Any> =
+    listOfNotNull(
+        "organisasjonsnummer" to organisasjonsnummer,
+        "aktørId" to aktørId,
+        "saksbehandler" to
+            mapOf(
+                "epostaddresse" to saksbehandlerEpost,
+                "oid" to saksbehandlerOid,
+                "navn" to saksbehandlerNavn,
+                "ident" to saksbehandlerIdent,
+            ),
+        "begrunnelser" to begrunnelser,
+        "utbetalingId" to utbetalingId,
+        "vedtaksperiodeId" to vedtaksperiodeId,
+        "arbeidsgiverFagsystemId" to arbeidsgiverFagsystemId,
+        "personFagsystemId" to personFagsystemId,
+        kommentar?.let { "kommentar" to it },
+        arsaker?.let { "arsaker" to it.map { arsak -> mapOf("arsak" to arsak.arsak, "key" to arsak.key) } },
+    ).toMap()
+
+private fun LagtPåVentEvent.detaljer(): Map<String, Any> =
+    listOfNotNull(
+        "oppgaveId" to oppgaveId,
+        "behandlingId" to behandlingId,
+        "skalTildeles" to skalTildeles,
+        "frist" to frist,
+        "saksbehandlerOid" to saksbehandlerOid,
+        "saksbehandlerIdent" to saksbehandlerIdent,
+        "årsaker" to årsaker.map { mapOf("årsak" to it.årsak, "key" to it.key) },
+        notatTekst?.let { "notatTekst" to it },
+    ).toMap()
+
+private fun MinimumSykdomsgradVurdertEvent.detaljer(): Map<String, Any> =
+    mapOf(
+        "@id" to id,
+        "aktørId" to aktørId,
+        "perioderMedMinimumSykdomsgradVurdertOk" to perioderMedMinimumSykdomsgradVurdertOk,
+        "perioderMedMinimumSykdomsgradVurdertIkkeOk" to perioderMedMinimumSykdomsgradVurdertIkkeOk,
+        "saksbehandlerOid" to saksbehandlerOid,
+        "saksbehandlerNavn" to saksbehandlerNavn,
+        "saksbehandlerIdent" to saksbehandlerIdent,
+        "saksbehandlerEpost" to saksbehandlerEpost,
+    )
+
+private fun OverstyrtArbeidsforholdEvent.detaljer(): Map<String, Any> =
+    mapOf(
+        "@id" to id,
+        "aktørId" to aktørId,
+        "saksbehandlerOid" to saksbehandlerOid,
+        "saksbehandlerNavn" to saksbehandlerNavn,
+        "saksbehandlerIdent" to saksbehandlerIdent,
+        "saksbehandlerEpost" to saksbehandlerEpost,
+        "skjæringstidspunkt" to skjæringstidspunkt,
+        "overstyrteArbeidsforhold" to overstyrteArbeidsforhold,
+    )
+
+private fun OverstyrtInntektOgRefusjonEvent.detaljer(): Map<String, Any> =
+    mapOf(
+        "@id" to id,
+        "aktørId" to aktørId,
+        "skjæringstidspunkt" to skjæringstidspunkt,
+        "arbeidsgivere" to arbeidsgivere,
+        "saksbehandlerOid" to saksbehandlerOid,
+        "saksbehandlerNavn" to saksbehandlerNavn,
+        "saksbehandlerIdent" to saksbehandlerIdent,
+        "saksbehandlerEpost" to saksbehandlerEpost,
+    )
+
+private fun OverstyrtTidslinjeEvent.detaljer(): Map<String, Any> =
+    mapOf(
+        "@id" to id,
+        "aktørId" to aktørId,
+        "organisasjonsnummer" to organisasjonsnummer,
+        "dager" to dager,
+    )
+
+private fun SkjønnsfastsattSykepengegrunnlagEvent.detaljer(): Map<String, Any> =
+    mapOf(
+        "@id" to id,
+        "aktørId" to aktørId,
+        "skjæringstidspunkt" to skjæringstidspunkt,
+        "arbeidsgivere" to arbeidsgivere,
+        "saksbehandlerOid" to saksbehandlerOid,
+        "saksbehandlerNavn" to saksbehandlerNavn,
+        "saksbehandlerIdent" to saksbehandlerIdent,
+        "saksbehandlerEpost" to saksbehandlerEpost,
+    )

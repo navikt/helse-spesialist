@@ -1,6 +1,6 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
-import no.nav.helse.modell.saksbehandler.OverstyrtTidslinjeEvent
+import no.nav.helse.modell.melding.OverstyrtTidslinjeEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinjedag.Companion.byggSubsumsjoner
 import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtTidslinjeDto

@@ -1,12 +1,12 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
 import no.nav.helse.modell.januar
+import no.nav.helse.modell.melding.LagtPåVentEvent
+import no.nav.helse.modell.melding.MinimumSykdomsgradVurdertEvent
+import no.nav.helse.modell.melding.OverstyrtArbeidsforholdEvent
+import no.nav.helse.modell.melding.OverstyrtInntektOgRefusjonEvent
+import no.nav.helse.modell.melding.OverstyrtTidslinjeEvent
 import no.nav.helse.modell.melding.SubsumsjonEvent
-import no.nav.helse.modell.saksbehandler.LagtPåVentEvent
-import no.nav.helse.modell.saksbehandler.MinimumSykdomsgradVurdertEvent
-import no.nav.helse.modell.saksbehandler.OverstyrtArbeidsforholdEvent
-import no.nav.helse.modell.saksbehandler.OverstyrtInntektOgRefusjonEvent
-import no.nav.helse.modell.saksbehandler.OverstyrtTidslinjeEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.gjenopprett
 import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
