@@ -8,6 +8,7 @@ import no.nav.helse.mediator.UtgåendeMeldingerMediator
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
+import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
 import no.nav.helse.modell.person.Person
@@ -27,7 +28,7 @@ internal class UtgåendeMeldingerMediatorTest {
         private val vedtaksperiodeId = UUID.randomUUID()
     }
 
-    private val meldingPubliserer = object: MeldingPubliserer {
+    private val meldingPubliserer = object : MeldingPubliserer {
         var antallMeldinger: Int = 0
             private set
 
@@ -35,18 +36,17 @@ internal class UtgåendeMeldingerMediatorTest {
             antallMeldinger++
         }
 
+        override fun publiser(fødselsnummer: String, subsumsjonEvent: SubsumsjonEvent, versjonAvKode: String) =
+            error("Not implemented in test")
+
         override fun publiser(
             hendelseId: UUID,
             commandContextId: UUID,
             fødselsnummer: String,
             behov: List<Behov>
-        ) {
-            antallMeldinger++
-        }
+        ) = error("Not implemented in test")
 
-        override fun publiser(event: KommandokjedeEndretEvent, hendelseNavn: String) {
-            antallMeldinger++
-        }
+        override fun publiser(event: KommandokjedeEndretEvent, hendelseNavn: String) = error("Not implemented in test")
     }
 
     private val utgåendeMeldingerMediator: UtgåendeMeldingerMediator = UtgåendeMeldingerMediator()

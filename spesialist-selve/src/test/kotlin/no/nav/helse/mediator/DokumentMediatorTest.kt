@@ -7,6 +7,7 @@ import no.nav.helse.MeldingPubliserer
 import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.modell.melding.Behov
+import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.test.lagFødselsnummer
@@ -29,6 +30,9 @@ internal class DokumentMediatorTest {
         override fun publiser(fødselsnummer: String, hendelse: UtgåendeHendelse, årsak: String) {
             antallMeldinger++
         }
+
+        override fun publiser(fødselsnummer: String, subsumsjonEvent: SubsumsjonEvent, versjonAvKode: String) =
+            error("Not implemented in test")
 
         override fun publiser(hendelseId: UUID, commandContextId: UUID, fødselsnummer: String, behov: List<Behov>) =
             error("Not implemented in test")
