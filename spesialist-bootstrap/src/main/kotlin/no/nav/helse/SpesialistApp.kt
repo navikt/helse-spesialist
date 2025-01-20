@@ -182,6 +182,7 @@ class SpesialistApp(
                 dataSource = dataSource,
                 versjonAvKode = versjonAvKode,
                 rapidsConnection = rapidsConnection,
+                meldingPubliserer = meldingPubliserer,
                 oppgaveService = oppgaveService,
                 tilgangsgrupper = tilgangsgrupper,
                 stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
@@ -196,7 +197,7 @@ class SpesialistApp(
                 saksbehandlerRepository = saksbehandlerDao,
                 tilgangskontroll = tilgangskontrollørForReservasjon,
             )
-        subsumsjonsmelder = Subsumsjonsmelder(versjonAvKode, rapidsConnection)
+        subsumsjonsmelder = Subsumsjonsmelder(versjonAvKode, meldingPubliserer)
 
         loggOppstartsmelding()
 

@@ -71,7 +71,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             oppgaveDao,
             notatDao,
             dialogDao,
-        ) { Subsumsjonsmelder("versjonAvKode", testRapid) }
+        ) { Subsumsjonsmelder("versjonAvKode", meldingPubliserer) }
     private val oppgaveService =
         OppgaveService(
             oppgaveDao,
@@ -89,6 +89,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             dataSource,
             "versjonAvKode",
             testRapid,
+            meldingPubliserer,
             oppgaveService,
             tilgangsgrupper,
             stansAutomatiskBehandlingMediator,

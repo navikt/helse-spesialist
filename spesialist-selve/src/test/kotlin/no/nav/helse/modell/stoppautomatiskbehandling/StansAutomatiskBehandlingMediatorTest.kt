@@ -1,18 +1,20 @@
 package no.nav.helse.modell.stoppautomatiskbehandling
 
-import com.fasterxml.jackson.module.kotlin.convertValue
-import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.TestRapidHelpers.hendelser
+import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
+import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.mediator.Subsumsjonsmelder
+import no.nav.helse.modell.melding.Behov
+import no.nav.helse.modell.melding.SubsumsjonEvent
+import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.periodehistorikk.AutomatiskBehandlingStanset
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.OpphevStans
@@ -22,16 +24,15 @@ import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.MANGLENDE_
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.MEDISINSK_VILKAR
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_UAVKLART
-import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime.now
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 class StansAutomatiskBehandlingMediatorTest {
@@ -40,8 +41,29 @@ class StansAutomatiskBehandlingMediatorTest {
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val notatDao = mockk<NotatDao>(relaxed = true)
     private val dialogDao = mockk<PgDialogDao>(relaxed = true)
-    private val testRapid = TestRapid()
-    private val subsumsjonsmelder = Subsumsjonsmelder("versjonAvKode", testRapid)
+
+    private val meldingPubliserer = object : MeldingPubliserer {
+        private val subsumsjonEvents: MutableList<SubsumsjonEvent> = mutableListOf()
+        fun subsumsjonEvents(): List<SubsumsjonEvent> = subsumsjonEvents
+
+        override fun publiser(fødselsnummer: String, hendelse: UtgåendeHendelse, årsak: String) =
+            error("Not implemented for test")
+
+        override fun publiser(fødselsnummer: String, subsumsjonEvent: SubsumsjonEvent, versjonAvKode: String) {
+            subsumsjonEvents.add(subsumsjonEvent)
+        }
+
+        override fun publiser(
+            hendelseId: UUID,
+            commandContextId: UUID,
+            fødselsnummer: String,
+            behov: List<Behov>
+        ) = error("Not implemented for test")
+
+        override fun publiser(event: KommandokjedeEndretEvent, hendelseNavn: String) = error("Not implemented for test")
+    }
+
+    private val subsumsjonsmelder = Subsumsjonsmelder("versjonAvKode", meldingPubliserer)
 
     private companion object {
         private const val FNR = "12345678910"
@@ -57,11 +79,6 @@ class StansAutomatiskBehandlingMediatorTest {
             notatDao,
             dialogDao,
         ) { subsumsjonsmelder }
-
-    @BeforeEach
-    fun beforeEach() {
-        testRapid.reset()
-    }
 
     @Test
     fun `Lagrer melding og periodehistorikk når stoppknapp-mleding håndteres`() {
@@ -118,9 +135,9 @@ class StansAutomatiskBehandlingMediatorTest {
     @Test
     fun `Melding med status STOPP_AUTOMATIKK gjør at personen skal unntas fra automatisering`() {
         every { stansAutomatiskBehandlingDao.hentFor(FNR) } returns
-            meldinger(
-                stans(MEDISINSK_VILKAR, MANGLENDE_MEDVIRKING),
-            )
+                meldinger(
+                    stans(MEDISINSK_VILKAR, MANGLENDE_MEDVIRKING),
+                )
         val dataTilSpeil = mediator.unntattFraAutomatiskGodkjenning(FNR)
 
         assertTrue(mediator.sjekkOmAutomatiseringErStanset(FNR, VEDTAKSPERIODEID, ORGNR))
@@ -131,10 +148,10 @@ class StansAutomatiskBehandlingMediatorTest {
     @Test
     fun `Melding med status NORMAL gjør at personen ikke lenger er unntatt fra automatisering`() {
         every { stansAutomatiskBehandlingDao.hentFor(FNR) } returns
-            meldinger(
-                stans(MEDISINSK_VILKAR),
-                opphevStans(),
-            )
+                meldinger(
+                    stans(MEDISINSK_VILKAR),
+                    opphevStans(),
+                )
         val dataTilSpeil = mediator.unntattFraAutomatiskGodkjenning(FNR)
 
         assertFalse(mediator.sjekkOmAutomatiseringErStanset(FNR, VEDTAKSPERIODEID, ORGNR))
@@ -145,11 +162,11 @@ class StansAutomatiskBehandlingMediatorTest {
     @Test
     fun `Kan stanses på nytt etter stans er opphevet`() {
         every { stansAutomatiskBehandlingDao.hentFor(FNR) } returns
-            meldinger(
-                stans(MEDISINSK_VILKAR),
-                opphevStans(),
-                stans(AKTIVITETSKRAV),
-            )
+                meldinger(
+                    stans(MEDISINSK_VILKAR),
+                    opphevStans(),
+                    stans(AKTIVITETSKRAV),
+                )
         val dataTilSpeil = mediator.unntattFraAutomatiskGodkjenning(FNR)
 
         assertTrue(mediator.sjekkOmAutomatiseringErStanset(FNR, VEDTAKSPERIODEID, ORGNR))
@@ -160,204 +177,191 @@ class StansAutomatiskBehandlingMediatorTest {
     @Test
     fun `sender subsumsjonsmelding med årsak medisinsk vilkår`() {
         every { stansAutomatiskBehandlingDao.hentFor(FNR) } returns
-            meldinger(
-                stans(MEDISINSK_VILKAR),
-            )
+                meldinger(
+                    stans(MEDISINSK_VILKAR),
+                )
 
         mediator.sjekkOmAutomatiseringErStanset(FNR, VEDTAKSPERIODEID, ORGNR)
 
-        val subsumsjonMeldinger =
-            testRapid.inspektør.hendelser("subsumsjon").filter { it.path("subsumsjon")["paragraf"].asText() == "8-4" }
-        val subsumsjon = subsumsjonMeldinger.first().path("subsumsjon")
-
+        val subsumsjonMeldinger = meldingPubliserer.subsumsjonEvents()
         assertEquals(1, subsumsjonMeldinger.size)
-        assertEquals(FNR, subsumsjon["fodselsnummer"].asText())
-        assertEquals("versjonAvKode", subsumsjon["versjonAvKode"].asText())
-        assertEquals("1.0.0", subsumsjon["versjon"].asText())
-        assertEquals("8-4", subsumsjon["paragraf"].asText())
-        assertEquals("1", subsumsjon["ledd"].asText())
-        assertNull(subsumsjon["bokstav"])
-        assertEquals("folketrygdloven", subsumsjon["lovverk"].asText())
-        assertEquals("2021-05-21", subsumsjon["lovverksversjon"].asText())
-        assertEquals(VILKAR_UAVKLART.name, subsumsjon["utfall"].asText())
+
+        val subsumsjon = subsumsjonMeldinger.single()
+        assertEquals(FNR, subsumsjon.fødselsnummer)
+        assertEquals("8-4", subsumsjon.paragraf)
+        assertEquals("1", subsumsjon.ledd)
+        assertNull(subsumsjon.bokstav)
+        assertEquals("folketrygdloven", subsumsjon.lovverk)
+        assertEquals("2021-05-21", subsumsjon.lovverksversjon)
+        assertEquals(VILKAR_UAVKLART.name, subsumsjon.utfall)
         assertEquals(
-            mapOf("syfostopp" to true, "årsak" to MEDISINSK_VILKAR.name),
-            objectMapper.convertValue<Map<String, Any>>(subsumsjon["input"]),
+            mapOf("syfostopp" to true, "årsak" to MEDISINSK_VILKAR),
+            subsumsjon.input,
         )
     }
 
     @Test
     fun `sender subsumsjonsmelding med årsak bestridelse sykmelding`() {
         every { stansAutomatiskBehandlingDao.hentFor(FNR) } returns
-            meldinger(
-                stans(BESTRIDELSE_SYKMELDING),
-            )
+                meldinger(
+                    stans(BESTRIDELSE_SYKMELDING),
+                )
 
         mediator.sjekkOmAutomatiseringErStanset(FNR, VEDTAKSPERIODEID, ORGNR)
 
-        val subsumsjonMeldinger =
-            testRapid.inspektør.hendelser("subsumsjon").filter { it.path("subsumsjon")["paragraf"].asText() == "8-4" }
-        val subsumsjon = subsumsjonMeldinger.first().path("subsumsjon")
-
+        val subsumsjonMeldinger = meldingPubliserer.subsumsjonEvents()
         assertEquals(1, subsumsjonMeldinger.size)
-        assertEquals(FNR, subsumsjon["fodselsnummer"].asText())
-        assertEquals("versjonAvKode", subsumsjon["versjonAvKode"].asText())
-        assertEquals("1.0.0", subsumsjon["versjon"].asText())
-        assertEquals("8-4", subsumsjon["paragraf"].asText())
-        assertEquals("1", subsumsjon["ledd"].asText())
-        assertNull(subsumsjon["bokstav"])
-        assertEquals("folketrygdloven", subsumsjon["lovverk"].asText())
-        assertEquals("2021-05-21", subsumsjon["lovverksversjon"].asText())
-        assertEquals(VILKAR_UAVKLART.name, subsumsjon["utfall"].asText())
+
+        val subsumsjon = subsumsjonMeldinger.single()
+        assertEquals(FNR, subsumsjon.fødselsnummer)
+        assertEquals("8-4", subsumsjon.paragraf)
+        assertEquals("1", subsumsjon.ledd)
+        assertNull(subsumsjon.bokstav)
+        assertEquals("folketrygdloven", subsumsjon.lovverk)
+        assertEquals("2021-05-21", subsumsjon.lovverksversjon)
+        assertEquals(VILKAR_UAVKLART.name, subsumsjon.utfall)
         assertEquals(
-            mapOf("syfostopp" to true, "årsak" to BESTRIDELSE_SYKMELDING.name),
-            objectMapper.convertValue<Map<String, Any>>(subsumsjon["input"]),
+            mapOf("syfostopp" to true, "årsak" to BESTRIDELSE_SYKMELDING),
+            subsumsjon.input,
         )
     }
 
     @Test
     fun `sender subsumsjonsmelding med årsak aktivitetskrav`() {
         every { stansAutomatiskBehandlingDao.hentFor(FNR) } returns
-            meldinger(
-                stans(AKTIVITETSKRAV),
-            )
+                meldinger(
+                    stans(AKTIVITETSKRAV),
+                )
 
         mediator.sjekkOmAutomatiseringErStanset(FNR, VEDTAKSPERIODEID, ORGNR)
 
-        val subsumsjonMeldinger =
-            testRapid.inspektør.hendelser("subsumsjon").filter { it.path("subsumsjon")["paragraf"].asText() == "8-8" }
-        val subsumsjon = subsumsjonMeldinger.first().path("subsumsjon")
-
+        val subsumsjonMeldinger = meldingPubliserer.subsumsjonEvents().filter { it.paragraf == "8-8" }
         assertEquals(1, subsumsjonMeldinger.size)
-        assertEquals(FNR, subsumsjon["fodselsnummer"].asText())
-        assertEquals("versjonAvKode", subsumsjon["versjonAvKode"].asText())
-        assertEquals("1.0.0", subsumsjon["versjon"].asText())
-        assertEquals("8-8", subsumsjon["paragraf"].asText())
-        assertEquals("2", subsumsjon["ledd"].asText())
-        assertNull(subsumsjon["bokstav"])
-        assertEquals("folketrygdloven", subsumsjon["lovverk"].asText())
-        assertEquals("2021-05-21", subsumsjon["lovverksversjon"].asText())
-        assertEquals(VILKAR_UAVKLART.name, subsumsjon["utfall"].asText())
+
+        val subsumsjon = subsumsjonMeldinger.single()
+        assertEquals(FNR, subsumsjon.fødselsnummer)
+        assertEquals("8-8", subsumsjon.paragraf)
+        assertEquals("2", subsumsjon.ledd)
+        assertNull(subsumsjon.bokstav)
+        assertEquals("folketrygdloven", subsumsjon.lovverk)
+        assertEquals("2021-05-21", subsumsjon.lovverksversjon)
+        assertEquals(VILKAR_UAVKLART.name, subsumsjon.utfall)
         assertEquals(
-            mapOf("syfostopp" to true, "årsak" to AKTIVITETSKRAV.name),
-            objectMapper.convertValue<Map<String, Any>>(subsumsjon["input"]),
+            mapOf("syfostopp" to true, "årsak" to AKTIVITETSKRAV),
+            subsumsjon.input,
         )
     }
 
     @Test
     fun `sender subsumsjonsmelding med årsak manglende medvirking`() {
         every { stansAutomatiskBehandlingDao.hentFor(FNR) } returns
-            meldinger(
-                stans(MANGLENDE_MEDVIRKING),
-            )
+                meldinger(
+                    stans(MANGLENDE_MEDVIRKING),
+                )
 
         mediator.sjekkOmAutomatiseringErStanset(FNR, VEDTAKSPERIODEID, ORGNR)
 
-        val subsumsjonMeldinger =
-            testRapid.inspektør.hendelser("subsumsjon").filter { it.path("subsumsjon")["paragraf"].asText() == "8-8" }
-        val subsumsjon = subsumsjonMeldinger.first().path("subsumsjon")
-
+        val subsumsjonMeldinger = meldingPubliserer.subsumsjonEvents().filter { it.paragraf == "8-8" }
         assertEquals(1, subsumsjonMeldinger.size)
-        assertEquals(FNR, subsumsjon["fodselsnummer"].asText())
-        assertEquals("versjonAvKode", subsumsjon["versjonAvKode"].asText())
-        assertEquals("1.0.0", subsumsjon["versjon"].asText())
-        assertEquals("8-8", subsumsjon["paragraf"].asText())
-        assertEquals("1", subsumsjon["ledd"].asText())
-        assertNull(subsumsjon["bokstav"])
-        assertEquals("folketrygdloven", subsumsjon["lovverk"].asText())
-        assertEquals("2021-05-21", subsumsjon["lovverksversjon"].asText())
-        assertEquals(VILKAR_UAVKLART.name, subsumsjon["utfall"].asText())
+
+        val subsumsjon = subsumsjonMeldinger.single()
+        assertEquals(FNR, subsumsjon.fødselsnummer)
+        assertEquals("8-8", subsumsjon.paragraf)
+        assertEquals("1", subsumsjon.ledd)
+        assertNull(subsumsjon.bokstav)
+        assertEquals("folketrygdloven", subsumsjon.lovverk)
+        assertEquals("2021-05-21", subsumsjon.lovverksversjon)
+        assertEquals(VILKAR_UAVKLART.name, subsumsjon.utfall)
         assertEquals(
-            mapOf("syfostopp" to true, "årsak" to MANGLENDE_MEDVIRKING.name),
-            objectMapper.convertValue<Map<String, Any>>(subsumsjon["input"]),
+            mapOf("syfostopp" to true, "årsak" to MANGLENDE_MEDVIRKING),
+            subsumsjon.input,
         )
     }
 
     @Test
     fun `sender flere subsumsjonsmeldinger når det er flere stoppmeldinger med ulik årsak`() {
         every { stansAutomatiskBehandlingDao.hentFor(FNR) } returns
-            meldinger(
-                stans(MEDISINSK_VILKAR),
-                stans(AKTIVITETSKRAV),
-            )
+                meldinger(
+                    stans(MEDISINSK_VILKAR),
+                    stans(AKTIVITETSKRAV),
+                )
 
         mediator.sjekkOmAutomatiseringErStanset(FNR, VEDTAKSPERIODEID, ORGNR)
 
-        val subsumsjonMeldinger = testRapid.inspektør.hendelser("subsumsjon")
-        val åtteFireSubsumsjon = subsumsjonMeldinger.first().path("subsumsjon")
-        val åtteÅtteSubsumsjon = subsumsjonMeldinger.last().path("subsumsjon")
+        val subsumsjonMeldinger = meldingPubliserer.subsumsjonEvents()
+        val åtteFireSubsumsjon = subsumsjonMeldinger.first()
+        val åtteÅtteSubsumsjon = subsumsjonMeldinger.last()
 
         assertEquals(2, subsumsjonMeldinger.size)
-        assertEquals("8-4", åtteFireSubsumsjon["paragraf"].asText())
-        assertEquals("1", åtteFireSubsumsjon["ledd"].asText())
-        assertEquals(VILKAR_UAVKLART.name, åtteFireSubsumsjon["utfall"].asText())
+        assertEquals("8-4", åtteFireSubsumsjon.paragraf)
+        assertEquals("1", åtteFireSubsumsjon.ledd)
+        assertEquals(VILKAR_UAVKLART.name, åtteFireSubsumsjon.utfall)
         assertEquals(
-            mapOf("syfostopp" to true, "årsak" to MEDISINSK_VILKAR.name),
-            objectMapper.convertValue<Map<String, Any>>(åtteFireSubsumsjon["input"]),
+            mapOf("syfostopp" to true, "årsak" to MEDISINSK_VILKAR),
+            åtteFireSubsumsjon.input,
         )
 
-        assertEquals("8-8", åtteÅtteSubsumsjon["paragraf"].asText())
-        assertEquals("2", åtteÅtteSubsumsjon["ledd"].asText())
-        assertEquals(VILKAR_UAVKLART.name, åtteÅtteSubsumsjon["utfall"].asText())
+        assertEquals("8-8", åtteÅtteSubsumsjon.paragraf)
+        assertEquals("2", åtteÅtteSubsumsjon.ledd)
+        assertEquals(VILKAR_UAVKLART.name, åtteÅtteSubsumsjon.utfall)
         assertEquals(
-            mapOf("syfostopp" to true, "årsak" to AKTIVITETSKRAV.name),
-            objectMapper.convertValue<Map<String, Any>>(åtteÅtteSubsumsjon["input"]),
+            mapOf("syfostopp" to true, "årsak" to AKTIVITETSKRAV),
+            åtteÅtteSubsumsjon.input,
         )
     }
 
     @Test
     fun `sender flere subsumsjonsmeldinger når det er flere årsaker i samme stoppmelding`() {
         every { stansAutomatiskBehandlingDao.hentFor(FNR) } returns
-            meldinger(
-                stans(MEDISINSK_VILKAR, AKTIVITETSKRAV),
-            )
+                meldinger(
+                    stans(MEDISINSK_VILKAR, AKTIVITETSKRAV),
+                )
 
         mediator.sjekkOmAutomatiseringErStanset(FNR, VEDTAKSPERIODEID, ORGNR)
 
-        val subsumsjonMeldinger = testRapid.inspektør.hendelser("subsumsjon")
-        val åtteFireSubsumsjon = subsumsjonMeldinger.first().path("subsumsjon")
-        val åtteÅtteSubsumsjon = subsumsjonMeldinger.last().path("subsumsjon")
+        val subsumsjonMeldinger = meldingPubliserer.subsumsjonEvents()
+        val åtteFireSubsumsjon = subsumsjonMeldinger.first()
+        val åtteÅtteSubsumsjon = subsumsjonMeldinger.last()
 
         assertEquals(2, subsumsjonMeldinger.size)
-        assertEquals("8-4", åtteFireSubsumsjon["paragraf"].asText())
-        assertEquals("1", åtteFireSubsumsjon["ledd"].asText())
-        assertEquals(VILKAR_UAVKLART.name, åtteFireSubsumsjon["utfall"].asText())
+        assertEquals("8-4", åtteFireSubsumsjon.paragraf)
+        assertEquals("1", åtteFireSubsumsjon.ledd)
+        assertEquals(VILKAR_UAVKLART.name, åtteFireSubsumsjon.utfall)
         assertEquals(
-            mapOf("syfostopp" to true, "årsak" to MEDISINSK_VILKAR.name),
-            objectMapper.convertValue<Map<String, Any>>(åtteFireSubsumsjon["input"]),
+            mapOf("syfostopp" to true, "årsak" to MEDISINSK_VILKAR),
+            åtteFireSubsumsjon.input,
         )
 
-        assertEquals("8-8", åtteÅtteSubsumsjon["paragraf"].asText())
-        assertEquals("2", åtteÅtteSubsumsjon["ledd"].asText())
-        assertEquals(VILKAR_UAVKLART.name, åtteÅtteSubsumsjon["utfall"].asText())
+        assertEquals("8-8", åtteÅtteSubsumsjon.paragraf)
+        assertEquals("2", åtteÅtteSubsumsjon.ledd)
+        assertEquals(VILKAR_UAVKLART.name, åtteÅtteSubsumsjon.utfall)
         assertEquals(
-            mapOf("syfostopp" to true, "årsak" to AKTIVITETSKRAV.name),
-            objectMapper.convertValue<Map<String, Any>>(åtteÅtteSubsumsjon["input"]),
+            mapOf("syfostopp" to true, "årsak" to AKTIVITETSKRAV),
+            åtteÅtteSubsumsjon.input,
         )
     }
 
     @Test
     fun `sender bare subsumsjonsmelding for stoppmeldinger etter siste opphevelse av stans`() {
         every { stansAutomatiskBehandlingDao.hentFor(FNR) } returns
-            meldinger(
-                stans(AKTIVITETSKRAV),
-                opphevStans(),
-                stans(MEDISINSK_VILKAR),
-            )
+                meldinger(
+                    stans(AKTIVITETSKRAV),
+                    opphevStans(),
+                    stans(MEDISINSK_VILKAR),
+                )
 
         mediator.sjekkOmAutomatiseringErStanset(FNR, VEDTAKSPERIODEID, ORGNR)
 
-        val subsumsjonMeldinger =
-            testRapid.inspektør.hendelser("subsumsjon").filter { it.path("subsumsjon")["paragraf"].asText() == "8-4" }
-        val subsumsjon = subsumsjonMeldinger.first().path("subsumsjon")
-
+        val subsumsjonMeldinger = meldingPubliserer.subsumsjonEvents()
         assertEquals(1, subsumsjonMeldinger.size)
-        assertEquals("8-4", subsumsjon["paragraf"].asText())
-        assertEquals("1", subsumsjon["ledd"].asText())
-        assertEquals(VILKAR_UAVKLART.name, subsumsjon["utfall"].asText())
+
+        val subsumsjon = subsumsjonMeldinger.single()
+        assertEquals("8-4", subsumsjon.paragraf)
+        assertEquals("1", subsumsjon.ledd)
+        assertEquals(VILKAR_UAVKLART.name, subsumsjon.utfall)
         assertEquals(
-            mapOf("syfostopp" to true, "årsak" to MEDISINSK_VILKAR.name),
-            objectMapper.convertValue<Map<String, Any>>(subsumsjon["input"]),
+            mapOf("syfostopp" to true, "årsak" to MEDISINSK_VILKAR),
+            subsumsjon.input,
         )
     }
 
@@ -367,35 +371,33 @@ class StansAutomatiskBehandlingMediatorTest {
 
         mediator.sjekkOmAutomatiseringErStanset(FNR, VEDTAKSPERIODEID, ORGNR)
 
-        val subsumsjonMeldinger =
-            testRapid.inspektør.hendelser("subsumsjon")
-        val subsumsjon = subsumsjonMeldinger.first().path("subsumsjon")
-
+        val subsumsjonMeldinger = meldingPubliserer.subsumsjonEvents()
         assertEquals(1, subsumsjonMeldinger.size)
-        assertEquals(FNR, subsumsjon["fodselsnummer"].asText())
-        assertEquals("8-4", subsumsjon["paragraf"].asText())
-        assertEquals("1", subsumsjon["ledd"].asText())
-        assertEquals(VILKAR_OPPFYLT.name, subsumsjon["utfall"].asText())
+
+        val subsumsjon = subsumsjonMeldinger.single()
+        assertEquals(FNR, subsumsjon.fødselsnummer)
+        assertEquals("8-4", subsumsjon.paragraf)
+        assertEquals("1", subsumsjon.ledd)
+        assertEquals(VILKAR_OPPFYLT.name, subsumsjon.utfall)
     }
 
     @Test
     fun `sender 8-4 oppfylt subsumsjon selv om automatisering er stanset på grunn av 8-8`() {
         every { stansAutomatiskBehandlingDao.hentFor(FNR) } returns
-            meldinger(
-                stans(AKTIVITETSKRAV),
-            )
+                meldinger(
+                    stans(AKTIVITETSKRAV),
+                )
 
         mediator.sjekkOmAutomatiseringErStanset(FNR, VEDTAKSPERIODEID, ORGNR)
 
-        val subsumsjonMeldinger =
-            testRapid.inspektør.hendelser("subsumsjon").filter { it.path("subsumsjon")["paragraf"].asText() == "8-4" }
-        val subsumsjon = subsumsjonMeldinger.first().path("subsumsjon")
-
+        val subsumsjonMeldinger = meldingPubliserer.subsumsjonEvents().filter { it.paragraf == "8-4" }
         assertEquals(1, subsumsjonMeldinger.size)
-        assertEquals(FNR, subsumsjon["fodselsnummer"].asText())
-        assertEquals("8-4", subsumsjon["paragraf"].asText())
-        assertEquals("1", subsumsjon["ledd"].asText())
-        assertEquals(VILKAR_OPPFYLT.name, subsumsjon["utfall"].asText())
+
+        val subsumsjon = subsumsjonMeldinger.single()
+        assertEquals(FNR, subsumsjon.fødselsnummer)
+        assertEquals("8-4", subsumsjon.paragraf)
+        assertEquals("1", subsumsjon.ledd)
+        assertEquals(VILKAR_OPPFYLT.name, subsumsjon.utfall)
     }
 
     private fun stans(vararg årsaker: StoppknappÅrsak) = "STOPP_AUTOMATIKK" to årsaker.toSet()

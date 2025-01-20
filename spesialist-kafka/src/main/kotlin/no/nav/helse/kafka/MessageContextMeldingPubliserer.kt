@@ -7,6 +7,7 @@ import no.nav.helse.kafka.message_builders.behovName
 import no.nav.helse.kafka.message_builders.somJsonMessage
 import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.modell.melding.Behov
+import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -20,6 +21,17 @@ class MessageContextMeldingPubliserer(private val context: MessageContext) : Mel
         val packet = hendelse.somJsonMessage(fødselsnummer).toJson()
         logg.info("Publiserer hendelse på grunn av $årsak")
         sikkerlogg.info("Publiserer hendelse på grunn av $årsak\n{}", packet)
+        context.publish(packet)
+    }
+
+    override fun publiser(
+        fødselsnummer: String,
+        subsumsjonEvent: SubsumsjonEvent,
+        versjonAvKode: String,
+    ) {
+        val packet = subsumsjonEvent.somJsonMessage(fødselsnummer, versjonAvKode).toJson()
+        logg.info("Publiserer subsumsjon")
+        sikkerlogg.info("Publiserer subsumsjon\n{}", packet)
         context.publish(packet)
     }
 

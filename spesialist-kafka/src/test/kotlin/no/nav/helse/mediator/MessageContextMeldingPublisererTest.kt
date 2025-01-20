@@ -1,21 +1,28 @@
 package no.nav.helse.mediator
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.convertValue
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
+import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.HentDokument
 import no.nav.helse.modell.melding.OppgaveOppdatert
 import no.nav.helse.modell.melding.OppgaveOpprettet
+import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
+import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagSaksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
@@ -235,6 +242,100 @@ internal class MessageContextMeldingPublisererTest {
                 assertEquals(beslutter.oid, UUID.fromString(beslutterObject["oid"]?.asText()))
             } ?: fail("Mangler beslutter")
         }
+    }
+
+    @Test
+    fun `publiserer SubsumsjonEvent med forventet format`() {
+        val id = UUID.randomUUID()
+        val tidsstempel = LocalDateTime.now()
+
+        val subsumsjonEvent = SubsumsjonEvent(
+            id = id,
+            fødselsnummer = fødselsnummer,
+            paragraf = "EN PARAGRAF",
+            ledd = "ET LEDD",
+            bokstav = "EN BOKSTAV",
+            lovverk = "folketrygdloven",
+            lovverksversjon = "1970-01-01",
+            utfall = "VILKAR_BEREGNET",
+            input = mapOf("foo" to "bar"),
+            output = mapOf("foo" to "bar"),
+            sporing = mapOf("identifikator" to listOf("EN ID")),
+            tidsstempel = tidsstempel,
+            kilde = "KILDE",
+        )
+
+        meldingPubliserer.publiser(fødselsnummer, subsumsjonEvent, "versjonAvKode")
+
+        val meldinger = testRapid.inspektør.meldinger()
+        assertEquals(1, meldinger.size)
+        val melding = meldinger.single()
+        val subsumsjon = melding.path("subsumsjon")
+
+        assertEquals("subsumsjon", melding["@event_name"].asText())
+        assertNotNull(melding["@id"].asUUID())
+        assertNotNull(melding["@opprettet"].asLocalDateTime())
+        assertEquals(id, subsumsjon["id"].asUUID())
+        assertEquals(fødselsnummer, subsumsjon["fodselsnummer"].asText())
+        assertEquals("versjonAvKode", subsumsjon["versjonAvKode"].asText())
+        assertEquals("1.0.0", subsumsjon["versjon"].asText())
+        assertEquals("EN PARAGRAF", subsumsjon["paragraf"].asText())
+        assertEquals("ET LEDD", subsumsjon["ledd"].asText())
+        assertEquals("EN BOKSTAV", subsumsjon["bokstav"].asText())
+        assertEquals("folketrygdloven", subsumsjon["lovverk"].asText())
+        assertEquals("1970-01-01", subsumsjon["lovverksversjon"].asText())
+        assertEquals("VILKAR_BEREGNET", subsumsjon["utfall"].asText())
+        assertEquals(mapOf("foo" to "bar"), objectMapper.convertValue<Map<String, Any>>(subsumsjon["input"]))
+        assertEquals(mapOf("foo" to "bar"), objectMapper.convertValue<Map<String, Any>>(subsumsjon["output"]))
+        assertEquals(tidsstempel, subsumsjon["tidsstempel"].asLocalDateTime())
+        assertEquals("KILDE", subsumsjon["kilde"].asText())
+    }
+
+    @Test
+    fun `publiserer SubsumsjonEvent uten ledd og bokstav med forventet format`() {
+        val id = UUID.randomUUID()
+        val tidsstempel = LocalDateTime.now()
+
+        val subsumsjonEvent = SubsumsjonEvent(
+            id = id,
+            fødselsnummer = fødselsnummer,
+            paragraf = "EN PARAGRAF",
+            ledd = null,
+            bokstav = null,
+            lovverk = "folketrygdloven",
+            lovverksversjon = "1970-01-01",
+            utfall = "VILKAR_BEREGNET",
+            input = mapOf("foo" to "bar"),
+            output = mapOf("foo" to "bar"),
+            sporing = mapOf("identifikator" to listOf("EN ID")),
+            tidsstempel = tidsstempel,
+            kilde = "KILDE",
+        )
+
+        meldingPubliserer.publiser(fødselsnummer, subsumsjonEvent, "versjonAvKode")
+
+        val meldinger = testRapid.inspektør.meldinger()
+        assertEquals(1, meldinger.size)
+        val melding = meldinger.single()
+        val subsumsjon = melding.path("subsumsjon")
+
+        assertEquals("subsumsjon", melding["@event_name"].asText())
+        assertNotNull(melding["@id"].asUUID())
+        assertNotNull(melding["@opprettet"].asLocalDateTime())
+        assertEquals(id, subsumsjon["id"].asUUID())
+        assertEquals(fødselsnummer, subsumsjon["fodselsnummer"].asText())
+        assertEquals("versjonAvKode", subsumsjon["versjonAvKode"].asText())
+        assertEquals("1.0.0", subsumsjon["versjon"].asText())
+        assertEquals("EN PARAGRAF", subsumsjon["paragraf"].asText())
+        assertNull(subsumsjon["ledd"])
+        assertNull(subsumsjon["bokstav"])
+        assertEquals("folketrygdloven", subsumsjon["lovverk"].asText())
+        assertEquals("1970-01-01", subsumsjon["lovverksversjon"].asText())
+        assertEquals("VILKAR_BEREGNET", subsumsjon["utfall"].asText())
+        assertEquals(mapOf("foo" to "bar"), objectMapper.convertValue<Map<String, Any>>(subsumsjon["input"]))
+        assertEquals(mapOf("foo" to "bar"), objectMapper.convertValue<Map<String, Any>>(subsumsjon["output"]))
+        assertEquals(tidsstempel, subsumsjon["tidsstempel"].asLocalDateTime())
+        assertEquals("KILDE", subsumsjon["kilde"].asText())
     }
 
 }

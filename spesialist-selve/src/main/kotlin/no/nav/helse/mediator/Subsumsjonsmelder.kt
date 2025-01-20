@@ -1,58 +1,19 @@
 package no.nav.helse.mediator
 
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.helse.MeldingPubliserer
+import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.saksbehandler.SaksbehandlerObserver
-import no.nav.helse.modell.vilkårsprøving.SubsumsjonEvent
-import org.slf4j.LoggerFactory
 
-class Subsumsjonsmelder(private val versjonAvKode: String, private val rapidsConnection: RapidsConnection) :
+class Subsumsjonsmelder(private val versjonAvKode: String, private val meldingPubliserer: MeldingPubliserer) :
     SaksbehandlerObserver {
-    private val versjon = "1.0.0"
-
-    private companion object {
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-        private val logg = LoggerFactory.getLogger(this::class.java)
-    }
-
     override fun nySubsumsjon(
         fødselsnummer: String,
         subsumsjonEvent: SubsumsjonEvent,
     ) {
-        val json = subsumsjonEvent.somJsonMessage().toJson()
-        logg.info("Publiserer subsumsjon")
-        sikkerlogg.info(
-            "Publiserer subsumsjon for {}:\n{}",
-            kv("fødselsnummer", fødselsnummer),
-            kv("json", json),
+        meldingPubliserer.publiser(
+            fødselsnummer = fødselsnummer,
+            subsumsjonEvent = subsumsjonEvent,
+            versjonAvKode = versjonAvKode,
         )
-        rapidsConnection.publish(fødselsnummer, json)
     }
-
-    private fun SubsumsjonEvent.somJsonMessage(): JsonMessage =
-        JsonMessage.newMessage(
-            "subsumsjon",
-            mapOf(
-                "subsumsjon" to
-                    mutableMapOf(
-                        "id" to id,
-                        "versjon" to versjon,
-                        "kilde" to kilde,
-                        "versjonAvKode" to versjonAvKode,
-                        "fodselsnummer" to fødselsnummer,
-                        "sporing" to sporing,
-                        "tidsstempel" to tidsstempel,
-                        "lovverk" to lovverk,
-                        "lovverksversjon" to lovverksversjon,
-                        "paragraf" to paragraf,
-                        "input" to input,
-                        "output" to output,
-                        "utfall" to utfall,
-                    ).apply {
-                        compute("ledd") { _, _ -> ledd }
-                        compute("bokstav") { _, _ -> bokstav }
-                    }.toMap(),
-            ),
-        )
 }

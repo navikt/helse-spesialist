@@ -3,6 +3,7 @@ package no.nav.helse.mediator
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.AnnulleringDao
 import no.nav.helse.db.OpptegnelseDao
@@ -106,6 +107,7 @@ class SaksbehandlerMediator(
     dataSource: DataSource,
     private val versjonAvKode: String,
     private val rapidsConnection: RapidsConnection,
+    private val meldingPubliserer: MeldingPubliserer,
     private val oppgaveService: OppgaveService,
     private val tilgangsgrupper: Tilgangsgrupper,
     private val stansAutomatiskBehandlingMediator: StansAutomatiskBehandlingMediator,
@@ -135,7 +137,7 @@ class SaksbehandlerMediator(
         SaksbehandlerLagrer(saksbehandlerDao).lagre(saksbehandler)
         tell(modellhandling)
         saksbehandler.register(Saksbehandlingsmelder(rapidsConnection))
-        saksbehandler.register(Subsumsjonsmelder(versjonAvKode, rapidsConnection))
+        saksbehandler.register(Subsumsjonsmelder(versjonAvKode, meldingPubliserer))
         val handlingId = UUID.randomUUID()
 
         withMDC(

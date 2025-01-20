@@ -22,6 +22,7 @@ import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.TestMelding
 import no.nav.helse.modell.melding.Behov
+import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
@@ -95,6 +96,9 @@ internal class OppgaveServiceTest {
         override fun publiser(fødselsnummer: String, hendelse: UtgåendeHendelse, årsak: String) {
             antallMeldinger++
         }
+
+        override fun publiser(fødselsnummer: String, subsumsjonEvent: SubsumsjonEvent, versjonAvKode: String) =
+            error("Not implemented for test")
 
         override fun publiser(
             hendelseId: UUID,

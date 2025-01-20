@@ -54,7 +54,7 @@ internal class TestMediator(
             oppgaveDao,
             notatDao,
             dialogDao,
-        ) { Subsumsjonsmelder("versjonAvKode", testRapid) }
+        ) { Subsumsjonsmelder("versjonAvKode", meldingPubliserer) }
 
     private val godkjenningMediator = GodkjenningMediator(opptegnelseDao)
     private val tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
@@ -75,6 +75,7 @@ internal class TestMediator(
             dataSource,
             "versjonAvKode",
             testRapid,
+            meldingPubliserer,
             oppgaveService,
             tilgangsgrupper,
             stansAutomatiskBehandlingMediator,
@@ -108,7 +109,7 @@ internal class TestMediator(
             dataSource = dataSource,
             oppgaveService = { oppgaveService },
             godkjenningMediator = godkjenningMediator,
-            subsumsjonsmelderProvider = { Subsumsjonsmelder("versjonAvKode", testRapid) },
+            subsumsjonsmelderProvider = { Subsumsjonsmelder("versjonAvKode", meldingPubliserer) },
             stikkprøver = stikkprøver,
         )
 

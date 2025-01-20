@@ -1,6 +1,7 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
 import no.nav.helse.modell.januar
+import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.saksbehandler.LagtPåVentEvent
 import no.nav.helse.modell.saksbehandler.MinimumSykdomsgradVurdertEvent
 import no.nav.helse.modell.saksbehandler.OverstyrtArbeidsforholdEvent
@@ -13,7 +14,6 @@ import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import no.nav.helse.modell.saksbehandler.SaksbehandlerObserver
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon
-import no.nav.helse.modell.vilkårsprøving.SubsumsjonEvent
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
