@@ -1,4 +1,4 @@
-package no.nav.helse.modell.person
+package no.nav.helse.db
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue

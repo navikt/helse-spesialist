@@ -1,6 +1,10 @@
-package no.nav.helse.modell.varsel
+package no.nav.helse.db
 
 import no.nav.helse.AbstractDatabaseTest
+import no.nav.helse.modell.varsel.DefinisjonDao
+import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.varsel.Varseldefinisjon
+import no.nav.helse.modell.varsel.VarseldefinisjonDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime

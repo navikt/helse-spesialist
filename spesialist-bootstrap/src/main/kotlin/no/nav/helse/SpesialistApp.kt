@@ -3,6 +3,7 @@ package no.nav.helse
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.ktor.server.application.Application
 import no.nav.helse.bootstrap.Environment
+import no.nav.helse.db.AnnulleringDao
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgAvviksvurderingDao
@@ -186,6 +187,7 @@ class SpesialistApp(
                 tilgangsgrupper = tilgangsgrupper,
                 stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
                 totrinnsvurderingService = totrinnsvurderingService,
+                annulleringRepository = AnnulleringDao(dataSource),
             )
         dokumentMediator = DokumentMediator(dokumentDao, meldingPubliserer)
         godkjenningService =

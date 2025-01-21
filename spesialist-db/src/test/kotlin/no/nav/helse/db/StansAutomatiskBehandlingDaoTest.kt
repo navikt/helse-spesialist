@@ -1,4 +1,4 @@
-package no.nav.helse.modell.stoppknapp
+package no.nav.helse.db
 
 import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMelding

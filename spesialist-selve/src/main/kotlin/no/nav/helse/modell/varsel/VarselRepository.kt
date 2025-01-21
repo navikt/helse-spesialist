@@ -6,7 +6,7 @@ class VarselRepository(dataSource: DataSource) {
     private val varselDao = PgVarselDao(dataSource)
     private val definisjonDao = DefinisjonDao(dataSource)
 
-    internal fun lagreDefinisjon(definisjonDto: VarseldefinisjonDto) {
+    fun lagreDefinisjon(definisjonDto: VarseldefinisjonDto) {
         definisjonDao.lagreDefinisjon(
             unikId = definisjonDto.id,
             kode = definisjonDto.varselkode,

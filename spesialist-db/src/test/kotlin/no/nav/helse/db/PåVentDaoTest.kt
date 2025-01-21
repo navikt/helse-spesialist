@@ -1,8 +1,8 @@
-package no.nav.helse.modell.påvent
+package no.nav.helse.db
 
-import no.nav.helse.DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals

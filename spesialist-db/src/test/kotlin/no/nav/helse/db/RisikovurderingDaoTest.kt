@@ -1,9 +1,9 @@
-package no.nav.helse.modell.risiko
+package no.nav.helse.db
 
-import no.nav.helse.DatabaseIntegrationTest
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.DatabaseIntegrationTest
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

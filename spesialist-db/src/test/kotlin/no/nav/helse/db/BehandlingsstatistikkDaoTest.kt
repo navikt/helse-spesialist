@@ -1,7 +1,6 @@
-package no.nav.helse.modell.oppgave.behandlingsstatistikk
+package no.nav.helse.db
 
 import no.nav.helse.DatabaseIntegrationTest
-import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype

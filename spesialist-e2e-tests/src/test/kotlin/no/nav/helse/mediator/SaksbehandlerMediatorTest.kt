@@ -91,13 +91,13 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             meldingPubliserer,
             oppgaveService,
             tilgangsgrupper,
-            stansAutomatiskBehandlingMediator,
-            TotrinnsvurderingService(
+            stansAutomatiskBehandlingMediator,TotrinnsvurderingService(
                 totrinnsvurderingDao = totrinnsvurderingDao,
                 oppgaveDao = oppgaveDao,
                 periodehistorikkDao = historikkinnslagRepository,
                 dialogDao = dialogDao,
             ),
+            annulleringRepository = annulleringDao,
         )
 
     private val AKTØR_ID = lagAktørId()

@@ -1,6 +1,7 @@
-package no.nav.helse.modell.gosysoppgaver
+package no.nav.helse.db
 
 import no.nav.helse.DatabaseIntegrationTest
+import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
