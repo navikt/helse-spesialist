@@ -1,7 +1,6 @@
 package no.nav.helse.modell.utbetaling
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import kotliquery.TransactionalSession
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OpptegnelseRepository
@@ -41,7 +40,7 @@ class UtbetalingEndret(
         utbetalingId = UUID.fromString(jsonNode["utbetalingId"].asText()),
         type = jsonNode["type"].asText(),
         gjeldendeStatus = Utbetalingsstatus.valueOf(jsonNode["gjeldendeStatus"].asText()),
-        opprettet = jsonNode["@opprettet"].asLocalDateTime(),
+        opprettet = jsonNode["@opprettet"].asText().let(LocalDateTime::parse),
         arbeidsgiverbeløp = jsonNode["arbeidsgiverOppdrag"]["nettoBeløp"].asInt(),
         personbeløp = jsonNode["personOppdrag"]["nettoBeløp"].asInt(),
         arbeidsgiverOppdrag = tilOppdrag(jsonNode["arbeidsgiverOppdrag"], jsonNode["organisasjonsnummer"].asText()),

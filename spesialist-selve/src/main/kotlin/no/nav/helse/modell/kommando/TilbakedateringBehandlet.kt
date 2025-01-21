@@ -1,7 +1,6 @@
 package no.nav.helse.modell.kommando
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import kotliquery.TransactionalSession
 import no.nav.helse.db.AutomatiseringRepository
 import no.nav.helse.mediator.GodkjenningMediator
@@ -17,6 +16,7 @@ import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
+import java.time.LocalDate
 import java.util.UUID
 
 class TilbakedateringBehandlet(
@@ -30,7 +30,10 @@ class TilbakedateringBehandlet(
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
         perioder =
             jsonNode["perioder"].map {
-                Periode(it["fom"].asLocalDate(), it["tom"].asLocalDate())
+                Periode(
+                    fom = it["fom"].asText().let(LocalDate::parse),
+                    tom = it["tom"].asText().let(LocalDate::parse),
+                )
             },
         json = jsonNode.toString(),
     )

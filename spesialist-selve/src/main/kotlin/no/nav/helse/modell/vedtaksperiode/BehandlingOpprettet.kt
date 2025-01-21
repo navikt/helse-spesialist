@@ -1,7 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import kotliquery.TransactionalSession
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
@@ -27,8 +26,8 @@ class BehandlingOpprettet(
         organisasjonsnummer = jsonNode["organisasjonsnummer"].asText(),
         vedtaksperiodeId = jsonNode["vedtaksperiodeId"].asUUID(),
         spleisBehandlingId = jsonNode["behandlingId"].asUUID(),
-        fom = jsonNode["fom"].asLocalDate(),
-        tom = jsonNode["tom"].asLocalDate(),
+        fom = jsonNode["fom"].asText().let(LocalDate::parse),
+        tom = jsonNode["tom"].asText().let(LocalDate::parse),
         json = jsonNode.toString(),
     )
 

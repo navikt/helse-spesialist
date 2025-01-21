@@ -1,6 +1,5 @@
 package no.nav.helse.modell
 
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.db.MedDataSource
@@ -131,13 +130,13 @@ class MeldingDao(queryRunner: QueryRunner) : MeldingRepository, QueryRunner by q
                 if (data["årsak"].asText() != "KORRIGERT_SØKNAD") return@let null
 
                 OverstyringIgangsattKorrigertSøknad(
-                    periodeForEndringFom = data["periodeForEndringFom"].asLocalDate(),
+                    periodeForEndringFom = data["periodeForEndringFom"].asText().let(LocalDate::parse),
                     meldingId = data["@id"].asText(),
                     berørtePerioder =
                         data["berørtePerioder"].map { berørtPeriode ->
                             BerørtPeriode(
                                 vedtaksperiodeId = UUID.fromString(berørtPeriode["vedtaksperiodeId"].asText()),
-                                periodeFom = berørtPeriode["periodeFom"].asLocalDate(),
+                                periodeFom = berørtPeriode["periodeFom"].asText().let(LocalDate::parse),
                                 orgnummer = berørtPeriode["orgnummer"].asText(),
                             )
                         },

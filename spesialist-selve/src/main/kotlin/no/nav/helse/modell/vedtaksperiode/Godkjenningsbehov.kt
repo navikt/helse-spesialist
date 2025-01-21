@@ -1,8 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
-import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import kotliquery.TransactionalSession
 import no.nav.helse.db.ArbeidsforholdRepository
 import no.nav.helse.db.AutomatiseringRepository
@@ -143,7 +141,7 @@ class Godkjenningsbehov(
         periodeTom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeTom").asText()),
         vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
         avviksvurderingId =
-            jsonNode.path("avviksvurderingId").takeUnless { it.isMissingOrNull() }
+            jsonNode.path("avviksvurderingId").takeUnless { it.isMissingNode || it.isNull }
                 ?.let { UUID.fromString(it.asText()) },
         vilkårsgrunnlagId = UUID.fromString(jsonNode.path("Godkjenning").path("vilkårsgrunnlagId").asText()),
         spleisVedtaksperioder =
@@ -151,9 +149,9 @@ class Godkjenningsbehov(
                 SpleisVedtaksperiode(
                     vedtaksperiodeId = periodeNode["vedtaksperiodeId"].asUUID(),
                     spleisBehandlingId = periodeNode["behandlingId"].asUUID(),
-                    fom = periodeNode["fom"].asLocalDate(),
-                    tom = periodeNode["tom"].asLocalDate(),
-                    skjæringstidspunkt = jsonNode.path("Godkjenning").path("skjæringstidspunkt").asLocalDate(),
+                    fom = periodeNode["fom"].asText().let(LocalDate::parse),
+                    tom = periodeNode["tom"].asText().let(LocalDate::parse),
+                    skjæringstidspunkt = jsonNode.path("Godkjenning").path("skjæringstidspunkt").asText().let(LocalDate::parse),
                 )
             },
         spleisBehandlingId = UUID.fromString(jsonNode.path("Godkjenning").path("behandlingId").asText()),
@@ -181,7 +179,7 @@ class Godkjenningsbehov(
             jsonNode
                 .path("Godkjenning")
                 .path("orgnummereMedRelevanteArbeidsforhold")
-                .takeUnless(JsonNode::isMissingOrNull)
+                .takeUnless { it.isMissingNode || it.isNull }
                 ?.map { it.asText() } ?: emptyList(),
         kanAvvises = jsonNode.path("Godkjenning").path("kanAvvises").asBoolean(),
         json = jsonNode.toString(),

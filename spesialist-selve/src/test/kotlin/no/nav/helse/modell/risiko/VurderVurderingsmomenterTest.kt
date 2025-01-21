@@ -6,22 +6,20 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.RisikovurderingRepository
-import no.nav.helse.util.januar
 import no.nav.helse.mediator.CommandContextObserver
-import no.nav.helse.mediator.meldinger.Risikofunn
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
+import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.InntektTilRisk
-import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.person.vedtaksperiode.Behandling
+import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.test.TestPerson
+import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -39,25 +37,14 @@ internal class VurderVurderingsmomenterTest {
 
         private fun behovløsning(
             vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
-            kanGodkjennesAutomatisk: Boolean = true,
-            funn: List<Risikofunn>
+            kanGodkjennesAutomatisk: Boolean = true
         ) = Risikovurderingløsning(
             vedtaksperiodeId = vedtaksperiodeId,
             opprettet = LocalDateTime.now(),
             kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
-            løsning = risikovurderingLøsning(funn = funn),
+            løsning = objectMapper.readTree("""{}"""),
         )
 
-        private fun risikovurderingLøsning(funn: List<Risikofunn>) =
-            objectMapper.readTree(
-                Testmeldingfabrikk.lagRisikovurderingløsning(
-                    aktørId = testperson.aktørId,
-                    fødselsnummer = testperson.fødselsnummer,
-                    organisasjonsnummer = testperson.orgnummer,
-                    vedtaksperiodeId = testperson.vedtaksperiodeId1,
-                    funn = funn,
-                ),
-            ).path("@løsning").path("Risikovurdering")
     }
 
     private val behandling = Behandling(UUID.randomUUID(), testperson.vedtaksperiodeId1, 1.januar, 31.januar, 1.januar)
@@ -164,13 +151,7 @@ internal class VurderVurderingsmomenterTest {
     fun `Om vi har fått løsning på rett vedtaksperiode lagres den`() {
         every { risikovurderingRepository.lagre(testperson.vedtaksperiodeId1, any(), any(), any()) } just Runs
         context.add(
-            behovløsning(
-                funn = listOf(
-                    Risikofunn(
-                        kategori = listOf("test"), beskrivelse = "test"
-                    )
-                )
-            )
+            behovløsning()
         )
         val risikoCommand = risikoCommand()
         assertTrue(risikoCommand.execute(context))
@@ -183,13 +164,7 @@ internal class VurderVurderingsmomenterTest {
         val enAnnenVedtaksperiodeId = UUID.randomUUID()
         context.add(
             behovløsning(
-                vedtaksperiodeId = enAnnenVedtaksperiodeId,
-                funn = listOf(
-                    Risikofunn(
-                        kategori = listOf("test"),
-                        beskrivelse = "test",
-                    ),
-                )
+                vedtaksperiodeId = enAnnenVedtaksperiodeId
             )
         )
 
@@ -223,12 +198,7 @@ internal class VurderVurderingsmomenterTest {
         every { risikovurderingRepository.lagre(testperson.vedtaksperiodeId1, any(), any(), any()) } just Runs
         context.add(
             behovløsning(
-                kanGodkjennesAutomatisk = false, funn = listOf(
-                    Risikofunn(
-                        kategori = listOf("test"),
-                        beskrivelse = "test",
-                    ),
-                )
+                kanGodkjennesAutomatisk = false
             )
         )
 
@@ -249,12 +219,16 @@ internal class VurderVurderingsmomenterTest {
         førstegangsbehandling = førstegangsbehandling,
         sykefraværstilfelle = sykefraværstilfelle,
         utbetaling = utbetalingMock,
-        spleisSykepengegrunnlangsfakta = SpleisSykepengegrunnlagsfakta(listOf( SykepengegrunnlagsArbeidsgiver(
-            omregnetÅrsinntekt = 123456.7,
-            arbeidsgiver = testperson.orgnummer,
-            inntektskilde = Inntektsopplysningkilde.Arbeidsgiver,
-            skjønnsfastsatt = null
-        )),)
+        spleisSykepengegrunnlangsfakta = SpleisSykepengegrunnlagsfakta(
+            listOf(
+                SykepengegrunnlagsArbeidsgiver(
+                    omregnetÅrsinntekt = 123456.7,
+                    arbeidsgiver = testperson.orgnummer,
+                    inntektskilde = Inntektsopplysningkilde.Arbeidsgiver,
+                    skjønnsfastsatt = null
+                )
+            ),
+        )
     )
 
     private fun inntekt() = InntektTilRisk(

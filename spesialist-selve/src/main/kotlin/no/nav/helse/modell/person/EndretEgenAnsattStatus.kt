@@ -1,7 +1,6 @@
 package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import kotliquery.TransactionalSession
 import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.mediator.Kommandostarter
@@ -24,7 +23,7 @@ class EndretEgenAnsattStatus(
         id = UUID.fromString(jsonNode["@id"].asText()),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
         erEgenAnsatt = jsonNode["skjermet"].asBoolean(),
-        opprettet = jsonNode["@opprettet"].asLocalDateTime(),
+        opprettet = jsonNode["@opprettet"].asText().let(LocalDateTime::parse),
         json = jsonNode.toString(),
     )
 

@@ -1,6 +1,5 @@
 package no.nav.helse.db
 
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import kotliquery.Row
 import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
@@ -212,7 +211,8 @@ class PgOppgaveDao(
             "oppgaveId" to oppgaveId,
         ).singleOrNull { row ->
             val json = objectMapper.readTree(row.string("godkjenningbehovJson"))
-            val skjæringstidspunkt = json.path("Godkjenning").path("skjæringstidspunkt").asLocalDate()
+            val skjæringstidspunkt =
+                json.path("Godkjenning").path("skjæringstidspunkt").asText().let(LocalDate::parse)
             OppgaveDataForAutomatisering(
                 oppgaveId = oppgaveId,
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),

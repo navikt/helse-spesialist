@@ -1,8 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode.vedtak
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
-import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import kotliquery.TransactionalSession
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
@@ -39,7 +37,7 @@ class Saksbehandlerløsning(
         godkjent = jsonNode["godkjent"].asBoolean(),
         ident = jsonNode["saksbehandlerident"].asText(),
         epostadresse = jsonNode["saksbehandlerepost"].asText(),
-        godkjenttidspunkt = jsonNode["godkjenttidspunkt"].asLocalDateTime(),
+        godkjenttidspunkt = jsonNode["godkjenttidspunkt"].asText().let(LocalDateTime::parse),
         årsak = jsonNode.path("årsak").takeUnless(JsonNode::isMissingOrNull)?.asText(),
         begrunnelser = jsonNode.path("begrunnelser").takeUnless(JsonNode::isMissingOrNull)?.map(JsonNode::asText),
         kommentar = jsonNode.path("kommentar").takeUnless(JsonNode::isMissingOrNull)?.asText(),
@@ -77,3 +75,5 @@ class Saksbehandlerløsning(
 
     override fun toJson() = json
 }
+
+private fun JsonNode.isMissingOrNull() = isMissingNode || isNull
