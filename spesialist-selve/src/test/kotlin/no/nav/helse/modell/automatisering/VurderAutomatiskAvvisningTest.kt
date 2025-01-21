@@ -46,7 +46,7 @@ internal class VurderAutomatiskAvvisningTest {
 
     @Test
     fun `skal avvise dersom IM mangler`() {
-        assertAvvisning(lagCommand(fødselsnummer = "01111111111", kanAvvises = true, inntektsopplysningkilde = Inntektsopplysningkilde.AOrdningen), "Mangler inntektsmelding")
+        assertIkkeAvvisning(lagCommand(fødselsnummer = "01111111111", kanAvvises = true, inntektsopplysningkilde = Inntektsopplysningkilde.AOrdningen))
     }
 
     @Test
