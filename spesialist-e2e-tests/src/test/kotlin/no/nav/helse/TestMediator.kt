@@ -74,7 +74,6 @@ internal class TestMediator(
         SaksbehandlerMediator(
             dataSource,
             "versjonAvKode",
-            testRapid,
             meldingPubliserer,
             oppgaveService,
             tilgangsgrupper,

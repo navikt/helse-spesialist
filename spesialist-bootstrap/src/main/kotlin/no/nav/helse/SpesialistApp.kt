@@ -181,7 +181,6 @@ class SpesialistApp(
             SaksbehandlerMediator(
                 dataSource = dataSource,
                 versjonAvKode = versjonAvKode,
-                rapidsConnection = rapidsConnection,
                 meldingPubliserer = meldingPubliserer,
                 oppgaveService = oppgaveService,
                 tilgangsgrupper = tilgangsgrupper,

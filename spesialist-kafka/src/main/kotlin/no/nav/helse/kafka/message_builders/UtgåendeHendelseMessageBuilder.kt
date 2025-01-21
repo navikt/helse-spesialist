@@ -18,6 +18,7 @@ import no.nav.helse.modell.melding.Saksbehandlerløsning
 import no.nav.helse.modell.melding.SkjønnsfastsattSykepengegrunnlagEvent
 import no.nav.helse.modell.melding.Sykepengevedtak
 import no.nav.helse.modell.melding.UtgåendeHendelse
+import no.nav.helse.modell.melding.VarselEndret
 import no.nav.helse.modell.melding.VedtaksperiodeAvvistAutomatisk
 import no.nav.helse.modell.melding.VedtaksperiodeAvvistManuelt
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
@@ -64,6 +65,7 @@ internal fun UtgåendeHendelse.eventName() =
         is OverstyrtInntektOgRefusjonEvent -> "overstyr_inntekt_og_refusjon"
         is OverstyrtTidslinjeEvent -> "overstyr_tidslinje"
         is SkjønnsfastsattSykepengegrunnlagEvent -> "skjønnsmessig_fastsettelse"
+        is VarselEndret -> "varsel_endret"
     }
 
 private fun UtgåendeHendelse.detaljer(): Map<String, Any> {
@@ -87,6 +89,7 @@ private fun UtgåendeHendelse.detaljer(): Map<String, Any> {
         is OverstyrtInntektOgRefusjonEvent -> this.detaljer()
         is OverstyrtTidslinjeEvent -> this.detaljer()
         is SkjønnsfastsattSykepengegrunnlagEvent -> this.detaljer()
+        is VarselEndret -> this.detaljer()
     }
 }
 
@@ -398,4 +401,15 @@ private fun SkjønnsfastsattSykepengegrunnlagEvent.detaljer(): Map<String, Any> 
         "saksbehandlerNavn" to saksbehandlerNavn,
         "saksbehandlerIdent" to saksbehandlerIdent,
         "saksbehandlerEpost" to saksbehandlerEpost,
+    )
+
+private fun VarselEndret.detaljer(): Map<String, Any> =
+    mapOf(
+        "vedtaksperiode_id" to vedtaksperiodeId,
+        "behandling_id" to behandlingId,
+        "varsel_id" to varselId,
+        "varseltittel" to varseltittel,
+        "varselkode" to varselkode,
+        "forrige_status" to forrigeStatus,
+        "gjeldende_status" to gjeldendeStatus,
     )

@@ -88,7 +88,6 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         SaksbehandlerMediator(
             dataSource,
             "versjonAvKode",
-            testRapid,
             meldingPubliserer,
             oppgaveService,
             tilgangsgrupper,

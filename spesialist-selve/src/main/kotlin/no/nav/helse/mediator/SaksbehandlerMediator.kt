@@ -1,8 +1,5 @@
 package no.nav.helse.mediator
 
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.AnnulleringDao
@@ -28,6 +25,7 @@ import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
 import no.nav.helse.modell.OppgaveTildeltNoenAndre
+import no.nav.helse.modell.melding.VarselEndret
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
@@ -106,7 +104,6 @@ import javax.sql.DataSource
 class SaksbehandlerMediator(
     dataSource: DataSource,
     private val versjonAvKode: String,
-    private val rapidsConnection: RapidsConnection,
     private val meldingPubliserer: MeldingPubliserer,
     private val oppgaveService: OppgaveService,
     private val tilgangsgrupper: Tilgangsgrupper,
@@ -603,27 +600,17 @@ class SaksbehandlerMediator(
         saksbehandlerIdent: String,
     ) {
         varselRepository.vurderVarselFor(varselId, gjeldendeStatus, saksbehandlerIdent)
-        val message =
-            JsonMessage.newMessage(
-                "varsel_endret",
-                mapOf(
-                    "fødselsnummer" to fødselsnummer,
-                    "vedtaksperiode_id" to vedtaksperiodeId,
-                    "behandling_id" to behandlingId,
-                    "varsel_id" to varselId,
-                    "varseltittel" to varseltittel,
-                    "varselkode" to varselkode,
-                    "forrige_status" to forrigeStatus.name,
-                    "gjeldende_status" to gjeldendeStatus.name,
-                ),
+        val varselEndret =
+            VarselEndret(
+                vedtaksperiodeId = vedtaksperiodeId,
+                behandlingId = behandlingId,
+                varselId = varselId,
+                varseltittel = varseltittel,
+                varselkode = varselkode,
+                forrigeStatus = forrigeStatus.name,
+                gjeldendeStatus = gjeldendeStatus.name,
             )
-        sikkerlogg.info(
-            "Publiserer varsel_endret for varsel med {}, {}, {}",
-            kv("varselId", varselId),
-            kv("varselkode", varselkode),
-            kv("status", gjeldendeStatus),
-        )
-        rapidsConnection.publish(fødselsnummer, message.toJson())
+        meldingPubliserer.publiser(fødselsnummer, varselEndret, "varsel vurdert")
     }
 
     internal companion object {
