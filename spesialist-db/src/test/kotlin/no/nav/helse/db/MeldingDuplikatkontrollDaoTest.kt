@@ -1,4 +1,4 @@
-package no.nav.helse.modell
+package no.nav.helse.db
 
 import no.nav.helse.DatabaseIntegrationTest
 import org.junit.jupiter.api.Assertions.assertFalse

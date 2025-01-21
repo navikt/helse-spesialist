@@ -1,8 +1,7 @@
-package no.nav.helse.modell
+package no.nav.helse.db
 
 import no.nav.helse.DatabaseIntegrationTest
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType.UTBETALING_ANNULLERING_OK

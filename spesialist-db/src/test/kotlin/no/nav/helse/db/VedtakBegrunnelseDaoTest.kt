@@ -1,10 +1,8 @@
-package no.nav.helse.modell
+package no.nav.helse.db
 
 import no.nav.helse.DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.db.VedtakBegrunnelseDao
-import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.modell.vedtak.Utfall
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse

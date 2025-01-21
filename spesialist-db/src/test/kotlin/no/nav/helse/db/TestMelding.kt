@@ -1,4 +1,4 @@
-package no.nav.helse.modell.kommando
+package no.nav.helse.db
 
 import kotliquery.TransactionalSession
 import no.nav.helse.mediator.Kommandostarter

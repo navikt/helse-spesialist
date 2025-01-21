@@ -1,4 +1,4 @@
-package no.nav.helse.modell.automatisering
+package no.nav.helse.db
 
 import no.nav.helse.DatabaseIntegrationTest
 import java.util.UUID

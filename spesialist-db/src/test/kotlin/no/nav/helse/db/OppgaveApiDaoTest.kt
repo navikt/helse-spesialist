@@ -1,9 +1,8 @@
-package no.nav.helse.modell
+package no.nav.helse.db
 
 import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.CommandContextDao
-import no.nav.helse.modell.kommando.TestMelding
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach

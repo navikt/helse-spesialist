@@ -1,4 +1,4 @@
-package no.nav.helse.modell.dokument
+package no.nav.helse.db
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.DatabaseIntegrationTest

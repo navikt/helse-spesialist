@@ -28,7 +28,7 @@ import no.nav.helse.modell.dokument.PgDokumentDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.CommandContextDao
-import no.nav.helse.modell.kommando.TestMelding
+import no.nav.helse.db.TestMelding
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.PersonService

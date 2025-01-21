@@ -1,7 +1,8 @@
-package no.nav.helse.modell.arbeidsforhold
+package no.nav.helse.db
 
 import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.modell.KomplettArbeidsforholdDto
+import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.util.april
 import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals

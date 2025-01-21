@@ -5,7 +5,6 @@ import kotliquery.sessionOf
 import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.mediator.meldinger.Melding
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.kommando.TestMelding
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach

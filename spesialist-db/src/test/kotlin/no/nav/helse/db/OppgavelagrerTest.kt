@@ -1,11 +1,11 @@
-package no.nav.helse.mediator.oppgave
+package no.nav.helse.db
 
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.DatabaseIntegrationTest
-import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.db.TildelingRepository
+import no.nav.helse.mediator.oppgave.OppgaveService
+import no.nav.helse.mediator.oppgave.Oppgavelagrer
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
