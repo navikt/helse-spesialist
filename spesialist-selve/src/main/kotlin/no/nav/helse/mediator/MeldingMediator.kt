@@ -2,7 +2,6 @@ package no.nav.helse.mediator
 
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.sessionOf
-import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.CommandContextRepository
@@ -205,7 +204,7 @@ class MeldingMediator(
     ) {
         val messageJson = objectMapper.writeValueAsString(message)
         logg.error("alvorlig feil: ${err.message} (se sikkerlogg for melding)", err)
-        sikkerlogg.error("alvorlig feil: ${err.message}", kv("stack_trace", err), kv("json", messageJson))
+        sikkerlogg.error("alvorlig feil: ${err.message}\n\t$messageJson", err)
     }
 
     fun mottaSøknadSendt(
