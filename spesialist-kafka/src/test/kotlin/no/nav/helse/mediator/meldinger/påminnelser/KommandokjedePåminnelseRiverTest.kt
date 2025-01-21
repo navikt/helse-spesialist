@@ -24,7 +24,7 @@ class KommandokjedePåminnelseRiverTest {
     @Test
     fun `leser kommandokjede_påminnelse fra kafka`() {
         testRapid.sendTestMessage(event())
-        verify(exactly = 1) { mediator.påminnelse(any(), any(), any(), any(), any()) }
+        verify(exactly = 1) { mediator.påminnelse(any(), any(), any(), any()) }
     }
 
     @Language("JSON")

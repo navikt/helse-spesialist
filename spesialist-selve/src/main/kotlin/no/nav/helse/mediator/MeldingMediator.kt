@@ -107,7 +107,6 @@ class MeldingMediator(
         meldingId: UUID,
         contextId: UUID,
         hendelseId: UUID,
-        påminnelse: Any,
         kontekstbasertPubliserer: MeldingPubliserer,
     ) {
         withMDC(
@@ -117,13 +116,8 @@ class MeldingMediator(
                 "meldingId" to "$meldingId",
             ),
         ) {
-            påminnelse(kontekstbasertPubliserer, hendelseId, contextId)?.also {
-                it.add(hendelseId, contextId, påminnelse)
-                it.fortsett(this)
-            }
-                ?: logg.info(
-                    "mottok påminnelse som ikke kunne brukes fordi kommandoen ikke lengre er suspendert, eller fordi hendelsen er ukjent",
-                )
+            påminnelse(kontekstbasertPubliserer, hendelseId, contextId)?.fortsett(this)
+                ?: logg.info("mottok påminnelse som ikke kunne brukes fordi kommandoen ikke lengre er suspendert, eller fordi hendelsen er ukjent")
         }
     }
 
@@ -178,7 +172,7 @@ class MeldingMediator(
             }
         val melding = finnMelding(meldingId) ?: return null
 
-        return Påminnelse(kontekstbasertPubliserer, melding, contextId, commandContext)
+        return Påminnelse(kontekstbasertPubliserer, melding, commandContext)
     }
 
     private fun finnMelding(meldingId: UUID): Personmelding? =
@@ -349,19 +343,8 @@ class MeldingMediator(
     private class Påminnelse(
         private val kontekstbasertPubliserer: MeldingPubliserer,
         private val melding: Personmelding,
-        private val contextId: UUID,
         private val commandContext: CommandContext,
     ) {
-        fun add(
-            hendelseId: UUID,
-            contextId: UUID,
-            påminnelse: Any,
-        ) {
-            check(hendelseId == melding.id)
-            check(contextId == this.contextId)
-            commandContext.add(påminnelse)
-        }
-
         fun fortsett(mediator: MeldingMediator) {
             logg.info("fortsetter utførelse av kommandokontekst som følge av påminnelse")
             mediator.gjenopptaMelding(melding, commandContext, kontekstbasertPubliserer)

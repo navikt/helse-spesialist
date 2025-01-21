@@ -7,7 +7,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.mediator.meldinger.påminnelser.KommandokjedePåminnelse
 
 class KommandokjedePåminnelseRiver(
     private val mediator: MeldingMediator,
@@ -29,18 +28,10 @@ class KommandokjedePåminnelseRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        val meldingId = packet["meldingId"].asUUID()
-        val kommandokjede =
-            KommandokjedePåminnelse(
-                commandContextId = packet["commandContextId"].asUUID(),
-                meldingId = packet["meldingId"].asUUID(),
-            )
-
         mediator.påminnelse(
-            meldingId = meldingId,
-            contextId = kommandokjede.commandContextId,
-            hendelseId = kommandokjede.meldingId,
-            påminnelse = kommandokjede,
+            meldingId = packet["meldingId"].asUUID(),
+            contextId = packet["commandContextId"].asUUID(),
+            hendelseId = packet["meldingId"].asUUID(),
             kontekstbasertPubliserer = MessageContextMeldingPubliserer(context),
         )
     }
