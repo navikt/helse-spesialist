@@ -6,10 +6,10 @@ import no.nav.helse.spesialist.api.graphql.schema.Annullering
 import java.util.UUID
 import javax.sql.DataSource
 
-class AnnulleringDao(dataSource: DataSource) {
+class AnnulleringDao(dataSource: DataSource) : AnnulleringRepository {
     private val dbQuery = DbQuery(dataSource)
 
-    internal fun lagreAnnullering(
+    override fun lagreAnnullering(
         annulleringDto: AnnulleringDto,
         saksbehandler: Saksbehandler,
     ) {
@@ -42,7 +42,7 @@ class AnnulleringDao(dataSource: DataSource) {
         "saksbehandler_ref" to saksbehandlerOid,
     )
 
-    fun finnAnnullering(
+    override fun finnAnnullering(
         arbeidsgiverFagsystemId: String,
         personFagsystemId: String,
     ): Annullering? =
@@ -66,9 +66,9 @@ class AnnulleringDao(dataSource: DataSource) {
             )
         }
 
-    fun finnAnnullering(annulleringDto: AnnulleringDto): Annullering? {
+    override fun finnAnnullering(annulleringDto: AnnulleringDto): Annullering? {
         return finnAnnullering(annulleringDto.arbeidsgiverFagsystemId, annulleringDto.personFagsystemId)
     }
 }
 
-fun <T> Iterable<T>.somDbArray(transform: (T) -> String) = joinToString(prefix = "{", postfix = "}", transform = transform)
+private fun <T> Iterable<T>.somDbArray(transform: (T) -> String) = joinToString(prefix = "{", postfix = "}", transform = transform)

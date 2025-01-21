@@ -139,7 +139,7 @@ class UtbetalingDao(session: Session) : UtbetalingRepository, QueryRunner by Med
             )
         }
 
-    internal fun utbetalingFor(oppgaveId: Long): Utbetaling? =
+    fun utbetalingFor(oppgaveId: Long): Utbetaling? =
         asSQL(
             """SELECT utbetaling_id, arbeidsgiverbeløp, personbeløp, type FROM utbetaling_id u WHERE u.utbetaling_id = (SELECT utbetaling_id FROM oppgave o WHERE o.id = :oppgave_id)"""
                 .trimIndent(),

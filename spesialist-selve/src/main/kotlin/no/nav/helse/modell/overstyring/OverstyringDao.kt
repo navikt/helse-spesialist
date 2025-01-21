@@ -216,7 +216,7 @@ class OverstyringDao(queryRunner: QueryRunner) : OverstyringRepository, QueryRun
         }
     }
 
-    internal fun persisterSkjønnsfastsettingSykepengegrunnlag(
+    fun persisterSkjønnsfastsettingSykepengegrunnlag(
         skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlagForDatabase,
         saksbehandlerOid: UUID,
     ) {

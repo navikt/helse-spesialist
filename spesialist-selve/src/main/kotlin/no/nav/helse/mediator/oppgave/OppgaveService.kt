@@ -145,7 +145,7 @@ class OppgaveService(
         }
     }
 
-    internal fun lagreTotrinnsvurdering(totrinnsvurderingDto: TotrinnsvurderingDto) {
+    fun lagreTotrinnsvurdering(totrinnsvurderingDto: TotrinnsvurderingDto) {
         val totrinnsvurderingFraDatabase =
             TotrinnsvurderingFraDatabase(
                 vedtaksperiodeId = totrinnsvurderingDto.vedtaksperiodeId,
@@ -381,7 +381,7 @@ class OppgaveService(
         }
     }
 
-    internal fun opprett(
+    fun opprett(
         id: Long,
         vedtaksperiodeId: UUID,
         behandlingId: UUID,

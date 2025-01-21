@@ -6,7 +6,6 @@ import no.nav.helse.db.MedDataSource
 import no.nav.helse.db.MedSession
 import no.nav.helse.db.PåVentRepository
 import no.nav.helse.db.QueryRunner
-import no.nav.helse.db.somDbArray
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import java.time.LocalDate
 import java.util.UUID
@@ -114,4 +113,6 @@ class PåVentDao(
             "arsaker" to årsaker.somDbArray { it.årsak },
         ).update()
     }
+
+    private fun <T> Iterable<T>.somDbArray(transform: (T) -> String) = joinToString(prefix = "{", postfix = "}", transform = transform)
 }

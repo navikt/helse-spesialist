@@ -19,7 +19,7 @@ class PgAvviksvurderingDao(private val queryRunner: QueryRunner) : Avviksvurderi
     constructor(session: Session) : this(MedSession(session))
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
-    internal fun lagre(avviksvurdering: AvviksvurderingDto) {
+    fun lagre(avviksvurdering: AvviksvurderingDto) {
         val sammenligningsgrunnlagRef =
             asSQL(
                 """
