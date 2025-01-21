@@ -28,7 +28,7 @@ internal class VurderAutomatiskAvvisning(
             godkjenningsbehov.spleisSykepengegrunnlagsfakta.arbeidsgivere.find { it.arbeidsgiver == godkjenningsbehov.organisasjonsnummer }
                 ?.let {
                     it.inntektskilde == Inntektsopplysningkilde.AOrdningen &&
-                        !(fødselsnummer.length == 11 && (29..31).contains(fødselsnummer.take(2).toInt()))
+                        !(fødselsnummer.length == 11 && (1..31).contains(fødselsnummer.take(2).toInt()))
                 } ?: false
 
         val tilhørerEnhetUtland = HentEnhetløsning.erEnhetUtland(personRepository.finnEnhetId(fødselsnummer))
