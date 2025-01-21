@@ -2,7 +2,7 @@ package no.nav.helse.mediator
 
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.Environment
-import no.nav.helse.db.AnnulleringDao
+import no.nav.helse.db.AnnulleringRepository
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PgDialogDao
@@ -109,6 +109,7 @@ class SaksbehandlerMediator(
     private val tilgangsgrupper: Tilgangsgrupper,
     private val stansAutomatiskBehandlingMediator: StansAutomatiskBehandlingMediator,
     private val totrinnsvurderingService: TotrinnsvurderingService,
+    private val annulleringRepository: AnnulleringRepository,
 ) : Saksbehandlerhåndterer {
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val generasjonRepository = ApiGenerasjonRepository(dataSource)
@@ -121,7 +122,6 @@ class SaksbehandlerMediator(
     private val påVentDao = PåVentDao(dataSource)
     private val periodehistorikkDao: PeriodehistorikkDao = PgPeriodehistorikkDao(dataSource)
     private val vedtakBegrunnelseDao = VedtakBegrunnelseDao(dataSource)
-    private val annulleringDao = AnnulleringDao(dataSource)
     private val dialogDao = PgDialogDao(dataSource)
     private val env = Environment()
 
@@ -283,8 +283,8 @@ class SaksbehandlerMediator(
         saksbehandler: Saksbehandler,
     ) {
         try {
-            if (annulleringDao.finnAnnullering(handling.toDto()) != null) throw AlleredeAnnullert(handling)
-            annulleringDao.lagreAnnullering(handling.toDto(), saksbehandler)
+            if (annulleringRepository.finnAnnullering(handling.toDto()) != null) throw AlleredeAnnullert(handling)
+            annulleringRepository.lagreAnnullering(handling.toDto(), saksbehandler)
             handling.utførAv(saksbehandler)
         } catch (e: Modellfeil) {
             throw e.tilApiversjon()
@@ -544,7 +544,7 @@ class SaksbehandlerMediator(
         arbeidsgiverFagsystemId: String,
         personFagsystemId: String,
     ): no.nav.helse.spesialist.api.graphql.schema.Annullering? =
-        annulleringDao.finnAnnullering(
+        annulleringRepository.finnAnnullering(
             arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
             personFagsystemId = personFagsystemId,
         )

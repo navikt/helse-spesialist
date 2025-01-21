@@ -63,7 +63,7 @@ class CommandContext(
 
     internal fun sti() = sti.toList()
 
-    internal fun opprett(
+    fun opprett(
         commandContextDao: CommandContextRepository,
         hendelseId: UUID,
     ) {

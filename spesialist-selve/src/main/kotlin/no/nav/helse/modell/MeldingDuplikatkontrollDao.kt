@@ -7,7 +7,7 @@ import java.util.UUID
 import javax.sql.DataSource
 
 class MeldingDuplikatkontrollDao(private val dataSource: DataSource) {
-    internal fun lagre(
+    fun lagre(
         meldingId: UUID,
         type: String,
     ) {

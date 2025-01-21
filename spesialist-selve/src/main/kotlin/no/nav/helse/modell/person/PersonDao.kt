@@ -63,7 +63,7 @@ class PersonDao(
             "foedselsnummer" to fødselsnummer,
         ).singleOrNull { row -> row.long("id") }
 
-    internal fun finnAktørId(fødselsnummer: String): String? =
+    fun finnAktørId(fødselsnummer: String): String? =
         asSQL(
             "SELECT aktør_id FROM person WHERE fødselsnummer = :foedselsnummer",
             "foedselsnummer" to fødselsnummer,

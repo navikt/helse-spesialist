@@ -51,7 +51,7 @@ data class KomplettInntektskildeDto(
     val sistOppdatert: LocalDate,
 ) : InntektskildeDto
 
-internal data class NyInntektskildeDto(
+data class NyInntektskildeDto(
     override val identifikator: String,
     override val type: InntektskildetypeDto,
 ) : InntektskildeDto

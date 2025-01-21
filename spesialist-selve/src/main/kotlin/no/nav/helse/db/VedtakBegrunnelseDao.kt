@@ -21,7 +21,7 @@ class VedtakBegrunnelseDao(queryRunner: QueryRunner) : QueryRunner by queryRunne
         "saksbehandler_ref" to saksbehandlerOid,
     ).updateAndReturnGeneratedKey()
 
-    internal fun lagreVedtakBegrunnelse(
+    fun lagreVedtakBegrunnelse(
         oppgaveId: Long,
         type: VedtakBegrunnelseTypeFraDatabase,
         begrunnelse: String,
@@ -49,7 +49,7 @@ class VedtakBegrunnelseDao(queryRunner: QueryRunner) : QueryRunner by queryRunne
         }
     }
 
-    internal fun invaliderVedtakBegrunnelse(oppgaveId: Long) =
+    fun invaliderVedtakBegrunnelse(oppgaveId: Long) =
         asSQL(
             """
             WITH t as ( 
@@ -67,7 +67,7 @@ class VedtakBegrunnelseDao(queryRunner: QueryRunner) : QueryRunner by queryRunne
             "oppgaveId" to oppgaveId,
         ).update()
 
-    internal fun finnVedtakBegrunnelse(
+    fun finnVedtakBegrunnelse(
         vedtaksperiodeId: UUID,
         generasjonId: Long,
     ): VedtakBegrunnelse? =
@@ -88,7 +88,7 @@ class VedtakBegrunnelseDao(queryRunner: QueryRunner) : QueryRunner by queryRunne
             VedtakBegrunnelse(utfall = type.toDomain(), begrunnelse = begrunnelse)
         }
 
-    internal fun finnVedtakBegrunnelse(oppgaveId: Long): VedtakBegrunnelseFraDatabase? =
+    fun finnVedtakBegrunnelse(oppgaveId: Long): VedtakBegrunnelseFraDatabase? =
         asSQL(
             """
             SELECT b.type, b.tekst FROM begrunnelse AS b, vedtak_begrunnelse AS vb, oppgave AS o, behandling AS bh, vedtak AS v
@@ -115,7 +115,7 @@ class VedtakBegrunnelseDao(queryRunner: QueryRunner) : QueryRunner by queryRunne
             VedtakBegrunnelseTypeFraDatabase.INNVILGELSE -> Utfall.INNVILGELSE
         }
 
-    internal fun finnAlleVedtakBegrunnelser(
+    fun finnAlleVedtakBegrunnelser(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
     ) = asSQL(

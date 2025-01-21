@@ -6,6 +6,7 @@ include(
     "spesialist-opprydding-dev",
     "spesialist-modell",
     "spesialist-kafka",
+    "spesialist-db",
     "spesialist-bootstrap",
     "spesialist-e2e-tests",
 )

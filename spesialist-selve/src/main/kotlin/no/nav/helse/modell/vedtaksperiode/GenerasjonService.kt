@@ -15,11 +15,11 @@ class GenerasjonService(dataSource: DataSource) {
 
     private val sikkerLogger = LoggerFactory.getLogger("tjenestekall")
 
-    internal fun TransactionalSession.finnVedtaksperioder(fødselsnummer: String): List<VedtaksperiodeDto> {
+    fun TransactionalSession.finnVedtaksperioder(fødselsnummer: String): List<VedtaksperiodeDto> {
         return PgGenerasjonDao(this).finnVedtaksperiodeIderFor(fødselsnummer).map { finnVedtaksperiode(it) }
     }
 
-    internal fun TransactionalSession.lagreVedtaksperioder(
+    fun TransactionalSession.lagreVedtaksperioder(
         fødselsnummer: String,
         vedtaksperioder: List<VedtaksperiodeDto>,
     ) {

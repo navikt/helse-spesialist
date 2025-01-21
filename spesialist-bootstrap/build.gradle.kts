@@ -13,6 +13,7 @@ repositories {
 
 dependencies {
     api(project(":spesialist-kafka"))
+    api(project(":spesialist-db"))
     api(project(":spesialist-selve"))
     api(project(":spesialist-api"))
     api(project(":spesialist-felles"))

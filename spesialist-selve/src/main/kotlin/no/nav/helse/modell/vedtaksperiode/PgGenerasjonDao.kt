@@ -20,7 +20,7 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
     constructor(session: Session) : this(MedSession(session))
 
-    internal fun finnGenerasjoner(vedtaksperiodeId: UUID): List<BehandlingDto> {
+    fun finnGenerasjoner(vedtaksperiodeId: UUID): List<BehandlingDto> {
         return asSQL(
             """
             SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, spleis_behandling_id, skjæringstidspunkt, fom, tom, tilstand, tags
@@ -47,7 +47,7 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
             }
     }
 
-    internal fun lagreGenerasjon(behandlingDto: BehandlingDto) {
+    fun lagreGenerasjon(behandlingDto: BehandlingDto) {
         lagre(behandlingDto)
         slettVarsler(behandlingDto.id, behandlingDto.varsler.map { it.id })
         behandlingDto.varsler.forEach { varselDto ->
@@ -146,7 +146,7 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
         }
     }
 
-    internal fun finnVedtaksperiodeIderFor(fødselsnummer: String): Set<UUID> {
+    fun finnVedtaksperiodeIderFor(fødselsnummer: String): Set<UUID> {
         return asSQL(
             """
             SELECT b.vedtaksperiode_id FROM behandling b 

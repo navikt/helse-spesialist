@@ -138,7 +138,7 @@ class OverstyringDao(queryRunner: QueryRunner) : OverstyringRepository, QueryRun
             "eksternHendelseId" to eksternHendelseId,
         ).singleOrNull { true } ?: false
 
-    internal fun persisterOverstyringTidslinje(
+    fun persisterOverstyringTidslinje(
         overstyrtTidslinje: OverstyrtTidslinjeForDatabase,
         saksbehandlerOid: UUID,
     ) {
@@ -172,7 +172,7 @@ class OverstyringDao(queryRunner: QueryRunner) : OverstyringRepository, QueryRun
         }
     }
 
-    internal fun persisterOverstyringInntektOgRefusjon(
+    fun persisterOverstyringInntektOgRefusjon(
         overstyrtInntektOgRefusjon: OverstyrtInntektOgRefusjonForDatabase,
         saksbehandlerOid: UUID,
     ) {
@@ -216,7 +216,7 @@ class OverstyringDao(queryRunner: QueryRunner) : OverstyringRepository, QueryRun
         }
     }
 
-    internal fun persisterSkjønnsfastsettingSykepengegrunnlag(
+    fun persisterSkjønnsfastsettingSykepengegrunnlag(
         skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlagForDatabase,
         saksbehandlerOid: UUID,
     ) {
@@ -282,7 +282,7 @@ class OverstyringDao(queryRunner: QueryRunner) : OverstyringRepository, QueryRun
         "saksbehandlerRef" to saksbehandlerOid,
     ).updateAndReturnGeneratedKey()
 
-    internal fun persisterMinimumSykdomsgrad(
+    fun persisterMinimumSykdomsgrad(
         minimumSykdomsgrad: MinimumSykdomsgradForDatabase,
         saksbehandlerOid: UUID,
     ) {

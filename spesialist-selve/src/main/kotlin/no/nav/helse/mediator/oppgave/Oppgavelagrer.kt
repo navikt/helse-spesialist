@@ -5,7 +5,7 @@ import no.nav.helse.mediator.oppgave.OppgaveMapper.tilDatabaseversjon
 import no.nav.helse.modell.oppgave.OppgaveDto
 
 class Oppgavelagrer(private val tildelingRepository: TildelingRepository) {
-    internal fun lagre(
+    fun lagre(
         oppgaveService: OppgaveService,
         oppgaveDto: OppgaveDto,
     ) {
@@ -24,7 +24,7 @@ class Oppgavelagrer(private val tildelingRepository: TildelingRepository) {
         if (totrinnsvurdering != null) oppgaveService.lagreTotrinnsvurdering(totrinnsvurdering)
     }
 
-    internal fun oppdater(
+    fun oppdater(
         oppgaveService: OppgaveService,
         oppgaveDto: OppgaveDto,
     ) {
