@@ -210,7 +210,7 @@ class MeldingMediator(
             ),
         ) {
             logg.error("alvorlig feil: ${err.message} (se sikkerlogg for melding)", err)
-            sikkerlogg.error("alvorlig feil: ${err.message}\n\t${messageJson.toPrettyString()}", err)
+            sikkerlogg.error("alvorlig feil: ${err.message}\n${objectMapper.writeValueAsString(messageJson)}", err)
         }
     }
 

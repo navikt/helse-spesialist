@@ -1,0 +1,26 @@
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>
+                %d{HH:mm:ss.SSS} [%.10t] %-5level %logger{36} - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <logger name="kafka" level="ERROR" />
+    <logger name="org.apache.zookeeper" level="ERROR" />
+    <logger name="org.apache.kafka" level="ERROR" />
+    <logger name="org.apache.http" level="WARN" />
+    <logger name="org.flywaydb" level="WARN" />
+    <logger name="com.zaxxer" level="WARN" />
+    <logger name="org.eclipse" level="WARN" />
+    <logger name="io.netty" level="WARN" />
+    <logger name="ktor.application" level="WARN" />
+    <logger name="io.ktor" level="INFO" />
+    <logger name="org.testcontainers" level="WARN" />
+    <logger name="tjenestekall" level="debug" />
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>
