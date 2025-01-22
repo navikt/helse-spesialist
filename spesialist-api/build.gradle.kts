@@ -24,7 +24,6 @@ dependencies {
 
     implementation(libs.bundles.db)
 
-    testImplementation(testFixtures(project(":spesialist-felles")))
     testImplementation(libs.testcontainers.postgresql)
     testImplementation(libs.bundles.ktor.server.test)
 }
