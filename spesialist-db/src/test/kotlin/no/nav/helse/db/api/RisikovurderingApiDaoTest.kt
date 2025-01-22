@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.risikovurdering
+package no.nav.helse.db.api
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest

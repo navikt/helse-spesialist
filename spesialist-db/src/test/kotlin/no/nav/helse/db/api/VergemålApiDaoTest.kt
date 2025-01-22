@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.vergemål
+package no.nav.helse.db.api
 
 import kotliquery.queryOf
 import kotliquery.sessionOf

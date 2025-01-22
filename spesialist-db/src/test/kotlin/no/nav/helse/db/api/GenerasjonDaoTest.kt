@@ -1,14 +1,16 @@
-package no.nav.helse.spesialist.api.vedtak
+package no.nav.helse.db.api
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest
 import no.nav.helse.spesialist.api.februar
 import no.nav.helse.spesialist.api.januar
 import no.nav.helse.spesialist.api.mars
+import no.nav.helse.spesialist.api.vedtak.GenerasjonDao
+import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.UUID
 
 internal class GenerasjonDaoTest: DatabaseIntegrationTest() {
 

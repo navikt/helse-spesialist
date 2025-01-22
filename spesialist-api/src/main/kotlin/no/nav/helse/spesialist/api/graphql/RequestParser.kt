@@ -12,7 +12,7 @@ import java.io.IOException
 
     Caused by: java.lang.NoSuchMethodError: 'java.lang.Object io.ktor.server.request.ApplicationReceiveFunctionsKt.receiveNullable(io.ktor.server.application.ApplicationCall, io.ktor.util.reflect.TypeInfo, kotlin.coroutines.Continuation)'
 */
-internal class RequestParser : KtorGraphQLRequestParser(objectMapper) {
+class RequestParser : KtorGraphQLRequestParser(objectMapper) {
     override suspend fun parseRequest(request: ApplicationRequest): GraphQLServerRequest =
         try {
             val rawRequest = request.call.receiveText()

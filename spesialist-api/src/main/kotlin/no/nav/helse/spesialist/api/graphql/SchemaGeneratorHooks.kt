@@ -19,7 +19,7 @@ import kotlin.reflect.KType
 /**
  * Støttekode for å kunne bruke UUID som type, i stedet for å måtte ha den som String.
  */
-internal val schemaGeneratorHooks =
+val schemaGeneratorHooks =
     object : SchemaGeneratorHooks {
         override fun willGenerateGraphQLType(type: KType): GraphQLType? =
             when (type.classifier as? KClass<*>) {

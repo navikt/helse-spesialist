@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.notat
+package no.nav.helse.db.api
 
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest
 import no.nav.helse.spesialist.api.graphql.schema.NotatType

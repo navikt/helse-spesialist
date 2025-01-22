@@ -14,12 +14,12 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
+class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
     private companion object {
         private val log = LoggerFactory.getLogger(ApiVarselDao::class.java)
     }
 
-    internal fun finnVarslerSomIkkeErInaktiveFor(
+    fun finnVarslerSomIkkeErInaktiveFor(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
     ): Set<Varsel> =
@@ -35,7 +35,7 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
             "status_inaktiv" to INAKTIV.name,
         ).listKomplett()
 
-    internal fun finnVarslerSomIkkeErInaktiveForSisteGenerasjon(
+    fun finnVarslerSomIkkeErInaktiveForSisteGenerasjon(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
     ) = asSQL(
@@ -55,7 +55,7 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
         "status_inaktiv" to INAKTIV.name,
     ).listKomplett()
 
-    internal fun finnVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<Varsel> =
+    fun finnVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<Varsel> =
         asSQL(
             """
             SELECT b.unik_id as generasjon_id, sv.unik_id as varsel_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv
@@ -67,7 +67,7 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
             "status_inaktiv" to INAKTIV.name,
         ).listKomplett()
 
-    internal fun finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<Varsel> =
+    fun finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<Varsel> =
         asSQL(
             """
             SELECT b.unik_id as generasjon_id, sv.unik_id as varsel_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv
@@ -79,7 +79,7 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
             "status_godkjent" to GODKJENT.name,
         ).listKomplett()
 
-    internal fun godkjennVarslerFor(vedtaksperioder: List<UUID>) =
+    fun godkjennVarslerFor(vedtaksperioder: List<UUID>) =
         asSQLWithQuestionMarks(
             """
             UPDATE selve_varsel 
@@ -93,7 +93,7 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
             *vedtaksperioder.toTypedArray(),
         ).update()
 
-    internal fun settStatusVurdert(
+    fun settStatusVurdert(
         generasjonId: UUID,
         definisjonId: UUID,
         varselkode: String,
@@ -126,7 +126,7 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
             "kode" to varselkode,
         ).single(::mapVarsel)
 
-    internal fun settStatusAktiv(
+    fun settStatusAktiv(
         generasjonId: UUID,
         varselkode: String,
         ident: String,
@@ -169,7 +169,7 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
             "generasjon_id" to generasjonId,
         ).single { Varselstatus.valueOf(it.string("status")) }
 
-    internal fun finnVarslerFor(generasjonId: UUID): Set<Varsel> =
+    fun finnVarslerFor(generasjonId: UUID): Set<Varsel> =
         asSQL(
             """
             SELECT sv.unik_id as varsel_id, b.unik_id as generasjon_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv 
@@ -265,7 +265,7 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
         )
     }
 
-    internal fun vurderVarselFor(
+    fun vurderVarselFor(
         varselId: UUID,
         gjeldendeStatus: Varselstatus,
         saksbehandlerIdent: String,

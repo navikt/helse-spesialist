@@ -20,8 +20,8 @@ dependencies {
     implementation(libs.ktor.micrometer)
     implementation(libs.micrometer.prometheus)
 
-    implementation(libs.bundles.ktor.server)
-    implementation(libs.bundles.ktor.client)
+    api(libs.bundles.ktor.server)
+    api(libs.bundles.ktor.client)
 
     implementation(libs.bundles.db)
 

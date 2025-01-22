@@ -13,7 +13,7 @@ class ApiVarselRepository(dataSource: DataSource) {
     private val varselDao = ApiVarselDao(dataSource)
     private val generasjonDao = GenerasjonDao(dataSource)
 
-    internal fun finnVarslerSomIkkeErInaktiveFor(
+    fun finnVarslerSomIkkeErInaktiveFor(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
     ): Set<VarselDTO> {
@@ -27,7 +27,7 @@ class ApiVarselRepository(dataSource: DataSource) {
         return varselDao.finnVarslerSomIkkeErInaktiveForSisteGenerasjon(vedtaksperiodeId, utbetalingId).toDto()
     }
 
-    internal fun finnVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<VarselDTO> {
+    fun finnVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<VarselDTO> {
         return varselDao.finnVarslerForUberegnetPeriode(vedtaksperiodeId).toDto()
     }
 
@@ -48,7 +48,7 @@ class ApiVarselRepository(dataSource: DataSource) {
         varselDao.vurderVarselFor(varselId, gjeldendeStatus, saksbehandlerIdent)
     }
 
-    internal fun erAktiv(
+    fun erAktiv(
         varselkode: String,
         generasjonId: UUID,
     ): Boolean? {
@@ -56,7 +56,7 @@ class ApiVarselRepository(dataSource: DataSource) {
         return varselstatus == AKTIV
     }
 
-    internal fun erGodkjent(
+    fun erGodkjent(
         varselkode: String,
         generasjonId: UUID,
     ): Boolean? {
@@ -64,7 +64,7 @@ class ApiVarselRepository(dataSource: DataSource) {
         return varselstatus == GODKJENT
     }
 
-    internal fun settStatusVurdert(
+    fun settStatusVurdert(
         generasjonId: UUID,
         definisjonId: UUID,
         varselkode: String,
@@ -81,7 +81,7 @@ class ApiVarselRepository(dataSource: DataSource) {
         return varselDao.settStatusAktiv(generasjonId, varselkode, ident)?.toDto()
     }
 
-    internal fun perioderSomSkalViseVarsler(oppgaveId: Long?): Set<UUID> {
+    fun perioderSomSkalViseVarsler(oppgaveId: Long?): Set<UUID> {
         if (oppgaveId == null) return emptySet()
         return sammenhengendePerioder(oppgaveId).map { it.vedtaksperiodeId() }.toSet()
     }

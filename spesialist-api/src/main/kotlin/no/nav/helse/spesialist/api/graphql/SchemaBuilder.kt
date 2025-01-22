@@ -44,7 +44,7 @@ import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vergemål.VergemålApiDao
 
-internal class SchemaBuilder(
+class SchemaBuilder(
     personApiDao: PersonApiDao,
     egenAnsattApiDao: EgenAnsattApiDao,
     tildelingApiDao: TildelingApiDao,

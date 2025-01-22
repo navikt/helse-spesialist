@@ -49,7 +49,7 @@ class ArbeidsgiverApiDao(dataSource: DataSource) : QueryRunner by MedDataSource(
         "fodselsnummer" to fødselsnummer,
     ).list { tilArbeidsforholdApiDto(organisasjonsnummer, it) }
 
-    internal fun finnArbeidsgiverInntekterFraAordningen(
+    fun finnArbeidsgiverInntekterFraAordningen(
         fødselsnummer: String,
         orgnummer: String,
     ): List<ArbeidsgiverInntekterFraAOrdningen> =
@@ -76,7 +76,7 @@ class ArbeidsgiverApiDao(dataSource: DataSource) : QueryRunner by MedDataSource(
             ).takeIf { it.inntekter.isNotEmpty() }
         }
 
-    internal data class Inntekter(val årMåned: YearMonth, val inntektsliste: List<Inntekt>) {
+    data class Inntekter(val årMåned: YearMonth, val inntektsliste: List<Inntekt>) {
         data class Inntekt(val beløp: Double, val orgnummer: String)
     }
 

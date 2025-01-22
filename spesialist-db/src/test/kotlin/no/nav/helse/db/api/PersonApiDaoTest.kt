@@ -1,6 +1,7 @@
-package no.nav.helse.spesialist.api.person
+package no.nav.helse.db.api
 
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest
+import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse.Ugradert
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue

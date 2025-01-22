@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api
 
 import io.mockk.mockk
 import no.nav.helse.db.DbQuery
+import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao.Inntekter
 import no.nav.helse.spesialist.api.db.AbstractDatabaseTest

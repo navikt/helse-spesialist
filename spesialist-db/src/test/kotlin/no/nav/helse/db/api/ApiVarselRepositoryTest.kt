@@ -1,7 +1,5 @@
-package no.nav.helse.spesialist.api.varsel
+package no.nav.helse.db.api
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest
 import no.nav.helse.spesialist.api.januar
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -9,6 +7,8 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.UUID
 
 internal class ApiVarselRepositoryTest: DatabaseIntegrationTest() {
 

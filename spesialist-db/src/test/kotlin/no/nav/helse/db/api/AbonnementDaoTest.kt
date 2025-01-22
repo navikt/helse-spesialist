@@ -1,6 +1,7 @@
-package no.nav.helse.spesialist.api.abonnement
+package no.nav.helse.db.api
 
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest
+import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals

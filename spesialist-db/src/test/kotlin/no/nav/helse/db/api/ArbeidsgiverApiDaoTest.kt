@@ -1,12 +1,12 @@
-package no.nav.helse.spesialist.api.arbeidsgiver
+package no.nav.helse.db.api
 
-import java.time.LocalDate
-import java.time.YearMonth
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao.Inntekter
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.YearMonth
 
 internal class ArbeidsgiverApiDaoTest: DatabaseIntegrationTest() {
 

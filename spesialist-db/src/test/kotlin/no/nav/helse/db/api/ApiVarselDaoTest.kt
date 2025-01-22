@@ -1,8 +1,10 @@
-package no.nav.helse.spesialist.api.varsel
+package no.nav.helse.db.api
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest
+import no.nav.helse.spesialist.api.varsel.ApiVarselDao
+import no.nav.helse.spesialist.api.varsel.Varsel
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.AKTIV
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.GODKJENT

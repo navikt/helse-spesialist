@@ -135,7 +135,7 @@ fun Application.graphQLApi(
 
 // TODO Erstatt denne med å bruke graphQLPostRoute() i routingen
 //  Per nå feiler det med ClassNotFoundException: io.ktor.server.routing.RoutingKt
-internal fun Route.queryHandler(server: GraphQLServer<ApplicationRequest>) {
+fun Route.queryHandler(server: GraphQLServer<ApplicationRequest>) {
     post {
         val start = System.nanoTime()
 

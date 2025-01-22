@@ -8,8 +8,8 @@ import no.nav.helse.spesialist.api.varsel.Varsel
 import java.util.UUID
 import javax.sql.DataSource
 
-internal class GenerasjonDao(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource) {
-    internal fun gjeldendeGenerasjonFor(oppgaveId: Long): Vedtaksperiode =
+class GenerasjonDao(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource) {
+    fun gjeldendeGenerasjonFor(oppgaveId: Long): Vedtaksperiode =
         asSQL(
             """
             SELECT b.vedtaksperiode_id, b.fom, b.tom, b.skjæringstidspunkt
@@ -22,7 +22,7 @@ internal class GenerasjonDao(dataSource: DataSource) : QueryRunner by MedDataSou
             "oppgave_id" to oppgaveId,
         ).single { it.tilVedtaksperiode() }
 
-    internal fun gjeldendeGenerasjonerForPerson(oppgaveId: Long): Set<Vedtaksperiode> =
+    fun gjeldendeGenerasjonerForPerson(oppgaveId: Long): Set<Vedtaksperiode> =
         asSQL(
             """
             SELECT DISTINCT ON (b.vedtaksperiode_id) b.vedtaksperiode_id, b.fom, b.tom, b.skjæringstidspunkt 
@@ -53,7 +53,7 @@ internal class GenerasjonDao(dataSource: DataSource) : QueryRunner by MedDataSou
             "oppgave_id" to oppgaveId,
         ).single { it.tilVedtaksperiode(varselGetter) }
 
-    internal fun gjeldendeGenerasjonerForPerson(
+    fun gjeldendeGenerasjonerForPerson(
         oppgaveId: Long,
         varselGetter: (generasjonId: UUID) -> Set<Varsel>,
     ): Set<Vedtaksperiode> =
