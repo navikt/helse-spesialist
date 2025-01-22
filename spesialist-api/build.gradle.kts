@@ -25,8 +25,6 @@ dependencies {
 
     implementation(libs.bundles.db)
 
-    testImplementation(project(":spesialist-db-migrations"))
-    testImplementation(libs.testcontainers.postgresql)
     testImplementation(libs.bundles.ktor.server.test)
 }
 
