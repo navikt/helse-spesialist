@@ -27,6 +27,9 @@ internal class VurderAutomatiskAvvisning(
         val stoppesForManglendeIM =
             godkjenningsbehov.spleisSykepengegrunnlagsfakta.arbeidsgivere.find { it.arbeidsgiver == godkjenningsbehov.organisasjonsnummer }
                 ?.let {
+                    if (it.inntektskilde == Inntektsopplysningkilde.AOrdningen) {
+                        sikkerlogg.info("Mottatt godkjenningsbehov der IM mangler for fnr $fødselsnummer")
+                    }
                     it.inntektskilde == Inntektsopplysningkilde.AOrdningen &&
                         !(fødselsnummer.length == 11 && (1..31).contains(fødselsnummer.take(2).toInt()))
                 } ?: false
@@ -68,5 +71,6 @@ internal class VurderAutomatiskAvvisning(
 
     private companion object {
         private val logg = LoggerFactory.getLogger(VurderAutomatiskAvvisning::class.java)
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 }
