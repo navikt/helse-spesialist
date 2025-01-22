@@ -236,7 +236,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             avviksvurderingTestdata = avviksvurderingTestdata,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata,
         )
-        if (!harOppdatertMetadata) håndterEgenansattløsning()
+        if (!harOppdatertMetadata) håndterEgenansattløsning(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer)
     }
 
     protected fun spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver(
@@ -258,7 +258,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             avviksvurderingTestdata = avviksvurderingTestdata,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata,
         )
-        håndterVergemålOgFullmaktløsning(fullmakter = fullmakter)
+        håndterVergemålOgFullmaktløsning(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer, fullmakter = fullmakter)
     }
 
     protected fun spesialistBehandlerGodkjenningsbehovFremTilEgenAnsatt(
@@ -270,7 +270,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
         godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
-        if (regelverksvarsler.isNotEmpty()) håndterAktivitetsloggNyAktivitet(varselkoder = regelverksvarsler)
+        if (regelverksvarsler.isNotEmpty()) håndterAktivitetsloggNyAktivitet(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer, varselkoder = regelverksvarsler)
         håndterGodkjenningsbehov(
             harOppdatertMetainfo = harOppdatertMetadata,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
@@ -279,13 +279,14 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             godkjenningsbehovTestdata = godkjenningsbehovTestdata,
         )
         if (!harOppdatertMetadata) {
-            håndterPersoninfoløsning()
-            håndterEnhetløsning(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId, enhet = enhet)
-            håndterInfotrygdutbetalingerløsning(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
+            håndterPersoninfoløsning(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer)
+            håndterEnhetløsning(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer, vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId, enhet = enhet)
+            håndterInfotrygdutbetalingerløsning(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer, vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
             håndterArbeidsgiverinformasjonløsning(
+                fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
                 vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
             )
-            håndterArbeidsforholdløsning(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
+            håndterArbeidsforholdløsning(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer, vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
         }
     }
 
@@ -327,9 +328,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
                 risikofunn = risikofunn,
                 vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
+                fødselsnummer = godkjenningsbehovTestdata.fødselsnummer
             )
         }
-        if (!erFerdigstilt(sisteGodkjenningsbehovId)) håndterInntektløsning()
+        if (!erFerdigstilt(sisteGodkjenningsbehovId)) håndterInntektløsning(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer)
     }
 
     private fun spesialistBehandlerGodkjenningsbehovFremTilRisikovurdering(
@@ -352,7 +354,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             avviksvurderingTestdata = avviksvurderingTestdata,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata,
         )
-        håndterÅpneOppgaverløsning()
+        håndterÅpneOppgaverløsning(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer)
     }
 
     protected fun vedtaksløsningenMottarNySøknad(
@@ -664,16 +666,18 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     ) {
         val erRevurdering = erRevurdering(godkjenningsbehovTestdata.vedtaksperiodeId)
         håndterVedtaksperiodeNyUtbetaling(
+            fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
             vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
             utbetalingId = godkjenningsbehovTestdata.utbetalingId,
         )
         håndterUtbetalingOpprettet(
+            fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
             utbetalingtype = if (erRevurdering) "REVURDERING" else "UTBETALING",
             utbetalingId = godkjenningsbehovTestdata.utbetalingId,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
         )
-        håndterVedtaksperiodeEndret(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
+        håndterVedtaksperiodeEndret(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer, vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
         spinnvillAvviksvurderer(
             avviksvurderingTestdata,
             godkjenningsbehovTestdata.fødselsnummer,
