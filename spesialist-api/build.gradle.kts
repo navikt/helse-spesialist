@@ -8,9 +8,9 @@ plugins {
 }
 
 dependencies {
+    api(project(":spesialist-modell"))
+
     api("com.nimbusds:nimbus-jose-jwt:9.37.3")
-    implementation(project(":spesialist-db-migrations"))
-    implementation(project(":spesialist-modell"))
     api("com.expediagroup:graphql-kotlin-ktor-server:$graphQLKotlinVersion")
 
     implementation(libs.bundles.logging)
@@ -25,6 +25,7 @@ dependencies {
 
     implementation(libs.bundles.db)
 
+    testImplementation(project(":spesialist-db-migrations"))
     testImplementation(libs.testcontainers.postgresql)
     testImplementation(libs.bundles.ktor.server.test)
 }

@@ -1,12 +1,12 @@
 rootProject.name = "spesialist"
 include(
-    "spesialist-db-migrations",
-    "spesialist-api",
-    "spesialist-selve",
-    "spesialist-opprydding-dev",
     "spesialist-modell",
-    "spesialist-kafka",
+    "spesialist-selve",
+    "spesialist-api",
+    "spesialist-db-migrations",
     "spesialist-db",
+    "spesialist-kafka",
+    "spesialist-opprydding-dev",
     "spesialist-bootstrap",
     "spesialist-e2e-tests",
 )

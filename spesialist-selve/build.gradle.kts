@@ -9,11 +9,10 @@ plugins {
 }
 
 dependencies {
+    api(project(":spesialist-api"))
+
     api("com.nimbusds:nimbus-jose-jwt:9.37.3")
     api(libs.bundles.db)
-    api(project(":spesialist-db-migrations"))
-    api(project(":spesialist-api"))
-    api(project(":spesialist-modell"))
 
     implementation("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryPrometheusVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
