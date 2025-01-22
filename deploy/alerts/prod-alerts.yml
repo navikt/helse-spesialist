@@ -1,0 +1,27 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: spesialist-alerts
+  namespace: tbd
+  labels:
+    team: tbd
+spec:
+  groups:
+    - name: applikasjon-alerts
+      rules:
+        - alert: CrashLoopBackoff
+          expr: >-
+            sum(
+              changes(
+                kube_pod_container_status_restarts_total{container="spesialist"}[1m]
+              )
+            ) by (container, namespace) > 0
+          for: 1m
+          annotations:
+            consequence: '*{{ $labels.pod }}* er i CrashLoopBackoff'
+            action: 'Du må se på hvorfor appen kræsjer'
+          labels:
+            namespace: tbd
+            severity: critical
+            team_speilvendt_alerts: slack
+            alert_type: custom

@@ -13,8 +13,8 @@ on:
             - 'deploy/dev-migrering.yml'
             - 'deploy/prod-migrering.yml'
             - '.github/workflows/deploy_specific_commit_to_dev.yml'
-            - '.github/workflows/hpa.yml'
-            - 'deploy/hpa/**'
+            - '.github/workflows/alerts.yml'
+            - 'deploy/alerts/**'
             - '.github/workflows/codeql.yml'
             - '.github/workflows/pr.yml'
         branches:
