@@ -10,9 +10,9 @@ import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.VergemålRepository
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -25,11 +25,12 @@ internal class VurderAutomatiskAvvisningTest {
     private val personRepository = mockk<PersonRepository>(relaxed = true)
     private val egenAnsattRepository = mockk<EgenAnsattRepository>(relaxed = true)
     private val godkjenningMediator = mockk<GodkjenningMediator>(relaxed = true)
+    private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
 
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
-        clearMocks(vergemålRepository, personRepository, egenAnsattRepository, godkjenningMediator)
+        clearMocks(vergemålRepository, personRepository, egenAnsattRepository, godkjenningMediator, sykefraværstilfelle)
     }
 
     @Test
@@ -46,17 +47,22 @@ internal class VurderAutomatiskAvvisningTest {
 
     @Test
     fun `skal avvise dersom IM mangler`() {
-        assertIkkeAvvisning(lagCommand(fødselsnummer = "01111111111", kanAvvises = true, inntektsopplysningkilde = Inntektsopplysningkilde.AOrdningen))
+        every { sykefraværstilfelle.harVarselOmManglendeInntektsmelding(any()) } returns true
+        //testen gir for øyeblikket ikke mening da vi midlertidig slipper igjennom alle
+        //assertAvvisning(lagCommand(fødselsnummer = "01111111111", kanAvvises = true), "Mangler inntektsmelding")
+        assertIkkeAvvisning(lagCommand(fødselsnummer = "01111111111", kanAvvises = true))
     }
 
     @Test
     fun `skal ikke avvise dersom IM er mottatt`() {
-        assertIkkeAvvisning(lagCommand(fødselsnummer = "01111111111", kanAvvises = true, inntektsopplysningkilde = Inntektsopplysningkilde.Arbeidsgiver))
+        every { sykefraværstilfelle.harVarselOmManglendeInntektsmelding(any()) } returns false
+        assertIkkeAvvisning(lagCommand(fødselsnummer = "01111111111", kanAvvises = true))
     }
 
     @Test
     fun `skal ikke avvise dersom IM mangler, men fødselsdato treffer toggle`() {
-        assertIkkeAvvisning(lagCommand(fødselsnummer = "29111111111", kanAvvises = true, inntektsopplysningkilde = Inntektsopplysningkilde.AOrdningen))
+        every { sykefraværstilfelle.harVarselOmManglendeInntektsmelding(any()) } returns true
+        assertIkkeAvvisning(lagCommand(fødselsnummer = "29111111111", kanAvvises = true))
     }
 
     @Test
@@ -94,7 +100,6 @@ internal class VurderAutomatiskAvvisningTest {
     private fun lagCommand(
         kanAvvises: Boolean = true,
         fødselsnummer: String = "12345678910",
-        inntektsopplysningkilde: Inntektsopplysningkilde = Inntektsopplysningkilde.Arbeidsgiver,
     ) = VurderAutomatiskAvvisning(
         personRepository = personRepository,
         vergemålRepository = vergemålRepository,
@@ -103,8 +108,8 @@ internal class VurderAutomatiskAvvisningTest {
         godkjenningsbehov = godkjenningsbehovData(
             fødselsnummer = fødselsnummer,
             kanAvvises = kanAvvises,
-            inntektsopplysningkilde = inntektsopplysningkilde,
-        )
+        ),
+        sykefraværstilfelle = sykefraværstilfelle
     )
 
     private companion object {

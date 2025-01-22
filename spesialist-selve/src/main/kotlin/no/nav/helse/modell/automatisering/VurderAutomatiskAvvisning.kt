@@ -8,9 +8,9 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
 import no.nav.helse.modell.person.HentEnhetløsning
+import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
-import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
 import org.slf4j.LoggerFactory
 
 internal class VurderAutomatiskAvvisning(
@@ -19,20 +19,20 @@ internal class VurderAutomatiskAvvisning(
     private val godkjenningMediator: GodkjenningMediator,
     private val utbetaling: Utbetaling,
     private val godkjenningsbehov: GodkjenningsbehovData,
+    private val sykefraværstilfelle: Sykefraværstilfelle,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
         val fødselsnummer = godkjenningsbehov.fødselsnummer
         val vedtaksperiodeId = godkjenningsbehov.vedtaksperiodeId
 
         val stoppesForManglendeIM =
-            godkjenningsbehov.spleisSykepengegrunnlagsfakta.arbeidsgivere.find { it.arbeidsgiver == godkjenningsbehov.organisasjonsnummer }
-                ?.let {
-                    if (it.inntektskilde == Inntektsopplysningkilde.AOrdningen) {
-                        sikkerlogg.info("Mottatt godkjenningsbehov der IM mangler for fnr $fødselsnummer")
-                    }
-                    it.inntektskilde == Inntektsopplysningkilde.AOrdningen &&
-                        !(fødselsnummer.length == 11 && (1..31).contains(fødselsnummer.take(2).toInt()))
-                } ?: false
+            sykefraværstilfelle.harVarselOmManglendeInntektsmelding(vedtaksperiodeId) &&
+                !(fødselsnummer.length == 11 && (1..31).contains(fødselsnummer.take(2).toInt()))
+
+        // Midlertid logging så lenge vi potensielt avviser disse.
+        if (sykefraværstilfelle.harVarselOmManglendeInntektsmelding(vedtaksperiodeId)) {
+            sikkerlogg.info("Mottatt godkjenningsbehov med varsel for manglende IM for fnr $fødselsnummer, avvises=$stoppesForManglendeIM")
+        }
 
         val tilhørerEnhetUtland = HentEnhetløsning.erEnhetUtland(personRepository.finnEnhetId(fødselsnummer))
         val underVergemål = vergemålRepository.harVergemål(fødselsnummer) ?: false
