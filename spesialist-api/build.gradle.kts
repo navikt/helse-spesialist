@@ -10,6 +10,7 @@ plugins {
 dependencies {
     api("com.nimbusds:nimbus-jose-jwt:9.37.3")
     implementation(project(":spesialist-felles"))
+    implementation(project(":spesialist-modell"))
     api("com.expediagroup:graphql-kotlin-ktor-server:$graphQLKotlinVersion")
 
     implementation(libs.bundles.logging)
