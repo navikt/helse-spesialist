@@ -3,6 +3,9 @@ name: "CodeQL"
 on:
   push:
     branches: ["master"]
+    paths-ignore:
+        - '.github/**'
+        - 'deploy/**'
 
 jobs:
   analyze:
