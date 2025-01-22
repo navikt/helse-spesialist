@@ -16,4 +16,4 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: deploy/alertconfig.yml,deploy/prod-alerts.yml
+          RESOURCE: deploy/alerts/alertconfig.yml,deploy/alerts/prod-alerts.yml
