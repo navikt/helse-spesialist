@@ -1,10 +1,10 @@
 package no.nav.helse.spesialist.api.risikovurdering
 
-import java.util.UUID
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class SaksbehandlerTilgangerTest {
     private val kode7Saksbehandlergruppe = UUID.randomUUID()

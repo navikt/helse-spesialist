@@ -1,9 +1,9 @@
 package no.nav.helse.spesialist.api.saksbehandler
 
+import no.nav.helse.db.api.EgenAnsattApiDao
+import no.nav.helse.db.api.PersonApiDao
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
-import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
-import no.nav.helse.spesialist.api.person.PersonApiDao
 
 internal fun manglerTilgang(
     egenAnsattApiDao: EgenAnsattApiDao,

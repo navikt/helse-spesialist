@@ -4,11 +4,11 @@ import com.expediagroup.graphql.server.operations.Mutation
 import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
+import no.nav.helse.db.api.NotatApiDao
 import no.nav.helse.spesialist.api.graphql.schema.Kommentar
 import no.nav.helse.spesialist.api.graphql.schema.Notat
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.notat.KommentarDto
-import no.nav.helse.spesialist.api.notat.NotatApiDao
 import no.nav.helse.spesialist.api.notat.NotatDto
 import java.util.UUID
 

@@ -21,13 +21,13 @@ data class Varsel(
     private val handling: String?,
     private val vurdering: Varselvurdering?,
 ) {
-    internal companion object {
-        internal fun Set<Varsel>.toDto(): Set<VarselDTO> {
+    companion object {
+        fun Set<Varsel>.toDto(): Set<VarselDTO> {
             return map { it.toDto() }.toSet()
         }
     }
 
-    internal fun toDto() =
+    fun toDto() =
         VarselDTO(
             generasjonId,
             definisjonId,

@@ -2,18 +2,18 @@ package no.nav.helse.spesialist.api.graphql.schema
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDeprecated
 import io.ktor.utils.io.core.toByteArray
+import no.nav.helse.db.api.ApiVarselRepository
+import no.nav.helse.db.api.ArbeidsgiverApiDao
+import no.nav.helse.db.api.NotatApiDao
+import no.nav.helse.db.api.OppgaveApiDao
+import no.nav.helse.db.api.PeriodehistorikkApiDao
+import no.nav.helse.db.api.PåVentApiDao
+import no.nav.helse.db.api.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
-import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
-import no.nav.helse.spesialist.api.notat.NotatApiDao
-import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
-import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
-import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
-import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGenerasjon
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUberegnetPeriode

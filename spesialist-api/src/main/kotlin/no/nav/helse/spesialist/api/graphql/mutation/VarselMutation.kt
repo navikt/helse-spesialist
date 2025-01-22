@@ -7,8 +7,8 @@ import graphql.execution.DataFetcherResult
 import graphql.execution.DataFetcherResult.newResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import no.nav.helse.db.api.ApiVarselRepository
 import no.nav.helse.spesialist.api.graphql.schema.VarselDTO
-import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import org.slf4j.LoggerFactory
 import java.util.UUID
 

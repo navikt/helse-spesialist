@@ -1,5 +1,18 @@
 package no.nav.helse.spesialist.api.graphql
 
+import no.nav.helse.db.api.ApiVarselRepository
+import no.nav.helse.db.api.ArbeidsgiverApiDao
+import no.nav.helse.db.api.EgenAnsattApiDao
+import no.nav.helse.db.api.NotatApiDao
+import no.nav.helse.db.api.OppgaveApiDao
+import no.nav.helse.db.api.OverstyringApiDao
+import no.nav.helse.db.api.PeriodehistorikkApiDao
+import no.nav.helse.db.api.PersonApiDao
+import no.nav.helse.db.api.PåVentApiDao
+import no.nav.helse.db.api.RisikovurderingApiDao
+import no.nav.helse.db.api.TildelingApiDao
+import no.nav.helse.db.api.TotrinnsvurderingApiDao
+import no.nav.helse.db.api.VergemålApiDao
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
@@ -7,9 +20,7 @@ import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
-import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
-import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.mutation.AnnulleringMutation
 import no.nav.helse.spesialist.api.graphql.mutation.MinimumSykdomsgradMutation
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutation
@@ -28,21 +39,10 @@ import no.nav.helse.spesialist.api.graphql.query.DokumentQuery
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQuery
 import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQuery
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
-import no.nav.helse.spesialist.api.notat.NotatApiDao
-import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
-import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
-import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.person.PersonService
-import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
-import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
-import no.nav.helse.spesialist.api.tildeling.TildelingApiDao
-import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
-import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
-import no.nav.helse.spesialist.api.vergemål.VergemålApiDao
 
 class SchemaBuilder(
     personApiDao: PersonApiDao,

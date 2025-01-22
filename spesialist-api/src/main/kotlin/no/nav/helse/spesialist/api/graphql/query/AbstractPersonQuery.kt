@@ -3,10 +3,10 @@ package no.nav.helse.spesialist.api.graphql.query
 import com.expediagroup.graphql.server.operations.Query
 import graphql.GraphQLError
 import graphql.schema.DataFetchingEnvironment
-import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
+import no.nav.helse.db.api.EgenAnsattApiDao
+import no.nav.helse.db.api.PersonApiDao
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
 import no.nav.helse.spesialist.api.graphql.forbiddenError
-import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.saksbehandler.manglerTilgang
 
 abstract class AbstractPersonQuery(

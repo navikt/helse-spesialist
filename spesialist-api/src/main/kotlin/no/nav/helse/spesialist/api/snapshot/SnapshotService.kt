@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.snapshot
 
+import no.nav.helse.db.api.SnapshotApiDao
 import no.nav.helse.spesialist.api.graphql.schema.Personinfo
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.slf4j.Logger

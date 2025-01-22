@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.api.bootstrap
 
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
@@ -10,7 +9,7 @@ import io.ktor.server.routing.route
 import java.lang.management.ManagementFactory
 import java.lang.management.MemoryUsage
 
-internal fun Route.debugMinneApi() {
+fun Route.debugMinneApi() {
     route("/minne") {
         get {
             val heapMemoryUsage: MemoryUsage = ManagementFactory.getMemoryMXBean().heapMemoryUsage

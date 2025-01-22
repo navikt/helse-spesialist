@@ -1,15 +1,15 @@
 package no.nav.helse.db
 
-import no.nav.helse.DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.util.januar
+import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
 import no.nav.helse.modell.vilkårsprøving.BeregningsgrunnlagDto
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntektDto
 import no.nav.helse.modell.vilkårsprøving.InntektDto
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntektDto
 import no.nav.helse.modell.vilkårsprøving.SammenligningsgrunnlagDto
+import no.nav.helse.util.januar
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull

@@ -11,8 +11,9 @@ import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import no.nav.helse.db.api.EgenAnsattApiDao
+import no.nav.helse.db.api.PersonApiDao
 import no.nav.helse.spesialist.api.Dokumenthåndterer
-import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.schema.AvsenderSystem
 import no.nav.helse.spesialist.api.graphql.schema.DokumentInntektsmelding
 import no.nav.helse.spesialist.api.graphql.schema.EndringIRefusjon
@@ -29,7 +30,6 @@ import no.nav.helse.spesialist.api.graphql.schema.Sporsmal
 import no.nav.helse.spesialist.api.graphql.schema.Svar
 import no.nav.helse.spesialist.api.graphql.schema.Svartype
 import no.nav.helse.spesialist.api.graphql.schema.Visningskriterium
-import no.nav.helse.spesialist.api.person.PersonApiDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID

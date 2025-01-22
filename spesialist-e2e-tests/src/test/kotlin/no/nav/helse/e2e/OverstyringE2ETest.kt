@@ -7,10 +7,22 @@ import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.TestRapidHelpers.siste
+import no.nav.helse.db.api.PgApiVarselRepository
+import no.nav.helse.db.api.PgArbeidsgiverApiDao
+import no.nav.helse.db.api.PgEgenAnsattApiDao
+import no.nav.helse.db.api.PgNotatApiDao
+import no.nav.helse.db.api.PgOppgaveApiDao
+import no.nav.helse.db.api.PgOverstyringApiDao
+import no.nav.helse.db.api.PgPeriodehistorikkApiDao
+import no.nav.helse.db.api.PgPersonApiDao
+import no.nav.helse.db.api.PgPåVentApiDao
+import no.nav.helse.db.api.PgRisikovurderingApiDao
+import no.nav.helse.db.api.PgSnapshotApiDao
+import no.nav.helse.db.api.PgTildelingApiDao
+import no.nav.helse.db.api.PgTotrinnsvurderingApiDao
+import no.nav.helse.db.api.PgVergemålApiDao
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
-import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
-import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
@@ -21,23 +33,11 @@ import no.nav.helse.spesialist.api.graphql.schema.Lovhjemmel
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.Person
-import no.nav.helse.spesialist.api.notat.NotatApiDao
-import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Invalidert
-import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
-import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.person.PersonService
-import no.nav.helse.spesialist.api.påvent.PåVentApiDao
-import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
-import no.nav.helse.spesialist.api.tildeling.TildelingApiDao
-import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
-import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
-import no.nav.helse.spesialist.api.vergemål.VergemålApiDao
 import no.nav.helse.util.januar
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -328,20 +328,20 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
     private val personQuery =
         PersonQuery(
             personoppslagService = PersonService(
-                personApiDao = PersonApiDao(dataSource),
-                egenAnsattApiDao = EgenAnsattApiDao(dataSource),
-                tildelingApiDao = TildelingApiDao(dataSource),
-                arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource),
-                overstyringApiDao = OverstyringApiDao(dataSource),
-                risikovurderingApiDao = RisikovurderingApiDao(dataSource),
-                varselRepository = ApiVarselRepository(dataSource),
-                oppgaveApiDao = OppgaveApiDao(dataSource),
-                periodehistorikkApiDao = PeriodehistorikkApiDao(dataSource),
-                notatDao = NotatApiDao(dataSource),
-                totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource),
-                påVentApiDao = PåVentApiDao(dataSource),
-                vergemålApiDao = VergemålApiDao(dataSource),
-                snapshotService = SnapshotService(SnapshotApiDao(dataSource), snapshotClient),
+                personApiDao = PgPersonApiDao(dataSource),
+                egenAnsattApiDao = PgEgenAnsattApiDao(dataSource),
+                tildelingApiDao = PgTildelingApiDao(dataSource),
+                arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource),
+                overstyringApiDao = PgOverstyringApiDao(dataSource),
+                risikovurderingApiDao = PgRisikovurderingApiDao(dataSource),
+                varselRepository = PgApiVarselRepository(dataSource),
+                oppgaveApiDao = PgOppgaveApiDao(dataSource),
+                periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource),
+                notatDao = PgNotatApiDao(dataSource),
+                totrinnsvurderingApiDao = PgTotrinnsvurderingApiDao(dataSource),
+                påVentApiDao = PgPåVentApiDao(dataSource),
+                vergemålApiDao = PgVergemålApiDao(dataSource),
+                snapshotService = SnapshotService(PgSnapshotApiDao(dataSource), snapshotClient),
                 reservasjonClient = mockk(relaxed = true),
                 oppgavehåndterer = mockk(relaxed = true),
                 saksbehandlerhåndterer = mockk(relaxed = true),

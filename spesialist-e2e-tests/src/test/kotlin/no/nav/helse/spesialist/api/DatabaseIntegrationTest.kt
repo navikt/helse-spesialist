@@ -2,28 +2,28 @@ package no.nav.helse.spesialist.api
 
 import io.mockk.mockk
 import no.nav.helse.db.DbQuery
+import no.nav.helse.db.api.ArbeidsgiverApiDao.Inntekter
+import no.nav.helse.db.api.EgenAnsattApiDao
+import no.nav.helse.db.api.PgApiVarselRepository
+import no.nav.helse.db.api.PgArbeidsgiverApiDao
+import no.nav.helse.db.api.PgNotatApiDao
+import no.nav.helse.db.api.PgOppgaveApiDao
+import no.nav.helse.db.api.PgOverstyringApiDao
+import no.nav.helse.db.api.PgPeriodehistorikkApiDao
+import no.nav.helse.db.api.PgPersonApiDao
+import no.nav.helse.db.api.PgPåVentApiDao
+import no.nav.helse.db.api.PgRisikovurderingApiDao
+import no.nav.helse.db.api.PgTildelingApiDao
+import no.nav.helse.db.api.PgTotrinnsvurderingApiDao
+import no.nav.helse.db.api.PgVergemålApiDao
 import no.nav.helse.objectMapper
-import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
-import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao.Inntekter
 import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
-import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
-import no.nav.helse.spesialist.api.notat.NotatApiDao
-import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
-import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
-import no.nav.helse.spesialist.api.person.PersonApiDao
-import no.nav.helse.spesialist.api.påvent.PåVentApiDao
-import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
-import no.nav.helse.spesialist.api.tildeling.TildelingApiDao
-import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
-import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
-import no.nav.helse.spesialist.api.vergemål.VergemålApiDao
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagEtternavn
 import no.nav.helse.spesialist.test.lagFornavn
@@ -57,18 +57,18 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     val ORGANISASJONSNUMMER = lagOrganisasjonsnummer()
     val ORGANISASJONSNUMMER_GHOST = lagOrganisasjonsnummer()
 
-    protected val apiVarselRepository = ApiVarselRepository(dataSource)
-    protected val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
-    protected val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
-    protected val notatDao = NotatApiDao(dataSource)
-    protected val totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource)
-    protected val påVentApiDao = PåVentApiDao(dataSource)
-    protected val personApiDao = PersonApiDao(dataSource)
-    protected val tildelingApiDao = TildelingApiDao(dataSource)
-    protected val overstyringApiDao = OverstyringApiDao(dataSource)
-    protected val oppgaveApiDao = OppgaveApiDao(dataSource)
-    protected val periodehistorikkApiDao = PeriodehistorikkApiDao(dataSource)
-    protected val vergemålApiDao = VergemålApiDao(dataSource)
+    protected val apiVarselRepository = PgApiVarselRepository(dataSource)
+    protected val arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource)
+    protected val risikovurderingApiDao = PgRisikovurderingApiDao(dataSource)
+    protected val notatDao = PgNotatApiDao(dataSource)
+    protected val totrinnsvurderingApiDao = PgTotrinnsvurderingApiDao(dataSource)
+    protected val påVentApiDao = PgPåVentApiDao(dataSource)
+    protected val personApiDao = PgPersonApiDao(dataSource)
+    protected val tildelingApiDao = PgTildelingApiDao(dataSource)
+    protected val overstyringApiDao = PgOverstyringApiDao(dataSource)
+    protected val oppgaveApiDao = PgOppgaveApiDao(dataSource)
+    protected val periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource)
+    protected val vergemålApiDao = PgVergemålApiDao(dataSource)
 
     protected val egenAnsattApiDao = mockk<EgenAnsattApiDao>(relaxed = true)
     protected val oppgavehåndterer = mockk<Oppgavehåndterer>(relaxed = true)

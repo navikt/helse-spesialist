@@ -23,8 +23,6 @@ dependencies {
     api(libs.bundles.ktor.server)
     api(libs.bundles.ktor.client)
 
-    implementation(libs.bundles.db)
-
     testImplementation(libs.bundles.ktor.server.test)
 }
 

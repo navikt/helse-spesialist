@@ -11,9 +11,9 @@ data class Vedtaksperiode(
     private val skjæringstidspunkt: LocalDate,
     private val varsler: Set<Varsel>,
 ) {
-    internal fun vedtaksperiodeId() = this.vedtaksperiodeId
+    fun vedtaksperiodeId() = this.vedtaksperiodeId
 
-    internal fun tidligereEnnOgSammenhengende(other: Vedtaksperiode): Boolean =
+    fun tidligereEnnOgSammenhengende(other: Vedtaksperiode): Boolean =
         this.fom <= other.tom && this.skjæringstidspunkt == other.skjæringstidspunkt
 
     private fun harAktiveVarsler(): Boolean {

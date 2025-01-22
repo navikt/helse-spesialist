@@ -12,6 +12,10 @@ import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.db.VedtakBegrunnelseFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
+import no.nav.helse.db.api.PgAbonnementDao
+import no.nav.helse.db.api.PgApiGenerasjonRepository
+import no.nav.helse.db.api.PgApiVarselRepository
+import no.nav.helse.db.api.PgOppgaveApiDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.mediator.overstyring.Overstyringlagrer
 import no.nav.helse.mediator.overstyring.Saksbehandlingsmelder
@@ -59,7 +63,6 @@ import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMe
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
-import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.api.feilhåndtering.FinnerIkkeLagtPåVent
 import no.nav.helse.spesialist.api.feilhåndtering.IkkeTilgang
@@ -82,20 +85,17 @@ import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse.Skjonnsfas
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.RAPPORTERT_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.VedtakBegrunnelse
-import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OpphevStans
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
-import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.varsel.Varsel
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.avvisVarsler
 import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.godkjennVarsler
 import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.harAktiveVarsler
-import no.nav.helse.spesialist.api.vedtaksperiode.ApiGenerasjonRepository
 import no.nav.helse.tell
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -112,11 +112,11 @@ class SaksbehandlerMediator(
     private val annulleringRepository: AnnulleringRepository,
 ) : Saksbehandlerhåndterer {
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
-    private val generasjonRepository = ApiGenerasjonRepository(dataSource)
-    private val varselRepository = ApiVarselRepository(dataSource)
-    private val oppgaveApiDao = OppgaveApiDao(dataSource)
+    private val generasjonRepository = PgApiGenerasjonRepository(dataSource)
+    private val varselRepository = PgApiVarselRepository(dataSource)
+    private val oppgaveApiDao = PgOppgaveApiDao(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
-    private val abonnementDao = AbonnementDao(dataSource)
+    private val abonnementDao = PgAbonnementDao(dataSource)
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
     private val påVentDao = PåVentDao(dataSource)

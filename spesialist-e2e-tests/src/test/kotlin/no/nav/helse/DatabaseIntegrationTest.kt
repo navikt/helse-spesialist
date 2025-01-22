@@ -18,6 +18,12 @@ import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.TildelingDao
+import no.nav.helse.db.api.PgAbonnementDao
+import no.nav.helse.db.api.PgArbeidsgiverApiDao
+import no.nav.helse.db.api.PgNotatApiDao
+import no.nav.helse.db.api.PgOppgaveApiDao
+import no.nav.helse.db.api.PgOverstyringApiDao
+import no.nav.helse.db.api.PgPeriodehistorikkApiDao
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.MeldingDao
@@ -44,12 +50,6 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vergemal.VergemålDao
-import no.nav.helse.spesialist.api.abonnement.AbonnementDao
-import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
-import no.nav.helse.spesialist.api.notat.NotatApiDao
-import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
-import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.spesialist.typer.Kjønn
@@ -127,18 +127,18 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     internal val personDao = PersonDao(session)
     internal val oppgaveDao = PgOppgaveDao(dataSource)
-    internal val oppgaveApiDao = OppgaveApiDao(dataSource)
-    internal val notatApiDao = NotatApiDao(dataSource)
-    internal val periodehistorikkApiDao = PeriodehistorikkApiDao(dataSource)
+    internal val oppgaveApiDao = PgOppgaveApiDao(dataSource)
+    internal val notatApiDao = PgNotatApiDao(dataSource)
+    internal val periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource)
     internal val historikkinnslagRepository = PgPeriodehistorikkDao(dataSource)
     internal val arbeidsforholdDao = ArbeidsforholdDao(session)
-    internal val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
+    internal val arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource)
     internal val vedtakDao = PgVedtakDao(dataSource)
     internal val commandContextDao = CommandContextDao(dataSource)
     internal val tildelingDao = TildelingDao(dataSource)
     internal val saksbehandlerDao = SaksbehandlerDao(dataSource)
     internal val overstyringDao = OverstyringDao(session)
-    internal val overstyringApiDao = OverstyringApiDao(dataSource)
+    internal val overstyringApiDao = PgOverstyringApiDao(dataSource)
     internal val reservasjonDao = ReservasjonDao(session)
     internal val meldingDao = MeldingDao(dataSource)
     internal val meldingDuplikatkontrollDao = MeldingDuplikatkontrollDao(dataSource)
@@ -146,7 +146,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val automatiseringDao = AutomatiseringDao(session)
     internal val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(session)
     internal val egenAnsattDao = EgenAnsattDao(session)
-    internal val abonnementDao = AbonnementDao(dataSource)
+    internal val abonnementDao = PgAbonnementDao(dataSource)
     internal val utbetalingDao = UtbetalingDao(session)
     internal val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
     internal val vergemålDao = VergemålDao(session)

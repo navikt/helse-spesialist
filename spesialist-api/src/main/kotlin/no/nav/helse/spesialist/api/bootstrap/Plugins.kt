@@ -29,7 +29,7 @@ import java.util.UUID
 private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 private val logg = LoggerFactory.getLogger("SpesialistApp")
 
-internal fun Application.installPlugins() {
+fun Application.installPlugins() {
     install(CallId) {
         retrieveFromHeader(HttpHeaders.XRequestId)
         generate {
