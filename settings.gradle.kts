@@ -1,6 +1,6 @@
 rootProject.name = "spesialist"
 include(
-    "spesialist-felles",
+    "spesialist-db-migrations",
     "spesialist-api",
     "spesialist-selve",
     "spesialist-opprydding-dev",

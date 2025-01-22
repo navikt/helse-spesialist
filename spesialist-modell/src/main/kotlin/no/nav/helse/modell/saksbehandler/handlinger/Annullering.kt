@@ -2,6 +2,7 @@ package no.nav.helse.modell.saksbehandler.handlinger
 
 import no.nav.helse.modell.melding.AnnullertUtbetalingEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
+import java.time.LocalDateTime
 import java.util.UUID
 
 class Annullering(
@@ -69,6 +70,15 @@ data class AnnulleringDto(
     val personFagsystemId: String,
     val årsaker: List<AnnulleringArsak>,
     val kommentar: String?,
+)
+
+data class Annullering(
+    val saksbehandlerIdent: String,
+    val arbeidsgiverFagsystemId: String?,
+    val personFagsystemId: String?,
+    val tidspunkt: LocalDateTime,
+    val arsaker: List<String>,
+    val begrunnelse: String?,
 )
 
 data class AnnulleringArsak(

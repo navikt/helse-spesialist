@@ -11,8 +11,6 @@ plugins {
 dependencies {
     api("com.nimbusds:nimbus-jose-jwt:9.37.3")
     api(libs.bundles.db)
-    api(project(":spesialist-felles"))
-    api(project(":spesialist-api"))
     api(project(":spesialist-modell"))
 
     implementation("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryPrometheusVersion")
@@ -20,7 +18,6 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("net.logstash.logback:logstash-logback-encoder:$logbackEncoderVersion")
 
-    testImplementation(testFixtures(project(":spesialist-felles")))
     testImplementation(libs.bundles.ktor.server)
     testImplementation("com.expediagroup:graphql-kotlin-ktor-server:$graphQLKotlinVersion")
     testImplementation(libs.testcontainers.postgresql)
