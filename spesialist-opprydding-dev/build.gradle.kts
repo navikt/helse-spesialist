@@ -14,7 +14,7 @@ dependencies {
     implementation(libs.kotliquery)
     implementation(libs.hikari)
 
-    testImplementation(project(":spesialist-felles"))
+    testImplementation(project(":spesialist-db-migrations"))
     testImplementation(libs.testcontainers.postgresql)
     testImplementation(libs.rapids.and.rivers.test)
     testImplementation(libs.flyway.core)

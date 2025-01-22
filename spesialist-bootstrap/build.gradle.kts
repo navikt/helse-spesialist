@@ -16,7 +16,7 @@ dependencies {
     api(project(":spesialist-db"))
     api(project(":spesialist-selve"))
     api(project(":spesialist-api"))
-    api(project(":spesialist-felles"))
+    api(project(":spesialist-db-migrations"))
     implementation(libs.rapids.and.rivers)
 
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
