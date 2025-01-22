@@ -7,12 +7,12 @@ import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgPeriodehistorikkDao
+import no.nav.helse.db.RepositoryFactory
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.db.VedtakBegrunnelseFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
-import no.nav.helse.db.api.PgAbonnementDao
 import no.nav.helse.db.api.PgApiGenerasjonRepository
 import no.nav.helse.db.api.PgApiVarselRepository
 import no.nav.helse.db.api.PgOppgaveApiDao
@@ -103,6 +103,7 @@ import javax.sql.DataSource
 
 class SaksbehandlerMediator(
     dataSource: DataSource,
+    repositoryFactory: RepositoryFactory,
     private val versjonAvKode: String,
     private val meldingPubliserer: MeldingPubliserer,
     private val oppgaveService: OppgaveService,
@@ -116,7 +117,7 @@ class SaksbehandlerMediator(
     private val varselRepository = PgApiVarselRepository(dataSource)
     private val oppgaveApiDao = PgOppgaveApiDao(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
-    private val abonnementDao = PgAbonnementDao(dataSource)
+    private val abonnementDao = repositoryFactory.createAbonnementDao()
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
     private val påVentDao = PåVentDao(dataSource)

@@ -6,6 +6,7 @@ import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.db.OpptegnelseDao
+import no.nav.helse.db.RepositoryFactoryImpl
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
@@ -87,6 +88,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private val mediator =
         SaksbehandlerMediator(
             dataSource,
+            RepositoryFactoryImpl(dataSource),
             "versjonAvKode",
             meldingPubliserer,
             oppgaveService,

@@ -13,6 +13,7 @@ import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.PoisonPillDao
+import no.nav.helse.db.RepositoryFactoryImpl
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
@@ -181,6 +182,7 @@ class SpesialistApp(
         saksbehandlerMediator =
             SaksbehandlerMediator(
                 dataSource = dataSource,
+                repositoryFactory = RepositoryFactoryImpl(dataSource),
                 versjonAvKode = versjonAvKode,
                 meldingPubliserer = meldingPubliserer,
                 oppgaveService = oppgaveService,

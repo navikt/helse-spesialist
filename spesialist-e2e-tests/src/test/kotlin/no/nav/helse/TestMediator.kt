@@ -8,6 +8,7 @@ import no.nav.helse.db.PgNotatDao
 import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
+import no.nav.helse.db.RepositoryFactoryImpl
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
@@ -75,6 +76,7 @@ internal class TestMediator(
     private val saksbehandlerMediator =
         SaksbehandlerMediator(
             dataSource,
+            RepositoryFactoryImpl(dataSource),
             "versjonAvKode",
             meldingPubliserer,
             oppgaveService,
