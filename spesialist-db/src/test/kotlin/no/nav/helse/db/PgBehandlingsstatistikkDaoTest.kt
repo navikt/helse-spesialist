@@ -14,7 +14,7 @@ import org.junit.jupiter.api.parallel.Isolated
 import java.time.LocalDate
 
 @Isolated
-internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
+internal class PgBehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
 
     private val NOW = LocalDate.now()
 

@@ -7,6 +7,7 @@ import javax.sql.DataSource
 class RepositoriesImpl(dataSource: DataSource) : Repositories {
     override val abonnementDao = PgAbonnementDao(dataSource)
     override val annulleringRepository = PgAnnulleringRepository(dataSource)
+    override val behandlingsstatistikkDao = PgBehandlingsstatistikkDao(dataSource)
 
     override fun withSessionContext(session: Session) = SessionContextImpl(session)
 }

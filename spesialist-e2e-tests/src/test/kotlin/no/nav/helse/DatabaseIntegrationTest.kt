@@ -3,7 +3,6 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.sessionOf
-import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.DbQuery
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.InntektskilderDao
@@ -149,7 +148,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val egenAnsattDao = EgenAnsattDao(session)
     internal val abonnementDao = PgAbonnementDao(dataSource)
     internal val utbetalingDao = UtbetalingDao(session)
-    internal val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
+    internal val behandlingsstatistikkDao = repositories.behandlingsstatistikkDao
     internal val vergemålDao = VergemålDao(session)
     internal val totrinnsvurderingDao = PgTotrinnsvurderingDao(session)
     internal val dokumentDao = PgDokumentDao(dataSource)

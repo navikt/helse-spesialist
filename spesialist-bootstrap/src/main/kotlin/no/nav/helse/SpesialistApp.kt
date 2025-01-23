@@ -3,7 +3,6 @@ package no.nav.helse
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.ktor.server.application.Application
 import no.nav.helse.bootstrap.Environment
-import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgAvviksvurderingDao
 import no.nav.helse.db.PgDialogDao
@@ -68,7 +67,7 @@ class SpesialistApp(
     private val tildelingDao = TildelingDao(dataSource)
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
-    private val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
+    private val behandlingsstatistikkDao = repositories.behandlingsstatistikkDao
     private val notatDao = PgNotatDao(dataSource)
     private val dialogDao = PgDialogDao(dataSource)
     private val totrinnsvurderingDao = PgTotrinnsvurderingDao(dataSource)
