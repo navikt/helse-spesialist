@@ -15,6 +15,7 @@ interface Repositories {
     val periodehistorikkDao: PeriodehistorikkDao
     val totrinnsvurderingDao: TotrinnsvurderingDao
     val vedtakDao: VedtakDao
+    val poisonPillDao: PoisonPillDao
 
     fun withSessionContext(session: Session): SessionContext
 }

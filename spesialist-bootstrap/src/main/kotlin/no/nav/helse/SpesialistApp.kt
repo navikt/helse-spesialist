@@ -4,7 +4,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.ktor.server.application.Application
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.DBRepositories
-import no.nav.helse.db.PoisonPillDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
@@ -171,7 +170,7 @@ class SpesialistApp(
                 repositories = repositories,
                 publiserer = meldingPubliserer,
                 kommandofabrikk = kommandofabrikk,
-                poisonPills = PoisonPillDao(dataSource).poisonPills(),
+                poisonPills = repositories.poisonPillDao.poisonPills(),
             )
         RiverSetup(dataSource, rapidsConnection, meldingMediator).setUp()
         saksbehandlerMediator =

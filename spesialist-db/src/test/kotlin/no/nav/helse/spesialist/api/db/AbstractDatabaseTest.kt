@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.db.DBRepositories
 import org.flywaydb.core.Flyway
 import org.intellij.lang.annotations.Language
 import org.testcontainers.containers.PostgreSQLContainer
@@ -11,6 +12,8 @@ import java.util.UUID
 import javax.sql.DataSource
 
 abstract class AbstractDatabaseTest {
+
+    protected val repositories = DBRepositories(dataSource)
 
     companion object {
         private val postgres = PostgreSQLContainer<Nothing>("postgres:14").apply {

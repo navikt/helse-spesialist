@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.sessionOf
-import no.nav.helse.db.DBRepositories
 import no.nav.helse.db.DbQuery
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.ReservasjonDao
@@ -114,7 +113,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     @AfterEach
     fun tearDown() = session.close()
 
-    protected val repositories = DBRepositories(dataSource)
     internal val personDao = PersonDao(session)
     internal val oppgaveDao = repositories.oppgaveDao
     internal val oppgaveApiDao = PgOppgaveApiDao(dataSource)

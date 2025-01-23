@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-class PoisonPillDaoTest: AbstractDatabaseTest() {
+class PgPoisonPillDaoTest: AbstractDatabaseTest() {
 
-    private val poisonPillDao = PoisonPillDao(dataSource)
+    private val poisonPillDao = repositories.poisonPillDao
 
     @Test
     fun `kan finne poison pills`() {
