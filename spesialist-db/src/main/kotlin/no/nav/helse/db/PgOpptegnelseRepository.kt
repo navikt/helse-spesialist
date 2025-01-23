@@ -9,7 +9,7 @@ import no.nav.helse.spesialist.api.graphql.schema.Opptegnelsetype
 import java.util.UUID
 import javax.sql.DataSource
 
-class OpptegnelseDao(private val queryRunner: QueryRunner) : OpptegnelseRepository, QueryRunner by queryRunner {
+class PgOpptegnelseRepository(private val queryRunner: QueryRunner) : OpptegnelseRepository, QueryRunner by queryRunner {
     constructor(session: Session) : this(MedSession(session))
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 

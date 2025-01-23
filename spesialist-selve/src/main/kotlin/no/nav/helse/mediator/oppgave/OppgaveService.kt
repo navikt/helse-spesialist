@@ -6,10 +6,10 @@ import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OppgavesorteringForDatabase
-import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
+import no.nav.helse.db.Repositories
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.ReservasjonRepository
 import no.nav.helse.db.SaksbehandlerDao
@@ -71,6 +71,7 @@ class OppgaveService(
     private val meldingPubliserer: MeldingPubliserer,
     private val tilgangskontroll: Tilgangskontroll,
     private val tilgangsgrupper: Tilgangsgrupper,
+    private val repositories: Repositories,
 ) : Oppgavehåndterer, Oppgavefinner {
     private val logg = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -80,12 +81,13 @@ class OppgaveService(
             oppgaveDao = PgOppgaveDao(transactionalSession),
             tildelingRepository = TildelingDao(transactionalSession),
             reservasjonRepository = ReservasjonDao(transactionalSession),
-            opptegnelseRepository = OpptegnelseDao(transactionalSession),
+            opptegnelseRepository = repositories.withSessionContext(transactionalSession).opptegnelseRepository,
             totrinnsvurderingDao = PgTotrinnsvurderingDao(transactionalSession),
             saksbehandlerRepository = SaksbehandlerDao(transactionalSession),
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = tilgangskontroll,
             tilgangsgrupper = tilgangsgrupper,
+            repositories = repositories,
         )
 
     internal fun nyOppgave(

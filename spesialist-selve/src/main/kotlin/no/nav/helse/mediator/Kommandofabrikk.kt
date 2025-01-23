@@ -4,7 +4,6 @@ import kotliquery.Session
 import kotliquery.TransactionalSession
 import kotliquery.sessionOf
 import no.nav.helse.db.CommandContextRepository
-import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgAvviksvurderingDao
 import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgOppgaveDao
@@ -124,7 +123,7 @@ class Kommandofabrikk(
             åpneGosysOppgaverRepository = ÅpneGosysOppgaverDao(transactionalSession),
             oppgaveDao = PgOppgaveDao(transactionalSession),
             oppgaveService = transaksjonellOppgaveService(transactionalSession),
-            godkjenningMediator = GodkjenningMediator(OpptegnelseDao(transactionalSession)),
+            godkjenningMediator = GodkjenningMediator(repositories.withSessionContext(transactionalSession).opptegnelseRepository),
             godkjenningsbehov = godkjenningsbehovData,
             automatiseringRepository = AutomatiseringDao(transactionalSession),
         )
@@ -147,7 +146,7 @@ class Kommandofabrikk(
             automatisering = transaksjonellAutomatisering(transactionalSession),
             oppgaveDataForAutomatisering = oppgaveDataForAutomatisering,
             oppgaveService = transaksjonellOppgaveService(transactionalSession),
-            godkjenningMediator = GodkjenningMediator(OpptegnelseDao(transactionalSession)),
+            godkjenningMediator = GodkjenningMediator(repositories.withSessionContext(transactionalSession).opptegnelseRepository),
             søknadsperioder = melding.perioder,
             godkjenningsbehov = godkjenningsbehovData,
             automatiseringRepository = AutomatiseringDao(transactionalSession),
@@ -232,7 +231,7 @@ class Kommandofabrikk(
             fødselsnummer = melding.fødselsnummer(),
             personRepository = PersonDao(transactionalSession),
             oppgaveDao = PgOppgaveDao(transactionalSession),
-            godkjenningMediator = GodkjenningMediator(OpptegnelseDao(transactionalSession)),
+            godkjenningMediator = GodkjenningMediator(repositories.withSessionContext(transactionalSession).opptegnelseRepository),
             godkjenningsbehov = godkjenningsbehovData,
             utbetaling = utbetaling,
         )
@@ -246,7 +245,7 @@ class Kommandofabrikk(
             fødselsnummer = hendelse.fødselsnummer(),
             førsteKjenteDagFinner = { generasjonService.førsteKjenteDag(hendelse.fødselsnummer()) },
             personRepository = PersonDao(transactionalSession),
-            opptegnelseRepository = OpptegnelseDao(transactionalSession),
+            opptegnelseRepository = repositories.withSessionContext(transactionalSession).opptegnelseRepository,
         )
 
     internal fun klargjørTilgangsrelaterteData(
@@ -257,7 +256,7 @@ class Kommandofabrikk(
             fødselsnummer = hendelse.fødselsnummer(),
             personRepository = PersonDao(transactionalSession),
             egenAnsattRepository = EgenAnsattDao(transactionalSession),
-            opptegnelseRepository = OpptegnelseDao(transactionalSession),
+            opptegnelseRepository = repositories.withSessionContext(transactionalSession).opptegnelseRepository,
         )
 
     internal fun overstyringIgangsatt(
@@ -286,7 +285,7 @@ class Kommandofabrikk(
             arbeidsgiverbeløp = hendelse.arbeidsgiverbeløp,
             personbeløp = hendelse.personbeløp,
             utbetalingRepository = UtbetalingDao(session),
-            opptegnelseRepository = OpptegnelseDao(session),
+            opptegnelseRepository = repositories.withSessionContext(session).opptegnelseRepository,
             reservasjonRepository = ReservasjonDao(session),
             oppgaveDao = PgOppgaveDao(session),
             tildelingRepository = TildelingDao(session),
@@ -386,7 +385,7 @@ class Kommandofabrikk(
             oppgaveDao = PgOppgaveDao(session),
             avviksvurderingDao = PgAvviksvurderingDao(session),
             oppgaveService = transaksjonellOppgaveService(session),
-            godkjenningMediator = GodkjenningMediator(OpptegnelseDao(session)),
+            godkjenningMediator = GodkjenningMediator(repositories.withSessionContext(session).opptegnelseRepository),
             totrinnsvurderingService = lagTotrinnsvurderingService(session),
             person = person,
         )

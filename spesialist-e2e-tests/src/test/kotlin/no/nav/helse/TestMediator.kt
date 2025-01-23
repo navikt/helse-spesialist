@@ -2,7 +2,6 @@ package no.nav.helse
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.db.DBRepositories
-import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgNotatDao
 import no.nav.helse.db.PgOppgaveDao
@@ -38,7 +37,7 @@ internal class TestMediator(
     dataSource: DataSource,
 ) {
     private val repositories = DBRepositories(dataSource)
-    private val opptegnelseDao = OpptegnelseDao(dataSource)
+    private val opptegnelseRepository = repositories.opptegnelseRepository
     private val oppgaveDao = PgOppgaveDao(dataSource)
     private val historikkinnslagRepository = PgPeriodehistorikkDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
@@ -59,19 +58,20 @@ internal class TestMediator(
             dialogDao,
         ) { Subsumsjonsmelder("versjonAvKode", meldingPubliserer) }
 
-    private val godkjenningMediator = GodkjenningMediator(opptegnelseDao)
+    private val godkjenningMediator = GodkjenningMediator(opptegnelseRepository)
     private val tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
     private val oppgaveService =
         OppgaveService(
             oppgaveDao = PgOppgaveDao(dataSource),
             tildelingRepository = tildelingDao,
             reservasjonRepository = ReservasjonDao(dataSource),
-            opptegnelseRepository = opptegnelseDao,
+            opptegnelseRepository = opptegnelseRepository,
             totrinnsvurderingDao = totrinnsvurderingDao,
             saksbehandlerRepository = saksbehandlerDao,
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = tilgangsgrupper,
+            repositories = repositories,
         )
 
     private val saksbehandlerMediator =

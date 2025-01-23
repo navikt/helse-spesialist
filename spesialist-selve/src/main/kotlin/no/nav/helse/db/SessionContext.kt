@@ -5,4 +5,5 @@ interface SessionContext {
     val arbeidsgiverDao: ArbeidsgiverDao
     val avviksvurderingDao: AvviksvurderingDao
     val inntektskilderRepository: InntektskilderRepository
+    val opptegnelseRepository: OpptegnelseRepository
 }

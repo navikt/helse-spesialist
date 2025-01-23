@@ -8,6 +8,7 @@ class DBRepositories(dataSource: DataSource) : Repositories {
     override val abonnementDao = PgAbonnementDao(dataSource)
     override val annulleringRepository = PgAnnulleringRepository(dataSource)
     override val behandlingsstatistikkDao = PgBehandlingsstatistikkDao(dataSource)
+    override val opptegnelseRepository = PgOpptegnelseRepository(dataSource)
 
     override fun withSessionContext(session: Session) = DBSessionContext(session)
 }

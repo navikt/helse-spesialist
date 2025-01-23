@@ -3,7 +3,6 @@ package no.nav.helse.mediator
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.AnnulleringRepository
-import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgPeriodehistorikkDao
@@ -117,7 +116,7 @@ class SaksbehandlerMediator(
     private val generasjonRepository = PgApiGenerasjonRepository(dataSource)
     private val varselRepository = PgApiVarselRepository(dataSource)
     private val oppgaveApiDao = PgOppgaveApiDao(dataSource)
-    private val opptegnelseDao = OpptegnelseDao(dataSource)
+    private val opptegnelseRepository = repositories.opptegnelseRepository
     private val abonnementDao = repositories.abonnementDao
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
@@ -422,13 +421,13 @@ class SaksbehandlerMediator(
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         SaksbehandlerLagrer(saksbehandlerDao).lagre(saksbehandler)
         abonnementDao.registrerSistekvensnummer(saksbehandler.oid(), sisteSekvensId)
-        return opptegnelseDao.finnOpptegnelser(saksbehandler.oid())
+        return opptegnelseRepository.finnOpptegnelser(saksbehandler.oid())
     }
 
     override fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi): List<Opptegnelse> {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         SaksbehandlerLagrer(saksbehandlerDao).lagre(saksbehandler)
-        return opptegnelseDao.finnOpptegnelser(saksbehandler.oid())
+        return opptegnelseRepository.finnOpptegnelser(saksbehandler.oid())
     }
 
     override fun hentAvslag(

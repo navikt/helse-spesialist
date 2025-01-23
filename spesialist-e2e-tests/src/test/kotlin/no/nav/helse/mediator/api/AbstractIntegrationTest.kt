@@ -4,7 +4,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.TestRapidHelpers.siste
-import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgPeriodehistorikkDao
@@ -42,12 +41,13 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
             oppgaveDao = PgOppgaveDao(dataSource),
             tildelingRepository = TildelingDao(dataSource),
             reservasjonRepository = reservasjonDao,
-            opptegnelseRepository = OpptegnelseDao(dataSource),
+            opptegnelseRepository = repositories.opptegnelseRepository,
             totrinnsvurderingDao = totrinnsvurderingDao,
             saksbehandlerRepository = SaksbehandlerDao(dataSource),
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = SpeilTilgangsgrupper(testEnv),
+            repositories = repositories
         )
 
     val godkjenningService =

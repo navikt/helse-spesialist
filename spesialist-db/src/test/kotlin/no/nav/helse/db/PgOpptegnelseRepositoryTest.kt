@@ -1,7 +1,7 @@
 package no.nav.helse.db
 
-import no.nav.helse.DatabaseIntegrationTest
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType.UTBETALING_ANNULLERING_OK
@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class OpptegnelseDaoTest : DatabaseIntegrationTest() {
-    private val opptegnelseDao = OpptegnelseDao(session)
+internal class PgOpptegnelseRepositoryTest : DatabaseIntegrationTest() {
+    private val opptegnelseRepository = repositories.withSessionContext(session).opptegnelseRepository
 
     private companion object {
         private val UTBETALING_PAYLOAD = UtbetalingPayload(UUID.randomUUID())
@@ -28,15 +28,15 @@ internal class OpptegnelseDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettSaksbehandler()
         abonnementDao.opprettAbonnement(SAKSBEHANDLER_OID, AKTØR)
-        opptegnelseDao.opprettOpptegnelse(
+        opptegnelseRepository.opprettOpptegnelse(
             FNR,
             UTBETALING_PAYLOAD,
             UTBETALING_ANNULLERING_OK
         )
 
-        opptegnelseDao.opprettOpptegnelse(FNR, GODKJENNINGSBEHOV_PAYLOAD, NY_SAKSBEHANDLEROPPGAVE)
+        opptegnelseRepository.opprettOpptegnelse(FNR, GODKJENNINGSBEHOV_PAYLOAD, NY_SAKSBEHANDLEROPPGAVE)
 
-        val alle = opptegnelseDao.finnOpptegnelser(SAKSBEHANDLER_OID)
+        val alle = opptegnelseRepository.finnOpptegnelser(SAKSBEHANDLER_OID)
         assertEquals(2, alle.size)
 
         alle.first { it.type == Opptegnelsetype.UTBETALING_ANNULLERING_OK }.also { opptegnelse ->
@@ -54,14 +54,14 @@ internal class OpptegnelseDaoTest : DatabaseIntegrationTest() {
     fun `Skal ikke få opptegnelser fra før abonneringstidspunkt`() {
         opprettPerson()
         opprettSaksbehandler()
-        opptegnelseDao.opprettOpptegnelse(
+        opptegnelseRepository.opprettOpptegnelse(
             FNR,
             UTBETALING_PAYLOAD,
             UTBETALING_ANNULLERING_OK
         )
         abonnementDao.opprettAbonnement(SAKSBEHANDLER_OID, AKTØR)
 
-        val alle = opptegnelseDao.finnOpptegnelser(SAKSBEHANDLER_OID)
+        val alle = opptegnelseRepository.finnOpptegnelser(SAKSBEHANDLER_OID)
         assertEquals(0, alle.size)
     }
 }

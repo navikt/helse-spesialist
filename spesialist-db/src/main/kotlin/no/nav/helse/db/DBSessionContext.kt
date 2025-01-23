@@ -6,5 +6,6 @@ class DBSessionContext(session: Session) : SessionContext {
     override val sykefraværstilfelleDao = PgSykefraværstilfelleDao(session)
     override val arbeidsgiverDao = PgArbeidsgiverDao(session)
     override val avviksvurderingDao = PgAvviksvurderingDao(session)
+    override val opptegnelseRepository = PgOpptegnelseRepository(session)
     override val inntektskilderRepository = PgInntektskilderRepository(session, arbeidsgiverDao, avviksvurderingDao)
 }

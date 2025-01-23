@@ -4,7 +4,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.ktor.server.application.Application
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.DBRepositories
-import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgAvviksvurderingDao
 import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgNotatDao
@@ -66,7 +65,7 @@ class SpesialistApp(
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
     private val reservasjonDao = ReservasjonDao(dataSource)
-    private val opptegnelseDao = OpptegnelseDao(dataSource)
+    private val opptegnelseRepository = repositories.opptegnelseRepository
     private val behandlingsstatistikkDao = repositories.behandlingsstatistikkDao
     private val notatDao = PgNotatDao(dataSource)
     private val dialogDao = PgDialogDao(dataSource)
@@ -82,7 +81,7 @@ class SpesialistApp(
 
     private val behandlingsstatistikkService =
         BehandlingsstatistikkService(behandlingsstatistikkDao = behandlingsstatistikkDao)
-    private val godkjenningMediator = GodkjenningMediator(opptegnelseDao)
+    private val godkjenningMediator = GodkjenningMediator(opptegnelseRepository)
     private val stansAutomatiskBehandlingMediator =
         StansAutomatiskBehandlingMediator(
             stansAutomatiskBehandlingDao,
@@ -164,12 +163,13 @@ class SpesialistApp(
                 oppgaveDao = oppgaveDao,
                 tildelingRepository = tildelingDao,
                 reservasjonRepository = reservasjonDao,
-                opptegnelseRepository = opptegnelseDao,
+                opptegnelseRepository = opptegnelseRepository,
                 totrinnsvurderingDao = totrinnsvurderingDao,
                 saksbehandlerRepository = saksbehandlerDao,
                 meldingPubliserer = meldingPubliserer,
                 tilgangskontroll = tilgangskontrollørForReservasjon,
                 tilgangsgrupper = tilgangsgrupper,
+                repositories = repositories,
             )
         meldingMediator =
             MeldingMediator(

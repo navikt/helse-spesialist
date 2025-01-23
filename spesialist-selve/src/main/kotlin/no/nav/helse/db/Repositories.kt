@@ -7,6 +7,7 @@ interface Repositories {
     val abonnementDao: AbonnementDao
     val annulleringRepository: AnnulleringRepository
     val behandlingsstatistikkDao: BehandlingsstatistikkDao
+    val opptegnelseRepository: OpptegnelseRepository
 
     fun withSessionContext(session: Session): SessionContext
 }

@@ -4,8 +4,7 @@ import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.Testdata.godkjenningsbehovData
-import no.nav.helse.db.OpptegnelseDao
-import no.nav.helse.util.januar
+import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.modell.gosysoppgaver.inspektør
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.UtgåendeHendelse
@@ -22,6 +21,7 @@ import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.test.lagSaksbehandlerident
 import no.nav.helse.spesialist.test.lagTilfeldigSaksbehandlerepost
+import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
@@ -31,7 +31,7 @@ import java.util.UUID
 
 internal class GodkjenningMediatorTest {
     private lateinit var context: CommandContext
-    private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
+    private val opptegnelseRepository = mockk<OpptegnelseRepository>(relaxed = true)
     private val hendelserInspektør =
         object : CommandContextObserver {
             private val hendelser = mutableListOf<UtgåendeHendelse>()
@@ -42,7 +42,7 @@ internal class GodkjenningMediatorTest {
                 hendelser.add(hendelse)
             }
         }
-    private val mediator = GodkjenningMediator(opptegnelseDao)
+    private val mediator = GodkjenningMediator(opptegnelseRepository)
 
     private val saksbehandler =
         Saksbehandlerløsning.Saksbehandler(
@@ -62,7 +62,7 @@ internal class GodkjenningMediatorTest {
     fun setup() {
         context = CommandContext(UUID.randomUUID())
         context.nyObserver(hendelserInspektør)
-        clearMocks(opptegnelseDao)
+        clearMocks(opptegnelseRepository)
     }
 
     @Test
@@ -228,12 +228,12 @@ internal class GodkjenningMediatorTest {
 
     private fun assertFerdigbehandletGodkjenningsbehovOpptegnelseOpprettet() =
         verify(exactly = 1) {
-            opptegnelseDao.opprettOpptegnelse(eq(fnr), any(), eq(OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV))
+            opptegnelseRepository.opprettOpptegnelse(eq(fnr), any(), eq(OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV))
         }
 
     private fun assertOpptegnelseIkkeOpprettet() =
         verify(exactly = 0) {
-            opptegnelseDao.opprettOpptegnelse(eq(fnr), any(), eq(OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE))
+            opptegnelseRepository.opprettOpptegnelse(eq(fnr), any(), eq(OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE))
         }
 
     private companion object {

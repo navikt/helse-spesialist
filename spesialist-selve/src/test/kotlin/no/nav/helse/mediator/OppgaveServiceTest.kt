@@ -13,6 +13,7 @@ import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.db.PersonnavnFraDatabase
+import no.nav.helse.db.Repositories
 import no.nav.helse.db.Reservasjon
 import no.nav.helse.db.ReservasjonRepository
 import no.nav.helse.db.SaksbehandlerFraDatabase
@@ -83,6 +84,7 @@ internal class OppgaveServiceTest {
         )
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
+    private val repositories = mockk<Repositories>(relaxed = true)
     private val tildelingRepository = mockk<TildelingRepository>(relaxed = true)
     private val reservasjonRepository = mockk<ReservasjonRepository>(relaxed = true)
     private val opptegnelseRepository = mockk<OpptegnelseRepository>(relaxed = true)
@@ -121,6 +123,7 @@ internal class OppgaveServiceTest {
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = SpeilTilgangsgrupper(testEnv),
+            repositories = repositories
         )
     private val saksbehandlerFraDatabase =
         SaksbehandlerFraDatabase(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT)
