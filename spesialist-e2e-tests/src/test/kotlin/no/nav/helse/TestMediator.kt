@@ -7,7 +7,7 @@ import no.nav.helse.db.PgNotatDao
 import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
-import no.nav.helse.db.RepositoryFactoryImpl
+import no.nav.helse.db.RepositoriesImpl
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
@@ -37,7 +37,7 @@ internal class TestMediator(
     testRapid: TestRapid,
     dataSource: DataSource,
 ) {
-    private val repositoryFactory = RepositoryFactoryImpl(dataSource)
+    private val repositories = RepositoriesImpl(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val oppgaveDao = PgOppgaveDao(dataSource)
     private val historikkinnslagRepository = PgPeriodehistorikkDao(dataSource)
@@ -47,7 +47,7 @@ internal class TestMediator(
     private val tildelingDao = TildelingDao(dataSource)
     private val notatDao = PgNotatDao(dataSource)
     private val dialogDao = PgDialogDao(dataSource)
-    private val annulleringRepository = repositoryFactory.createAnnulleringRepository()
+    private val annulleringRepository = repositories.annulleringRepository
     private val meldingPubliserer = MessageContextMeldingPubliserer(testRapid)
 
     private val stansAutomatiskBehandlingMediator =
@@ -77,7 +77,7 @@ internal class TestMediator(
     private val saksbehandlerMediator =
         SaksbehandlerMediator(
             dataSource,
-            repositoryFactory,
+            repositories,
             "versjonAvKode",
             meldingPubliserer,
             oppgaveService,
@@ -112,7 +112,7 @@ internal class TestMediator(
     private val kommandofabrikk =
         Kommandofabrikk(
             dataSource = dataSource,
-            repositoryFactory = repositoryFactory,
+            repositories = repositories,
             oppgaveService = { oppgaveService },
             godkjenningMediator = godkjenningMediator,
             subsumsjonsmelderProvider = { Subsumsjonsmelder("versjonAvKode", meldingPubliserer) },
@@ -123,7 +123,7 @@ internal class TestMediator(
     init {
         val meldingMediator = MeldingMediator(
             dataSource = dataSource,
-            repositoryFactory = repositoryFactory,
+            repositories = repositories,
             publiserer = meldingPubliserer,
             kommandofabrikk = kommandofabrikk,
             poisonPills = PoisonPills(emptyMap()),

@@ -12,7 +12,7 @@ import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.PoisonPillDao
-import no.nav.helse.db.RepositoryFactoryImpl
+import no.nav.helse.db.RepositoriesImpl
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
@@ -60,7 +60,7 @@ class SpesialistApp(
 
     private val dataSourceBuilder = DataSourceBuilder(env)
     private val dataSource = dataSourceBuilder.getDataSource()
-    private val repositoryFactory = RepositoryFactoryImpl(dataSource)
+    private val repositories = RepositoriesImpl(dataSource)
 
     private val oppgaveDao = PgOppgaveDao(dataSource)
     private val historikkinnslagRepository = PgPeriodehistorikkDao(dataSource)
@@ -150,7 +150,7 @@ class SpesialistApp(
     private val kommandofabrikk =
         Kommandofabrikk(
             dataSource = dataSource,
-            repositoryFactory = repositoryFactory,
+            repositories = repositories,
             oppgaveService = { oppgaveService },
             godkjenningMediator = godkjenningMediator,
             subsumsjonsmelderProvider = { subsumsjonsmelder },
@@ -175,7 +175,7 @@ class SpesialistApp(
         meldingMediator =
             MeldingMediator(
                 dataSource = dataSource,
-                repositoryFactory = repositoryFactory,
+                repositories = repositories,
                 publiserer = meldingPubliserer,
                 kommandofabrikk = kommandofabrikk,
                 poisonPills = PoisonPillDao(dataSource).poisonPills(),
@@ -184,14 +184,14 @@ class SpesialistApp(
         saksbehandlerMediator =
             SaksbehandlerMediator(
                 dataSource = dataSource,
-                repositoryFactory = repositoryFactory,
+                repositories = repositories,
                 versjonAvKode = versjonAvKode,
                 meldingPubliserer = meldingPubliserer,
                 oppgaveService = oppgaveService,
                 tilgangsgrupper = tilgangsgrupper,
                 stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
                 totrinnsvurderingService = totrinnsvurderingService,
-                annulleringRepository = repositoryFactory.createAnnulleringRepository(),
+                annulleringRepository = repositories.annulleringRepository,
             )
         dokumentMediator = DokumentMediator(dokumentDao, meldingPubliserer)
         godkjenningService =

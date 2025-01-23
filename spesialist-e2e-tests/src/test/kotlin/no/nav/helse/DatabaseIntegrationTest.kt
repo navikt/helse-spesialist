@@ -13,7 +13,7 @@ import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.PgVedtakDao
-import no.nav.helse.db.RepositoryFactoryImpl
+import no.nav.helse.db.RepositoriesImpl
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
@@ -125,7 +125,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     @AfterEach
     fun tearDown() = session.close()
 
-    private val repositoryFactory = RepositoryFactoryImpl(dataSource)
+    private val repositories = RepositoriesImpl(dataSource)
     internal val personDao = PersonDao(session)
     internal val oppgaveDao = PgOppgaveDao(dataSource)
     internal val oppgaveApiDao = PgOppgaveApiDao(dataSource)
@@ -157,9 +157,9 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(session)
     internal val notatDao = PgNotatDao(dataSource)
     internal val dialogDao = PgDialogDao(dataSource)
-    internal val annulleringRepository = repositoryFactory.createAnnulleringRepository()
-    private val personService = PersonService(dataSource, repositoryFactory)
-    private val inntektskilderDao = InntektskilderDao(session, repositoryFactory)
+    internal val annulleringRepository = repositories.annulleringRepository
+    private val personService = PersonService(dataSource, repositories)
+    private val inntektskilderDao = InntektskilderDao(session, repositories)
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,

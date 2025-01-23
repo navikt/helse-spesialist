@@ -10,9 +10,9 @@ import no.nav.helse.modell.NyInntektskildeDto
 
 class InntektskilderDao(
     private val session: Session,
-    private val repositoryFactory: RepositoryFactory,
+    private val repositories: Repositories,
 ) : InntektskilderRepository {
-    private val arbeidsgiverDao = repositoryFactory.sessionContextFrom(session).arbeidsgiverDao
+    private val arbeidsgiverDao = repositories.withSessionContext(session).arbeidsgiverDao
     private val avviksvurderingDao = PgAvviksvurderingDao(session)
 
     override fun lagreInntektskilder(inntektskilder: List<InntektskildeDto>) {

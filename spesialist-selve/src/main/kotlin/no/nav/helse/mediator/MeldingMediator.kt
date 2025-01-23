@@ -5,7 +5,7 @@ import kotliquery.sessionOf
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.CommandContextRepository
-import no.nav.helse.db.RepositoryFactory
+import no.nav.helse.db.Repositories
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
@@ -30,7 +30,7 @@ import javax.sql.DataSource
 
 class MeldingMediator(
     private val dataSource: DataSource,
-    private val repositoryFactory: RepositoryFactory,
+    private val repositories: Repositories,
     private val publiserer: MeldingPubliserer,
     private val personDao: PersonDao = PersonDao(dataSource),
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
@@ -39,7 +39,7 @@ class MeldingMediator(
     private val kommandofabrikk: Kommandofabrikk,
     private val dokumentDao: DokumentDao = PgDokumentDao(dataSource),
     private val varselRepository: VarselRepository = VarselRepository(dataSource),
-    private val personService: PersonService = PersonService(dataSource, repositoryFactory),
+    private val personService: PersonService = PersonService(dataSource, repositories),
     private val poisonPills: PoisonPills,
 ) : Personhåndterer {
     private companion object {
