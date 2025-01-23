@@ -7,20 +7,18 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
+import no.nav.helse.db.MeldingDuplikatkontrollDao
 import no.nav.helse.mediator.MeldingMediator
-import no.nav.helse.modell.MeldingDuplikatkontrollDao
 import no.nav.helse.registrerTidsbrukForDuplikatsjekk
 import org.slf4j.LoggerFactory
 import java.util.UUID
-import javax.sql.DataSource
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
 class RiverSetup(
-    private val dataSource: DataSource,
     private val rapidsConnection: RapidsConnection,
     private val mediator: MeldingMediator,
-    private val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao = MeldingDuplikatkontrollDao(dataSource),
+    private val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao,
 ) {
     fun setUp() {
         val delegatedRapid =

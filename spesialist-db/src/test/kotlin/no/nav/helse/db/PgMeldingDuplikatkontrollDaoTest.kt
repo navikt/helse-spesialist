@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class MeldingDuplikatkontrollDaoTest : DatabaseIntegrationTest() {
+internal class PgMeldingDuplikatkontrollDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `sjekk om lagret melding oppfattes som behandlet`() {
         val meldingId = UUID.randomUUID()

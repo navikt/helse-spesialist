@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.sessionOf
 import no.nav.helse.db.DbQuery
 import no.nav.helse.db.EgenskapForDatabase
+import no.nav.helse.db.PgMeldingDuplikatkontrollDao
 import no.nav.helse.db.PgPersonDao
 import no.nav.helse.db.TestMelding
 import no.nav.helse.db.api.PgAbonnementDao
@@ -16,7 +17,6 @@ import no.nav.helse.db.api.PgOverstyringApiDao
 import no.nav.helse.db.api.PgPeriodehistorikkApiDao
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
-import no.nav.helse.modell.MeldingDuplikatkontrollDao
 import no.nav.helse.modell.person.PersonService
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
@@ -114,7 +114,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val overstyringDao = sessionContext.overstyringDao
     internal val overstyringApiDao = PgOverstyringApiDao(dataSource)
     internal val reservasjonDao = sessionContext.reservasjonDao
-    internal val meldingDuplikatkontrollDao = MeldingDuplikatkontrollDao(dataSource)
+    internal val meldingDuplikatkontrollDao = PgMeldingDuplikatkontrollDao(dataSource)
     internal val risikovurderingDao = sessionContext.risikovurderingDao
     internal val automatiseringDao = sessionContext.automatiseringDao
     internal val åpneGosysOppgaverDao = sessionContext.åpneGosysOppgaverDao

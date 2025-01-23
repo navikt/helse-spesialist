@@ -40,6 +40,7 @@ internal class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
                 definisjonDao = repositories.definisjonDao
             ),
             meldingDao = repositories.meldingDao,
+            meldingDuplikatkontrollDao = repositories.meldingDuplikatkontrollDao,
         )
     }
 

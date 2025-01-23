@@ -31,6 +31,7 @@ interface Repositories {
     val definisjonDao: DefinisjonDao
     val varselDao: VarselDao
     val meldingDao: MeldingDao
+    val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao
 
     fun withSessionContext(session: Session): SessionContext
 }

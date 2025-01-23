@@ -126,8 +126,9 @@ internal class TestMediator(
                 definisjonDao = repositories.definisjonDao
             ),
             meldingDao = repositories.meldingDao,
+            meldingDuplikatkontrollDao = repositories.meldingDuplikatkontrollDao,
         )
-        RiverSetup(dataSource, testRapid, meldingMediator).setUp()
+        RiverSetup(testRapid, meldingMediator, repositories.meldingDuplikatkontrollDao).setUp()
     }
 
     internal fun overstyringstyperForVedtaksperiode(vedtaksperiodeId: UUID) =

@@ -39,6 +39,7 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
                 definisjonDao = repositories.definisjonDao
             ),
             meldingDao = repositories.meldingDao,
+            meldingDuplikatkontrollDao = repositories.meldingDuplikatkontrollDao,
         )
 
     @BeforeEach

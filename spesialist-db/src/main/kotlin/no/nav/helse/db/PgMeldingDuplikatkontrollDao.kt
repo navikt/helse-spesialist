@@ -1,4 +1,4 @@
-package no.nav.helse.modell
+package no.nav.helse.db
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -6,8 +6,8 @@ import org.intellij.lang.annotations.Language
 import java.util.UUID
 import javax.sql.DataSource
 
-class MeldingDuplikatkontrollDao(private val dataSource: DataSource) {
-    fun lagre(
+class PgMeldingDuplikatkontrollDao internal constructor(private val dataSource: DataSource) : MeldingDuplikatkontrollDao {
+    override fun lagre(
         meldingId: UUID,
         type: String,
     ) {
@@ -31,7 +31,7 @@ class MeldingDuplikatkontrollDao(private val dataSource: DataSource) {
         }
     }
 
-    fun erBehandlet(meldingId: UUID): Boolean {
+    override fun erBehandlet(meldingId: UUID): Boolean {
         @Language("PostgreSQL")
         val query =
             """
