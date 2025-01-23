@@ -1,6 +1,5 @@
 package no.nav.helse.modell.stoppautomatiskbehandling
 
-import kotliquery.Session
 import no.nav.helse.db.DialogDao
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveDao
@@ -8,7 +7,6 @@ import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
-import no.nav.helse.db.StansAutomatiskBehandlingRepository
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
@@ -30,7 +28,7 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class StansAutomatiskBehandlingMediator(
-    private val stansAutomatiskBehandlingRepository: StansAutomatiskBehandlingRepository,
+    private val stansAutomatiskBehandlingDao: StansAutomatiskBehandlingDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val oppgaveDao: OppgaveDao,
     private val notatDao: NotatDao,
@@ -44,12 +42,11 @@ class StansAutomatiskBehandlingMediator(
 
     object Factory {
         fun stansAutomatiskBehandlingMediator(
-            session: Session,
             sessionContext: SessionContext,
             subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
         ): StansAutomatiskBehandlingMediator =
             StansAutomatiskBehandlingMediator(
-                StansAutomatiskBehandlingDao(session),
+                sessionContext.stansAutomatiskBehandlingDao,
                 sessionContext.periodehistorikkDao,
                 sessionContext.oppgaveDao,
                 sessionContext.notatDao,
@@ -62,17 +59,17 @@ class StansAutomatiskBehandlingMediator(
         handling: Personhandling,
         saksbehandler: Saksbehandler,
     ) {
-        stansAutomatiskBehandlingRepository.lagreFraSpeil(handling.gjelderFødselsnummer())
+        stansAutomatiskBehandlingDao.lagreFraSpeil(handling.gjelderFødselsnummer())
         lagreNotat(handling.gjelderFødselsnummer(), handling.begrunnelse(), saksbehandler.oid())
     }
 
     fun håndter(melding: StansAutomatiskBehandlingMelding) {
-        stansAutomatiskBehandlingRepository.lagreFraISyfo(melding)
+        stansAutomatiskBehandlingDao.lagreFraISyfo(melding)
         lagrePeriodehistorikk(melding.fødselsnummer())
     }
 
     override fun unntattFraAutomatiskGodkjenning(fødselsnummer: String): UnntattFraAutomatiskGodkjenning =
-        stansAutomatiskBehandlingRepository
+        stansAutomatiskBehandlingDao
             .hentFor(fødselsnummer)
             .filtrerGjeldendeStopp()
             .tilUnntattFraAutomatiskGodkjenning()
@@ -83,7 +80,7 @@ class StansAutomatiskBehandlingMediator(
         organisasjonsnummer: String,
     ): Boolean {
         val stoppmeldinger =
-            stansAutomatiskBehandlingRepository.hentFor(fødselsnummer).filtrerGjeldendeStopp().map {
+            stansAutomatiskBehandlingDao.hentFor(fødselsnummer).filtrerGjeldendeStopp().map {
                 StoppknappmeldingForSubsumsjon(it.årsaker, it.meldingId!!)
             }
         sendSubsumsjonMeldinger(stoppmeldinger, fødselsnummer, vedtaksperiodeId, organisasjonsnummer)

@@ -13,4 +13,5 @@ interface SessionContext {
     val totrinnsvurderingDao: TotrinnsvurderingDao
     val vedtakDao: VedtakDao
     val saksbehandlerDao: SaksbehandlerDao
+    val stansAutomatiskBehandlingDao: StansAutomatiskBehandlingDao
 }

@@ -7,7 +7,6 @@ import kotliquery.sessionOf
 import no.nav.helse.db.DbQuery
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.api.PgPeriodehistorikkApiDao
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
@@ -107,7 +106,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val egenAnsattDao = EgenAnsattDao(session)
     internal val totrinnsvurderingDao = repositories.withSessionContext(session).totrinnsvurderingDao
     internal val påVentDao = PåVentDao(session)
-    internal val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(session)
+    internal val stansAutomatiskBehandlingDao = repositories.withSessionContext(session).stansAutomatiskBehandlingDao
     internal val notatDao = repositories.notatDao
     internal val dialogDao = repositories.dialogDao
     internal val annulleringRepository = repositories.annulleringRepository

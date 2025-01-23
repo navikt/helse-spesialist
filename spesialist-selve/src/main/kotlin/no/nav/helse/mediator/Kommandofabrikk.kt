@@ -311,7 +311,6 @@ class Kommandofabrikk(
     ) = ikkesuspenderendeCommand {
         StansAutomatiskBehandlingMediator.Factory
             .stansAutomatiskBehandlingMediator(
-                session,
                 repositories.withSessionContext(session),
                 subsumsjonsmelderProvider,
             ).håndter(hendelse)

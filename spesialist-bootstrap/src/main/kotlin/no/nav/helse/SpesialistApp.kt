@@ -5,7 +5,6 @@ import io.ktor.server.application.Application
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.DBRepositories
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.kafka.RiverSetup
@@ -63,7 +62,7 @@ class SpesialistApp(
     private val dialogDao = repositories.dialogDao
     private val totrinnsvurderingDao = repositories.totrinnsvurderingDao
     private val dokumentDao = PgDokumentDao(dataSource)
-    private val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(dataSource)
+    private val stansAutomatiskBehandlingDao = repositories.stansAutomatiskBehandlingDao
 
     private lateinit var meldingMediator: MeldingMediator
     private lateinit var saksbehandlerMediator: SaksbehandlerMediator

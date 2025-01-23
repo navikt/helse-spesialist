@@ -63,7 +63,6 @@ internal class Automatisering(
                 risikovurderingRepository = RisikovurderingDao(transactionalSession),
                 stansAutomatiskBehandlinghåndterer =
                     StansAutomatiskBehandlingMediator.Factory.stansAutomatiskBehandlingMediator(
-                        transactionalSession,
                         sessionContext,
                         subsumsjonsmelderProvider,
                     ),
