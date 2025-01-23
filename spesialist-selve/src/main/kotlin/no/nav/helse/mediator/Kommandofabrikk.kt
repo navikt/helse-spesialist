@@ -12,7 +12,6 @@ import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.automatisering.Automatisering
-import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommand
@@ -116,7 +115,7 @@ class Kommandofabrikk(
             oppgaveService = transaksjonellOppgaveService(transactionalSession),
             godkjenningMediator = GodkjenningMediator(repositories.withSessionContext(transactionalSession).opptegnelseRepository),
             godkjenningsbehov = godkjenningsbehovData,
-            automatiseringRepository = AutomatiseringDao(transactionalSession),
+            automatiseringDao = repositories.withSessionContext(transactionalSession).automatiseringDao,
         )
     }
 
@@ -140,7 +139,7 @@ class Kommandofabrikk(
             godkjenningMediator = GodkjenningMediator(repositories.withSessionContext(transactionalSession).opptegnelseRepository),
             søknadsperioder = melding.perioder,
             godkjenningsbehov = godkjenningsbehovData,
-            automatiseringRepository = AutomatiseringDao(transactionalSession),
+            automatiseringDao = repositories.withSessionContext(transactionalSession).automatiseringDao,
         )
     }
 
@@ -372,7 +371,7 @@ class Kommandofabrikk(
             risikovurderingRepository = RisikovurderingDao(session),
             påVentRepository = PåVentDao(session),
             overstyringRepository = OverstyringDao(session),
-            automatiseringRepository = AutomatiseringDao(session),
+            automatiseringDao = repositories.withSessionContext(session).automatiseringDao,
             oppgaveDao = repositories.withSessionContext(session).oppgaveDao,
             avviksvurderingDao = repositories.withSessionContext(session).avviksvurderingDao,
             oppgaveService = transaksjonellOppgaveService(session),

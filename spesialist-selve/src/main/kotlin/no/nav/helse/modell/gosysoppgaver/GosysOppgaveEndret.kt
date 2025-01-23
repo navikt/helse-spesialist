@@ -2,7 +2,7 @@ package no.nav.helse.modell.gosysoppgaver
 
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.TransactionalSession
-import no.nav.helse.db.AutomatiseringRepository
+import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.ÅpneGosysOppgaverRepository
 import no.nav.helse.mediator.GodkjenningMediator
@@ -60,7 +60,7 @@ internal class GosysOppgaveEndretCommand(
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
     godkjenningsbehov: GodkjenningsbehovData,
-    automatiseringRepository: AutomatiseringRepository,
+    automatiseringDao: AutomatiseringDao,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -87,7 +87,7 @@ internal class GosysOppgaveEndretCommand(
                 utbetaling = utbetaling,
                 sykefraværstilfelle = sykefraværstilfelle,
                 godkjenningsbehov = godkjenningsbehov,
-                automatiseringRepository = automatiseringRepository,
+                automatiseringDao = automatiseringDao,
             ),
         )
 }

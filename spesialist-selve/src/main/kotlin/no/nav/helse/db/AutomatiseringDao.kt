@@ -1,9 +1,8 @@
 package no.nav.helse.db
 
-import no.nav.helse.modell.automatisering.AutomatiseringDto
 import java.util.UUID
 
-internal interface AutomatiseringRepository {
+interface AutomatiseringDao {
     fun plukketUtTilStikkprøve(
         vedtaksperiodeId: UUID,
         hendelseId: UUID,
@@ -50,3 +49,11 @@ internal interface AutomatiseringRepository {
 
     fun finnVedtaksperiode(vedtaksperiodeId: UUID): Long?
 }
+
+data class AutomatiseringDto(
+    val automatisert: Boolean,
+    val vedtaksperiodeId: UUID,
+    val hendelseId: UUID,
+    val problemer: List<String>,
+    val utbetalingId: UUID?,
+)

@@ -1,7 +1,7 @@
 package no.nav.helse.modell.automatisering
 
 import kotliquery.TransactionalSession
-import no.nav.helse.db.AutomatiseringRepository
+import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.GenerasjonDao
 import no.nav.helse.db.MeldingRepository
@@ -40,7 +40,7 @@ import java.util.UUID
 internal class Automatisering(
     private val risikovurderingRepository: RisikovurderingRepository,
     private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
-    private val automatiseringRepository: AutomatiseringRepository,
+    private val automatiseringDao: AutomatiseringDao,
     private val åpneGosysOppgaverRepository: ÅpneGosysOppgaverRepository,
     private val vergemålRepository: VergemålRepository,
     private val personRepository: PersonRepository,
@@ -65,7 +65,7 @@ internal class Automatisering(
                         sessionContext,
                         subsumsjonsmelderProvider,
                     ),
-                automatiseringRepository = AutomatiseringDao(transactionalSession),
+                automatiseringDao = sessionContext.automatiseringDao,
                 åpneGosysOppgaverRepository = ÅpneGosysOppgaverDao(transactionalSession),
                 vergemålRepository = VergemålDao(transactionalSession),
                 personRepository = PersonDao(transactionalSession),
@@ -88,8 +88,8 @@ internal class Automatisering(
         vedtaksperiodeId: UUID,
         hendelseId: UUID,
     ) {
-        automatiseringRepository.settAutomatiseringInaktiv(vedtaksperiodeId, hendelseId)
-        automatiseringRepository.settAutomatiseringProblemInaktiv(vedtaksperiodeId, hendelseId)
+        automatiseringDao.settAutomatiseringInaktiv(vedtaksperiodeId, hendelseId)
+        automatiseringDao.settAutomatiseringProblemInaktiv(vedtaksperiodeId, hendelseId)
     }
 
     internal fun utfør(
@@ -308,7 +308,7 @@ internal class Automatisering(
     fun erStikkprøve(
         vedtaksperiodeId: UUID,
         hendelseId: UUID,
-    ) = automatiseringRepository.plukketUtTilStikkprøve(vedtaksperiodeId, hendelseId)
+    ) = automatiseringDao.plukketUtTilStikkprøve(vedtaksperiodeId, hendelseId)
 }
 
 typealias PlukkTilManuell<String> = (String?) -> Boolean

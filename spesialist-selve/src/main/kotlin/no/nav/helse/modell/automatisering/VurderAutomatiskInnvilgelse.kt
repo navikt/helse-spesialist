@@ -1,7 +1,7 @@
 package no.nav.helse.modell.automatisering
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.db.AutomatiseringRepository
+import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.Command
@@ -18,7 +18,7 @@ internal class VurderAutomatiskInnvilgelse(
     private val utbetaling: Utbetaling,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val godkjenningsbehov: GodkjenningsbehovData,
-    private val automatiseringRepository: AutomatiseringRepository,
+    private val automatiseringDao: AutomatiseringDao,
     private val oppgaveService: OppgaveService,
 ) : Command {
     private companion object {
@@ -76,15 +76,15 @@ internal class VurderAutomatiskInnvilgelse(
     }
 
     private fun manuellSaksbehandling(problemer: List<String>) {
-        automatiseringRepository.manuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId, utbetalingId)
+        automatiseringDao.manuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId, utbetalingId)
     }
 
     private fun stikkprøve() {
-        automatiseringRepository.stikkprøve(vedtaksperiodeId, hendelseId, utbetalingId)
+        automatiseringDao.stikkprøve(vedtaksperiodeId, hendelseId, utbetalingId)
     }
 
     private fun automatiserSaksbehandling(context: CommandContext) {
-        automatiseringRepository.automatisert(vedtaksperiodeId, hendelseId, utbetalingId)
+        automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetalingId)
         godkjenningMediator.automatiskUtbetaling(context, godkjenningsbehov, utbetaling)
         oppgaveService.avbrytOppgaveFor(vedtaksperiodeId)
     }

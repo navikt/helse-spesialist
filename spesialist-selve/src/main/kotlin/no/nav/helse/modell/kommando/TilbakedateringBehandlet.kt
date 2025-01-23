@@ -2,7 +2,7 @@ package no.nav.helse.modell.kommando
 
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.TransactionalSession
-import no.nav.helse.db.AutomatiseringRepository
+import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
@@ -65,7 +65,7 @@ internal class TilbakedateringGodkjentCommand(
     godkjenningMediator: GodkjenningMediator,
     søknadsperioder: List<Periode>,
     godkjenningsbehov: GodkjenningsbehovData,
-    automatiseringRepository: AutomatiseringRepository,
+    automatiseringDao: AutomatiseringDao,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -85,7 +85,7 @@ internal class TilbakedateringGodkjentCommand(
                 utbetaling = utbetaling,
                 sykefraværstilfelle = sykefraværstilfelle,
                 godkjenningsbehov = godkjenningsbehov,
-                automatiseringRepository = automatiseringRepository,
+                automatiseringDao = automatiseringDao,
             ),
         )
 }

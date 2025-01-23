@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.Testdata.godkjenningsbehovData
-import no.nav.helse.db.AutomatiseringRepository
+import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.GodkjenningMediator
@@ -37,7 +37,7 @@ internal class VurderAutomatiskInnvilgelseTest {
 
     private val automatisering = mockk<Automatisering>(relaxed = true)
     private val behandling = Behandling(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
-    private val automatiseringRepository = mockk<AutomatiseringRepository>(relaxed = true)
+    private val automatiseringDao = mockk<AutomatiseringDao>(relaxed = true)
     private val command =
         VurderAutomatiskInnvilgelse(
             automatisering,
@@ -58,7 +58,7 @@ internal class VurderAutomatiskInnvilgelseTest {
                 periodetype = periodetype,
                 json = """{ "@event_name": "behov" }"""
             ),
-            automatiseringRepository = automatiseringRepository,
+            automatiseringDao = automatiseringDao,
             oppgaveService = mockk(relaxed = true),
         )
 
@@ -100,8 +100,8 @@ internal class VurderAutomatiskInnvilgelseTest {
     fun `automatiserer når resultat er at perioden kan automatiseres`() {
         every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
         assertTrue(command.execute(context))
-        verify(exactly = 1) { automatiseringRepository.automatisert(vedtaksperiodeId, hendelseId, utbetalingId) }
-        verify(exactly = 0) { automatiseringRepository.manuellSaksbehandling(any(), any(), any(), any()) }
+        verify(exactly = 1) { automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetalingId) }
+        verify(exactly = 0) { automatiseringDao.manuellSaksbehandling(any(), any(), any(), any()) }
     }
 
     @Test
@@ -109,16 +109,16 @@ internal class VurderAutomatiskInnvilgelseTest {
         val problemer = listOf("Problem 1", "Problem 2")
         every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanIkkeAutomatiseres(problemer)
         assertTrue(command.execute(context))
-        verify(exactly = 0) { automatiseringRepository.automatisert(any(), any(), any()) }
-        verify(exactly = 1) { automatiseringRepository.manuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId, utbetalingId) }
+        verify(exactly = 0) { automatiseringDao.automatisert(any(), any(), any()) }
+        verify(exactly = 1) { automatiseringDao.manuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId, utbetalingId) }
     }
 
     @Test
     fun `automatiserer ikke når resultat er at perioden er stikkprøve`() {
         every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.Stikkprøve("En årsak")
         assertTrue(command.execute(context))
-        verify(exactly = 0) { automatiseringRepository.automatisert(any(), any(), any()) }
-        verify(exactly = 1) { automatiseringRepository.stikkprøve(vedtaksperiodeId, hendelseId, utbetalingId) }
+        verify(exactly = 0) { automatiseringDao.automatisert(any(), any(), any()) }
+        verify(exactly = 1) { automatiseringDao.stikkprøve(vedtaksperiodeId, hendelseId, utbetalingId) }
     }
 
     @Test

@@ -1,4 +1,4 @@
-package no.nav.helse.modell.automatisering
+package no.nav.helse.db
 
 import kotliquery.Row
 import kotliquery.Session
@@ -6,10 +6,9 @@ import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.HelseDao.Companion.list
 import no.nav.helse.HelseDao.Companion.single
 import no.nav.helse.HelseDao.Companion.update
-import no.nav.helse.db.AutomatiseringRepository
 import java.util.UUID
 
-class AutomatiseringDao(val session: Session) : AutomatiseringRepository {
+class PgAutomatiseringDao(val session: Session) : AutomatiseringDao {
     override fun settAutomatiseringInaktiv(
         vedtaksperiodeId: UUID,
         hendelseId: UUID,
@@ -171,11 +170,3 @@ class AutomatiseringDao(val session: Session) : AutomatiseringRepository {
         utbetalingId = row.stringOrNull("utbetaling_id")?.let(UUID::fromString),
     )
 }
-
-data class AutomatiseringDto(
-    val automatisert: Boolean,
-    val vedtaksperiodeId: UUID,
-    val hendelseId: UUID,
-    val problemer: List<String>,
-    val utbetalingId: UUID?,
-)

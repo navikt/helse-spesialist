@@ -16,7 +16,6 @@ import no.nav.helse.db.api.PgPeriodehistorikkApiDao
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.MeldingDuplikatkontrollDao
-import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.dokument.PgDokumentDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
@@ -124,7 +123,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val reservasjonDao = repositories.withSessionContext(session).reservasjonDao
     internal val meldingDuplikatkontrollDao = MeldingDuplikatkontrollDao(dataSource)
     internal val risikovurderingDao = RisikovurderingDao(session)
-    internal val automatiseringDao = AutomatiseringDao(session)
+    internal val automatiseringDao = repositories.withSessionContext(session).automatiseringDao
     internal val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(session)
     internal val egenAnsattDao = EgenAnsattDao(session)
     internal val abonnementDao = PgAbonnementDao(dataSource)

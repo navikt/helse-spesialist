@@ -2,6 +2,7 @@ package no.nav.helse.modell.automatisering
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.GenerasjonDao
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.modell.MeldingDao
@@ -87,7 +88,7 @@ internal class AutomatiseringTest {
         Automatisering(
             risikovurderingRepository = risikovurderingDaoMock,
             stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlingMediatorMock,
-            automatiseringRepository = automatiseringDaoMock,
+            automatiseringDao = automatiseringDaoMock,
             åpneGosysOppgaverRepository = åpneGosysOppgaverDaoMock,
             vergemålRepository = vergemålDaoMock,
             personRepository = personDaoMock,

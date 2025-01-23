@@ -1,9 +1,8 @@
 package no.nav.helse.db
 
-import no.nav.helse.DatabaseIntegrationTest
-import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.DatabaseIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -12,8 +11,9 @@ import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
-internal class AutomatiseringDaoTest : DatabaseIntegrationTest() {
+internal class PgAutomatiseringDaoTest : DatabaseIntegrationTest() {
 
     @BeforeEach
     fun setup() {
