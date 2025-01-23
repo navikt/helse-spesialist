@@ -73,10 +73,12 @@ internal class TestMediator(
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = tilgangsgrupper,
         )
+    private val repositoryFactory = RepositoryFactoryImpl(dataSource)
+
     private val saksbehandlerMediator =
         SaksbehandlerMediator(
             dataSource,
-            RepositoryFactoryImpl(dataSource),
+            repositoryFactory,
             "versjonAvKode",
             meldingPubliserer,
             oppgaveService,
@@ -111,6 +113,7 @@ internal class TestMediator(
     private val kommandofabrikk =
         Kommandofabrikk(
             dataSource = dataSource,
+            repositoryFactory = repositoryFactory,
             oppgaveService = { oppgaveService },
             godkjenningMediator = godkjenningMediator,
             subsumsjonsmelderProvider = { Subsumsjonsmelder("versjonAvKode", meldingPubliserer) },
@@ -121,7 +124,7 @@ internal class TestMediator(
     init {
         val meldingMediator = MeldingMediator(
             dataSource = dataSource,
-            repositoryFactory = RepositoryFactoryImpl(dataSource),
+            repositoryFactory = repositoryFactory,
             publiserer = meldingPubliserer,
             kommandofabrikk = kommandofabrikk,
             poisonPills = PoisonPills(emptyMap()),

@@ -34,7 +34,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class OverstyringDaoTest : DatabaseIntegrationTest() {
-    private val inntektskilderDao = InntektskilderDao(session)
+    private val inntektskilderDao = InntektskilderDao(session, RepositoryFactoryImpl(dataSource))
     private val PERSON_FORNAVN = "Per"
     private val PERSON_ETTERNAVN = "Son"
     private val PERSON_FØDSELSDATO = LocalDate.of(1998, 4, 20)

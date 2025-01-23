@@ -1,7 +1,7 @@
 package no.nav.helse.db
 
-import no.nav.helse.DatabaseIntegrationTest
 import kotliquery.sessionOf
+import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import org.junit.jupiter.api.Assertions
@@ -10,14 +10,15 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 
-internal class ArbeidsgiverDaoTest : DatabaseIntegrationTest() {
-    private val inntektskildeDao = InntektskilderDao(sessionOf(dataSource, returnGeneratedKey = true))
+internal class PgArbeidsgiverDaoTest : DatabaseIntegrationTest() {
+    private val inntektskildeDao = InntektskilderDao(sessionOf(dataSource, returnGeneratedKey = true), RepositoryFactoryImpl(
+        dataSource))
 
     @Test
     fun `Oppretter minimal arbeidsgiver`() {
         sessionOf(dataSource).use { session ->
             session.transaction { transaction ->
-                val dao = ArbeidsgiverDao(transaction)
+                val dao = PgArbeidsgiverDao(transaction)
                 dao.insertMinimalArbeidsgiver(ORGNUMMER)
                 assertNotNull(dao.findArbeidsgiverByOrgnummer(ORGNUMMER))
             }

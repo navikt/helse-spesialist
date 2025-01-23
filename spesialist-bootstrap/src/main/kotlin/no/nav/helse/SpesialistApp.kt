@@ -151,6 +151,7 @@ class SpesialistApp(
     private val kommandofabrikk =
         Kommandofabrikk(
             dataSource = dataSource,
+            repositoryFactory = repositoryFactory,
             oppgaveService = { oppgaveService },
             godkjenningMediator = godkjenningMediator,
             subsumsjonsmelderProvider = { subsumsjonsmelder },

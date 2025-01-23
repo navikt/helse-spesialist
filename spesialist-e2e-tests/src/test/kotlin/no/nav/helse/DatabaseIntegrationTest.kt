@@ -160,7 +160,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val dialogDao = PgDialogDao(dataSource)
     internal val annulleringDao = AnnulleringDao(dataSource)
     private val personService = PersonService(dataSource, repositoryFactory)
-    private val inntektskilderDao = InntektskilderDao(session)
+    private val inntektskilderDao = InntektskilderDao(session, repositoryFactory)
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,

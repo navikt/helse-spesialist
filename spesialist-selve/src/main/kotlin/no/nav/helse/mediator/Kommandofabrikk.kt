@@ -12,6 +12,7 @@ import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.PgVedtakDao
+import no.nav.helse.db.RepositoryFactory
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
@@ -76,6 +77,7 @@ typealias Kommandostarter = Personmelding.(Kommandofabrikk.() -> Command?) -> Un
 
 class Kommandofabrikk(
     private val dataSource: DataSource,
+    private val repositoryFactory: RepositoryFactory,
     oppgaveService: () -> OppgaveService,
     private val godkjenningMediator: GodkjenningMediator,
     private val generasjonService: GenerasjonService = GenerasjonService(dataSource),
@@ -213,7 +215,7 @@ class Kommandofabrikk(
             aktørId = hendelse.aktørId,
             organisasjonsnummer = hendelse.organisasjonsnummer,
             personRepository = PersonDao(transactionalSession),
-            inntektskilderRepository = InntektskilderDao(transactionalSession),
+            inntektskilderRepository = InntektskilderDao(transactionalSession, repositoryFactory),
         )
 
     internal fun adressebeskyttelseEndret(
@@ -372,7 +374,7 @@ class Kommandofabrikk(
             vedtakDao = PgVedtakDao(session),
             commandContextRepository = CommandContextDao(session),
             personRepository = PersonDao(session),
-            inntektskilderRepository = InntektskilderDao(session),
+            inntektskilderRepository = InntektskilderDao(session, repositoryFactory),
             arbeidsforholdRepository = ArbeidsforholdDao(session),
             egenAnsattRepository = EgenAnsattDao(session),
             utbetalingRepository = UtbetalingDao(session),

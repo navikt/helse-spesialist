@@ -1,11 +1,10 @@
 package no.nav.helse.db
 
-import no.nav.helse.DatabaseIntegrationTest
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Session
+import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.HelseDao.Companion.single
-import no.nav.helse.util.januar
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.NyInntektskildeDto
@@ -16,6 +15,7 @@ import no.nav.helse.modell.vilkårsprøving.SammenligningsgrunnlagDto
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnavn
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
+import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -24,7 +24,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class InntektskilderDaoTest : DatabaseIntegrationTest() {
-    private val dao = InntektskilderDao(session)
+    private val dao = InntektskilderDao(session, RepositoryFactoryImpl(dataSource))
     private val avviksvurderingDao = PgAvviksvurderingDao(session)
 
     @Test
