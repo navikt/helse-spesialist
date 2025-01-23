@@ -7,4 +7,5 @@ interface SessionContext {
     val inntektskilderRepository: InntektskilderRepository
     val opptegnelseRepository: OpptegnelseRepository
     val dialogDao: DialogDao
+    val notatDao: NotatDao
 }

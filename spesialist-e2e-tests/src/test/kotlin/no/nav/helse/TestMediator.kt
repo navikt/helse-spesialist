@@ -2,7 +2,6 @@ package no.nav.helse
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.db.DBRepositories
-import no.nav.helse.db.PgNotatDao
 import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
@@ -43,7 +42,7 @@ internal class TestMediator(
     private val totrinnsvurderingDao = PgTotrinnsvurderingDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
-    private val notatDao = PgNotatDao(dataSource)
+    private val notatDao = repositories.notatDao
     private val dialogDao = repositories.dialogDao
     private val annulleringRepository = repositories.annulleringRepository
     private val meldingPubliserer = MessageContextMeldingPubliserer(testRapid)

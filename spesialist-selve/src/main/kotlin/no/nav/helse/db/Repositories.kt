@@ -10,6 +10,7 @@ interface Repositories {
     val opptegnelseRepository: OpptegnelseRepository
     val avviksvurderingDao: AvviksvurderingDao
     val dialogDao: DialogDao
+    val notatDao: NotatDao
 
     fun withSessionContext(session: Session): SessionContext
 }
