@@ -31,4 +31,5 @@ class DBSessionContext(session: Session) : SessionContext {
     override val utbetalingDao = PgUtbetalingDao(session)
     override val vergemålDao = PgVergemålDao(session)
     override val meldingDao = PgMeldingDao(session)
+    override val metrikkDao = PgMetrikkDao(session)
 }

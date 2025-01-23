@@ -5,7 +5,7 @@ import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
-import no.nav.helse.mediator.GodkjenningsbehovUtfall
+import no.nav.helse.db.GodkjenningsbehovUtfall
 import no.nav.helse.modell.saksbehandler.handlinger.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.Handling
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold

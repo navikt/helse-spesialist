@@ -4,6 +4,8 @@ import kotliquery.Session
 import kotliquery.TransactionalSession
 import kotliquery.sessionOf
 import no.nav.helse.db.CommandContextDao
+import no.nav.helse.db.GodkjenningsbehovUtfall
+import no.nav.helse.db.MetrikkDao
 import no.nav.helse.db.Repositories
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
@@ -386,14 +388,15 @@ class Kommandofabrikk(
     ) {
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             session.transaction { transactionalSession ->
-                val transactionalCommandContextDao = repositories.withSessionContext(transactionalSession).commandContextDao
+                val sessionContext = repositories.withSessionContext(transactionalSession)
+                val transactionalCommandContextDao = sessionContext.commandContextDao
                 iverksett(
                     command = søknadSendt(melding, transactionalSession),
                     meldingId = melding.id,
                     commandContext = nyContext(melding.id, transactionalCommandContextDao),
                     commandContextObservers = setOf(commandContextObservers),
                     commandContextDao = transactionalCommandContextDao,
-                    metrikkDao = MetrikkDao(transactionalSession),
+                    metrikkDao = sessionContext.metrikkDao,
                 )
             }
         }
@@ -412,7 +415,8 @@ class Kommandofabrikk(
         transactionalSession: TransactionalSession,
     ): Kommandostarter =
         { kommandooppretter ->
-            val transactionalCommandContextDao = repositories.withSessionContext(transactionalSession).commandContextDao
+            val sessionContext = repositories.withSessionContext(transactionalSession)
+            val transactionalCommandContextDao = sessionContext.commandContextDao
             val melding = this
             this@Kommandofabrikk.kommandooppretter()?.let { command ->
                 iverksett(
@@ -421,7 +425,7 @@ class Kommandofabrikk(
                     commandContext = commandContext,
                     commandContextObservers = commandContextObservers,
                     commandContextDao = transactionalCommandContextDao,
-                    metrikkDao = MetrikkDao(transactionalSession),
+                    metrikkDao = sessionContext.metrikkDao,
                 )
             }
         }

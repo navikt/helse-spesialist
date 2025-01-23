@@ -29,4 +29,5 @@ interface SessionContext {
     val utbetalingDao: UtbetalingDao
     val vergemålDao: VergemålDao
     val meldingDao: MeldingDao
+    val metrikkDao: MetrikkDao
 }

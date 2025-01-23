@@ -1,15 +1,12 @@
-package no.nav.helse.mediator
+package no.nav.helse.db
 
 import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.HelseDao.Companion.single
 import java.util.UUID
 
-class MetrikkDao(private val session: Session) {
-    /**
-     Denne funksjonen antar at den kun kalles for en **ferdigbehandlet** kommandokjede for **godkjenningsbehov**.
-     */
-    fun finnUtfallForGodkjenningsbehov(contextId: UUID): GodkjenningsbehovUtfall {
+class PgMetrikkDao internal constructor(private val session: Session) : MetrikkDao {
+    override fun finnUtfallForGodkjenningsbehov(contextId: UUID): GodkjenningsbehovUtfall {
         val antallSuspenderinger =
             asSQL(
                 """
@@ -53,11 +50,4 @@ class MetrikkDao(private val session: Session) {
             GodkjenningsbehovUtfall.AutomatiskAvvist
         }
     }
-}
-
-enum class GodkjenningsbehovUtfall {
-    AutomatiskAvvist,
-    AutomatiskGodkjent,
-    ManuellOppgave,
-    Avbrutt,
 }
