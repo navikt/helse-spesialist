@@ -7,8 +7,6 @@ import kotliquery.sessionOf
 import no.nav.helse.db.DBRepositories
 import no.nav.helse.db.DbQuery
 import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.db.PgOppgaveDao
-import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.db.ReservasjonDao
@@ -120,11 +118,11 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected val repositories = DBRepositories(dataSource)
     internal val personDao = PersonDao(session)
-    internal val oppgaveDao = PgOppgaveDao(dataSource)
+    internal val oppgaveDao = repositories.oppgaveDao
     internal val oppgaveApiDao = PgOppgaveApiDao(dataSource)
     internal val notatApiDao = PgNotatApiDao(dataSource)
     internal val periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource)
-    internal val historikkinnslagRepository = PgPeriodehistorikkDao(dataSource)
+    internal val periodehistorikkDao = repositories.periodehistorikkDao
     internal val arbeidsforholdDao = ArbeidsforholdDao(session)
     internal val arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource)
     internal val vedtakDao = PgVedtakDao(dataSource)

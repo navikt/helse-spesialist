@@ -5,8 +5,6 @@ import no.nav.helse.db.DialogDao
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
-import no.nav.helse.db.PgOppgaveDao
-import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
@@ -52,8 +50,8 @@ class StansAutomatiskBehandlingMediator(
         ): StansAutomatiskBehandlingMediator =
             StansAutomatiskBehandlingMediator(
                 StansAutomatiskBehandlingDao(session),
-                PgPeriodehistorikkDao(session),
-                PgOppgaveDao(session),
+                sessionContext.periodehistorikkDao,
+                sessionContext.oppgaveDao,
                 sessionContext.notatDao,
                 sessionContext.dialogDao,
                 subsumsjonsmelderProvider,

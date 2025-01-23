@@ -2,8 +2,6 @@ package no.nav.helse
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.db.DBRepositories
-import no.nav.helse.db.PgOppgaveDao
-import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
@@ -36,8 +34,8 @@ internal class TestMediator(
 ) {
     private val repositories = DBRepositories(dataSource)
     private val opptegnelseRepository = repositories.opptegnelseRepository
-    private val oppgaveDao = PgOppgaveDao(dataSource)
-    private val historikkinnslagRepository = PgPeriodehistorikkDao(dataSource)
+    private val oppgaveDao = repositories.oppgaveDao
+    private val periodehistorikkDao = repositories.periodehistorikkDao
     private val overstyringDao = OverstyringDao(dataSource)
     private val totrinnsvurderingDao = PgTotrinnsvurderingDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
@@ -50,7 +48,7 @@ internal class TestMediator(
     private val stansAutomatiskBehandlingMediator =
         StansAutomatiskBehandlingMediator(
             StansAutomatiskBehandlingDao(dataSource),
-            historikkinnslagRepository,
+            periodehistorikkDao,
             oppgaveDao,
             notatDao,
             dialogDao,
@@ -60,7 +58,7 @@ internal class TestMediator(
     private val tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
     private val oppgaveService =
         OppgaveService(
-            oppgaveDao = PgOppgaveDao(dataSource),
+            oppgaveDao = repositories.oppgaveDao,
             tildelingRepository = tildelingDao,
             reservasjonRepository = ReservasjonDao(dataSource),
             opptegnelseRepository = opptegnelseRepository,
@@ -85,7 +83,7 @@ internal class TestMediator(
                 TotrinnsvurderingService(
                     totrinnsvurderingDao = totrinnsvurderingDao,
                     oppgaveDao = oppgaveDao,
-                    periodehistorikkDao = historikkinnslagRepository,
+                    periodehistorikkDao = periodehistorikkDao,
                     dialogDao = dialogDao,
                 ),
             annulleringRepository = annulleringRepository,

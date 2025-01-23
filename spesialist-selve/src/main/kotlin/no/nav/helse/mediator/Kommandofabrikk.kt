@@ -4,8 +4,6 @@ import kotliquery.Session
 import kotliquery.TransactionalSession
 import kotliquery.sessionOf
 import no.nav.helse.db.CommandContextRepository
-import no.nav.helse.db.PgOppgaveDao
-import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.db.Repositories
@@ -119,7 +117,7 @@ class Kommandofabrikk(
             oppgavedataForAutomatisering = oppgaveDataForAutomatisering,
             automatisering = transaksjonellAutomatisering(transactionalSession),
             åpneGosysOppgaverRepository = ÅpneGosysOppgaverDao(transactionalSession),
-            oppgaveDao = PgOppgaveDao(transactionalSession),
+            oppgaveDao = repositories.withSessionContext(transactionalSession).oppgaveDao,
             oppgaveService = transaksjonellOppgaveService(transactionalSession),
             godkjenningMediator = GodkjenningMediator(repositories.withSessionContext(transactionalSession).opptegnelseRepository),
             godkjenningsbehov = godkjenningsbehovData,
@@ -155,7 +153,7 @@ class Kommandofabrikk(
         fødselsnummer: String,
         session: Session,
     ): OppgaveDataForAutomatisering? {
-        val oppgaveDao = PgOppgaveDao(session)
+        val oppgaveDao = repositories.withSessionContext(session).oppgaveDao
         return oppgaveDao.finnOppgaveId(fødselsnummer)?.let { oppgaveId ->
             sikkerlogg.info("Fant en oppgave for {}: {}", fødselsnummer, oppgaveId)
             val oppgaveDataForAutomatisering = oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)
@@ -183,12 +181,12 @@ class Kommandofabrikk(
         VedtaksperiodeReberegnetCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             vedtaksperiode = vedtaksperiode,
-            periodehistorikkDao = PgPeriodehistorikkDao(session),
+            periodehistorikkDao = repositories.withSessionContext(session).periodehistorikkDao,
             commandContextRepository = CommandContextDao(session),
             oppgaveService = transaksjonellOppgaveService(session),
             reservasjonRepository = ReservasjonDao(session),
             tildelingRepository = TildelingDao(session),
-            oppgaveDao = PgOppgaveDao(session),
+            oppgaveDao = repositories.withSessionContext(session).oppgaveDao,
             totrinnsvurderingService = lagTotrinnsvurderingService(session),
         )
 
@@ -228,7 +226,7 @@ class Kommandofabrikk(
         return AdressebeskyttelseEndretCommand(
             fødselsnummer = melding.fødselsnummer(),
             personRepository = PersonDao(transactionalSession),
-            oppgaveDao = PgOppgaveDao(transactionalSession),
+            oppgaveDao = repositories.withSessionContext(transactionalSession).oppgaveDao,
             godkjenningMediator = GodkjenningMediator(repositories.withSessionContext(transactionalSession).opptegnelseRepository),
             godkjenningsbehov = godkjenningsbehovData,
             utbetaling = utbetaling,
@@ -285,7 +283,7 @@ class Kommandofabrikk(
             utbetalingRepository = UtbetalingDao(session),
             opptegnelseRepository = repositories.withSessionContext(session).opptegnelseRepository,
             reservasjonRepository = ReservasjonDao(session),
-            oppgaveDao = PgOppgaveDao(session),
+            oppgaveDao = repositories.withSessionContext(session).oppgaveDao,
             tildelingRepository = TildelingDao(session),
             oppgaveService = transaksjonellOppgaveService(session),
             totrinnsvurderingService = lagTotrinnsvurderingService(session),
@@ -304,7 +302,7 @@ class Kommandofabrikk(
             oppgaveService = transaksjonellOppgaveService(session),
             reservasjonRepository = ReservasjonDao(session),
             tildelingRepository = TildelingDao(session),
-            oppgaveDao = PgOppgaveDao(session),
+            oppgaveDao = repositories.withSessionContext(session).oppgaveDao,
             totrinnsvurderingService = lagTotrinnsvurderingService(session),
         )
 
@@ -381,7 +379,7 @@ class Kommandofabrikk(
             påVentRepository = PåVentDao(session),
             overstyringRepository = OverstyringDao(session),
             automatiseringRepository = AutomatiseringDao(session),
-            oppgaveDao = PgOppgaveDao(session),
+            oppgaveDao = repositories.withSessionContext(session).oppgaveDao,
             avviksvurderingDao = repositories.withSessionContext(session).avviksvurderingDao,
             oppgaveService = transaksjonellOppgaveService(session),
             godkjenningMediator = GodkjenningMediator(repositories.withSessionContext(session).opptegnelseRepository),
@@ -494,8 +492,8 @@ class Kommandofabrikk(
     private fun lagTotrinnsvurderingService(session: Session) =
         TotrinnsvurderingService(
             PgTotrinnsvurderingDao(session),
-            PgOppgaveDao(session),
-            PgPeriodehistorikkDao(session),
+            repositories.withSessionContext(session).oppgaveDao,
+            repositories.withSessionContext(session).periodehistorikkDao,
             repositories.withSessionContext(session).dialogDao,
         )
 }

@@ -11,6 +11,8 @@ interface Repositories {
     val avviksvurderingDao: AvviksvurderingDao
     val dialogDao: DialogDao
     val notatDao: NotatDao
+    val oppgaveDao: OppgaveDao
+    val periodehistorikkDao: PeriodehistorikkDao
 
     fun withSessionContext(session: Session): SessionContext
 }

@@ -4,8 +4,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.TestRapidHelpers.siste
-import no.nav.helse.db.PgOppgaveDao
-import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
@@ -29,15 +27,15 @@ import org.junit.jupiter.api.Assertions.assertTrue
 internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     protected val testRapid = __ikke_bruk_denne
     private val meldingPubliserer: MeldingPubliserer = MessageContextMeldingPubliserer(testRapid)
-    protected val oppgaveDao = PgOppgaveDao(dataSource)
+    protected val oppgaveDao = repositories.oppgaveDao
     private val reservasjonDao = ReservasjonDao(dataSource)
-    private val historikkinnslagRepository = PgPeriodehistorikkDao(dataSource)
+    private val periodehistorikkDao = repositories.periodehistorikkDao
     private val totrinnsvurderingDao = PgTotrinnsvurderingDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
 
     private val oppgaveService =
         OppgaveService(
-            oppgaveDao = PgOppgaveDao(dataSource),
+            oppgaveDao = oppgaveDao,
             tildelingRepository = TildelingDao(dataSource),
             reservasjonRepository = reservasjonDao,
             opptegnelseRepository = repositories.opptegnelseRepository,
@@ -62,11 +60,12 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
                 TotrinnsvurderingService(
                     totrinnsvurderingDao,
                     oppgaveDao,
-                    historikkinnslagRepository,
+                    periodehistorikkDao,
                     repositories.dialogDao,
                 ),
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
-            dialogDao = repositories.dialogDao
+            dialogDao = repositories.dialogDao,
+            periodehistorikkDao = periodehistorikkDao,
         )
 
     protected fun sisteOppgaveId() = testRapid.inspektør.oppgaveId()

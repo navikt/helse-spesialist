@@ -68,7 +68,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private val stansAutomatiskBehandlingMediator =
         StansAutomatiskBehandlingMediator(
             stansAutomatiskBehandlingDao,
-            historikkinnslagRepository,
+            periodehistorikkDao,
             oppgaveDao,
             notatDao,
             dialogDao,
@@ -97,7 +97,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             stansAutomatiskBehandlingMediator,TotrinnsvurderingService(
                 totrinnsvurderingDao = totrinnsvurderingDao,
                 oppgaveDao = oppgaveDao,
-                periodehistorikkDao = historikkinnslagRepository,
+                periodehistorikkDao = periodehistorikkDao,
                 dialogDao = dialogDao,
             ),
             annulleringRepository = annulleringRepository,

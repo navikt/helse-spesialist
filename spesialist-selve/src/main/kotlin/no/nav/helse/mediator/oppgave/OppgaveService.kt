@@ -7,7 +7,6 @@ import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.OpptegnelseRepository
-import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.Repositories
 import no.nav.helse.db.ReservasjonDao
@@ -78,7 +77,7 @@ class OppgaveService(
 
     internal fun nyOppgaveService(transactionalSession: TransactionalSession): OppgaveService =
         OppgaveService(
-            oppgaveDao = PgOppgaveDao(transactionalSession),
+            oppgaveDao = repositories.withSessionContext(transactionalSession).oppgaveDao,
             tildelingRepository = TildelingDao(transactionalSession),
             reservasjonRepository = ReservasjonDao(transactionalSession),
             opptegnelseRepository = repositories.withSessionContext(transactionalSession).opptegnelseRepository,

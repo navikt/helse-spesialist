@@ -5,8 +5,6 @@ import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.DialogDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
-import no.nav.helse.db.PgOppgaveDao
-import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerRepository
@@ -29,12 +27,12 @@ import javax.sql.DataSource
 
 class GodkjenningService(
     private val dataSource: DataSource,
-    private val oppgaveDao: OppgaveDao = PgOppgaveDao(dataSource),
+    private val oppgaveDao: OppgaveDao,
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
     private val publiserer: MeldingPubliserer,
     private val oppgaveService: OppgaveService,
     private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
-    private val periodehistorikkDao: PeriodehistorikkDao = PgPeriodehistorikkDao(dataSource),
+    private val periodehistorikkDao: PeriodehistorikkDao,
     private val saksbehandlerRepository: SaksbehandlerRepository,
     private val dialogDao: DialogDao,
     private val totrinnsvurderingService: TotrinnsvurderingService =

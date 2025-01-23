@@ -6,8 +6,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.sessionOf
 import no.nav.helse.db.DbQuery
 import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.db.PgOppgaveDao
-import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.db.ReservasjonDao
@@ -101,9 +99,9 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     fun tearDown() = session.close()
 
     internal val personDao = PersonDao(session)
-    internal val oppgaveDao = PgOppgaveDao(dataSource)
+    internal val oppgaveDao = repositories.oppgaveDao
     internal val periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource)
-    internal val historikkinnslagRepository = PgPeriodehistorikkDao(dataSource)
+    internal val periodehistorikkDao = repositories.periodehistorikkDao
     internal val vedtakDao = PgVedtakDao(dataSource)
     internal val commandContextDao = CommandContextDao(dataSource)
     internal val saksbehandlerDao = SaksbehandlerDao(dataSource)

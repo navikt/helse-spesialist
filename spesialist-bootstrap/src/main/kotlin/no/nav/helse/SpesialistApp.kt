@@ -4,8 +4,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.ktor.server.application.Application
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.DBRepositories
-import no.nav.helse.db.PgOppgaveDao
-import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.PoisonPillDao
 import no.nav.helse.db.ReservasjonDao
@@ -57,8 +55,8 @@ class SpesialistApp(
     private val dataSource = dataSourceBuilder.getDataSource()
     private val repositories = DBRepositories(dataSource)
 
-    private val oppgaveDao = PgOppgaveDao(dataSource)
-    private val historikkinnslagRepository = PgPeriodehistorikkDao(dataSource)
+    private val oppgaveDao = repositories.oppgaveDao
+    private val periodehistorikkDao = repositories.periodehistorikkDao
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
     private val reservasjonDao = ReservasjonDao(dataSource)
@@ -82,7 +80,7 @@ class SpesialistApp(
     private val stansAutomatiskBehandlingMediator =
         StansAutomatiskBehandlingMediator(
             stansAutomatiskBehandlingDao,
-            historikkinnslagRepository,
+            periodehistorikkDao,
             oppgaveDao,
             notatDao,
             dialogDao,
@@ -91,7 +89,7 @@ class SpesialistApp(
         TotrinnsvurderingService(
             totrinnsvurderingDao = totrinnsvurderingDao,
             oppgaveDao = oppgaveDao,
-            periodehistorikkDao = historikkinnslagRepository,
+            periodehistorikkDao = periodehistorikkDao,
             dialogDao = dialogDao,
         )
 
@@ -198,6 +196,8 @@ class SpesialistApp(
                 saksbehandlerRepository = saksbehandlerDao,
                 tilgangskontroll = tilgangskontrollørForReservasjon,
                 dialogDao = repositories.dialogDao,
+                oppgaveDao = repositories.oppgaveDao,
+                periodehistorikkDao = repositories.periodehistorikkDao,
             )
         subsumsjonsmelder = Subsumsjonsmelder(versjonAvKode, meldingPubliserer)
 
