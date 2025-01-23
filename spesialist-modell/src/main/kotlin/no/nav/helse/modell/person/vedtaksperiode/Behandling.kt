@@ -312,14 +312,14 @@ class Behandling private constructor(
             logg.error(
                 "Utbetaling med {} ble forsøkt forkastet, men det støttes ikke for {} som er i {}.",
                 keyValue("Behandling", behandling),
-                keyValue("tilstand", this::class.simpleName),
                 keyValue("utbetalingId", utbetalingId),
+                keyValue("tilstand", this::class.simpleName),
             )
             sikkerlogg.error(
                 "Utbetaling med {} ble forsøkt forkastet, men det støttes ikke for {} som er i {}.",
                 keyValue("Behandling", behandling),
-                keyValue("tilstand", this::class.simpleName),
                 keyValue("utbetalingId", utbetalingId),
+                keyValue("tilstand", this::class.simpleName),
             )
         }
 
