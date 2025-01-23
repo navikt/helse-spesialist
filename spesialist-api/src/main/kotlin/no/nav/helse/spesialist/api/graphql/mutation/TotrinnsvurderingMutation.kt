@@ -8,8 +8,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
+import no.nav.helse.spesialist.api.SendTilGodkjenningResult
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
-import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.PaVentRequest
@@ -36,69 +36,70 @@ class TotrinnsvurderingMutation(
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
             val behandlendeSaksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
+            val result = saksbehandlerhåndterer.håndterTotrinnsvurdering(oppgavereferanse.toLong())
 
-            try {
-                saksbehandlerhåndterer.håndterTotrinnsvurdering(oppgavereferanse.toLong())
-            } catch (error: ManglerVurderingAvVarsler) {
-                return@withContext DataFetcherResult
-                    .newResult<Boolean>()
-                    .error(
-                        GraphqlErrorException
-                            .newErrorException()
-                            .message(error.message)
-                            .extensions(mapOf("code" to error.httpkode))
-                            .build(),
-                    ).data(false)
-                    .build()
-            } catch (error: RuntimeException) {
-                return@withContext DataFetcherResult
-                    .newResult<Boolean>()
-                    .error(
-                        GraphqlErrorException
-                            .newErrorException()
-                            .message("Kunne ikke håndtere totrinnsvurdering, ukjennt feil")
-                            .extensions(mapOf("code" to 500))
-                            .build(),
-                    ).data(false)
-                    .build()
+            return@withContext when (result) {
+                is SendTilGodkjenningResult.Feil.KunneIkkeHåndtereTotrinnsvurdering ->
+                    DataFetcherResult
+                        .newResult<Boolean>()
+                        .error(
+                            GraphqlErrorException
+                                .newErrorException()
+                                .message("Kunne ikke håndtere totrinnsvurdering, ukjennt feil")
+                                .extensions(mapOf("code" to 500))
+                                .build(),
+                        ).data(false)
+                        .build()
+                is SendTilGodkjenningResult.Feil.ManglerVurderingAvVarsler ->
+                    DataFetcherResult
+                        .newResult<Boolean>()
+                        .error(
+                            GraphqlErrorException
+                                .newErrorException()
+                                .message(result.modellfeil.message)
+                                .extensions(mapOf("code" to result.modellfeil.httpkode))
+                                .build(),
+                        ).data(false)
+                        .build()
+                SendTilGodkjenningResult.Ok -> {
+                    try {
+                        saksbehandlerhåndterer.håndterVedtakBegrunnelse(
+                            oppgaveId = oppgavereferanse.toLong(),
+                            saksbehandlerFraApi = behandlendeSaksbehandler,
+                            utfall = vedtakUtfall,
+                            begrunnelse = vedtakBegrunnelse,
+                        )
+                        oppgavehåndterer.sendTilBeslutter(oppgavereferanse.toLong(), behandlendeSaksbehandler)
+                        saksbehandlerhåndterer.påVent(
+                            PaVentRequest.FjernPaVentUtenHistorikkinnslag(oppgavereferanse.toLong()),
+                            behandlendeSaksbehandler,
+                        )
+                    } catch (modellfeil: Modellfeil) {
+                        return@withContext DataFetcherResult
+                            .newResult<Boolean>()
+                            .error(
+                                GraphqlErrorException
+                                    .newErrorException()
+                                    .message("Feil ved sending til beslutter: ${modellfeil.message}")
+                                    .extensions(mapOf("code" to modellfeil.httpkode))
+                                    .build(),
+                            ).data(false)
+                            .build()
+                    }
+
+                    sikkerlogg.info(
+                        "Oppgave med {} sendes til godkjenning av saksbehandler med {}",
+                        StructuredArguments.kv("oppgaveId", oppgavereferanse),
+                        StructuredArguments.kv("oid", behandlendeSaksbehandler.oid),
+                    )
+
+                    totrinnsvurderinghåndterer.avventerTotrinnsvurdering(oppgavereferanse.toLong(), behandlendeSaksbehandler)
+
+                    log.info("OppgaveId $oppgavereferanse sendt til godkjenning")
+
+                    DataFetcherResult.newResult<Boolean>().data(true).build()
+                }
             }
-
-            try {
-                saksbehandlerhåndterer.håndterVedtakBegrunnelse(
-                    oppgaveId = oppgavereferanse.toLong(),
-                    saksbehandlerFraApi = behandlendeSaksbehandler,
-                    utfall = vedtakUtfall,
-                    begrunnelse = vedtakBegrunnelse,
-                )
-                oppgavehåndterer.sendTilBeslutter(oppgavereferanse.toLong(), behandlendeSaksbehandler)
-                saksbehandlerhåndterer.påVent(
-                    PaVentRequest.FjernPaVentUtenHistorikkinnslag(oppgavereferanse.toLong()),
-                    behandlendeSaksbehandler,
-                )
-            } catch (modellfeil: Modellfeil) {
-                return@withContext DataFetcherResult
-                    .newResult<Boolean>()
-                    .error(
-                        GraphqlErrorException
-                            .newErrorException()
-                            .message("Feil ved sending til beslutter: ${modellfeil.message}")
-                            .extensions(mapOf("code" to modellfeil.httpkode))
-                            .build(),
-                    ).data(false)
-                    .build()
-            }
-
-            sikkerlogg.info(
-                "Oppgave med {} sendes til godkjenning av saksbehandler med {}",
-                StructuredArguments.kv("oppgaveId", oppgavereferanse),
-                StructuredArguments.kv("oid", behandlendeSaksbehandler.oid),
-            )
-
-            totrinnsvurderinghåndterer.avventerTotrinnsvurdering(oppgavereferanse.toLong(), behandlendeSaksbehandler)
-
-            log.info("OppgaveId $oppgavereferanse sendt til godkjenning")
-
-            DataFetcherResult.newResult<Boolean>().data(true).build()
         }
 
     @Suppress("unused")

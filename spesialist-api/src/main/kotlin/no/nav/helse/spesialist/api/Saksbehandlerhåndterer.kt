@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api
 
+import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakUtfall
 import no.nav.helse.spesialist.api.graphql.schema.Annullering
@@ -11,6 +12,16 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import java.util.UUID
+
+sealed interface SendTilGodkjenningResult {
+    data object Ok : SendTilGodkjenningResult
+
+    sealed interface Feil : SendTilGodkjenningResult {
+        data class ManglerVurderingAvVarsler(val modellfeil: Modellfeil) : Feil
+
+        data class KunneIkkeHåndtereTotrinnsvurdering(val e: Exception) : Feil
+    }
+}
 
 interface Saksbehandlerhåndterer {
     fun vedtak(
@@ -63,7 +74,7 @@ interface Saksbehandlerhåndterer {
         saksbehandlerFraApi: SaksbehandlerFraApi,
     )
 
-    fun håndterTotrinnsvurdering(oppgavereferanse: Long)
+    fun håndterTotrinnsvurdering(oppgavereferanse: Long): SendTilGodkjenningResult
 
     fun hentAvslag(
         vedtaksperiodeId: UUID,

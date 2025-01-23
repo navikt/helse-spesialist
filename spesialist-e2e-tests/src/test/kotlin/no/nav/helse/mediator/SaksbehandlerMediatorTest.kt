@@ -13,6 +13,7 @@ import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
+import no.nav.helse.spesialist.api.SendTilGodkjenningResult
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
@@ -229,9 +230,8 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             definisjonRef = definisjonRef,
             status = "AKTIV",
         )
-        assertThrows<ManglerVurderingAvVarsler> {
-            mediator.håndterTotrinnsvurdering(oppgaveId)
-        }
+
+        assertTrue(mediator.håndterTotrinnsvurdering(oppgaveId) is SendTilGodkjenningResult.Feil.ManglerVurderingAvVarsler)
     }
 
     @Test

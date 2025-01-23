@@ -63,6 +63,7 @@ import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMe
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
+import no.nav.helse.spesialist.api.SendTilGodkjenningResult
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.api.feilhåndtering.FinnerIkkeLagtPåVent
 import no.nav.helse.spesialist.api.feilhåndtering.IkkeTilgang
@@ -582,11 +583,16 @@ class SaksbehandlerMediator(
         )
     }
 
-    override fun håndterTotrinnsvurdering(oppgavereferanse: Long) {
-        val perioderTilBehandling = generasjonRepository.perioderTilBehandling(oppgavereferanse)
-        if (perioderTilBehandling.harAktiveVarsler()) {
-            throw ManglerVurderingAvVarsler(oppgavereferanse)
+    override fun håndterTotrinnsvurdering(oppgavereferanse: Long): SendTilGodkjenningResult {
+        try {
+            val perioderTilBehandling = generasjonRepository.perioderTilBehandling(oppgavereferanse)
+            if (perioderTilBehandling.harAktiveVarsler()) {
+                return SendTilGodkjenningResult.Feil.ManglerVurderingAvVarsler(ManglerVurderingAvVarsler(oppgavereferanse))
+            }
+        } catch (e: Exception) {
+            return SendTilGodkjenningResult.Feil.KunneIkkeHåndtereTotrinnsvurdering(e)
         }
+        return SendTilGodkjenningResult.Ok
     }
 
     private fun vurderVarsel(
