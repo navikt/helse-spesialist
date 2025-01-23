@@ -25,7 +25,7 @@ import java.util.UUID
 
 internal class PgInntektskilderRepositoryTest : DatabaseIntegrationTest() {
     private val inntektskilderRepository = repositories.withSessionContext(session).inntektskilderRepository
-    private val avviksvurderingDao = PgAvviksvurderingDao(session)
+    private val avviksvurderingDao = repositories.withSessionContext(session).avviksvurderingDao
 
     @Test
     fun `når det ikke finnes arbeidsgivere i databasen får vi kun tilbake nye inntektskilder`() {

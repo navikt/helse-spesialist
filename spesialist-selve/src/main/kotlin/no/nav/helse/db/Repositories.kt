@@ -8,6 +8,7 @@ interface Repositories {
     val annulleringRepository: AnnulleringRepository
     val behandlingsstatistikkDao: BehandlingsstatistikkDao
     val opptegnelseRepository: OpptegnelseRepository
+    val avviksvurderingDao: AvviksvurderingDao
 
     fun withSessionContext(session: Session): SessionContext
 }

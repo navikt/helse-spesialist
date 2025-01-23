@@ -4,6 +4,8 @@ import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
 import java.util.UUID
 
 interface AvviksvurderingDao {
+    fun lagre(avviksvurdering: AvviksvurderingDto)
+
     fun opprettKobling(
         avviksvurderingId: UUID,
         vilkårsgrunnlagId: UUID,

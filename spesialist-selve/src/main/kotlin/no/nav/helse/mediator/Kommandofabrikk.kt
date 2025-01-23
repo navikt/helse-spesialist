@@ -4,7 +4,6 @@ import kotliquery.Session
 import kotliquery.TransactionalSession
 import kotliquery.sessionOf
 import no.nav.helse.db.CommandContextRepository
-import no.nav.helse.db.PgAvviksvurderingDao
 import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgPeriodehistorikkDao
@@ -325,7 +324,7 @@ class Kommandofabrikk(
         avviksvurdering: AvviksvurderingDto,
         session: Session,
     ) = ikkesuspenderendeCommand {
-        PgAvviksvurderingDao(session).lagre(avviksvurdering)
+        repositories.withSessionContext(session).avviksvurderingDao.lagre(avviksvurdering)
     }
 
     internal fun løsGodkjenningsbehov(
@@ -383,7 +382,7 @@ class Kommandofabrikk(
             overstyringRepository = OverstyringDao(session),
             automatiseringRepository = AutomatiseringDao(session),
             oppgaveDao = PgOppgaveDao(session),
-            avviksvurderingDao = PgAvviksvurderingDao(session),
+            avviksvurderingDao = repositories.withSessionContext(session).avviksvurderingDao,
             oppgaveService = transaksjonellOppgaveService(session),
             godkjenningMediator = GodkjenningMediator(repositories.withSessionContext(session).opptegnelseRepository),
             totrinnsvurderingService = lagTotrinnsvurderingService(session),

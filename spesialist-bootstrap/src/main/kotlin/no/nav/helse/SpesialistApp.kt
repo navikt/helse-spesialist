@@ -4,7 +4,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.ktor.server.application.Application
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.DBRepositories
-import no.nav.helse.db.PgAvviksvurderingDao
 import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgNotatDao
 import no.nav.helse.db.PgOppgaveDao
@@ -111,7 +110,7 @@ class SpesialistApp(
             stansAutomatiskBehandlinghåndterer = { stansAutomatiskBehandlingMediator },
             behandlingstatistikk = behandlingsstatistikkService,
             snapshotClient = snapshotClient,
-            avviksvurderinghenter = PgAvviksvurderingDao(dataSource),
+            avviksvurderinghenter = repositories.avviksvurderingDao,
         )
 
     private val bootstrap = Bootstrap(dataSource, apiAvhengigheter, reservasjonClient, tilgangsgrupper)
