@@ -10,7 +10,7 @@ import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 import java.time.LocalDate
 import javax.sql.DataSource
 
-class PgBehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource), BehandlingsstatistikkDao {
+class PgBehandlingsstatistikkDao internal constructor(dataSource: DataSource) : HelseDao(dataSource), BehandlingsstatistikkDao {
     override fun getAntallTilgjengeligeBeslutteroppgaver() =
         asSQL(
             """

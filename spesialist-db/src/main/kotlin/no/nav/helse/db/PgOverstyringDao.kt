@@ -14,9 +14,9 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgOverstyringDao(queryRunner: QueryRunner) : OverstyringDao, QueryRunner by queryRunner {
-    constructor(session: Session) : this(MedSession(session))
-    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
+class PgOverstyringDao private constructor(queryRunner: QueryRunner) : OverstyringDao, QueryRunner by queryRunner {
+    internal constructor(session: Session) : this(MedSession(session))
+    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun finnOverstyringerMedTypeForVedtaksperioder(vedtaksperiodeIder: List<UUID>) =
         asSQLWithQuestionMarks(

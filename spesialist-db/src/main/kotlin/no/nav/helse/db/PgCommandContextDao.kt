@@ -13,11 +13,11 @@ import no.nav.helse.modell.kommando.CommandContext
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgCommandContextDao(
+class PgCommandContextDao private constructor(
     queryRunner: QueryRunner,
 ) : CommandContextDao, QueryRunner by queryRunner {
-    constructor(session: Session) : this(MedSession(session))
-    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
+    internal constructor(session: Session) : this(MedSession(session))
+    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     private companion object {
         private val mapper = jacksonObjectMapper()

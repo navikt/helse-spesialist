@@ -9,9 +9,9 @@ import no.nav.helse.spesialist.api.graphql.schema.Opptegnelsetype
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgOpptegnelseRepository(private val queryRunner: QueryRunner) : OpptegnelseRepository, QueryRunner by queryRunner {
-    constructor(session: Session) : this(MedSession(session))
-    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
+class PgOpptegnelseRepository private constructor(private val queryRunner: QueryRunner) : OpptegnelseRepository, QueryRunner by queryRunner {
+    internal constructor(session: Session) : this(MedSession(session))
+    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun opprettOpptegnelse(
         fødselsnummer: String,

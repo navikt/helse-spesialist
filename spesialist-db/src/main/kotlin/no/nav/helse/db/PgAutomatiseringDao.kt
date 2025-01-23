@@ -8,7 +8,7 @@ import no.nav.helse.HelseDao.Companion.single
 import no.nav.helse.HelseDao.Companion.update
 import java.util.UUID
 
-class PgAutomatiseringDao(val session: Session) : AutomatiseringDao {
+class PgAutomatiseringDao internal constructor(val session: Session) : AutomatiseringDao {
     override fun settAutomatiseringInaktiv(
         vedtaksperiodeId: UUID,
         hendelseId: UUID,

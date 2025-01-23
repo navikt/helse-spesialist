@@ -8,9 +8,9 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgSaksbehandlerDao(private val queryRunner: QueryRunner) : SaksbehandlerDao, QueryRunner by queryRunner {
-    constructor(session: Session) : this(MedSession(session))
-    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
+class PgSaksbehandlerDao private constructor(private val queryRunner: QueryRunner) : SaksbehandlerDao, QueryRunner by queryRunner {
+    internal constructor(session: Session) : this(MedSession(session))
+    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun opprettEllerOppdater(
         oid: UUID,

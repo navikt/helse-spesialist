@@ -5,9 +5,9 @@ import no.nav.helse.HelseDao.Companion.asSQL
 import java.time.LocalDateTime
 import javax.sql.DataSource
 
-class PgEgenAnsattDao(queryRunner: QueryRunner) : EgenAnsattDao, QueryRunner by queryRunner {
-    constructor(session: Session) : this(MedSession(session))
-    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
+class PgEgenAnsattDao private constructor(queryRunner: QueryRunner) : EgenAnsattDao, QueryRunner by queryRunner {
+    internal constructor(session: Session) : this(MedSession(session))
+    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun lagre(
         fødselsnummer: String,

@@ -14,11 +14,11 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.sql.DataSource
 
-class PgPersonDao(
+class PgPersonDao internal constructor(
     queryRunner: QueryRunner,
 ) : PersonDao, QueryRunner by queryRunner {
-    constructor(session: Session) : this(MedSession(session))
-    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
+    internal constructor(session: Session) : this(MedSession(session))
+    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun finnMinimalPerson(fødselsnummer: String): MinimalPersonDto? =
         finnPerson(fødselsnummer)?.let {

@@ -6,7 +6,7 @@ import no.nav.helse.HelseDao.Companion.list
 import no.nav.helse.HelseDao.Companion.update
 import no.nav.helse.modell.KomplettArbeidsforholdDto
 
-class PgArbeidsforholdDao(
+class PgArbeidsforholdDao internal constructor(
     private val session: Session,
 ) : ArbeidsforholdDao {
     override fun findArbeidsforhold(

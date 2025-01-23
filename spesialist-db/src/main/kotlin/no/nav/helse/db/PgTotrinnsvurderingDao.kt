@@ -7,11 +7,11 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgTotrinnsvurderingDao(
+class PgTotrinnsvurderingDao private constructor(
     queryRunner: QueryRunner,
 ) : TotrinnsvurderingDao, QueryRunner by queryRunner {
-    constructor(session: Session) : this(MedSession(session))
-    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
+    internal constructor(session: Session) : this(MedSession(session))
+    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun hentAktivTotrinnsvurdering(oppgaveId: Long) =
         asSQL(

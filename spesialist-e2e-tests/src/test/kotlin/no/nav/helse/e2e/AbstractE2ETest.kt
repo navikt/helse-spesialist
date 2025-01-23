@@ -19,7 +19,6 @@ import no.nav.helse.TestRapidHelpers.sisteBehov
 import no.nav.helse.Testdata
 import no.nav.helse.Testdata.snapshot
 import no.nav.helse.db.DbQuery
-import no.nav.helse.db.PgPersonDao
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
@@ -1361,7 +1360,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         adressebeskyttelse: Adressebeskyttelse?,
     ) {
-        assertEquals(adressebeskyttelse, PgPersonDao(dataSource).finnAdressebeskyttelse(fødselsnummer))
+        assertEquals(adressebeskyttelse, repositories.personDao.finnAdressebeskyttelse(fødselsnummer))
     }
 
     protected fun assertVedtaksperiodeEksisterer(vedtaksperiodeId: UUID) {

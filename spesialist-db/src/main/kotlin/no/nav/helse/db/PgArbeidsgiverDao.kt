@@ -9,7 +9,7 @@ import no.nav.helse.HelseDao.Companion.updateAndReturnGeneratedKey
 import no.nav.helse.objectMapper
 import org.intellij.lang.annotations.Language
 
-class PgArbeidsgiverDao(
+class PgArbeidsgiverDao internal constructor(
     private val session: Session,
 ) : ArbeidsgiverDao {
     override fun findArbeidsgiverByOrgnummer(organisasjonsnummer: String) =

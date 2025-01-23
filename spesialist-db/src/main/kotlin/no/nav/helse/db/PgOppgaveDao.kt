@@ -12,12 +12,12 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgOppgaveDao(
+class PgOppgaveDao internal constructor(
     queryRunner: QueryRunner,
 ) : OppgaveDao,
     QueryRunner by queryRunner {
-    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
-    constructor(session: Session) : this(MedSession(session))
+    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
+    internal constructor(session: Session) : this(MedSession(session))
 
     override fun finnGenerasjonId(oppgaveId: Long): UUID =
         asSQL("SELECT generasjon_ref FROM oppgave WHERE id = :oppgaveId", "oppgaveId" to oppgaveId)

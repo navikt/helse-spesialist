@@ -5,9 +5,9 @@ import no.nav.helse.HelseDao
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgReservasjonDao(queryRunner: QueryRunner) : ReservasjonDao, QueryRunner by queryRunner {
-    constructor(session: Session) : this(MedSession(session))
-    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
+class PgReservasjonDao private constructor(queryRunner: QueryRunner) : ReservasjonDao, QueryRunner by queryRunner {
+    internal constructor(session: Session) : this(MedSession(session))
+    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun reserverPerson(
         saksbehandlerOid: UUID,

@@ -8,9 +8,9 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgVedtakDao(queryRunner: QueryRunner) : VedtakDao, QueryRunner by queryRunner {
-    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
-    constructor(session: Session) : this(MedSession(session))
+class PgVedtakDao private constructor(queryRunner: QueryRunner) : VedtakDao, QueryRunner by queryRunner {
+    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
+    internal constructor(session: Session) : this(MedSession(session))
 
     override fun finnVedtaksperiode(vedtaksperiodeId: UUID): VedtaksperiodeDto? {
         return asSQL(

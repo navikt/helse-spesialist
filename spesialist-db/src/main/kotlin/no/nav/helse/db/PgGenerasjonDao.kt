@@ -12,8 +12,8 @@ import java.util.UUID
 import javax.sql.DataSource
 
 class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) : GenerasjonDao, QueryRunner by queryRunner {
-    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
-    constructor(session: Session) : this(MedSession(session))
+    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
+    internal constructor(session: Session) : this(MedSession(session))
 
     override fun finnGenerasjoner(vedtaksperiodeId: UUID): List<BehandlingDto> {
         return asSQL(

@@ -4,12 +4,12 @@ import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
 import javax.sql.DataSource
 
-class PgDialogDao(
+class PgDialogDao private constructor(
     queryRunner: QueryRunner,
 ) : DialogDao,
     QueryRunner by queryRunner {
-    constructor(session: Session) : this(MedSession(session))
-    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
+    internal constructor(session: Session) : this(MedSession(session))
+    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun lagre(): Long =
         asSQL(

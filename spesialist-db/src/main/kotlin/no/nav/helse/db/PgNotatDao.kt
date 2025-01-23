@@ -6,12 +6,12 @@ import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgNotatDao(
+class PgNotatDao private constructor(
     queryRunner: QueryRunner,
 ) : NotatDao,
     QueryRunner by queryRunner {
-    constructor(session: Session) : this(MedSession(session))
-    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
+    internal constructor(session: Session) : this(MedSession(session))
+    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun lagreForOppgaveId(
         oppgaveId: Long,

@@ -9,7 +9,7 @@ import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingsårsakDto
 import no.nav.helse.objectMapper
 
-class PgSykefraværstilfelleDao(private val session: Session) : SykefraværstilfelleDao {
+class PgSykefraværstilfelleDao internal constructor(private val session: Session) : SykefraværstilfelleDao {
     override fun finnSkjønnsfastsatteSykepengegrunnlag(fødselsnummer: String): List<SkjønnsfastsattSykepengegrunnlagDto> =
         asSQL(
             """

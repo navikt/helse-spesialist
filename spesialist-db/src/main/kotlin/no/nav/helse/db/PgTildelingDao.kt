@@ -5,9 +5,9 @@ import no.nav.helse.HelseDao.Companion.asSQL
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgTildelingDao(queryRunner: QueryRunner) : TildelingDao, QueryRunner by queryRunner {
-    constructor(session: Session) : this(MedSession(session))
-    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
+class PgTildelingDao private constructor(queryRunner: QueryRunner) : TildelingDao, QueryRunner by queryRunner {
+    internal constructor(session: Session) : this(MedSession(session))
+    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun tildel(
         oppgaveId: Long,

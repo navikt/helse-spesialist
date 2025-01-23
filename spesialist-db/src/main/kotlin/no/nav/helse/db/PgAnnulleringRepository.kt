@@ -6,7 +6,7 @@ import no.nav.helse.spesialist.api.graphql.schema.Annullering
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgAnnulleringRepository(dataSource: DataSource) : AnnulleringRepository {
+class PgAnnulleringRepository internal constructor(dataSource: DataSource) : AnnulleringRepository {
     private val dbQuery = DbQuery(dataSource)
 
     override fun lagreAnnullering(

@@ -8,7 +8,7 @@ import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.NyInntektskildeDto
 
-class PgInntektskilderRepository(
+class PgInntektskilderRepository internal constructor(
     private val session: Session,
     private val arbeidsgiverDao: ArbeidsgiverDao,
     private val avviksvurderingDao: AvviksvurderingDao,

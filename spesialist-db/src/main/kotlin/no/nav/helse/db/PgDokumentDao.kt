@@ -6,8 +6,8 @@ import no.nav.helse.objectMapper
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgDokumentDao(queryRunner: QueryRunner) : DokumentDao, QueryRunner by queryRunner {
-    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
+class PgDokumentDao private constructor(queryRunner: QueryRunner) : DokumentDao, QueryRunner by queryRunner {
+    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun lagre(
         fødselsnummer: String,

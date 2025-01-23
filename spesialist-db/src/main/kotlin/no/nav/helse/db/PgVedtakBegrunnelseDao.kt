@@ -6,8 +6,8 @@ import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgVedtakBegrunnelseDao(queryRunner: QueryRunner) : QueryRunner by queryRunner, VedtakBegrunnelseDao {
-    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
+class PgVedtakBegrunnelseDao internal constructor(queryRunner: QueryRunner) : QueryRunner by queryRunner, VedtakBegrunnelseDao {
+    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     private fun lagreBegrunnelse(
         vedtakBegrunnelse: VedtakBegrunnelseFraDatabase,

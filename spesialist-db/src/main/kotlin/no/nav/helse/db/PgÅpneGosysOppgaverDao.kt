@@ -4,7 +4,7 @@ import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
 
-class PgÅpneGosysOppgaverDao(session: Session) : ÅpneGosysOppgaverDao, QueryRunner by MedSession(session) {
+class PgÅpneGosysOppgaverDao internal constructor(session: Session) : ÅpneGosysOppgaverDao, QueryRunner by MedSession(session) {
     override fun persisterÅpneGosysOppgaver(åpneGosysOppgaver: ÅpneGosysOppgaverDto) {
         asSQL(
             """

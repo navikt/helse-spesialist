@@ -6,7 +6,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.sessionOf
 import no.nav.helse.db.DbQuery
 import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.db.PgPersonDao
 import no.nav.helse.db.api.PgPeriodehistorikkApiDao
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
@@ -87,28 +86,29 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         private set
 
     protected val session = sessionOf(dataSource, returnGeneratedKey = true)
+    private val sessionContext = repositories.withSessionContext(session)
 
     @AfterEach
     fun tearDown() = session.close()
 
-    internal val personDao = PgPersonDao(session)
+    internal val personDao = sessionContext.personDao
     internal val oppgaveDao = repositories.oppgaveDao
     internal val periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource)
     internal val periodehistorikkDao = repositories.periodehistorikkDao
     internal val vedtakDao = repositories.vedtakDao
     internal val commandContextDao = repositories.commandContextDao
     internal val saksbehandlerDao = repositories.saksbehandlerDao
-    internal val reservasjonDao = repositories.withSessionContext(session).reservasjonDao
+    internal val reservasjonDao = sessionContext.reservasjonDao
     internal val meldingDao = MeldingDao(dataSource)
-    internal val egenAnsattDao = repositories.withSessionContext(session).egenAnsattDao
-    internal val totrinnsvurderingDao = repositories.withSessionContext(session).totrinnsvurderingDao
+    internal val egenAnsattDao = sessionContext.egenAnsattDao
+    internal val totrinnsvurderingDao = sessionContext.totrinnsvurderingDao
     internal val påVentDao = PåVentDao(session)
-    internal val stansAutomatiskBehandlingDao = repositories.withSessionContext(session).stansAutomatiskBehandlingDao
+    internal val stansAutomatiskBehandlingDao = sessionContext.stansAutomatiskBehandlingDao
     internal val notatDao = repositories.notatDao
     internal val dialogDao = repositories.dialogDao
     internal val annulleringRepository = repositories.annulleringRepository
     private val personService = PersonService(dataSource, repositories)
-    private val inntektskilderDao = repositories.withSessionContext(session).inntektskilderRepository
+    private val inntektskilderDao = sessionContext.inntektskilderRepository
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,

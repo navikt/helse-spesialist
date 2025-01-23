@@ -15,9 +15,9 @@ import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering as ApiAvviksvurdering
 
-class PgAvviksvurderingDao(private val queryRunner: QueryRunner) : AvviksvurderingDao, Avviksvurderinghenter, QueryRunner by queryRunner {
-    constructor(session: Session) : this(MedSession(session))
-    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
+class PgAvviksvurderingDao private constructor(private val queryRunner: QueryRunner) : AvviksvurderingDao, Avviksvurderinghenter, QueryRunner by queryRunner {
+    internal constructor(session: Session) : this(MedSession(session))
+    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun lagre(avviksvurdering: AvviksvurderingDto) {
         val sammenligningsgrunnlagRef =
