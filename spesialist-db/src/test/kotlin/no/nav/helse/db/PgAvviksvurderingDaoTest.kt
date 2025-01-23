@@ -246,7 +246,7 @@ internal class PgAvviksvurderingDaoTest : DatabaseIntegrationTest() {
 
     private fun assertAntallAvviksvurderinger(
         avviksvurderingUnikId: UUID,
-        forventetAntall: Int,
+        @Suppress("SameParameterValue") forventetAntall: Int,
     ) {
         @Language("PostgreSQL")
         val query = """select count(1) from avviksvurdering where unik_id = :unik_id;"""
