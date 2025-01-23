@@ -81,6 +81,11 @@ spec:
       - type: POSTGRES_14
         diskAutoresize: true
         tier: db-custom-1-3840
+        flags:
+          - name: cloudsql.enable_pgaudit
+            value: "true"
+          - name: pgaudit.log
+            value: 'write'
         databases:
           - name: spesialist
             envVarPrefix: DATABASE
