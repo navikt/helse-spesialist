@@ -11,7 +11,7 @@ import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OverstyringDao
 import no.nav.helse.db.PersonDao
-import no.nav.helse.db.PåVentRepository
+import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.RisikovurderingRepository
 import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.db.VedtakDao
@@ -201,7 +201,7 @@ internal class GodkjenningsbehovCommand(
     vergemålRepository: VergemålRepository,
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     risikovurderingRepository: RisikovurderingRepository,
-    påVentRepository: PåVentRepository,
+    påVentDao: PåVentDao,
     overstyringDao: OverstyringDao,
     automatiseringDao: AutomatiseringDao,
     oppgaveDao: OppgaveDao,
@@ -321,7 +321,7 @@ internal class GodkjenningsbehovCommand(
                 sykefraværstilfelle = sykefraværstilfelle,
                 utbetaling = utbetaling,
                 vergemålRepository = vergemålRepository,
-                påVentRepository = påVentRepository,
+                påVentDao = påVentDao,
             ),
             VurderBehovForTotrinnskontroll(
                 fødselsnummer = behovData.fødselsnummer,

@@ -13,7 +13,6 @@ import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.kommando.TestMelding
 import no.nav.helse.modell.person.PersonService
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
-import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -102,7 +101,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val meldingDao = MeldingDao(dataSource)
     internal val egenAnsattDao = sessionContext.egenAnsattDao
     internal val totrinnsvurderingDao = sessionContext.totrinnsvurderingDao
-    internal val påVentDao = PåVentDao(session)
+    internal val påVentDao = sessionContext.påVentDao
     internal val stansAutomatiskBehandlingDao = sessionContext.stansAutomatiskBehandlingDao
     internal val notatDao = repositories.notatDao
     internal val dialogDao = repositories.dialogDao

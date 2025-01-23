@@ -1,28 +1,24 @@
-package no.nav.helse.modell.påvent
+package no.nav.helse.db
 
 import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.db.MedDataSource
-import no.nav.helse.db.MedSession
-import no.nav.helse.db.PåVentRepository
-import no.nav.helse.db.QueryRunner
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 
-class PåVentDao(
+class PgPåVentDao private constructor(
     private val queryRunner: QueryRunner,
-) : PåVentRepository, QueryRunner by queryRunner {
-    constructor(session: Session) : this(MedSession(session))
-    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
+) : PåVentDao, QueryRunner by queryRunner {
+    internal constructor(session: Session) : this(MedSession(session))
+    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
-    fun lagrePåVent(
+    override fun lagrePåVent(
         oppgaveId: Long,
         saksbehandlerOid: UUID,
         frist: LocalDate?,
         årsaker: List<PåVentÅrsak>,
-        notatTekst: String? = null,
+        notatTekst: String?,
         dialogRef: Long,
     ) {
         val vedtaksperiodeId =
@@ -49,7 +45,7 @@ class PåVentDao(
         ).update()
     }
 
-    fun slettPåVent(oppgaveId: Long) =
+    override fun slettPåVent(oppgaveId: Long) =
         asSQL(
             """
             SELECT v.vedtaksperiode_id
@@ -75,7 +71,7 @@ class PåVentDao(
             "vedtaksperiodeId" to vedtaksperiodeId,
         ).singleOrNull { true } ?: false
 
-    fun erPåVent(oppgaveId: Long) =
+    override fun erPåVent(oppgaveId: Long) =
         asSQL(
             """
             select 1 from pa_vent
@@ -86,12 +82,12 @@ class PåVentDao(
             "oppgaveId" to oppgaveId,
         ).singleOrNull { true } ?: false
 
-    fun oppdaterPåVent(
+    override fun oppdaterPåVent(
         oppgaveId: Long,
         saksbehandlerOid: UUID,
         frist: LocalDate?,
         årsaker: List<PåVentÅrsak>,
-        notatTekst: String? = null,
+        notatTekst: String?,
         dialogRef: Long,
     ) {
         asSQL(

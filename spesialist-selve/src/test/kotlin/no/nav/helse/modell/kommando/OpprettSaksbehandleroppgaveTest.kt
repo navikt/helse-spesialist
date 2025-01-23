@@ -7,7 +7,7 @@ import io.mockk.verify
 import no.nav.helse.Testdata.godkjenningsbehovData
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.PersonDao
-import no.nav.helse.db.PåVentRepository
+import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.RisikovurderingRepository
 import no.nav.helse.db.VergemålRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -65,7 +65,7 @@ internal class OpprettSaksbehandleroppgaveTest {
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val vergemålRepository = mockk<VergemålRepository>(relaxed = true)
     private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
-    private val påVentRepository = mockk<PåVentRepository>(relaxed = true)
+    private val påVentDao = mockk<PåVentDao>(relaxed = true)
 
     private val command get() = opprettSaksbehandlerOppgaveCommand()
     private val utbetaling = mockk<Utbetaling>(relaxed = true)
@@ -221,7 +221,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter oppgave med egenskap PÅ_VENT`() {
-        every { påVentRepository.erPåVent(VEDTAKSPERIODE_ID) } returns true
+        every { påVentDao.erPåVent(VEDTAKSPERIODE_ID) } returns true
         assertTrue(command.execute(context))
         assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, PÅ_VENT)
     }
@@ -286,6 +286,6 @@ internal class OpprettSaksbehandleroppgaveTest {
         sykefraværstilfelle = sykefraværstilfelle,
         utbetaling = utbetaling,
         vergemålRepository = vergemålRepository,
-        påVentRepository = påVentRepository
+        påVentDao = påVentDao
     )
 }

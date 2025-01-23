@@ -25,7 +25,6 @@ import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.melding.VarselEndret
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
-import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
 import no.nav.helse.modell.saksbehandler.handlinger.Annullering
@@ -113,7 +112,7 @@ class SaksbehandlerMediator(
     private val abonnementDao = repositories.abonnementDao
     private val reservasjonDao = repositories.reservasjonDao
     private val overstyringDao = repositories.overstyringDao
-    private val påVentDao = PåVentDao(dataSource)
+    private val påVentDao = repositories.påVentDao
     private val periodehistorikkDao = repositories.periodehistorikkDao
     private val vedtakBegrunnelseDao = repositories.vedtakBegrunnelseDao
     private val dialogDao = repositories.dialogDao

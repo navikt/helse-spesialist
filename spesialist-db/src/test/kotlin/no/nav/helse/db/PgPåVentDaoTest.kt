@@ -13,7 +13,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class PåVentDaoTest : DatabaseIntegrationTest() {
+internal class PgPåVentDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `lagre påvent`() {
         nyPerson()

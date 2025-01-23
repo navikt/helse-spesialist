@@ -2,7 +2,7 @@ package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.PersonDao
-import no.nav.helse.db.PåVentRepository
+import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.RisikovurderingRepository
 import no.nav.helse.db.VergemålRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -56,7 +56,7 @@ internal class OpprettSaksbehandleroppgave(
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val utbetaling: Utbetaling,
     private val vergemålRepository: VergemålRepository,
-    private val påVentRepository: PåVentRepository,
+    private val påVentDao: PåVentDao,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
         val fødselsnummer = behovData.fødselsnummer
@@ -172,7 +172,7 @@ internal class OpprettSaksbehandleroppgave(
     }
 
     private fun MutableSet<Egenskap>.påVent(vedtaksperiodeId: UUID) {
-        if (påVentRepository.erPåVent(vedtaksperiodeId)) add(PÅ_VENT)
+        if (påVentDao.erPåVent(vedtaksperiodeId)) add(PÅ_VENT)
     }
 
     private fun MutableSet<Egenskap>.skjønnsfastsettelse(vedtaksperiodeId: UUID) {

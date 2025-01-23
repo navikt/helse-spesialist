@@ -27,6 +27,7 @@ interface Repositories {
     val egenAnsattDao: EgenAnsattDao
     val overstyringDao: OverstyringDao
     val personDao: PersonDao
+    val påVentDao: PåVentDao
 
     fun withSessionContext(session: Session): SessionContext
 }

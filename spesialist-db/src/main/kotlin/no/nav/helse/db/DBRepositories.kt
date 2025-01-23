@@ -28,6 +28,7 @@ class DBRepositories(dataSource: DataSource) : Repositories {
     override val egenAnsattDao = PgEgenAnsattDao(dataSource)
     override val overstyringDao = PgOverstyringDao(dataSource)
     override val personDao = PgPersonDao(dataSource)
+    override val påVentDao = PgPåVentDao(dataSource)
 
     override fun withSessionContext(session: Session) = DBSessionContext(session)
 }

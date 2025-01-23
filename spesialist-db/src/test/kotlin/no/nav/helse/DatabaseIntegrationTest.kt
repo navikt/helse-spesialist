@@ -19,7 +19,6 @@ import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.MeldingDuplikatkontrollDao
 import no.nav.helse.modell.person.PersonService
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
-import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import no.nav.helse.modell.utbetaling.UtbetalingDao
@@ -129,7 +128,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val vergemålDao = VergemålDao(session)
     internal val totrinnsvurderingDao = sessionContext.totrinnsvurderingDao
     internal val dokumentDao = repositories.dokumentDao
-    internal val påVentDao = PåVentDao(session)
+    internal val påVentDao = sessionContext.påVentDao
     internal val stansAutomatiskBehandlingDao = sessionContext.stansAutomatiskBehandlingDao
     internal val dialogDao = repositories.dialogDao
     internal val annulleringRepository = repositories.annulleringRepository

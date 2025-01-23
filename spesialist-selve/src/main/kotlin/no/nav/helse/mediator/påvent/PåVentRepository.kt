@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.påvent
 
-import no.nav.helse.modell.påvent.PåVentDao
+import no.nav.helse.db.PåVentDao
 import no.nav.helse.modell.saksbehandler.handlinger.EndrePåVent
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import java.util.UUID

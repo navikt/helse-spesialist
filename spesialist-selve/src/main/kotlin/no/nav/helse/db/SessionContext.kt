@@ -24,4 +24,5 @@ interface SessionContext {
     val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao
     val overstyringDao: OverstyringDao
     val personDao: PersonDao
+    val påVentDao: PåVentDao
 }
