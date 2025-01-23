@@ -16,7 +16,6 @@ import no.nav.helse.db.api.PgPeriodehistorikkApiDao
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.MeldingDuplikatkontrollDao
-import no.nav.helse.modell.dokument.PgDokumentDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -131,7 +130,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val behandlingsstatistikkDao = repositories.behandlingsstatistikkDao
     internal val vergemålDao = VergemålDao(session)
     internal val totrinnsvurderingDao = repositories.withSessionContext(session).totrinnsvurderingDao
-    internal val dokumentDao = PgDokumentDao(dataSource)
+    internal val dokumentDao = repositories.dokumentDao
     internal val påVentDao = PåVentDao(session)
     internal val stansAutomatiskBehandlingDao = repositories.withSessionContext(session).stansAutomatiskBehandlingDao
     internal val dialogDao = repositories.dialogDao

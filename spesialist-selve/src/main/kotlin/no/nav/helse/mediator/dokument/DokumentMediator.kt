@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.MeldingPubliserer
-import no.nav.helse.modell.dokument.DokumentDao
+import no.nav.helse.db.DokumentDao
 import no.nav.helse.modell.melding.HentDokument
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.Dokumenthåndterer

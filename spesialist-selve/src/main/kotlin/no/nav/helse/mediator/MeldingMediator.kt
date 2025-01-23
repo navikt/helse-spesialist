@@ -5,14 +5,13 @@ import kotliquery.sessionOf
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.CommandContextDao
+import no.nav.helse.db.DokumentDao
 import no.nav.helse.db.Repositories
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.MeldingDuplikatkontrollDao
-import no.nav.helse.modell.dokument.DokumentDao
-import no.nav.helse.modell.dokument.PgDokumentDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.KlargjørPersonForVisning
 import no.nav.helse.modell.melding.OppdaterPersondata
@@ -36,7 +35,7 @@ class MeldingMediator(
     private val meldingDao: MeldingDao = MeldingDao(dataSource),
     private val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao = MeldingDuplikatkontrollDao(dataSource),
     private val kommandofabrikk: Kommandofabrikk,
-    private val dokumentDao: DokumentDao = PgDokumentDao(dataSource),
+    private val dokumentDao: DokumentDao,
     private val varselRepository: VarselRepository = VarselRepository(dataSource),
     private val personService: PersonService = PersonService(dataSource, repositories),
     private val poisonPills: PoisonPills,

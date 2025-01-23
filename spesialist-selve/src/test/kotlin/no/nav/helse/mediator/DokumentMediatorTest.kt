@@ -4,8 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.MeldingPubliserer
+import no.nav.helse.db.DokumentDao
 import no.nav.helse.mediator.dokument.DokumentMediator
-import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse

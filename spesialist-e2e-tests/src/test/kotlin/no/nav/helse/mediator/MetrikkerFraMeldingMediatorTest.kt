@@ -31,7 +31,8 @@ internal class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
             kommandofabrikk = kommandofabrikk,
             personService = mockk(relaxed = true),
             poisonPills = PoisonPills(emptyMap()),
-            commandContextDao = repositories.commandContextDao
+            commandContextDao = repositories.commandContextDao,
+            dokumentDao = repositories.dokumentDao,
         )
     }
 

@@ -18,7 +18,6 @@ import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.PlukkTilManuell
 import no.nav.helse.modell.automatisering.Stikkprøver
-import no.nav.helse.modell.dokument.PgDokumentDao
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.spesialist.api.AzureConfig
@@ -59,7 +58,7 @@ class SpesialistApp(
     private val notatDao = repositories.notatDao
     private val dialogDao = repositories.dialogDao
     private val totrinnsvurderingDao = repositories.totrinnsvurderingDao
-    private val dokumentDao = PgDokumentDao(dataSource)
+    private val dokumentDao = repositories.dokumentDao
     private val stansAutomatiskBehandlingDao = repositories.stansAutomatiskBehandlingDao
 
     private lateinit var meldingMediator: MeldingMediator
@@ -168,6 +167,7 @@ class SpesialistApp(
                 kommandofabrikk = kommandofabrikk,
                 poisonPills = repositories.poisonPillDao.poisonPills(),
                 commandContextDao = repositories.commandContextDao,
+                dokumentDao = dokumentDao,
             )
         RiverSetup(dataSource, rapidsConnection, meldingMediator).setUp()
         saksbehandlerMediator =

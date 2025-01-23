@@ -30,7 +30,8 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
             publiserer = MessageContextMeldingPubliserer(testRapid),
             kommandofabrikk = kommandofabrikk,
             poisonPills = PoisonPills(emptyMap()),
-            commandContextDao = repositories.commandContextDao
+            commandContextDao = repositories.commandContextDao,
+            dokumentDao = repositories.dokumentDao,
         )
 
     @BeforeEach

@@ -1,27 +1,10 @@
-package no.nav.helse.modell.dokument
+package no.nav.helse.db
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.db.MedDataSource
-import no.nav.helse.db.QueryRunner
+import no.nav.helse.HelseDao
 import no.nav.helse.objectMapper
 import java.util.UUID
 import javax.sql.DataSource
-
-interface DokumentDao {
-    fun lagre(
-        fødselsnummer: String,
-        dokumentId: UUID,
-        dokument: JsonNode,
-    )
-
-    fun hent(
-        fødselsnummer: String,
-        dokumentId: UUID,
-    ): JsonNode?
-
-    fun slettGamleDokumenter(): Int
-}
 
 class PgDokumentDao(queryRunner: QueryRunner) : DokumentDao, QueryRunner by queryRunner {
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
@@ -31,13 +14,13 @@ class PgDokumentDao(queryRunner: QueryRunner) : DokumentDao, QueryRunner by quer
         dokumentId: UUID,
         dokument: JsonNode,
     ) {
-        asSQL(
+        HelseDao.asSQL(
             """
             SELECT id FROM person WHERE fødselsnummer=:fodselsnummer
             """.trimIndent(),
             "fodselsnummer" to fødselsnummer,
         ).singleOrNull { it.int("id") }?.let { personId ->
-            asSQL(
+            HelseDao.asSQL(
                 """
                 INSERT INTO dokumenter (dokument_id, person_ref, dokument)
                 VALUES (
@@ -58,7 +41,7 @@ class PgDokumentDao(queryRunner: QueryRunner) : DokumentDao, QueryRunner by quer
         fødselsnummer: String,
         dokumentId: UUID,
     ): JsonNode? =
-        asSQL(
+        HelseDao.asSQL(
             """
             SELECT dokument FROM dokumenter WHERE person_ref = (SELECT id FROM person WHERE fødselsnummer=:fodselsnummer) AND dokument_id =:dokumentId
             """.trimIndent(),
@@ -69,7 +52,7 @@ class PgDokumentDao(queryRunner: QueryRunner) : DokumentDao, QueryRunner by quer
         }
 
     override fun slettGamleDokumenter() =
-        asSQL(
+        HelseDao.asSQL(
             """
             delete from dokumenter where opprettet < current_date - interval '3 months';
             """.trimIndent(),
