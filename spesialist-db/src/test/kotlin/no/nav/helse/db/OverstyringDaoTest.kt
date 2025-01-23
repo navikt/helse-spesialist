@@ -34,7 +34,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class OverstyringDaoTest : DatabaseIntegrationTest() {
-    private val inntektskilderDao = InntektskilderDao(session, DBRepositories(dataSource))
+    private val inntektskilderRepository = repositories.withSessionContext(session).inntektskilderRepository
     private val PERSON_FORNAVN = "Per"
     private val PERSON_ETTERNAVN = "Son"
     private val PERSON_FØDSELSDATO = LocalDate.of(1998, 4, 20)
@@ -67,7 +67,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
 
     private fun opprettPerson() {
         saksbehandlerDao.opprettEllerOppdater(OID, SAKSBEHANDLER_NAVN, EPOST, SAKSBEHANDLER_IDENT)
-        inntektskilderDao.lagreInntektskilder(
+        inntektskilderRepository.lagreInntektskilder(
             listOf(
                 KomplettInntektskildeDto(ORGNUMMER, ORDINÆR, ARBEIDSGIVER_NAVN, BRANSJER, LocalDate.now())
             )

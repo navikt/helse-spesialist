@@ -8,13 +8,11 @@ import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.NyInntektskildeDto
 
-class InntektskilderDao(
+class PgInntektskilderRepository(
     private val session: Session,
-    private val repositories: Repositories,
+    private val arbeidsgiverDao: ArbeidsgiverDao,
+    private val avviksvurderingDao: AvviksvurderingDao,
 ) : InntektskilderRepository {
-    private val arbeidsgiverDao = repositories.withSessionContext(session).arbeidsgiverDao
-    private val avviksvurderingDao = PgAvviksvurderingDao(session)
-
     override fun lagreInntektskilder(inntektskilder: List<InntektskildeDto>) {
         inntektskilder.forEach { inntekt ->
             when (inntekt) {

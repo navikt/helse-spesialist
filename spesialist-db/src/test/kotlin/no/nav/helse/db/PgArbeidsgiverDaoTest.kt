@@ -11,8 +11,7 @@ import java.time.LocalDate
 
 
 internal class PgArbeidsgiverDaoTest : DatabaseIntegrationTest() {
-    private val inntektskildeDao = InntektskilderDao(sessionOf(dataSource, returnGeneratedKey = true), DBRepositories(
-        dataSource))
+    private val inntektskilderRepository = repositories.withSessionContext(sessionOf(dataSource, returnGeneratedKey = true)).inntektskilderRepository
 
     @Test
     fun `Oppretter minimal arbeidsgiver`() {
@@ -27,7 +26,7 @@ internal class PgArbeidsgiverDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `kan hente bransjer`() {
-        inntektskildeDao.lagreInntektskilder(listOf(
+        inntektskilderRepository.lagreInntektskilder(listOf(
             KomplettInntektskildeDto(ORGNUMMER, InntektskildetypeDto.ORDINÆR, ORGNAVN, BRANSJER, LocalDate.now())
         ))
         Assertions.assertEquals(BRANSJER, arbeidsgiverApiDao.finnBransjer(ORGNUMMER))
@@ -35,7 +34,7 @@ internal class PgArbeidsgiverDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `kan hente blanke bransjer`() {
-        inntektskildeDao.lagreInntektskilder(listOf(
+        inntektskilderRepository.lagreInntektskilder(listOf(
             KomplettInntektskildeDto(ORGNUMMER, InntektskildetypeDto.ORDINÆR, ORGNAVN, listOf(""), LocalDate.now())
         ))
         Assertions.assertTrue(arbeidsgiverApiDao.finnBransjer(ORGNUMMER).isEmpty())
@@ -43,7 +42,7 @@ internal class PgArbeidsgiverDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `kan hente tomme bransjer`() {
-        inntektskildeDao.lagreInntektskilder(listOf(
+        inntektskilderRepository.lagreInntektskilder(listOf(
             KomplettInntektskildeDto(ORGNUMMER, InntektskildetypeDto.ORDINÆR, ORGNAVN, emptyList(), LocalDate.now())
         ))
         Assertions.assertTrue(arbeidsgiverApiDao.finnBransjer(ORGNUMMER).isEmpty())
@@ -51,7 +50,7 @@ internal class PgArbeidsgiverDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `kan hente navn`() {
-        inntektskildeDao.lagreInntektskilder(listOf(
+        inntektskilderRepository.lagreInntektskilder(listOf(
             KomplettInntektskildeDto(ORGNUMMER, InntektskildetypeDto.ORDINÆR, ORGNAVN, BRANSJER, LocalDate.now())
         ))
         Assertions.assertEquals(ORGNAVN, arbeidsgiverApiDao.finnNavn(ORGNUMMER))

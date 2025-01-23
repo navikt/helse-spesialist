@@ -23,15 +23,15 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class InntektskilderDaoTest : DatabaseIntegrationTest() {
-    private val dao = InntektskilderDao(session, DBRepositories(dataSource))
+internal class PgInntektskilderRepositoryTest : DatabaseIntegrationTest() {
+    private val inntektskilderRepository = repositories.withSessionContext(session).inntektskilderRepository
     private val avviksvurderingDao = PgAvviksvurderingDao(session)
 
     @Test
     fun `når det ikke finnes arbeidsgivere i databasen får vi kun tilbake nye inntektskilder`() {
         val organisasjonsnummer1 = lagOrganisasjonsnummer()
         val organisasjonsnummer2 = lagOrganisasjonsnummer()
-        val funnet = dao.finnInntektskilder(lagFødselsnummer(), listOf(organisasjonsnummer1, organisasjonsnummer2))
+        val funnet = inntektskilderRepository.finnInntektskilder(lagFødselsnummer(), listOf(organisasjonsnummer1, organisasjonsnummer2))
         assertEquals(2, funnet.size)
         assertTrue(funnet.all { it is NyInntektskildeDto })
     }
@@ -42,7 +42,7 @@ internal class InntektskilderDaoTest : DatabaseIntegrationTest() {
         val navn = lagOrganisasjonsnavn()
 
         opprettArbeidsgiver(organisasjonsnummer, navn, listOf("Uteliv", "Reise"))
-        val funnet = dao.finnInntektskilder(lagFødselsnummer(), listOf(organisasjonsnummer))
+        val funnet = inntektskilderRepository.finnInntektskilder(lagFødselsnummer(), listOf(organisasjonsnummer))
         assertEquals(1, funnet.size)
         val dto = funnet.single()
         check(dto is KomplettInntektskildeDto)
@@ -57,7 +57,7 @@ internal class InntektskilderDaoTest : DatabaseIntegrationTest() {
         val navn = lagOrganisasjonsnavn()
 
         opprettArbeidsgiver(identifikator, navn, listOf("Uteliv", "Reise"))
-        val funnet = dao.finnInntektskilder(lagFødselsnummer(), listOf(identifikator))
+        val funnet = inntektskilderRepository.finnInntektskilder(lagFødselsnummer(), listOf(identifikator))
         assertEquals(1, funnet.size)
         val dto = funnet.single()
         check(dto is KomplettInntektskildeDto)
@@ -72,7 +72,7 @@ internal class InntektskilderDaoTest : DatabaseIntegrationTest() {
         val navn = lagOrganisasjonsnavn()
 
         opprettArbeidsgiver(identifikator, navn, listOf("Uteliv", "Reise"))
-        val funnet = dao.finnInntektskilder(lagFødselsnummer(), listOf(identifikator))
+        val funnet = inntektskilderRepository.finnInntektskilder(lagFødselsnummer(), listOf(identifikator))
         assertEquals(1, funnet.size)
         val dto = funnet.single()
         check(dto is KomplettInntektskildeDto)
@@ -88,7 +88,7 @@ internal class InntektskilderDaoTest : DatabaseIntegrationTest() {
         val navn = lagOrganisasjonsnavn()
 
         opprettArbeidsgiver(organisasjonsnummer1, navn, listOf("Uteliv", "Reise"))
-        val funnet = dao.finnInntektskilder(lagFødselsnummer(), listOf(organisasjonsnummer1, organisasjonsnummer2))
+        val funnet = inntektskilderRepository.finnInntektskilder(lagFødselsnummer(), listOf(organisasjonsnummer1, organisasjonsnummer2))
         assertEquals(2, funnet.size)
         assertTrue(funnet[0] is KomplettInntektskildeDto)
         assertTrue(funnet[1] is NyInntektskildeDto)
@@ -114,7 +114,7 @@ internal class InntektskilderDaoTest : DatabaseIntegrationTest() {
             )
         )
 
-        val funnet = dao.finnInntektskilder(fødselsnummer, listOf(organisasjonsnummer))
+        val funnet = inntektskilderRepository.finnInntektskilder(fødselsnummer, listOf(organisasjonsnummer))
         assertEquals(1, funnet.size)
         assertTrue(funnet.single() is NyInntektskildeDto)
     }
@@ -142,7 +142,7 @@ internal class InntektskilderDaoTest : DatabaseIntegrationTest() {
             )
         )
 
-        val funnet = dao.finnInntektskilder(fødselsnummer, listOf(organisasjonsnummerSomSpleisKjennerTil))
+        val funnet = inntektskilderRepository.finnInntektskilder(fødselsnummer, listOf(organisasjonsnummerSomSpleisKjennerTil))
         assertEquals(2, funnet.size)
         assertTrue(funnet.all { it is NyInntektskildeDto})
     }
@@ -173,7 +173,7 @@ internal class InntektskilderDaoTest : DatabaseIntegrationTest() {
 
         opprettArbeidsgiver(organisasjonsnummer, navn, listOf("Uteliv", "Reise"))
 
-        val funnet = dao.finnInntektskilder(fødselsnummer, listOf(organisasjonsnummer))
+        val funnet = inntektskilderRepository.finnInntektskilder(fødselsnummer, listOf(organisasjonsnummer))
         assertEquals(1, funnet.size)
         assertTrue(funnet.single() is KomplettInntektskildeDto)
     }
@@ -187,7 +187,7 @@ internal class InntektskilderDaoTest : DatabaseIntegrationTest() {
         val bransjer1 = listOf("Uteliv", "Reise")
         val bransjer2 = listOf("Hotell")
 
-        dao.lagreInntektskilder(
+        inntektskilderRepository.lagreInntektskilder(
             listOf(
                 KomplettInntektskildeDto(
                     identifikator = organisasjonsnummer1,

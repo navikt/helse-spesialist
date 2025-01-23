@@ -4,7 +4,6 @@ import kotliquery.Session
 import kotliquery.TransactionalSession
 import kotliquery.sessionOf
 import no.nav.helse.db.CommandContextRepository
-import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PgAvviksvurderingDao
 import no.nav.helse.db.PgDialogDao
@@ -215,7 +214,7 @@ class Kommandofabrikk(
             aktørId = hendelse.aktørId,
             organisasjonsnummer = hendelse.organisasjonsnummer,
             personRepository = PersonDao(transactionalSession),
-            inntektskilderRepository = InntektskilderDao(transactionalSession, repositories),
+            inntektskilderRepository = repositories.withSessionContext(transactionalSession).inntektskilderRepository,
         )
 
     internal fun adressebeskyttelseEndret(
@@ -374,7 +373,7 @@ class Kommandofabrikk(
             vedtakDao = PgVedtakDao(session),
             commandContextRepository = CommandContextDao(session),
             personRepository = PersonDao(session),
-            inntektskilderRepository = InntektskilderDao(session, repositories),
+            inntektskilderRepository = repositories.withSessionContext(session).inntektskilderRepository,
             arbeidsforholdRepository = ArbeidsforholdDao(session),
             egenAnsattRepository = EgenAnsattDao(session),
             utbetalingRepository = UtbetalingDao(session),

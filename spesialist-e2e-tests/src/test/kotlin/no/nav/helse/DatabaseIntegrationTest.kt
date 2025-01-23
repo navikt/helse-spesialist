@@ -7,7 +7,6 @@ import kotliquery.sessionOf
 import no.nav.helse.db.DBRepositories
 import no.nav.helse.db.DbQuery
 import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgNotatDao
 import no.nav.helse.db.PgOppgaveDao
@@ -122,7 +121,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val dialogDao = PgDialogDao(dataSource)
     internal val annulleringRepository = repositories.annulleringRepository
     private val personService = PersonService(dataSource, repositories)
-    private val inntektskilderDao = InntektskilderDao(session, repositories)
+    private val inntektskilderDao = repositories.withSessionContext(session).inntektskilderRepository
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,
