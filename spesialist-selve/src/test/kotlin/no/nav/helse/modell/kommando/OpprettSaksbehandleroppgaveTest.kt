@@ -8,7 +8,7 @@ import no.nav.helse.Testdata.godkjenningsbehovData
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentDao
-import no.nav.helse.db.RisikovurderingRepository
+import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.VergemålRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
@@ -61,7 +61,7 @@ internal class OpprettSaksbehandleroppgaveTest {
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
     private val automatisering = mockk<Automatisering>(relaxed = true)
     private val personDao = mockk<PersonDao>(relaxed = true)
-    private val risikovurderingRepository = mockk<RisikovurderingRepository>(relaxed = true)
+    private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val vergemålRepository = mockk<VergemålRepository>(relaxed = true)
     private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
@@ -91,7 +91,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter risk QA`() {
-        every { risikovurderingRepository.måTilManuell(VEDTAKSPERIODE_ID) } returns true
+        every { risikovurderingDao.måTilManuell(VEDTAKSPERIODE_ID) } returns true
         assertTrue(command.execute(context))
         assertForventedeEgenskaper(SØKNAD, RISK_QA, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING)
     }
@@ -228,7 +228,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `legger ikke til egenskap RISK_QA hvis oppgaven har egenskap REVURDERING`() {
-        every { risikovurderingRepository.måTilManuell(VEDTAKSPERIODE_ID) } returns true
+        every { risikovurderingDao.måTilManuell(VEDTAKSPERIODE_ID) } returns true
         assertTrue(opprettSaksbehandlerOppgaveCommand(utbetalingtype = Utbetalingtype.REVURDERING).execute(context))
 
         assertForventedeEgenskaper(REVURDERING, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING)
@@ -280,7 +280,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         oppgaveService = oppgaveService,
         automatisering = automatisering,
         personDao = personDao,
-        risikovurderingRepository = risikovurderingRepository,
+        risikovurderingDao = risikovurderingDao,
         egenAnsattDao = egenAnsattDao,
         utbetalingtype = utbetalingtype,
         sykefraværstilfelle = sykefraværstilfelle,

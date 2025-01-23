@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.db.RisikovurderingRepository
+import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
 import no.nav.helse.modell.kommando.CommandContext
@@ -29,7 +29,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class VurderVurderingsmomenterTest {
-    private val risikovurderingRepository = mockk<RisikovurderingRepository>()
+    private val risikovurderingDao = mockk<RisikovurderingDao>()
     private val utbetalingMock = mockk<Utbetaling>(relaxed = true)
 
     private companion object {
@@ -66,7 +66,7 @@ internal class VurderVurderingsmomenterTest {
     fun setup() {
         context = CommandContext(UUID.randomUUID())
         context.nyObserver(observer)
-        every { risikovurderingRepository.hentRisikovurdering(testperson.vedtaksperiodeId1) } returns null
+        every { risikovurderingDao.hentRisikovurdering(testperson.vedtaksperiodeId1) } returns null
     }
 
     @Test
@@ -141,7 +141,7 @@ internal class VurderVurderingsmomenterTest {
 
     @Test
     fun `Går videre hvis risikovurderingen for vedtaksperioden allerede er gjort`() {
-        every { risikovurderingRepository.hentRisikovurdering(testperson.vedtaksperiodeId1) } returns mockk()
+        every { risikovurderingDao.hentRisikovurdering(testperson.vedtaksperiodeId1) } returns mockk()
         assertTrue(risikoCommand().resume(context))
         assertTrue(risikoCommand().execute(context))
         assertTrue(observer.behov.isEmpty())
@@ -149,14 +149,14 @@ internal class VurderVurderingsmomenterTest {
 
     @Test
     fun `Om vi har fått løsning på rett vedtaksperiode lagres den`() {
-        every { risikovurderingRepository.lagre(testperson.vedtaksperiodeId1, any(), any(), any()) } just Runs
+        every { risikovurderingDao.lagre(testperson.vedtaksperiodeId1, any(), any(), any()) } just Runs
         context.add(
             behovløsning()
         )
         val risikoCommand = risikoCommand()
         assertTrue(risikoCommand.execute(context))
         assertTrue(observer.behov.isEmpty())
-        verify(exactly = 1) { risikovurderingRepository.lagre(testperson.vedtaksperiodeId1, any(), any(), any()) }
+        verify(exactly = 1) { risikovurderingDao.lagre(testperson.vedtaksperiodeId1, any(), any(), any()) }
     }
 
     @Test
@@ -195,7 +195,7 @@ internal class VurderVurderingsmomenterTest {
 
     @Test
     fun `Lager varsel om risk-svaret tilsier det`() {
-        every { risikovurderingRepository.lagre(testperson.vedtaksperiodeId1, any(), any(), any()) } just Runs
+        every { risikovurderingDao.lagre(testperson.vedtaksperiodeId1, any(), any(), any()) } just Runs
         context.add(
             behovløsning(
                 kanGodkjennesAutomatisk = false
@@ -209,12 +209,12 @@ internal class VurderVurderingsmomenterTest {
 
     private fun risikoCommand(
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
-        risikovurderingRepository: RisikovurderingRepository = this.risikovurderingRepository,
+        risikovurderingDao: RisikovurderingDao = this.risikovurderingDao,
         organisasjonsnummer: String = testperson.orgnummer,
         førstegangsbehandling: Boolean = true,
     ) = VurderVurderingsmomenter(
         vedtaksperiodeId = vedtaksperiodeId,
-        risikovurderingRepository = risikovurderingRepository,
+        risikovurderingDao = risikovurderingDao,
         organisasjonsnummer = organisasjonsnummer,
         førstegangsbehandling = førstegangsbehandling,
         sykefraværstilfelle = sykefraværstilfelle,

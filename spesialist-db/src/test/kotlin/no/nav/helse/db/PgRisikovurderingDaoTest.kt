@@ -11,7 +11,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class RisikovurderingDaoTest : DatabaseIntegrationTest() {
+internal class PgRisikovurderingDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `lagrer risikovurdering`() {

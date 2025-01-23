@@ -1,16 +1,14 @@
-package no.nav.helse.modell.risiko
+package no.nav.helse.db
 
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.db.MedSession
-import no.nav.helse.db.QueryRunner
-import no.nav.helse.db.RisikovurderingRepository
+import no.nav.helse.modell.risiko.Risikovurdering
 import no.nav.helse.objectMapper
 import java.time.LocalDateTime
 import java.util.UUID
 
-class RisikovurderingDao(session: Session) : RisikovurderingRepository, QueryRunner by MedSession(session) {
+class PgRisikovurderingDao internal constructor(session: Session) : RisikovurderingDao, QueryRunner by MedSession(session) {
     override fun hentRisikovurdering(vedtaksperiodeId: UUID) =
         asSQL(
             """
@@ -19,7 +17,7 @@ class RisikovurderingDao(session: Session) : RisikovurderingRepository, QueryRun
             """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
         ).singleOrNull { it.boolean("kan_godkjennes_automatisk") }
-            ?.let(Risikovurdering::restore)
+            ?.let(Risikovurdering.Companion::restore)
 
     override fun måTilManuell(vedtaksperiodeId: UUID) =
         asSQL(

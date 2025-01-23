@@ -7,7 +7,7 @@ import no.nav.helse.db.GenerasjonDao
 import no.nav.helse.db.MeldingRepository
 import no.nav.helse.db.OverstyringDao
 import no.nav.helse.db.PersonDao
-import no.nav.helse.db.RisikovurderingRepository
+import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålRepository
@@ -18,7 +18,6 @@ import no.nav.helse.modell.MeldingDao.OverstyringIgangsattKorrigertSøknad
 import no.nav.helse.modell.automatisering.Automatisering.AutomatiserKorrigertSøknadResultat.SkyldesKorrigertSøknad
 import no.nav.helse.modell.person.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.utbetaling.Utbetaling
@@ -34,7 +33,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class Automatisering(
-    private val risikovurderingRepository: RisikovurderingRepository,
+    private val risikovurderingDao: RisikovurderingDao,
     private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
     private val automatiseringDao: AutomatiseringDao,
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
@@ -55,7 +54,7 @@ internal class Automatisering(
             sessionContext: SessionContext,
         ): Automatisering {
             return Automatisering(
-                risikovurderingRepository = RisikovurderingDao(transactionalSession),
+                risikovurderingDao = sessionContext.risikovurderingDao,
                 stansAutomatiskBehandlinghåndterer =
                     StansAutomatiskBehandlingMediator.Factory.stansAutomatiskBehandlingMediator(
                         sessionContext,
@@ -237,7 +236,7 @@ internal class Automatisering(
         organisasjonsnummer: String,
     ): List<String> {
         val risikovurdering =
-            risikovurderingRepository.hentRisikovurdering(vedtaksperiodeId)
+            risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
                 ?: validering("Mangler risikovurdering") { false }
         val unntattFraAutomatisering =
             stansAutomatiskBehandlinghåndterer.sjekkOmAutomatiseringErStanset(

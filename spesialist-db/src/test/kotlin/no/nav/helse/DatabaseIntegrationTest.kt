@@ -19,7 +19,6 @@ import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.MeldingDuplikatkontrollDao
 import no.nav.helse.modell.person.PersonService
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
-import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
@@ -118,7 +117,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val overstyringApiDao = PgOverstyringApiDao(dataSource)
     internal val reservasjonDao = sessionContext.reservasjonDao
     internal val meldingDuplikatkontrollDao = MeldingDuplikatkontrollDao(dataSource)
-    internal val risikovurderingDao = RisikovurderingDao(session)
+    internal val risikovurderingDao = sessionContext.risikovurderingDao
     internal val automatiseringDao = sessionContext.automatiseringDao
     internal val åpneGosysOppgaverDao = sessionContext.åpneGosysOppgaverDao
     internal val egenAnsattDao = sessionContext.egenAnsattDao

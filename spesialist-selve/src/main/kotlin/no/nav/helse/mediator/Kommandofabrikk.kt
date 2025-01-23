@@ -31,7 +31,6 @@ import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.SøknadSendtCommand
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
-import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMelding
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
@@ -364,7 +363,7 @@ class Kommandofabrikk(
             utbetalingRepository = UtbetalingDao(session),
             vergemålRepository = VergemålDao(session),
             åpneGosysOppgaverDao = sessionContext.åpneGosysOppgaverDao,
-            risikovurderingRepository = RisikovurderingDao(session),
+            risikovurderingDao = sessionContext.risikovurderingDao,
             påVentDao = sessionContext.påVentDao,
             overstyringDao = sessionContext.overstyringDao,
             automatiseringDao = sessionContext.automatiseringDao,

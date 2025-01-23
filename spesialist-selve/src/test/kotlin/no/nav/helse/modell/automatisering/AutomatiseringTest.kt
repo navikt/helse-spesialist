@@ -7,6 +7,7 @@ import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.GenerasjonDao
 import no.nav.helse.db.OverstyringDao
 import no.nav.helse.db.PersonDao
+import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.MeldingDao
@@ -14,7 +15,6 @@ import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.risiko.Risikovurdering
-import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -86,7 +86,7 @@ internal class AutomatiseringTest {
 
     private val automatisering =
         Automatisering(
-            risikovurderingRepository = risikovurderingDaoMock,
+            risikovurderingDao = risikovurderingDaoMock,
             stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlingMediatorMock,
             automatiseringDao = automatiseringDaoMock,
             åpneGosysOppgaverDao = åpneGosysOppgaverDaoMock,

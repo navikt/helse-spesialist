@@ -3,7 +3,7 @@ package no.nav.helse.modell.kommando
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentDao
-import no.nav.helse.db.RisikovurderingRepository
+import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.VergemålRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
@@ -50,7 +50,7 @@ internal class OpprettSaksbehandleroppgave(
     private val oppgaveService: OppgaveService,
     private val automatisering: Automatisering,
     private val personDao: PersonDao,
-    private val risikovurderingRepository: RisikovurderingRepository,
+    private val risikovurderingDao: RisikovurderingDao,
     private val egenAnsattDao: EgenAnsattDao,
     private val utbetalingtype: Utbetalingtype,
     private val sykefraværstilfelle: Sykefraværstilfelle,
@@ -132,7 +132,7 @@ internal class OpprettSaksbehandleroppgave(
         vedtaksperiodeId: UUID,
         utbetalingtype: Utbetalingtype,
     ) {
-        if (utbetalingtype != Utbetalingtype.REVURDERING && risikovurderingRepository.måTilManuell(vedtaksperiodeId)) {
+        if (utbetalingtype != Utbetalingtype.REVURDERING && risikovurderingDao.måTilManuell(vedtaksperiodeId)) {
             add(RISK_QA)
         }
     }

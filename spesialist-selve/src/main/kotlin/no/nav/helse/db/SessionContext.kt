@@ -25,4 +25,5 @@ interface SessionContext {
     val overstyringDao: OverstyringDao
     val personDao: PersonDao
     val påVentDao: PåVentDao
+    val risikovurderingDao: RisikovurderingDao
 }

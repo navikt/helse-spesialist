@@ -12,7 +12,7 @@ import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OverstyringDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentDao
-import no.nav.helse.db.RisikovurderingRepository
+import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålRepository
@@ -200,7 +200,7 @@ internal class GodkjenningsbehovCommand(
     utbetalingRepository: UtbetalingRepository,
     vergemålRepository: VergemålRepository,
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
-    risikovurderingRepository: RisikovurderingRepository,
+    risikovurderingDao: RisikovurderingDao,
     påVentDao: PåVentDao,
     overstyringDao: OverstyringDao,
     automatiseringDao: AutomatiseringDao,
@@ -286,7 +286,7 @@ internal class GodkjenningsbehovCommand(
             ),
             VurderVurderingsmomenter(
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
-                risikovurderingRepository = risikovurderingRepository,
+                risikovurderingDao = risikovurderingDao,
                 organisasjonsnummer = behovData.organisasjonsnummer,
                 førstegangsbehandling = behovData.førstegangsbehandling,
                 sykefraværstilfelle = sykefraværstilfelle,
@@ -315,7 +315,7 @@ internal class GodkjenningsbehovCommand(
                 oppgaveService = oppgaveService,
                 automatisering = automatisering,
                 personDao = personDao,
-                risikovurderingRepository = risikovurderingRepository,
+                risikovurderingDao = risikovurderingDao,
                 egenAnsattDao = egenAnsattDao,
                 utbetalingtype = behovData.utbetalingtype,
                 sykefraværstilfelle = sykefraværstilfelle,

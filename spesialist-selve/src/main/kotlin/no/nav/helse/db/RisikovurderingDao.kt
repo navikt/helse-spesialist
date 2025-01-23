@@ -5,7 +5,7 @@ import no.nav.helse.modell.risiko.Risikovurdering
 import java.time.LocalDateTime
 import java.util.UUID
 
-interface RisikovurderingRepository {
+interface RisikovurderingDao {
     fun hentRisikovurdering(vedtaksperiodeId: UUID): Risikovurdering?
 
     fun måTilManuell(vedtaksperiodeId: UUID): Boolean
