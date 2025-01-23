@@ -2,7 +2,7 @@ package no.nav.helse.modell.automatisering
 
 import kotliquery.TransactionalSession
 import no.nav.helse.db.AutomatiseringDao
-import no.nav.helse.db.EgenAnsattRepository
+import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.GenerasjonDao
 import no.nav.helse.db.MeldingRepository
 import no.nav.helse.db.PersonRepository
@@ -16,7 +16,6 @@ import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.MeldingDao.OverstyringIgangsattKorrigertSøknad
 import no.nav.helse.modell.automatisering.Automatisering.AutomatiserKorrigertSøknadResultat.SkyldesKorrigertSøknad
-import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.HentEnhetløsning.Companion.erEnhetUtland
@@ -49,7 +48,7 @@ internal class Automatisering(
     private val stikkprøver: Stikkprøver,
     private val meldingRepository: MeldingRepository,
     private val generasjonDao: GenerasjonDao,
-    private val egenAnsattRepository: EgenAnsattRepository,
+    private val egenAnsattDao: EgenAnsattDao,
 ) {
     object Factory {
         fun automatisering(
@@ -74,7 +73,7 @@ internal class Automatisering(
                 stikkprøver = stikkprøver,
                 meldingRepository = MeldingDao(transactionalSession),
                 generasjonDao = sessionContext.generasjonDao,
-                egenAnsattRepository = EgenAnsattDao(transactionalSession),
+                egenAnsattDao = sessionContext.egenAnsattDao,
             )
         }
     }
@@ -127,7 +126,7 @@ internal class Automatisering(
     }
 
     private fun erEgenAnsattEllerSkjermet(fødselsnummer: String) =
-        egenAnsattRepository.erEgenAnsatt(fødselsnummer) == true ||
+        egenAnsattDao.erEgenAnsatt(fødselsnummer) == true ||
             personRepository.finnAdressebeskyttelse(fødselsnummer) != Adressebeskyttelse.Ugradert
 
     private fun finnSisteOverstyringIgangsattHvisSkyldesKorrigertSøknad(

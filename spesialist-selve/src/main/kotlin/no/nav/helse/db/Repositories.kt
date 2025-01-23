@@ -24,6 +24,7 @@ interface Repositories {
     val reservasjonDao: ReservasjonDao
     val commandContextDao: CommandContextDao
     val dokumentDao: DokumentDao
+    val egenAnsattDao: EgenAnsattDao
 
     fun withSessionContext(session: Session): SessionContext
 }

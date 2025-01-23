@@ -1,6 +1,6 @@
 package no.nav.helse.modell.egenansatt
 
-import no.nav.helse.db.EgenAnsattRepository
+import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory
 
 internal class KontrollerEgenAnsattstatus(
     private val fødselsnummer: String,
-    private val egenAnsattRepository: EgenAnsattRepository,
+    private val egenAnsattDao: EgenAnsattDao,
 ) : Command {
     private companion object {
         private val logg = LoggerFactory.getLogger(KontrollerEgenAnsattstatus::class.java)
@@ -28,10 +28,10 @@ internal class KontrollerEgenAnsattstatus(
             return false
         }
 
-        løsning.lagre(egenAnsattRepository)
+        løsning.lagre(egenAnsattDao)
         return true
     }
 
     // Hvis vi har informasjon i databasen er den "garantert" oppdatert, pga. at vi lytter på endringer på topic fra NOM.
-    private fun viHarInformasjon() = egenAnsattRepository.erEgenAnsatt(fødselsnummer) != null
+    private fun viHarInformasjon() = egenAnsattDao.erEgenAnsatt(fødselsnummer) != null
 }

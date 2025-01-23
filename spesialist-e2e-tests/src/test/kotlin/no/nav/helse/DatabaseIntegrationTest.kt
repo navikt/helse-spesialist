@@ -10,7 +10,6 @@ import no.nav.helse.db.api.PgPeriodehistorikkApiDao
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.MeldingDao
-import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.TestMelding
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.PersonService
@@ -101,7 +100,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val saksbehandlerDao = repositories.saksbehandlerDao
     internal val reservasjonDao = repositories.withSessionContext(session).reservasjonDao
     internal val meldingDao = MeldingDao(dataSource)
-    internal val egenAnsattDao = EgenAnsattDao(session)
+    internal val egenAnsattDao = repositories.withSessionContext(session).egenAnsattDao
     internal val totrinnsvurderingDao = repositories.withSessionContext(session).totrinnsvurderingDao
     internal val påVentDao = PåVentDao(session)
     internal val stansAutomatiskBehandlingDao = repositories.withSessionContext(session).stansAutomatiskBehandlingDao

@@ -6,7 +6,7 @@ import no.nav.helse.db.ArbeidsforholdDao
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.CommandContextDao
-import no.nav.helse.db.EgenAnsattRepository
+import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PersonRepository
@@ -196,7 +196,7 @@ internal class GodkjenningsbehovCommand(
     personRepository: PersonRepository,
     inntektskilderRepository: InntektskilderRepository,
     arbeidsforholdDao: ArbeidsforholdDao,
-    egenAnsattRepository: EgenAnsattRepository,
+    egenAnsattDao: EgenAnsattDao,
     utbetalingRepository: UtbetalingRepository,
     vergemålRepository: VergemålRepository,
     åpneGosysOppgaverRepository: ÅpneGosysOppgaverRepository,
@@ -263,7 +263,7 @@ internal class GodkjenningsbehovCommand(
             ),
             KontrollerEgenAnsattstatus(
                 fødselsnummer = behovData.fødselsnummer,
-                egenAnsattRepository = egenAnsattRepository,
+                egenAnsattDao = egenAnsattDao,
             ),
             VurderVergemålOgFullmakt(
                 fødselsnummer = behovData.fødselsnummer,
@@ -316,7 +316,7 @@ internal class GodkjenningsbehovCommand(
                 automatisering = automatisering,
                 personRepository = personRepository,
                 risikovurderingRepository = risikovurderingRepository,
-                egenAnsattRepository = egenAnsattRepository,
+                egenAnsattDao = egenAnsattDao,
                 utbetalingtype = behovData.utbetalingtype,
                 sykefraværstilfelle = sykefraværstilfelle,
                 utbetaling = utbetaling,

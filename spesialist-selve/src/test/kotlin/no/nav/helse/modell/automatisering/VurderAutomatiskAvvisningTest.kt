@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.Testdata.godkjenningsbehovData
-import no.nav.helse.db.EgenAnsattRepository
+import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.VergemålRepository
 import no.nav.helse.mediator.GodkjenningMediator
@@ -23,14 +23,14 @@ internal class VurderAutomatiskAvvisningTest {
 
     private val vergemålRepository = mockk<VergemålRepository>(relaxed = true)
     private val personRepository = mockk<PersonRepository>(relaxed = true)
-    private val egenAnsattRepository = mockk<EgenAnsattRepository>(relaxed = true)
+    private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val godkjenningMediator = mockk<GodkjenningMediator>(relaxed = true)
     private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
 
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
-        clearMocks(vergemålRepository, personRepository, egenAnsattRepository, godkjenningMediator, sykefraværstilfelle)
+        clearMocks(vergemålRepository, personRepository, egenAnsattDao, godkjenningMediator, sykefraværstilfelle)
     }
 
     @Test

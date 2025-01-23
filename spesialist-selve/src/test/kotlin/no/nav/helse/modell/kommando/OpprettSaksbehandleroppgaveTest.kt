@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.Testdata.godkjenningsbehovData
-import no.nav.helse.db.EgenAnsattRepository
+import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.PåVentRepository
 import no.nav.helse.db.RisikovurderingRepository
@@ -62,7 +62,7 @@ internal class OpprettSaksbehandleroppgaveTest {
     private val automatisering = mockk<Automatisering>(relaxed = true)
     private val personRepository = mockk<PersonRepository>(relaxed = true)
     private val risikovurderingRepository = mockk<RisikovurderingRepository>(relaxed = true)
-    private val egenAnsattRepository = mockk<EgenAnsattRepository>(relaxed = true)
+    private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val vergemålRepository = mockk<VergemålRepository>(relaxed = true)
     private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
     private val påVentRepository = mockk<PåVentRepository>(relaxed = true)
@@ -183,7 +183,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter oppgave med egen ansatt`() {
-        every { egenAnsattRepository.erEgenAnsatt(FNR) } returns true
+        every { egenAnsattDao.erEgenAnsatt(FNR) } returns true
         assertTrue(command.execute(context))
         assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, EGEN_ANSATT)
     }
@@ -281,7 +281,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         automatisering = automatisering,
         personRepository = personRepository,
         risikovurderingRepository = risikovurderingRepository,
-        egenAnsattRepository = egenAnsattRepository,
+        egenAnsattDao = egenAnsattDao,
         utbetalingtype = utbetalingtype,
         sykefraværstilfelle = sykefraværstilfelle,
         utbetaling = utbetaling,

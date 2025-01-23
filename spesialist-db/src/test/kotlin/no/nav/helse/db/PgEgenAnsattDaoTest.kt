@@ -7,7 +7,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
-internal class EgenAnsattDaoTest : DatabaseIntegrationTest() {
+internal class PgEgenAnsattDaoTest : DatabaseIntegrationTest() {
     @BeforeEach
     fun setup() {
         testhendelse()

@@ -23,7 +23,6 @@ import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemål
-import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.melding.OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiverEvent.OverstyrtRefusjonselementEvent
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.person.PersonDao
@@ -1355,7 +1354,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         skjermet: Boolean?,
     ) {
-        assertEquals(skjermet, EgenAnsattDao(dataSource).erEgenAnsatt(fødselsnummer))
+        assertEquals(skjermet, repositories.egenAnsattDao.erEgenAnsatt(fødselsnummer))
     }
 
     protected fun assertAdressebeskyttelse(

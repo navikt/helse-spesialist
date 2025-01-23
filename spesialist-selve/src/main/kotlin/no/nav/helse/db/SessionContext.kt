@@ -20,4 +20,5 @@ interface SessionContext {
     val commandContextDao: CommandContextDao
     val arbeidsforholdDao: ArbeidsforholdDao
     val automatiseringDao: AutomatiseringDao
+    val egenAnsattDao: EgenAnsattDao
 }

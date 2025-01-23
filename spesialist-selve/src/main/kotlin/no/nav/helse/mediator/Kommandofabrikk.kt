@@ -13,7 +13,6 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.Stikkprøver
-import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommand
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
@@ -87,7 +86,7 @@ class Kommandofabrikk(
             fødselsnummer = melding.fødselsnummer(),
             erEgenAnsatt = melding.erEgenAnsatt,
             opprettet = melding.opprettet,
-            egenAnsattRepository = EgenAnsattDao(transactionalSession),
+            egenAnsattDao = repositories.withSessionContext(transactionalSession).egenAnsattDao,
             oppgaveService = transaksjonellOppgaveService(transactionalSession),
         )
 
@@ -245,7 +244,7 @@ class Kommandofabrikk(
         KlargjørTilgangsrelaterteDataCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             personRepository = PersonDao(transactionalSession),
-            egenAnsattRepository = EgenAnsattDao(transactionalSession),
+            egenAnsattDao = repositories.withSessionContext(transactionalSession).egenAnsattDao,
             opptegnelseRepository = repositories.withSessionContext(transactionalSession).opptegnelseRepository,
         )
 
@@ -364,7 +363,7 @@ class Kommandofabrikk(
             personRepository = PersonDao(session),
             inntektskilderRepository = repositories.withSessionContext(session).inntektskilderRepository,
             arbeidsforholdDao = repositories.withSessionContext(session).arbeidsforholdDao,
-            egenAnsattRepository = EgenAnsattDao(session),
+            egenAnsattDao = repositories.withSessionContext(session).egenAnsattDao,
             utbetalingRepository = UtbetalingDao(session),
             vergemålRepository = VergemålDao(session),
             åpneGosysOppgaverRepository = ÅpneGosysOppgaverDao(session),

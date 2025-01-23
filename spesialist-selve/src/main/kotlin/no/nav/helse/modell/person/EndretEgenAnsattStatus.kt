@@ -2,7 +2,7 @@ package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.TransactionalSession
-import no.nav.helse.db.EgenAnsattRepository
+import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -44,13 +44,13 @@ internal class EndretEgenAnsattStatusCommand(
     private val fødselsnummer: String,
     erEgenAnsatt: Boolean,
     opprettet: LocalDateTime,
-    egenAnsattRepository: EgenAnsattRepository,
+    egenAnsattDao: EgenAnsattDao,
     oppgaveService: OppgaveService,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
             ikkesuspenderendeCommand("lagreEgenAnsattStatus") {
-                egenAnsattRepository.lagre(fødselsnummer, erEgenAnsatt, opprettet)
+                egenAnsattDao.lagre(fødselsnummer, erEgenAnsatt, opprettet)
             },
             ikkesuspenderendeCommand("endretEgenAnsattStatus") {
                 oppgaveService.endretEgenAnsattStatus(erEgenAnsatt, fødselsnummer)

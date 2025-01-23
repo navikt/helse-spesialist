@@ -1,15 +1,11 @@
-package no.nav.helse.modell.egenansatt
+package no.nav.helse.db
 
 import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.db.EgenAnsattRepository
-import no.nav.helse.db.MedDataSource
-import no.nav.helse.db.MedSession
-import no.nav.helse.db.QueryRunner
 import java.time.LocalDateTime
 import javax.sql.DataSource
 
-class EgenAnsattDao(queryRunner: QueryRunner) : EgenAnsattRepository, QueryRunner by queryRunner {
+class PgEgenAnsattDao(queryRunner: QueryRunner) : EgenAnsattDao, QueryRunner by queryRunner {
     constructor(session: Session) : this(MedSession(session))
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 

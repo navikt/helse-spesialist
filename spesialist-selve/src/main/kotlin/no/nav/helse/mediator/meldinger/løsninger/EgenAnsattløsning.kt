@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.meldinger.løsninger
 
-import no.nav.helse.db.EgenAnsattRepository
+import no.nav.helse.db.EgenAnsattDao
 import java.time.LocalDateTime
 
 class EgenAnsattløsning(
@@ -8,7 +8,7 @@ class EgenAnsattløsning(
     private val fødselsnummer: String,
     private val erEgenAnsatt: Boolean,
 ) {
-    internal fun lagre(egenAnsattRepository: EgenAnsattRepository) {
-        egenAnsattRepository.lagre(fødselsnummer, erEgenAnsatt, opprettet)
+    internal fun lagre(egenAnsattDao: EgenAnsattDao) {
+        egenAnsattDao.lagre(fødselsnummer, erEgenAnsatt, opprettet)
     }
 }

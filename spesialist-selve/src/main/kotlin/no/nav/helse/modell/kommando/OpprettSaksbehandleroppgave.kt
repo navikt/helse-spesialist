@@ -1,6 +1,6 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.db.EgenAnsattRepository
+import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.PåVentRepository
 import no.nav.helse.db.RisikovurderingRepository
@@ -51,7 +51,7 @@ internal class OpprettSaksbehandleroppgave(
     private val automatisering: Automatisering,
     private val personRepository: PersonRepository,
     private val risikovurderingRepository: RisikovurderingRepository,
-    private val egenAnsattRepository: EgenAnsattRepository,
+    private val egenAnsattDao: EgenAnsattDao,
     private val utbetalingtype: Utbetalingtype,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val utbetaling: Utbetaling,
@@ -103,7 +103,7 @@ internal class OpprettSaksbehandleroppgave(
     }
 
     private fun MutableSet<Egenskap>.egenAnsatt(fødselsnummer: String) {
-        if (egenAnsattRepository.erEgenAnsatt(fødselsnummer) == true) add(EGEN_ANSATT)
+        if (egenAnsattDao.erEgenAnsatt(fødselsnummer) == true) add(EGEN_ANSATT)
     }
 
     private fun MutableSet<Egenskap>.adressebeskyttelse(fødselsnummer: String) {

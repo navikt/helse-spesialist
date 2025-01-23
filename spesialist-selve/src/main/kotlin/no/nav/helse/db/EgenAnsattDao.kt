@@ -2,7 +2,7 @@ package no.nav.helse.db
 
 import java.time.LocalDateTime
 
-interface EgenAnsattRepository {
+interface EgenAnsattDao {
     fun erEgenAnsatt(fødselsnummer: String): Boolean?
 
     fun lagre(
