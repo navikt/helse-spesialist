@@ -79,7 +79,7 @@ class MeldingMediator(
     }
 
     private var løsninger: Løsninger? = null
-    var meldingPasserteValidering = false
+    var meldingenHarBlittBehandletAvEnRiver = false
 
     // samler opp løsninger
     fun løsning(
@@ -141,7 +141,7 @@ class MeldingMediator(
 
     fun nullstillTilstand() {
         løsninger = null
-        meldingPasserteValidering = false
+        meldingenHarBlittBehandletAvEnRiver = false
     }
 
     private fun løsninger(
@@ -185,7 +185,7 @@ class MeldingMediator(
     fun fortsett(message: String) {
         val jsonNode = objectMapper.readTree(message)
         løsninger?.fortsett(this, jsonNode)
-        if (meldingPasserteValidering) {
+        if (meldingenHarBlittBehandletAvEnRiver) {
             jsonNode["@id"]?.asUUID()?.let { id ->
                 val type =
                     when (val eventName = jsonNode["@event_name"]?.asText()) {

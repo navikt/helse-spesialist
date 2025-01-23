@@ -77,10 +77,10 @@ class RiverSetup(
                 .validate(river.validations())
                 .register(duplikatsjekkendeRiver(river))
                 .onSuccess { packet, _, _, _ ->
-                    logg.info(
-                        "${river.name()} leste melding id=${packet.id}, event_name=${packet.eventName()}, meldingPasserteValidering=${mediator.meldingPasserteValidering}",
+                    logg.debug(
+                        "${river.name()} leste melding id=${packet.id}, event_name=${packet.eventName()}. En annen/tidligere river har allerede/også behandlet meldingen:${mediator.meldingenHarBlittBehandletAvEnRiver}",
                     )
-                    mediator.meldingPasserteValidering = true
+                    mediator.meldingenHarBlittBehandletAvEnRiver = true
                 }
         }
     }
