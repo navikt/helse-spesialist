@@ -116,7 +116,7 @@ internal class PgCommandContextDaoTest : DatabaseIntegrationTest() {
         }
     }
 
-    private fun assertContextRad(finnes: Boolean, contextId: UUID) {
+    private fun assertContextRad(@Suppress("SameParameterValue") finnes: Boolean, contextId: UUID) {
         val count = sessionOf(dataSource).use  {
             it.run(
                 queryOf("SELECT COUNT(1) FROM command_context WHERE context_id = ?",
