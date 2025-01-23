@@ -1,8 +1,6 @@
 package no.nav.helse.db
 
-import no.nav.helse.modell.vergemal.VergemålOgFremtidsfullmakt
-
-interface VergemålRepository {
+interface VergemålDao {
     fun lagre(
         fødselsnummer: String,
         vergemålOgFremtidsfullmakt: VergemålOgFremtidsfullmakt,
@@ -10,4 +8,11 @@ interface VergemålRepository {
     )
 
     fun harVergemål(fødselsnummer: String): Boolean?
+
+    fun harFullmakt(fødselsnummer: String): Boolean?
 }
+
+data class VergemålOgFremtidsfullmakt(
+    val harVergemål: Boolean,
+    val harFremtidsfullmakter: Boolean,
+)

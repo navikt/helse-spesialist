@@ -26,7 +26,6 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
-import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.spesialist.typer.Kjønn
@@ -123,7 +122,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val abonnementDao = PgAbonnementDao(dataSource)
     internal val utbetalingDao = sessionContext.utbetalingDao
     internal val behandlingsstatistikkDao = repositories.behandlingsstatistikkDao
-    internal val vergemålDao = VergemålDao(session)
+    internal val vergemålDao = sessionContext.vergemålDao
     internal val totrinnsvurderingDao = sessionContext.totrinnsvurderingDao
     internal val dokumentDao = repositories.dokumentDao
     internal val påVentDao = sessionContext.påVentDao

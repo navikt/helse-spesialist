@@ -46,7 +46,6 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetalingCommand
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnetCommand
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
-import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
 import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
@@ -366,7 +365,7 @@ class Kommandofabrikk(
             arbeidsforholdDao = sessionContext.arbeidsforholdDao,
             egenAnsattDao = sessionContext.egenAnsattDao,
             utbetalingDao = sessionContext.utbetalingDao,
-            vergemålRepository = VergemålDao(session),
+            vergemålDao = sessionContext.vergemålDao,
             åpneGosysOppgaverDao = sessionContext.åpneGosysOppgaverDao,
             risikovurderingDao = sessionContext.risikovurderingDao,
             påVentDao = sessionContext.påVentDao,

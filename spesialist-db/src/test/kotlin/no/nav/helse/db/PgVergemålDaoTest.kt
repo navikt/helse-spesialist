@@ -1,13 +1,12 @@
 package no.nav.helse.db
 
 import no.nav.helse.DatabaseIntegrationTest
-import no.nav.helse.modell.vergemal.VergemålOgFremtidsfullmakt
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class VergemålDaoTest : DatabaseIntegrationTest() {
+class PgVergemålDaoTest : DatabaseIntegrationTest() {
 
     @BeforeEach
     fun setup() {

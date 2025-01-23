@@ -4,7 +4,7 @@ import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.RisikovurderingDao
-import no.nav.helse.db.VergemålRepository
+import no.nav.helse.db.VergemålDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.oppgave.Egenskap
@@ -55,7 +55,7 @@ internal class OpprettSaksbehandleroppgave(
     private val utbetalingtype: Utbetalingtype,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val utbetaling: Utbetaling,
-    private val vergemålRepository: VergemålRepository,
+    private val vergemålDao: VergemålDao,
     private val påVentDao: PåVentDao,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
@@ -138,7 +138,7 @@ internal class OpprettSaksbehandleroppgave(
     }
 
     private fun MutableSet<Egenskap>.vergemål(fødselsnummer: String) {
-        if (vergemålRepository.harVergemål(fødselsnummer) == true) add(VERGEMÅL)
+        if (vergemålDao.harVergemål(fødselsnummer) == true) add(VERGEMÅL)
     }
 
     private fun MutableSet<Egenskap>.enhetUtland(fødselsnummer: String) {

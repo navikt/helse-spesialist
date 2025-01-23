@@ -1,18 +1,10 @@
-package no.nav.helse.modell.vergemal
+package no.nav.helse.db
 
 import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.db.MedSession
-import no.nav.helse.db.QueryRunner
-import no.nav.helse.db.VergemålRepository
 import java.time.LocalDateTime
 
-data class VergemålOgFremtidsfullmakt(
-    val harVergemål: Boolean,
-    val harFremtidsfullmakter: Boolean,
-)
-
-class VergemålDao(session: Session) : VergemålRepository, QueryRunner by MedSession(session) {
+class PgVergemålDao internal constructor(session: Session) : VergemålDao, QueryRunner by MedSession(session) {
     override fun lagre(
         fødselsnummer: String,
         vergemålOgFremtidsfullmakt: VergemålOgFremtidsfullmakt,
@@ -56,7 +48,7 @@ class VergemålDao(session: Session) : VergemålRepository, QueryRunner by MedSe
             "fodselsnummer" to fødselsnummer,
         ).singleOrNull { it.boolean("har_vergemal") }
 
-    fun harFullmakt(fødselsnummer: String): Boolean? =
+    override fun harFullmakt(fødselsnummer: String): Boolean? =
         asSQL(
             """
             SELECT har_fremtidsfullmakter, har_fullmakter

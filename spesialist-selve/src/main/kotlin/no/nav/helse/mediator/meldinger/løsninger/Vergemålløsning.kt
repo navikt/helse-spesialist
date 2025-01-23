@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.meldinger.løsninger
 
-import no.nav.helse.modell.vergemal.VergemålOgFremtidsfullmakt
+import no.nav.helse.db.VergemålOgFremtidsfullmakt
 
 class Vergemålløsning(
     val vergemålOgFremtidsfullmakt: VergemålOgFremtidsfullmakt,

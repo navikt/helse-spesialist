@@ -7,7 +7,7 @@ import io.mockk.verify
 import no.nav.helse.Testdata.godkjenningsbehovData
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.PersonDao
-import no.nav.helse.db.VergemålRepository
+import no.nav.helse.db.VergemålDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.Sykefraværstilfelle
@@ -21,7 +21,7 @@ import java.util.UUID
 internal class VurderAutomatiskAvvisningTest {
     private lateinit var context: CommandContext
 
-    private val vergemålRepository = mockk<VergemålRepository>(relaxed = true)
+    private val vergemålDao = mockk<VergemålDao>(relaxed = true)
     private val personDao = mockk<PersonDao>(relaxed = true)
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val godkjenningMediator = mockk<GodkjenningMediator>(relaxed = true)
@@ -30,18 +30,18 @@ internal class VurderAutomatiskAvvisningTest {
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
-        clearMocks(vergemålRepository, personDao, egenAnsattDao, godkjenningMediator, sykefraværstilfelle)
+        clearMocks(vergemålDao, personDao, egenAnsattDao, godkjenningMediator, sykefraværstilfelle)
     }
 
     @Test
     fun `skal avvise ved vergemål dersom perioden kan avvises`() {
-        every { vergemålRepository.harVergemål(fødselsnummer) } returns true
+        every { vergemålDao.harVergemål(fødselsnummer) } returns true
         assertAvvisning(lagCommand(kanAvvises = true), "Vergemål")
     }
 
     @Test
     fun `skal ikke avvise ved vergemål dersom perioden ikke kan avvises`() {
-        every { vergemålRepository.harVergemål(fødselsnummer) } returns true
+        every { vergemålDao.harVergemål(fødselsnummer) } returns true
         assertIkkeAvvisning(lagCommand(kanAvvises = false))
     }
 
@@ -102,7 +102,7 @@ internal class VurderAutomatiskAvvisningTest {
         fødselsnummer: String = "12345678910",
     ) = VurderAutomatiskAvvisning(
         personDao = personDao,
-        vergemålRepository = vergemålRepository,
+        vergemålDao = vergemålDao,
         godkjenningMediator = godkjenningMediator,
         utbetaling = Utbetaling(utbetalingId, 1000, 1000, Utbetalingtype.UTBETALING),
         godkjenningsbehov = godkjenningsbehovData(

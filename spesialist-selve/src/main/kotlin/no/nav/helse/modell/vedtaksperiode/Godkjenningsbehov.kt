@@ -15,7 +15,7 @@ import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.UtbetalingDao
 import no.nav.helse.db.VedtakDao
-import no.nav.helse.db.VergemålRepository
+import no.nav.helse.db.VergemålDao
 import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
@@ -198,7 +198,7 @@ internal class GodkjenningsbehovCommand(
     arbeidsforholdDao: ArbeidsforholdDao,
     egenAnsattDao: EgenAnsattDao,
     utbetalingDao: UtbetalingDao,
-    vergemålRepository: VergemålRepository,
+    vergemålDao: VergemålDao,
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     risikovurderingDao: RisikovurderingDao,
     påVentDao: PåVentDao,
@@ -267,7 +267,7 @@ internal class GodkjenningsbehovCommand(
             ),
             VurderVergemålOgFullmakt(
                 fødselsnummer = behovData.fødselsnummer,
-                vergemålRepository = vergemålRepository,
+                vergemålDao = vergemålDao,
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
                 sykefraværstilfelle = sykefraværstilfelle,
             ),
@@ -295,7 +295,7 @@ internal class GodkjenningsbehovCommand(
             ),
             VurderAutomatiskAvvisning(
                 personDao = personDao,
-                vergemålRepository = vergemålRepository,
+                vergemålDao = vergemålDao,
                 godkjenningMediator = godkjenningMediator,
                 utbetaling = utbetaling,
                 godkjenningsbehov = behovData,
@@ -320,7 +320,7 @@ internal class GodkjenningsbehovCommand(
                 utbetalingtype = behovData.utbetalingtype,
                 sykefraværstilfelle = sykefraværstilfelle,
                 utbetaling = utbetaling,
-                vergemålRepository = vergemålRepository,
+                vergemålDao = vergemålDao,
                 påVentDao = påVentDao,
             ),
             VurderBehovForTotrinnskontroll(

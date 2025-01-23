@@ -10,7 +10,7 @@ import no.nav.helse.db.PersonDao
 import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.VedtakDao
-import no.nav.helse.db.VergemålRepository
+import no.nav.helse.db.VergemålDao
 import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.modell.MeldingDao
@@ -25,7 +25,6 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
-import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.slf4j.LoggerFactory
@@ -37,7 +36,7 @@ internal class Automatisering(
     private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
     private val automatiseringDao: AutomatiseringDao,
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
-    private val vergemålRepository: VergemålRepository,
+    private val vergemålDao: VergemålDao,
     private val personDao: PersonDao,
     private val vedtakDao: VedtakDao,
     private val overstyringDao: OverstyringDao,
@@ -62,7 +61,7 @@ internal class Automatisering(
                     ),
                 automatiseringDao = sessionContext.automatiseringDao,
                 åpneGosysOppgaverDao = sessionContext.åpneGosysOppgaverDao,
-                vergemålRepository = VergemålDao(transactionalSession),
+                vergemålDao = sessionContext.vergemålDao,
                 personDao = sessionContext.personDao,
                 vedtakDao = sessionContext.vedtakDao,
                 overstyringDao = sessionContext.overstyringDao,
@@ -245,7 +244,7 @@ internal class Automatisering(
                 organisasjonsnummer,
             )
         val forhindrerAutomatisering = sykefraværstilfelle.forhindrerAutomatisering(vedtaksperiodeId)
-        val harVergemål = vergemålRepository.harVergemål(fødselsnummer) ?: false
+        val harVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
         val tilhørerUtlandsenhet = erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
         val antallÅpneGosysoppgaver = åpneGosysOppgaverDao.antallÅpneOppgaver(fødselsnummer)
         val harPågåendeOverstyring = overstyringDao.harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId)

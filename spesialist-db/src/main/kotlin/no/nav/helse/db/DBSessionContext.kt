@@ -29,4 +29,5 @@ class DBSessionContext(session: Session) : SessionContext {
     override val påVentDao = PgPåVentDao(session)
     override val risikovurderingDao = PgRisikovurderingDao(session)
     override val utbetalingDao = PgUtbetalingDao(session)
+    override val vergemålDao = PgVergemålDao(session)
 }

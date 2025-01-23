@@ -6,10 +6,10 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
+import no.nav.helse.db.VergemålOgFremtidsfullmakt
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
-import no.nav.helse.modell.vergemal.VergemålOgFremtidsfullmakt
 
 class VergemålLøsningRiver(
     private val meldingMediator: MeldingMediator,

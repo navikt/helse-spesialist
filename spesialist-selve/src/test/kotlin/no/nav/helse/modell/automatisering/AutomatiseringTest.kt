@@ -9,6 +9,7 @@ import no.nav.helse.db.OverstyringDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.VedtakDao
+import no.nav.helse.db.VergemålDao
 import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.person.Sykefraværstilfelle
@@ -23,7 +24,6 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
-import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
@@ -90,7 +90,7 @@ internal class AutomatiseringTest {
             stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlingMediatorMock,
             automatiseringDao = automatiseringDaoMock,
             åpneGosysOppgaverDao = åpneGosysOppgaverDaoMock,
-            vergemålRepository = vergemålDaoMock,
+            vergemålDao = vergemålDaoMock,
             personDao = personDaoMock,
             vedtakDao = vedtakDaoMock,
             overstyringDao = overstyringDaoMock,

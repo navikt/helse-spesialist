@@ -9,7 +9,7 @@ import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.RisikovurderingDao
-import no.nav.helse.db.VergemålRepository
+import no.nav.helse.db.VergemålDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.oppgave.Egenskap
@@ -63,7 +63,7 @@ internal class OpprettSaksbehandleroppgaveTest {
     private val personDao = mockk<PersonDao>(relaxed = true)
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
-    private val vergemålRepository = mockk<VergemålRepository>(relaxed = true)
+    private val vergemålDao = mockk<VergemålDao>(relaxed = true)
     private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
     private val påVentDao = mockk<PåVentDao>(relaxed = true)
 
@@ -285,7 +285,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         utbetalingtype = utbetalingtype,
         sykefraværstilfelle = sykefraværstilfelle,
         utbetaling = utbetaling,
-        vergemålRepository = vergemålRepository,
+        vergemålDao = vergemålDao,
         påVentDao = påVentDao
     )
 }
