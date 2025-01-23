@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.TransactionalSession
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.OppgaveDao
-import no.nav.helse.db.ÅpneGosysOppgaverRepository
+import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
@@ -55,7 +55,7 @@ internal class GosysOppgaveEndretCommand(
     harTildeltOppgave: Boolean,
     oppgavedataForAutomatisering: OppgaveDataForAutomatisering,
     automatisering: Automatisering,
-    åpneGosysOppgaverRepository: ÅpneGosysOppgaverRepository,
+    åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     oppgaveDao: OppgaveDao,
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
@@ -65,7 +65,7 @@ internal class GosysOppgaveEndretCommand(
     override val commands: List<Command> =
         listOf(
             VurderÅpenGosysoppgave(
-                åpneGosysOppgaverRepository = åpneGosysOppgaverRepository,
+                åpneGosysOppgaverDao = åpneGosysOppgaverDao,
                 vedtaksperiodeId = oppgavedataForAutomatisering.vedtaksperiodeId,
                 sykefraværstilfelle = sykefraværstilfelle,
                 harTildeltOppgave = harTildeltOppgave,

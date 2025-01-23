@@ -21,4 +21,5 @@ interface SessionContext {
     val arbeidsforholdDao: ArbeidsforholdDao
     val automatiseringDao: AutomatiseringDao
     val egenAnsattDao: EgenAnsattDao
+    val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao
 }

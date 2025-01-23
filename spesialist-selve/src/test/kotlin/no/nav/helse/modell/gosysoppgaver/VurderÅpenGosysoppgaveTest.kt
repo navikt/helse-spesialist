@@ -3,18 +3,18 @@ package no.nav.helse.modell.gosysoppgaver
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.db.ÅpneGosysOppgaverRepository
-import no.nav.helse.util.januar
+import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.person.vedtaksperiode.Varsel
-import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
+import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
+import no.nav.helse.modell.person.vedtaksperiode.Varsel
+import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
+import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -39,13 +39,13 @@ internal class VurderÅpenGosysoppgaveTest {
         skjæringstidspunkt,
         listOf(behandlingAg1, behandlingAg2)
     )
-    private val åpneGosysOppgaverRepository = mockk<ÅpneGosysOppgaverRepository>(relaxed = true)
+    private val åpneGosysOppgaverDao = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
 
     private fun command(
         harTildeltOppgave: Boolean = false,
     ) = VurderÅpenGosysoppgave(
-        åpneGosysOppgaverRepository = åpneGosysOppgaverRepository,
+        åpneGosysOppgaverDao = åpneGosysOppgaverDao,
         vedtaksperiodeId = VEDTAKPERIODE_ID_AG_1,
         sykefraværstilfelle = sykefraværstilfelle,
         harTildeltOppgave = harTildeltOppgave,
@@ -67,7 +67,7 @@ internal class VurderÅpenGosysoppgaveTest {
     fun setup() {
         context = CommandContext(UUID.randomUUID())
         context.nyObserver(observer)
-        clearMocks(åpneGosysOppgaverRepository)
+        clearMocks(åpneGosysOppgaverDao)
     }
 
     @Test
@@ -79,14 +79,14 @@ internal class VurderÅpenGosysoppgaveTest {
     @Test
     fun `Mangler løsning ved resume`() {
         assertFalse(command().resume(context))
-        verify(exactly = 0) { åpneGosysOppgaverRepository.persisterÅpneGosysOppgaver(any()) }
+        verify(exactly = 0) { åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(any()) }
     }
 
     @Test
     fun `Lagrer løsning ved resume`() {
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
         assertTrue(command().resume(context))
-        verify(exactly = 1) { åpneGosysOppgaverRepository.persisterÅpneGosysOppgaver(any()) }
+        verify(exactly = 1) { åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(any()) }
     }
 
     @Test
@@ -97,7 +97,7 @@ internal class VurderÅpenGosysoppgaveTest {
         }
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
         assertTrue(command().resume(context))
-        verify(exactly = 1) { åpneGosysOppgaverRepository.persisterÅpneGosysOppgaver(any()) }
+        verify(exactly = 1) { åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(any()) }
         behandlingAg1.inspektør {
             assertEquals(1, varsler.size)
             assertEquals("SB_EX_1", varsler.first().varselkode)
@@ -130,7 +130,7 @@ internal class VurderÅpenGosysoppgaveTest {
     fun `Lagrer varsel ved oppslag feilet`() {
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, null, true))
         assertTrue(command().resume(context))
-        verify(exactly = 1) { åpneGosysOppgaverRepository.persisterÅpneGosysOppgaver(any()) }
+        verify(exactly = 1) { åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(any()) }
         behandlingAg1.inspektør {
             assertEquals(1, varsler.size)
             assertEquals("SB_EX_3", varsler.first().varselkode)
@@ -156,7 +156,7 @@ internal class VurderÅpenGosysoppgaveTest {
     private fun lagrerVarselVedÅpneOppgaver(harTildeltOppgave: Boolean) {
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
         assertTrue(command(harTildeltOppgave).resume(context))
-        verify(exactly = 1) { åpneGosysOppgaverRepository.persisterÅpneGosysOppgaver(any()) }
+        verify(exactly = 1) { åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(any()) }
         behandlingAg1.inspektør {
             assertEquals(1, varsler.size)
             assertEquals("SB_EX_1", varsler.first().varselkode)

@@ -1,7 +1,7 @@
 package no.nav.helse.modell.gosysoppgaver
 
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.db.ÅpneGosysOppgaverRepository
+import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.Command
@@ -13,7 +13,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class VurderÅpenGosysoppgave(
-    private val åpneGosysOppgaverRepository: ÅpneGosysOppgaverRepository,
+    private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     private val vedtaksperiodeId: UUID,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val harTildeltOppgave: Boolean,
@@ -39,7 +39,7 @@ internal class VurderÅpenGosysoppgave(
             return false
         }
 
-        løsning.lagre(åpneGosysOppgaverRepository)
+        løsning.lagre(åpneGosysOppgaverDao)
         løsning.evaluer(vedtaksperiodeId, sykefraværstilfelle, harTildeltOppgave, oppgaveService)
         return true
     }

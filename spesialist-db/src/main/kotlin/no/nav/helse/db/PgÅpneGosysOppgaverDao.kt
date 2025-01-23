@@ -1,12 +1,10 @@
-package no.nav.helse.modell.gosysoppgaver
+package no.nav.helse.db
 
 import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.db.MedSession
-import no.nav.helse.db.QueryRunner
-import no.nav.helse.db.ÅpneGosysOppgaverRepository
+import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
 
-class ÅpneGosysOppgaverDao(session: Session) : ÅpneGosysOppgaverRepository, QueryRunner by MedSession(session) {
+class PgÅpneGosysOppgaverDao(session: Session) : ÅpneGosysOppgaverDao, QueryRunner by MedSession(session) {
     override fun persisterÅpneGosysOppgaver(åpneGosysOppgaver: ÅpneGosysOppgaverDto) {
         asSQL(
             """

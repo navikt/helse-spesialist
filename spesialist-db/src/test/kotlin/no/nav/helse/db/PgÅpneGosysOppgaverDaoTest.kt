@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
 
-internal class ÅpneGosysOppgaverDaoTest : DatabaseIntegrationTest() {
+internal class PgÅpneGosysOppgaverDaoTest : DatabaseIntegrationTest() {
 
     @BeforeEach
     fun setup() {

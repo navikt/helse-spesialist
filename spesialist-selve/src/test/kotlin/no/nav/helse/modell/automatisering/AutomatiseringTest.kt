@@ -6,8 +6,8 @@ import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.GenerasjonDao
 import no.nav.helse.db.VedtakDao
+import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.MeldingDao
-import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.Sykefraværstilfelle
@@ -89,7 +89,7 @@ internal class AutomatiseringTest {
             risikovurderingRepository = risikovurderingDaoMock,
             stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlingMediatorMock,
             automatiseringDao = automatiseringDaoMock,
-            åpneGosysOppgaverRepository = åpneGosysOppgaverDaoMock,
+            åpneGosysOppgaverDao = åpneGosysOppgaverDaoMock,
             vergemålRepository = vergemålDaoMock,
             personRepository = personDaoMock,
             vedtakDao = vedtakDaoMock,

@@ -16,7 +16,7 @@ import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålRepository
 import no.nav.helse.db.overstyring.OverstyringRepository
-import no.nav.helse.db.ÅpneGosysOppgaverRepository
+import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
@@ -199,7 +199,7 @@ internal class GodkjenningsbehovCommand(
     egenAnsattDao: EgenAnsattDao,
     utbetalingRepository: UtbetalingRepository,
     vergemålRepository: VergemålRepository,
-    åpneGosysOppgaverRepository: ÅpneGosysOppgaverRepository,
+    åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     risikovurderingRepository: RisikovurderingRepository,
     påVentRepository: PåVentRepository,
     overstyringRepository: OverstyringRepository,
@@ -278,7 +278,7 @@ internal class GodkjenningsbehovCommand(
                 sykefraværstilfelle = sykefraværstilfelle,
             ),
             VurderÅpenGosysoppgave(
-                åpneGosysOppgaverRepository = åpneGosysOppgaverRepository,
+                åpneGosysOppgaverDao = åpneGosysOppgaverDao,
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
                 sykefraværstilfelle = sykefraværstilfelle,
                 harTildeltOppgave = false,

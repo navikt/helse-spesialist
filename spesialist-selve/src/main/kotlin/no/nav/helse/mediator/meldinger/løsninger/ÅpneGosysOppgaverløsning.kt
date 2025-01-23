@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.meldinger.løsninger
 
-import no.nav.helse.db.ÅpneGosysOppgaverRepository
+import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
 import no.nav.helse.modell.person.Sykefraværstilfelle
@@ -15,8 +15,8 @@ class ÅpneGosysOppgaverløsning(
     private val antall: Int?,
     private val oppslagFeilet: Boolean,
 ) {
-    internal fun lagre(åpneGosysOppgaverRepository: ÅpneGosysOppgaverRepository) {
-        åpneGosysOppgaverRepository.persisterÅpneGosysOppgaver(
+    internal fun lagre(åpneGosysOppgaverDao: ÅpneGosysOppgaverDao) {
+        åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(
             ÅpneGosysOppgaverDto(
                 fødselsnummer = fødselsnummer,
                 antall = antall,

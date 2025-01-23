@@ -23,4 +23,5 @@ class DBSessionContext(session: Session) : SessionContext {
     override val arbeidsforholdDao = PgArbeidsforholdDao(session)
     override val automatiseringDao = PgAutomatiseringDao(session)
     override val egenAnsattDao = PgEgenAnsattDao(session)
+    override val åpneGosysOppgaverDao = PgÅpneGosysOppgaverDao(session)
 }

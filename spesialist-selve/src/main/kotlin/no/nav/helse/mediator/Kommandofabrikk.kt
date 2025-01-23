@@ -15,7 +15,6 @@ import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommand
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
-import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.LøsGodkjenningsbehov
@@ -109,7 +108,7 @@ class Kommandofabrikk(
             harTildeltOppgave = harTildeltOppgave,
             oppgavedataForAutomatisering = oppgaveDataForAutomatisering,
             automatisering = transaksjonellAutomatisering(transactionalSession),
-            åpneGosysOppgaverRepository = ÅpneGosysOppgaverDao(transactionalSession),
+            åpneGosysOppgaverDao = repositories.withSessionContext(transactionalSession).åpneGosysOppgaverDao,
             oppgaveDao = repositories.withSessionContext(transactionalSession).oppgaveDao,
             oppgaveService = transaksjonellOppgaveService(transactionalSession),
             godkjenningMediator = GodkjenningMediator(repositories.withSessionContext(transactionalSession).opptegnelseRepository),
@@ -366,7 +365,7 @@ class Kommandofabrikk(
             egenAnsattDao = repositories.withSessionContext(session).egenAnsattDao,
             utbetalingRepository = UtbetalingDao(session),
             vergemålRepository = VergemålDao(session),
-            åpneGosysOppgaverRepository = ÅpneGosysOppgaverDao(session),
+            åpneGosysOppgaverDao = repositories.withSessionContext(session).åpneGosysOppgaverDao,
             risikovurderingRepository = RisikovurderingDao(session),
             påVentRepository = PåVentDao(session),
             overstyringRepository = OverstyringDao(session),

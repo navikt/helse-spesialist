@@ -11,12 +11,11 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålRepository
 import no.nav.helse.db.overstyring.OverstyringRepository
-import no.nav.helse.db.ÅpneGosysOppgaverRepository
+import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.MeldingDao.OverstyringIgangsattKorrigertSøknad
 import no.nav.helse.modell.automatisering.Automatisering.AutomatiserKorrigertSøknadResultat.SkyldesKorrigertSøknad
-import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.modell.person.PersonDao
@@ -40,7 +39,7 @@ internal class Automatisering(
     private val risikovurderingRepository: RisikovurderingRepository,
     private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
     private val automatiseringDao: AutomatiseringDao,
-    private val åpneGosysOppgaverRepository: ÅpneGosysOppgaverRepository,
+    private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     private val vergemålRepository: VergemålRepository,
     private val personRepository: PersonRepository,
     private val vedtakDao: VedtakDao,
@@ -65,7 +64,7 @@ internal class Automatisering(
                         subsumsjonsmelderProvider,
                     ),
                 automatiseringDao = sessionContext.automatiseringDao,
-                åpneGosysOppgaverRepository = ÅpneGosysOppgaverDao(transactionalSession),
+                åpneGosysOppgaverDao = sessionContext.åpneGosysOppgaverDao,
                 vergemålRepository = VergemålDao(transactionalSession),
                 personRepository = PersonDao(transactionalSession),
                 vedtakDao = sessionContext.vedtakDao,
@@ -251,7 +250,7 @@ internal class Automatisering(
         val forhindrerAutomatisering = sykefraværstilfelle.forhindrerAutomatisering(vedtaksperiodeId)
         val harVergemål = vergemålRepository.harVergemål(fødselsnummer) ?: false
         val tilhørerUtlandsenhet = erEnhetUtland(personRepository.finnEnhetId(fødselsnummer))
-        val antallÅpneGosysoppgaver = åpneGosysOppgaverRepository.antallÅpneOppgaver(fødselsnummer)
+        val antallÅpneGosysoppgaver = åpneGosysOppgaverDao.antallÅpneOppgaver(fødselsnummer)
         val harPågåendeOverstyring = overstyringRepository.harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId)
         val harUtbetalingTilSykmeldt = utbetaling.harEndringIUtbetalingTilSykmeldt()
 
