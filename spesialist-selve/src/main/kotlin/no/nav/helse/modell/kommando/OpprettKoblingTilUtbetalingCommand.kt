@@ -1,15 +1,15 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.db.UtbetalingRepository
+import no.nav.helse.db.UtbetalingDao
 import java.util.UUID
 
 internal class OpprettKoblingTilUtbetalingCommand(
     private val vedtaksperiodeId: UUID,
     private val utbetalingId: UUID,
-    private val utbetalingRepository: UtbetalingRepository,
+    private val utbetalingDao: UtbetalingDao,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
-        utbetalingRepository.opprettKobling(vedtaksperiodeId, utbetalingId)
+        utbetalingDao.opprettKobling(vedtaksperiodeId, utbetalingId)
         return true
     }
 }

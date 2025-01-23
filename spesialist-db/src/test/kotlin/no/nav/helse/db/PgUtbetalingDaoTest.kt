@@ -12,7 +12,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.random.Random.Default.nextLong
 
-class UtbetalingDaoTest : DatabaseIntegrationTest() {
+class PgUtbetalingDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `finner utbetaling`() {
         nyPerson()

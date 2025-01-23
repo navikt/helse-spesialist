@@ -1,7 +1,7 @@
 package no.nav.helse.modell.utbetaling
 
 import no.nav.helse.db.OpptegnelseRepository
-import no.nav.helse.db.UtbetalingRepository
+import no.nav.helse.db.UtbetalingDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.ANNULLERT
@@ -27,7 +27,7 @@ class LagreOppdragCommand(
     private val arbeidsgiverbeløp: Int,
     private val personbeløp: Int,
     private val json: String,
-    private val utbetalingRepository: UtbetalingRepository,
+    private val utbetalingDao: UtbetalingDao,
     private val opptegnelseRepository: OpptegnelseRepository,
 ) : Command {
     private companion object {
@@ -38,7 +38,7 @@ class LagreOppdragCommand(
         private val fagsystemId: String,
         private val mottaker: String,
     ) {
-        internal fun lagre(utbetalingRepository: UtbetalingRepository) = utbetalingRepository.nyttOppdrag(fagsystemId, mottaker)
+        internal fun lagre(utbetalingDao: UtbetalingDao) = utbetalingDao.nyttOppdrag(fagsystemId, mottaker)
     }
 
     override fun execute(context: CommandContext): Boolean {
@@ -50,14 +50,14 @@ class LagreOppdragCommand(
 
     private fun lagre() {
         val utbetalingIdRef =
-            utbetalingRepository.finnUtbetalingIdRef(utbetalingId)
+            utbetalingDao.finnUtbetalingIdRef(utbetalingId)
                 ?: run {
                     val arbeidsgiverFagsystemIdRef =
-                        requireNotNull(arbeidsgiverOppdrag.lagre(utbetalingRepository)) { "Forventet arbeidsgiver fagsystemId ref" }
+                        requireNotNull(arbeidsgiverOppdrag.lagre(utbetalingDao)) { "Forventet arbeidsgiver fagsystemId ref" }
                     val personFagsystemIdRef =
-                        requireNotNull(personOppdrag.lagre(utbetalingRepository)) { "Forventet person fagsystemId ref" }
+                        requireNotNull(personOppdrag.lagre(utbetalingDao)) { "Forventet person fagsystemId ref" }
 
-                    utbetalingRepository.opprettUtbetalingId(
+                    utbetalingDao.opprettUtbetalingId(
                         utbetalingId,
                         fødselsnummer,
                         orgnummer,
@@ -70,7 +70,7 @@ class LagreOppdragCommand(
                     )
                 }
 
-        utbetalingRepository.nyUtbetalingStatus(utbetalingIdRef, status, opprettet, json)
+        utbetalingDao.nyUtbetalingStatus(utbetalingIdRef, status, opprettet, json)
     }
 
     private fun lagOpptegnelse() {

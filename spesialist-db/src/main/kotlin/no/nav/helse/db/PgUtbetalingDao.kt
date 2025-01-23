@@ -1,14 +1,15 @@
-package no.nav.helse.modell.utbetaling
+package no.nav.helse.db
 
 import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.db.MedSession
-import no.nav.helse.db.QueryRunner
-import no.nav.helse.db.UtbetalingRepository
+import no.nav.helse.db.UtbetalingDao.TidligereUtbetalingerForVedtaksperiodeDto
+import no.nav.helse.modell.utbetaling.Utbetaling
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus
+import no.nav.helse.modell.utbetaling.Utbetalingtype
 import java.time.LocalDateTime
 import java.util.UUID
 
-class UtbetalingDao(session: Session) : UtbetalingRepository, QueryRunner by MedSession(session) {
+class PgUtbetalingDao internal constructor(session: Session) : UtbetalingDao, QueryRunner by MedSession(session) {
     override fun finnUtbetalingIdRef(utbetalingId: UUID): Long? =
         asSQL(
             """
@@ -115,12 +116,6 @@ class UtbetalingDao(session: Session) : UtbetalingRepository, QueryRunner by Med
         ).update()
     }
 
-    data class TidligereUtbetalingerForVedtaksperiodeDto(
-        val utbetalingId: UUID,
-        val id: Int,
-        val utbetalingsstatus: Utbetalingsstatus,
-    )
-
     override fun hentUtbetaling(utbetalingId: UUID): Utbetaling =
         checkNotNull(utbetalingFor(utbetalingId)) { "Finner ikke utbetaling, utbetalingId=$utbetalingId" }
 
@@ -139,7 +134,7 @@ class UtbetalingDao(session: Session) : UtbetalingRepository, QueryRunner by Med
             )
         }
 
-    fun utbetalingFor(oppgaveId: Long): Utbetaling? =
+    override fun utbetalingFor(oppgaveId: Long): Utbetaling? =
         asSQL(
             """SELECT utbetaling_id, arbeidsgiverbeløp, personbeløp, type FROM utbetaling_id u WHERE u.utbetaling_id = (SELECT utbetaling_id FROM oppgave o WHERE o.id = :oppgave_id)"""
                 .trimIndent(),

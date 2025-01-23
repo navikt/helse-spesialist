@@ -1,13 +1,12 @@
 package no.nav.helse.db
 
 import no.nav.helse.modell.utbetaling.Utbetaling
-import no.nav.helse.modell.utbetaling.UtbetalingDao.TidligereUtbetalingerForVedtaksperiodeDto
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import java.time.LocalDateTime
 import java.util.UUID
 
-interface UtbetalingRepository {
+interface UtbetalingDao {
     fun finnUtbetalingIdRef(utbetalingId: UUID): Long?
 
     fun hentUtbetaling(utbetalingId: UUID): Utbetaling
@@ -46,4 +45,12 @@ interface UtbetalingRepository {
     fun utbetalingerForVedtaksperiode(vedtaksperiodeId: UUID): List<TidligereUtbetalingerForVedtaksperiodeDto>
 
     fun erUtbetalingForkastet(utbetalingId: UUID): Boolean
+
+    fun utbetalingFor(oppgaveId: Long): Utbetaling?
+
+    data class TidligereUtbetalingerForVedtaksperiodeDto(
+        val utbetalingId: UUID,
+        val id: Int,
+        val utbetalingsstatus: Utbetalingsstatus,
+    )
 }

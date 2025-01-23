@@ -13,7 +13,7 @@ import no.nav.helse.db.OverstyringDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.RisikovurderingDao
-import no.nav.helse.db.UtbetalingRepository
+import no.nav.helse.db.UtbetalingDao
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålRepository
 import no.nav.helse.db.ÅpneGosysOppgaverDao
@@ -197,7 +197,7 @@ internal class GodkjenningsbehovCommand(
     inntektskilderRepository: InntektskilderRepository,
     arbeidsforholdDao: ArbeidsforholdDao,
     egenAnsattDao: EgenAnsattDao,
-    utbetalingRepository: UtbetalingRepository,
+    utbetalingDao: UtbetalingDao,
     vergemålRepository: VergemålRepository,
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     risikovurderingDao: RisikovurderingDao,
@@ -229,7 +229,7 @@ internal class GodkjenningsbehovCommand(
             ),
             VurderVidereBehandlingAvGodkjenningsbehov(
                 commandData = behovData,
-                utbetalingRepository = utbetalingRepository,
+                utbetalingDao = utbetalingDao,
                 oppgaveDao = oppgaveDao,
                 vedtakDao = vedtakDao,
             ),
@@ -250,7 +250,7 @@ internal class GodkjenningsbehovCommand(
             OpprettKoblingTilUtbetalingCommand(
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
                 utbetalingId = behovData.utbetalingId,
-                utbetalingRepository = utbetalingRepository,
+                utbetalingDao = utbetalingDao,
             ),
             ForberedVisningCommand(
                 fødselsnummer = behovData.fødselsnummer,

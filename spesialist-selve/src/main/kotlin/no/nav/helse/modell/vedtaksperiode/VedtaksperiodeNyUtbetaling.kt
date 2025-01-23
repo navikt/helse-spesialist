@@ -2,7 +2,7 @@ package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.TransactionalSession
-import no.nav.helse.db.UtbetalingRepository
+import no.nav.helse.db.UtbetalingDao
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.kommando.Command
@@ -45,14 +45,14 @@ class VedtaksperiodeNyUtbetaling(
 internal class VedtaksperiodeNyUtbetalingCommand(
     vedtaksperiodeId: UUID,
     utbetalingId: UUID,
-    utbetalingRepository: UtbetalingRepository,
+    utbetalingDao: UtbetalingDao,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
             OpprettKoblingTilUtbetalingCommand(
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingId = utbetalingId,
-                utbetalingRepository = utbetalingRepository,
+                utbetalingDao = utbetalingDao,
             ),
         )
 }

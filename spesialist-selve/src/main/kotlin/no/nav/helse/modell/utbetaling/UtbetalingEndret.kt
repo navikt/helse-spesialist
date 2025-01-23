@@ -6,7 +6,7 @@ import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.UtbetalingRepository
+import no.nav.helse.db.UtbetalingDao
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -83,7 +83,7 @@ internal class UtbetalingEndretCommand(
     personOppdrag: LagreOppdragCommand.Oppdrag,
     arbeidsgiverbeløp: Int,
     personbeløp: Int,
-    utbetalingRepository: UtbetalingRepository,
+    utbetalingDao: UtbetalingDao,
     opptegnelseRepository: OpptegnelseRepository,
     reservasjonDao: ReservasjonDao,
     oppgaveDao: OppgaveDao,
@@ -106,7 +106,7 @@ internal class UtbetalingEndretCommand(
                 arbeidsgiverbeløp = arbeidsgiverbeløp,
                 personbeløp = personbeløp,
                 json = json,
-                utbetalingRepository = utbetalingRepository,
+                utbetalingDao = utbetalingDao,
                 opptegnelseRepository = opptegnelseRepository,
             ),
             ReserverPersonHvisTildeltCommand(

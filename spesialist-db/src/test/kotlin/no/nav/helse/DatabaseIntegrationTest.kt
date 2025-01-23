@@ -20,7 +20,6 @@ import no.nav.helse.modell.MeldingDuplikatkontrollDao
 import no.nav.helse.modell.person.PersonService
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
-import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -122,7 +121,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val åpneGosysOppgaverDao = sessionContext.åpneGosysOppgaverDao
     internal val egenAnsattDao = sessionContext.egenAnsattDao
     internal val abonnementDao = PgAbonnementDao(dataSource)
-    internal val utbetalingDao = UtbetalingDao(session)
+    internal val utbetalingDao = sessionContext.utbetalingDao
     internal val behandlingsstatistikkDao = repositories.behandlingsstatistikkDao
     internal val vergemålDao = VergemålDao(session)
     internal val totrinnsvurderingDao = sessionContext.totrinnsvurderingDao

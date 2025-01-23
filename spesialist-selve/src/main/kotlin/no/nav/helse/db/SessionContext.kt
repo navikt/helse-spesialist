@@ -26,4 +26,5 @@ interface SessionContext {
     val personDao: PersonDao
     val påVentDao: PåVentDao
     val risikovurderingDao: RisikovurderingDao
+    val utbetalingDao: UtbetalingDao
 }
