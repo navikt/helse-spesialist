@@ -3,11 +3,11 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.sessionOf
-import no.nav.helse.db.AnnulleringDao
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.DbQuery
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.InntektskilderDao
+import no.nav.helse.db.PgAnnulleringRepository
 import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgNotatDao
 import no.nav.helse.db.PgOppgaveDao
@@ -158,7 +158,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(session)
     internal val notatDao = PgNotatDao(dataSource)
     internal val dialogDao = PgDialogDao(dataSource)
-    internal val annulleringDao = AnnulleringDao(dataSource)
+    internal val annulleringRepository = PgAnnulleringRepository(dataSource)
     private val personService = PersonService(dataSource, repositoryFactory)
     private val inntektskilderDao = InntektskilderDao(session, repositoryFactory)
 

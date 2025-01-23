@@ -100,7 +100,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
                 periodehistorikkDao = historikkinnslagRepository,
                 dialogDao = dialogDao,
             ),
-            annulleringRepository = annulleringDao,
+            annulleringRepository = annulleringRepository,
         )
 
     private val AKTØR_ID = lagAktørId()

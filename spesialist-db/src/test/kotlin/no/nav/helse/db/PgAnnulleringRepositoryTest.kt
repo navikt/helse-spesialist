@@ -1,10 +1,10 @@
 package no.nav.helse.db
 
 import no.nav.helse.DatabaseIntegrationTest
-import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringArsak
 import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringDto
+import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -12,14 +12,14 @@ import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-class AnnulleringDaoTest : DatabaseIntegrationTest() {
+class PgAnnulleringRepositoryTest : DatabaseIntegrationTest() {
     @Test
     fun `kan finne annullering med begrunnelse og årsaker`() {
         val arbeidsgiverFagsystemId = "EN-ARBEIDSGIVER-FAGSYSTEMID1"
         val personFagsystemId = "EN-PERSON-FAGSYSTEMID1"
         opprettSaksbehandler()
         val årsaker = setOf("en årsak", "to årsak")
-        annulleringDao.lagreAnnullering(
+        annulleringRepository.lagreAnnullering(
             annulleringDto(
                 arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
                 personFagsystemId = personFagsystemId,
@@ -27,7 +27,7 @@ class AnnulleringDaoTest : DatabaseIntegrationTest() {
             ),
             saksbehandler(),
         )
-        val annullering = annulleringDao.finnAnnullering(arbeidsgiverFagsystemId, personFagsystemId) ?: fail()
+        val annullering = annulleringRepository.finnAnnullering(arbeidsgiverFagsystemId, personFagsystemId) ?: fail()
         assertEquals(arbeidsgiverFagsystemId, annullering.arbeidsgiverFagsystemId)
         assertEquals(personFagsystemId, annullering.personFagsystemId)
         assertEquals(SAKSBEHANDLER_IDENT, annullering.saksbehandlerIdent)
@@ -40,7 +40,7 @@ class AnnulleringDaoTest : DatabaseIntegrationTest() {
         val arbeidsgiverFagsystemId = "EN-ARBEIDSGIVER-FAGSYSTEMID2"
         val personFagsystemId = "EN-PERSON-FAGSYSTEMID2"
         opprettSaksbehandler()
-        annulleringDao.lagreAnnullering(
+        annulleringRepository.lagreAnnullering(
             annulleringDto(
                 begrunnelse = null,
                 arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
@@ -49,7 +49,7 @@ class AnnulleringDaoTest : DatabaseIntegrationTest() {
             ),
             saksbehandler(),
         )
-        val annullering = annulleringDao.finnAnnullering(arbeidsgiverFagsystemId, personFagsystemId)
+        val annullering = annulleringRepository.finnAnnullering(arbeidsgiverFagsystemId, personFagsystemId)
         assertEquals(arbeidsgiverFagsystemId, annullering?.arbeidsgiverFagsystemId)
         assertEquals(personFagsystemId, annullering?.personFagsystemId)
         assertEquals(SAKSBEHANDLER_IDENT, annullering?.saksbehandlerIdent)
