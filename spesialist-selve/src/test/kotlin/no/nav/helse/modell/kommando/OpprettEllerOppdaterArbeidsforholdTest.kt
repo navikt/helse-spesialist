@@ -32,7 +32,7 @@ class OpprettEllerOppdaterArbeidsforholdTest {
                 List<KomplettArbeidsforholdDto> {
             return eksisterendeArbeidsforhold.filter {
                 it.fødselsnummer.equals(fødselsnummer) &&
-                it.organisasjonsnummer.equals(organisasjonsnummer)
+                        it.organisasjonsnummer.equals(organisasjonsnummer)
             }
         }
 
@@ -88,7 +88,7 @@ class OpprettEllerOppdaterArbeidsforholdTest {
         assertTrue(command.resume(context))
 
         assertEquals(1, repository.arbeidsforholdSomHarBlittOppdatert.size)
-        assertEquals(enKomplettArbeidsforholdDto(), repository.arbeidsforholdSomHarBlittOppdatert.first())
+        assertExpectedKomplettArbeidsforholdDto(repository.arbeidsforholdSomHarBlittOppdatert.single())
     }
 
     @Test
@@ -112,7 +112,7 @@ class OpprettEllerOppdaterArbeidsforholdTest {
         assertTrue(command.resume(context))
 
         assertEquals(1, repository.arbeidsforholdSomHarBlittOppdatert.size)
-        assertEquals(enKomplettArbeidsforholdDto(), repository.arbeidsforholdSomHarBlittOppdatert.first())
+        assertExpectedKomplettArbeidsforholdDto(repository.arbeidsforholdSomHarBlittOppdatert.single())
     }
 
     @Test
@@ -176,4 +176,29 @@ class OpprettEllerOppdaterArbeidsforholdTest {
         stillingsprosent = stillingsprosent,
         oppdatert = oppdatert
     )
+
+    private fun assertExpectedKomplettArbeidsforholdDto(actual: KomplettArbeidsforholdDto) {
+        assertEquals(FØDSELSNUMMER, actual.fødselsnummer)
+        assertEquals(ORGANISASJONSNUMMER, actual.organisasjonsnummer)
+        assertEquals(STARTDATO, actual.startdato)
+        assertEquals(SLUTTDATO, actual.sluttdato)
+        assertEquals(STILLINGSTITTEL, actual.stillingstittel)
+        assertEquals(STILLINGSPROSENT, actual.stillingsprosent)
+        assertIFortiden(actual.oppdatert)
+        assertMindreEnnNSekunderSiden(5, actual.oppdatert)
+    }
+
+    private fun assertIFortiden(actual: LocalDateTime) {
+        val now = LocalDateTime.now()
+        assertTrue(actual.isBefore(now)) {
+            "Forventet at tidspunktet var i fortiden (i forhold til nå: $now), men det var $actual"
+        }
+    }
+
+    private fun assertMindreEnnNSekunderSiden(sekunder: Int, actual: LocalDateTime) {
+        val now = LocalDateTime.now()
+        assertTrue(actual.isAfter(now.minusSeconds(sekunder.toLong()))) {
+            "Forventet at tidspunktet var innenfor $sekunder sekunder tilbake i tid (i forhold til nå: $now), men det var $actual"
+        }
+    }
 }
