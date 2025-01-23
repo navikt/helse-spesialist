@@ -195,7 +195,7 @@ class OpprettEllerOppdaterArbeidsforholdTest {
         }
     }
 
-    private fun assertMindreEnnNSekunderSiden(sekunder: Int, actual: LocalDateTime) {
+    private fun assertMindreEnnNSekunderSiden(@Suppress("SameParameterValue") sekunder: Int, actual: LocalDateTime) {
         val now = LocalDateTime.now()
         assertTrue(actual.isAfter(now.minusSeconds(sekunder.toLong()))) {
             "Forventet at tidspunktet var innenfor $sekunder sekunder tilbake i tid (i forhold til nå: $now), men det var $actual"
