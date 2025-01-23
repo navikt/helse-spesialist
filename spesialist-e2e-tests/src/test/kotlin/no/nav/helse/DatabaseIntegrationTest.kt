@@ -379,7 +379,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected fun assertAvvisteVarsler(
         vedtaksperiodeId: UUID,
-        forventetAntall: Int,
+        @Suppress("SameParameterValue") forventetAntall: Int,
     ) {
         val antall = dbQuery.single(
             """
