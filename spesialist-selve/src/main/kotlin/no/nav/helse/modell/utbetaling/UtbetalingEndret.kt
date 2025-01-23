@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.TransactionalSession
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OpptegnelseRepository
-import no.nav.helse.db.ReservasjonRepository
+import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.mediator.Kommandostarter
@@ -85,7 +85,7 @@ internal class UtbetalingEndretCommand(
     personbeløp: Int,
     utbetalingRepository: UtbetalingRepository,
     opptegnelseRepository: OpptegnelseRepository,
-    reservasjonRepository: ReservasjonRepository,
+    reservasjonDao: ReservasjonDao,
     oppgaveDao: OppgaveDao,
     tildelingDao: TildelingDao,
     oppgaveService: OppgaveService,
@@ -111,7 +111,7 @@ internal class UtbetalingEndretCommand(
             ),
             ReserverPersonHvisTildeltCommand(
                 fødselsnummer = fødselsnummer,
-                reservasjonRepository = reservasjonRepository,
+                reservasjonDao = reservasjonDao,
                 tildelingDao = tildelingDao,
                 oppgaveDao = oppgaveDao,
                 totrinnsvurderingService = totrinnsvurderingService,

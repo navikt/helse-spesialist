@@ -4,7 +4,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.ktor.server.application.Application
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.DBRepositories
-import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.kafka.RiverSetup
 import no.nav.helse.mediator.BehandlingsstatistikkService
@@ -54,7 +53,7 @@ class SpesialistApp(
     private val periodehistorikkDao = repositories.periodehistorikkDao
     private val saksbehandlerDao = repositories.saksbehandlerDao
     private val tildelingDao = repositories.tildelingDao
-    private val reservasjonDao = ReservasjonDao(dataSource)
+    private val reservasjonDao = repositories.reservasjonDao
     private val opptegnelseRepository = repositories.opptegnelseRepository
     private val behandlingsstatistikkDao = repositories.behandlingsstatistikkDao
     private val notatDao = repositories.notatDao
@@ -152,7 +151,7 @@ class SpesialistApp(
             OppgaveService(
                 oppgaveDao = oppgaveDao,
                 tildelingDao = tildelingDao,
-                reservasjonRepository = reservasjonDao,
+                reservasjonDao = reservasjonDao,
                 opptegnelseRepository = opptegnelseRepository,
                 totrinnsvurderingDao = totrinnsvurderingDao,
                 saksbehandlerDao = saksbehandlerDao,
@@ -192,6 +191,7 @@ class SpesialistApp(
                 tilgangskontroll = tilgangskontrollørForReservasjon,
                 oppgaveDao = oppgaveDao,
                 periodehistorikkDao = periodehistorikkDao,
+                reservasjonDao = reservasjonDao,
                 totrinnsvurderingService =
                     TotrinnsvurderingService(
                         oppgaveDao = oppgaveDao,

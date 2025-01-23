@@ -16,4 +16,5 @@ interface SessionContext {
     val stansAutomatiskBehandlingDao: StansAutomatiskBehandlingDao
     val tildelingDao: TildelingDao
     val generasjonDao: GenerasjonDao
+    val reservasjonDao: ReservasjonDao
 }

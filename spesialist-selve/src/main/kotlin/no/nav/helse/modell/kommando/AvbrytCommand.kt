@@ -2,7 +2,7 @@ package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.OppgaveDao
-import no.nav.helse.db.ReservasjonRepository
+import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
@@ -13,7 +13,7 @@ internal class AvbrytCommand(
     vedtaksperiodeId: UUID,
     commandContextRepository: CommandContextRepository,
     oppgaveService: OppgaveService,
-    reservasjonRepository: ReservasjonRepository,
+    reservasjonDao: ReservasjonDao,
     tildelingDao: TildelingDao,
     oppgaveDao: OppgaveDao,
     totrinnsvurderingService: TotrinnsvurderingService,
@@ -22,7 +22,7 @@ internal class AvbrytCommand(
         listOf(
             ReserverPersonHvisTildeltCommand(
                 fødselsnummer = fødselsnummer,
-                reservasjonRepository = reservasjonRepository,
+                reservasjonDao = reservasjonDao,
                 tildelingDao = tildelingDao,
                 oppgaveDao = oppgaveDao,
                 totrinnsvurderingService = totrinnsvurderingService,

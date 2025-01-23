@@ -29,7 +29,7 @@ class GodkjenningService(
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
     private val publiserer: MeldingPubliserer,
     private val oppgaveService: OppgaveService,
-    private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
+    private val reservasjonDao: ReservasjonDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val saksbehandlerDao: SaksbehandlerDao,
     private val totrinnsvurderingService: TotrinnsvurderingService,

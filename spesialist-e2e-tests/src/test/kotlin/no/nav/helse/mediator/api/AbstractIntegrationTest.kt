@@ -4,7 +4,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.TestRapidHelpers.siste
-import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.e2e.AbstractE2ETest
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.GodkjenningService
@@ -25,7 +24,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     protected val testRapid = __ikke_bruk_denne
     private val meldingPubliserer: MeldingPubliserer = MessageContextMeldingPubliserer(testRapid)
     protected val oppgaveDao = repositories.oppgaveDao
-    private val reservasjonDao = ReservasjonDao(dataSource)
+    private val reservasjonDao = repositories.reservasjonDao
     private val periodehistorikkDao = repositories.periodehistorikkDao
     private val totrinnsvurderingDao = repositories.totrinnsvurderingDao
     private val saksbehandlerDao = repositories.saksbehandlerDao
@@ -34,7 +33,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
         OppgaveService(
             oppgaveDao = oppgaveDao,
             tildelingDao = repositories.tildelingDao,
-            reservasjonRepository = reservasjonDao,
+            reservasjonDao = reservasjonDao,
             opptegnelseRepository = repositories.opptegnelseRepository,
             totrinnsvurderingDao = totrinnsvurderingDao,
             saksbehandlerDao = saksbehandlerDao,

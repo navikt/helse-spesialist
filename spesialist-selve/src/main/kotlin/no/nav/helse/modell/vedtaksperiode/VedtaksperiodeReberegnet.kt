@@ -5,7 +5,7 @@ import kotliquery.TransactionalSession
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
-import no.nav.helse.db.ReservasjonRepository
+import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
@@ -56,7 +56,7 @@ internal class VedtaksperiodeReberegnetCommand(
     periodehistorikkDao: PeriodehistorikkDao,
     commandContextRepository: CommandContextRepository,
     oppgaveService: OppgaveService,
-    reservasjonRepository: ReservasjonRepository,
+    reservasjonDao: ReservasjonDao,
     tildelingDao: TildelingDao,
     oppgaveDao: OppgaveDao,
     totrinnsvurderingService: TotrinnsvurderingService,
@@ -69,7 +69,7 @@ internal class VedtaksperiodeReberegnetCommand(
             ),
             ReserverPersonHvisTildeltCommand(
                 fødselsnummer = fødselsnummer,
-                reservasjonRepository = reservasjonRepository,
+                reservasjonDao = reservasjonDao,
                 tildelingDao = tildelingDao,
                 oppgaveDao = oppgaveDao,
                 totrinnsvurderingService = totrinnsvurderingService,
@@ -79,7 +79,7 @@ internal class VedtaksperiodeReberegnetCommand(
                 vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId(),
                 commandContextRepository = commandContextRepository,
                 oppgaveService = oppgaveService,
-                reservasjonRepository = reservasjonRepository,
+                reservasjonDao = reservasjonDao,
                 tildelingDao = tildelingDao,
                 oppgaveDao = oppgaveDao,
                 totrinnsvurderingService = totrinnsvurderingService,

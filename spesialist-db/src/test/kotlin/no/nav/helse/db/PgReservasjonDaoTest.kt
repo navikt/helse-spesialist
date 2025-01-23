@@ -15,7 +15,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
+internal class PgReservasjonDaoTest : DatabaseIntegrationTest() {
 
     private companion object {
         private val objectMapper = jacksonObjectMapper()

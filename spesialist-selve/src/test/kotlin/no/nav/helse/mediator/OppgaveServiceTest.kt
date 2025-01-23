@@ -15,7 +15,7 @@ import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.Repositories
 import no.nav.helse.db.Reservasjon
-import no.nav.helse.db.ReservasjonRepository
+import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.TildelingDao
@@ -86,7 +86,7 @@ internal class OppgaveServiceTest {
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val repositories = mockk<Repositories>(relaxed = true)
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
-    private val reservasjonRepository = mockk<ReservasjonRepository>(relaxed = true)
+    private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val opptegnelseRepository = mockk<OpptegnelseRepository>(relaxed = true)
     private val totrinnsvurderingDao = mockk<TotrinnsvurderingDao>(relaxed = true)
     private val saksbehandlerDao = mockk<SaksbehandlerDao>()
@@ -116,7 +116,7 @@ internal class OppgaveServiceTest {
         OppgaveService(
             oppgaveDao = oppgaveDao,
             tildelingDao = tildelingDao,
-            reservasjonRepository = reservasjonRepository,
+            reservasjonDao = reservasjonDao,
             opptegnelseRepository = opptegnelseRepository,
             totrinnsvurderingDao = totrinnsvurderingDao,
             saksbehandlerDao = saksbehandlerDao,
@@ -171,7 +171,7 @@ internal class OppgaveServiceTest {
         every { oppgaveDao.reserverNesteId() } returns oppgaveId
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
         every { oppgaveDao.finnFødselsnummer(oppgaveId) } returns fødselsnummer
-        every { reservasjonRepository.hentReservasjonFor(fødselsnummer) } returns null
+        every { reservasjonDao.hentReservasjonFor(fødselsnummer) } returns null
         lagSøknadsoppgave(fødselsnummer)
         verify(exactly = 1) {
             oppgaveDao.opprettOppgave(
@@ -192,7 +192,7 @@ internal class OppgaveServiceTest {
     fun `lagrer oppgave og tildeler til saksbehandler som har reservert personen`() {
         every { oppgaveDao.reserverNesteId() } returns 0L
         val fødselsnummer = lagFødselsnummer()
-        every { reservasjonRepository.hentReservasjonFor(fødselsnummer) } returns Reservasjon(saksbehandlerFraDatabase)
+        every { reservasjonDao.hentReservasjonFor(fødselsnummer) } returns Reservasjon(saksbehandlerFraDatabase)
         every { oppgaveDao.finnFødselsnummer(0L) } returns fødselsnummer
         lagSøknadsoppgave(fødselsnummer)
         verify(exactly = 1) { tildelingDao.tildel(0L, SAKSBEHANDLEROID) }
@@ -204,7 +204,7 @@ internal class OppgaveServiceTest {
         val fødselsnummer = lagFødselsnummer()
         val oppgaveId = 0L
         every { oppgaveDao.reserverNesteId() } returns oppgaveId
-        every { reservasjonRepository.hentReservasjonFor(fødselsnummer) } returns Reservasjon(saksbehandlerFraDatabase)
+        every { reservasjonDao.hentReservasjonFor(fødselsnummer) } returns Reservasjon(saksbehandlerFraDatabase)
         every { oppgaveDao.finnFødselsnummer(oppgaveId) } returns fødselsnummer
         lagStikkprøveoppgave(fødselsnummer)
         verify(exactly = 0) { tildelingDao.tildel(any(), any()) }
@@ -215,7 +215,7 @@ internal class OppgaveServiceTest {
     fun `kaller bare hentGrupper når personen er reservert`() {
         val fødselsnummer = lagFødselsnummer()
         val oppgaveId = 0L
-        every { reservasjonRepository.hentReservasjonFor(fødselsnummer) } returns null
+        every { reservasjonDao.hentReservasjonFor(fødselsnummer) } returns null
         every { oppgaveDao.reserverNesteId() } returns oppgaveId
         every { oppgaveDao.finnFødselsnummer(oppgaveId) } returns fødselsnummer
         lagStikkprøveoppgave(fødselsnummer)
@@ -241,7 +241,7 @@ internal class OppgaveServiceTest {
         val oppgaveId = 0L
         every { oppgaveDao.reserverNesteId() } returns oppgaveId
         every { oppgaveDao.finnFødselsnummer(oppgaveId) } returns fødselsnummer
-        every { reservasjonRepository.hentReservasjonFor(fødselsnummer) } returns null
+        every { reservasjonDao.hentReservasjonFor(fødselsnummer) } returns null
 
         lagSøknadsoppgave(fødselsnummer)
 

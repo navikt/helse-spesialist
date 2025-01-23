@@ -1,6 +1,5 @@
 package no.nav.helse.mediator.oppgave
 
-import kotliquery.TransactionalSession
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.EgenskapForDatabase
@@ -9,8 +8,8 @@ import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.db.Repositories
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.db.ReservasjonRepository
 import no.nav.helse.db.SaksbehandlerDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
@@ -60,7 +59,7 @@ interface Oppgavefinner {
 class OppgaveService(
     private val oppgaveDao: OppgaveDao,
     private val tildelingDao: TildelingDao,
-    private val reservasjonRepository: ReservasjonRepository,
+    private val reservasjonDao: ReservasjonDao,
     private val opptegnelseRepository: OpptegnelseRepository,
     private val totrinnsvurderingDao: TotrinnsvurderingDao,
     private val saksbehandlerDao: SaksbehandlerDao,
@@ -72,14 +71,14 @@ class OppgaveService(
     private val logg = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-    internal fun nyOppgaveService(transactionalSession: TransactionalSession): OppgaveService =
+    internal fun nyOppgaveService(sessionContext: SessionContext): OppgaveService =
         OppgaveService(
-            oppgaveDao = repositories.withSessionContext(transactionalSession).oppgaveDao,
-            tildelingDao = repositories.withSessionContext(transactionalSession).tildelingDao,
-            reservasjonRepository = ReservasjonDao(transactionalSession),
-            opptegnelseRepository = repositories.withSessionContext(transactionalSession).opptegnelseRepository,
-            totrinnsvurderingDao = repositories.withSessionContext(transactionalSession).totrinnsvurderingDao,
-            saksbehandlerDao = repositories.withSessionContext(transactionalSession).saksbehandlerDao,
+            oppgaveDao = sessionContext.oppgaveDao,
+            tildelingDao = sessionContext.tildelingDao,
+            reservasjonDao = sessionContext.reservasjonDao,
+            opptegnelseRepository = sessionContext.opptegnelseRepository,
+            totrinnsvurderingDao = sessionContext.totrinnsvurderingDao,
+            saksbehandlerDao = sessionContext.saksbehandlerDao,
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = tilgangskontroll,
             tilgangsgrupper = tilgangsgrupper,
@@ -411,7 +410,7 @@ class OppgaveService(
         fødselsnummer: String,
     ) {
         try {
-            reservasjonRepository.reserverPerson(saksbehandleroid, fødselsnummer)
+            reservasjonDao.reserverPerson(saksbehandleroid, fødselsnummer)
         } catch (e: SQLException) {
             logg.warn("Kunne ikke reservere person")
         }
@@ -422,7 +421,7 @@ class OppgaveService(
         oppgave: Oppgave,
     ) {
         val (saksbehandlerFraDatabase) =
-            reservasjonRepository.hentReservasjonFor(fødselsnummer) ?: run {
+            reservasjonDao.hentReservasjonFor(fødselsnummer) ?: run {
                 logg.info("Finner ingen reservasjon for $oppgave, blir ikke tildelt.")
                 return
             }

@@ -2,7 +2,6 @@ package no.nav.helse
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.db.DBRepositories
-import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.kafka.RiverSetup
 import no.nav.helse.mediator.GodkjenningMediator
@@ -56,7 +55,7 @@ internal class TestMediator(
         OppgaveService(
             oppgaveDao = repositories.oppgaveDao,
             tildelingDao = tildelingDao,
-            reservasjonRepository = ReservasjonDao(dataSource),
+            reservasjonDao = repositories.reservasjonDao,
             opptegnelseRepository = opptegnelseRepository,
             totrinnsvurderingDao = totrinnsvurderingDao,
             saksbehandlerDao = saksbehandlerDao,

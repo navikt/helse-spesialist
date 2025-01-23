@@ -18,4 +18,5 @@ class DBSessionContext(session: Session) : SessionContext {
     override val stansAutomatiskBehandlingDao = PgStansAutomatiskBehandlingDao(session)
     override val tildelingDao = PgTildelingDao(session)
     override val generasjonDao = PgGenerasjonDao(session)
+    override val reservasjonDao = PgReservasjonDao(session)
 }

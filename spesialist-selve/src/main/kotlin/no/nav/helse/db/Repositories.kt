@@ -21,6 +21,7 @@ interface Repositories {
     val tildelingDao: TildelingDao
     val vedtakBegrunnelseDao: VedtakBegrunnelseDao
     val generasjonDao: GenerasjonDao
+    val reservasjonDao: ReservasjonDao
 
     fun withSessionContext(session: Session): SessionContext
 }

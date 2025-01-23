@@ -5,7 +5,6 @@ import kotliquery.TransactionalSession
 import kotliquery.sessionOf
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.Repositories
-import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
@@ -182,7 +181,7 @@ class Kommandofabrikk(
             periodehistorikkDao = repositories.withSessionContext(session).periodehistorikkDao,
             commandContextRepository = CommandContextDao(session),
             oppgaveService = transaksjonellOppgaveService(session),
-            reservasjonRepository = ReservasjonDao(session),
+            reservasjonDao = repositories.withSessionContext(session).reservasjonDao,
             tildelingDao = repositories.withSessionContext(session).tildelingDao,
             oppgaveDao = repositories.withSessionContext(session).oppgaveDao,
             totrinnsvurderingService = lagTotrinnsvurderingService(repositories.withSessionContext(session)),
@@ -280,7 +279,7 @@ class Kommandofabrikk(
             personbeløp = hendelse.personbeløp,
             utbetalingRepository = UtbetalingDao(session),
             opptegnelseRepository = repositories.withSessionContext(session).opptegnelseRepository,
-            reservasjonRepository = ReservasjonDao(session),
+            reservasjonDao = repositories.withSessionContext(session).reservasjonDao,
             oppgaveDao = repositories.withSessionContext(session).oppgaveDao,
             tildelingDao = repositories.withSessionContext(session).tildelingDao,
             oppgaveService = transaksjonellOppgaveService(session),
@@ -298,7 +297,7 @@ class Kommandofabrikk(
             id = hendelse.id,
             commandContextRepository = CommandContextDao(session),
             oppgaveService = transaksjonellOppgaveService(session),
-            reservasjonRepository = ReservasjonDao(session),
+            reservasjonDao = repositories.withSessionContext(session).reservasjonDao,
             tildelingDao = repositories.withSessionContext(session).tildelingDao,
             oppgaveDao = repositories.withSessionContext(session).oppgaveDao,
             totrinnsvurderingService = lagTotrinnsvurderingService(repositories.withSessionContext(session)),
@@ -433,7 +432,7 @@ class Kommandofabrikk(
         }
 
     private fun transaksjonellOppgaveService(transactionalSession: TransactionalSession): OppgaveService =
-        oppgaveService.nyOppgaveService(transactionalSession)
+        oppgaveService.nyOppgaveService(repositories.withSessionContext(transactionalSession))
 
     private fun transaksjonellAutomatisering(transactionalSession: TransactionalSession): Automatisering =
         Automatisering.Factory.automatisering(
