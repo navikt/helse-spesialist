@@ -1,26 +1,12 @@
-package no.nav.helse.modell.varsel
+package no.nav.helse.db
 
-import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.db.MedDataSource
-import no.nav.helse.db.MedSession
-import no.nav.helse.db.QueryRunner
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-internal interface VarselDao {
-    fun avvikleVarsel(
-        varselkode: String,
-        definisjonId: UUID,
-    )
-}
-
-class PgVarselDao(queryRunner: QueryRunner) : VarselDao, QueryRunner by queryRunner {
-    constructor(session: Session) : this(MedSession(session))
-    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
-
+class PgVarselDao internal constructor(dataSource: DataSource) : VarselDao, QueryRunner by MedDataSource(dataSource) {
     override fun avvikleVarsel(
         varselkode: String,
         definisjonId: UUID,

@@ -1,9 +1,10 @@
 package no.nav.helse.modell.varsel
 
 import no.nav.helse.db.DefinisjonDao
+import no.nav.helse.db.VarselDao
 
 class VarselRepository(
-    private val varselDao: PgVarselDao,
+    private val varselDao: VarselDao,
     private val definisjonDao: DefinisjonDao,
 ) {
     fun lagreDefinisjon(definisjonDto: VarseldefinisjonDto) {

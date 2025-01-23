@@ -14,7 +14,6 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
-import no.nav.helse.modell.varsel.PgVarselDao
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
@@ -123,7 +122,7 @@ internal class TestMediator(
             dokumentDao = repositories.dokumentDao,
             personDao = repositories.personDao,
             varselRepository = VarselRepository(
-                varselDao = PgVarselDao(dataSource),
+                varselDao = repositories.varselDao,
                 definisjonDao = repositories.definisjonDao
             )
         )

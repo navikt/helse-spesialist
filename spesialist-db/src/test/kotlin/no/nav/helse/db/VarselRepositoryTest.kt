@@ -1,7 +1,6 @@
 package no.nav.helse.db
 
 import no.nav.helse.AbstractDatabaseTest
-import no.nav.helse.modell.varsel.PgVarselDao
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.varsel.VarseldefinisjonDto
@@ -12,10 +11,10 @@ import java.util.UUID
 
 internal class VarselRepositoryTest : AbstractDatabaseTest() {
     private val varselRepository  = VarselRepository(
-        varselDao = PgVarselDao(dataSource),
+        varselDao = repositories.varselDao,
         definisjonDao = repositories.definisjonDao
     )
-    private val definisjonDao = PgDefinisjonDao(dataSource)
+    private val definisjonDao = repositories.definisjonDao
 
     @Test
     fun `lagre definisjon`() {

@@ -20,7 +20,6 @@ import no.nav.helse.modell.automatisering.PlukkTilManuell
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
-import no.nav.helse.modell.varsel.PgVarselDao
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.bootstrap.ApiAvhengigheter
@@ -173,7 +172,7 @@ class SpesialistApp(
                 personDao = repositories.personDao,
                 varselRepository =
                     VarselRepository(
-                        varselDao = PgVarselDao(dataSource),
+                        varselDao = repositories.varselDao,
                         definisjonDao = repositories.definisjonDao,
                     ),
             )

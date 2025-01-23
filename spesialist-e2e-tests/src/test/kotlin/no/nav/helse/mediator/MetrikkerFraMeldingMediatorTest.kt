@@ -10,7 +10,6 @@ import no.nav.helse.Meldingssender
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.modell.person.SøknadSendtCommand
-import no.nav.helse.modell.varsel.PgVarselDao
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -37,7 +36,7 @@ internal class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
             dokumentDao = repositories.dokumentDao,
             personDao = repositories.personDao,
             varselRepository = VarselRepository(
-                varselDao = PgVarselDao(dataSource),
+                varselDao = repositories.varselDao,
                 definisjonDao = repositories.definisjonDao
             ),
         )
