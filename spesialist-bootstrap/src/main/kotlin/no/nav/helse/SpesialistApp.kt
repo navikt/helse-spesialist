@@ -175,6 +175,7 @@ class SpesialistApp(
                         varselDao = repositories.varselDao,
                         definisjonDao = repositories.definisjonDao,
                     ),
+                meldingDao = repositories.meldingDao,
             )
         RiverSetup(dataSource, rapidsConnection, meldingMediator).setUp()
         saksbehandlerMediator =

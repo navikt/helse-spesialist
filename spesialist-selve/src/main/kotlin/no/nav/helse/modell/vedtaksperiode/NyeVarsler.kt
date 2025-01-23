@@ -16,7 +16,7 @@ class NyeVarsler(
     internal val varsler: List<Varsel>,
     private val json: String,
 ) : Personmelding {
-    internal constructor(jsonNode: JsonNode) : this(
+    constructor(jsonNode: JsonNode) : this(
         id = UUID.fromString(jsonNode["@id"].asText()),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
         varsler = jsonNode["aktiviteter"].varsler(),

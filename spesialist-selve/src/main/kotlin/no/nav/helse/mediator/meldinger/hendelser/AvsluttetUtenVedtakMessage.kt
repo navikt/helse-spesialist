@@ -17,7 +17,7 @@ class AvsluttetUtenVedtakMessage(
     private val hendelser: List<UUID>,
     private val json: String,
 ) : Vedtaksperiodemelding {
-    internal constructor(jsonNode: JsonNode) : this(
+    constructor(jsonNode: JsonNode) : this(
         id = jsonNode["@id"].asUUID(),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
         vedtaksperiodeId = UUID.fromString(jsonNode["vedtaksperiodeId"].asText()),

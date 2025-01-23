@@ -10,7 +10,6 @@ import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommand
@@ -93,7 +92,7 @@ class Kommandofabrikk(
         val harTildeltOppgave =
             sessionContext.tildelingDao.tildelingForOppgave(oppgaveDataForAutomatisering.oppgaveId) != null
         val godkjenningsbehovData =
-            MeldingDao(transactionalSession)
+            sessionContext.meldingDao
                 .finnGodkjenningsbehov(oppgaveDataForAutomatisering.hendelseId)
                 .data()
 
@@ -120,7 +119,7 @@ class Kommandofabrikk(
     ): TilbakedateringGodkjentCommand {
         val sessionContext = repositories.withSessionContext(transactionalSession)
         val godkjenningsbehovData =
-            MeldingDao(transactionalSession).finnGodkjenningsbehov(oppgaveDataForAutomatisering.hendelseId).data()
+            sessionContext.meldingDao.finnGodkjenningsbehov(oppgaveDataForAutomatisering.hendelseId).data()
         val sykefraværstilfelle = person.sykefraværstilfelle(godkjenningsbehovData.vedtaksperiodeId)
         val utbetaling = sessionContext.utbetalingDao.hentUtbetaling(godkjenningsbehovData.utbetalingId)
 
@@ -209,7 +208,7 @@ class Kommandofabrikk(
         val godkjenningsbehovData =
             oppgaveDataForAutomatisering
                 ?.let {
-                    MeldingDao(transactionalSession).finnGodkjenningsbehov(it.hendelseId)
+                    sessionContext.meldingDao.finnGodkjenningsbehov(it.hendelseId)
                 }?.data()
         val utbetaling = godkjenningsbehovData?.let { sessionContext.utbetalingDao.hentUtbetaling(it.utbetalingId) }
         return AdressebeskyttelseEndretCommand(
@@ -321,7 +320,7 @@ class Kommandofabrikk(
         transactionalSession: TransactionalSession,
     ): LøsGodkjenningsbehov {
         val sessionContext = repositories.withSessionContext(transactionalSession)
-        val godkjenningsbehov = MeldingDao(transactionalSession).finnGodkjenningsbehov(melding.godkjenningsbehovhendelseId)
+        val godkjenningsbehov = sessionContext.meldingDao.finnGodkjenningsbehov(melding.godkjenningsbehovhendelseId)
         val oppgaveId = melding.oppgaveId
         val sykefraværstilfelle = person.sykefraværstilfelle(godkjenningsbehov.vedtaksperiodeId())
         val utbetaling =
@@ -432,10 +431,9 @@ class Kommandofabrikk(
 
     private fun transaksjonellAutomatisering(transactionalSession: TransactionalSession): Automatisering =
         Automatisering.Factory.automatisering(
-            transactionalSession,
+            repositories.withSessionContext(transactionalSession),
             subsumsjonsmelderProvider,
             stikkprøver,
-            repositories.withSessionContext(transactionalSession),
         )
 
     private fun iverksett(

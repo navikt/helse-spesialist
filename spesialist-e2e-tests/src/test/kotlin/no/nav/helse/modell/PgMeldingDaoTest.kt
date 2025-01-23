@@ -23,7 +23,7 @@ import java.time.LocalDate.now
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class MeldingDaoTest : DatabaseIntegrationTest() {
+internal class PgMeldingDaoTest : DatabaseIntegrationTest() {
     private val godkjenningsbehov: Godkjenningsbehov = mockGodkjenningsbehov()
 
     private val saksbehandlerløsning: Saksbehandlerløsning = mockSaksbehandlerløsning()

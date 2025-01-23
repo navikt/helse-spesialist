@@ -28,4 +28,5 @@ interface SessionContext {
     val risikovurderingDao: RisikovurderingDao
     val utbetalingDao: UtbetalingDao
     val vergemålDao: VergemålDao
+    val meldingDao: MeldingDao
 }

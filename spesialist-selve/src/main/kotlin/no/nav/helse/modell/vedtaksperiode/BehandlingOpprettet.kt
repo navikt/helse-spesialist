@@ -20,7 +20,7 @@ class BehandlingOpprettet(
     private val tom: LocalDate,
     private val json: String,
 ) : Vedtaksperiodemelding {
-    internal constructor(jsonNode: JsonNode) : this(
+    constructor(jsonNode: JsonNode) : this(
         id = jsonNode["@id"].asUUID(),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
         organisasjonsnummer = jsonNode["organisasjonsnummer"].asText(),

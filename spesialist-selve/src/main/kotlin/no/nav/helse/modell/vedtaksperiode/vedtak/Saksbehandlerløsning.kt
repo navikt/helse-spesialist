@@ -29,7 +29,7 @@ class Saksbehandlerløsning(
     val beslutter: Saksbehandler?,
     private val json: String,
 ) : Personmelding {
-    internal constructor(jsonNode: JsonNode) : this(
+    constructor(jsonNode: JsonNode) : this(
         id = UUID.fromString(jsonNode["@id"].asText()),
         oppgaveId = jsonNode["oppgaveId"].asLong(),
         godkjenningsbehovhendelseId = UUID.fromString(jsonNode["hendelseId"].asText()),

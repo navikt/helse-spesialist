@@ -133,7 +133,7 @@ class Godkjenningsbehov(
             json = json,
         )
 
-    internal constructor(jsonNode: JsonNode) : this(
+    constructor(jsonNode: JsonNode) : this(
         id = UUID.fromString(jsonNode.path("@id").asText()),
         fødselsnummer = jsonNode.path("fødselsnummer").asText(),
         organisasjonsnummer = jsonNode.path("organisasjonsnummer").asText(),

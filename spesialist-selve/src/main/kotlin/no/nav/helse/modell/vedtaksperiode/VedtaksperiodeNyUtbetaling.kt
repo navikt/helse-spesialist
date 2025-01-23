@@ -18,7 +18,7 @@ class VedtaksperiodeNyUtbetaling(
     val utbetalingId: UUID,
     private val json: String,
 ) : Vedtaksperiodemelding {
-    internal constructor(jsonNode: JsonNode) : this(
+    constructor(jsonNode: JsonNode) : this(
         id = UUID.fromString(jsonNode["@id"].asText()),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
         vedtaksperiodeId = UUID.fromString(jsonNode["vedtaksperiodeId"].asText()),

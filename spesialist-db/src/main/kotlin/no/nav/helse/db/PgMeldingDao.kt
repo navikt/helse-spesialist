@@ -1,37 +1,33 @@
-package no.nav.helse.modell
+package no.nav.helse.db
 
 import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.db.MedDataSource
-import no.nav.helse.db.MedSession
-import no.nav.helse.db.MeldingRepository
-import no.nav.helse.db.QueryRunner
+import no.nav.helse.db.PgMeldingDao.Meldingtype.ADRESSEBESKYTTELSE_ENDRET
+import no.nav.helse.db.PgMeldingDao.Meldingtype.AVSLUTTET_MED_VEDTAK
+import no.nav.helse.db.PgMeldingDao.Meldingtype.AVSLUTTET_UTEN_VEDTAK
+import no.nav.helse.db.PgMeldingDao.Meldingtype.AVVIK_VURDERT
+import no.nav.helse.db.PgMeldingDao.Meldingtype.BEHANDLING_OPPRETTET
+import no.nav.helse.db.PgMeldingDao.Meldingtype.ENDRET_EGEN_ANSATT_STATUS
+import no.nav.helse.db.PgMeldingDao.Meldingtype.GODKJENNING
+import no.nav.helse.db.PgMeldingDao.Meldingtype.GODKJENT_TILBAKEDATERT_SYKMELDING
+import no.nav.helse.db.PgMeldingDao.Meldingtype.GOSYS_OPPGAVE_ENDRET
+import no.nav.helse.db.PgMeldingDao.Meldingtype.KLARGJØR_TILGANGSRELATERTE_DATA
+import no.nav.helse.db.PgMeldingDao.Meldingtype.NYE_VARSLER
+import no.nav.helse.db.PgMeldingDao.Meldingtype.OPPDATER_PERSONSNAPSHOT
+import no.nav.helse.db.PgMeldingDao.Meldingtype.OVERSTYRING_IGANGSATT
+import no.nav.helse.db.PgMeldingDao.Meldingtype.SAKSBEHANDLERLØSNING
+import no.nav.helse.db.PgMeldingDao.Meldingtype.SØKNAD_SENDT
+import no.nav.helse.db.PgMeldingDao.Meldingtype.UTBETALING_ENDRET
+import no.nav.helse.db.PgMeldingDao.Meldingtype.VEDTAKSPERIODE_FORKASTET
+import no.nav.helse.db.PgMeldingDao.Meldingtype.VEDTAKSPERIODE_NY_UTBETALING
+import no.nav.helse.db.PgMeldingDao.Meldingtype.VEDTAKSPERIODE_REBEREGNET
+import no.nav.helse.db.PgMeldingDao.Meldingtype.VEDTAK_FATTET
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetUtenVedtakMessage
 import no.nav.helse.mediator.meldinger.hendelser.AvvikVurdertMessage
-import no.nav.helse.modell.MeldingDao.Meldingtype.ADRESSEBESKYTTELSE_ENDRET
-import no.nav.helse.modell.MeldingDao.Meldingtype.AVSLUTTET_MED_VEDTAK
-import no.nav.helse.modell.MeldingDao.Meldingtype.AVSLUTTET_UTEN_VEDTAK
-import no.nav.helse.modell.MeldingDao.Meldingtype.AVVIK_VURDERT
-import no.nav.helse.modell.MeldingDao.Meldingtype.BEHANDLING_OPPRETTET
-import no.nav.helse.modell.MeldingDao.Meldingtype.ENDRET_EGEN_ANSATT_STATUS
-import no.nav.helse.modell.MeldingDao.Meldingtype.GODKJENNING
-import no.nav.helse.modell.MeldingDao.Meldingtype.GODKJENT_TILBAKEDATERT_SYKMELDING
-import no.nav.helse.modell.MeldingDao.Meldingtype.GOSYS_OPPGAVE_ENDRET
-import no.nav.helse.modell.MeldingDao.Meldingtype.KLARGJØR_TILGANGSRELATERTE_DATA
-import no.nav.helse.modell.MeldingDao.Meldingtype.NYE_VARSLER
-import no.nav.helse.modell.MeldingDao.Meldingtype.OPPDATER_PERSONSNAPSHOT
-import no.nav.helse.modell.MeldingDao.Meldingtype.OVERSTYRING_IGANGSATT
-import no.nav.helse.modell.MeldingDao.Meldingtype.SAKSBEHANDLERLØSNING
-import no.nav.helse.modell.MeldingDao.Meldingtype.SØKNAD_SENDT
-import no.nav.helse.modell.MeldingDao.Meldingtype.UTBETALING_ENDRET
-import no.nav.helse.modell.MeldingDao.Meldingtype.VEDTAKSPERIODE_FORKASTET
-import no.nav.helse.modell.MeldingDao.Meldingtype.VEDTAKSPERIODE_NY_UTBETALING
-import no.nav.helse.modell.MeldingDao.Meldingtype.VEDTAKSPERIODE_REBEREGNET
-import no.nav.helse.modell.MeldingDao.Meldingtype.VEDTAK_FATTET
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
@@ -54,9 +50,9 @@ import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 
-class MeldingDao(queryRunner: QueryRunner) : MeldingRepository, QueryRunner by queryRunner {
-    constructor(session: Session) : this(MedSession(session))
-    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
+class PgMeldingDao private constructor(queryRunner: QueryRunner) : MeldingDao, QueryRunner by queryRunner {
+    internal constructor(session: Session) : this(MedSession(session))
+    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun lagre(melding: Personmelding) {
         asSQL(
@@ -111,7 +107,7 @@ class MeldingDao(queryRunner: QueryRunner) : MeldingRepository, QueryRunner by q
     override fun sisteOverstyringIgangsattOmKorrigertSøknad(
         fødselsnummer: String,
         vedtaksperiodeId: UUID,
-    ): OverstyringIgangsattKorrigertSøknad? =
+    ): MeldingDao.OverstyringIgangsattKorrigertSøknad? =
         asSQL(
             """
             SELECT h.data
@@ -129,12 +125,12 @@ class MeldingDao(queryRunner: QueryRunner) : MeldingRepository, QueryRunner by q
                 val data = objectMapper.readTree(it)
                 if (data["årsak"].asText() != "KORRIGERT_SØKNAD") return@let null
 
-                OverstyringIgangsattKorrigertSøknad(
+                MeldingDao.OverstyringIgangsattKorrigertSøknad(
                     periodeForEndringFom = data["periodeForEndringFom"].asText().let(LocalDate::parse),
                     meldingId = data["@id"].asText(),
                     berørtePerioder =
                         data["berørtePerioder"].map { berørtPeriode ->
-                            BerørtPeriode(
+                            MeldingDao.BerørtPeriode(
                                 vedtaksperiodeId = UUID.fromString(berørtPeriode["vedtaksperiodeId"].asText()),
                                 periodeFom = berørtPeriode["periodeFom"].asText().let(LocalDate::parse),
                                 orgnummer = berørtPeriode["orgnummer"].asText(),
@@ -143,18 +139,6 @@ class MeldingDao(queryRunner: QueryRunner) : MeldingRepository, QueryRunner by q
                 )
             }
         }
-
-    data class OverstyringIgangsattKorrigertSøknad(
-        val periodeForEndringFom: LocalDate,
-        val meldingId: String,
-        val berørtePerioder: List<BerørtPeriode>,
-    )
-
-    data class BerørtPeriode(
-        val vedtaksperiodeId: UUID,
-        val periodeFom: LocalDate,
-        val orgnummer: String,
-    )
 
     override fun finnGodkjenningsbehov(meldingId: UUID): Godkjenningsbehov {
         val melding =

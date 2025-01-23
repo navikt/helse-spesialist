@@ -14,7 +14,7 @@ class OverstyringIgangsatt(
     val berørteVedtaksperiodeIder: List<UUID>,
     private val json: String,
 ) : Personmelding {
-    internal constructor(jsonNode: JsonNode) : this(
+    constructor(jsonNode: JsonNode) : this(
         id = UUID.fromString(jsonNode["@id"].asText()),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
         kilde = UUID.fromString(jsonNode["kilde"].asText()),

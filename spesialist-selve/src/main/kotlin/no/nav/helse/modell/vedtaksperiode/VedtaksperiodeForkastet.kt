@@ -22,7 +22,7 @@ class VedtaksperiodeForkastet(
     private val fødselsnummer: String,
     private val json: String,
 ) : Vedtaksperiodemelding {
-    internal constructor(jsonNode: JsonNode) : this(
+    constructor(jsonNode: JsonNode) : this(
         UUID.fromString(jsonNode["@id"].asText()),
         UUID.fromString(jsonNode["vedtaksperiodeId"].asText()),
         jsonNode["fødselsnummer"].asText(),

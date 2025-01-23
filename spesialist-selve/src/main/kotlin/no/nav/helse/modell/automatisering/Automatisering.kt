@@ -1,10 +1,10 @@
 package no.nav.helse.modell.automatisering
 
-import kotliquery.TransactionalSession
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.GenerasjonDao
-import no.nav.helse.db.MeldingRepository
+import no.nav.helse.db.MeldingDao
+import no.nav.helse.db.MeldingDao.OverstyringIgangsattKorrigertSøknad
 import no.nav.helse.db.OverstyringDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.RisikovurderingDao
@@ -13,8 +13,6 @@ import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålDao
 import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.mediator.Subsumsjonsmelder
-import no.nav.helse.modell.MeldingDao
-import no.nav.helse.modell.MeldingDao.OverstyringIgangsattKorrigertSøknad
 import no.nav.helse.modell.automatisering.Automatisering.AutomatiserKorrigertSøknadResultat.SkyldesKorrigertSøknad
 import no.nav.helse.modell.person.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.modell.person.Sykefraværstilfelle
@@ -41,16 +39,15 @@ internal class Automatisering(
     private val vedtakDao: VedtakDao,
     private val overstyringDao: OverstyringDao,
     private val stikkprøver: Stikkprøver,
-    private val meldingRepository: MeldingRepository,
+    private val meldingDao: MeldingDao,
     private val generasjonDao: GenerasjonDao,
     private val egenAnsattDao: EgenAnsattDao,
 ) {
     object Factory {
         fun automatisering(
-            transactionalSession: TransactionalSession,
+            sessionContext: SessionContext,
             subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
             stikkprøver: Stikkprøver,
-            sessionContext: SessionContext,
         ): Automatisering {
             return Automatisering(
                 risikovurderingDao = sessionContext.risikovurderingDao,
@@ -66,7 +63,7 @@ internal class Automatisering(
                 vedtakDao = sessionContext.vedtakDao,
                 overstyringDao = sessionContext.overstyringDao,
                 stikkprøver = stikkprøver,
-                meldingRepository = MeldingDao(transactionalSession),
+                meldingDao = sessionContext.meldingDao,
                 generasjonDao = sessionContext.generasjonDao,
                 egenAnsattDao = sessionContext.egenAnsattDao,
             )
@@ -129,7 +126,7 @@ internal class Automatisering(
         vedtaksperiodeId: UUID,
     ): OverstyringIgangsattKorrigertSøknad? =
         generasjonDao.førsteGenerasjonVedtakFattetTidspunkt(vedtaksperiodeId)?.let {
-            meldingRepository.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, vedtaksperiodeId)
+            meldingDao.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, vedtaksperiodeId)
         }
 
     private sealed interface AutomatiserKorrigertSøknadResultat {
@@ -158,7 +155,7 @@ internal class Automatisering(
         overstyringIgangsattKorrigertSøknad: OverstyringIgangsattKorrigertSøknad,
     ): AutomatiserKorrigertSøknadResultat {
         val hendelseId = UUID.fromString(overstyringIgangsattKorrigertSøknad.meldingId)
-        if (meldingRepository.erKorrigertSøknadAutomatiskBehandlet(hendelseId)) return SkyldesKorrigertSøknad.KanAutomatiseres
+        if (meldingDao.erKorrigertSøknadAutomatiskBehandlet(hendelseId)) return SkyldesKorrigertSøknad.KanAutomatiseres
 
         val orgnummer = vedtakDao.finnOrganisasjonsnummer(vedtaksperiodeId)
         val vedtaksperiodeIdKorrigertSøknad =
@@ -176,8 +173,8 @@ internal class Automatisering(
                 generasjonDao.førsteGenerasjonVedtakFattetTidspunkt(it)
                     ?.isBefore(LocalDateTime.now().minusMonths(6))
                     ?: true
-            val antallKorrigeringer = meldingRepository.finnAntallAutomatisertKorrigertSøknad(it)
-            meldingRepository.opprettAutomatiseringKorrigertSøknad(it, hendelseId)
+            val antallKorrigeringer = meldingDao.finnAntallAutomatisertKorrigertSøknad(it)
+            meldingDao.opprettAutomatiseringKorrigertSøknad(it, hendelseId)
 
             if (merEnn6MånederSidenVedtakPåFørsteMottattSøknad) {
                 return SkyldesKorrigertSøknad.KanIkkeAutomatiseres(

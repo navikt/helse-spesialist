@@ -6,12 +6,12 @@ import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.DokumentDao
+import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.Repositories
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
-import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.MeldingDuplikatkontrollDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.KlargjørPersonForVisning
@@ -32,7 +32,7 @@ class MeldingMediator(
     private val publiserer: MeldingPubliserer,
     private val personDao: PersonDao,
     private val commandContextDao: CommandContextDao,
-    private val meldingDao: MeldingDao = MeldingDao(dataSource),
+    private val meldingDao: MeldingDao,
     private val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao = MeldingDuplikatkontrollDao(dataSource),
     private val kommandofabrikk: Kommandofabrikk,
     private val dokumentDao: DokumentDao,

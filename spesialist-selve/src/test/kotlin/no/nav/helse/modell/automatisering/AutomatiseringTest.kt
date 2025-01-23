@@ -5,13 +5,13 @@ import io.mockk.mockk
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.GenerasjonDao
+import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.OverstyringDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålDao
 import no.nav.helse.db.ÅpneGosysOppgaverDao
-import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
@@ -95,7 +95,7 @@ internal class AutomatiseringTest {
             vedtakDao = vedtakDaoMock,
             overstyringDao = overstyringDaoMock,
             stikkprøver = stikkprøver,
-            meldingRepository = meldingDaoMock,
+            meldingDao = meldingDaoMock,
             generasjonDao = generasjonDaoMock,
             egenAnsattDao = egenAnsattDao,
         )
@@ -107,18 +107,18 @@ internal class AutomatiseringTest {
         every { åpneGosysOppgaverDaoMock.antallÅpneOppgaver(any()) } returns 0
         every { overstyringDaoMock.harVedtaksperiodePågåendeOverstyring(any()) } returns false
         every { meldingDaoMock.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, vedtaksperiodeId) } returns
-            MeldingDao.OverstyringIgangsattKorrigertSøknad(
-                meldingId = hendelseId.toString(),
-                periodeForEndringFom = periodeFom,
-                berørtePerioder =
-                    listOf(
-                        MeldingDao.BerørtPeriode(
-                            vedtaksperiodeId = vedtaksperiodeId,
-                            orgnummer = orgnummer,
-                            periodeFom = periodeFom,
+                MeldingDao.OverstyringIgangsattKorrigertSøknad(
+                    meldingId = hendelseId.toString(),
+                    periodeForEndringFom = periodeFom,
+                    berørtePerioder =
+                        listOf(
+                            MeldingDao.BerørtPeriode(
+                                vedtaksperiodeId = vedtaksperiodeId,
+                                orgnummer = orgnummer,
+                                periodeFom = periodeFom,
+                            ),
                         ),
-                    ),
-            )
+                )
         every { vedtakDaoMock.finnOrganisasjonsnummer(vedtaksperiodeId) } returns orgnummer
         every { meldingDaoMock.finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId) } returns 1
         every { meldingDaoMock.erKorrigertSøknadAutomatiskBehandlet(hendelseId) } returns false

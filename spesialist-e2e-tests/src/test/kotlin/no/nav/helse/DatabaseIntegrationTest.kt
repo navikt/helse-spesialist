@@ -9,7 +9,6 @@ import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.api.PgPeriodehistorikkApiDao
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
-import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.kommando.TestMelding
 import no.nav.helse.modell.person.PersonService
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
@@ -98,7 +97,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val commandContextDao = repositories.commandContextDao
     internal val saksbehandlerDao = repositories.saksbehandlerDao
     internal val reservasjonDao = sessionContext.reservasjonDao
-    internal val meldingDao = MeldingDao(dataSource)
+    internal val meldingDao = repositories.meldingDao
     internal val egenAnsattDao = sessionContext.egenAnsattDao
     internal val totrinnsvurderingDao = sessionContext.totrinnsvurderingDao
     internal val påVentDao = sessionContext.påVentDao

@@ -124,7 +124,8 @@ internal class TestMediator(
             varselRepository = VarselRepository(
                 varselDao = repositories.varselDao,
                 definisjonDao = repositories.definisjonDao
-            )
+            ),
+            meldingDao = repositories.meldingDao,
         )
         RiverSetup(dataSource, testRapid, meldingMediator).setUp()
     }

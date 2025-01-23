@@ -37,7 +37,8 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
             varselRepository = VarselRepository(
                 varselDao = repositories.varselDao,
                 definisjonDao = repositories.definisjonDao
-            )
+            ),
+            meldingDao = repositories.meldingDao,
         )
 
     @BeforeEach
