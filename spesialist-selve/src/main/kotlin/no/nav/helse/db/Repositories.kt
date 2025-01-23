@@ -13,6 +13,7 @@ interface Repositories {
     val notatDao: NotatDao
     val oppgaveDao: OppgaveDao
     val periodehistorikkDao: PeriodehistorikkDao
+    val totrinnsvurderingDao: TotrinnsvurderingDao
 
     fun withSessionContext(session: Session): SessionContext
 }

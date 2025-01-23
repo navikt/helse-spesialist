@@ -2,7 +2,6 @@ package no.nav.helse
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.db.DBRepositories
-import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
@@ -37,7 +36,7 @@ internal class TestMediator(
     private val oppgaveDao = repositories.oppgaveDao
     private val periodehistorikkDao = repositories.periodehistorikkDao
     private val overstyringDao = OverstyringDao(dataSource)
-    private val totrinnsvurderingDao = PgTotrinnsvurderingDao(dataSource)
+    private val totrinnsvurderingDao = repositories.totrinnsvurderingDao
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
     private val notatDao = repositories.notatDao

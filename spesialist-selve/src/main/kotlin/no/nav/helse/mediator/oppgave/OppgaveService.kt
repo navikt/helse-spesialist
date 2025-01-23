@@ -7,7 +7,6 @@ import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.OpptegnelseRepository
-import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.Repositories
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.ReservasjonRepository
@@ -81,7 +80,7 @@ class OppgaveService(
             tildelingRepository = TildelingDao(transactionalSession),
             reservasjonRepository = ReservasjonDao(transactionalSession),
             opptegnelseRepository = repositories.withSessionContext(transactionalSession).opptegnelseRepository,
-            totrinnsvurderingDao = PgTotrinnsvurderingDao(transactionalSession),
+            totrinnsvurderingDao = repositories.withSessionContext(transactionalSession).totrinnsvurderingDao,
             saksbehandlerRepository = SaksbehandlerDao(transactionalSession),
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = tilgangskontroll,

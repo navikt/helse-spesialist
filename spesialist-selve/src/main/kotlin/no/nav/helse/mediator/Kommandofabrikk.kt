@@ -4,10 +4,10 @@ import kotliquery.Session
 import kotliquery.TransactionalSession
 import kotliquery.sessionOf
 import no.nav.helse.db.CommandContextRepository
-import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.db.Repositories
 import no.nav.helse.db.ReservasjonDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
@@ -187,7 +187,7 @@ class Kommandofabrikk(
             reservasjonRepository = ReservasjonDao(session),
             tildelingRepository = TildelingDao(session),
             oppgaveDao = repositories.withSessionContext(session).oppgaveDao,
-            totrinnsvurderingService = lagTotrinnsvurderingService(session),
+            totrinnsvurderingService = lagTotrinnsvurderingService(repositories.withSessionContext(session)),
         )
 
     internal fun vedtaksperiodeNyUtbetaling(
@@ -286,7 +286,7 @@ class Kommandofabrikk(
             oppgaveDao = repositories.withSessionContext(session).oppgaveDao,
             tildelingRepository = TildelingDao(session),
             oppgaveService = transaksjonellOppgaveService(session),
-            totrinnsvurderingService = lagTotrinnsvurderingService(session),
+            totrinnsvurderingService = lagTotrinnsvurderingService(repositories.withSessionContext(session)),
             json = hendelse.toJson(),
         )
 
@@ -303,7 +303,7 @@ class Kommandofabrikk(
             reservasjonRepository = ReservasjonDao(session),
             tildelingRepository = TildelingDao(session),
             oppgaveDao = repositories.withSessionContext(session).oppgaveDao,
-            totrinnsvurderingService = lagTotrinnsvurderingService(session),
+            totrinnsvurderingService = lagTotrinnsvurderingService(repositories.withSessionContext(session)),
         )
 
     internal fun stansAutomatiskBehandling(
@@ -383,7 +383,7 @@ class Kommandofabrikk(
             avviksvurderingDao = repositories.withSessionContext(session).avviksvurderingDao,
             oppgaveService = transaksjonellOppgaveService(session),
             godkjenningMediator = GodkjenningMediator(repositories.withSessionContext(session).opptegnelseRepository),
-            totrinnsvurderingService = lagTotrinnsvurderingService(session),
+            totrinnsvurderingService = lagTotrinnsvurderingService(repositories.withSessionContext(session)),
             person = person,
         )
     }
@@ -489,11 +489,11 @@ class Kommandofabrikk(
         registrerTidsbrukForHendelse(hendelsenavn, kjøretidMs)
     }
 
-    private fun lagTotrinnsvurderingService(session: Session) =
+    private fun lagTotrinnsvurderingService(sessionContext: SessionContext) =
         TotrinnsvurderingService(
-            PgTotrinnsvurderingDao(session),
-            repositories.withSessionContext(session).oppgaveDao,
-            repositories.withSessionContext(session).periodehistorikkDao,
-            repositories.withSessionContext(session).dialogDao,
+            sessionContext.totrinnsvurderingDao,
+            sessionContext.oppgaveDao,
+            sessionContext.periodehistorikkDao,
+            sessionContext.dialogDao,
         )
 }
