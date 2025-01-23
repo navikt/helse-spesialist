@@ -943,7 +943,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
     private fun assertOppgave(
         oppgaveId: Long,
-        forventetStatus: String,
+        @Suppress("SameParameterValue") forventetStatus: String,
     ) {
         val status = dbQuery.single(
             "SELECT status FROM oppgave WHERE id = :oppgaveId",
