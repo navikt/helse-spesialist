@@ -24,7 +24,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class InntektskilderDaoTest : DatabaseIntegrationTest() {
-    private val dao = InntektskilderDao(session, RepositoriesImpl(dataSource))
+    private val dao = InntektskilderDao(session, DBRepositories(dataSource))
     private val avviksvurderingDao = PgAvviksvurderingDao(session)
 
     @Test

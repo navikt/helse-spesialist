@@ -11,7 +11,7 @@ import java.time.LocalDate
 
 
 internal class PgArbeidsgiverDaoTest : DatabaseIntegrationTest() {
-    private val inntektskildeDao = InntektskilderDao(sessionOf(dataSource, returnGeneratedKey = true), RepositoriesImpl(
+    private val inntektskildeDao = InntektskilderDao(sessionOf(dataSource, returnGeneratedKey = true), DBRepositories(
         dataSource))
 
     @Test

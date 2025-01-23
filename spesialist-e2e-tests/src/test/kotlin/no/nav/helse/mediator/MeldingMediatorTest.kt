@@ -6,7 +6,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.TestRapidHelpers.meldinger
-import no.nav.helse.db.RepositoriesImpl
+import no.nav.helse.db.DBRepositories
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
@@ -27,7 +27,7 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
     private val meldingMediator =
         MeldingMediator(
             dataSource = dataSource,
-            repositories = RepositoriesImpl(dataSource),
+            repositories = DBRepositories(dataSource),
             publiserer = MessageContextMeldingPubliserer(testRapid),
             kommandofabrikk = kommandofabrikk,
             poisonPills = PoisonPills(emptyMap())
