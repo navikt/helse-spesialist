@@ -9,13 +9,13 @@ import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.db.OppgaveDao
+import no.nav.helse.db.OverstyringDao
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.PåVentRepository
 import no.nav.helse.db.RisikovurderingRepository
 import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålRepository
-import no.nav.helse.db.overstyring.OverstyringRepository
 import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
@@ -202,7 +202,7 @@ internal class GodkjenningsbehovCommand(
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     risikovurderingRepository: RisikovurderingRepository,
     påVentRepository: PåVentRepository,
-    overstyringRepository: OverstyringRepository,
+    overstyringDao: OverstyringDao,
     automatiseringDao: AutomatiseringDao,
     oppgaveDao: OppgaveDao,
     avviksvurderingDao: AvviksvurderingDao,
@@ -327,7 +327,7 @@ internal class GodkjenningsbehovCommand(
                 fødselsnummer = behovData.fødselsnummer,
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
                 oppgaveService = oppgaveService,
-                overstyringRepository = overstyringRepository,
+                overstyringDao = overstyringDao,
                 totrinnsvurderingService = totrinnsvurderingService,
                 sykefraværstilfelle = sykefraværstilfelle,
                 spleisVedtaksperioder = behovData.spleisVedtaksperioder,

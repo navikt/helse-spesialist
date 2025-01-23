@@ -1,14 +1,10 @@
-package no.nav.helse.modell.overstyring
+package no.nav.helse.db
 
 import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.HelseDao.Companion.asSQLWithQuestionMarks
-import no.nav.helse.db.MedDataSource
-import no.nav.helse.db.MedSession
-import no.nav.helse.db.QueryRunner
 import no.nav.helse.db.overstyring.MinimumSykdomsgradForDatabase
 import no.nav.helse.db.overstyring.OverstyringForDatabase
-import no.nav.helse.db.overstyring.OverstyringRepository
 import no.nav.helse.db.overstyring.OverstyrtArbeidsforholdForDatabase
 import no.nav.helse.db.overstyring.OverstyrtInntektOgRefusjonForDatabase
 import no.nav.helse.db.overstyring.OverstyrtTidslinjeForDatabase
@@ -18,7 +14,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import java.util.UUID
 import javax.sql.DataSource
 
-class OverstyringDao(queryRunner: QueryRunner) : OverstyringRepository, QueryRunner by queryRunner {
+class PgOverstyringDao(queryRunner: QueryRunner) : OverstyringDao, QueryRunner by queryRunner {
     constructor(session: Session) : this(MedSession(session))
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
@@ -71,7 +67,7 @@ class OverstyringDao(queryRunner: QueryRunner) : OverstyringRepository, QueryRun
             "vedtaksperiodeId" to vedtaksperiodeId,
         ).list { OverstyringType.valueOf(it.string("type")) }
 
-    fun finnAktiveOverstyringer(vedtaksperiodeId: UUID): List<EksternHendelseId> =
+    override fun finnAktiveOverstyringer(vedtaksperiodeId: UUID): List<EksternHendelseId> =
         asSQL(
             """
             SELECT o.ekstern_hendelse_id FROM overstyring o
@@ -84,7 +80,7 @@ class OverstyringDao(queryRunner: QueryRunner) : OverstyringRepository, QueryRun
             "vedtaksperiode_id" to vedtaksperiodeId,
         ).list { it.uuid("ekstern_hendelse_id") }
 
-    fun ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId: UUID) =
+    override fun ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId: UUID) =
         asSQL(
             """
             UPDATE overstyring
@@ -138,7 +134,7 @@ class OverstyringDao(queryRunner: QueryRunner) : OverstyringRepository, QueryRun
             "eksternHendelseId" to eksternHendelseId,
         ).singleOrNull { true } ?: false
 
-    fun persisterOverstyringTidslinje(
+    override fun persisterOverstyringTidslinje(
         overstyrtTidslinje: OverstyrtTidslinjeForDatabase,
         saksbehandlerOid: UUID,
     ) {
@@ -172,7 +168,7 @@ class OverstyringDao(queryRunner: QueryRunner) : OverstyringRepository, QueryRun
         }
     }
 
-    fun persisterOverstyringInntektOgRefusjon(
+    override fun persisterOverstyringInntektOgRefusjon(
         overstyrtInntektOgRefusjon: OverstyrtInntektOgRefusjonForDatabase,
         saksbehandlerOid: UUID,
     ) {
@@ -216,7 +212,7 @@ class OverstyringDao(queryRunner: QueryRunner) : OverstyringRepository, QueryRun
         }
     }
 
-    fun persisterSkjønnsfastsettingSykepengegrunnlag(
+    override fun persisterSkjønnsfastsettingSykepengegrunnlag(
         skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlagForDatabase,
         saksbehandlerOid: UUID,
     ) {
@@ -282,7 +278,7 @@ class OverstyringDao(queryRunner: QueryRunner) : OverstyringRepository, QueryRun
         "saksbehandlerRef" to saksbehandlerOid,
     ).updateAndReturnGeneratedKey()
 
-    fun persisterMinimumSykdomsgrad(
+    override fun persisterMinimumSykdomsgrad(
         minimumSykdomsgrad: MinimumSykdomsgradForDatabase,
         saksbehandlerOid: UUID,
     ) {
@@ -337,7 +333,7 @@ class OverstyringDao(queryRunner: QueryRunner) : OverstyringRepository, QueryRun
         }
     }
 
-    fun persisterOverstyringArbeidsforhold(
+    override fun persisterOverstyringArbeidsforhold(
         overstyrtArbeidsforhold: OverstyrtArbeidsforholdForDatabase,
         saksbehandlerOid: UUID,
     ) {
@@ -379,5 +375,3 @@ class OverstyringDao(queryRunner: QueryRunner) : OverstyringRepository, QueryRun
             "vedtaksperiodeId" to request.vedtaksperiodeId,
         ).updateAndReturnGeneratedKey()
 }
-
-private typealias EksternHendelseId = UUID

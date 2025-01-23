@@ -16,7 +16,6 @@ import no.nav.helse.db.api.PgPeriodehistorikkApiDao
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.MeldingDuplikatkontrollDao
-import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.PersonService
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
@@ -99,6 +98,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         private set
 
     protected val session = sessionOf(dataSource, returnGeneratedKey = true)
+    private val sessionContext = repositories.withSessionContext(session)
 
     @AfterEach
     fun tearDown() = session.close()
@@ -109,32 +109,32 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val notatApiDao = PgNotatApiDao(dataSource)
     internal val periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource)
     internal val periodehistorikkDao = repositories.periodehistorikkDao
-    internal val arbeidsforholdDao = repositories.withSessionContext(session).arbeidsforholdDao
+    internal val arbeidsforholdDao = sessionContext.arbeidsforholdDao
     internal val arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource)
     internal val vedtakDao = repositories.vedtakDao
     internal val commandContextDao = repositories.commandContextDao
     internal val tildelingDao = repositories.tildelingDao
     internal val saksbehandlerDao = repositories.saksbehandlerDao
-    internal val overstyringDao = OverstyringDao(session)
+    internal val overstyringDao = sessionContext.overstyringDao
     internal val overstyringApiDao = PgOverstyringApiDao(dataSource)
-    internal val reservasjonDao = repositories.withSessionContext(session).reservasjonDao
+    internal val reservasjonDao = sessionContext.reservasjonDao
     internal val meldingDuplikatkontrollDao = MeldingDuplikatkontrollDao(dataSource)
     internal val risikovurderingDao = RisikovurderingDao(session)
-    internal val automatiseringDao = repositories.withSessionContext(session).automatiseringDao
-    internal val åpneGosysOppgaverDao = repositories.withSessionContext(session).åpneGosysOppgaverDao
-    internal val egenAnsattDao = repositories.withSessionContext(session).egenAnsattDao
+    internal val automatiseringDao = sessionContext.automatiseringDao
+    internal val åpneGosysOppgaverDao = sessionContext.åpneGosysOppgaverDao
+    internal val egenAnsattDao = sessionContext.egenAnsattDao
     internal val abonnementDao = PgAbonnementDao(dataSource)
     internal val utbetalingDao = UtbetalingDao(session)
     internal val behandlingsstatistikkDao = repositories.behandlingsstatistikkDao
     internal val vergemålDao = VergemålDao(session)
-    internal val totrinnsvurderingDao = repositories.withSessionContext(session).totrinnsvurderingDao
+    internal val totrinnsvurderingDao = sessionContext.totrinnsvurderingDao
     internal val dokumentDao = repositories.dokumentDao
     internal val påVentDao = PåVentDao(session)
-    internal val stansAutomatiskBehandlingDao = repositories.withSessionContext(session).stansAutomatiskBehandlingDao
+    internal val stansAutomatiskBehandlingDao = sessionContext.stansAutomatiskBehandlingDao
     internal val dialogDao = repositories.dialogDao
     internal val annulleringRepository = repositories.annulleringRepository
     private val personService = PersonService(dataSource, repositories)
-    private val inntektskilderDao = repositories.withSessionContext(session).inntektskilderRepository
+    private val inntektskilderDao = sessionContext.inntektskilderRepository
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,

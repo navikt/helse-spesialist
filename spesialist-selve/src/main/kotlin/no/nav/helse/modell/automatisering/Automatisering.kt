@@ -5,18 +5,17 @@ import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.GenerasjonDao
 import no.nav.helse.db.MeldingRepository
+import no.nav.helse.db.OverstyringDao
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.RisikovurderingRepository
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålRepository
-import no.nav.helse.db.overstyring.OverstyringRepository
 import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.MeldingDao.OverstyringIgangsattKorrigertSøknad
 import no.nav.helse.modell.automatisering.Automatisering.AutomatiserKorrigertSøknadResultat.SkyldesKorrigertSøknad
-import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.Sykefraværstilfelle
@@ -43,7 +42,7 @@ internal class Automatisering(
     private val vergemålRepository: VergemålRepository,
     private val personRepository: PersonRepository,
     private val vedtakDao: VedtakDao,
-    private val overstyringRepository: OverstyringRepository,
+    private val overstyringDao: OverstyringDao,
     private val stikkprøver: Stikkprøver,
     private val meldingRepository: MeldingRepository,
     private val generasjonDao: GenerasjonDao,
@@ -68,7 +67,7 @@ internal class Automatisering(
                 vergemålRepository = VergemålDao(transactionalSession),
                 personRepository = PersonDao(transactionalSession),
                 vedtakDao = sessionContext.vedtakDao,
-                overstyringRepository = OverstyringDao(transactionalSession),
+                overstyringDao = sessionContext.overstyringDao,
                 stikkprøver = stikkprøver,
                 meldingRepository = MeldingDao(transactionalSession),
                 generasjonDao = sessionContext.generasjonDao,
@@ -251,7 +250,7 @@ internal class Automatisering(
         val harVergemål = vergemålRepository.harVergemål(fødselsnummer) ?: false
         val tilhørerUtlandsenhet = erEnhetUtland(personRepository.finnEnhetId(fødselsnummer))
         val antallÅpneGosysoppgaver = åpneGosysOppgaverDao.antallÅpneOppgaver(fødselsnummer)
-        val harPågåendeOverstyring = overstyringRepository.harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId)
+        val harPågåendeOverstyring = overstyringDao.harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId)
         val harUtbetalingTilSykmeldt = utbetaling.harEndringIUtbetalingTilSykmeldt()
 
         val skalStoppesPgaUTS = harUtbetalingTilSykmeldt && periodetype !in listOf(FORLENGELSE, FØRSTEGANGSBEHANDLING)

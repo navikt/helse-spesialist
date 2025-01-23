@@ -1,16 +1,16 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.db.overstyring.OverstyringRepository
+import no.nav.helse.db.OverstyringDao
 import java.util.UUID
 
 internal class OverstyringIgangsattCommand(
     val berørteVedtaksperiodeIder: List<UUID>,
     val kilde: UUID,
-    val overstyringRepository: OverstyringRepository,
+    val overstyringDao: OverstyringDao,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
-        if (overstyringRepository.finnesEksternHendelseId(kilde)) {
-            overstyringRepository.kobleOverstyringOgVedtaksperiode(berørteVedtaksperiodeIder, kilde)
+        if (overstyringDao.finnesEksternHendelseId(kilde)) {
+            overstyringDao.kobleOverstyringOgVedtaksperiode(berørteVedtaksperiodeIder, kilde)
         }
 
         return true

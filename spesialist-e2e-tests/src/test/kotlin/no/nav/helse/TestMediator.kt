@@ -12,7 +12,6 @@ import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Stikkprøver
-import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
@@ -31,7 +30,7 @@ internal class TestMediator(
     private val opptegnelseRepository = repositories.opptegnelseRepository
     private val oppgaveDao = repositories.oppgaveDao
     private val periodehistorikkDao = repositories.periodehistorikkDao
-    private val overstyringDao = OverstyringDao(dataSource)
+    private val overstyringDao = repositories.overstyringDao
     private val totrinnsvurderingDao = repositories.totrinnsvurderingDao
     private val saksbehandlerDao = repositories.saksbehandlerDao
     private val tildelingDao = repositories.tildelingDao

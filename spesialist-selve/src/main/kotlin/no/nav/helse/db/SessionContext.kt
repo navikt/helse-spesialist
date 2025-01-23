@@ -22,4 +22,5 @@ interface SessionContext {
     val automatiseringDao: AutomatiseringDao
     val egenAnsattDao: EgenAnsattDao
     val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao
+    val overstyringDao: OverstyringDao
 }

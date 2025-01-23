@@ -5,10 +5,10 @@ import io.mockk.mockk
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.GenerasjonDao
+import no.nav.helse.db.OverstyringDao
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.MeldingDao
-import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Behandling
@@ -93,7 +93,7 @@ internal class AutomatiseringTest {
             vergemålRepository = vergemålDaoMock,
             personRepository = personDaoMock,
             vedtakDao = vedtakDaoMock,
-            overstyringRepository = overstyringDaoMock,
+            overstyringDao = overstyringDaoMock,
             stikkprøver = stikkprøver,
             meldingRepository = meldingDaoMock,
             generasjonDao = generasjonDaoMock,

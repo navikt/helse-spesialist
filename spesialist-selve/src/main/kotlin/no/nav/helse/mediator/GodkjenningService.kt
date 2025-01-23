@@ -3,13 +3,13 @@ package no.nav.helse.mediator
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.OppgaveDao
+import no.nav.helse.db.OverstyringDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.toDto
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.melding.Saksbehandlerløsning
-import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
@@ -21,12 +21,10 @@ import org.slf4j.LoggerFactory
 import java.sql.SQLException
 import java.time.LocalDateTime
 import java.util.UUID
-import javax.sql.DataSource
 
 class GodkjenningService(
-    private val dataSource: DataSource,
     private val oppgaveDao: OppgaveDao,
-    private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
+    private val overstyringDao: OverstyringDao,
     private val publiserer: MeldingPubliserer,
     private val oppgaveService: OppgaveService,
     private val reservasjonDao: ReservasjonDao,

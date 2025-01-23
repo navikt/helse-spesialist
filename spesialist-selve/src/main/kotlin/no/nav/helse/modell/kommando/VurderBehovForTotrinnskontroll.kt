@@ -1,7 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.db.overstyring.OverstyringRepository
+import no.nav.helse.db.OverstyringDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
@@ -14,7 +14,7 @@ internal class VurderBehovForTotrinnskontroll(
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
     private val oppgaveService: OppgaveService,
-    private val overstyringRepository: OverstyringRepository,
+    private val overstyringDao: OverstyringDao,
     private val totrinnsvurderingService: TotrinnsvurderingService,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val spleisVedtaksperioder: List<SpleisVedtaksperiode>,
@@ -70,7 +70,7 @@ internal class VurderBehovForTotrinnskontroll(
 
     private fun finnOverstyringerNyttOppslag(): List<OverstyringType> {
         val spleisVedtaksperiodeIder = spleisVedtaksperioder.map { it.vedtaksperiodeId }
-        return overstyringRepository.finnOverstyringerMedTypeForVedtaksperioder(spleisVedtaksperiodeIder)
+        return overstyringDao.finnOverstyringerMedTypeForVedtaksperioder(spleisVedtaksperiodeIder)
     }
 
     private fun loggDiffMellomOverstyringstyper(
@@ -88,7 +88,7 @@ internal class VurderBehovForTotrinnskontroll(
 
     // Overstyringer og Revurderinger
     private fun finnOverstyringerMedType(): List<OverstyringType> {
-        val vedtaksperiodeOverstyringtyper = overstyringRepository.finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId)
+        val vedtaksperiodeOverstyringtyper = overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId)
         if (vedtaksperiodeOverstyringtyper.isNotEmpty()) {
             logg.info(
                 "Vedtaksperioden: $vedtaksperiodeId har blitt overstyrt eller revurdert med typer: $vedtaksperiodeOverstyringtyper",

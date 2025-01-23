@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
 
-internal class OverstyringDaoTest : DatabaseIntegrationTest() {
+internal class PgOverstyringDaoTest : DatabaseIntegrationTest() {
     private val inntektskilderRepository = repositories.withSessionContext(session).inntektskilderRepository
     private val PERSON_FORNAVN = "Per"
     private val PERSON_ETTERNAVN = "Son"

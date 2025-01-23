@@ -3,17 +3,17 @@ package no.nav.helse.modell.kommando
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.db.overstyring.OverstyringRepository
-import no.nav.helse.util.februar
-import no.nav.helse.util.januar
+import no.nav.helse.db.OverstyringDao
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
+import no.nav.helse.modell.person.vedtaksperiode.Varsel
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
+import no.nav.helse.util.februar
+import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -31,7 +31,7 @@ internal class VurderBehovForTotrinnskontrollTest {
 
     private val totrinnsvurderingService = mockk<TotrinnsvurderingService>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
-    private val overstyringRepository = mockk<OverstyringRepository>(relaxed = true)
+    private val overstyringDao = mockk<OverstyringDao>(relaxed = true)
     private lateinit var context: CommandContext
 
     val sykefraværstilfelle =
@@ -48,7 +48,7 @@ internal class VurderBehovForTotrinnskontrollTest {
             fødselsnummer = FØDSELSNUMMER,
             vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
             oppgaveService = oppgaveService,
-            overstyringRepository = overstyringRepository,
+            overstyringDao = overstyringDao,
             totrinnsvurderingService = totrinnsvurderingService,
             sykefraværstilfelle = sykefraværstilfelle,
             spleisVedtaksperioder = listOf(SpleisVedtaksperiode(VEDTAKSPERIODE_ID_1, UUID.randomUUID(), 1.januar, 31.januar, 1.januar), SpleisVedtaksperiode(VEDTAKSPERIODE_ID_2, UUID.randomUUID(), 1.februar, 28.februar, 1.januar)),
@@ -61,7 +61,7 @@ internal class VurderBehovForTotrinnskontrollTest {
 
     @Test
     fun `Oppretter totrinnsvurdering dersom vedtaksperioden finnes i overstyringer_for_vedtaksperioder`() {
-        every { overstyringRepository.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
+        every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
 
         assertTrue(command.execute(context))
 
@@ -97,7 +97,7 @@ internal class VurderBehovForTotrinnskontrollTest {
     fun `Hvis totrinnsvurdering har saksbehander skal oppgaven reserveres`() {
         val saksbehander = UUID.randomUUID()
 
-        every { overstyringRepository.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
+        every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
         every { totrinnsvurderingService.finnEllerOpprettNy(any()) } returns
             TotrinnsvurderingOld(
                 vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
@@ -120,7 +120,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         val saksbehander = UUID.randomUUID()
         val beslutter = UUID.randomUUID()
 
-        every { overstyringRepository.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
+        every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
         every { totrinnsvurderingService.finnEllerOpprettNy(any()) } returns
             TotrinnsvurderingOld(
                 vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
@@ -148,7 +148,7 @@ internal class VurderBehovForTotrinnskontrollTest {
 
     @Test
     fun `Oppretter trengerTotrinnsvurdering dersom oppgaven har blitt overstyrt`() {
-        every { overstyringRepository.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
+        every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
 
         assertTrue(command.execute(context))
         verify(exactly = 1) { totrinnsvurderingService.finnEllerOpprettNy(any()) }
@@ -156,7 +156,7 @@ internal class VurderBehovForTotrinnskontrollTest {
 
     @Test
     fun `Oppretter trengerTotrinnsvurdering dersom oppgaven har fått avklart skjønnsfastsatt sykepengegrunnlag`() {
-        every { overstyringRepository.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Sykepengegrunnlag)
+        every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Sykepengegrunnlag)
 
         assertTrue(command.execute(context))
         verify(exactly = 1) { totrinnsvurderingService.finnEllerOpprettNy(any()) }

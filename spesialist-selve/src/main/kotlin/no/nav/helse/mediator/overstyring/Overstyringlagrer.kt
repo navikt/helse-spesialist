@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.overstyring
 
+import no.nav.helse.db.OverstyringDao
 import no.nav.helse.db.overstyring.ArbeidsforholdForDatabase
 import no.nav.helse.db.overstyring.LovhjemmelForDatabase
 import no.nav.helse.db.overstyring.MinimumSykdomsgradForDatabase
@@ -12,7 +13,6 @@ import no.nav.helse.db.overstyring.RefusjonselementForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsattArbeidsgiverForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsattSykepengegrunnlagForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsettingstypeForDatabase
-import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold

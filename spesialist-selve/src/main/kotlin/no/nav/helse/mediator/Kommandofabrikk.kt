@@ -22,7 +22,6 @@ import no.nav.helse.modell.kommando.OverstyringIgangsattCommand
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.kommando.TilbakedateringGodkjentCommand
 import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
-import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.EndretEgenAnsattStatusCommand
@@ -254,7 +253,7 @@ class Kommandofabrikk(
         OverstyringIgangsattCommand(
             berørteVedtaksperiodeIder = melding.berørteVedtaksperiodeIder,
             kilde = melding.kilde,
-            overstyringRepository = OverstyringDao(transactionalSession),
+            overstyringDao = repositories.withSessionContext(transactionalSession).overstyringDao,
         )
 
     internal fun utbetalingEndret(
@@ -350,6 +349,7 @@ class Kommandofabrikk(
         person: Person,
         session: TransactionalSession,
     ): GodkjenningsbehovCommand {
+        val sessionContext = repositories.withSessionContext(session)
         val utbetaling = UtbetalingDao(session).hentUtbetaling(godkjenningsbehovData.utbetalingId)
         val førsteKjenteDagFinner = { generasjonService.førsteKjenteDag(godkjenningsbehovData.fødselsnummer) }
         return GodkjenningsbehovCommand(
@@ -357,24 +357,24 @@ class Kommandofabrikk(
             utbetaling = utbetaling,
             førsteKjenteDagFinner = førsteKjenteDagFinner,
             automatisering = transaksjonellAutomatisering(session),
-            vedtakDao = repositories.withSessionContext(session).vedtakDao,
-            commandContextDao = repositories.withSessionContext(session).commandContextDao,
+            vedtakDao = sessionContext.vedtakDao,
+            commandContextDao = sessionContext.commandContextDao,
             personRepository = PersonDao(session),
-            inntektskilderRepository = repositories.withSessionContext(session).inntektskilderRepository,
-            arbeidsforholdDao = repositories.withSessionContext(session).arbeidsforholdDao,
-            egenAnsattDao = repositories.withSessionContext(session).egenAnsattDao,
+            inntektskilderRepository = sessionContext.inntektskilderRepository,
+            arbeidsforholdDao = sessionContext.arbeidsforholdDao,
+            egenAnsattDao = sessionContext.egenAnsattDao,
             utbetalingRepository = UtbetalingDao(session),
             vergemålRepository = VergemålDao(session),
-            åpneGosysOppgaverDao = repositories.withSessionContext(session).åpneGosysOppgaverDao,
+            åpneGosysOppgaverDao = sessionContext.åpneGosysOppgaverDao,
             risikovurderingRepository = RisikovurderingDao(session),
             påVentRepository = PåVentDao(session),
-            overstyringRepository = OverstyringDao(session),
-            automatiseringDao = repositories.withSessionContext(session).automatiseringDao,
-            oppgaveDao = repositories.withSessionContext(session).oppgaveDao,
-            avviksvurderingDao = repositories.withSessionContext(session).avviksvurderingDao,
+            overstyringDao = sessionContext.overstyringDao,
+            automatiseringDao = sessionContext.automatiseringDao,
+            oppgaveDao = sessionContext.oppgaveDao,
+            avviksvurderingDao = sessionContext.avviksvurderingDao,
             oppgaveService = transaksjonellOppgaveService(session),
-            godkjenningMediator = GodkjenningMediator(repositories.withSessionContext(session).opptegnelseRepository),
-            totrinnsvurderingService = lagTotrinnsvurderingService(repositories.withSessionContext(session)),
+            godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseRepository),
+            totrinnsvurderingService = lagTotrinnsvurderingService(sessionContext),
             person = person,
         )
     }

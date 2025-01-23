@@ -8,7 +8,6 @@ import no.nav.helse.e2e.AbstractE2ETest
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.GodkjenningService
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
@@ -45,12 +44,12 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
 
     val godkjenningService =
         GodkjenningService(
-            dataSource = dataSource,
             oppgaveDao = oppgaveDao,
-            overstyringDao = OverstyringDao(dataSource),
+            overstyringDao = repositories.overstyringDao,
             publiserer = MessageContextMeldingPubliserer(testRapid),
             oppgaveService = oppgaveService,
             reservasjonDao = reservasjonDao,
+            periodehistorikkDao = periodehistorikkDao,
             saksbehandlerDao = saksbehandlerDao,
             totrinnsvurderingService =
                 TotrinnsvurderingService(
@@ -60,7 +59,6 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
                     repositories.dialogDao,
                 ),
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
-            periodehistorikkDao = periodehistorikkDao,
         )
 
     protected fun sisteOppgaveId() = testRapid.inspektør.oppgaveId()

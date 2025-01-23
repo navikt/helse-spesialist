@@ -185,14 +185,13 @@ class SpesialistApp(
         dokumentMediator = DokumentMediator(dokumentDao, meldingPubliserer)
         godkjenningService =
             GodkjenningService(
-                dataSource = dataSource,
+                oppgaveDao = oppgaveDao,
+                overstyringDao = repositories.overstyringDao,
                 publiserer = meldingPubliserer,
                 oppgaveService = oppgaveService,
-                saksbehandlerDao = saksbehandlerDao,
-                tilgangskontroll = tilgangskontrollørForReservasjon,
-                oppgaveDao = oppgaveDao,
-                periodehistorikkDao = periodehistorikkDao,
                 reservasjonDao = reservasjonDao,
+                periodehistorikkDao = periodehistorikkDao,
+                saksbehandlerDao = saksbehandlerDao,
                 totrinnsvurderingService =
                     TotrinnsvurderingService(
                         oppgaveDao = oppgaveDao,
@@ -200,6 +199,7 @@ class SpesialistApp(
                         periodehistorikkDao = periodehistorikkDao,
                         dialogDao = dialogDao,
                     ),
+                tilgangskontroll = tilgangskontrollørForReservasjon,
             )
         subsumsjonsmelder = Subsumsjonsmelder(versjonAvKode, meldingPubliserer)
 
