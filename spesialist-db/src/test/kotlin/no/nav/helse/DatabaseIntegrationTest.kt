@@ -1,4 +1,5 @@
 package no.nav.helse
+
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -7,7 +8,6 @@ import no.nav.helse.db.DbQuery
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.InntektskilderDao
 import no.nav.helse.db.PgDialogDao
-import no.nav.helse.db.PgNotatDao
 import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
@@ -26,7 +26,6 @@ import no.nav.helse.db.api.PgOverstyringApiDao
 import no.nav.helse.db.api.PgPeriodehistorikkApiDao
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
-import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.MeldingDuplikatkontrollDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.automatisering.AutomatiseringDao
@@ -54,7 +53,6 @@ import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.spesialist.typer.Kjønn
 import no.nav.helse.util.januar
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Random
@@ -104,8 +102,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected open val SAKSBEHANDLER_NAVN = "Sara Saksbehandler"
     protected open val SAKSBEHANDLER_IDENT = "Z999999"
 
-    protected val PERIODE = Periode(UUID.randomUUID(), LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
-
     protected companion object {
         internal val objectMapper =
             jacksonObjectMapper()
@@ -140,7 +136,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val overstyringDao = OverstyringDao(session)
     internal val overstyringApiDao = PgOverstyringApiDao(dataSource)
     internal val reservasjonDao = ReservasjonDao(session)
-    internal val meldingDao = MeldingDao(dataSource)
     internal val meldingDuplikatkontrollDao = MeldingDuplikatkontrollDao(dataSource)
     internal val risikovurderingDao = RisikovurderingDao(session)
     internal val automatiseringDao = AutomatiseringDao(session)
@@ -154,7 +149,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val dokumentDao = PgDokumentDao(dataSource)
     internal val påVentDao = PåVentDao(session)
     internal val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(session)
-    internal val notatDao = PgNotatDao(dataSource)
     internal val dialogDao = PgDialogDao(dataSource)
     internal val annulleringRepository = repositories.annulleringRepository
     private val personService = PersonService(dataSource, repositories)
@@ -282,7 +276,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ): Persondata {
         val personinfoId =
             insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, adressebeskyttelse)
-        val infotrygdutbetalingerId = personDao.upsertInfotrygdutbetalinger(fødselsnummer, objectMapper.createObjectNode())
+        val infotrygdutbetalingerId =
+            personDao.upsertInfotrygdutbetalinger(fødselsnummer, objectMapper.createObjectNode())
         val enhetId = ENHET.toInt()
         personId = personDao.insertPerson(fødselsnummer, aktørId, personinfoId, enhetId, infotrygdutbetalingerId)
         egenAnsattDao.lagre(fødselsnummer, false, LocalDateTime.now())
@@ -347,7 +342,15 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         spleisBehandlingId: UUID = UUID.randomUUID(),
     ) {
         personService.brukPersonHvisFinnes(FNR) {
-            this.nySpleisBehandling(SpleisBehandling(ORGNUMMER, vedtaksperiodeId, spleisBehandlingId, 1.januar, 31.januar))
+            this.nySpleisBehandling(
+                SpleisBehandling(
+                    ORGNUMMER,
+                    vedtaksperiodeId,
+                    spleisBehandlingId,
+                    1.januar,
+                    31.januar
+                )
+            )
         }
     }
 
@@ -364,7 +367,15 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         spleisBehandlingId: UUID = UUID.randomUUID(),
     ) {
         personService.brukPersonHvisFinnes(fødselsnummer) {
-            this.nySpleisBehandling(SpleisBehandling(organisasjonsnummer, vedtaksperiodeId, spleisBehandlingId, fom, tom))
+            this.nySpleisBehandling(
+                SpleisBehandling(
+                    organisasjonsnummer,
+                    vedtaksperiodeId,
+                    spleisBehandlingId,
+                    fom,
+                    tom
+                )
+            )
             if (utbetalingId != null) this.nyUtbetalingForVedtaksperiode(vedtaksperiodeId, utbetalingId)
             if (forkastet) this.vedtaksperiodeForkastet(vedtaksperiodeId)
         }
@@ -508,43 +519,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val infotrygdutbetalingerId: Long,
     )
 
-    protected fun nyttVarsel(
-        id: UUID = UUID.randomUUID(),
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        kode: String = "EN_KODE",
-        definisjonRef: Long? = null,
-        status: String,
-        endretTidspunkt: LocalDateTime? = LocalDateTime.now(),
-    ) = dbQuery.update(
-        """
-        INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, generasjon_ref, definisjon_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt) 
-        VALUES (:id, :kode, :vedtaksperiodeId, (SELECT id FROM behandling WHERE vedtaksperiode_id = :vedtaksperiodeId LIMIT 1), :definisjonRef, :opprettet, :status, :ident, :tidspunkt)
-        """.trimIndent(),
-        "id" to id,
-        "kode" to kode,
-        "vedtaksperiodeId" to vedtaksperiodeId,
-        "definisjonRef" to definisjonRef,
-        "opprettet" to LocalDateTime.now(),
-        "status" to status,
-        "ident" to if (endretTidspunkt != null) "EN_IDENT" else null,
-        "tidspunkt" to endretTidspunkt,
-    )
-
-    protected fun opprettVarseldefinisjon(
-        tittel: String = "EN_TITTEL",
-        kode: String = "EN_KODE",
-        definisjonId: UUID = UUID.randomUUID(),
-    ): Long = dbQuery.updateAndReturnGeneratedKey(
-        """
-        INSERT INTO api_varseldefinisjon(unik_id, kode, tittel, forklaring, handling, opprettet) 
-        VALUES (:definisjonId, :kode, :tittel, null, null, :opprettet)    
-        """.trimIndent(),
-        "definisjonId" to definisjonId,
-        "kode" to kode,
-        "tittel" to tittel,
-        "opprettet" to LocalDateTime.now(),
-    ).let(::requireNotNull)
-
     protected fun settSaksbehandler(
         vedtaksperiodeId: UUID,
         saksbehandlerOid: UUID,
@@ -556,41 +530,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         """.trimIndent(),
         "vedtaksperiodeId" to vedtaksperiodeId,
         "saksbehandlerOid" to saksbehandlerOid,
-    )
-
-    protected fun assertGodkjenteVarsler(
-        vedtaksperiodeId: UUID,
-        forventetAntall: Int,
-    ) {
-        val antall = dbQuery.single(
-            """
-            SELECT COUNT(1) FROM selve_varsel sv
-            WHERE sv.generasjon_ref = ( SELECT id FROM behandling WHERE vedtaksperiode_id = :vedtaksperiodeId )
-             AND status = 'GODKJENT'
-            """.trimIndent(), "vedtaksperiodeId" to vedtaksperiodeId
-        ) { it.int(1) }
-        assertEquals(forventetAntall, antall)
-    }
-
-    protected fun assertAvvisteVarsler(
-        vedtaksperiodeId: UUID,
-        forventetAntall: Int,
-    ) {
-        val antall = dbQuery.single(
-            """
-            SELECT COUNT(1) FROM selve_varsel sv
-            WHERE sv.generasjon_ref = ( SELECT id FROM behandling WHERE vedtaksperiode_id = :vedtaksperiodeId )
-             AND status = 'AVVIST'
-             """.trimIndent(),
-            "vedtaksperiodeId" to vedtaksperiodeId
-        ) { it.int(1) }
-        assertEquals(forventetAntall, antall)
-    }
-
-    protected data class Periode(
-        val id: UUID,
-        val fom: LocalDate,
-        val tom: LocalDate,
     )
 
 }

@@ -1,4 +1,5 @@
 package no.nav.helse
+
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -16,43 +17,24 @@ import no.nav.helse.db.RepositoriesImpl
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
-import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.api.PgAbonnementDao
-import no.nav.helse.db.api.PgArbeidsgiverApiDao
-import no.nav.helse.db.api.PgNotatApiDao
-import no.nav.helse.db.api.PgOppgaveApiDao
-import no.nav.helse.db.api.PgOverstyringApiDao
 import no.nav.helse.db.api.PgPeriodehistorikkApiDao
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.MeldingDao
-import no.nav.helse.modell.MeldingDuplikatkontrollDao
-import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
-import no.nav.helse.modell.automatisering.AutomatiseringDao
-import no.nav.helse.modell.dokument.PgDokumentDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
-import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.CommandContextDao
 import no.nav.helse.modell.kommando.TestMelding
-import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.PersonService
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.påvent.PåVentDao
-import no.nav.helse.modell.risiko.RisikovurderingDao
-import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
-import no.nav.helse.modell.utbetaling.UtbetalingDao
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus
-import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
-import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.spesialist.typer.Kjønn
-import no.nav.helse.util.januar
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate
@@ -72,7 +54,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected open var OPPGAVE_ID = nextLong()
     protected val EGENSKAP = EgenskapForDatabase.SØKNAD
-    protected val OPPGAVESTATUS = "AvventerSaksbehandler"
 
     protected val ORGNUMMER =
         with(testperson) {
@@ -92,7 +73,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val ETTERNAVN = testperson.etternavn
     protected val FØDSELSDATO: LocalDate = LocalDate.EPOCH
     protected val KJØNN = testperson.kjønn
-    protected val ADRESSEBESKYTTELSE = Adressebeskyttelse.Ugradert
     protected val ENHET = "0301"
 
     private val FOM: LocalDate = LocalDate.of(2018, 1, 1)
@@ -127,31 +107,15 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     private val repositories = RepositoriesImpl(dataSource)
     internal val personDao = PersonDao(session)
     internal val oppgaveDao = PgOppgaveDao(dataSource)
-    internal val oppgaveApiDao = PgOppgaveApiDao(dataSource)
-    internal val notatApiDao = PgNotatApiDao(dataSource)
     internal val periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource)
     internal val historikkinnslagRepository = PgPeriodehistorikkDao(dataSource)
-    internal val arbeidsforholdDao = ArbeidsforholdDao(session)
-    internal val arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource)
     internal val vedtakDao = PgVedtakDao(dataSource)
     internal val commandContextDao = CommandContextDao(dataSource)
-    internal val tildelingDao = TildelingDao(dataSource)
     internal val saksbehandlerDao = SaksbehandlerDao(dataSource)
-    internal val overstyringDao = OverstyringDao(session)
-    internal val overstyringApiDao = PgOverstyringApiDao(dataSource)
     internal val reservasjonDao = ReservasjonDao(session)
     internal val meldingDao = MeldingDao(dataSource)
-    internal val meldingDuplikatkontrollDao = MeldingDuplikatkontrollDao(dataSource)
-    internal val risikovurderingDao = RisikovurderingDao(session)
-    internal val automatiseringDao = AutomatiseringDao(session)
-    internal val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(session)
     internal val egenAnsattDao = EgenAnsattDao(session)
-    internal val abonnementDao = PgAbonnementDao(dataSource)
-    internal val utbetalingDao = UtbetalingDao(session)
-    internal val behandlingsstatistikkDao = repositories.behandlingsstatistikkDao
-    internal val vergemålDao = VergemålDao(session)
     internal val totrinnsvurderingDao = PgTotrinnsvurderingDao(session)
-    internal val dokumentDao = PgDokumentDao(dataSource)
     internal val påVentDao = PåVentDao(session)
     internal val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(session)
     internal val notatDao = PgNotatDao(dataSource)
@@ -170,14 +134,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         lagreHendelse(it.id, it.fødselsnummer(), type, json)
     }
 
-    protected fun godkjenningsbehov(
-        hendelseId: UUID = HENDELSE_ID,
-        fødselsnummer: String = FNR,
-        json: String = "{}",
-    ) {
-        lagreHendelse(hendelseId, fødselsnummer, "GODKJENNING", json)
-    }
-
     private fun lagreHendelse(
         hendelseId: UUID,
         fødselsnummer: String = FNR,
@@ -190,14 +146,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             "json" to json,
             "type" to type,
         )
-    }
-
-    protected fun nyttAutomatiseringsinnslag(automatisert: Boolean) {
-        if (automatisert) {
-            automatiseringDao.automatisert(VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
-        } else {
-            automatiseringDao.manuellSaksbehandling(listOf("Dårlig ånde"), VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
-        }
     }
 
     protected fun nyPerson(
@@ -239,33 +187,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         commandContextDao.opprett(hendelse.id, contextId)
     }
 
-    protected fun tildelOppgave(
-        oppgaveId: Long = OPPGAVE_ID,
-        saksbehandlerOid: UUID,
-        navn: String = SAKSBEHANDLER_NAVN,
-        egenskaper: List<EgenskapForDatabase> = listOf(EgenskapForDatabase.SØKNAD),
-    ) {
-        opprettSaksbehandler(saksbehandlerOid, navn = navn, epost = SAKSBEHANDLER_EPOST, ident = SAKSBEHANDLER_IDENT)
-        oppgaveDao.updateOppgave(oppgaveId, oppgavestatus = "AvventerSaksbehandler", egenskaper = egenskaper)
-        dbQuery.update(
-            "INSERT INTO tildeling (saksbehandler_ref, oppgave_id_ref) VALUES (:oid, :oppgaveId)",
-            "oid" to saksbehandlerOid,
-            "oppgaveId" to oppgaveId
-        )
-    }
-
-    protected fun leggOppgavePåVent(
-        oppgaveId: Long = OPPGAVE_ID,
-        saksbehandlerOid: UUID,
-        frist: LocalDate = LocalDate.now().plusDays(1),
-        årsaker: List<PåVentÅrsak> = emptyList(),
-        tekst: String = "En notattekst",
-    ) {
-        val dialogRef = dialogDao.lagre()
-        påVentDao.lagrePåVent(oppgaveId, saksbehandlerOid, frist, årsaker, tekst, dialogRef)
-        notatApiDao.leggTilKommentar(dialogRef.toInt(), "En kommentar", SAKSBEHANDLER_IDENT)
-    }
-
     private fun opprettVedtakstype(
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         type: Periodetype = FØRSTEGANGSBEHANDLING,
@@ -281,7 +202,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ): Persondata {
         val personinfoId =
             insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, adressebeskyttelse)
-        val infotrygdutbetalingerId = personDao.upsertInfotrygdutbetalinger(fødselsnummer, objectMapper.createObjectNode())
+        val infotrygdutbetalingerId =
+            personDao.upsertInfotrygdutbetalinger(fødselsnummer, objectMapper.createObjectNode())
         val enhetId = ENHET.toInt()
         personId = personDao.insertPerson(fødselsnummer, aktørId, personinfoId, enhetId, infotrygdutbetalingerId)
         egenAnsattDao.lagre(fødselsnummer, false, LocalDateTime.now())
@@ -341,15 +263,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
     }
 
-    protected fun opprettGenerasjon(
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
-        spleisBehandlingId: UUID = UUID.randomUUID(),
-    ) {
-        personService.brukPersonHvisFinnes(FNR) {
-            this.nySpleisBehandling(SpleisBehandling(ORGNUMMER, vedtaksperiodeId, spleisBehandlingId, 1.januar, 31.januar))
-        }
-    }
-
     protected fun opprettVedtaksperiode(
         fødselsnummer: String = FNR,
         organisasjonsnummer: String = ORGNUMMER,
@@ -363,7 +276,15 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         spleisBehandlingId: UUID = UUID.randomUUID(),
     ) {
         personService.brukPersonHvisFinnes(fødselsnummer) {
-            this.nySpleisBehandling(SpleisBehandling(organisasjonsnummer, vedtaksperiodeId, spleisBehandlingId, fom, tom))
+            this.nySpleisBehandling(
+                SpleisBehandling(
+                    organisasjonsnummer,
+                    vedtaksperiodeId,
+                    spleisBehandlingId,
+                    fom,
+                    tom
+                )
+            )
             if (utbetalingId != null) this.nyUtbetalingForVedtaksperiode(vedtaksperiodeId, utbetalingId)
             if (forkastet) this.vedtaksperiodeForkastet(vedtaksperiodeId)
         }
@@ -396,107 +317,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             kanAvvises = kanAvvises,
         )
     }
-
-    protected fun avventerSystem(
-        oppgaveId: Long,
-        ferdigstiltAv: String,
-        ferdigstiltAvOid: UUID,
-    ) {
-        oppgaveDao.updateOppgave(
-            oppgaveId = oppgaveId,
-            oppgavestatus = "AvventerSystem",
-            ferdigstiltAv = ferdigstiltAv,
-            oid = ferdigstiltAvOid,
-            egenskaper = listOf(EGENSKAP),
-        )
-    }
-
-    protected fun ferdigstillOppgave(
-        oppgaveId: Long,
-        ferdigstiltAv: String? = null,
-        ferdigstiltAvOid: UUID? = null,
-    ) {
-        oppgaveDao.updateOppgave(
-            oppgaveId = oppgaveId,
-            oppgavestatus = "Ferdigstilt",
-            ferdigstiltAv = ferdigstiltAv,
-            oid = ferdigstiltAvOid,
-            egenskaper = listOf(EGENSKAP),
-        )
-    }
-
-    protected fun opprettTotrinnsvurdering(
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
-        saksbehandler: UUID? = null,
-        erRetur: Boolean = false,
-        ferdigstill: Boolean = false,
-    ) {
-        totrinnsvurderingDao.opprett(vedtaksperiodeId)
-
-        if (saksbehandler != null) {
-            settSaksbehandler(vedtaksperiodeId, saksbehandler)
-        }
-        if (erRetur) {
-            totrinnsvurderingDao.settErRetur(vedtaksperiodeId)
-        }
-        if (ferdigstill) {
-            totrinnsvurderingDao.ferdigstill(vedtaksperiodeId)
-        }
-    }
-
-    protected fun opprettUtbetalingKobling(
-        vedtaksperiodeId: UUID,
-        utbetalingId: UUID,
-    ) {
-        utbetalingDao.opprettKobling(vedtaksperiodeId, utbetalingId)
-    }
-
-    protected fun utbetalingsopplegg(
-        beløpTilArbeidsgiver: Int,
-        beløpTilSykmeldt: Int,
-        utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
-    ) {
-        val arbeidsgiveroppdragId = lagArbeidsgiveroppdrag(fagsystemId())
-        val personOppdragId = lagPersonoppdrag(fagsystemId())
-        val utbetaling_idId =
-            lagUtbetalingId(
-                arbeidsgiveroppdragId,
-                personOppdragId,
-                UTBETALING_ID,
-                arbeidsgiverbeløp = beløpTilArbeidsgiver,
-                personbeløp = beløpTilSykmeldt,
-                utbetalingtype = utbetalingtype,
-            )
-        utbetalingDao.nyUtbetalingStatus(utbetaling_idId, Utbetalingsstatus.UTBETALT, LocalDateTime.now(), "{}")
-        opprettUtbetalingKobling(VEDTAKSPERIODE, UTBETALING_ID)
-    }
-
-    protected fun lagArbeidsgiveroppdrag(
-        fagsystemId: String = fagsystemId(),
-        mottaker: String = ORGNUMMER,
-    ) = utbetalingDao.nyttOppdrag(fagsystemId, mottaker)!!
-
-    protected fun lagPersonoppdrag(fagsystemId: String = fagsystemId()) = utbetalingDao.nyttOppdrag(fagsystemId, FNR)!!
-
-    protected fun lagUtbetalingId(
-        arbeidsgiverOppdragId: Long,
-        personOppdragId: Long,
-        utbetalingId: UUID = UUID.randomUUID(),
-        arbeidsgiverbeløp: Int = 2000,
-        personbeløp: Int = 2000,
-        utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
-    ): Long =
-        utbetalingDao.opprettUtbetalingId(
-            utbetalingId = utbetalingId,
-            fødselsnummer = FNR,
-            organisasjonsnummer = ORGNUMMER,
-            type = utbetalingtype,
-            opprettet = LocalDateTime.now(),
-            arbeidsgiverFagsystemIdRef = arbeidsgiverOppdragId,
-            personFagsystemIdRef = personOppdragId,
-            arbeidsgiverbeløp = arbeidsgiverbeløp,
-            personbeløp = personbeløp,
-        )
 
     protected fun fagsystemId() = (0..31).map { 'A' + Random().nextInt('Z' - 'A') }.joinToString("")
 
@@ -543,19 +363,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         "tittel" to tittel,
         "opprettet" to LocalDateTime.now(),
     ).let(::requireNotNull)
-
-    protected fun settSaksbehandler(
-        vedtaksperiodeId: UUID,
-        saksbehandlerOid: UUID,
-    ) = dbQuery.update(
-        """
-        UPDATE totrinnsvurdering
-        SET saksbehandler = :saksbehandlerOid, oppdatert = now()
-        WHERE vedtaksperiode_id = :vedtaksperiodeId AND utbetaling_id_ref IS null
-        """.trimIndent(),
-        "vedtaksperiodeId" to vedtaksperiodeId,
-        "saksbehandlerOid" to saksbehandlerOid,
-    )
 
     protected fun assertGodkjenteVarsler(
         vedtaksperiodeId: UUID,
