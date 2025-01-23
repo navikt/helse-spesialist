@@ -1,7 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.EgenAnsattDao
-import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentRepository
 import no.nav.helse.db.RisikovurderingRepository
 import no.nav.helse.db.VergemålRepository
@@ -49,7 +49,7 @@ internal class OpprettSaksbehandleroppgave(
     private val behovData: GodkjenningsbehovData,
     private val oppgaveService: OppgaveService,
     private val automatisering: Automatisering,
-    private val personRepository: PersonRepository,
+    private val personDao: PersonDao,
     private val risikovurderingRepository: RisikovurderingRepository,
     private val egenAnsattDao: EgenAnsattDao,
     private val utbetalingtype: Utbetalingtype,
@@ -107,7 +107,7 @@ internal class OpprettSaksbehandleroppgave(
     }
 
     private fun MutableSet<Egenskap>.adressebeskyttelse(fødselsnummer: String) {
-        when (personRepository.finnAdressebeskyttelse(fødselsnummer)) {
+        when (personDao.finnAdressebeskyttelse(fødselsnummer)) {
             Adressebeskyttelse.StrengtFortrolig,
             Adressebeskyttelse.StrengtFortroligUtland,
             -> add(STRENGT_FORTROLIG_ADRESSE)
@@ -142,7 +142,7 @@ internal class OpprettSaksbehandleroppgave(
     }
 
     private fun MutableSet<Egenskap>.enhetUtland(fødselsnummer: String) {
-        if (HentEnhetløsning.erEnhetUtland(personRepository.finnEnhetId(fødselsnummer))) add(UTLAND)
+        if (HentEnhetløsning.erEnhetUtland(personDao.finnEnhetId(fødselsnummer))) add(UTLAND)
     }
 
     private fun MutableSet<Egenskap>.mottaker() {

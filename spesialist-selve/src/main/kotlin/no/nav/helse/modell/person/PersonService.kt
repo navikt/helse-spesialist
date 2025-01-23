@@ -51,5 +51,6 @@ class PersonService(
         }
     }
 
-    private fun Session.finnPerson(fødselsnummer: String): PersonDto? = PersonDao(this).finnPerson(fødselsnummer)
+    private fun Session.finnPerson(fødselsnummer: String): PersonDto? =
+        repositories.withSessionContext(this).personDao.finnPerson(fødselsnummer)
 }

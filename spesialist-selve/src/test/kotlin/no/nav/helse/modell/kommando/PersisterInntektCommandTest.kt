@@ -4,7 +4,7 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.PersonDao
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.mediator.meldinger.løsninger.Inntektløsning
@@ -22,7 +22,7 @@ internal class PersisterInntektCommandTest {
         private const val FNR = "12345678910"
     }
 
-    private val personRepository = mockk<PersonRepository>(relaxed = true)
+    private val personDao = mockk<PersonDao>(relaxed = true)
     private lateinit var context: CommandContext
 
     private val observer = object : CommandContextObserver {
@@ -37,14 +37,14 @@ internal class PersisterInntektCommandTest {
     fun setup() {
         context = CommandContext(UUID.randomUUID())
         context.nyObserver(observer)
-        clearMocks(personRepository)
+        clearMocks(personDao)
     }
 
     @Test
     fun `Sender behov om inntekt ikke er lagret fra før`() {
-        every { personRepository.finnInntekter(any(), any()) } returns null
+        every { personDao.finnInntekter(any(), any()) } returns null
 
-        val command = PersisterInntektCommand(FNR, LocalDate.now(), personRepository)
+        val command = PersisterInntektCommand(FNR, LocalDate.now(), personDao)
 
         assertFalse(command.execute(context))
         assertTrue(observer.behov.isNotEmpty())
@@ -52,9 +52,9 @@ internal class PersisterInntektCommandTest {
 
     @Test
     fun `Fullfører dersom inntekt er lagret fra før`() {
-        every { personRepository.finnInntekter(any(), any()) } returns inntekter()
+        every { personDao.finnInntekter(any(), any()) } returns inntekter()
 
-        val command = PersisterInntektCommand(FNR, LocalDate.now(), personRepository)
+        val command = PersisterInntektCommand(FNR, LocalDate.now(), personDao)
 
         assertTrue(command.execute(context))
         assertTrue(observer.behov.isEmpty())
@@ -64,16 +64,16 @@ internal class PersisterInntektCommandTest {
     fun `Lagrer inntekter dersom det ikke finnes på skjæringstidspunkt for person`() {
         val skjæringtidspunkt = LocalDate.now()
 
-        every { personRepository.finnInntekter(FNR, skjæringtidspunkt) } returns null
+        every { personDao.finnInntekter(FNR, skjæringtidspunkt) } returns null
 
-        val command = PersisterInntektCommand(FNR, skjæringtidspunkt, personRepository)
+        val command = PersisterInntektCommand(FNR, skjæringtidspunkt, personDao)
 
         assertFalse(command.execute(context))
         assertTrue(observer.behov.isNotEmpty())
 
         context.add(løsning())
         assertTrue(command.resume(context))
-        verify(exactly = 1) { personRepository.lagreInntekter(FNR, skjæringtidspunkt, inntekter()) }
+        verify(exactly = 1) { personDao.lagreInntekter(FNR, skjæringtidspunkt, inntekter()) }
     }
 
     private fun løsning(inntekter: List<Inntekter> = inntekter()) = Inntektløsning(inntekter)

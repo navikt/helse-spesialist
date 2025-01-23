@@ -6,7 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.Testdata.godkjenningsbehovData
 import no.nav.helse.db.EgenAnsattDao
-import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentRepository
 import no.nav.helse.db.RisikovurderingRepository
 import no.nav.helse.db.VergemålRepository
@@ -60,7 +60,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
     private val automatisering = mockk<Automatisering>(relaxed = true)
-    private val personRepository = mockk<PersonRepository>(relaxed = true)
+    private val personDao = mockk<PersonDao>(relaxed = true)
     private val risikovurderingRepository = mockk<RisikovurderingRepository>(relaxed = true)
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val vergemålRepository = mockk<VergemålRepository>(relaxed = true)
@@ -104,21 +104,21 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter oppgave med egen oppgavetype for fortrolig adresse`() {
-        every { personRepository.finnAdressebeskyttelse(FNR) } returns Adressebeskyttelse.Fortrolig
+        every { personDao.finnAdressebeskyttelse(FNR) } returns Adressebeskyttelse.Fortrolig
         assertTrue(command.execute(context))
         assertForventedeEgenskaper(SØKNAD, FORTROLIG_ADRESSE, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING)
     }
 
     @Test
     fun `oppretter oppgave med egen oppgavetype for strengt fortrolig adresse`() {
-        every { personRepository.finnAdressebeskyttelse(FNR) } returns Adressebeskyttelse.StrengtFortrolig
+        every { personDao.finnAdressebeskyttelse(FNR) } returns Adressebeskyttelse.StrengtFortrolig
         assertTrue(command.execute(context))
         assertForventedeEgenskaper(SØKNAD, STRENGT_FORTROLIG_ADRESSE, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING)
     }
 
     @Test
     fun `oppretter oppgave med egen oppgavetype for strengt fortrolig adresse utland`() {
-        every { personRepository.finnAdressebeskyttelse(FNR) } returns Adressebeskyttelse.StrengtFortroligUtland
+        every { personDao.finnAdressebeskyttelse(FNR) } returns Adressebeskyttelse.StrengtFortroligUtland
         assertTrue(command.execute(context))
         assertForventedeEgenskaper(SØKNAD, STRENGT_FORTROLIG_ADRESSE, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING)
     }
@@ -190,7 +190,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter oppgave med egenskap UTLAND`() {
-        every { personRepository.finnEnhetId(FNR) } returns "0393"
+        every { personDao.finnEnhetId(FNR) } returns "0393"
         assertTrue(command.execute(context))
         assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, UTLAND)
     }
@@ -279,7 +279,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         ),
         oppgaveService = oppgaveService,
         automatisering = automatisering,
-        personRepository = personRepository,
+        personDao = personDao,
         risikovurderingRepository = risikovurderingRepository,
         egenAnsattDao = egenAnsattDao,
         utbetalingtype = utbetalingtype,

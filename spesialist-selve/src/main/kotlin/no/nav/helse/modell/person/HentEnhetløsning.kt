@@ -1,6 +1,6 @@
 package no.nav.helse.modell.person
 
-import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.PersonDao
 
 class HentEnhetløsning(private val enhetNr: String) {
     internal companion object {
@@ -24,7 +24,7 @@ class HentEnhetløsning(private val enhetNr: String) {
     )
 
     fun oppdater(
-        personRepository: PersonRepository,
+        personDao: PersonDao,
         fødselsnummer: String,
-    ) = personRepository.oppdaterEnhet(fødselsnummer, enhetNr.toInt())
+    ) = personDao.oppdaterEnhet(fødselsnummer, enhetNr.toInt())
 }

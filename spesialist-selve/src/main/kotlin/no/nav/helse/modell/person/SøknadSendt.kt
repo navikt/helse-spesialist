@@ -3,7 +3,7 @@ package no.nav.helse.modell.person
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.TransactionalSession
 import no.nav.helse.db.InntektskilderRepository
-import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.PersonDao
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.kommando.Command
@@ -45,12 +45,12 @@ class SøknadSendtCommand(
     fødselsnummer: String,
     aktørId: String,
     organisasjonsnummer: String,
-    personRepository: PersonRepository,
+    personDao: PersonDao,
     inntektskilderRepository: InntektskilderRepository,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
-            OpprettMinimalPersonCommand(fødselsnummer, aktørId, personRepository),
+            OpprettMinimalPersonCommand(fødselsnummer, aktørId, personDao),
             OpprettMinimalArbeidsgiverCommand(organisasjonsnummer, inntektskilderRepository),
         )
 }

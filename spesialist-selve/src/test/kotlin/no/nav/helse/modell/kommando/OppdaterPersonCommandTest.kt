@@ -4,7 +4,7 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.PersonDao
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.HentEnhetløsning
@@ -23,10 +23,10 @@ internal class OppdaterPersonCommandTest {
         private const val FNR = "12345678911"
     }
 
-    private val personRepository = mockk<PersonRepository>(relaxed = true)
+    private val personDao = mockk<PersonDao>(relaxed = true)
 
     val førsteKjenteDagFinner = { LocalDate.now() }
-    private val command = OppdaterPersonCommand(FNR, førsteKjenteDagFinner, personRepository)
+    private val command = OppdaterPersonCommand(FNR, førsteKjenteDagFinner, personDao)
     private lateinit var context: CommandContext
 
     private val observer = object : CommandContextObserver {
@@ -41,18 +41,18 @@ internal class OppdaterPersonCommandTest {
     fun setup() {
         context = CommandContext(UUID.randomUUID())
         context.nyObserver(observer)
-        clearMocks(personRepository)
+        clearMocks(personDao)
     }
 
     @Test
     fun `oppdaterer ingenting når informasjonen er ny nok`() {
-        every { personRepository.finnPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
-        every { personRepository.finnEnhetSistOppdatert(FNR) } returns LocalDate.now()
-        every { personRepository.finnITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now()
+        every { personDao.finnPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
+        every { personDao.finnEnhetSistOppdatert(FNR) } returns LocalDate.now()
+        every { personDao.finnITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now()
         assertTrue(command.execute(context))
-        verify(exactly = 0) { personRepository.oppdaterEnhet(any(), any()) }
-        verify(exactly = 0) { personRepository.upsertPersoninfo(any(), any(), any(), any(), any(), any(), any()) }
-        verify(exactly = 0) { personRepository.upsertInfotrygdutbetalinger(any(), any()) }
+        verify(exactly = 0) { personDao.oppdaterEnhet(any(), any()) }
+        verify(exactly = 0) { personDao.upsertPersoninfo(any(), any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { personDao.upsertInfotrygdutbetalinger(any(), any()) }
     }
 
     @Test
@@ -69,7 +69,7 @@ internal class OppdaterPersonCommandTest {
         val løsning = mockk<HentEnhetløsning>(relaxed = true)
         context.add(løsning)
         assertTrue(command.execute(context))
-        verify(exactly = 1) { løsning.oppdater(personRepository, FNR) }
+        verify(exactly = 1) { løsning.oppdater(personDao, FNR) }
     }
 
     @Test
@@ -90,7 +90,7 @@ internal class OppdaterPersonCommandTest {
         val løsning = mockk<HentInfotrygdutbetalingerløsning>(relaxed = true)
         context.add(løsning)
         assertTrue(command.execute(context))
-        verify(exactly = 1) { løsning.oppdater(personRepository, FNR) }
+        verify(exactly = 1) { løsning.oppdater(personDao, FNR) }
     }
 
     @Test
@@ -103,26 +103,26 @@ internal class OppdaterPersonCommandTest {
         context.add(enhet)
         context.add(utbetalinger)
         assertTrue(command.execute(context))
-        verify(exactly = 1) { personinfo.oppdater(personRepository, FNR) }
-        verify(exactly = 1) { enhet.oppdater(personRepository, FNR) }
-        verify(exactly = 1) { utbetalinger.oppdater(personRepository, FNR) }
+        verify(exactly = 1) { personinfo.oppdater(personDao, FNR) }
+        verify(exactly = 1) { enhet.oppdater(personDao, FNR) }
+        verify(exactly = 1) { utbetalinger.oppdater(personDao, FNR) }
     }
 
     private fun utdatertEnhet() {
-        every { personRepository.finnPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
-        every { personRepository.finnEnhetSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
-        every { personRepository.finnITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now()
+        every { personDao.finnPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
+        every { personDao.finnEnhetSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
+        every { personDao.finnITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now()
     }
 
     private fun utdatertUtbetalinger() {
-        every { personRepository.finnPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
-        every { personRepository.finnEnhetSistOppdatert(FNR) } returns LocalDate.now()
-        every { personRepository.finnITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
+        every { personDao.finnPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
+        every { personDao.finnEnhetSistOppdatert(FNR) } returns LocalDate.now()
+        every { personDao.finnITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
     }
 
     private fun altUtdatert() {
-        every { personRepository.finnPersoninfoSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
-        every { personRepository.finnEnhetSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
-        every { personRepository.finnITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
+        every { personDao.finnPersoninfoSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
+        every { personDao.finnEnhetSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
+        every { personDao.finnITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
     }
 }

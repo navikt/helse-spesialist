@@ -1,7 +1,7 @@
 package no.nav.helse.modell.automatisering
 
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.PersonDao
 import no.nav.helse.db.VergemålRepository
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.kommando.Command
@@ -14,7 +14,7 @@ import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import org.slf4j.LoggerFactory
 
 internal class VurderAutomatiskAvvisning(
-    private val personRepository: PersonRepository,
+    private val personDao: PersonDao,
     private val vergemålRepository: VergemålRepository,
     private val godkjenningMediator: GodkjenningMediator,
     private val utbetaling: Utbetaling,
@@ -34,7 +34,7 @@ internal class VurderAutomatiskAvvisning(
             sikkerlogg.info("Mottatt godkjenningsbehov med varsel for manglende IM for fnr $fødselsnummer, avvises=$stoppesForManglendeIM")
         }
 
-        val tilhørerEnhetUtland = HentEnhetløsning.erEnhetUtland(personRepository.finnEnhetId(fødselsnummer))
+        val tilhørerEnhetUtland = HentEnhetløsning.erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
         val underVergemål = vergemålRepository.harVergemål(fødselsnummer) ?: false
 
         if (!(tilhørerEnhetUtland || underVergemål || stoppesForManglendeIM)) return true

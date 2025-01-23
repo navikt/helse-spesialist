@@ -32,6 +32,7 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
             poisonPills = PoisonPills(emptyMap()),
             commandContextDao = repositories.commandContextDao,
             dokumentDao = repositories.dokumentDao,
+            personDao = repositories.personDao,
         )
 
     @BeforeEach

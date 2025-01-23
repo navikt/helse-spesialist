@@ -1,6 +1,6 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.PersonDao
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerløsning
 import org.slf4j.LoggerFactory
@@ -8,21 +8,21 @@ import java.time.LocalDate
 
 internal class OppdaterInfotrygdutbetalingerHardt(
     private val fødselsnummer: String,
-    private val personRepository: PersonRepository,
+    private val personDao: PersonDao,
     private val førsteKjenteDagFinner: () -> LocalDate,
 ) : Command {
-    override fun execute(context: CommandContext) = behandle(context, personRepository, fødselsnummer)
+    override fun execute(context: CommandContext) = behandle(context, personDao, fødselsnummer)
 
-    override fun resume(context: CommandContext) = behandle(context, personRepository, fødselsnummer)
+    override fun resume(context: CommandContext) = behandle(context, personDao, fødselsnummer)
 
     private fun behandle(
         context: CommandContext,
-        personRepository: PersonRepository,
+        personDao: PersonDao,
         fødselsnummer: String,
     ): Boolean {
         val utbetalinger = context.get<HentInfotrygdutbetalingerløsning>() ?: return trengerMerInformasjon(context)
         log.info("Lagrer utbetalinger fra Infotrygd")
-        utbetalinger.oppdater(personRepository, fødselsnummer)
+        utbetalinger.oppdater(personDao, fødselsnummer)
         return true
     }
 

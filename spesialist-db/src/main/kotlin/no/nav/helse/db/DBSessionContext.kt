@@ -25,4 +25,5 @@ class DBSessionContext(session: Session) : SessionContext {
     override val egenAnsattDao = PgEgenAnsattDao(session)
     override val åpneGosysOppgaverDao = PgÅpneGosysOppgaverDao(session)
     override val overstyringDao = PgOverstyringDao(session)
+    override val personDao = PgPersonDao(session)
 }

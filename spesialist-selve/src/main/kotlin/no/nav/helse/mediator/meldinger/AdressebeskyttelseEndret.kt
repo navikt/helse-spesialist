@@ -3,7 +3,7 @@ package no.nav.helse.mediator.meldinger
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.TransactionalSession
 import no.nav.helse.db.OppgaveDao
-import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.PersonDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
@@ -48,7 +48,7 @@ class AdressebeskyttelseEndret(
 
 internal class AdressebeskyttelseEndretCommand(
     fødselsnummer: String,
-    personRepository: PersonRepository,
+    personDao: PersonDao,
     oppgaveDao: OppgaveDao,
     godkjenningMediator: GodkjenningMediator,
     godkjenningsbehov: GodkjenningsbehovData?,
@@ -56,13 +56,13 @@ internal class AdressebeskyttelseEndretCommand(
 ) : MacroCommand() {
     override val commands: List<Command> =
         mutableListOf<Command>(
-            OppdaterPersoninfoCommand(fødselsnummer, personRepository, force = true),
+            OppdaterPersoninfoCommand(fødselsnummer, personDao, force = true),
         ).apply {
             if (godkjenningsbehov != null) {
                 check(utbetaling != null) { "Forventer å finne utbetaling for godkjenningsbehov med id=${godkjenningsbehov.id}" }
                 add(
                     AvvisVedStrengtFortroligAdressebeskyttelseCommand(
-                        personRepository = personRepository,
+                        personDao = personDao,
                         oppgaveDao = oppgaveDao,
                         godkjenningMediator = godkjenningMediator,
                         godkjenningsbehov = godkjenningsbehov,

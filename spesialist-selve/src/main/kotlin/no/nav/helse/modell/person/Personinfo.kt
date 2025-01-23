@@ -1,6 +1,6 @@
 package no.nav.helse.modell.person
 
-import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.PersonDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
@@ -21,9 +21,9 @@ class HentPersoninfoløsning(
     internal fun navn() = listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ")
 
     fun oppdater(
-        personRepository: PersonRepository,
+        personDao: PersonDao,
         fødselsnummer: String,
-    ) = personRepository.upsertPersoninfo(
+    ) = personDao.upsertPersoninfo(
         fødselsnummer = fødselsnummer,
         fornavn = fornavn,
         mellomnavn = mellomnavn,

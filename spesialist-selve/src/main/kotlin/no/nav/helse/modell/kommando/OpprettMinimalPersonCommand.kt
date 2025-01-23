@@ -1,6 +1,6 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.PersonDao
 import org.slf4j.LoggerFactory
 
 data class MinimalPersonDto(
@@ -11,15 +11,15 @@ data class MinimalPersonDto(
 internal class OpprettMinimalPersonCommand(
     private val fødselsnummer: String,
     private val aktørId: String,
-    private val personRepository: PersonRepository,
+    private val personDao: PersonDao,
 ) : Command {
     private companion object {
         private val logg = LoggerFactory.getLogger(OpprettMinimalPersonCommand::class.java)
     }
 
     override fun execute(context: CommandContext): Boolean {
-        if (personRepository.finnMinimalPerson(fødselsnummer) != null) return ignorer("Person finnes fra før")
-        personRepository.lagreMinimalPerson(MinimalPersonDto(fødselsnummer, aktørId))
+        if (personDao.finnMinimalPerson(fødselsnummer) != null) return ignorer("Person finnes fra før")
+        personDao.lagreMinimalPerson(MinimalPersonDto(fødselsnummer, aktørId))
         return true
     }
 

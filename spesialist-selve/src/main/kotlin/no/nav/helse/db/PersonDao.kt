@@ -3,11 +3,12 @@ package no.nav.helse.db
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.kommando.MinimalPersonDto
+import no.nav.helse.modell.person.PersonDto
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
 
-interface PersonRepository {
+interface PersonDao {
     fun personKlargjort(fødselsnummer: String)
 
     fun finnMinimalPerson(fødselsnummer: String): MinimalPersonDto?
@@ -58,4 +59,16 @@ interface PersonRepository {
     fun finnEnhetId(fødselsnummer: String): String
 
     fun finnAdressebeskyttelse(fødselsnummer: String): Adressebeskyttelse?
+
+    fun finnPerson(fødselsnummer: String): PersonDto?
+
+    fun finnAktørId(fødselsnummer: String): String?
+
+    fun insertPerson(
+        fødselsnummer: String,
+        aktørId: String,
+        personinfoId: Long,
+        enhetId: Int,
+        infotrygdutbetalingerId: Long,
+    ): Long
 }

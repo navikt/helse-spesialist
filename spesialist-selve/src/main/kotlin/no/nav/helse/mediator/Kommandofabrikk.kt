@@ -28,7 +28,6 @@ import no.nav.helse.modell.person.EndretEgenAnsattStatusCommand
 import no.nav.helse.modell.person.KlargjørTilgangsrelaterteDataCommand
 import no.nav.helse.modell.person.OppdaterPersondataCommand
 import no.nav.helse.modell.person.Person
-import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.SøknadSendtCommand
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
@@ -199,7 +198,7 @@ class Kommandofabrikk(
             fødselsnummer = hendelse.fødselsnummer(),
             aktørId = hendelse.aktørId,
             organisasjonsnummer = hendelse.organisasjonsnummer,
-            personRepository = PersonDao(transactionalSession),
+            personDao = repositories.withSessionContext(transactionalSession).personDao,
             inntektskilderRepository = repositories.withSessionContext(transactionalSession).inntektskilderRepository,
         )
 
@@ -216,7 +215,7 @@ class Kommandofabrikk(
         val utbetaling = godkjenningsbehovData?.let { UtbetalingDao(transactionalSession).hentUtbetaling(it.utbetalingId) }
         return AdressebeskyttelseEndretCommand(
             fødselsnummer = melding.fødselsnummer(),
-            personRepository = PersonDao(transactionalSession),
+            personDao = repositories.withSessionContext(transactionalSession).personDao,
             oppgaveDao = repositories.withSessionContext(transactionalSession).oppgaveDao,
             godkjenningMediator = GodkjenningMediator(repositories.withSessionContext(transactionalSession).opptegnelseRepository),
             godkjenningsbehov = godkjenningsbehovData,
@@ -231,7 +230,7 @@ class Kommandofabrikk(
         OppdaterPersondataCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             førsteKjenteDagFinner = { generasjonService.førsteKjenteDag(hendelse.fødselsnummer()) },
-            personRepository = PersonDao(transactionalSession),
+            personDao = repositories.withSessionContext(transactionalSession).personDao,
             opptegnelseRepository = repositories.withSessionContext(transactionalSession).opptegnelseRepository,
         )
 
@@ -241,7 +240,7 @@ class Kommandofabrikk(
     ): KlargjørTilgangsrelaterteDataCommand =
         KlargjørTilgangsrelaterteDataCommand(
             fødselsnummer = hendelse.fødselsnummer(),
-            personRepository = PersonDao(transactionalSession),
+            personDao = repositories.withSessionContext(transactionalSession).personDao,
             egenAnsattDao = repositories.withSessionContext(transactionalSession).egenAnsattDao,
             opptegnelseRepository = repositories.withSessionContext(transactionalSession).opptegnelseRepository,
         )
@@ -359,7 +358,7 @@ class Kommandofabrikk(
             automatisering = transaksjonellAutomatisering(session),
             vedtakDao = sessionContext.vedtakDao,
             commandContextDao = sessionContext.commandContextDao,
-            personRepository = PersonDao(session),
+            personDao = repositories.withSessionContext(session).personDao,
             inntektskilderRepository = sessionContext.inntektskilderRepository,
             arbeidsforholdDao = sessionContext.arbeidsforholdDao,
             egenAnsattDao = sessionContext.egenAnsattDao,

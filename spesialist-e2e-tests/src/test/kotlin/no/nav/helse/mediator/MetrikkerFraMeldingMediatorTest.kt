@@ -33,6 +33,7 @@ internal class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
             poisonPills = PoisonPills(emptyMap()),
             commandContextDao = repositories.commandContextDao,
             dokumentDao = repositories.dokumentDao,
+            personDao = repositories.personDao,
         )
     }
 
@@ -43,7 +44,7 @@ internal class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
                 fødselsnummer,
                 "aktørId",
                 "organisasjonsnummer",
-                personRepository = mockk(relaxed = true),
+                personDao = mockk(relaxed = true),
                 inntektskilderRepository = mockk(relaxed = true),
             )
 

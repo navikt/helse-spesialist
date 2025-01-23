@@ -5,10 +5,10 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.helse.db.PersonDao
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.Sykefraværstilfelle
+import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.vergemal.VergemålDao
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -51,7 +51,7 @@ internal class VurderEnhetUtlandTest {
         VurderEnhetUtland(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
-            personRepository = personDao,
+            personDao = personDao,
             sykefraværstilfelle = sykefraværstilfelle,
         )
 

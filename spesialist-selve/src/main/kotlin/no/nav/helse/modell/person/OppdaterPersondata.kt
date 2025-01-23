@@ -3,7 +3,7 @@ package no.nav.helse.modell.person
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.TransactionalSession
 import no.nav.helse.db.OpptegnelseRepository
-import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.PersonDao
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.kommando.Command
@@ -42,12 +42,12 @@ class OppdaterPersondata(
 internal class OppdaterPersondataCommand(
     fødselsnummer: String,
     førsteKjenteDagFinner: () -> LocalDate,
-    personRepository: PersonRepository,
+    personDao: PersonDao,
     opptegnelseRepository: OpptegnelseRepository,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
-            OppdaterInfotrygdutbetalingerHardt(fødselsnummer, personRepository, førsteKjenteDagFinner),
+            OppdaterInfotrygdutbetalingerHardt(fødselsnummer, personDao, førsteKjenteDagFinner),
             ikkesuspenderendeCommand("opprettOpptegnelse") {
                 opptegnelseRepository.opprettOpptegnelse(
                     fødselsnummer,

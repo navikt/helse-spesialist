@@ -1,6 +1,6 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.PersonDao
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerløsning
@@ -10,7 +10,7 @@ import java.time.LocalDate
 internal class OppdaterPersonCommand(
     fødselsnummer: String,
     førsteKjenteDagFinner: () -> LocalDate,
-    personRepository: PersonRepository,
+    personDao: PersonDao,
 ) : MacroCommand() {
     private companion object {
         private val log = LoggerFactory.getLogger(OppdaterPersonCommand::class.java)
@@ -18,23 +18,23 @@ internal class OppdaterPersonCommand(
 
     override val commands: List<Command> =
         listOf(
-            OppdaterPersoninfoCommand(fødselsnummer, personRepository, force = false),
-            OppdaterEnhetCommand(fødselsnummer, personRepository),
-            OppdaterInfotrygdutbetalingerCommand(fødselsnummer, personRepository, førsteKjenteDagFinner),
+            OppdaterPersoninfoCommand(fødselsnummer, personDao, force = false),
+            OppdaterEnhetCommand(fødselsnummer, personDao),
+            OppdaterInfotrygdutbetalingerCommand(fødselsnummer, personDao, førsteKjenteDagFinner),
         )
 
     internal abstract class OppdaterCommand protected constructor(
         private val fødselsnummer: String,
-        private val personRepository: PersonRepository,
+        private val personDao: PersonDao,
         private val behov: Behov,
     ) : Command {
         override fun execute(context: CommandContext): Boolean {
-            if (erOppdatert(personRepository, fødselsnummer)) return ignorer()
-            return behandle(context, personRepository, fødselsnummer)
+            if (erOppdatert(personDao, fødselsnummer)) return ignorer()
+            return behandle(context, personDao, fødselsnummer)
         }
 
         override fun resume(context: CommandContext): Boolean {
-            return behandle(context, personRepository, fødselsnummer)
+            return behandle(context, personDao, fødselsnummer)
         }
 
         private fun ignorer(): Boolean {
@@ -43,13 +43,13 @@ internal class OppdaterPersonCommand(
         }
 
         protected abstract fun erOppdatert(
-            personRepository: PersonRepository,
+            personDao: PersonDao,
             fødselsnummer: String,
         ): Boolean
 
         protected abstract fun behandle(
             context: CommandContext,
-            personRepository: PersonRepository,
+            personDao: PersonDao,
             fødselsnummer: String,
         ): Boolean
 
@@ -62,36 +62,36 @@ internal class OppdaterPersonCommand(
 
     internal class OppdaterEnhetCommand(
         fødselsnummer: String,
-        personRepository: PersonRepository,
-    ) : OppdaterCommand(fødselsnummer, personRepository, Behov.Enhet) {
+        personDao: PersonDao,
+    ) : OppdaterCommand(fødselsnummer, personDao, Behov.Enhet) {
         override fun erOppdatert(
-            personRepository: PersonRepository,
+            personDao: PersonDao,
             fødselsnummer: String,
         ): Boolean {
-            val sistOppdatert = personRepository.finnEnhetSistOppdatert(fødselsnummer)
+            val sistOppdatert = personDao.finnEnhetSistOppdatert(fødselsnummer)
             return sistOppdatert != null && sistOppdatert > LocalDate.now().minusDays(5)
         }
 
         override fun behandle(
             context: CommandContext,
-            personRepository: PersonRepository,
+            personDao: PersonDao,
             fødselsnummer: String,
         ): Boolean {
             val enhet = context.get<HentEnhetløsning>() ?: return trengerMerInformasjon(context)
             log.info("oppdaterer enhetsnr")
-            enhet.oppdater(personRepository, fødselsnummer)
+            enhet.oppdater(personDao, fødselsnummer)
             return true
         }
     }
 
     private class OppdaterInfotrygdutbetalingerCommand(
         fødselsnummer: String,
-        personRepository: PersonRepository,
+        personDao: PersonDao,
         førsteKjenteDagFinner: () -> LocalDate,
     ) :
         OppdaterCommand(
                 fødselsnummer = fødselsnummer,
-                personRepository = personRepository,
+                personDao = personDao,
                 behov =
                     Behov.Infotrygdutbetalinger(
                         førsteKjenteDagFinner().minusYears(3),
@@ -99,21 +99,21 @@ internal class OppdaterPersonCommand(
                     ),
             ) {
         override fun erOppdatert(
-            personRepository: PersonRepository,
+            personDao: PersonDao,
             fødselsnummer: String,
         ): Boolean {
-            val sistOppdatert = personRepository.finnITUtbetalingsperioderSistOppdatert(fødselsnummer)
+            val sistOppdatert = personDao.finnITUtbetalingsperioderSistOppdatert(fødselsnummer)
             return sistOppdatert != null && sistOppdatert > LocalDate.now().minusDays(1)
         }
 
         override fun behandle(
             context: CommandContext,
-            personRepository: PersonRepository,
+            personDao: PersonDao,
             fødselsnummer: String,
         ): Boolean {
             val utbetalinger = context.get<HentInfotrygdutbetalingerløsning>() ?: return trengerMerInformasjon(context)
             log.info("oppdaterer utbetalinger fra Infotrygd")
-            utbetalinger.oppdater(personRepository, fødselsnummer)
+            utbetalinger.oppdater(personDao, fødselsnummer)
             return true
         }
     }

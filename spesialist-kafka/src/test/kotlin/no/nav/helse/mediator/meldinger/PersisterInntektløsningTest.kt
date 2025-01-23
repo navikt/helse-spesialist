@@ -2,9 +2,9 @@ package no.nav.helse.mediator.meldinger
 
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.db.PersonDao
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.mediator.meldinger.løsninger.Inntektløsning
-import no.nav.helse.modell.person.PersonDao
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth

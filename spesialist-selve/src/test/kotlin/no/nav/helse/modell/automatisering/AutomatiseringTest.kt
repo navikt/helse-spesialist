@@ -6,10 +6,10 @@ import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.GenerasjonDao
 import no.nav.helse.db.OverstyringDao
+import no.nav.helse.db.PersonDao
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.MeldingDao
-import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
@@ -91,7 +91,7 @@ internal class AutomatiseringTest {
             automatiseringDao = automatiseringDaoMock,
             åpneGosysOppgaverDao = åpneGosysOppgaverDaoMock,
             vergemålRepository = vergemålDaoMock,
-            personRepository = personDaoMock,
+            personDao = personDaoMock,
             vedtakDao = vedtakDaoMock,
             overstyringDao = overstyringDaoMock,
             stikkprøver = stikkprøver,

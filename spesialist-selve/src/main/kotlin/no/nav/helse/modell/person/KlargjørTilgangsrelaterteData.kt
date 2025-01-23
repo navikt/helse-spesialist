@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.TransactionalSession
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.OpptegnelseRepository
-import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.PersonDao
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.egenansatt.KontrollerEgenAnsattstatus
@@ -43,7 +43,7 @@ class KlargjørTilgangsrelaterteData(
 
 internal class KlargjørTilgangsrelaterteDataCommand(
     fødselsnummer: String,
-    personRepository: PersonRepository,
+    personDao: PersonDao,
     egenAnsattDao: EgenAnsattDao,
     opptegnelseRepository: OpptegnelseRepository,
 ) : MacroCommand() {
@@ -51,10 +51,10 @@ internal class KlargjørTilgangsrelaterteDataCommand(
         listOf(
             OppdaterPersoninfoCommand(
                 fødselsnummer = fødselsnummer,
-                personRepository = personRepository,
+                personDao = personDao,
                 force = false,
             ),
-            OppdaterEnhetCommand(fødselsnummer, personRepository),
+            OppdaterEnhetCommand(fødselsnummer, personDao),
             KontrollerEgenAnsattstatus(
                 fødselsnummer = fødselsnummer,
                 egenAnsattDao = egenAnsattDao,
@@ -63,7 +63,7 @@ internal class KlargjørTilgangsrelaterteDataCommand(
                 opptegnelseRepository.opprettOpptegnelse(fødselsnummer, payload = PersonKlarTilVisning, type = PERSON_KLAR_TIL_BEHANDLING)
             },
             ikkesuspenderendeCommand("ferdigstillKlargjøring") {
-                personRepository.personKlargjort(fødselsnummer)
+                personDao.personKlargjort(fødselsnummer)
             },
         )
 }

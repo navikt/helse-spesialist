@@ -19,13 +19,13 @@ import no.nav.helse.TestRapidHelpers.sisteBehov
 import no.nav.helse.Testdata
 import no.nav.helse.Testdata.snapshot
 import no.nav.helse.db.DbQuery
+import no.nav.helse.db.PgPersonDao
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemål
 import no.nav.helse.modell.melding.OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiverEvent.OverstyrtRefusjonselementEvent
 import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
@@ -1361,7 +1361,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         adressebeskyttelse: Adressebeskyttelse?,
     ) {
-        assertEquals(adressebeskyttelse, PersonDao(dataSource).finnAdressebeskyttelse(fødselsnummer))
+        assertEquals(adressebeskyttelse, PgPersonDao(dataSource).finnAdressebeskyttelse(fødselsnummer))
     }
 
     protected fun assertVedtaksperiodeEksisterer(vedtaksperiodeId: UUID) {

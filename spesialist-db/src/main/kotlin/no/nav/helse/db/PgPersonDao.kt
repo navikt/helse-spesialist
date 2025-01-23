@@ -1,15 +1,12 @@
-package no.nav.helse.modell.person
+package no.nav.helse.db
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.db.MedDataSource
-import no.nav.helse.db.MedSession
-import no.nav.helse.db.PersonRepository
-import no.nav.helse.db.QueryRunner
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.kommando.MinimalPersonDto
+import no.nav.helse.modell.person.PersonDto
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.typer.Kjønn
@@ -17,9 +14,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.sql.DataSource
 
-class PersonDao(
+class PgPersonDao(
     queryRunner: QueryRunner,
-) : PersonRepository, QueryRunner by queryRunner {
+) : PersonDao, QueryRunner by queryRunner {
     constructor(session: Session) : this(MedSession(session))
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
@@ -43,7 +40,7 @@ class PersonDao(
         asSQL("DELETE FROM person_klargjores WHERE fødselsnummer = :foedselsnummer", "foedselsnummer" to fødselsnummer).update()
     }
 
-    internal fun finnPerson(fødselsnummer: String) =
+    override fun finnPerson(fødselsnummer: String) =
         asSQL(
             "SELECT aktør_id, fødselsnummer FROM person WHERE fødselsnummer = :foedselsnummer",
             "foedselsnummer" to fødselsnummer,
@@ -63,7 +60,7 @@ class PersonDao(
             "foedselsnummer" to fødselsnummer,
         ).singleOrNull { row -> row.long("id") }
 
-    fun finnAktørId(fødselsnummer: String): String? =
+    override fun finnAktørId(fødselsnummer: String): String? =
         asSQL(
             "SELECT aktør_id FROM person WHERE fødselsnummer = :foedselsnummer",
             "foedselsnummer" to fødselsnummer,
@@ -313,7 +310,7 @@ class PersonDao(
             "foedselsnummer" to fødselsnummer,
         ).singleOrNull { it.longOrNull("infotrygdutbetalinger_ref") }
 
-    fun insertPerson(
+    override fun insertPerson(
         fødselsnummer: String,
         aktørId: String,
         personinfoId: Long,
@@ -339,6 +336,6 @@ class PersonDao(
         ).singleOrNull {
             it.int("enhet_ref").toEnhetnummer()
         }.let { checkNotNull(it) }
-}
 
-private fun Int.toEnhetnummer() = if (this < 1000) "0$this" else "$this"
+    private fun Int.toEnhetnummer() = if (this < 1000) "0$this" else "$this"
+}

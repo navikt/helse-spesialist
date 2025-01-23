@@ -6,7 +6,7 @@ import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.GenerasjonDao
 import no.nav.helse.db.MeldingRepository
 import no.nav.helse.db.OverstyringDao
-import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.PersonDao
 import no.nav.helse.db.RisikovurderingRepository
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.VedtakDao
@@ -17,7 +17,6 @@ import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.MeldingDao.OverstyringIgangsattKorrigertSøknad
 import no.nav.helse.modell.automatisering.Automatisering.AutomatiserKorrigertSøknadResultat.SkyldesKorrigertSøknad
 import no.nav.helse.modell.person.HentEnhetløsning.Companion.erEnhetUtland
-import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
@@ -40,7 +39,7 @@ internal class Automatisering(
     private val automatiseringDao: AutomatiseringDao,
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     private val vergemålRepository: VergemålRepository,
-    private val personRepository: PersonRepository,
+    private val personDao: PersonDao,
     private val vedtakDao: VedtakDao,
     private val overstyringDao: OverstyringDao,
     private val stikkprøver: Stikkprøver,
@@ -65,7 +64,7 @@ internal class Automatisering(
                 automatiseringDao = sessionContext.automatiseringDao,
                 åpneGosysOppgaverDao = sessionContext.åpneGosysOppgaverDao,
                 vergemålRepository = VergemålDao(transactionalSession),
-                personRepository = PersonDao(transactionalSession),
+                personDao = sessionContext.personDao,
                 vedtakDao = sessionContext.vedtakDao,
                 overstyringDao = sessionContext.overstyringDao,
                 stikkprøver = stikkprøver,
@@ -125,7 +124,7 @@ internal class Automatisering(
 
     private fun erEgenAnsattEllerSkjermet(fødselsnummer: String) =
         egenAnsattDao.erEgenAnsatt(fødselsnummer) == true ||
-            personRepository.finnAdressebeskyttelse(fødselsnummer) != Adressebeskyttelse.Ugradert
+            personDao.finnAdressebeskyttelse(fødselsnummer) != Adressebeskyttelse.Ugradert
 
     private fun finnSisteOverstyringIgangsattHvisSkyldesKorrigertSøknad(
         fødselsnummer: String,
@@ -248,7 +247,7 @@ internal class Automatisering(
             )
         val forhindrerAutomatisering = sykefraværstilfelle.forhindrerAutomatisering(vedtaksperiodeId)
         val harVergemål = vergemålRepository.harVergemål(fødselsnummer) ?: false
-        val tilhørerUtlandsenhet = erEnhetUtland(personRepository.finnEnhetId(fødselsnummer))
+        val tilhørerUtlandsenhet = erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
         val antallÅpneGosysoppgaver = åpneGosysOppgaverDao.antallÅpneOppgaver(fødselsnummer)
         val harPågåendeOverstyring = overstyringDao.harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId)
         val harUtbetalingTilSykmeldt = utbetaling.harEndringIUtbetalingTilSykmeldt()

@@ -21,7 +21,7 @@ import java.time.LocalDateTime.now
 import java.time.YearMonth
 
 @Isolated
-internal class PersonDaoTest : DatabaseIntegrationTest() {
+internal class PgPersonDaoTest : DatabaseIntegrationTest() {
     @BeforeEach
     fun tømTabeller() {
         sessionOf(dataSource).use {

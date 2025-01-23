@@ -10,7 +10,7 @@ import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OverstyringDao
-import no.nav.helse.db.PersonRepository
+import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentRepository
 import no.nav.helse.db.RisikovurderingRepository
 import no.nav.helse.db.UtbetalingRepository
@@ -193,7 +193,7 @@ internal class GodkjenningsbehovCommand(
     automatisering: Automatisering,
     vedtakDao: VedtakDao,
     commandContextDao: CommandContextDao,
-    personRepository: PersonRepository,
+    personDao: PersonDao,
     inntektskilderRepository: InntektskilderRepository,
     arbeidsforholdDao: ArbeidsforholdDao,
     egenAnsattDao: EgenAnsattDao,
@@ -256,7 +256,7 @@ internal class GodkjenningsbehovCommand(
                 fødselsnummer = behovData.fødselsnummer,
                 organisasjonsnummer = behovData.organisasjonsnummer,
                 førsteKjenteDagFinner = førsteKjenteDagFinner,
-                personRepository = personRepository,
+                personDao = personDao,
                 inntektskilder = inntektskilder,
                 inntektskilderRepository = inntektskilderRepository,
                 arbeidsforholdDao = arbeidsforholdDao,
@@ -274,7 +274,7 @@ internal class GodkjenningsbehovCommand(
             VurderEnhetUtland(
                 fødselsnummer = behovData.fødselsnummer,
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
-                personRepository = personRepository,
+                personDao = personDao,
                 sykefraværstilfelle = sykefraværstilfelle,
             ),
             VurderÅpenGosysoppgave(
@@ -294,7 +294,7 @@ internal class GodkjenningsbehovCommand(
                 spleisSykepengegrunnlangsfakta = behovData.spleisSykepengegrunnlagsfakta,
             ),
             VurderAutomatiskAvvisning(
-                personRepository = personRepository,
+                personDao = personDao,
                 vergemålRepository = vergemålRepository,
                 godkjenningMediator = godkjenningMediator,
                 utbetaling = utbetaling,
@@ -314,7 +314,7 @@ internal class GodkjenningsbehovCommand(
                 behovData = behovData,
                 oppgaveService = oppgaveService,
                 automatisering = automatisering,
-                personRepository = personRepository,
+                personDao = personDao,
                 risikovurderingRepository = risikovurderingRepository,
                 egenAnsattDao = egenAnsattDao,
                 utbetalingtype = behovData.utbetalingtype,
@@ -335,7 +335,7 @@ internal class GodkjenningsbehovCommand(
             PersisterInntektCommand(
                 fødselsnummer = behovData.fødselsnummer,
                 skjæringstidspunkt = behovData.skjæringstidspunkt,
-                personRepository = personRepository,
+                personDao = personDao,
             ),
         )
 }
@@ -344,7 +344,7 @@ private class ForberedVisningCommand(
     fødselsnummer: String,
     organisasjonsnummer: String,
     førsteKjenteDagFinner: () -> LocalDate,
-    personRepository: PersonRepository,
+    personDao: PersonDao,
     inntektskilder: List<no.nav.helse.modell.Inntektskilde>,
     inntektskilderRepository: InntektskilderRepository,
     arbeidsforholdDao: ArbeidsforholdDao,
@@ -354,7 +354,7 @@ private class ForberedVisningCommand(
             OppdaterPersonCommand(
                 fødselsnummer = fødselsnummer,
                 førsteKjenteDagFinner = førsteKjenteDagFinner,
-                personRepository = personRepository,
+                personDao = personDao,
             ),
             OpprettEllerOppdaterInntektskilder(
                 inntektskilder = inntektskilder,
