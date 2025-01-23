@@ -18,4 +18,5 @@ interface SessionContext {
     val generasjonDao: GenerasjonDao
     val reservasjonDao: ReservasjonDao
     val commandContextDao: CommandContextDao
+    val arbeidsforholdDao: ArbeidsforholdDao
 }

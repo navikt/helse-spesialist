@@ -1,15 +1,14 @@
-package no.nav.helse.modell.arbeidsforhold
+package no.nav.helse.db
 
 import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.HelseDao.Companion.list
 import no.nav.helse.HelseDao.Companion.update
-import no.nav.helse.db.ArbeidsforholdRepository
 import no.nav.helse.modell.KomplettArbeidsforholdDto
 
-class ArbeidsforholdDao(
+class PgArbeidsforholdDao(
     private val session: Session,
-) : ArbeidsforholdRepository {
+) : ArbeidsforholdDao {
     override fun findArbeidsforhold(
         fødselsnummer: String,
         organisasjonsnummer: String,

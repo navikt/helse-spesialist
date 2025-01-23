@@ -2,7 +2,7 @@ package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.TransactionalSession
-import no.nav.helse.db.ArbeidsforholdRepository
+import no.nav.helse.db.ArbeidsforholdDao
 import no.nav.helse.db.AutomatiseringRepository
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.CommandContextDao
@@ -195,7 +195,7 @@ internal class GodkjenningsbehovCommand(
     commandContextDao: CommandContextDao,
     personRepository: PersonRepository,
     inntektskilderRepository: InntektskilderRepository,
-    arbeidsforholdRepository: ArbeidsforholdRepository,
+    arbeidsforholdDao: ArbeidsforholdDao,
     egenAnsattRepository: EgenAnsattRepository,
     utbetalingRepository: UtbetalingRepository,
     vergemålRepository: VergemålRepository,
@@ -259,7 +259,7 @@ internal class GodkjenningsbehovCommand(
                 personRepository = personRepository,
                 inntektskilder = inntektskilder,
                 inntektskilderRepository = inntektskilderRepository,
-                arbeidsforholdRepository = arbeidsforholdRepository,
+                arbeidsforholdDao = arbeidsforholdDao,
             ),
             KontrollerEgenAnsattstatus(
                 fødselsnummer = behovData.fødselsnummer,
@@ -347,7 +347,7 @@ private class ForberedVisningCommand(
     personRepository: PersonRepository,
     inntektskilder: List<no.nav.helse.modell.Inntektskilde>,
     inntektskilderRepository: InntektskilderRepository,
-    arbeidsforholdRepository: ArbeidsforholdRepository,
+    arbeidsforholdDao: ArbeidsforholdDao,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -363,7 +363,7 @@ private class ForberedVisningCommand(
             OpprettEllerOppdaterArbeidsforhold(
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
-                arbeidsforholdRepository = arbeidsforholdRepository,
+                arbeidsforholdDao = arbeidsforholdDao,
             ),
         )
 }

@@ -1,6 +1,6 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.db.ArbeidsforholdRepository
+import no.nav.helse.db.ArbeidsforholdDao
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.modell.KomplettArbeidsforholdDto
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
@@ -24,7 +24,7 @@ class OpprettEllerOppdaterArbeidsforholdTest {
         val SLUTTDATO = null
     }
 
-    private val repository = object : ArbeidsforholdRepository {
+    private val repository = object : ArbeidsforholdDao {
         val arbeidsforholdSomHarBlittOppdatert = mutableListOf<KomplettArbeidsforholdDto>()
         val eksisterendeArbeidsforhold = mutableListOf<KomplettArbeidsforholdDto>()
 
@@ -50,7 +50,7 @@ class OpprettEllerOppdaterArbeidsforholdTest {
     private fun enCommand() = OpprettEllerOppdaterArbeidsforhold(
         fødselsnummer = FØDSELSNUMMER,
         organisasjonsnummer = ORGANISASJONSNUMMER,
-        arbeidsforholdRepository = repository
+        arbeidsforholdDao = repository
     )
 
     private val observer = object : CommandContextObserver {

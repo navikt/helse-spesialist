@@ -20,4 +20,5 @@ class DBSessionContext(session: Session) : SessionContext {
     override val generasjonDao = PgGenerasjonDao(session)
     override val reservasjonDao = PgReservasjonDao(session)
     override val commandContextDao = PgCommandContextDao(session)
+    override val arbeidsforholdDao = PgArbeidsforholdDao(session)
 }

@@ -1,6 +1,6 @@
 package no.nav.helse.modell.arbeidsforhold
 
-import no.nav.helse.db.ArbeidsforholdRepository
+import no.nav.helse.db.ArbeidsforholdDao
 import no.nav.helse.modell.KomplettArbeidsforholdDto
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -16,12 +16,12 @@ class Arbeidsforholdløsning(
     )
 
     fun upsert(
-        arbeidsforholdRepository: ArbeidsforholdRepository,
+        arbeidsforholdDao: ArbeidsforholdDao,
         fødselsnummer: String,
         organisasjonsnummer: String,
         oppdatert: LocalDateTime = LocalDateTime.now(),
     ) {
-        arbeidsforholdRepository.upsertArbeidsforhold(
+        arbeidsforholdDao.upsertArbeidsforhold(
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             arbeidsforhold =

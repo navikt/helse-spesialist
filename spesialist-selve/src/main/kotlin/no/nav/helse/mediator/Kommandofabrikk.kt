@@ -11,7 +11,6 @@ import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.MeldingDao
-import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.automatisering.Stikkprøver
@@ -365,7 +364,7 @@ class Kommandofabrikk(
             commandContextDao = repositories.withSessionContext(session).commandContextDao,
             personRepository = PersonDao(session),
             inntektskilderRepository = repositories.withSessionContext(session).inntektskilderRepository,
-            arbeidsforholdRepository = ArbeidsforholdDao(session),
+            arbeidsforholdDao = repositories.withSessionContext(session).arbeidsforholdDao,
             egenAnsattRepository = EgenAnsattDao(session),
             utbetalingRepository = UtbetalingDao(session),
             vergemålRepository = VergemålDao(session),

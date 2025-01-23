@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-internal class ArbeidsforholdDaoTest : DatabaseIntegrationTest() {
+internal class PgArbeidsforholdDaoTest : DatabaseIntegrationTest() {
     private companion object {
         const val STILLINGSPROSENT = 100
         const val STILLINGSTITTEL = "Slabberasansvarlig"

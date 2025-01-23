@@ -16,7 +16,6 @@ import no.nav.helse.db.api.PgPeriodehistorikkApiDao
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.MeldingDuplikatkontrollDao
-import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.dokument.PgDokumentDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
@@ -114,7 +113,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val notatApiDao = PgNotatApiDao(dataSource)
     internal val periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource)
     internal val periodehistorikkDao = repositories.periodehistorikkDao
-    internal val arbeidsforholdDao = ArbeidsforholdDao(session)
+    internal val arbeidsforholdDao = repositories.withSessionContext(session).arbeidsforholdDao
     internal val arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource)
     internal val vedtakDao = repositories.vedtakDao
     internal val commandContextDao = repositories.commandContextDao

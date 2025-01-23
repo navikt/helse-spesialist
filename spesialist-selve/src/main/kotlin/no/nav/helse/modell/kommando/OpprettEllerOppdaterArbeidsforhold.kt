@@ -1,6 +1,6 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.db.ArbeidsforholdRepository
+import no.nav.helse.db.ArbeidsforholdDao
 import no.nav.helse.modell.ArbeidsforholdDto
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.melding.Behov
@@ -9,14 +9,14 @@ import org.slf4j.LoggerFactory
 internal class OpprettEllerOppdaterArbeidsforhold(
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
-    private val arbeidsforholdRepository: ArbeidsforholdRepository,
+    private val arbeidsforholdDao: ArbeidsforholdDao,
 ) : Command {
     private companion object {
         private val log = LoggerFactory.getLogger(OpprettEllerOppdaterArbeidsforhold::class.java)
     }
 
     private val arbeidsforhold =
-        arbeidsforholdRepository.findArbeidsforhold(fødselsnummer, organisasjonsnummer)
+        arbeidsforholdDao.findArbeidsforhold(fødselsnummer, organisasjonsnummer)
             .ifEmpty {
                 listOf(ArbeidsforholdDto(fødselsnummer = fødselsnummer, organisasjonsnummer = organisasjonsnummer))
             }
@@ -39,7 +39,7 @@ internal class OpprettEllerOppdaterArbeidsforhold(
 
     fun behandle(løsning: Arbeidsforholdløsning): Boolean {
         if (arbeidsforhold.any { it.måOppdateres() }) {
-            løsning.upsert(arbeidsforholdRepository, fødselsnummer, organisasjonsnummer)
+            løsning.upsert(arbeidsforholdDao, fødselsnummer, organisasjonsnummer)
         }
         return true
     }
