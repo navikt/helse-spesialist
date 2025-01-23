@@ -7,6 +7,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.Meldingssender
+import no.nav.helse.db.RepositoryFactoryImpl
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.modell.person.SøknadSendtCommand
@@ -26,6 +27,7 @@ internal class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
     init {
         MeldingMediator(
             dataSource = dataSource,
+            repositoryFactory = RepositoryFactoryImpl(dataSource),
             publiserer = MessageContextMeldingPubliserer(testRapid),
             kommandofabrikk = kommandofabrikk,
             personService = mockk(relaxed = true),

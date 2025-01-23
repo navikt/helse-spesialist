@@ -121,6 +121,7 @@ internal class TestMediator(
     init {
         val meldingMediator = MeldingMediator(
             dataSource = dataSource,
+            repositoryFactory = RepositoryFactoryImpl(dataSource),
             publiserer = meldingPubliserer,
             kommandofabrikk = kommandofabrikk,
             poisonPills = PoisonPills(emptyMap()),

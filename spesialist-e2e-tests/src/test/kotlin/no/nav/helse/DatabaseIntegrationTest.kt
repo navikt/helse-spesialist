@@ -14,6 +14,7 @@ import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.PgVedtakDao
+import no.nav.helse.db.RepositoryFactoryImpl
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
@@ -125,6 +126,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     @AfterEach
     fun tearDown() = session.close()
 
+    private val repositoryFactory = RepositoryFactoryImpl(dataSource)
     internal val personDao = PersonDao(session)
     internal val oppgaveDao = PgOppgaveDao(dataSource)
     internal val oppgaveApiDao = PgOppgaveApiDao(dataSource)
@@ -157,7 +159,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val notatDao = PgNotatDao(dataSource)
     internal val dialogDao = PgDialogDao(dataSource)
     internal val annulleringDao = AnnulleringDao(dataSource)
-    private val personService = PersonService(dataSource)
+    private val personService = PersonService(dataSource, repositoryFactory)
     private val inntektskilderDao = InntektskilderDao(session)
 
     internal fun testhendelse(

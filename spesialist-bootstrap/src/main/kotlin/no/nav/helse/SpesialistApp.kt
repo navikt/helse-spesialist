@@ -61,6 +61,7 @@ class SpesialistApp(
 
     private val dataSourceBuilder = DataSourceBuilder(env)
     private val dataSource = dataSourceBuilder.getDataSource()
+    private val repositoryFactory = RepositoryFactoryImpl(dataSource)
 
     private val oppgaveDao = PgOppgaveDao(dataSource)
     private val historikkinnslagRepository = PgPeriodehistorikkDao(dataSource)
@@ -174,6 +175,7 @@ class SpesialistApp(
         meldingMediator =
             MeldingMediator(
                 dataSource = dataSource,
+                repositoryFactory = repositoryFactory,
                 publiserer = meldingPubliserer,
                 kommandofabrikk = kommandofabrikk,
                 poisonPills = PoisonPillDao(dataSource).poisonPills(),
@@ -182,7 +184,7 @@ class SpesialistApp(
         saksbehandlerMediator =
             SaksbehandlerMediator(
                 dataSource = dataSource,
-                repositoryFactory = RepositoryFactoryImpl(dataSource),
+                repositoryFactory = repositoryFactory,
                 versjonAvKode = versjonAvKode,
                 meldingPubliserer = meldingPubliserer,
                 oppgaveService = oppgaveService,

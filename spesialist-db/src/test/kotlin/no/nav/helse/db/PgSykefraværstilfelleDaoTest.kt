@@ -7,10 +7,10 @@ import no.nav.helse.db.overstyring.SkjønnsfastsattSykepengegrunnlagForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsettingstypeForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsettingstypeForDatabase.OMREGNET_ÅRSINNTEKT
 import no.nav.helse.db.overstyring.SkjønnsfastsettingstypeForDatabase.RAPPORTERT_ÅRSINNTEKT
-import no.nav.helse.util.januar
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingstypeDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingsårsakDto
+import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -18,9 +18,9 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
-internal class SykefraværstilfelleDaoTest : DatabaseIntegrationTest() {
+internal class PgSykefraværstilfelleDaoTest : DatabaseIntegrationTest() {
 
-    private val sykefraværstilfelleDao = SykefraværstilfelleDao(session)
+    private val sykefraværstilfelleDao = PgSykefraværstilfelleDao(session)
 
     @Test
     fun `Finner skjønnsfastsatt sykepengegrunnlag`() {
