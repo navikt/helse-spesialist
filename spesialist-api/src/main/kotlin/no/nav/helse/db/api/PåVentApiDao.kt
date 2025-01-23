@@ -1,8 +1,13 @@
 package no.nav.helse.db.api
 
-import no.nav.helse.spesialist.api.graphql.schema.PaVent
+import java.time.LocalDate
 import java.util.UUID
 
 interface PåVentApiDao {
-    fun hentAktivPåVent(vedtaksperiodeId: UUID): PaVent?
+    fun hentAktivPåVent(vedtaksperiodeId: UUID): PaVentDto?
+
+    data class PaVentDto(
+        val frist: LocalDate?,
+        val oid: UUID,
+    )
 }

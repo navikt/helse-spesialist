@@ -15,7 +15,6 @@ import no.nav.helse.db.api.PgOppgaveApiDao
 import no.nav.helse.db.api.PgOverstyringApiDao
 import no.nav.helse.db.api.PgPeriodehistorikkApiDao
 import no.nav.helse.db.api.PgPersonApiDao
-import no.nav.helse.db.api.PgPåVentApiDao
 import no.nav.helse.db.api.PgRisikovurderingApiDao
 import no.nav.helse.db.api.PgSnapshotApiDao
 import no.nav.helse.db.api.PgTildelingApiDao
@@ -339,7 +338,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                 periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource),
                 notatDao = PgNotatApiDao(dataSource),
                 totrinnsvurderingApiDao = PgTotrinnsvurderingApiDao(dataSource),
-                påVentApiDao = PgPåVentApiDao(dataSource),
+                påVentApiDao = repositories.påVentApiDao,
                 vergemålApiDao = PgVergemålApiDao(dataSource),
                 snapshotService = SnapshotService(PgSnapshotApiDao(dataSource), snapshotClient),
                 reservasjonClient = mockk(relaxed = true),

@@ -103,7 +103,14 @@ class SpesialistApp(
             avviksvurderinghenter = repositories.avviksvurderingDao,
         )
 
-    private val bootstrap = Bootstrap(dataSource, apiAvhengigheter, reservasjonClient, tilgangsgrupper)
+    private val bootstrap =
+        Bootstrap(
+            dataSource = dataSource,
+            repositories = repositories,
+            avhengigheter = apiAvhengigheter,
+            reservasjonClient = reservasjonClient,
+            tilgangsgrupper = tilgangsgrupper,
+        )
 
     private val plukkTilManuell: PlukkTilManuell<String> = (
         {

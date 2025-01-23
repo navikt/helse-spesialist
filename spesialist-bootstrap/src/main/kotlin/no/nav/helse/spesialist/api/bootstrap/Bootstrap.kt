@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.bootstrap
 import io.ktor.server.application.Application
 import io.ktor.server.routing.routing
 import no.nav.helse.bootstrap.Environment
+import no.nav.helse.db.Repositories
 import no.nav.helse.db.api.PgApiVarselRepository
 import no.nav.helse.db.api.PgArbeidsgiverApiDao
 import no.nav.helse.db.api.PgEgenAnsattApiDao
@@ -11,7 +12,6 @@ import no.nav.helse.db.api.PgOppgaveApiDao
 import no.nav.helse.db.api.PgOverstyringApiDao
 import no.nav.helse.db.api.PgPeriodehistorikkApiDao
 import no.nav.helse.db.api.PgPersonApiDao
-import no.nav.helse.db.api.PgPåVentApiDao
 import no.nav.helse.db.api.PgRisikovurderingApiDao
 import no.nav.helse.db.api.PgSnapshotApiDao
 import no.nav.helse.db.api.PgTildelingApiDao
@@ -27,6 +27,7 @@ import javax.sql.DataSource
 
 class Bootstrap(
     dataSource: DataSource,
+    repositories: Repositories,
     private val avhengigheter: ApiAvhengigheter,
     private val reservasjonClient: ReservasjonClient,
     private val tilgangsgrupper: Tilgangsgrupper,
@@ -43,7 +44,7 @@ class Bootstrap(
     private val notatApiDao = PgNotatApiDao(dataSource)
     private val totrinnsvurderingApiDao = PgTotrinnsvurderingApiDao(dataSource)
     private val apiVarselRepository = PgApiVarselRepository(dataSource)
-    private val påVentApiDao = PgPåVentApiDao(dataSource)
+    private val påVentApiDao = repositories.påVentApiDao
     private val vergemålApiDao = PgVergemålApiDao(dataSource)
 
     fun ktorApp(

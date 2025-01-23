@@ -2,6 +2,7 @@ package no.nav.helse.db
 
 import kotliquery.Session
 import no.nav.helse.db.api.PgAbonnementDao
+import no.nav.helse.db.api.PgPåVentApiDao
 import javax.sql.DataSource
 
 class DBRepositories(dataSource: DataSource) : Repositories {
@@ -33,6 +34,7 @@ class DBRepositories(dataSource: DataSource) : Repositories {
     override val varselDao = PgVarselDao(dataSource)
     override val meldingDao = PgMeldingDao(dataSource)
     override val meldingDuplikatkontrollDao = PgMeldingDuplikatkontrollDao(dataSource)
+    override val påVentApiDao = PgPåVentApiDao(dataSource)
 
     override fun withSessionContext(session: Session) = DBSessionContext(session)
 }
