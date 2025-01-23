@@ -11,7 +11,7 @@ class PersonService(
     private val dataSource: DataSource,
     private val repositories: Repositories,
 ) {
-    private val generasjonService = GenerasjonService(dataSource, repositories)
+    private val generasjonService = GenerasjonService(repositories)
 
     fun brukPersonHvisFinnes(
         fødselsnummer: String,

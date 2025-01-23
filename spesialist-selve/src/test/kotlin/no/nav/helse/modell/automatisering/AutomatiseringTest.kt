@@ -2,6 +2,7 @@ package no.nav.helse.modell.automatisering
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.helse.db.GenerasjonDao
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
@@ -21,7 +22,6 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
-import no.nav.helse.modell.vedtaksperiode.PgGenerasjonDao
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.test.lagFødselsnummer
@@ -62,7 +62,7 @@ internal class AutomatiseringTest {
     private val vergemålDaoMock = mockk<VergemålDao>(relaxed = true)
     private val overstyringDaoMock = mockk<OverstyringDao>(relaxed = true)
     private val meldingDaoMock = mockk<MeldingDao>(relaxed = true)
-    private val generasjonDaoMock = mockk<PgGenerasjonDao>(relaxed = true)
+    private val generasjonDaoMock = mockk<GenerasjonDao>(relaxed = true)
     private var stikkprøveFullRefusjonEnArbeidsgiver = false
     private var stikkprøveUtsEnArbeidsgiverFørstegangsbehandling = false
     private var stikkprøveUtsEnArbeidsgiverForlengelse = false

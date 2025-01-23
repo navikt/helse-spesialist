@@ -1,13 +1,8 @@
-package no.nav.helse.modell.vedtaksperiode
+package no.nav.helse.db
 
 import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
 import no.nav.helse.HelseDao.Companion.asSQLWithQuestionMarks
-import no.nav.helse.db.GenerasjonDao
-import no.nav.helse.db.MedDataSource
-import no.nav.helse.db.MedSession
-import no.nav.helse.db.QueryRunner
-import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
@@ -20,7 +15,7 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
     constructor(session: Session) : this(MedSession(session))
 
-    fun finnGenerasjoner(vedtaksperiodeId: UUID): List<BehandlingDto> {
+    override fun finnGenerasjoner(vedtaksperiodeId: UUID): List<BehandlingDto> {
         return asSQL(
             """
             SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, spleis_behandling_id, skjæringstidspunkt, fom, tom, tilstand, tags
@@ -41,13 +36,13 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
                     tom = row.localDate("tom"),
                     tilstand = enumValueOf(row.string("tilstand")),
                     tags = row.array<String>("tags").toList(),
-                    vedtakBegrunnelse = VedtakBegrunnelseDao(queryRunner).finnVedtakBegrunnelse(vedtaksperiodeId, generasjonRef),
+                    vedtakBegrunnelse = PgVedtakBegrunnelseDao(queryRunner).finnVedtakBegrunnelse(vedtaksperiodeId, generasjonRef),
                     varsler = finnVarsler(generasjonRef),
                 )
             }
     }
 
-    fun lagreGenerasjon(behandlingDto: BehandlingDto) {
+    override fun lagreGenerasjon(behandlingDto: BehandlingDto) {
         lagre(behandlingDto)
         slettVarsler(behandlingDto.id, behandlingDto.varsler.map { it.id })
         behandlingDto.varsler.forEach { varselDto ->
@@ -146,7 +141,7 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
         }
     }
 
-    fun finnVedtaksperiodeIderFor(fødselsnummer: String): Set<UUID> {
+    override fun finnVedtaksperiodeIderFor(fødselsnummer: String): Set<UUID> {
         return asSQL(
             """
             SELECT b.vedtaksperiode_id FROM behandling b 
@@ -175,7 +170,7 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
         }
     }
 
-    internal fun førsteKjenteDag(fødselsnummer: String): LocalDate {
+    override fun førsteKjenteDag(fødselsnummer: String): LocalDate {
         return asSQL(
             """
             select min(b.fom) as foersteFom

@@ -7,16 +7,15 @@ import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import org.slf4j.LoggerFactory
 import java.util.UUID
-import javax.sql.DataSource
 
-class GenerasjonService(dataSource: DataSource, private val repositories: Repositories) {
-    private val pgGenerasjonDao = PgGenerasjonDao(dataSource)
+class GenerasjonService(private val repositories: Repositories) {
+    private val generasjonDao = repositories.generasjonDao
     private val hentedeGenerasjoner: MutableMap<UUID, List<BehandlingDto>> = mutableMapOf()
 
     private val sikkerLogger = LoggerFactory.getLogger("tjenestekall")
 
     fun TransactionalSession.finnVedtaksperioder(fødselsnummer: String): List<VedtaksperiodeDto> {
-        return PgGenerasjonDao(this).finnVedtaksperiodeIderFor(fødselsnummer).map { finnVedtaksperiode(it) }
+        return repositories.withSessionContext(this).generasjonDao.finnVedtaksperiodeIderFor(fødselsnummer).map { finnVedtaksperiode(it) }
     }
 
     fun TransactionalSession.lagreVedtaksperioder(
@@ -33,20 +32,23 @@ class GenerasjonService(dataSource: DataSource, private val repositories: Reposi
     }
 
     private fun TransactionalSession.finnGenerasjoner(vedtaksperiodeId: UUID): List<BehandlingDto> {
-        return PgGenerasjonDao(this).finnGenerasjoner(vedtaksperiodeId).also { hentedeGenerasjoner[vedtaksperiodeId] = it }
+        return repositories.withSessionContext(this).generasjonDao.finnGenerasjoner(vedtaksperiodeId).also {
+            hentedeGenerasjoner[vedtaksperiodeId] = it
+        }
     }
 
     private fun TransactionalSession.lagreVedtaksperiode(
         fødselsnummer: String,
         vedtaksperiode: VedtaksperiodeDto,
     ) {
-        repositories.withSessionContext(this).vedtakDao.lagreVedtaksperiode(fødselsnummer, vedtaksperiode)
+        val sessionContext = repositories.withSessionContext(this)
+        sessionContext.vedtakDao.lagreVedtaksperiode(fødselsnummer, vedtaksperiode)
         loggDiffMellomHentetOgSkalLagres(vedtaksperiode)
         hentedeGenerasjoner.remove(vedtaksperiode.vedtaksperiodeId)
         vedtaksperiode.behandlinger.forEach { generasjonDto ->
-            PgGenerasjonDao(this).lagreGenerasjon(generasjonDto)
+            sessionContext.generasjonDao.lagreGenerasjon(generasjonDto)
         }
-        repositories.withSessionContext(this).vedtakDao.lagreOpprinneligSøknadsdato(vedtaksperiode.vedtaksperiodeId)
+        sessionContext.vedtakDao.lagreOpprinneligSøknadsdato(vedtaksperiode.vedtaksperiodeId)
     }
 
     private fun loggDiffMellomHentetOgSkalLagres(vedtaksperiode: VedtaksperiodeDto) {
@@ -103,5 +105,5 @@ class GenerasjonService(dataSource: DataSource, private val repositories: Reposi
 
     private fun List<VarselDto>.prettyPrint(): List<String> = map { "${it.varselkode} (${it.status})" }
 
-    internal fun førsteKjenteDag(fødselsnummer: String) = pgGenerasjonDao.førsteKjenteDag(fødselsnummer)
+    internal fun førsteKjenteDag(fødselsnummer: String) = generasjonDao.førsteKjenteDag(fødselsnummer)
 }

@@ -7,7 +7,6 @@ import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vedtak.VedtakBegrunnelse
-import no.nav.helse.modell.vedtaksperiode.PgGenerasjonDao
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
@@ -19,6 +18,9 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class PgBehandlingDaoTest : DatabaseIntegrationTest() {
+
+    private val generasjonDao = repositories.generasjonDao
+
     @Test
     fun `finner liste av unike vedtaksperiodeIder med fnr`() {
         val vedtaksperiodeId1 = UUID.randomUUID()
@@ -35,7 +37,7 @@ internal class PgBehandlingDaoTest : DatabaseIntegrationTest() {
         opprettGenerasjon(vedtaksperiodeId2, generasjonId2)
         opprettGenerasjon(vedtaksperiodeId2, generasjonId3)
 
-        val vedtaksperiodeIder = PgGenerasjonDao(dataSource).finnVedtaksperiodeIderFor(FNR)
+        val vedtaksperiodeIder = generasjonDao.finnVedtaksperiodeIderFor(FNR)
         assertEquals(2, vedtaksperiodeIder.size)
         assertTrue(vedtaksperiodeIder.containsAll(setOf(vedtaksperiodeId1, vedtaksperiodeId2)))
     }
@@ -66,9 +68,9 @@ internal class PgBehandlingDaoTest : DatabaseIntegrationTest() {
             vedtaksperiodeId = vedtaksperiodeId2
         )
 
-        val vedtaksperiodeIderPerson1 = PgGenerasjonDao(dataSource).finnVedtaksperiodeIderFor(person1)
+        val vedtaksperiodeIderPerson1 = generasjonDao.finnVedtaksperiodeIderFor(person1)
 
-        val vedtaksperiodeIderPerson2 = PgGenerasjonDao(dataSource).finnVedtaksperiodeIderFor(person2)
+        val vedtaksperiodeIderPerson2 = generasjonDao.finnVedtaksperiodeIderFor(person2)
         assertEquals(1, vedtaksperiodeIderPerson1.size)
         assertEquals(1, vedtaksperiodeIderPerson2.size)
         assertTrue(vedtaksperiodeIderPerson1.containsAll(setOf(vedtaksperiodeId1)))
@@ -88,7 +90,7 @@ internal class PgBehandlingDaoTest : DatabaseIntegrationTest() {
             vedtaksperiodeId = vedtaksperiodeId,
             status = VarselStatusDto.AKTIV
         )
-        PgGenerasjonDao(dataSource).lagreGenerasjon(
+        generasjonDao.lagreGenerasjon(
             BehandlingDto(
                 id = generasjonId,
                 vedtaksperiodeId = vedtaksperiodeId,
@@ -104,7 +106,7 @@ internal class PgBehandlingDaoTest : DatabaseIntegrationTest() {
             )
 
         )
-        val funnet = PgGenerasjonDao(dataSource).finnGenerasjoner(vedtaksperiodeId)
+        val funnet = generasjonDao.finnGenerasjoner(vedtaksperiodeId)
         assertEquals(1, funnet.size)
         assertEquals(
             BehandlingDto(

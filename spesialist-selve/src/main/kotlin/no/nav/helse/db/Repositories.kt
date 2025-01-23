@@ -19,6 +19,8 @@ interface Repositories {
     val saksbehandlerDao: SaksbehandlerDao
     val stansAutomatiskBehandlingDao: StansAutomatiskBehandlingDao
     val tildelingDao: TildelingDao
+    val vedtakBegrunnelseDao: VedtakBegrunnelseDao
+    val generasjonDao: GenerasjonDao
 
     fun withSessionContext(session: Session): SessionContext
 }

@@ -5,7 +5,6 @@ import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.AnnulleringRepository
 import no.nav.helse.db.Repositories
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.db.VedtakBegrunnelseFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.db.api.PgApiGenerasjonRepository
@@ -118,7 +117,7 @@ class SaksbehandlerMediator(
     private val overstyringDao = OverstyringDao(dataSource)
     private val påVentDao = PåVentDao(dataSource)
     private val periodehistorikkDao = repositories.periodehistorikkDao
-    private val vedtakBegrunnelseDao = VedtakBegrunnelseDao(dataSource)
+    private val vedtakBegrunnelseDao = repositories.vedtakBegrunnelseDao
     private val dialogDao = repositories.dialogDao
     private val env = Environment()
 

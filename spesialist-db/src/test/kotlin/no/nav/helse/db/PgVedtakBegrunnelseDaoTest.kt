@@ -1,8 +1,8 @@
 package no.nav.helse.db
 
-import no.nav.helse.DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.modell.vedtak.Utfall
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -11,9 +11,9 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class VedtakBegrunnelseDaoTest : DatabaseIntegrationTest() {
+internal class PgVedtakBegrunnelseDaoTest : DatabaseIntegrationTest() {
 
-    private val dao = VedtakBegrunnelseDao(dataSource)
+    private val dao = repositories.vedtakBegrunnelseDao
 
     @Test
     fun `lagrer og finner vedtaksbegrunnelse`() {
@@ -53,7 +53,7 @@ internal class VedtakBegrunnelseDaoTest : DatabaseIntegrationTest() {
 
         val generasjonId = finnGenerasjonId(vedtaksperiodeId)
 
-        val lagretVedtakBegrunnelse = VedtakBegrunnelseDao(dataSource).finnVedtakBegrunnelse(vedtaksperiodeId, generasjonId)
+        val lagretVedtakBegrunnelse = dao.finnVedtakBegrunnelse(vedtaksperiodeId, generasjonId)
         assertNotNull(lagretVedtakBegrunnelse)
         with(lagretVedtakBegrunnelse!!) {
             assertEquals(Utfall.AVSLAG, utfall)

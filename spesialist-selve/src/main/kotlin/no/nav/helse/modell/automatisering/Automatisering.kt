@@ -30,7 +30,6 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
-import no.nav.helse.modell.vedtaksperiode.PgGenerasjonDao
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
@@ -74,7 +73,7 @@ internal class Automatisering(
                 overstyringRepository = OverstyringDao(transactionalSession),
                 stikkprøver = stikkprøver,
                 meldingRepository = MeldingDao(transactionalSession),
-                generasjonDao = PgGenerasjonDao(transactionalSession),
+                generasjonDao = sessionContext.generasjonDao,
                 egenAnsattRepository = EgenAnsattDao(transactionalSession),
             )
         }

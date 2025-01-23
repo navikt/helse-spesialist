@@ -72,7 +72,7 @@ class Kommandofabrikk(
     private val repositories: Repositories,
     oppgaveService: () -> OppgaveService,
     private val godkjenningMediator: GodkjenningMediator,
-    private val generasjonService: GenerasjonService = GenerasjonService(dataSource, repositories),
+    private val generasjonService: GenerasjonService = GenerasjonService(repositories),
     private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
     private val stikkprøver: Stikkprøver,
 ) {

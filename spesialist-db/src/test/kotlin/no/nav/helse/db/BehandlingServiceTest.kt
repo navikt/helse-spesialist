@@ -17,7 +17,7 @@ import java.util.UUID
 
 class BehandlingServiceTest: DatabaseIntegrationTest() {
 
-    private val generasjonService = GenerasjonService(dataSource, repositories)
+    private val generasjonService = GenerasjonService(repositories)
 
     @Test
     fun `lagrer og finner liste av vedtaksperioder`() {
