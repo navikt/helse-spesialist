@@ -118,6 +118,7 @@ internal class TestMediator(
             publiserer = meldingPubliserer,
             kommandofabrikk = kommandofabrikk,
             poisonPills = PoisonPills(emptyMap()),
+            commandContextDao = repositories.commandContextDao
         )
         RiverSetup(dataSource, testRapid, meldingMediator).setUp()
     }

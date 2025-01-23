@@ -21,7 +21,6 @@ import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.dokument.PgDokumentDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
-import no.nav.helse.modell.kommando.CommandContextDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.PersonService
@@ -118,7 +117,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val arbeidsforholdDao = ArbeidsforholdDao(session)
     internal val arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource)
     internal val vedtakDao = repositories.vedtakDao
-    internal val commandContextDao = CommandContextDao(dataSource)
+    internal val commandContextDao = repositories.commandContextDao
     internal val tildelingDao = repositories.tildelingDao
     internal val saksbehandlerDao = repositories.saksbehandlerDao
     internal val overstyringDao = OverstyringDao(session)

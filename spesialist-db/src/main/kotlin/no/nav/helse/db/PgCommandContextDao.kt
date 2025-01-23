@@ -1,24 +1,21 @@
-package no.nav.helse.modell.kommando
+package no.nav.helse.db
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Session
 import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.db.CommandContextRepository
-import no.nav.helse.db.MedDataSource
-import no.nav.helse.db.MedSession
-import no.nav.helse.db.QueryRunner
-import no.nav.helse.modell.kommando.CommandContextDao.CommandContextTilstand.AVBRUTT
-import no.nav.helse.modell.kommando.CommandContextDao.CommandContextTilstand.FEIL
-import no.nav.helse.modell.kommando.CommandContextDao.CommandContextTilstand.FERDIG
-import no.nav.helse.modell.kommando.CommandContextDao.CommandContextTilstand.NY
-import no.nav.helse.modell.kommando.CommandContextDao.CommandContextTilstand.SUSPENDERT
+import no.nav.helse.db.PgCommandContextDao.CommandContextTilstand.AVBRUTT
+import no.nav.helse.db.PgCommandContextDao.CommandContextTilstand.FEIL
+import no.nav.helse.db.PgCommandContextDao.CommandContextTilstand.FERDIG
+import no.nav.helse.db.PgCommandContextDao.CommandContextTilstand.NY
+import no.nav.helse.db.PgCommandContextDao.CommandContextTilstand.SUSPENDERT
+import no.nav.helse.modell.kommando.CommandContext
 import java.util.UUID
 import javax.sql.DataSource
 
-class CommandContextDao(
+class PgCommandContextDao(
     queryRunner: QueryRunner,
-) : CommandContextRepository, QueryRunner by queryRunner {
+) : CommandContextDao, QueryRunner by queryRunner {
     constructor(session: Session) : this(MedSession(session))
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
@@ -141,12 +138,12 @@ class CommandContextDao(
             "contextId" to contextId,
         ).single { it.int("tid_brukt_ms") }
 
-    fun finnSuspendert(contextId: UUID) =
+    override fun finnSuspendert(contextId: UUID) =
         finnSiste(contextId)?.takeIf { it.first == SUSPENDERT }?.let { (_, dto, hash) ->
             CommandContext(contextId, dto.sti, hash?.let { UUID.fromString(it) })
         }
 
-    fun finnSuspendertEllerFeil(contextId: UUID) =
+    override fun finnSuspendertEllerFeil(contextId: UUID) =
         finnSiste(contextId)?.takeIf { it.first == SUSPENDERT || it.first == FEIL }?.let { (_, dto, hash) ->
             CommandContext(contextId, dto.sti, hash?.let { UUID.fromString(it) })
         }

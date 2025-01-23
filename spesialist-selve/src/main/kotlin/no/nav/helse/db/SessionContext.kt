@@ -17,4 +17,5 @@ interface SessionContext {
     val tildelingDao: TildelingDao
     val generasjonDao: GenerasjonDao
     val reservasjonDao: ReservasjonDao
+    val commandContextDao: CommandContextDao
 }

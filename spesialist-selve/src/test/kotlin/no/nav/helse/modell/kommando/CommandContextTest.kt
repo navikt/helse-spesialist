@@ -3,13 +3,13 @@ package no.nav.helse.modell.kommando
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.db.CommandContextRepository
+import no.nav.helse.db.CommandContextDao
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.KommandokjedeEndretEvent
-import no.nav.helse.modell.melding.Behov
-import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.kommando.CommandContext.Companion.convertToUUID
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
+import no.nav.helse.modell.melding.Behov
+import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -28,7 +28,7 @@ internal class CommandContextTest {
         private val CONTEXT = UUID.randomUUID()
     }
 
-    private val commandContextRepository = mockk<CommandContextRepository>(relaxed = true)
+    private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
 
     private val observer =
         object : CommandContextObserver {
@@ -63,11 +63,11 @@ internal class CommandContextTest {
     @Test
     fun `executer kommando uten tilstand`() {
         TestCommand().apply {
-            assertTrue(context.utfør(commandContextRepository, this.id, this))
+            assertTrue(context.utfør(commandContextDao, this.id, this))
             assertTrue(executed)
             assertFalse(resumed)
-            verify(exactly = 1) { commandContextRepository.ferdig(this@apply.id, CONTEXT) }
-            verify(exactly = 0) { commandContextRepository.suspendert(any(), any(), hash().convertToUUID(), any()) }
+            verify(exactly = 1) { commandContextDao.ferdig(this@apply.id, CONTEXT) }
+            verify(exactly = 0) { commandContextDao.suspendert(any(), any(), hash().convertToUUID(), any()) }
         }
     }
 
@@ -75,20 +75,20 @@ internal class CommandContextTest {
     fun `resumer kommando med tilstand`() {
         context = CommandContext(CONTEXT, listOf(1))
         TestCommand().apply {
-            assertTrue(context.utfør(commandContextRepository, this.id, this))
+            assertTrue(context.utfør(commandContextDao, this.id, this))
             assertFalse(executed)
             assertTrue(resumed)
-            verify(exactly = 1) { commandContextRepository.ferdig(this@apply.id, CONTEXT) }
-            verify(exactly = 0) { commandContextRepository.suspendert(any(), any(), hash().convertToUUID(), any()) }
+            verify(exactly = 1) { commandContextDao.ferdig(this@apply.id, CONTEXT) }
+            verify(exactly = 0) { commandContextDao.suspendert(any(), any(), hash().convertToUUID(), any()) }
         }
     }
 
     @Test
     fun `suspenderer ved execute`() {
         TestCommand(executeAction = { false }).apply {
-            assertFalse(context.utfør(commandContextRepository, this.id, this))
-            verify(exactly = 0) { commandContextRepository.ferdig(any(), any()) }
-            verify(exactly = 1) { commandContextRepository.suspendert(this@apply.id, CONTEXT, hash().convertToUUID(), any()) }
+            assertFalse(context.utfør(commandContextDao, this.id, this))
+            verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
+            verify(exactly = 1) { commandContextDao.suspendert(this@apply.id, CONTEXT, hash().convertToUUID(), any()) }
         }
     }
 
@@ -97,24 +97,24 @@ internal class CommandContextTest {
         val sti = listOf(1)
         context = CommandContext(CONTEXT, sti)
         TestCommand(resumeAction = { false }).apply {
-            assertFalse(context.utfør(commandContextRepository, this.id, this))
-            verify(exactly = 0) { commandContextRepository.ferdig(any(), any()) }
-            verify(exactly = 1) { commandContextRepository.suspendert(this@apply.id, CONTEXT, hash().convertToUUID(), sti) }
+            assertFalse(context.utfør(commandContextDao, this.id, this))
+            verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
+            verify(exactly = 1) { commandContextDao.suspendert(this@apply.id, CONTEXT, hash().convertToUUID(), sti) }
         }
     }
 
     @Test
     fun ferdigstiller() {
         TestCommand(executeAction = { this.ferdigstill(context) }).apply {
-            context.utfør(commandContextRepository, this.id, this)
-            verify(exactly = 1) { commandContextRepository.ferdig(any(), any()) }
+            context.utfør(commandContextDao, this.id, this)
+            verify(exactly = 1) { commandContextDao.ferdig(any(), any()) }
         }
     }
 
     @Test
     fun `lager kommandokjede_ferdigstilt hendelse når kommandokjeden ferdigstilles`() {
         TestCommand(executeAction = { this.ferdigstill(context) }).apply {
-            context.utfør(commandContextRepository, this.id, this)
+            context.utfør(commandContextDao, this.id, this)
         }
         val result = observer.utgåendeTilstandEndringer
         assertTrue(result.isNotEmpty())
@@ -126,7 +126,7 @@ internal class CommandContextTest {
         TestCommand(executeAction = {
             false
         }).apply {
-            context.utfør(commandContextRepository, this.id, this)
+            context.utfør(commandContextDao, this.id, this)
         }
         val result = observer.utgåendeTilstandEndringer
         assertTrue(result.isNotEmpty())
@@ -135,13 +135,13 @@ internal class CommandContextTest {
 
     @Test
     fun `lager kommandokjede_avbrutt hendelse når kommandokjeden avbrytes`() {
-        every { commandContextRepository.avbryt(any(), any()) } returns listOf(Pair(context.id(), HENDELSE))
+        every { commandContextDao.avbryt(any(), any()) } returns listOf(Pair(context.id(), HENDELSE))
         TestCommand(executeAction = {
             false
         }).apply {
-            context.utfør(commandContextRepository, this.id, this)
+            context.utfør(commandContextDao, this.id, this)
         }
-        context.avbrytAlleForPeriode(commandContextRepository, UUID.randomUUID())
+        context.avbrytAlleForPeriode(commandContextDao, UUID.randomUUID())
         val result = observer.utgåendeTilstandEndringer
         assertTrue(result.isNotEmpty())
         assertTrue(result.last() is KommandokjedeEndretEvent.Avbrutt)
@@ -154,8 +154,8 @@ internal class CommandContextTest {
             this.ferdigstill(context)
             false
         }).apply {
-            context.utfør(commandContextRepository, this.id, this)
-            verify(exactly = 1) { commandContextRepository.ferdig(any(), any()) }
+            context.utfør(commandContextDao, this.id, this)
+            verify(exactly = 1) { commandContextDao.ferdig(any(), any()) }
         }
     }
 

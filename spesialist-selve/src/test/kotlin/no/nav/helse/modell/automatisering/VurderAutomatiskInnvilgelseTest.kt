@@ -5,8 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.Testdata.godkjenningsbehovData
 import no.nav.helse.db.AutomatiseringRepository
-import no.nav.helse.db.CommandContextRepository
-import no.nav.helse.util.januar
+import no.nav.helse.db.CommandContextDao
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.KommandokjedeEndretEvent
@@ -18,6 +17,7 @@ import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -124,25 +124,27 @@ internal class VurderAutomatiskInnvilgelseTest {
     @Test
     fun `Ferdigstiller kjede når perioden kan behandles automatisk`() {
         every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
-        context.utfør(commandContextRepository, UUID.randomUUID(), command)
+        context.utfør(commandContextDao, UUID.randomUUID(), command)
         assertEquals("Ferdig", observatør.gjeldendeTilstand)
     }
 
     @Test
     fun `Ferdigstiller kjede når perioden er spesialsak som kan behandles automatisk`() {
         every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
-        context.utfør(commandContextRepository, UUID.randomUUID(), command)
+        context.utfør(commandContextDao, UUID.randomUUID(), command)
         assertEquals("Ferdig", observatør.gjeldendeTilstand)
     }
 
-    private val commandContextRepository = object : CommandContextRepository {
-        override fun nyContext(meldingId: UUID): CommandContext = TODO("Not yet implemented")
+    private val commandContextDao = object : CommandContextDao {
+        override fun nyContext(meldingId: UUID) = error("Not implemented in test")
         override fun opprett(hendelseId: UUID, contextId: UUID) {}
         override fun ferdig(hendelseId: UUID, contextId: UUID) {}
         override fun suspendert(hendelseId: UUID, contextId: UUID, hash: UUID, sti: List<Int>) {}
         override fun feil(hendelseId: UUID, contextId: UUID) {}
-        override fun tidsbrukForContext(contextId: UUID): Int = TODO("Not yet implemented")
-        override fun avbryt(vedtaksperiodeId: UUID, contextId: UUID): List<Pair<UUID, UUID>> = TODO("Not yet implemented")
+        override fun tidsbrukForContext(contextId: UUID) = error("Not implemented in test")
+        override fun avbryt(vedtaksperiodeId: UUID, contextId: UUID) = error("Not implemented in test")
+        override fun finnSuspendert(contextId: UUID) = error("Not implemented in test")
+        override fun finnSuspendertEllerFeil(contextId: UUID) = error("Not implemented in test")
     }
 
     private val observatør = object : CommandContextObserver {

@@ -5,7 +5,7 @@ import kotliquery.TransactionalSession
 import no.nav.helse.db.ArbeidsforholdRepository
 import no.nav.helse.db.AutomatiseringRepository
 import no.nav.helse.db.AvviksvurderingDao
-import no.nav.helse.db.CommandContextRepository
+import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.db.OppgaveDao
@@ -192,7 +192,7 @@ internal class GodkjenningsbehovCommand(
     førsteKjenteDagFinner: () -> LocalDate,
     automatisering: Automatisering,
     vedtakDao: VedtakDao,
-    commandContextRepository: CommandContextRepository,
+    commandContextDao: CommandContextDao,
     personRepository: PersonRepository,
     inntektskilderRepository: InntektskilderRepository,
     arbeidsforholdRepository: ArbeidsforholdRepository,
@@ -239,7 +239,7 @@ internal class GodkjenningsbehovCommand(
             ),
             AvbrytContextCommand(
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
-                commandContextRepository = commandContextRepository,
+                commandContextDao = commandContextDao,
             ),
             PersisterVedtaksperiodetypeCommand(
                 vedtaksperiodeId = behovData.vedtaksperiodeId,

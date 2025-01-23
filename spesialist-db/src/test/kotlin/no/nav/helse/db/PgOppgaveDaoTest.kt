@@ -16,7 +16,6 @@ import no.nav.helse.db.EgenskapForDatabase.SØKNAD
 import no.nav.helse.db.EgenskapForDatabase.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.db.EgenskapForDatabase.UTLAND
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.kommando.CommandContextDao
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -50,7 +49,7 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
     @BeforeEach
     fun setupDaoTest() {
         godkjenningsbehov(TESTHENDELSE.id)
-        CommandContext(CONTEXT_ID).opprett(CommandContextDao(dataSource), TESTHENDELSE.id)
+        CommandContext(CONTEXT_ID).opprett(commandContextDao, TESTHENDELSE.id)
         dbQuery.execute("truncate oppgave restart identity cascade")
     }
 

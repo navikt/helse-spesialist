@@ -3,7 +3,7 @@ package no.nav.helse.mediator
 import kotliquery.Session
 import kotliquery.TransactionalSession
 import kotliquery.sessionOf
-import no.nav.helse.db.CommandContextRepository
+import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.Repositories
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
@@ -21,7 +21,6 @@ import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.kommando.CommandContextDao
 import no.nav.helse.modell.kommando.LøsGodkjenningsbehov
 import no.nav.helse.modell.kommando.OverstyringIgangsattCommand
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
@@ -179,7 +178,7 @@ class Kommandofabrikk(
             fødselsnummer = hendelse.fødselsnummer(),
             vedtaksperiode = vedtaksperiode,
             periodehistorikkDao = repositories.withSessionContext(session).periodehistorikkDao,
-            commandContextRepository = CommandContextDao(session),
+            commandContextDao = repositories.withSessionContext(session).commandContextDao,
             oppgaveService = transaksjonellOppgaveService(session),
             reservasjonDao = repositories.withSessionContext(session).reservasjonDao,
             tildelingDao = repositories.withSessionContext(session).tildelingDao,
@@ -295,7 +294,7 @@ class Kommandofabrikk(
             fødselsnummer = hendelse.fødselsnummer(),
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
             id = hendelse.id,
-            commandContextRepository = CommandContextDao(session),
+            commandContextDao = repositories.withSessionContext(session).commandContextDao,
             oppgaveService = transaksjonellOppgaveService(session),
             reservasjonDao = repositories.withSessionContext(session).reservasjonDao,
             tildelingDao = repositories.withSessionContext(session).tildelingDao,
@@ -363,7 +362,7 @@ class Kommandofabrikk(
             førsteKjenteDagFinner = førsteKjenteDagFinner,
             automatisering = transaksjonellAutomatisering(session),
             vedtakDao = repositories.withSessionContext(session).vedtakDao,
-            commandContextRepository = CommandContextDao(session),
+            commandContextDao = repositories.withSessionContext(session).commandContextDao,
             personRepository = PersonDao(session),
             inntektskilderRepository = repositories.withSessionContext(session).inntektskilderRepository,
             arbeidsforholdRepository = ArbeidsforholdDao(session),
@@ -391,7 +390,7 @@ class Kommandofabrikk(
     ) {
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             session.transaction { transactionalSession ->
-                val transactionalCommandContextDao = CommandContextDao(transactionalSession)
+                val transactionalCommandContextDao = repositories.withSessionContext(transactionalSession).commandContextDao
                 iverksett(
                     command = søknadSendt(melding, transactionalSession),
                     meldingId = melding.id,
@@ -406,7 +405,7 @@ class Kommandofabrikk(
 
     private fun nyContext(
         meldingId: UUID,
-        transactionalCommandContextDao: CommandContextRepository,
+        transactionalCommandContextDao: CommandContextDao,
     ) = CommandContext(UUID.randomUUID()).apply {
         opprett(transactionalCommandContextDao, meldingId)
     }
@@ -417,7 +416,7 @@ class Kommandofabrikk(
         transactionalSession: TransactionalSession,
     ): Kommandostarter =
         { kommandooppretter ->
-            val transactionalCommandContextDao = CommandContextDao(transactionalSession)
+            val transactionalCommandContextDao = repositories.withSessionContext(transactionalSession).commandContextDao
             val melding = this
             this@Kommandofabrikk.kommandooppretter()?.let { command ->
                 iverksett(
@@ -447,7 +446,7 @@ class Kommandofabrikk(
         meldingId: UUID,
         commandContext: CommandContext,
         commandContextObservers: Collection<CommandContextObserver>,
-        commandContextDao: CommandContextRepository,
+        commandContextDao: CommandContextDao,
         metrikkDao: MetrikkDao,
     ) {
         commandContextObservers.forEach { commandContext.nyObserver(it) }

@@ -1,6 +1,6 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.db.CommandContextRepository
+import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
@@ -11,7 +11,7 @@ import java.util.UUID
 internal class AvbrytCommand(
     fødselsnummer: String,
     vedtaksperiodeId: UUID,
-    commandContextRepository: CommandContextRepository,
+    commandContextDao: CommandContextDao,
     oppgaveService: OppgaveService,
     reservasjonDao: ReservasjonDao,
     tildelingDao: TildelingDao,
@@ -28,6 +28,6 @@ internal class AvbrytCommand(
                 totrinnsvurderingService = totrinnsvurderingService,
             ),
             AvbrytOppgaveCommand(vedtaksperiodeId = vedtaksperiodeId, oppgaveService = oppgaveService),
-            AvbrytContextCommand(vedtaksperiodeId = vedtaksperiodeId, commandContextRepository = commandContextRepository),
+            AvbrytContextCommand(vedtaksperiodeId = vedtaksperiodeId, commandContextDao = commandContextDao),
         )
 }

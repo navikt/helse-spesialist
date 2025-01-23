@@ -11,7 +11,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class CommandContextDaoTest : DatabaseIntegrationTest() {
+internal class PgCommandContextDaoTest : DatabaseIntegrationTest() {
 
     private val VEDTAKSPERIODE_ID1 = UUID.randomUUID()
     private val VEDTAKSPERIODE_ID2 = UUID.randomUUID()

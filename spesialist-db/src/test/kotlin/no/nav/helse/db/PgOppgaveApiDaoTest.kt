@@ -2,7 +2,6 @@ package no.nav.helse.db
 
 import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.kommando.CommandContextDao
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
@@ -16,7 +15,7 @@ class PgOppgaveApiDaoTest : DatabaseIntegrationTest() {
     @BeforeEach
     fun setupDaoTest() {
         godkjenningsbehov(TESTHENDELSE.id)
-        CommandContext(CONTEXT_ID).opprett(CommandContextDao(dataSource), TESTHENDELSE.id)
+        CommandContext(CONTEXT_ID).opprett(commandContextDao, TESTHENDELSE.id)
     }
 
     @Test

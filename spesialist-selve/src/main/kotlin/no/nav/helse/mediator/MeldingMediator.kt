@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.sessionOf
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.Environment
-import no.nav.helse.db.CommandContextRepository
+import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.Repositories
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.PoisonPills
@@ -14,7 +14,6 @@ import no.nav.helse.modell.MeldingDuplikatkontrollDao
 import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.modell.dokument.PgDokumentDao
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.kommando.CommandContextDao
 import no.nav.helse.modell.melding.KlargjørPersonForVisning
 import no.nav.helse.modell.melding.OppdaterPersondata
 import no.nav.helse.modell.person.PersonDao
@@ -33,7 +32,7 @@ class MeldingMediator(
     private val repositories: Repositories,
     private val publiserer: MeldingPubliserer,
     private val personDao: PersonDao = PersonDao(dataSource),
-    private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
+    private val commandContextDao: CommandContextDao,
     private val meldingDao: MeldingDao = MeldingDao(dataSource),
     private val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao = MeldingDuplikatkontrollDao(dataSource),
     private val kommandofabrikk: Kommandofabrikk,
@@ -289,7 +288,7 @@ class MeldingMediator(
     private fun behandleMelding(
         melding: Personmelding,
         kontekstbasertPubliserer: MeldingPubliserer,
-        commandContext: (CommandContextRepository) -> CommandContext,
+        commandContext: (CommandContextDao) -> CommandContext,
     ) {
         val meldingnavn = requireNotNull(melding::class.simpleName)
         val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
@@ -302,7 +301,7 @@ class MeldingMediator(
                         val kommandostarter =
                             kommandofabrikk.lagKommandostarter(
                                 setOf(utgåendeMeldingerMediator),
-                                commandContext(CommandContextDao(transactionalSession)),
+                                commandContext(repositories.withSessionContext(transactionalSession).commandContextDao),
                                 transactionalSession,
                             )
                         melding.behandle(this, kommandostarter, transactionalSession)

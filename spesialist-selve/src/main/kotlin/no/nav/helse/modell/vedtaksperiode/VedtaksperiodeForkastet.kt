@@ -2,7 +2,7 @@ package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.TransactionalSession
-import no.nav.helse.db.CommandContextRepository
+import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
@@ -49,7 +49,7 @@ class VedtaksperiodeForkastetCommand(
     val fødselsnummer: String,
     val vedtaksperiodeId: UUID,
     val id: UUID,
-    commandContextRepository: CommandContextRepository,
+    commandContextDao: CommandContextDao,
     oppgaveService: OppgaveService,
     reservasjonDao: ReservasjonDao,
     tildelingDao: TildelingDao,
@@ -61,7 +61,7 @@ class VedtaksperiodeForkastetCommand(
             AvbrytCommand(
                 fødselsnummer = fødselsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
-                commandContextRepository = commandContextRepository,
+                commandContextDao = commandContextDao,
                 oppgaveService = oppgaveService,
                 reservasjonDao = reservasjonDao,
                 tildelingDao = tildelingDao,

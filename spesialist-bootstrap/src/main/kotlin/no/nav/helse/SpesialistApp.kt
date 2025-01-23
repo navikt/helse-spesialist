@@ -167,6 +167,7 @@ class SpesialistApp(
                 publiserer = meldingPubliserer,
                 kommandofabrikk = kommandofabrikk,
                 poisonPills = repositories.poisonPillDao.poisonPills(),
+                commandContextDao = repositories.commandContextDao,
             )
         RiverSetup(dataSource, rapidsConnection, meldingMediator).setUp()
         saksbehandlerMediator =

@@ -1,7 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.db.CommandContextRepository
+import no.nav.helse.db.CommandContextDao
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.mediator.UtgåendeMeldingerObserver
@@ -64,17 +64,17 @@ class CommandContext(
     internal fun sti() = sti.toList()
 
     fun opprett(
-        commandContextDao: CommandContextRepository,
+        commandContextDao: CommandContextDao,
         hendelseId: UUID,
     ) {
         commandContextDao.opprett(hendelseId, id)
     }
 
     internal fun avbrytAlleForPeriode(
-        commandContextRepository: CommandContextRepository,
+        commandContextDao: CommandContextDao,
         vedtaksperiodeId: UUID,
     ) {
-        val avbrutteKommandokjeder = commandContextRepository.avbryt(vedtaksperiodeId, id)
+        val avbrutteKommandokjeder = commandContextDao.avbryt(vedtaksperiodeId, id)
         avbrutteKommandokjeder.forEach { (contextId, hendelseId) ->
             kommandokjedetilstandEndret(KommandokjedeEndretEvent.Avbrutt(contextId, hendelseId))
         }
@@ -87,7 +87,7 @@ class CommandContext(
     internal inline fun <reified T> get(): T? = data.filterIsInstance<T>().firstOrNull()
 
     internal fun utfør(
-        commandContextDao: CommandContextRepository,
+        commandContextDao: CommandContextDao,
         hendelseId: UUID,
         command: Command,
     ): Boolean {

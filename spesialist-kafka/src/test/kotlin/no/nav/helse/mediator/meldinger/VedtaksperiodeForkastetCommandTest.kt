@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.Testdata.snapshot
-import no.nav.helse.db.CommandContextRepository
+import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.CommandContext
@@ -22,7 +22,7 @@ internal class VedtaksperiodeForkastetCommandTest {
         private const val FNR = "fnr"
     }
 
-    private val commandContextRepository = mockk<CommandContextRepository>(relaxed = true)
+    private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
     private val personRepository = mockk<PersonRepository>(relaxed = true)
     private val graphQLClient = mockk<SnapshotClient>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
@@ -32,7 +32,7 @@ internal class VedtaksperiodeForkastetCommandTest {
             fødselsnummer = FNR,
             vedtaksperiodeId = VEDTAKSPERIODE,
             id = HENDELSE,
-            commandContextRepository = commandContextRepository,
+            commandContextDao = commandContextDao,
             oppgaveService = oppgaveService,
             reservasjonDao = mockk(relaxed = true),
             tildelingDao = mockk(relaxed = true),
@@ -46,6 +46,6 @@ internal class VedtaksperiodeForkastetCommandTest {
         every { graphQLClient.hentSnapshot(FNR) } returns snapshot
         every { personRepository.finnPersonMedFødselsnummer(FNR) } returns 1
         assertTrue(vedtaksperiodeForkastetCommand.execute(context))
-        verify(exactly = 1) { commandContextRepository.avbryt(VEDTAKSPERIODE, CONTEXT) }
+        verify(exactly = 1) { commandContextDao.avbryt(VEDTAKSPERIODE, CONTEXT) }
     }
 }

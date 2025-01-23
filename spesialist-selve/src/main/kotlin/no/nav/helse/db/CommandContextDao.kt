@@ -3,7 +3,7 @@ package no.nav.helse.db
 import no.nav.helse.modell.kommando.CommandContext
 import java.util.UUID
 
-interface CommandContextRepository {
+interface CommandContextDao {
     fun nyContext(meldingId: UUID): CommandContext
 
     fun opprett(
@@ -34,4 +34,8 @@ interface CommandContextRepository {
         vedtaksperiodeId: UUID,
         contextId: UUID,
     ): List<Pair<UUID, UUID>>
+
+    fun finnSuspendert(contextId: UUID): CommandContext?
+
+    fun finnSuspendertEllerFeil(contextId: UUID): CommandContext?
 }
