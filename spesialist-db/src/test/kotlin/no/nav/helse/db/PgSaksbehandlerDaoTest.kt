@@ -9,35 +9,34 @@ import java.time.LocalDateTime.now
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
-internal class SaksbehandlerDaoTest : DatabaseIntegrationTest() {
-    private val dao = SaksbehandlerDao(dataSource)
+internal class PgSaksbehandlerDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `lagre saksbehandler`() {
-        dao.opprettEllerOppdater(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
+        saksbehandlerDao.opprettEllerOppdater(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
         assertSaksbehandler(skalFinnesIDatabasen = true, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
     }
 
     @Test
     fun `oppdater saksbehandler`() {
-        dao.opprettEllerOppdater(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
-        dao.opprettEllerOppdater(SAKSBEHANDLER_OID, "ANNET_NAVN", "ANNEN_EPOST", "ANNEN_IDENT")
+        saksbehandlerDao.opprettEllerOppdater(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
+        saksbehandlerDao.opprettEllerOppdater(SAKSBEHANDLER_OID, "ANNET_NAVN", "ANNEN_EPOST", "ANNEN_IDENT")
         assertSaksbehandler(skalFinnesIDatabasen = true, SAKSBEHANDLER_OID, "ANNET_NAVN", "ANNEN_EPOST", "ANNEN_IDENT")
         assertSaksbehandler(skalFinnesIDatabasen = false, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
     }
 
     @Test
     fun `setter ikke initielt timestamp`() {
-        dao.opprettEllerOppdater(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
+        saksbehandlerDao.opprettEllerOppdater(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
         assertSisteTidspunkt(null, SAKSBEHANDLER_OID)
     }
 
     @Test
     fun `setter tidspunkt når spesialist behandler en handling fra saksbehandleren`() {
-        dao.opprettEllerOppdater(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
+        saksbehandlerDao.opprettEllerOppdater(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
 
         val tidspunkt = now()
-        dao.oppdaterSistObservert(SAKSBEHANDLER_OID, tidspunkt)
+        saksbehandlerDao.oppdaterSistObservert(SAKSBEHANDLER_OID, tidspunkt)
 
         assertSisteTidspunkt(tidspunkt, SAKSBEHANDLER_OID)
     }

@@ -5,7 +5,6 @@ import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.AnnulleringRepository
 import no.nav.helse.db.Repositories
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.db.VedtakBegrunnelseFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
@@ -109,7 +108,7 @@ class SaksbehandlerMediator(
     private val totrinnsvurderingService: TotrinnsvurderingService,
     private val annulleringRepository: AnnulleringRepository,
 ) : Saksbehandlerhåndterer {
-    private val saksbehandlerDao = SaksbehandlerDao(dataSource)
+    private val saksbehandlerDao = repositories.saksbehandlerDao
     private val generasjonRepository = PgApiGenerasjonRepository(dataSource)
     private val varselRepository = PgApiVarselRepository(dataSource)
     private val oppgaveApiDao = PgOppgaveApiDao(dataSource)

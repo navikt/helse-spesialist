@@ -1,7 +1,7 @@
 package no.nav.helse.mediator.oppgave
 
 import no.nav.helse.db.OppgaveDao
-import no.nav.helse.db.SaksbehandlerRepository
+import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.db.toDto
 import no.nav.helse.mediator.oppgave.OppgaveMapper.toDto
@@ -14,7 +14,7 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDto
 class Oppgavehenter(
     private val oppgaveDao: OppgaveDao,
     private val totrinnsvurderingDao: TotrinnsvurderingDao,
-    private val saksbehandlerRepository: SaksbehandlerRepository,
+    private val saksbehandlerDao: SaksbehandlerDao,
     private val tilgangskontroll: Tilgangskontroll,
 ) {
     fun oppgave(id: Long): Oppgave {
@@ -40,11 +40,11 @@ class Oppgavehenter(
                             erRetur = it.erRetur,
                             saksbehandler =
                                 it.saksbehandler?.let {
-                                    saksbehandlerRepository.finnSaksbehandler(it)?.toDto()
+                                    saksbehandlerDao.finnSaksbehandler(it)?.toDto()
                                 },
                             beslutter =
                                 it.beslutter?.let {
-                                    saksbehandlerRepository.finnSaksbehandler(it)?.toDto()
+                                    saksbehandlerDao.finnSaksbehandler(it)?.toDto()
                                 },
                             utbetalingId = it.utbetalingId,
                             opprettet = it.opprettet,

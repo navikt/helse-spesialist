@@ -5,7 +5,7 @@ import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.db.SaksbehandlerRepository
+import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.toDto
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.melding.Saksbehandlerløsning
@@ -31,7 +31,7 @@ class GodkjenningService(
     private val oppgaveService: OppgaveService,
     private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
     private val periodehistorikkDao: PeriodehistorikkDao,
-    private val saksbehandlerRepository: SaksbehandlerRepository,
+    private val saksbehandlerDao: SaksbehandlerDao,
     private val totrinnsvurderingService: TotrinnsvurderingService,
     private val tilgangskontroll: Tilgangskontroll,
 ) : Godkjenninghåndterer {
@@ -79,7 +79,7 @@ class GodkjenningService(
 
             if (totrinnsvurdering?.erBeslutteroppgave() == true && godkjenningDTO.godkjent) {
                 val beslutter =
-                    totrinnsvurdering.beslutter?.let { saksbehandlerRepository.finnSaksbehandler(it)?.toDto() }
+                    totrinnsvurdering.beslutter?.let { saksbehandlerDao.finnSaksbehandler(it)?.toDto() }
                 checkNotNull(beslutter) { "Forventer at beslutter er satt" }
                 val innslag = Historikkinnslag.totrinnsvurderingFerdigbehandletInnslag(beslutter)
                 periodehistorikkDao.lagreMedOppgaveId(innslag, godkjenningDTO.oppgavereferanse)
@@ -122,7 +122,7 @@ class GodkjenningService(
 
     private fun saksbehandlerForJson(oid: UUID): Saksbehandler =
         requireNotNull(
-            saksbehandlerRepository.finnSaksbehandler(oid, tilgangskontroll),
+            saksbehandlerDao.finnSaksbehandler(oid, tilgangskontroll),
         ) { "Finner ikke saksbehandleren i databasen. Det gir ikke noen mening" }
 
     private fun reserverPerson(

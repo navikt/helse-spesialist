@@ -4,8 +4,8 @@ import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.OppgavesorteringForDatabase
+import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SaksbehandlerFraDatabase
-import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.modell.oppgave.Egenskap
@@ -55,7 +55,7 @@ class OppgavehenterTest {
         val oppgavehenter = Oppgavehenter(
             oppgaveDao = oppgaveRepository(),
             totrinnsvurderingDao = totrinnsvurderingRepository(),
-            saksbehandlerRepository = saksbehandlerRepository,
+            saksbehandlerDao = saksbehandlerDao,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang
         )
         val oppgave = oppgavehenter.oppgave(OPPGAVE_ID).toDto()
@@ -85,7 +85,7 @@ class OppgavehenterTest {
         val oppgavehenter = Oppgavehenter(
             oppgaveDao = oppgaveRepository(),
             totrinnsvurderingDao = totrinnsvurderingRepository(totrinnsvurdering),
-            saksbehandlerRepository = saksbehandlerRepository,
+            saksbehandlerDao = saksbehandlerDao,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang
         )
         val oppgave = oppgavehenter.oppgave(OPPGAVE_ID).toDto()
@@ -190,7 +190,7 @@ class OppgavehenterTest {
         override fun ferdigstill(vedtaksperiodeId: UUID) = error("Not implemented in test")
     }
 
-    private val saksbehandlerRepository = object : SaksbehandlerRepository {
+    private val saksbehandlerDao = object : SaksbehandlerDao {
         val saksbehandlere = mapOf(
             SAKSBEHANDLER_OID to SaksbehandlerFraDatabase(
                 epostadresse = SAKSBEHANDLER_EPOST,
@@ -216,6 +216,14 @@ class OppgavehenterTest {
                 ident = it.ident,
                 tilgangskontroll = tilgangskontroll
             )
+        }
+
+        override fun opprettEllerOppdater(oid: UUID, navn: String, epost: String, ident: String): Int {
+            error("Not implemented in test")
+        }
+
+        override fun oppdaterSistObservert(oid: UUID, sisteHandlingUtført: LocalDateTime): Int {
+            error("Not implemented in test")
         }
     }
 

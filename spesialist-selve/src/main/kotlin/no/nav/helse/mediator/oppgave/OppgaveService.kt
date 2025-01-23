@@ -11,7 +11,6 @@ import no.nav.helse.db.Repositories
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.ReservasjonRepository
 import no.nav.helse.db.SaksbehandlerDao
-import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TildelingRepository
@@ -65,7 +64,7 @@ class OppgaveService(
     private val reservasjonRepository: ReservasjonRepository,
     private val opptegnelseRepository: OpptegnelseRepository,
     private val totrinnsvurderingDao: TotrinnsvurderingDao,
-    private val saksbehandlerRepository: SaksbehandlerRepository,
+    private val saksbehandlerDao: SaksbehandlerDao,
     private val meldingPubliserer: MeldingPubliserer,
     private val tilgangskontroll: Tilgangskontroll,
     private val tilgangsgrupper: Tilgangsgrupper,
@@ -81,7 +80,7 @@ class OppgaveService(
             reservasjonRepository = ReservasjonDao(transactionalSession),
             opptegnelseRepository = repositories.withSessionContext(transactionalSession).opptegnelseRepository,
             totrinnsvurderingDao = repositories.withSessionContext(transactionalSession).totrinnsvurderingDao,
-            saksbehandlerRepository = SaksbehandlerDao(transactionalSession),
+            saksbehandlerDao = repositories.withSessionContext(transactionalSession).saksbehandlerDao,
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = tilgangskontroll,
             tilgangsgrupper = tilgangsgrupper,
@@ -125,7 +124,7 @@ class OppgaveService(
             Oppgavehenter(
                 oppgaveDao,
                 totrinnsvurderingDao,
-                saksbehandlerRepository,
+                saksbehandlerDao,
                 tilgangskontroll,
             ).oppgave(id)
         val fødselsnummer = oppgaveDao.finnFødselsnummer(id)

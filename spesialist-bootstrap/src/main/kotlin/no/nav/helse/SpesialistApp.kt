@@ -5,7 +5,6 @@ import io.ktor.server.application.Application
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.DBRepositories
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
@@ -55,7 +54,7 @@ class SpesialistApp(
 
     private val oppgaveDao = repositories.oppgaveDao
     private val periodehistorikkDao = repositories.periodehistorikkDao
-    private val saksbehandlerDao = SaksbehandlerDao(dataSource)
+    private val saksbehandlerDao = repositories.saksbehandlerDao
     private val tildelingDao = TildelingDao(dataSource)
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val opptegnelseRepository = repositories.opptegnelseRepository
@@ -158,7 +157,7 @@ class SpesialistApp(
                 reservasjonRepository = reservasjonDao,
                 opptegnelseRepository = opptegnelseRepository,
                 totrinnsvurderingDao = totrinnsvurderingDao,
-                saksbehandlerRepository = saksbehandlerDao,
+                saksbehandlerDao = saksbehandlerDao,
                 meldingPubliserer = meldingPubliserer,
                 tilgangskontroll = tilgangskontrollørForReservasjon,
                 tilgangsgrupper = tilgangsgrupper,
@@ -191,7 +190,7 @@ class SpesialistApp(
                 dataSource = dataSource,
                 publiserer = meldingPubliserer,
                 oppgaveService = oppgaveService,
-                saksbehandlerRepository = saksbehandlerDao,
+                saksbehandlerDao = saksbehandlerDao,
                 tilgangskontroll = tilgangskontrollørForReservasjon,
                 oppgaveDao = oppgaveDao,
                 periodehistorikkDao = periodehistorikkDao,

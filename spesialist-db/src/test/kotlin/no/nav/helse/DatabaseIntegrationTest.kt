@@ -7,7 +7,6 @@ import kotliquery.sessionOf
 import no.nav.helse.db.DbQuery
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.TestMelding
 import no.nav.helse.db.TildelingDao
@@ -124,7 +123,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val vedtakDao = repositories.vedtakDao
     internal val commandContextDao = CommandContextDao(dataSource)
     internal val tildelingDao = TildelingDao(dataSource)
-    internal val saksbehandlerDao = SaksbehandlerDao(dataSource)
+    internal val saksbehandlerDao = repositories.saksbehandlerDao
     internal val overstyringDao = OverstyringDao(session)
     internal val overstyringApiDao = PgOverstyringApiDao(dataSource)
     internal val reservasjonDao = ReservasjonDao(session)

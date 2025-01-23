@@ -5,7 +5,6 @@ import no.nav.helse.MeldingPubliserer
 import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.e2e.AbstractE2ETest
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
@@ -30,7 +29,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val periodehistorikkDao = repositories.periodehistorikkDao
     private val totrinnsvurderingDao = repositories.totrinnsvurderingDao
-    private val saksbehandlerDao = SaksbehandlerDao(dataSource)
+    private val saksbehandlerDao = repositories.saksbehandlerDao
 
     private val oppgaveService =
         OppgaveService(
@@ -39,7 +38,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
             reservasjonRepository = reservasjonDao,
             opptegnelseRepository = repositories.opptegnelseRepository,
             totrinnsvurderingDao = totrinnsvurderingDao,
-            saksbehandlerRepository = SaksbehandlerDao(dataSource),
+            saksbehandlerDao = saksbehandlerDao,
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = SpeilTilgangsgrupper(testEnv),
@@ -54,7 +53,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
             publiserer = MessageContextMeldingPubliserer(testRapid),
             oppgaveService = oppgaveService,
             reservasjonDao = reservasjonDao,
-            saksbehandlerRepository = saksbehandlerDao,
+            saksbehandlerDao = saksbehandlerDao,
             totrinnsvurderingService =
                 TotrinnsvurderingService(
                     totrinnsvurderingDao,

@@ -16,8 +16,8 @@ import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.Repositories
 import no.nav.helse.db.Reservasjon
 import no.nav.helse.db.ReservasjonRepository
+import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SaksbehandlerFraDatabase
-import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TildelingRepository
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -89,7 +89,7 @@ internal class OppgaveServiceTest {
     private val reservasjonRepository = mockk<ReservasjonRepository>(relaxed = true)
     private val opptegnelseRepository = mockk<OpptegnelseRepository>(relaxed = true)
     private val totrinnsvurderingDao = mockk<TotrinnsvurderingDao>(relaxed = true)
-    private val saksbehandlerRepository = mockk<SaksbehandlerRepository>()
+    private val saksbehandlerDao = mockk<SaksbehandlerDao>()
 
     private val meldingPubliserer = object : MeldingPubliserer {
         var antallMeldinger: Int = 0
@@ -119,7 +119,7 @@ internal class OppgaveServiceTest {
             reservasjonRepository = reservasjonRepository,
             opptegnelseRepository = opptegnelseRepository,
             totrinnsvurderingDao = totrinnsvurderingDao,
-            saksbehandlerRepository = saksbehandlerRepository,
+            saksbehandlerDao = saksbehandlerDao,
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = SpeilTilgangsgrupper(testEnv),
@@ -226,7 +226,7 @@ internal class OppgaveServiceTest {
     fun `oppdaterer oppgave`() {
         every { oppgaveDao.finnOppgave(OPPGAVE_ID) } returns oppgaveFraDatabase()
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
-        every { saksbehandlerRepository.finnSaksbehandler(any()) } returns saksbehandlerFraDatabase
+        every { saksbehandlerDao.finnSaksbehandler(any()) } returns saksbehandlerFraDatabase
         mediator.oppgave(OPPGAVE_ID) {
             avventerSystem(SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
             ferdigstill()
