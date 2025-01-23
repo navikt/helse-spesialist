@@ -13,13 +13,13 @@ spec:
           expr: >-
             sum(
               changes(
-                kube_pod_container_status_restarts_total{container="spesialist"}[1m]
+                kube_pod_container_status_restarts_total{container="spesialist"}[5m]
               )
             ) by (container, namespace) > 0
-          for: 1m
+          for: 15s
           annotations:
-            consequence: '*{{ $labels.pod }}* er i CrashLoopBackoff'
-            action: 'Du må se på hvorfor appen kræsjer'
+            hva: '*{{ $labels.pod }}* er i CrashLoopBackoff'
+            handling: 'Du må se på hvorfor appen kræsjer'
           labels:
             namespace: tbd
             severity: critical

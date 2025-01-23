@@ -21,8 +21,8 @@ spec:
             [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}
           text: >-
             {{ range .Alerts -}}
-            *Beskrivelse:* {{ .Annotations.beskrivelse }}{{ "\n" }}
-            *Detaljer:* {{ .Annotations.detaljer }}
+            *Hva:* {{ .Annotations.hva }}{{ "\n" }}
+            *Handling:* {{ .Annotations.handling }}
             {{ end }}
           color: |-
             {{ if eq .Status "firing" -}}
