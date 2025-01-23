@@ -5,7 +5,7 @@ import kotliquery.TransactionalSession
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.db.ReservasjonRepository
-import no.nav.helse.db.TildelingRepository
+import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.UtbetalingRepository
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
@@ -87,7 +87,7 @@ internal class UtbetalingEndretCommand(
     opptegnelseRepository: OpptegnelseRepository,
     reservasjonRepository: ReservasjonRepository,
     oppgaveDao: OppgaveDao,
-    tildelingRepository: TildelingRepository,
+    tildelingDao: TildelingDao,
     oppgaveService: OppgaveService,
     totrinnsvurderingService: TotrinnsvurderingService,
     json: String,
@@ -112,7 +112,7 @@ internal class UtbetalingEndretCommand(
             ReserverPersonHvisTildeltCommand(
                 fødselsnummer = fødselsnummer,
                 reservasjonRepository = reservasjonRepository,
-                tildelingRepository = tildelingRepository,
+                tildelingDao = tildelingDao,
                 oppgaveDao = oppgaveDao,
                 totrinnsvurderingService = totrinnsvurderingService,
             ),

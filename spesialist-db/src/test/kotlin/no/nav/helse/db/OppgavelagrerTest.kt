@@ -53,7 +53,7 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
 
     override val HENDELSE_ID: UUID = UUID.randomUUID()
 
-    private val tildelingRepository = mockk<TildelingRepository>(relaxed = true)
+    private val tildelingRepository = mockk<TildelingDao>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
 
     @BeforeEach

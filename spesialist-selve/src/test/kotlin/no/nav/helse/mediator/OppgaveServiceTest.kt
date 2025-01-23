@@ -18,7 +18,7 @@ import no.nav.helse.db.Reservasjon
 import no.nav.helse.db.ReservasjonRepository
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SaksbehandlerFraDatabase
-import no.nav.helse.db.TildelingRepository
+import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.TestMelding
@@ -85,7 +85,7 @@ internal class OppgaveServiceTest {
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val repositories = mockk<Repositories>(relaxed = true)
-    private val tildelingRepository = mockk<TildelingRepository>(relaxed = true)
+    private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val reservasjonRepository = mockk<ReservasjonRepository>(relaxed = true)
     private val opptegnelseRepository = mockk<OpptegnelseRepository>(relaxed = true)
     private val totrinnsvurderingDao = mockk<TotrinnsvurderingDao>(relaxed = true)
@@ -115,7 +115,7 @@ internal class OppgaveServiceTest {
     private val mediator =
         OppgaveService(
             oppgaveDao = oppgaveDao,
-            tildelingRepository = tildelingRepository,
+            tildelingDao = tildelingDao,
             reservasjonRepository = reservasjonRepository,
             opptegnelseRepository = opptegnelseRepository,
             totrinnsvurderingDao = totrinnsvurderingDao,
@@ -161,7 +161,7 @@ internal class OppgaveServiceTest {
 
     @BeforeEach
     fun setup() {
-        clearMocks(oppgaveDao, tildelingRepository, opptegnelseRepository)
+        clearMocks(oppgaveDao, tildelingDao, opptegnelseRepository)
     }
 
     @Test
@@ -195,7 +195,7 @@ internal class OppgaveServiceTest {
         every { reservasjonRepository.hentReservasjonFor(fødselsnummer) } returns Reservasjon(saksbehandlerFraDatabase)
         every { oppgaveDao.finnFødselsnummer(0L) } returns fødselsnummer
         lagSøknadsoppgave(fødselsnummer)
-        verify(exactly = 1) { tildelingRepository.tildel(0L, SAKSBEHANDLEROID) }
+        verify(exactly = 1) { tildelingDao.tildel(0L, SAKSBEHANDLEROID) }
         assertAntallOpptegnelser(1, fødselsnummer)
     }
 
@@ -207,7 +207,7 @@ internal class OppgaveServiceTest {
         every { reservasjonRepository.hentReservasjonFor(fødselsnummer) } returns Reservasjon(saksbehandlerFraDatabase)
         every { oppgaveDao.finnFødselsnummer(oppgaveId) } returns fødselsnummer
         lagStikkprøveoppgave(fødselsnummer)
-        verify(exactly = 0) { tildelingRepository.tildel(any(), any()) }
+        verify(exactly = 0) { tildelingDao.tildel(any(), any()) }
         assertAntallOpptegnelser(1, fødselsnummer)
     }
 

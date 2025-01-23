@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class TildelingDaoTest : DatabaseIntegrationTest() {
+internal class PgTildelingDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun tildel() {

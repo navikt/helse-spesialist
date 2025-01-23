@@ -3,7 +3,7 @@ package no.nav.helse.modell.kommando
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.ReservasjonRepository
-import no.nav.helse.db.TildelingRepository
+import no.nav.helse.db.TildelingDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import java.util.UUID
@@ -14,7 +14,7 @@ internal class AvbrytCommand(
     commandContextRepository: CommandContextRepository,
     oppgaveService: OppgaveService,
     reservasjonRepository: ReservasjonRepository,
-    tildelingRepository: TildelingRepository,
+    tildelingDao: TildelingDao,
     oppgaveDao: OppgaveDao,
     totrinnsvurderingService: TotrinnsvurderingService,
 ) : MacroCommand() {
@@ -23,7 +23,7 @@ internal class AvbrytCommand(
             ReserverPersonHvisTildeltCommand(
                 fødselsnummer = fødselsnummer,
                 reservasjonRepository = reservasjonRepository,
-                tildelingRepository = tildelingRepository,
+                tildelingDao = tildelingDao,
                 oppgaveDao = oppgaveDao,
                 totrinnsvurderingService = totrinnsvurderingService,
             ),

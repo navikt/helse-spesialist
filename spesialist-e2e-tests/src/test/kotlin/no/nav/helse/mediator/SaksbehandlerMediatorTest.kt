@@ -6,7 +6,6 @@ import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.db.DBRepositories
-import no.nav.helse.db.TildelingDao
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
@@ -61,7 +60,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private val tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
     private val testRapid = TestRapid()
     private val meldingPubliserer: MeldingPubliserer = MessageContextMeldingPubliserer(testRapid)
-    private val tildelingDbDao = TildelingDao(dataSource)
+    private val tildelingDbDao = repositories.tildelingDao
     private val opptegnelseRepository = repositories.opptegnelseRepository
     private val stansAutomatiskBehandlingMediator =
         StansAutomatiskBehandlingMediator(

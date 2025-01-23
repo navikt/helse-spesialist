@@ -7,7 +7,6 @@ import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.Repositories
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SessionContext
-import no.nav.helse.db.TildelingDao
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
 import no.nav.helse.mediator.meldinger.Personmelding
@@ -103,7 +102,7 @@ class Kommandofabrikk(
     ): GosysOppgaveEndretCommand {
         val utbetaling = UtbetalingDao(transactionalSession).hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
         val harTildeltOppgave =
-            TildelingDao(transactionalSession).tildelingForOppgave(oppgaveDataForAutomatisering.oppgaveId) != null
+            repositories.withSessionContext(transactionalSession).tildelingDao.tildelingForOppgave(oppgaveDataForAutomatisering.oppgaveId) != null
         val godkjenningsbehovData =
             MeldingDao(transactionalSession)
                 .finnGodkjenningsbehov(oppgaveDataForAutomatisering.hendelseId)
@@ -184,7 +183,7 @@ class Kommandofabrikk(
             commandContextRepository = CommandContextDao(session),
             oppgaveService = transaksjonellOppgaveService(session),
             reservasjonRepository = ReservasjonDao(session),
-            tildelingRepository = TildelingDao(session),
+            tildelingDao = repositories.withSessionContext(session).tildelingDao,
             oppgaveDao = repositories.withSessionContext(session).oppgaveDao,
             totrinnsvurderingService = lagTotrinnsvurderingService(repositories.withSessionContext(session)),
         )
@@ -283,7 +282,7 @@ class Kommandofabrikk(
             opptegnelseRepository = repositories.withSessionContext(session).opptegnelseRepository,
             reservasjonRepository = ReservasjonDao(session),
             oppgaveDao = repositories.withSessionContext(session).oppgaveDao,
-            tildelingRepository = TildelingDao(session),
+            tildelingDao = repositories.withSessionContext(session).tildelingDao,
             oppgaveService = transaksjonellOppgaveService(session),
             totrinnsvurderingService = lagTotrinnsvurderingService(repositories.withSessionContext(session)),
             json = hendelse.toJson(),
@@ -300,7 +299,7 @@ class Kommandofabrikk(
             commandContextRepository = CommandContextDao(session),
             oppgaveService = transaksjonellOppgaveService(session),
             reservasjonRepository = ReservasjonDao(session),
-            tildelingRepository = TildelingDao(session),
+            tildelingDao = repositories.withSessionContext(session).tildelingDao,
             oppgaveDao = repositories.withSessionContext(session).oppgaveDao,
             totrinnsvurderingService = lagTotrinnsvurderingService(repositories.withSessionContext(session)),
         )

@@ -1,10 +1,10 @@
 package no.nav.helse.mediator.oppgave
 
-import no.nav.helse.db.TildelingRepository
+import no.nav.helse.db.TildelingDao
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilDatabaseversjon
 import no.nav.helse.modell.oppgave.OppgaveDto
 
-class Oppgavelagrer(private val tildelingRepository: TildelingRepository) {
+class Oppgavelagrer(private val tildelingDao: TildelingDao) {
     fun lagre(
         oppgaveService: OppgaveService,
         oppgaveDto: OppgaveDto,
@@ -44,9 +44,9 @@ class Oppgavelagrer(private val tildelingRepository: TildelingRepository) {
     private fun oppdaterTildeling(oppgaveDto: OppgaveDto) {
         val tildeltTil = oppgaveDto.tildeltTil
         if (tildeltTil != null) {
-            tildelingRepository.tildel(oppgaveDto.id, tildeltTil.oid)
+            tildelingDao.tildel(oppgaveDto.id, tildeltTil.oid)
         } else {
-            tildelingRepository.avmeld(oppgaveDto.id)
+            tildelingDao.avmeld(oppgaveDto.id)
         }
     }
 

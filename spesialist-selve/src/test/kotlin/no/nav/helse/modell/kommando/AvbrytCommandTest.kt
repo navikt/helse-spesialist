@@ -18,7 +18,7 @@ internal class AvbrytCommandTest {
             commandContextRepository = commandContextRepository,
             oppgaveService = mockk<OppgaveService>(relaxed = true),
             reservasjonRepository = mockk(relaxed = true),
-            tildelingRepository = mockk(relaxed = true),
+            tildelingDao = mockk(relaxed = true),
             oppgaveDao = mockk(relaxed = true),
             totrinnsvurderingService = mockk(relaxed = true)
         )

@@ -2,7 +2,7 @@ package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.ReservasjonRepository
-import no.nav.helse.db.TildelingRepository
+import no.nav.helse.db.TildelingDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -11,7 +11,7 @@ import java.util.UUID
 internal class ReserverPersonHvisTildeltCommand(
     private val fødselsnummer: String,
     private val reservasjonRepository: ReservasjonRepository,
-    private val tildelingRepository: TildelingRepository,
+    private val tildelingDao: TildelingDao,
     private val oppgaveDao: OppgaveDao,
     private val totrinnsvurderingService: TotrinnsvurderingService,
 ) : Command {
@@ -20,7 +20,7 @@ internal class ReserverPersonHvisTildeltCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        val tildeltSaksbehandler = tildelingRepository.tildelingForPerson(fødselsnummer) ?: return true
+        val tildeltSaksbehandler = tildelingDao.tildelingForPerson(fødselsnummer) ?: return true
         val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(fødselsnummer)
         val totrinnsvurdering = totrinnsvurderingService.hentAktiv(vedtaksperiodeId)
         val saksbehandlerOid: UUID =

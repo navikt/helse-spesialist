@@ -5,7 +5,6 @@ import io.ktor.server.application.Application
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.DBRepositories
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.db.TildelingDao
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.kafka.RiverSetup
 import no.nav.helse.mediator.BehandlingsstatistikkService
@@ -54,7 +53,7 @@ class SpesialistApp(
     private val oppgaveDao = repositories.oppgaveDao
     private val periodehistorikkDao = repositories.periodehistorikkDao
     private val saksbehandlerDao = repositories.saksbehandlerDao
-    private val tildelingDao = TildelingDao(dataSource)
+    private val tildelingDao = repositories.tildelingDao
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val opptegnelseRepository = repositories.opptegnelseRepository
     private val behandlingsstatistikkDao = repositories.behandlingsstatistikkDao
@@ -152,7 +151,7 @@ class SpesialistApp(
         oppgaveService =
             OppgaveService(
                 oppgaveDao = oppgaveDao,
-                tildelingRepository = tildelingDao,
+                tildelingDao = tildelingDao,
                 reservasjonRepository = reservasjonDao,
                 opptegnelseRepository = opptegnelseRepository,
                 totrinnsvurderingDao = totrinnsvurderingDao,

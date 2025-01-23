@@ -8,7 +8,6 @@ import no.nav.helse.db.DbQuery
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TestMelding
-import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.api.PgAbonnementDao
 import no.nav.helse.db.api.PgArbeidsgiverApiDao
 import no.nav.helse.db.api.PgNotatApiDao
@@ -121,7 +120,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource)
     internal val vedtakDao = repositories.vedtakDao
     internal val commandContextDao = CommandContextDao(dataSource)
-    internal val tildelingDao = TildelingDao(dataSource)
+    internal val tildelingDao = repositories.tildelingDao
     internal val saksbehandlerDao = repositories.saksbehandlerDao
     internal val overstyringDao = OverstyringDao(session)
     internal val overstyringApiDao = PgOverstyringApiDao(dataSource)

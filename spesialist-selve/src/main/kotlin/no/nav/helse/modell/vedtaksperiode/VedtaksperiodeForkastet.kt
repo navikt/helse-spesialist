@@ -5,7 +5,7 @@ import kotliquery.TransactionalSession
 import no.nav.helse.db.CommandContextRepository
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.ReservasjonRepository
-import no.nav.helse.db.TildelingRepository
+import no.nav.helse.db.TildelingDao
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -52,7 +52,7 @@ class VedtaksperiodeForkastetCommand(
     commandContextRepository: CommandContextRepository,
     oppgaveService: OppgaveService,
     reservasjonRepository: ReservasjonRepository,
-    tildelingRepository: TildelingRepository,
+    tildelingDao: TildelingDao,
     oppgaveDao: OppgaveDao,
     totrinnsvurderingService: TotrinnsvurderingService,
 ) : MacroCommand() {
@@ -64,7 +64,7 @@ class VedtaksperiodeForkastetCommand(
                 commandContextRepository = commandContextRepository,
                 oppgaveService = oppgaveService,
                 reservasjonRepository = reservasjonRepository,
-                tildelingRepository = tildelingRepository,
+                tildelingDao = tildelingDao,
                 oppgaveDao = oppgaveDao,
                 totrinnsvurderingService = totrinnsvurderingService,
             ),

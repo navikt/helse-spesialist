@@ -5,7 +5,6 @@ import no.nav.helse.MeldingPubliserer
 import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.db.TildelingDao
 import no.nav.helse.e2e.AbstractE2ETest
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.GodkjenningService
@@ -34,7 +33,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     private val oppgaveService =
         OppgaveService(
             oppgaveDao = oppgaveDao,
-            tildelingRepository = TildelingDao(dataSource),
+            tildelingDao = repositories.tildelingDao,
             reservasjonRepository = reservasjonDao,
             opptegnelseRepository = repositories.opptegnelseRepository,
             totrinnsvurderingDao = totrinnsvurderingDao,

@@ -13,7 +13,6 @@ import no.nav.helse.db.ReservasjonRepository
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.TildelingRepository
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.mediator.SaksbehandlerMediator.Companion.tilApiversjon
@@ -60,7 +59,7 @@ interface Oppgavefinner {
 
 class OppgaveService(
     private val oppgaveDao: OppgaveDao,
-    private val tildelingRepository: TildelingRepository,
+    private val tildelingDao: TildelingDao,
     private val reservasjonRepository: ReservasjonRepository,
     private val opptegnelseRepository: OpptegnelseRepository,
     private val totrinnsvurderingDao: TotrinnsvurderingDao,
@@ -76,7 +75,7 @@ class OppgaveService(
     internal fun nyOppgaveService(transactionalSession: TransactionalSession): OppgaveService =
         OppgaveService(
             oppgaveDao = repositories.withSessionContext(transactionalSession).oppgaveDao,
-            tildelingRepository = TildelingDao(transactionalSession),
+            tildelingDao = repositories.withSessionContext(transactionalSession).tildelingDao,
             reservasjonRepository = ReservasjonDao(transactionalSession),
             opptegnelseRepository = repositories.withSessionContext(transactionalSession).opptegnelseRepository,
             totrinnsvurderingDao = repositories.withSessionContext(transactionalSession).totrinnsvurderingDao,
@@ -113,7 +112,7 @@ class OppgaveService(
         oppgave.register(oppgavemelder)
         oppgavemelder.oppgaveOpprettet(oppgave)
         tildelVedReservasjon(fødselsnummer, oppgave)
-        Oppgavelagrer(tildelingRepository).lagre(this, oppgave.toDto())
+        Oppgavelagrer(tildelingDao).lagre(this, oppgave.toDto())
     }
 
     fun <T> oppgave(
@@ -130,7 +129,7 @@ class OppgaveService(
         val fødselsnummer = oppgaveDao.finnFødselsnummer(id)
         oppgave.register(Oppgavemelder(fødselsnummer, meldingPubliserer))
         val returverdi = oppgaveBlock(oppgave)
-        Oppgavelagrer(tildelingRepository).oppdater(this@OppgaveService, oppgave.toDto())
+        Oppgavelagrer(tildelingDao).oppdater(this@OppgaveService, oppgave.toDto())
         return returverdi
     }
 

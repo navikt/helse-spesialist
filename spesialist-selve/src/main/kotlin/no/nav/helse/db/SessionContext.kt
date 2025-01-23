@@ -14,4 +14,5 @@ interface SessionContext {
     val vedtakDao: VedtakDao
     val saksbehandlerDao: SaksbehandlerDao
     val stansAutomatiskBehandlingDao: StansAutomatiskBehandlingDao
+    val tildelingDao: TildelingDao
 }
