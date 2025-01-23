@@ -2,7 +2,6 @@ package no.nav.helse
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.db.OpptegnelseDao
-import no.nav.helse.db.PgAnnulleringRepository
 import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgNotatDao
 import no.nav.helse.db.PgOppgaveDao
@@ -38,6 +37,7 @@ internal class TestMediator(
     testRapid: TestRapid,
     dataSource: DataSource,
 ) {
+    private val repositoryFactory = RepositoryFactoryImpl(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val oppgaveDao = PgOppgaveDao(dataSource)
     private val historikkinnslagRepository = PgPeriodehistorikkDao(dataSource)
@@ -47,7 +47,7 @@ internal class TestMediator(
     private val tildelingDao = TildelingDao(dataSource)
     private val notatDao = PgNotatDao(dataSource)
     private val dialogDao = PgDialogDao(dataSource)
-    private val annulleringRepository = PgAnnulleringRepository(dataSource)
+    private val annulleringRepository = repositoryFactory.createAnnulleringRepository()
     private val meldingPubliserer = MessageContextMeldingPubliserer(testRapid)
 
     private val stansAutomatiskBehandlingMediator =
@@ -73,7 +73,6 @@ internal class TestMediator(
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = tilgangsgrupper,
         )
-    private val repositoryFactory = RepositoryFactoryImpl(dataSource)
 
     private val saksbehandlerMediator =
         SaksbehandlerMediator(

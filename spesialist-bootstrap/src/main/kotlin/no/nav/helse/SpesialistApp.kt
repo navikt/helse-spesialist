@@ -5,7 +5,6 @@ import io.ktor.server.application.Application
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.OpptegnelseDao
-import no.nav.helse.db.PgAnnulleringRepository
 import no.nav.helse.db.PgAvviksvurderingDao
 import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgNotatDao
@@ -192,7 +191,7 @@ class SpesialistApp(
                 tilgangsgrupper = tilgangsgrupper,
                 stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
                 totrinnsvurderingService = totrinnsvurderingService,
-                annulleringRepository = PgAnnulleringRepository(dataSource),
+                annulleringRepository = repositoryFactory.createAnnulleringRepository(),
             )
         dokumentMediator = DokumentMediator(dokumentDao, meldingPubliserer)
         godkjenningService =

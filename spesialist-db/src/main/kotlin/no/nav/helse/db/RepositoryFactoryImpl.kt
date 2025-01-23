@@ -8,5 +8,7 @@ import javax.sql.DataSource
 class RepositoryFactoryImpl(private val dataSource: DataSource) : RepositoryFactory {
     override fun createAbonnementDao(): AbonnementDao = PgAbonnementDao(dataSource)
 
+    override fun createAnnulleringRepository() = PgAnnulleringRepository(dataSource)
+
     override fun sessionContextFrom(session: Session) = SessionContextImpl(session)
 }
