@@ -1,11 +1,11 @@
 package no.nav.helse.modell.varsel
 
-import javax.sql.DataSource
+import no.nav.helse.db.DefinisjonDao
 
-class VarselRepository(dataSource: DataSource) {
-    private val varselDao = PgVarselDao(dataSource)
-    private val definisjonDao = DefinisjonDao(dataSource)
-
+class VarselRepository(
+    private val varselDao: PgVarselDao,
+    private val definisjonDao: DefinisjonDao,
+) {
     fun lagreDefinisjon(definisjonDto: VarseldefinisjonDto) {
         definisjonDao.lagreDefinisjon(
             unikId = definisjonDto.id,

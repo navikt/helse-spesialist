@@ -1,27 +1,26 @@
-package no.nav.helse.modell.varsel
+package no.nav.helse.db
 
 import kotliquery.Row
 import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.db.MedDataSource
-import no.nav.helse.db.QueryRunner
+import no.nav.helse.modell.varsel.Varseldefinisjon
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-class DefinisjonDao(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource) {
-    fun definisjonFor(definisjonId: UUID) =
+class PgDefinisjonDao internal constructor(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource), DefinisjonDao {
+    override fun definisjonFor(definisjonId: UUID) =
         asSQL(
             "SELECT * FROM api_varseldefinisjon WHERE unik_id = :definisjonId LIMIT 1",
             "definisjonId" to definisjonId,
         ).single { it.mapToDefinisjon() }.let(::checkNotNull)
 
-    fun sisteDefinisjonFor(varselkode: String) =
+    override fun sisteDefinisjonFor(varselkode: String) =
         asSQL(
             "SELECT * FROM api_varseldefinisjon WHERE kode = :varselKode ORDER BY opprettet DESC LIMIT 1",
             "varselKode" to varselkode,
         ).single { it.mapToDefinisjon() }.let(::checkNotNull)
 
-    fun lagreDefinisjon(
+    override fun lagreDefinisjon(
         unikId: UUID,
         kode: String,
         tittel: String,

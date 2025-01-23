@@ -17,7 +17,7 @@ internal interface VarselDao {
     )
 }
 
-internal class PgVarselDao(queryRunner: QueryRunner) : VarselDao, QueryRunner by queryRunner {
+class PgVarselDao(queryRunner: QueryRunner) : VarselDao, QueryRunner by queryRunner {
     constructor(session: Session) : this(MedSession(session))
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 

@@ -9,6 +9,8 @@ import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
+import no.nav.helse.modell.varsel.PgVarselDao
+import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.intellij.lang.annotations.Language
@@ -33,6 +35,10 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
             commandContextDao = repositories.commandContextDao,
             dokumentDao = repositories.dokumentDao,
             personDao = repositories.personDao,
+            varselRepository = VarselRepository(
+                varselDao = PgVarselDao(dataSource),
+                definisjonDao = repositories.definisjonDao
+            )
         )
 
     @BeforeEach

@@ -14,6 +14,8 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
+import no.nav.helse.modell.varsel.PgVarselDao
+import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
@@ -120,6 +122,10 @@ internal class TestMediator(
             commandContextDao = repositories.commandContextDao,
             dokumentDao = repositories.dokumentDao,
             personDao = repositories.personDao,
+            varselRepository = VarselRepository(
+                varselDao = PgVarselDao(dataSource),
+                definisjonDao = repositories.definisjonDao
+            )
         )
         RiverSetup(dataSource, testRapid, meldingMediator).setUp()
     }

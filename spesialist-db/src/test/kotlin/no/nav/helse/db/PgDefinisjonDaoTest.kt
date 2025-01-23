@@ -1,7 +1,6 @@
 package no.nav.helse.db
 
 import no.nav.helse.DatabaseIntegrationTest
-import no.nav.helse.modell.varsel.DefinisjonDao
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -12,9 +11,9 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Isolated
-internal class DefinisjonDaoTest: DatabaseIntegrationTest() {
+internal class PgDefinisjonDaoTest: DatabaseIntegrationTest() {
 
-    private val definisjonDao = DefinisjonDao(dataSource)
+    private val definisjonDao = PgDefinisjonDao(dataSource)
 
     @BeforeEach
     fun tømTabeller() {

@@ -28,6 +28,7 @@ interface Repositories {
     val overstyringDao: OverstyringDao
     val personDao: PersonDao
     val påVentDao: PåVentDao
+    val definisjonDao: DefinisjonDao
 
     fun withSessionContext(session: Session): SessionContext
 }

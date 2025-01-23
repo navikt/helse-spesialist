@@ -36,7 +36,7 @@ class MeldingMediator(
     private val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao = MeldingDuplikatkontrollDao(dataSource),
     private val kommandofabrikk: Kommandofabrikk,
     private val dokumentDao: DokumentDao,
-    private val varselRepository: VarselRepository = VarselRepository(dataSource),
+    private val varselRepository: VarselRepository,
     private val personService: PersonService = PersonService(dataSource, repositories),
     private val poisonPills: PoisonPills,
 ) : Personhåndterer {

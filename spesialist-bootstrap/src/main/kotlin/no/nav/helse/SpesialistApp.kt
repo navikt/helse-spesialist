@@ -20,6 +20,8 @@ import no.nav.helse.modell.automatisering.PlukkTilManuell
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
+import no.nav.helse.modell.varsel.PgVarselDao
+import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.bootstrap.ApiAvhengigheter
 import no.nav.helse.spesialist.api.bootstrap.Bootstrap
@@ -169,6 +171,11 @@ class SpesialistApp(
                 commandContextDao = repositories.commandContextDao,
                 dokumentDao = dokumentDao,
                 personDao = repositories.personDao,
+                varselRepository =
+                    VarselRepository(
+                        varselDao = PgVarselDao(dataSource),
+                        definisjonDao = repositories.definisjonDao,
+                    ),
             )
         RiverSetup(dataSource, rapidsConnection, meldingMediator).setUp()
         saksbehandlerMediator =
