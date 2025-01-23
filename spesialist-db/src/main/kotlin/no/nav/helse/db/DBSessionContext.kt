@@ -8,4 +8,5 @@ class DBSessionContext(session: Session) : SessionContext {
     override val avviksvurderingDao = PgAvviksvurderingDao(session)
     override val opptegnelseRepository = PgOpptegnelseRepository(session)
     override val inntektskilderRepository = PgInntektskilderRepository(session, arbeidsgiverDao, avviksvurderingDao)
+    override val dialogDao = PgDialogDao(session)
 }

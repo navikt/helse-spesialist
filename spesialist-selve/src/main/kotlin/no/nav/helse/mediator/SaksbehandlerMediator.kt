@@ -4,7 +4,6 @@ import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.AnnulleringRepository
 import no.nav.helse.db.PeriodehistorikkDao
-import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.Repositories
 import no.nav.helse.db.ReservasjonDao
@@ -123,7 +122,7 @@ class SaksbehandlerMediator(
     private val påVentDao = PåVentDao(dataSource)
     private val periodehistorikkDao: PeriodehistorikkDao = PgPeriodehistorikkDao(dataSource)
     private val vedtakBegrunnelseDao = VedtakBegrunnelseDao(dataSource)
-    private val dialogDao = PgDialogDao(dataSource)
+    private val dialogDao = repositories.dialogDao
     private val env = Environment()
 
     override fun håndter(

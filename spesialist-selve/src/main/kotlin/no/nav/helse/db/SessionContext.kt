@@ -6,4 +6,5 @@ interface SessionContext {
     val avviksvurderingDao: AvviksvurderingDao
     val inntektskilderRepository: InntektskilderRepository
     val opptegnelseRepository: OpptegnelseRepository
+    val dialogDao: DialogDao
 }

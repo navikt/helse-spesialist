@@ -8,6 +8,7 @@ import no.nav.helse.db.MeldingRepository
 import no.nav.helse.db.PersonRepository
 import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.db.RisikovurderingRepository
+import no.nav.helse.db.SessionContext
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålRepository
 import no.nav.helse.db.overstyring.OverstyringRepository
@@ -57,12 +58,14 @@ internal class Automatisering(
             transactionalSession: TransactionalSession,
             subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
             stikkprøver: Stikkprøver,
+            sessionContext: SessionContext,
         ): Automatisering {
             return Automatisering(
                 risikovurderingRepository = RisikovurderingDao(transactionalSession),
                 stansAutomatiskBehandlinghåndterer =
                     StansAutomatiskBehandlingMediator.Factory.stansAutomatiskBehandlingMediator(
                         transactionalSession,
+                        sessionContext,
                         subsumsjonsmelderProvider,
                     ),
                 automatiseringRepository = AutomatiseringDao(transactionalSession),

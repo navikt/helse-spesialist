@@ -4,10 +4,10 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.MeldingPubliserer
+import no.nav.helse.db.DialogDao
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
-import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
 import no.nav.helse.mediator.KommandokjedeEndretEvent
@@ -40,7 +40,7 @@ class StansAutomatiskBehandlingMediatorTest {
     private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val notatDao = mockk<NotatDao>(relaxed = true)
-    private val dialogDao = mockk<PgDialogDao>(relaxed = true)
+    private val dialogDao = mockk<DialogDao>(relaxed = true)
 
     private val meldingPubliserer = object : MeldingPubliserer {
         private val subsumsjonEvents: MutableList<SubsumsjonEvent> = mutableListOf()

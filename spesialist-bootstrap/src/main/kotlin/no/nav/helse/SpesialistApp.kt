@@ -4,7 +4,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.ktor.server.application.Application
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.DBRepositories
-import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgNotatDao
 import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgPeriodehistorikkDao
@@ -67,7 +66,7 @@ class SpesialistApp(
     private val opptegnelseRepository = repositories.opptegnelseRepository
     private val behandlingsstatistikkDao = repositories.behandlingsstatistikkDao
     private val notatDao = PgNotatDao(dataSource)
-    private val dialogDao = PgDialogDao(dataSource)
+    private val dialogDao = repositories.dialogDao
     private val totrinnsvurderingDao = PgTotrinnsvurderingDao(dataSource)
     private val dokumentDao = PgDokumentDao(dataSource)
     private val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(dataSource)
@@ -199,6 +198,7 @@ class SpesialistApp(
                 oppgaveService = oppgaveService,
                 saksbehandlerRepository = saksbehandlerDao,
                 tilgangskontroll = tilgangskontrollørForReservasjon,
+                dialogDao = repositories.dialogDao,
             )
         subsumsjonsmelder = Subsumsjonsmelder(versjonAvKode, meldingPubliserer)
 

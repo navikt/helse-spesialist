@@ -4,7 +4,6 @@ import kotliquery.Session
 import kotliquery.TransactionalSession
 import kotliquery.sessionOf
 import no.nav.helse.db.CommandContextRepository
-import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
@@ -316,6 +315,7 @@ class Kommandofabrikk(
         StansAutomatiskBehandlingMediator.Factory
             .stansAutomatiskBehandlingMediator(
                 session,
+                repositories.withSessionContext(session),
                 subsumsjonsmelderProvider,
             ).håndter(hendelse)
     }
@@ -441,7 +441,12 @@ class Kommandofabrikk(
         oppgaveService.nyOppgaveService(transactionalSession)
 
     private fun transaksjonellAutomatisering(transactionalSession: TransactionalSession): Automatisering =
-        Automatisering.Factory.automatisering(transactionalSession, subsumsjonsmelderProvider, stikkprøver)
+        Automatisering.Factory.automatisering(
+            transactionalSession,
+            subsumsjonsmelderProvider,
+            stikkprøver,
+            repositories.withSessionContext(transactionalSession),
+        )
 
     private fun iverksett(
         command: Command,
@@ -491,6 +496,6 @@ class Kommandofabrikk(
             PgTotrinnsvurderingDao(session),
             PgOppgaveDao(session),
             PgPeriodehistorikkDao(session),
-            PgDialogDao(session),
+            repositories.withSessionContext(session).dialogDao,
         )
 }

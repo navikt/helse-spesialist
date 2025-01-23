@@ -6,7 +6,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.sessionOf
 import no.nav.helse.db.DbQuery
 import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgNotatDao
 import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgPeriodehistorikkDao
@@ -116,7 +115,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val påVentDao = PåVentDao(session)
     internal val stansAutomatiskBehandlingDao = StansAutomatiskBehandlingDao(session)
     internal val notatDao = PgNotatDao(dataSource)
-    internal val dialogDao = PgDialogDao(dataSource)
+    internal val dialogDao = repositories.dialogDao
     internal val annulleringRepository = repositories.annulleringRepository
     private val personService = PersonService(dataSource, repositories)
     private val inntektskilderDao = repositories.withSessionContext(session).inntektskilderRepository

@@ -2,9 +2,9 @@ package no.nav.helse.mediator
 
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.MeldingPubliserer
+import no.nav.helse.db.DialogDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
-import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgPeriodehistorikkDao
 import no.nav.helse.db.PgTotrinnsvurderingDao
@@ -36,12 +36,13 @@ class GodkjenningService(
     private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
     private val periodehistorikkDao: PeriodehistorikkDao = PgPeriodehistorikkDao(dataSource),
     private val saksbehandlerRepository: SaksbehandlerRepository,
+    private val dialogDao: DialogDao,
     private val totrinnsvurderingService: TotrinnsvurderingService =
         TotrinnsvurderingService(
             PgTotrinnsvurderingDao(dataSource),
             oppgaveDao,
             periodehistorikkDao,
-            PgDialogDao(dataSource),
+            dialogDao,
         ),
     private val tilgangskontroll: Tilgangskontroll,
 ) : Godkjenninghåndterer {

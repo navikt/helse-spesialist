@@ -5,10 +5,10 @@ import no.nav.helse.db.DialogDao
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
-import no.nav.helse.db.PgDialogDao
 import no.nav.helse.db.PgNotatDao
 import no.nav.helse.db.PgOppgaveDao
 import no.nav.helse.db.PgPeriodehistorikkDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
 import no.nav.helse.db.StansAutomatiskBehandlingRepository
@@ -48,6 +48,7 @@ class StansAutomatiskBehandlingMediator(
     object Factory {
         fun stansAutomatiskBehandlingMediator(
             session: Session,
+            sessionContext: SessionContext,
             subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
         ): StansAutomatiskBehandlingMediator =
             StansAutomatiskBehandlingMediator(
@@ -55,7 +56,7 @@ class StansAutomatiskBehandlingMediator(
                 PgPeriodehistorikkDao(session),
                 PgOppgaveDao(session),
                 PgNotatDao(session),
-                PgDialogDao(session),
+                sessionContext.dialogDao,
                 subsumsjonsmelderProvider,
             )
     }
