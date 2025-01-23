@@ -4,7 +4,6 @@ import kotliquery.Session
 import kotliquery.TransactionalSession
 import kotliquery.sessionOf
 import no.nav.helse.db.CommandContextRepository
-import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.db.Repositories
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SessionContext
@@ -74,7 +73,7 @@ class Kommandofabrikk(
     private val repositories: Repositories,
     oppgaveService: () -> OppgaveService,
     private val godkjenningMediator: GodkjenningMediator,
-    private val generasjonService: GenerasjonService = GenerasjonService(dataSource),
+    private val generasjonService: GenerasjonService = GenerasjonService(dataSource, repositories),
     private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
     private val stikkprøver: Stikkprøver,
 ) {
@@ -366,7 +365,7 @@ class Kommandofabrikk(
             utbetaling = utbetaling,
             førsteKjenteDagFinner = førsteKjenteDagFinner,
             automatisering = transaksjonellAutomatisering(session),
-            vedtakDao = PgVedtakDao(session),
+            vedtakDao = repositories.withSessionContext(session).vedtakDao,
             commandContextRepository = CommandContextDao(session),
             personRepository = PersonDao(session),
             inntektskilderRepository = repositories.withSessionContext(session).inntektskilderRepository,

@@ -11,4 +11,5 @@ interface SessionContext {
     val oppgaveDao: OppgaveDao
     val periodehistorikkDao: PeriodehistorikkDao
     val totrinnsvurderingDao: TotrinnsvurderingDao
+    val vedtakDao: VedtakDao
 }

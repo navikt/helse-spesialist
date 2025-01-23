@@ -6,7 +6,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.sessionOf
 import no.nav.helse.db.DbQuery
 import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
@@ -101,7 +100,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val oppgaveDao = repositories.oppgaveDao
     internal val periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource)
     internal val periodehistorikkDao = repositories.periodehistorikkDao
-    internal val vedtakDao = PgVedtakDao(dataSource)
+    internal val vedtakDao = repositories.vedtakDao
     internal val commandContextDao = CommandContextDao(dataSource)
     internal val saksbehandlerDao = SaksbehandlerDao(dataSource)
     internal val reservasjonDao = ReservasjonDao(session)
@@ -280,7 +279,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             if (utbetalingId != null) this.nyUtbetalingForVedtaksperiode(vedtaksperiodeId, utbetalingId)
             if (forkastet) this.vedtaksperiodeForkastet(vedtaksperiodeId)
         }
-        PgVedtakDao(dataSource).finnVedtakId(vedtaksperiodeId)?.also {
+        vedtakDao.finnVedtakId(vedtaksperiodeId)?.also {
             vedtakId = it
         }
         opprettVedtakstype(vedtaksperiodeId, periodetype, inntektskilde)

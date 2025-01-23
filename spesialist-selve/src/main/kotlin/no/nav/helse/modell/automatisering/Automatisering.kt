@@ -6,7 +6,6 @@ import no.nav.helse.db.EgenAnsattRepository
 import no.nav.helse.db.GenerasjonDao
 import no.nav.helse.db.MeldingRepository
 import no.nav.helse.db.PersonRepository
-import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.db.RisikovurderingRepository
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.VedtakDao
@@ -72,7 +71,7 @@ internal class Automatisering(
                 åpneGosysOppgaverRepository = ÅpneGosysOppgaverDao(transactionalSession),
                 vergemålRepository = VergemålDao(transactionalSession),
                 personRepository = PersonDao(transactionalSession),
-                vedtakDao = PgVedtakDao(transactionalSession),
+                vedtakDao = sessionContext.vedtakDao,
                 overstyringRepository = OverstyringDao(transactionalSession),
                 stikkprøver = stikkprøver,
                 meldingRepository = MeldingDao(transactionalSession),

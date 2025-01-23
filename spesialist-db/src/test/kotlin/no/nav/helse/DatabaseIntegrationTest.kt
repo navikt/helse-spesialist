@@ -7,7 +7,6 @@ import kotliquery.sessionOf
 import no.nav.helse.db.DBRepositories
 import no.nav.helse.db.DbQuery
 import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
@@ -124,7 +123,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val periodehistorikkDao = repositories.periodehistorikkDao
     internal val arbeidsforholdDao = ArbeidsforholdDao(session)
     internal val arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource)
-    internal val vedtakDao = PgVedtakDao(dataSource)
+    internal val vedtakDao = repositories.vedtakDao
     internal val commandContextDao = CommandContextDao(dataSource)
     internal val tildelingDao = TildelingDao(dataSource)
     internal val saksbehandlerDao = SaksbehandlerDao(dataSource)
@@ -374,7 +373,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             if (utbetalingId != null) this.nyUtbetalingForVedtaksperiode(vedtaksperiodeId, utbetalingId)
             if (forkastet) this.vedtaksperiodeForkastet(vedtaksperiodeId)
         }
-        PgVedtakDao(dataSource).finnVedtakId(vedtaksperiodeId)?.also {
+        vedtakDao.finnVedtakId(vedtaksperiodeId)?.also {
             vedtakId = it
         }
         opprettVedtakstype(vedtaksperiodeId, periodetype, inntektskilde)

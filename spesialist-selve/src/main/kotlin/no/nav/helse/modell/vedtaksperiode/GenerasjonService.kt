@@ -1,7 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import kotliquery.TransactionalSession
-import no.nav.helse.db.PgVedtakDao
+import no.nav.helse.db.Repositories
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 import javax.sql.DataSource
 
-class GenerasjonService(dataSource: DataSource) {
+class GenerasjonService(dataSource: DataSource, private val repositories: Repositories) {
     private val pgGenerasjonDao = PgGenerasjonDao(dataSource)
     private val hentedeGenerasjoner: MutableMap<UUID, List<BehandlingDto>> = mutableMapOf()
 
@@ -27,7 +27,7 @@ class GenerasjonService(dataSource: DataSource) {
     }
 
     private fun TransactionalSession.finnVedtaksperiode(vedtaksperiodeId: UUID): VedtaksperiodeDto {
-        return PgVedtakDao(this).finnVedtaksperiode(vedtaksperiodeId)
+        return repositories.withSessionContext(this).vedtakDao.finnVedtaksperiode(vedtaksperiodeId)
             ?.copy(behandlinger = finnGenerasjoner(vedtaksperiodeId))
             ?: throw IllegalStateException("Forventer å finne vedtaksperiode for vedtaksperiodeId=$vedtaksperiodeId")
     }
@@ -40,13 +40,13 @@ class GenerasjonService(dataSource: DataSource) {
         fødselsnummer: String,
         vedtaksperiode: VedtaksperiodeDto,
     ) {
-        PgVedtakDao(this).lagreVedtaksperiode(fødselsnummer, vedtaksperiode)
+        repositories.withSessionContext(this).vedtakDao.lagreVedtaksperiode(fødselsnummer, vedtaksperiode)
         loggDiffMellomHentetOgSkalLagres(vedtaksperiode)
         hentedeGenerasjoner.remove(vedtaksperiode.vedtaksperiodeId)
         vedtaksperiode.behandlinger.forEach { generasjonDto ->
             PgGenerasjonDao(this).lagreGenerasjon(generasjonDto)
         }
-        PgVedtakDao(this).lagreOpprinneligSøknadsdato(vedtaksperiode.vedtaksperiodeId)
+        repositories.withSessionContext(this).vedtakDao.lagreOpprinneligSøknadsdato(vedtaksperiode.vedtaksperiodeId)
     }
 
     private fun loggDiffMellomHentetOgSkalLagres(vedtaksperiode: VedtaksperiodeDto) {

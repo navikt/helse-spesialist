@@ -2,22 +2,21 @@ package no.nav.helse.modell.automatisering
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.helse.db.PgVedtakDao
-import no.nav.helse.util.januar
+import no.nav.helse.db.VedtakDao
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.person.Sykefraværstilfelle
+import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.risiko.Risikovurdering
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
-import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetaling.Utbetalingtype.REVURDERING
-import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
@@ -27,6 +26,7 @@ import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
+import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -43,7 +43,7 @@ internal class AutomatiseringTest {
     private val hendelseId = UUID.randomUUID()
     private val periodeFom = LocalDate.now()
 
-    private val vedtakDaoMock = mockk<PgVedtakDao>()
+    private val vedtakDaoMock = mockk<VedtakDao>()
     private val risikovurderingDaoMock =
         mockk<RisikovurderingDao> {
             every { hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(true)
