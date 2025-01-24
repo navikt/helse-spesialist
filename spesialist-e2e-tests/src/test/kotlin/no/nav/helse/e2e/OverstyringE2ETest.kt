@@ -9,7 +9,6 @@ import kotliquery.sessionOf
 import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.db.api.PgApiVarselRepository
 import no.nav.helse.db.api.PgArbeidsgiverApiDao
-import no.nav.helse.db.api.PgEgenAnsattApiDao
 import no.nav.helse.db.api.PgNotatApiDao
 import no.nav.helse.db.api.PgOppgaveApiDao
 import no.nav.helse.db.api.PgOverstyringApiDao
@@ -19,7 +18,6 @@ import no.nav.helse.db.api.PgRisikovurderingApiDao
 import no.nav.helse.db.api.PgSnapshotApiDao
 import no.nav.helse.db.api.PgTildelingApiDao
 import no.nav.helse.db.api.PgTotrinnsvurderingApiDao
-import no.nav.helse.db.api.PgVergemålApiDao
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
@@ -328,7 +326,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         PersonQuery(
             personoppslagService = PersonService(
                 personApiDao = PgPersonApiDao(dataSource),
-                egenAnsattApiDao = PgEgenAnsattApiDao(dataSource),
+                egenAnsattApiDao = repositories.egenAnsattApiDao,
                 tildelingApiDao = PgTildelingApiDao(dataSource),
                 arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource),
                 overstyringApiDao = PgOverstyringApiDao(dataSource),
@@ -339,7 +337,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                 notatDao = PgNotatApiDao(dataSource),
                 totrinnsvurderingApiDao = PgTotrinnsvurderingApiDao(dataSource),
                 påVentApiDao = repositories.påVentApiDao,
-                vergemålApiDao = PgVergemålApiDao(dataSource),
+                vergemålApiDao = repositories.vergemålApiDao,
                 snapshotService = SnapshotService(PgSnapshotApiDao(dataSource), snapshotClient),
                 reservasjonClient = mockk(relaxed = true),
                 oppgavehåndterer = mockk(relaxed = true),

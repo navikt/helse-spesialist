@@ -6,7 +6,6 @@ import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.Repositories
 import no.nav.helse.db.api.PgApiVarselRepository
 import no.nav.helse.db.api.PgArbeidsgiverApiDao
-import no.nav.helse.db.api.PgEgenAnsattApiDao
 import no.nav.helse.db.api.PgNotatApiDao
 import no.nav.helse.db.api.PgOppgaveApiDao
 import no.nav.helse.db.api.PgOverstyringApiDao
@@ -16,7 +15,6 @@ import no.nav.helse.db.api.PgRisikovurderingApiDao
 import no.nav.helse.db.api.PgSnapshotApiDao
 import no.nav.helse.db.api.PgTildelingApiDao
 import no.nav.helse.db.api.PgTotrinnsvurderingApiDao
-import no.nav.helse.db.api.PgVergemålApiDao
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.graphql.graphQLApi
@@ -40,12 +38,12 @@ class Bootstrap(
     private val tildelingApiDao = PgTildelingApiDao(dataSource)
     private val overstyringApiDao = PgOverstyringApiDao(dataSource)
     private val arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource)
-    private val egenAnsattApiDao = PgEgenAnsattApiDao(dataSource)
+    private val egenAnsattApiDao = repositories.egenAnsattApiDao
     private val notatApiDao = PgNotatApiDao(dataSource)
     private val totrinnsvurderingApiDao = PgTotrinnsvurderingApiDao(dataSource)
     private val apiVarselRepository = PgApiVarselRepository(dataSource)
     private val påVentApiDao = repositories.påVentApiDao
-    private val vergemålApiDao = PgVergemålApiDao(dataSource)
+    private val vergemålApiDao = repositories.vergemålApiDao
 
     fun ktorApp(
         application: Application,

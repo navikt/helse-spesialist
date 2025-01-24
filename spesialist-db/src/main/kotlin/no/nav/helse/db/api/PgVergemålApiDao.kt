@@ -3,7 +3,7 @@ package no.nav.helse.db.api
 import no.nav.helse.HelseDao
 import javax.sql.DataSource
 
-class PgVergemålApiDao(dataSource: DataSource) : HelseDao(dataSource), VergemålApiDao {
+class PgVergemålApiDao internal constructor(dataSource: DataSource) : HelseDao(dataSource), VergemålApiDao {
     override fun harFullmakt(fødselsnummer: String): Boolean? =
         asSQL(
             """

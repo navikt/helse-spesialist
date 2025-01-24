@@ -14,7 +14,6 @@ import no.nav.helse.db.api.PgPersonApiDao
 import no.nav.helse.db.api.PgRisikovurderingApiDao
 import no.nav.helse.db.api.PgTildelingApiDao
 import no.nav.helse.db.api.PgTotrinnsvurderingApiDao
-import no.nav.helse.db.api.PgVergemålApiDao
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
@@ -67,7 +66,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val overstyringApiDao = PgOverstyringApiDao(dataSource)
     protected val oppgaveApiDao = PgOppgaveApiDao(dataSource)
     protected val periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource)
-    protected val vergemålApiDao = PgVergemålApiDao(dataSource)
+    protected val vergemålApiDao = repositories.vergemålApiDao
 
     protected val egenAnsattApiDao = mockk<EgenAnsattApiDao>(relaxed = true)
     protected val oppgavehåndterer = mockk<Oppgavehåndterer>(relaxed = true)

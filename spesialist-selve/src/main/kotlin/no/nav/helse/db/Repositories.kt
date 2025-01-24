@@ -3,7 +3,9 @@ package no.nav.helse.db
 import kotliquery.Session
 import no.nav.helse.db.api.AbonnementDao
 import no.nav.helse.db.api.ApiGenerasjonRepository
+import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.PåVentApiDao
+import no.nav.helse.db.api.VergemålApiDao
 
 interface Repositories {
     val abonnementDao: AbonnementDao
@@ -36,6 +38,8 @@ interface Repositories {
     val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao
     val påVentApiDao: PåVentApiDao
     val apiGenerasjonRepository: ApiGenerasjonRepository
+    val egenAnsattApiDao: EgenAnsattApiDao
+    val vergemålApiDao: VergemålApiDao
 
     fun withSessionContext(session: Session): SessionContext
 }
