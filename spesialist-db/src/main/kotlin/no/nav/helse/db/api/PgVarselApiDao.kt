@@ -15,9 +15,9 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgApiVarselDao internal constructor(dataSource: DataSource) : HelseDao(dataSource), ApiVarselDao {
+class PgVarselApiDao internal constructor(dataSource: DataSource) : HelseDao(dataSource), VarselApiDao {
     private companion object {
-        private val log = LoggerFactory.getLogger(PgApiVarselDao::class.java)
+        private val log = LoggerFactory.getLogger(PgVarselApiDao::class.java)
     }
 
     override fun finnVarslerSomIkkeErInaktiveFor(

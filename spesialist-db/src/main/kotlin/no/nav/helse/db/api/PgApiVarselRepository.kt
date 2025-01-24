@@ -10,7 +10,7 @@ import java.util.UUID
 import javax.sql.DataSource
 
 class PgApiVarselRepository internal constructor(dataSource: DataSource) : ApiVarselRepository {
-    private val varselDao = PgApiVarselDao(dataSource)
+    private val varselDao = PgVarselApiDao(dataSource)
     private val generasjonDao = PgGenerasjonApiDao(dataSource)
 
     override fun finnVarslerSomIkkeErInaktiveFor(

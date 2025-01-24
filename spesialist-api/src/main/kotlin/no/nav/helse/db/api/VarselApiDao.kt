@@ -4,7 +4,7 @@ import no.nav.helse.spesialist.api.varsel.Varsel
 import java.time.LocalDateTime
 import java.util.UUID
 
-interface ApiVarselDao {
+interface VarselApiDao {
     fun finnVarslerSomIkkeErInaktiveFor(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,

@@ -3,8 +3,8 @@ package no.nav.helse.db.api
 import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode
 import javax.sql.DataSource
 
-class PgApiGenerasjonRepository internal constructor(dataSource: DataSource) : ApiGenerasjonRepository {
-    private val varselDao = PgApiVarselDao(dataSource)
+class PgGenerasjonApiRepository internal constructor(dataSource: DataSource) : GenerasjonApiRepository {
+    private val varselDao = PgVarselApiDao(dataSource)
     private val generasjonDao = PgGenerasjonApiDao(dataSource)
 
     override fun perioderTilBehandling(oppgaveId: Long): Set<Vedtaksperiode> {

@@ -2,7 +2,7 @@ package no.nav.helse.db.api
 
 import java.util.UUID
 
-interface AbonnementDao {
+interface AbonnementApiDao {
     fun opprettAbonnement(
         saksbehandlerId: UUID,
         aktørId: String,

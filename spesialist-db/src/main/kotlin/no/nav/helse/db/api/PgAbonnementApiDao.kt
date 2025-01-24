@@ -6,7 +6,7 @@ import no.nav.helse.db.QueryRunner
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgAbonnementDao(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource), AbonnementDao {
+class PgAbonnementApiDao(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource), AbonnementApiDao {
     override fun opprettAbonnement(
         saksbehandlerId: UUID,
         aktørId: String,

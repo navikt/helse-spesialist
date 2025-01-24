@@ -102,11 +102,11 @@ class SaksbehandlerMediator(
     private val annulleringRepository: AnnulleringRepository,
 ) : Saksbehandlerhåndterer {
     private val saksbehandlerDao = repositories.saksbehandlerDao
-    private val generasjonRepository = repositories.apiGenerasjonRepository
+    private val generasjonRepository = repositories.generasjonApiRepository
     private val varselRepository = repositories.apiVarselRepository
     private val oppgaveApiDao = repositories.oppgaveApiDao
     private val opptegnelseRepository = repositories.opptegnelseRepository
-    private val abonnementDao = repositories.abonnementDao
+    private val abonnementDao = repositories.abonnementApiDao
     private val reservasjonDao = repositories.reservasjonDao
     private val overstyringDao = repositories.overstyringDao
     private val påVentDao = repositories.påVentDao

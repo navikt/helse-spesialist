@@ -10,9 +10,9 @@ import org.junit.jupiter.api.parallel.Isolated
 import java.util.UUID
 
 @Isolated
-internal class PgAbonnementDaoTest : DatabaseIntegrationTest() {
+internal class PgAbonnementApiDaoTest : DatabaseIntegrationTest() {
 
-    private val abonnementDao = PgAbonnementDao(dataSource)
+    private val abonnementDao = PgAbonnementApiDao(dataSource)
 
     @Test
     fun `får nytt sekvensnummer selvom det allerede fins et`() {

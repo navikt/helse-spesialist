@@ -21,9 +21,9 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Isolated
-internal class PgApiVarselDaoTest: DatabaseIntegrationTest() {
+internal class PgVarselApiDaoTest: DatabaseIntegrationTest() {
 
-    private val apiVarselDao = PgApiVarselDao(dataSource)
+    private val apiVarselDao = PgVarselApiDao(dataSource)
 
     @Test
     fun `Tom liste ved manglende varsler`() {

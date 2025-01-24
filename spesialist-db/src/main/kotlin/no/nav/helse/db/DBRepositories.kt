@@ -1,13 +1,12 @@
 package no.nav.helse.db
 
 import kotliquery.Session
-import no.nav.helse.db.api.PgAbonnementDao
-import no.nav.helse.db.api.PgApiGenerasjonRepository
-import no.nav.helse.db.api.PgApiVarselDao
+import no.nav.helse.db.api.PgAbonnementApiDao
 import no.nav.helse.db.api.PgApiVarselRepository
 import no.nav.helse.db.api.PgArbeidsgiverApiDao
 import no.nav.helse.db.api.PgEgenAnsattApiDao
 import no.nav.helse.db.api.PgGenerasjonApiDao
+import no.nav.helse.db.api.PgGenerasjonApiRepository
 import no.nav.helse.db.api.PgNotatApiDao
 import no.nav.helse.db.api.PgOppgaveApiDao
 import no.nav.helse.db.api.PgOverstyringApiDao
@@ -18,11 +17,12 @@ import no.nav.helse.db.api.PgRisikovurderingApiDao
 import no.nav.helse.db.api.PgSnapshotApiDao
 import no.nav.helse.db.api.PgTildelingApiDao
 import no.nav.helse.db.api.PgTotrinnsvurderingApiDao
+import no.nav.helse.db.api.PgVarselApiDao
 import no.nav.helse.db.api.PgVergemålApiDao
 import javax.sql.DataSource
 
 class DBRepositories(dataSource: DataSource) : Repositories {
-    override val abonnementDao = PgAbonnementDao(dataSource)
+    override val abonnementApiDao = PgAbonnementApiDao(dataSource)
     override val annulleringRepository = PgAnnulleringRepository(dataSource)
     override val behandlingsstatistikkDao = PgBehandlingsstatistikkDao(dataSource)
     override val opptegnelseRepository = PgOpptegnelseRepository(dataSource)
@@ -51,12 +51,12 @@ class DBRepositories(dataSource: DataSource) : Repositories {
     override val meldingDao = PgMeldingDao(dataSource)
     override val meldingDuplikatkontrollDao = PgMeldingDuplikatkontrollDao(dataSource)
     override val påVentApiDao = PgPåVentApiDao(dataSource)
-    override val apiGenerasjonRepository = PgApiGenerasjonRepository(dataSource)
+    override val generasjonApiRepository = PgGenerasjonApiRepository(dataSource)
     override val egenAnsattApiDao = PgEgenAnsattApiDao(dataSource)
     override val vergemålApiDao = PgVergemålApiDao(dataSource)
     override val totrinnsvurderingApiDao = PgTotrinnsvurderingApiDao(dataSource)
     override val tildelingApiDao = PgTildelingApiDao(dataSource)
-    override val apiVarselDao = PgApiVarselDao(dataSource)
+    override val varselApiDao = PgVarselApiDao(dataSource)
     override val apiVarselRepository = PgApiVarselRepository(dataSource)
     override val arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource)
     override val generasjonApiDao = PgGenerasjonApiDao(dataSource)

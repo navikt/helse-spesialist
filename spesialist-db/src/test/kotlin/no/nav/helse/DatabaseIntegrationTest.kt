@@ -9,7 +9,7 @@ import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.PgMeldingDuplikatkontrollDao
 import no.nav.helse.db.PgPersonDao
 import no.nav.helse.db.TestMelding
-import no.nav.helse.db.api.PgAbonnementDao
+import no.nav.helse.db.api.PgAbonnementApiDao
 import no.nav.helse.db.api.PgArbeidsgiverApiDao
 import no.nav.helse.db.api.PgNotatApiDao
 import no.nav.helse.db.api.PgOppgaveApiDao
@@ -119,7 +119,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val automatiseringDao = sessionContext.automatiseringDao
     internal val åpneGosysOppgaverDao = sessionContext.åpneGosysOppgaverDao
     internal val egenAnsattDao = sessionContext.egenAnsattDao
-    internal val abonnementDao = PgAbonnementDao(dataSource)
+    internal val abonnementDao = PgAbonnementApiDao(dataSource)
     internal val utbetalingDao = sessionContext.utbetalingDao
     internal val behandlingsstatistikkDao = repositories.behandlingsstatistikkDao
     internal val vergemålDao = sessionContext.vergemålDao
