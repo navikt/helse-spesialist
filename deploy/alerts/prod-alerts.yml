@@ -18,7 +18,7 @@ spec:
             ) by (container, namespace) > 0
           for: 15s
           annotations:
-            hva: '*{{ $labels.pod }}* er i CrashLoopBackoff'
+            hva: 'En eller flere av poddene til *{{ $labels.container }}* er i CrashLoopBackOff'
             handling: 'Du må se på hvorfor appen kræsjer'
           labels:
             namespace: tbd
