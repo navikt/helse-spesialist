@@ -21,51 +21,52 @@ import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.db.api.VergemålApiDao
 
 interface Repositories {
-    val abonnementApiDao: AbonnementApiDao
     val annulleringRepository: AnnulleringRepository
-    val behandlingsstatistikkDao: BehandlingsstatistikkDao
-    val opptegnelseRepository: OpptegnelseRepository
     val avviksvurderingDao: AvviksvurderingDao
+    val behandlingsstatistikkDao: BehandlingsstatistikkDao
+    val commandContextDao: CommandContextDao
+    val definisjonDao: DefinisjonDao
     val dialogDao: DialogDao
+    val dokumentDao: DokumentDao
+    val egenAnsattDao: EgenAnsattDao
+    val generasjonDao: GenerasjonDao
+    val meldingDao: MeldingDao
+    val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao
     val notatDao: NotatDao
     val oppgaveDao: OppgaveDao
+    val opptegnelseRepository: OpptegnelseRepository
+    val overstyringDao: OverstyringDao
     val periodehistorikkDao: PeriodehistorikkDao
-    val totrinnsvurderingDao: TotrinnsvurderingDao
-    val vedtakDao: VedtakDao
+    val personDao: PersonDao
     val poisonPillDao: PoisonPillDao
+    val påVentDao: PåVentDao
+    val reservasjonDao: ReservasjonDao
     val saksbehandlerDao: SaksbehandlerDao
     val stansAutomatiskBehandlingDao: StansAutomatiskBehandlingDao
     val tildelingDao: TildelingDao
-    val vedtakBegrunnelseDao: VedtakBegrunnelseDao
-    val generasjonDao: GenerasjonDao
-    val reservasjonDao: ReservasjonDao
-    val commandContextDao: CommandContextDao
-    val dokumentDao: DokumentDao
-    val egenAnsattDao: EgenAnsattDao
-    val overstyringDao: OverstyringDao
-    val personDao: PersonDao
-    val påVentDao: PåVentDao
-    val definisjonDao: DefinisjonDao
+    val totrinnsvurderingDao: TotrinnsvurderingDao
     val varselDao: VarselDao
-    val meldingDao: MeldingDao
-    val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao
-    val påVentApiDao: PåVentApiDao
-    val generasjonApiRepository: GenerasjonApiRepository
-    val egenAnsattApiDao: EgenAnsattApiDao
-    val vergemålApiDao: VergemålApiDao
-    val totrinnsvurderingApiDao: TotrinnsvurderingApiDao
-    val tildelingApiDao: TildelingApiDao
-    val varselApiDao: VarselApiDao
-    val varselApiRepository: VarselApiRepository
+    val vedtakDao: VedtakDao
+    val vedtakBegrunnelseDao: VedtakBegrunnelseDao
+
+    val abonnementApiDao: AbonnementApiDao
     val arbeidsgiverApiDao: ArbeidsgiverApiDao
+    val egenAnsattApiDao: EgenAnsattApiDao
     val generasjonApiDao: GenerasjonApiDao
+    val generasjonApiRepository: GenerasjonApiRepository
     val notatApiDao: NotatApiDao
     val oppgaveApiDao: OppgaveApiDao
     val overstyringApiDao: OverstyringApiDao
     val periodehistorikkApiDao: PeriodehistorikkApiDao
     val personApiDao: PersonApiDao
+    val påVentApiDao: PåVentApiDao
     val risikovurderingApiDao: RisikovurderingApiDao
     val snapshotApiDao: SnapshotApiDao
+    val tildelingApiDao: TildelingApiDao
+    val totrinnsvurderingApiDao: TotrinnsvurderingApiDao
+    val varselApiDao: VarselApiDao
+    val varselApiRepository: VarselApiRepository
+    val vergemålApiDao: VergemålApiDao
 
     fun withSessionContext(session: Session): SessionContext
 }

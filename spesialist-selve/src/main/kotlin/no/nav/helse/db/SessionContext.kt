@@ -1,33 +1,33 @@
 package no.nav.helse.db
 
 interface SessionContext {
-    val sykefraværstilfelleDao: SykefraværstilfelleDao
-    val arbeidsgiverDao: ArbeidsgiverDao
-    val avviksvurderingDao: AvviksvurderingDao
-    val inntektskilderRepository: InntektskilderRepository
-    val opptegnelseRepository: OpptegnelseRepository
-    val dialogDao: DialogDao
-    val notatDao: NotatDao
-    val oppgaveDao: OppgaveDao
-    val periodehistorikkDao: PeriodehistorikkDao
-    val totrinnsvurderingDao: TotrinnsvurderingDao
-    val vedtakDao: VedtakDao
-    val saksbehandlerDao: SaksbehandlerDao
-    val stansAutomatiskBehandlingDao: StansAutomatiskBehandlingDao
-    val tildelingDao: TildelingDao
-    val generasjonDao: GenerasjonDao
-    val reservasjonDao: ReservasjonDao
-    val commandContextDao: CommandContextDao
     val arbeidsforholdDao: ArbeidsforholdDao
+    val arbeidsgiverDao: ArbeidsgiverDao
     val automatiseringDao: AutomatiseringDao
+    val avviksvurderingDao: AvviksvurderingDao
+    val commandContextDao: CommandContextDao
+    val dialogDao: DialogDao
     val egenAnsattDao: EgenAnsattDao
-    val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao
-    val overstyringDao: OverstyringDao
-    val personDao: PersonDao
-    val påVentDao: PåVentDao
-    val risikovurderingDao: RisikovurderingDao
-    val utbetalingDao: UtbetalingDao
-    val vergemålDao: VergemålDao
+    val generasjonDao: GenerasjonDao
+    val inntektskilderRepository: InntektskilderRepository
     val meldingDao: MeldingDao
     val metrikkDao: MetrikkDao
+    val notatDao: NotatDao
+    val oppgaveDao: OppgaveDao
+    val opptegnelseRepository: OpptegnelseRepository
+    val overstyringDao: OverstyringDao
+    val periodehistorikkDao: PeriodehistorikkDao
+    val personDao: PersonDao
+    val påVentDao: PåVentDao
+    val reservasjonDao: ReservasjonDao
+    val risikovurderingDao: RisikovurderingDao
+    val saksbehandlerDao: SaksbehandlerDao
+    val stansAutomatiskBehandlingDao: StansAutomatiskBehandlingDao
+    val sykefraværstilfelleDao: SykefraværstilfelleDao
+    val tildelingDao: TildelingDao
+    val totrinnsvurderingDao: TotrinnsvurderingDao
+    val utbetalingDao: UtbetalingDao
+    val vedtakDao: VedtakDao
+    val vergemålDao: VergemålDao
+    val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao
 }
