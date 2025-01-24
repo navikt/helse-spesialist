@@ -3,7 +3,7 @@ package no.nav.helse.db
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Session
-import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.db.HelseDao.Companion.asSQL
 import no.nav.helse.db.PgCommandContextDao.CommandContextTilstand.AVBRUTT
 import no.nav.helse.db.PgCommandContextDao.CommandContextTilstand.FEIL
 import no.nav.helse.db.PgCommandContextDao.CommandContextTilstand.FERDIG

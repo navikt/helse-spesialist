@@ -2,10 +2,10 @@ package no.nav.helse.db
 
 import kotliquery.Session
 import kotliquery.queryOf
-import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.HelseDao.Companion.single
-import no.nav.helse.HelseDao.Companion.update
-import no.nav.helse.HelseDao.Companion.updateAndReturnGeneratedKey
+import no.nav.helse.db.HelseDao.Companion.asSQL
+import no.nav.helse.db.HelseDao.Companion.single
+import no.nav.helse.db.HelseDao.Companion.update
+import no.nav.helse.db.HelseDao.Companion.updateAndReturnGeneratedKey
 import no.nav.helse.objectMapper
 import org.intellij.lang.annotations.Language
 

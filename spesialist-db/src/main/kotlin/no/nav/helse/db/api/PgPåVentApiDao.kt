@@ -1,6 +1,6 @@
 package no.nav.helse.db.api
 
-import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.db.HelseDao.Companion.asSQL
 import no.nav.helse.db.MedDataSource
 import no.nav.helse.db.QueryRunner
 import no.nav.helse.db.api.PåVentApiDao.PaVentDto

@@ -2,7 +2,7 @@ package no.nav.helse.db
 
 import kotliquery.Query
 import kotliquery.Session
-import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.db.HelseDao.Companion.asSQL
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import java.util.UUID
 import javax.sql.DataSource

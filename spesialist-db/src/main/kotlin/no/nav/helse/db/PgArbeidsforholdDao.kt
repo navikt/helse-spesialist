@@ -1,9 +1,9 @@
 package no.nav.helse.db
 
 import kotliquery.Session
-import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.HelseDao.Companion.list
-import no.nav.helse.HelseDao.Companion.update
+import no.nav.helse.db.HelseDao.Companion.asSQL
+import no.nav.helse.db.HelseDao.Companion.list
+import no.nav.helse.db.HelseDao.Companion.update
 import no.nav.helse.modell.KomplettArbeidsforholdDto
 
 class PgArbeidsforholdDao internal constructor(

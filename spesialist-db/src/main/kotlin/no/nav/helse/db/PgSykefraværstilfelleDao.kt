@@ -2,8 +2,8 @@ package no.nav.helse.db
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Session
-import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.HelseDao.Companion.list
+import no.nav.helse.db.HelseDao.Companion.asSQL
+import no.nav.helse.db.HelseDao.Companion.list
 import no.nav.helse.db.overstyring.LovhjemmelForDatabase
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingsårsakDto

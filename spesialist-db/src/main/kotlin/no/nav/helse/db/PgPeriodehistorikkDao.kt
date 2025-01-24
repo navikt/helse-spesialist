@@ -1,7 +1,7 @@
 package no.nav.helse.db
 
 import kotliquery.Session
-import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.db.HelseDao.Companion.asSQL
 import no.nav.helse.modell.periodehistorikk.AutomatiskBehandlingStanset
 import no.nav.helse.modell.periodehistorikk.AvventerTotrinnsvurdering
 import no.nav.helse.modell.periodehistorikk.EndrePåVent

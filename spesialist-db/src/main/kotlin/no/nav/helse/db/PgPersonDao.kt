@@ -3,7 +3,7 @@ package no.nav.helse.db
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Session
-import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.db.HelseDao.Companion.asSQL
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.modell.person.PersonDto

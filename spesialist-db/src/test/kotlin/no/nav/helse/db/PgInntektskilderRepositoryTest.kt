@@ -3,8 +3,8 @@ package no.nav.helse.db
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Session
 import no.nav.helse.DatabaseIntegrationTest
-import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.HelseDao.Companion.single
+import no.nav.helse.db.HelseDao.Companion.asSQL
+import no.nav.helse.db.HelseDao.Companion.single
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.NyInntektskildeDto

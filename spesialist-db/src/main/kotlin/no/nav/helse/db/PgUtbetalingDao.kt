@@ -1,7 +1,7 @@
 package no.nav.helse.db
 
 import kotliquery.Session
-import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.db.HelseDao.Companion.asSQL
 import no.nav.helse.db.UtbetalingDao.TidligereUtbetalingerForVedtaksperiodeDto
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus

@@ -1,8 +1,8 @@
 package no.nav.helse.db
 
 import kotliquery.Session
-import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.HelseDao.Companion.asSQLWithQuestionMarks
+import no.nav.helse.db.HelseDao.Companion.asSQL
+import no.nav.helse.db.HelseDao.Companion.asSQLWithQuestionMarks
 import no.nav.helse.db.overstyring.MinimumSykdomsgradForDatabase
 import no.nav.helse.db.overstyring.OverstyringForDatabase
 import no.nav.helse.db.overstyring.OverstyrtArbeidsforholdForDatabase

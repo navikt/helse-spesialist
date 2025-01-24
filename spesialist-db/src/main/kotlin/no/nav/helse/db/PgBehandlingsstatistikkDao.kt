@@ -1,6 +1,5 @@
 package no.nav.helse.db
 
-import no.nav.helse.HelseDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.AntallPerKombinasjonRad
 import no.nav.helse.spesialist.api.behandlingsstatistikk.StatistikkPerKombinasjon
 import no.nav.helse.spesialist.api.graphql.schema.Utbetalingtype

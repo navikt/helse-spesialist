@@ -1,7 +1,6 @@
 package no.nav.helse.db
 
 import kotliquery.Session
-import no.nav.helse.HelseDao
 import java.util.UUID
 import javax.sql.DataSource
 

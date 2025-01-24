@@ -1,4 +1,4 @@
-package no.nav.helse
+package no.nav.helse.db
 
 import kotliquery.Query
 import kotliquery.Row

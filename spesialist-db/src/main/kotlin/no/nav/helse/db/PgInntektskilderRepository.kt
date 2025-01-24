@@ -1,8 +1,8 @@
 package no.nav.helse.db
 
 import kotliquery.Session
-import no.nav.helse.HelseDao.Companion.asSQLWithQuestionMarks
-import no.nav.helse.HelseDao.Companion.list
+import no.nav.helse.db.HelseDao.Companion.asSQLWithQuestionMarks
+import no.nav.helse.db.HelseDao.Companion.list
 import no.nav.helse.modell.InntektskildeDto
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto

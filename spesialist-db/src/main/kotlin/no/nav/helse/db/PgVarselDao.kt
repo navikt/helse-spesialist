@@ -1,6 +1,6 @@
 package no.nav.helse.db
 
-import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.db.HelseDao.Companion.asSQL
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status
 import java.time.LocalDateTime
 import java.util.UUID

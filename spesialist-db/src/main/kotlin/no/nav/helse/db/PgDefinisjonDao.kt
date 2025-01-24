@@ -1,7 +1,7 @@
 package no.nav.helse.db
 
 import kotliquery.Row
-import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.db.HelseDao.Companion.asSQL
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import java.time.LocalDateTime
 import java.util.UUID

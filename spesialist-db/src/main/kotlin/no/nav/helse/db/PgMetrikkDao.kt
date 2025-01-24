@@ -1,8 +1,8 @@
 package no.nav.helse.db
 
 import kotliquery.Session
-import no.nav.helse.HelseDao.Companion.asSQL
-import no.nav.helse.HelseDao.Companion.single
+import no.nav.helse.db.HelseDao.Companion.asSQL
+import no.nav.helse.db.HelseDao.Companion.single
 import java.util.UUID
 
 class PgMetrikkDao internal constructor(private val session: Session) : MetrikkDao {

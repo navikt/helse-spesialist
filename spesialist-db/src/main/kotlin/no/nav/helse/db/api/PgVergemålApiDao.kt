@@ -1,6 +1,6 @@
 package no.nav.helse.db.api
 
-import no.nav.helse.HelseDao
+import no.nav.helse.db.HelseDao
 import javax.sql.DataSource
 
 class PgVergemålApiDao internal constructor(dataSource: DataSource) : HelseDao(dataSource), VergemålApiDao {

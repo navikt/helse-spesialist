@@ -6,7 +6,7 @@ import kotliquery.Row
 import kotliquery.Session
 import kotliquery.action.QueryAction
 import kotliquery.sessionOf
-import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.db.HelseDao.Companion.asSQL
 import org.intellij.lang.annotations.Language
 import java.sql.Array
 import javax.sql.DataSource

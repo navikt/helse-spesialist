@@ -1,7 +1,7 @@
 package no.nav.helse.db
 
 import kotliquery.Session
-import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.db.HelseDao.Companion.asSQL
 import no.nav.helse.db.PgMeldingDao.Meldingtype.ADRESSEBESKYTTELSE_ENDRET
 import no.nav.helse.db.PgMeldingDao.Meldingtype.AVSLUTTET_MED_VEDTAK
 import no.nav.helse.db.PgMeldingDao.Meldingtype.AVSLUTTET_UTEN_VEDTAK

@@ -2,7 +2,7 @@ package no.nav.helse.db
 
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.Session
-import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.db.HelseDao.Companion.asSQL
 import no.nav.helse.modell.risiko.Risikovurdering
 import no.nav.helse.objectMapper
 import java.time.LocalDateTime

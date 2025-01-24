@@ -1,6 +1,5 @@
 package no.nav.helse.db
 
-import no.nav.helse.HelseDao
 import no.nav.helse.mediator.meldinger.PoisonPills
 import javax.sql.DataSource
 

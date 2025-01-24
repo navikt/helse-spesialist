@@ -1,7 +1,7 @@
 package no.nav.helse.e2e
 
 import kotliquery.sessionOf
-import no.nav.helse.HelseDao.Companion.asSQL
+import no.nav.helse.db.HelseDao.Companion.asSQL
 import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

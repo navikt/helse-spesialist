@@ -2,7 +2,7 @@ package no.nav.helse.db.api
 
 import kotliquery.Query
 import kotliquery.Row
-import no.nav.helse.HelseDao
+import no.nav.helse.db.HelseDao
 import no.nav.helse.spesialist.api.varsel.Varsel
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.AKTIV

@@ -1,7 +1,6 @@
 package no.nav.helse.db
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.HelseDao
 import no.nav.helse.objectMapper
 import java.util.UUID
 import javax.sql.DataSource
