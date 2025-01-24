@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql
 
-import no.nav.helse.db.api.ApiVarselRepository
 import no.nav.helse.db.api.ArbeidsgiverApiDao
 import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.NotatApiDao
@@ -12,6 +11,7 @@ import no.nav.helse.db.api.PåVentApiDao
 import no.nav.helse.db.api.RisikovurderingApiDao
 import no.nav.helse.db.api.TildelingApiDao
 import no.nav.helse.db.api.TotrinnsvurderingApiDao
+import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.db.api.VergemålApiDao
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Dokumenthåndterer
@@ -51,7 +51,7 @@ class SchemaBuilder(
     arbeidsgiverApiDao: ArbeidsgiverApiDao,
     overstyringApiDao: OverstyringApiDao,
     risikovurderingApiDao: RisikovurderingApiDao,
-    varselRepository: ApiVarselRepository,
+    varselRepository: VarselApiRepository,
     oppgaveApiDao: OppgaveApiDao,
     periodehistorikkApiDao: PeriodehistorikkApiDao,
     påVentApiDao: PåVentApiDao,

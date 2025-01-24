@@ -30,7 +30,7 @@ class Bootstrap(
     private val egenAnsattApiDao = repositories.egenAnsattApiDao
     private val notatApiDao = repositories.notatApiDao
     private val totrinnsvurderingApiDao = repositories.totrinnsvurderingApiDao
-    private val apiVarselRepository = repositories.apiVarselRepository
+    private val apiVarselRepository = repositories.varselApiRepository
     private val påVentApiDao = repositories.påVentApiDao
     private val vergemålApiDao = repositories.vergemålApiDao
 

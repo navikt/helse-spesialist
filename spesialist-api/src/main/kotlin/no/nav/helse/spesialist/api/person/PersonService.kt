@@ -7,7 +7,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.bootstrap.Environment
-import no.nav.helse.db.api.ApiVarselRepository
 import no.nav.helse.db.api.ArbeidsgiverApiDao
 import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.NotatApiDao
@@ -19,6 +18,7 @@ import no.nav.helse.db.api.PåVentApiDao
 import no.nav.helse.db.api.RisikovurderingApiDao
 import no.nav.helse.db.api.TildelingApiDao
 import no.nav.helse.db.api.TotrinnsvurderingApiDao
+import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.db.api.VergemålApiDao
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Personhåndterer
@@ -55,7 +55,7 @@ class PersonService(
     private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
     private val overstyringApiDao: OverstyringApiDao,
     private val risikovurderingApiDao: RisikovurderingApiDao,
-    private val varselRepository: ApiVarselRepository,
+    private val varselRepository: VarselApiRepository,
     private val oppgaveApiDao: OppgaveApiDao,
     private val periodehistorikkApiDao: PeriodehistorikkApiDao,
     private val notatDao: NotatApiDao,

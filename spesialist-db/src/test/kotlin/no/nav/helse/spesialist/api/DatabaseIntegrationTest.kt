@@ -4,7 +4,6 @@ import io.mockk.mockk
 import no.nav.helse.db.DbQuery
 import no.nav.helse.db.api.ArbeidsgiverApiDao.Inntekter
 import no.nav.helse.db.api.EgenAnsattApiDao
-import no.nav.helse.db.api.PgApiVarselRepository
 import no.nav.helse.db.api.PgArbeidsgiverApiDao
 import no.nav.helse.db.api.PgNotatApiDao
 import no.nav.helse.db.api.PgOppgaveApiDao
@@ -15,6 +14,7 @@ import no.nav.helse.db.api.PgPåVentApiDao
 import no.nav.helse.db.api.PgRisikovurderingApiDao
 import no.nav.helse.db.api.PgTildelingApiDao
 import no.nav.helse.db.api.PgTotrinnsvurderingApiDao
+import no.nav.helse.db.api.PgVarselApiRepository
 import no.nav.helse.db.api.PgVergemålApiDao
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
@@ -57,7 +57,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     val ORGANISASJONSNUMMER = lagOrganisasjonsnummer()
     val ORGANISASJONSNUMMER_GHOST = lagOrganisasjonsnummer()
 
-    protected val apiVarselRepository = PgApiVarselRepository(dataSource)
+    protected val apiVarselRepository = PgVarselApiRepository(dataSource)
     protected val arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource)
     protected val risikovurderingApiDao = PgRisikovurderingApiDao(dataSource)
     protected val notatDao = PgNotatApiDao(dataSource)

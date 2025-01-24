@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
 
-internal class PgApiVarselRepositoryTest: DatabaseIntegrationTest() {
+internal class PgVarselApiRepositoryTest: DatabaseIntegrationTest() {
 
     @Test
     fun `Finner varsler med vedtaksperiodeId og utbetalingId`() {

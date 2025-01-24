@@ -4,7 +4,7 @@ import no.nav.helse.spesialist.api.graphql.schema.VarselDTO
 import no.nav.helse.spesialist.api.varsel.Varsel
 import java.util.UUID
 
-interface ApiVarselRepository {
+interface VarselApiRepository {
     fun finnVarslerSomIkkeErInaktiveFor(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,

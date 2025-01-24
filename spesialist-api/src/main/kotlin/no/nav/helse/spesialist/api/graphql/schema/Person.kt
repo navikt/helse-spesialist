@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.api.graphql.schema
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.db.api.ApiVarselRepository
 import no.nav.helse.db.api.ArbeidsgiverApiDao
 import no.nav.helse.db.api.NotatApiDao
 import no.nav.helse.db.api.OppgaveApiDao
@@ -12,6 +11,7 @@ import no.nav.helse.db.api.PersonApiDao
 import no.nav.helse.db.api.PåVentApiDao
 import no.nav.helse.db.api.TildelingApiDao
 import no.nav.helse.db.api.TotrinnsvurderingApiDao
+import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
@@ -105,7 +105,7 @@ data class Person(
     private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
     private val overstyringApiDao: OverstyringApiDao,
     private val risikovurderinger: Map<UUID, RisikovurderingApiDto>,
-    private val varselRepository: ApiVarselRepository,
+    private val varselRepository: VarselApiRepository,
     private val oppgaveApiDao: OppgaveApiDao,
     private val periodehistorikkApiDao: PeriodehistorikkApiDao,
     private val notatDao: NotatApiDao,

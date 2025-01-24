@@ -2,13 +2,13 @@ package no.nav.helse.spesialist.api.graphql.schema
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDeprecated
 import io.ktor.utils.io.core.toByteArray
-import no.nav.helse.db.api.ApiVarselRepository
 import no.nav.helse.db.api.ArbeidsgiverApiDao
 import no.nav.helse.db.api.NotatApiDao
 import no.nav.helse.db.api.OppgaveApiDao
 import no.nav.helse.db.api.PeriodehistorikkApiDao
 import no.nav.helse.db.api.PåVentApiDao
 import no.nav.helse.db.api.TotrinnsvurderingApiDao
+import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.overstyring.Dagtype
@@ -177,7 +177,7 @@ data class Arbeidsgiver(
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
     private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
     private val risikovurderinger: Map<UUID, RisikovurderingApiDto>,
-    private val varselRepository: ApiVarselRepository,
+    private val varselRepository: VarselApiRepository,
     private val oppgaveApiDao: OppgaveApiDao,
     private val periodehistorikkApiDao: PeriodehistorikkApiDao,
     private val notatDao: NotatApiDao,

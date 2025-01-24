@@ -9,7 +9,7 @@ import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgApiVarselRepository internal constructor(dataSource: DataSource) : ApiVarselRepository {
+class PgVarselApiRepository internal constructor(dataSource: DataSource) : VarselApiRepository {
     private val varselDao = PgVarselApiDao(dataSource)
     private val generasjonDao = PgGenerasjonApiDao(dataSource)
 

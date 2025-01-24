@@ -45,7 +45,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     val ORGANISASJONSNUMMER = lagOrganisasjonsnummer()
     val ORGANISASJONSNUMMER_GHOST = lagOrganisasjonsnummer()
 
-    protected val apiVarselRepository = repositories.apiVarselRepository
+    protected val apiVarselRepository = repositories.varselApiRepository
     protected val arbeidsgiverApiDao = repositories.arbeidsgiverApiDao
     protected val risikovurderingApiDao = repositories.risikovurderingApiDao
     protected val notatDao = repositories.notatApiDao

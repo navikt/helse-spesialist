@@ -2,7 +2,6 @@ package no.nav.helse.db
 
 import kotliquery.Session
 import no.nav.helse.db.api.PgAbonnementApiDao
-import no.nav.helse.db.api.PgApiVarselRepository
 import no.nav.helse.db.api.PgArbeidsgiverApiDao
 import no.nav.helse.db.api.PgEgenAnsattApiDao
 import no.nav.helse.db.api.PgGenerasjonApiDao
@@ -18,6 +17,7 @@ import no.nav.helse.db.api.PgSnapshotApiDao
 import no.nav.helse.db.api.PgTildelingApiDao
 import no.nav.helse.db.api.PgTotrinnsvurderingApiDao
 import no.nav.helse.db.api.PgVarselApiDao
+import no.nav.helse.db.api.PgVarselApiRepository
 import no.nav.helse.db.api.PgVergemålApiDao
 import javax.sql.DataSource
 
@@ -57,7 +57,7 @@ class DBRepositories(dataSource: DataSource) : Repositories {
     override val totrinnsvurderingApiDao = PgTotrinnsvurderingApiDao(dataSource)
     override val tildelingApiDao = PgTildelingApiDao(dataSource)
     override val varselApiDao = PgVarselApiDao(dataSource)
-    override val apiVarselRepository = PgApiVarselRepository(dataSource)
+    override val varselApiRepository = PgVarselApiRepository(dataSource)
     override val arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource)
     override val generasjonApiDao = PgGenerasjonApiDao(dataSource)
     override val notatApiDao = PgNotatApiDao(dataSource)

@@ -7,12 +7,12 @@ import graphql.execution.DataFetcherResult
 import graphql.execution.DataFetcherResult.newResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import no.nav.helse.db.api.ApiVarselRepository
+import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.spesialist.api.graphql.schema.VarselDTO
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class VarselMutation(private val varselRepository: ApiVarselRepository) : Mutation {
+class VarselMutation(private val varselRepository: VarselApiRepository) : Mutation {
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }

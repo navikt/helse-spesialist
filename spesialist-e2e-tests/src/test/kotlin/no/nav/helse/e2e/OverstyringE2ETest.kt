@@ -320,7 +320,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                 arbeidsgiverApiDao = repositories.arbeidsgiverApiDao,
                 overstyringApiDao = repositories.overstyringApiDao,
                 risikovurderingApiDao = repositories.risikovurderingApiDao,
-                varselRepository = repositories.apiVarselRepository,
+                varselRepository = repositories.varselApiRepository,
                 oppgaveApiDao = repositories.oppgaveApiDao,
                 periodehistorikkApiDao = repositories.periodehistorikkApiDao,
                 notatDao = repositories.notatApiDao,

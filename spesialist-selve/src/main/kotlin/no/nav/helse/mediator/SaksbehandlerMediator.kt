@@ -103,7 +103,7 @@ class SaksbehandlerMediator(
 ) : Saksbehandlerhåndterer {
     private val saksbehandlerDao = repositories.saksbehandlerDao
     private val generasjonRepository = repositories.generasjonApiRepository
-    private val varselRepository = repositories.apiVarselRepository
+    private val varselRepository = repositories.varselApiRepository
     private val oppgaveApiDao = repositories.oppgaveApiDao
     private val opptegnelseRepository = repositories.opptegnelseRepository
     private val abonnementDao = repositories.abonnementApiDao

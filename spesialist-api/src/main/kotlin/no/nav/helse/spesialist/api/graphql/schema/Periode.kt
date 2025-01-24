@@ -6,12 +6,12 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.jackson.asLocalDate
 import com.github.navikt.tbd_libs.jackson.isMissingOrNull
 import io.ktor.utils.io.core.toByteArray
-import no.nav.helse.db.api.ApiVarselRepository
 import no.nav.helse.db.api.NotatApiDao
 import no.nav.helse.db.api.OppgaveApiDao
 import no.nav.helse.db.api.PeriodehistorikkApiDao
 import no.nav.helse.db.api.PåVentApiDao
 import no.nav.helse.db.api.TotrinnsvurderingApiDao
+import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.Toggle
 import no.nav.helse.spesialist.api.objectMapper
@@ -411,7 +411,7 @@ interface Periode {
 
 @Suppress("unused")
 data class UberegnetPeriode(
-    private val varselRepository: ApiVarselRepository,
+    private val varselRepository: VarselApiRepository,
     private val periode: GraphQLTidslinjeperiode,
     private val skalViseAktiveVarsler: Boolean,
     private val notatDao: NotatApiDao,
@@ -471,7 +471,7 @@ data class BeregnetPeriode(
     private val oppgavehåndterer: Oppgavehåndterer,
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
     private val risikovurderinger: Map<UUID, RisikovurderingApiDto>,
-    private val varselRepository: ApiVarselRepository,
+    private val varselRepository: VarselApiRepository,
     private val oppgaveApiDao: OppgaveApiDao,
     private val periodehistorikkApiDao: PeriodehistorikkApiDao,
     private val notatDao: NotatApiDao,
