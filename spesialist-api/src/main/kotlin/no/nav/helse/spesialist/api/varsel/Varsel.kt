@@ -39,11 +39,11 @@ data class Varsel(
             vurdering?.toDto(status),
         )
 
-    internal fun erAktiv(): Boolean {
+    fun erAktiv(): Boolean {
         return status == AKTIV
     }
 
-    internal fun vurder(
+    fun vurder(
         godkjent: Boolean,
         fødselsnummer: String,
         behandlingId: UUID,

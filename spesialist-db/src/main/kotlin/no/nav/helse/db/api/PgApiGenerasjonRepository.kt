@@ -3,7 +3,7 @@ package no.nav.helse.db.api
 import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode
 import javax.sql.DataSource
 
-class PgApiGenerasjonRepository(dataSource: DataSource) : ApiGenerasjonRepository {
+class PgApiGenerasjonRepository internal constructor(dataSource: DataSource) : ApiGenerasjonRepository {
     private val varselDao = PgApiVarselDao(dataSource)
     private val generasjonDao = PgGenerasjonDao(dataSource)
 

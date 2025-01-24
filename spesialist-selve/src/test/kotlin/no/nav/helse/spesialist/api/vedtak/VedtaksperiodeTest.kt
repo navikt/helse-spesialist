@@ -1,8 +1,5 @@
 package no.nav.helse.spesialist.api.vedtak
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.spesialist.api.april
 import no.nav.helse.spesialist.api.februar
 import no.nav.helse.spesialist.api.januar
@@ -13,6 +10,9 @@ import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.harAktiveVars
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class VedtaksperiodeTest {
 
