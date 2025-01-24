@@ -13,7 +13,7 @@ import org.intellij.lang.annotations.Language
 import org.slf4j.LoggerFactory
 import javax.sql.DataSource
 
-class PgSnapshotApiDao(private val dataSource: DataSource) : SnapshotApiDao {
+class PgSnapshotApiDao internal constructor(private val dataSource: DataSource) : SnapshotApiDao {
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
@@ -68,48 +68,48 @@ class PgSnapshotApiDao(private val dataSource: DataSource) : SnapshotApiDao {
             tx.lagre(personRef, snapshotJson, versjon)
         }
     }
-}
 
-private fun TransactionalSession.lagre(
-    personRef: Int,
-    snapshot: String,
-    versjon: Int,
-): Int {
-    @Language("PostgreSQL")
-    val statement = """
+    private fun TransactionalSession.lagre(
+        personRef: Int,
+        snapshot: String,
+        versjon: Int,
+    ): Int {
+        @Language("PostgreSQL")
+        val statement = """
             INSERT INTO snapshot(data, versjon, person_ref)
                 VALUES(CAST(:snapshot as json), :versjon, :person_ref)
             ON CONFLICT(person_ref) DO UPDATE
                 SET data = CAST(:snapshot as json), versjon = :versjon;
         """
-    return requireNotNull(
-        run(
-            queryOf(
-                statement,
-                mapOf(
-                    "snapshot" to snapshot,
-                    "versjon" to versjon,
-                    "person_ref" to personRef,
-                ),
-            ).asUpdateAndReturnGeneratedKey,
-        ),
-    ).toInt()
-}
+        return requireNotNull(
+            run(
+                queryOf(
+                    statement,
+                    mapOf(
+                        "snapshot" to snapshot,
+                        "versjon" to versjon,
+                        "person_ref" to personRef,
+                    ),
+                ).asUpdateAndReturnGeneratedKey,
+            ),
+        ).toInt()
+    }
 
-private fun TransactionalSession.finnPersonRef(fødselsnummer: String): Int {
-    @Language("PostgreSQL")
-    val statement = "SELECT id FROM person WHERE fødselsnummer = ?"
-    return requireNotNull(this.run(queryOf(statement, fødselsnummer).map { it.int("id") }.asSingle))
-}
+    private fun TransactionalSession.finnPersonRef(fødselsnummer: String): Int {
+        @Language("PostgreSQL")
+        val statement = "SELECT id FROM person WHERE fødselsnummer = ?"
+        return requireNotNull(this.run(queryOf(statement, fødselsnummer).map { it.int("id") }.asSingle))
+    }
 
-private fun TransactionalSession.finnGlobalVersjon(): Int {
-    @Language("PostgreSQL")
-    val statement = "SELECT versjon FROM global_snapshot_versjon"
-    return requireNotNull(this.run(queryOf(statement).map { it.int("versjon") }.asSingle))
-}
+    private fun TransactionalSession.finnGlobalVersjon(): Int {
+        @Language("PostgreSQL")
+        val statement = "SELECT versjon FROM global_snapshot_versjon"
+        return requireNotNull(this.run(queryOf(statement).map { it.int("versjon") }.asSingle))
+    }
 
-private fun TransactionalSession.oppdaterGlobalVersjon(versjon: Int) {
-    @Language("PostgreSQL")
-    val statement = "UPDATE global_snapshot_versjon SET versjon = ?, sist_endret = now() WHERE id = 1"
-    this.run(queryOf(statement, versjon).asExecute)
+    private fun TransactionalSession.oppdaterGlobalVersjon(versjon: Int) {
+        @Language("PostgreSQL")
+        val statement = "UPDATE global_snapshot_versjon SET versjon = ?, sist_endret = now() WHERE id = 1"
+        this.run(queryOf(statement, versjon).asExecute)
+    }
 }

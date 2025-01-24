@@ -6,8 +6,6 @@ import no.nav.helse.db.AnnulleringRepository
 import no.nav.helse.db.Repositories
 import no.nav.helse.db.VedtakBegrunnelseFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
-import no.nav.helse.db.api.PgApiVarselRepository
-import no.nav.helse.db.api.PgOppgaveApiDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.mediator.overstyring.Overstyringlagrer
 import no.nav.helse.mediator.overstyring.Saksbehandlingsmelder
@@ -105,8 +103,8 @@ class SaksbehandlerMediator(
 ) : Saksbehandlerhåndterer {
     private val saksbehandlerDao = repositories.saksbehandlerDao
     private val generasjonRepository = repositories.apiGenerasjonRepository
-    private val varselRepository = PgApiVarselRepository(dataSource)
-    private val oppgaveApiDao = PgOppgaveApiDao(dataSource)
+    private val varselRepository = repositories.apiVarselRepository
+    private val oppgaveApiDao = repositories.oppgaveApiDao
     private val opptegnelseRepository = repositories.opptegnelseRepository
     private val abonnementDao = repositories.abonnementDao
     private val reservasjonDao = repositories.reservasjonDao

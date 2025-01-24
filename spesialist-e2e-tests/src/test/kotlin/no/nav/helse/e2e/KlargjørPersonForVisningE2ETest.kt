@@ -2,7 +2,6 @@ package no.nav.helse.e2e
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.db.api.PgPersonApiDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.intellij.lang.annotations.Language
@@ -82,12 +81,12 @@ internal class KlargjørPersonForVisningE2ETest : AbstractE2ETest() {
     }
 
     private fun assertHarTilgangsdata(fødselsnummer: String) {
-        val dao = PgPersonApiDao(dataSource)
+        val dao = repositories.personApiDao
         assertTrue(dao.harDataNødvendigForVisning(fødselsnummer))
     }
 
     private fun assertKanVisePersonen(fødselsnummer: String) {
-        val dao = PgPersonApiDao(dataSource)
+        val dao = repositories.personApiDao
         assertTrue(dao.harDataNødvendigForVisning(fødselsnummer))
     }
 }

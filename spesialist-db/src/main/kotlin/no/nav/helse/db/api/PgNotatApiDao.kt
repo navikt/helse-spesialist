@@ -10,7 +10,7 @@ import no.nav.helse.spesialist.api.notat.NotatDto
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgNotatApiDao(
+class PgNotatApiDao internal constructor(
     private val dataSource: DataSource,
 ) : QueryRunner by MedDataSource(dataSource), NotatApiDao {
     override fun opprettNotat(

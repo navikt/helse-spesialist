@@ -11,7 +11,7 @@ import no.nav.helse.spesialist.api.graphql.schema.InntektFraAOrdningen
 import no.nav.helse.spesialist.api.objectMapper
 import javax.sql.DataSource
 
-class PgArbeidsgiverApiDao(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource), ArbeidsgiverApiDao {
+class PgArbeidsgiverApiDao internal constructor(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource), ArbeidsgiverApiDao {
     override fun finnBransjer(organisasjonsnummer: String) =
         asSQL(
             """

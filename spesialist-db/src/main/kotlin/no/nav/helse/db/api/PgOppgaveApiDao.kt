@@ -7,7 +7,7 @@ import no.nav.helse.spesialist.api.oppgave.OppgaveForPeriodevisningDto
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgOppgaveApiDao(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource), OppgaveApiDao {
+class PgOppgaveApiDao internal constructor(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource), OppgaveApiDao {
     override fun finnOppgaveId(fødselsnummer: String) =
         asSQL(
             """

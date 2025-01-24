@@ -4,14 +4,6 @@ import io.mockk.mockk
 import no.nav.helse.db.DbQuery
 import no.nav.helse.db.api.ArbeidsgiverApiDao.Inntekter
 import no.nav.helse.db.api.EgenAnsattApiDao
-import no.nav.helse.db.api.PgApiVarselRepository
-import no.nav.helse.db.api.PgArbeidsgiverApiDao
-import no.nav.helse.db.api.PgNotatApiDao
-import no.nav.helse.db.api.PgOppgaveApiDao
-import no.nav.helse.db.api.PgOverstyringApiDao
-import no.nav.helse.db.api.PgPeriodehistorikkApiDao
-import no.nav.helse.db.api.PgPersonApiDao
-import no.nav.helse.db.api.PgRisikovurderingApiDao
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
@@ -53,17 +45,17 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     val ORGANISASJONSNUMMER = lagOrganisasjonsnummer()
     val ORGANISASJONSNUMMER_GHOST = lagOrganisasjonsnummer()
 
-    protected val apiVarselRepository = PgApiVarselRepository(dataSource)
-    protected val arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource)
-    protected val risikovurderingApiDao = PgRisikovurderingApiDao(dataSource)
-    protected val notatDao = PgNotatApiDao(dataSource)
+    protected val apiVarselRepository = repositories.apiVarselRepository
+    protected val arbeidsgiverApiDao = repositories.arbeidsgiverApiDao
+    protected val risikovurderingApiDao = repositories.risikovurderingApiDao
+    protected val notatDao = repositories.notatApiDao
     protected val totrinnsvurderingApiDao = repositories.totrinnsvurderingApiDao
     protected val påVentApiDao = repositories.påVentApiDao
-    protected val personApiDao = PgPersonApiDao(dataSource)
+    protected val personApiDao = repositories.personApiDao
     protected val tildelingApiDao = repositories.tildelingApiDao
-    protected val overstyringApiDao = PgOverstyringApiDao(dataSource)
-    protected val oppgaveApiDao = PgOppgaveApiDao(dataSource)
-    protected val periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource)
+    protected val overstyringApiDao = repositories.overstyringApiDao
+    protected val oppgaveApiDao = repositories.oppgaveApiDao
+    protected val periodehistorikkApiDao = repositories.periodehistorikkApiDao
     protected val vergemålApiDao = repositories.vergemålApiDao
 
     protected val egenAnsattApiDao = mockk<EgenAnsattApiDao>(relaxed = true)

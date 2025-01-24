@@ -9,7 +9,7 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgPeriodehistorikkApiDao(
+class PgPeriodehistorikkApiDao internal constructor(
     private val dataSource: DataSource,
 ) : QueryRunner by MedDataSource(dataSource), PeriodehistorikkApiDao {
     override fun finn(utbetalingId: UUID) =

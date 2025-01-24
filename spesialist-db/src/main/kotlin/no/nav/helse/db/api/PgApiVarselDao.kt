@@ -15,7 +15,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgApiVarselDao(dataSource: DataSource) : HelseDao(dataSource), ApiVarselDao {
+class PgApiVarselDao internal constructor(dataSource: DataSource) : HelseDao(dataSource), ApiVarselDao {
     private companion object {
         private val log = LoggerFactory.getLogger(PgApiVarselDao::class.java)
     }

@@ -3,8 +3,19 @@ package no.nav.helse.db
 import kotliquery.Session
 import no.nav.helse.db.api.AbonnementDao
 import no.nav.helse.db.api.ApiGenerasjonRepository
+import no.nav.helse.db.api.ApiVarselDao
+import no.nav.helse.db.api.ApiVarselRepository
+import no.nav.helse.db.api.ArbeidsgiverApiDao
 import no.nav.helse.db.api.EgenAnsattApiDao
+import no.nav.helse.db.api.GenerasjonApiDao
+import no.nav.helse.db.api.NotatApiDao
+import no.nav.helse.db.api.OppgaveApiDao
+import no.nav.helse.db.api.OverstyringApiDao
+import no.nav.helse.db.api.PeriodehistorikkApiDao
+import no.nav.helse.db.api.PersonApiDao
 import no.nav.helse.db.api.PåVentApiDao
+import no.nav.helse.db.api.RisikovurderingApiDao
+import no.nav.helse.db.api.SnapshotApiDao
 import no.nav.helse.db.api.TildelingApiDao
 import no.nav.helse.db.api.TotrinnsvurderingApiDao
 import no.nav.helse.db.api.VergemålApiDao
@@ -44,6 +55,17 @@ interface Repositories {
     val vergemålApiDao: VergemålApiDao
     val totrinnsvurderingApiDao: TotrinnsvurderingApiDao
     val tildelingApiDao: TildelingApiDao
+    val apiVarselDao: ApiVarselDao
+    val apiVarselRepository: ApiVarselRepository
+    val arbeidsgiverApiDao: ArbeidsgiverApiDao
+    val generasjonApiDao: GenerasjonApiDao
+    val notatApiDao: NotatApiDao
+    val oppgaveApiDao: OppgaveApiDao
+    val overstyringApiDao: OverstyringApiDao
+    val periodehistorikkApiDao: PeriodehistorikkApiDao
+    val personApiDao: PersonApiDao
+    val risikovurderingApiDao: RisikovurderingApiDao
+    val snapshotApiDao: SnapshotApiDao
 
     fun withSessionContext(session: Session): SessionContext
 }

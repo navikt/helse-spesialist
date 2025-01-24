@@ -9,9 +9,9 @@ import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgApiVarselRepository(dataSource: DataSource) : ApiVarselRepository {
+class PgApiVarselRepository internal constructor(dataSource: DataSource) : ApiVarselRepository {
     private val varselDao = PgApiVarselDao(dataSource)
-    private val generasjonDao = PgGenerasjonDao(dataSource)
+    private val generasjonDao = PgGenerasjonApiDao(dataSource)
 
     override fun finnVarslerSomIkkeErInaktiveFor(
         vedtaksperiodeId: UUID,

@@ -4,15 +4,6 @@ import io.ktor.server.application.Application
 import io.ktor.server.routing.routing
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.Repositories
-import no.nav.helse.db.api.PgApiVarselRepository
-import no.nav.helse.db.api.PgArbeidsgiverApiDao
-import no.nav.helse.db.api.PgNotatApiDao
-import no.nav.helse.db.api.PgOppgaveApiDao
-import no.nav.helse.db.api.PgOverstyringApiDao
-import no.nav.helse.db.api.PgPeriodehistorikkApiDao
-import no.nav.helse.db.api.PgPersonApiDao
-import no.nav.helse.db.api.PgRisikovurderingApiDao
-import no.nav.helse.db.api.PgSnapshotApiDao
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.graphql.graphQLApi
@@ -28,18 +19,18 @@ class Bootstrap(
     private val reservasjonClient: ReservasjonClient,
     private val tilgangsgrupper: Tilgangsgrupper,
 ) {
-    private val snapshotApiDao = PgSnapshotApiDao(dataSource)
-    private val personApiDao = PgPersonApiDao(dataSource)
-    private val oppgaveApiDao = PgOppgaveApiDao(dataSource)
-    private val periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource)
-    private val risikovurderingApiDao = PgRisikovurderingApiDao(dataSource)
+    private val snapshotApiDao = repositories.snapshotApiDao
+    private val personApiDao = repositories.personApiDao
+    private val oppgaveApiDao = repositories.oppgaveApiDao
+    private val periodehistorikkApiDao = repositories.periodehistorikkApiDao
+    private val risikovurderingApiDao = repositories.risikovurderingApiDao
     private val tildelingApiDao = repositories.tildelingApiDao
-    private val overstyringApiDao = PgOverstyringApiDao(dataSource)
-    private val arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource)
+    private val overstyringApiDao = repositories.overstyringApiDao
+    private val arbeidsgiverApiDao = repositories.arbeidsgiverApiDao
     private val egenAnsattApiDao = repositories.egenAnsattApiDao
-    private val notatApiDao = PgNotatApiDao(dataSource)
+    private val notatApiDao = repositories.notatApiDao
     private val totrinnsvurderingApiDao = repositories.totrinnsvurderingApiDao
-    private val apiVarselRepository = PgApiVarselRepository(dataSource)
+    private val apiVarselRepository = repositories.apiVarselRepository
     private val påVentApiDao = repositories.påVentApiDao
     private val vergemålApiDao = repositories.vergemålApiDao
 

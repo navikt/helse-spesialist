@@ -6,7 +6,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.sessionOf
 import no.nav.helse.db.DbQuery
 import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.db.api.PgPeriodehistorikkApiDao
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.kommando.TestMelding
@@ -91,7 +90,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     internal val personDao = sessionContext.personDao
     internal val oppgaveDao = repositories.oppgaveDao
-    internal val periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource)
+    internal val periodehistorikkApiDao = repositories.periodehistorikkApiDao
     internal val periodehistorikkDao = repositories.periodehistorikkDao
     internal val vedtakDao = repositories.vedtakDao
     internal val commandContextDao = repositories.commandContextDao

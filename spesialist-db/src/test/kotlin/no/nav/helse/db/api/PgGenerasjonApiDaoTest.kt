@@ -11,9 +11,9 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
 
-internal class PgGenerasjonDaoTest: DatabaseIntegrationTest() {
+internal class PgGenerasjonApiDaoTest: DatabaseIntegrationTest() {
 
-    private val generasjonDao = PgGenerasjonDao(dataSource)
+    private val generasjonDao = PgGenerasjonApiDao(dataSource)
 
     @Test
     fun `Finner generasjon med oppgave`() {

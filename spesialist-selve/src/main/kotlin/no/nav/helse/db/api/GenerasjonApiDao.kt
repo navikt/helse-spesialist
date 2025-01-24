@@ -4,7 +4,7 @@ import no.nav.helse.spesialist.api.varsel.Varsel
 import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode
 import java.util.UUID
 
-interface GenerasjonDao {
+interface GenerasjonApiDao {
     fun gjeldendeGenerasjonFor(oppgaveId: Long): Vedtaksperiode
 
     fun gjeldendeGenerasjonerForPerson(oppgaveId: Long): Set<Vedtaksperiode>

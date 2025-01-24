@@ -16,7 +16,7 @@ import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunn
 import org.intellij.lang.annotations.Language
 import javax.sql.DataSource
 
-class PgOverstyringApiDao(
+class PgOverstyringApiDao internal constructor(
     private val dataSource: DataSource,
 ) : OverstyringApiDao {
     override fun finnOverstyringer(fødselsnummer: String): List<OverstyringDto> =

@@ -5,7 +5,7 @@ import javax.sql.DataSource
 
 class PgApiGenerasjonRepository internal constructor(dataSource: DataSource) : ApiGenerasjonRepository {
     private val varselDao = PgApiVarselDao(dataSource)
-    private val generasjonDao = PgGenerasjonDao(dataSource)
+    private val generasjonDao = PgGenerasjonApiDao(dataSource)
 
     override fun perioderTilBehandling(oppgaveId: Long): Set<Vedtaksperiode> {
         val periodeTilGodkjenning = generasjonDao.gjeldendeGenerasjonFor(oppgaveId, varselDao::finnVarslerFor)

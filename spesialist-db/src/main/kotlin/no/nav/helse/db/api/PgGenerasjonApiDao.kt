@@ -9,7 +9,7 @@ import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgGenerasjonDao(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource), GenerasjonDao {
+class PgGenerasjonApiDao internal constructor(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource), GenerasjonApiDao {
     override fun gjeldendeGenerasjonFor(oppgaveId: Long): Vedtaksperiode =
         asSQL(
             """

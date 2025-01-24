@@ -8,7 +8,7 @@ import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
 import java.time.LocalDateTime
 import javax.sql.DataSource
 
-class PgPersonApiDao(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource), PersonApiDao {
+class PgPersonApiDao internal constructor(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource), PersonApiDao {
     override fun personKlargjøres(fødselsnummer: String) {
         asSQL(
             "INSERT INTO person_klargjores(fødselsnummer, opprettet) VALUES(:fodselsnummer, :opprettet) ON CONFLICT DO NOTHING",

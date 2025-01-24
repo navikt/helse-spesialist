@@ -17,7 +17,6 @@ import io.ktor.server.routing.route
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.helse.db.api.PgSnapshotApiDao
 import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering
 import no.nav.helse.spesialist.api.avviksvurdering.Beregningsgrunnlag
 import no.nav.helse.spesialist.api.avviksvurdering.InnrapportertInntekt
@@ -61,7 +60,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     private val stansAutomatiskBehandlinghåndterer = mockk<StansAutomatiskBehandlinghåndterer>(relaxed = true)
 
     protected val snapshotClient = mockk<SnapshotClient>(relaxed = true)
-    private val snapshotApiDao = PgSnapshotApiDao(dataSource)
+    private val snapshotApiDao = repositories.snapshotApiDao
     private val snapshotService = SnapshotService(snapshotApiDao, snapshotClient)
 
     private val apiTesting = ApiTesting(

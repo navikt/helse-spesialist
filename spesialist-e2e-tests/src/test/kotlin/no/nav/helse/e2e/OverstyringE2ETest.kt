@@ -7,15 +7,6 @@ import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.TestRapidHelpers.siste
-import no.nav.helse.db.api.PgApiVarselRepository
-import no.nav.helse.db.api.PgArbeidsgiverApiDao
-import no.nav.helse.db.api.PgNotatApiDao
-import no.nav.helse.db.api.PgOppgaveApiDao
-import no.nav.helse.db.api.PgOverstyringApiDao
-import no.nav.helse.db.api.PgPeriodehistorikkApiDao
-import no.nav.helse.db.api.PgPersonApiDao
-import no.nav.helse.db.api.PgRisikovurderingApiDao
-import no.nav.helse.db.api.PgSnapshotApiDao
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
@@ -323,20 +314,20 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
     private val personQuery =
         PersonQuery(
             personoppslagService = PersonService(
-                personApiDao = PgPersonApiDao(dataSource),
+                personApiDao = repositories.personApiDao,
                 egenAnsattApiDao = repositories.egenAnsattApiDao,
                 tildelingApiDao = repositories.tildelingApiDao,
-                arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource),
-                overstyringApiDao = PgOverstyringApiDao(dataSource),
-                risikovurderingApiDao = PgRisikovurderingApiDao(dataSource),
-                varselRepository = PgApiVarselRepository(dataSource),
-                oppgaveApiDao = PgOppgaveApiDao(dataSource),
-                periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource),
-                notatDao = PgNotatApiDao(dataSource),
+                arbeidsgiverApiDao = repositories.arbeidsgiverApiDao,
+                overstyringApiDao = repositories.overstyringApiDao,
+                risikovurderingApiDao = repositories.risikovurderingApiDao,
+                varselRepository = repositories.apiVarselRepository,
+                oppgaveApiDao = repositories.oppgaveApiDao,
+                periodehistorikkApiDao = repositories.periodehistorikkApiDao,
+                notatDao = repositories.notatApiDao,
                 totrinnsvurderingApiDao = repositories.totrinnsvurderingApiDao,
                 påVentApiDao = repositories.påVentApiDao,
                 vergemålApiDao = repositories.vergemålApiDao,
-                snapshotService = SnapshotService(PgSnapshotApiDao(dataSource), snapshotClient),
+                snapshotService = SnapshotService(repositories.snapshotApiDao, snapshotClient),
                 reservasjonClient = mockk(relaxed = true),
                 oppgavehåndterer = mockk(relaxed = true),
                 saksbehandlerhåndterer = mockk(relaxed = true),
