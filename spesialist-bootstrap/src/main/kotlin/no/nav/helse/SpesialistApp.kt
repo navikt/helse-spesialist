@@ -233,9 +233,5 @@ class SpesialistApp(
         dataSourceBuilder.migrate()
     }
 
-    override fun onShutdown(rapidsConnection: RapidsConnection) {
-        dataSource.close()
-    }
-
     fun ktorApp(application: Application) = bootstrap.ktorApp(application, azureConfig, env)
 }
