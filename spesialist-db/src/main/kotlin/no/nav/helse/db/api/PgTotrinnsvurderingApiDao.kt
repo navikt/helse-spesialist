@@ -5,7 +5,7 @@ import no.nav.helse.HelseDao
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgTotrinnsvurderingApiDao(dataSource: DataSource) : HelseDao(dataSource), TotrinnsvurderingApiDao {
+class PgTotrinnsvurderingApiDao internal constructor(dataSource: DataSource) : HelseDao(dataSource), TotrinnsvurderingApiDao {
     override fun hentAktiv(vedtaksperiodeId: UUID) =
         asSQL(
             """

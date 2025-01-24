@@ -17,7 +17,6 @@ import no.nav.helse.db.api.PgPersonApiDao
 import no.nav.helse.db.api.PgRisikovurderingApiDao
 import no.nav.helse.db.api.PgSnapshotApiDao
 import no.nav.helse.db.api.PgTildelingApiDao
-import no.nav.helse.db.api.PgTotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
@@ -335,7 +334,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                 oppgaveApiDao = PgOppgaveApiDao(dataSource),
                 periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource),
                 notatDao = PgNotatApiDao(dataSource),
-                totrinnsvurderingApiDao = PgTotrinnsvurderingApiDao(dataSource),
+                totrinnsvurderingApiDao = repositories.totrinnsvurderingApiDao,
                 påVentApiDao = repositories.påVentApiDao,
                 vergemålApiDao = repositories.vergemålApiDao,
                 snapshotService = SnapshotService(PgSnapshotApiDao(dataSource), snapshotClient),
