@@ -6,7 +6,7 @@ import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgTildelingApiDao(dataSource: DataSource) : HelseDao(dataSource), TildelingApiDao {
+class PgTildelingApiDao internal constructor(dataSource: DataSource) : HelseDao(dataSource), TildelingApiDao {
     override fun tildelingForPerson(fødselsnummer: String) =
         asSQL(
             """ 

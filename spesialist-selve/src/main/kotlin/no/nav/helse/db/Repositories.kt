@@ -5,6 +5,7 @@ import no.nav.helse.db.api.AbonnementDao
 import no.nav.helse.db.api.ApiGenerasjonRepository
 import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.PåVentApiDao
+import no.nav.helse.db.api.TildelingApiDao
 import no.nav.helse.db.api.TotrinnsvurderingApiDao
 import no.nav.helse.db.api.VergemålApiDao
 
@@ -42,6 +43,7 @@ interface Repositories {
     val egenAnsattApiDao: EgenAnsattApiDao
     val vergemålApiDao: VergemålApiDao
     val totrinnsvurderingApiDao: TotrinnsvurderingApiDao
+    val tildelingApiDao: TildelingApiDao
 
     fun withSessionContext(session: Session): SessionContext
 }

@@ -5,6 +5,7 @@ import no.nav.helse.db.api.PgAbonnementDao
 import no.nav.helse.db.api.PgApiGenerasjonRepository
 import no.nav.helse.db.api.PgEgenAnsattApiDao
 import no.nav.helse.db.api.PgPåVentApiDao
+import no.nav.helse.db.api.PgTildelingApiDao
 import no.nav.helse.db.api.PgTotrinnsvurderingApiDao
 import no.nav.helse.db.api.PgVergemålApiDao
 import javax.sql.DataSource
@@ -43,6 +44,7 @@ class DBRepositories(dataSource: DataSource) : Repositories {
     override val egenAnsattApiDao = PgEgenAnsattApiDao(dataSource)
     override val vergemålApiDao = PgVergemålApiDao(dataSource)
     override val totrinnsvurderingApiDao = PgTotrinnsvurderingApiDao(dataSource)
+    override val tildelingApiDao = PgTildelingApiDao(dataSource)
 
     override fun withSessionContext(session: Session) = DBSessionContext(session)
 }

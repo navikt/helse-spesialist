@@ -12,7 +12,6 @@ import no.nav.helse.db.api.PgOverstyringApiDao
 import no.nav.helse.db.api.PgPeriodehistorikkApiDao
 import no.nav.helse.db.api.PgPersonApiDao
 import no.nav.helse.db.api.PgRisikovurderingApiDao
-import no.nav.helse.db.api.PgTildelingApiDao
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
@@ -61,7 +60,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val totrinnsvurderingApiDao = repositories.totrinnsvurderingApiDao
     protected val påVentApiDao = repositories.påVentApiDao
     protected val personApiDao = PgPersonApiDao(dataSource)
-    protected val tildelingApiDao = PgTildelingApiDao(dataSource)
+    protected val tildelingApiDao = repositories.tildelingApiDao
     protected val overstyringApiDao = PgOverstyringApiDao(dataSource)
     protected val oppgaveApiDao = PgOppgaveApiDao(dataSource)
     protected val periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource)

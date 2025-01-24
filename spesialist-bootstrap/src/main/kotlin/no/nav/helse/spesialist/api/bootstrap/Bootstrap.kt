@@ -13,7 +13,6 @@ import no.nav.helse.db.api.PgPeriodehistorikkApiDao
 import no.nav.helse.db.api.PgPersonApiDao
 import no.nav.helse.db.api.PgRisikovurderingApiDao
 import no.nav.helse.db.api.PgSnapshotApiDao
-import no.nav.helse.db.api.PgTildelingApiDao
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.graphql.graphQLApi
@@ -34,7 +33,7 @@ class Bootstrap(
     private val oppgaveApiDao = PgOppgaveApiDao(dataSource)
     private val periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource)
     private val risikovurderingApiDao = PgRisikovurderingApiDao(dataSource)
-    private val tildelingApiDao = PgTildelingApiDao(dataSource)
+    private val tildelingApiDao = repositories.tildelingApiDao
     private val overstyringApiDao = PgOverstyringApiDao(dataSource)
     private val arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource)
     private val egenAnsattApiDao = repositories.egenAnsattApiDao

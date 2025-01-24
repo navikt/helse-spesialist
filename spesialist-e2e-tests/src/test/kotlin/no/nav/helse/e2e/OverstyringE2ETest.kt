@@ -16,7 +16,6 @@ import no.nav.helse.db.api.PgPeriodehistorikkApiDao
 import no.nav.helse.db.api.PgPersonApiDao
 import no.nav.helse.db.api.PgRisikovurderingApiDao
 import no.nav.helse.db.api.PgSnapshotApiDao
-import no.nav.helse.db.api.PgTildelingApiDao
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
@@ -326,7 +325,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             personoppslagService = PersonService(
                 personApiDao = PgPersonApiDao(dataSource),
                 egenAnsattApiDao = repositories.egenAnsattApiDao,
-                tildelingApiDao = PgTildelingApiDao(dataSource),
+                tildelingApiDao = repositories.tildelingApiDao,
                 arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource),
                 overstyringApiDao = PgOverstyringApiDao(dataSource),
                 risikovurderingApiDao = PgRisikovurderingApiDao(dataSource),
