@@ -8,9 +8,9 @@ import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class GenerasjonService(private val repositories: Repositories) {
+class PgVedtaksperiodeRepository(private val repositories: Repositories) {
     private val generasjonDao = repositories.generasjonDao
-    private val hentedeGenerasjoner: MutableMap<UUID, List<BehandlingDto>> = mutableMapOf()
+    private val hentedeBehandlinger: MutableMap<UUID, List<BehandlingDto>> = mutableMapOf()
 
     private val sikkerLogger = LoggerFactory.getLogger("tjenestekall")
 
@@ -33,7 +33,7 @@ class GenerasjonService(private val repositories: Repositories) {
 
     private fun TransactionalSession.finnGenerasjoner(vedtaksperiodeId: UUID): List<BehandlingDto> {
         return repositories.withSessionContext(this).generasjonDao.finnGenerasjoner(vedtaksperiodeId).also {
-            hentedeGenerasjoner[vedtaksperiodeId] = it
+            hentedeBehandlinger[vedtaksperiodeId] = it
         }
     }
 
@@ -44,7 +44,7 @@ class GenerasjonService(private val repositories: Repositories) {
         val sessionContext = repositories.withSessionContext(this)
         sessionContext.vedtakDao.lagreVedtaksperiode(fødselsnummer, vedtaksperiode)
         loggDiffMellomHentetOgSkalLagres(vedtaksperiode)
-        hentedeGenerasjoner.remove(vedtaksperiode.vedtaksperiodeId)
+        hentedeBehandlinger.remove(vedtaksperiode.vedtaksperiodeId)
         vedtaksperiode.behandlinger.forEach { generasjonDto ->
             sessionContext.generasjonDao.lagreGenerasjon(generasjonDto)
         }
@@ -52,7 +52,7 @@ class GenerasjonService(private val repositories: Repositories) {
     }
 
     private fun loggDiffMellomHentetOgSkalLagres(vedtaksperiode: VedtaksperiodeDto) {
-        val hentedeGenerasjonerForPeriode = hentedeGenerasjoner[vedtaksperiode.vedtaksperiodeId] ?: return
+        val hentedeGenerasjonerForPeriode = hentedeBehandlinger[vedtaksperiode.vedtaksperiodeId] ?: return
         val antallHentet = hentedeGenerasjonerForPeriode.size
         if (antallHentet == 0) return
         val generasjonerForLagring = vedtaksperiode.behandlinger

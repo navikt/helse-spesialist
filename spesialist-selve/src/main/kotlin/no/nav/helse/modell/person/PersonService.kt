@@ -4,14 +4,14 @@ import kotliquery.Session
 import kotliquery.TransactionalSession
 import kotliquery.sessionOf
 import no.nav.helse.db.Repositories
-import no.nav.helse.modell.vedtaksperiode.GenerasjonService
+import no.nav.helse.modell.vedtaksperiode.PgVedtaksperiodeRepository
 import javax.sql.DataSource
 
 class PersonService(
     private val dataSource: DataSource,
     private val repositories: Repositories,
 ) {
-    private val generasjonService = GenerasjonService(repositories)
+    private val pgVedtaksperiodeRepository = PgVedtaksperiodeRepository(repositories)
 
     fun brukPersonHvisFinnes(
         fødselsnummer: String,
@@ -28,7 +28,7 @@ class PersonService(
 
     private fun TransactionalSession.hentPerson(fødselsnummer: String): Person? =
         finnPerson(fødselsnummer)
-            ?.copy(vedtaksperioder = with(generasjonService) { finnVedtaksperioder(fødselsnummer) })
+            ?.copy(vedtaksperioder = with(pgVedtaksperiodeRepository) { finnVedtaksperioder(fødselsnummer) })
             ?.copy(
                 skjønnsfastsatteSykepengegrunnlag =
                     repositories.withSessionContext(this).sykefraværstilfelleDao
@@ -46,7 +46,7 @@ class PersonService(
             }
 
     private fun TransactionalSession.lagrePerson(person: PersonDto) {
-        with(generasjonService) {
+        with(pgVedtaksperiodeRepository) {
             lagreVedtaksperioder(person.fødselsnummer, person.vedtaksperioder)
         }
     }

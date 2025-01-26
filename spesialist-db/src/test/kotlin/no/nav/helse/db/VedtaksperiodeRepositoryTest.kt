@@ -5,7 +5,7 @@ import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
-import no.nav.helse.modell.vedtaksperiode.GenerasjonService
+import no.nav.helse.modell.vedtaksperiode.PgVedtaksperiodeRepository
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
@@ -15,9 +15,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-class BehandlingServiceTest: DatabaseIntegrationTest() {
+class VedtaksperiodeRepositoryTest: DatabaseIntegrationTest() {
 
-    private val generasjonService = GenerasjonService(repositories)
+    private val pgVedtaksperiodeRepository = PgVedtaksperiodeRepository(repositories)
 
     @Test
     fun `lagrer og finner liste av vedtaksperioder`() {
@@ -74,7 +74,7 @@ class BehandlingServiceTest: DatabaseIntegrationTest() {
 
         sessionOf(dataSource).use { session ->
             session.transaction { tx ->
-                with(generasjonService) {
+                with(pgVedtaksperiodeRepository) {
                     tx.lagreVedtaksperioder(person1, vedtaksperioder)
                 }
             }
@@ -82,7 +82,7 @@ class BehandlingServiceTest: DatabaseIntegrationTest() {
 
         val funnet = sessionOf(dataSource).use { session ->
             session.transaction { tx ->
-                with(generasjonService) {
+                with(pgVedtaksperiodeRepository) {
                     tx.finnVedtaksperioder(person1)
                 }
             }
