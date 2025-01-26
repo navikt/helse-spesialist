@@ -37,9 +37,9 @@ import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMe
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.utbetaling.UtbetalingEndretCommand
-import no.nav.helse.modell.vedtaksperiode.GenerasjonService
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovCommand
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
+import no.nav.helse.modell.vedtaksperiode.PgVedtaksperiodeRepository
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastetCommand
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
@@ -61,7 +61,7 @@ class Kommandofabrikk(
     private val repositories: Repositories,
     oppgaveService: () -> OppgaveService,
     private val godkjenningMediator: GodkjenningMediator,
-    private val generasjonService: GenerasjonService = GenerasjonService(repositories),
+    private val pgVedtaksperiodeRepository: PgVedtaksperiodeRepository = PgVedtaksperiodeRepository(repositories),
     private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
     private val stikkprøver: Stikkprøver,
 ) {
@@ -229,7 +229,7 @@ class Kommandofabrikk(
     ): OppdaterPersondataCommand =
         OppdaterPersondataCommand(
             fødselsnummer = hendelse.fødselsnummer(),
-            førsteKjenteDagFinner = { generasjonService.førsteKjenteDag(hendelse.fødselsnummer()) },
+            førsteKjenteDagFinner = { pgVedtaksperiodeRepository.førsteKjenteDag(hendelse.fødselsnummer()) },
             personDao = repositories.withSessionContext(transactionalSession).personDao,
             opptegnelseRepository = repositories.withSessionContext(transactionalSession).opptegnelseRepository,
         )
@@ -353,7 +353,7 @@ class Kommandofabrikk(
     ): GodkjenningsbehovCommand {
         val sessionContext = repositories.withSessionContext(session)
         val utbetaling = sessionContext.utbetalingDao.hentUtbetaling(godkjenningsbehovData.utbetalingId)
-        val førsteKjenteDagFinner = { generasjonService.førsteKjenteDag(godkjenningsbehovData.fødselsnummer) }
+        val førsteKjenteDagFinner = { pgVedtaksperiodeRepository.førsteKjenteDag(godkjenningsbehovData.fødselsnummer) }
         return GodkjenningsbehovCommand(
             behovData = godkjenningsbehovData,
             utbetaling = utbetaling,
