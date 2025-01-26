@@ -30,4 +30,5 @@ interface SessionContext {
     val vedtakDao: VedtakDao
     val vergemålDao: VergemålDao
     val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao
+    val vedtaksperiodeRepository: VedtaksperiodeRepository
 }

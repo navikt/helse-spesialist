@@ -172,18 +172,18 @@ class SpesialistApp(
                 dataSource = dataSource,
                 repositories = repositories,
                 publiserer = meldingPubliserer,
-                kommandofabrikk = kommandofabrikk,
-                poisonPills = repositories.poisonPillDao.poisonPills(),
-                commandContextDao = repositories.commandContextDao,
-                dokumentDao = dokumentDao,
                 personDao = repositories.personDao,
+                commandContextDao = repositories.commandContextDao,
+                meldingDao = repositories.meldingDao,
+                meldingDuplikatkontrollDao = repositories.meldingDuplikatkontrollDao,
+                kommandofabrikk = kommandofabrikk,
+                dokumentDao = dokumentDao,
                 varselRepository =
                     VarselRepository(
                         varselDao = repositories.varselDao,
                         definisjonDao = repositories.definisjonDao,
                     ),
-                meldingDao = repositories.meldingDao,
-                meldingDuplikatkontrollDao = repositories.meldingDuplikatkontrollDao,
+                poisonPills = repositories.poisonPillDao.poisonPills(),
             )
         RiverSetup(rapidsConnection, meldingMediator, repositories.meldingDuplikatkontrollDao).setUp()
         saksbehandlerMediator =

@@ -129,7 +129,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val stansAutomatiskBehandlingDao = sessionContext.stansAutomatiskBehandlingDao
     internal val dialogDao = repositories.dialogDao
     internal val annulleringRepository = repositories.annulleringRepository
-    private val personService = PersonService(dataSource, repositories)
+    private val personService = PersonService(sessionContext)
     private val inntektskilderDao = sessionContext.inntektskilderRepository
 
     internal fun testhendelse(
