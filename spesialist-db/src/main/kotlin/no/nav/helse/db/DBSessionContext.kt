@@ -32,4 +32,5 @@ class DBSessionContext(session: Session) : SessionContext {
     override val vedtakDao = PgVedtakDao(session)
     override val vergemålDao = PgVergemålDao(session)
     override val åpneGosysOppgaverDao = PgÅpneGosysOppgaverDao(session)
+    override val vedtaksperiodeRepository = PgVedtaksperiodeRepository(generasjonDao, vedtakDao)
 }

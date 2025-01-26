@@ -1,40 +1,31 @@
 package no.nav.helse.modell.person
 
-import kotliquery.Session
-import kotliquery.TransactionalSession
-import kotliquery.sessionOf
-import no.nav.helse.db.Repositories
-import no.nav.helse.modell.vedtaksperiode.PgVedtaksperiodeRepository
-import javax.sql.DataSource
+import no.nav.helse.db.SessionContext
 
 class PersonService(
-    private val dataSource: DataSource,
-    private val repositories: Repositories,
+    sessionContext: SessionContext,
 ) {
-    private val pgVedtaksperiodeRepository = PgVedtaksperiodeRepository(repositories)
+    private val vedtaksperiodeRepository = sessionContext.vedtaksperiodeRepository
+    private val sykefraværstilfelleDao = sessionContext.sykefraværstilfelleDao
+    private val avviksvurderingDao = sessionContext.avviksvurderingDao
+    private val personDao = sessionContext.personDao
 
     fun brukPersonHvisFinnes(
         fødselsnummer: String,
         personScope: Person.() -> Unit,
     ) {
-        sessionOf(dataSource).use {
-            it.transaction { tx ->
-                val person = tx.hentPerson(fødselsnummer) ?: return
-                personScope(person)
-                tx.lagrePerson(person.toDto())
-            }
-        }
+        val person = hentPerson(fødselsnummer) ?: return
+        personScope(person)
+        lagrePerson(person.toDto())
     }
 
-    private fun TransactionalSession.hentPerson(fødselsnummer: String): Person? =
+    private fun hentPerson(fødselsnummer: String): Person? =
         finnPerson(fødselsnummer)
-            ?.copy(vedtaksperioder = with(pgVedtaksperiodeRepository) { finnVedtaksperioder(fødselsnummer) })
+            ?.copy(vedtaksperioder = vedtaksperiodeRepository.finnVedtaksperioder(fødselsnummer))
             ?.copy(
-                skjønnsfastsatteSykepengegrunnlag =
-                    repositories.withSessionContext(this).sykefraværstilfelleDao
-                        .finnSkjønnsfastsatteSykepengegrunnlag(fødselsnummer),
+                skjønnsfastsatteSykepengegrunnlag = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(fødselsnummer),
             )?.copy(
-                avviksvurderinger = repositories.withSessionContext(this).avviksvurderingDao.finnAvviksvurderinger(fødselsnummer),
+                avviksvurderinger = avviksvurderingDao.finnAvviksvurderinger(fødselsnummer),
             )?.let {
                 Person.gjenopprett(
                     aktørId = it.aktørId,
@@ -45,12 +36,9 @@ class PersonService(
                 )
             }
 
-    private fun TransactionalSession.lagrePerson(person: PersonDto) {
-        with(pgVedtaksperiodeRepository) {
-            lagreVedtaksperioder(person.fødselsnummer, person.vedtaksperioder)
-        }
+    private fun lagrePerson(person: PersonDto) {
+        vedtaksperiodeRepository.lagreVedtaksperioder(person.fødselsnummer, person.vedtaksperioder)
     }
 
-    private fun Session.finnPerson(fødselsnummer: String): PersonDto? =
-        repositories.withSessionContext(this).personDao.finnPerson(fødselsnummer)
+    private fun finnPerson(fødselsnummer: String): PersonDto? = personDao.finnPerson(fødselsnummer)
 }

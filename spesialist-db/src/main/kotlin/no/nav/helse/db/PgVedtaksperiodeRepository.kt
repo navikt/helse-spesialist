@@ -1,54 +1,53 @@
-package no.nav.helse.modell.vedtaksperiode
+package no.nav.helse.db
 
-import kotliquery.TransactionalSession
-import no.nav.helse.db.Repositories
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class PgVedtaksperiodeRepository(private val repositories: Repositories) {
-    private val generasjonDao = repositories.generasjonDao
+class PgVedtaksperiodeRepository(
+    private val generasjonDao: GenerasjonDao,
+    private val vedtakDao: VedtakDao,
+) : VedtaksperiodeRepository {
     private val hentedeBehandlinger: MutableMap<UUID, List<BehandlingDto>> = mutableMapOf()
 
     private val sikkerLogger = LoggerFactory.getLogger("tjenestekall")
 
-    fun TransactionalSession.finnVedtaksperioder(fødselsnummer: String): List<VedtaksperiodeDto> {
-        return repositories.withSessionContext(this).generasjonDao.finnVedtaksperiodeIderFor(fødselsnummer).map { finnVedtaksperiode(it) }
+    override fun finnVedtaksperioder(fødselsnummer: String): List<VedtaksperiodeDto> {
+        return generasjonDao.finnVedtaksperiodeIderFor(fødselsnummer).map { finnVedtaksperiode(it) }
     }
 
-    fun TransactionalSession.lagreVedtaksperioder(
+    override fun lagreVedtaksperioder(
         fødselsnummer: String,
         vedtaksperioder: List<VedtaksperiodeDto>,
     ) {
         vedtaksperioder.forEach { lagreVedtaksperiode(fødselsnummer, it) }
     }
 
-    private fun TransactionalSession.finnVedtaksperiode(vedtaksperiodeId: UUID): VedtaksperiodeDto {
-        return repositories.withSessionContext(this).vedtakDao.finnVedtaksperiode(vedtaksperiodeId)
+    private fun finnVedtaksperiode(vedtaksperiodeId: UUID): VedtaksperiodeDto {
+        return vedtakDao.finnVedtaksperiode(vedtaksperiodeId)
             ?.copy(behandlinger = finnGenerasjoner(vedtaksperiodeId))
             ?: throw IllegalStateException("Forventer å finne vedtaksperiode for vedtaksperiodeId=$vedtaksperiodeId")
     }
 
-    private fun TransactionalSession.finnGenerasjoner(vedtaksperiodeId: UUID): List<BehandlingDto> {
-        return repositories.withSessionContext(this).generasjonDao.finnGenerasjoner(vedtaksperiodeId).also {
+    private fun finnGenerasjoner(vedtaksperiodeId: UUID): List<BehandlingDto> {
+        return generasjonDao.finnGenerasjoner(vedtaksperiodeId).also {
             hentedeBehandlinger[vedtaksperiodeId] = it
         }
     }
 
-    private fun TransactionalSession.lagreVedtaksperiode(
+    private fun lagreVedtaksperiode(
         fødselsnummer: String,
         vedtaksperiode: VedtaksperiodeDto,
     ) {
-        val sessionContext = repositories.withSessionContext(this)
-        sessionContext.vedtakDao.lagreVedtaksperiode(fødselsnummer, vedtaksperiode)
+        vedtakDao.lagreVedtaksperiode(fødselsnummer, vedtaksperiode)
         loggDiffMellomHentetOgSkalLagres(vedtaksperiode)
         hentedeBehandlinger.remove(vedtaksperiode.vedtaksperiodeId)
         vedtaksperiode.behandlinger.forEach { generasjonDto ->
-            sessionContext.generasjonDao.lagreGenerasjon(generasjonDto)
+            generasjonDao.lagreGenerasjon(generasjonDto)
         }
-        sessionContext.vedtakDao.lagreOpprinneligSøknadsdato(vedtaksperiode.vedtaksperiodeId)
+        vedtakDao.lagreOpprinneligSøknadsdato(vedtaksperiode.vedtaksperiodeId)
     }
 
     private fun loggDiffMellomHentetOgSkalLagres(vedtaksperiode: VedtaksperiodeDto) {
@@ -105,5 +104,5 @@ class PgVedtaksperiodeRepository(private val repositories: Repositories) {
 
     private fun List<VarselDto>.prettyPrint(): List<String> = map { "${it.varselkode} (${it.status})" }
 
-    internal fun førsteKjenteDag(fødselsnummer: String) = generasjonDao.førsteKjenteDag(fødselsnummer)
+    override fun førsteKjenteDag(fødselsnummer: String) = generasjonDao.førsteKjenteDag(fødselsnummer)
 }

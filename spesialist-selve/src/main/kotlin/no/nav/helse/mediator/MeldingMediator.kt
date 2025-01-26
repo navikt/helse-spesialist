@@ -37,7 +37,6 @@ class MeldingMediator(
     private val kommandofabrikk: Kommandofabrikk,
     private val dokumentDao: DokumentDao,
     private val varselRepository: VarselRepository,
-    private val personService: PersonService = PersonService(dataSource, repositories),
     private val poisonPills: PoisonPills,
 ) : Personhåndterer {
     private companion object {
@@ -292,11 +291,12 @@ class MeldingMediator(
         val meldingnavn = requireNotNull(melding::class.simpleName)
         val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
         try {
-            personService.brukPersonHvisFinnes(melding.fødselsnummer()) {
-                logg.info("Personen finnes i databasen, behandler melding $meldingnavn")
-                sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")
-                sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-                    session.transaction { transactionalSession ->
+            logg.info("Personen finnes i databasen, behandler melding $meldingnavn")
+            sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")
+            sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+                session.transaction { transactionalSession ->
+                    val personService = PersonService(repositories.withSessionContext(transactionalSession))
+                    personService.brukPersonHvisFinnes(melding.fødselsnummer()) {
                         val kommandostarter =
                             kommandofabrikk.lagKommandostarter(
                                 setOf(utgåendeMeldingerMediator),
@@ -304,9 +304,9 @@ class MeldingMediator(
                                 transactionalSession,
                             )
                         melding.behandle(this, kommandostarter, transactionalSession)
+                        utgåendeMeldinger().forEach(utgåendeMeldingerMediator::hendelse)
                     }
                 }
-                utgåendeMeldinger().forEach(utgåendeMeldingerMediator::hendelse)
             }
             utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, kontekstbasertPubliserer)
         } catch (e: Exception) {

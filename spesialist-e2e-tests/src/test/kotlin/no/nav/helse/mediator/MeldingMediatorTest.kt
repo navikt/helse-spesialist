@@ -29,17 +29,17 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
             dataSource = dataSource,
             repositories = repositories,
             publiserer = MessageContextMeldingPubliserer(testRapid),
-            kommandofabrikk = kommandofabrikk,
-            poisonPills = PoisonPills(emptyMap()),
-            commandContextDao = repositories.commandContextDao,
-            dokumentDao = repositories.dokumentDao,
             personDao = repositories.personDao,
+            commandContextDao = repositories.commandContextDao,
+            meldingDao = repositories.meldingDao,
+            meldingDuplikatkontrollDao = repositories.meldingDuplikatkontrollDao,
+            kommandofabrikk = kommandofabrikk,
+            dokumentDao = repositories.dokumentDao,
             varselRepository = VarselRepository(
                 varselDao = repositories.varselDao,
                 definisjonDao = repositories.definisjonDao
             ),
-            meldingDao = repositories.meldingDao,
-            meldingDuplikatkontrollDao = repositories.meldingDuplikatkontrollDao,
+            poisonPills = PoisonPills(emptyMap()),
         )
 
     @BeforeEach
