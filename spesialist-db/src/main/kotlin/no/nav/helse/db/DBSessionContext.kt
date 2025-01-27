@@ -33,4 +33,5 @@ class DBSessionContext(session: Session) : SessionContext {
     override val vergemålDao = PgVergemålDao(session)
     override val åpneGosysOppgaverDao = PgÅpneGosysOppgaverDao(session)
     override val vedtaksperiodeRepository = PgVedtaksperiodeRepository(generasjonDao, vedtakDao)
+    override val personRepository = PgPersonRepository(vedtaksperiodeRepository, sykefraværstilfelleDao, avviksvurderingDao, personDao)
 }

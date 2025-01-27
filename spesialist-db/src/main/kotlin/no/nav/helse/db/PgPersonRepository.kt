@@ -1,17 +1,17 @@
-package no.nav.helse.modell.person
+package no.nav.helse.db
 
-import no.nav.helse.db.SessionContext
+import no.nav.helse.modell.person.Person
+import no.nav.helse.modell.person.PersonDto
+import no.nav.helse.modell.person.PersonRepository
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 
-class PersonService(
-    sessionContext: SessionContext,
-) {
-    private val vedtaksperiodeRepository = sessionContext.vedtaksperiodeRepository
-    private val sykefraværstilfelleDao = sessionContext.sykefraværstilfelleDao
-    private val avviksvurderingDao = sessionContext.avviksvurderingDao
-    private val personDao = sessionContext.personDao
-
-    fun brukPersonHvisFinnes(
+class PgPersonRepository(
+    private val vedtaksperiodeRepository: VedtaksperiodeRepository,
+    private val sykefraværstilfelleDao: SykefraværstilfelleDao,
+    private val avviksvurderingDao: AvviksvurderingDao,
+    private val personDao: PersonDao,
+) : PersonRepository {
+    override fun brukPersonHvisFinnes(
         fødselsnummer: String,
         personScope: Person.() -> Unit,
     ) {

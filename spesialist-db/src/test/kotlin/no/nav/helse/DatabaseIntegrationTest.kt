@@ -17,7 +17,6 @@ import no.nav.helse.db.api.PgOverstyringApiDao
 import no.nav.helse.db.api.PgPeriodehistorikkApiDao
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
-import no.nav.helse.modell.person.PersonService
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
@@ -129,7 +128,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val stansAutomatiskBehandlingDao = sessionContext.stansAutomatiskBehandlingDao
     internal val dialogDao = repositories.dialogDao
     internal val annulleringRepository = repositories.annulleringRepository
-    private val personService = PersonService(sessionContext)
+    private val pgPersonRepository = sessionContext.personRepository
     private val inntektskilderRepository = sessionContext.inntektskilderRepository
 
     internal fun testhendelse(
@@ -319,7 +318,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         spleisBehandlingId: UUID = UUID.randomUUID(),
     ) {
-        personService.brukPersonHvisFinnes(FNR) {
+        pgPersonRepository.brukPersonHvisFinnes(FNR) {
             this.nySpleisBehandling(
                 SpleisBehandling(
                     ORGNUMMER,
@@ -344,7 +343,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         forkastet: Boolean = false,
         spleisBehandlingId: UUID = UUID.randomUUID(),
     ) {
-        personService.brukPersonHvisFinnes(fødselsnummer) {
+        pgPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
             this.nySpleisBehandling(
                 SpleisBehandling(
                     organisasjonsnummer,

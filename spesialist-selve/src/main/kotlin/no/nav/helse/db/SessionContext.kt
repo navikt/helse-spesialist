@@ -1,5 +1,7 @@
 package no.nav.helse.db
 
+import no.nav.helse.modell.person.PersonRepository
+
 interface SessionContext {
     val arbeidsforholdDao: ArbeidsforholdDao
     val arbeidsgiverDao: ArbeidsgiverDao
@@ -31,4 +33,5 @@ interface SessionContext {
     val vergemålDao: VergemålDao
     val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao
     val vedtaksperiodeRepository: VedtaksperiodeRepository
+    val personRepository: PersonRepository
 }

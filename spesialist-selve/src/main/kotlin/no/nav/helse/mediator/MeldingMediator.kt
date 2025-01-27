@@ -15,7 +15,6 @@ import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.KlargjørPersonForVisning
 import no.nav.helse.modell.melding.OppdaterPersondata
-import no.nav.helse.modell.person.PersonService
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
@@ -293,8 +292,7 @@ class MeldingMediator(
             logg.info("Personen finnes i databasen, behandler melding $meldingnavn")
             sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")
             sessionFactory.transactionalSessionScope { sessionContext ->
-                val personService = PersonService(sessionContext)
-                personService.brukPersonHvisFinnes(melding.fødselsnummer()) {
+                sessionContext.personRepository.brukPersonHvisFinnes(melding.fødselsnummer()) {
                     val kommandostarter =
                         kommandofabrikk.lagKommandostarter(
                             setOf(utgåendeMeldingerMediator),

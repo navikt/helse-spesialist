@@ -9,7 +9,6 @@ import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.kommando.TestMelding
-import no.nav.helse.modell.person.PersonService
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
@@ -104,7 +103,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val notatDao = repositories.notatDao
     internal val dialogDao = repositories.dialogDao
     internal val annulleringRepository = repositories.annulleringRepository
-    private val personService = PersonService(sessionContext)
+    private val pgPersonRepository = sessionContext.personRepository
     private val inntektskilderRepository = sessionContext.inntektskilderRepository
 
     internal fun testhendelse(
@@ -290,7 +289,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         forkastet: Boolean = false,
         spleisBehandlingId: UUID = UUID.randomUUID(),
     ) {
-        personService.brukPersonHvisFinnes(fødselsnummer) {
+        pgPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
             this.nySpleisBehandling(
                 SpleisBehandling(
                     organisasjonsnummer,
