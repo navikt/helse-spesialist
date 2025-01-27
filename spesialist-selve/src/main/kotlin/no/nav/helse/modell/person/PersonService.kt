@@ -1,6 +1,7 @@
 package no.nav.helse.modell.person
 
 import no.nav.helse.db.SessionContext
+import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 
 class PersonService(
     sessionContext: SessionContext,
@@ -14,12 +15,28 @@ class PersonService(
         fødselsnummer: String,
         personScope: Person.() -> Unit,
     ) {
-        val person = hentPerson(fødselsnummer) ?: return
+        val (person, dtoFør) = hentPerson(fødselsnummer) ?: return
         personScope(person)
-        lagrePerson(person.toDto())
+        val dtoEtter = person.toDto()
+        if (dtoFør != dtoEtter) lagrePerson(dtoFør, dtoEtter)
     }
 
-    private fun hentPerson(fødselsnummer: String): Person? =
+    private fun finnEndredeVedtaksperioder(
+        dtoFør: PersonDto,
+        dtoEtter: PersonDto,
+    ): List<VedtaksperiodeDto> {
+        val vedtaksperioderFør = dtoFør.vedtaksperioder.associateBy { it.vedtaksperiodeId }
+        val vedtaksperioderEtter = dtoEtter.vedtaksperioder
+
+        val tilLagring =
+            vedtaksperioderEtter.filter { vedtaksperiodeEtter ->
+                val vedtaksperiodeFør = vedtaksperioderFør[vedtaksperiodeEtter.vedtaksperiodeId] ?: return@filter true
+                vedtaksperiodeFør != vedtaksperiodeEtter
+            }
+        return tilLagring
+    }
+
+    private fun hentPerson(fødselsnummer: String): Pair<Person, PersonDto>? =
         finnPerson(fødselsnummer)
             ?.copy(vedtaksperioder = vedtaksperiodeRepository.finnVedtaksperioder(fødselsnummer))
             ?.copy(
@@ -33,11 +50,15 @@ class PersonService(
                     vedtaksperioder = it.vedtaksperioder,
                     skjønnsfastsattSykepengegrunnlag = it.skjønnsfastsatteSykepengegrunnlag,
                     avviksvurderinger = it.avviksvurderinger,
-                )
+                ) to it
             }
 
-    private fun lagrePerson(person: PersonDto) {
-        vedtaksperiodeRepository.lagreVedtaksperioder(person.fødselsnummer, person.vedtaksperioder)
+    private fun lagrePerson(
+        dtoFør: PersonDto,
+        dtoEtter: PersonDto,
+    ) {
+        val vedtaksperioderSomSkalLagres = finnEndredeVedtaksperioder(dtoFør, dtoEtter)
+        vedtaksperiodeRepository.lagreVedtaksperioder(dtoEtter.fødselsnummer, vedtaksperioderSomSkalLagres)
     }
 
     private fun finnPerson(fødselsnummer: String): PersonDto? = personDao.finnPerson(fødselsnummer)
