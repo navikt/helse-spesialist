@@ -11,7 +11,9 @@ internal class TotrinnsvurderingMutationTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `send oppgave til godkjenning med V2`() {
-        every { saksbehandlerhåndterer.håndterTotrinnsvurdering(any()) }.returns(SendTilGodkjenningResult.Ok)
+        every { saksbehandlerhåndterer.håndterTotrinnsvurdering(any(), any(), any(), any()) }.returns(
+            SendTilGodkjenningResult.Ok
+        )
         opprettSaksbehandler()
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         val oppgaveRef = finnOppgaveIdFor(PERIODE.id)

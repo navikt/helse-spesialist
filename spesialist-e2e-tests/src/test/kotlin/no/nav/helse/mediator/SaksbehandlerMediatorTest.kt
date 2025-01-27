@@ -19,6 +19,7 @@ import no.nav.helse.spesialist.api.graphql.mutation.Avslag
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagsdata
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagshandling
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
+import no.nav.helse.spesialist.api.graphql.mutation.VedtakUtfall
 import no.nav.helse.spesialist.api.graphql.schema.AnnulleringArsak
 import no.nav.helse.spesialist.api.graphql.schema.AnnulleringData
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
@@ -91,7 +92,8 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             meldingPubliserer,
             oppgaveService,
             tilgangsgrupper,
-            stansAutomatiskBehandlingMediator,TotrinnsvurderingService(
+            stansAutomatiskBehandlingMediator,
+            TotrinnsvurderingService(
                 totrinnsvurderingDao = totrinnsvurderingDao,
                 oppgaveDao = oppgaveDao,
                 periodehistorikkDao = periodehistorikkDao,
@@ -206,21 +208,41 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     fun `håndter totrinnsvurdering`() {
         val vedtaksperiodeId = UUID.randomUUID()
         nyPerson(vedtaksperiodeId = vedtaksperiodeId)
+        opprettTotrinnsvurdering(vedtaksperiodeId)
+        opprettSaksbehandler()
+        val saksbehandler = SaksbehandlerFraApi(
+            SAKSBEHANDLER_OID,
+            SAKSBEHANDLER_NAVN,
+            SAKSBEHANDLER_EPOST,
+            SAKSBEHANDLER_IDENT,
+            emptyList()
+        )
         val definisjonRef = opprettVarseldefinisjon()
         nyttVarsel(
             vedtaksperiodeId = vedtaksperiodeId,
             definisjonRef = definisjonRef,
             status = "VURDERT",
         )
-        assertDoesNotThrow {
-            mediator.håndterTotrinnsvurdering(oppgaveId)
-        }
+
+        val result =
+            mediator.håndterTotrinnsvurdering(oppgaveId, saksbehandler, VedtakUtfall.INNVILGELSE, "Begrunnelse")
+
+        assertEquals(SendTilGodkjenningResult.Ok, result)
     }
 
     @Test
     fun `håndter totrinnsvurdering når periode har aktivt varsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
         nyPerson(vedtaksperiodeId = vedtaksperiodeId)
+        opprettTotrinnsvurdering(vedtaksperiodeId)
+        opprettSaksbehandler()
+        val saksbehandler = SaksbehandlerFraApi(
+            SAKSBEHANDLER_OID,
+            SAKSBEHANDLER_NAVN,
+            SAKSBEHANDLER_EPOST,
+            SAKSBEHANDLER_IDENT,
+            emptyList()
+        )
         val definisjonRef = opprettVarseldefinisjon()
         nyttVarsel(
             vedtaksperiodeId = vedtaksperiodeId,
@@ -228,16 +250,35 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             status = "AKTIV",
         )
 
-        assertTrue(mediator.håndterTotrinnsvurdering(oppgaveId) is SendTilGodkjenningResult.Feil.ManglerVurderingAvVarsler)
+        assertTrue(
+            mediator.håndterTotrinnsvurdering(
+                oppgaveId,
+                saksbehandler,
+                VedtakUtfall.INNVILGELSE,
+                "Begrunnelse"
+            ) is SendTilGodkjenningResult.Feil.ManglerVurderingAvVarsler
+        )
     }
 
     @Test
     fun `håndter totrinnsvurdering når periode ikke har noen varsler`() {
         val vedtaksperiodeId = UUID.randomUUID()
         nyPerson(vedtaksperiodeId = vedtaksperiodeId)
-        assertDoesNotThrow {
-            mediator.håndterTotrinnsvurdering(oppgaveId)
-        }
+
+        opprettTotrinnsvurdering(vedtaksperiodeId)
+        opprettSaksbehandler()
+        val saksbehandler = SaksbehandlerFraApi(
+            SAKSBEHANDLER_OID,
+            SAKSBEHANDLER_NAVN,
+            SAKSBEHANDLER_EPOST,
+            SAKSBEHANDLER_IDENT,
+            emptyList()
+        )
+
+        val result =
+            mediator.håndterTotrinnsvurdering(oppgaveId, saksbehandler, VedtakUtfall.INNVILGELSE, "Begrunnelse")
+
+        assertEquals(SendTilGodkjenningResult.Ok, result)
     }
 
     @Test
@@ -346,7 +387,16 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         val oppgaveId = OPPGAVE_ID
         val frist = LocalDate.now()
         val skalTildeles = true
-        mediator.påVent(PaVentRequest.LeggPaVent(oppgaveId, saksbehandler.oid, frist, skalTildeles, "en tekst", listOf(PaVentRequest.PaVentArsak("key", "arsak"))), saksbehandler)
+        mediator.påVent(
+            PaVentRequest.LeggPaVent(
+                oppgaveId,
+                saksbehandler.oid,
+                frist,
+                skalTildeles,
+                "en tekst",
+                listOf(PaVentRequest.PaVentArsak("key", "arsak"))
+            ), saksbehandler
+        )
         val melding = testRapid.inspektør.hendelser("lagt_på_vent").lastOrNull()
         val årsaker = melding?.get("årsaker")?.map { it.get("key").asText() to it.get("årsak").asText() }
         assertNotNull(melding)
@@ -368,12 +418,30 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         val oppgaveId = OPPGAVE_ID
         val frist = LocalDate.now()
         val skalTildeles = true
-        mediator.påVent(PaVentRequest.LeggPaVent(oppgaveId, saksbehandler.oid, frist, skalTildeles, "en tekst", listOf(PaVentRequest.PaVentArsak("key", "arsak"))), saksbehandler)
+        mediator.påVent(
+            PaVentRequest.LeggPaVent(
+                oppgaveId,
+                saksbehandler.oid,
+                frist,
+                skalTildeles,
+                "en tekst",
+                listOf(PaVentRequest.PaVentArsak("key", "arsak"))
+            ), saksbehandler
+        )
         val melding1 = testRapid.inspektør.hendelser("lagt_på_vent").lastOrNull()
         assertEquals("lagt_på_vent", melding1?.get("@event_name")?.asText())
 
         val nyFrist = LocalDate.now().plusDays(5)
-        mediator.påVent(PaVentRequest.EndrePaVent(oppgaveId, saksbehandler.oid, nyFrist, skalTildeles, "en ny tekst", listOf(PaVentRequest.PaVentArsak("key", "arsak"))), saksbehandler)
+        mediator.påVent(
+            PaVentRequest.EndrePaVent(
+                oppgaveId,
+                saksbehandler.oid,
+                nyFrist,
+                skalTildeles,
+                "en ny tekst",
+                listOf(PaVentRequest.PaVentArsak("key", "arsak"))
+            ), saksbehandler
+        )
 
 
         val melding2 = testRapid.inspektør.hendelser("lagt_på_vent").lastOrNull()
@@ -510,7 +578,8 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         mediator.påVent(PaVentRequest.FjernPaVent(oppgaveId), saksbehandler)
         val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
         val historikk = periodehistorikkApiDao.finn(UTBETALING_ID)
-        assertTrue(historikk.map { it.type }.containsAll(listOf(PeriodehistorikkType.FJERN_FRA_PA_VENT, PeriodehistorikkType.LEGG_PA_VENT)))
+        assertTrue(historikk.map { it.type }
+            .containsAll(listOf(PeriodehistorikkType.FJERN_FRA_PA_VENT, PeriodehistorikkType.LEGG_PA_VENT)))
         assertFalse(melding["egenskaper"].map { it.asText() }.contains("PÅ_VENT"))
     }
 
@@ -881,12 +950,12 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
                 ),
                 begrunnelse = "en begrunnelse",
                 arbeidsgivere =
-                listOf(
-                    MinimumSykdomsgrad.Arbeidsgiver(
-                        organisasjonsnummer = ORGANISASJONSNUMMER,
-                        berortVedtaksperiodeId = PERIODE.id,
+                    listOf(
+                        MinimumSykdomsgrad.Arbeidsgiver(
+                            organisasjonsnummer = ORGANISASJONSNUMMER,
+                            berortVedtaksperiodeId = PERIODE.id,
+                        ),
                     ),
-                ),
                 initierendeVedtaksperiodeId = PERIODE.id,
             )
 

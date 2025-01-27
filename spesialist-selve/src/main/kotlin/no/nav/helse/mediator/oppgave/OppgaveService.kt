@@ -202,10 +202,9 @@ class OppgaveService(
         oppgaveId: Long,
         behandlendeSaksbehandler: SaksbehandlerFraApi,
     ) {
-        val saksbehandler = behandlendeSaksbehandler.tilSaksbehandler()
         oppgave(oppgaveId) {
             try {
-                sendTilBeslutter(saksbehandler)
+                sendTilBeslutter(behandlendeSaksbehandler.tilSaksbehandler())
             } catch (e: Modellfeil) {
                 throw e.tilApiversjon()
             }

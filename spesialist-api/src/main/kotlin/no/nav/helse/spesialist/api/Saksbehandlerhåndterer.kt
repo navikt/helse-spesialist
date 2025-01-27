@@ -19,7 +19,19 @@ sealed interface SendTilGodkjenningResult {
     sealed interface Feil : SendTilGodkjenningResult {
         data class ManglerVurderingAvVarsler(val modellfeil: Modellfeil) : Feil
 
-        data class KunneIkkeHåndtereTotrinnsvurdering(val e: Exception) : Feil
+        data class KunneIkkeFinnePerioderTilBehandling(val e: Exception) : Feil
+
+        data class KunneIkkeHåndtereBegrunnelse(val e: Exception) : Feil
+
+        data class KunneIkkeSendeTilBeslutter(val modellfeil: Modellfeil) : Feil
+
+        data class UventetFeilVedSendigTilBeslutter(val e: Exception) : Feil
+
+        data class KunneIkkeFjerneFraPåVent(val modellfeil: Modellfeil) : Feil
+
+        data class UventetFeilVedFjernFraPåVent(val e: Exception) : Feil
+
+        data class UventetFeilVedOpprettingAvPeriodehistorikk(val e: Exception) : Feil
     }
 }
 
@@ -74,7 +86,12 @@ interface Saksbehandlerhåndterer {
         saksbehandlerFraApi: SaksbehandlerFraApi,
     )
 
-    fun håndterTotrinnsvurdering(oppgavereferanse: Long): SendTilGodkjenningResult
+    fun håndterTotrinnsvurdering(
+        oppgavereferanse: Long,
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+        utfall: VedtakUtfall,
+        begrunnelse: String?,
+    ): SendTilGodkjenningResult
 
     fun hentAvslag(
         vedtaksperiodeId: UUID,

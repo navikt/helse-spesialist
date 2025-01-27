@@ -1,5 +1,6 @@
 package no.nav.helse.mediator
 
+import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.AnnulleringRepository
@@ -24,6 +25,7 @@ import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
+import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import no.nav.helse.modell.saksbehandler.handlinger.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringArsak
 import no.nav.helse.modell.saksbehandler.handlinger.Arbeidsforhold
@@ -571,15 +573,67 @@ class SaksbehandlerMediator(
         )
     }
 
-    override fun håndterTotrinnsvurdering(oppgavereferanse: Long): SendTilGodkjenningResult {
+    override fun håndterTotrinnsvurdering(
+        oppgavereferanse: Long,
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+        utfall: VedtakUtfall,
+        begrunnelse: String?,
+    ): SendTilGodkjenningResult {
         try {
             val perioderTilBehandling = generasjonRepository.perioderTilBehandling(oppgavereferanse)
             if (perioderTilBehandling.harAktiveVarsler()) {
-                return SendTilGodkjenningResult.Feil.ManglerVurderingAvVarsler(ManglerVurderingAvVarsler(oppgavereferanse))
+                return SendTilGodkjenningResult.Feil.ManglerVurderingAvVarsler(
+                    ManglerVurderingAvVarsler(
+                        oppgavereferanse,
+                    ),
+                )
             }
         } catch (e: Exception) {
-            return SendTilGodkjenningResult.Feil.KunneIkkeHåndtereTotrinnsvurdering(e)
+            return SendTilGodkjenningResult.Feil.KunneIkkeFinnePerioderTilBehandling(e)
         }
+
+        try {
+            håndterVedtakBegrunnelse(
+                utfall = utfall,
+                begrunnelse = begrunnelse,
+                oppgaveId = oppgavereferanse,
+                saksbehandlerOid = saksbehandlerFraApi.oid,
+            )
+        } catch (e: Exception) {
+            return SendTilGodkjenningResult.Feil.KunneIkkeHåndtereBegrunnelse(e)
+        }
+
+        try {
+            oppgaveService.sendTilBeslutter(oppgavereferanse.toLong(), saksbehandlerFraApi)
+        } catch (modellfeil: no.nav.helse.spesialist.api.feilhåndtering.Modellfeil) {
+            return SendTilGodkjenningResult.Feil.KunneIkkeSendeTilBeslutter(modellfeil)
+        } catch (e: Exception) {
+            return SendTilGodkjenningResult.Feil.UventetFeilVedSendigTilBeslutter(e)
+        }
+
+        try {
+            påVent(PaVentRequest.FjernPaVentUtenHistorikkinnslag(oppgavereferanse.toLong()), saksbehandlerFraApi)
+        } catch (modellfeil: no.nav.helse.spesialist.api.feilhåndtering.Modellfeil) {
+            return SendTilGodkjenningResult.Feil.KunneIkkeFjerneFraPåVent(modellfeil)
+        } catch (e: Exception) {
+            return SendTilGodkjenningResult.Feil.UventetFeilVedFjernFraPåVent(e)
+        }
+
+        sikkerlogg.info(
+            "Oppgave med {} sendes til godkjenning av saksbehandler med {}",
+            StructuredArguments.kv("oppgaveId", oppgavereferanse),
+            StructuredArguments.kv("oid", saksbehandlerFraApi.oid),
+        )
+
+        try {
+            val innslag = Historikkinnslag.avventerTotrinnsvurdering(saksbehandlerFraApi.toDto())
+            periodehistorikkDao.lagreMedOppgaveId(innslag, oppgavereferanse)
+        } catch (e: Exception) {
+            return SendTilGodkjenningResult.Feil.UventetFeilVedOpprettingAvPeriodehistorikk(e)
+        }
+
+        log.info("OppgaveId $oppgavereferanse sendt til godkjenning")
+
         return SendTilGodkjenningResult.Ok
     }
 
@@ -610,6 +664,7 @@ class SaksbehandlerMediator(
 
     internal companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+        private val log = LoggerFactory.getLogger(SaksbehandlerMediator::class.java.simpleName)
 
         internal fun Modellfeil.tilApiversjon(): no.nav.helse.spesialist.api.feilhåndtering.Modellfeil =
             when (this) {
@@ -877,4 +932,12 @@ class SaksbehandlerMediator(
             VedtakUtfall.DELVIS_INNVILGELSE -> VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE
             VedtakUtfall.INNVILGELSE -> VedtakBegrunnelseTypeFraDatabase.INNVILGELSE
         }
+
+    private fun SaksbehandlerFraApi.toDto(): SaksbehandlerDto =
+        SaksbehandlerDto(
+            epostadresse = this.epost,
+            oid = this.oid,
+            navn = this.navn,
+            ident = this.ident,
+        )
 }

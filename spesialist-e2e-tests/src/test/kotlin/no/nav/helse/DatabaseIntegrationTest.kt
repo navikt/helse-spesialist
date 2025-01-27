@@ -163,6 +163,38 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
     }
 
+    protected fun opprettTotrinnsvurdering(
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
+        saksbehandler: UUID? = null,
+        erRetur: Boolean = false,
+        ferdigstill: Boolean = false,
+    ) {
+        totrinnsvurderingDao.opprett(vedtaksperiodeId)
+
+        if (saksbehandler != null) {
+            settSaksbehandler(vedtaksperiodeId, saksbehandler)
+        }
+        if (erRetur) {
+            totrinnsvurderingDao.settErRetur(vedtaksperiodeId)
+        }
+        if (ferdigstill) {
+            totrinnsvurderingDao.ferdigstill(vedtaksperiodeId)
+        }
+    }
+
+    protected fun settSaksbehandler(
+        vedtaksperiodeId: UUID,
+        saksbehandlerOid: UUID,
+    ) = dbQuery.update(
+        """
+        UPDATE totrinnsvurdering
+        SET saksbehandler = :saksbehandlerOid, oppdatert = now()
+        WHERE vedtaksperiode_id = :vedtaksperiodeId AND utbetaling_id_ref IS null
+        """.trimIndent(),
+        "vedtaksperiodeId" to vedtaksperiodeId,
+        "saksbehandlerOid" to saksbehandlerOid,
+    )
+
     private fun opprettCommandContext(
         hendelse: TestMelding,
         contextId: UUID,
