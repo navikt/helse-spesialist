@@ -225,7 +225,7 @@ class MeldingMediator(
             sikkerlogg.info("Melding SøknadSendt mottatt:\n${melding.toJson()}")
             meldingDao.lagre(melding)
             val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
-            sessionFactory.sessionScope { sessionContext ->
+            sessionFactory.transactionalSessionScope { sessionContext ->
                 kommandofabrikk.iverksettSøknadSendt(melding, utgåendeMeldingerMediator, sessionContext)
             }
             utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, kontekstbasertPubliserer)
@@ -292,7 +292,7 @@ class MeldingMediator(
         try {
             logg.info("Personen finnes i databasen, behandler melding $meldingnavn")
             sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")
-            sessionFactory.sessionScope { sessionContext ->
+            sessionFactory.transactionalSessionScope { sessionContext ->
                 val personService = PersonService(sessionContext)
                 personService.brukPersonHvisFinnes(melding.fødselsnummer()) {
                     val kommandostarter =

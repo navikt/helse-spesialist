@@ -7,7 +7,7 @@ class TransactionalSessionFactory(
     private val dataSource: DataSource,
     private val repositories: Repositories,
 ) : SessionFactory {
-    override fun sessionScope(transactionalBlock: (SessionContext) -> Unit) {
+    override fun transactionalSessionScope(transactionalBlock: (SessionContext) -> Unit) {
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             session.transaction { transactionalSession ->
                 transactionalBlock(repositories.withSessionContext(transactionalSession))

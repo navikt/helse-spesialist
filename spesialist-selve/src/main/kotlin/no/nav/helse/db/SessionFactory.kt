@@ -1,5 +1,5 @@
 package no.nav.helse.db
 
 interface SessionFactory {
-    fun sessionScope(transactionalBlock: (SessionContext) -> Unit)
+    fun transactionalSessionScope(transactionalBlock: (SessionContext) -> Unit)
 }
