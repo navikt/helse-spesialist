@@ -85,7 +85,7 @@ class Oppgave private constructor(
 
         egenskaper.remove(RETUR)
         egenskaper.add(BESLUTTER)
-        tildeltTil = totrinnsvurdering.tidligereBeslutter()
+        tildeltTil = totrinnsvurdering.beslutter
         oppgaveEndret()
     }
 
@@ -98,7 +98,7 @@ class Oppgave private constructor(
         totrinnsvurdering.sendIRetur(id, besluttendeSaksbehandler)
 
         val opprinneligSaksbehandler =
-            requireNotNull(totrinnsvurdering.opprinneligSaksbehandler()) {
+            requireNotNull(totrinnsvurdering.saksbehandler) {
                 "Opprinnelig saksbehandler kan ikke være null ved retur av beslutteroppgave"
             }
 

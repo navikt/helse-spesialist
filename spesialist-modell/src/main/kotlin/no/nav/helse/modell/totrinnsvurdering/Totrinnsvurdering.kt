@@ -12,30 +12,29 @@ import java.util.UUID
 
 class Totrinnsvurdering(
     private val vedtaksperiodeId: UUID,
-    private var erRetur: Boolean,
-    private var saksbehandler: Saksbehandler?,
-    var beslutter: Saksbehandler?,
-    private var utbetalingId: UUID?,
+    erRetur: Boolean,
+    saksbehandler: Saksbehandler?,
+    beslutter: Saksbehandler?,
+    utbetalingId: UUID?,
     private val opprettet: LocalDateTime,
-    private var oppdatert: LocalDateTime?,
+    oppdatert: LocalDateTime?,
 ) {
+    var erRetur: Boolean = erRetur
+        private set
+
+    var saksbehandler: Saksbehandler? = saksbehandler
+        private set
+
+    var beslutter: Saksbehandler? = beslutter
+        private set
+
+    var utbetalingId: UUID? = utbetalingId
+        private set
+
+    var oppdatert: LocalDateTime? = oppdatert
+        private set
+
     private val erBeslutteroppgave: Boolean get() = !erRetur && saksbehandler != null
-
-    internal fun accept(totrinnsvurderingVisitor: TotrinnsvurderingVisitor) {
-        totrinnsvurderingVisitor.visitTotrinnsvurdering(
-            vedtaksperiodeId,
-            erRetur,
-            saksbehandler,
-            beslutter,
-            utbetalingId,
-            opprettet,
-            oppdatert,
-        )
-    }
-
-    internal fun tidligereBeslutter() = beslutter
-
-    internal fun opprinneligSaksbehandler() = saksbehandler
 
     internal fun sendTilBeslutter(
         oppgaveId: Long,

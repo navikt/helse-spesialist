@@ -9,13 +9,11 @@ import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering.Companion.gjenopprett
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering.Companion.toDto
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTest.TotrinnsvurderingInspektør.Companion.inspektør
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
 import java.util.UUID
-import kotlin.properties.Delegates
 
 internal class TotrinnsvurderingTest {
 
@@ -24,12 +22,11 @@ internal class TotrinnsvurderingTest {
         val totrinnsvurdering = nyTotrinnsvurdering()
         val behandlendeSaksbehandler = nySaksbehandler()
         totrinnsvurdering.sendTilBeslutter(1L, behandlendeSaksbehandler)
-        inspektør(totrinnsvurdering) {
-            assertEquals(behandlendeSaksbehandler, saksbehandler)
-            assertEquals(null, beslutter)
-            assertEquals(false, erRetur)
-            assertEquals(null, utbetalingId)
-        }
+
+        assertEquals(behandlendeSaksbehandler, totrinnsvurdering.saksbehandler)
+        assertEquals(null, totrinnsvurdering.beslutter)
+        assertEquals(false, totrinnsvurdering.erRetur)
+        assertEquals(null, totrinnsvurdering.utbetalingId)
     }
 
     @Test
@@ -39,12 +36,11 @@ internal class TotrinnsvurderingTest {
         val besluttendeSaksbehandler = nySaksbehandler()
         totrinnsvurdering.sendTilBeslutter(1L, behandlendeSaksbehandler)
         totrinnsvurdering.sendIRetur(1L, besluttendeSaksbehandler)
-        inspektør(totrinnsvurdering) {
-            assertEquals(behandlendeSaksbehandler, saksbehandler)
-            assertEquals(besluttendeSaksbehandler, beslutter)
-            assertEquals(true, erRetur)
-            assertEquals(null, utbetalingId)
-        }
+
+        assertEquals(behandlendeSaksbehandler, totrinnsvurdering.saksbehandler)
+        assertEquals(besluttendeSaksbehandler, totrinnsvurdering.beslutter)
+        assertEquals(true, totrinnsvurdering.erRetur)
+        assertEquals(null, totrinnsvurdering.utbetalingId)
     }
 
     @Test
@@ -55,12 +51,10 @@ internal class TotrinnsvurderingTest {
         totrinnsvurdering.sendTilBeslutter(1L, behandlendeSaksbehandler)
         totrinnsvurdering.sendIRetur(1L, besluttendeSaksbehandler)
         totrinnsvurdering.sendTilBeslutter(1L, behandlendeSaksbehandler)
-        inspektør(totrinnsvurdering) {
-            assertEquals(behandlendeSaksbehandler, saksbehandler)
-            assertEquals(besluttendeSaksbehandler, beslutter)
-            assertEquals(false, erRetur)
-            assertEquals(null, utbetalingId)
-        }
+        assertEquals(behandlendeSaksbehandler, totrinnsvurdering.saksbehandler)
+        assertEquals(besluttendeSaksbehandler, totrinnsvurdering.beslutter)
+        assertEquals(false, totrinnsvurdering.erRetur)
+        assertEquals(null, totrinnsvurdering.utbetalingId)
     }
 
     @Test
@@ -70,11 +64,9 @@ internal class TotrinnsvurderingTest {
         totrinnsvurdering.sendTilBeslutter(1L, behandlendeSaksbehandler)
         val utbetalingId = UUID.randomUUID()
         totrinnsvurdering.ferdigstill(utbetalingId)
-        inspektør(totrinnsvurdering) {
-            assertEquals(behandlendeSaksbehandler, saksbehandler)
-            assertEquals(false, erRetur)
-            assertEquals(utbetalingId, this.utbetalingId)
-        }
+        assertEquals(behandlendeSaksbehandler, totrinnsvurdering.saksbehandler)
+        assertEquals(false, totrinnsvurdering.erRetur)
+        assertEquals(utbetalingId, totrinnsvurdering.utbetalingId)
     }
 
     @Test
@@ -161,40 +153,4 @@ internal class TotrinnsvurderingTest {
         opprettet = LocalDateTime.now(),
         oppdatert = null
     )
-
-    private class TotrinnsvurderingInspektør private constructor(): TotrinnsvurderingVisitor {
-        lateinit var vedtaksperiodeId: UUID
-        var erRetur by Delegates.notNull<Boolean>()
-        var saksbehandler: Saksbehandler? = null
-        var beslutter: Saksbehandler? = null
-        var utbetalingId: UUID? = null
-        lateinit var opprettet: LocalDateTime
-        var oppdatert: LocalDateTime? = null
-        override fun visitTotrinnsvurdering(
-            vedtaksperiodeId: UUID,
-            erRetur: Boolean,
-            saksbehandler: Saksbehandler?,
-            beslutter: Saksbehandler?,
-            utbetalingId: UUID?,
-            opprettet: LocalDateTime,
-            oppdatert: LocalDateTime?
-        ) {
-            this.vedtaksperiodeId = vedtaksperiodeId
-            this.erRetur = erRetur
-            this.saksbehandler = saksbehandler
-            this.beslutter = beslutter
-            this.utbetalingId = utbetalingId
-            this.opprettet = opprettet
-            this.oppdatert = oppdatert
-        }
-
-        companion object {
-            fun inspektør(totrinnsvurdering: Totrinnsvurdering, block: TotrinnsvurderingInspektør.() -> Unit) {
-                val inspektør = TotrinnsvurderingInspektør()
-                totrinnsvurdering.accept(inspektør)
-                block(inspektør)
-            }
-        }
-
-    }
 }
