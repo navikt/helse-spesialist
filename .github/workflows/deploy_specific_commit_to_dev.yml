@@ -51,8 +51,6 @@ jobs:
         id: login
         with:
           team: tbd
-          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
-          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.lag_tag.outputs.tag }}
