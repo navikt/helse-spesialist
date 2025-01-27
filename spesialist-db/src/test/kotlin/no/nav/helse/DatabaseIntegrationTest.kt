@@ -130,7 +130,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val dialogDao = repositories.dialogDao
     internal val annulleringRepository = repositories.annulleringRepository
     private val personService = PersonService(sessionContext)
-    private val inntektskilderDao = sessionContext.inntektskilderRepository
+    private val inntektskilderRepository = sessionContext.inntektskilderRepository
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,
@@ -302,7 +302,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         navn: String = ORGNAVN,
         bransjer: List<String> = BRANSJER,
     ) {
-        inntektskilderDao.lagreInntektskilder(
+        inntektskilderRepository.lagreInntektskilder(
             listOf(
                 KomplettInntektskildeDto(
                     identifikator = organisasjonsnummer,
