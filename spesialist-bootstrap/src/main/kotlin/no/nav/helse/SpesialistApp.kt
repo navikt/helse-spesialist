@@ -4,6 +4,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.ktor.server.application.Application
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.DBRepositories
+import no.nav.helse.db.DataSourceBuilder
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.kafka.RiverSetup
 import no.nav.helse.mediator.BehandlingsstatistikkService
@@ -188,7 +189,6 @@ class SpesialistApp(
         RiverSetup(rapidsConnection, meldingMediator, repositories.meldingDuplikatkontrollDao).setUp()
         saksbehandlerMediator =
             SaksbehandlerMediator(
-                dataSource = dataSource,
                 repositories = repositories,
                 versjonAvKode = versjonAvKode,
                 meldingPubliserer = meldingPubliserer,

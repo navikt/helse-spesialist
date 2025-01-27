@@ -67,7 +67,6 @@ internal class TestMediator(
 
     private val saksbehandlerMediator =
         SaksbehandlerMediator(
-            dataSource,
             repositories,
             "versjonAvKode",
             meldingPubliserer,

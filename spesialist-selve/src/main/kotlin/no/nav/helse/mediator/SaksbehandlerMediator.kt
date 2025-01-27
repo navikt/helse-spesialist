@@ -90,10 +90,8 @@ import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.harAktiveVars
 import no.nav.helse.tell
 import org.slf4j.LoggerFactory
 import java.util.UUID
-import javax.sql.DataSource
 
 class SaksbehandlerMediator(
-    dataSource: DataSource,
     repositories: Repositories,
     private val versjonAvKode: String,
     private val meldingPubliserer: MeldingPubliserer,
@@ -604,7 +602,7 @@ class SaksbehandlerMediator(
         }
 
         try {
-            oppgaveService.sendTilBeslutter(oppgavereferanse.toLong(), saksbehandlerFraApi)
+            oppgaveService.sendTilBeslutter(oppgavereferanse, saksbehandlerFraApi)
         } catch (modellfeil: no.nav.helse.spesialist.api.feilhåndtering.Modellfeil) {
             return SendTilGodkjenningResult.Feil.KunneIkkeSendeTilBeslutter(modellfeil)
         } catch (e: Exception) {
@@ -612,7 +610,7 @@ class SaksbehandlerMediator(
         }
 
         try {
-            påVent(PaVentRequest.FjernPaVentUtenHistorikkinnslag(oppgavereferanse.toLong()), saksbehandlerFraApi)
+            påVent(PaVentRequest.FjernPaVentUtenHistorikkinnslag(oppgavereferanse), saksbehandlerFraApi)
         } catch (modellfeil: no.nav.helse.spesialist.api.feilhåndtering.Modellfeil) {
             return SendTilGodkjenningResult.Feil.KunneIkkeFjerneFraPåVent(modellfeil)
         } catch (e: Exception) {
