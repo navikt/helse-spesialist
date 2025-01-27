@@ -10,10 +10,8 @@ import no.nav.helse.spesialist.api.graphql.graphQLApi
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.websockets.webSocketsApi
-import javax.sql.DataSource
 
 class Bootstrap(
-    dataSource: DataSource,
     repositories: Repositories,
     private val avhengigheter: ApiAvhengigheter,
     private val reservasjonClient: ReservasjonClient,

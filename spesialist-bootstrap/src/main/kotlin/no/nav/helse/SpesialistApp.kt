@@ -107,7 +107,6 @@ class SpesialistApp(
 
     private val bootstrap =
         Bootstrap(
-            dataSource = dataSource,
             repositories = repositories,
             avhengigheter = apiAvhengigheter,
             reservasjonClient = reservasjonClient,
