@@ -1,7 +1,6 @@
 package no.nav.helse.mediator
 
 import com.fasterxml.jackson.databind.JsonNode
-import kotliquery.sessionOf
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.CommandContextDao
@@ -9,7 +8,7 @@ import no.nav.helse.db.DokumentDao
 import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.MeldingDuplikatkontrollDao
 import no.nav.helse.db.PersonDao
-import no.nav.helse.db.Repositories
+import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
@@ -24,11 +23,9 @@ import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.Personhåndterer
 import org.slf4j.LoggerFactory
 import java.util.UUID
-import javax.sql.DataSource
 
 class MeldingMediator(
-    private val dataSource: DataSource,
-    private val repositories: Repositories,
+    private val sessionFactory: SessionFactory,
     private val publiserer: MeldingPubliserer,
     private val personDao: PersonDao,
     private val commandContextDao: CommandContextDao,
@@ -228,11 +225,8 @@ class MeldingMediator(
             sikkerlogg.info("Melding SøknadSendt mottatt:\n${melding.toJson()}")
             meldingDao.lagre(melding)
             val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
-            sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-                session.transaction { transactionalSession ->
-                    val sessionContext = repositories.withSessionContext(transactionalSession)
-                    kommandofabrikk.iverksettSøknadSendt(melding, utgåendeMeldingerMediator, sessionContext)
-                }
+            sessionFactory.sessionScope { sessionContext ->
+                kommandofabrikk.iverksettSøknadSendt(melding, utgåendeMeldingerMediator, sessionContext)
             }
             utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, kontekstbasertPubliserer)
             logg.info("Melding SøknadSendt lest")
@@ -298,20 +292,17 @@ class MeldingMediator(
         try {
             logg.info("Personen finnes i databasen, behandler melding $meldingnavn")
             sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")
-            sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-                session.transaction { transactionalSession ->
-                    val sessionContext = repositories.withSessionContext(transactionalSession)
-                    val personService = PersonService(sessionContext)
-                    personService.brukPersonHvisFinnes(melding.fødselsnummer()) {
-                        val kommandostarter =
-                            kommandofabrikk.lagKommandostarter(
-                                setOf(utgåendeMeldingerMediator),
-                                commandContext(sessionContext.commandContextDao),
-                                sessionContext,
-                            )
-                        melding.behandle(this, kommandostarter, sessionContext)
-                        utgåendeMeldinger().forEach(utgåendeMeldingerMediator::hendelse)
-                    }
+            sessionFactory.sessionScope { sessionContext ->
+                val personService = PersonService(sessionContext)
+                personService.brukPersonHvisFinnes(melding.fødselsnummer()) {
+                    val kommandostarter =
+                        kommandofabrikk.lagKommandostarter(
+                            setOf(utgåendeMeldingerMediator),
+                            commandContext(sessionContext.commandContextDao),
+                            sessionContext,
+                        )
+                    melding.behandle(this, kommandostarter, sessionContext)
+                    utgåendeMeldinger().forEach(utgåendeMeldingerMediator::hendelse)
                 }
             }
             utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, kontekstbasertPubliserer)

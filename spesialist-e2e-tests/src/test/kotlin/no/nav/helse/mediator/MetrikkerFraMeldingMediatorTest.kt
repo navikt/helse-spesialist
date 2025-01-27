@@ -7,6 +7,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.Meldingssender
+import no.nav.helse.db.TransactionalSessionFactory
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.modell.person.SøknadSendtCommand
@@ -26,8 +27,7 @@ internal class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
 
     init {
         MeldingMediator(
-            dataSource = dataSource,
-            repositories = repositories,
+            sessionFactory = TransactionalSessionFactory(dataSource, repositories),
             publiserer = MessageContextMeldingPubliserer(testRapid),
             personDao = repositories.personDao,
             commandContextDao = repositories.commandContextDao,

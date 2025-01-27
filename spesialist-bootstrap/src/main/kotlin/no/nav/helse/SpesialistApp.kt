@@ -5,6 +5,7 @@ import io.ktor.server.application.Application
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.DBRepositories
 import no.nav.helse.db.DataSourceBuilder
+import no.nav.helse.db.TransactionalSessionFactory
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.kafka.RiverSetup
 import no.nav.helse.mediator.BehandlingsstatistikkService
@@ -168,8 +169,7 @@ class SpesialistApp(
             )
         meldingMediator =
             MeldingMediator(
-                dataSource = dataSource,
-                repositories = repositories,
+                sessionFactory = TransactionalSessionFactory(dataSource, repositories),
                 publiserer = meldingPubliserer,
                 personDao = repositories.personDao,
                 commandContextDao = repositories.commandContextDao,

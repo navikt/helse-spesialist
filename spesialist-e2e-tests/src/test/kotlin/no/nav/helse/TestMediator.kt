@@ -2,6 +2,7 @@ package no.nav.helse
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.db.DBRepositories
+import no.nav.helse.db.TransactionalSessionFactory
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.kafka.RiverSetup
 import no.nav.helse.mediator.GodkjenningMediator
@@ -110,8 +111,7 @@ internal class TestMediator(
 
     init {
         val meldingMediator = MeldingMediator(
-            dataSource = dataSource,
-            repositories = repositories,
+            sessionFactory = TransactionalSessionFactory(dataSource, repositories),
             publiserer = meldingPubliserer,
             personDao = repositories.personDao,
             commandContextDao = repositories.commandContextDao,
