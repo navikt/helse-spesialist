@@ -2,7 +2,6 @@ package no.nav.helse.mediator
 
 import kotliquery.Session
 import kotliquery.TransactionalSession
-import kotliquery.sessionOf
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.GodkjenningsbehovUtfall
 import no.nav.helse.db.MetrikkDao
@@ -51,12 +50,10 @@ import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
 import org.slf4j.LoggerFactory
 import java.util.UUID
-import javax.sql.DataSource
 
 typealias Kommandostarter = Personmelding.(Kommandofabrikk.() -> Command?) -> Unit
 
 class Kommandofabrikk(
-    private val dataSource: DataSource,
     private val repositories: Repositories,
     oppgaveService: () -> OppgaveService,
     private val godkjenningMediator: GodkjenningMediator,
@@ -189,14 +186,14 @@ class Kommandofabrikk(
 
     fun søknadSendt(
         hendelse: SøknadSendt,
-        transactionalSession: TransactionalSession,
+        sessionContext: SessionContext,
     ): SøknadSendtCommand =
         SøknadSendtCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             aktørId = hendelse.aktørId,
             organisasjonsnummer = hendelse.organisasjonsnummer,
-            personDao = repositories.withSessionContext(transactionalSession).personDao,
-            inntektskilderRepository = repositories.withSessionContext(transactionalSession).inntektskilderRepository,
+            personDao = sessionContext.personDao,
+            inntektskilderRepository = sessionContext.inntektskilderRepository,
         )
 
     internal fun adressebeskyttelseEndret(
@@ -391,21 +388,16 @@ class Kommandofabrikk(
     internal fun iverksettSøknadSendt(
         melding: SøknadSendt,
         commandContextObservers: CommandContextObserver,
+        sessionContext: SessionContext,
     ) {
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            session.transaction { transactionalSession ->
-                val sessionContext = repositories.withSessionContext(transactionalSession)
-                val transactionalCommandContextDao = sessionContext.commandContextDao
-                iverksett(
-                    command = søknadSendt(melding, transactionalSession),
-                    meldingId = melding.id,
-                    commandContext = nyContext(melding.id, transactionalCommandContextDao),
-                    commandContextObservers = setOf(commandContextObservers),
-                    commandContextDao = transactionalCommandContextDao,
-                    metrikkDao = sessionContext.metrikkDao,
-                )
-            }
-        }
+        iverksett(
+            command = søknadSendt(melding, sessionContext),
+            meldingId = melding.id,
+            commandContext = nyContext(melding.id, sessionContext.commandContextDao),
+            commandContextObservers = setOf(commandContextObservers),
+            commandContextDao = sessionContext.commandContextDao,
+            metrikkDao = sessionContext.metrikkDao,
+        )
     }
 
     private fun nyContext(

@@ -228,7 +228,12 @@ class MeldingMediator(
             sikkerlogg.info("Melding SøknadSendt mottatt:\n${melding.toJson()}")
             meldingDao.lagre(melding)
             val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
-            kommandofabrikk.iverksettSøknadSendt(melding, utgåendeMeldingerMediator)
+            sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+                session.transaction { transactionalSession ->
+                    val sessionContext = repositories.withSessionContext(transactionalSession)
+                    kommandofabrikk.iverksettSøknadSendt(melding, utgåendeMeldingerMediator, sessionContext)
+                }
+            }
             utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, kontekstbasertPubliserer)
             logg.info("Melding SøknadSendt lest")
             sikkerlogg.info("Melding SøknadSendt lest")

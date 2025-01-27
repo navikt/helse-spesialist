@@ -101,7 +101,6 @@ internal class TestMediator(
 
     private val kommandofabrikk =
         Kommandofabrikk(
-            dataSource = dataSource,
             repositories = repositories,
             oppgaveService = { oppgaveService },
             godkjenningMediator = godkjenningMediator,
