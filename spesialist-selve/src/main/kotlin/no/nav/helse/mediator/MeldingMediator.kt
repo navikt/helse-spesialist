@@ -300,15 +300,16 @@ class MeldingMediator(
             sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")
             sessionOf(dataSource, returnGeneratedKey = true).use { session ->
                 session.transaction { transactionalSession ->
-                    val personService = PersonService(repositories.withSessionContext(transactionalSession))
+                    val sessionContext = repositories.withSessionContext(transactionalSession)
+                    val personService = PersonService(sessionContext)
                     personService.brukPersonHvisFinnes(melding.fødselsnummer()) {
                         val kommandostarter =
                             kommandofabrikk.lagKommandostarter(
                                 setOf(utgåendeMeldingerMediator),
-                                commandContext(repositories.withSessionContext(transactionalSession).commandContextDao),
+                                commandContext(sessionContext.commandContextDao),
                                 transactionalSession,
                             )
-                        melding.behandle(this, kommandostarter, transactionalSession)
+                        melding.behandle(this, kommandostarter, sessionContext)
                         utgåendeMeldinger().forEach(utgåendeMeldingerMediator::hendelse)
                     }
                 }

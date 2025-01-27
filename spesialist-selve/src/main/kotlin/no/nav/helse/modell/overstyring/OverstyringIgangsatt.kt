@@ -1,7 +1,7 @@
 package no.nav.helse.modell.overstyring
 
 import com.fasterxml.jackson.databind.JsonNode
-import kotliquery.TransactionalSession
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.person.Person
@@ -25,9 +25,9 @@ class OverstyringIgangsatt(
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
-        transactionalSession: TransactionalSession,
+        sessionContext: SessionContext,
     ) {
-        kommandostarter { overstyringIgangsatt(this@OverstyringIgangsatt, transactionalSession) }
+        kommandostarter { overstyringIgangsatt(this@OverstyringIgangsatt, sessionContext) }
     }
 
     override fun fødselsnummer() = fødselsnummer

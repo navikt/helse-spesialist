@@ -1,8 +1,8 @@
 package no.nav.helse.modell.kommando
 
 import com.fasterxml.jackson.databind.JsonNode
-import kotliquery.TransactionalSession
 import no.nav.helse.db.AutomatiseringDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
@@ -41,13 +41,13 @@ class TilbakedateringBehandlet(
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
-        transactionalSession: TransactionalSession,
+        sessionContext: SessionContext,
     ) {
         person.behandleTilbakedateringBehandlet(perioder)
         kommandostarter {
             val oppgaveDataForAutomatisering =
-                finnOppgavedata(fødselsnummer, transactionalSession) ?: return@kommandostarter null
-            tilbakedateringGodkjent(this@TilbakedateringBehandlet, person, oppgaveDataForAutomatisering, transactionalSession)
+                finnOppgavedata(fødselsnummer, sessionContext) ?: return@kommandostarter null
+            tilbakedateringGodkjent(this@TilbakedateringBehandlet, person, oppgaveDataForAutomatisering, sessionContext)
         }
     }
 

@@ -1,7 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode.vedtak
 
 import com.fasterxml.jackson.databind.JsonNode
-import kotliquery.TransactionalSession
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.person.Person
@@ -68,8 +68,8 @@ class Saksbehandlerløsning(
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
-        transactionalSession: TransactionalSession,
-    ) = kommandostarter { løsGodkjenningsbehov(this@Saksbehandlerløsning, person, transactionalSession) }
+        sessionContext: SessionContext,
+    ) = kommandostarter { løsGodkjenningsbehov(this@Saksbehandlerløsning, person, sessionContext) }
 
     override fun fødselsnummer() = fødselsnummer
 

@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.meldinger.hendelser
 
-import kotliquery.TransactionalSession
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.person.Person
@@ -31,7 +31,7 @@ class AvsluttetMedVedtakMessage(
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
-        transactionalSession: TransactionalSession,
+        sessionContext: SessionContext,
     ) = person.fattVedtak(avsluttetMedVedtak)
 
     override fun toJson(): String = json

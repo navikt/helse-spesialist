@@ -1,9 +1,9 @@
 package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
-import kotliquery.TransactionalSession
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PersonDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
@@ -34,13 +34,13 @@ class AdressebeskyttelseEndret(
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
-        transactionalSession: TransactionalSession,
+        sessionContext: SessionContext,
     ) {
         kommandostarter {
             adressebeskyttelseEndret(
                 this@AdressebeskyttelseEndret,
-                finnOppgavedata(fødselsnummer, transactionalSession),
-                transactionalSession,
+                finnOppgavedata(fødselsnummer, sessionContext),
+                sessionContext,
             )
         }
     }

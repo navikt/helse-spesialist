@@ -1,9 +1,9 @@
 package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
-import kotliquery.TransactionalSession
 import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.db.PersonDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.kommando.Command
@@ -29,9 +29,9 @@ class OppdaterPersondata(
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
-        transactionalSession: TransactionalSession,
+        sessionContext: SessionContext,
     ) {
-        kommandostarter { oppdaterPersondata(this@OppdaterPersondata, transactionalSession) }
+        kommandostarter { oppdaterPersondata(this@OppdaterPersondata, sessionContext) }
     }
 
     override fun fødselsnummer(): String = fødselsnummer

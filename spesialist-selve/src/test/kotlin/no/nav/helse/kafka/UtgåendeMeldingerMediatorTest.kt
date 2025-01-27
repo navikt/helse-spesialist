@@ -1,7 +1,7 @@
 package no.nav.helse.kafka
 
-import kotliquery.TransactionalSession
 import no.nav.helse.MeldingPubliserer
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.UtgåendeMeldingerMediator
@@ -93,7 +93,7 @@ internal class UtgåendeMeldingerMediatorTest {
         override fun behandle(
             person: Person,
             kommandostarter: Kommandostarter,
-            transactionalSession: TransactionalSession
+            sessionContext: SessionContext,
         ) {
         }
 

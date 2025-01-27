@@ -4,8 +4,8 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
-import kotliquery.TransactionalSession
 import no.nav.helse.TestRapidHelpers.meldinger
+import no.nav.helse.db.SessionContext
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.melding.Sykepengevedtak
@@ -51,7 +51,7 @@ internal class PubliserSykepengevedtakTest {
         override fun behandle(
             person: Person,
             kommandostarter: Kommandostarter,
-            transactionalSession: TransactionalSession
+            sessionContext: SessionContext,
         ) {}
 
         override fun fødselsnummer(): String = FØDSELSNUMMER

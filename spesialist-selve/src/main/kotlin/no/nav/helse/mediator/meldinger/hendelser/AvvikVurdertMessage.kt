@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.meldinger.hendelser
 
-import kotliquery.TransactionalSession
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.person.Person
@@ -42,9 +42,9 @@ class AvvikVurdertMessage(
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
-        transactionalSession: TransactionalSession,
+        sessionContext: SessionContext,
     ) {
-        kommandostarter { håndterAvvikVurdert(avviksvurdering, transactionalSession) }
+        kommandostarter { håndterAvvikVurdert(avviksvurdering, sessionContext) }
     }
 
     override fun fødselsnummer(): String = fødselsnummer

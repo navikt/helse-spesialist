@@ -1,7 +1,7 @@
 package no.nav.helse.mediator
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
-import kotliquery.TransactionalSession
+import no.nav.helse.db.SessionContext
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.person.Person
@@ -15,7 +15,7 @@ class KommandokjedeTilstandsendringTest {
     private val testRapid = TestRapid()
     private val publiserer = MessageContextMeldingPubliserer(testRapid)
     private val testmelding = object: Personmelding {
-        override fun behandle(person: Person, kommandostarter: Kommandostarter, transactionalSession: TransactionalSession) {}
+        override fun behandle(person: Person, kommandostarter: Kommandostarter, sessionContext: SessionContext) {}
         override fun fødselsnummer(): String = lagFødselsnummer()
         override fun toJson(): String = "{}"
         override val id: UUID = UUID.randomUUID()

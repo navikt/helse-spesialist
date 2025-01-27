@@ -1,6 +1,5 @@
 package no.nav.helse.db
 
-import kotliquery.TransactionalSession
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.person.Person
@@ -18,7 +17,7 @@ internal class TestMelding(
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
-        transactionalSession: TransactionalSession
+        sessionContext: SessionContext,
     ) {
     }
 

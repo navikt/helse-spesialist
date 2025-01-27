@@ -1,10 +1,10 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
-import kotliquery.TransactionalSession
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.ReservasjonDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
@@ -36,10 +36,10 @@ class VedtaksperiodeForkastet(
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
-        transactionalSession: TransactionalSession,
+        sessionContext: SessionContext,
     ) {
         person.vedtaksperiodeForkastet(vedtaksperiodeId)
-        kommandostarter { vedtaksperiodeForkastet(this@VedtaksperiodeForkastet, transactionalSession) }
+        kommandostarter { vedtaksperiodeForkastet(this@VedtaksperiodeForkastet, sessionContext) }
     }
 
     override fun toJson() = json

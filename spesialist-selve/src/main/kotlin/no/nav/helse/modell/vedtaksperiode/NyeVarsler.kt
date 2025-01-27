@@ -1,7 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
-import kotliquery.TransactionalSession
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Personmelding
@@ -30,7 +30,7 @@ class NyeVarsler(
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
-        transactionalSession: TransactionalSession,
+        sessionContext: SessionContext,
     ) = person.nyeVarsler(varsler)
 
     private companion object {

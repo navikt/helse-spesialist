@@ -1,10 +1,10 @@
 package no.nav.helse.modell.utbetaling
 
 import com.fasterxml.jackson.databind.JsonNode
-import kotliquery.TransactionalSession
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.db.ReservasjonDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.UtbetalingDao
 import no.nav.helse.mediator.Kommandostarter
@@ -51,10 +51,10 @@ class UtbetalingEndret(
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
-        transactionalSession: TransactionalSession,
+        sessionContext: SessionContext,
     ) {
         if (gjeldendeStatus == Utbetalingsstatus.FORKASTET) person.utbetalingForkastet(utbetalingId)
-        this.kommandostarter { utbetalingEndret(this@UtbetalingEndret, transactionalSession) }
+        this.kommandostarter { utbetalingEndret(this@UtbetalingEndret, sessionContext) }
     }
 
     override fun fødselsnummer(): String = fødselsnummer

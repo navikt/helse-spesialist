@@ -1,11 +1,11 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
-import kotliquery.TransactionalSession
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.ReservasjonDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
@@ -42,11 +42,11 @@ class VedtaksperiodeReberegnet(
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
-        transactionalSession: TransactionalSession,
+        sessionContext: SessionContext,
     ) {
         val vedtaksperiode = person.vedtaksperiodeOrNull(vedtaksperiodeId)
         checkNotNull(vedtaksperiode)
-        kommandostarter { vedtaksperiodeReberegnet(this@VedtaksperiodeReberegnet, vedtaksperiode, transactionalSession) }
+        kommandostarter { vedtaksperiodeReberegnet(this@VedtaksperiodeReberegnet, vedtaksperiode, sessionContext) }
     }
 }
 

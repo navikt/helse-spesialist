@@ -1,9 +1,9 @@
 package no.nav.helse.modell.gosysoppgaver
 
 import com.fasterxml.jackson.databind.JsonNode
-import kotliquery.TransactionalSession
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.OppgaveDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
@@ -35,12 +35,12 @@ class GosysOppgaveEndret(
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
-        transactionalSession: TransactionalSession,
+        sessionContext: SessionContext,
     ) {
         kommandostarter {
             val oppgaveDataForAutomatisering =
-                finnOppgavedata(fødselsnummer, transactionalSession) ?: return@kommandostarter null
-            gosysOppgaveEndret(person, oppgaveDataForAutomatisering, transactionalSession)
+                finnOppgavedata(fødselsnummer, sessionContext) ?: return@kommandostarter null
+            gosysOppgaveEndret(person, oppgaveDataForAutomatisering, sessionContext)
         }
     }
 

@@ -1,7 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
-import kotliquery.TransactionalSession
 import no.nav.helse.db.ArbeidsforholdDao
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.AvviksvurderingDao
@@ -13,6 +12,7 @@ import no.nav.helse.db.OverstyringDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.RisikovurderingDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.db.UtbetalingDao
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålDao
@@ -103,9 +103,9 @@ class Godkjenningsbehov(
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
-        transactionalSession: TransactionalSession,
+        sessionContext: SessionContext,
     ) {
-        kommandostarter { godkjenningsbehov(data(), person, transactionalSession) }
+        kommandostarter { godkjenningsbehov(data(), person, sessionContext) }
     }
 
     internal fun data(): GodkjenningsbehovData =

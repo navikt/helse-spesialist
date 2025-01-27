@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
-import kotliquery.TransactionalSession
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.modell.person.Person
 import java.util.UUID
@@ -15,7 +15,7 @@ interface Personmelding : Melding {
     fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
-        transactionalSession: TransactionalSession,
+        sessionContext: SessionContext,
     )
 
     fun fødselsnummer(): String
