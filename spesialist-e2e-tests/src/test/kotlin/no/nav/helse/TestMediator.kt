@@ -101,7 +101,6 @@ internal class TestMediator(
 
     private val kommandofabrikk =
         Kommandofabrikk(
-            repositories = repositories,
             oppgaveService = { oppgaveService },
             godkjenningMediator = godkjenningMediator,
             subsumsjonsmelderProvider = { Subsumsjonsmelder("versjonAvKode", meldingPubliserer) },

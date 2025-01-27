@@ -307,7 +307,7 @@ class MeldingMediator(
                             kommandofabrikk.lagKommandostarter(
                                 setOf(utgåendeMeldingerMediator),
                                 commandContext(sessionContext.commandContextDao),
-                                transactionalSession,
+                                sessionContext,
                             )
                         melding.behandle(this, kommandostarter, sessionContext)
                         utgåendeMeldinger().forEach(utgåendeMeldingerMediator::hendelse)

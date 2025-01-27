@@ -1,10 +1,8 @@
 package no.nav.helse.mediator
 
-import kotliquery.TransactionalSession
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.GodkjenningsbehovUtfall
 import no.nav.helse.db.MetrikkDao
-import no.nav.helse.db.Repositories
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
@@ -53,7 +51,6 @@ import java.util.UUID
 typealias Kommandostarter = Personmelding.(Kommandofabrikk.() -> Command?) -> Unit
 
 class Kommandofabrikk(
-    private val repositories: Repositories,
     oppgaveService: () -> OppgaveService,
     private val godkjenningMediator: GodkjenningMediator,
     private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
@@ -402,10 +399,9 @@ class Kommandofabrikk(
     internal fun lagKommandostarter(
         commandContextObservers: Set<CommandContextObserver>,
         commandContext: CommandContext,
-        transactionalSession: TransactionalSession,
+        sessionContext: SessionContext,
     ): Kommandostarter =
         { kommandooppretter ->
-            val sessionContext = repositories.withSessionContext(transactionalSession)
             val transactionalCommandContextDao = sessionContext.commandContextDao
             val melding = this
             this@Kommandofabrikk.kommandooppretter()?.let { command ->
