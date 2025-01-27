@@ -21,7 +21,7 @@ class MessageContextMeldingPubliserer(private val context: MessageContext) : Mel
         val packet = hendelse.somJsonMessage(fødselsnummer).toJson()
         logg.info("Publiserer hendelse på grunn av $årsak")
         sikkerlogg.info("Publiserer hendelse på grunn av $årsak\n{}", packet)
-        context.publish(packet)
+        context.publish(fødselsnummer, packet)
     }
 
     override fun publiser(
@@ -32,7 +32,7 @@ class MessageContextMeldingPubliserer(private val context: MessageContext) : Mel
         val packet = subsumsjonEvent.somJsonMessage(fødselsnummer, versjonAvKode).toJson()
         logg.info("Publiserer subsumsjon")
         sikkerlogg.info("Publiserer subsumsjon\n{}", packet)
-        context.publish(packet)
+        context.publish(fødselsnummer, packet)
     }
 
     override fun publiser(
@@ -45,7 +45,7 @@ class MessageContextMeldingPubliserer(private val context: MessageContext) : Mel
         val behovNames = behov.map(Behov::behovName)
         logg.info("Publiserer behov for $behovNames")
         sikkerlogg.info("Publiserer behov for $behovNames\n{}", packet)
-        context.publish(packet)
+        context.publish(fødselsnummer, packet)
     }
 
     override fun publiser(
