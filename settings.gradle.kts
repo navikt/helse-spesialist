@@ -18,7 +18,7 @@ dependencyResolutionManagement {
             version("logback", "1.5.7")
             version("logstash", "8.0")
             version("jackson", "2.18.1")
-            version("tbd-libs", "2024.11.25-10.59-6f263a10")
+            version("tbd-libs", "2025.01.27-12.50-76316f3b")
             version("ktor", "3.0.1")
             version("micrometer", "1.13.3")
             version("testcontainers", "1.20.4")
