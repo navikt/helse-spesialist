@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.overstyring
+package no.nav.helse.modell
 
 enum class OverstyringType {
     Dager,

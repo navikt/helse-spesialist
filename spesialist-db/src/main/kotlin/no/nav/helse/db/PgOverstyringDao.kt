@@ -9,8 +9,8 @@ import no.nav.helse.db.overstyring.OverstyrtArbeidsforholdForDatabase
 import no.nav.helse.db.overstyring.OverstyrtInntektOgRefusjonForDatabase
 import no.nav.helse.db.overstyring.OverstyrtTidslinjeForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsattSykepengegrunnlagForDatabase
+import no.nav.helse.modell.OverstyringType
 import no.nav.helse.objectMapper
-import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import java.util.UUID
 import javax.sql.DataSource
 

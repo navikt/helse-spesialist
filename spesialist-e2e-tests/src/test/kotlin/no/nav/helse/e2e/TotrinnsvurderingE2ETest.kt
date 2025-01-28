@@ -1,8 +1,8 @@
 package no.nav.helse.e2e
 
+import no.nav.helse.modell.OverstyringType
 import no.nav.helse.spesialist.api.graphql.schema.Lovhjemmel
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsforhold
-import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Test
 import java.util.UUID

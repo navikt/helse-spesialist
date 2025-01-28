@@ -5,13 +5,13 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.OverstyringDao
 import no.nav.helse.mediator.oppgave.OppgaveService
+import no.nav.helse.modell.OverstyringType
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
-import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import no.nav.helse.util.februar
 import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertTrue
