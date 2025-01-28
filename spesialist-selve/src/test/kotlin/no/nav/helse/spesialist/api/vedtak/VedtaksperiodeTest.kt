@@ -1,12 +1,13 @@
 package no.nav.helse.spesialist.api.vedtak
 
+import no.nav.helse.db.api.VarselDbDto
+import no.nav.helse.db.api.VarselDbDto.Varselstatus
+import no.nav.helse.db.api.VedtaksperiodeDbDto
+import no.nav.helse.db.api.VedtaksperiodeDbDto.Companion.harAktiveVarsler
 import no.nav.helse.spesialist.api.april
 import no.nav.helse.spesialist.api.februar
 import no.nav.helse.spesialist.api.januar
 import no.nav.helse.spesialist.api.mars
-import no.nav.helse.spesialist.api.varsel.Varsel
-import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus
-import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.harAktiveVarsler
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -87,22 +88,22 @@ internal class VedtaksperiodeTest {
         assertFalse(setOf(generasjon1).harAktiveVarsler())
     }
 
-    private fun opprettApiGenerasjon(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate, varsler: List<Varsel> = emptyList()): Vedtaksperiode {
-        return Vedtaksperiode(UUID.randomUUID(), fom, tom, skjæringstidspunkt, varsler.toSet())
+    private fun opprettApiGenerasjon(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate, varsler: List<VarselDbDto> = emptyList()): VedtaksperiodeDbDto {
+        return VedtaksperiodeDbDto(UUID.randomUUID(), fom, tom, skjæringstidspunkt, varsler.toSet())
     }
 
-    private fun opprettVarsel(status: Varselstatus): Varsel {
-        return Varsel(
-            UUID.randomUUID(),
-            UUID.randomUUID(),
-            UUID.randomUUID(),
-            LocalDateTime.now(),
-            "SB_EX_1",
-            status,
-            "EN_TITTEL",
-            null,
-            null,
-            null,
-        )
-    }
+    private fun opprettVarsel(status: Varselstatus) = VarselDbDto(
+        varselId = UUID.randomUUID(),
+        generasjonId = UUID.randomUUID(),
+        opprettet = LocalDateTime.now(),
+        kode = "SB_EX_1",
+        status = status,
+        varseldefinisjon = VarselDbDto.VarseldefinisjonDbDto(
+            definisjonId = UUID.randomUUID(),
+            tittel = "EN_TITTEL",
+            forklaring = null,
+            handling = null,
+        ),
+        varselvurdering = null,
+    )
 }

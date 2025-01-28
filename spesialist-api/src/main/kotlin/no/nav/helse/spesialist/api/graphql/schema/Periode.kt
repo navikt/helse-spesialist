@@ -14,6 +14,7 @@ import no.nav.helse.db.api.TotrinnsvurderingApiDao
 import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.Toggle
+import no.nav.helse.spesialist.api.graphql.mapping.toVarselDto
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveForPeriodevisningDto
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
@@ -445,9 +446,9 @@ data class UberegnetPeriode(
 
     override fun varsler(): List<VarselDTO> =
         if (skalViseAktiveVarsler) {
-            varselRepository.finnVarslerForUberegnetPeriode(vedtaksperiodeId()).toList()
+            varselRepository.finnVarslerForUberegnetPeriode(vedtaksperiodeId()).map { it.toVarselDto() }
         } else {
-            varselRepository.finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId()).toList()
+            varselRepository.finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId()).map { it.toVarselDto() }
         }
 
     fun notater(): List<Notat> = notater(notatDao, vedtaksperiodeId())
@@ -714,13 +715,13 @@ data class BeregnetPeriode(
                 .finnVarslerSomIkkeErInaktiveForSisteGenerasjon(
                     vedtaksperiodeId(),
                     periode.utbetaling.id,
-                ).toList()
+                ).map { it.toVarselDto() }
         } else {
             varselRepository
                 .finnVarslerSomIkkeErInaktiveFor(
                     vedtaksperiodeId(),
                     periode.utbetaling.id,
-                ).toList()
+                ).map { it.toVarselDto() }
         }
 
     private val oppgaveDto: OppgaveForPeriodevisningDto? by lazy {

@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-class PgVedtaksperiodeRepositoryTest: DatabaseIntegrationTest() {
+class PgVedtaksperiodeDbDtoRepositoryTest: DatabaseIntegrationTest() {
 
     private val pgVedtaksperiodeRepository = PgVedtaksperiodeRepository(
         generasjonDao = PgGenerasjonDao(session),

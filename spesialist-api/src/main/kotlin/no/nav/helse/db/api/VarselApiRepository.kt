@@ -1,29 +1,27 @@
 package no.nav.helse.db.api
 
-import no.nav.helse.spesialist.api.graphql.schema.VarselDTO
-import no.nav.helse.spesialist.api.varsel.Varsel
 import java.util.UUID
 
 interface VarselApiRepository {
     fun finnVarslerSomIkkeErInaktiveFor(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
-    ): Set<VarselDTO>
+    ): Set<VarselDbDto>
 
     fun finnVarslerSomIkkeErInaktiveForSisteGenerasjon(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
-    ): Set<VarselDTO>
+    ): Set<VarselDbDto>
 
-    fun finnVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<VarselDTO>
+    fun finnVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<VarselDbDto>
 
-    fun finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<VarselDTO>
+    fun finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<VarselDbDto>
 
     fun godkjennVarslerFor(oppgaveId: Long)
 
     fun vurderVarselFor(
         varselId: UUID,
-        gjeldendeStatus: Varsel.Varselstatus,
+        gjeldendeStatus: VarselDbDto.Varselstatus,
         saksbehandlerIdent: String,
     )
 
@@ -42,13 +40,13 @@ interface VarselApiRepository {
         definisjonId: UUID,
         varselkode: String,
         ident: String,
-    ): VarselDTO?
+    ): VarselDbDto?
 
     fun settStatusAktiv(
         generasjonId: UUID,
         varselkode: String,
         ident: String,
-    ): VarselDTO?
+    ): VarselDbDto?
 
     fun perioderSomSkalViseVarsler(oppgaveId: Long?): Set<UUID>
 }

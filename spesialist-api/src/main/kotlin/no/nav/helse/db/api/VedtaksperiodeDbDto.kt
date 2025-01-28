@@ -1,19 +1,18 @@
-package no.nav.helse.spesialist.api.vedtak
+package no.nav.helse.db.api
 
-import no.nav.helse.spesialist.api.varsel.Varsel
 import java.time.LocalDate
 import java.util.UUID
 
-data class Vedtaksperiode(
-    private val vedtaksperiodeId: UUID,
-    private val fom: LocalDate,
-    private val tom: LocalDate,
-    private val skjæringstidspunkt: LocalDate,
-    private val varsler: Set<Varsel>,
+data class VedtaksperiodeDbDto(
+    val vedtaksperiodeId: UUID,
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val skjæringstidspunkt: LocalDate,
+    val varsler: Set<VarselDbDto>,
 ) {
     fun vedtaksperiodeId() = this.vedtaksperiodeId
 
-    fun tidligereEnnOgSammenhengende(other: Vedtaksperiode): Boolean =
+    fun tidligereEnnOgSammenhengende(other: VedtaksperiodeDbDto): Boolean =
         this.fom <= other.tom && this.skjæringstidspunkt == other.skjæringstidspunkt
 
     private fun harAktiveVarsler(): Boolean {
@@ -21,11 +20,11 @@ data class Vedtaksperiode(
     }
 
     companion object {
-        fun Set<Vedtaksperiode>.harAktiveVarsler(): Boolean {
+        fun Set<VedtaksperiodeDbDto>.harAktiveVarsler(): Boolean {
             return any { it.harAktiveVarsler() }
         }
 
-        fun Set<Vedtaksperiode>.godkjennVarsler(
+        fun Set<VedtaksperiodeDbDto>.godkjennVarsler(
             fødselsnummer: String,
             behandlingId: UUID,
             ident: String,
@@ -36,8 +35,8 @@ data class Vedtaksperiode(
                 varselId: UUID,
                 varselTittel: String,
                 varselkode: String,
-                forrigeStatus: Varsel.Varselstatus,
-                gjeldendeStatus: Varsel.Varselstatus,
+                forrigeStatus: VarselDbDto.Varselstatus,
+                gjeldendeStatus: VarselDbDto.Varselstatus,
                 saksbehandlerIdent: String,
             ) -> Unit,
         ) {
@@ -55,7 +54,7 @@ data class Vedtaksperiode(
             }
         }
 
-        fun Vedtaksperiode.avvisVarsler(
+        fun VedtaksperiodeDbDto.avvisVarsler(
             fødselsnummer: String,
             behandlingId: UUID,
             ident: String,
@@ -66,8 +65,8 @@ data class Vedtaksperiode(
                 varselId: UUID,
                 varselTittel: String,
                 varselkode: String,
-                forrigeStatus: Varsel.Varselstatus,
-                gjeldendeStatus: Varsel.Varselstatus,
+                forrigeStatus: VarselDbDto.Varselstatus,
+                gjeldendeStatus: VarselDbDto.Varselstatus,
                 saksbehandlerIdent: String,
             ) -> Unit,
         ) {

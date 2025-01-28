@@ -8,6 +8,10 @@ import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.Repositories
 import no.nav.helse.db.VedtakBegrunnelseFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
+import no.nav.helse.db.api.VarselDbDto
+import no.nav.helse.db.api.VedtaksperiodeDbDto.Companion.avvisVarsler
+import no.nav.helse.db.api.VedtaksperiodeDbDto.Companion.godkjennVarsler
+import no.nav.helse.db.api.VedtaksperiodeDbDto.Companion.harAktiveVarsler
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.mediator.overstyring.Overstyringlagrer
 import no.nav.helse.mediator.overstyring.Saksbehandlingsmelder
@@ -84,11 +88,7 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OpphevStans
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
-import no.nav.helse.spesialist.api.varsel.Varsel
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
-import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.avvisVarsler
-import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.godkjennVarsler
-import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.harAktiveVarsler
 import no.nav.helse.tell
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -666,8 +666,8 @@ class SaksbehandlerMediator(
         varselId: UUID,
         varseltittel: String,
         varselkode: String,
-        forrigeStatus: Varsel.Varselstatus,
-        gjeldendeStatus: Varsel.Varselstatus,
+        forrigeStatus: VarselDbDto.Varselstatus,
+        gjeldendeStatus: VarselDbDto.Varselstatus,
         saksbehandlerIdent: String,
     ) {
         varselRepository.vurderVarselFor(varselId, gjeldendeStatus, saksbehandlerIdent)

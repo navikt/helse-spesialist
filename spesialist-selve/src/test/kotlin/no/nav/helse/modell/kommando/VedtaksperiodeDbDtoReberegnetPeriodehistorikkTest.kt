@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-class VedtaksperiodeReberegnetPeriodehistorikkTest {
+class VedtaksperiodeDbDtoReberegnetPeriodehistorikkTest {
     @Test
     fun `Lagrer historikkinnslag når vedtaksperioden er reberegnet`() {
         val context = CommandContext(UUID.randomUUID())

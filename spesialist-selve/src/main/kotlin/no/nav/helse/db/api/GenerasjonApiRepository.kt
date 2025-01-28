@@ -1,9 +1,7 @@
 package no.nav.helse.db.api
 
-import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode
-
 interface GenerasjonApiRepository {
-    fun perioderTilBehandling(oppgaveId: Long): Set<Vedtaksperiode>
+    fun perioderTilBehandling(oppgaveId: Long): Set<VedtaksperiodeDbDto>
 
-    fun periodeTilGodkjenning(oppgaveId: Long): Vedtaksperiode
+    fun periodeTilGodkjenning(oppgaveId: Long): VedtaksperiodeDbDto
 }

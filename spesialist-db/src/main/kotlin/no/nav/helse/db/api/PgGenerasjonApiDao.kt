@@ -4,13 +4,11 @@ import kotliquery.Row
 import no.nav.helse.db.HelseDao.Companion.asSQL
 import no.nav.helse.db.MedDataSource
 import no.nav.helse.db.QueryRunner
-import no.nav.helse.spesialist.api.varsel.Varsel
-import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode
 import java.util.UUID
 import javax.sql.DataSource
 
 class PgGenerasjonApiDao internal constructor(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource) {
-    fun gjeldendeGenerasjonFor(oppgaveId: Long): Vedtaksperiode =
+    fun gjeldendeGenerasjonFor(oppgaveId: Long): VedtaksperiodeDbDto =
         asSQL(
             """
             SELECT b.vedtaksperiode_id, b.fom, b.tom, b.skjæringstidspunkt
@@ -23,7 +21,7 @@ class PgGenerasjonApiDao internal constructor(dataSource: DataSource) : QueryRun
             "oppgave_id" to oppgaveId,
         ).single { it.tilVedtaksperiode() }
 
-    fun gjeldendeGenerasjonerForPerson(oppgaveId: Long): Set<Vedtaksperiode> =
+    fun gjeldendeGenerasjonerForPerson(oppgaveId: Long): Set<VedtaksperiodeDbDto> =
         asSQL(
             """
             SELECT DISTINCT ON (b.vedtaksperiode_id) b.vedtaksperiode_id, b.fom, b.tom, b.skjæringstidspunkt 
@@ -40,8 +38,8 @@ class PgGenerasjonApiDao internal constructor(dataSource: DataSource) : QueryRun
 
     fun gjeldendeGenerasjonFor(
         oppgaveId: Long,
-        varselGetter: (generasjonId: UUID) -> Set<Varsel>,
-    ): Vedtaksperiode =
+        varselGetter: (generasjonId: UUID) -> Set<VarselDbDto>,
+    ): VedtaksperiodeDbDto =
         asSQL(
             """
             SELECT b.vedtaksperiode_id, b.unik_id, b.fom, b.tom, b.skjæringstidspunkt
@@ -56,8 +54,8 @@ class PgGenerasjonApiDao internal constructor(dataSource: DataSource) : QueryRun
 
     fun gjeldendeGenerasjonerForPerson(
         oppgaveId: Long,
-        varselGetter: (generasjonId: UUID) -> Set<Varsel>,
-    ): Set<Vedtaksperiode> =
+        varselGetter: (generasjonId: UUID) -> Set<VarselDbDto>,
+    ): Set<VedtaksperiodeDbDto> =
         asSQL(
             """
             SELECT DISTINCT ON (b.vedtaksperiode_id) b.vedtaksperiode_id, b.unik_id, b.fom, b.tom, b.skjæringstidspunkt 
@@ -72,10 +70,13 @@ class PgGenerasjonApiDao internal constructor(dataSource: DataSource) : QueryRun
             "oppgave_id" to oppgaveId,
         ).list { it.tilVedtaksperiode(varselGetter) }.toSet()
 
-    private fun Row.tilVedtaksperiode(varselGetter: (generasjonId: UUID) -> Set<Varsel>) = tilVedtaksperiode(varselGetter(uuid("unik_id")))
+    private fun Row.tilVedtaksperiode(varselGetter: (generasjonId: UUID) -> Set<VarselDbDto>) =
+        tilVedtaksperiode(
+            varselGetter(uuid("unik_id")),
+        )
 
-    private fun Row.tilVedtaksperiode(varsler: Set<Varsel> = emptySet()) =
-        Vedtaksperiode(
+    private fun Row.tilVedtaksperiode(varsler: Set<VarselDbDto> = emptySet()) =
+        VedtaksperiodeDbDto(
             uuid("vedtaksperiode_id"),
             localDate("fom"),
             localDate("tom"),
