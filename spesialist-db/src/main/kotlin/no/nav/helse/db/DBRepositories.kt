@@ -34,7 +34,7 @@ class DBRepositories(dataSource: DataSource) : Repositories {
     override val meldingDuplikatkontrollDao = PgMeldingDuplikatkontrollDao(dataSource)
     override val notatDao = PgNotatDao(dataSource)
     override val oppgaveDao = PgOppgaveDao(dataSource)
-    override val opptegnelseRepository = PgOpptegnelseRepository(dataSource)
+    override val opptegnelseDao = PgOpptegnelseDao(dataSource)
     override val overstyringDao = PgOverstyringDao(dataSource)
     override val periodehistorikkDao = PgPeriodehistorikkDao(dataSource)
     override val personDao = PgPersonDao(dataSource)

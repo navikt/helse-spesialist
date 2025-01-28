@@ -56,7 +56,7 @@ class SpesialistApp(
     private val saksbehandlerDao = repositories.saksbehandlerDao
     private val tildelingDao = repositories.tildelingDao
     private val reservasjonDao = repositories.reservasjonDao
-    private val opptegnelseRepository = repositories.opptegnelseRepository
+    private val opptegnelseDao = repositories.opptegnelseDao
     private val behandlingsstatistikkDao = repositories.behandlingsstatistikkDao
     private val notatDao = repositories.notatDao
     private val dialogDao = repositories.dialogDao
@@ -72,7 +72,7 @@ class SpesialistApp(
 
     private val behandlingsstatistikkService =
         BehandlingsstatistikkService(behandlingsstatistikkDao = behandlingsstatistikkDao)
-    private val godkjenningMediator = GodkjenningMediator(opptegnelseRepository)
+    private val godkjenningMediator = GodkjenningMediator(opptegnelseDao)
     private val stansAutomatiskBehandlingMediator =
         StansAutomatiskBehandlingMediator(
             stansAutomatiskBehandlingDao,
@@ -158,7 +158,7 @@ class SpesialistApp(
                 oppgaveDao = oppgaveDao,
                 tildelingDao = tildelingDao,
                 reservasjonDao = reservasjonDao,
-                opptegnelseRepository = opptegnelseRepository,
+                opptegnelseDao = opptegnelseDao,
                 totrinnsvurderingDao = totrinnsvurderingDao,
                 saksbehandlerDao = saksbehandlerDao,
                 meldingPubliserer = meldingPubliserer,

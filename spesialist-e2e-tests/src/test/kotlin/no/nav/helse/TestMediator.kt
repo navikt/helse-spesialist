@@ -29,7 +29,7 @@ internal class TestMediator(
     dataSource: DataSource,
 ) {
     private val repositories = DBRepositories(dataSource)
-    private val opptegnelseRepository = repositories.opptegnelseRepository
+    private val opptegnelseDao = repositories.opptegnelseDao
     private val oppgaveDao = repositories.oppgaveDao
     private val periodehistorikkDao = repositories.periodehistorikkDao
     private val overstyringDao = repositories.overstyringDao
@@ -50,14 +50,14 @@ internal class TestMediator(
             dialogDao,
         ) { Subsumsjonsmelder("versjonAvKode", meldingPubliserer) }
 
-    private val godkjenningMediator = GodkjenningMediator(opptegnelseRepository)
+    private val godkjenningMediator = GodkjenningMediator(opptegnelseDao)
     private val tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
     private val oppgaveService =
         OppgaveService(
             oppgaveDao = repositories.oppgaveDao,
             tildelingDao = tildelingDao,
             reservasjonDao = repositories.reservasjonDao,
-            opptegnelseRepository = opptegnelseRepository,
+            opptegnelseDao = opptegnelseDao,
             totrinnsvurderingDao = totrinnsvurderingDao,
             saksbehandlerDao = saksbehandlerDao,
             meldingPubliserer = meldingPubliserer,

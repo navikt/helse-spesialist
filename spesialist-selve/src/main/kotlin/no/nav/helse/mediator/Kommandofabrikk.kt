@@ -97,7 +97,7 @@ class Kommandofabrikk(
             åpneGosysOppgaverDao = sessionContext.åpneGosysOppgaverDao,
             oppgaveDao = sessionContext.oppgaveDao,
             oppgaveService = transaksjonellOppgaveService(sessionContext),
-            godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseRepository),
+            godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseDao),
             godkjenningsbehov = godkjenningsbehovData,
             automatiseringDao = sessionContext.automatiseringDao,
         )
@@ -120,7 +120,7 @@ class Kommandofabrikk(
             automatisering = transaksjonellAutomatisering(sessionContext),
             oppgaveDataForAutomatisering = oppgaveDataForAutomatisering,
             oppgaveService = transaksjonellOppgaveService(sessionContext),
-            godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseRepository),
+            godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseDao),
             søknadsperioder = melding.perioder,
             godkjenningsbehov = godkjenningsbehovData,
             automatiseringDao = sessionContext.automatiseringDao,
@@ -205,7 +205,7 @@ class Kommandofabrikk(
             fødselsnummer = melding.fødselsnummer(),
             personDao = sessionContext.personDao,
             oppgaveDao = sessionContext.oppgaveDao,
-            godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseRepository),
+            godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseDao),
             godkjenningsbehov = godkjenningsbehovData,
             utbetaling = utbetaling,
         )
@@ -223,7 +223,7 @@ class Kommandofabrikk(
                 )
             },
             personDao = sessionContext.personDao,
-            opptegnelseRepository = sessionContext.opptegnelseRepository,
+            opptegnelseDao = sessionContext.opptegnelseDao,
         )
 
     internal fun klargjørTilgangsrelaterteData(
@@ -234,7 +234,7 @@ class Kommandofabrikk(
             fødselsnummer = hendelse.fødselsnummer(),
             personDao = sessionContext.personDao,
             egenAnsattDao = sessionContext.egenAnsattDao,
-            opptegnelseRepository = sessionContext.opptegnelseRepository,
+            opptegnelseDao = sessionContext.opptegnelseDao,
         )
 
     internal fun overstyringIgangsatt(
@@ -263,7 +263,7 @@ class Kommandofabrikk(
             arbeidsgiverbeløp = hendelse.arbeidsgiverbeløp,
             personbeløp = hendelse.personbeløp,
             utbetalingDao = sessionContext.utbetalingDao,
-            opptegnelseRepository = sessionContext.opptegnelseRepository,
+            opptegnelseDao = sessionContext.opptegnelseDao,
             reservasjonDao = sessionContext.reservasjonDao,
             oppgaveDao = sessionContext.oppgaveDao,
             tildelingDao = sessionContext.tildelingDao,
@@ -367,7 +367,7 @@ class Kommandofabrikk(
             oppgaveDao = sessionContext.oppgaveDao,
             avviksvurderingDao = sessionContext.avviksvurderingDao,
             oppgaveService = transaksjonellOppgaveService(sessionContext),
-            godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseRepository),
+            godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseDao),
             totrinnsvurderingService = lagTotrinnsvurderingService(sessionContext),
             person = person,
         )

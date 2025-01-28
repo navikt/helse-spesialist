@@ -1,6 +1,6 @@
 package no.nav.helse.modell.utbetaling
 
-import no.nav.helse.db.OpptegnelseRepository
+import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.UtbetalingDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
@@ -27,7 +27,7 @@ class LagreOppdragCommand(
     private val personbeløp: Int,
     private val json: String,
     private val utbetalingDao: UtbetalingDao,
-    private val opptegnelseRepository: OpptegnelseRepository,
+    private val opptegnelseDao: OpptegnelseDao,
 ) : Command {
     private companion object {
         private val log = LoggerFactory.getLogger(LagreOppdragCommand::class.java)
@@ -73,20 +73,20 @@ class LagreOppdragCommand(
     }
 
     private fun lagOpptegnelse() {
-        val opptegnelseType: OpptegnelseRepository.OpptegnelseType =
+        val opptegnelseType: OpptegnelseDao.OpptegnelseType =
             when {
                 type == Utbetalingtype.ANNULLERING && status == UTBETALING_FEILET -> {
-                    OpptegnelseRepository.OpptegnelseType.UTBETALING_ANNULLERING_FEILET
+                    OpptegnelseDao.OpptegnelseType.UTBETALING_ANNULLERING_FEILET
                 }
                 type == Utbetalingtype.ANNULLERING && status == ANNULLERT -> {
-                    OpptegnelseRepository.OpptegnelseType.UTBETALING_ANNULLERING_OK
+                    OpptegnelseDao.OpptegnelseType.UTBETALING_ANNULLERING_OK
                 }
                 type == Utbetalingtype.REVURDERING && status in listOf(UTBETALT, GODKJENT_UTEN_UTBETALING, OVERFØRT) -> {
-                    OpptegnelseRepository.OpptegnelseType.REVURDERING_FERDIGBEHANDLET
+                    OpptegnelseDao.OpptegnelseType.REVURDERING_FERDIGBEHANDLET
                 }
                 else -> return
             }
 
-        opptegnelseRepository.opprettOpptegnelse(fødselsnummer, UtbetalingPayload(utbetalingId).toJson(), opptegnelseType)
+        opptegnelseDao.opprettOpptegnelse(fødselsnummer, UtbetalingPayload(utbetalingId).toJson(), opptegnelseType)
     }
 }

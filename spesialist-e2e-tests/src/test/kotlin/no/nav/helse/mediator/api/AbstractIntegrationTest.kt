@@ -33,7 +33,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
             oppgaveDao = oppgaveDao,
             tildelingDao = repositories.tildelingDao,
             reservasjonDao = reservasjonDao,
-            opptegnelseRepository = repositories.opptegnelseRepository,
+            opptegnelseDao = repositories.opptegnelseDao,
             totrinnsvurderingDao = totrinnsvurderingDao,
             saksbehandlerDao = saksbehandlerDao,
             meldingPubliserer = meldingPubliserer,

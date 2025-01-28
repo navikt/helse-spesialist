@@ -2,7 +2,7 @@ package no.nav.helse.e2e
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.db.OpptegnelseRepository
+import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -52,7 +52,7 @@ internal class KlargjørPersonForVisningE2ETest : AbstractE2ETest() {
         håndterEgenansattløsning(fødselsnummer = fødselsnummer)
 
         assertHarTilgangsdata(fødselsnummer)
-        assertOpptegnelse(fødselsnummer, OpptegnelseRepository.OpptegnelseType.PERSON_KLAR_TIL_BEHANDLING)
+        assertOpptegnelse(fødselsnummer, OpptegnelseDao.OpptegnelseType.PERSON_KLAR_TIL_BEHANDLING)
     }
 
     @Test
@@ -69,11 +69,11 @@ internal class KlargjørPersonForVisningE2ETest : AbstractE2ETest() {
         assertKanVisePersonen(fødselsnummer)
     }
 
-    private fun assertOpptegnelse(fødselsnummer: String, opptegnelseType: OpptegnelseRepository.OpptegnelseType) {
+    private fun assertOpptegnelse(fødselsnummer: String, opptegnelseType: OpptegnelseDao.OpptegnelseType) {
         val opptegnelser = sessionOf(dataSource).use {
             @Language("PostgreSQL")
             val query = """SELECT type FROM opptegnelse WHERE person_id = (SELECT id FROM person WHERE fødselsnummer = ?)"""
-            it.run(queryOf(query, fødselsnummer).map { row -> enumValueOf<OpptegnelseRepository.OpptegnelseType>(row.string("type")) }.asList)
+            it.run(queryOf(query, fødselsnummer).map { row -> enumValueOf<OpptegnelseDao.OpptegnelseType>(row.string("type")) }.asList)
         }
 
         assertEquals(1, opptegnelser.size)

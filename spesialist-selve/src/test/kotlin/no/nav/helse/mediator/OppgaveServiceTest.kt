@@ -11,7 +11,7 @@ import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
-import no.nav.helse.db.OpptegnelseRepository
+import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.Repositories
 import no.nav.helse.db.Reservasjon
@@ -86,7 +86,7 @@ internal class OppgaveServiceTest {
     private val repositories = mockk<Repositories>(relaxed = true)
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
-    private val opptegnelseRepository = mockk<OpptegnelseRepository>(relaxed = true)
+    private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
     private val totrinnsvurderingDao = mockk<TotrinnsvurderingDao>(relaxed = true)
     private val saksbehandlerDao = mockk<SaksbehandlerDao>()
 
@@ -116,7 +116,7 @@ internal class OppgaveServiceTest {
             oppgaveDao = oppgaveDao,
             tildelingDao = tildelingDao,
             reservasjonDao = reservasjonDao,
-            opptegnelseRepository = opptegnelseRepository,
+            opptegnelseDao = opptegnelseDao,
             totrinnsvurderingDao = totrinnsvurderingDao,
             saksbehandlerDao = saksbehandlerDao,
             meldingPubliserer = meldingPubliserer,
@@ -160,7 +160,7 @@ internal class OppgaveServiceTest {
 
     @BeforeEach
     fun setup() {
-        clearMocks(oppgaveDao, tildelingDao, opptegnelseRepository)
+        clearMocks(oppgaveDao, tildelingDao, opptegnelseDao)
     }
 
     @Test
@@ -593,10 +593,10 @@ internal class OppgaveServiceTest {
         antallOpptegnelser: Int,
         fødselsnummer: String,
     ) = verify(exactly = antallOpptegnelser) {
-        opptegnelseRepository.opprettOpptegnelse(
+        opptegnelseDao.opprettOpptegnelse(
             eq(fødselsnummer),
             any(),
-            eq(OpptegnelseRepository.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE),
+            eq(OpptegnelseDao.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE),
         )
     }
 

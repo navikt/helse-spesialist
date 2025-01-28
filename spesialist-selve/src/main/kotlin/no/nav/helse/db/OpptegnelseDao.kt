@@ -2,7 +2,7 @@ package no.nav.helse.db
 
 import java.util.UUID
 
-interface OpptegnelseRepository {
+interface OpptegnelseDao {
     fun opprettOpptegnelse(
         fødselsnummer: String,
         payload: String,

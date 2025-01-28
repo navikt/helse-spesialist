@@ -1,7 +1,7 @@
 package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.db.OpptegnelseRepository
+import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
@@ -42,16 +42,16 @@ internal class OppdaterPersondataCommand(
     fødselsnummer: String,
     førsteKjenteDagFinner: () -> LocalDate,
     personDao: PersonDao,
-    opptegnelseRepository: OpptegnelseRepository,
+    opptegnelseDao: OpptegnelseDao,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
             OppdaterInfotrygdutbetalingerHardt(fødselsnummer, personDao, førsteKjenteDagFinner),
             ikkesuspenderendeCommand("opprettOpptegnelse") {
-                opptegnelseRepository.opprettOpptegnelse(
+                opptegnelseDao.opprettOpptegnelse(
                     fødselsnummer,
                     PersonOppdatertPayload.toJson(),
-                    OpptegnelseRepository.OpptegnelseType.PERSONDATA_OPPDATERT,
+                    OpptegnelseDao.OpptegnelseType.PERSONDATA_OPPDATERT,
                 )
             },
         )

@@ -5,7 +5,7 @@ import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OppgavesorteringForDatabase
-import no.nav.helse.db.OpptegnelseRepository
+import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.Repositories
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
@@ -59,7 +59,7 @@ class OppgaveService(
     private val oppgaveDao: OppgaveDao,
     private val tildelingDao: TildelingDao,
     private val reservasjonDao: ReservasjonDao,
-    private val opptegnelseRepository: OpptegnelseRepository,
+    private val opptegnelseDao: OpptegnelseDao,
     private val totrinnsvurderingDao: TotrinnsvurderingDao,
     private val saksbehandlerDao: SaksbehandlerDao,
     private val meldingPubliserer: MeldingPubliserer,
@@ -75,7 +75,7 @@ class OppgaveService(
             oppgaveDao = sessionContext.oppgaveDao,
             tildelingDao = sessionContext.tildelingDao,
             reservasjonDao = sessionContext.reservasjonDao,
-            opptegnelseRepository = sessionContext.opptegnelseRepository,
+            opptegnelseDao = sessionContext.opptegnelseDao,
             totrinnsvurderingDao = sessionContext.totrinnsvurderingDao,
             saksbehandlerDao = sessionContext.saksbehandlerDao,
             meldingPubliserer = meldingPubliserer,
@@ -386,10 +386,10 @@ class OppgaveService(
         kanAvvises: Boolean,
     ) {
         oppgaveDao.opprettOppgave(id, godkjenningsbehovId, egenskaper, vedtaksperiodeId, behandlingId, utbetalingId, kanAvvises)
-        opptegnelseRepository.opprettOpptegnelse(
+        opptegnelseDao.opprettOpptegnelse(
             oppgaveDao.finnFødselsnummer(id),
             GodkjenningsbehovPayload(godkjenningsbehovId).toJson(),
-            OpptegnelseRepository.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE,
+            OpptegnelseDao.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE,
         )
     }
 

@@ -4,7 +4,7 @@ import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.AnnulleringRepository
-import no.nav.helse.db.OpptegnelseRepository
+import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.Repositories
 import no.nav.helse.db.VedtakBegrunnelseFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
@@ -107,7 +107,7 @@ class SaksbehandlerMediator(
     private val generasjonRepository = repositories.generasjonApiRepository
     private val varselRepository = repositories.varselApiRepository
     private val oppgaveApiDao = repositories.oppgaveApiDao
-    private val opptegnelseRepository = repositories.opptegnelseRepository
+    private val opptegnelseRepository = repositories.opptegnelseDao
     private val abonnementDao = repositories.abonnementApiDao
     private val reservasjonDao = repositories.reservasjonDao
     private val overstyringDao = repositories.overstyringDao
@@ -421,7 +421,7 @@ class SaksbehandlerMediator(
         return opptegnelseRepository.finnOpptegnelser(saksbehandler.oid()).toApiOpptegnelser()
     }
 
-    private fun List<OpptegnelseRepository.Opptegnelse>.toApiOpptegnelser() =
+    private fun List<OpptegnelseDao.Opptegnelse>.toApiOpptegnelser() =
         map { opptegnelse ->
             Opptegnelse(
                 aktorId = opptegnelse.aktorId,
@@ -429,14 +429,14 @@ class SaksbehandlerMediator(
                 type =
                     opptegnelse.type.let { type ->
                         when (type) {
-                            OpptegnelseRepository.OpptegnelseType.UTBETALING_ANNULLERING_FEILET -> Opptegnelsetype.UTBETALING_ANNULLERING_FEILET
-                            OpptegnelseRepository.OpptegnelseType.UTBETALING_ANNULLERING_OK -> Opptegnelsetype.UTBETALING_ANNULLERING_OK
-                            OpptegnelseRepository.OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV -> Opptegnelsetype.FERDIGBEHANDLET_GODKJENNINGSBEHOV
-                            OpptegnelseRepository.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE -> Opptegnelsetype.NY_SAKSBEHANDLEROPPGAVE
-                            OpptegnelseRepository.OpptegnelseType.REVURDERING_AVVIST -> Opptegnelsetype.REVURDERING_AVVIST
-                            OpptegnelseRepository.OpptegnelseType.REVURDERING_FERDIGBEHANDLET -> Opptegnelsetype.REVURDERING_FERDIGBEHANDLET
-                            OpptegnelseRepository.OpptegnelseType.PERSONDATA_OPPDATERT -> Opptegnelsetype.PERSONDATA_OPPDATERT
-                            OpptegnelseRepository.OpptegnelseType.PERSON_KLAR_TIL_BEHANDLING -> Opptegnelsetype.PERSON_KLAR_TIL_BEHANDLING
+                            OpptegnelseDao.OpptegnelseType.UTBETALING_ANNULLERING_FEILET -> Opptegnelsetype.UTBETALING_ANNULLERING_FEILET
+                            OpptegnelseDao.OpptegnelseType.UTBETALING_ANNULLERING_OK -> Opptegnelsetype.UTBETALING_ANNULLERING_OK
+                            OpptegnelseDao.OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV -> Opptegnelsetype.FERDIGBEHANDLET_GODKJENNINGSBEHOV
+                            OpptegnelseDao.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE -> Opptegnelsetype.NY_SAKSBEHANDLEROPPGAVE
+                            OpptegnelseDao.OpptegnelseType.REVURDERING_AVVIST -> Opptegnelsetype.REVURDERING_AVVIST
+                            OpptegnelseDao.OpptegnelseType.REVURDERING_FERDIGBEHANDLET -> Opptegnelsetype.REVURDERING_FERDIGBEHANDLET
+                            OpptegnelseDao.OpptegnelseType.PERSONDATA_OPPDATERT -> Opptegnelsetype.PERSONDATA_OPPDATERT
+                            OpptegnelseDao.OpptegnelseType.PERSON_KLAR_TIL_BEHANDLING -> Opptegnelsetype.PERSON_KLAR_TIL_BEHANDLING
                         }
                     },
                 payload = opptegnelse.payload,

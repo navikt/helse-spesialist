@@ -4,7 +4,7 @@ import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.Testdata.godkjenningsbehovData
-import no.nav.helse.db.OpptegnelseRepository
+import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.modell.gosysoppgaver.inspektør
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.UtgåendeHendelse
@@ -30,7 +30,7 @@ import java.util.UUID
 
 internal class GodkjenningMediatorTest {
     private lateinit var context: CommandContext
-    private val opptegnelseRepository = mockk<OpptegnelseRepository>(relaxed = true)
+    private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
     private val hendelserInspektør =
         object : CommandContextObserver {
             private val hendelser = mutableListOf<UtgåendeHendelse>()
@@ -41,7 +41,7 @@ internal class GodkjenningMediatorTest {
                 hendelser.add(hendelse)
             }
         }
-    private val mediator = GodkjenningMediator(opptegnelseRepository)
+    private val mediator = GodkjenningMediator(opptegnelseDao)
 
     private val saksbehandler =
         Saksbehandlerløsning.Saksbehandler(
@@ -61,7 +61,7 @@ internal class GodkjenningMediatorTest {
     fun setup() {
         context = CommandContext(UUID.randomUUID())
         context.nyObserver(hendelserInspektør)
-        clearMocks(opptegnelseRepository)
+        clearMocks(opptegnelseDao)
     }
 
     @Test
@@ -227,12 +227,12 @@ internal class GodkjenningMediatorTest {
 
     private fun assertFerdigbehandletGodkjenningsbehovOpptegnelseOpprettet() =
         verify(exactly = 1) {
-            opptegnelseRepository.opprettOpptegnelse(eq(fnr), any(), eq(OpptegnelseRepository.OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV))
+            opptegnelseDao.opprettOpptegnelse(eq(fnr), any(), eq(OpptegnelseDao.OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV))
         }
 
     private fun assertOpptegnelseIkkeOpprettet() =
         verify(exactly = 0) {
-            opptegnelseRepository.opprettOpptegnelse(eq(fnr), any(), eq(OpptegnelseRepository.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE))
+            opptegnelseDao.opprettOpptegnelse(eq(fnr), any(), eq(OpptegnelseDao.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE))
         }
 
     private companion object {

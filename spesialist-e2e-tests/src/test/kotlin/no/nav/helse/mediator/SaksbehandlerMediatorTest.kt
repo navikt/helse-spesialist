@@ -62,7 +62,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private val testRapid = TestRapid()
     private val meldingPubliserer: MeldingPubliserer = MessageContextMeldingPubliserer(testRapid)
     private val tildelingDbDao = repositories.tildelingDao
-    private val opptegnelseRepository = repositories.opptegnelseRepository
+    private val opptegnelseRepository = repositories.opptegnelseDao
     private val stansAutomatiskBehandlingMediator =
         StansAutomatiskBehandlingMediator(
             stansAutomatiskBehandlingDao,

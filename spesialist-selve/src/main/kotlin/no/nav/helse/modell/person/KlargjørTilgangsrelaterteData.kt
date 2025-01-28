@@ -2,7 +2,7 @@ package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.EgenAnsattDao
-import no.nav.helse.db.OpptegnelseRepository
+import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
@@ -44,7 +44,7 @@ internal class KlargjørTilgangsrelaterteDataCommand(
     fødselsnummer: String,
     personDao: PersonDao,
     egenAnsattDao: EgenAnsattDao,
-    opptegnelseRepository: OpptegnelseRepository,
+    opptegnelseDao: OpptegnelseDao,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -59,10 +59,10 @@ internal class KlargjørTilgangsrelaterteDataCommand(
                 egenAnsattDao = egenAnsattDao,
             ),
             ikkesuspenderendeCommand("opprettOptegnelse") {
-                opptegnelseRepository.opprettOpptegnelse(
+                opptegnelseDao.opprettOpptegnelse(
                     fødselsnummer = fødselsnummer,
                     payload = PersonKlarTilVisning.toJson(),
-                    type = OpptegnelseRepository.OpptegnelseType.PERSON_KLAR_TIL_BEHANDLING,
+                    type = OpptegnelseDao.OpptegnelseType.PERSON_KLAR_TIL_BEHANDLING,
                 )
             },
             ikkesuspenderendeCommand("ferdigstillKlargjøring") {

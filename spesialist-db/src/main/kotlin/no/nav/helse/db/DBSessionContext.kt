@@ -16,7 +16,7 @@ class DBSessionContext(session: Session) : SessionContext {
     override val metrikkDao = PgMetrikkDao(session)
     override val notatDao = PgNotatDao(session)
     override val oppgaveDao = PgOppgaveDao(session)
-    override val opptegnelseRepository = PgOpptegnelseRepository(session)
+    override val opptegnelseDao = PgOpptegnelseDao(session)
     override val overstyringDao = PgOverstyringDao(session)
     override val periodehistorikkDao = PgPeriodehistorikkDao(session)
     override val personDao = PgPersonDao(session)

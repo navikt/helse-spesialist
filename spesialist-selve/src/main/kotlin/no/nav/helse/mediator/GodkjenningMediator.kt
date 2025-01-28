@@ -1,7 +1,7 @@
 package no.nav.helse.mediator
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.db.OpptegnelseRepository
+import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
 
-class GodkjenningMediator(private val opptegnelseRepository: OpptegnelseRepository) {
+class GodkjenningMediator(private val opptegnelseDao: OpptegnelseDao) {
     internal fun saksbehandlerUtbetaling(
         context: CommandContext,
         behov: GodkjenningsbehovData,
@@ -81,10 +81,10 @@ class GodkjenningMediator(private val opptegnelseRepository: OpptegnelseReposito
         behov.godkjennAutomatisk(utbetaling)
         context.hendelse(behov.medLøsning())
         context.hendelse(behov.lagVedtaksperiodeGodkjentAutomatisk())
-        opptegnelseRepository.opprettOpptegnelse(
+        opptegnelseDao.opprettOpptegnelse(
             fødselsnummer = behov.fødselsnummer,
             payload = AutomatiskBehandlingPayload(behov.id, AutomatiskBehandlingUtfall.UTBETALT).toJson(),
-            type = OpptegnelseRepository.OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV,
+            type = OpptegnelseDao.OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV,
         )
         tellAutomatisering()
         sikkerLogg.info(
@@ -105,10 +105,10 @@ class GodkjenningMediator(private val opptegnelseRepository: OpptegnelseReposito
         )
         context.hendelse(behov.medLøsning())
         context.hendelse(behov.lagVedtaksperiodeAvvistAutomatisk())
-        opptegnelseRepository.opprettOpptegnelse(
+        opptegnelseDao.opprettOpptegnelse(
             fødselsnummer = behov.fødselsnummer,
             payload = AutomatiskBehandlingPayload(behov.id, AutomatiskBehandlingUtfall.AVVIST).toJson(),
-            type = OpptegnelseRepository.OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV,
+            type = OpptegnelseDao.OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV,
         )
         begrunnelser.forEach { tellAvvistÅrsak(it) }
         tellAutomatisering()

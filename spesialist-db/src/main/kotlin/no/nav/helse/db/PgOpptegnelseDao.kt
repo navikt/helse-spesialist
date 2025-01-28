@@ -5,14 +5,14 @@ import no.nav.helse.db.HelseDao.Companion.asSQL
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgOpptegnelseRepository private constructor(private val queryRunner: QueryRunner) : OpptegnelseRepository, QueryRunner by queryRunner {
+class PgOpptegnelseDao private constructor(private val queryRunner: QueryRunner) : OpptegnelseDao, QueryRunner by queryRunner {
     internal constructor(session: Session) : this(MedSession(session))
     internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun opprettOpptegnelse(
         fødselsnummer: String,
         payload: String,
-        type: OpptegnelseRepository.OpptegnelseType,
+        type: OpptegnelseDao.OpptegnelseType,
     ) {
         asSQL(
             """
@@ -40,11 +40,11 @@ class PgOpptegnelseRepository private constructor(private val queryRunner: Query
             """.trimIndent(),
             "saksbehandlerIdent" to saksbehandlerIdent,
         ).list { row ->
-            OpptegnelseRepository.Opptegnelse(
+            OpptegnelseDao.Opptegnelse(
                 payload = row.string("payload"),
                 aktorId = row.long("aktør_id").toString(),
                 sekvensnummer = row.int("sekvensnummer"),
-                type = OpptegnelseRepository.OpptegnelseType.valueOf(row.string("type")),
+                type = OpptegnelseDao.OpptegnelseType.valueOf(row.string("type")),
             )
         }
 }
