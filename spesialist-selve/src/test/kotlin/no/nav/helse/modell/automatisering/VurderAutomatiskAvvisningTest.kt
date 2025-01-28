@@ -46,17 +46,15 @@ internal class VurderAutomatiskAvvisningTest {
     }
 
     @Test
-    fun `skal avvise dersom IM mangler`() {
-        every { sykefraværstilfelle.harVarselOmManglendeInntektsmelding(any()) } returns true
-        //testen gir for øyeblikket ikke mening da vi midlertidig slipper igjennom alle
-        //assertAvvisning(lagCommand(fødselsnummer = "01111111111", kanAvvises = true), "Mangler inntektsmelding")
+    fun `skal ikke avvise dersom IM er mottatt`() {
+        every { sykefraværstilfelle.harVarselOmManglendeInntektsmelding(any()) } returns false
         assertIkkeAvvisning(lagCommand(fødselsnummer = "01111111111", kanAvvises = true))
     }
 
     @Test
-    fun `skal ikke avvise dersom IM er mottatt`() {
-        every { sykefraværstilfelle.harVarselOmManglendeInntektsmelding(any()) } returns false
-        assertIkkeAvvisning(lagCommand(fødselsnummer = "01111111111", kanAvvises = true))
+    fun `skal avvise dersom IM mangler og fødselsdato faller utenfor toggle`() {
+        every { sykefraværstilfelle.harVarselOmManglendeInntektsmelding(any()) } returns true
+        assertAvvisning(lagCommand(fødselsnummer = "41111111111", kanAvvises = true), "Mangler inntektsmelding")
     }
 
     @Test
