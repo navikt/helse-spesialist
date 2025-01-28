@@ -10,6 +10,7 @@ import no.nav.helse.db.PgCommandContextDao.CommandContextTilstand.FERDIG
 import no.nav.helse.db.PgCommandContextDao.CommandContextTilstand.NY
 import no.nav.helse.db.PgCommandContextDao.CommandContextTilstand.SUSPENDERT
 import no.nav.helse.modell.kommando.CommandContext
+import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -78,11 +79,12 @@ class PgCommandContextDao private constructor(
     ) {
         asSQL(
             """
-            INSERT INTO command_context(context_id, hendelse_id, tilstand, data, hash)
-            VALUES (:contextId, :hendelseId, :tilstand, :data::json, :hash)
+            INSERT INTO command_context (context_id, hendelse_id, opprettet, tilstand, data, hash)
+            VALUES (:contextId, :hendelseId, :opprettet, :tilstand, :data::json, :hash)
             """.trimIndent(),
             "contextId" to contextId,
             "hendelseId" to hendelseId,
+            "opprettet" to LocalDateTime.now(),
             "tilstand" to tilstand.name,
             "data" to mapper.writeValueAsString(CommandContextDto(sti)),
             "hash" to hash,
@@ -98,12 +100,13 @@ class PgCommandContextDao private constructor(
     private fun avbrytContext(contextRad: ContextRad) {
         asSQL(
             """
-            INSERT INTO command_context(context_id, hendelse_id, tilstand, data)
-            VALUES (:contextId, :hendelseId, :avbrutt, :data::json)
+            INSERT INTO command_context (context_id, hendelse_id, opprettet, tilstand, data)
+            VALUES (:contextId, :hendelseId, :opprettet, :avbrutt, :data::json)
             """.trimIndent(),
             "avbrutt" to AVBRUTT.name,
             "contextId" to contextRad.contextId,
             "hendelseId" to contextRad.hendelseId,
+            "opprettet" to LocalDateTime.now(),
             "data" to contextRad.data,
         ).update()
     }
