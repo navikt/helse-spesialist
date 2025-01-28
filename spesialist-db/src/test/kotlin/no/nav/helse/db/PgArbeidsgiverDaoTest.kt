@@ -11,7 +11,7 @@ import java.time.LocalDate
 
 
 internal class PgArbeidsgiverDaoTest : DatabaseIntegrationTest() {
-    private val inntektskilderRepository = repositories.withSessionContext(sessionOf(dataSource, returnGeneratedKey = true)).inntektskilderRepository
+    private val inntektskilderRepository = DBSessionContext(sessionOf(dataSource, returnGeneratedKey = true)).inntektskilderRepository
 
     @Test
     fun `Oppretter minimal arbeidsgiver`() {

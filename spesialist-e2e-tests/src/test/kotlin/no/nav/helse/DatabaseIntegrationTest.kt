@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.sessionOf
+import no.nav.helse.db.DBSessionContext
 import no.nav.helse.db.DbQuery
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.modell.InntektskildetypeDto
@@ -82,7 +83,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         private set
 
     protected val session = sessionOf(dataSource, returnGeneratedKey = true)
-    private val sessionContext = repositories.withSessionContext(session)
+    private val sessionContext = DBSessionContext(session)
 
     @AfterEach
     fun tearDown() = session.close()

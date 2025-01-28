@@ -1,6 +1,5 @@
 package no.nav.helse.db
 
-import kotliquery.Session
 import no.nav.helse.db.api.PgAbonnementApiDao
 import no.nav.helse.db.api.PgArbeidsgiverApiDao
 import no.nav.helse.db.api.PgEgenAnsattApiDao
@@ -68,6 +67,4 @@ class DBRepositories(dataSource: DataSource) : Repositories {
     override val varselApiDao = PgVarselApiDao(dataSource)
     override val varselApiRepository = PgVarselApiRepository(dataSource)
     override val vergemålApiDao = PgVergemålApiDao(dataSource)
-
-    override fun withSessionContext(session: Session) = DBSessionContext(session)
 }

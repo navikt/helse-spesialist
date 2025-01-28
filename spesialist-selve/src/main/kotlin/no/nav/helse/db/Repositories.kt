@@ -1,6 +1,5 @@
 package no.nav.helse.db
 
-import kotliquery.Session
 import no.nav.helse.db.api.AbonnementApiDao
 import no.nav.helse.db.api.ArbeidsgiverApiDao
 import no.nav.helse.db.api.EgenAnsattApiDao
@@ -67,6 +66,4 @@ interface Repositories {
     val varselApiDao: VarselApiDao
     val varselApiRepository: VarselApiRepository
     val vergemålApiDao: VergemålApiDao
-
-    fun withSessionContext(session: Session): SessionContext
 }

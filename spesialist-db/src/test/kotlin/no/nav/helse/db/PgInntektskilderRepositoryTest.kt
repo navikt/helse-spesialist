@@ -24,8 +24,8 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class PgInntektskilderRepositoryTest : DatabaseIntegrationTest() {
-    private val inntektskilderRepository = repositories.withSessionContext(session).inntektskilderRepository
-    private val avviksvurderingDao = repositories.withSessionContext(session).avviksvurderingDao
+    private val inntektskilderRepository = DBSessionContext(session).inntektskilderRepository
+    private val avviksvurderingDao = DBSessionContext(session).avviksvurderingDao
 
     @Test
     fun `når det ikke finnes arbeidsgivere i databasen får vi kun tilbake nye inntektskilder`() {

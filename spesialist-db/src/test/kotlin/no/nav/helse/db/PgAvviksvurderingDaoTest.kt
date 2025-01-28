@@ -20,7 +20,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class PgAvviksvurderingDaoTest : DatabaseIntegrationTest() {
-    private val avviksvurderingDao = repositories.withSessionContext(session).avviksvurderingDao
+    private val avviksvurderingDao = DBSessionContext(session).avviksvurderingDao
 
     @Test
     fun `lagre avviksvurdering`() {

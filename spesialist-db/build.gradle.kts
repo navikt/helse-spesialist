@@ -3,6 +3,7 @@ val micrometerRegistryPrometheusVersion = "1.13.6"
 dependencies {
     implementation(project(":spesialist-db-migrations"))
     implementation(project(":spesialist-selve"))
+    api(libs.bundles.db)
 
     implementation("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryPrometheusVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")

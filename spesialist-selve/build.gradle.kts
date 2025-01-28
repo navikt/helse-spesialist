@@ -12,7 +12,6 @@ dependencies {
     api(project(":spesialist-api"))
 
     api("com.nimbusds:nimbus-jose-jwt:9.37.3")
-    api(libs.bundles.db)
 
     implementation("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryPrometheusVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -21,5 +20,4 @@ dependencies {
 
     testImplementation(libs.bundles.ktor.server)
     testImplementation("com.expediagroup:graphql-kotlin-ktor-server:$graphQLKotlinVersion")
-    testImplementation(libs.testcontainers.postgresql)
 }

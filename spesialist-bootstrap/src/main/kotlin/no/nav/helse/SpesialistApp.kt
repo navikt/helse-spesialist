@@ -168,7 +168,7 @@ class SpesialistApp(
             )
         meldingMediator =
             MeldingMediator(
-                sessionFactory = TransactionalSessionFactory(dataSource, repositories),
+                sessionFactory = TransactionalSessionFactory(dataSource),
                 publiserer = meldingPubliserer,
                 personDao = repositories.personDao,
                 commandContextDao = repositories.commandContextDao,

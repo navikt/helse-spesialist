@@ -2,6 +2,7 @@ package no.nav.helse.mediator
 
 import kotliquery.sessionOf
 import no.nav.helse.TestRapidHelpers.contextId
+import no.nav.helse.db.DBSessionContext
 import no.nav.helse.db.GodkjenningsbehovUtfall
 import no.nav.helse.e2e.AbstractE2ETest
 import org.junit.jupiter.api.AfterEach
@@ -11,7 +12,7 @@ import org.junit.jupiter.api.Test
 
 internal class PgMetrikkDaoE2ETest : AbstractE2ETest() {
     private val session = sessionOf(dataSource)
-    private val dao = repositories.withSessionContext(session).metrikkDao
+    private val dao = DBSessionContext(session).metrikkDao
 
     @AfterEach
     fun lukkSession() = session.close()

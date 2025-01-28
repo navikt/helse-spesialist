@@ -27,7 +27,7 @@ internal class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
 
     init {
         MeldingMediator(
-            sessionFactory = TransactionalSessionFactory(dataSource, repositories),
+            sessionFactory = TransactionalSessionFactory(dataSource),
             publiserer = MessageContextMeldingPubliserer(testRapid),
             personDao = repositories.personDao,
             commandContextDao = repositories.commandContextDao,

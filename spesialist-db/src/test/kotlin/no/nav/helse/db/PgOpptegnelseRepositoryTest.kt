@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class PgOpptegnelseRepositoryTest : DatabaseIntegrationTest() {
-    private val opptegnelseRepository = repositories.withSessionContext(session).opptegnelseRepository
+    private val opptegnelseRepository = DBSessionContext(session).opptegnelseRepository
 
     private companion object {
         private val UTBETALING_PAYLOAD = UtbetalingPayload(UUID.randomUUID())

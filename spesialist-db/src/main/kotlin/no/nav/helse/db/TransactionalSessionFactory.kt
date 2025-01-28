@@ -5,12 +5,11 @@ import javax.sql.DataSource
 
 class TransactionalSessionFactory(
     private val dataSource: DataSource,
-    private val repositories: Repositories,
 ) : SessionFactory {
     override fun transactionalSessionScope(transactionalBlock: (SessionContext) -> Unit) {
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             session.transaction { transactionalSession ->
-                transactionalBlock(repositories.withSessionContext(transactionalSession))
+                transactionalBlock(DBSessionContext(transactionalSession))
             }
         }
     }

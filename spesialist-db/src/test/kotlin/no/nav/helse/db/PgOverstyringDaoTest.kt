@@ -34,7 +34,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class PgOverstyringDaoTest : DatabaseIntegrationTest() {
-    private val inntektskilderRepository = repositories.withSessionContext(session).inntektskilderRepository
+    private val inntektskilderRepository = DBSessionContext(session).inntektskilderRepository
     private val PERSON_FORNAVN = "Per"
     private val PERSON_ETTERNAVN = "Son"
     private val PERSON_FØDSELSDATO = LocalDate.of(1998, 4, 20)
