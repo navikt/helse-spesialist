@@ -18,7 +18,6 @@ import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.test.lagSaksbehandlerident
 import no.nav.helse.spesialist.test.lagTilfeldigSaksbehandlerepost
 import no.nav.helse.util.januar
@@ -228,12 +227,12 @@ internal class GodkjenningMediatorTest {
 
     private fun assertFerdigbehandletGodkjenningsbehovOpptegnelseOpprettet() =
         verify(exactly = 1) {
-            opptegnelseRepository.opprettOpptegnelse(eq(fnr), any(), eq(OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV))
+            opptegnelseRepository.opprettOpptegnelse(eq(fnr), any(), eq(OpptegnelseRepository.OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV))
         }
 
     private fun assertOpptegnelseIkkeOpprettet() =
         verify(exactly = 0) {
-            opptegnelseRepository.opprettOpptegnelse(eq(fnr), any(), eq(OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE))
+            opptegnelseRepository.opprettOpptegnelse(eq(fnr), any(), eq(OpptegnelseRepository.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE))
         }
 
     private companion object {

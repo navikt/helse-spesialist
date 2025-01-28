@@ -2,10 +2,6 @@ package no.nav.helse.db
 
 import kotliquery.Session
 import no.nav.helse.db.HelseDao.Companion.asSQL
-import no.nav.helse.spesialist.api.abonnement.OpptegnelsePayload
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
-import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
-import no.nav.helse.spesialist.api.graphql.schema.Opptegnelsetype
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -15,8 +11,8 @@ class PgOpptegnelseRepository private constructor(private val queryRunner: Query
 
     override fun opprettOpptegnelse(
         fødselsnummer: String,
-        payload: OpptegnelsePayload,
-        type: OpptegnelseType,
+        payload: String,
+        type: OpptegnelseRepository.OpptegnelseType,
     ) {
         asSQL(
             """
@@ -26,7 +22,7 @@ class PgOpptegnelseRepository private constructor(private val queryRunner: Query
             WHERE fødselsnummer = :fodselsnummer
             """.trimIndent(),
             "fodselsnummer" to fødselsnummer,
-            "payload" to payload.toJson(),
+            "payload" to payload,
             "type" to "$type",
         ).update()
     }
@@ -44,11 +40,11 @@ class PgOpptegnelseRepository private constructor(private val queryRunner: Query
             """.trimIndent(),
             "saksbehandlerIdent" to saksbehandlerIdent,
         ).list { row ->
-            Opptegnelse(
+            OpptegnelseRepository.Opptegnelse(
                 payload = row.string("payload"),
                 aktorId = row.long("aktør_id").toString(),
                 sekvensnummer = row.int("sekvensnummer"),
-                type = Opptegnelsetype.valueOf(row.string("type")),
+                type = OpptegnelseRepository.OpptegnelseType.valueOf(row.string("type")),
             )
         }
 }

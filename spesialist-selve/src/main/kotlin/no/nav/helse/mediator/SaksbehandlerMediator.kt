@@ -4,6 +4,7 @@ import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.AnnulleringRepository
+import no.nav.helse.db.OpptegnelseRepository
 import no.nav.helse.db.Repositories
 import no.nav.helse.db.VedtakBegrunnelseFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
@@ -69,6 +70,7 @@ import no.nav.helse.spesialist.api.graphql.schema.Avslag
 import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.MinimumSykdomsgrad
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
+import no.nav.helse.spesialist.api.graphql.schema.Opptegnelsetype
 import no.nav.helse.spesialist.api.graphql.schema.PaVentRequest
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.ANNET
@@ -410,14 +412,36 @@ class SaksbehandlerMediator(
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         SaksbehandlerLagrer(saksbehandlerDao).lagre(saksbehandler)
         abonnementDao.registrerSistekvensnummer(saksbehandler.oid(), sisteSekvensId)
-        return opptegnelseRepository.finnOpptegnelser(saksbehandler.oid())
+        return opptegnelseRepository.finnOpptegnelser(saksbehandler.oid()).toApiOpptegnelser()
     }
 
     override fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi): List<Opptegnelse> {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         SaksbehandlerLagrer(saksbehandlerDao).lagre(saksbehandler)
-        return opptegnelseRepository.finnOpptegnelser(saksbehandler.oid())
+        return opptegnelseRepository.finnOpptegnelser(saksbehandler.oid()).toApiOpptegnelser()
     }
+
+    private fun List<OpptegnelseRepository.Opptegnelse>.toApiOpptegnelser() =
+        map { opptegnelse ->
+            Opptegnelse(
+                aktorId = opptegnelse.aktorId,
+                sekvensnummer = opptegnelse.sekvensnummer,
+                type =
+                    opptegnelse.type.let { type ->
+                        when (type) {
+                            OpptegnelseRepository.OpptegnelseType.UTBETALING_ANNULLERING_FEILET -> Opptegnelsetype.UTBETALING_ANNULLERING_FEILET
+                            OpptegnelseRepository.OpptegnelseType.UTBETALING_ANNULLERING_OK -> Opptegnelsetype.UTBETALING_ANNULLERING_OK
+                            OpptegnelseRepository.OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV -> Opptegnelsetype.FERDIGBEHANDLET_GODKJENNINGSBEHOV
+                            OpptegnelseRepository.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE -> Opptegnelsetype.NY_SAKSBEHANDLEROPPGAVE
+                            OpptegnelseRepository.OpptegnelseType.REVURDERING_AVVIST -> Opptegnelsetype.REVURDERING_AVVIST
+                            OpptegnelseRepository.OpptegnelseType.REVURDERING_FERDIGBEHANDLET -> Opptegnelsetype.REVURDERING_FERDIGBEHANDLET
+                            OpptegnelseRepository.OpptegnelseType.PERSONDATA_OPPDATERT -> Opptegnelsetype.PERSONDATA_OPPDATERT
+                            OpptegnelseRepository.OpptegnelseType.PERSON_KLAR_TIL_BEHANDLING -> Opptegnelsetype.PERSON_KLAR_TIL_BEHANDLING
+                        }
+                    },
+                payload = opptegnelse.payload,
+            )
+        }
 
     override fun hentAvslag(
         vedtaksperiodeId: UUID,

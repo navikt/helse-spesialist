@@ -9,7 +9,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.GODKJENT_UTEN_UTBETALING
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.OVERFØRT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALING_FEILET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.abonnement.UtbetalingPayload
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -74,20 +73,20 @@ class LagreOppdragCommand(
     }
 
     private fun lagOpptegnelse() {
-        val opptegnelseType: OpptegnelseType =
+        val opptegnelseType: OpptegnelseRepository.OpptegnelseType =
             when {
                 type == Utbetalingtype.ANNULLERING && status == UTBETALING_FEILET -> {
-                    OpptegnelseType.UTBETALING_ANNULLERING_FEILET
+                    OpptegnelseRepository.OpptegnelseType.UTBETALING_ANNULLERING_FEILET
                 }
                 type == Utbetalingtype.ANNULLERING && status == ANNULLERT -> {
-                    OpptegnelseType.UTBETALING_ANNULLERING_OK
+                    OpptegnelseRepository.OpptegnelseType.UTBETALING_ANNULLERING_OK
                 }
                 type == Utbetalingtype.REVURDERING && status in listOf(UTBETALT, GODKJENT_UTEN_UTBETALING, OVERFØRT) -> {
-                    OpptegnelseType.REVURDERING_FERDIGBEHANDLET
+                    OpptegnelseRepository.OpptegnelseType.REVURDERING_FERDIGBEHANDLET
                 }
                 else -> return
             }
 
-        opptegnelseRepository.opprettOpptegnelse(fødselsnummer, UtbetalingPayload(utbetalingId), opptegnelseType)
+        opptegnelseRepository.opprettOpptegnelse(fødselsnummer, UtbetalingPayload(utbetalingId).toJson(), opptegnelseType)
     }
 }

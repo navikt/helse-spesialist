@@ -13,7 +13,6 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterPersonCommand.OppdaterEnhetCommand
 import no.nav.helse.modell.kommando.OppdaterPersoninfoCommand
 import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseType.PERSON_KLAR_TIL_BEHANDLING
 import no.nav.helse.spesialist.api.abonnement.PersonKlarTilVisning
 import java.util.UUID
 
@@ -60,7 +59,11 @@ internal class KlargjørTilgangsrelaterteDataCommand(
                 egenAnsattDao = egenAnsattDao,
             ),
             ikkesuspenderendeCommand("opprettOptegnelse") {
-                opptegnelseRepository.opprettOpptegnelse(fødselsnummer, payload = PersonKlarTilVisning, type = PERSON_KLAR_TIL_BEHANDLING)
+                opptegnelseRepository.opprettOpptegnelse(
+                    fødselsnummer = fødselsnummer,
+                    payload = PersonKlarTilVisning.toJson(),
+                    type = OpptegnelseRepository.OpptegnelseType.PERSON_KLAR_TIL_BEHANDLING,
+                )
             },
             ikkesuspenderendeCommand("ferdigstillKlargjøring") {
                 personDao.personKlargjort(fødselsnummer)

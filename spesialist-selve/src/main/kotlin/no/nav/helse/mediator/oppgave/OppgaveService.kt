@@ -34,7 +34,6 @@ import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDto
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.BehandledeOppgaver
@@ -389,8 +388,8 @@ class OppgaveService(
         oppgaveDao.opprettOppgave(id, godkjenningsbehovId, egenskaper, vedtaksperiodeId, behandlingId, utbetalingId, kanAvvises)
         opptegnelseRepository.opprettOpptegnelse(
             oppgaveDao.finnFødselsnummer(id),
-            GodkjenningsbehovPayload(godkjenningsbehovId),
-            OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE,
+            GodkjenningsbehovPayload(godkjenningsbehovId).toJson(),
+            OpptegnelseRepository.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE,
         )
     }
 

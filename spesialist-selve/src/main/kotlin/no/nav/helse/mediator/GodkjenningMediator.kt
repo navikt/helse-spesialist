@@ -9,7 +9,6 @@ import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.spesialist.api.abonnement.AutomatiskBehandlingPayload
 import no.nav.helse.spesialist.api.abonnement.AutomatiskBehandlingUtfall
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.tellAutomatisering
 import no.nav.helse.tellAvvistÅrsak
 import org.slf4j.LoggerFactory
@@ -84,8 +83,8 @@ class GodkjenningMediator(private val opptegnelseRepository: OpptegnelseReposito
         context.hendelse(behov.lagVedtaksperiodeGodkjentAutomatisk())
         opptegnelseRepository.opprettOpptegnelse(
             fødselsnummer = behov.fødselsnummer,
-            payload = AutomatiskBehandlingPayload(behov.id, AutomatiskBehandlingUtfall.UTBETALT),
-            type = OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV,
+            payload = AutomatiskBehandlingPayload(behov.id, AutomatiskBehandlingUtfall.UTBETALT).toJson(),
+            type = OpptegnelseRepository.OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV,
         )
         tellAutomatisering()
         sikkerLogg.info(
@@ -108,8 +107,8 @@ class GodkjenningMediator(private val opptegnelseRepository: OpptegnelseReposito
         context.hendelse(behov.lagVedtaksperiodeAvvistAutomatisk())
         opptegnelseRepository.opprettOpptegnelse(
             fødselsnummer = behov.fødselsnummer,
-            payload = AutomatiskBehandlingPayload(behov.id, AutomatiskBehandlingUtfall.AVVIST),
-            type = OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV,
+            payload = AutomatiskBehandlingPayload(behov.id, AutomatiskBehandlingUtfall.AVVIST).toJson(),
+            type = OpptegnelseRepository.OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV,
         )
         begrunnelser.forEach { tellAvvistÅrsak(it) }
         tellAutomatisering()

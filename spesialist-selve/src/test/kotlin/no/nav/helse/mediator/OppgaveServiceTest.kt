@@ -28,7 +28,6 @@ import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import no.nav.helse.spesialist.api.graphql.schema.AntallArbeidsforhold
@@ -597,7 +596,7 @@ internal class OppgaveServiceTest {
         opptegnelseRepository.opprettOpptegnelse(
             eq(fødselsnummer),
             any(),
-            eq(OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE),
+            eq(OpptegnelseRepository.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE),
         )
     }
 

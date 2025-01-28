@@ -10,7 +10,6 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterInfotrygdutbetalingerHardt
 import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.abonnement.PersonOppdatertPayload
 import java.time.LocalDate
 import java.util.UUID
@@ -51,8 +50,8 @@ internal class OppdaterPersondataCommand(
             ikkesuspenderendeCommand("opprettOpptegnelse") {
                 opptegnelseRepository.opprettOpptegnelse(
                     fødselsnummer,
-                    PersonOppdatertPayload,
-                    OpptegnelseType.PERSONDATA_OPPDATERT,
+                    PersonOppdatertPayload.toJson(),
+                    OpptegnelseRepository.OpptegnelseType.PERSONDATA_OPPDATERT,
                 )
             },
         )
