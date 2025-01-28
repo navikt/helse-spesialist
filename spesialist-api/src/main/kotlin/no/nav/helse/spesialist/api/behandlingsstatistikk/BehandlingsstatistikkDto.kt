@@ -1,10 +1,5 @@
 package no.nav.helse.spesialist.api.behandlingsstatistikk
 
-import no.nav.helse.spesialist.api.graphql.schema.Utbetalingtype
-import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
-import no.nav.helse.spesialist.api.vedtaksperiode.Mottakertype
-import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
-
 data class Statistikk(
     val automatisk: Int,
     val manuelt: Int,
@@ -28,19 +23,4 @@ data class BehandlingsstatistikkResponse(
     val egenAnsatt: Statistikk,
     val antallAnnulleringer: Int,
     val antallAvvisninger: Int,
-)
-
-data class StatistikkPerKombinasjon(
-    val perInntekttype: Map<Inntektskilde, Int>,
-    val perPeriodetype: Map<Periodetype, Int>,
-    val perMottakertype: Map<Mottakertype, Int>,
-    val perUtbetalingtype: Map<Utbetalingtype, Int>,
-)
-
-data class AntallPerKombinasjonRad(
-    val inntekttype: Inntektskilde,
-    val periodetype: Periodetype,
-    val mottakertype: Mottakertype?,
-    val utbetalingtype: Utbetalingtype?,
-    val antall: Int,
 )

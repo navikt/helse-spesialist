@@ -6,8 +6,3 @@ enum class Periodetype {
     INFOTRYGDFORLENGELSE,
     OVERGANG_FRA_IT,
 }
-
-enum class Inntektskilde {
-    EN_ARBEIDSGIVER,
-    FLERE_ARBEIDSGIVERE,
-}

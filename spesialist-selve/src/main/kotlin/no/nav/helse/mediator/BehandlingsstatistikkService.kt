@@ -1,14 +1,14 @@
 package no.nav.helse.mediator
 
 import no.nav.helse.db.BehandlingsstatistikkDao
+import no.nav.helse.db.BehandlingsstatistikkDao.StatistikkPerKombinasjon.Mottakertype
+import no.nav.helse.db.BehandlingsstatistikkDao.StatistikkPerKombinasjon.Utbetalingtype
 import no.nav.helse.db.EgenskapForDatabase
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkResponse
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.behandlingsstatistikk.Statistikk
-import no.nav.helse.spesialist.api.graphql.schema.Utbetalingtype
-import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
-import no.nav.helse.spesialist.api.vedtaksperiode.Mottakertype
-import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 import java.time.LocalDate
 
 class BehandlingsstatistikkService(private val behandlingsstatistikkDao: BehandlingsstatistikkDao) :

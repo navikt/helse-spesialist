@@ -1,11 +1,11 @@
 package no.nav.helse.db
 
 import no.nav.helse.DatabaseIntegrationTest
+import no.nav.helse.db.BehandlingsstatistikkDao.StatistikkPerKombinasjon.Mottakertype
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
-import no.nav.helse.spesialist.api.vedtaksperiode.Mottakertype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -42,9 +42,9 @@ internal class PgBehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
     fun `henter statikk for tilgjengelige oppgaver`() {
         nyPerson()
         val dto = behandlingsstatistikkDao.getTilgjengeligeOppgaverPerInntektOgPeriodetype()
-        assertEquals(1, dto.perInntekttype[no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER])
-        assertEquals(0, dto.perInntekttype[no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde.FLERE_ARBEIDSGIVERE])
-        assertEquals(1, dto.perPeriodetype[no.nav.helse.spesialist.api.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING])
+        assertEquals(1, dto.perInntekttype[Inntektskilde.EN_ARBEIDSGIVER])
+        assertEquals(0, dto.perInntekttype[Inntektskilde.FLERE_ARBEIDSGIVERE])
+        assertEquals(1, dto.perPeriodetype[Periodetype.FØRSTEGANGSBEHANDLING])
         assertTrue(dto.perMottakertype.isEmpty())
     }
 
@@ -96,7 +96,7 @@ internal class PgBehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
     @Test
     fun`Får antall automatiserte revurderinger`() {
         nyPersonMedAutomatiskVedtak(utbetalingtype = Utbetalingtype.REVURDERING)
-        assertEquals(1, behandlingsstatistikkDao.getAutomatiseringPerKombinasjon(LocalDate.now()).perUtbetalingtype[no.nav.helse.spesialist.api.graphql.schema.Utbetalingtype.REVURDERING])
+        assertEquals(1, behandlingsstatistikkDao.getAutomatiseringPerKombinasjon(LocalDate.now()).perUtbetalingtype[no.nav.helse.db.BehandlingsstatistikkDao.StatistikkPerKombinasjon.Utbetalingtype.REVURDERING])
     }
 
     @Test
@@ -133,8 +133,8 @@ internal class PgBehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
         nyPersonMedAutomatiskVedtak(mottakertype = mottakertype)
         val (perInntekttype, perPeriodetype, perMottakertype) =
             behandlingsstatistikkDao.getAutomatiseringPerKombinasjon(NOW)
-        assertEquals(1, perInntekttype[no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER])
-        assertEquals(1, perPeriodetype[no.nav.helse.spesialist.api.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING])
+        assertEquals(1, perInntekttype[Inntektskilde.EN_ARBEIDSGIVER])
+        assertEquals(1, perPeriodetype[Periodetype.FØRSTEGANGSBEHANDLING])
         assertEquals(1, perMottakertype[mottakertype])
     }
 

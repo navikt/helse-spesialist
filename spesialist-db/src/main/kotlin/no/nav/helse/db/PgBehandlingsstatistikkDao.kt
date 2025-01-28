@@ -1,11 +1,10 @@
 package no.nav.helse.db
 
-import no.nav.helse.spesialist.api.behandlingsstatistikk.AntallPerKombinasjonRad
-import no.nav.helse.spesialist.api.behandlingsstatistikk.StatistikkPerKombinasjon
-import no.nav.helse.spesialist.api.graphql.schema.Utbetalingtype
-import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
-import no.nav.helse.spesialist.api.vedtaksperiode.Mottakertype
-import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
+import no.nav.helse.db.BehandlingsstatistikkDao.StatistikkPerKombinasjon
+import no.nav.helse.db.BehandlingsstatistikkDao.StatistikkPerKombinasjon.Mottakertype
+import no.nav.helse.db.BehandlingsstatistikkDao.StatistikkPerKombinasjon.Utbetalingtype
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import java.time.LocalDate
 import javax.sql.DataSource
 
@@ -232,4 +231,12 @@ class PgBehandlingsstatistikkDao internal constructor(dataSource: DataSource) : 
             """.trimIndent(),
             "fom" to fom,
         ).single { it.int("avvisninger") } ?: 0
+
+    private data class AntallPerKombinasjonRad(
+        val inntekttype: Inntektskilde,
+        val periodetype: Periodetype,
+        val mottakertype: Mottakertype?,
+        val utbetalingtype: Utbetalingtype?,
+        val antall: Int,
+    )
 }
