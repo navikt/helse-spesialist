@@ -15,12 +15,12 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgVarselApiDao internal constructor(dataSource: DataSource) : HelseDao(dataSource), VarselApiDao {
+class PgVarselApiDao internal constructor(dataSource: DataSource) : HelseDao(dataSource) {
     private companion object {
         private val log = LoggerFactory.getLogger(PgVarselApiDao::class.java)
     }
 
-    override fun finnVarslerSomIkkeErInaktiveFor(
+    fun finnVarslerSomIkkeErInaktiveFor(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
     ): Set<Varsel> =
@@ -36,7 +36,7 @@ class PgVarselApiDao internal constructor(dataSource: DataSource) : HelseDao(dat
             "status_inaktiv" to INAKTIV.name,
         ).listKomplett()
 
-    override fun finnVarslerSomIkkeErInaktiveForSisteGenerasjon(
+    fun finnVarslerSomIkkeErInaktiveForSisteGenerasjon(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
     ) = asSQL(
@@ -56,7 +56,7 @@ class PgVarselApiDao internal constructor(dataSource: DataSource) : HelseDao(dat
         "status_inaktiv" to INAKTIV.name,
     ).listKomplett()
 
-    override fun finnVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<Varsel> =
+    fun finnVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<Varsel> =
         asSQL(
             """
             SELECT b.unik_id as generasjon_id, sv.unik_id as varsel_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv
@@ -68,7 +68,7 @@ class PgVarselApiDao internal constructor(dataSource: DataSource) : HelseDao(dat
             "status_inaktiv" to INAKTIV.name,
         ).listKomplett()
 
-    override fun finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<Varsel> =
+    fun finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<Varsel> =
         asSQL(
             """
             SELECT b.unik_id as generasjon_id, sv.unik_id as varsel_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv
@@ -80,7 +80,7 @@ class PgVarselApiDao internal constructor(dataSource: DataSource) : HelseDao(dat
             "status_godkjent" to GODKJENT.name,
         ).listKomplett()
 
-    override fun godkjennVarslerFor(vedtaksperioder: List<UUID>) =
+    fun godkjennVarslerFor(vedtaksperioder: List<UUID>) =
         asSQLWithQuestionMarks(
             """
             UPDATE selve_varsel 
@@ -94,12 +94,12 @@ class PgVarselApiDao internal constructor(dataSource: DataSource) : HelseDao(dat
             *vedtaksperioder.toTypedArray(),
         ).update()
 
-    override fun settStatusVurdert(
+    fun settStatusVurdert(
         generasjonId: UUID,
         definisjonId: UUID,
         varselkode: String,
         ident: String,
-        endretTidspunkt: LocalDateTime?,
+        endretTidspunkt: LocalDateTime? = LocalDateTime.now(),
     ): Varsel? =
         asSQL(
             """
@@ -127,11 +127,11 @@ class PgVarselApiDao internal constructor(dataSource: DataSource) : HelseDao(dat
             "kode" to varselkode,
         ).single(::mapVarsel)
 
-    override fun settStatusAktiv(
+    fun settStatusAktiv(
         generasjonId: UUID,
         varselkode: String,
         ident: String,
-        endretTidspunkt: LocalDateTime?,
+        endretTidspunkt: LocalDateTime? = LocalDateTime.now(),
     ): Varsel? =
         asSQL(
             """
@@ -158,7 +158,7 @@ class PgVarselApiDao internal constructor(dataSource: DataSource) : HelseDao(dat
             "kode" to varselkode,
         ).single(::mapVarsel)
 
-    override fun finnStatusFor(
+    fun finnStatusFor(
         varselkode: String,
         generasjonId: UUID,
     ): Varselstatus? =
@@ -170,7 +170,7 @@ class PgVarselApiDao internal constructor(dataSource: DataSource) : HelseDao(dat
             "generasjon_id" to generasjonId,
         ).single { Varselstatus.valueOf(it.string("status")) }
 
-    override fun finnVarslerFor(generasjonId: UUID): Set<Varsel> =
+    fun finnVarslerFor(generasjonId: UUID): Set<Varsel> =
         asSQL(
             """
             SELECT sv.unik_id as varsel_id, b.unik_id as generasjon_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv 
@@ -266,7 +266,7 @@ class PgVarselApiDao internal constructor(dataSource: DataSource) : HelseDao(dat
         )
     }
 
-    override fun vurderVarselFor(
+    fun vurderVarselFor(
         varselId: UUID,
         gjeldendeStatus: Varselstatus,
         saksbehandlerIdent: String,

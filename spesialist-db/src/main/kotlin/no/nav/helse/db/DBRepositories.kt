@@ -14,7 +14,6 @@ import no.nav.helse.db.api.PgRisikovurderingApiDao
 import no.nav.helse.db.api.PgSnapshotApiDao
 import no.nav.helse.db.api.PgTildelingApiDao
 import no.nav.helse.db.api.PgTotrinnsvurderingApiDao
-import no.nav.helse.db.api.PgVarselApiDao
 import no.nav.helse.db.api.PgVarselApiRepository
 import no.nav.helse.db.api.PgVergemålApiDao
 import javax.sql.DataSource
@@ -62,7 +61,6 @@ class DBRepositories(dataSource: DataSource) : Repositories {
     override val snapshotApiDao = PgSnapshotApiDao(dataSource)
     override val tildelingApiDao = PgTildelingApiDao(dataSource)
     override val totrinnsvurderingApiDao = PgTotrinnsvurderingApiDao(dataSource)
-    override val varselApiDao = PgVarselApiDao(dataSource)
     override val varselApiRepository = PgVarselApiRepository(dataSource)
     override val vergemålApiDao = PgVergemålApiDao(dataSource)
 }

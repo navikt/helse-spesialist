@@ -14,7 +14,6 @@ import no.nav.helse.db.api.RisikovurderingApiDao
 import no.nav.helse.db.api.SnapshotApiDao
 import no.nav.helse.db.api.TildelingApiDao
 import no.nav.helse.db.api.TotrinnsvurderingApiDao
-import no.nav.helse.db.api.VarselApiDao
 import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.db.api.VergemålApiDao
 
@@ -61,7 +60,6 @@ interface Repositories {
     val snapshotApiDao: SnapshotApiDao
     val tildelingApiDao: TildelingApiDao
     val totrinnsvurderingApiDao: TotrinnsvurderingApiDao
-    val varselApiDao: VarselApiDao
     val varselApiRepository: VarselApiRepository
     val vergemålApiDao: VergemålApiDao
 }
