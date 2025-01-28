@@ -533,7 +533,7 @@ class SaksbehandlerMediator(
     override fun hentAnnullering(
         arbeidsgiverFagsystemId: String,
         personFagsystemId: String,
-    ): no.nav.helse.spesialist.api.graphql.schema.Annullering? =
+    ): no.nav.helse.modell.Annullering? =
         annulleringRepository.finnAnnullering(
             arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
             personFagsystemId = personFagsystemId,

@@ -1,9 +1,9 @@
 package no.nav.helse.spesialist.api
 
+import no.nav.helse.modell.Annullering
 import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakUtfall
-import no.nav.helse.spesialist.api.graphql.schema.Annullering
 import no.nav.helse.spesialist.api.graphql.schema.Avslag
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
 import no.nav.helse.spesialist.api.graphql.schema.PaVentRequest

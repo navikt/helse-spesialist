@@ -760,7 +760,16 @@ data class BeregnetPeriode(
             saksbehandlerhåndterer.hentAnnullering(
                 periode.utbetaling.arbeidsgiverFagsystemId,
                 periode.utbetaling.personFagsystemId,
-            )
+            )?.let {
+                Annullering(
+                    saksbehandlerIdent = it.saksbehandlerIdent,
+                    arbeidsgiverFagsystemId = it.arbeidsgiverFagsystemId,
+                    personFagsystemId = it.personFagsystemId,
+                    tidspunkt = it.tidspunkt,
+                    arsaker = it.arsaker,
+                    begrunnelse = it.begrunnelse,
+                )
+            }
         } else {
             null
         }
