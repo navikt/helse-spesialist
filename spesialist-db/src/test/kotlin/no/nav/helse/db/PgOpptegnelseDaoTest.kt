@@ -2,8 +2,8 @@ package no.nav.helse.db
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.DatabaseIntegrationTest
-import no.nav.helse.db.OpptegnelseDao.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE
-import no.nav.helse.db.OpptegnelseDao.OpptegnelseType.UTBETALING_ANNULLERING_OK
+import no.nav.helse.db.OpptegnelseDao.Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE
+import no.nav.helse.db.OpptegnelseDao.Opptegnelse.Type.UTBETALING_ANNULLERING_OK
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.UtbetalingPayload
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -38,12 +38,12 @@ internal class PgOpptegnelseDaoTest : DatabaseIntegrationTest() {
         val alle = opptegnelseRepository.finnOpptegnelser(SAKSBEHANDLER_OID)
         assertEquals(2, alle.size)
 
-        alle.first { it.type == OpptegnelseDao.OpptegnelseType.UTBETALING_ANNULLERING_OK }.also { opptegnelse ->
+        alle.first { it.type == OpptegnelseDao.Opptegnelse.Type.UTBETALING_ANNULLERING_OK }.also { opptegnelse ->
             assertEquals(AKTØR, opptegnelse.aktorId)
             assertJson(UTBETALING_PAYLOAD, opptegnelse.payload)
         }
 
-        alle.first { it.type == OpptegnelseDao.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE }.also { opptegnelse ->
+        alle.first { it.type == OpptegnelseDao.Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE }.also { opptegnelse ->
             assertEquals(AKTØR, opptegnelse.aktorId)
             assertJson(GODKJENNINGSBEHOV_PAYLOAD, opptegnelse.payload)
         }

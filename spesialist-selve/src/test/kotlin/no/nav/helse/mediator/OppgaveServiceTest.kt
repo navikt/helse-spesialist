@@ -596,7 +596,7 @@ internal class OppgaveServiceTest {
         opptegnelseDao.opprettOpptegnelse(
             eq(fødselsnummer),
             any(),
-            eq(OpptegnelseDao.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE),
+            eq(OpptegnelseDao.Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE),
         )
     }
 

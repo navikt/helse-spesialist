@@ -12,7 +12,7 @@ class PgOpptegnelseDao private constructor(private val queryRunner: QueryRunner)
     override fun opprettOpptegnelse(
         fødselsnummer: String,
         payload: String,
-        type: OpptegnelseDao.OpptegnelseType,
+        type: OpptegnelseDao.Opptegnelse.Type,
     ) {
         asSQL(
             """
@@ -44,7 +44,7 @@ class PgOpptegnelseDao private constructor(private val queryRunner: QueryRunner)
                 payload = row.string("payload"),
                 aktorId = row.long("aktør_id").toString(),
                 sekvensnummer = row.int("sekvensnummer"),
-                type = OpptegnelseDao.OpptegnelseType.valueOf(row.string("type")),
+                type = OpptegnelseDao.Opptegnelse.Type.valueOf(row.string("type")),
             )
         }
 }

@@ -73,16 +73,16 @@ class LagreOppdragCommand(
     }
 
     private fun lagOpptegnelse() {
-        val opptegnelseType: OpptegnelseDao.OpptegnelseType =
+        val opptegnelseType: OpptegnelseDao.Opptegnelse.Type =
             when {
                 type == Utbetalingtype.ANNULLERING && status == UTBETALING_FEILET -> {
-                    OpptegnelseDao.OpptegnelseType.UTBETALING_ANNULLERING_FEILET
+                    OpptegnelseDao.Opptegnelse.Type.UTBETALING_ANNULLERING_FEILET
                 }
                 type == Utbetalingtype.ANNULLERING && status == ANNULLERT -> {
-                    OpptegnelseDao.OpptegnelseType.UTBETALING_ANNULLERING_OK
+                    OpptegnelseDao.Opptegnelse.Type.UTBETALING_ANNULLERING_OK
                 }
                 type == Utbetalingtype.REVURDERING && status in listOf(UTBETALT, GODKJENT_UTEN_UTBETALING, OVERFØRT) -> {
-                    OpptegnelseDao.OpptegnelseType.REVURDERING_FERDIGBEHANDLET
+                    OpptegnelseDao.Opptegnelse.Type.REVURDERING_FERDIGBEHANDLET
                 }
                 else -> return
             }

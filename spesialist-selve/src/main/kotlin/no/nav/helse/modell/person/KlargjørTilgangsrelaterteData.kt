@@ -62,7 +62,7 @@ internal class KlargjørTilgangsrelaterteDataCommand(
                 opptegnelseDao.opprettOpptegnelse(
                     fødselsnummer = fødselsnummer,
                     payload = PersonKlarTilVisning.toJson(),
-                    type = OpptegnelseDao.OpptegnelseType.PERSON_KLAR_TIL_BEHANDLING,
+                    type = OpptegnelseDao.Opptegnelse.Type.PERSON_KLAR_TIL_BEHANDLING,
                 )
             },
             ikkesuspenderendeCommand("ferdigstillKlargjøring") {

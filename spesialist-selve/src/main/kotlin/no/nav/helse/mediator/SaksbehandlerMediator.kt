@@ -429,14 +429,14 @@ class SaksbehandlerMediator(
                 type =
                     opptegnelse.type.let { type ->
                         when (type) {
-                            OpptegnelseDao.OpptegnelseType.UTBETALING_ANNULLERING_FEILET -> Opptegnelsetype.UTBETALING_ANNULLERING_FEILET
-                            OpptegnelseDao.OpptegnelseType.UTBETALING_ANNULLERING_OK -> Opptegnelsetype.UTBETALING_ANNULLERING_OK
-                            OpptegnelseDao.OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV -> Opptegnelsetype.FERDIGBEHANDLET_GODKJENNINGSBEHOV
-                            OpptegnelseDao.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE -> Opptegnelsetype.NY_SAKSBEHANDLEROPPGAVE
-                            OpptegnelseDao.OpptegnelseType.REVURDERING_AVVIST -> Opptegnelsetype.REVURDERING_AVVIST
-                            OpptegnelseDao.OpptegnelseType.REVURDERING_FERDIGBEHANDLET -> Opptegnelsetype.REVURDERING_FERDIGBEHANDLET
-                            OpptegnelseDao.OpptegnelseType.PERSONDATA_OPPDATERT -> Opptegnelsetype.PERSONDATA_OPPDATERT
-                            OpptegnelseDao.OpptegnelseType.PERSON_KLAR_TIL_BEHANDLING -> Opptegnelsetype.PERSON_KLAR_TIL_BEHANDLING
+                            OpptegnelseDao.Opptegnelse.Type.UTBETALING_ANNULLERING_FEILET -> Opptegnelsetype.UTBETALING_ANNULLERING_FEILET
+                            OpptegnelseDao.Opptegnelse.Type.UTBETALING_ANNULLERING_OK -> Opptegnelsetype.UTBETALING_ANNULLERING_OK
+                            OpptegnelseDao.Opptegnelse.Type.FERDIGBEHANDLET_GODKJENNINGSBEHOV -> Opptegnelsetype.FERDIGBEHANDLET_GODKJENNINGSBEHOV
+                            OpptegnelseDao.Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE -> Opptegnelsetype.NY_SAKSBEHANDLEROPPGAVE
+                            OpptegnelseDao.Opptegnelse.Type.REVURDERING_AVVIST -> Opptegnelsetype.REVURDERING_AVVIST
+                            OpptegnelseDao.Opptegnelse.Type.REVURDERING_FERDIGBEHANDLET -> Opptegnelsetype.REVURDERING_FERDIGBEHANDLET
+                            OpptegnelseDao.Opptegnelse.Type.PERSONDATA_OPPDATERT -> Opptegnelsetype.PERSONDATA_OPPDATERT
+                            OpptegnelseDao.Opptegnelse.Type.PERSON_KLAR_TIL_BEHANDLING -> Opptegnelsetype.PERSON_KLAR_TIL_BEHANDLING
                         }
                     },
                 payload = opptegnelse.payload,

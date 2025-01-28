@@ -52,7 +52,7 @@ internal class KlargjørPersonForVisningE2ETest : AbstractE2ETest() {
         håndterEgenansattløsning(fødselsnummer = fødselsnummer)
 
         assertHarTilgangsdata(fødselsnummer)
-        assertOpptegnelse(fødselsnummer, OpptegnelseDao.OpptegnelseType.PERSON_KLAR_TIL_BEHANDLING)
+        assertOpptegnelse(fødselsnummer, OpptegnelseDao.Opptegnelse.Type.PERSON_KLAR_TIL_BEHANDLING)
     }
 
     @Test
@@ -69,11 +69,11 @@ internal class KlargjørPersonForVisningE2ETest : AbstractE2ETest() {
         assertKanVisePersonen(fødselsnummer)
     }
 
-    private fun assertOpptegnelse(fødselsnummer: String, opptegnelseType: OpptegnelseDao.OpptegnelseType) {
+    private fun assertOpptegnelse(fødselsnummer: String, opptegnelseType: OpptegnelseDao.Opptegnelse.Type) {
         val opptegnelser = sessionOf(dataSource).use {
             @Language("PostgreSQL")
             val query = """SELECT type FROM opptegnelse WHERE person_id = (SELECT id FROM person WHERE fødselsnummer = ?)"""
-            it.run(queryOf(query, fødselsnummer).map { row -> enumValueOf<OpptegnelseDao.OpptegnelseType>(row.string("type")) }.asList)
+            it.run(queryOf(query, fødselsnummer).map { row -> enumValueOf<OpptegnelseDao.Opptegnelse.Type>(row.string("type")) }.asList)
         }
 
         assertEquals(1, opptegnelser.size)

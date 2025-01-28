@@ -84,7 +84,7 @@ class GodkjenningMediator(private val opptegnelseDao: OpptegnelseDao) {
         opptegnelseDao.opprettOpptegnelse(
             fødselsnummer = behov.fødselsnummer,
             payload = AutomatiskBehandlingPayload(behov.id, AutomatiskBehandlingUtfall.UTBETALT).toJson(),
-            type = OpptegnelseDao.OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV,
+            type = OpptegnelseDao.Opptegnelse.Type.FERDIGBEHANDLET_GODKJENNINGSBEHOV,
         )
         tellAutomatisering()
         sikkerLogg.info(
@@ -108,7 +108,7 @@ class GodkjenningMediator(private val opptegnelseDao: OpptegnelseDao) {
         opptegnelseDao.opprettOpptegnelse(
             fødselsnummer = behov.fødselsnummer,
             payload = AutomatiskBehandlingPayload(behov.id, AutomatiskBehandlingUtfall.AVVIST).toJson(),
-            type = OpptegnelseDao.OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV,
+            type = OpptegnelseDao.Opptegnelse.Type.FERDIGBEHANDLET_GODKJENNINGSBEHOV,
         )
         begrunnelser.forEach { tellAvvistÅrsak(it) }
         tellAutomatisering()

@@ -51,7 +51,7 @@ internal class OppdaterPersondataCommand(
                 opptegnelseDao.opprettOpptegnelse(
                     fødselsnummer,
                     PersonOppdatertPayload.toJson(),
-                    OpptegnelseDao.OpptegnelseType.PERSONDATA_OPPDATERT,
+                    OpptegnelseDao.Opptegnelse.Type.PERSONDATA_OPPDATERT,
                 )
             },
         )

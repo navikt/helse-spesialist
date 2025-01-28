@@ -227,12 +227,12 @@ internal class GodkjenningMediatorTest {
 
     private fun assertFerdigbehandletGodkjenningsbehovOpptegnelseOpprettet() =
         verify(exactly = 1) {
-            opptegnelseDao.opprettOpptegnelse(eq(fnr), any(), eq(OpptegnelseDao.OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV))
+            opptegnelseDao.opprettOpptegnelse(eq(fnr), any(), eq(OpptegnelseDao.Opptegnelse.Type.FERDIGBEHANDLET_GODKJENNINGSBEHOV))
         }
 
     private fun assertOpptegnelseIkkeOpprettet() =
         verify(exactly = 0) {
-            opptegnelseDao.opprettOpptegnelse(eq(fnr), any(), eq(OpptegnelseDao.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE))
+            opptegnelseDao.opprettOpptegnelse(eq(fnr), any(), eq(OpptegnelseDao.Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE))
         }
 
     private companion object {

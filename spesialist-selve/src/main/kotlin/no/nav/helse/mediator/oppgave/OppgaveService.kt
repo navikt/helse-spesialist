@@ -389,7 +389,7 @@ class OppgaveService(
         opptegnelseDao.opprettOpptegnelse(
             oppgaveDao.finnFødselsnummer(id),
             GodkjenningsbehovPayload(godkjenningsbehovId).toJson(),
-            OpptegnelseDao.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE,
+            OpptegnelseDao.Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE,
         )
     }
 
