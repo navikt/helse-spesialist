@@ -27,47 +27,6 @@ class VedtakMutation(
     }
 
     @Suppress("unused")
-    suspend fun innvilgVedtak(
-        oppgavereferanse: String,
-        env: DataFetchingEnvironment,
-        avslag: Avslag?,
-    ): DataFetcherResult<Boolean> =
-        withContext(Dispatchers.IO) {
-            val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
-            logg.info("Fatter vedtak for oppgave $oppgavereferanse")
-
-            val resultat =
-                saksbehandlerhåndterer.vedtak(
-                    saksbehandlerFraApi = saksbehandler,
-                    oppgavereferanse = oppgavereferanse.toLong(),
-                    godkjent = true,
-                    avslag = avslag,
-                )
-            when (resultat) {
-                is VedtakResultat.Ok -> {
-                    val dto =
-                        GodkjenningDto(
-                            oppgavereferanse = oppgavereferanse.toLong(),
-                            godkjent = true,
-                            saksbehandlerIdent = saksbehandler.ident,
-                            årsak = null,
-                            begrunnelser = null,
-                            kommentar = null,
-                            avslag = avslag,
-                        )
-                    godkjenninghåndterer.håndter(dto, saksbehandler.epost, saksbehandler.oid)
-                    newResult<Boolean>().data(true).build()
-                }
-
-                is VedtakResultat.Feil -> {
-                    logg.warn("Kunne ikke innvilge vedtak: ${resultat.melding}")
-                    newResult<Boolean>().error(vedtakGraphQLError(resultat.melding, resultat.code, resultat.exception))
-                        .data(false).build()
-                }
-            }
-        }
-
-    @Suppress("unused")
     suspend fun fattVedtak(
         oppgavereferanse: String,
         env: DataFetchingEnvironment,

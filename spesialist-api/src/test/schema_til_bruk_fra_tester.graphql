@@ -26,6 +26,7 @@ interface Overstyring {
     hendelseId: UUID!
     saksbehandler: Saksbehandler!
     timestamp: LocalDateTime!
+    vedtaksperiodeId: UUID!
 }
 
 interface Periode {
@@ -96,6 +97,7 @@ type Arbeidsforholdoverstyring implements Overstyring {
     saksbehandler: Saksbehandler!
     skjaeringstidspunkt: LocalDate!
     timestamp: LocalDateTime!
+    vedtaksperiodeId: UUID!
 }
 
 type Arbeidsgiver {
@@ -230,6 +232,7 @@ type Dagoverstyring implements Overstyring {
     hendelseId: UUID!
     saksbehandler: Saksbehandler!
     timestamp: LocalDateTime!
+    vedtaksperiodeId: UUID!
 }
 
 type DokumentInntektsmelding {
@@ -352,6 +355,7 @@ type Inntektoverstyring implements Overstyring {
     inntekt: OverstyrtInntekt!
     saksbehandler: Saksbehandler!
     timestamp: LocalDateTime!
+    vedtaksperiodeId: UUID!
 }
 
 type Inntektsmelding implements Hendelse {
@@ -393,6 +397,7 @@ type MinimumSykdomsgradOverstyring implements Overstyring {
     minimumSykdomsgrad: OverstyrtMinimumSykdomsgrad!
     saksbehandler: Saksbehandler!
     timestamp: LocalDateTime!
+    vedtaksperiodeId: UUID!
 }
 
 type Mutation {
@@ -404,7 +409,6 @@ type Mutation {
     feilregistrerNotat(id: Int!): Notat
     fjernPaVent(oppgaveId: String!): Boolean
     fjernTildeling(oppgaveId: String!): Boolean!
-    innvilgVedtak(avslag: AvslagInput, oppgavereferanse: String!): Boolean!
     leggPaVent(arsaker: [PaVentArsakInput!], frist: LocalDate!, notatTekst: String, oppgaveId: String!, tildeling: Boolean!): PaVent
     leggTilKommentar(dialogRef: Int!, saksbehandlerident: String!, tekst: String!): Kommentar
     leggTilNotat(saksbehandlerOid: String!, tekst: String!, type: NotatType!, vedtaksperiodeId: String!): Notat
@@ -417,10 +421,9 @@ type Mutation {
     overstyrDager(overstyring: TidslinjeOverstyringInput!): Boolean!
     overstyrInntektOgRefusjon(overstyring: InntektOgRefusjonOverstyringInput!): Boolean!
     sendIRetur(notatTekst: String!, oppgavereferanse: String!): Boolean!
-    sendTilGodkjenning(avslag: AvslagInput, oppgavereferanse: String!): Boolean!
     sendTilGodkjenningV2(oppgavereferanse: String!, vedtakBegrunnelse: String, vedtakUtfall: VedtakUtfall!): Boolean!
     sendTilInfotrygd(arsak: String!, begrunnelser: [String!]!, kommentar: String, oppgavereferanse: String!): Boolean!
-    settVarselstatus(definisjonIdString: String, generasjonIdString: String!, ident: String!, varselkode: String!): VarselDTO!
+    settVarselstatus(definisjonIdString: String, generasjonIdString: String!, ident: String!, varselkode: String!): VarselDTO
     skjonnsfastsettSykepengegrunnlag(skjonnsfastsettelse: SkjonnsfastsettelseInput!): Boolean!
 }
 
@@ -521,7 +524,7 @@ type OverstyrtInntekt {
 
 type OverstyrtMinimumSykdomsgrad {
     begrunnelse: String!
-    initierendeVedtaksperiodeId: UUID!
+    initierendeVedtaksperiodeId: UUID! @deprecated(reason: "Bruk vedtaksperiodeId i stedet")
     perioderVurdertIkkeOk: [OverstyrtMinimumSykdomsgradPeriode!]!
     perioderVurdertOk: [OverstyrtMinimumSykdomsgradPeriode!]!
 }
@@ -596,7 +599,7 @@ type Query {
     behandledeOppgaverFeed(limit: Int!, offset: Int!): BehandledeOppgaver!
     behandlingsstatistikk: Behandlingsstatistikk!
     hentInntektsmelding(dokumentId: String!, fnr: String!): DokumentInntektsmelding
-    hentSoknad(dokumentId: String!, fnr: String!): Soknad!
+    hentSoknad(dokumentId: String!, fnr: String!): Soknad
     oppgaveFeed(filtrering: FiltreringInput!, limit: Int!, offset: Int!, sortering: [OppgavesorteringInput!]!): OppgaverTilBehandling!
     opptegnelser(sekvensId: Int): [Opptegnelse!]!
     person(aktorId: String, fnr: String): Person
@@ -798,6 +801,7 @@ type Sykepengegrunnlagskjonnsfastsetting implements Overstyring {
     saksbehandler: Saksbehandler!
     skjonnsfastsatt: SkjonnsfastsattSykepengegrunnlag!
     timestamp: LocalDateTime!
+    vedtaksperiodeId: UUID!
 }
 
 type Sykmelding implements Hendelse {
@@ -954,11 +958,6 @@ enum Adressebeskyttelse {
 enum AntallArbeidsforhold {
     ET_ARBEIDSFORHOLD
     FLERE_ARBEIDSFORHOLD
-}
-
-enum Avslagshandling {
-    INVALIDER
-    OPPRETT
 }
 
 enum Avslagstype {
@@ -1371,16 +1370,6 @@ input ArbeidsforholdOverstyringHandlingInput {
 input ArbeidsgiverInput {
     berortVedtaksperiodeId: UUID!
     organisasjonsnummer: String!
-}
-
-input AvslagInput {
-    data: AvslagsdataInput
-    handling: Avslagshandling!
-}
-
-input AvslagsdataInput {
-    begrunnelse: String!
-    type: Avslagstype!
 }
 
 input FiltreringInput {
