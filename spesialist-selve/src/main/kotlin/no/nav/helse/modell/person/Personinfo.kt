@@ -1,7 +1,6 @@
 package no.nav.helse.modell.person
 
 import no.nav.helse.db.PersonDao
-import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
 

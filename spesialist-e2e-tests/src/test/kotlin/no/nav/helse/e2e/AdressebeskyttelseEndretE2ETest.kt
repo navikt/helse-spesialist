@@ -1,8 +1,6 @@
 package no.nav.helse.e2e
 
-import no.nav.helse.spesialist.api.person.Adressebeskyttelse.Fortrolig
-import no.nav.helse.spesialist.api.person.Adressebeskyttelse.StrengtFortrolig
-import no.nav.helse.spesialist.api.person.Adressebeskyttelse.StrengtFortroligUtland
+import no.nav.helse.modell.person.Adressebeskyttelse
 import org.junit.jupiter.api.Test
 
 internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
@@ -14,8 +12,8 @@ internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
         assertSisteEtterspurteBehov("HentPersoninfoV2")
 
         assertAdressebeskyttelse(adressebeskyttelse = null)
-        håndterPersoninfoløsning(adressebeskyttelse = Fortrolig)
-        assertAdressebeskyttelse(adressebeskyttelse = Fortrolig)
+        håndterPersoninfoløsning(adressebeskyttelse = Adressebeskyttelse.Fortrolig)
+        assertAdressebeskyttelse(adressebeskyttelse = Adressebeskyttelse.Fortrolig)
     }
 
     @Test
@@ -44,7 +42,7 @@ internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
 
         håndterAdressebeskyttelseEndret()
         assertSisteEtterspurteBehov("HentPersoninfoV2")
-        håndterPersoninfoløsning(adressebeskyttelse = StrengtFortrolig)
+        håndterPersoninfoløsning(adressebeskyttelse = Adressebeskyttelse.StrengtFortrolig)
         assertIkkeUtgåendeMelding("vedtaksperiode_avvist")
     }
 
@@ -56,7 +54,7 @@ internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
         håndterAdressebeskyttelseEndret()
         assertSisteEtterspurteBehov("HentPersoninfoV2")
 
-        håndterPersoninfoløsning(adressebeskyttelse = StrengtFortrolig)
+        håndterPersoninfoløsning(adressebeskyttelse = Adressebeskyttelse.StrengtFortrolig)
         assertUtgåendeMelding("vedtaksperiode_avvist")
     }
 
@@ -68,7 +66,7 @@ internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
         håndterAdressebeskyttelseEndret()
         assertSisteEtterspurteBehov("HentPersoninfoV2")
 
-        håndterPersoninfoløsning(adressebeskyttelse = StrengtFortroligUtland)
+        håndterPersoninfoløsning(adressebeskyttelse = Adressebeskyttelse.StrengtFortroligUtland)
         assertUtgåendeMelding("vedtaksperiode_avvist")
     }
 
@@ -80,7 +78,7 @@ internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
         håndterAdressebeskyttelseEndret()
         assertSisteEtterspurteBehov("HentPersoninfoV2")
 
-        håndterPersoninfoløsning(adressebeskyttelse = Fortrolig)
+        håndterPersoninfoløsning(adressebeskyttelse = Adressebeskyttelse.Fortrolig)
         assertIkkeUtgåendeMelding("vedtaksperiode_avvist")
     }
 }

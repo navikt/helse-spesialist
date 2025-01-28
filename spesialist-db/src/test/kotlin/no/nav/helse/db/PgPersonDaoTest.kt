@@ -7,7 +7,7 @@ import kotliquery.sessionOf
 import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.kommando.MinimalPersonDto
-import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse

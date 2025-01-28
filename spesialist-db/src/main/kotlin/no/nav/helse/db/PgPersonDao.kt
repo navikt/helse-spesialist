@@ -6,9 +6,9 @@ import kotliquery.Session
 import no.nav.helse.db.HelseDao.Companion.asSQL
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.kommando.MinimalPersonDto
+import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.PersonDto
 import no.nav.helse.objectMapper
-import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
 import java.time.LocalDateTime

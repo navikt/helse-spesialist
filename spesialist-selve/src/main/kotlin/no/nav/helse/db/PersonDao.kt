@@ -3,8 +3,8 @@ package no.nav.helse.db
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.kommando.MinimalPersonDto
+import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.PersonDto
-import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
 

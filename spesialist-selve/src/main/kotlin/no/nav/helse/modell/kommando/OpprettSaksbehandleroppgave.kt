@@ -35,6 +35,9 @@ import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.oppgave.Egenskap.UTLAND
 import no.nav.helse.modell.oppgave.Egenskap.VERGEMÅL
+import no.nav.helse.modell.person.Adressebeskyttelse.Fortrolig
+import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortrolig
+import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortroligUtland
 import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
@@ -42,7 +45,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import java.util.UUID
 
 internal class OpprettSaksbehandleroppgave(
@@ -108,11 +110,10 @@ internal class OpprettSaksbehandleroppgave(
 
     private fun MutableSet<Egenskap>.adressebeskyttelse(fødselsnummer: String) {
         when (personDao.finnAdressebeskyttelse(fødselsnummer)) {
-            Adressebeskyttelse.StrengtFortrolig,
-            Adressebeskyttelse.StrengtFortroligUtland,
+            StrengtFortrolig,
+            StrengtFortroligUtland,
             -> add(STRENGT_FORTROLIG_ADRESSE)
-
-            Adressebeskyttelse.Fortrolig -> add(FORTROLIG_ADRESSE)
+            Fortrolig -> add(FORTROLIG_ADRESSE)
             else -> Unit
         }
     }

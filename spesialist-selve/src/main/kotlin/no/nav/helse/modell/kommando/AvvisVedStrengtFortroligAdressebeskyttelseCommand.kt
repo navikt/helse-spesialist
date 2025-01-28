@@ -3,10 +3,10 @@ package no.nav.helse.modell.kommando
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.mediator.GodkjenningMediator
+import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortrolig
+import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortroligUtland
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
-import no.nav.helse.spesialist.api.person.Adressebeskyttelse.StrengtFortrolig
-import no.nav.helse.spesialist.api.person.Adressebeskyttelse.StrengtFortroligUtland
 
 internal class AvvisVedStrengtFortroligAdressebeskyttelseCommand(
     private val personDao: PersonDao,
