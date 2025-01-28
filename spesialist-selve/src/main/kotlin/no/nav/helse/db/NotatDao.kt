@@ -1,6 +1,6 @@
 package no.nav.helse.db
 
-import no.nav.helse.spesialist.api.graphql.schema.NotatType
+import no.nav.helse.modell.NotatType
 import java.util.UUID
 
 interface NotatDao {
