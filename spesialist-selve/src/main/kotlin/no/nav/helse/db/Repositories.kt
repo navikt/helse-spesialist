@@ -3,7 +3,6 @@ package no.nav.helse.db
 import no.nav.helse.db.api.AbonnementApiDao
 import no.nav.helse.db.api.ArbeidsgiverApiDao
 import no.nav.helse.db.api.EgenAnsattApiDao
-import no.nav.helse.db.api.GenerasjonApiDao
 import no.nav.helse.db.api.GenerasjonApiRepository
 import no.nav.helse.db.api.NotatApiDao
 import no.nav.helse.db.api.OppgaveApiDao
@@ -51,7 +50,6 @@ interface Repositories {
     val abonnementApiDao: AbonnementApiDao
     val arbeidsgiverApiDao: ArbeidsgiverApiDao
     val egenAnsattApiDao: EgenAnsattApiDao
-    val generasjonApiDao: GenerasjonApiDao
     val generasjonApiRepository: GenerasjonApiRepository
     val notatApiDao: NotatApiDao
     val oppgaveApiDao: OppgaveApiDao

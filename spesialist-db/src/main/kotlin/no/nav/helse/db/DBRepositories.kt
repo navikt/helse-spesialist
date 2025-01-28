@@ -3,7 +3,6 @@ package no.nav.helse.db
 import no.nav.helse.db.api.PgAbonnementApiDao
 import no.nav.helse.db.api.PgArbeidsgiverApiDao
 import no.nav.helse.db.api.PgEgenAnsattApiDao
-import no.nav.helse.db.api.PgGenerasjonApiDao
 import no.nav.helse.db.api.PgGenerasjonApiRepository
 import no.nav.helse.db.api.PgNotatApiDao
 import no.nav.helse.db.api.PgOppgaveApiDao
@@ -52,7 +51,6 @@ class DBRepositories(dataSource: DataSource) : Repositories {
     override val abonnementApiDao = PgAbonnementApiDao(dataSource)
     override val arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource)
     override val egenAnsattApiDao = PgEgenAnsattApiDao(dataSource)
-    override val generasjonApiDao = PgGenerasjonApiDao(dataSource)
     override val generasjonApiRepository = PgGenerasjonApiRepository(dataSource)
     override val notatApiDao = PgNotatApiDao(dataSource)
     override val oppgaveApiDao = PgOppgaveApiDao(dataSource)

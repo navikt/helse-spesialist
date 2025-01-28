@@ -9,8 +9,8 @@ import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgGenerasjonApiDao internal constructor(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource), GenerasjonApiDao {
-    override fun gjeldendeGenerasjonFor(oppgaveId: Long): Vedtaksperiode =
+class PgGenerasjonApiDao internal constructor(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource) {
+    fun gjeldendeGenerasjonFor(oppgaveId: Long): Vedtaksperiode =
         asSQL(
             """
             SELECT b.vedtaksperiode_id, b.fom, b.tom, b.skjæringstidspunkt
@@ -23,7 +23,7 @@ class PgGenerasjonApiDao internal constructor(dataSource: DataSource) : QueryRun
             "oppgave_id" to oppgaveId,
         ).single { it.tilVedtaksperiode() }
 
-    override fun gjeldendeGenerasjonerForPerson(oppgaveId: Long): Set<Vedtaksperiode> =
+    fun gjeldendeGenerasjonerForPerson(oppgaveId: Long): Set<Vedtaksperiode> =
         asSQL(
             """
             SELECT DISTINCT ON (b.vedtaksperiode_id) b.vedtaksperiode_id, b.fom, b.tom, b.skjæringstidspunkt 
@@ -38,7 +38,7 @@ class PgGenerasjonApiDao internal constructor(dataSource: DataSource) : QueryRun
             "oppgave_id" to oppgaveId,
         ).list { it.tilVedtaksperiode() }.toSet()
 
-    override fun gjeldendeGenerasjonFor(
+    fun gjeldendeGenerasjonFor(
         oppgaveId: Long,
         varselGetter: (generasjonId: UUID) -> Set<Varsel>,
     ): Vedtaksperiode =
@@ -54,7 +54,7 @@ class PgGenerasjonApiDao internal constructor(dataSource: DataSource) : QueryRun
             "oppgave_id" to oppgaveId,
         ).single { it.tilVedtaksperiode(varselGetter) }
 
-    override fun gjeldendeGenerasjonerForPerson(
+    fun gjeldendeGenerasjonerForPerson(
         oppgaveId: Long,
         varselGetter: (generasjonId: UUID) -> Set<Varsel>,
     ): Set<Vedtaksperiode> =
