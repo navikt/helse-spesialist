@@ -1,6 +1,7 @@
 package no.nav.helse
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
+import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.DBRepositories
 import no.nav.helse.db.TransactionalSessionFactory
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
@@ -28,6 +29,11 @@ internal class TestMediator(
     testRapid: TestRapid,
     dataSource: DataSource,
 ) {
+    private val environment = object : Environment, Map<String, String> by emptyMap() {
+        override val erLokal = false
+        override val erDev = false
+        override val erProd = false
+    }
     private val repositories = DBRepositories(dataSource)
     private val opptegnelseDao = repositories.opptegnelseDao
     private val oppgaveDao = repositories.oppgaveDao
@@ -82,7 +88,9 @@ internal class TestMediator(
                     dialogDao = dialogDao,
                 ),
             annulleringRepository = annulleringRepository,
+            env = environment
         )
+
     private val stikkprøver =
         object : Stikkprøver {
             override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
@@ -124,6 +132,7 @@ internal class TestMediator(
                 definisjonDao = repositories.definisjonDao
             ),
             poisonPills = PoisonPills(emptyMap()),
+            env = environment,
         )
         RiverSetup(testRapid, meldingMediator, repositories.meldingDuplikatkontrollDao).setUp()
     }

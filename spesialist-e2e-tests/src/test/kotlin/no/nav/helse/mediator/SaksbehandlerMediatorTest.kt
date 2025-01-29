@@ -99,6 +99,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
                 dialogDao = dialogDao,
             ),
             annulleringRepository = annulleringRepository,
+            env = environment,
         )
 
     private val AKTØR_ID = lagAktørId()

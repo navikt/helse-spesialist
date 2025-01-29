@@ -40,6 +40,7 @@ internal class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
                 definisjonDao = repositories.definisjonDao
             ),
             poisonPills = PoisonPills(emptyMap()),
+            env = environment,
         )
     }
 

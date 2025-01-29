@@ -182,6 +182,7 @@ class SpesialistApp(
                         definisjonDao = repositories.definisjonDao,
                     ),
                 poisonPills = repositories.poisonPillDao.poisonPills(),
+                env = env,
             )
         RiverSetup(rapidsConnection, meldingMediator, repositories.meldingDuplikatkontrollDao).setUp()
         saksbehandlerMediator =
@@ -194,6 +195,7 @@ class SpesialistApp(
                 stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
                 totrinnsvurderingService = totrinnsvurderingService,
                 annulleringRepository = repositories.annulleringRepository,
+                env = env,
             )
         dokumentMediator = DokumentMediator(dokumentDao, meldingPubliserer)
         godkjenningService =

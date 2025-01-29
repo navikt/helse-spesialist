@@ -11,6 +11,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.api.ArbeidsgiverApiDao
 import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.NotatApiDao
@@ -70,6 +71,7 @@ fun Application.graphQLApi(
     personhåndterer: Personhåndterer,
     dokumenthåndterer: Dokumenthåndterer,
     stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
+    env: Environment,
 ) {
     val schemaBuilder =
         SchemaBuilder(
@@ -97,6 +99,7 @@ fun Application.graphQLApi(
             personhåndterer = personhåndterer,
             dokumenthåndterer = dokumenthåndterer,
             stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
+            env = env,
         )
 
     val graphQL =

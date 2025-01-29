@@ -7,7 +7,7 @@ import io.ktor.server.auth.authenticate
 import io.ktor.server.routing.Route
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
-import no.nav.helse.bootstrap.Environment
+import no.nav.helse.bootstrap.EnvironmentImpl
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.JwtStub
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
@@ -33,7 +33,7 @@ internal class ApiTesting(
                 tokenEndpoint = "",
             )
         application {
-            azureAdAppAuthentication(azureConfig, Environment())
+            azureAdAppAuthentication(azureConfig, EnvironmentImpl())
         }
         applicationBuilder(this)
         routing {

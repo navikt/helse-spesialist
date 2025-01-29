@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.DBRepositories
 import org.flywaydb.core.Flyway
 import org.intellij.lang.annotations.Language
@@ -12,7 +13,11 @@ import java.util.UUID
 import javax.sql.DataSource
 
 abstract class AbstractDatabaseTest {
-
+    protected val environment: Environment = object : Environment, Map<String, String> by emptyMap() {
+        override val erLokal = false
+        override val erDev = false
+        override val erProd = false
+    }
     protected val repositories = DBRepositories(dataSource)
 
     companion object {

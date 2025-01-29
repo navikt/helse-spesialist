@@ -102,6 +102,7 @@ class SaksbehandlerMediator(
     private val stansAutomatiskBehandlingMediator: StansAutomatiskBehandlingMediator,
     private val totrinnsvurderingService: TotrinnsvurderingService,
     private val annulleringRepository: AnnulleringRepository,
+    private val env: Environment,
 ) : Saksbehandlerhåndterer {
     private val saksbehandlerDao = repositories.saksbehandlerDao
     private val generasjonRepository = repositories.generasjonApiRepository
@@ -115,7 +116,6 @@ class SaksbehandlerMediator(
     private val periodehistorikkDao = repositories.periodehistorikkDao
     private val vedtakBegrunnelseDao = repositories.vedtakBegrunnelseDao
     private val dialogDao = repositories.dialogDao
-    private val env = Environment()
 
     override fun håndter(
         handlingFraApi: HandlingFraApi,

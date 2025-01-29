@@ -337,6 +337,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                     override fun klargjørPersonForVisning(fødselsnummer: String) {}
                 },
                 stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
+                env = environment,
             ),
         )
 }

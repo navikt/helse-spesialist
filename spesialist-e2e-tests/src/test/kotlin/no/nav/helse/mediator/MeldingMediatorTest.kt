@@ -40,6 +40,7 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
                 definisjonDao = repositories.definisjonDao
             ),
             poisonPills = PoisonPills(emptyMap()),
+            env = environment,
         )
 
     @BeforeEach

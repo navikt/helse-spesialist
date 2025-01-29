@@ -181,6 +181,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
                     override fun klargjørPersonForVisning(fødselsnummer: String) {}
                 },
                 stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
+                env = environment,
             ),
         )
 

@@ -34,9 +34,9 @@ class MeldingMediator(
     private val dokumentDao: DokumentDao,
     private val varselRepository: VarselRepository,
     private val poisonPills: PoisonPills,
+    private val env: Environment,
 ) : Personhåndterer {
     private companion object {
-        private val env = Environment()
         private val logg = LoggerFactory.getLogger(MeldingMediator::class.java)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }

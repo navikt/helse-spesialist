@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.graphql
 
+import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.api.ArbeidsgiverApiDao
 import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.NotatApiDao
@@ -69,6 +70,7 @@ class SchemaBuilder(
     personhåndterer: Personhåndterer,
     dokumenthåndterer: Dokumenthåndterer,
     stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
+    env: Environment,
 ) {
     val queries =
         listOf(
@@ -95,6 +97,7 @@ class SchemaBuilder(
                         avviksvurderinghenter = avviksvurderinghenter,
                         personhåndterer = personhåndterer,
                         stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
+                        env = env,
                     ),
             ),
             OppgaverQuery(

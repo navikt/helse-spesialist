@@ -68,12 +68,11 @@ class PersonService(
     private val personhåndterer: Personhåndterer,
     private val snapshotService: SnapshotService,
     private val reservasjonClient: ReservasjonClient,
+    private val env: Environment,
 ) : PersonoppslagService {
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
-
-    private val env = Environment()
 
     override fun finnesPersonMedFødselsnummer(fødselsnummer: String): Boolean {
         return personApiDao.finnesPersonMedFødselsnummer(fødselsnummer)

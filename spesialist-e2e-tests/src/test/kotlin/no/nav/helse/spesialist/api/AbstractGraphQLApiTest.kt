@@ -101,6 +101,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
             personhåndterer = personhåndterer,
             dokumenthåndterer = dokumenthåndterer,
             stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
+            env = environment,
         )
 
         install(GraphQL) {

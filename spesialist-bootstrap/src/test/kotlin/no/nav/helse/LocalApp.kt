@@ -20,7 +20,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
-import no.nav.helse.bootstrap.Environment
+import no.nav.helse.bootstrap.EnvironmentImpl
 import no.nav.helse.rapids_rivers.RapidApplication.Builder
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
@@ -82,7 +82,7 @@ object LocalApp {
 
     private val spesialistApp =
         SpesialistApp(
-            env = Environment(database.envvars + mapOf("LOKAL_UTVIKLING" to "true")),
+            env = EnvironmentImpl(database.envvars + mapOf("LOKAL_UTVIKLING" to "true")),
             gruppekontroll = gruppekontroll,
             snapshotClient = snapshotClient,
             azureConfig = azureConfig,
