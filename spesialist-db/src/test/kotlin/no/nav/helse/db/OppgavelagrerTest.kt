@@ -25,10 +25,6 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
     private val VEDTAKSPERIODE_ID = UUID.randomUUID()
     private val BEHANDLING_ID = UUID.randomUUID()
     override val UTBETALING_ID: UUID = UUID.randomUUID()
-    override val SAKSBEHANDLER_IDENT = "Z999999"
-    override val SAKSBEHANDLER_EPOST = "saksbehandler@nav.no"
-    override val SAKSBEHANDLER_NAVN = "Hen Saksbehandler"
-    override val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()
     private val BESLUTTER_OID = UUID.randomUUID()
     override var OPPGAVE_ID = Random.nextLong()
     private val saksbehandler =

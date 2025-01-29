@@ -1,21 +1,20 @@
 package no.nav.helse.db.api
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.spesialist.api.DatabaseIntegrationTest
+import no.nav.helse.DatabaseIntegrationTest
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import java.util.UUID
 
-internal class PgRisikovurderingApiDaoTest: DatabaseIntegrationTest() {
+internal class PgRisikovurderingApiDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `finner risikovurdering`() {
-        risikovurdering()
-        val risikovurdering = requireNotNull(risikovurderingApiDao.finnRisikovurderinger(FØDSELSNUMMER)[PERIODE.id])
+        risikovurdering(riskrespons)
+        val risikovurdering = requireNotNull(risikovurderingApiDao.finnRisikovurderinger(FNR)[PERIODE.id])
         assertEquals(1, risikovurdering.funn.size)
         assertEquals(1, risikovurdering.kontrollertOk.size)
         assertEquals("En beskrivelse", risikovurdering.funn.first()["beskrivelse"].asText())
@@ -39,9 +38,11 @@ internal class PgRisikovurderingApiDaoTest: DatabaseIntegrationTest() {
             }
         """
         risikovurdering(data = data)
-        val risikovurdering = requireNotNull(risikovurderingApiDao.finnRisikovurderinger(FØDSELSNUMMER)[PERIODE.id])
+        val risikovurdering = requireNotNull(risikovurderingApiDao.finnRisikovurderinger(FNR)[PERIODE.id])
         risikovurdering.also { dto ->
-            assertEquals(listOf("Eierandel i selskap (0 prosent)"), dto.kontrollertOk.map { it["beskrivelse"].asText() })
+            assertEquals(
+                listOf("Eierandel i selskap (0 prosent)"),
+                dto.kontrollertOk.map { it["beskrivelse"].asText() })
             assertEquals(listOf("REL"), dto.kontrollertOk.flatMap { it["kategori"].map(JsonNode::asText) })
 
             assertEquals(listOf("Liten bedrift (2 ansatte)"), dto.funn.map { it["beskrivelse"].asText() })
@@ -51,21 +52,20 @@ internal class PgRisikovurderingApiDaoTest: DatabaseIntegrationTest() {
 
     @Test
     fun `leser manglende risikovurdering`() {
-        assertNull(risikovurderingApiDao.finnRisikovurderinger(FØDSELSNUMMER)[PERIODE.id])
+        assertNull(risikovurderingApiDao.finnRisikovurderinger(FNR)[PERIODE.id])
     }
 
-    private fun risikovurdering(vedtaksperiodeId: UUID = PERIODE.id, data: String = riskrespons) {
-        opprettVedtak(
-            opprettPerson(),
-            opprettArbeidsgiver(),
-            periode = Periode(vedtaksperiodeId, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31))
-        )
+    private fun risikovurdering(data: String) {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+
         dbQuery.update(
             """
             INSERT INTO risikovurdering_2021 (vedtaksperiode_id, kan_godkjennes_automatisk, data)
             VALUES (:vedtaksperiodeId, true, :data::json)
             """.trimIndent(),
-            "vedtaksperiodeId" to vedtaksperiodeId,
+            "vedtaksperiodeId" to PERIODE.id,
             "data" to data
         )
     }

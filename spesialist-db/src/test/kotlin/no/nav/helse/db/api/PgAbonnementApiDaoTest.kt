@@ -1,6 +1,6 @@
 package no.nav.helse.db.api
 
-import no.nav.helse.spesialist.api.DatabaseIntegrationTest
+import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -12,15 +12,13 @@ import java.util.UUID
 @Isolated
 internal class PgAbonnementApiDaoTest : DatabaseIntegrationTest() {
 
-    private val abonnementDao = PgAbonnementApiDao(dataSource)
-
     @Test
     fun `får nytt sekvensnummer selvom det allerede fins et`() {
         val saksbehandlerId = opprettSaksbehandler()
         settSekvensnummer(saksbehandlerId, 42)
 
         val aktørId = lagAktørId()
-        val personId = opprettPerson(aktørId = aktørId)
+        val (personId) = opprettPerson(aktørId = aktørId)
         lagOpptegnelse(personId, 962)
 
         abonnementDao.opprettAbonnement(saksbehandlerId, aktørId)
@@ -33,11 +31,11 @@ internal class PgAbonnementApiDaoTest : DatabaseIntegrationTest() {
         val saksbehandlerId = opprettSaksbehandler()
         val sekvensnummerForEnUrelatertPerson = 4095
         val endaEtSekvensnummerForEnUrelatertPerson = 4096
-        val personId = opprettPerson()
+        val (personId) = opprettPerson()
         lagOpptegnelse(personId, sekvensnummerForEnUrelatertPerson)
         lagOpptegnelse(personId, endaEtSekvensnummerForEnUrelatertPerson)
 
-        abonnementDao.opprettAbonnement(saksbehandlerId, AKTØRID)
+        abonnementDao.opprettAbonnement(saksbehandlerId, AKTØR)
 
         assertEquals(endaEtSekvensnummerForEnUrelatertPerson, finnSekvensnummer(saksbehandlerId))
     }

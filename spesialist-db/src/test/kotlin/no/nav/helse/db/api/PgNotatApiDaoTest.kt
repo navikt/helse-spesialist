@@ -1,6 +1,6 @@
 package no.nav.helse.db.api
 
-import no.nav.helse.spesialist.api.DatabaseIntegrationTest
+import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -11,27 +11,29 @@ internal class PgNotatApiDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `notater defaulter til type Generelt`() {
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
         val oid = opprettSaksbehandler()
-        val vedtaksperiodeId = PERIODE.id
 
-        notatDao.opprettNotat(vedtaksperiodeId, "tekst", oid)
+        notatApiDao.opprettNotat(VEDTAKSPERIODE, "tekst", oid)
 
-        val notater = notatDao.finnNotater(vedtaksperiodeId)
+        val notater = notatApiDao.finnNotater(VEDTAKSPERIODE)
 
         assertEquals(NotatType.Generelt, notater[0].type)
     }
 
     @Test
     fun `lagre notat`() {
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
         val oid = opprettSaksbehandler()
-        val vedtaksperiodeId = PERIODE.id
 
         val tekst = "tekst"
-        val notatDto = notatDao.opprettNotat(vedtaksperiodeId, tekst, oid)
+        val notatDto = notatApiDao.opprettNotat(VEDTAKSPERIODE, tekst, oid)
         assertEquals(tekst, notatDto?.tekst)
-        assertEquals(vedtaksperiodeId, notatDto?.vedtaksperiodeId)
+        assertEquals(VEDTAKSPERIODE, notatDto?.vedtaksperiodeId)
         assertEquals(oid, notatDto?.saksbehandlerOid)
         assertEquals(SAKSBEHANDLER.epost, notatDto?.saksbehandlerEpost)
         assertEquals(SAKSBEHANDLER.navn, notatDto?.saksbehandlerNavn)
@@ -41,30 +43,32 @@ internal class PgNotatApiDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `lagre kommentar`() {
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
         val oid = opprettSaksbehandler()
-        val vedtaksperiodeId = PERIODE.id
 
         val tekst = "tekst"
-        val notatDto = notatDao.opprettNotat(vedtaksperiodeId, tekst, oid)
+        val notatDto = notatApiDao.opprettNotat(VEDTAKSPERIODE, tekst, oid)
         checkNotNull(notatDto)
-        val kommentarDto = notatDao.leggTilKommentar(notatDto.dialogRef, tekst, SAKSBEHANDLER.ident)
+        val kommentarDto = notatApiDao.leggTilKommentar(notatDto.dialogRef, tekst, SAKSBEHANDLER.ident)
         assertEquals(tekst, kommentarDto?.tekst)
     }
 
     @Test
     fun `feilregistrer notat`() {
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
         val oid = opprettSaksbehandler()
-        val vedtaksperiodeId = PERIODE.id
 
-        notatDao.opprettNotat(vedtaksperiodeId, "tekst", oid)
-        val notater = notatDao.finnNotater(vedtaksperiodeId)
+        notatApiDao.opprettNotat(VEDTAKSPERIODE, "tekst", oid)
+        val notater = notatApiDao.finnNotater(VEDTAKSPERIODE)
 
         val notatId = notater[0].id
-        notatDao.feilregistrerNotat(notatId)
+        notatApiDao.feilregistrerNotat(notatId)
 
-        val feilregistrerteNotater = notatDao.finnNotater(vedtaksperiodeId)
+        val feilregistrerteNotater = notatApiDao.finnNotater(VEDTAKSPERIODE)
 
         assertTrue(feilregistrerteNotater[0].feilregistrert)
         assertNotNull(feilregistrerteNotater[0].feilregistrert_tidspunkt)

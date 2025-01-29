@@ -1,8 +1,12 @@
 package no.nav.helse.db.api
 
-import no.nav.helse.spesialist.api.DatabaseIntegrationTest
-import no.nav.helse.spesialist.api.person.Adressebeskyttelse
-import no.nav.helse.spesialist.api.person.Adressebeskyttelse.Ugradert
+import no.nav.helse.DatabaseIntegrationTest
+import no.nav.helse.modell.person.Adressebeskyttelse
+import no.nav.helse.modell.person.Adressebeskyttelse.Fortrolig
+import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortrolig
+import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortroligUtland
+import no.nav.helse.modell.person.Adressebeskyttelse.Ugradert
+import no.nav.helse.modell.person.Adressebeskyttelse.Ukjent
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -11,32 +15,32 @@ internal class PgPersonApiDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `skal oppdage at en person har fortrolig adresse`() {
-        opprettPerson(adressebeskyttelse = Adressebeskyttelse.Fortrolig)
-        assertTrue(personApiDao.personHarAdressebeskyttelse(FØDSELSNUMMER, Adressebeskyttelse.Fortrolig))
+        opprettPerson(adressebeskyttelse = Fortrolig)
+        assertTrue(personApiDao.personHarAdressebeskyttelse(FNR, Fortrolig.somApiType()))
     }
 
     @Test
     fun `person med ugradert adresse er ikke kode 7`() {
         opprettPerson(adressebeskyttelse = Ugradert)
-        assertFalse(personApiDao.personHarAdressebeskyttelse(FØDSELSNUMMER, Adressebeskyttelse.Fortrolig))
+        assertFalse(personApiDao.personHarAdressebeskyttelse(FNR, Fortrolig.somApiType()))
     }
 
     @Test
     fun `person med strengt fortrolig adresse er ikke kode 7`() {
-        opprettPerson(adressebeskyttelse = Adressebeskyttelse.StrengtFortrolig)
-        assertFalse(personApiDao.personHarAdressebeskyttelse(FØDSELSNUMMER, Adressebeskyttelse.Fortrolig))
+        opprettPerson(adressebeskyttelse = StrengtFortrolig)
+        assertFalse(personApiDao.personHarAdressebeskyttelse(FNR, Fortrolig.somApiType()))
     }
 
     @Test
     fun `person med strengt fortrolig utland adresse er ikke kode 7`() {
-        opprettPerson(adressebeskyttelse = Adressebeskyttelse.StrengtFortroligUtland)
-        assertFalse(personApiDao.personHarAdressebeskyttelse(FØDSELSNUMMER, Adressebeskyttelse.Fortrolig))
+        opprettPerson(adressebeskyttelse = StrengtFortroligUtland)
+        assertFalse(personApiDao.personHarAdressebeskyttelse(FNR, Fortrolig.somApiType()))
     }
 
     @Test
     fun `person med ukjent adressebeskyttelse er (kanskje) ikke kode 7`() {
-        opprettPerson(adressebeskyttelse = Adressebeskyttelse.Ukjent)
-        assertFalse(personApiDao.personHarAdressebeskyttelse(FØDSELSNUMMER, Adressebeskyttelse.Fortrolig))
+        opprettPerson(adressebeskyttelse = Ukjent)
+        assertFalse(personApiDao.personHarAdressebeskyttelse(FNR, Fortrolig.somApiType()))
     }
 
     @Test
@@ -73,12 +77,16 @@ internal class PgPersonApiDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `kan markere at en person er under klargjøring`() {
-        assertFalse(personApiDao.klargjøringPågår(FØDSELSNUMMER))
-        personApiDao.personKlargjøres(FØDSELSNUMMER)
-        assertTrue(personApiDao.klargjøringPågår(FØDSELSNUMMER))
+        assertFalse(personApiDao.klargjøringPågår(FNR))
+        personApiDao.personKlargjøres(FNR)
+        assertTrue(personApiDao.klargjøringPågår(FNR))
     }
 
-    private fun harDataNødvendigForVisning() = personApiDao.harDataNødvendigForVisning(FØDSELSNUMMER)
+    private fun harDataNødvendigForVisning() = personApiDao.harDataNødvendigForVisning(FNR)
     private fun assertPersonenErIkkeKlar() = assertFalse(harDataNødvendigForVisning())
     private fun assertPersonenErKlar() = assertTrue(harDataNødvendigForVisning())
+}
+
+private fun Adressebeskyttelse.somApiType(): no.nav.helse.spesialist.api.person.Adressebeskyttelse {
+    return no.nav.helse.spesialist.api.person.Adressebeskyttelse.valueOf(this.name)
 }

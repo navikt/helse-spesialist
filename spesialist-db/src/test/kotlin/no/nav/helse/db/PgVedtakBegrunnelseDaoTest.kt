@@ -1,7 +1,5 @@
 package no.nav.helse.db
 
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.modell.vedtak.Utfall
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -20,7 +18,7 @@ internal class PgVedtakBegrunnelseDaoTest : DatabaseIntegrationTest() {
         val oid = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         nyPerson(vedtaksperiodeId = vedtaksperiodeId)
-        nySaksbehandler(oid)
+        opprettSaksbehandler(oid)
         dao.lagreVedtakBegrunnelse(
             oppgaveId = OPPGAVE_ID,
             type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
@@ -43,7 +41,7 @@ internal class PgVedtakBegrunnelseDaoTest : DatabaseIntegrationTest() {
         val oid = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         nyPerson(vedtaksperiodeId = vedtaksperiodeId)
-        nySaksbehandler(oid)
+        opprettSaksbehandler(oid)
         dao.lagreVedtakBegrunnelse(
             oppgaveId = OPPGAVE_ID,
             type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
@@ -66,7 +64,7 @@ internal class PgVedtakBegrunnelseDaoTest : DatabaseIntegrationTest() {
         val oid = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         nyPerson(vedtaksperiodeId = vedtaksperiodeId)
-        nySaksbehandler(oid)
+        opprettSaksbehandler(oid)
         dao.lagreVedtakBegrunnelse(
             oppgaveId = OPPGAVE_ID,
             type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
@@ -87,7 +85,7 @@ internal class PgVedtakBegrunnelseDaoTest : DatabaseIntegrationTest() {
         val oid = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         nyPerson(vedtaksperiodeId = vedtaksperiodeId)
-        nySaksbehandler(oid)
+        opprettSaksbehandler(oid)
         val generasjonId = finnGenerasjonId(vedtaksperiodeId)
         dao.lagreVedtakBegrunnelse(
             oppgaveId = OPPGAVE_ID,
@@ -104,7 +102,7 @@ internal class PgVedtakBegrunnelseDaoTest : DatabaseIntegrationTest() {
     fun `finner alle vedtaksbegrunnelser for periode`() {
         val oid = UUID.randomUUID()
         nyPerson()
-        nySaksbehandler(oid)
+        opprettSaksbehandler(oid)
         dao.lagreVedtakBegrunnelse(
             oppgaveId = OPPGAVE_ID,
             type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
@@ -147,18 +145,9 @@ internal class PgVedtakBegrunnelseDaoTest : DatabaseIntegrationTest() {
         }
     }
 
-
-    private fun nySaksbehandler(oid: UUID = UUID.randomUUID()) {
-        saksbehandlerDao.opprettEllerOppdater(oid, "Navn Navnesen", "navn@navnesen.no", "Z999999")
-    }
-
     private fun finnGenerasjonId(vedtaksperiodeId: UUID): Long =
-        requireNotNull(
-            sessionOf(dataSource).use { session ->
-                session.run(
-                    queryOf("SELECT id FROM behandling WHERE vedtaksperiode_id = ?", vedtaksperiodeId)
-                        .map { it.long("id") }.asSingle
-                )
-            }
-        )
+        dbQuery.single(
+            "SELECT id FROM behandling WHERE vedtaksperiode_id = :vedtaksperiodeId",
+            "vedtaksperiodeId" to vedtaksperiodeId
+        ) { it.long("id") }.let(::requireNotNull)
 }
