@@ -3,8 +3,8 @@ package no.nav.helse.db
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue

@@ -18,7 +18,7 @@ abstract class AbstractDatabaseTest {
     companion object {
         private val postgres = PostgreSQLContainer<Nothing>("postgres:14").apply {
             withReuse(true)
-            withLabel("app-navn", "spesialist-api")
+            withLabel("app-navn", "spesialist-db")
             start()
             println("Database: jdbc:postgresql://localhost:$firstMappedPort/test startet opp, credentials: test og test")
         }
@@ -40,20 +40,13 @@ abstract class AbstractDatabaseTest {
                 .load()
                 .migrate()
 
-            createTruncateFunction(dataSource)
-            resetDatabase()
-        }
-
-        private fun resetDatabase() {
-            sessionOf(dataSource).use  {
-                it.run(queryOf("SELECT truncate_tables()").asExecute)
-            }
+            resetDatabase(dataSource)
         }
     }
 }
 
-private fun createTruncateFunction(dataSource: DataSource) {
-    sessionOf(dataSource).use  {
+private fun resetDatabase(dataSource: DataSource) {
+    sessionOf(dataSource).use {
         @Language("PostgreSQL")
         val query = """
             CREATE OR REPLACE FUNCTION truncate_tables() RETURNS void AS $$
@@ -70,7 +63,8 @@ private fun createTruncateFunction(dataSource: DataSource) {
                 EXECUTE truncate_statement;
             END;
             $$ LANGUAGE plpgsql;
-        """
+        """.trimIndent()
         it.run(queryOf(query).asExecute)
+        it.run(queryOf("SELECT truncate_tables()").asExecute)
     }
 }

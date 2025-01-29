@@ -27,6 +27,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
+import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.spesialist.typer.Kjønn
 import no.nav.helse.util.januar
