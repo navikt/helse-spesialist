@@ -13,19 +13,15 @@ import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.melding.KlargjørPersonForVisning
-import no.nav.helse.modell.melding.OppdaterPersondata
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.objectMapper
-import no.nav.helse.spesialist.api.Personhåndterer
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class MeldingMediator(
     private val sessionFactory: SessionFactory,
-    private val publiserer: MeldingPubliserer,
     private val personDao: PersonDao,
     private val commandContextDao: CommandContextDao,
     private val meldingDao: MeldingDao,
@@ -35,7 +31,7 @@ class MeldingMediator(
     private val varselRepository: VarselRepository,
     private val poisonPills: PoisonPills,
     private val env: Environment,
-) : Personhåndterer {
+) {
     private companion object {
         private val logg = LoggerFactory.getLogger(MeldingMediator::class.java)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -350,13 +346,5 @@ class MeldingMediator(
             logg.info("fortsetter utførelse av kommandokontekst som følge av påminnelse")
             mediator.gjenopptaMelding(melding, commandContext, kontekstbasertPubliserer)
         }
-    }
-
-    override fun oppdaterSnapshot(fødselsnummer: String) {
-        publiserer.publiser(fødselsnummer, OppdaterPersondata, "oppdaterSnapshot")
-    }
-
-    override fun klargjørPersonForVisning(fødselsnummer: String) {
-        publiserer.publiser(fødselsnummer, KlargjørPersonForVisning, "klargjørPersonForVisning")
     }
 }

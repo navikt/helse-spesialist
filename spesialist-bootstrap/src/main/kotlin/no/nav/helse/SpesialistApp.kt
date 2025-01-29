@@ -13,6 +13,7 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.GodkjenningService
 import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.mediator.PersonhåndtererImpl
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.TilgangskontrollørForReservasjon
@@ -24,6 +25,7 @@ import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMe
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.api.AzureConfig
+import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.bootstrap.ApiAvhengigheter
 import no.nav.helse.spesialist.api.bootstrap.Bootstrap
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
@@ -65,6 +67,7 @@ class SpesialistApp(
     private val stansAutomatiskBehandlingDao = repositories.stansAutomatiskBehandlingDao
 
     private lateinit var meldingMediator: MeldingMediator
+    private lateinit var personhåndterer: Personhåndterer
     private lateinit var saksbehandlerMediator: SaksbehandlerMediator
     private lateinit var oppgaveService: OppgaveService
     private lateinit var dokumentMediator: DokumentMediator
@@ -97,7 +100,7 @@ class SpesialistApp(
             oppgavehåndtererProvider = { oppgaveService },
             totrinnsvurderinghåndterer = { totrinnsvurderingService },
             godkjenninghåndtererProvider = { godkjenningService },
-            personhåndtererProvider = { meldingMediator },
+            personhåndtererProvider = { personhåndterer },
             dokumenthåndtererProvider = { dokumentMediator },
             stansAutomatiskBehandlinghåndterer = { stansAutomatiskBehandlingMediator },
             behandlingstatistikk = behandlingsstatistikkService,
@@ -169,7 +172,6 @@ class SpesialistApp(
         meldingMediator =
             MeldingMediator(
                 sessionFactory = TransactionalSessionFactory(dataSource),
-                publiserer = meldingPubliserer,
                 personDao = repositories.personDao,
                 commandContextDao = repositories.commandContextDao,
                 meldingDao = repositories.meldingDao,
@@ -184,6 +186,7 @@ class SpesialistApp(
                 poisonPills = repositories.poisonPillDao.poisonPills(),
                 env = env,
             )
+        personhåndterer = PersonhåndtererImpl(publiserer = meldingPubliserer)
         RiverSetup(rapidsConnection, meldingMediator, repositories.meldingDuplikatkontrollDao).setUp()
         saksbehandlerMediator =
             SaksbehandlerMediator(

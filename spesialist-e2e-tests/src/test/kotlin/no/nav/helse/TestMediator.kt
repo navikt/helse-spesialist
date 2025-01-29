@@ -120,7 +120,6 @@ internal class TestMediator(
     init {
         val meldingMediator = MeldingMediator(
             sessionFactory = TransactionalSessionFactory(dataSource),
-            publiserer = meldingPubliserer,
             personDao = repositories.personDao,
             commandContextDao = repositories.commandContextDao,
             meldingDao = repositories.meldingDao,

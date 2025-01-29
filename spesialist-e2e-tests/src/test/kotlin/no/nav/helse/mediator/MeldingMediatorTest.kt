@@ -5,14 +5,11 @@ import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
-import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.db.TransactionalSessionFactory
-import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
-import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -28,7 +25,6 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
     private val meldingMediator =
         MeldingMediator(
             sessionFactory = TransactionalSessionFactory(dataSource),
-            publiserer = MessageContextMeldingPubliserer(testRapid),
             personDao = repositories.personDao,
             commandContextDao = repositories.commandContextDao,
             meldingDao = repositories.meldingDao,
@@ -55,24 +51,6 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
         val varseldefinisjon = Varseldefinisjon(id, "SB_EX_1", "En tittel", null, null, false, LocalDateTime.now())
         meldingMediator.håndter(varseldefinisjon)
         assertVarseldefinisjon(id)
-    }
-
-    @Test
-    fun `oppdater persondata`() {
-        val fødselsnummer = lagFødselsnummer()
-        meldingMediator.oppdaterSnapshot(fødselsnummer)
-        val sisteMelding = testRapid.inspektør.meldinger().last()
-        assertEquals("oppdater_persondata", sisteMelding["@event_name"].asText())
-        assertEquals(fødselsnummer, sisteMelding["fødselsnummer"].asText())
-    }
-
-    @Test
-    fun `klargjør person for visning`() {
-        val fødselsnummer = lagFødselsnummer()
-        meldingMediator.klargjørPersonForVisning(fødselsnummer)
-        val sisteMelding = testRapid.inspektør.meldinger().last()
-        assertEquals("klargjør_person_for_visning", sisteMelding["@event_name"].asText())
-        assertEquals(fødselsnummer, sisteMelding["fødselsnummer"].asText())
     }
 
     private fun assertVarseldefinisjon(id: UUID) {
