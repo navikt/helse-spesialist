@@ -278,6 +278,7 @@ internal class PersonRepository(
         slettAutomatiseringProblem(personRef)
         slettSaksbehandleroppgavetype(personRef)
         slettVedtaksperiodegenerasjoner(personRef)
+        slettVedtaksperiodebehandlingV2(personRef)
         slettOpprinneligSøknadsdato(personRef)
         slettUtbetalingIdVedtaksperiodeId(personRef)
         @Language("PostgreSQL")
@@ -312,6 +313,14 @@ internal class PersonRepository(
         @Language("PostgreSQL")
         val query = """
              DELETE FROM behandling b USING vedtak v WHERE b.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?
+        """
+        run(queryOf(query, personRef).asExecute)
+    }
+
+    private fun TransactionalSession.slettVedtaksperiodebehandlingV2(personRef: Int) {
+        @Language("PostgreSQL")
+        val query = """
+             DELETE FROM behandling_v2 b USING vedtak v WHERE b.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?
         """
         run(queryOf(query, personRef).asExecute)
     }

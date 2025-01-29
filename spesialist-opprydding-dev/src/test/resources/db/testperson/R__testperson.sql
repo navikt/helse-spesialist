@@ -33,6 +33,8 @@ INSERT INTO vedtak(id, vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref
 VALUES (${sequence_number}, '${vedtaksperiode_id}', now(), now(), ${sequence_number}, ${sequence_number}, false);
 INSERT INTO behandling(id, unik_id, vedtaksperiode_id, opprettet_av_hendelse, tilstand)
 VALUES (${sequence_number}, '${generasjon_id}', '${vedtaksperiode_id}', '${hendelse_id}', 'VidereBehandlingAvklares');
+INSERT INTO behandling_v2(vedtaksperiode_id, behandling_id, fom, tom, skjæringstidspunkt, opprettet)
+VALUES ('${vedtaksperiode_id}', gen_random_uuid(), now(), now(), now(), now());
 INSERT INTO opprinnelig_soknadsdato (vedtaksperiode_id, soknad_mottatt)
 VALUES ('${vedtaksperiode_id}', now());
 INSERT INTO selve_varsel(unik_id, kode, vedtaksperiode_id, opprettet, generasjon_ref)
