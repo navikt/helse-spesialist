@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.api.abonnement
 
 import org.intellij.lang.annotations.Language
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 sealed class OpptegnelsePayload {
     abstract fun toJson(): String

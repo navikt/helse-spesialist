@@ -1,5 +1,5 @@
 dependencies {
-    implementation(project(":spesialist-selve"))
+    api(project(":spesialist-selve"))
 
     api(libs.rapids.and.rivers)
 

@@ -12,9 +12,9 @@ repositories {
 }
 
 dependencies {
+    api(project(":spesialist-api"))
     api(project(":spesialist-db"))
     api(project(":spesialist-kafka"))
-    api(project(":spesialist-selve"))
 
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
     testImplementation("no.nav.security:mock-oauth2-server:$mockOAuth2ServerVersion")

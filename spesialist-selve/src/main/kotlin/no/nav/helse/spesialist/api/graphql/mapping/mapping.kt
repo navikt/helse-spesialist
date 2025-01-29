@@ -5,7 +5,7 @@ import no.nav.helse.spesialist.api.graphql.schema.VarselDTO
 import no.nav.helse.spesialist.api.graphql.schema.VarselDTO.VarselvurderingDTO
 import no.nav.helse.spesialist.api.graphql.schema.Varselstatus
 
-internal fun VarselDbDto.toVarselDto(): VarselDTO {
+fun VarselDbDto.toVarselDto(): VarselDTO {
     checkNotNull(varseldefinisjon)
     return VarselDTO(
         generasjonId = generasjonId,
