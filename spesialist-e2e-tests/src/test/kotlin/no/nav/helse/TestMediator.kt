@@ -14,7 +14,7 @@ import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Stikkprøver
-import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
+import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
@@ -47,14 +47,13 @@ internal class TestMediator(
     private val annulleringRepository = repositories.annulleringRepository
     private val meldingPubliserer = MessageContextMeldingPubliserer(testRapid)
 
-    private val stansAutomatiskBehandlingMediator =
-        StansAutomatiskBehandlingMediator(
+    private val stansAutomatiskBehandlinghåndterer =
+        StansAutomatiskBehandlinghåndtererImpl(
             repositories.stansAutomatiskBehandlingDao,
-            periodehistorikkDao,
             oppgaveDao,
             notatDao,
             dialogDao,
-        ) { Subsumsjonsmelder("versjonAvKode", meldingPubliserer) }
+        )
 
     private val godkjenningMediator = GodkjenningMediator(opptegnelseDao)
     private val tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
@@ -79,7 +78,7 @@ internal class TestMediator(
             meldingPubliserer,
             oppgaveService,
             tilgangsgrupper,
-            stansAutomatiskBehandlingMediator,
+            stansAutomatiskBehandlinghåndterer,
             totrinnsvurderingService =
                 TotrinnsvurderingService(
                     totrinnsvurderingDao = totrinnsvurderingDao,

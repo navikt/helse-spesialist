@@ -4,28 +4,22 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.MeldingPubliserer
-import no.nav.helse.db.DialogDao
-import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
 import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.mediator.Subsumsjonsmelder
-import no.nav.helse.modell.NotatType
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.periodehistorikk.AutomatiskBehandlingStanset
-import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.modell.saksbehandler.handlinger.OpphevStans
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.AKTIVITETSKRAV
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.BESTRIDELSE_SYKMELDING
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.MANGLENDE_MEDVIRKING
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.MEDISINSK_VILKAR
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_UAVKLART
-import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -39,8 +33,6 @@ class StansAutomatiskBehandlingMediatorTest {
     private val stansAutomatiskBehandlingDao = mockk<StansAutomatiskBehandlingDao>(relaxed = true)
     private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
-    private val notatDao = mockk<NotatDao>(relaxed = true)
-    private val dialogDao = mockk<DialogDao>(relaxed = true)
 
     private val meldingPubliserer = object : MeldingPubliserer {
         private val subsumsjonEvents: MutableList<SubsumsjonEvent> = mutableListOf()
@@ -76,8 +68,6 @@ class StansAutomatiskBehandlingMediatorTest {
             stansAutomatiskBehandlingDao,
             periodehistorikkDao,
             oppgaveDao,
-            notatDao,
-            dialogDao,
         ) { subsumsjonsmelder }
 
     @Test
@@ -106,43 +96,12 @@ class StansAutomatiskBehandlingMediatorTest {
     }
 
     @Test
-    fun `Lagrer melding og notat når stans oppheves fra speil`() {
-        val oid = randomUUID()
-        mediator.håndter(
-            handling = OpphevStans(FNR, "begrunnelse"),
-            saksbehandler =
-                Saksbehandler(
-                    epostadresse = "epost",
-                    oid = oid,
-                    navn = "navn",
-                    ident = "ident",
-                    tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
-                ),
-        )
-
-        verify(exactly = 1) { stansAutomatiskBehandlingDao.lagreFraSpeil(fødselsnummer = FNR) }
-        verify(exactly = 1) {
-            notatDao.lagreForOppgaveId(
-                oppgaveId = any(),
-                tekst = "begrunnelse",
-                saksbehandlerOid = oid,
-                notatType = NotatType.OpphevStans,
-                dialogRef = any(),
-            )
-        }
-    }
-
-    @Test
     fun `Melding med status STOPP_AUTOMATIKK gjør at personen skal unntas fra automatisering`() {
         every { stansAutomatiskBehandlingDao.hentFor(FNR) } returns
                 meldinger(
                     stans(MEDISINSK_VILKAR, MANGLENDE_MEDVIRKING),
                 )
-        val dataTilSpeil = mediator.unntattFraAutomatiskGodkjenning(FNR)
-
         assertTrue(mediator.sjekkOmAutomatiseringErStanset(FNR, VEDTAKSPERIODEID, ORGNR))
-        assertTrue(dataTilSpeil.erUnntatt)
-        assertEquals(listOf(MEDISINSK_VILKAR.name, MANGLENDE_MEDVIRKING.name), dataTilSpeil.arsaker)
     }
 
     @Test
@@ -152,11 +111,8 @@ class StansAutomatiskBehandlingMediatorTest {
                     stans(MEDISINSK_VILKAR),
                     opphevStans(),
                 )
-        val dataTilSpeil = mediator.unntattFraAutomatiskGodkjenning(FNR)
 
         assertFalse(mediator.sjekkOmAutomatiseringErStanset(FNR, VEDTAKSPERIODEID, ORGNR))
-        assertFalse(dataTilSpeil.erUnntatt)
-        assertEquals(emptyList<String>(), dataTilSpeil.arsaker)
     }
 
     @Test
@@ -167,11 +123,8 @@ class StansAutomatiskBehandlingMediatorTest {
                     opphevStans(),
                     stans(AKTIVITETSKRAV),
                 )
-        val dataTilSpeil = mediator.unntattFraAutomatiskGodkjenning(FNR)
 
         assertTrue(mediator.sjekkOmAutomatiseringErStanset(FNR, VEDTAKSPERIODEID, ORGNR))
-        assertTrue(dataTilSpeil.erUnntatt)
-        assertEquals(listOf(AKTIVITETSKRAV.name), dataTilSpeil.arsaker)
     }
 
     @Test

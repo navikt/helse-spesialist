@@ -8,7 +8,7 @@ import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.db.DBRepositories
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
+import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.spesialist.api.SendTilGodkjenningResult
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
@@ -63,14 +63,13 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private val meldingPubliserer: MeldingPubliserer = MessageContextMeldingPubliserer(testRapid)
     private val tildelingDbDao = repositories.tildelingDao
     private val opptegnelseRepository = repositories.opptegnelseDao
-    private val stansAutomatiskBehandlingMediator =
-        StansAutomatiskBehandlingMediator(
+    private val stansAutomatiskBehandlinghåndterer =
+        StansAutomatiskBehandlinghåndtererImpl(
             stansAutomatiskBehandlingDao,
-            periodehistorikkDao,
             oppgaveDao,
             notatDao,
             dialogDao,
-        ) { Subsumsjonsmelder("versjonAvKode", meldingPubliserer) }
+        )
     private val oppgaveService =
         OppgaveService(
             oppgaveDao,
@@ -91,7 +90,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             meldingPubliserer,
             oppgaveService,
             tilgangsgrupper,
-            stansAutomatiskBehandlingMediator,
+            stansAutomatiskBehandlinghåndterer,
             TotrinnsvurderingService(
                 totrinnsvurderingDao = totrinnsvurderingDao,
                 oppgaveDao = oppgaveDao,

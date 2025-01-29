@@ -21,7 +21,7 @@ import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.PlukkTilManuell
 import no.nav.helse.modell.automatisering.Stikkprøver
-import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
+import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.api.AzureConfig
@@ -76,14 +76,13 @@ class SpesialistApp(
     private val behandlingsstatistikkService =
         BehandlingsstatistikkService(behandlingsstatistikkDao = behandlingsstatistikkDao)
     private val godkjenningMediator = GodkjenningMediator(opptegnelseDao)
-    private val stansAutomatiskBehandlingMediator =
-        StansAutomatiskBehandlingMediator(
+    private val stansAutomatiskBehandlinghåndterer =
+        StansAutomatiskBehandlinghåndtererImpl(
             stansAutomatiskBehandlingDao,
-            periodehistorikkDao,
             oppgaveDao,
             notatDao,
             dialogDao,
-        ) { subsumsjonsmelder }
+        )
     private val totrinnsvurderingService =
         TotrinnsvurderingService(
             totrinnsvurderingDao = totrinnsvurderingDao,
@@ -102,7 +101,7 @@ class SpesialistApp(
             godkjenninghåndtererProvider = { godkjenningService },
             personhåndtererProvider = { personhåndterer },
             dokumenthåndtererProvider = { dokumentMediator },
-            stansAutomatiskBehandlinghåndterer = { stansAutomatiskBehandlingMediator },
+            stansAutomatiskBehandlinghåndterer = { stansAutomatiskBehandlinghåndterer },
             behandlingstatistikk = behandlingsstatistikkService,
             snapshotClient = snapshotClient,
             avviksvurderinghenter = repositories.avviksvurderingDao,
@@ -195,7 +194,7 @@ class SpesialistApp(
                 meldingPubliserer = meldingPubliserer,
                 oppgaveService = oppgaveService,
                 tilgangsgrupper = tilgangsgrupper,
-                stansAutomatiskBehandlingMediator = stansAutomatiskBehandlingMediator,
+                stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
                 totrinnsvurderingService = totrinnsvurderingService,
                 annulleringRepository = repositories.annulleringRepository,
                 env = env,

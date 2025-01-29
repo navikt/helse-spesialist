@@ -1,18 +1,14 @@
 package no.nav.helse.modell.stoppautomatiskbehandling
 
-import no.nav.helse.db.DialogDao
-import no.nav.helse.db.NotatDao
+import no.nav.helse.AutomatiseringStansetSjekker
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
 import no.nav.helse.mediator.Subsumsjonsmelder
-import no.nav.helse.modell.NotatType
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
-import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.modell.saksbehandler.handlinger.Personhandling
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.AKTIVITETSKRAV
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.BESTRIDELSE_SYKMELDING
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.MANGLENDE_MEDVIRKING
@@ -22,8 +18,6 @@ import no.nav.helse.modell.vilkårsprøving.Subsumsjon
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.SporingStansAutomatiskBehandling
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_UAVKLART
-import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
-import no.nav.helse.spesialist.api.graphql.schema.UnntattFraAutomatiskGodkjenning
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -31,10 +25,8 @@ class StansAutomatiskBehandlingMediator(
     private val stansAutomatiskBehandlingDao: StansAutomatiskBehandlingDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val oppgaveDao: OppgaveDao,
-    private val notatDao: NotatDao,
-    private val dialogDao: DialogDao,
     private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
-) : StansAutomatiskBehandlinghåndterer {
+) : AutomatiseringStansetSjekker {
     private val logg = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
@@ -49,30 +41,14 @@ class StansAutomatiskBehandlingMediator(
                 sessionContext.stansAutomatiskBehandlingDao,
                 sessionContext.periodehistorikkDao,
                 sessionContext.oppgaveDao,
-                sessionContext.notatDao,
-                sessionContext.dialogDao,
                 subsumsjonsmelderProvider,
             )
-    }
-
-    fun håndter(
-        handling: Personhandling,
-        saksbehandler: Saksbehandler,
-    ) {
-        stansAutomatiskBehandlingDao.lagreFraSpeil(handling.gjelderFødselsnummer())
-        lagreNotat(handling.gjelderFødselsnummer(), handling.begrunnelse(), saksbehandler.oid())
     }
 
     fun håndter(melding: StansAutomatiskBehandlingMelding) {
         stansAutomatiskBehandlingDao.lagreFraISyfo(melding)
         lagrePeriodehistorikk(melding.fødselsnummer())
     }
-
-    override fun unntattFraAutomatiskGodkjenning(fødselsnummer: String): UnntattFraAutomatiskGodkjenning =
-        stansAutomatiskBehandlingDao
-            .hentFor(fødselsnummer)
-            .filtrerGjeldendeStopp()
-            .tilUnntattFraAutomatiskGodkjenning()
 
     override fun sjekkOmAutomatiseringErStanset(
         fødselsnummer: String,
@@ -97,20 +73,6 @@ class StansAutomatiskBehandlingMediator(
         }
     }
 
-    private fun lagreNotat(
-        fødselsnummer: String,
-        begrunnelse: String,
-        saksbehandlerOid: UUID,
-    ) = try {
-        val oppgaveId = fødselsnummer.finnOppgaveId()
-        val dialogRef = dialogDao.lagre()
-        notatDao.lagreForOppgaveId(oppgaveId, begrunnelse, saksbehandlerOid, NotatType.OpphevStans, dialogRef)
-    } catch (e: Exception) {
-        sikkerlogg.error("Fant ikke oppgave for $fødselsnummer. Fikk ikke lagret notat om oppheving av stans")
-    }
-
-    private fun String.finnOppgaveId() = oppgaveDao.finnOppgaveId(this) ?: oppgaveDao.finnOppgaveIdUansettStatus(this)
-
     private fun List<StansAutomatiskBehandlingFraDatabase>.filtrerGjeldendeStopp(): List<StansAutomatiskBehandlingFraDatabase> {
         val gjeldende = mutableListOf<StansAutomatiskBehandlingFraDatabase>()
         sortedWith { a, b ->
@@ -127,21 +89,6 @@ class StansAutomatiskBehandlingMediator(
         }
         return gjeldende
     }
-
-    private fun List<StansAutomatiskBehandlingFraDatabase>.tilUnntattFraAutomatiskGodkjenning() =
-        if (isEmpty()) {
-            UnntattFraAutomatiskGodkjenning(
-                erUnntatt = false,
-                arsaker = emptyList(),
-                tidspunkt = null,
-            )
-        } else {
-            UnntattFraAutomatiskGodkjenning(
-                erUnntatt = true,
-                arsaker = flatMap { it.årsaker.map(StoppknappÅrsak::name) },
-                tidspunkt = last().opprettet,
-            )
-        }
 
     private fun sendSubsumsjonMeldinger(
         stoppmeldinger: List<StoppknappmeldingForSubsumsjon>,

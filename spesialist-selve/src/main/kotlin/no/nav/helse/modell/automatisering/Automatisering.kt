@@ -1,5 +1,6 @@
 package no.nav.helse.modell.automatisering
 
+import no.nav.helse.AutomatiseringStansetSjekker
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.GenerasjonDao
@@ -24,14 +25,13 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
-import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
 
 internal class Automatisering(
     private val risikovurderingDao: RisikovurderingDao,
-    private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
+    private val automatiseringStansetSjekker: AutomatiseringStansetSjekker,
     private val automatiseringDao: AutomatiseringDao,
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     private val vergemålDao: VergemålDao,
@@ -51,7 +51,7 @@ internal class Automatisering(
         ): Automatisering {
             return Automatisering(
                 risikovurderingDao = sessionContext.risikovurderingDao,
-                stansAutomatiskBehandlinghåndterer =
+                automatiseringStansetSjekker =
                     StansAutomatiskBehandlingMediator.Factory.stansAutomatiskBehandlingMediator(
                         sessionContext,
                         subsumsjonsmelderProvider,
@@ -235,7 +235,7 @@ internal class Automatisering(
             risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
                 ?: validering("Mangler risikovurdering") { false }
         val unntattFraAutomatisering =
-            stansAutomatiskBehandlinghåndterer.sjekkOmAutomatiseringErStanset(
+            automatiseringStansetSjekker.sjekkOmAutomatiseringErStanset(
                 fødselsnummer,
                 vedtaksperiodeId,
                 organisasjonsnummer,

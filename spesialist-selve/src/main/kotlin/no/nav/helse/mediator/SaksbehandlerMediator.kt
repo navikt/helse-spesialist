@@ -54,7 +54,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import no.nav.helse.modell.saksbehandler.handlinger.Refusjonselement
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
-import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
+import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
@@ -99,7 +99,7 @@ class SaksbehandlerMediator(
     private val meldingPubliserer: MeldingPubliserer,
     private val oppgaveService: OppgaveService,
     private val tilgangsgrupper: Tilgangsgrupper,
-    private val stansAutomatiskBehandlingMediator: StansAutomatiskBehandlingMediator,
+    private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndtererImpl,
     private val totrinnsvurderingService: TotrinnsvurderingService,
     private val annulleringRepository: AnnulleringRepository,
     private val env: Environment,
@@ -298,7 +298,7 @@ class SaksbehandlerMediator(
         handling: Personhandling,
         saksbehandler: Saksbehandler,
     ) = try {
-        stansAutomatiskBehandlingMediator.håndter(handling, saksbehandler)
+        stansAutomatiskBehandlinghåndterer.håndter(handling, saksbehandler)
         handling.utførAv(saksbehandler)
     } catch (e: Modellfeil) {
         throw e.tilApiversjon()
