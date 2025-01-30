@@ -2,7 +2,7 @@ name: Monitor dependencies with Dependabot
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - "**.gradle.kts"
       - "gradle.properties"

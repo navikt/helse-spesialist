@@ -17,14 +17,14 @@ on:
             - 'deploy/prod-sidegig.yml'
             - 'deploy/alerts/**'
         branches:
-            - master
+            - main
 
 jobs:
     build:
         permissions:
             contents: read
             id-token: write
-        uses: navikt/helse-spesialist/.github/workflows/build-image.yml@master
+        uses: navikt/helse-spesialist/.github/workflows/build-image.yml@main
         secrets: inherit
 
     deployDev:

@@ -12,8 +12,8 @@ jobs:
     name: Lag en tag
     permissions:
       contents: write
-      id-token: write # For å kunne kjøre workflowen fra master-branchen
-      actions: write # For å kunne kjøre workflowen fra master-branchen
+      id-token: write # For å kunne kjøre workflowen fra main-branchen
+      actions: write # For å kunne kjøre workflowen fra main-branchen
     runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.lage-tag.outputs.tag }}

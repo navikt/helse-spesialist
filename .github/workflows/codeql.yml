@@ -2,7 +2,7 @@ name: "CodeQL"
 
 on:
   push:
-    branches: ["master"]
+    branches: ["main"]
     paths-ignore:
         - '.github/**'
         - 'deploy/**'
@@ -30,7 +30,7 @@ jobs:
         with:
           languages: ${{ matrix.language }}
 
-      - name: Setup Java 
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin

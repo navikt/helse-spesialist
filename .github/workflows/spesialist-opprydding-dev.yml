@@ -3,7 +3,7 @@ name: Spesialist-opprydding-dev
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - 'Dockerfile-opprydding-dev'
       - 'spesialist-opprydding-dev/**'

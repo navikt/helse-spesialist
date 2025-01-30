@@ -3,7 +3,7 @@ name: Spesialist-sidegig
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - 'Dockerfile-sidegig'
       - 'spesialist-sidegig/**'
