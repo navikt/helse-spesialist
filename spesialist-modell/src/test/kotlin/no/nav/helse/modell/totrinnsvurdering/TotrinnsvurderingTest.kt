@@ -14,6 +14,8 @@ import no.nav.helse.modell.saksbehandler.handlinger.TilgangskontrollForTestHarIk
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering.Companion.gjenopprett
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering.Companion.toDto
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
@@ -130,6 +132,19 @@ internal class TotrinnsvurderingTest {
             begrunnelse = "begrunnelse",
         ))
         assertEquals(1, totrinnsvurdering.overstyringer().size)
+    }
+
+    @Test
+    fun `ferdigstilt er default false`() {
+        val totrinnsvurdering = nyTotrinnsvurdering()
+        assertFalse(totrinnsvurdering.ferdigstilt)
+    }
+
+    @Test
+    fun `kan ferdistille totrinnsurdering`() {
+        val totrinnsvurdering = nyTotrinnsvurdering()
+        totrinnsvurdering.ferdigstill()
+        assertTrue(totrinnsvurdering.ferdigstilt)
     }
 
     @Test

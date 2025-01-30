@@ -20,6 +20,7 @@ class Totrinnsvurdering(
     private val opprettet: LocalDateTime,
     oppdatert: LocalDateTime?,
     overstyringer: List<Overstyring> = emptyList(),
+    ferdigstilt: Boolean = false,
 ) {
     private val overstyringer: MutableList<Overstyring> = overstyringer.toMutableList()
 
@@ -38,9 +39,16 @@ class Totrinnsvurdering(
     var oppdatert: LocalDateTime? = oppdatert
         private set
 
+    var ferdigstilt: Boolean = ferdigstilt
+        private set
+
     private val erBeslutteroppgave: Boolean get() = !erRetur && saksbehandler != null
 
     fun overstyringer(): List<Overstyring> = overstyringer
+
+    fun ferdigstill() {
+        ferdigstilt = true
+    }
 
     fun nyOverstyring(overstyring: Overstyring) {
         overstyringer.add(overstyring)
