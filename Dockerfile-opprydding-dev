@@ -1,5 +1,9 @@
-FROM ghcr.io/navikt/baseimages/temurin:21
+FROM gcr.io/distroless/java21-debian12:nonroot
 
-ENV JAVA_OPTS='-XX:MaxRAMPercentage=90'
+ENV TZ="Europe/Oslo"
+ENV JDK_JAVA_OPTIONS='-XX:MaxRAMPercentage=90'
 
-COPY spesialist-opprydding-dev/build/libs/*.jar ./
+WORKDIR /app
+
+COPY spesialist-opprydding-dev/build/libs/*.jar .
+CMD ["app.jar"]
