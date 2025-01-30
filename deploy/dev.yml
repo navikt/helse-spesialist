@@ -12,12 +12,15 @@ spec:
     - https://spesialist.intern.dev.nav.no
   strategy:
     type: Recreate
+  startup:
+    path: isready
+    initialDelay: 20
+    periodSeconds: 5
+    failureThreshold: 9
   liveness:
     path: isalive
-    initialDelay: 5
   readiness:
     path: isready
-    initialDelay: 15
   preStopHook:
     http:
       path: /stop
