@@ -43,7 +43,7 @@ jobs:
       image: ${{ steps.docker-build-push.outputs.image }}
 
   deployDev:
-    name: deploy to dev
+    name: deploy to prod
     needs: [build]
     runs-on: ubuntu-latest
     steps:
