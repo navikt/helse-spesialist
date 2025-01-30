@@ -7,14 +7,20 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class BehandlingOpprettetRiver(
     rapidsConnection: RapidsConnection,
     private val behandlingDao: BehandlingDao,
 ) : River.PacketListener {
+    private companion object {
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+    }
+
     init {
         River(rapidsConnection).apply {
             precondition {
@@ -29,12 +35,29 @@ class BehandlingOpprettetRiver(
         }.register(this)
     }
 
+    override fun onPreconditionError(
+        error: MessageProblems,
+        context: MessageContext,
+        metadata: MessageMetadata,
+    ) {
+        sikkerlogg.info("Ignorerer melding pga feil i precondition:\n${error.toExtendedReport()}")
+    }
+
+    override fun onError(
+        problems: MessageProblems,
+        context: MessageContext,
+        metadata: MessageMetadata,
+    ) {
+        sikkerlogg.error("Ignorerer melding pga feil i validate:\n${problems.toExtendedReport()}")
+    }
+
     override fun onPacket(
         packet: JsonMessage,
         context: MessageContext,
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
+        sikkerlogg.info("Behandler melding behandling_opprettet:\n${packet.toJson()}")
         val behandling =
             Behandling(
                 vedtaksperiodeId = packet["vedtaksperiodeId"].asUuid(),
