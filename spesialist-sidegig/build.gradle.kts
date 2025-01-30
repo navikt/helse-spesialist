@@ -1,8 +1,3 @@
-plugins {
-    kotlin("jvm")
-}
-
-group = "no.nav.helse"
 val mainClass = "no.nav.helse.sidegig.AppKt"
 
 repositories {
@@ -25,9 +20,6 @@ dependencies {
 }
 
 tasks {
-    test {
-        useJUnitPlatform()
-    }
     val copyDeps by registering(Sync::class) {
         from(configurations.runtimeClasspath)
         into("build/libs")
@@ -44,8 +36,4 @@ tasks {
                 }
         }
     }
-}
-
-kotlin {
-    jvmToolchain(21)
 }
