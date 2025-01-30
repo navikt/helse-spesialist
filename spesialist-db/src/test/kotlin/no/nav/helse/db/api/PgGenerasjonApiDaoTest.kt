@@ -125,8 +125,6 @@ internal class PgGenerasjonApiDaoTest: DatabaseIntegrationTest() {
         assertEquals(setOf(forventetVedtaksperiode), alleVedtaksperioderForPerson)
     }
 
-    private fun finnOppgaveIdFor(vedtaksperiodeId: UUID): Long = oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)!!
-
     // Burde bruke VedtaksperiodeDto og lagre via vedtakDao i stedet for manuell update
     private fun oppdaterSkjæringstidspunkt(spleisBehandlingId: UUID, dato: LocalDate) {
         dbQuery.update(

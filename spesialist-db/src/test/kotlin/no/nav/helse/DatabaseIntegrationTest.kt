@@ -18,12 +18,14 @@ import no.nav.helse.db.api.PgOverstyringApiDao
 import no.nav.helse.db.api.PgPeriodehistorikkApiDao
 import no.nav.helse.db.api.PgPersonApiDao
 import no.nav.helse.db.api.PgRisikovurderingApiDao
+import no.nav.helse.db.api.PgVarselApiRepository
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettArbeidsforholdDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
+import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -122,6 +124,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val arbeidsforholdDao = sessionContext.arbeidsforholdDao
     internal val arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource)
     internal val vedtakDao = repositories.vedtakDao
+    protected val apiVarselRepository = PgVarselApiRepository(dataSource)
     internal val commandContextDao = repositories.commandContextDao
     internal val tildelingDao = repositories.tildelingDao
     internal val saksbehandlerDao = repositories.saksbehandlerDao
@@ -380,6 +383,14 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         }
     }
 
+    // For å få satt riktig skjæringstidspunkt på behandlinger
+    // Burde kanskje erstattes med bruk av DAO-er
+    protected fun oppdaterBehandlingdata(vararg perioder: SpleisVedtaksperiode) {
+        pgPersonRepository.brukPersonHvisFinnes(FNR) {
+            mottaSpleisVedtaksperioder(perioder.toList())
+        }
+    }
+
     protected fun opprettVedtaksperiode(
         fødselsnummer: String = FNR,
         organisasjonsnummer: String = ORGNUMMER,
@@ -411,6 +422,48 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         opprettVedtakstype(vedtaksperiodeId, periodetype, inntektskilde)
     }
 
+    protected fun opprettVarseldefinisjon(
+        tittel: String = "EN_TITTEL",
+        kode: String = "EN_KODE",
+        definisjonId: UUID = UUID.randomUUID(),
+    ) = dbQuery.updateAndReturnGeneratedKey(
+        """
+        insert into api_varseldefinisjon (unik_id, kode, tittel, forklaring, handling, opprettet) 
+        values (:definisjonId, :kode, :tittel, null, null, :opprettet)
+        """.trimIndent(),
+        "definisjonId" to definisjonId,
+        "kode" to kode,
+        "tittel" to tittel,
+        "opprettet" to LocalDateTime.now(),
+    ).let(::checkNotNull)
+
+    fun nyttVarsel(
+        id: UUID = UUID.randomUUID(),
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        opprettet: LocalDateTime? = LocalDateTime.now(),
+        kode: String = "EN_KODE",
+        spleisBehandlingId: UUID = UUID.randomUUID(),
+        definisjonRef: Long? = null,
+        status: String = "AKTIV",
+        endretTidspunkt: LocalDateTime? = LocalDateTime.now(),
+    ) = dbQuery.update(
+        """
+        insert into selve_varsel (unik_id, kode, vedtaksperiode_id, generasjon_ref, definisjon_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt) 
+        select :id, :kode, :vedtaksperiodeId, id, :definisjonRef, :opprettet, :status, :ident, :endretTidspunkt
+        from behandling
+        where spleis_behandling_id = :spleisBehandlingId
+        """.trimIndent(),
+        "id" to id,
+        "kode" to kode,
+        "vedtaksperiodeId" to vedtaksperiodeId,
+        "spleisBehandlingId" to spleisBehandlingId,
+        "definisjonRef" to definisjonRef,
+        "opprettet" to opprettet,
+        "status" to status,
+        "ident" to if (endretTidspunkt != null) "EN_IDENT" else null,
+        "endretTidspunkt" to endretTidspunkt,
+    )
+
     protected fun opprettOppgave(
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
@@ -434,6 +487,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             kanAvvises = kanAvvises,
         )
     }
+
+    fun finnOppgaveIdFor(vedtaksperiodeId: UUID): Long = oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)!!
 
     protected fun avventerSystem(
         oppgaveId: Long,
