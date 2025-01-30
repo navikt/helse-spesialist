@@ -46,8 +46,10 @@ spec:
   env:
     - name: KAFKA_RAPID_TOPIC
       value: tbd.rapid.v1
+    - name: KAFKA_RESET_POLICY
+      value: "EARLIEST"
     - name: KAFKA_CONSUMER_GROUP_ID
-      value: tbd-spesialist-sidegig-v1
+      value: tbd-spesialist-sidegig-v2
     - name: DATABASE_REGION
       value: "europe-north1"
     - name: DATABASE_INSTANCE
