@@ -1,4 +1,4 @@
-name: Hovedbygget
+name: Spesialist
 
 on:
     push:
@@ -25,6 +25,10 @@ jobs:
             contents: read
             id-token: write
         uses: navikt/helse-spesialist/.github/workflows/build-image.yml@main
+        with:
+            gradle_command: build
+            dockerfile: Dockerfile
+            image_suffix: ''
         secrets: inherit
 
     deployDev:

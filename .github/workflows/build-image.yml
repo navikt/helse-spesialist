@@ -8,6 +8,21 @@ on:
         type: string
         default: ${{ github.sha }}
         required: false
+      gradle_command:
+        description: 'gradle build command'
+        type: string
+        default: build
+        required: false
+      dockerfile:
+        description: 'dockerfile to build'
+        type: string
+        default: Dockerfile
+        required: false
+      image_suffix:
+        description: 'suffix to append to docker image'
+        type: string
+        default: ''
+        required: false
 
     outputs:
       image:
@@ -38,7 +53,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Gradle build
-        run: ./gradlew build
+        run: ./gradlew ${{ inputs.gradle_command }}
         env:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
@@ -52,3 +67,5 @@ jobs:
         with:
           team: tbd
           tag: ${{ inputs.ref }}
+          dockerfile: ${{ inputs.dockerfile }}
+          image_suffix: ${{ inputs.image_suffix }}
