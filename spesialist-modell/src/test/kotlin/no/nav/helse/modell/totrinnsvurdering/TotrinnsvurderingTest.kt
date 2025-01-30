@@ -3,9 +3,13 @@ package no.nav.helse.modell.totrinnsvurdering
 import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
+import no.nav.helse.modell.lagAktørId
+import no.nav.helse.modell.lagFødselsnummer
+import no.nav.helse.modell.lagOrganisasjonsnummer
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
+import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
 import no.nav.helse.modell.saksbehandler.handlinger.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering.Companion.gjenopprett
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering.Companion.toDto
@@ -111,6 +115,21 @@ internal class TotrinnsvurderingTest {
         assertThrows<OppgaveKreverVurderingAvToSaksbehandlere> {
             totrinnsvurdering.sendIRetur(1L, behandlendeSaksbehandler)
         }
+    }
+
+    @Test
+    fun `kan legge til ny overstyring`() {
+        val totrinnsvurdering = nyTotrinnsvurdering()
+        totrinnsvurdering.nyOverstyring(OverstyrtTidslinje(
+            id = UUID.randomUUID(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            aktørId = lagAktørId(),
+            fødselsnummer = lagFødselsnummer(),
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+            dager = emptyList(),
+            begrunnelse = "begrunnelse",
+        ))
+        assertEquals(1, totrinnsvurdering.overstyringer().size)
     }
 
     @Test

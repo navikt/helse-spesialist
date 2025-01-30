@@ -7,6 +7,7 @@ import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.gjenopprett
 import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
+import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -18,7 +19,10 @@ class Totrinnsvurdering(
     utbetalingId: UUID?,
     private val opprettet: LocalDateTime,
     oppdatert: LocalDateTime?,
+    overstyringer: List<Overstyring> = emptyList(),
 ) {
+    private val overstyringer: MutableList<Overstyring> = overstyringer.toMutableList()
+
     var erRetur: Boolean = erRetur
         private set
 
@@ -35,6 +39,12 @@ class Totrinnsvurdering(
         private set
 
     private val erBeslutteroppgave: Boolean get() = !erRetur && saksbehandler != null
+
+    fun overstyringer(): List<Overstyring> = overstyringer
+
+    fun nyOverstyring(overstyring: Overstyring) {
+        overstyringer.add(overstyring)
+    }
 
     internal fun sendTilBeslutter(
         oppgaveId: Long,
