@@ -35,14 +35,6 @@ class BehandlingOpprettetRiver(
         }.register(this)
     }
 
-    override fun onPreconditionError(
-        error: MessageProblems,
-        context: MessageContext,
-        metadata: MessageMetadata,
-    ) {
-        sikkerlogg.info("Ignorerer melding pga feil i precondition:\n${error.toExtendedReport()}")
-    }
-
     override fun onError(
         problems: MessageProblems,
         context: MessageContext,
