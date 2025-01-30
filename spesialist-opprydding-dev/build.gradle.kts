@@ -1,6 +1,3 @@
-val cloudSqlVersion = "1.16.0"
-val postgresqlVersion = "42.7.3"
-
 val mainClass = "no.nav.helse.opprydding.AppKt"
 
 repositories {
@@ -8,7 +5,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.google.cloud.sql:postgres-socket-factory:$cloudSqlVersion")
+    implementation(libs.cloudsql)
     implementation(libs.rapids.and.rivers)
     implementation(libs.postgres)
     implementation(libs.kotliquery)

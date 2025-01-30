@@ -10,6 +10,7 @@ repositories {
 }
 
 dependencies {
+    implementation(libs.cloudsql)
     implementation(libs.rapids.and.rivers)
     implementation(libs.hikari)
     implementation(libs.kotliquery)

@@ -27,6 +27,7 @@ dependencyResolutionManagement {
             version("flyway", "10.9.0")
             version("hikari", "5.1.0")
             version("postgres", "42.7.3")
+            version("cloudsql", "1.16.0")
 
             library("rapids-and-rivers", "com.github.navikt", "rapids-and-rivers").versionRef("rapids-and-rivers")
             library("rapids-and-rivers-test", "com.github.navikt.tbd-libs", "rapids-and-rivers-test").versionRef("tbd-libs")
@@ -36,6 +37,7 @@ dependencyResolutionManagement {
             library("flyway-core", "org.flywaydb", "flyway-core").versionRef("flyway")
             library("hikari", "com.zaxxer", "HikariCP").versionRef("hikari")
             library("postgres", "org.postgresql", "postgresql").versionRef("postgres")
+            library("cloudsql", "com.google.cloud.sql", "postgres-socket-factory").versionRef("cloudsql")
 
             library("logback", "ch.qos.logback", "logback-classic").versionRef("logback")
             library("logstash", "net.logstash.logback", "logstash-logback-encoder").versionRef("logstash")
