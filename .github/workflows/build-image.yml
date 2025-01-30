@@ -11,18 +11,15 @@ on:
       gradle_command:
         description: 'gradle build command'
         type: string
-        default: build
-        required: false
+        required: true
       dockerfile:
         description: 'dockerfile to build'
         type: string
-        default: Dockerfile
-        required: false
+        required: true
       image_suffix:
         description: 'suffix to append to docker image'
         type: string
-        default: ''
-        required: false
+        required: true
 
     outputs:
       image:
