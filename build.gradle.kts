@@ -1,4 +1,4 @@
-val junitJupiterVersion = "5.10.2"
+val junitJupiterVersion = "5.11.4"
 val jvmTargetVersion = "21"
 val graphqlKotlinVersion = "8.1.0"
 val logbackSyslog4jVersion = "1.0.0"
