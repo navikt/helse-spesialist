@@ -4,19 +4,18 @@ on:
     push:
         paths-ignore:
             - 'Dockerfile-opprydding-dev'
+            - 'Dockerfile-sidegig'
             - 'spesialist-opprydding-dev/**'
+            - 'spesialist-sidegig/**'
             - '.github/workflows/spesialist-opprydding-dev.yml'
-            - 'deploy/dev-opprydding.yml'
-            - 'Dockerfile-migrering'
-            - 'spesialist-migrering/**'
-            - '.github/workflows/spesialist-migrering.yml'
-            - 'deploy/dev-migrering.yml'
-            - 'deploy/prod-migrering.yml'
+            - '.github/workflows/spesialist-sidegig.yml'
             - '.github/workflows/deploy_specific_commit_to_dev.yml'
             - '.github/workflows/alerts.yml'
-            - 'deploy/alerts/**'
             - '.github/workflows/codeql.yml'
             - '.github/workflows/pr.yml'
+            - 'deploy/dev-opprydding.yml'
+            - 'deploy/prod-sidegig.yml'
+            - 'deploy/alerts/**'
         branches:
             - master
 

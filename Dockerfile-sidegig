@@ -1,0 +1,6 @@
+FROM ghcr.io/navikt/baseimages/temurin:21
+
+ENV TZ="Europe/Oslo"
+ENV JDK_JAVA_OPTIONS='-XX:MaxRAMPercentage=90'
+
+COPY spesialist-sidegig/build/libs/*.jar ./

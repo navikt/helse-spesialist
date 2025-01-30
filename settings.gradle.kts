@@ -9,6 +9,7 @@ include(
     "spesialist-opprydding-dev",
     "spesialist-bootstrap",
     "spesialist-e2e-tests",
+    "spesialist-sidegig",
 )
 
 dependencyResolutionManagement {
