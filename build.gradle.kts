@@ -6,7 +6,7 @@ val mockkVersion = "1.13.10"
 
 plugins {
     kotlin("jvm") version "2.0.20"
-    id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
 }
 
 val githubUser: String by project
