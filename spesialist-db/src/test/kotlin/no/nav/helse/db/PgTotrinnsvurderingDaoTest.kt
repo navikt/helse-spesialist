@@ -28,6 +28,25 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `hent totrinnsvurdering basert på fødselsnummer`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode(FNR)
+        val totrinnsvurderingOld: TotrinnsvurderingOld = totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+
+        val totrinnsvurdering = totrinnsvurderingDao.hentAktivTotrinnsvurdering(FNR)
+        assertNotNull(totrinnsvurdering)
+        assertEquals(totrinnsvurderingOld.vedtaksperiodeId, totrinnsvurdering?.vedtaksperiodeId)
+        assertEquals(totrinnsvurderingOld.erRetur, totrinnsvurdering?.erRetur)
+        assertEquals(totrinnsvurderingOld.saksbehandler, totrinnsvurdering?.saksbehandler)
+        assertEquals(totrinnsvurderingOld.beslutter, totrinnsvurdering?.beslutter)
+        assertNull(totrinnsvurdering?.utbetalingId)
+        assertEquals(totrinnsvurderingOld.opprettet.withNano(0), totrinnsvurdering?.opprettet?.withNano(0))
+        assertEquals(totrinnsvurderingOld.oppdatert?.withNano(0), totrinnsvurdering?.oppdatert?.withNano(0))
+
+    }
+
+    @Test
     fun `Sett saksbehandler på totrinnsvurdering`() {
         opprettPerson()
         opprettSaksbehandler()

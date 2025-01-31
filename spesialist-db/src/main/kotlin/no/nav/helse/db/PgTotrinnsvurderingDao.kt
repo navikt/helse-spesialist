@@ -43,6 +43,36 @@ class PgTotrinnsvurderingDao private constructor(
             )
         }
 
+    internal fun hentAktivTotrinnsvurdering(fødselsnummer: String) =
+        asSQL(
+            """
+            SELECT v.vedtaksperiode_id,
+                   er_retur,
+                   tv.saksbehandler,
+                   tv.beslutter,
+                   ui.id as utbetaling_id,
+                   tv.opprettet,
+                   tv.oppdatert
+            FROM totrinnsvurdering tv
+                     INNER JOIN vedtak v on tv.vedtaksperiode_id = v.vedtaksperiode_id
+                     INNER JOIN person p on v.person_ref = p.id
+                     LEFT JOIN utbetaling_id ui on ui.id = tv.utbetaling_id_ref
+            WHERE p.fødselsnummer= :fodselsnummer
+              AND utbetaling_id_ref IS NULL
+            """.trimIndent(),
+            "fodselsnummer" to fødselsnummer,
+        ).singleOrNull { row ->
+            TotrinnsvurderingFraDatabase(
+                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                erRetur = row.boolean("er_retur"),
+                saksbehandler = row.uuidOrNull("saksbehandler"),
+                beslutter = row.uuidOrNull("beslutter"),
+                utbetalingId = row.uuidOrNull("utbetaling_id"),
+                opprettet = row.localDateTime("opprettet"),
+                oppdatert = row.localDateTimeOrNull("oppdatert"),
+            )
+        }
+
     override fun oppdater(totrinnsvurderingFraDatabase: TotrinnsvurderingFraDatabase) {
         asSQL(
             """
