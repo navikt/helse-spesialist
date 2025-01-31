@@ -443,6 +443,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         spleisBehandlingId: UUID = UUID.randomUUID(),
         utbetalingId: UUID = UUID.randomUUID(),
+        fom: LocalDate = 1.januar,
+        tom: LocalDate = 31.januar,
     ) {
         pgPersonRepository.brukPersonHvisFinnes(FNR) {
             this.nySpleisBehandling(
@@ -450,8 +452,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                     ORGNUMMER,
                     vedtaksperiodeId,
                     spleisBehandlingId,
-                    1.januar,
-                    31.januar
+                    fom,
+                    tom
                 )
             )
             nyUtbetalingForVedtaksperiode(vedtaksperiodeId, utbetalingId)
