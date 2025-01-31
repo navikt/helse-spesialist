@@ -2,6 +2,7 @@ rootProject.name = "spesialist"
 include(
     "spesialist-modell",
     "spesialist-selve",
+    "spesialist-api-schema",
     "spesialist-api",
     "spesialist-db-migrations",
     "spesialist-db",
