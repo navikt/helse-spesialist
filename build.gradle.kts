@@ -47,7 +47,7 @@ allprojects {
         }
 
         constraints {
-            implementation("io.netty:netty-all:4.1.108.final") {
+            implementation("io.netty:netty-all:4.1.117.Final") {
                 because("sårbarhet i 4.1.107.final")
             }
             implementation("org.apache.commons:commons-compress:1.27.1") {
