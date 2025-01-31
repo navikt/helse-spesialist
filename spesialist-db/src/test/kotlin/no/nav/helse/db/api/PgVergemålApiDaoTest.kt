@@ -1,46 +1,42 @@
 package no.nav.helse.db.api
 
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import no.nav.helse.spesialist.api.DatabaseIntegrationTest
-import org.intellij.lang.annotations.Language
+import no.nav.helse.DatabaseIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
 private class PgVergemålApiDaoTest : DatabaseIntegrationTest() {
-    private fun opprettVergemål(
-        personId: Long,
-        harVergemål: Boolean = false,
-        harFullmakt: Boolean = false,
-        harFremtidsFullmakt: Boolean = false
-    ) =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val statement = """
-                INSERT INTO vergemal(person_ref, har_vergemal, har_fremtidsfullmakter, har_fullmakter, vergemål_oppdatert, fullmakt_oppdatert) 
-                VALUES(:personRef, :harVergemal, :harFremtidsFullmakt, :harFullmakter, :oppdatert, :oppdatert)
-                """
-            session.run(
-                queryOf(
-                    statement,
-                    mapOf(
-                        "personRef" to personId,
-                        "harVergemal" to harVergemål,
-                        "harFremtidsFullmakt" to harFremtidsFullmakt,
-                        "harFullmakter" to harFullmakt,
-                        "oppdatert" to LocalDateTime.now()
-                    )
-                ).asExecute
-            )
-        }
+
+    private val vergemålApiDao = PgVergemålApiDao(dataSource)
 
     @Test
     fun `kan hente ut om person har vergemål`() {
-        val personRef = opprettPerson()
-        opprettVedtaksperiode(personRef, opprettArbeidsgiver())
-        opprettVergemål(personRef, harFullmakt = true)
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettVergemål(FNR, harFullmakt = true)
 
-        assertEquals(true, vergemålApiDao.harFullmakt(FØDSELSNUMMER))
+        assertEquals(true, vergemålApiDao.harFullmakt(FNR))
     }
+
+    private fun opprettVergemål(
+        fødselsnummer: String,
+        harVergemål: Boolean = false,
+        harFullmakt: Boolean = false,
+        harFremtidsFullmakt: Boolean = false
+    ) = dbQuery.update(
+        """
+        insert into vergemal (person_ref, har_vergemal, har_fremtidsfullmakter, har_fullmakter, vergemål_oppdatert, fullmakt_oppdatert) 
+        select id, :harVergemal, :harFremtidsFullmakt, :harFullmakter, :oppdatert, :oppdatert
+        from person
+        where fødselsnummer = :foedselsnummer
+        """.trimIndent(),
+        "foedselsnummer" to fødselsnummer,
+        "harVergemal" to harVergemål,
+        "harFremtidsFullmakt" to harFremtidsFullmakt,
+        "harFullmakter" to harFullmakt,
+        "oppdatert" to LocalDateTime.now()
+    )
+
+
 }
