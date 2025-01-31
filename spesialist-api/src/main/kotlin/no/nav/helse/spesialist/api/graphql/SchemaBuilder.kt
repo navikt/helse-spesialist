@@ -14,6 +14,7 @@ import no.nav.helse.db.api.TildelingApiDao
 import no.nav.helse.db.api.TotrinnsvurderingApiDao
 import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.db.api.VergemålApiDao
+import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
@@ -40,7 +41,6 @@ import no.nav.helse.spesialist.api.graphql.query.DokumentQuery
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQuery
 import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQuery
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
-import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
@@ -64,7 +64,7 @@ class SchemaBuilder(
     avviksvurderinghenter: Avviksvurderinghenter,
     behandlingsstatistikkMediator: IBehandlingsstatistikkService,
     saksbehandlerhåndterer: Saksbehandlerhåndterer,
-    oppgavehåndterer: Oppgavehåndterer,
+    apiOppgaveService: ApiOppgaveService,
     totrinnsvurderinghåndterer: Totrinnsvurderinghåndterer,
     godkjenninghåndterer: Godkjenninghåndterer,
     personhåndterer: Personhåndterer,
@@ -92,7 +92,7 @@ class SchemaBuilder(
                         vergemålApiDao = vergemålApiDao,
                         snapshotService = snapshotService,
                         reservasjonClient = reservasjonClient,
-                        oppgavehåndterer = oppgavehåndterer,
+                        apiOppgaveService = apiOppgaveService,
                         saksbehandlerhåndterer = saksbehandlerhåndterer,
                         avviksvurderinghenter = avviksvurderinghenter,
                         personhåndterer = personhåndterer,
@@ -101,7 +101,7 @@ class SchemaBuilder(
                     ),
             ),
             OppgaverQuery(
-                oppgavehåndterer = oppgavehåndterer,
+                apiOppgaveService = apiOppgaveService,
             ),
             BehandlingsstatistikkQuery(
                 behandlingsstatistikkMediator = behandlingsstatistikkMediator,
@@ -127,7 +127,7 @@ class SchemaBuilder(
             MinimumSykdomsgradMutation(saksbehandlerhåndterer = saksbehandlerhåndterer),
             TotrinnsvurderingMutation(
                 saksbehandlerhåndterer = saksbehandlerhåndterer,
-                oppgavehåndterer = oppgavehåndterer,
+                apiOppgaveService = apiOppgaveService,
                 totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
             ),
             VedtakMutation(

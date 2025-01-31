@@ -1,0 +1,192 @@
+package no.nav.helse.mediator.oppgave
+
+import no.nav.helse.db.EgenskapForDatabase
+import no.nav.helse.db.OppgaveDao
+import no.nav.helse.db.OppgavesorteringForDatabase
+import no.nav.helse.db.SorteringsnøkkelForDatabase
+import no.nav.helse.mediator.SaksbehandlerMediator.Companion.tilApiversjon
+import no.nav.helse.mediator.TilgangskontrollørForApi
+import no.nav.helse.mediator.oppgave.OppgaveMapper.tilApiversjon
+import no.nav.helse.mediator.oppgave.OppgaveMapper.tilBehandledeOppgaver
+import no.nav.helse.mediator.oppgave.OppgaveMapper.tilDatabaseversjon
+import no.nav.helse.mediator.oppgave.OppgaveMapper.tilEgenskaperForVisning
+import no.nav.helse.mediator.oppgave.OppgaveMapper.tilOppgaverTilBehandling
+import no.nav.helse.modell.Modellfeil
+import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
+import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
+import no.nav.helse.spesialist.api.graphql.schema.BehandledeOppgaver
+import no.nav.helse.spesialist.api.graphql.schema.Filtrering
+import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
+import no.nav.helse.spesialist.api.graphql.schema.OppgaverTilBehandling
+import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
+import no.nav.helse.spesialist.api.graphql.schema.Sorteringsnokkel
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
+import java.util.UUID
+
+class ApiOppgaveService(
+    private val oppgaveDao: OppgaveDao,
+    private val tilgangsgrupper: Tilgangsgrupper,
+    private val oppgaveService: OppgaveService,
+) {
+    fun oppgaver(
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+        offset: Int,
+        limit: Int,
+        sortering: List<Oppgavesortering>,
+        filtrering: Filtrering,
+    ): OppgaverTilBehandling {
+        val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
+        val egenskaperSaksbehandlerIkkeHarTilgangTil =
+            Egenskap
+                .alleTilgangsstyrteEgenskaper
+                .filterNot { saksbehandler.harTilgangTil(listOf(it)) }
+                .map(Egenskap::toString)
+
+        val alleUkategoriserteEgenskaper =
+            Egenskap
+                .alleUkategoriserteEgenskaper
+                .map(Egenskap::toString)
+
+        val ekskluderteEgenskaper =
+            filtrering.ekskluderteEgenskaper?.tilDatabaseversjon()?.map(
+                EgenskapForDatabase::toString,
+            ) ?: emptyList()
+
+        val egenskaperSomSkalEkskluderes =
+            egenskaperSaksbehandlerIkkeHarTilgangTil + ekskluderteEgenskaper + if (filtrering.ingenUkategoriserteEgenskaper) alleUkategoriserteEgenskaper else emptyList()
+
+        val grupperteFiltrerteEgenskaper =
+            filtrering.egenskaper
+                .groupBy { it.kategori }
+                .map { it.key.tilDatabaseversjon() to it.value.tilDatabaseversjon() }
+                .toMap()
+
+        val oppgaver =
+            oppgaveDao
+                .finnOppgaverForVisning(
+                    ekskluderEgenskaper = egenskaperSomSkalEkskluderes,
+                    saksbehandlerOid = saksbehandler.oid(),
+                    offset = offset,
+                    limit = limit,
+                    sortering = sortering.tilOppgavesorteringForDatabase(),
+                    egneSakerPåVent = filtrering.egneSakerPaVent,
+                    egneSaker = filtrering.egneSaker,
+                    tildelt = filtrering.tildelt,
+                    grupperteFiltrerteEgenskaper = grupperteFiltrerteEgenskaper,
+                )
+        return OppgaverTilBehandling(
+            oppgaver = oppgaver.tilOppgaverTilBehandling(),
+            totaltAntallOppgaver = if (oppgaver.isEmpty()) 0 else oppgaver.first().filtrertAntall,
+        )
+    }
+
+    fun antallOppgaver(saksbehandlerFraApi: SaksbehandlerFraApi): AntallOppgaver {
+        val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
+        val antallOppgaver = oppgaveDao.finnAntallOppgaver(saksbehandlerOid = saksbehandler.oid())
+        return antallOppgaver.tilApiversjon()
+    }
+
+    fun behandledeOppgaver(
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+        offset: Int,
+        limit: Int,
+    ): BehandledeOppgaver {
+        val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
+        val behandledeOppgaver =
+            oppgaveDao.finnBehandledeOppgaver(
+                behandletAvOid = saksbehandler.oid(),
+                offset = offset,
+                limit = limit,
+            )
+        return BehandledeOppgaver(
+            oppgaver = behandledeOppgaver.tilBehandledeOppgaver(),
+            totaltAntallOppgaver = if (behandledeOppgaver.isEmpty()) 0 else behandledeOppgaver.first().filtrertAntall,
+        )
+    }
+
+    fun hentEgenskaper(
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+    ): List<Oppgaveegenskap> {
+        val egenskaper =
+            oppgaveDao.finnEgenskaper(
+                vedtaksperiodeId = vedtaksperiodeId,
+                utbetalingId = utbetalingId,
+            )
+
+        return egenskaper?.tilEgenskaperForVisning() ?: emptyList()
+    }
+
+    private fun SaksbehandlerFraApi.tilSaksbehandler() =
+        Saksbehandler(
+            epostadresse = epost,
+            oid = oid,
+            navn = navn,
+            ident = ident,
+            tilgangskontroll = TilgangskontrollørForApi(grupper, tilgangsgrupper),
+        )
+
+    private fun List<Oppgavesortering>.tilOppgavesorteringForDatabase() =
+        map {
+            when (it.nokkel) {
+                Sorteringsnokkel.TILDELT_TIL ->
+                    OppgavesorteringForDatabase(
+                        SorteringsnøkkelForDatabase.TILDELT_TIL,
+                        it.stigende,
+                    )
+
+                Sorteringsnokkel.OPPRETTET ->
+                    OppgavesorteringForDatabase(
+                        SorteringsnøkkelForDatabase.OPPRETTET,
+                        it.stigende,
+                    )
+
+                Sorteringsnokkel.SOKNAD_MOTTATT ->
+                    OppgavesorteringForDatabase(
+                        SorteringsnøkkelForDatabase.SØKNAD_MOTTATT,
+                        it.stigende,
+                    )
+
+                Sorteringsnokkel.TIDSFRIST ->
+                    OppgavesorteringForDatabase(
+                        SorteringsnøkkelForDatabase.TIDSFRIST,
+                        it.stigende,
+                    )
+            }
+        }
+
+    fun sendTilBeslutter(
+        oppgaveId: Long,
+        behandlendeSaksbehandler: SaksbehandlerFraApi,
+    ) {
+        oppgaveService.oppgave(oppgaveId) {
+            try {
+                sendTilBeslutter(behandlendeSaksbehandler.tilSaksbehandler())
+            } catch (e: Modellfeil) {
+                throw e.tilApiversjon()
+            }
+        }
+    }
+
+    fun sendIRetur(
+        oppgaveId: Long,
+        besluttendeSaksbehandler: SaksbehandlerFraApi,
+    ) {
+        val saksbehandler = besluttendeSaksbehandler.tilSaksbehandler()
+        oppgaveService.oppgave(oppgaveId) {
+            try {
+                sendIRetur(saksbehandler)
+            } catch (e: Modellfeil) {
+                throw e.tilApiversjon()
+            }
+        }
+    }
+
+    fun venterPåSaksbehandler(oppgaveId: Long): Boolean = oppgaveDao.venterPåSaksbehandler(oppgaveId)
+
+    fun spleisBehandlingId(oppgaveId: Long): UUID = oppgaveDao.finnSpleisBehandlingId(oppgaveId)
+
+    fun fødselsnummer(oppgaveId: Long): String = oppgaveDao.finnFødselsnummer(oppgaveId)
+}

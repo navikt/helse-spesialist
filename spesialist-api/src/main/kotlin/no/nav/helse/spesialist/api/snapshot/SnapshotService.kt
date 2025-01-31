@@ -1,6 +1,8 @@
 package no.nav.helse.spesialist.api.snapshot
 
 import no.nav.helse.db.api.SnapshotApiDao
+import no.nav.helse.spesialist.api.graphql.schema.Adressebeskyttelse
+import no.nav.helse.spesialist.api.graphql.schema.Kjonn
 import no.nav.helse.spesialist.api.graphql.schema.Personinfo
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.slf4j.Logger
@@ -22,7 +24,32 @@ class SnapshotService(private val snapshotDao: SnapshotApiDao, private val snaps
                 hentOgLagre(fødselsnummer)
                 snapshotDao.hentSnapshotMedMetadata(fødselsnummer)
             }
-        return snapshot
+        return snapshot?.let { (personinfo, graphqlPerson) ->
+            Personinfo(
+                fornavn = personinfo.fornavn,
+                mellomnavn = personinfo.mellomnavn,
+                etternavn = personinfo.etternavn,
+                fodselsdato = personinfo.fodselsdato,
+                kjonn =
+                    personinfo.kjonn.let {
+                        when (it) {
+                            SnapshotApiDao.Personinfo.Kjonn.Kvinne -> Kjonn.Kvinne
+                            SnapshotApiDao.Personinfo.Kjonn.Mann -> Kjonn.Mann
+                            SnapshotApiDao.Personinfo.Kjonn.Ukjent -> Kjonn.Ukjent
+                        }
+                    },
+                adressebeskyttelse =
+                    personinfo.adressebeskyttelse.let {
+                        when (it) {
+                            SnapshotApiDao.Personinfo.Adressebeskyttelse.Ugradert -> Adressebeskyttelse.Ugradert
+                            SnapshotApiDao.Personinfo.Adressebeskyttelse.Fortrolig -> Adressebeskyttelse.Fortrolig
+                            SnapshotApiDao.Personinfo.Adressebeskyttelse.StrengtFortrolig -> Adressebeskyttelse.StrengtFortrolig
+                            SnapshotApiDao.Personinfo.Adressebeskyttelse.StrengtFortroligUtland -> Adressebeskyttelse.StrengtFortroligUtland
+                            SnapshotApiDao.Personinfo.Adressebeskyttelse.Ukjent -> Adressebeskyttelse.Ukjent
+                        }
+                    },
+            ) to graphqlPerson
+        }
     }
 
     private fun hentOgLagre(fødselsnummer: String) {

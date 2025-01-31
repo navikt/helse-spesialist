@@ -12,6 +12,7 @@ import no.nav.helse.db.api.VarselDbDto
 import no.nav.helse.db.api.VedtaksperiodeDbDto.Companion.avvisVarsler
 import no.nav.helse.db.api.VedtaksperiodeDbDto.Companion.godkjennVarsler
 import no.nav.helse.db.api.VedtaksperiodeDbDto.Companion.harAktiveVarsler
+import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.mediator.overstyring.Overstyringlagrer
 import no.nav.helse.mediator.overstyring.Saksbehandlingsmelder
@@ -98,6 +99,7 @@ class SaksbehandlerMediator(
     private val versjonAvKode: String,
     private val meldingPubliserer: MeldingPubliserer,
     private val oppgaveService: OppgaveService,
+    private val apiOppgaveService: ApiOppgaveService,
     private val tilgangsgrupper: Tilgangsgrupper,
     private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndtererImpl,
     private val totrinnsvurderingService: TotrinnsvurderingService,
@@ -198,8 +200,8 @@ class SaksbehandlerMediator(
         saksbehandler: Saksbehandler,
         godkjent: Boolean,
     ): VedtakResultat {
-        val erÅpenOppgave = oppgaveService.venterPåSaksbehandler(oppgavereferanse)
-        val spleisBehandlingId = oppgaveService.spleisBehandlingId(oppgavereferanse)
+        val erÅpenOppgave = apiOppgaveService.venterPåSaksbehandler(oppgavereferanse)
+        val spleisBehandlingId = apiOppgaveService.spleisBehandlingId(oppgavereferanse)
         val fødselsnummer = oppgaveApiDao.finnFødselsnummer(oppgavereferanse)
         if (!erÅpenOppgave) return VedtakResultat.Feil.IkkeÅpenOppgave()
 
@@ -626,7 +628,7 @@ class SaksbehandlerMediator(
         }
 
         try {
-            oppgaveService.sendTilBeslutter(oppgavereferanse, saksbehandlerFraApi)
+            apiOppgaveService.sendTilBeslutter(oppgavereferanse, saksbehandlerFraApi)
         } catch (modellfeil: no.nav.helse.spesialist.api.feilhåndtering.Modellfeil) {
             return SendTilGodkjenningResult.Feil.KunneIkkeSendeTilBeslutter(modellfeil)
         } catch (e: Exception) {
@@ -904,9 +906,9 @@ class SaksbehandlerMediator(
 
     private fun PaVentRequest.LeggPaVent.tilModellversjon(): LeggPåVent =
         LeggPåVent(
-            fødselsnummer = oppgaveService.fødselsnummer(oppgaveId),
+            fødselsnummer = apiOppgaveService.fødselsnummer(oppgaveId),
             oppgaveId = oppgaveId,
-            behandlingId = oppgaveService.spleisBehandlingId(oppgaveId),
+            behandlingId = apiOppgaveService.spleisBehandlingId(oppgaveId),
             frist = frist,
             skalTildeles = skalTildeles,
             notatTekst = notatTekst,
@@ -915,9 +917,9 @@ class SaksbehandlerMediator(
 
     private fun PaVentRequest.EndrePaVent.tilModellversjon(): EndrePåVent {
         return EndrePåVent(
-            fødselsnummer = oppgaveService.fødselsnummer(oppgaveId),
+            fødselsnummer = apiOppgaveService.fødselsnummer(oppgaveId),
             oppgaveId = oppgaveId,
-            behandlingId = oppgaveService.spleisBehandlingId(oppgaveId),
+            behandlingId = apiOppgaveService.spleisBehandlingId(oppgaveId),
             frist = frist,
             skalTildeles = skalTildeles,
             notatTekst = notatTekst,

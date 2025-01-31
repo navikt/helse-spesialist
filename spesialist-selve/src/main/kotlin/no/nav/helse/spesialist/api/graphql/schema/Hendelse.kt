@@ -102,7 +102,7 @@ data class InntektHentetFraAOrdningen(
     val mottattDato: LocalDateTime,
 ) : Hendelse
 
-internal fun GraphQLHendelse.tilHendelse(): Hendelse =
+fun GraphQLHendelse.tilHendelse(): Hendelse =
     when (this) {
         is GraphQLInntektsmelding ->
             Inntektsmelding(

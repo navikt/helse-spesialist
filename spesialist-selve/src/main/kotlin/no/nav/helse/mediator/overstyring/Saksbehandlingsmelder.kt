@@ -10,7 +10,7 @@ import no.nav.helse.modell.melding.OverstyrtTidslinjeEvent
 import no.nav.helse.modell.melding.SkjønnsfastsattSykepengegrunnlagEvent
 import no.nav.helse.modell.saksbehandler.SaksbehandlerObserver
 
-internal class Saksbehandlingsmelder(
+class Saksbehandlingsmelder(
     private val meldingPubliserer: MeldingPubliserer,
 ) : SaksbehandlerObserver {
     override fun tidslinjeOverstyrt(

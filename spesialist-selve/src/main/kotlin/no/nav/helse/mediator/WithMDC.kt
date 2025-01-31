@@ -2,7 +2,7 @@ package no.nav.helse.mediator
 
 import org.slf4j.MDC
 
-internal fun withMDC(
+fun withMDC(
     context: Map<String, String>,
     block: () -> Unit,
 ) {

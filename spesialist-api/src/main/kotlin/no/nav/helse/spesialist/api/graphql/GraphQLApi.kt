@@ -25,6 +25,7 @@ import no.nav.helse.db.api.TildelingApiDao
 import no.nav.helse.db.api.TotrinnsvurderingApiDao
 import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.db.api.VergemålApiDao
+import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
@@ -35,7 +36,6 @@ import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
-import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import org.slf4j.Logger
@@ -65,7 +65,7 @@ fun Application.graphQLApi(
     snapshotService: SnapshotService,
     behandlingsstatistikkMediator: IBehandlingsstatistikkService,
     saksbehandlerhåndterer: Saksbehandlerhåndterer,
-    oppgavehåndterer: Oppgavehåndterer,
+    apiOppgaveService: ApiOppgaveService,
     totrinnsvurderinghåndterer: Totrinnsvurderinghåndterer,
     godkjenninghåndterer: Godkjenninghåndterer,
     personhåndterer: Personhåndterer,
@@ -93,7 +93,7 @@ fun Application.graphQLApi(
             avviksvurderinghenter = avviksvurderinghenter,
             behandlingsstatistikkMediator = behandlingsstatistikkMediator,
             saksbehandlerhåndterer = saksbehandlerhåndterer,
-            oppgavehåndterer = oppgavehåndterer,
+            apiOppgaveService = apiOppgaveService,
             totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
             godkjenninghåndterer = godkjenninghåndterer,
             personhåndterer = personhåndterer,

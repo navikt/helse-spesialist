@@ -7,6 +7,7 @@ import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.db.DBRepositories
 import no.nav.helse.e2e.DatabaseIntegrationTest
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
+import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
@@ -72,26 +73,32 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         )
     private val oppgaveService =
         OppgaveService(
-            oppgaveDao,
-            tildelingDbDao,
-            reservasjonDao,
-            opptegnelseRepository,
-            totrinnsvurderingDao,
-            saksbehandlerDao,
-            meldingPubliserer,
-            TilgangskontrollForTestHarIkkeTilgang,
-            tilgangsgrupper,
+            oppgaveDao = oppgaveDao,
+            tildelingDao = tildelingDbDao,
+            reservasjonDao = reservasjonDao,
+            opptegnelseDao = opptegnelseRepository,
+            totrinnsvurderingDao = totrinnsvurderingDao,
+            saksbehandlerDao = saksbehandlerDao,
+            meldingPubliserer = meldingPubliserer,
+            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
+            tilgangsgrupper = tilgangsgrupper,
             repositories = repositories
         )
+    private val apiOppgaveService = ApiOppgaveService(
+        oppgaveDao = oppgaveDao,
+        tilgangsgrupper = tilgangsgrupper,
+        oppgaveService = oppgaveService
+    )
     private val mediator =
         SaksbehandlerMediator(
-            DBRepositories(dataSource),
-            "versjonAvKode",
-            meldingPubliserer,
-            oppgaveService,
-            tilgangsgrupper,
-            stansAutomatiskBehandlinghåndterer,
-            TotrinnsvurderingService(
+            repositories = DBRepositories(dataSource),
+            versjonAvKode = "versjonAvKode",
+            meldingPubliserer = meldingPubliserer,
+            oppgaveService = oppgaveService,
+            apiOppgaveService = apiOppgaveService,
+            tilgangsgrupper = tilgangsgrupper,
+            stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
+            totrinnsvurderingService = TotrinnsvurderingService(
                 totrinnsvurderingDao = totrinnsvurderingDao,
                 oppgaveDao = oppgaveDao,
                 periodehistorikkDao = periodehistorikkDao,

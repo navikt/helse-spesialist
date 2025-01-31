@@ -18,6 +18,7 @@ import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.TilgangskontrollørForReservasjon
 import no.nav.helse.mediator.dokument.DokumentMediator
+import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.PlukkTilManuell
 import no.nav.helse.modell.automatisering.Stikkprøver
@@ -70,6 +71,7 @@ class SpesialistApp(
     private lateinit var personhåndterer: Personhåndterer
     private lateinit var saksbehandlerMediator: SaksbehandlerMediator
     private lateinit var oppgaveService: OppgaveService
+    private lateinit var apiOppgaveService: ApiOppgaveService
     private lateinit var dokumentMediator: DokumentMediator
     private lateinit var subsumsjonsmelder: Subsumsjonsmelder
 
@@ -96,7 +98,7 @@ class SpesialistApp(
     private val apiAvhengigheter =
         ApiAvhengigheter(
             saksbehandlerhåndtererProvider = { saksbehandlerMediator },
-            oppgavehåndtererProvider = { oppgaveService },
+            apiOppgaveServiceProvider = { apiOppgaveService },
             totrinnsvurderinghåndterer = { totrinnsvurderingService },
             godkjenninghåndtererProvider = { godkjenningService },
             personhåndtererProvider = { personhåndterer },
@@ -168,6 +170,12 @@ class SpesialistApp(
                 tilgangsgrupper = tilgangsgrupper,
                 repositories = repositories,
             )
+        apiOppgaveService =
+            ApiOppgaveService(
+                oppgaveDao = oppgaveDao,
+                tilgangsgrupper = tilgangsgrupper,
+                oppgaveService = oppgaveService,
+            )
         meldingMediator =
             MeldingMediator(
                 sessionFactory = TransactionalSessionFactory(dataSource),
@@ -193,6 +201,7 @@ class SpesialistApp(
                 versjonAvKode = versjonAvKode,
                 meldingPubliserer = meldingPubliserer,
                 oppgaveService = oppgaveService,
+                apiOppgaveService = apiOppgaveService,
                 tilgangsgrupper = tilgangsgrupper,
                 stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
                 totrinnsvurderingService = totrinnsvurderingService,

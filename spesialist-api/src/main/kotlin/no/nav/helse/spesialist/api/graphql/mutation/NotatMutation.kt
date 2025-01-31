@@ -5,11 +5,12 @@ import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import no.nav.helse.db.api.NotatApiDao
+import no.nav.helse.spesialist.api.graphql.mapping.tilDatabasetype
+import no.nav.helse.spesialist.api.graphql.mapping.tilSkjematype
 import no.nav.helse.spesialist.api.graphql.schema.Kommentar
 import no.nav.helse.spesialist.api.graphql.schema.Notat
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.notat.KommentarDto
-import no.nav.helse.spesialist.api.notat.NotatDto
 import java.util.UUID
 
 class NotatMutation(
@@ -53,7 +54,12 @@ class NotatMutation(
         val vedtaksperiodeIdUUID = UUID.fromString(vedtaksperiodeId)
         val notatDto =
             try {
-                notatDao.opprettNotat(vedtaksperiodeIdUUID, tekst, UUID.fromString(saksbehandlerOid), type)
+                notatDao.opprettNotat(
+                    vedtaksperiodeId = vedtaksperiodeIdUUID,
+                    tekst = tekst,
+                    saksbehandlerOid = UUID.fromString(saksbehandlerOid),
+                    type = type.tilDatabasetype(),
+                )
             } catch (e: RuntimeException) {
                 return DataFetcherResult
                     .newResult<Notat?>()
@@ -110,7 +116,7 @@ class NotatMutation(
             .extensions(mapOf("code" to 500))
             .build()
 
-    private fun tilNotat(notat: NotatDto) =
+    private fun tilNotat(notat: NotatApiDao.NotatDto) =
         Notat(
             id = notat.id,
             dialogRef = notat.dialogRef,
@@ -123,7 +129,7 @@ class NotatMutation(
             vedtaksperiodeId = notat.vedtaksperiodeId,
             feilregistrert = notat.feilregistrert,
             feilregistrert_tidspunkt = notat.feilregistrert_tidspunkt,
-            type = notat.type,
+            type = notat.type.tilSkjematype(),
             kommentarer = notat.kommentarer.map(::tilKommentar),
         )
 

@@ -1,8 +1,8 @@
 package no.nav.helse.db.api
 
-import no.nav.helse.spesialist.api.graphql.schema.NotatType
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.helse.spesialist.api.notat.KommentarDto
-import no.nav.helse.spesialist.api.notat.NotatDto
+import java.time.LocalDateTime
 import java.util.UUID
 
 interface NotatApiDao {
@@ -27,4 +27,28 @@ interface NotatApiDao {
     fun feilregistrerKommentar(kommentarId: Int): KommentarDto?
 
     fun finnKommentarer(dialogRef: Long): List<KommentarDto>
+
+    @JsonIgnoreProperties
+    data class NotatDto(
+        val id: Int,
+        val dialogRef: Int,
+        val tekst: String,
+        val type: NotatType,
+        val opprettet: LocalDateTime,
+        val saksbehandlerOid: UUID,
+        val saksbehandlerNavn: String,
+        val saksbehandlerEpost: String,
+        val saksbehandlerIdent: String,
+        val vedtaksperiodeId: UUID,
+        val feilregistrert: Boolean,
+        val feilregistrert_tidspunkt: LocalDateTime?,
+        val kommentarer: List<KommentarDto>,
+    )
+
+    enum class NotatType {
+        Retur,
+        Generelt,
+        PaaVent,
+        OpphevStans,
+    }
 }

@@ -95,7 +95,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
             avviksvurderinghenter = avviksvurderinghenter,
             behandlingsstatistikkMediator = behandlingsstatistikkMediator,
             saksbehandlerhåndterer = saksbehandlerhåndterer,
-            oppgavehåndterer = oppgavehåndterer,
+            apiOppgaveService = apiOppgaveService,
             totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
             godkjenninghåndterer = godkjenninghåndterer,
             personhåndterer = personhåndterer,

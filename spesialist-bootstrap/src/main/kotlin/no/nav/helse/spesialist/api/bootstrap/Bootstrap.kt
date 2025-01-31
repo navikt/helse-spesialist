@@ -61,7 +61,7 @@ class Bootstrap(
             snapshotService = SnapshotService(snapshotApiDao, avhengigheter.snapshotClient),
             behandlingsstatistikkMediator = avhengigheter.behandlingstatistikk,
             saksbehandlerhåndterer = avhengigheter.saksbehandlerhåndtererProvider(),
-            oppgavehåndterer = avhengigheter.oppgavehåndtererProvider(),
+            apiOppgaveService = avhengigheter.apiOppgaveServiceProvider(),
             totrinnsvurderinghåndterer = avhengigheter.totrinnsvurderinghåndterer(),
             godkjenninghåndterer = avhengigheter.godkjenninghåndtererProvider(),
             personhåndterer = avhengigheter.personhåndtererProvider(),

@@ -91,7 +91,7 @@ data class Dag(
     val begrunnelser: List<Begrunnelse>?,
 )
 
-internal fun GraphQLDag.tilDag(): Dag =
+fun GraphQLDag.tilDag(): Dag =
     Dag(
         dato = dato,
         grad = grad,

@@ -4,9 +4,9 @@ import kotliquery.Row
 import no.nav.helse.db.HelseDao.Companion.asSQL
 import no.nav.helse.db.MedDataSource
 import no.nav.helse.db.QueryRunner
-import no.nav.helse.spesialist.api.graphql.schema.NotatType
+import no.nav.helse.db.api.NotatApiDao.NotatDto
+import no.nav.helse.db.api.NotatApiDao.NotatType
 import no.nav.helse.spesialist.api.notat.KommentarDto
-import no.nav.helse.spesialist.api.notat.NotatDto
 import java.util.UUID
 import javax.sql.DataSource
 

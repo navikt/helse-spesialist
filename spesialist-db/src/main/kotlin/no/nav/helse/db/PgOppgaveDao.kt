@@ -6,7 +6,6 @@ import no.nav.helse.db.HelseDao.Companion.asSQL
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.objectMapper
-import no.nav.helse.spesialist.api.graphql.schema.Mottaker
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -670,4 +669,11 @@ class PgOppgaveDao internal constructor(
         ).single {
             it.long("id")
         }
+
+    private enum class Mottaker {
+        SYKMELDT,
+        ARBEIDSGIVER,
+        BEGGE,
+        INGEN,
+    }
 }

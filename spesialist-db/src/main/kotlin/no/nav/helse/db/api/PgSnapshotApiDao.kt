@@ -4,9 +4,9 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.spesialist.api.graphql.schema.Adressebeskyttelse
-import no.nav.helse.spesialist.api.graphql.schema.Kjonn
-import no.nav.helse.spesialist.api.graphql.schema.Personinfo
+import no.nav.helse.db.api.SnapshotApiDao.Personinfo
+import no.nav.helse.db.api.SnapshotApiDao.Personinfo.Adressebeskyttelse
+import no.nav.helse.db.api.SnapshotApiDao.Personinfo.Kjonn
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.intellij.lang.annotations.Language
@@ -41,9 +41,6 @@ class PgSnapshotApiDao internal constructor(private val dataSource: DataSource) 
                             fodselsdato = row.localDate("fodselsdato"),
                             kjonn = row.stringOrNull("kjonn")?.let(Kjonn::valueOf) ?: Kjonn.Ukjent,
                             adressebeskyttelse = row.string("adressebeskyttelse").let(Adressebeskyttelse::valueOf),
-                            unntattFraAutomatisering = null, // denne settes i query
-                            reservasjon = null, // denne settes i query
-                            fullmakt = null, // denne settes i query
                         )
                     val snapshot = objectMapper.readValue<GraphQLPerson>(row.string("data"))
                     personinfo to snapshot

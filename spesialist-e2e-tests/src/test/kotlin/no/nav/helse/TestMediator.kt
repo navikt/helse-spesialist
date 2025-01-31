@@ -12,6 +12,7 @@ import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.meldinger.PoisonPills
+import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
@@ -70,15 +71,21 @@ internal class TestMediator(
             tilgangsgrupper = tilgangsgrupper,
             repositories = repositories,
         )
+    private val apiOppgaveService = ApiOppgaveService(
+        oppgaveDao = repositories.oppgaveDao,
+        tilgangsgrupper = tilgangsgrupper,
+        oppgaveService = oppgaveService
+    )
 
     private val saksbehandlerMediator =
         SaksbehandlerMediator(
-            repositories,
-            "versjonAvKode",
-            meldingPubliserer,
-            oppgaveService,
-            tilgangsgrupper,
-            stansAutomatiskBehandlinghåndterer,
+            repositories = repositories,
+            versjonAvKode = "versjonAvKode",
+            meldingPubliserer = meldingPubliserer,
+            oppgaveService = oppgaveService,
+            apiOppgaveService = apiOppgaveService,
+            tilgangsgrupper = tilgangsgrupper,
+            stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
             totrinnsvurderingService =
                 TotrinnsvurderingService(
                     totrinnsvurderingDao = totrinnsvurderingDao,

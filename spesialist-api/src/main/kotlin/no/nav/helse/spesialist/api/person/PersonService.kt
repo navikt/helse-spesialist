@@ -20,6 +20,7 @@ import no.nav.helse.db.api.TildelingApiDao
 import no.nav.helse.db.api.TotrinnsvurderingApiDao
 import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.db.api.VergemålApiDao
+import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
@@ -30,7 +31,6 @@ import no.nav.helse.spesialist.api.graphql.query.PersonoppslagService
 import no.nav.helse.spesialist.api.graphql.schema.Person
 import no.nav.helse.spesialist.api.graphql.schema.Personinfo
 import no.nav.helse.spesialist.api.graphql.schema.Reservasjon
-import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.saksbehandler.manglerTilgang
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
@@ -62,7 +62,7 @@ class PersonService(
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val påVentApiDao: PåVentApiDao,
     private val avviksvurderinghenter: Avviksvurderinghenter,
-    private val oppgavehåndterer: Oppgavehåndterer,
+    private val apiOppgaveService: ApiOppgaveService,
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
     private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
     private val personhåndterer: Personhåndterer,
@@ -135,7 +135,7 @@ class PersonService(
                 totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                 påVentApiDao = påVentApiDao,
                 avviksvurderinghenter = avviksvurderinghenter,
-                oppgavehåndterer = oppgavehåndterer,
+                apiOppgaveService = apiOppgaveService,
                 saksbehandlerhåndterer = saksbehandlerhåndterer,
             ),
         )

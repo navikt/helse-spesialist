@@ -5,7 +5,7 @@ import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
 
 class SaksbehandlerLagrer(private val saksbehandlerDao: SaksbehandlerDao) {
-    internal fun lagre(saksbehandler: Saksbehandler) {
+    fun lagre(saksbehandler: Saksbehandler) {
         val dto = saksbehandler.toDto()
         saksbehandlerDao.opprettEllerOppdater(
             oid = dto.oid,

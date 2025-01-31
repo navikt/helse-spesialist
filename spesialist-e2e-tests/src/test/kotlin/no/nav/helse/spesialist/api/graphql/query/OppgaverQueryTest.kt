@@ -30,7 +30,7 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
     @Test
     fun `oppgaver query uten parametere returnerer oppgave`() {
         every {
-            oppgavehåndterer.oppgaver(any(), any(), any(), any(), any())
+            apiOppgaveService.oppgaver(any(), any(), any(), any(), any())
         } returns OppgaverTilBehandling(oppgaver = listOf(oppgaveTilBehandling()), totaltAntallOppgaver = 1)
 
         val body =
@@ -51,14 +51,14 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
             )
         val antallOppgaver = body["data"]["oppgaveFeed"].size()
 
-        verify(exactly = 1) { oppgavehåndterer.oppgaver(any(), 0, 14, any(), any()) }
+        verify(exactly = 1) { apiOppgaveService.oppgaver(any(), 0, 14, any(), any()) }
         assertEquals(1, antallOppgaver)
     }
 
     @Test
     fun `oppgaver query med parametere returnerer oppgave`() {
         every {
-            oppgavehåndterer.oppgaver(any(), any(), any(), any(), any())
+            apiOppgaveService.oppgaver(any(), any(), any(), any(), any())
         } returns OppgaverTilBehandling(oppgaver = listOf(oppgaveTilBehandling()), totaltAntallOppgaver = 1)
 
         val body =
@@ -80,7 +80,7 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
         val antallOppgaver = body["data"]["oppgaveFeed"].size()
 
         verify(exactly = 1) {
-            oppgavehåndterer.oppgaver(
+            apiOppgaveService.oppgaver(
                 saksbehandlerFraApi = any(),
                 offset = 14,
                 limit = 14,
@@ -98,7 +98,7 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
     @Test
     fun `oppgaver query sortert på tidsfrist`() {
         every {
-            oppgavehåndterer.oppgaver(any(), any(), any(), any(), any())
+            apiOppgaveService.oppgaver(any(), any(), any(), any(), any())
         } returns OppgaverTilBehandling(oppgaver = listOf(oppgaveTilBehandling()), totaltAntallOppgaver = 1)
 
         val body =
@@ -120,7 +120,7 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
         val antallOppgaver = body["data"]["oppgaveFeed"].size()
 
         verify(exactly = 1) {
-            oppgavehåndterer.oppgaver(
+            apiOppgaveService.oppgaver(
                 saksbehandlerFraApi = any(),
                 offset = 14,
                 limit = 14,
@@ -138,7 +138,7 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
     @Test
     fun `behandledeOppgaverFeed uten parametere returnerer oppgave`() {
         every {
-            oppgavehåndterer.behandledeOppgaver(any(), any(), any())
+            apiOppgaveService.behandledeOppgaver(any(), any(), any())
         } returns BehandledeOppgaver(oppgaver = listOf(behandletOppgave()), totaltAntallOppgaver = 1)
 
         val body =
@@ -152,14 +152,14 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
             )
         val antallOppgaver = body["data"]["behandledeOppgaverFeed"].size()
 
-        verify(exactly = 1) { oppgavehåndterer.behandledeOppgaver(any(), 0, 14) }
+        verify(exactly = 1) { apiOppgaveService.behandledeOppgaver(any(), 0, 14) }
         assertEquals(1, antallOppgaver)
     }
 
     @Test
     fun `behandledeOppgaverFeed med parametere returnerer oppgave`() {
         every {
-            oppgavehåndterer.behandledeOppgaver(any(), any(), any())
+            apiOppgaveService.behandledeOppgaver(any(), any(), any())
         } returns BehandledeOppgaver(oppgaver = listOf(behandletOppgave()), totaltAntallOppgaver = 1)
 
         val body =
@@ -174,7 +174,7 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
         val antallOppgaver = body["data"]["behandledeOppgaverFeed"].size()
 
         verify(exactly = 1) {
-            oppgavehåndterer.behandledeOppgaver(
+            apiOppgaveService.behandledeOppgaver(
                 saksbehandlerFraApi = any(),
                 offset = 14,
                 limit = 14,
@@ -185,7 +185,7 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `antallOppgaver returnerer antall oppgaver`() {
-        every { oppgavehåndterer.antallOppgaver(any()) } returns AntallOppgaver(antallMineSaker = 2, antallMineSakerPaVent = 1)
+        every { apiOppgaveService.antallOppgaver(any()) } returns AntallOppgaver(antallMineSaker = 2, antallMineSakerPaVent = 1)
 
         val body =
             runQuery(
@@ -201,7 +201,7 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
         val antallMineSakerPåVent = body["data"]["antallOppgaver"]["antallMineSakerPaVent"].asInt()
 
         verify(exactly = 1) {
-            oppgavehåndterer.antallOppgaver(
+            apiOppgaveService.antallOppgaver(
                 saksbehandlerFraApi = any(),
             )
         }

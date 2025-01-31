@@ -95,10 +95,11 @@ class GodkjenningService(
             totrinnsvurdering == null -> saksbehandlerForJson(oid)
 
             else -> {
+                val saksbehandler = totrinnsvurdering.saksbehandler
                 checkNotNull(
-                    totrinnsvurdering.saksbehandler,
+                    saksbehandler,
                 ) { "Totrinnsvurdering uten saksbehandler gir ikke noen mening ved godkjenning av periode" }
-                saksbehandlerForJson(totrinnsvurdering.saksbehandler)
+                saksbehandlerForJson(saksbehandler)
             }
         }
 
@@ -111,10 +112,11 @@ class GodkjenningService(
             totrinnsvurdering == null -> null
 
             else -> {
+                val beslutter = totrinnsvurdering.beslutter
                 checkNotNull(
-                    totrinnsvurdering.beslutter,
+                    beslutter,
                 ) { "Totrinnsvurdering uten beslutter gir ikke noen mening ved godkjenning av periode" }
-                saksbehandlerForJson(totrinnsvurdering.beslutter)
+                saksbehandlerForJson(beslutter)
             }
         }
 

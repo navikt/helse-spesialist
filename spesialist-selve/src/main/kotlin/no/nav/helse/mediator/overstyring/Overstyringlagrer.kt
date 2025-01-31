@@ -31,7 +31,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
-    internal fun lagre(
+    fun lagre(
         overstyring: Overstyring,
         saksbehandlerOid: UUID,
     ) {

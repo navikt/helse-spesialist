@@ -8,7 +8,7 @@ import java.util.UUID
 class PåVentRepository(
     private val dao: PåVentDao,
 ) {
-    internal fun leggPåVent(
+    fun leggPåVent(
         saksbehandlerOid: UUID,
         påVent: LeggPåVent,
         dialogRef: Long,
@@ -16,11 +16,11 @@ class PåVentRepository(
         dao.lagrePåVent(påVent.oppgaveId, saksbehandlerOid, påVent.frist, påVent.årsaker, påVent.notatTekst, dialogRef)
     }
 
-    internal fun fjernFraPåVent(oppgaveId: Long) {
+    fun fjernFraPåVent(oppgaveId: Long) {
         dao.slettPåVent(oppgaveId)
     }
 
-    internal fun endrePåVent(
+    fun endrePåVent(
         saksbehandlerOid: UUID,
         endrePåVent: EndrePåVent,
         dialogRef: Long,

@@ -12,12 +12,13 @@ import no.nav.helse.db.api.PeriodehistorikkApiDao
 import no.nav.helse.db.api.PåVentApiDao
 import no.nav.helse.db.api.TotrinnsvurderingApiDao
 import no.nav.helse.db.api.VarselApiRepository
+import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.Toggle
+import no.nav.helse.spesialist.api.graphql.mapping.tilSkjematype
 import no.nav.helse.spesialist.api.graphql.mapping.toVarselDto
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveForPeriodevisningDto
-import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
@@ -392,7 +393,7 @@ interface Periode {
                 vedtaksperiodeId = it.vedtaksperiodeId,
                 feilregistrert = it.feilregistrert,
                 feilregistrert_tidspunkt = it.feilregistrert_tidspunkt,
-                type = it.type,
+                type = it.type.tilSkjematype(),
                 kommentarer =
                     it.kommentarer.map { kommentar ->
                         Kommentar(
@@ -469,7 +470,7 @@ data class Handling(
 data class BeregnetPeriode(
     private val orgnummer: String,
     private val periode: GraphQLBeregnetPeriode,
-    private val oppgavehåndterer: Oppgavehåndterer,
+    private val apiOppgaveService: ApiOppgaveService,
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
     private val risikovurderinger: Map<UUID, RisikovurderingApiDto>,
     private val varselRepository: VarselApiRepository,
@@ -507,7 +508,7 @@ data class BeregnetPeriode(
 
     fun handlinger() = byggHandlinger()
 
-    fun egenskaper(): List<Oppgaveegenskap> = oppgavehåndterer.hentEgenskaper(periode.vedtaksperiodeId, periode.utbetaling.id)
+    fun egenskaper(): List<Oppgaveegenskap> = apiOppgaveService.hentEgenskaper(periode.vedtaksperiodeId, periode.utbetaling.id)
 
     private fun byggHandlinger(): List<Handling> =
         if (periodetilstand != Periodetilstand.TilGodkjenning) {

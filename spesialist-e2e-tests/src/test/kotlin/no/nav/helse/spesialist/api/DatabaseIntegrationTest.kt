@@ -4,10 +4,10 @@ import io.mockk.mockk
 import no.nav.helse.db.DbQuery
 import no.nav.helse.db.api.ArbeidsgiverApiDao.Inntekter
 import no.nav.helse.db.api.EgenAnsattApiDao
+import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
-import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
@@ -59,7 +59,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val vergemålApiDao = repositories.vergemålApiDao
 
     protected val egenAnsattApiDao = mockk<EgenAnsattApiDao>(relaxed = true)
-    protected val oppgavehåndterer = mockk<Oppgavehåndterer>(relaxed = true)
+    protected val apiOppgaveService = mockk<ApiOppgaveService>(relaxed = true)
     protected val totrinnsvurderinghåndterer = mockk<Totrinnsvurderinghåndterer>(relaxed = true)
 
     protected fun opprettVedtaksperiode(

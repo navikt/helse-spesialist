@@ -9,8 +9,8 @@ import no.nav.helse.db.api.PeriodehistorikkApiDao
 import no.nav.helse.db.api.PåVentApiDao
 import no.nav.helse.db.api.TotrinnsvurderingApiDao
 import no.nav.helse.db.api.VarselApiRepository
+import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
-import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
@@ -173,7 +173,7 @@ data class Arbeidsgiver(
     val nyeInntektsforholdPerioder: List<NyttInntektsforholdPeriode>,
     private val fødselsnummer: String,
     private val generasjoner: List<GraphQLGenerasjon>,
-    private val oppgavehåndterer: Oppgavehåndterer,
+    private val apiOppgaveService: ApiOppgaveService,
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
     private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
     private val risikovurderinger: Map<UUID, RisikovurderingApiDto>,
@@ -207,7 +207,7 @@ data class Arbeidsgiver(
                                 BeregnetPeriode(
                                     orgnummer = organisasjonsnummer,
                                     periode = it,
-                                    oppgavehåndterer = oppgavehåndterer,
+                                    apiOppgaveService = apiOppgaveService,
                                     saksbehandlerhåndterer = saksbehandlerhåndterer,
                                     risikovurderinger = risikovurderinger,
                                     varselRepository = varselRepository,
@@ -242,5 +242,16 @@ data class Arbeidsgiver(
         arbeidsgiverApiDao.finnArbeidsgiverInntekterFraAordningen(
             fødselsnummer,
             organisasjonsnummer,
-        )
+        ).map { fraAO ->
+            ArbeidsgiverInntekterFraAOrdningen(
+                skjaeringstidspunkt = fraAO.skjaeringstidspunkt,
+                inntekter =
+                    fraAO.inntekter.map { inntekt ->
+                        InntektFraAOrdningen(
+                            maned = inntekt.maned,
+                            sum = inntekt.sum,
+                        )
+                    },
+            )
+        }
 }

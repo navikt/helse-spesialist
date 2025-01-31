@@ -12,12 +12,12 @@ import no.nav.helse.db.api.PåVentApiDao
 import no.nav.helse.db.api.TildelingApiDao
 import no.nav.helse.db.api.TotrinnsvurderingApiDao
 import no.nav.helse.db.api.VarselApiRepository
+import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakUtfall
 import no.nav.helse.spesialist.api.objectMapper
-import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.overstyring.OverstyringArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringInntektDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringMinimumSykdomsgradDto
@@ -112,7 +112,7 @@ data class Person(
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val påVentApiDao: PåVentApiDao,
     private val avviksvurderinghenter: Avviksvurderinghenter,
-    private val oppgavehåndterer: Oppgavehåndterer,
+    private val apiOppgaveService: ApiOppgaveService,
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
 ) {
     fun versjon(): Int = snapshot.versjon
@@ -165,7 +165,7 @@ data class Person(
                 nyeInntektsforholdPerioder = arbeidsgiver.nyeInntektsforholdPerioder.tilNyeInntektsforholdPerioder(),
                 fødselsnummer = snapshot.fodselsnummer,
                 generasjoner = arbeidsgiver.generasjoner,
-                oppgavehåndterer = oppgavehåndterer,
+                apiOppgaveService = apiOppgaveService,
                 saksbehandlerhåndterer = saksbehandlerhåndterer,
                 arbeidsgiverApiDao = arbeidsgiverApiDao,
                 risikovurderinger = risikovurderinger,

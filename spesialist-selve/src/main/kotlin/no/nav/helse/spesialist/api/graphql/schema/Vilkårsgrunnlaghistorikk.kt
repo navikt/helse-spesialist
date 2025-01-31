@@ -51,7 +51,7 @@ data class VilkarsgrunnlagSpleis(
     val opptjeningFra: LocalDate,
 ) : Vilkarsgrunnlag
 
-internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Avviksvurderinghenter): Vilkarsgrunnlag {
+fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Avviksvurderinghenter): Vilkarsgrunnlag {
     return when (this) {
         is GraphQLSpleisVilkarsgrunnlag -> {
             val avviksvurdering: Avviksvurdering =

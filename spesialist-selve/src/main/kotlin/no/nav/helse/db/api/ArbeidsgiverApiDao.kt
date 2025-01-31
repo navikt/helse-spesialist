@@ -1,7 +1,6 @@
 package no.nav.helse.db.api
 
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsforholdApiDto
-import no.nav.helse.spesialist.api.graphql.schema.ArbeidsgiverInntekterFraAOrdningen
 import java.time.YearMonth
 
 interface ArbeidsgiverApiDao {
@@ -25,4 +24,14 @@ interface ArbeidsgiverApiDao {
     ) {
         data class Inntekt(val beløp: Double, val orgnummer: String)
     }
+
+    data class ArbeidsgiverInntekterFraAOrdningen(
+        val skjaeringstidspunkt: String,
+        val inntekter: List<InntektFraAOrdningen>,
+    )
+
+    data class InntektFraAOrdningen(
+        val maned: YearMonth,
+        val sum: Double,
+    )
 }

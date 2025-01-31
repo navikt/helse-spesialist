@@ -5,19 +5,19 @@ import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.BehandledeOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.Filtrering
 import no.nav.helse.spesialist.api.graphql.schema.OppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
-import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.time.measureTimedValue
 
-class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
+class OppgaverQuery(private val apiOppgaveService: ApiOppgaveService) : Query {
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
     @Suppress("unused")
@@ -29,7 +29,7 @@ class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         val behandledeOppgaver =
             withContext(Dispatchers.IO) {
-                oppgavehåndterer.behandledeOppgaver(
+                apiOppgaveService.behandledeOppgaver(
                     saksbehandlerFraApi = saksbehandler,
                     offset = offset,
                     limit = limit,
@@ -52,7 +52,7 @@ class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
         val (oppgaver, tid) =
             measureTimedValue {
                 withContext(Dispatchers.IO) {
-                    oppgavehåndterer.oppgaver(
+                    apiOppgaveService.oppgaver(
                         saksbehandlerFraApi = saksbehandler,
                         offset = offset,
                         limit = limit,
@@ -77,7 +77,7 @@ class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
         val (antallOppgaver, tid) =
             measureTimedValue {
                 withContext(Dispatchers.IO) {
-                    oppgavehåndterer.antallOppgaver(
+                    apiOppgaveService.antallOppgaver(
                         saksbehandlerFraApi = saksbehandler,
                     )
                 }
