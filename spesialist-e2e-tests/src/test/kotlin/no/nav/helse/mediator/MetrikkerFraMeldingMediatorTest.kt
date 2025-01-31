@@ -5,9 +5,9 @@ import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.Meldingssender
 import no.nav.helse.db.TransactionalSessionFactory
+import no.nav.helse.e2e.AbstractDatabaseTest
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.modell.person.SøknadSendtCommand
 import no.nav.helse.modell.varsel.VarselRepository

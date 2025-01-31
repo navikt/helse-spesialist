@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.DatabaseIntegrationTest
+import no.nav.helse.e2e.DatabaseIntegrationTest
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov

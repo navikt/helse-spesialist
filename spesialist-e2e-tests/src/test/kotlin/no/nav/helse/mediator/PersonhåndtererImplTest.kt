@@ -1,8 +1,8 @@
 package no.nav.helse.mediator
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
-import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.TestRapidHelpers.meldinger
+import no.nav.helse.e2e.AbstractDatabaseTest
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
