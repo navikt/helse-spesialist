@@ -43,7 +43,7 @@ enum class Inntektskilde {
     SKJONNSMESSIG_FASTSATT,
 }
 
-internal fun GraphQLOmregnetArsinntekt.tilOmregnetÅrsinntekt(): OmregnetArsinntekt =
+fun GraphQLOmregnetArsinntekt.tilOmregnetÅrsinntekt(): OmregnetArsinntekt =
     OmregnetArsinntekt(
         belop = belop,
         inntektFraAOrdningen = inntekterFraAOrdningen?.map { it.tilInntektFraAOrdningen() },
@@ -51,7 +51,7 @@ internal fun GraphQLOmregnetArsinntekt.tilOmregnetÅrsinntekt(): OmregnetArsinnt
         manedsbelop = manedsbelop,
     )
 
-internal fun GraphQLSkjonnsmessigFastsatt.tilOmregnetÅrsinntekt(): OmregnetArsinntekt =
+fun GraphQLSkjonnsmessigFastsatt.tilOmregnetÅrsinntekt(): OmregnetArsinntekt =
     OmregnetArsinntekt(
         belop = belop,
         inntektFraAOrdningen = null,

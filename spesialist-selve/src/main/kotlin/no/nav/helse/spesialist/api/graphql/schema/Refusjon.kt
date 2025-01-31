@@ -17,7 +17,7 @@ data class Refusjonselement(
     val meldingsreferanseId: UUID,
 )
 
-internal fun GraphQLArbeidsgiverrefusjon.tilArbeidsgiverrefusjon(): Arbeidsgiverrefusjon =
+fun GraphQLArbeidsgiverrefusjon.tilArbeidsgiverrefusjon(): Arbeidsgiverrefusjon =
     Arbeidsgiverrefusjon(
         arbeidsgiver = arbeidsgiver,
         refusjonsopplysninger = refusjonsopplysninger.tilRefusjonsopplysninger(),
