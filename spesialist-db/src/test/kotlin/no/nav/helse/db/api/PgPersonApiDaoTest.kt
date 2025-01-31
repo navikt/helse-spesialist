@@ -45,32 +45,32 @@ internal class PgPersonApiDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `kan svare på om en person er klar for visning`() {
-        val personId = opprettMinimalPerson()
+        opprettMinimalPerson()
         assertPersonenErIkkeKlar()
 
-        oppdaterEnhet(personId, 101)
+        oppdaterEnhet(enhetNr = 101)
         assertPersonenErIkkeKlar()
 
-        opprettEgenAnsatt(personId, false)
+        opprettEgenAnsatt(FNR, false)
         assertPersonenErIkkeKlar()
 
-        oppdaterPersoninfo(Ugradert)
+        oppdaterAdressebeskyttelse(Ugradert)
         assertPersonenErKlar()
     }
 
     // Denne testen komplementerer den ovenstående, for å vise at både personinfo og info om egen ansatt må finnes
     @Test
     fun `kan svare på om en person er klar for visning, med dataene mottatt i ikke-realistisk rekkefølge`() {
-        val personId = opprettMinimalPerson()
+        opprettMinimalPerson()
         assertPersonenErIkkeKlar()
 
-        oppdaterPersoninfo(Ugradert)
+        oppdaterAdressebeskyttelse(Ugradert)
         assertPersonenErIkkeKlar()
 
-        opprettEgenAnsatt(personId, false)
+        opprettEgenAnsatt(FNR, false)
         assertPersonenErIkkeKlar()
 
-        oppdaterEnhet(personId, 101)
+        oppdaterEnhet(enhetNr = 101)
 
         assertPersonenErKlar()
     }

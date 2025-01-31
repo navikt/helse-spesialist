@@ -1,11 +1,8 @@
 package no.nav.helse.db
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.DatabaseIntegrationTest
-import no.nav.helse.modell.person.Adressebeskyttelse
-import no.nav.helse.spesialist.typer.Kjønn
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -16,10 +13,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class PgReservasjonDaoTest : DatabaseIntegrationTest() {
-
-    private companion object {
-        private val objectMapper = jacksonObjectMapper()
-    }
 
     @Test
     fun `reserverer person`() {
@@ -58,20 +51,7 @@ internal class PgReservasjonDaoTest : DatabaseIntegrationTest() {
     }
 
     private fun opprettData(fødselsnummer: String = FNR) {
-        val personinfoRef = insertPersoninfo(
-            "KARI",
-            "Mellomnavn",
-            "Nordmann",
-            LocalDate.EPOCH,
-            Kjønn.Kvinne,
-            Adressebeskyttelse.Ugradert
-        )
-        val utbetalingerRef = personDao.upsertInfotrygdutbetalinger(fødselsnummer, objectMapper.createObjectNode())
-        personDao.insertPerson(
-            fødselsnummer,
-            "4321098765432", personinfoRef, "0301".toInt(), utbetalingerRef
-        )
-
+        opprettPerson(fødselsnummer)
         saksbehandlerDao.opprettEllerOppdater(
             SAKSBEHANDLER_OID,
             "Sara Saksbehandler",

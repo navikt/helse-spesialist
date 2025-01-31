@@ -15,6 +15,7 @@ import no.nav.helse.db.overstyring.SkjønnsfastsattSykepengegrunnlagForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsettingstypeForDatabase
 import no.nav.helse.modell.InntektskildetypeDto.ORDINÆR
 import no.nav.helse.modell.KomplettInntektskildeDto
+import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
@@ -72,17 +73,17 @@ internal class PgOverstyringDaoTest : DatabaseIntegrationTest() {
                 KomplettInntektskildeDto(ORGNUMMER, ORDINÆR, ARBEIDSGIVER_NAVN, BRANSJER, LocalDate.now())
             )
         )
-        val navn_ref =
-            insertPersoninfo(
-                PERSON_FORNAVN,
-                null,
-                PERSON_ETTERNAVN,
-                PERSON_FØDSELSDATO,
-                PERSON_KJØNN,
-                ADRESSEBESKYTTELSE,
-            )
-        val infotrygdutbetaling_ref = personDao.upsertInfotrygdutbetalinger(FNR, objectMapper.createObjectNode())
-        personDao.insertPerson(FNR, AKTØR, navn_ref, 420, infotrygdutbetaling_ref)
+        personDao.lagreMinimalPerson(MinimalPersonDto(FNR, AKTØR))
+        opprettPersoninfo(
+            FNR,
+            PERSON_FORNAVN,
+            null,
+            PERSON_ETTERNAVN,
+            PERSON_FØDSELSDATO,
+            PERSON_KJØNN,
+            ADRESSEBESKYTTELSE,
+        )
+        personDao.upsertInfotrygdutbetalinger(FNR, objectMapper.createObjectNode())
     }
 
     @Test
@@ -348,9 +349,10 @@ internal class PgOverstyringDaoTest : DatabaseIntegrationTest() {
                 fødselsnummer = FNR,
                 perioderVurdertOk = listOf(
                     MinimumSykdomsgradForDatabase.MinimumSykdomsgradPeriodeForDatabase(
-                    fom = 1.januar,
-                    tom = 31.januar
-                )),
+                        fom = 1.januar,
+                        tom = 31.januar
+                    )
+                ),
                 perioderVurdertIkkeOk = emptyList(),
                 begrunnelse = "en begrunnelse",
                 opprettet = OPPRETTET,

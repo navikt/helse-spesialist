@@ -10,7 +10,6 @@ import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.PgMeldingDuplikatkontrollDao
 import no.nav.helse.db.PgPersonDao
 import no.nav.helse.db.TestMelding
-import no.nav.helse.db.api.ArbeidsgiverApiDao.Inntekter
 import no.nav.helse.db.api.PgAbonnementApiDao
 import no.nav.helse.db.api.PgArbeidsgiverApiDao
 import no.nav.helse.db.api.PgNotatApiDao
@@ -20,7 +19,9 @@ import no.nav.helse.db.api.PgPeriodehistorikkApiDao
 import no.nav.helse.db.api.PgPersonApiDao
 import no.nav.helse.db.api.PgRisikovurderingApiDao
 import no.nav.helse.modell.InntektskildetypeDto
+import no.nav.helse.modell.KomplettArbeidsforholdDto
 import no.nav.helse.modell.KomplettInntektskildeDto
+import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
@@ -234,11 +235,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ) {
         opprettSaksbehandler(saksbehandlerOid, navn = navn, epost = SAKSBEHANDLER_EPOST, ident = SAKSBEHANDLER_IDENT)
         oppgaveDao.updateOppgave(oppgaveId, oppgavestatus = "AvventerSaksbehandler", egenskaper = egenskaper)
-        dbQuery.update(
-            "INSERT INTO tildeling (saksbehandler_ref, oppgave_id_ref) VALUES (:oid, :oppgaveId)",
-            "oid" to saksbehandlerOid,
-            "oppgaveId" to oppgaveId
-        )
+        tildelingDao.tildel(oppgaveId, saksbehandlerOid)
     }
 
     protected fun leggOppgavePåVent(
@@ -264,28 +261,22 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun opprettMinimalPerson(
         fødselsnummer: String = FNR,
         aktørId: String = AKTØR,
-    ) = requireNotNull(
-        dbQuery.updateAndReturnGeneratedKey(
-            "insert into person (fødselsnummer, aktør_id) values (:foedselsnummer, :aktoerId)",
-            "foedselsnummer" to fødselsnummer,
-            "aktoerId" to aktørId,
-        )
-    )
+    ) = personDao.lagreMinimalPerson(MinimalPersonDto(fødselsnummer, aktørId))
 
     protected fun opprettPerson(
         fødselsnummer: String = FNR,
         aktørId: String = AKTØR,
         adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
     ): Persondata {
-        val personinfoId =
-            insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, adressebeskyttelse)
+        personDao.lagreMinimalPerson(MinimalPersonDto(fødselsnummer, aktørId))
+        val personinfoId = opprettPersoninfo(fødselsnummer, adressebeskyttelse = adressebeskyttelse)
         val infotrygdutbetalingerId =
             personDao.upsertInfotrygdutbetalinger(fødselsnummer, objectMapper.createObjectNode())
         val enhetId = ENHET.toInt()
-        personId = personDao.insertPerson(fødselsnummer, aktørId, personinfoId, enhetId, infotrygdutbetalingerId)
+        personDao.oppdaterEnhet(fødselsnummer, enhetId)
+        personId = personDao.finnPersonMedFødselsnummer(fødselsnummer)!!
         egenAnsattDao.lagre(fødselsnummer, false, LocalDateTime.now())
         return Persondata(
-            personId = personId,
             personinfoId = personinfoId,
             enhetId = enhetId,
             infotrygdutbetalingerId = infotrygdutbetalingerId,
@@ -293,90 +284,36 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     }
 
     protected fun oppdaterEnhet(
-        personId: Long,
+        fødselsnummer: String = FNR,
         enhetNr: Int,
-    ) = dbQuery.update(
-        "update person set enhet_ref = :enhetNr, enhet_ref_oppdatert = now() where id = :personId",
-        "enhetNr" to enhetNr,
-        "personId" to personId,
-    )
+    ) = personDao.oppdaterEnhet(fødselsnummer, enhetNr)
 
     protected fun opprettEgenAnsatt(
-        personId: Long,
-        erEgenAnsatt: Boolean,
-    ) = dbQuery.update(
-        "insert into egen_ansatt values (:personId, :erEgenAnsatt, now())",
-        "personId" to personId,
-        "erEgenAnsatt" to erEgenAnsatt,
-    )
-
-    protected fun oppdaterPersoninfo(adressebeskyttelse: Adressebeskyttelse) {
-        val personinfoId = opprettPersoninfo(adressebeskyttelse)
-        oppdaterPersonpekere(FNR, personinfoId)
-    }
-
-    private fun opprettPersoninfo(adressebeskyttelse: Adressebeskyttelse) = dbQuery.updateAndReturnGeneratedKey(
-        """
-        INSERT INTO person_info (fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse)
-        VALUES (:fornavn, :mellomnavn, :etternavn, :foedselsdato::date, :kjoenn::person_kjonn, :adressebeskyttelse)
-        """.trimIndent(),
-        "fornavn" to FORNAVN,
-        "mellomnavn" to MELLOMNAVN,
-        "etternavn" to ETTERNAVN,
-        "foedselsdato" to LocalDate.of(1970, 1, 1),
-        "kjoenn" to "Ukjent",
-        "adressebeskyttelse" to adressebeskyttelse.name,
-    )
-
-    private fun oppdaterPersonpekere(
         fødselsnummer: String,
-        personinfoId: Long? = null,
-        infotrygdutbetalingerId: Long? = null,
-    ) {
-        dbQuery.update(
-            """
-            update person
-            set info_ref=:personinfoId,
-                infotrygdutbetalinger_ref=:infotrygdutbetalingerRef,
-                personinfo_oppdatert = (
-                    CASE 
-                        when (:harPersoninfoId is not null) then now()
-                    END
-                ),
-                infotrygdutbetalinger_oppdatert = (
-                    CASE 
-                        when (:harInfotrygdutbetalingerRef is not null) then now()
-                    END
-                )
-            where fødselsnummer = :foedselsnummer
-            """.trimIndent(),
-            "personinfoId" to personinfoId,
-            "harPersoninfoId" to (personinfoId != null),
-            "infotrygdutbetalingerRef" to infotrygdutbetalingerId,
-            "harInfotrygdutbetalingerRef" to (infotrygdutbetalingerId != null),
-            "foedselsnummer" to fødselsnummer,
-        )
+        erEgenAnsatt: Boolean,
+    ) = egenAnsattDao.lagre(fødselsnummer, erEgenAnsatt, LocalDateTime.now())
+
+    protected fun oppdaterAdressebeskyttelse(adressebeskyttelse: Adressebeskyttelse) {
+        opprettPersoninfo(FNR, adressebeskyttelse = adressebeskyttelse)
     }
 
-    protected fun insertPersoninfo(
-        fornavn: String,
-        mellomnavn: String?,
-        etternavn: String,
-        fødselsdato: LocalDate,
-        kjønn: Kjønn,
+    protected fun opprettPersoninfo(
+        fødselsnummer: String,
+        fornavn: String = FORNAVN,
+        mellomnavn: String? = MELLOMNAVN,
+        etternavn: String = ETTERNAVN,
+        fødselsdato: LocalDate = LocalDate.of(1970, 1, 1),
+        kjønn: Kjønn = Kjønn.Ukjent,
         adressebeskyttelse: Adressebeskyttelse,
-    ) = dbQuery.updateAndReturnGeneratedKey(
-        """
-        INSERT INTO person_info (fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse)
-        VALUES (:fornavn, :mellomnavn, :etternavn, :foedselsdato, CAST(:kjoenn as person_kjonn), :adressebeskyttelse);
-        """.trimIndent(),
-        "fornavn" to fornavn,
-        "mellomnavn" to mellomnavn,
-        "etternavn" to etternavn,
-        "foedselsdato" to fødselsdato,
-        "kjoenn" to kjønn.name,
-        "adressebeskyttelse" to adressebeskyttelse.name,
-    ).let(::requireNotNull)
+    ) = personDao.upsertPersoninfo(
+        fødselsnummer = fødselsnummer,
+        fornavn = fornavn,
+        mellomnavn = mellomnavn,
+        etternavn = etternavn,
+        fødselsdato = fødselsdato,
+        kjønn = kjønn,
+        adressebeskyttelse = adressebeskyttelse,
+    ).let { personDao.finnPersoninfoRef(fødselsnummer) }!!
 
     protected fun opprettSaksbehandler(
         saksbehandlerOID: UUID = SAKSBEHANDLER_OID,
@@ -407,37 +344,20 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     }
 
     protected fun opprettArbeidsforhold(
-        personId: Long = this.personId,
+        fødselsnummer: String = FNR,
         orgnummer: String = ORGNUMMER,
-    ) = dbQuery.updateAndReturnGeneratedKey(
-        """
-        INSERT INTO arbeidsforhold (person_ref, arbeidsgiver_ref, startdato, sluttdato, stillingstittel, stillingsprosent, oppdatert)
-        select :personId, id, :startdato, :sluttdato, :tittel, :prosent, :oppdatert
-        from arbeidsgiver
-        where organisasjonsnummer = :orgnummer
-        """.trimIndent(),
-        "personId" to personId,
-        "orgnummer" to orgnummer,
-        "startdato" to ARBEIDSFORHOLD.start,
-        "sluttdato" to ARBEIDSFORHOLD.slutt,
-        "tittel" to ARBEIDSFORHOLD.tittel,
-        "prosent" to ARBEIDSFORHOLD.prosent,
-        "oppdatert" to LocalDateTime.now(),
-    )
-
-    protected fun opprettInntekt(
-        personId: Long,
-        skjæringstidspunkt: LocalDate,
-        inntekter: List<Inntekter>,
-    ) = dbQuery.update(
-        """
-        insert into inntekt (person_ref, skjaeringstidspunkt, inntekter)
-        values (:person_ref, :skjaeringstidspunkt, :inntekter::json)
-        """.trimIndent(),
-        "person_ref" to personId,
-        "skjaeringstidspunkt" to skjæringstidspunkt,
-        "inntekter" to objectMapper.writeValueAsString(inntekter),
-    )
+    ) {
+        val arbeidsforholdDto = KomplettArbeidsforholdDto(
+            ARBEIDSFORHOLD.start,
+            ARBEIDSFORHOLD.slutt,
+            ARBEIDSFORHOLD.tittel,
+            ARBEIDSFORHOLD.prosent,
+            LocalDateTime.now(),
+            fødselsnummer,
+            orgnummer
+        )
+        arbeidsforholdDao.upsertArbeidsforhold(fødselsnummer, orgnummer, listOf(arbeidsforholdDto))
+    }
 
     protected fun opprettGenerasjon(
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
@@ -632,7 +552,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     )
 
     protected data class Persondata(
-        val personId: Long,
         val personinfoId: Long,
         val enhetId: Int,
         val infotrygdutbetalingerId: Long,

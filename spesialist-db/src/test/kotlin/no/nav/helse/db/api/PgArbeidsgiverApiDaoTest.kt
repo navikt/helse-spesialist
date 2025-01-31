@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
 
-internal class PgArbeidsgiverApiDaoTest: DatabaseIntegrationTest() {
+internal class PgArbeidsgiverApiDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `finner bransjer`() {
@@ -21,7 +21,7 @@ internal class PgArbeidsgiverApiDaoTest: DatabaseIntegrationTest() {
     fun `finner bransjer når det ikke er noen bransjer`() {
         opprettArbeidsgiver(bransjer = emptyList())
         arbeidsgiverApiDao.finnBransjer(ORGNUMMER).let {
-            assertTrue(it.isEmpty()) { "Forventet at $it skulle være tom liste"}
+            assertTrue(it.isEmpty()) { "Forventet at $it skulle være tom liste" }
         }
     }
 
@@ -49,13 +49,12 @@ internal class PgArbeidsgiverApiDaoTest: DatabaseIntegrationTest() {
 
     @Test
     fun `Finn inntekter fra aordningen for arbeidsgiveren i 3 foregående måneder for alle skjæringstidspunkt`() {
-        val (personId) = opprettPerson()
+        opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         opprettInntekt(
-            personId,
-            LocalDate.parse("2020-01-01"),
-            listOf(
+            skjæringstidspunkt = LocalDate.parse("2020-01-01"),
+            inntekter = listOf(
                 Inntekter(
                     årMåned = YearMonth.of(2019, 12),
                     inntektsliste = listOf(
@@ -81,9 +80,8 @@ internal class PgArbeidsgiverApiDaoTest: DatabaseIntegrationTest() {
             )
         )
         opprettInntekt(
-            personId,
-            LocalDate.parse("2022-11-11"),
-            listOf(
+            skjæringstidspunkt = LocalDate.parse("2022-11-11"),
+            inntekter = listOf(
                 Inntekter(
                     årMåned = YearMonth.of(2022, 10),
                     inntektsliste = listOf(
@@ -145,4 +143,21 @@ internal class PgArbeidsgiverApiDaoTest: DatabaseIntegrationTest() {
         assertEquals(0, inntektFraAordningen.size)
         assertTrue(inntektFraAordningen.isEmpty())
     }
+
+    private fun opprettInntekt(
+        fødselsnummer: String = FNR,
+        skjæringstidspunkt: LocalDate,
+        inntekter: List<Inntekter>,
+    ) = dbQuery.update(
+        """
+        with person_id as (select id from person where fødselsnummer = :foedselsnummer)
+        insert into inntekt (person_ref, skjaeringstidspunkt, inntekter)
+        select id, :skjaeringstidspunkt, :inntekter::json
+        from person_id
+        """.trimIndent(),
+        "foedselsnummer" to fødselsnummer,
+        "skjaeringstidspunkt" to skjæringstidspunkt,
+        "inntekter" to objectMapper.writeValueAsString(inntekter),
+    )
+
 }

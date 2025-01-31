@@ -66,7 +66,7 @@ internal class PgPersonDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `oppretter person`() {
-        val (_, personinfoId, enhetId, infotrygdutbetalingerId) = opprettPerson()
+        val (personinfoId, enhetId, infotrygdutbetalingerId) = opprettPerson()
         assertNotNull(personDao.finnPersonMedFødselsnummer(FNR))
         assertEquals(1, infotrygdUtbetalinger().size)
         assertEquals(LocalDate.now(), personDao.finnEnhetSistOppdatert(FNR))

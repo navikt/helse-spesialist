@@ -18,8 +18,8 @@ internal class PgAbonnementApiDaoTest : DatabaseIntegrationTest() {
         settSekvensnummer(saksbehandlerId, 42)
 
         val aktørId = lagAktørId()
-        val (personId) = opprettPerson(aktørId = aktørId)
-        lagOpptegnelse(personId, 962)
+        opprettPerson(aktørId = aktørId)
+        lagOpptegnelse(FNR, 962)
 
         abonnementDao.opprettAbonnement(saksbehandlerId, aktørId)
 
@@ -31,9 +31,9 @@ internal class PgAbonnementApiDaoTest : DatabaseIntegrationTest() {
         val saksbehandlerId = opprettSaksbehandler()
         val sekvensnummerForEnUrelatertPerson = 4095
         val endaEtSekvensnummerForEnUrelatertPerson = 4096
-        val (personId) = opprettPerson()
-        lagOpptegnelse(personId, sekvensnummerForEnUrelatertPerson)
-        lagOpptegnelse(personId, endaEtSekvensnummerForEnUrelatertPerson)
+        opprettPerson()
+        lagOpptegnelse(FNR, sekvensnummerForEnUrelatertPerson)
+        lagOpptegnelse(FNR, endaEtSekvensnummerForEnUrelatertPerson)
 
         abonnementDao.opprettAbonnement(saksbehandlerId, AKTØR)
 
@@ -75,11 +75,12 @@ internal class PgAbonnementApiDaoTest : DatabaseIntegrationTest() {
         """.trimIndent()
     )
 
-    private fun lagOpptegnelse(personRef: Long, eksisterendeSekvensnummer: Int) = dbQuery.update(
+    private fun lagOpptegnelse(fødselsnummer: String, eksisterendeSekvensnummer: Int) = dbQuery.update(
         """
             insert into opptegnelse
-            values (:person_id, :sekvensnummer, '{"innhold": "noe oppdateringsrelatert"}', 'en eller annen opptegnelsestype')
-        """.trimIndent(), "person_id" to personRef, "sekvensnummer" to eksisterendeSekvensnummer
+            select id, :sekvensnummer, '{"innhold": "noe oppdateringsrelatert"}', 'en eller annen opptegnelsestype'
+            from person where person.fødselsnummer = :foedselsnummer
+        """.trimIndent(), "foedselsnummer" to fødselsnummer, "sekvensnummer" to eksisterendeSekvensnummer
     )
 
     private fun finnSekvensnummer(saksbehandlerId: UUID) = dbQuery.single(
