@@ -631,7 +631,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     ) {
         fun fagsystemidFor(utbetalingId: UUID, tilArbeidsgiver: Boolean): String {
             val fagsystemidtype = if (tilArbeidsgiver) "arbeidsgiver" else "person"
-            val fagsystemId = dbQuery.single(
+            val fagsystemId = dbQuery.singleOrNull(
                 """
                 SELECT fagsystem_id FROM utbetaling_id ui
                 INNER JOIN oppdrag o ON o.id = ui.${fagsystemidtype}_fagsystem_id_ref
@@ -906,12 +906,12 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fun oppgaveIdFor(vedtaksperiodeId: UUID): Long = dbQuery.single(
             "SELECT id FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId) ORDER BY id DESC LIMIT 1",
             "vedtaksperiodeId" to vedtaksperiodeId,
-        ) { it.long(1) }!!
+        ) { it.long(1) }
 
         fun godkjenningsbehovIdFor(vedtaksperiodeId: UUID): UUID = dbQuery.single(
             "SELECT id FROM hendelse h INNER JOIN vedtaksperiode_hendelse vh on h.id = vh.hendelse_ref WHERE vh.vedtaksperiode_id = :vedtaksperiodeId AND h.type = 'GODKJENNING' LIMIT 1",
             "vedtaksperiodeId" to vedtaksperiodeId,
-        ) { it.uuid("id") }!!
+        ) { it.uuid("id") }
 
         fun settOppgaveIAvventerSystem(oppgaveId: Long) = dbQuery.update(
             "UPDATE oppgave SET status = 'AvventerSystem' WHERE id = :oppgaveId", "oppgaveId" to oppgaveId
@@ -1187,7 +1187,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             )
     }
 
-    private fun erRevurdering(vedtaksperiodeId: UUID) = dbQuery.single(
+    private fun erRevurdering(vedtaksperiodeId: UUID) = dbQuery.singleOrNull(
         """
         SELECT 1 FROM behandling
         WHERE vedtaksperiode_id = :vedtaksperiodeId AND tilstand = '${Behandling.VedtakFattet.navn()}'
@@ -1291,7 +1291,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     private fun hentOppgaveegenskaper(oppgaveId: Long): Set<Egenskap> {
-        val egenskaper = dbQuery.single(
+        val egenskaper = dbQuery.singleOrNull(
             "select egenskaper from oppgave where id = :oppgaveId",
             "oppgaveId" to oppgaveId,
         ) { it.array<String>("egenskaper").map<String, Egenskap>(::enumValueOf).toSet() }
@@ -1471,7 +1471,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun assertTotrinnsvurdering(oppgaveId: Long) {
-        val erToTrinnsvurdering = dbQuery.single(
+        val erToTrinnsvurdering = dbQuery.singleOrNull(
             """
             SELECT 1 FROM totrinnsvurdering
             INNER JOIN vedtak v on totrinnsvurdering.vedtaksperiode_id = v.vedtaksperiode_id
@@ -1494,10 +1494,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     internal fun commandContextId(godkjenningsbehovId: UUID) = dbQuery.single(
         "SELECT context_id FROM command_context WHERE hendelse_id = :godkjenningsbehovId ORDER by id DESC LIMIT 1",
         "godkjenningsbehovId" to godkjenningsbehovId,
-    ) { it.uuid("context_id") }.let(::requireNotNull)
+    ) { it.uuid("context_id") }
 
     private fun finnbeløp(type: String): Int? {
-        return dbQuery.single(
+        return dbQuery.singleOrNull(
             "SELECT ${type}beløp FROM utbetaling_id WHERE utbetaling_id = :utbetalingId", "utbetalingId" to utbetalingId
         ) { it.intOrNull("${type}beløp") }
     }
@@ -1509,22 +1509,22 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         "SELECT COUNT(*) FROM person WHERE fødselsnummer = :foedselsnummer AND aktør_id = :aktoerId",
         "foedselsnummer" to fødselsnummer,
         "aktoerId" to aktørId,
-    ) { it.int(1) }.let(::requireNotNull)
+    ) { it.int(1) }
 
     protected fun arbeidsgiver(organisasjonsnummer: String) = dbQuery.single(
         "SELECT COUNT(*) FROM arbeidsgiver WHERE organisasjonsnummer = :organisasjonsnummer",
         "organisasjonsnummer" to organisasjonsnummer,
-    ) { row -> row.int(1) }.let(::requireNotNull)
+    ) { row -> row.int(1) }
 
     private fun vedtak(vedtaksperiodeId: UUID) = dbQuery.single(
         "SELECT COUNT(*) FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId",
         "vedtaksperiodeId" to vedtaksperiodeId,
-    ) { it.int(1) }.let(::requireNotNull)
+    ) { it.int(1) }
 
     private fun forkastedeVedtak(vedtaksperiodeId: UUID) = dbQuery.single(
         "SELECT COUNT(*) FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId AND forkastet = TRUE",
         "vedtaksperiodeId" to vedtaksperiodeId,
-    ) { it.int(1) }.let(::requireNotNull)
+    ) { it.int(1) }
 
     private fun List<OverstyringRefusjonselement>.byggRefusjonselementEvent() =
         this.map {

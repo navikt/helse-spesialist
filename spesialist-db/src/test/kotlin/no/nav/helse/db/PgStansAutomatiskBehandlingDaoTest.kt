@@ -70,5 +70,5 @@ internal class PgStansAutomatiskBehandlingDaoTest : DatabaseIntegrationTest() {
 
             else -> error("Mangler mapping for ${T::class}")
         }
-    }!!
+    }
 }

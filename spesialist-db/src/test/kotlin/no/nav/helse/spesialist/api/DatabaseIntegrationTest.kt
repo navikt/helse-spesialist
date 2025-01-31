@@ -570,7 +570,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun finnOppgaveIdFor(vedtaksperiodeId: UUID): Long = dbQuery.single(
         "SELECT o.id FROM oppgave o JOIN vedtak v ON v.id = o.vedtak_ref WHERE v.vedtaksperiode_id = :vedtaksperiode_id;",
         "vedtaksperiode_id" to vedtaksperiodeId
-    ) { it.long("id") }.let(::requireNotNull)
+    ) { it.long("id") }
 
     protected data class Navn(
         val fornavn: String,

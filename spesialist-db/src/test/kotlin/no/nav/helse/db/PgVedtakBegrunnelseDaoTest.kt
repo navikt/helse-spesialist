@@ -149,5 +149,5 @@ internal class PgVedtakBegrunnelseDaoTest : DatabaseIntegrationTest() {
         dbQuery.single(
             "SELECT id FROM behandling WHERE vedtaksperiode_id = :vedtaksperiodeId",
             "vedtaksperiodeId" to vedtaksperiodeId
-        ) { it.long("id") }.let(::requireNotNull)
+        ) { it.long("id") }
 }

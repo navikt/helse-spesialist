@@ -44,7 +44,7 @@ internal class PgSaksbehandlerDaoTest : DatabaseIntegrationTest() {
     private fun assertSaksbehandler(
         skalFinnesIDatabasen: Boolean, oid: UUID, navn: String, epost: String, ident: String
     ) {
-        val erLagret = dbQuery.single(
+        val erLagret = dbQuery.singleOrNull(
             """
             SELECT 1 FROM saksbehandler
             WHERE oid = :oid AND navn = :navn AND epost = :epost AND ident = :ident
@@ -55,7 +55,7 @@ internal class PgSaksbehandlerDaoTest : DatabaseIntegrationTest() {
     }
 
     private fun assertSisteTidspunkt(forventetSisteTidspunkt: LocalDateTime?, oid: UUID) {
-        val tidspunktFraDb = dbQuery.single(
+        val tidspunktFraDb = dbQuery.singleOrNull(
             """
             SELECT siste_handling_utført_tidspunkt FROM saksbehandler WHERE oid = :oid
             """.trimIndent(), "oid" to oid

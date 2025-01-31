@@ -75,7 +75,7 @@ internal class PgDokumentDaoTest : DatabaseIntegrationTest() {
         fødselsnummer: String,
         dokumentId: UUID,
         dokument: JsonNode,
-    ) = dbQuery.single(
+    ) = dbQuery.singleOrNull(
         """
         SELECT id FROM person WHERE fødselsnummer = :fodselsnummer
         """.trimIndent(), "fodselsnummer" to fødselsnummer

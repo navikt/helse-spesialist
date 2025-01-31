@@ -282,7 +282,7 @@ internal class PgPersonDaoTest : DatabaseIntegrationTest() {
         )
     }
 
-    private fun personFinnesIKlargjøringstabellen(fødselsnummer: String) = dbQuery.single(
+    private fun personFinnesIKlargjøringstabellen(fødselsnummer: String) = dbQuery.singleOrNull(
         "select 1 from person_klargjores where fødselsnummer = :foedselsnummer",
         "foedselsnummer" to fødselsnummer
     ) { true } ?: false

@@ -95,6 +95,12 @@ class DbQuery(private val dataSource: DataSource) {
         @Language("PostgreSQL") sql: String,
         vararg params: Pair<String, Any?>,
         mapper: (Row) -> T?,
+    ) = requireNotNull(run { asSQL(sql, *params).map(mapper).asSingle })
+
+    fun <T> singleOrNull(
+        @Language("PostgreSQL") sql: String,
+        vararg params: Pair<String, Any?>,
+        mapper: (Row) -> T?,
     ) = run { asSQL(sql, *params).map(mapper).asSingle }
 
     fun <T> list(

@@ -413,7 +413,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val (tags, spleisBehandlingId) = dbQuery.single(
             "SELECT tags, spleis_behandling_id FROM behandling WHERE vedtaksperiode_id = :vedtaksperiodeId",
             "vedtaksperiodeId" to vedtaksperiodeId
-        ) { it.array<String>("tags").toList() to it.uuid("spleis_behandling_id") }!!
+        ) { it.array<String>("tags").toList() to it.uuid("spleis_behandling_id") }
 
         assertEquals(forventedeTags, tags)
         assertEquals(forventetSpleisBehandlingId, spleisBehandlingId)

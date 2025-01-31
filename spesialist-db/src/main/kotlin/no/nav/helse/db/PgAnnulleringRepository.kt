@@ -46,7 +46,7 @@ class PgAnnulleringRepository internal constructor(dataSource: DataSource) : Ann
         arbeidsgiverFagsystemId: String,
         personFagsystemId: String,
     ): Annullering? =
-        dbQuery.single(
+        dbQuery.singleOrNull(
             """
             select aas.id, aas.annullert_tidspunkt, aas.arbeidsgiver_fagsystem_id, aas.person_fagsystem_id, s.ident, aas.årsaker, b.tekst from annullert_av_saksbehandler aas
             inner join saksbehandler s on s.oid = aas.saksbehandler_ref
