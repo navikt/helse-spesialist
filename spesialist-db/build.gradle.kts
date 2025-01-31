@@ -1,4 +1,4 @@
-val micrometerRegistryPrometheusVersion = "1.13.6"
+val micrometerRegistryPrometheusVersion = "1.14.3"
 
 dependencies {
     implementation(project(":spesialist-db-migrations"))
