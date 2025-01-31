@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-interface OverstyringForDatabase {
+sealed interface OverstyringForDatabase {
     val eksternHendelseId: UUID
     val fødselsnummer: String
     val opprettet: LocalDateTime
