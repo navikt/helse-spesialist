@@ -1,7 +1,7 @@
 val graphQLKotlinVersion = "8.2.1"
 
 plugins {
-    id("com.expediagroup.graphql") version "8.2.1"
+    id("com.expediagroup.graphql") version "8.3.0"
 }
 
 dependencies {
