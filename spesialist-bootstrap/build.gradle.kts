@@ -5,7 +5,7 @@ plugins {
 group = "no.nav.helse"
 
 val testcontainersVersion = "1.20.4"
-val mockOAuth2ServerVersion = "2.1.9"
+val mockOAuth2ServerVersion = "2.1.10"
 
 repositories {
     mavenCentral()
