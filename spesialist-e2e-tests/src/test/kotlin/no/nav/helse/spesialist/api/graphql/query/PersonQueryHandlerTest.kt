@@ -13,7 +13,6 @@ import io.mockk.every
 import no.nav.helse.db.VedtakBegrunnelseMedSaksbehandlerIdentFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
-import no.nav.helse.spesialist.api.DatabaseIntegrationTest.Periode.Companion.til
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettBeregnetPeriode
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotGenerasjon
@@ -27,6 +26,8 @@ import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
+import no.nav.helse.util.Periode
+import no.nav.helse.util.Periode.Companion.til
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull

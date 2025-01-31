@@ -29,6 +29,11 @@ import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnavn
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.test.lagSaksbehandlerident
+import no.nav.helse.util.Arbeidsforhold
+import no.nav.helse.util.Enhet
+import no.nav.helse.util.Navn
+import no.nav.helse.util.Periode
+import no.nav.helse.util.Saksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -633,39 +638,4 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         "vedtaksperiode_id" to vedtaksperiodeId
     ) { it.long("id") }
 
-    protected data class Navn(
-        val fornavn: String,
-        val mellomnavn: String?,
-        val etternavn: String,
-    )
-
-    protected data class Enhet(
-        val id: Int,
-        val navn: String,
-    )
-
-    protected data class Periode(
-        val id: UUID,
-        val fom: LocalDate,
-        val tom: LocalDate,
-    ) {
-        companion object {
-            infix fun LocalDate.til(tom: LocalDate) =
-                Periode(UUID.randomUUID(), this, tom)
-        }
-    }
-
-    protected data class Arbeidsforhold(
-        val start: LocalDate,
-        val slutt: LocalDate,
-        val tittel: String,
-        val prosent: Int,
-    )
-
-    protected data class Saksbehandler(
-        val oid: UUID,
-        val navn: String,
-        val ident: String,
-        val epost: String,
-    )
 }

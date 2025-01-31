@@ -53,6 +53,7 @@ import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiver
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
+import no.nav.helse.util.Periode
 import org.intellij.lang.annotations.Language
 import java.util.UUID
 
