@@ -153,11 +153,11 @@ data class Person(
         }
     }
 
-    fun arbeidsgivere(): List<Arbeidsgiver> {
+    fun arbeidsgivere(): List<ApiArbeidsgiver> {
         val overstyringer = overstyringApiDao.finnOverstyringer(snapshot.fodselsnummer)
 
         return snapshot.arbeidsgivere.map { arbeidsgiver ->
-            Arbeidsgiver(
+            ApiArbeidsgiver(
                 organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
                 navn = arbeidsgiverApiDao.finnNavn(arbeidsgiver.organisasjonsnummer) ?: "navn er utilgjengelig",
                 bransjer = arbeidsgiverApiDao.finnBransjer(arbeidsgiver.organisasjonsnummer),
@@ -199,9 +199,9 @@ data class Person(
 
     fun vilkarsgrunnlag(): List<Vilkarsgrunnlag> = snapshot.vilkarsgrunnlag.map { it.tilVilkarsgrunnlag(avviksvurderinghenter) }
 
-    private fun List<GraphQLGhostPeriode>.tilGhostPerioder(organisasjonsnummer: String): List<GhostPeriode> =
+    private fun List<GraphQLGhostPeriode>.tilGhostPerioder(organisasjonsnummer: String): List<ApiGhostPeriode> =
         map {
-            GhostPeriode(
+            ApiGhostPeriode(
                 fom = it.fom,
                 tom = it.tom,
                 skjaeringstidspunkt = it.skjaeringstidspunkt,
@@ -211,9 +211,9 @@ data class Person(
             )
         }
 
-    private fun List<GraphQLNyttInntektsforholdPeriode>.tilNyeInntektsforholdPerioder(): List<NyttInntektsforholdPeriode> =
+    private fun List<GraphQLNyttInntektsforholdPeriode>.tilNyeInntektsforholdPerioder(): List<ApiNyttInntektsforholdPeriode> =
         map {
-            NyttInntektsforholdPeriode(
+            ApiNyttInntektsforholdPeriode(
                 id = it.id,
                 fom = it.fom,
                 tom = it.tom,
@@ -226,7 +226,7 @@ data class Person(
 }
 
 private fun OverstyringTidslinjeDto.tilDagoverstyring() =
-    Dagoverstyring(
+    ApiDagoverstyring(
         hendelseId = hendelseId,
         begrunnelse = begrunnelse,
         timestamp = timestamp,
@@ -237,7 +237,7 @@ private fun OverstyringTidslinjeDto.tilDagoverstyring() =
             ),
         dager =
             overstyrteDager.map { dag ->
-                Dagoverstyring.OverstyrtDag(
+                ApiDagoverstyring.ApiOverstyrtDag(
                     dato = dag.dato,
                     type = dag.type,
                     fraType = dag.fraType,
@@ -250,7 +250,7 @@ private fun OverstyringTidslinjeDto.tilDagoverstyring() =
     )
 
 private fun OverstyringInntektDto.tilInntektoverstyring() =
-    Inntektoverstyring(
+    ApiInntektoverstyring(
         hendelseId = hendelseId,
         timestamp = timestamp,
         saksbehandler =
@@ -259,7 +259,7 @@ private fun OverstyringInntektDto.tilInntektoverstyring() =
                 ident = saksbehandlerIdent,
             ),
         inntekt =
-            Inntektoverstyring.OverstyrtInntekt(
+            ApiInntektoverstyring.ApiOverstyrtInntekt(
                 forklaring = forklaring,
                 begrunnelse = begrunnelse,
                 manedligInntekt = månedligInntekt,
@@ -267,7 +267,7 @@ private fun OverstyringInntektDto.tilInntektoverstyring() =
                 skjaeringstidspunkt = skjæringstidspunkt,
                 refusjonsopplysninger =
                     refusjonsopplysninger?.map {
-                        Inntektoverstyring.Refusjonsopplysning(
+                        ApiInntektoverstyring.ApiRefusjonsopplysning(
                             fom = it.fom,
                             tom = it.tom,
                             belop = it.beløp,
@@ -275,7 +275,7 @@ private fun OverstyringInntektDto.tilInntektoverstyring() =
                     } ?: emptyList(),
                 fraRefusjonsopplysninger =
                     fraRefusjonsopplysninger?.map {
-                        Inntektoverstyring.Refusjonsopplysning(
+                        ApiInntektoverstyring.ApiRefusjonsopplysning(
                             fom = it.fom,
                             tom = it.tom,
                             belop = it.beløp,
@@ -287,7 +287,7 @@ private fun OverstyringInntektDto.tilInntektoverstyring() =
     )
 
 private fun OverstyringArbeidsforholdDto.tilArbeidsforholdoverstyring() =
-    Arbeidsforholdoverstyring(
+    ApiArbeidsforholdoverstyring(
         hendelseId = hendelseId,
         begrunnelse = begrunnelse,
         timestamp = timestamp,
@@ -304,7 +304,7 @@ private fun OverstyringArbeidsforholdDto.tilArbeidsforholdoverstyring() =
     )
 
 private fun SkjønnsfastsettingSykepengegrunnlagDto.tilSykepengegrunnlagSkjønnsfastsetting() =
-    Sykepengegrunnlagskjonnsfastsetting(
+    ApiSykepengegrunnlagskjonnsfastsetting(
         hendelseId = hendelseId,
         timestamp = timestamp,
         saksbehandler =
@@ -313,7 +313,7 @@ private fun SkjønnsfastsettingSykepengegrunnlagDto.tilSykepengegrunnlagSkjønns
                 ident = saksbehandlerIdent,
             ),
         skjonnsfastsatt =
-            Sykepengegrunnlagskjonnsfastsetting.SkjonnsfastsattSykepengegrunnlag(
+            ApiSykepengegrunnlagskjonnsfastsetting.ApiSkjonnsfastsattSykepengegrunnlag(
                 arsak = årsak,
                 type = type,
                 begrunnelse = begrunnelse,
@@ -329,7 +329,7 @@ private fun SkjønnsfastsettingSykepengegrunnlagDto.tilSykepengegrunnlagSkjønns
     )
 
 private fun OverstyringMinimumSykdomsgradDto.tilMinimumSykdomsgradOverstyring() =
-    MinimumSykdomsgradOverstyring(
+    ApiMinimumSykdomsgradOverstyring(
         hendelseId = hendelseId,
         timestamp = timestamp,
         saksbehandler =
@@ -338,17 +338,17 @@ private fun OverstyringMinimumSykdomsgradDto.tilMinimumSykdomsgradOverstyring() 
                 ident = saksbehandlerIdent,
             ),
         minimumSykdomsgrad =
-            MinimumSykdomsgradOverstyring.OverstyrtMinimumSykdomsgrad(
+            ApiMinimumSykdomsgradOverstyring.ApiOverstyrtMinimumSykdomsgrad(
                 perioderVurdertOk =
                     perioderVurdertOk.map {
-                        MinimumSykdomsgradOverstyring.OverstyrtMinimumSykdomsgradPeriode(
+                        ApiMinimumSykdomsgradOverstyring.ApiOverstyrtMinimumSykdomsgradPeriode(
                             fom = it.fom,
                             tom = it.tom,
                         )
                     },
                 perioderVurdertIkkeOk =
                     perioderVurdertIkkeOk.map {
-                        MinimumSykdomsgradOverstyring.OverstyrtMinimumSykdomsgradPeriode(
+                        ApiMinimumSykdomsgradOverstyring.ApiOverstyrtMinimumSykdomsgradPeriode(
                             fom = it.fom,
                             tom = it.tom,
                         )

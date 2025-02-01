@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDeprecated
+import com.expediagroup.graphql.generator.annotations.GraphQLName
 import io.ktor.utils.io.core.toByteArray
 import no.nav.helse.db.api.ArbeidsgiverApiDao
 import no.nav.helse.db.api.NotatApiDao
@@ -21,24 +22,28 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-data class Arbeidsforhold(
+@GraphQLName("Arbeidsforhold")
+data class ApiArbeidsforhold(
     val stillingstittel: String,
     val stillingsprosent: Int,
     val startdato: LocalDate,
     val sluttdato: LocalDate?,
 )
 
-data class Generasjon(
+@GraphQLName("Generasjon")
+data class ApiGenerasjon(
     val id: UUID,
     val perioder: List<Periode>,
 )
 
-data class ArbeidsgiverInntekterFraAOrdningen(
+@GraphQLName("ArbeidsgiverInntekterFraAOrdningen")
+data class ApiArbeidsgiverInntekterFraAOrdningen(
     val skjaeringstidspunkt: String,
     val inntekter: List<InntektFraAOrdningen>,
 )
 
-interface Overstyring {
+@GraphQLName("Overstyring")
+interface ApiOverstyring {
     val hendelseId: UUID
     val timestamp: LocalDateTime
     val saksbehandler: Saksbehandler
@@ -46,16 +51,18 @@ interface Overstyring {
     val vedtaksperiodeId: UUID
 }
 
-data class Dagoverstyring(
+@GraphQLName("Dagoverstyring")
+data class ApiDagoverstyring(
     override val hendelseId: UUID,
     override val timestamp: LocalDateTime,
     override val saksbehandler: Saksbehandler,
     override val ferdigstilt: Boolean,
-    val dager: List<OverstyrtDag>,
+    val dager: List<ApiOverstyrtDag>,
     val begrunnelse: String,
     override val vedtaksperiodeId: UUID,
-) : Overstyring {
-    data class OverstyrtDag(
+) : ApiOverstyring {
+    @GraphQLName("OverstyrtDag")
+    data class ApiOverstyrtDag(
         val dato: LocalDate,
         val type: Dagtype,
         val fraType: Dagtype?,
@@ -64,62 +71,70 @@ data class Dagoverstyring(
     )
 }
 
-data class Inntektoverstyring(
+@GraphQLName("Inntektoverstyring")
+data class ApiInntektoverstyring(
     override val hendelseId: UUID,
     override val timestamp: LocalDateTime,
     override val saksbehandler: Saksbehandler,
     override val ferdigstilt: Boolean,
-    val inntekt: OverstyrtInntekt,
+    val inntekt: ApiOverstyrtInntekt,
     override val vedtaksperiodeId: UUID,
-) : Overstyring {
-    data class OverstyrtInntekt(
+) : ApiOverstyring {
+    @GraphQLName("OverstyrtInntekt")
+    data class ApiOverstyrtInntekt(
         val forklaring: String,
         val begrunnelse: String,
         val manedligInntekt: Double,
         val fraManedligInntekt: Double?,
         val skjaeringstidspunkt: LocalDate,
-        val refusjonsopplysninger: List<Refusjonsopplysning>?,
-        val fraRefusjonsopplysninger: List<Refusjonsopplysning>?,
+        val refusjonsopplysninger: List<ApiRefusjonsopplysning>?,
+        val fraRefusjonsopplysninger: List<ApiRefusjonsopplysning>?,
     )
 
-    data class Refusjonsopplysning(
+    @GraphQLName("Refusjonsopplysning")
+    data class ApiRefusjonsopplysning(
         val fom: LocalDate,
         val tom: LocalDate?,
         val belop: Double,
     )
 }
 
-data class MinimumSykdomsgradOverstyring(
+@GraphQLName("MinimumSykdomsgradOverstyring")
+data class ApiMinimumSykdomsgradOverstyring(
     override val hendelseId: UUID,
     override val timestamp: LocalDateTime,
     override val saksbehandler: Saksbehandler,
     override val ferdigstilt: Boolean,
-    val minimumSykdomsgrad: OverstyrtMinimumSykdomsgrad,
+    val minimumSykdomsgrad: ApiOverstyrtMinimumSykdomsgrad,
     override val vedtaksperiodeId: UUID,
-) : Overstyring {
-    data class OverstyrtMinimumSykdomsgrad(
-        val perioderVurdertOk: List<OverstyrtMinimumSykdomsgradPeriode>,
-        val perioderVurdertIkkeOk: List<OverstyrtMinimumSykdomsgradPeriode>,
+) : ApiOverstyring {
+    @GraphQLName("OverstyrtMinimumSykdomsgrad")
+    data class ApiOverstyrtMinimumSykdomsgrad(
+        val perioderVurdertOk: List<ApiOverstyrtMinimumSykdomsgradPeriode>,
+        val perioderVurdertIkkeOk: List<ApiOverstyrtMinimumSykdomsgradPeriode>,
         val begrunnelse: String,
         @GraphQLDeprecated("Bruk vedtaksperiodeId i stedet")
         val initierendeVedtaksperiodeId: UUID,
     )
 
-    data class OverstyrtMinimumSykdomsgradPeriode(
+    @GraphQLName("OverstyrtMinimumSykdomsgradPeriode")
+    data class ApiOverstyrtMinimumSykdomsgradPeriode(
         val fom: LocalDate,
         val tom: LocalDate,
     )
 }
 
-data class Sykepengegrunnlagskjonnsfastsetting(
+@GraphQLName("Sykepengegrunnlagskjonnsfastsetting")
+data class ApiSykepengegrunnlagskjonnsfastsetting(
     override val hendelseId: UUID,
     override val timestamp: LocalDateTime,
     override val saksbehandler: Saksbehandler,
     override val ferdigstilt: Boolean,
-    val skjonnsfastsatt: SkjonnsfastsattSykepengegrunnlag,
+    val skjonnsfastsatt: ApiSkjonnsfastsattSykepengegrunnlag,
     override val vedtaksperiodeId: UUID,
-) : Overstyring {
-    data class SkjonnsfastsattSykepengegrunnlag(
+) : ApiOverstyring {
+    @GraphQLName("SkjonnsfastsattSykepengegrunnlag")
+    data class ApiSkjonnsfastsattSykepengegrunnlag(
         val arsak: String,
         val type: Skjonnsfastsettingstype?,
         val begrunnelse: String?,
@@ -132,7 +147,8 @@ data class Sykepengegrunnlagskjonnsfastsetting(
     )
 }
 
-data class Arbeidsforholdoverstyring(
+@GraphQLName("Arbeidsforholdoverstyring")
+data class ApiArbeidsforholdoverstyring(
     override val hendelseId: UUID,
     override val timestamp: LocalDateTime,
     override val saksbehandler: Saksbehandler,
@@ -142,9 +158,10 @@ data class Arbeidsforholdoverstyring(
     val forklaring: String,
     val begrunnelse: String,
     override val vedtaksperiodeId: UUID,
-) : Overstyring
+) : ApiOverstyring
 
-data class GhostPeriode(
+@GraphQLName("GhostPeriode")
+data class ApiGhostPeriode(
     val fom: LocalDate,
     val tom: LocalDate,
     val skjaeringstidspunkt: LocalDate,
@@ -155,7 +172,8 @@ data class GhostPeriode(
     val id = UUID.nameUUIDFromBytes(fom.toString().toByteArray() + organisasjonsnummer.toByteArray()).toString()
 }
 
-data class NyttInntektsforholdPeriode(
+@GraphQLName("NyttInntektsforholdPeriode")
+data class ApiNyttInntektsforholdPeriode(
     val id: UUID,
     val fom: LocalDate,
     val tom: LocalDate,
@@ -165,12 +183,13 @@ data class NyttInntektsforholdPeriode(
     val manedligBelop: Double,
 )
 
-data class Arbeidsgiver(
+@GraphQLName("Arbeidsgiver")
+data class ApiArbeidsgiver(
     val organisasjonsnummer: String,
     val navn: String,
     val bransjer: List<String>,
-    val ghostPerioder: List<GhostPeriode>,
-    val nyeInntektsforholdPerioder: List<NyttInntektsforholdPeriode>,
+    val ghostPerioder: List<ApiGhostPeriode>,
+    val nyeInntektsforholdPerioder: List<ApiNyttInntektsforholdPeriode>,
     private val fødselsnummer: String,
     private val generasjoner: List<GraphQLGenerasjon>,
     private val apiOppgaveService: ApiOppgaveService,
@@ -183,13 +202,13 @@ data class Arbeidsgiver(
     private val notatDao: NotatApiDao,
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val påVentApiDao: PåVentApiDao,
-    private val overstyringer: List<Overstyring>,
+    private val overstyringer: List<ApiOverstyring>,
 ) {
-    fun generasjoner(): List<Generasjon> =
+    fun generasjoner(): List<ApiGenerasjon> =
         generasjoner.mapIndexed { index, generasjon ->
             val oppgaveId = oppgaveApiDao.finnOppgaveId(fødselsnummer)
             val perioderSomSkalViseAktiveVarsler = varselRepository.perioderSomSkalViseVarsler(oppgaveId)
-            Generasjon(
+            ApiGenerasjon(
                 id = generasjon.id,
                 perioder =
                     generasjon.perioder.map {
@@ -225,11 +244,11 @@ data class Arbeidsgiver(
             )
         }
 
-    fun overstyringer(): List<Overstyring> = overstyringer
+    fun overstyringer(): List<ApiOverstyring> = overstyringer
 
-    fun arbeidsforhold(): List<Arbeidsforhold> =
+    fun arbeidsforhold(): List<ApiArbeidsforhold> =
         arbeidsgiverApiDao.finnArbeidsforhold(fødselsnummer, organisasjonsnummer).map {
-            Arbeidsforhold(
+            ApiArbeidsforhold(
                 stillingstittel = it.stillingstittel,
                 stillingsprosent = it.stillingsprosent,
                 startdato = it.startdato,
@@ -238,12 +257,12 @@ data class Arbeidsgiver(
         }
 
     @Suppress("unused")
-    fun inntekterFraAordningen(): List<ArbeidsgiverInntekterFraAOrdningen> =
+    fun inntekterFraAordningen(): List<ApiArbeidsgiverInntekterFraAOrdningen> =
         arbeidsgiverApiDao.finnArbeidsgiverInntekterFraAordningen(
             fødselsnummer,
             organisasjonsnummer,
         ).map { fraAO ->
-            ArbeidsgiverInntekterFraAOrdningen(
+            ApiArbeidsgiverInntekterFraAOrdningen(
                 skjaeringstidspunkt = fraAO.skjaeringstidspunkt,
                 inntekter =
                     fraAO.inntekter.map { inntekt ->

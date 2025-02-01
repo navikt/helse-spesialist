@@ -12,9 +12,9 @@ import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
-import no.nav.helse.spesialist.api.graphql.schema.Arbeidsforholdoverstyring
-import no.nav.helse.spesialist.api.graphql.schema.Dagoverstyring
-import no.nav.helse.spesialist.api.graphql.schema.Inntektoverstyring
+import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdoverstyring
+import no.nav.helse.spesialist.api.graphql.schema.ApiDagoverstyring
+import no.nav.helse.spesialist.api.graphql.schema.ApiInntektoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Lovhjemmel
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringDag
@@ -204,9 +204,9 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertNotNull(snapshot)
         val overstyringer = snapshot.arbeidsgivere().first().overstyringer()
         assertEquals(3, overstyringer.size)
-        assertEquals(1, (overstyringer[0] as Dagoverstyring).dager.size)
-        assertEquals(25000.0, (overstyringer[1] as Inntektoverstyring).inntekt.manedligInntekt)
-        assertEquals(true, (overstyringer[2] as Arbeidsforholdoverstyring).deaktivert)
+        assertEquals(1, (overstyringer[0] as ApiDagoverstyring).dager.size)
+        assertEquals(25000.0, (overstyringer[1] as ApiInntektoverstyring).inntekt.manedligInntekt)
+        assertEquals(true, (overstyringer[2] as ApiArbeidsforholdoverstyring).deaktivert)
         assertFalse(overstyringer.first().ferdigstilt)
         assertFalse(overstyringer[1].ferdigstilt)
         assertFalse(overstyringer.last().ferdigstilt)
