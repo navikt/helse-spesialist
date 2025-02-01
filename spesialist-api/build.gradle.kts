@@ -5,7 +5,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":spesialist-api-schema"))
+    api(project(":spesialist-api-schema"))
     api(project(":spesialist-selve"))
 
     api("com.nimbusds:nimbus-jose-jwt:9.37.3")
