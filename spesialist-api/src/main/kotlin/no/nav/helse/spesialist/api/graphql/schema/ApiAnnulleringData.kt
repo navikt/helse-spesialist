@@ -1,9 +1,11 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
+import com.expediagroup.graphql.generator.annotations.GraphQLName
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import java.util.UUID
 
-data class AnnulleringData(
+@GraphQLName("AnnulleringData")
+data class ApiAnnulleringData(
     val aktorId: String,
     val fodselsnummer: String,
     val organisasjonsnummer: String,
@@ -12,11 +14,12 @@ data class AnnulleringData(
     val arbeidsgiverFagsystemId: String,
     val personFagsystemId: String,
     val begrunnelser: List<String>,
-    val arsaker: List<AnnulleringArsak>,
+    val arsaker: List<ApiAnnulleringArsak>,
     val kommentar: String?,
-) : HandlingFraApi
-
-data class AnnulleringArsak(
-    val _key: String,
-    val arsak: String,
-)
+) : HandlingFraApi {
+    @GraphQLName("AnnulleringArsak")
+    data class ApiAnnulleringArsak(
+        val _key: String,
+        val arsak: String,
+    )
+}

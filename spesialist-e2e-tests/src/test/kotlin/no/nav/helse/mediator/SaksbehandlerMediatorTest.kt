@@ -21,8 +21,8 @@ import no.nav.helse.spesialist.api.graphql.mutation.Avslagsdata
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagshandling
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakUtfall
-import no.nav.helse.spesialist.api.graphql.schema.AnnulleringArsak
-import no.nav.helse.spesialist.api.graphql.schema.AnnulleringData
+import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
+import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData.ApiAnnulleringArsak
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Lovhjemmel
@@ -1042,9 +1042,9 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private fun annullering(
         begrunnelser: List<String> = listOf("EN_BEGRUNNELSE"),
         kommentar: String? = "EN_KOMMENTAR",
-        arsaker: List<AnnulleringArsak> =
-            listOf(AnnulleringArsak(_key = "key01", arsak = "Ferie"), AnnulleringArsak(_key = "key02", arsak = "Perm")),
-    ) = AnnulleringData(
+        arsaker: List<ApiAnnulleringArsak> =
+            listOf(ApiAnnulleringArsak(_key = "key01", arsak = "Ferie"), ApiAnnulleringArsak(_key = "key02", arsak = "Perm")),
+    ) = ApiAnnulleringData(
         aktorId = AKTØR_ID,
         fodselsnummer = FØDSELSNUMMER,
         organisasjonsnummer = ORGANISASJONSNUMMER,

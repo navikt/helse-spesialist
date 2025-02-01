@@ -69,7 +69,7 @@ import no.nav.helse.spesialist.api.graphql.mutation.Avslagshandling
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation.VedtakResultat
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakUtfall
-import no.nav.helse.spesialist.api.graphql.schema.AnnulleringData
+import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.Avslag
 import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
@@ -735,7 +735,7 @@ class SaksbehandlerMediator(
             is TidslinjeOverstyring -> this.tilModellversjon()
             is Skjonnsfastsettelse -> this.tilModellversjon()
             is MinimumSykdomsgrad -> this.tilModellversjon()
-            is AnnulleringData -> this.tilModellversjon()
+            is ApiAnnulleringData -> this.tilModellversjon()
             is TildelOppgave -> this.tilModellversjon()
             is AvmeldOppgave -> this.tilModellversjon()
             is OpphevStans -> this.tilModellversjon()
@@ -890,7 +890,7 @@ class SaksbehandlerMediator(
             begrunnelse = begrunnelse,
         )
 
-    private fun AnnulleringData.tilModellversjon(): Annullering =
+    private fun ApiAnnulleringData.tilModellversjon(): Annullering =
         Annullering(
             aktørId = this.aktorId,
             fødselsnummer = this.fodselsnummer,

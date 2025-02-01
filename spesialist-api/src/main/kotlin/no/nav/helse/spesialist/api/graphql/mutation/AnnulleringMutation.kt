@@ -7,7 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.graphql.ContextValues
-import no.nav.helse.spesialist.api.graphql.schema.AnnulleringData
+import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 
 class AnnulleringMutation(
@@ -15,7 +15,7 @@ class AnnulleringMutation(
 ) : Mutation {
     @Suppress("unused")
     suspend fun annuller(
-        annullering: AnnulleringData,
+        annullering: ApiAnnulleringData,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
