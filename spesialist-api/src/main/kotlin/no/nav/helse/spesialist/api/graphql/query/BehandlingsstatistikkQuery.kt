@@ -8,9 +8,15 @@ import no.nav.helse.spesialist.api.behandlingsstatistikk.Statistikk
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntall
 import no.nav.helse.spesialist.api.graphql.schema.ApiBehandlingsstatistikk
 
-class BehandlingsstatistikkQuery(private val behandlingsstatistikkMediator: IBehandlingsstatistikkService) : Query {
+interface BehandlingsstatistikkQuerySchema : Query {
+    fun behandlingsstatistikk(): DataFetcherResult<ApiBehandlingsstatistikk>
+}
+
+class BehandlingsstatistikkQuery(private val handler: BehandlingsstatistikkQuerySchema) : BehandlingsstatistikkQuerySchema by handler
+
+class BehandlingsstatistikkQueryHandler(private val behandlingsstatistikkMediator: IBehandlingsstatistikkService) : BehandlingsstatistikkQuerySchema {
     @Suppress("unused")
-    fun behandlingsstatistikk(): DataFetcherResult<ApiBehandlingsstatistikk> =
+    override fun behandlingsstatistikk(): DataFetcherResult<ApiBehandlingsstatistikk> =
         behandlingsstatistikkMediator.getBehandlingsstatistikk()
             .tilApiBehandlingsstatistikk()
             .tilDataFetcherResult()

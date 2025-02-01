@@ -37,6 +37,7 @@ import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutation
 import no.nav.helse.spesialist.api.graphql.mutation.VarselMutation
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQuery
+import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.DokumentQuery
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQuery
 import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQuery
@@ -104,7 +105,10 @@ class SchemaBuilder(
                 apiOppgaveService = apiOppgaveService,
             ),
             BehandlingsstatistikkQuery(
-                behandlingsstatistikkMediator = behandlingsstatistikkMediator,
+                handler =
+                    BehandlingsstatistikkQueryHandler(
+                        behandlingsstatistikkMediator = behandlingsstatistikkMediator,
+                    ),
             ),
             OpptegnelseQuery(
                 saksbehandlerhåndterer = saksbehandlerhåndterer,
