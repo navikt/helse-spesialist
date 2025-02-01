@@ -4,8 +4,6 @@ import com.expediagroup.graphql.generator.annotations.GraphQLDeprecated
 import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.expediagroup.graphql.generator.annotations.GraphQLName
 import io.ktor.utils.io.core.toByteArray
-import no.nav.helse.spesialist.api.overstyring.Dagtype
-import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -52,8 +50,8 @@ data class ApiDagoverstyring(
     @GraphQLName("OverstyrtDag")
     data class ApiOverstyrtDag(
         val dato: LocalDate,
-        val type: Dagtype,
-        val fraType: Dagtype?,
+        val type: ApiDagtype,
+        val fraType: ApiDagtype?,
         val grad: Int?,
         val fraGrad: Int?,
     )
@@ -124,7 +122,7 @@ data class ApiSykepengegrunnlagskjonnsfastsetting(
     @GraphQLName("SkjonnsfastsattSykepengegrunnlag")
     data class ApiSkjonnsfastsattSykepengegrunnlag(
         val arsak: String,
-        val type: Skjonnsfastsettingstype?,
+        val type: ApiSkjonnsfastsettingstype?,
         val begrunnelse: String?,
         val begrunnelseMal: String?,
         val begrunnelseFritekst: String?,

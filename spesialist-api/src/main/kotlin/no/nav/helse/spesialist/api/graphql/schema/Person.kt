@@ -19,10 +19,12 @@ import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakUtfall
 import no.nav.helse.spesialist.api.graphql.resolvers.ApiArbeidsgiverResolver
 import no.nav.helse.spesialist.api.objectMapper
+import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringInntektDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringMinimumSykdomsgradDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringTidslinjeDto
+import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunnlagDto
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGhostPeriode
@@ -243,8 +245,8 @@ private fun OverstyringTidslinjeDto.tilDagoverstyring() =
             overstyrteDager.map { dag ->
                 ApiDagoverstyring.ApiOverstyrtDag(
                     dato = dag.dato,
-                    type = dag.type,
-                    fraType = dag.fraType,
+                    type = dag.type.tilApiDagtype(),
+                    fraType = dag.fraType?.tilApiDagtype(),
                     grad = dag.grad,
                     fraGrad = dag.fraGrad,
                 )
@@ -252,6 +254,26 @@ private fun OverstyringTidslinjeDto.tilDagoverstyring() =
         ferdigstilt = ferdigstilt,
         vedtaksperiodeId = vedtaksperiodeId,
     )
+
+private fun Dagtype.tilApiDagtype() =
+    when (this) {
+        Dagtype.Sykedag -> ApiDagtype.Sykedag
+        Dagtype.SykedagNav -> ApiDagtype.SykedagNav
+        Dagtype.Feriedag -> ApiDagtype.Feriedag
+        Dagtype.Egenmeldingsdag -> ApiDagtype.Egenmeldingsdag
+        Dagtype.Permisjonsdag -> ApiDagtype.Permisjonsdag
+        Dagtype.Arbeidsdag -> ApiDagtype.Arbeidsdag
+        Dagtype.ArbeidIkkeGjenopptattDag -> ApiDagtype.ArbeidIkkeGjenopptattDag
+        Dagtype.Foreldrepengerdag -> ApiDagtype.Foreldrepengerdag
+        Dagtype.AAPdag -> ApiDagtype.AAPdag
+        Dagtype.Omsorgspengerdag -> ApiDagtype.Omsorgspengerdag
+        Dagtype.Pleiepengerdag -> ApiDagtype.Pleiepengerdag
+        Dagtype.Svangerskapspengerdag -> ApiDagtype.Svangerskapspengerdag
+        Dagtype.Opplaringspengerdag -> ApiDagtype.Opplaringspengerdag
+        Dagtype.Dagpengerdag -> ApiDagtype.Dagpengerdag
+        Dagtype.Avvistdag -> ApiDagtype.Avvistdag
+        Dagtype.Helg -> ApiDagtype.Helg
+    }
 
 private fun OverstyringInntektDto.tilInntektoverstyring() =
     ApiInntektoverstyring(
@@ -319,7 +341,7 @@ private fun SkjønnsfastsettingSykepengegrunnlagDto.tilSykepengegrunnlagSkjønns
         skjonnsfastsatt =
             ApiSykepengegrunnlagskjonnsfastsetting.ApiSkjonnsfastsattSykepengegrunnlag(
                 arsak = årsak,
-                type = type,
+                type = type.tilApiSkjonnsfastsettingstype(),
                 begrunnelse = begrunnelse,
                 begrunnelseMal = begrunnelseMal,
                 begrunnelseFritekst = begrunnelseFritekst,
@@ -331,6 +353,13 @@ private fun SkjønnsfastsettingSykepengegrunnlagDto.tilSykepengegrunnlagSkjønns
         ferdigstilt = ferdigstilt,
         vedtaksperiodeId = vedtaksperiodeId,
     )
+
+private fun Skjonnsfastsettingstype.tilApiSkjonnsfastsettingstype() =
+    when (this) {
+        Skjonnsfastsettingstype.OMREGNET_ARSINNTEKT -> ApiSkjonnsfastsettingstype.OMREGNET_ARSINNTEKT
+        Skjonnsfastsettingstype.RAPPORTERT_ARSINNTEKT -> ApiSkjonnsfastsettingstype.RAPPORTERT_ARSINNTEKT
+        Skjonnsfastsettingstype.ANNET -> ApiSkjonnsfastsettingstype.ANNET
+    }
 
 private fun OverstyringMinimumSykdomsgradDto.tilMinimumSykdomsgradOverstyring() =
     ApiMinimumSykdomsgradOverstyring(
