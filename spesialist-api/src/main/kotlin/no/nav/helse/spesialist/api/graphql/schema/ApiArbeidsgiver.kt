@@ -1,23 +1,11 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDeprecated
+import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.expediagroup.graphql.generator.annotations.GraphQLName
 import io.ktor.utils.io.core.toByteArray
-import no.nav.helse.db.api.ArbeidsgiverApiDao
-import no.nav.helse.db.api.NotatApiDao
-import no.nav.helse.db.api.OppgaveApiDao
-import no.nav.helse.db.api.PeriodehistorikkApiDao
-import no.nav.helse.db.api.PåVentApiDao
-import no.nav.helse.db.api.TotrinnsvurderingApiDao
-import no.nav.helse.db.api.VarselApiRepository
-import no.nav.helse.mediator.oppgave.ApiOppgaveService
-import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
-import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGenerasjon
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUberegnetPeriode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -183,94 +171,26 @@ data class ApiNyttInntektsforholdPeriode(
     val manedligBelop: Double,
 )
 
-@GraphQLName("Arbeidsgiver")
-data class ApiArbeidsgiver(
-    val organisasjonsnummer: String,
-    val navn: String,
-    val bransjer: List<String>,
-    val ghostPerioder: List<ApiGhostPeriode>,
-    val nyeInntektsforholdPerioder: List<ApiNyttInntektsforholdPeriode>,
-    private val fødselsnummer: String,
-    private val generasjoner: List<GraphQLGenerasjon>,
-    private val apiOppgaveService: ApiOppgaveService,
-    private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
-    private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
-    private val risikovurderinger: Map<UUID, RisikovurderingApiDto>,
-    private val varselRepository: VarselApiRepository,
-    private val oppgaveApiDao: OppgaveApiDao,
-    private val periodehistorikkApiDao: PeriodehistorikkApiDao,
-    private val notatDao: NotatApiDao,
-    private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
-    private val påVentApiDao: PåVentApiDao,
-    private val overstyringer: List<ApiOverstyring>,
-) {
-    fun generasjoner(): List<ApiGenerasjon> =
-        generasjoner.mapIndexed { index, generasjon ->
-            val oppgaveId = oppgaveApiDao.finnOppgaveId(fødselsnummer)
-            val perioderSomSkalViseAktiveVarsler = varselRepository.perioderSomSkalViseVarsler(oppgaveId)
-            ApiGenerasjon(
-                id = generasjon.id,
-                perioder =
-                    generasjon.perioder.map {
-                        when (it) {
-                            is GraphQLUberegnetPeriode ->
-                                UberegnetPeriode(
-                                    varselRepository = varselRepository,
-                                    periode = it,
-                                    skalViseAktiveVarsler = index == 0 && perioderSomSkalViseAktiveVarsler.contains(it.vedtaksperiodeId),
-                                    notatDao = notatDao,
-                                    index = index,
-                                )
+@GraphQLIgnore
+interface ArbeidsgiverSchema {
+    fun organisasjonsnummer(): String
 
-                            is GraphQLBeregnetPeriode ->
-                                BeregnetPeriode(
-                                    orgnummer = organisasjonsnummer,
-                                    periode = it,
-                                    apiOppgaveService = apiOppgaveService,
-                                    saksbehandlerhåndterer = saksbehandlerhåndterer,
-                                    risikovurderinger = risikovurderinger,
-                                    varselRepository = varselRepository,
-                                    oppgaveApiDao = oppgaveApiDao,
-                                    periodehistorikkApiDao = periodehistorikkApiDao,
-                                    notatDao = notatDao,
-                                    totrinnsvurderingApiDao = totrinnsvurderingApiDao,
-                                    påVentApiDao = påVentApiDao,
-                                    erSisteGenerasjon = index == 0,
-                                    index = index,
-                                )
-                            else -> throw Exception("Ukjent tidslinjeperiode")
-                        }
-                    },
-            )
-        }
+    fun navn(): String
 
-    fun overstyringer(): List<ApiOverstyring> = overstyringer
+    fun bransjer(): List<String>
 
-    fun arbeidsforhold(): List<ApiArbeidsforhold> =
-        arbeidsgiverApiDao.finnArbeidsforhold(fødselsnummer, organisasjonsnummer).map {
-            ApiArbeidsforhold(
-                stillingstittel = it.stillingstittel,
-                stillingsprosent = it.stillingsprosent,
-                startdato = it.startdato,
-                sluttdato = it.sluttdato,
-            )
-        }
+    fun ghostPerioder(): List<ApiGhostPeriode>
 
-    @Suppress("unused")
-    fun inntekterFraAordningen(): List<ApiArbeidsgiverInntekterFraAOrdningen> =
-        arbeidsgiverApiDao.finnArbeidsgiverInntekterFraAordningen(
-            fødselsnummer,
-            organisasjonsnummer,
-        ).map { fraAO ->
-            ApiArbeidsgiverInntekterFraAOrdningen(
-                skjaeringstidspunkt = fraAO.skjaeringstidspunkt,
-                inntekter =
-                    fraAO.inntekter.map { inntekt ->
-                        InntektFraAOrdningen(
-                            maned = inntekt.maned,
-                            sum = inntekt.sum,
-                        )
-                    },
-            )
-        }
+    fun nyeInntektsforholdPerioder(): List<ApiNyttInntektsforholdPeriode>
+
+    fun generasjoner(): List<ApiGenerasjon>
+
+    fun overstyringer(): List<ApiOverstyring>
+
+    fun arbeidsforhold(): List<ApiArbeidsforhold>
+
+    fun inntekterFraAordningen(): List<ApiArbeidsgiverInntekterFraAOrdningen>
 }
+
+@GraphQLName("Arbeidsgiver")
+class ApiArbeidsgiver(private val resolver: ArbeidsgiverSchema) : ArbeidsgiverSchema by resolver

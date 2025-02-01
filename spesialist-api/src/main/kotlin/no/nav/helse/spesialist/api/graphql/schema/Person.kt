@@ -17,6 +17,7 @@ import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakUtfall
+import no.nav.helse.spesialist.api.graphql.resolvers.ApiArbeidsgiverResolver
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.overstyring.OverstyringArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringInntektDto
@@ -158,35 +159,38 @@ data class Person(
 
         return snapshot.arbeidsgivere.map { arbeidsgiver ->
             ApiArbeidsgiver(
-                organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-                navn = arbeidsgiverApiDao.finnNavn(arbeidsgiver.organisasjonsnummer) ?: "navn er utilgjengelig",
-                bransjer = arbeidsgiverApiDao.finnBransjer(arbeidsgiver.organisasjonsnummer),
-                ghostPerioder = arbeidsgiver.ghostPerioder.tilGhostPerioder(arbeidsgiver.organisasjonsnummer),
-                nyeInntektsforholdPerioder = arbeidsgiver.nyeInntektsforholdPerioder.tilNyeInntektsforholdPerioder(),
-                fødselsnummer = snapshot.fodselsnummer,
-                generasjoner = arbeidsgiver.generasjoner,
-                apiOppgaveService = apiOppgaveService,
-                saksbehandlerhåndterer = saksbehandlerhåndterer,
-                arbeidsgiverApiDao = arbeidsgiverApiDao,
-                risikovurderinger = risikovurderinger,
-                varselRepository = varselRepository,
-                oppgaveApiDao = oppgaveApiDao,
-                periodehistorikkApiDao = periodehistorikkApiDao,
-                notatDao = notatDao,
-                totrinnsvurderingApiDao = totrinnsvurderingApiDao,
-                påVentApiDao = påVentApiDao,
-                overstyringer =
-                    overstyringer
-                        .filter { it.relevantFor(arbeidsgiver.organisasjonsnummer) }
-                        .map { overstyring ->
-                            when (overstyring) {
-                                is OverstyringTidslinjeDto -> overstyring.tilDagoverstyring()
-                                is OverstyringArbeidsforholdDto -> overstyring.tilArbeidsforholdoverstyring()
-                                is OverstyringInntektDto -> overstyring.tilInntektoverstyring()
-                                is SkjønnsfastsettingSykepengegrunnlagDto -> overstyring.tilSykepengegrunnlagSkjønnsfastsetting()
-                                is OverstyringMinimumSykdomsgradDto -> overstyring.tilMinimumSykdomsgradOverstyring()
-                            }
-                        },
+                resolver =
+                    ApiArbeidsgiverResolver(
+                        organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+                        navn = arbeidsgiverApiDao.finnNavn(arbeidsgiver.organisasjonsnummer) ?: "navn er utilgjengelig",
+                        bransjer = arbeidsgiverApiDao.finnBransjer(arbeidsgiver.organisasjonsnummer),
+                        ghostPerioder = arbeidsgiver.ghostPerioder.tilGhostPerioder(arbeidsgiver.organisasjonsnummer),
+                        nyeInntektsforholdPerioder = arbeidsgiver.nyeInntektsforholdPerioder.tilNyeInntektsforholdPerioder(),
+                        fødselsnummer = snapshot.fodselsnummer,
+                        generasjoner = arbeidsgiver.generasjoner,
+                        apiOppgaveService = apiOppgaveService,
+                        saksbehandlerhåndterer = saksbehandlerhåndterer,
+                        arbeidsgiverApiDao = arbeidsgiverApiDao,
+                        risikovurderinger = risikovurderinger,
+                        varselRepository = varselRepository,
+                        oppgaveApiDao = oppgaveApiDao,
+                        periodehistorikkApiDao = periodehistorikkApiDao,
+                        notatDao = notatDao,
+                        totrinnsvurderingApiDao = totrinnsvurderingApiDao,
+                        påVentApiDao = påVentApiDao,
+                        overstyringer =
+                            overstyringer
+                                .filter { it.relevantFor(arbeidsgiver.organisasjonsnummer) }
+                                .map { overstyring ->
+                                    when (overstyring) {
+                                        is OverstyringTidslinjeDto -> overstyring.tilDagoverstyring()
+                                        is OverstyringArbeidsforholdDto -> overstyring.tilArbeidsforholdoverstyring()
+                                        is OverstyringInntektDto -> overstyring.tilInntektoverstyring()
+                                        is SkjønnsfastsettingSykepengegrunnlagDto -> overstyring.tilSykepengegrunnlagSkjønnsfastsetting()
+                                        is OverstyringMinimumSykdomsgradDto -> overstyring.tilMinimumSykdomsgradOverstyring()
+                                    }
+                                },
+                    ),
             )
         }
     }
