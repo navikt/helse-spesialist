@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql.query
 
-import com.expediagroup.graphql.server.operations.Query
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import kotlinx.coroutines.Dispatchers
@@ -17,11 +16,10 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.time.measureTimedValue
 
-class OppgaverQuery(private val apiOppgaveService: ApiOppgaveService) : Query {
+class OppgaverQueryHandler(private val apiOppgaveService: ApiOppgaveService) : OppgaverQuerySchema {
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
-    @Suppress("unused")
-    suspend fun behandledeOppgaverFeed(
+    override suspend fun behandledeOppgaverFeed(
         offset: Int,
         limit: Int,
         env: DataFetchingEnvironment,
@@ -39,8 +37,7 @@ class OppgaverQuery(private val apiOppgaveService: ApiOppgaveService) : Query {
         return DataFetcherResult.newResult<ApiBehandledeOppgaver>().data(behandledeOppgaver).build()
     }
 
-    @Suppress("unused")
-    suspend fun oppgaveFeed(
+    override suspend fun oppgaveFeed(
         offset: Int,
         limit: Int,
         sortering: List<ApiOppgavesortering>,
@@ -70,8 +67,7 @@ class OppgaverQuery(private val apiOppgaveService: ApiOppgaveService) : Query {
         return DataFetcherResult.newResult<ApiOppgaverTilBehandling>().data(oppgaver).build()
     }
 
-    @Suppress("unused")
-    suspend fun antallOppgaver(env: DataFetchingEnvironment): DataFetcherResult<ApiAntallOppgaver> {
+    override suspend fun antallOppgaver(env: DataFetchingEnvironment): DataFetcherResult<ApiAntallOppgaver> {
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         sikkerLogg.info("Henter AntallOppgaver for ${saksbehandler.navn}")
         val (antallOppgaver, tid) =

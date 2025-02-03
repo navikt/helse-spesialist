@@ -40,6 +40,7 @@ import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQuery
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.DokumentQuery
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQuery
+import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQuery
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.spesialist.api.person.PersonService
@@ -102,7 +103,10 @@ class SchemaBuilder(
                     ),
             ),
             OppgaverQuery(
-                apiOppgaveService = apiOppgaveService,
+                handler =
+                    OppgaverQueryHandler(
+                        apiOppgaveService = apiOppgaveService,
+                    ),
             ),
             BehandlingsstatistikkQuery(
                 handler =
