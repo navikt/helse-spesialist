@@ -2,6 +2,8 @@ package no.nav.helse.spesialist.api.graphql.schema
 
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering
+import no.nav.helse.spesialist.api.graphql.mapping.tilApiArbeidsgiverrefusjon
+import no.nav.helse.spesialist.api.graphql.mapping.tilApiOmregnetArsinntekt
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInfotrygdVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSpleisVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSykepengegrunnlagsgrense
@@ -70,7 +72,7 @@ fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Avviksvurde
                         avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter.singleOrNull { it.arbeidsgiverreferanse == arbeidsgiverreferanse }
                     ApiArbeidsgiverinntekt(
                         arbeidsgiver = arbeidsgiverreferanse,
-                        omregnetArsinntekt = inntektFraSpleis?.omregnetArsinntekt?.tilOmregnetÅrsinntekt(),
+                        omregnetArsinntekt = inntektFraSpleis?.omregnetArsinntekt?.tilApiOmregnetArsinntekt(),
                         sammenligningsgrunnlag =
                             sammenligningsgrunnlagInntekt?.let {
                                 ApiSammenligningsgrunnlag(
@@ -84,7 +86,7 @@ fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Avviksvurde
                                         },
                                 )
                             },
-                        skjonnsmessigFastsatt = inntektFraSpleis?.skjonnsmessigFastsatt?.tilOmregnetÅrsinntekt(),
+                        skjonnsmessigFastsatt = inntektFraSpleis?.skjonnsmessigFastsatt?.tilApiOmregnetArsinntekt(),
                         deaktivert = inntektFraSpleis?.deaktivert,
                         fom = inntektFraSpleis?.fom,
                         tom = inntektFraSpleis?.tom,
@@ -98,7 +100,7 @@ fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Avviksvurde
                 avviksprosent = avviksvurdering.avviksprosent,
                 vilkarsgrunnlagtype = Vilkarsgrunnlagtype.SPLEIS,
                 id = id,
-                arbeidsgiverrefusjoner = arbeidsgiverrefusjoner.map { it.tilArbeidsgiverrefusjon() },
+                arbeidsgiverrefusjoner = arbeidsgiverrefusjoner.map { it.tilApiArbeidsgiverrefusjon() },
                 skjonnsmessigFastsattAarlig = skjonnsmessigFastsattAarlig,
                 skjaeringstidspunkt = skjaeringstidspunkt,
                 sykepengegrunnlag = sykepengegrunnlag,
@@ -120,13 +122,13 @@ fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Avviksvurde
                     inntekter.map {
                         ApiArbeidsgiverinntekt(
                             arbeidsgiver = it.arbeidsgiver,
-                            omregnetArsinntekt = it.omregnetArsinntekt.tilOmregnetÅrsinntekt(),
+                            omregnetArsinntekt = it.omregnetArsinntekt.tilApiOmregnetArsinntekt(),
                             sammenligningsgrunnlag = null,
                             skjonnsmessigFastsatt = null,
                             deaktivert = it.deaktivert,
                         )
                     },
-                arbeidsgiverrefusjoner = arbeidsgiverrefusjoner.map { it.tilArbeidsgiverrefusjon() },
+                arbeidsgiverrefusjoner = arbeidsgiverrefusjoner.map { it.tilApiArbeidsgiverrefusjon() },
                 omregnetArsinntekt = omregnetArsinntekt,
                 skjaeringstidspunkt = skjaeringstidspunkt,
                 sykepengegrunnlag = sykepengegrunnlag,

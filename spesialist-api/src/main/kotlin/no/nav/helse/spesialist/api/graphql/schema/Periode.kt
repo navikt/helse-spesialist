@@ -15,6 +15,8 @@ import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.Toggle
+import no.nav.helse.spesialist.api.graphql.mapping.tilApiDag
+import no.nav.helse.spesialist.api.graphql.mapping.tilApiHendelse
 import no.nav.helse.spesialist.api.graphql.mapping.tilSkjematype
 import no.nav.helse.spesialist.api.graphql.mapping.toVarselDto
 import no.nav.helse.spesialist.api.objectMapper
@@ -408,7 +410,7 @@ interface Periode {
         }
 
     @GraphQLIgnore
-    fun tidslinje(periode: GraphQLTidslinjeperiode): List<ApiDag> = periode.tidslinje.map { it.tilDag() }
+    fun tidslinje(periode: GraphQLTidslinjeperiode): List<ApiDag> = periode.tidslinje.map { it.tilApiDag() }
 }
 
 @Suppress("unused")
