@@ -42,6 +42,7 @@ import no.nav.helse.spesialist.api.graphql.mutation.PersonMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutation
 import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutation
+import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutation
 import no.nav.helse.spesialist.api.graphql.mutation.VarselMutation
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation
@@ -151,7 +152,9 @@ class SchemaBuilder(
                 handler = NotatMutationHandler(notatDao = notatDao),
             ),
             VarselMutation(varselRepository = varselRepository),
-            TildelingMutation(saksbehandlerhåndterer = saksbehandlerhåndterer),
+            TildelingMutation(
+                handler = TildelingMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
+            ),
             OpptegnelseMutation(
                 handler = OpptegnelseMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
             ),

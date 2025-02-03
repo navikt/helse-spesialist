@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
-import com.expediagroup.graphql.server.operations.Mutation
 import graphql.GraphQLError
 import graphql.GraphqlErrorException.newErrorException
 import graphql.execution.DataFetcherResult
@@ -20,15 +19,14 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class TildelingMutation(
+class TildelingMutationHandler(
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
-) : Mutation {
+) : TildelingMutationSchema {
     private companion object {
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
     }
 
-    @Suppress("unused")
-    suspend fun opprettTildeling(
+    override suspend fun opprettTildeling(
         oppgaveId: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiTildeling?> {
@@ -47,8 +45,7 @@ class TildelingMutation(
         }
     }
 
-    @Suppress("unused")
-    suspend fun fjernTildeling(
+    override suspend fun fjernTildeling(
         oppgaveId: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> {
