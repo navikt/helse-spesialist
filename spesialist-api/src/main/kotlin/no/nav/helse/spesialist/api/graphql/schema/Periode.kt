@@ -312,7 +312,7 @@ interface Periode {
 
     fun varsler(): List<VarselDTO>
 
-    fun hendelser(): List<Hendelse>
+    fun hendelser(): List<ApiHendelse>
 
     @GraphQLIgnore
     fun periodetilstand(
@@ -443,7 +443,7 @@ data class UberegnetPeriode(
 
     override fun skjaeringstidspunkt(): LocalDate = periode.skjaeringstidspunkt
 
-    override fun hendelser(): List<Hendelse> = periode.hendelser.map { it.tilHendelse() }
+    override fun hendelser(): List<ApiHendelse> = periode.hendelser.map { it.tilApiHendelse() }
 
     override fun varsler(): List<VarselDTO> =
         if (skalViseAktiveVarsler) {
@@ -524,7 +524,7 @@ data class BeregnetPeriode(
                 }
         }
 
-    override fun hendelser(): List<Hendelse> = periode.hendelser.map { it.tilHendelse() }
+    override fun hendelser(): List<ApiHendelse> = periode.hendelser.map { it.tilApiHendelse() }
 
     fun notater(): List<Notat> = notater(notatDao, vedtaksperiodeId())
 
