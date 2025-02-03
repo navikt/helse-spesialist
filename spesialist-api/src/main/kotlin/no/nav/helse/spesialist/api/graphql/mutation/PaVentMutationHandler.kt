@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
-import com.expediagroup.graphql.server.operations.Mutation
 import graphql.GraphQLError
 import graphql.GraphqlErrorException.newErrorException
 import graphql.execution.DataFetcherResult
@@ -22,20 +21,19 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
-class PaVentMutation(
+class PaVentMutationHandler(
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
-) : Mutation {
+) : PaVentMutationSchema {
     private companion object {
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
     }
 
-    @Suppress("unused")
-    suspend fun leggPaVent(
+    override suspend fun leggPaVent(
         oppgaveId: String,
         notatTekst: String?,
         frist: LocalDate,
         tildeling: Boolean,
-        arsaker: List<ApiPaVentRequest.ApiPaVentArsak>? = emptyList(),
+        arsaker: List<ApiPaVentRequest.ApiPaVentArsak>?,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiPaVent?> {
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
@@ -70,8 +68,7 @@ class PaVentMutation(
         }
     }
 
-    @Suppress("unused")
-    suspend fun fjernPaVent(
+    override suspend fun fjernPaVent(
         oppgaveId: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean?> {
@@ -90,8 +87,7 @@ class PaVentMutation(
         }
     }
 
-    @Suppress("unused")
-    suspend fun endrePaVent(
+    override suspend fun endrePaVent(
         oppgaveId: String,
         notatTekst: String?,
         frist: LocalDate,

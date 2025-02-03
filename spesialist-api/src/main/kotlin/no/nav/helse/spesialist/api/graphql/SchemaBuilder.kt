@@ -36,6 +36,7 @@ import no.nav.helse.spesialist.api.graphql.mutation.OpptegnelseMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutation
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.PaVentMutation
+import no.nav.helse.spesialist.api.graphql.mutation.PaVentMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.PersonMutation
 import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutation
 import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutation
@@ -178,7 +179,7 @@ class SchemaBuilder(
                     ),
             ),
             PaVentMutation(
-                saksbehandlerhåndterer = saksbehandlerhåndterer,
+                handler = PaVentMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
             ),
             OpphevStansMutation(
                 handler = OpphevStansMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
