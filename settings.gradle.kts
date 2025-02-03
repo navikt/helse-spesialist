@@ -24,7 +24,7 @@ dependencyResolutionManagement {
             version("ktor", "3.0.1")
             version("micrometer", "1.13.3")
             version("testcontainers", "1.20.4")
-            version("kotliquery", "1.9.0")
+            version("kotliquery", "1.9.1")
             version("flyway", "10.9.0")
             version("hikari", "5.1.0")
             version("postgres", "42.7.3")
