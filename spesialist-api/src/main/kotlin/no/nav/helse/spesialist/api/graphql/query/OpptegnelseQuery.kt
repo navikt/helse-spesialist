@@ -5,7 +5,7 @@ import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
-import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
+import no.nav.helse.spesialist.api.graphql.schema.ApiOpptegnelse
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 
 class OpptegnelseQuery(
@@ -15,7 +15,7 @@ class OpptegnelseQuery(
     fun opptegnelser(
         sekvensId: Int? = null,
         environment: DataFetchingEnvironment,
-    ): DataFetcherResult<List<Opptegnelse>> {
+    ): DataFetcherResult<List<ApiOpptegnelse>> {
         val saksbehandler = environment.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         val opptegnelser =
             if (sekvensId != null) {
@@ -24,6 +24,6 @@ class OpptegnelseQuery(
                 saksbehandlerhåndterer.hentAbonnerteOpptegnelser(saksbehandler)
             }
 
-        return DataFetcherResult.newResult<List<Opptegnelse>>().data(opptegnelser).build()
+        return DataFetcherResult.newResult<List<ApiOpptegnelse>>().data(opptegnelser).build()
     }
 }

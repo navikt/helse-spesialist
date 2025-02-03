@@ -71,11 +71,11 @@ import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation.VedtakResulta
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakUtfall
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
 import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgrad
+import no.nav.helse.spesialist.api.graphql.schema.ApiOpptegnelse
+import no.nav.helse.spesialist.api.graphql.schema.ApiOpptegnelsetype
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.Avslag
 import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
-import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
-import no.nav.helse.spesialist.api.graphql.schema.Opptegnelsetype
 import no.nav.helse.spesialist.api.graphql.schema.PaVentRequest
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.ANNET
@@ -410,14 +410,14 @@ class SaksbehandlerMediator(
     override fun hentAbonnerteOpptegnelser(
         saksbehandlerFraApi: SaksbehandlerFraApi,
         sisteSekvensId: Int,
-    ): List<Opptegnelse> {
+    ): List<ApiOpptegnelse> {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         SaksbehandlerLagrer(saksbehandlerDao).lagre(saksbehandler)
         abonnementDao.registrerSistekvensnummer(saksbehandler.oid(), sisteSekvensId)
         return opptegnelseRepository.finnOpptegnelser(saksbehandler.oid()).toApiOpptegnelser()
     }
 
-    override fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi): List<Opptegnelse> {
+    override fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi): List<ApiOpptegnelse> {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         SaksbehandlerLagrer(saksbehandlerDao).lagre(saksbehandler)
         return opptegnelseRepository.finnOpptegnelser(saksbehandler.oid()).toApiOpptegnelser()
@@ -425,20 +425,20 @@ class SaksbehandlerMediator(
 
     private fun List<OpptegnelseDao.Opptegnelse>.toApiOpptegnelser() =
         map { opptegnelse ->
-            Opptegnelse(
+            ApiOpptegnelse(
                 aktorId = opptegnelse.aktorId,
                 sekvensnummer = opptegnelse.sekvensnummer,
                 type =
                     opptegnelse.type.let { type ->
                         when (type) {
-                            OpptegnelseDao.Opptegnelse.Type.UTBETALING_ANNULLERING_FEILET -> Opptegnelsetype.UTBETALING_ANNULLERING_FEILET
-                            OpptegnelseDao.Opptegnelse.Type.UTBETALING_ANNULLERING_OK -> Opptegnelsetype.UTBETALING_ANNULLERING_OK
-                            OpptegnelseDao.Opptegnelse.Type.FERDIGBEHANDLET_GODKJENNINGSBEHOV -> Opptegnelsetype.FERDIGBEHANDLET_GODKJENNINGSBEHOV
-                            OpptegnelseDao.Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE -> Opptegnelsetype.NY_SAKSBEHANDLEROPPGAVE
-                            OpptegnelseDao.Opptegnelse.Type.REVURDERING_AVVIST -> Opptegnelsetype.REVURDERING_AVVIST
-                            OpptegnelseDao.Opptegnelse.Type.REVURDERING_FERDIGBEHANDLET -> Opptegnelsetype.REVURDERING_FERDIGBEHANDLET
-                            OpptegnelseDao.Opptegnelse.Type.PERSONDATA_OPPDATERT -> Opptegnelsetype.PERSONDATA_OPPDATERT
-                            OpptegnelseDao.Opptegnelse.Type.PERSON_KLAR_TIL_BEHANDLING -> Opptegnelsetype.PERSON_KLAR_TIL_BEHANDLING
+                            OpptegnelseDao.Opptegnelse.Type.UTBETALING_ANNULLERING_FEILET -> ApiOpptegnelsetype.UTBETALING_ANNULLERING_FEILET
+                            OpptegnelseDao.Opptegnelse.Type.UTBETALING_ANNULLERING_OK -> ApiOpptegnelsetype.UTBETALING_ANNULLERING_OK
+                            OpptegnelseDao.Opptegnelse.Type.FERDIGBEHANDLET_GODKJENNINGSBEHOV -> ApiOpptegnelsetype.FERDIGBEHANDLET_GODKJENNINGSBEHOV
+                            OpptegnelseDao.Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE -> ApiOpptegnelsetype.NY_SAKSBEHANDLEROPPGAVE
+                            OpptegnelseDao.Opptegnelse.Type.REVURDERING_AVVIST -> ApiOpptegnelsetype.REVURDERING_AVVIST
+                            OpptegnelseDao.Opptegnelse.Type.REVURDERING_FERDIGBEHANDLET -> ApiOpptegnelsetype.REVURDERING_FERDIGBEHANDLET
+                            OpptegnelseDao.Opptegnelse.Type.PERSONDATA_OPPDATERT -> ApiOpptegnelsetype.PERSONDATA_OPPDATERT
+                            OpptegnelseDao.Opptegnelse.Type.PERSON_KLAR_TIL_BEHANDLING -> ApiOpptegnelsetype.PERSON_KLAR_TIL_BEHANDLING
                         }
                     },
                 payload = opptegnelse.payload,

@@ -4,8 +4,8 @@ import no.nav.helse.modell.Annullering
 import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakUtfall
+import no.nav.helse.spesialist.api.graphql.schema.ApiOpptegnelse
 import no.nav.helse.spesialist.api.graphql.schema.Avslag
-import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
 import no.nav.helse.spesialist.api.graphql.schema.PaVentRequest
 import no.nav.helse.spesialist.api.graphql.schema.VedtakBegrunnelse
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
@@ -75,9 +75,9 @@ interface Saksbehandlerhåndterer {
     fun hentAbonnerteOpptegnelser(
         saksbehandlerFraApi: SaksbehandlerFraApi,
         sisteSekvensId: Int,
-    ): List<Opptegnelse>
+    ): List<ApiOpptegnelse>
 
-    fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi): List<Opptegnelse>
+    fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi): List<ApiOpptegnelse>
 
     // TODO: Ser ut til å være død kode, brukes bare av tester
     fun håndter(

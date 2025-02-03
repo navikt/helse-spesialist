@@ -1,13 +1,17 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
-data class Opptegnelse(
+import com.expediagroup.graphql.generator.annotations.GraphQLName
+
+@GraphQLName("Opptegnelse")
+data class ApiOpptegnelse(
     val aktorId: String,
     val sekvensnummer: Int,
-    val type: Opptegnelsetype,
+    val type: ApiOpptegnelsetype,
     val payload: String,
 )
 
-enum class Opptegnelsetype {
+@GraphQLName("Opptegnelsetype")
+enum class ApiOpptegnelsetype {
     UTBETALING_ANNULLERING_FEILET,
     UTBETALING_ANNULLERING_OK,
     FERDIGBEHANDLET_GODKJENNINGSBEHOV,

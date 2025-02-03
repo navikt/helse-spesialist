@@ -4,10 +4,10 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.mockk.every
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
-import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
-import no.nav.helse.spesialist.api.graphql.schema.Opptegnelsetype.REVURDERING_FERDIGBEHANDLET
-import no.nav.helse.spesialist.api.graphql.schema.Opptegnelsetype.UTBETALING_ANNULLERING_FEILET
-import no.nav.helse.spesialist.api.graphql.schema.Opptegnelsetype.UTBETALING_ANNULLERING_OK
+import no.nav.helse.spesialist.api.graphql.schema.ApiOpptegnelse
+import no.nav.helse.spesialist.api.graphql.schema.ApiOpptegnelsetype.REVURDERING_FERDIGBEHANDLET
+import no.nav.helse.spesialist.api.graphql.schema.ApiOpptegnelsetype.UTBETALING_ANNULLERING_FEILET
+import no.nav.helse.spesialist.api.graphql.schema.ApiOpptegnelsetype.UTBETALING_ANNULLERING_OK
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -22,7 +22,7 @@ internal class OpptegnelseQueryTest: AbstractGraphQLApiTest() {
             REVURDERING_FERDIGBEHANDLET
         )
         abonner(AKTØRID)
-        every { saksbehandlerhåndterer.hentAbonnerteOpptegnelser(any()) } returns typer.mapIndexed { idx, type -> Opptegnelse(AKTØRID, idx + 1, type, "{}") }
+        every { saksbehandlerhåndterer.hentAbonnerteOpptegnelser(any()) } returns typer.mapIndexed { idx, type -> ApiOpptegnelse(AKTØRID, idx + 1, type, "{}") }
 
         val body = runQuery(
             """query HentOpptegnelser {
@@ -34,7 +34,7 @@ internal class OpptegnelseQueryTest: AbstractGraphQLApiTest() {
                 }
             }"""
         )
-        val opptegnelser = jacksonObjectMapper().treeToValue<List<Opptegnelse>>(body["data"]["opptegnelser"])
+        val opptegnelser = jacksonObjectMapper().treeToValue<List<ApiOpptegnelse>>(body["data"]["opptegnelser"])
         assertEquals(3, opptegnelser.size)
         opptegnelser.forEachIndexed { index, opptegnelse ->
             assertEquals(AKTØRID, opptegnelse.aktorId)
@@ -53,7 +53,7 @@ internal class OpptegnelseQueryTest: AbstractGraphQLApiTest() {
             REVURDERING_FERDIGBEHANDLET
         )
         abonner(AKTØRID)
-        every { saksbehandlerhåndterer.hentAbonnerteOpptegnelser(any(), any()) } returns listOf(Opptegnelse(AKTØRID, 3, typer[2], "{}"))
+        every { saksbehandlerhåndterer.hentAbonnerteOpptegnelser(any(), any()) } returns listOf(ApiOpptegnelse(AKTØRID, 3, typer[2], "{}"))
         val body = runQuery(
             """query HentOpptegnelser {
                 opptegnelser(sekvensId: 2) {
@@ -65,7 +65,7 @@ internal class OpptegnelseQueryTest: AbstractGraphQLApiTest() {
             }"""
         )
 
-        val opptegnelser = jacksonObjectMapper().treeToValue<List<Opptegnelse>>(body["data"]["opptegnelser"])
+        val opptegnelser = jacksonObjectMapper().treeToValue<List<ApiOpptegnelse>>(body["data"]["opptegnelser"])
         assertEquals(1, opptegnelser.size)
         val opptegnelse = opptegnelser.single()
         assertEquals(AKTØRID, opptegnelse.aktorId)
