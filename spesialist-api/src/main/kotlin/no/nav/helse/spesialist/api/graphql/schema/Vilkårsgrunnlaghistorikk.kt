@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
+import com.expediagroup.graphql.generator.annotations.GraphQLName
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering
 import no.nav.helse.spesialist.api.graphql.mapping.tilApiArbeidsgiverrefusjon
@@ -11,11 +12,13 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLVilkarsgrunnlag
 import java.time.LocalDate
 import java.util.UUID
 
-enum class Vilkarsgrunnlagtype { INFOTRYGD, SPLEIS, UKJENT }
+@GraphQLName("Vilkarsgrunnlagtype")
+enum class ApiVilkårsgrunnlagtype { INFOTRYGD, SPLEIS, UKJENT }
 
-interface Vilkarsgrunnlag {
+@GraphQLName("Vilkarsgrunnlag")
+interface ApiVilkårsgrunnlag {
     val id: UUID
-    val vilkarsgrunnlagtype: Vilkarsgrunnlagtype
+    val vilkarsgrunnlagtype: ApiVilkårsgrunnlagtype
     val inntekter: List<ApiArbeidsgiverinntekt>
     val arbeidsgiverrefusjoner: List<ApiArbeidsgiverrefusjon>
     val omregnetArsinntekt: Double
@@ -23,19 +26,21 @@ interface Vilkarsgrunnlag {
     val sykepengegrunnlag: Double
 }
 
-data class VilkarsgrunnlagInfotrygd(
+@GraphQLName("VilkarsgrunnlagInfotrygd")
+data class ApiVilkårsgrunnlagInfotrygd(
     override val id: UUID,
-    override val vilkarsgrunnlagtype: Vilkarsgrunnlagtype,
+    override val vilkarsgrunnlagtype: ApiVilkårsgrunnlagtype,
     override val inntekter: List<ApiArbeidsgiverinntekt>,
     override val arbeidsgiverrefusjoner: List<ApiArbeidsgiverrefusjon>,
     override val omregnetArsinntekt: Double,
     override val skjaeringstidspunkt: LocalDate,
     override val sykepengegrunnlag: Double,
-) : Vilkarsgrunnlag
+) : ApiVilkårsgrunnlag
 
-data class VilkarsgrunnlagSpleis(
+@GraphQLName("VilkarsgrunnlagSpleis")
+data class ApiVilkårsgrunnlagSpleis(
     override val id: UUID,
-    override val vilkarsgrunnlagtype: Vilkarsgrunnlagtype,
+    override val vilkarsgrunnlagtype: ApiVilkårsgrunnlagtype,
     override val inntekter: List<ApiArbeidsgiverinntekt>,
     override val omregnetArsinntekt: Double,
     override val skjaeringstidspunkt: LocalDate,
@@ -46,14 +51,14 @@ data class VilkarsgrunnlagSpleis(
     val avviksprosent: Double?,
     val antallOpptjeningsdagerErMinst: Int,
     val grunnbelop: Int,
-    val sykepengegrunnlagsgrense: Sykepengegrunnlagsgrense,
+    val sykepengegrunnlagsgrense: ApiSykepengegrunnlagsgrense,
     val oppfyllerKravOmMedlemskap: Boolean?,
     val oppfyllerKravOmMinstelonn: Boolean,
     val oppfyllerKravOmOpptjening: Boolean,
     val opptjeningFra: LocalDate,
-) : Vilkarsgrunnlag
+) : ApiVilkårsgrunnlag
 
-fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Avviksvurderinghenter): Vilkarsgrunnlag {
+fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Avviksvurderinghenter): ApiVilkårsgrunnlag {
     return when (this) {
         is GraphQLSpleisVilkarsgrunnlag -> {
             val avviksvurdering: Avviksvurdering =
@@ -93,12 +98,12 @@ fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Avviksvurde
                     )
                 }
 
-            VilkarsgrunnlagSpleis(
+            ApiVilkårsgrunnlagSpleis(
                 inntekter = inntekter,
                 omregnetArsinntekt = avviksvurdering.beregningsgrunnlag.totalbeløp,
                 sammenligningsgrunnlag = avviksvurdering.sammenligningsgrunnlag.totalbeløp,
                 avviksprosent = avviksvurdering.avviksprosent,
-                vilkarsgrunnlagtype = Vilkarsgrunnlagtype.SPLEIS,
+                vilkarsgrunnlagtype = ApiVilkårsgrunnlagtype.SPLEIS,
                 id = id,
                 arbeidsgiverrefusjoner = arbeidsgiverrefusjoner.map { it.tilApiArbeidsgiverrefusjon() },
                 skjonnsmessigFastsattAarlig = skjonnsmessigFastsattAarlig,
@@ -115,9 +120,9 @@ fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Avviksvurde
         }
 
         is GraphQLInfotrygdVilkarsgrunnlag ->
-            VilkarsgrunnlagInfotrygd(
+            ApiVilkårsgrunnlagInfotrygd(
                 id = id,
-                vilkarsgrunnlagtype = Vilkarsgrunnlagtype.INFOTRYGD,
+                vilkarsgrunnlagtype = ApiVilkårsgrunnlagtype.INFOTRYGD,
                 inntekter =
                     inntekter.map {
                         ApiArbeidsgiverinntekt(
@@ -138,9 +143,15 @@ fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Avviksvurde
     }
 }
 
-internal fun GraphQLSykepengegrunnlagsgrense.tilSykepengegrunnlaggrense() = Sykepengegrunnlagsgrense(grunnbelop, grense, virkningstidspunkt)
+internal fun GraphQLSykepengegrunnlagsgrense.tilSykepengegrunnlaggrense() =
+    ApiSykepengegrunnlagsgrense(
+        grunnbelop,
+        grense,
+        virkningstidspunkt,
+    )
 
-data class Sykepengegrunnlagsgrense(
+@GraphQLName("Sykepengegrunnlagsgrense")
+data class ApiSykepengegrunnlagsgrense(
     val grunnbelop: Int,
     val grense: Int,
     val virkningstidspunkt: LocalDate,

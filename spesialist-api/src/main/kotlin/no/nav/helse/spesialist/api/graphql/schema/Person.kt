@@ -203,7 +203,7 @@ data class Person(
             .finnInfotrygdutbetalinger(snapshot.fodselsnummer)
             ?.let { objectMapper.readValue(it) }
 
-    fun vilkarsgrunnlag(): List<Vilkarsgrunnlag> = snapshot.vilkarsgrunnlag.map { it.tilVilkarsgrunnlag(avviksvurderinghenter) }
+    fun vilkarsgrunnlag(): List<ApiVilkårsgrunnlag> = snapshot.vilkarsgrunnlag.map { it.tilVilkarsgrunnlag(avviksvurderinghenter) }
 
     private fun List<GraphQLGhostPeriode>.tilGhostPerioder(organisasjonsnummer: String): List<ApiGhostPeriode> =
         map {
