@@ -336,7 +336,7 @@ internal class PgVarselApiRepositoryTest: DatabaseIntegrationTest() {
     private fun finnGenerasjonId(spleisBehandlingId: UUID) = dbQuery.single(
         "select unik_id from behandling where behandling.spleis_behandling_id = :spleisBehandlingId",
         "spleisBehandlingId" to spleisBehandlingId
-    ) { it.uuid("unik_id") }.let(::checkNotNull)
+    ) { it.uuid("unik_id") }
 
     private fun periode(fom: LocalDate, tom: LocalDate) = Periode(UUID.randomUUID(), fom, tom)
 
