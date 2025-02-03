@@ -24,6 +24,7 @@ import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.graphql.mutation.AnnulleringMutation
+import no.nav.helse.spesialist.api.graphql.mutation.AnnulleringMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.MinimumSykdomsgradMutation
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutation
 import no.nav.helse.spesialist.api.graphql.mutation.OpphevStansMutation
@@ -158,7 +159,10 @@ class SchemaBuilder(
                 personhåndterer = personhåndterer,
             ),
             AnnulleringMutation(
-                saksbehandlerhåndterer = saksbehandlerhåndterer,
+                handler =
+                    AnnulleringMutationHandler(
+                        saksbehandlerhåndterer = saksbehandlerhåndterer,
+                    ),
             ),
             PaVentMutation(
                 saksbehandlerhåndterer = saksbehandlerhåndterer,

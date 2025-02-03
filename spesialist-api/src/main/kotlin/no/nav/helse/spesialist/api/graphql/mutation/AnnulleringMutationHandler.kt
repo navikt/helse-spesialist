@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
-import com.expediagroup.graphql.server.operations.Mutation
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import kotlinx.coroutines.Dispatchers
@@ -10,11 +9,10 @@ import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 
-class AnnulleringMutation(
+class AnnulleringMutationHandler(
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
-) : Mutation {
-    @Suppress("unused")
-    suspend fun annuller(
+) : AnnulleringMutationSchema {
+    override suspend fun annuller(
         annullering: ApiAnnulleringData,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
