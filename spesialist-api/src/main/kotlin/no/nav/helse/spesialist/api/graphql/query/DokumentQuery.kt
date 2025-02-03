@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.graphql.query
 
+import com.expediagroup.graphql.server.operations.Query
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.jackson.asLocalDate
 import com.github.navikt.tbd_libs.jackson.asLocalDateOrNull
@@ -14,6 +15,8 @@ import kotlinx.coroutines.withContext
 import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.PersonApiDao
 import no.nav.helse.spesialist.api.Dokumenthåndterer
+import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
+import no.nav.helse.spesialist.api.graphql.forbiddenError
 import no.nav.helse.spesialist.api.graphql.schema.ApiAvsenderSystem
 import no.nav.helse.spesialist.api.graphql.schema.ApiDokumentInntektsmelding
 import no.nav.helse.spesialist.api.graphql.schema.ApiEndringIRefusjon
@@ -30,15 +33,16 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiSporsmal
 import no.nav.helse.spesialist.api.graphql.schema.ApiSvar
 import no.nav.helse.spesialist.api.graphql.schema.ApiSvartype
 import no.nav.helse.spesialist.api.graphql.schema.ApiVisningskriterium
+import no.nav.helse.spesialist.api.saksbehandler.manglerTilgang
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class DokumentQuery(
-    personApiDao: PersonApiDao,
-    egenAnsattApiDao: EgenAnsattApiDao,
+    private val personApiDao: PersonApiDao,
+    private val egenAnsattApiDao: EgenAnsattApiDao,
     private val dokumenthåndterer: Dokumenthåndterer,
-) : AbstractPersonQuery(personApiDao, egenAnsattApiDao) {
+) : Query {
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
     @Suppress("unused")
@@ -371,6 +375,13 @@ class DokumentQuery(
             }
         }
     }
+
+    private fun isForbidden(
+        fnr: String,
+        env: DataFetchingEnvironment,
+    ): Boolean = manglerTilgang(egenAnsattApiDao, personApiDao, fnr, env.graphQlContext.get(TILGANGER))
+
+    private fun getForbiddenError(fødselsnummer: String): GraphQLError = forbiddenError(fødselsnummer)
 }
 
 private fun JsonNode.getIfNotNull(key: String) = get(key).takeUnless { it.isMissingOrNull() }
