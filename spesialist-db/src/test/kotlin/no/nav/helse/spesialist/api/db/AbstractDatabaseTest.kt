@@ -29,7 +29,7 @@ abstract class AbstractDatabaseTest {
                 username = postgres.username
                 password = postgres.password
                 maximumPoolSize = 100
-                connectionTimeout = 500
+                connectionTimeout = 1500
                 initializationFailTimeout = 5000
             })
 
