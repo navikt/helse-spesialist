@@ -28,8 +28,8 @@ import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.graphql.query.FetchPersonResult
 import no.nav.helse.spesialist.api.graphql.query.PersonoppslagService
+import no.nav.helse.spesialist.api.graphql.schema.ApiPersoninfo
 import no.nav.helse.spesialist.api.graphql.schema.Person
-import no.nav.helse.spesialist.api.graphql.schema.Personinfo
 import no.nav.helse.spesialist.api.graphql.schema.Reservasjon
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.saksbehandler.manglerTilgang
@@ -38,7 +38,7 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.slf4j.LoggerFactory
 
 private sealed interface HentSnapshotResult {
-    class Ok(val snapshot: Pair<Personinfo, GraphQLPerson>) : HentSnapshotResult
+    class Ok(val snapshot: Pair<ApiPersoninfo, GraphQLPerson>) : HentSnapshotResult
 
     sealed interface Feil : HentSnapshotResult {
         data object IkkeFunnet : Feil
@@ -110,7 +110,7 @@ class PersonService(
 
     private suspend fun person(
         fødselsnummer: String,
-        snapshot: Pair<Personinfo, GraphQLPerson>,
+        snapshot: Pair<ApiPersoninfo, GraphQLPerson>,
         reservasjon: Deferred<Reservasjon?>,
     ): FetchPersonResult.Ok {
         val (personinfo, personSnapshot) = snapshot

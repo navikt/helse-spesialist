@@ -1,14 +1,17 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
+import com.expediagroup.graphql.generator.annotations.GraphQLName
 import java.time.LocalDate
 
-enum class Kjonn {
+@GraphQLName("Kjonn")
+enum class ApiKjonn {
     Kvinne,
     Mann,
     Ukjent,
 }
 
-enum class Adressebeskyttelse {
+@GraphQLName("Adressebeskyttelse")
+enum class ApiAdressebeskyttelse {
     Ugradert,
     Fortrolig,
     StrengtFortrolig,
@@ -16,13 +19,14 @@ enum class Adressebeskyttelse {
     Ukjent,
 }
 
-data class Personinfo(
+@GraphQLName("Personinfo")
+data class ApiPersoninfo(
     val fornavn: String,
     val mellomnavn: String?,
     val etternavn: String,
     val fodselsdato: LocalDate,
-    val kjonn: Kjonn,
-    val adressebeskyttelse: Adressebeskyttelse,
+    val kjonn: ApiKjonn,
+    val adressebeskyttelse: ApiAdressebeskyttelse,
     val fullmakt: Boolean? = null,
     val reservasjon: Reservasjon? = null,
     val unntattFraAutomatisering: UnntattFraAutomatiskGodkjenning? = null,

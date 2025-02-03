@@ -1,9 +1,9 @@
 package no.nav.helse.spesialist.api.snapshot
 
 import no.nav.helse.db.api.SnapshotApiDao
-import no.nav.helse.spesialist.api.graphql.schema.Adressebeskyttelse
-import no.nav.helse.spesialist.api.graphql.schema.Kjonn
-import no.nav.helse.spesialist.api.graphql.schema.Personinfo
+import no.nav.helse.spesialist.api.graphql.schema.ApiAdressebeskyttelse
+import no.nav.helse.spesialist.api.graphql.schema.ApiKjonn
+import no.nav.helse.spesialist.api.graphql.schema.ApiPersoninfo
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 class SnapshotService(private val snapshotDao: SnapshotApiDao, private val snapshotClient: ISnapshotClient) {
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
-    fun hentSnapshot(fødselsnummer: String): Pair<Personinfo, GraphQLPerson>? {
+    fun hentSnapshot(fødselsnummer: String): Pair<ApiPersoninfo, GraphQLPerson>? {
         // TODO: trenger ikke lagre snapshot fra spleis-api lenger, kan legge på metadata fra Spesialist
         // on the fly og returnere komplett snapshot (Pair<Personinfo, GraphQLPerson>) her
         hentOgLagre(fødselsnummer)
@@ -25,7 +25,7 @@ class SnapshotService(private val snapshotDao: SnapshotApiDao, private val snaps
                 snapshotDao.hentSnapshotMedMetadata(fødselsnummer)
             }
         return snapshot?.let { (personinfo, graphqlPerson) ->
-            Personinfo(
+            ApiPersoninfo(
                 fornavn = personinfo.fornavn,
                 mellomnavn = personinfo.mellomnavn,
                 etternavn = personinfo.etternavn,
@@ -33,19 +33,19 @@ class SnapshotService(private val snapshotDao: SnapshotApiDao, private val snaps
                 kjonn =
                     personinfo.kjonn.let {
                         when (it) {
-                            SnapshotApiDao.Personinfo.Kjonn.Kvinne -> Kjonn.Kvinne
-                            SnapshotApiDao.Personinfo.Kjonn.Mann -> Kjonn.Mann
-                            SnapshotApiDao.Personinfo.Kjonn.Ukjent -> Kjonn.Ukjent
+                            SnapshotApiDao.Personinfo.Kjonn.Kvinne -> ApiKjonn.Kvinne
+                            SnapshotApiDao.Personinfo.Kjonn.Mann -> ApiKjonn.Mann
+                            SnapshotApiDao.Personinfo.Kjonn.Ukjent -> ApiKjonn.Ukjent
                         }
                     },
                 adressebeskyttelse =
                     personinfo.adressebeskyttelse.let {
                         when (it) {
-                            SnapshotApiDao.Personinfo.Adressebeskyttelse.Ugradert -> Adressebeskyttelse.Ugradert
-                            SnapshotApiDao.Personinfo.Adressebeskyttelse.Fortrolig -> Adressebeskyttelse.Fortrolig
-                            SnapshotApiDao.Personinfo.Adressebeskyttelse.StrengtFortrolig -> Adressebeskyttelse.StrengtFortrolig
-                            SnapshotApiDao.Personinfo.Adressebeskyttelse.StrengtFortroligUtland -> Adressebeskyttelse.StrengtFortroligUtland
-                            SnapshotApiDao.Personinfo.Adressebeskyttelse.Ukjent -> Adressebeskyttelse.Ukjent
+                            SnapshotApiDao.Personinfo.Adressebeskyttelse.Ugradert -> ApiAdressebeskyttelse.Ugradert
+                            SnapshotApiDao.Personinfo.Adressebeskyttelse.Fortrolig -> ApiAdressebeskyttelse.Fortrolig
+                            SnapshotApiDao.Personinfo.Adressebeskyttelse.StrengtFortrolig -> ApiAdressebeskyttelse.StrengtFortrolig
+                            SnapshotApiDao.Personinfo.Adressebeskyttelse.StrengtFortroligUtland -> ApiAdressebeskyttelse.StrengtFortroligUtland
+                            SnapshotApiDao.Personinfo.Adressebeskyttelse.Ukjent -> ApiAdressebeskyttelse.Ukjent
                         }
                     },
             ) to graphqlPerson

@@ -102,7 +102,7 @@ data class Annullering(
 
 data class Person(
     private val snapshot: GraphQLPerson,
-    private val personinfo: Personinfo,
+    private val personinfo: ApiPersoninfo,
     private val personApiDao: PersonApiDao,
     private val tildelingApiDao: TildelingApiDao,
     private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
@@ -126,7 +126,7 @@ data class Person(
 
     fun dodsdato(): LocalDate? = snapshot.dodsdato
 
-    fun personinfo(): Personinfo = personinfo
+    fun personinfo(): ApiPersoninfo = personinfo
 
     fun enhet(): Enhet = personApiDao.finnEnhet(snapshot.fodselsnummer).let { Enhet(it.id, it.navn) }
 
