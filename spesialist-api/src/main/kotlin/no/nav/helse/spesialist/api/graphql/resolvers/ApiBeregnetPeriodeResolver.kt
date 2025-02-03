@@ -50,6 +50,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiSimuleringsdetaljer
 import no.nav.helse.spesialist.api.graphql.schema.ApiSimuleringslinje
 import no.nav.helse.spesialist.api.graphql.schema.ApiSimuleringsperiode
 import no.nav.helse.spesialist.api.graphql.schema.ApiSimuleringsutbetaling
+import no.nav.helse.spesialist.api.graphql.schema.ApiSykepengedager
 import no.nav.helse.spesialist.api.graphql.schema.ApiTotrinnsvurdering
 import no.nav.helse.spesialist.api.graphql.schema.ApiTotrinnsvurderingRetur
 import no.nav.helse.spesialist.api.graphql.schema.ApiUtbetaling
@@ -261,7 +262,16 @@ data class ApiBeregnetPeriodeResolver(
                         oppfylt = it.oppfylt,
                     )
                 },
-            sykepengedager = periode.periodevilkar.sykepengedager,
+            sykepengedager =
+                periode.periodevilkar.sykepengedager.let {
+                    ApiSykepengedager(
+                        forbrukteSykedager = it.forbrukteSykedager,
+                        gjenstaendeSykedager = it.gjenstaendeSykedager,
+                        maksdato = it.maksdato,
+                        oppfylt = it.oppfylt,
+                        skjaeringstidspunkt = it.skjaeringstidspunkt,
+                    )
+                },
         )
 
     override fun skjaeringstidspunkt(): LocalDate = periode.skjaeringstidspunkt

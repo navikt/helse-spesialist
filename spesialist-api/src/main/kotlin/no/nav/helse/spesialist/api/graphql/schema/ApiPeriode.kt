@@ -2,7 +2,10 @@ package no.nav.helse.spesialist.api.graphql.schema
 
 import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.expediagroup.graphql.generator.annotations.GraphQLName
-import no.nav.helse.spleis.graphql.hentsnapshot.Sykepengedager
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import no.nav.helse.spleis.graphql.scalars.AnyToLocalDateConverter
+import no.nav.helse.spleis.graphql.scalars.LocalDateToAnyConverter
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -147,7 +150,7 @@ data class ApiUtbetaling(
 @GraphQLName("Periodevilkar")
 data class ApiPeriodevilkar(
     val alder: ApiAlder,
-    val sykepengedager: Sykepengedager,
+    val sykepengedager: ApiSykepengedager,
 )
 
 @GraphQLName("Kommentar")
@@ -395,4 +398,17 @@ enum class ApiPeriodehistorikkType {
 data class ApiAlder(
     val alderSisteSykedag: Int,
     val oppfylt: Boolean,
+)
+
+@GraphQLName("Sykepengedager")
+data class ApiSykepengedager(
+    val forbrukteSykedager: Int? = null,
+    val gjenstaendeSykedager: Int? = null,
+    @JsonSerialize(converter = LocalDateToAnyConverter::class)
+    @JsonDeserialize(converter = AnyToLocalDateConverter::class)
+    val maksdato: LocalDate,
+    val oppfylt: Boolean,
+    @JsonSerialize(converter = LocalDateToAnyConverter::class)
+    @JsonDeserialize(converter = AnyToLocalDateConverter::class)
+    val skjaeringstidspunkt: LocalDate,
 )
