@@ -30,6 +30,7 @@ import no.nav.helse.spesialist.api.graphql.mutation.MinimumSykdomsgradMutationHa
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutation
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.OpphevStansMutation
+import no.nav.helse.spesialist.api.graphql.mutation.OpphevStansMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.OpptegnelseMutation
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutation
 import no.nav.helse.spesialist.api.graphql.mutation.PaVentMutation
@@ -173,6 +174,8 @@ class SchemaBuilder(
             PaVentMutation(
                 saksbehandlerhåndterer = saksbehandlerhåndterer,
             ),
-            OpphevStansMutation(saksbehandlerhåndterer = saksbehandlerhåndterer),
+            OpphevStansMutation(
+                handler = OpphevStansMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
+            ),
         )
 }

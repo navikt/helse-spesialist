@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
-import com.expediagroup.graphql.server.operations.Mutation
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import kotlinx.coroutines.Dispatchers
@@ -10,9 +9,8 @@ import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OpphevStans
 
-class OpphevStansMutation(private val saksbehandlerhåndterer: Saksbehandlerhåndterer) : Mutation {
-    @Suppress("unused")
-    suspend fun opphevStans(
+class OpphevStansMutationHandler(private val saksbehandlerhåndterer: Saksbehandlerhåndterer) : OpphevStansMutationSchema {
+    override suspend fun opphevStans(
         env: DataFetchingEnvironment,
         fodselsnummer: String,
         begrunnelse: String,
