@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql.query
 
-import com.expediagroup.graphql.server.operations.Query
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.jackson.asLocalDate
 import com.github.navikt.tbd_libs.jackson.asLocalDateOrNull
@@ -38,15 +37,14 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class DokumentQuery(
+class DokumentQueryHandler(
     private val personApiDao: PersonApiDao,
     private val egenAnsattApiDao: EgenAnsattApiDao,
     private val dokumenthåndterer: Dokumenthåndterer,
-) : Query {
+) : DokumentQuerySchema {
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
-    @Suppress("unused")
-    suspend fun hentSoknad(
+    override suspend fun hentSoknad(
         fnr: String,
         dokumentId: String,
         env: DataFetchingEnvironment,
@@ -75,8 +73,7 @@ class DokumentQuery(
         return DataFetcherResult.newResult<ApiSoknad>().data(dokument).build()
     }
 
-    @Suppress("unused")
-    suspend fun hentInntektsmelding(
+    override suspend fun hentInntektsmelding(
         fnr: String,
         dokumentId: String,
         env: DataFetchingEnvironment,

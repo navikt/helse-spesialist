@@ -39,6 +39,7 @@ import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQuery
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.DokumentQuery
+import no.nav.helse.spesialist.api.graphql.query.DokumentQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQuery
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQuery
@@ -122,9 +123,12 @@ class SchemaBuilder(
                     ),
             ),
             DokumentQuery(
-                personApiDao = personApiDao,
-                egenAnsattApiDao = egenAnsattApiDao,
-                dokumenthåndterer = dokumenthåndterer,
+                handler =
+                    DokumentQueryHandler(
+                        personApiDao = personApiDao,
+                        egenAnsattApiDao = egenAnsattApiDao,
+                        dokumenthåndterer = dokumenthåndterer,
+                    ),
             ),
         )
 
