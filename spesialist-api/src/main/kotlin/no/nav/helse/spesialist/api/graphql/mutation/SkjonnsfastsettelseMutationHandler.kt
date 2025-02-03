@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
-import com.expediagroup.graphql.server.operations.Mutation
 import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
@@ -14,13 +13,13 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class SkjonnsfastsettelseMutation(private val saksbehandlerhåndterer: Saksbehandlerhåndterer) : Mutation {
+class SkjonnsfastsettelseMutationHandler(private val saksbehandlerhåndterer: Saksbehandlerhåndterer) :
+    SkjonnsfastsettelseMutationSchema {
     private companion object {
-        private val logg: Logger = LoggerFactory.getLogger(SkjonnsfastsettelseMutation::class.java)
+        private val logg: Logger = LoggerFactory.getLogger(SkjonnsfastsettelseMutationHandler::class.java)
     }
 
-    @Suppress("unused")
-    suspend fun skjonnsfastsettSykepengegrunnlag(
+    override suspend fun skjonnsfastsettSykepengegrunnlag(
         skjonnsfastsettelse: ApiSkjonnsfastsettelse,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
