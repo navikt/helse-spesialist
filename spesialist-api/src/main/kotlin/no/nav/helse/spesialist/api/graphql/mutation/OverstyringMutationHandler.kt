@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
-import com.expediagroup.graphql.server.operations.Mutation
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
@@ -15,13 +14,12 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhåndterer) : Mutation {
+class OverstyringMutationHandler(private val saksbehandlerhåndterer: Saksbehandlerhåndterer) : OverstyringMutationSchema {
     private companion object {
-        private val logg: Logger = LoggerFactory.getLogger(OverstyringMutation::class.java)
+        private val logg: Logger = LoggerFactory.getLogger(OverstyringMutationHandler::class.java)
     }
 
-    @Suppress("unused")
-    suspend fun overstyrDager(
+    override suspend fun overstyrDager(
         overstyring: ApiTidslinjeOverstyring,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
@@ -37,8 +35,7 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
             DataFetcherResult.newResult<Boolean>().data(true).build()
         }
 
-    @Suppress("unused")
-    suspend fun overstyrInntektOgRefusjon(
+    override suspend fun overstyrInntektOgRefusjon(
         overstyring: ApiInntektOgRefusjonOverstyring,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
@@ -54,8 +51,7 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
             DataFetcherResult.newResult<Boolean>().data(true).build()
         }
 
-    @Suppress("unused")
-    suspend fun overstyrArbeidsforhold(
+    override suspend fun overstyrArbeidsforhold(
         overstyring: ApiArbeidsforholdOverstyringHandling,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
