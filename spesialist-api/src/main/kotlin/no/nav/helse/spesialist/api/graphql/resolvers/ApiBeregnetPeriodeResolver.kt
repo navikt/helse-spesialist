@@ -14,7 +14,12 @@ import no.nav.helse.db.api.TotrinnsvurderingApiDao
 import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
+import no.nav.helse.spesialist.api.graphql.mapping.tilApiDag
 import no.nav.helse.spesialist.api.graphql.mapping.tilApiHendelse
+import no.nav.helse.spesialist.api.graphql.mapping.tilApiInntektstype
+import no.nav.helse.spesialist.api.graphql.mapping.tilApiNotat
+import no.nav.helse.spesialist.api.graphql.mapping.tilApiPeriodetilstand
+import no.nav.helse.spesialist.api.graphql.mapping.tilApiPeriodetype
 import no.nav.helse.spesialist.api.graphql.mapping.toVarselDto
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnullering
 import no.nav.helse.spesialist.api.graphql.schema.ApiAvslag
@@ -80,25 +85,25 @@ data class ApiBeregnetPeriodeResolver(
     private val erSisteGenerasjon: Boolean,
     private val index: Int,
 ) : BeregnetPeriodeSchema {
-    private val periodetilstand = periodetilstand(periode.periodetilstand, erSisteGenerasjon)
+    private val periodetilstand = periode.periodetilstand.tilApiPeriodetilstand(erSisteGenerasjon)
 
     override fun behandlingId(): UUID = periode.behandlingId
 
-    override fun erForkastet(): Boolean = erForkastet(periode)
+    override fun erForkastet(): Boolean = periode.erForkastet
 
-    override fun fom(): LocalDate = fom(periode)
+    override fun fom(): LocalDate = periode.fom
 
-    override fun tom(): LocalDate = tom(periode)
+    override fun tom(): LocalDate = periode.tom
 
     override fun id(): UUID = UUID.nameUUIDFromBytes(vedtaksperiodeId().toString().toByteArray() + index.toByte())
 
-    override fun inntektstype(): ApiInntektstype = inntektstype(periode)
+    override fun inntektstype(): ApiInntektstype = periode.inntektstype.tilApiInntektstype()
 
-    override fun opprettet(): LocalDateTime = opprettet(periode)
+    override fun opprettet(): LocalDateTime = periode.opprettet
 
-    override fun periodetype(): ApiPeriodetype = periodetype(periode)
+    override fun periodetype(): ApiPeriodetype = periode.tilApiPeriodetype()
 
-    override fun tidslinje(): List<ApiDag> = tidslinje(periode)
+    override fun tidslinje(): List<ApiDag> = periode.tidslinje.map { it.tilApiDag() }
 
     override fun vedtaksperiodeId(): UUID = periode.vedtaksperiodeId
 
@@ -124,7 +129,7 @@ data class ApiBeregnetPeriodeResolver(
 
     override fun hendelser(): List<ApiHendelse> = periode.hendelser.map { it.tilApiHendelse() }
 
-    override fun notater(): List<ApiNotat> = notater(notatDao, vedtaksperiodeId())
+    override fun notater(): List<ApiNotat> = notatDao.finnNotater(vedtaksperiodeId()).map { it.tilApiNotat() }
 
     private fun mapLagtPåVentJson(json: String): Triple<List<String>, LocalDate?, String?> {
         val node = objectMapper.readTree(json)

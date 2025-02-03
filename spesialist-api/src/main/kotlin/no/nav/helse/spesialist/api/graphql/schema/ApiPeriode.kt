@@ -2,16 +2,8 @@ package no.nav.helse.spesialist.api.graphql.schema
 
 import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.expediagroup.graphql.generator.annotations.GraphQLName
-import no.nav.helse.db.api.NotatApiDao
-import no.nav.helse.spesialist.api.Toggle
-import no.nav.helse.spesialist.api.graphql.mapping.tilApiDag
-import no.nav.helse.spesialist.api.graphql.mapping.tilSkjematype
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
-import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
-import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
-import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetype
 import no.nav.helse.spleis.graphql.hentsnapshot.Alder
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLTidslinjeperiode
 import no.nav.helse.spleis.graphql.hentsnapshot.Sykepengedager
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -324,102 +316,6 @@ interface ApiPeriode {
     fun varsler(): List<ApiVarselDTO>
 
     fun hendelser(): List<ApiHendelse>
-
-    @GraphQLIgnore
-    fun periodetilstand(
-        tilstand: GraphQLPeriodetilstand,
-        erSisteGenerasjon: Boolean,
-    ) = when (tilstand) {
-        GraphQLPeriodetilstand.ANNULLERINGFEILET -> ApiPeriodetilstand.AnnulleringFeilet
-        GraphQLPeriodetilstand.ANNULLERT -> ApiPeriodetilstand.Annullert
-        GraphQLPeriodetilstand.INGENUTBETALING -> ApiPeriodetilstand.IngenUtbetaling
-        GraphQLPeriodetilstand.REVURDERINGFEILET -> ApiPeriodetilstand.RevurderingFeilet
-        GraphQLPeriodetilstand.TILANNULLERING -> ApiPeriodetilstand.TilAnnullering
-        GraphQLPeriodetilstand.TILINFOTRYGD -> ApiPeriodetilstand.TilInfotrygd
-        GraphQLPeriodetilstand.TILUTBETALING -> ApiPeriodetilstand.TilUtbetaling
-        GraphQLPeriodetilstand.UTBETALT -> ApiPeriodetilstand.Utbetalt
-        GraphQLPeriodetilstand.FORBEREDERGODKJENNING -> ApiPeriodetilstand.ForberederGodkjenning
-        GraphQLPeriodetilstand.MANGLERINFORMASJON -> ApiPeriodetilstand.ManglerInformasjon
-        GraphQLPeriodetilstand.TILGODKJENNING -> ApiPeriodetilstand.TilGodkjenning
-        GraphQLPeriodetilstand.UTBETALINGFEILET -> ApiPeriodetilstand.UtbetalingFeilet
-        GraphQLPeriodetilstand.VENTERPAANNENPERIODE -> ApiPeriodetilstand.VenterPaEnAnnenPeriode
-        GraphQLPeriodetilstand.UTBETALTVENTERPAANNENPERIODE -> {
-            if (Toggle.BehandleEnOgEnPeriode.enabled && erSisteGenerasjon) {
-                ApiPeriodetilstand.VenterPaEnAnnenPeriode
-            } else {
-                ApiPeriodetilstand.UtbetaltVenterPaEnAnnenPeriode
-            }
-        }
-
-        GraphQLPeriodetilstand.AVVENTERINNTEKTSOPPLYSNINGER -> ApiPeriodetilstand.AvventerInntektsopplysninger
-        GraphQLPeriodetilstand.TILSKJONNSFASTSETTELSE -> ApiPeriodetilstand.TilSkjonnsfastsettelse
-        else -> ApiPeriodetilstand.Ukjent
-    }
-
-    @GraphQLIgnore
-    fun erForkastet(periode: GraphQLTidslinjeperiode): Boolean = periode.erForkastet
-
-    @GraphQLIgnore
-    fun fom(periode: GraphQLTidslinjeperiode): LocalDate = periode.fom
-
-    @GraphQLIgnore
-    fun tom(periode: GraphQLTidslinjeperiode): LocalDate = periode.tom
-
-    @GraphQLIgnore
-    fun inntektstype(periode: GraphQLTidslinjeperiode): ApiInntektstype =
-        when (periode.inntektstype) {
-            GraphQLInntektstype.ENARBEIDSGIVER -> ApiInntektstype.ENARBEIDSGIVER
-            GraphQLInntektstype.FLEREARBEIDSGIVERE -> ApiInntektstype.FLEREARBEIDSGIVERE
-            else -> throw Exception("Ukjent inntektstype ${periode.inntektstype}")
-        }
-
-    @GraphQLIgnore
-    fun opprettet(periode: GraphQLTidslinjeperiode): LocalDateTime = periode.opprettet
-
-    @GraphQLIgnore
-    fun periodetype(periode: GraphQLTidslinjeperiode): ApiPeriodetype =
-        when (periode.periodetype) {
-            GraphQLPeriodetype.FORLENGELSE -> ApiPeriodetype.FORLENGELSE
-            GraphQLPeriodetype.FORSTEGANGSBEHANDLING -> ApiPeriodetype.FORSTEGANGSBEHANDLING
-            GraphQLPeriodetype.INFOTRYGDFORLENGELSE -> ApiPeriodetype.INFOTRYGDFORLENGELSE
-            GraphQLPeriodetype.OVERGANGFRAIT -> ApiPeriodetype.OVERGANG_FRA_IT
-            else -> throw Exception("Ukjent periodetype ${periode.periodetype}")
-        }
-
-    @GraphQLIgnore
-    fun notater(
-        notatDao: NotatApiDao,
-        vedtaksperiodeId: UUID,
-    ): List<ApiNotat> =
-        notatDao.finnNotater(vedtaksperiodeId).map {
-            ApiNotat(
-                id = it.id,
-                dialogRef = it.dialogRef,
-                tekst = it.tekst,
-                opprettet = it.opprettet,
-                saksbehandlerOid = it.saksbehandlerOid,
-                saksbehandlerNavn = it.saksbehandlerNavn,
-                saksbehandlerEpost = it.saksbehandlerEpost,
-                saksbehandlerIdent = it.saksbehandlerIdent,
-                vedtaksperiodeId = it.vedtaksperiodeId,
-                feilregistrert = it.feilregistrert,
-                feilregistrert_tidspunkt = it.feilregistrert_tidspunkt,
-                type = it.type.tilSkjematype(),
-                kommentarer =
-                    it.kommentarer.map { kommentar ->
-                        ApiKommentar(
-                            id = kommentar.id,
-                            tekst = kommentar.tekst,
-                            opprettet = kommentar.opprettet,
-                            saksbehandlerident = kommentar.saksbehandlerident,
-                            feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
-                        )
-                    },
-            )
-        }
-
-    @GraphQLIgnore
-    fun tidslinje(periode: GraphQLTidslinjeperiode): List<ApiDag> = periode.tidslinje.map { it.tilApiDag() }
 }
 
 @GraphQLIgnore

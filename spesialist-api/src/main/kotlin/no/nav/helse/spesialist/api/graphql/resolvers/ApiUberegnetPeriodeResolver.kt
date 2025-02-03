@@ -4,7 +4,12 @@ import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import io.ktor.utils.io.core.toByteArray
 import no.nav.helse.db.api.NotatApiDao
 import no.nav.helse.db.api.VarselApiRepository
+import no.nav.helse.spesialist.api.graphql.mapping.tilApiDag
 import no.nav.helse.spesialist.api.graphql.mapping.tilApiHendelse
+import no.nav.helse.spesialist.api.graphql.mapping.tilApiInntektstype
+import no.nav.helse.spesialist.api.graphql.mapping.tilApiNotat
+import no.nav.helse.spesialist.api.graphql.mapping.tilApiPeriodetilstand
+import no.nav.helse.spesialist.api.graphql.mapping.tilApiPeriodetype
 import no.nav.helse.spesialist.api.graphql.mapping.toVarselDto
 import no.nav.helse.spesialist.api.graphql.schema.ApiDag
 import no.nav.helse.spesialist.api.graphql.schema.ApiHendelse
@@ -29,25 +34,25 @@ data class ApiUberegnetPeriodeResolver(
 ) : UberegnetPeriodeSchema {
     override fun behandlingId(): UUID = periode.behandlingId
 
-    override fun erForkastet(): Boolean = erForkastet(periode)
+    override fun erForkastet(): Boolean = periode.erForkastet
 
-    override fun fom(): LocalDate = fom(periode)
+    override fun fom(): LocalDate = periode.fom
 
-    override fun tom(): LocalDate = tom(periode)
+    override fun tom(): LocalDate = periode.tom
 
     override fun id(): UUID = UUID.nameUUIDFromBytes(vedtaksperiodeId().toString().toByteArray() + index.toByte())
 
-    override fun inntektstype(): ApiInntektstype = inntektstype(periode)
+    override fun inntektstype(): ApiInntektstype = periode.inntektstype.tilApiInntektstype()
 
-    override fun opprettet(): LocalDateTime = opprettet(periode)
+    override fun opprettet(): LocalDateTime = periode.opprettet
 
-    override fun periodetype(): ApiPeriodetype = periodetype(periode)
+    override fun periodetype(): ApiPeriodetype = periode.tilApiPeriodetype()
 
-    override fun tidslinje(): List<ApiDag> = tidslinje(periode)
+    override fun tidslinje(): List<ApiDag> = periode.tidslinje.map { it.tilApiDag() }
 
     override fun vedtaksperiodeId(): UUID = periode.vedtaksperiodeId
 
-    override fun periodetilstand(): ApiPeriodetilstand = periodetilstand(periode.periodetilstand, true)
+    override fun periodetilstand(): ApiPeriodetilstand = periode.periodetilstand.tilApiPeriodetilstand(true)
 
     override fun skjaeringstidspunkt(): LocalDate = periode.skjaeringstidspunkt
 
@@ -60,5 +65,5 @@ data class ApiUberegnetPeriodeResolver(
             varselRepository.finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId()).map { it.toVarselDto() }
         }
 
-    override fun notater(): List<ApiNotat> = notater(notatDao, vedtaksperiodeId())
+    override fun notater(): List<ApiNotat> = notatDao.finnNotater(vedtaksperiodeId()).map { it.tilApiNotat() }
 }

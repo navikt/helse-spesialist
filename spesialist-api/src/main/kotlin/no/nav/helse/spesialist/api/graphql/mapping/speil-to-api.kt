@@ -1,5 +1,7 @@
 package no.nav.helse.spesialist.api.graphql.mapping
 
+import no.nav.helse.db.api.NotatApiDao
+import no.nav.helse.spesialist.api.Toggle
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverrefusjon
 import no.nav.helse.spesialist.api.graphql.schema.ApiBegrunnelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiDag
@@ -9,9 +11,14 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiInntektFraAOrdningen
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektHentetFraAOrdningen
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektskilde
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektsmelding
+import no.nav.helse.spesialist.api.graphql.schema.ApiInntektstype
 import no.nav.helse.spesialist.api.graphql.schema.ApiKilde
 import no.nav.helse.spesialist.api.graphql.schema.ApiKildetype
+import no.nav.helse.spesialist.api.graphql.schema.ApiKommentar
+import no.nav.helse.spesialist.api.graphql.schema.ApiNotat
 import no.nav.helse.spesialist.api.graphql.schema.ApiOmregnetArsinntekt
+import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetilstand
+import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiRefusjonselement
 import no.nav.helse.spesialist.api.graphql.schema.ApiSoknadArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.ApiSoknadArbeidsledig
@@ -24,6 +31,9 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiUtbetalingsdagtype
 import no.nav.helse.spesialist.api.graphql.schema.ApiUtbetalingsinfo
 import no.nav.helse.spleis.graphql.enums.GraphQLBegrunnelse
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektskilde
+import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
+import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
+import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetype
 import no.nav.helse.spleis.graphql.enums.GraphQLSykdomsdagkildetype
 import no.nav.helse.spleis.graphql.enums.GraphQLSykdomsdagtype
 import no.nav.helse.spleis.graphql.enums.GraphQLUtbetalingsdagType
@@ -43,6 +53,7 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadNav
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadSelvstendig
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSykdomsdagkilde
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSykmelding
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLTidslinjeperiode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetalingsinfo
 import java.util.UUID
 
@@ -265,3 +276,73 @@ private fun GraphQLRefusjonselement.tilApiRefusjonselement() =
         belop = belop,
         meldingsreferanseId = meldingsreferanseId,
     )
+
+fun GraphQLPeriodetilstand.tilApiPeriodetilstand(erSisteGenerasjon: Boolean) =
+    when (this) {
+        GraphQLPeriodetilstand.ANNULLERINGFEILET -> ApiPeriodetilstand.AnnulleringFeilet
+        GraphQLPeriodetilstand.ANNULLERT -> ApiPeriodetilstand.Annullert
+        GraphQLPeriodetilstand.INGENUTBETALING -> ApiPeriodetilstand.IngenUtbetaling
+        GraphQLPeriodetilstand.REVURDERINGFEILET -> ApiPeriodetilstand.RevurderingFeilet
+        GraphQLPeriodetilstand.TILANNULLERING -> ApiPeriodetilstand.TilAnnullering
+        GraphQLPeriodetilstand.TILINFOTRYGD -> ApiPeriodetilstand.TilInfotrygd
+        GraphQLPeriodetilstand.TILUTBETALING -> ApiPeriodetilstand.TilUtbetaling
+        GraphQLPeriodetilstand.UTBETALT -> ApiPeriodetilstand.Utbetalt
+        GraphQLPeriodetilstand.FORBEREDERGODKJENNING -> ApiPeriodetilstand.ForberederGodkjenning
+        GraphQLPeriodetilstand.MANGLERINFORMASJON -> ApiPeriodetilstand.ManglerInformasjon
+        GraphQLPeriodetilstand.TILGODKJENNING -> ApiPeriodetilstand.TilGodkjenning
+        GraphQLPeriodetilstand.UTBETALINGFEILET -> ApiPeriodetilstand.UtbetalingFeilet
+        GraphQLPeriodetilstand.VENTERPAANNENPERIODE -> ApiPeriodetilstand.VenterPaEnAnnenPeriode
+        GraphQLPeriodetilstand.UTBETALTVENTERPAANNENPERIODE -> {
+            if (Toggle.BehandleEnOgEnPeriode.enabled && erSisteGenerasjon) {
+                ApiPeriodetilstand.VenterPaEnAnnenPeriode
+            } else {
+                ApiPeriodetilstand.UtbetaltVenterPaEnAnnenPeriode
+            }
+        }
+
+        GraphQLPeriodetilstand.AVVENTERINNTEKTSOPPLYSNINGER -> ApiPeriodetilstand.AvventerInntektsopplysninger
+        GraphQLPeriodetilstand.TILSKJONNSFASTSETTELSE -> ApiPeriodetilstand.TilSkjonnsfastsettelse
+        else -> ApiPeriodetilstand.Ukjent
+    }
+
+fun NotatApiDao.NotatDto.tilApiNotat() =
+    ApiNotat(
+        id = id,
+        dialogRef = dialogRef,
+        tekst = tekst,
+        opprettet = opprettet,
+        saksbehandlerOid = saksbehandlerOid,
+        saksbehandlerNavn = saksbehandlerNavn,
+        saksbehandlerEpost = saksbehandlerEpost,
+        saksbehandlerIdent = saksbehandlerIdent,
+        vedtaksperiodeId = vedtaksperiodeId,
+        feilregistrert = feilregistrert,
+        feilregistrert_tidspunkt = feilregistrert_tidspunkt,
+        type = type.tilSkjematype(),
+        kommentarer =
+            kommentarer.map { kommentar ->
+                ApiKommentar(
+                    id = kommentar.id,
+                    tekst = kommentar.tekst,
+                    opprettet = kommentar.opprettet,
+                    saksbehandlerident = kommentar.saksbehandlerident,
+                    feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+                )
+            },
+    )
+
+fun GraphQLTidslinjeperiode.tilApiPeriodetype() =
+    when (periodetype) {
+        GraphQLPeriodetype.FORLENGELSE -> ApiPeriodetype.FORLENGELSE
+        GraphQLPeriodetype.FORSTEGANGSBEHANDLING -> ApiPeriodetype.FORSTEGANGSBEHANDLING
+        GraphQLPeriodetype.INFOTRYGDFORLENGELSE -> ApiPeriodetype.INFOTRYGDFORLENGELSE
+        GraphQLPeriodetype.OVERGANGFRAIT -> ApiPeriodetype.OVERGANG_FRA_IT
+        else -> throw Exception("Ukjent periodetype $periodetype")
+    }
+
+fun GraphQLInntektstype.tilApiInntektstype() =
+    when (this) {
+        GraphQLInntektstype.ENARBEIDSGIVER -> ApiInntektstype.ENARBEIDSGIVER
+        GraphQLInntektstype.FLEREARBEIDSGIVERE -> ApiInntektstype.FLEREARBEIDSGIVERE
+        else -> throw Exception("Ukjent inntektstype $this")
+    }
