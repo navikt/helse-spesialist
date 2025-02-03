@@ -94,32 +94,62 @@ class VedtaksperiodeTest {
     }
 
     @Test
-    fun `oppdater gjeldende generasjon dersom gjeldende generasjon er klar til behandling ved godkjenningsbehov`() {
+    fun `oppdater aktuell behandling dersom behandlingen klar til behandling ved godkjenningsbehov`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
+        val spleisBehandlingId = UUID.randomUUID()
+        val vedtaksperiode = nyVedtaksperiode(
+            vedtaksperiodeId = vedtaksperiodeId,
+            spleisBehandlingId = spleisBehandlingId
+        )
         vedtaksperiode.nyUtbetaling(UUID.randomUUID())
         vedtaksperiode.nyttGodkjenningsbehov(
-            listOf(SpleisVedtaksperiode(vedtaksperiodeId, UUID.randomUUID(), 1.februar, 28.februar, 1.februar)),
+            listOf(SpleisVedtaksperiode(vedtaksperiodeId, spleisBehandlingId, 1.februar, 28.februar, 1.februar)),
         )
         val dto = vedtaksperiode.toDto()
         assertEquals(1, dto.behandlinger.size)
         assertEquals(1.februar, dto.behandlinger.single().fom)
         assertEquals(28.februar, dto.behandlinger.single().tom)
         assertEquals(1.februar, dto.behandlinger.single().skjæringstidspunkt)
+        assertEquals(spleisBehandlingId, dto.behandlinger.single().spleisBehandlingId)
     }
 
     @Test
-    fun `oppdater gjeldende generasjon dersom gjeldende generasjon avventer videre avklaring ved godkjenningsbehov`() {
+    fun `oppdater aktuell behandling dersom behandlingen avventer videre avklaring ved godkjenningsbehov`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
+        val spleisBehandlingId = UUID.randomUUID()
+        val vedtaksperiode = nyVedtaksperiode(
+            vedtaksperiodeId = vedtaksperiodeId,
+            spleisBehandlingId = spleisBehandlingId
+        )
         vedtaksperiode.nyttGodkjenningsbehov(
-            listOf(SpleisVedtaksperiode(vedtaksperiodeId, UUID.randomUUID(), 1.februar, 28.februar, 1.februar)),
+            listOf(SpleisVedtaksperiode(vedtaksperiodeId, spleisBehandlingId, 1.februar, 28.februar, 1.februar)),
         )
         val dto = vedtaksperiode.toDto()
         assertEquals(1, dto.behandlinger.size)
         assertEquals(1.februar, dto.behandlinger.single().fom)
         assertEquals(28.februar, dto.behandlinger.single().tom)
         assertEquals(1.februar, dto.behandlinger.single().skjæringstidspunkt)
+        assertEquals(spleisBehandlingId, dto.behandlinger.single().spleisBehandlingId)
+    }
+
+    @Test
+    fun `oppdaterer ikke andre behandlinger enn den aktuelle`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val enBehandlingId = UUID.randomUUID()
+        val enAnnenBehandlingId = UUID.randomUUID()
+        val vedtaksperiode = nyVedtaksperiode(
+            vedtaksperiodeId = vedtaksperiodeId,
+            spleisBehandlingId = enBehandlingId
+        )
+        vedtaksperiode.nyttGodkjenningsbehov(
+            listOf(SpleisVedtaksperiode(vedtaksperiodeId, enAnnenBehandlingId, 1.februar, 28.februar, 1.februar)),
+        )
+        val dto = vedtaksperiode.toDto()
+        assertEquals(1, dto.behandlinger.size)
+        assertEquals(1.januar, dto.behandlinger.single().fom)
+        assertEquals(31.januar, dto.behandlinger.single().tom)
+        assertEquals(1.januar, dto.behandlinger.single().skjæringstidspunkt)
+        assertEquals(enBehandlingId, dto.behandlinger.single().spleisBehandlingId)
     }
 
     @Test

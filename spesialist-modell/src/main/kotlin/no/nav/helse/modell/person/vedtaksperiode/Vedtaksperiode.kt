@@ -48,7 +48,16 @@ class Vedtaksperiode private constructor(
     internal fun nyttGodkjenningsbehov(spleisVedtaksperioder: List<SpleisVedtaksperiode>) {
         if (forkastet) return
         val spleisVedtaksperiode = spleisVedtaksperioder.find { it.erRelevant(vedtaksperiodeId) } ?: return
-        gjeldendeBehandling.håndter(this, spleisVedtaksperiode)
+        val aktuellBehandling = behandlinger.find { spleisVedtaksperiode.spleisBehandlingId == it.spleisBehandlingId() }
+        if (aktuellBehandling == null) {
+            logg.info(
+                "Fant ikke behandling med {} for vedtaksperiode med {}",
+                kv("behandlingId", spleisVedtaksperiode.spleisBehandlingId),
+                kv("vedtaksperiodeId", spleisVedtaksperiode.vedtaksperiodeId),
+            )
+            return
+        }
+        aktuellBehandling.håndter(this, spleisVedtaksperiode)
     }
 
     internal fun nySpleisBehandling(spleisBehandling: SpleisBehandling) {
