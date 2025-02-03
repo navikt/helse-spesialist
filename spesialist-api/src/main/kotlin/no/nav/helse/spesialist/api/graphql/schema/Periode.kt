@@ -302,7 +302,7 @@ interface Periode {
 
     fun periodetype(): Periodetype
 
-    fun tidslinje(): List<Dag>
+    fun tidslinje(): List<ApiDag>
 
     fun vedtaksperiodeId(): UUID
 
@@ -408,7 +408,7 @@ interface Periode {
         }
 
     @GraphQLIgnore
-    fun tidslinje(periode: GraphQLTidslinjeperiode): List<Dag> = periode.tidslinje.map { it.tilDag() }
+    fun tidslinje(periode: GraphQLTidslinjeperiode): List<ApiDag> = periode.tidslinje.map { it.tilDag() }
 }
 
 @Suppress("unused")
@@ -435,7 +435,7 @@ data class UberegnetPeriode(
 
     override fun periodetype(): Periodetype = periodetype(periode)
 
-    override fun tidslinje(): List<Dag> = tidslinje(periode)
+    override fun tidslinje(): List<ApiDag> = tidslinje(periode)
 
     override fun vedtaksperiodeId(): UUID = periode.vedtaksperiodeId
 
@@ -500,7 +500,7 @@ data class BeregnetPeriode(
 
     override fun periodetype(): Periodetype = periodetype(periode)
 
-    override fun tidslinje(): List<Dag> = tidslinje(periode)
+    override fun tidslinje(): List<ApiDag> = tidslinje(periode)
 
     override fun vedtaksperiodeId(): UUID = periode.vedtaksperiodeId
 
