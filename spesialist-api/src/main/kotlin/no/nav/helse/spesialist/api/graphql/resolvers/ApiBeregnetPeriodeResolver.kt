@@ -18,6 +18,7 @@ import no.nav.helse.spesialist.api.graphql.mapping.tilApiDag
 import no.nav.helse.spesialist.api.graphql.mapping.tilApiHendelse
 import no.nav.helse.spesialist.api.graphql.mapping.tilApiInntektstype
 import no.nav.helse.spesialist.api.graphql.mapping.tilApiNotat
+import no.nav.helse.spesialist.api.graphql.mapping.tilApiPeriodehistorikkType
 import no.nav.helse.spesialist.api.graphql.mapping.tilApiPeriodetilstand
 import no.nav.helse.spesialist.api.graphql.mapping.tilApiPeriodetype
 import no.nav.helse.spesialist.api.graphql.mapping.toVarselDto
@@ -154,7 +155,7 @@ data class ApiBeregnetPeriodeResolver(
                         val (påVentÅrsaker, frist, notattekst) = mapLagtPåVentJson(json = it.json)
                         ApiLagtPaVent(
                             id = it.id,
-                            type = it.type,
+                            type = it.type.tilApiPeriodehistorikkType(),
                             timestamp = it.timestamp,
                             saksbehandlerIdent = it.saksbehandlerIdent,
                             dialogRef = it.dialogRef,
@@ -178,7 +179,7 @@ data class ApiBeregnetPeriodeResolver(
                         val (påVentÅrsaker, frist, notattekst) = mapLagtPåVentJson(json = it.json)
                         ApiEndrePaVent(
                             id = it.id,
-                            type = it.type,
+                            type = it.type.tilApiPeriodehistorikkType(),
                             timestamp = it.timestamp,
                             saksbehandlerIdent = it.saksbehandlerIdent,
                             dialogRef = it.dialogRef,
@@ -201,7 +202,7 @@ data class ApiBeregnetPeriodeResolver(
                     PeriodehistorikkType.FJERN_FRA_PA_VENT ->
                         ApiFjernetFraPaVent(
                             id = it.id,
-                            type = it.type,
+                            type = it.type.tilApiPeriodehistorikkType(),
                             timestamp = it.timestamp,
                             saksbehandlerIdent = it.saksbehandlerIdent,
                             dialogRef = it.dialogRef,
@@ -211,7 +212,7 @@ data class ApiBeregnetPeriodeResolver(
                         val notattekst = mapTotrinnsvurderingReturJson(json = it.json)
                         ApiTotrinnsvurderingRetur(
                             id = it.id,
-                            type = it.type,
+                            type = it.type.tilApiPeriodehistorikkType(),
                             saksbehandlerIdent = it.saksbehandlerIdent,
                             timestamp = it.timestamp,
                             dialogRef = it.dialogRef,
@@ -234,7 +235,7 @@ data class ApiBeregnetPeriodeResolver(
                     else ->
                         ApiPeriodeHistorikkElementNy(
                             id = it.id,
-                            type = it.type,
+                            type = it.type.tilApiPeriodehistorikkType(),
                             saksbehandlerIdent = it.saksbehandlerIdent,
                             timestamp = it.timestamp,
                             dialogRef = it.dialogRef,

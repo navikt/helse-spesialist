@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.api.graphql.schema
 
 import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.expediagroup.graphql.generator.annotations.GraphQLName
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spleis.graphql.hentsnapshot.Alder
 import no.nav.helse.spleis.graphql.hentsnapshot.Sykepengedager
 import java.time.LocalDate
@@ -195,7 +194,7 @@ enum class ApiNotatType {
 @GraphQLName("Historikkinnslag")
 sealed interface ApiHistorikkinnslag {
     val id: Int
-    val type: PeriodehistorikkType
+    val type: ApiPeriodehistorikkType
     val timestamp: LocalDateTime
     val saksbehandlerIdent: String?
     val dialogRef: Int?
@@ -204,7 +203,7 @@ sealed interface ApiHistorikkinnslag {
 @GraphQLName("LagtPaVent")
 data class ApiLagtPaVent(
     override val id: Int,
-    override val type: PeriodehistorikkType,
+    override val type: ApiPeriodehistorikkType,
     override val timestamp: LocalDateTime,
     override val saksbehandlerIdent: String?,
     override val dialogRef: Int?,
@@ -217,7 +216,7 @@ data class ApiLagtPaVent(
 @GraphQLName("EndrePaVent")
 data class ApiEndrePaVent(
     override val id: Int,
-    override val type: PeriodehistorikkType,
+    override val type: ApiPeriodehistorikkType,
     override val timestamp: LocalDateTime,
     override val saksbehandlerIdent: String?,
     override val dialogRef: Int?,
@@ -230,7 +229,7 @@ data class ApiEndrePaVent(
 @GraphQLName("FjernetFraPaVent")
 data class ApiFjernetFraPaVent(
     override val id: Int,
-    override val type: PeriodehistorikkType,
+    override val type: ApiPeriodehistorikkType,
     override val timestamp: LocalDateTime,
     override val saksbehandlerIdent: String?,
     override val dialogRef: Int?,
@@ -239,7 +238,7 @@ data class ApiFjernetFraPaVent(
 @GraphQLName("TotrinnsvurderingRetur")
 data class ApiTotrinnsvurderingRetur(
     override val id: Int,
-    override val type: PeriodehistorikkType,
+    override val type: ApiPeriodehistorikkType,
     override val timestamp: LocalDateTime,
     override val saksbehandlerIdent: String?,
     override val dialogRef: Int?,
@@ -250,7 +249,7 @@ data class ApiTotrinnsvurderingRetur(
 @GraphQLName("PeriodeHistorikkElementNy")
 data class ApiPeriodeHistorikkElementNy(
     override val id: Int,
-    override val type: PeriodehistorikkType,
+    override val type: ApiPeriodehistorikkType,
     override val timestamp: LocalDateTime,
     override val saksbehandlerIdent: String?,
     override val dialogRef: Int?,
@@ -380,3 +379,15 @@ interface BeregnetPeriodeSchema : ApiPeriode {
 
 @GraphQLName("BeregnetPeriode")
 class ApiBeregnetPeriode(private val resolver: BeregnetPeriodeSchema) : BeregnetPeriodeSchema by resolver
+
+@GraphQLName("PeriodehistorikkType")
+enum class ApiPeriodehistorikkType {
+    TOTRINNSVURDERING_TIL_GODKJENNING,
+    TOTRINNSVURDERING_RETUR,
+    TOTRINNSVURDERING_ATTESTERT,
+    VEDTAKSPERIODE_REBEREGNET,
+    LEGG_PA_VENT,
+    ENDRE_PA_VENT,
+    FJERN_FRA_PA_VENT,
+    STANS_AUTOMATISK_BEHANDLING,
+}
