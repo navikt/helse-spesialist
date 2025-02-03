@@ -42,6 +42,7 @@ import no.nav.helse.spesialist.api.graphql.query.DokumentQuery
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQuery
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQuery
+import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
@@ -115,7 +116,10 @@ class SchemaBuilder(
                     ),
             ),
             OpptegnelseQuery(
-                saksbehandlerhåndterer = saksbehandlerhåndterer,
+                handler =
+                    OpptegnelseQueryHandler(
+                        saksbehandlerhåndterer = saksbehandlerhåndterer,
+                    ),
             ),
             DokumentQuery(
                 personApiDao = personApiDao,

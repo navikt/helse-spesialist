@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql.query
 
-import com.expediagroup.graphql.server.operations.Query
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
@@ -8,12 +7,11 @@ import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.ApiOpptegnelse
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 
-class OpptegnelseQuery(
+class OpptegnelseQueryHandler(
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
-) : Query {
-    @Suppress("unused")
-    fun opptegnelser(
-        sekvensId: Int? = null,
+) : OpptegnelseQuerySchema {
+    override fun opptegnelser(
+        sekvensId: Int?,
         environment: DataFetchingEnvironment,
     ): DataFetcherResult<List<ApiOpptegnelse>> {
         val saksbehandler = environment.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
