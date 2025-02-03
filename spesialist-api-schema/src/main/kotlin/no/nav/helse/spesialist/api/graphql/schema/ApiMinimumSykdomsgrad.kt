@@ -1,24 +1,28 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
+import com.expediagroup.graphql.generator.annotations.GraphQLName
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import java.time.LocalDate
 import java.util.UUID
 
-data class MinimumSykdomsgrad(
+@GraphQLName("MinimumSykdomsgrad")
+data class ApiMinimumSykdomsgrad(
     val aktorId: String,
     val fodselsnummer: String,
-    val perioderVurdertOk: List<Periode>,
-    val perioderVurdertIkkeOk: List<Periode>,
+    val perioderVurdertOk: List<ApiPeriode>,
+    val perioderVurdertIkkeOk: List<ApiPeriode>,
     val begrunnelse: String,
-    val arbeidsgivere: List<Arbeidsgiver>,
+    val arbeidsgivere: List<ApiArbeidsgiver>,
     val initierendeVedtaksperiodeId: UUID,
 ) : HandlingFraApi {
-    data class Arbeidsgiver(
+    @GraphQLName("Arbeidsgiver")
+    data class ApiArbeidsgiver(
         val organisasjonsnummer: String,
         val berortVedtaksperiodeId: UUID,
     )
 
-    data class Periode(
+    @GraphQLName("Periode")
+    data class ApiPeriode(
         val fom: LocalDate,
         val tom: LocalDate,
     )

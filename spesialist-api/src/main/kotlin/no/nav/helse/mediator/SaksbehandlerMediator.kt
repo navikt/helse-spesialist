@@ -70,10 +70,10 @@ import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation.VedtakResultat
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakUtfall
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
+import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgrad
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.Avslag
 import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
-import no.nav.helse.spesialist.api.graphql.schema.MinimumSykdomsgrad
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelsetype
 import no.nav.helse.spesialist.api.graphql.schema.PaVentRequest
@@ -734,7 +734,7 @@ class SaksbehandlerMediator(
             is InntektOgRefusjonOverstyring -> this.tilModellversjon()
             is TidslinjeOverstyring -> this.tilModellversjon()
             is Skjonnsfastsettelse -> this.tilModellversjon()
-            is MinimumSykdomsgrad -> this.tilModellversjon()
+            is ApiMinimumSykdomsgrad -> this.tilModellversjon()
             is ApiAnnulleringData -> this.tilModellversjon()
             is TildelOppgave -> this.tilModellversjon()
             is AvmeldOppgave -> this.tilModellversjon()
@@ -802,7 +802,7 @@ class SaksbehandlerMediator(
                 },
         )
 
-    private fun MinimumSykdomsgrad.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad =
+    private fun ApiMinimumSykdomsgrad.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad =
         no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad(
             aktørId = aktorId,
             fødselsnummer = fodselsnummer,

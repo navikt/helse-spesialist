@@ -24,9 +24,9 @@ import no.nav.helse.spesialist.api.graphql.mutation.VedtakUtfall
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData.ApiAnnulleringArsak
 import no.nav.helse.spesialist.api.graphql.schema.ApiLovhjemmel
+import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgrad
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
-import no.nav.helse.spesialist.api.graphql.schema.MinimumSykdomsgrad
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringDag
@@ -936,20 +936,20 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     fun `håndterer vurdering av minimum sykdomsgrad`() {
         nyPerson(fødselsnummer = FØDSELSNUMMER, organisasjonsnummer = ORGANISASJONSNUMMER, aktørId = AKTØR_ID)
         val minimumSykdomsgrad =
-            MinimumSykdomsgrad(
+            ApiMinimumSykdomsgrad(
                 fodselsnummer = FØDSELSNUMMER,
                 aktorId = AKTØR_ID,
                 perioderVurdertOk = listOf(
-                    MinimumSykdomsgrad.Periode(
+                    ApiMinimumSykdomsgrad.ApiPeriode(
                         fom = 1.januar,
                         tom = 15.januar
-                    ), MinimumSykdomsgrad.Periode(
+                    ), ApiMinimumSykdomsgrad.ApiPeriode(
                         fom = 30.januar,
                         tom = 31.januar
                     )
                 ),
                 perioderVurdertIkkeOk = listOf(
-                    MinimumSykdomsgrad.Periode(
+                    ApiMinimumSykdomsgrad.ApiPeriode(
                         fom = 16.januar,
                         tom = 29.januar
                     )
@@ -957,7 +957,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
                 begrunnelse = "en begrunnelse",
                 arbeidsgivere =
                     listOf(
-                        MinimumSykdomsgrad.Arbeidsgiver(
+                        ApiMinimumSykdomsgrad.ApiArbeidsgiver(
                             organisasjonsnummer = ORGANISASJONSNUMMER,
                             berortVedtaksperiodeId = PERIODE.id,
                         ),

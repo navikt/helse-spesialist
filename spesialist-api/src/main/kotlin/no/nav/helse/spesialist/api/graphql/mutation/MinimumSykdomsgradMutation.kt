@@ -9,7 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
-import no.nav.helse.spesialist.api.graphql.schema.MinimumSykdomsgrad
+import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgrad
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -21,7 +21,7 @@ class MinimumSykdomsgradMutation(private val saksbehandlerhåndterer: Saksbehand
 
     @Suppress("unused")
     suspend fun minimumSykdomsgrad(
-        minimumSykdomsgrad: MinimumSykdomsgrad,
+        minimumSykdomsgrad: ApiMinimumSykdomsgrad,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
