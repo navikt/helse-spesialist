@@ -1,7 +1,7 @@
 import com.expediagroup.graphql.plugin.gradle.config.GraphQLScalar
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLIntrospectSchemaTask
 
-val graphQLKotlinVersion = "8.2.1"
+val graphQLKotlinVersion = "8.3.0"
 val micrometerRegistryPrometheusVersion = "1.13.6"
 val logbackEncoderVersion = "8.0"
 
