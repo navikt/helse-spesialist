@@ -16,8 +16,8 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiDagoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiLovhjemmel
-import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsgiver
-import no.nav.helse.spesialist.api.graphql.schema.OverstyringDag
+import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsgiver
+import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.Person
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Invalidert
@@ -41,7 +41,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         håndterOverstyrTidslinje(
             dager =
                 listOf(
-                    OverstyringDag(
+                    ApiOverstyringDag(
                         dato = 20.januar,
                         type = "Feriedag",
                         fraType = "Sykedag",
@@ -72,7 +72,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         håndterOverstyrTidslinje(
             dager =
                 listOf(
-                    OverstyringDag(
+                    ApiOverstyringDag(
                         dato = 20.januar,
                         type = "Feriedag",
                         fraType = "Sykedag",
@@ -103,7 +103,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         håndterOverstyrInntektOgRefusjon(
             arbeidsgivere =
                 listOf(
-                    OverstyringArbeidsgiver(
+                    ApiOverstyringArbeidsgiver(
                         organisasjonsnummer = ORGNR,
                         manedligInntekt = 25000.0,
                         fraManedligInntekt = 25001.0,

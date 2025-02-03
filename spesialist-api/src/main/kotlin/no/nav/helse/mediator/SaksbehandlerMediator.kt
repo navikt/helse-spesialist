@@ -70,18 +70,18 @@ import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation.VedtakResultat
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakUtfall
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
+import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
+import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgrad
 import no.nav.helse.spesialist.api.graphql.schema.ApiOpptegnelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiOpptegnelsetype
-import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
+import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Avslag
-import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.PaVentRequest
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.ANNET
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.OMREGNET_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.RAPPORTERT_ARSINNTEKT
-import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.VedtakBegrunnelse
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
@@ -730,9 +730,9 @@ class SaksbehandlerMediator(
 
     private fun HandlingFraApi.tilModellversjon(): Handling =
         when (this) {
-            is ArbeidsforholdOverstyringHandling -> this.tilModellversjon()
-            is InntektOgRefusjonOverstyring -> this.tilModellversjon()
-            is TidslinjeOverstyring -> this.tilModellversjon()
+            is ApiArbeidsforholdOverstyringHandling -> this.tilModellversjon()
+            is ApiInntektOgRefusjonOverstyring -> this.tilModellversjon()
+            is ApiTidslinjeOverstyring -> this.tilModellversjon()
             is Skjonnsfastsettelse -> this.tilModellversjon()
             is ApiMinimumSykdomsgrad -> this.tilModellversjon()
             is ApiAnnulleringData -> this.tilModellversjon()
@@ -750,7 +750,7 @@ class SaksbehandlerMediator(
             is PaVentRequest.EndrePaVent -> this.tilModellversjon()
         }
 
-    private fun ArbeidsforholdOverstyringHandling.tilModellversjon(): OverstyrtArbeidsforhold =
+    private fun ApiArbeidsforholdOverstyringHandling.tilModellversjon(): OverstyrtArbeidsforhold =
         OverstyrtArbeidsforhold(
             fødselsnummer = fodselsnummer,
             aktørId = aktorId,
@@ -831,7 +831,7 @@ class SaksbehandlerMediator(
             initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,
         )
 
-    private fun InntektOgRefusjonOverstyring.tilModellversjon(): OverstyrtInntektOgRefusjon =
+    private fun ApiInntektOgRefusjonOverstyring.tilModellversjon(): OverstyrtInntektOgRefusjon =
         OverstyrtInntektOgRefusjon(
             aktørId = aktorId,
             fødselsnummer = fodselsnummer,
@@ -861,7 +861,7 @@ class SaksbehandlerMediator(
                 },
         )
 
-    private fun TidslinjeOverstyring.tilModellversjon(): OverstyrtTidslinje =
+    private fun ApiTidslinjeOverstyring.tilModellversjon(): OverstyrtTidslinje =
         OverstyrtTidslinje(
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktorId,

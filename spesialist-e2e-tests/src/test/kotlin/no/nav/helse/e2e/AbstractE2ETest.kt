@@ -38,15 +38,15 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
+import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
+import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiLovhjemmel
-import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
-import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
-import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsforhold
-import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsgiver
-import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsgiver.OverstyringRefusjonselement
-import no.nav.helse.spesialist.api.graphql.schema.OverstyringDag
+import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsforhold
+import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsgiver
+import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement
+import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringDag
+import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse
-import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
@@ -1063,9 +1063,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
-        dager: List<OverstyringDag> =
+        dager: List<ApiOverstyringDag> =
             listOf(
-                OverstyringDag(
+                ApiOverstyringDag(
                     1.januar(1970),
                     Dagtype.Feriedag.toString(),
                     Dagtype.Sykedag.toString(),
@@ -1077,7 +1077,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     ) {
         håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "overstyr_tidslinje") {
             val handling =
-                TidslinjeOverstyring(
+                ApiTidslinjeOverstyring(
                     vedtaksperiodeId,
                     organisasjonsnummer,
                     fødselsnummer,
@@ -1095,9 +1095,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         skjæringstidspunkt: LocalDate = 1.januar(1970),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
-        arbeidsgivere: List<OverstyringArbeidsgiver> =
+        arbeidsgivere: List<ApiOverstyringArbeidsgiver> =
             listOf(
-                OverstyringArbeidsgiver(
+                ApiOverstyringArbeidsgiver(
                     organisasjonsnummer = ORGNR,
                     manedligInntekt = 25000.0,
                     fraManedligInntekt = 25001.0,
@@ -1113,7 +1113,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     ) {
         håndterOverstyring(aktørId, fødselsnummer, ORGNR, "overstyr_inntekt_og_refusjon") {
             val handling =
-                InntektOgRefusjonOverstyring(
+                ApiInntektOgRefusjonOverstyring(
                     aktørId,
                     fødselsnummer,
                     skjæringstidspunkt,
@@ -1130,9 +1130,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         organisasjonsnummer: String = ORGNR,
         skjæringstidspunkt: LocalDate = 1.januar,
         vedtaksperiodeId: UUID = UUID.randomUUID(),
-        overstyrteArbeidsforhold: List<OverstyringArbeidsforhold> =
+        overstyrteArbeidsforhold: List<ApiOverstyringArbeidsforhold> =
             listOf(
-                OverstyringArbeidsforhold(
+                ApiOverstyringArbeidsforhold(
                     orgnummer = organisasjonsnummer,
                     deaktivert = true,
                     begrunnelse = "begrunnelse",
@@ -1143,7 +1143,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     ) {
         håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "overstyr_arbeidsforhold") {
             val handling =
-                ArbeidsforholdOverstyringHandling(
+                ApiArbeidsforholdOverstyringHandling(
                     fodselsnummer = fødselsnummer,
                     aktorId = aktørId,
                     skjaringstidspunkt = skjæringstidspunkt,
@@ -1526,7 +1526,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         "vedtaksperiodeId" to vedtaksperiodeId,
     ) { it.int(1) }
 
-    private fun List<OverstyringRefusjonselement>.byggRefusjonselementEvent() =
+    private fun List<ApiOverstyringRefusjonselement>.byggRefusjonselementEvent() =
         this.map {
             OverstyrtRefusjonselementEvent(
                 fom = it.fom,

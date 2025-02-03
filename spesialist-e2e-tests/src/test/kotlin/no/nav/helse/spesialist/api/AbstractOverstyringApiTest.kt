@@ -1,12 +1,12 @@
 package no.nav.helse.spesialist.api
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
-import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
-import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
+import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
+import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
+import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 
 internal abstract class AbstractOverstyringApiTest : AbstractGraphQLApiTest() {
-    fun overstyrTidslinje(overstyring: TidslinjeOverstyring): JsonNode =
+    fun overstyrTidslinje(overstyring: ApiTidslinjeOverstyring): JsonNode =
         runQuery(
             """
             mutation OverstyrTidsline {
@@ -29,7 +29,7 @@ internal abstract class AbstractOverstyringApiTest : AbstractGraphQLApiTest() {
             """,
         )
 
-    fun overstyrArbeidsforhold(overstyring: ArbeidsforholdOverstyringHandling): JsonNode =
+    fun overstyrArbeidsforhold(overstyring: ApiArbeidsforholdOverstyringHandling): JsonNode =
         runQuery(
             """
             mutation OverstyrArbeidsforhold {
@@ -49,7 +49,7 @@ internal abstract class AbstractOverstyringApiTest : AbstractGraphQLApiTest() {
             """,
         )
 
-    fun overstyrInntektOgRefusjon(overstyring: InntektOgRefusjonOverstyring): JsonNode =
+    fun overstyrInntektOgRefusjon(overstyring: ApiInntektOgRefusjonOverstyring): JsonNode =
         runQuery(
             """
             mutation OverstyrInntektOgRefusjon {

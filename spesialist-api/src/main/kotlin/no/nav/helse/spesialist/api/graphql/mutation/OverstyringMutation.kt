@@ -8,9 +8,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
-import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
-import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
-import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
+import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
+import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
+import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -22,7 +22,7 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
 
     @Suppress("unused")
     suspend fun overstyrDager(
-        overstyring: TidslinjeOverstyring,
+        overstyring: ApiTidslinjeOverstyring,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
@@ -39,7 +39,7 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
 
     @Suppress("unused")
     suspend fun overstyrInntektOgRefusjon(
-        overstyring: InntektOgRefusjonOverstyring,
+        overstyring: ApiInntektOgRefusjonOverstyring,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
@@ -56,7 +56,7 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
 
     @Suppress("unused")
     suspend fun overstyrArbeidsforhold(
-        overstyring: ArbeidsforholdOverstyringHandling,
+        overstyring: ApiArbeidsforholdOverstyringHandling,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {

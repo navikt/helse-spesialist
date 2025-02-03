@@ -23,16 +23,16 @@ import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakUtfall
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData.ApiAnnulleringArsak
+import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
+import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiLovhjemmel
 import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgrad
-import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
-import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
-import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsforhold
-import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsgiver
-import no.nav.helse.spesialist.api.graphql.schema.OverstyringDag
+import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsforhold
+import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsgiver
+import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringDag
+import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.PaVentRequest
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse
-import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
@@ -188,7 +188,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         nyPerson(vedtaksperiodeId = vedtaksperiodeId, organisasjonsnummer = ORGANISASJONSNUMMER)
         mediator.håndter(
-            TidslinjeOverstyring(VEDTAKSPERIODE, ORGANISASJONSNUMMER, FNR, AKTØR, "", dager = emptyList()),
+            ApiTidslinjeOverstyring(VEDTAKSPERIODE, ORGANISASJONSNUMMER, FNR, AKTØR, "", dager = emptyList()),
             saksbehandler,
         )
         assertOppgave(OPPGAVE_ID, "Invalidert")
@@ -696,7 +696,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         nyPerson(fødselsnummer = person.fødselsnummer, aktørId = person.aktørId, organisasjonsnummer = person { 2.ag })
 
         val overstyring =
-            TidslinjeOverstyring(
+            ApiTidslinjeOverstyring(
                 vedtaksperiodeId = UUID.randomUUID(),
                 organisasjonsnummer = person { 2.ag },
                 fodselsnummer = person.fødselsnummer,
@@ -704,7 +704,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
                 begrunnelse = "En begrunnelse",
                 dager =
                     listOf(
-                        OverstyringDag(
+                        ApiOverstyringDag(
                             dato = 10.januar,
                             type = "Sykedag",
                             fraType = "Arbeidsdag",
@@ -736,14 +736,14 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     fun `håndterer overstyring av arbeidsforhold`() {
         nyPerson(fødselsnummer = FØDSELSNUMMER, aktørId = AKTØR_ID, organisasjonsnummer = ORGANISASJONSNUMMER)
         val overstyring =
-            ArbeidsforholdOverstyringHandling(
+            ApiArbeidsforholdOverstyringHandling(
                 fodselsnummer = FØDSELSNUMMER,
                 aktorId = AKTØR_ID,
                 skjaringstidspunkt = 1.januar,
                 vedtaksperiodeId = UUID.randomUUID(),
                 overstyrteArbeidsforhold =
                     listOf(
-                        OverstyringArbeidsforhold(
+                        ApiOverstyringArbeidsforhold(
                             orgnummer = ORGANISASJONSNUMMER_GHOST,
                             deaktivert = true,
                             begrunnelse = "en begrunnelse",
@@ -776,26 +776,26 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     fun `håndterer overstyring av inntekt og refusjon`() {
         nyPerson(fødselsnummer = FØDSELSNUMMER, aktørId = AKTØR_ID, organisasjonsnummer = ORGANISASJONSNUMMER)
         val overstyring =
-            InntektOgRefusjonOverstyring(
+            ApiInntektOgRefusjonOverstyring(
                 fodselsnummer = FØDSELSNUMMER,
                 aktorId = AKTØR_ID,
                 skjaringstidspunkt = 1.januar,
                 vedtaksperiodeId = UUID.randomUUID(),
                 arbeidsgivere =
                     listOf(
-                        OverstyringArbeidsgiver(
+                        ApiOverstyringArbeidsgiver(
                             organisasjonsnummer = ORGANISASJONSNUMMER,
                             manedligInntekt = 25000.0,
                             fraManedligInntekt = 25001.0,
                             refusjonsopplysninger =
                                 listOf(
-                                    OverstyringArbeidsgiver.OverstyringRefusjonselement(1.januar, 31.januar, 25000.0),
-                                    OverstyringArbeidsgiver.OverstyringRefusjonselement(1.februar, null, 24000.0),
+                                    ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(1.januar, 31.januar, 25000.0),
+                                    ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(1.februar, null, 24000.0),
                                 ),
                             fraRefusjonsopplysninger =
                                 listOf(
-                                    OverstyringArbeidsgiver.OverstyringRefusjonselement(1.januar, 31.januar, 24000.0),
-                                    OverstyringArbeidsgiver.OverstyringRefusjonselement(1.februar, null, 23000.0),
+                                    ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(1.januar, 31.januar, 24000.0),
+                                    ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(1.februar, null, 23000.0),
                                 ),
                             lovhjemmel = ApiLovhjemmel("8-28", "3", null, "folketrygdloven", "1970-01-01"),
                             begrunnelse = "En begrunnelse",
@@ -803,19 +803,19 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
                             fom = null,
                             tom = null,
                         ),
-                        OverstyringArbeidsgiver(
+                        ApiOverstyringArbeidsgiver(
                             organisasjonsnummer = ORGANISASJONSNUMMER_GHOST,
                             manedligInntekt = 21000.0,
                             fraManedligInntekt = 25001.0,
                             refusjonsopplysninger =
                                 listOf(
-                                    OverstyringArbeidsgiver.OverstyringRefusjonselement(1.januar, 31.januar, 21000.0),
-                                    OverstyringArbeidsgiver.OverstyringRefusjonselement(1.februar, null, 22000.0),
+                                    ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(1.januar, 31.januar, 21000.0),
+                                    ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(1.februar, null, 22000.0),
                                 ),
                             fraRefusjonsopplysninger =
                                 listOf(
-                                    OverstyringArbeidsgiver.OverstyringRefusjonselement(1.januar, 31.januar, 22000.0),
-                                    OverstyringArbeidsgiver.OverstyringRefusjonselement(1.februar, null, 23000.0),
+                                    ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(1.januar, 31.januar, 22000.0),
+                                    ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(1.februar, null, 23000.0),
                                 ),
                             lovhjemmel = ApiLovhjemmel("8-28", "3", null, "folketrygdloven", "1970-01-01"),
                             begrunnelse = "En begrunnelse 2",
