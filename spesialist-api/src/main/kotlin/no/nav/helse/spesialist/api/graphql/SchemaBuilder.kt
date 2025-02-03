@@ -38,6 +38,7 @@ import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.PaVentMutation
 import no.nav.helse.spesialist.api.graphql.mutation.PaVentMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.PersonMutation
+import no.nav.helse.spesialist.api.graphql.mutation.PersonMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutation
 import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutation
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutation
@@ -170,7 +171,7 @@ class SchemaBuilder(
                 godkjenninghåndterer = godkjenninghåndterer,
             ),
             PersonMutation(
-                personhåndterer = personhåndterer,
+                handler = PersonMutationHandler(personhåndterer = personhåndterer),
             ),
             AnnulleringMutation(
                 handler =
