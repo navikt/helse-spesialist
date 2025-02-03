@@ -118,7 +118,7 @@ data class ApiPaVentInfo(
     val saksbehandler: String,
     val opprettet: LocalDateTime,
     val tidsfrist: LocalDate,
-    val kommentarer: List<Kommentar>,
+    val kommentarer: List<ApiKommentar>,
 )
 
 @GraphQLName("OppgaveTilBehandling")
@@ -132,7 +132,7 @@ data class ApiOppgaveTilBehandling(
     val aktorId: String,
     val tildeling: ApiTildeling?,
     val egenskaper: List<ApiOppgaveegenskap>,
-    val periodetype: Periodetype,
+    val periodetype: ApiPeriodetype,
     val oppgavetype: ApiOppgavetype,
     val mottaker: ApiMottaker,
     val antallArbeidsforhold: ApiAntallArbeidsforhold,
@@ -178,7 +178,7 @@ data class ApiBehandletOppgave(
     val id: String,
     val aktorId: String,
     val oppgavetype: ApiOppgavetype,
-    val periodetype: Periodetype,
+    val periodetype: ApiPeriodetype,
     val antallArbeidsforhold: ApiAntallArbeidsforhold,
     val ferdigstiltTidspunkt: LocalDateTime,
     val ferdigstiltAv: String?,

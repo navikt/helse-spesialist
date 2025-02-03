@@ -7,7 +7,7 @@ import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
-import no.nav.helse.spesialist.api.graphql.schema.NotatType
+import no.nav.helse.spesialist.api.graphql.schema.ApiNotatType
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
@@ -250,7 +250,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         "tekst" to tekst,
         "oid" to saksbehandlerOid,
         "vedtaksperiodeId" to vedtaksperiodeId,
-        "type" to NotatType.Generelt.name,
+        "type" to ApiNotatType.Generelt.name,
         "dialogRef" to dialogRef,
     )
 

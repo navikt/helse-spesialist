@@ -10,15 +10,15 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiAntallArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.ApiBehandletOppgave
 import no.nav.helse.spesialist.api.graphql.schema.ApiKategori
+import no.nav.helse.spesialist.api.graphql.schema.ApiKommentar
 import no.nav.helse.spesialist.api.graphql.schema.ApiMottaker
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPaVentInfo
+import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersonnavn
 import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
-import no.nav.helse.spesialist.api.graphql.schema.Kommentar
-import no.nav.helse.spesialist.api.graphql.schema.Periodetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap as EgenskapForApi
 
 internal object OppgaveMapper {
@@ -41,7 +41,7 @@ internal object OppgaveMapper {
                             tidsfrist = påVentInfo.tidsfrist,
                             kommentarer =
                                 påVentInfo.kommentarer.map {
-                                    Kommentar(
+                                    ApiKommentar(
                                         id = it.id,
                                         tekst = it.tekst,
                                         opprettet = it.opprettet,
@@ -111,13 +111,13 @@ internal object OppgaveMapper {
 
     private fun Set<EgenskapForDatabase>.tilModellversjoner(): List<Egenskap> = this.map { it.tilModellversjon() }
 
-    private fun List<Egenskap>.periodetype(): Periodetype {
+    private fun List<Egenskap>.periodetype(): ApiPeriodetype {
         val egenskap = single { egenskap -> egenskap.kategori == Egenskap.Kategori.Periodetype }
         return when (egenskap) {
-            Egenskap.FORSTEGANGSBEHANDLING -> Periodetype.FORSTEGANGSBEHANDLING
-            Egenskap.FORLENGELSE -> Periodetype.FORLENGELSE
-            Egenskap.INFOTRYGDFORLENGELSE -> Periodetype.INFOTRYGDFORLENGELSE
-            Egenskap.OVERGANG_FRA_IT -> Periodetype.OVERGANG_FRA_IT
+            Egenskap.FORSTEGANGSBEHANDLING -> ApiPeriodetype.FORSTEGANGSBEHANDLING
+            Egenskap.FORLENGELSE -> ApiPeriodetype.FORLENGELSE
+            Egenskap.INFOTRYGDFORLENGELSE -> ApiPeriodetype.INFOTRYGDFORLENGELSE
+            Egenskap.OVERGANG_FRA_IT -> ApiPeriodetype.OVERGANG_FRA_IT
             else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
         }
     }

@@ -2,15 +2,15 @@ package no.nav.helse.spesialist.api.graphql.mapping
 
 import no.nav.helse.db.api.NotatApiDao
 import no.nav.helse.db.api.VarselDbDto
-import no.nav.helse.spesialist.api.graphql.schema.NotatType
-import no.nav.helse.spesialist.api.graphql.schema.VarselDTO
-import no.nav.helse.spesialist.api.graphql.schema.VarselDTO.VarselvurderingDTO
-import no.nav.helse.spesialist.api.graphql.schema.Varselstatus
+import no.nav.helse.spesialist.api.graphql.schema.ApiNotatType
+import no.nav.helse.spesialist.api.graphql.schema.ApiVarselDTO
+import no.nav.helse.spesialist.api.graphql.schema.ApiVarselDTO.ApiVarselvurderingDTO
+import no.nav.helse.spesialist.api.graphql.schema.ApiVarselstatus
 
-fun VarselDbDto.toVarselDto(): VarselDTO {
+fun VarselDbDto.toVarselDto(): ApiVarselDTO {
     val varseldefinisjon = this.varseldefinisjon
     checkNotNull(varseldefinisjon)
-    return VarselDTO(
+    return ApiVarselDTO(
         generasjonId = generasjonId,
         definisjonId = varseldefinisjon.definisjonId,
         opprettet = opprettet,
@@ -20,11 +20,11 @@ fun VarselDbDto.toVarselDto(): VarselDTO {
         handling = varseldefinisjon.handling,
         vurdering =
             varselvurdering?.let { varselvurdering ->
-                VarselvurderingDTO(
+                ApiVarselvurderingDTO(
                     ident = varselvurdering.ident,
                     tidsstempel = varselvurdering.tidsstempel,
                     status =
-                        Varselstatus.valueOf(
+                        ApiVarselstatus.valueOf(
                             status.let { status ->
                                 when (status) {
                                     VarselDbDto.Varselstatus.INAKTIV -> no.nav.helse.spesialist.api.varsel.Varselstatus.INAKTIV
@@ -42,16 +42,16 @@ fun VarselDbDto.toVarselDto(): VarselDTO {
 
 internal fun NotatApiDao.NotatType.tilSkjematype() =
     when (this) {
-        NotatApiDao.NotatType.Retur -> NotatType.Retur
-        NotatApiDao.NotatType.Generelt -> NotatType.Generelt
-        NotatApiDao.NotatType.PaaVent -> NotatType.PaaVent
-        NotatApiDao.NotatType.OpphevStans -> NotatType.OpphevStans
+        NotatApiDao.NotatType.Retur -> ApiNotatType.Retur
+        NotatApiDao.NotatType.Generelt -> ApiNotatType.Generelt
+        NotatApiDao.NotatType.PaaVent -> ApiNotatType.PaaVent
+        NotatApiDao.NotatType.OpphevStans -> ApiNotatType.OpphevStans
     }
 
-internal fun NotatType.tilDatabasetype() =
+internal fun ApiNotatType.tilDatabasetype() =
     when (this) {
-        NotatType.Retur -> NotatApiDao.NotatType.Retur
-        NotatType.Generelt -> NotatApiDao.NotatType.Generelt
-        NotatType.PaaVent -> NotatApiDao.NotatType.PaaVent
-        NotatType.OpphevStans -> NotatApiDao.NotatType.OpphevStans
+        ApiNotatType.Retur -> NotatApiDao.NotatType.Retur
+        ApiNotatType.Generelt -> NotatApiDao.NotatType.Generelt
+        ApiNotatType.PaaVent -> NotatApiDao.NotatType.PaaVent
+        ApiNotatType.OpphevStans -> NotatApiDao.NotatType.OpphevStans
     }

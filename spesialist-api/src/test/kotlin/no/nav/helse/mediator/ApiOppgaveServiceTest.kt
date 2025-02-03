@@ -33,7 +33,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiKategori
 import no.nav.helse.spesialist.api.graphql.schema.ApiMottaker
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
-import no.nav.helse.spesialist.api.graphql.schema.Periodetype
+import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.test.lagEpostadresseFraFulltNavn
 import no.nav.helse.spesialist.test.lagSaksbehandlerident
@@ -239,7 +239,7 @@ internal class ApiOppgaveServiceTest {
         assertEquals("Kurt", oppgave.ferdigstiltAv)
         assertEquals(ferdigstiltTidspunkt, oppgave.ferdigstiltTidspunkt)
         assertEquals(ApiOppgavetype.SOKNAD, oppgave.oppgavetype)
-        assertEquals(Periodetype.FORSTEGANGSBEHANDLING, oppgave.periodetype)
+        assertEquals(ApiPeriodetype.FORSTEGANGSBEHANDLING, oppgave.periodetype)
         assertEquals(ApiAntallArbeidsforhold.ET_ARBEIDSFORHOLD, oppgave.antallArbeidsforhold)
     }
 
@@ -507,12 +507,12 @@ internal class ApiOppgaveServiceTest {
         paVentInfo = null,
     )
 
-    private fun EgenskapForDatabase.periodetype(): Periodetype =
+    private fun EgenskapForDatabase.periodetype(): ApiPeriodetype =
         when (this) {
-            EgenskapForDatabase.FORSTEGANGSBEHANDLING -> Periodetype.FORSTEGANGSBEHANDLING
-            EgenskapForDatabase.FORLENGELSE -> Periodetype.FORLENGELSE
-            EgenskapForDatabase.INFOTRYGDFORLENGELSE -> Periodetype.INFOTRYGDFORLENGELSE
-            EgenskapForDatabase.OVERGANG_FRA_IT -> Periodetype.OVERGANG_FRA_IT
+            EgenskapForDatabase.FORSTEGANGSBEHANDLING -> ApiPeriodetype.FORSTEGANGSBEHANDLING
+            EgenskapForDatabase.FORLENGELSE -> ApiPeriodetype.FORLENGELSE
+            EgenskapForDatabase.INFOTRYGDFORLENGELSE -> ApiPeriodetype.INFOTRYGDFORLENGELSE
+            EgenskapForDatabase.OVERGANG_FRA_IT -> ApiPeriodetype.OVERGANG_FRA_IT
             else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
         }
 

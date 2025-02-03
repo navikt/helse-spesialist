@@ -19,7 +19,7 @@ data class ApiArbeidsforhold(
 @GraphQLName("Generasjon")
 data class ApiGenerasjon(
     val id: UUID,
-    val perioder: List<Periode>,
+    val perioder: List<ApiPeriode>,
 )
 
 @GraphQLName("ArbeidsgiverInntekterFraAOrdningen")

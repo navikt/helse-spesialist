@@ -9,7 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.spesialist.api.graphql.mapping.toVarselDto
-import no.nav.helse.spesialist.api.graphql.schema.VarselDTO
+import no.nav.helse.spesialist.api.graphql.schema.ApiVarselDTO
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -24,7 +24,7 @@ class VarselMutation(private val varselRepository: VarselApiRepository) : Mutati
         varselkode: String,
         ident: String,
         definisjonIdString: String? = null,
-    ): DataFetcherResult<VarselDTO?> =
+    ): DataFetcherResult<ApiVarselDTO?> =
         withContext(Dispatchers.IO) {
             val generasjonId = UUID.fromString(generasjonIdString)
 
@@ -54,13 +54,13 @@ class VarselMutation(private val varselRepository: VarselApiRepository) : Mutati
             }
         }
 
-    private fun varselError(error: GraphQLError): DataFetcherResult<VarselDTO?> = newResult<VarselDTO>().error(error).build()
+    private fun varselError(error: GraphQLError): DataFetcherResult<ApiVarselDTO?> = newResult<ApiVarselDTO>().error(error).build()
 
-    private fun VarselDTO?.graphQlResult(
+    private fun ApiVarselDTO?.graphQlResult(
         varselkode: String,
         generasjonId: UUID,
-    ): DataFetcherResult<VarselDTO?> =
-        this?.let { newResult<VarselDTO>().data(it).build() }
+    ): DataFetcherResult<ApiVarselDTO?> =
+        this?.let { newResult<ApiVarselDTO>().data(it).build() }
             ?: varselError(getUpdateError(varselkode, generasjonId))
 
     private fun getUpdateError(

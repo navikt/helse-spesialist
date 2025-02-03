@@ -15,9 +15,9 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavesortering
+import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersonnavn
 import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsnokkel
-import no.nav.helse.spesialist.api.graphql.schema.Periodetype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -225,7 +225,7 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
             aktorId = "1017011111111",
             tildeling = null,
             egenskaper = emptyList(),
-            periodetype = Periodetype.FORSTEGANGSBEHANDLING,
+            periodetype = ApiPeriodetype.FORSTEGANGSBEHANDLING,
             oppgavetype = OppgavetypeForApi.SOKNAD,
             mottaker = ApiMottaker.SYKMELDT,
             antallArbeidsforhold = ApiAntallArbeidsforhold.ET_ARBEIDSFORHOLD,
@@ -237,7 +237,7 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
             id = UUID.randomUUID().toString(),
             aktorId = "1017011111111",
             oppgavetype = OppgavetypeForApi.SOKNAD,
-            periodetype = Periodetype.FORSTEGANGSBEHANDLING,
+            periodetype = ApiPeriodetype.FORSTEGANGSBEHANDLING,
             antallArbeidsforhold = ApiAntallArbeidsforhold.ET_ARBEIDSFORHOLD,
             ferdigstiltTidspunkt = LocalDateTime.now(),
             ferdigstiltAv = "SAKSBEHANDLER",

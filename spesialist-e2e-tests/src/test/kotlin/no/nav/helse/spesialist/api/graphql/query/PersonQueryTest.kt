@@ -19,8 +19,8 @@ import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotHendel
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettUberegnetPeriode
 import no.nav.helse.spesialist.api.graphql.schema.ApiAvslag
 import no.nav.helse.spesialist.api.graphql.schema.ApiAvslagstype
-import no.nav.helse.spesialist.api.graphql.schema.Handling
-import no.nav.helse.spesialist.api.graphql.schema.Periodehandling
+import no.nav.helse.spesialist.api.graphql.schema.ApiHandling
+import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodehandling
 import no.nav.helse.spesialist.api.januar
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
@@ -304,10 +304,10 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val responseperiode1 = perioder.first { it["vedtaksperiodeId"].textValue() == periode1.id.toString() }
         val responseperiode2 = perioder.first { it["vedtaksperiodeId"].textValue() == periode2.id.toString() }
         assertFalse(
-            responseperiode1["handlinger"].first { it["type"].textValue() == Periodehandling.UTBETALE.name }["tillatt"].booleanValue(),
+            responseperiode1["handlinger"].first { it["type"].textValue() == ApiPeriodehandling.UTBETALE.name }["tillatt"].booleanValue(),
         )
         assertTrue(
-            responseperiode2["handlinger"].first { it["type"].textValue() == Periodehandling.UTBETALE.name }["tillatt"].booleanValue(),
+            responseperiode2["handlinger"].first { it["type"].textValue() == ApiPeriodehandling.UTBETALE.name }["tillatt"].booleanValue(),
         )
     }
 
@@ -326,7 +326,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
 
         val periode = body["data"]["person"]["arbeidsgivere"].first()["generasjoner"].first()["perioder"].first()
         assertFalse(periode["handlinger"].isEmpty)
-        assertTrue(periode["handlinger"].first { it["type"].textValue() == Periodehandling.UTBETALE.name }["tillatt"].booleanValue())
+        assertTrue(periode["handlinger"].first { it["type"].textValue() == ApiPeriodehandling.UTBETALE.name }["tillatt"].booleanValue())
     }
 
     @Test
@@ -398,8 +398,8 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val periode = body["data"]["person"]["arbeidsgivere"].first()["generasjoner"].first()["perioder"].first()
         val forventedeHandlinger =
             setOf(
-                Handling(Periodehandling.UTBETALE, true, null),
-                Handling(Periodehandling.AVVISE, false, "Spleis støtter ikke å avvise perioden"),
+                ApiHandling(ApiPeriodehandling.UTBETALE, true, null),
+                ApiHandling(ApiPeriodehandling.AVVISE, false, "Spleis støtter ikke å avvise perioden"),
             )
         assertFalse(periode["handlinger"].isEmpty)
         assertEquals(objectMapper.convertValue<Set<ObjectNode>>(forventedeHandlinger), periode["handlinger"].toSet())

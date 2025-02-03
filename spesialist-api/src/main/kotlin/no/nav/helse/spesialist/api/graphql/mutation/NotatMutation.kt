@@ -7,9 +7,9 @@ import graphql.execution.DataFetcherResult
 import no.nav.helse.db.api.NotatApiDao
 import no.nav.helse.spesialist.api.graphql.mapping.tilDatabasetype
 import no.nav.helse.spesialist.api.graphql.mapping.tilSkjematype
-import no.nav.helse.spesialist.api.graphql.schema.Kommentar
-import no.nav.helse.spesialist.api.graphql.schema.Notat
-import no.nav.helse.spesialist.api.graphql.schema.NotatType
+import no.nav.helse.spesialist.api.graphql.schema.ApiKommentar
+import no.nav.helse.spesialist.api.graphql.schema.ApiNotat
+import no.nav.helse.spesialist.api.graphql.schema.ApiNotatType
 import no.nav.helse.spesialist.api.notat.KommentarDto
 import java.util.UUID
 
@@ -17,40 +17,40 @@ class NotatMutation(
     private val notatDao: NotatApiDao,
 ) : Mutation {
     @Suppress("unused")
-    fun feilregistrerNotat(id: Int): DataFetcherResult<Notat?> {
+    fun feilregistrerNotat(id: Int): DataFetcherResult<ApiNotat?> {
         val notatDto =
             try {
                 notatDao.feilregistrerNotat(id)
             } catch (e: RuntimeException) {
-                return DataFetcherResult.newResult<Notat?>().error(kunneIkkeFeilregistrereNotatError(id)).build()
+                return DataFetcherResult.newResult<ApiNotat?>().error(kunneIkkeFeilregistrereNotatError(id)).build()
             }
-        return DataFetcherResult.newResult<Notat?>().data(notatDto?.let(::tilNotat)).build()
+        return DataFetcherResult.newResult<ApiNotat?>().data(notatDto?.let(::tilNotat)).build()
     }
 
     @Suppress("unused")
-    fun feilregistrerKommentar(id: Int): DataFetcherResult<Kommentar?> {
+    fun feilregistrerKommentar(id: Int): DataFetcherResult<ApiKommentar?> {
         val kommentarDto =
             try {
                 notatDao.feilregistrerKommentar(id)
             } catch (e: Exception) {
                 return DataFetcherResult
-                    .newResult<Kommentar?>()
+                    .newResult<ApiKommentar?>()
                     .error(kunneIkkeFeilregistrereKommentarError(id))
                     .build()
             }
-        return DataFetcherResult.newResult<Kommentar?>().data(kommentarDto?.let(::tilKommentar)).build()
+        return DataFetcherResult.newResult<ApiKommentar?>().data(kommentarDto?.let(::tilKommentar)).build()
     }
 
     @Suppress("unused")
-    fun feilregistrerKommentarV2(id: Int): DataFetcherResult<Kommentar?> = feilregistrerKommentar(id)
+    fun feilregistrerKommentarV2(id: Int): DataFetcherResult<ApiKommentar?> = feilregistrerKommentar(id)
 
     @Suppress("unused")
     fun leggTilNotat(
         tekst: String,
-        type: NotatType,
+        type: ApiNotatType,
         vedtaksperiodeId: String,
         saksbehandlerOid: String,
-    ): DataFetcherResult<Notat?> {
+    ): DataFetcherResult<ApiNotat?> {
         val vedtaksperiodeIdUUID = UUID.fromString(vedtaksperiodeId)
         val notatDto =
             try {
@@ -62,11 +62,11 @@ class NotatMutation(
                 )
             } catch (e: RuntimeException) {
                 return DataFetcherResult
-                    .newResult<Notat?>()
+                    .newResult<ApiNotat?>()
                     .error(kunneIkkeOppretteNotatError(vedtaksperiodeIdUUID))
                     .build()
             }
-        return DataFetcherResult.newResult<Notat?>().data(notatDto?.let(::tilNotat)).build()
+        return DataFetcherResult.newResult<ApiNotat?>().data(notatDto?.let(::tilNotat)).build()
     }
 
     @Suppress("unused")
@@ -74,18 +74,18 @@ class NotatMutation(
         dialogRef: Int,
         tekst: String,
         saksbehandlerident: String,
-    ): DataFetcherResult<Kommentar?> {
+    ): DataFetcherResult<ApiKommentar?> {
         val kommentarDto =
             try {
                 notatDao.leggTilKommentar(dialogRef, tekst, saksbehandlerident)
             } catch (e: Exception) {
                 return DataFetcherResult
-                    .newResult<Kommentar?>()
+                    .newResult<ApiKommentar?>()
                     .error(kunneIkkeLeggeTilKommentar(dialogRef))
                     .build()
             }
 
-        return DataFetcherResult.newResult<Kommentar?>().data(kommentarDto?.let(::tilKommentar)).build()
+        return DataFetcherResult.newResult<ApiKommentar?>().data(kommentarDto?.let(::tilKommentar)).build()
     }
 
     private fun kunneIkkeLeggeTilKommentar(dialogRef: Int): GraphQLError =
@@ -117,7 +117,7 @@ class NotatMutation(
             .build()
 
     private fun tilNotat(notat: NotatApiDao.NotatDto) =
-        Notat(
+        ApiNotat(
             id = notat.id,
             dialogRef = notat.dialogRef,
             tekst = notat.tekst,
@@ -134,7 +134,7 @@ class NotatMutation(
         )
 
     private fun tilKommentar(kommentar: KommentarDto) =
-        Kommentar(
+        ApiKommentar(
             id = kommentar.id,
             tekst = kommentar.tekst,
             opprettet = kommentar.opprettet,

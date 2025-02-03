@@ -26,8 +26,8 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiKategori
 import no.nav.helse.spesialist.api.graphql.schema.ApiMottaker
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
+import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersonnavn
-import no.nav.helse.spesialist.api.graphql.schema.Periodetype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -98,7 +98,7 @@ internal class OppgaveMapperTest {
         assertEquals(ApiAntallArbeidsforhold.ET_ARBEIDSFORHOLD, oppgaveTilBehandling.antallArbeidsforhold)
         assertEquals(ApiMottaker.BEGGE, oppgaveTilBehandling.mottaker)
         assertEquals(ApiOppgavetype.SOKNAD, oppgaveTilBehandling.oppgavetype)
-        assertEquals(Periodetype.FORSTEGANGSBEHANDLING, oppgaveTilBehandling.periodetype)
+        assertEquals(ApiPeriodetype.FORSTEGANGSBEHANDLING, oppgaveTilBehandling.periodetype)
         assertEquals(
             setOf(
                 ApiOppgaveegenskap(ApiEgenskap.SOKNAD, ApiKategori.Oppgavetype),
@@ -169,7 +169,7 @@ internal class OppgaveMapperTest {
         val oppgaverTilBehandling = listOf(oppgaveFraDatabaseForVisning).tilOppgaverTilBehandling()
         assertEquals(1, oppgaverTilBehandling.size)
         val oppgaveTilBehandling = oppgaverTilBehandling.single()
-        assertEquals(enumValueOf<Periodetype>(egenskapSomMapperTilPeriodetype.name), oppgaveTilBehandling.periodetype)
+        assertEquals(enumValueOf<ApiPeriodetype>(egenskapSomMapperTilPeriodetype.name), oppgaveTilBehandling.periodetype)
     }
 
     @ParameterizedTest
