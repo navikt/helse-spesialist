@@ -44,6 +44,7 @@ import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutationH
 import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutation
 import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutation
+import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.VarselMutation
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQuery
@@ -168,9 +169,12 @@ class SchemaBuilder(
                 handler = MinimumSykdomsgradMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
             ),
             TotrinnsvurderingMutation(
-                saksbehandlerhåndterer = saksbehandlerhåndterer,
-                apiOppgaveService = apiOppgaveService,
-                totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
+                handler =
+                    TotrinnsvurderingMutationHandler(
+                        saksbehandlerhåndterer = saksbehandlerhåndterer,
+                        apiOppgaveService = apiOppgaveService,
+                        totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
+                    ),
             ),
             VedtakMutation(
                 saksbehandlerhåndterer = saksbehandlerhåndterer,

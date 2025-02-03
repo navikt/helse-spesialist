@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
-import com.expediagroup.graphql.server.operations.Mutation
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
@@ -18,21 +17,20 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakUtfall
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.LoggerFactory
 
-class TotrinnsvurderingMutation(
+class TotrinnsvurderingMutationHandler(
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
     private val apiOppgaveService: ApiOppgaveService,
     private val totrinnsvurderinghåndterer: Totrinnsvurderinghåndterer,
-) : Mutation {
+) : TotrinnsvurderingMutationSchema {
     companion object {
         private val log = LoggerFactory.getLogger("TotrinnsvurderingApi")
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    @Suppress("unused")
-    suspend fun sendTilGodkjenningV2(
+    override suspend fun sendTilGodkjenningV2(
         oppgavereferanse: String,
         vedtakUtfall: ApiVedtakUtfall,
-        vedtakBegrunnelse: String? = null,
+        vedtakBegrunnelse: String?,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
@@ -148,8 +146,7 @@ class TotrinnsvurderingMutation(
             }
         }
 
-    @Suppress("unused")
-    suspend fun sendIRetur(
+    override suspend fun sendIRetur(
         oppgavereferanse: String,
         notatTekst: String,
         env: DataFetchingEnvironment,
