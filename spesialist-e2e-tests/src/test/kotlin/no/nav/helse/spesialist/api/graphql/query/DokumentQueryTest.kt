@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.node.NullNode
 import io.mockk.every
 import io.mockk.verify
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
-import no.nav.helse.spesialist.api.graphql.schema.Soknadstype
+import no.nav.helse.spesialist.api.graphql.schema.ApiSoknadstype
 import no.nav.helse.spesialist.api.objectMapper
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -167,7 +167,7 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
         }
 
         assertEquals(6, dokument.size())
-        assertEquals(Soknadstype.Arbeidstaker.name, dokument["type"]?.asText())
+        assertEquals(ApiSoknadstype.Arbeidstaker.name, dokument["type"]?.asText())
         assertEquals(arbeidGjenopptatt, dokument["arbeidGjenopptatt"].asText())
         assertEquals(sykmeldingSkrevet, dokument["sykmeldingSkrevet"].asText())
         assertEquals("2018-01-01", dokument["egenmeldingsdagerFraSykmelding"].first().asText())

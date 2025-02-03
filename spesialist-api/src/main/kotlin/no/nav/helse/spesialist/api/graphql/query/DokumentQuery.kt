@@ -14,22 +14,22 @@ import kotlinx.coroutines.withContext
 import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.PersonApiDao
 import no.nav.helse.spesialist.api.Dokumenthåndterer
-import no.nav.helse.spesialist.api.graphql.schema.AvsenderSystem
-import no.nav.helse.spesialist.api.graphql.schema.DokumentInntektsmelding
-import no.nav.helse.spesialist.api.graphql.schema.EndringIRefusjon
-import no.nav.helse.spesialist.api.graphql.schema.GjenopptakelseNaturalytelse
-import no.nav.helse.spesialist.api.graphql.schema.IMPeriode
-import no.nav.helse.spesialist.api.graphql.schema.InntektEndringAarsak
-import no.nav.helse.spesialist.api.graphql.schema.Naturalytelse
-import no.nav.helse.spesialist.api.graphql.schema.OpphoerAvNaturalytelse
-import no.nav.helse.spesialist.api.graphql.schema.Refusjon
-import no.nav.helse.spesialist.api.graphql.schema.Soknad
-import no.nav.helse.spesialist.api.graphql.schema.Soknadsperioder
-import no.nav.helse.spesialist.api.graphql.schema.Soknadstype
-import no.nav.helse.spesialist.api.graphql.schema.Sporsmal
-import no.nav.helse.spesialist.api.graphql.schema.Svar
-import no.nav.helse.spesialist.api.graphql.schema.Svartype
-import no.nav.helse.spesialist.api.graphql.schema.Visningskriterium
+import no.nav.helse.spesialist.api.graphql.schema.ApiAvsenderSystem
+import no.nav.helse.spesialist.api.graphql.schema.ApiDokumentInntektsmelding
+import no.nav.helse.spesialist.api.graphql.schema.ApiEndringIRefusjon
+import no.nav.helse.spesialist.api.graphql.schema.ApiGjenopptakelseNaturalytelse
+import no.nav.helse.spesialist.api.graphql.schema.ApiIMPeriode
+import no.nav.helse.spesialist.api.graphql.schema.ApiInntektEndringAarsak
+import no.nav.helse.spesialist.api.graphql.schema.ApiNaturalytelse
+import no.nav.helse.spesialist.api.graphql.schema.ApiOpphoerAvNaturalytelse
+import no.nav.helse.spesialist.api.graphql.schema.ApiRefusjon
+import no.nav.helse.spesialist.api.graphql.schema.ApiSoknad
+import no.nav.helse.spesialist.api.graphql.schema.ApiSoknadsperioder
+import no.nav.helse.spesialist.api.graphql.schema.ApiSoknadstype
+import no.nav.helse.spesialist.api.graphql.schema.ApiSporsmal
+import no.nav.helse.spesialist.api.graphql.schema.ApiSvar
+import no.nav.helse.spesialist.api.graphql.schema.ApiSvartype
+import no.nav.helse.spesialist.api.graphql.schema.ApiVisningskriterium
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -46,13 +46,13 @@ class DokumentQuery(
         fnr: String,
         dokumentId: String,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Soknad?> {
+    ): DataFetcherResult<ApiSoknad?> {
         if (isForbidden(fnr, env)) {
-            return DataFetcherResult.newResult<Soknad?>().error(getForbiddenError(fnr)).build()
+            return DataFetcherResult.newResult<ApiSoknad?>().error(getForbiddenError(fnr)).build()
         }
 
         if (dokumentId.isEmpty()) {
-            return DataFetcherResult.newResult<Soknad>().error(getEmptyRequestError()).build()
+            return DataFetcherResult.newResult<ApiSoknad>().error(getEmptyRequestError()).build()
         }
 
         val dokument =
@@ -61,14 +61,14 @@ class DokumentQuery(
             }.let {
                 val error = it.path("error")?.takeUnless { error -> error.isMissingOrNull() }?.asInt()
                 if (it.size() == 0) {
-                    return DataFetcherResult.newResult<Soknad>().error(getExpectationFailedError()).build()
+                    return DataFetcherResult.newResult<ApiSoknad>().error(getExpectationFailedError()).build()
                 } else if (error == 408) {
-                    return DataFetcherResult.newResult<Soknad>().error(getEmptyResultTimeoutError()).build()
+                    return DataFetcherResult.newResult<ApiSoknad>().error(getEmptyResultTimeoutError()).build()
                 }
                 it.tilSøknad()
             }
 
-        return DataFetcherResult.newResult<Soknad>().data(dokument).build()
+        return DataFetcherResult.newResult<ApiSoknad>().data(dokument).build()
     }
 
     @Suppress("unused")
@@ -76,13 +76,13 @@ class DokumentQuery(
         fnr: String,
         dokumentId: String,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<DokumentInntektsmelding?> {
+    ): DataFetcherResult<ApiDokumentInntektsmelding?> {
         if (isForbidden(fnr, env)) {
-            return DataFetcherResult.newResult<DokumentInntektsmelding?>().error(getForbiddenError(fnr)).build()
+            return DataFetcherResult.newResult<ApiDokumentInntektsmelding?>().error(getForbiddenError(fnr)).build()
         }
 
         if (dokumentId.isEmpty()) {
-            return DataFetcherResult.newResult<DokumentInntektsmelding>().error(getEmptyRequestError()).build()
+            return DataFetcherResult.newResult<ApiDokumentInntektsmelding>().error(getEmptyRequestError()).build()
         }
 
         val dokument =
@@ -91,19 +91,19 @@ class DokumentQuery(
             }.let {
                 val error = it.path("error")?.takeUnless { error -> error.isMissingOrNull() }?.asInt()
                 if (it.size() == 0) {
-                    return DataFetcherResult.newResult<DokumentInntektsmelding>()
+                    return DataFetcherResult.newResult<ApiDokumentInntektsmelding>()
                         .error(getExpectationFailedError()).build()
                 } else if (error == 404) {
-                    return DataFetcherResult.newResult<DokumentInntektsmelding>()
+                    return DataFetcherResult.newResult<ApiDokumentInntektsmelding>()
                         .error(getNotFoundErrorEkstern()).build()
                 } else if (error == 408) {
-                    return DataFetcherResult.newResult<DokumentInntektsmelding>().error(getEmptyResultTimeoutError())
+                    return DataFetcherResult.newResult<ApiDokumentInntektsmelding>().error(getEmptyResultTimeoutError())
                         .build()
                 }
                 it.tilInntektsmelding()
             }
 
-        return DataFetcherResult.newResult<DokumentInntektsmelding>().data(dokument).build()
+        return DataFetcherResult.newResult<ApiDokumentInntektsmelding>().data(dokument).build()
     }
 
     private fun getEmptyRequestError(): GraphQLError =
@@ -124,8 +124,8 @@ class DokumentQuery(
             .message("Speil har ikke tilgang til denne inntektsmeldingen, den må åpnes i Gosys.")
             .extensions(mapOf("code" to 404)).build()
 
-    private fun JsonNode.tilInntektsmelding(): DokumentInntektsmelding {
-        return DokumentInntektsmelding(
+    private fun JsonNode.tilInntektsmelding(): ApiDokumentInntektsmelding {
+        return ApiDokumentInntektsmelding(
             arbeidsforholdId = getIfNotNull("arbeidsforholdId")?.asText(),
             virksomhetsnummer = getIfNotNull("virksomhetsnummer")?.asText(),
             begrunnelseForReduksjonEllerIkkeUtbetalt = getIfNotNull("begrunnelseForReduksjonEllerIkkeUtbetalt")?.asText(),
@@ -133,21 +133,21 @@ class DokumentQuery(
             beregnetInntekt = getIfNotNull("beregnetInntekt")?.asDouble(),
             refusjon =
                 getIfNotNull("refusjon")?.let { refusjon ->
-                    Refusjon(
+                    ApiRefusjon(
                         beloepPrMnd = refusjon.getIfNotNull("beloepPrMnd")?.asDouble(),
                         opphoersdato = refusjon.getIfNotNull("opphoersdato")?.asLocalDate(),
                     )
                 },
             endringIRefusjoner =
                 getIfNotNull("endringIRefusjoner")?.map { endringIRefusjon ->
-                    EndringIRefusjon(
+                    ApiEndringIRefusjon(
                         endringsdato = endringIRefusjon.getIfNotNull("endringsdato")?.asLocalDate(),
                         beloep = endringIRefusjon.getIfNotNull("beloep")?.asDouble(),
                     )
                 },
             opphoerAvNaturalytelser =
                 getIfNotNull("opphoerAvNaturalytelser")?.map { opphørAvNaturalytelse ->
-                    OpphoerAvNaturalytelse(
+                    ApiOpphoerAvNaturalytelse(
                         naturalytelse = opphørAvNaturalytelse.getIfNotNull("naturalytelse")?.asText()?.tilNaturalytelse(),
                         fom = opphørAvNaturalytelse.getIfNotNull("fom")?.asLocalDate(),
                         beloepPrMnd = opphørAvNaturalytelse.getIfNotNull("beloepPrMnd")?.asDouble(),
@@ -155,7 +155,7 @@ class DokumentQuery(
                 },
             gjenopptakelseNaturalytelser =
                 getIfNotNull("gjenopptakelseNaturalytelser")?.map { gjenopptakelseNaturalytelse ->
-                    GjenopptakelseNaturalytelse(
+                    ApiGjenopptakelseNaturalytelse(
                         naturalytelse =
                             gjenopptakelseNaturalytelse.getIfNotNull("naturalytelse")?.asText()
                                 ?.tilNaturalytelse(),
@@ -165,14 +165,14 @@ class DokumentQuery(
                 },
             arbeidsgiverperioder =
                 getIfNotNull("arbeidsgiverperioder")?.map { arbeidsgiverperiode ->
-                    IMPeriode(
+                    ApiIMPeriode(
                         fom = arbeidsgiverperiode.getIfNotNull("fom")?.asLocalDate(),
                         tom = arbeidsgiverperiode.getIfNotNull("tom")?.asLocalDate(),
                     )
                 },
             ferieperioder =
                 getIfNotNull("ferieperioder")?.map { ferieperiode ->
-                    IMPeriode(
+                    ApiIMPeriode(
                         fom = ferieperiode.getIfNotNull("fom")?.asLocalDate(),
                         tom = ferieperiode.getIfNotNull("tom")?.asLocalDate(),
                     )
@@ -183,10 +183,10 @@ class DokumentQuery(
             innsenderTelefon = getIfNotNull("innsenderTelefon")?.asText(),
             inntektEndringAarsak =
                 getIfNotNull("inntektEndringAarsak")?.let { endringAarsak ->
-                    InntektEndringAarsak(
+                    ApiInntektEndringAarsak(
                         endringAarsak.get("aarsak").asText(),
                         endringAarsak.getIfNotNull("perioder")?.map { periode ->
-                            IMPeriode(
+                            ApiIMPeriode(
                                 fom = periode.getIfNotNull("fom")?.asLocalDate(),
                                 tom = periode.getIfNotNull("tom")?.asLocalDate(),
                             )
@@ -197,7 +197,7 @@ class DokumentQuery(
                 },
             avsenderSystem =
                 getIfNotNull("avsenderSystem")?.let { avsenderSystem ->
-                    AvsenderSystem(
+                    ApiAvsenderSystem(
                         navn = avsenderSystem.getIfNotNull("navn")?.asText(),
                         versjon = avsenderSystem.getIfNotNull("versjon")?.asText(),
                     )
@@ -205,45 +205,45 @@ class DokumentQuery(
         )
     }
 
-    private fun String.tilNaturalytelse(): Naturalytelse {
+    private fun String.tilNaturalytelse(): ApiNaturalytelse {
         return when (this) {
-            "KOSTDOEGN" -> Naturalytelse.KOSTDOEGN
-            "LOSJI" -> Naturalytelse.LOSJI
-            "ANNET" -> Naturalytelse.ANNET
-            "SKATTEPLIKTIGDELFORSIKRINGER" -> Naturalytelse.SKATTEPLIKTIGDELFORSIKRINGER
-            "BIL" -> Naturalytelse.BIL
-            "KOSTDAGER" -> Naturalytelse.KOSTDAGER
-            "RENTEFORDELLAAN" -> Naturalytelse.RENTEFORDELLAAN
-            "BOLIG" -> Naturalytelse.BOLIG
-            "ELEKTRONISKKOMMUNIKASJON" -> Naturalytelse.ELEKTRONISKKOMMUNIKASJON
-            "AKSJERGRUNNFONDSBEVISTILUNDERKURS" -> Naturalytelse.AKSJERGRUNNFONDSBEVISTILUNDERKURS
-            "OPSJONER" -> Naturalytelse.OPSJONER
-            "KOSTBESPARELSEIHJEMMET" -> Naturalytelse.KOSTBESPARELSEIHJEMMET
-            "FRITRANSPORT" -> Naturalytelse.FRITRANSPORT
-            "BEDRIFTSBARNEHAGEPLASS" -> Naturalytelse.BEDRIFTSBARNEHAGEPLASS
-            "TILSKUDDBARNEHAGEPLASS" -> Naturalytelse.TILSKUDDBARNEHAGEPLASS
-            "BESOEKSREISERHJEMMETANNET" -> Naturalytelse.BESOEKSREISERHJEMMETANNET
-            "INNBETALINGTILUTENLANDSKPENSJONSORDNING" -> Naturalytelse.INNBETALINGTILUTENLANDSKPENSJONSORDNING
-            "YRKEBILTJENESTLIGBEHOVLISTEPRIS" -> Naturalytelse.YRKEBILTJENESTLIGBEHOVLISTEPRIS
-            "YRKEBILTJENESTLIGBEHOVKILOMETER" -> Naturalytelse.YRKEBILTJENESTLIGBEHOVKILOMETER
+            "KOSTDOEGN" -> ApiNaturalytelse.KOSTDOEGN
+            "LOSJI" -> ApiNaturalytelse.LOSJI
+            "ANNET" -> ApiNaturalytelse.ANNET
+            "SKATTEPLIKTIGDELFORSIKRINGER" -> ApiNaturalytelse.SKATTEPLIKTIGDELFORSIKRINGER
+            "BIL" -> ApiNaturalytelse.BIL
+            "KOSTDAGER" -> ApiNaturalytelse.KOSTDAGER
+            "RENTEFORDELLAAN" -> ApiNaturalytelse.RENTEFORDELLAAN
+            "BOLIG" -> ApiNaturalytelse.BOLIG
+            "ELEKTRONISKKOMMUNIKASJON" -> ApiNaturalytelse.ELEKTRONISKKOMMUNIKASJON
+            "AKSJERGRUNNFONDSBEVISTILUNDERKURS" -> ApiNaturalytelse.AKSJERGRUNNFONDSBEVISTILUNDERKURS
+            "OPSJONER" -> ApiNaturalytelse.OPSJONER
+            "KOSTBESPARELSEIHJEMMET" -> ApiNaturalytelse.KOSTBESPARELSEIHJEMMET
+            "FRITRANSPORT" -> ApiNaturalytelse.FRITRANSPORT
+            "BEDRIFTSBARNEHAGEPLASS" -> ApiNaturalytelse.BEDRIFTSBARNEHAGEPLASS
+            "TILSKUDDBARNEHAGEPLASS" -> ApiNaturalytelse.TILSKUDDBARNEHAGEPLASS
+            "BESOEKSREISERHJEMMETANNET" -> ApiNaturalytelse.BESOEKSREISERHJEMMETANNET
+            "INNBETALINGTILUTENLANDSKPENSJONSORDNING" -> ApiNaturalytelse.INNBETALINGTILUTENLANDSKPENSJONSORDNING
+            "YRKEBILTJENESTLIGBEHOVLISTEPRIS" -> ApiNaturalytelse.YRKEBILTJENESTLIGBEHOVLISTEPRIS
+            "YRKEBILTJENESTLIGBEHOVKILOMETER" -> ApiNaturalytelse.YRKEBILTJENESTLIGBEHOVKILOMETER
             else -> {
                 sikkerLogg.error(
                     "Inntektsmelding har ny Naturalytelse som må støttes: {}, returnerer UKJENT enn så lenge",
                     this,
                 )
-                return Naturalytelse.UKJENT
+                return ApiNaturalytelse.UKJENT
             }
         }
     }
 
-    private fun JsonNode.tilSøknad(): Soknad {
+    private fun JsonNode.tilSøknad(): ApiSoknad {
         val type = getIfNotNull("type")?.asText()?.tilSoknadstype()
         val arbeidGjenopptatt = getIfNotNull("arbeidGjenopptatt")?.asLocalDateOrNull()
         val sykmeldingSkrevet = getIfNotNull("sykmeldingSkrevet")?.asLocalDateTimeOrNull()
         val egenmeldingsdagerFraSykmelding = getIfNotNull("egenmeldingsdagerFraSykmelding")?.map { it.asLocalDate() }
         val soknadsperioder = getIfNotNull("soknadsperioder")?.map { it.tilSøknadsperioder() }
         val sporsmal = getIfNotNull("sporsmal")?.map { it.tilSpørsmål() }?.filter { it.skalVises() }
-        return Soknad(
+        return ApiSoknad(
             type = type,
             arbeidGjenopptatt = arbeidGjenopptatt,
             sykmeldingSkrevet = sykmeldingSkrevet,
@@ -253,28 +253,28 @@ class DokumentQuery(
         )
     }
 
-    private fun String.tilSoknadstype(): Soknadstype {
+    private fun String.tilSoknadstype(): ApiSoknadstype {
         return when (this) {
-            "SELVSTENDIGE_OG_FRILANSERE" -> Soknadstype.Selvstendig_og_frilanser
-            "OPPHOLD_UTLAND" -> Soknadstype.Opphold_utland
-            "ARBEIDSTAKERE" -> Soknadstype.Arbeidstaker
-            "ANNET_ARBEIDSFORHOLD" -> Soknadstype.Annet_arbeidsforhold
-            "ARBEIDSLEDIG" -> Soknadstype.Arbeidsledig
-            "BEHANDLINGSDAGER" -> Soknadstype.Behandlingsdager
-            "REISETILSKUDD" -> Soknadstype.Reisetilskudd
-            "GRADERT_REISETILSKUDD" -> Soknadstype.Gradert_reisetilskudd
+            "SELVSTENDIGE_OG_FRILANSERE" -> ApiSoknadstype.Selvstendig_og_frilanser
+            "OPPHOLD_UTLAND" -> ApiSoknadstype.Opphold_utland
+            "ARBEIDSTAKERE" -> ApiSoknadstype.Arbeidstaker
+            "ANNET_ARBEIDSFORHOLD" -> ApiSoknadstype.Annet_arbeidsforhold
+            "ARBEIDSLEDIG" -> ApiSoknadstype.Arbeidsledig
+            "BEHANDLINGSDAGER" -> ApiSoknadstype.Behandlingsdager
+            "REISETILSKUDD" -> ApiSoknadstype.Reisetilskudd
+            "GRADERT_REISETILSKUDD" -> ApiSoknadstype.Gradert_reisetilskudd
             else -> {
                 sikkerLogg.error(
                     "Søknad har ny Soknadstype som må støttes: {}, returnerer UKJENT enn så lenge",
                     this,
                 )
-                return Soknadstype.UKJENT
+                return ApiSoknadstype.UKJENT
             }
         }
     }
 
-    private fun JsonNode.tilSøknadsperioder(): Soknadsperioder {
-        return Soknadsperioder(
+    private fun JsonNode.tilSøknadsperioder(): ApiSoknadsperioder {
+        return ApiSoknadsperioder(
             fom = get("fom").asLocalDate(),
             tom = get("tom").asLocalDate(),
             grad = getIfNotNull("grad")?.asInt(),
@@ -283,14 +283,14 @@ class DokumentQuery(
         )
     }
 
-    private fun JsonNode.tilSpørsmål(): Sporsmal {
-        val svar = getIfNotNull("svar")?.map { Svar(it.getIfNotNull("verdi")?.asText()) }
+    private fun JsonNode.tilSpørsmål(): ApiSporsmal {
+        val svar = getIfNotNull("svar")?.map { ApiSvar(it.getIfNotNull("verdi")?.asText()) }
         val kriterieForVisningAvUndersporsmal =
             getIfNotNull("kriterieForVisningAvUndersporsmal")?.asText()?.tilVisningskriterium()
         val undersporsmal =
             getIfNotNull("undersporsmal")?.map { it.tilSpørsmål() }?.filter { it.skalVises(rotnivå = false) }
 
-        return Sporsmal(
+        return ApiSporsmal(
             tag = getIfNotNull("tag")?.asText(),
             sporsmalstekst = getIfNotNull("sporsmalstekst")?.asText(),
             undertekst = getIfNotNull("undertekst")?.asText(),
@@ -301,7 +301,7 @@ class DokumentQuery(
         )
     }
 
-    private fun Sporsmal.skalVises(rotnivå: Boolean = true): Boolean {
+    private fun ApiSporsmal.skalVises(rotnivå: Boolean = true): Boolean {
         val harTagSomSkalVises =
             when (this.tag) {
                 "BEKREFT_OPPLYSNINGER" -> false
@@ -314,59 +314,60 @@ class DokumentQuery(
         val harUnderspørsmål = !this.undersporsmal.isNullOrEmpty()
         val førsteSvar = this.svar?.firstOrNull()?.verdi
         val svartNeiPåRotnivå = førsteSvar == "NEI" && rotnivå
+        val kriterieForVisningAvUndersporsmal = this.kriterieForVisningAvUndersporsmal
         val kriterieForVisningAvUndersporsmalOppfylt =
-            (this.kriterieForVisningAvUndersporsmal == null || this.kriterieForVisningAvUndersporsmal.name == this.svar?.firstOrNull()?.verdi) && harUnderspørsmål
+            (kriterieForVisningAvUndersporsmal == null || kriterieForVisningAvUndersporsmal.name == this.svar?.firstOrNull()?.verdi) && harUnderspørsmål
 
         return harTagSomSkalVises && (kriterieForVisningAvUndersporsmalOppfylt || (førsteSvar != null && !svartNeiPåRotnivå))
     }
 
-    private fun String.tilSvartype(): Svartype {
+    private fun String.tilSvartype(): ApiSvartype {
         return when (this) {
-            "JA_NEI" -> Svartype.JA_NEI
-            "CHECKBOX" -> Svartype.CHECKBOX
-            "CHECKBOX_GRUPPE" -> Svartype.CHECKBOX_GRUPPE
-            "CHECKBOX_PANEL" -> Svartype.CHECKBOX_PANEL
-            "DATO" -> Svartype.DATO
-            "PERIODE" -> Svartype.PERIODE
-            "PERIODER" -> Svartype.PERIODER
-            "TIMER" -> Svartype.TIMER
-            "FRITEKST" -> Svartype.FRITEKST
-            "IKKE_RELEVANT" -> Svartype.IKKE_RELEVANT
-            "BEKREFTELSESPUNKTER" -> Svartype.BEKREFTELSESPUNKTER
-            "OPPSUMMERING" -> Svartype.OPPSUMMERING
-            "PROSENT" -> Svartype.PROSENT
-            "RADIO_GRUPPE" -> Svartype.RADIO_GRUPPE
-            "RADIO_GRUPPE_TIMER_PROSENT" -> Svartype.RADIO_GRUPPE_TIMER_PROSENT
-            "RADIO" -> Svartype.RADIO
-            "TALL" -> Svartype.TALL
-            "RADIO_GRUPPE_UKEKALENDER" -> Svartype.RADIO_GRUPPE_UKEKALENDER
-            "LAND" -> Svartype.LAND
-            "COMBOBOX_SINGLE" -> Svartype.COMBOBOX_SINGLE
-            "COMBOBOX_MULTI" -> Svartype.COMBOBOX_MULTI
-            "INFO_BEHANDLINGSDAGER" -> Svartype.INFO_BEHANDLINGSDAGER
-            "KVITTERING" -> Svartype.KVITTERING
-            "DATOER" -> Svartype.DATOER
-            "BELOP" -> Svartype.BELOP
-            "KILOMETER" -> Svartype.KILOMETER
-            "GRUPPE_AV_UNDERSPORSMAL" -> Svartype.GRUPPE_AV_UNDERSPORSMAL
+            "JA_NEI" -> ApiSvartype.JA_NEI
+            "CHECKBOX" -> ApiSvartype.CHECKBOX
+            "CHECKBOX_GRUPPE" -> ApiSvartype.CHECKBOX_GRUPPE
+            "CHECKBOX_PANEL" -> ApiSvartype.CHECKBOX_PANEL
+            "DATO" -> ApiSvartype.DATO
+            "PERIODE" -> ApiSvartype.PERIODE
+            "PERIODER" -> ApiSvartype.PERIODER
+            "TIMER" -> ApiSvartype.TIMER
+            "FRITEKST" -> ApiSvartype.FRITEKST
+            "IKKE_RELEVANT" -> ApiSvartype.IKKE_RELEVANT
+            "BEKREFTELSESPUNKTER" -> ApiSvartype.BEKREFTELSESPUNKTER
+            "OPPSUMMERING" -> ApiSvartype.OPPSUMMERING
+            "PROSENT" -> ApiSvartype.PROSENT
+            "RADIO_GRUPPE" -> ApiSvartype.RADIO_GRUPPE
+            "RADIO_GRUPPE_TIMER_PROSENT" -> ApiSvartype.RADIO_GRUPPE_TIMER_PROSENT
+            "RADIO" -> ApiSvartype.RADIO
+            "TALL" -> ApiSvartype.TALL
+            "RADIO_GRUPPE_UKEKALENDER" -> ApiSvartype.RADIO_GRUPPE_UKEKALENDER
+            "LAND" -> ApiSvartype.LAND
+            "COMBOBOX_SINGLE" -> ApiSvartype.COMBOBOX_SINGLE
+            "COMBOBOX_MULTI" -> ApiSvartype.COMBOBOX_MULTI
+            "INFO_BEHANDLINGSDAGER" -> ApiSvartype.INFO_BEHANDLINGSDAGER
+            "KVITTERING" -> ApiSvartype.KVITTERING
+            "DATOER" -> ApiSvartype.DATOER
+            "BELOP" -> ApiSvartype.BELOP
+            "KILOMETER" -> ApiSvartype.KILOMETER
+            "GRUPPE_AV_UNDERSPORSMAL" -> ApiSvartype.GRUPPE_AV_UNDERSPORSMAL
             else -> {
                 sikkerLogg.error("Søknad har ny Svartype som må støttes: {}, returnerer UKJENT enn så lenge", this)
-                return Svartype.UKJENT
+                return ApiSvartype.UKJENT
             }
         }
     }
 
-    private fun String.tilVisningskriterium(): Visningskriterium {
+    private fun String.tilVisningskriterium(): ApiVisningskriterium {
         return when (this) {
-            "NEI" -> Visningskriterium.NEI
-            "JA" -> Visningskriterium.JA
-            "CHECKED" -> Visningskriterium.CHECKED
+            "NEI" -> ApiVisningskriterium.NEI
+            "JA" -> ApiVisningskriterium.JA
+            "CHECKED" -> ApiVisningskriterium.CHECKED
             else -> {
                 sikkerLogg.error(
                     "Søknad har nytt Visningskriterium som må støttes: {}, returnerer UKJENT enn så lenge",
                     this,
                 )
-                return Visningskriterium.UKJENT
+                return ApiVisningskriterium.UKJENT
             }
         }
     }
