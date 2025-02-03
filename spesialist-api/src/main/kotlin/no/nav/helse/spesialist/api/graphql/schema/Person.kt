@@ -140,7 +140,7 @@ data class Person(
         }
 
     @Suppress("unused")
-    fun tilleggsinfoForInntektskilder(): List<TilleggsinfoForInntektskilde> {
+    fun tilleggsinfoForInntektskilder(): List<ApiTilleggsinfoForInntektskilde> {
         return snapshot.vilkarsgrunnlag.flatMap { vilkårsgrunnlag ->
             val avviksvurdering = avviksvurderinghenter.hentAvviksvurdering(vilkårsgrunnlag.id)
             (
@@ -149,7 +149,7 @@ data class Person(
                 } ?: emptyList()
             ) + vilkårsgrunnlag.inntekter.map { inntekt -> inntekt.arbeidsgiver }
         }.toSet().map { orgnr ->
-            TilleggsinfoForInntektskilde(
+            ApiTilleggsinfoForInntektskilde(
                 orgnummer = orgnr,
                 navn = arbeidsgiverApiDao.finnNavn(orgnr) ?: "navn er utilgjengelig",
             )
