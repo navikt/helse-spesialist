@@ -9,7 +9,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.ApiLovhjemmel
-import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse
+import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
@@ -171,12 +171,12 @@ object Testdata {
         )
     }
 
-    internal fun skjønnsvurdering() = Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver(
+    internal fun skjønnsvurdering() = ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver(
         organisasjonsnummer = testperson.orgnummer,
         arlig = 1.0,
         fraArlig = 1.0,
         arsak = "årsak",
-        type = Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.OMREGNET_ARSINNTEKT,
+        type = ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.OMREGNET_ARSINNTEKT,
         begrunnelseMal = "begrunnelseMal",
         begrunnelseKonklusjon = "begrunnelseKonklusjon",
         begrunnelseFritekst = "begrunnelseFritekst",

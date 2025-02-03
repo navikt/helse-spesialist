@@ -30,9 +30,9 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgrad
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringDag
+import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.PaVentRequest
-import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
@@ -866,31 +866,31 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     fun `håndterer skjønnsfastsetting av sykepengegrunnlag`() {
         nyPerson(fødselsnummer = FØDSELSNUMMER, aktørId = AKTØR_ID, organisasjonsnummer = ORGANISASJONSNUMMER)
         val skjønnsfastsetting =
-            Skjonnsfastsettelse(
+            ApiSkjonnsfastsettelse(
                 fodselsnummer = FØDSELSNUMMER,
                 aktorId = AKTØR_ID,
                 skjaringstidspunkt = 1.januar,
                 arbeidsgivere =
                     listOf(
-                        Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver(
+                        ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver(
                             organisasjonsnummer = ORGANISASJONSNUMMER,
                             arlig = 25000.0,
                             fraArlig = 25001.0,
                             lovhjemmel = ApiLovhjemmel("8-28", "3", null, "folketrygdloven", "1970-01-01"),
                             arsak = "En årsak",
-                            type = Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.OMREGNET_ARSINNTEKT,
+                            type = ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.OMREGNET_ARSINNTEKT,
                             begrunnelseMal = "En begrunnelsemal",
                             begrunnelseFritekst = "begrunnelsefritekst",
                             begrunnelseKonklusjon = "begrunnelseKonklusjon",
                             initierendeVedtaksperiodeId = PERIODE.id.toString(),
                         ),
-                        Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver(
+                        ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver(
                             organisasjonsnummer = ORGANISASJONSNUMMER_GHOST,
                             arlig = 21000.0,
                             fraArlig = 25001.0,
                             lovhjemmel = ApiLovhjemmel("8-28", "3", null, "folketrygdloven", "1970-01-01"),
                             arsak = "En årsak 2",
-                            type = Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.OMREGNET_ARSINNTEKT,
+                            type = ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.OMREGNET_ARSINNTEKT,
                             begrunnelseMal = "En begrunnelsemal",
                             begrunnelseFritekst = "begrunnelsefritekst",
                             begrunnelseKonklusjon = "begrunnelseKonklusjon",

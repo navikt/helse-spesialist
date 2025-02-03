@@ -45,8 +45,8 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringDag
+import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
-import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
@@ -1042,11 +1042,11 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
         skjæringstidspunkt: LocalDate = 1.januar,
-        arbeidsgivere: List<Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver> = listOf(Testdata.skjønnsvurdering()),
+        arbeidsgivere: List<ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver> = listOf(Testdata.skjønnsvurdering()),
     ) {
         håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "skjønnsmessig_fastsettelse") {
             val handling =
-                Skjonnsfastsettelse(
+                ApiSkjonnsfastsettelse(
                     aktorId = aktørId,
                     fodselsnummer = fødselsnummer,
                     skjaringstidspunkt = skjæringstidspunkt,

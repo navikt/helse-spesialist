@@ -75,13 +75,13 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyrin
 import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgrad
 import no.nav.helse.spesialist.api.graphql.schema.ApiOpptegnelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiOpptegnelsetype
+import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse
+import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.ANNET
+import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.OMREGNET_ARSINNTEKT
+import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.RAPPORTERT_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Avslag
 import no.nav.helse.spesialist.api.graphql.schema.PaVentRequest
-import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse
-import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.ANNET
-import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.OMREGNET_ARSINNTEKT
-import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.RAPPORTERT_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.VedtakBegrunnelse
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
@@ -733,7 +733,7 @@ class SaksbehandlerMediator(
             is ApiArbeidsforholdOverstyringHandling -> this.tilModellversjon()
             is ApiInntektOgRefusjonOverstyring -> this.tilModellversjon()
             is ApiTidslinjeOverstyring -> this.tilModellversjon()
-            is Skjonnsfastsettelse -> this.tilModellversjon()
+            is ApiSkjonnsfastsettelse -> this.tilModellversjon()
             is ApiMinimumSykdomsgrad -> this.tilModellversjon()
             is ApiAnnulleringData -> this.tilModellversjon()
             is TildelOppgave -> this.tilModellversjon()
@@ -771,7 +771,7 @@ class SaksbehandlerMediator(
                 },
         )
 
-    private fun Skjonnsfastsettelse.tilModellversjon(): SkjønnsfastsattSykepengegrunnlag =
+    private fun ApiSkjonnsfastsettelse.tilModellversjon(): SkjønnsfastsattSykepengegrunnlag =
         SkjønnsfastsattSykepengegrunnlag(
             aktørId = aktorId,
             fødselsnummer = fodselsnummer,
