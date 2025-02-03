@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.api.graphql.schema
 import com.expediagroup.graphql.generator.annotations.GraphQLDeprecated
 import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.expediagroup.graphql.generator.annotations.GraphQLName
-import io.ktor.utils.io.core.toByteArray
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
