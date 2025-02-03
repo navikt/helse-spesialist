@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
-import com.expediagroup.graphql.server.operations.Mutation
 import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
@@ -13,11 +12,10 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiNotatType
 import no.nav.helse.spesialist.api.notat.KommentarDto
 import java.util.UUID
 
-class NotatMutation(
+class NotatMutationHandler(
     private val notatDao: NotatApiDao,
-) : Mutation {
-    @Suppress("unused")
-    fun feilregistrerNotat(id: Int): DataFetcherResult<ApiNotat?> {
+) : NotatMutationSchema {
+    override fun feilregistrerNotat(id: Int): DataFetcherResult<ApiNotat?> {
         val notatDto =
             try {
                 notatDao.feilregistrerNotat(id)
@@ -27,8 +25,7 @@ class NotatMutation(
         return DataFetcherResult.newResult<ApiNotat?>().data(notatDto?.let(::tilNotat)).build()
     }
 
-    @Suppress("unused")
-    fun feilregistrerKommentar(id: Int): DataFetcherResult<ApiKommentar?> {
+    override fun feilregistrerKommentar(id: Int): DataFetcherResult<ApiKommentar?> {
         val kommentarDto =
             try {
                 notatDao.feilregistrerKommentar(id)
@@ -41,11 +38,9 @@ class NotatMutation(
         return DataFetcherResult.newResult<ApiKommentar?>().data(kommentarDto?.let(::tilKommentar)).build()
     }
 
-    @Suppress("unused")
-    fun feilregistrerKommentarV2(id: Int): DataFetcherResult<ApiKommentar?> = feilregistrerKommentar(id)
+    override fun feilregistrerKommentarV2(id: Int): DataFetcherResult<ApiKommentar?> = feilregistrerKommentar(id)
 
-    @Suppress("unused")
-    fun leggTilNotat(
+    override fun leggTilNotat(
         tekst: String,
         type: ApiNotatType,
         vedtaksperiodeId: String,
@@ -69,8 +64,7 @@ class NotatMutation(
         return DataFetcherResult.newResult<ApiNotat?>().data(notatDto?.let(::tilNotat)).build()
     }
 
-    @Suppress("unused")
-    fun leggTilKommentar(
+    override fun leggTilKommentar(
         dialogRef: Int,
         tekst: String,
         saksbehandlerident: String,

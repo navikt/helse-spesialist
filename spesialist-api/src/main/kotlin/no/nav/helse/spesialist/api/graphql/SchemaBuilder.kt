@@ -28,6 +28,7 @@ import no.nav.helse.spesialist.api.graphql.mutation.AnnulleringMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.MinimumSykdomsgradMutation
 import no.nav.helse.spesialist.api.graphql.mutation.MinimumSykdomsgradMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutation
+import no.nav.helse.spesialist.api.graphql.mutation.NotatMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.OpphevStansMutation
 import no.nav.helse.spesialist.api.graphql.mutation.OpptegnelseMutation
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutation
@@ -140,7 +141,9 @@ class SchemaBuilder(
 
     val mutations =
         listOf(
-            NotatMutation(notatDao = notatDao),
+            NotatMutation(
+                handler = NotatMutationHandler(notatDao = notatDao),
+            ),
             VarselMutation(varselRepository = varselRepository),
             TildelingMutation(saksbehandlerhåndterer = saksbehandlerhåndterer),
             OpptegnelseMutation(saksbehandlerhåndterer = saksbehandlerhåndterer),
