@@ -78,19 +78,22 @@ class ApiArbeidsgiverResolver(
 
                             is GraphQLBeregnetPeriode ->
                                 ApiBeregnetPeriode(
-                                    orgnummer = organisasjonsnummer,
-                                    periode = it,
-                                    apiOppgaveService = apiOppgaveService,
-                                    saksbehandlerhåndterer = saksbehandlerhåndterer,
-                                    risikovurderinger = risikovurderinger,
-                                    varselRepository = varselRepository,
-                                    oppgaveApiDao = oppgaveApiDao,
-                                    periodehistorikkApiDao = periodehistorikkApiDao,
-                                    notatDao = notatDao,
-                                    totrinnsvurderingApiDao = totrinnsvurderingApiDao,
-                                    påVentApiDao = påVentApiDao,
-                                    erSisteGenerasjon = index == 0,
-                                    index = index,
+                                    resolver =
+                                        ApiBeregnetPeriodeResolver(
+                                            orgnummer = organisasjonsnummer,
+                                            periode = it,
+                                            apiOppgaveService = apiOppgaveService,
+                                            saksbehandlerhåndterer = saksbehandlerhåndterer,
+                                            risikovurderinger = risikovurderinger,
+                                            varselRepository = varselRepository,
+                                            oppgaveApiDao = oppgaveApiDao,
+                                            periodehistorikkApiDao = periodehistorikkApiDao,
+                                            notatDao = notatDao,
+                                            totrinnsvurderingApiDao = totrinnsvurderingApiDao,
+                                            påVentApiDao = påVentApiDao,
+                                            erSisteGenerasjon = index == 0,
+                                            index = index,
+                                        ),
                                 )
 
                             else -> throw Exception("Ukjent tidslinjeperiode")

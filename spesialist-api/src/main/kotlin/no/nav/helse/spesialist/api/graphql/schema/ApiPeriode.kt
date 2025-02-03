@@ -2,41 +2,20 @@ package no.nav.helse.spesialist.api.graphql.schema
 
 import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.expediagroup.graphql.generator.annotations.GraphQLName
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.jackson.asLocalDate
-import com.github.navikt.tbd_libs.jackson.isMissingOrNull
-import io.ktor.utils.io.core.toByteArray
 import no.nav.helse.db.api.NotatApiDao
-import no.nav.helse.db.api.OppgaveApiDao
-import no.nav.helse.db.api.PeriodehistorikkApiDao
-import no.nav.helse.db.api.PåVentApiDao
-import no.nav.helse.db.api.TotrinnsvurderingApiDao
-import no.nav.helse.db.api.VarselApiRepository
-import no.nav.helse.mediator.oppgave.ApiOppgaveService
-import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.Toggle
 import no.nav.helse.spesialist.api.graphql.mapping.tilApiDag
-import no.nav.helse.spesialist.api.graphql.mapping.tilApiHendelse
 import no.nav.helse.spesialist.api.graphql.mapping.tilSkjematype
-import no.nav.helse.spesialist.api.graphql.mapping.toVarselDto
-import no.nav.helse.spesialist.api.objectMapper
-import no.nav.helse.spesialist.api.oppgave.OppgaveForPeriodevisningDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
-import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetype
-import no.nav.helse.spleis.graphql.enums.GraphQLUtbetalingstatus
 import no.nav.helse.spleis.graphql.hentsnapshot.Alder
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLOppdrag
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLTidslinjeperiode
 import no.nav.helse.spleis.graphql.hentsnapshot.Sykepengedager
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.spleis.graphql.enums.Utbetalingtype as GraphQLUtbetalingtype
 
 @GraphQLName("Inntektstype")
 enum class ApiInntektstype { ENARBEIDSGIVER, FLEREARBEIDSGIVERE }
@@ -464,366 +443,44 @@ data class ApiHandling(
     val begrunnelse: String? = null,
 )
 
-@GraphQLName("BeregnetPeriode")
-data class ApiBeregnetPeriode(
-    private val orgnummer: String,
-    private val periode: GraphQLBeregnetPeriode,
-    private val apiOppgaveService: ApiOppgaveService,
-    private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
-    private val risikovurderinger: Map<UUID, RisikovurderingApiDto>,
-    private val varselRepository: VarselApiRepository,
-    private val oppgaveApiDao: OppgaveApiDao,
-    private val periodehistorikkApiDao: PeriodehistorikkApiDao,
-    private val notatDao: NotatApiDao,
-    private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
-    private val påVentApiDao: PåVentApiDao,
-    private val erSisteGenerasjon: Boolean,
-    private val index: Int,
-) : ApiPeriode {
-    private val periodetilstand = periodetilstand(periode.periodetilstand, erSisteGenerasjon)
+@GraphQLIgnore
+interface BeregnetPeriodeSchema : ApiPeriode {
+    fun oppgave(): ApiOppgaveForPeriodevisning?
 
-    override fun behandlingId(): UUID = periode.behandlingId
+    fun handlinger(): List<ApiHandling>
 
-    override fun erForkastet(): Boolean = erForkastet(periode)
+    fun egenskaper(): List<ApiOppgaveegenskap>
 
-    override fun fom(): LocalDate = fom(periode)
+    fun notater(): List<ApiNotat>
 
-    override fun tom(): LocalDate = tom(periode)
+    fun historikkinnslag(): List<ApiHistorikkinnslag>
 
-    override fun id(): UUID = UUID.nameUUIDFromBytes(vedtaksperiodeId().toString().toByteArray() + index.toByte())
+    fun beregningId(): UUID
 
-    override fun inntektstype(): ApiInntektstype = inntektstype(periode)
+    fun forbrukteSykedager(): Int?
 
-    override fun opprettet(): LocalDateTime = opprettet(periode)
+    fun gjenstaendeSykedager(): Int?
 
-    override fun periodetype(): ApiPeriodetype = periodetype(periode)
+    fun maksdato(): LocalDate
 
-    override fun tidslinje(): List<ApiDag> = tidslinje(periode)
+    fun periodevilkar(): ApiPeriodevilkar
 
-    override fun vedtaksperiodeId(): UUID = periode.vedtaksperiodeId
+    fun utbetaling(): ApiUtbetaling
 
-    override fun periodetilstand(): ApiPeriodetilstand = periodetilstand
+    fun vilkarsgrunnlagId(): UUID?
 
-    fun handlinger() = byggHandlinger()
+    fun risikovurdering(): ApiRisikovurdering?
 
-    fun egenskaper(): List<ApiOppgaveegenskap> = apiOppgaveService.hentEgenskaper(periode.vedtaksperiodeId, periode.utbetaling.id)
+    fun totrinnsvurdering(): ApiTotrinnsvurdering?
 
-    private fun byggHandlinger(): List<ApiHandling> =
-        if (periodetilstand != ApiPeriodetilstand.TilGodkjenning) {
-            listOf(
-                ApiHandling(ApiPeriodehandling.UTBETALE, false, "perioden er ikke til godkjenning"),
-            )
-        } else {
-            val handlinger = listOf(ApiHandling(ApiPeriodehandling.UTBETALE, true))
-            handlinger +
-                when (oppgaveDto?.kanAvvises) {
-                    true -> ApiHandling(ApiPeriodehandling.AVVISE, true)
-                    else -> ApiHandling(ApiPeriodehandling.AVVISE, false, "Spleis støtter ikke å avvise perioden")
-                }
-        }
+    fun paVent(): ApiPaVent?
 
-    override fun hendelser(): List<ApiHendelse> = periode.hendelser.map { it.tilApiHendelse() }
+    fun avslag(): List<ApiAvslag>
 
-    fun notater(): List<ApiNotat> = notater(notatDao, vedtaksperiodeId())
+    fun vedtakBegrunnelser(): List<ApiVedtakBegrunnelse>
 
-    private fun mapLagtPåVentJson(json: String): Triple<List<String>, LocalDate?, String?> {
-        val node = objectMapper.readTree(json)
-        val påVentÅrsaker = node["årsaker"].map { it["årsak"].asText() }
-        val frist = node["frist"]?.takeUnless { it.isMissingOrNull() }?.asLocalDate()
-        val notattekst = node["notattekst"]?.takeUnless { it.isMissingOrNull() }?.asText()
-        return Triple(påVentÅrsaker, frist, notattekst)
-    }
-
-    private fun mapTotrinnsvurderingReturJson(json: String): String? {
-        val node = objectMapper.readTree(json)
-        val notattekst = node["notattekst"]?.takeUnless { it.isMissingOrNull() }?.asText()
-        return notattekst
-    }
-
-    fun historikkinnslag(): List<ApiHistorikkinnslag> =
-        periodehistorikkApiDao
-            .finn(utbetaling().id)
-            .map {
-                when (it.type) {
-                    PeriodehistorikkType.LEGG_PA_VENT -> {
-                        val (påVentÅrsaker, frist, notattekst) = mapLagtPåVentJson(json = it.json)
-                        ApiLagtPaVent(
-                            id = it.id,
-                            type = it.type,
-                            timestamp = it.timestamp,
-                            saksbehandlerIdent = it.saksbehandlerIdent,
-                            dialogRef = it.dialogRef,
-                            arsaker = påVentÅrsaker,
-                            frist = frist,
-                            notattekst = notattekst,
-                            kommentarer =
-                                notatDao.finnKommentarer(it.dialogRef!!.toLong()).map { kommentar ->
-                                    ApiKommentar(
-                                        id = kommentar.id,
-                                        tekst = kommentar.tekst,
-                                        opprettet = kommentar.opprettet,
-                                        saksbehandlerident = kommentar.saksbehandlerident,
-                                        feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
-                                    )
-                                },
-                        )
-                    }
-
-                    PeriodehistorikkType.ENDRE_PA_VENT -> {
-                        val (påVentÅrsaker, frist, notattekst) = mapLagtPåVentJson(json = it.json)
-                        ApiEndrePaVent(
-                            id = it.id,
-                            type = it.type,
-                            timestamp = it.timestamp,
-                            saksbehandlerIdent = it.saksbehandlerIdent,
-                            dialogRef = it.dialogRef,
-                            arsaker = påVentÅrsaker,
-                            frist = frist,
-                            notattekst = notattekst,
-                            kommentarer =
-                                notatDao.finnKommentarer(it.dialogRef!!.toLong()).map { kommentar ->
-                                    ApiKommentar(
-                                        id = kommentar.id,
-                                        tekst = kommentar.tekst,
-                                        opprettet = kommentar.opprettet,
-                                        saksbehandlerident = kommentar.saksbehandlerident,
-                                        feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
-                                    )
-                                },
-                        )
-                    }
-
-                    PeriodehistorikkType.FJERN_FRA_PA_VENT ->
-                        ApiFjernetFraPaVent(
-                            id = it.id,
-                            type = it.type,
-                            timestamp = it.timestamp,
-                            saksbehandlerIdent = it.saksbehandlerIdent,
-                            dialogRef = it.dialogRef,
-                        )
-
-                    PeriodehistorikkType.TOTRINNSVURDERING_RETUR -> {
-                        val notattekst = mapTotrinnsvurderingReturJson(json = it.json)
-                        ApiTotrinnsvurderingRetur(
-                            id = it.id,
-                            type = it.type,
-                            saksbehandlerIdent = it.saksbehandlerIdent,
-                            timestamp = it.timestamp,
-                            dialogRef = it.dialogRef,
-                            notattekst = notattekst,
-                            kommentarer =
-                                it.dialogRef?.let { dialogRef ->
-                                    notatDao.finnKommentarer(dialogRef.toLong()).map { kommentar ->
-                                        ApiKommentar(
-                                            id = kommentar.id,
-                                            tekst = kommentar.tekst,
-                                            opprettet = kommentar.opprettet,
-                                            saksbehandlerident = kommentar.saksbehandlerident,
-                                            feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
-                                        )
-                                    }
-                                } ?: emptyList(),
-                        )
-                    }
-
-                    else ->
-                        ApiPeriodeHistorikkElementNy(
-                            id = it.id,
-                            type = it.type,
-                            saksbehandlerIdent = it.saksbehandlerIdent,
-                            timestamp = it.timestamp,
-                            dialogRef = it.dialogRef,
-                        )
-                }
-            }
-
-    fun beregningId(): UUID = periode.beregningId
-
-    fun forbrukteSykedager(): Int? = periode.forbrukteSykedager
-
-    fun gjenstaendeSykedager(): Int? = periode.gjenstaendeSykedager
-
-    fun maksdato(): LocalDate = periode.maksdato
-
-    fun periodevilkar(): ApiPeriodevilkar =
-        ApiPeriodevilkar(
-            alder = periode.periodevilkar.alder,
-            sykepengedager = periode.periodevilkar.sykepengedager,
-        )
-
-    override fun skjaeringstidspunkt(): LocalDate = periode.skjaeringstidspunkt
-
-    fun utbetaling(): ApiUtbetaling =
-        periode.utbetaling.let {
-            ApiUtbetaling(
-                id = it.id,
-                arbeidsgiverFagsystemId = it.arbeidsgiverFagsystemId,
-                arbeidsgiverNettoBelop = it.arbeidsgiverNettoBelop,
-                personFagsystemId = it.personFagsystemId,
-                personNettoBelop = it.personNettoBelop,
-                status =
-                    when (it.statusEnum) {
-                        GraphQLUtbetalingstatus.ANNULLERT -> ApiUtbetalingstatus.ANNULLERT
-                        GraphQLUtbetalingstatus.FORKASTET -> ApiUtbetalingstatus.FORKASTET
-                        GraphQLUtbetalingstatus.GODKJENT -> ApiUtbetalingstatus.GODKJENT
-                        GraphQLUtbetalingstatus.GODKJENTUTENUTBETALING -> ApiUtbetalingstatus.GODKJENTUTENUTBETALING
-                        GraphQLUtbetalingstatus.IKKEGODKJENT -> ApiUtbetalingstatus.IKKEGODKJENT
-                        GraphQLUtbetalingstatus.OVERFORT -> ApiUtbetalingstatus.OVERFORT
-                        GraphQLUtbetalingstatus.SENDT -> ApiUtbetalingstatus.SENDT
-                        GraphQLUtbetalingstatus.UBETALT -> ApiUtbetalingstatus.UBETALT
-                        GraphQLUtbetalingstatus.UTBETALINGFEILET -> ApiUtbetalingstatus.UTBETALINGFEILET
-                        GraphQLUtbetalingstatus.UTBETALT -> ApiUtbetalingstatus.UTBETALT
-                        GraphQLUtbetalingstatus.__UNKNOWN_VALUE -> ApiUtbetalingstatus.UKJENT
-                    },
-                type =
-                    when (it.typeEnum) {
-                        GraphQLUtbetalingtype.ANNULLERING -> ApiUtbetalingtype.ANNULLERING
-                        GraphQLUtbetalingtype.ETTERUTBETALING -> ApiUtbetalingtype.ETTERUTBETALING
-                        GraphQLUtbetalingtype.FERIEPENGER -> ApiUtbetalingtype.FERIEPENGER
-                        GraphQLUtbetalingtype.REVURDERING -> ApiUtbetalingtype.REVURDERING
-                        GraphQLUtbetalingtype.UTBETALING -> ApiUtbetalingtype.UTBETALING
-                        GraphQLUtbetalingtype.__UNKNOWN_VALUE -> ApiUtbetalingtype.UKJENT
-                    },
-                vurdering =
-                    it.vurdering?.let { vurdering ->
-                        ApiVurdering(
-                            automatisk = vurdering.automatisk,
-                            godkjent = vurdering.godkjent,
-                            ident = vurdering.ident,
-                            tidsstempel = vurdering.tidsstempel,
-                        )
-                    },
-                arbeidsgiversimulering = it.arbeidsgiveroppdrag?.tilSimulering(),
-                personsimulering = it.personoppdrag?.tilSimulering(),
-            )
-        }
-
-    fun vilkarsgrunnlagId(): UUID? = periode.vilkarsgrunnlagId
-
-    fun risikovurdering(): ApiRisikovurdering? =
-        risikovurderinger[vedtaksperiodeId()]?.let { vurdering ->
-            ApiRisikovurdering(
-                funn = vurdering.funn.tilFaresignaler(),
-                kontrollertOk = vurdering.kontrollertOk.tilFaresignaler(),
-            )
-        }
-
-    override fun varsler(): List<ApiVarselDTO> =
-        if (erSisteGenerasjon) {
-            varselRepository
-                .finnVarslerSomIkkeErInaktiveForSisteGenerasjon(
-                    vedtaksperiodeId(),
-                    periode.utbetaling.id,
-                ).map { it.toVarselDto() }
-        } else {
-            varselRepository
-                .finnVarslerSomIkkeErInaktiveFor(
-                    vedtaksperiodeId(),
-                    periode.utbetaling.id,
-                ).map { it.toVarselDto() }
-        }
-
-    private val oppgaveDto: OppgaveForPeriodevisningDto? by lazy {
-        oppgaveApiDao.finnPeriodeoppgave(periode.vedtaksperiodeId)
-    }
-
-    val oppgave = oppgaveDto?.let { oppgaveDto -> ApiOppgaveForPeriodevisning(id = oppgaveDto.id) }
-
-    fun totrinnsvurdering(): ApiTotrinnsvurdering? =
-        totrinnsvurderingApiDao.hentAktiv(vedtaksperiodeId())?.let {
-            ApiTotrinnsvurdering(
-                erRetur = it.erRetur,
-                saksbehandler = it.saksbehandler,
-                beslutter = it.beslutter,
-                erBeslutteroppgave = !it.erRetur && it.saksbehandler != null,
-            )
-        }
-
-    fun paVent(): ApiPaVent? =
-        påVentApiDao.hentAktivPåVent(vedtaksperiodeId())?.let {
-            ApiPaVent(
-                frist = it.frist,
-                oid = it.oid,
-            )
-        }
-
-    fun avslag(): List<ApiAvslag> = saksbehandlerhåndterer.hentAvslag(periode.vedtaksperiodeId, periode.utbetaling.id).toList()
-
-    fun vedtakBegrunnelser(): List<ApiVedtakBegrunnelse> =
-        saksbehandlerhåndterer.hentVedtakBegrunnelser(
-            periode.vedtaksperiodeId,
-            periode.utbetaling.id,
-        )
-
-    fun annullering(): ApiAnnullering? =
-        if (erSisteGenerasjon) {
-            saksbehandlerhåndterer.hentAnnullering(
-                periode.utbetaling.arbeidsgiverFagsystemId,
-                periode.utbetaling.personFagsystemId,
-            )?.let {
-                ApiAnnullering(
-                    saksbehandlerIdent = it.saksbehandlerIdent,
-                    arbeidsgiverFagsystemId = it.arbeidsgiverFagsystemId,
-                    personFagsystemId = it.personFagsystemId,
-                    tidspunkt = it.tidspunkt,
-                    arsaker = it.arsaker,
-                    begrunnelse = it.begrunnelse,
-                )
-            }
-        } else {
-            null
-        }
+    fun annullering(): ApiAnnullering?
 }
 
-private fun GraphQLOppdrag.tilSimulering(): ApiSimulering =
-    ApiSimulering(
-        fagsystemId = fagsystemId,
-        tidsstempel = tidsstempel,
-        utbetalingslinjer =
-            utbetalingslinjer.map { linje ->
-                ApiSimuleringslinje(
-                    fom = linje.fom,
-                    tom = linje.tom,
-                    dagsats = linje.dagsats,
-                    grad = linje.grad,
-                )
-            },
-        totalbelop = simulering?.totalbelop,
-        perioder =
-            simulering?.perioder?.map { periode ->
-                ApiSimuleringsperiode(
-                    fom = periode.fom,
-                    tom = periode.tom,
-                    utbetalinger =
-                        periode.utbetalinger.map { utbetaling ->
-                            ApiSimuleringsutbetaling(
-                                mottakerNavn = utbetaling.utbetalesTilNavn,
-                                mottakerId = utbetaling.utbetalesTilId,
-                                forfall = utbetaling.forfall,
-                                feilkonto = utbetaling.feilkonto,
-                                detaljer =
-                                    utbetaling.detaljer.map { detaljer ->
-                                        ApiSimuleringsdetaljer(
-                                            fom = detaljer.faktiskFom,
-                                            tom = detaljer.faktiskTom,
-                                            belop = detaljer.belop,
-                                            antallSats = detaljer.antallSats,
-                                            klassekode = detaljer.klassekode,
-                                            klassekodebeskrivelse = detaljer.klassekodeBeskrivelse,
-                                            konto = detaljer.konto,
-                                            refunderesOrgNr = detaljer.refunderesOrgNr,
-                                            sats = detaljer.sats,
-                                            tilbakeforing = detaljer.tilbakeforing,
-                                            typeSats = detaljer.typeSats,
-                                            uforegrad = detaljer.uforegrad,
-                                            utbetalingstype = detaljer.utbetalingstype,
-                                        )
-                                    },
-                            )
-                        },
-                )
-            },
-    )
-
-private fun List<JsonNode>.tilFaresignaler(): List<ApiFaresignal> =
-    map { objectMapper.readValue(it.traverse(), object : TypeReference<ApiFaresignal>() {}) }
+@GraphQLName("BeregnetPeriode")
+class ApiBeregnetPeriode(private val resolver: BeregnetPeriodeSchema) : BeregnetPeriodeSchema by resolver
