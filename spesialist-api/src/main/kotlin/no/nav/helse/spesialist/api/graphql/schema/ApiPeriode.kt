@@ -443,49 +443,13 @@ interface ApiPeriode {
     fun tidslinje(periode: GraphQLTidslinjeperiode): List<ApiDag> = periode.tidslinje.map { it.tilApiDag() }
 }
 
-@GraphQLName("UberegnetPeriode")
-data class ApiUberegnetPeriode(
-    private val varselRepository: VarselApiRepository,
-    private val periode: GraphQLTidslinjeperiode,
-    private val skalViseAktiveVarsler: Boolean,
-    private val notatDao: NotatApiDao,
-    private val index: Int,
-) : ApiPeriode {
-    override fun behandlingId(): UUID = periode.behandlingId
-
-    override fun erForkastet(): Boolean = erForkastet(periode)
-
-    override fun fom(): LocalDate = fom(periode)
-
-    override fun tom(): LocalDate = tom(periode)
-
-    override fun id(): UUID = UUID.nameUUIDFromBytes(vedtaksperiodeId().toString().toByteArray() + index.toByte())
-
-    override fun inntektstype(): ApiInntektstype = inntektstype(periode)
-
-    override fun opprettet(): LocalDateTime = opprettet(periode)
-
-    override fun periodetype(): ApiPeriodetype = periodetype(periode)
-
-    override fun tidslinje(): List<ApiDag> = tidslinje(periode)
-
-    override fun vedtaksperiodeId(): UUID = periode.vedtaksperiodeId
-
-    override fun periodetilstand(): ApiPeriodetilstand = periodetilstand(periode.periodetilstand, true)
-
-    override fun skjaeringstidspunkt(): LocalDate = periode.skjaeringstidspunkt
-
-    override fun hendelser(): List<ApiHendelse> = periode.hendelser.map { it.tilApiHendelse() }
-
-    override fun varsler(): List<ApiVarselDTO> =
-        if (skalViseAktiveVarsler) {
-            varselRepository.finnVarslerForUberegnetPeriode(vedtaksperiodeId()).map { it.toVarselDto() }
-        } else {
-            varselRepository.finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId()).map { it.toVarselDto() }
-        }
-
-    fun notater(): List<ApiNotat> = notater(notatDao, vedtaksperiodeId())
+@GraphQLIgnore
+interface UberegnetPeriodeSchema : ApiPeriode {
+    fun notater(): List<ApiNotat>
 }
+
+@GraphQLName("UberegnetPeriode")
+class ApiUberegnetPeriode(private val resolver: UberegnetPeriodeSchema) : UberegnetPeriodeSchema by resolver
 
 @GraphQLName("Periodehandling")
 enum class ApiPeriodehandling {

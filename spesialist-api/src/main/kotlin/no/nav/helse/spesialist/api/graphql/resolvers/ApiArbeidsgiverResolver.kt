@@ -66,11 +66,14 @@ class ApiArbeidsgiverResolver(
                         when (it) {
                             is GraphQLUberegnetPeriode ->
                                 ApiUberegnetPeriode(
-                                    varselRepository = varselRepository,
-                                    periode = it,
-                                    skalViseAktiveVarsler = index == 0 && perioderSomSkalViseAktiveVarsler.contains(it.vedtaksperiodeId),
-                                    notatDao = notatDao,
-                                    index = index,
+                                    resolver =
+                                        ApiUberegnetPeriodeResolver(
+                                            varselRepository = varselRepository,
+                                            periode = it,
+                                            skalViseAktiveVarsler = index == 0 && perioderSomSkalViseAktiveVarsler.contains(it.vedtaksperiodeId),
+                                            notatDao = notatDao,
+                                            index = index,
+                                        ),
                                 )
 
                             is GraphQLBeregnetPeriode ->
