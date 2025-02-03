@@ -1,10 +1,12 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
+import com.expediagroup.graphql.generator.annotations.GraphQLName
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-enum class Oppgavetype {
+@GraphQLName("Oppgavetype")
+enum class ApiOppgavetype {
     SOKNAD,
     STIKKPROVE,
     RISK_QA,
@@ -16,12 +18,14 @@ enum class Oppgavetype {
     INGEN_UTBETALING,
 }
 
-enum class AntallArbeidsforhold {
+@GraphQLName("AntallArbeidsforhold")
+enum class ApiAntallArbeidsforhold {
     ET_ARBEIDSFORHOLD,
     FLERE_ARBEIDSFORHOLD,
 }
 
-enum class Egenskap {
+@GraphQLName("Egenskap")
+enum class ApiEgenskap {
     RISK_QA,
     FORTROLIG_ADRESSE,
     STRENGT_FORTROLIG_ADRESSE,
@@ -54,7 +58,8 @@ enum class Egenskap {
     TILKOMMEN,
 }
 
-enum class Kategori {
+@GraphQLName("Kategori")
+enum class ApiKategori {
     Mottaker,
     Inntektskilde,
     Oppgavetype,
@@ -63,43 +68,50 @@ enum class Kategori {
     Status,
 }
 
-data class Filtrering(
-    val egenskaper: List<Oppgaveegenskap> = emptyList(),
-    val ekskluderteEgenskaper: List<Oppgaveegenskap>? = emptyList(),
+@GraphQLName("Filtrering")
+data class ApiFiltrering(
+    val egenskaper: List<ApiOppgaveegenskap> = emptyList(),
+    val ekskluderteEgenskaper: List<ApiOppgaveegenskap>? = emptyList(),
     val ingenUkategoriserteEgenskaper: Boolean = false,
     val tildelt: Boolean? = null,
     val egneSakerPaVent: Boolean = false,
     val egneSaker: Boolean = false,
 )
 
-data class Oppgavesortering(
-    val nokkel: Sorteringsnokkel,
+@GraphQLName("Oppgavesortering")
+data class ApiOppgavesortering(
+    val nokkel: ApiSorteringsnokkel,
     val stigende: Boolean,
 )
 
-enum class Sorteringsnokkel {
+@GraphQLName("Sorteringsnokkel")
+enum class ApiSorteringsnokkel {
     TILDELT_TIL,
     OPPRETTET,
     SOKNAD_MOTTATT,
     TIDSFRIST,
 }
 
-data class BehandledeOppgaver(
+@GraphQLName("BehandledeOppgaver")
+data class ApiBehandledeOppgaver(
     val totaltAntallOppgaver: Int,
-    val oppgaver: List<BehandletOppgave>,
+    val oppgaver: List<ApiBehandletOppgave>,
 )
 
-data class OppgaverTilBehandling(
+@GraphQLName("OppgaverTilBehandling")
+data class ApiOppgaverTilBehandling(
     val totaltAntallOppgaver: Int,
-    val oppgaver: List<OppgaveTilBehandling>,
+    val oppgaver: List<ApiOppgaveTilBehandling>,
 )
 
-data class AntallOppgaver(
+@GraphQLName("AntallOppgaver")
+data class ApiAntallOppgaver(
     val antallMineSaker: Int,
     val antallMineSakerPaVent: Int,
 )
 
-data class PaVentInfo(
+@GraphQLName("PaVentInfo")
+data class ApiPaVentInfo(
     val arsaker: List<String>,
     val tekst: String?,
     val dialogRef: Int,
@@ -109,59 +121,66 @@ data class PaVentInfo(
     val kommentarer: List<Kommentar>,
 )
 
-data class OppgaveTilBehandling(
+@GraphQLName("OppgaveTilBehandling")
+data class ApiOppgaveTilBehandling(
     val id: String,
     val opprettet: LocalDateTime,
     val opprinneligSoknadsdato: LocalDateTime,
     val tidsfrist: LocalDate?,
     val vedtaksperiodeId: UUID,
-    val navn: Personnavn,
+    val navn: ApiPersonnavn,
     val aktorId: String,
     val tildeling: Tildeling?,
-    val egenskaper: List<Oppgaveegenskap>,
+    val egenskaper: List<ApiOppgaveegenskap>,
     val periodetype: Periodetype,
-    val oppgavetype: Oppgavetype,
-    val mottaker: Mottaker,
-    val antallArbeidsforhold: AntallArbeidsforhold,
-    val paVentInfo: PaVentInfo?,
+    val oppgavetype: ApiOppgavetype,
+    val mottaker: ApiMottaker,
+    val antallArbeidsforhold: ApiAntallArbeidsforhold,
+    val paVentInfo: ApiPaVentInfo?,
 )
 
-data class Oppgaveegenskap(
-    val egenskap: Egenskap,
-    val kategori: Kategori,
+@GraphQLName("Oppgaveegenskap")
+data class ApiOppgaveegenskap(
+    val egenskap: ApiEgenskap,
+    val kategori: ApiKategori,
 )
 
-data class OppgaveForPeriodevisning(
+@GraphQLName("OppgaveForPeriodevisning")
+data class ApiOppgaveForPeriodevisning(
     val id: String,
 )
 
-data class Totrinnsvurdering(
+@GraphQLName("Totrinnsvurdering")
+data class ApiTotrinnsvurdering(
     val erRetur: Boolean,
     val saksbehandler: UUID?,
     val beslutter: UUID?,
     val erBeslutteroppgave: Boolean,
 )
 
-enum class Mottaker {
+@GraphQLName("Mottaker")
+enum class ApiMottaker {
     SYKMELDT,
     ARBEIDSGIVER,
     BEGGE,
     INGEN,
 }
 
-data class Personnavn(
+@GraphQLName("Personnavn")
+data class ApiPersonnavn(
     val fornavn: String,
     val etternavn: String,
     val mellomnavn: String?,
 )
 
-data class BehandletOppgave(
+@GraphQLName("BehandletOppgave")
+data class ApiBehandletOppgave(
     val id: String,
     val aktorId: String,
-    val oppgavetype: Oppgavetype,
+    val oppgavetype: ApiOppgavetype,
     val periodetype: Periodetype,
-    val antallArbeidsforhold: AntallArbeidsforhold,
+    val antallArbeidsforhold: ApiAntallArbeidsforhold,
     val ferdigstiltTidspunkt: LocalDateTime,
     val ferdigstiltAv: String?,
-    val personnavn: Personnavn,
+    val personnavn: ApiPersonnavn,
 )

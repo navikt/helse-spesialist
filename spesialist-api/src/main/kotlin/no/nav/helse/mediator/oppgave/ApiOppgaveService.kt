@@ -15,13 +15,13 @@ import no.nav.helse.modell.Modellfeil
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
-import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
-import no.nav.helse.spesialist.api.graphql.schema.BehandledeOppgaver
-import no.nav.helse.spesialist.api.graphql.schema.Filtrering
-import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
-import no.nav.helse.spesialist.api.graphql.schema.OppgaverTilBehandling
-import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
-import no.nav.helse.spesialist.api.graphql.schema.Sorteringsnokkel
+import no.nav.helse.spesialist.api.graphql.schema.ApiAntallOppgaver
+import no.nav.helse.spesialist.api.graphql.schema.ApiBehandledeOppgaver
+import no.nav.helse.spesialist.api.graphql.schema.ApiFiltrering
+import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
+import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaverTilBehandling
+import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavesortering
+import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsnokkel
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import java.util.UUID
 
@@ -34,9 +34,9 @@ class ApiOppgaveService(
         saksbehandlerFraApi: SaksbehandlerFraApi,
         offset: Int,
         limit: Int,
-        sortering: List<Oppgavesortering>,
-        filtrering: Filtrering,
-    ): OppgaverTilBehandling {
+        sortering: List<ApiOppgavesortering>,
+        filtrering: ApiFiltrering,
+    ): ApiOppgaverTilBehandling {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         val egenskaperSaksbehandlerIkkeHarTilgangTil =
             Egenskap
@@ -76,13 +76,13 @@ class ApiOppgaveService(
                     tildelt = filtrering.tildelt,
                     grupperteFiltrerteEgenskaper = grupperteFiltrerteEgenskaper,
                 )
-        return OppgaverTilBehandling(
+        return ApiOppgaverTilBehandling(
             oppgaver = oppgaver.tilOppgaverTilBehandling(),
             totaltAntallOppgaver = if (oppgaver.isEmpty()) 0 else oppgaver.first().filtrertAntall,
         )
     }
 
-    fun antallOppgaver(saksbehandlerFraApi: SaksbehandlerFraApi): AntallOppgaver {
+    fun antallOppgaver(saksbehandlerFraApi: SaksbehandlerFraApi): ApiAntallOppgaver {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         val antallOppgaver = oppgaveDao.finnAntallOppgaver(saksbehandlerOid = saksbehandler.oid())
         return antallOppgaver.tilApiversjon()
@@ -92,7 +92,7 @@ class ApiOppgaveService(
         saksbehandlerFraApi: SaksbehandlerFraApi,
         offset: Int,
         limit: Int,
-    ): BehandledeOppgaver {
+    ): ApiBehandledeOppgaver {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         val behandledeOppgaver =
             oppgaveDao.finnBehandledeOppgaver(
@@ -100,7 +100,7 @@ class ApiOppgaveService(
                 offset = offset,
                 limit = limit,
             )
-        return BehandledeOppgaver(
+        return ApiBehandledeOppgaver(
             oppgaver = behandledeOppgaver.tilBehandledeOppgaver(),
             totaltAntallOppgaver = if (behandledeOppgaver.isEmpty()) 0 else behandledeOppgaver.first().filtrertAntall,
         )
@@ -109,7 +109,7 @@ class ApiOppgaveService(
     fun hentEgenskaper(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
-    ): List<Oppgaveegenskap> {
+    ): List<ApiOppgaveegenskap> {
         val egenskaper =
             oppgaveDao.finnEgenskaper(
                 vedtaksperiodeId = vedtaksperiodeId,
@@ -128,28 +128,28 @@ class ApiOppgaveService(
             tilgangskontroll = TilgangskontrollørForApi(grupper, tilgangsgrupper),
         )
 
-    private fun List<Oppgavesortering>.tilOppgavesorteringForDatabase() =
+    private fun List<ApiOppgavesortering>.tilOppgavesorteringForDatabase() =
         map {
             when (it.nokkel) {
-                Sorteringsnokkel.TILDELT_TIL ->
+                ApiSorteringsnokkel.TILDELT_TIL ->
                     OppgavesorteringForDatabase(
                         SorteringsnøkkelForDatabase.TILDELT_TIL,
                         it.stigende,
                     )
 
-                Sorteringsnokkel.OPPRETTET ->
+                ApiSorteringsnokkel.OPPRETTET ->
                     OppgavesorteringForDatabase(
                         SorteringsnøkkelForDatabase.OPPRETTET,
                         it.stigende,
                     )
 
-                Sorteringsnokkel.SOKNAD_MOTTATT ->
+                ApiSorteringsnokkel.SOKNAD_MOTTATT ->
                     OppgavesorteringForDatabase(
                         SorteringsnøkkelForDatabase.SØKNAD_MOTTATT,
                         it.stigende,
                     )
 
-                Sorteringsnokkel.TIDSFRIST ->
+                ApiSorteringsnokkel.TIDSFRIST ->
                     OppgavesorteringForDatabase(
                         SorteringsnøkkelForDatabase.TIDSFRIST,
                         it.stigende,

@@ -6,33 +6,33 @@ import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.EgenskapDto
-import no.nav.helse.spesialist.api.graphql.schema.AntallArbeidsforhold
-import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
-import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
-import no.nav.helse.spesialist.api.graphql.schema.Kategori
+import no.nav.helse.spesialist.api.graphql.schema.ApiAntallArbeidsforhold
+import no.nav.helse.spesialist.api.graphql.schema.ApiAntallOppgaver
+import no.nav.helse.spesialist.api.graphql.schema.ApiBehandletOppgave
+import no.nav.helse.spesialist.api.graphql.schema.ApiKategori
+import no.nav.helse.spesialist.api.graphql.schema.ApiMottaker
+import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveTilBehandling
+import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
+import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
+import no.nav.helse.spesialist.api.graphql.schema.ApiPaVentInfo
+import no.nav.helse.spesialist.api.graphql.schema.ApiPersonnavn
 import no.nav.helse.spesialist.api.graphql.schema.Kommentar
-import no.nav.helse.spesialist.api.graphql.schema.Mottaker
-import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
-import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
-import no.nav.helse.spesialist.api.graphql.schema.Oppgavetype
-import no.nav.helse.spesialist.api.graphql.schema.PaVentInfo
 import no.nav.helse.spesialist.api.graphql.schema.Periodetype
-import no.nav.helse.spesialist.api.graphql.schema.Personnavn
 import no.nav.helse.spesialist.api.graphql.schema.Tildeling
-import no.nav.helse.spesialist.api.graphql.schema.Egenskap as EgenskapForApi
+import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap as EgenskapForApi
 
 internal object OppgaveMapper {
     internal fun List<OppgaveFraDatabaseForVisning>.tilOppgaverTilBehandling() =
         map { oppgave ->
             val egenskaper = oppgave.egenskaper.tilModellversjoner()
-            OppgaveTilBehandling(
+            ApiOppgaveTilBehandling(
                 id = oppgave.id.toString(),
                 opprettet = oppgave.opprettet,
                 opprinneligSoknadsdato = oppgave.opprinneligSøknadsdato,
                 tidsfrist = oppgave.tidsfrist,
                 paVentInfo =
                     oppgave.paVentInfo?.let { påVentInfo ->
-                        PaVentInfo(
+                        ApiPaVentInfo(
                             arsaker = påVentInfo.årsaker,
                             tekst = påVentInfo.tekst,
                             dialogRef = påVentInfo.dialogRef.toInt(),
@@ -53,7 +53,7 @@ internal object OppgaveMapper {
                     },
                 vedtaksperiodeId = oppgave.vedtaksperiodeId,
                 navn =
-                    Personnavn(
+                    ApiPersonnavn(
                         fornavn = oppgave.navn.fornavn,
                         etternavn = oppgave.navn.etternavn,
                         mellomnavn = oppgave.navn.mellomnavn,
@@ -69,7 +69,7 @@ internal object OppgaveMapper {
                     },
                 egenskaper =
                     egenskaper.map { egenskap ->
-                        Oppgaveegenskap(egenskap.tilApiversjon(), egenskap.kategori.tilApiversjon())
+                        ApiOppgaveegenskap(egenskap.tilApiversjon(), egenskap.kategori.tilApiversjon())
                     },
                 periodetype = egenskaper.periodetype(),
                 oppgavetype = egenskaper.oppgavetype(),
@@ -80,11 +80,11 @@ internal object OppgaveMapper {
 
     internal fun Set<EgenskapForDatabase>.tilEgenskaperForVisning() =
         tilModellversjoner().map { egenskap ->
-            Oppgaveegenskap(egenskap.tilApiversjon(), egenskap.kategori.tilApiversjon())
+            ApiOppgaveegenskap(egenskap.tilApiversjon(), egenskap.kategori.tilApiversjon())
         }
 
-    internal fun AntallOppgaverFraDatabase.tilApiversjon(): AntallOppgaver =
-        AntallOppgaver(
+    internal fun AntallOppgaverFraDatabase.tilApiversjon(): ApiAntallOppgaver =
+        ApiAntallOppgaver(
             antallMineSaker = this.antallMineSaker,
             antallMineSakerPaVent = this.antallMineSakerPåVent,
         )
@@ -92,7 +92,7 @@ internal object OppgaveMapper {
     internal fun List<BehandletOppgaveFraDatabaseForVisning>.tilBehandledeOppgaver() =
         map {
             val egenskaper = it.egenskaper.tilModellversjoner()
-            BehandletOppgave(
+            ApiBehandletOppgave(
                 id = it.id.toString(),
                 aktorId = it.aktørId,
                 oppgavetype = egenskaper.oppgavetype(),
@@ -101,7 +101,7 @@ internal object OppgaveMapper {
                 ferdigstiltTidspunkt = it.ferdigstiltTidspunkt,
                 ferdigstiltAv = it.ferdigstiltAv,
                 personnavn =
-                    Personnavn(
+                    ApiPersonnavn(
                         fornavn = it.navn.fornavn,
                         etternavn = it.navn.etternavn,
                         mellomnavn = it.navn.mellomnavn,
@@ -122,45 +122,45 @@ internal object OppgaveMapper {
         }
     }
 
-    private fun List<Egenskap>.oppgavetype(): Oppgavetype {
+    private fun List<Egenskap>.oppgavetype(): ApiOppgavetype {
         val egenskap = single { egenskap -> egenskap.kategori == Egenskap.Kategori.Oppgavetype }
         return when (egenskap) {
-            Egenskap.SØKNAD -> Oppgavetype.SOKNAD
-            Egenskap.REVURDERING -> Oppgavetype.REVURDERING
+            Egenskap.SØKNAD -> ApiOppgavetype.SOKNAD
+            Egenskap.REVURDERING -> ApiOppgavetype.REVURDERING
             else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
         }
     }
 
-    private fun List<Egenskap>.mottaker(): Mottaker {
+    private fun List<Egenskap>.mottaker(): ApiMottaker {
         val egenskap = single { egenskap -> egenskap.kategori == Egenskap.Kategori.Mottaker }
         return when (egenskap) {
-            Egenskap.UTBETALING_TIL_SYKMELDT -> Mottaker.SYKMELDT
-            Egenskap.UTBETALING_TIL_ARBEIDSGIVER -> Mottaker.ARBEIDSGIVER
-            Egenskap.DELVIS_REFUSJON -> Mottaker.BEGGE
-            Egenskap.INGEN_UTBETALING -> Mottaker.INGEN
+            Egenskap.UTBETALING_TIL_SYKMELDT -> ApiMottaker.SYKMELDT
+            Egenskap.UTBETALING_TIL_ARBEIDSGIVER -> ApiMottaker.ARBEIDSGIVER
+            Egenskap.DELVIS_REFUSJON -> ApiMottaker.BEGGE
+            Egenskap.INGEN_UTBETALING -> ApiMottaker.INGEN
             else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
         }
     }
 
-    private fun List<Egenskap>.antallArbeidsforhold(): AntallArbeidsforhold {
+    private fun List<Egenskap>.antallArbeidsforhold(): ApiAntallArbeidsforhold {
         val egenskap = single { egenskap -> egenskap.kategori == Egenskap.Kategori.Inntektskilde }
         return when (egenskap) {
-            Egenskap.EN_ARBEIDSGIVER -> AntallArbeidsforhold.ET_ARBEIDSFORHOLD
-            Egenskap.FLERE_ARBEIDSGIVERE -> AntallArbeidsforhold.FLERE_ARBEIDSFORHOLD
+            Egenskap.EN_ARBEIDSGIVER -> ApiAntallArbeidsforhold.ET_ARBEIDSFORHOLD
+            Egenskap.FLERE_ARBEIDSGIVERE -> ApiAntallArbeidsforhold.FLERE_ARBEIDSFORHOLD
             else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
         }
     }
 
-    internal fun List<Oppgaveegenskap>.tilDatabaseversjon(): List<EgenskapForDatabase> = this.map { it.tilDatabaseversjon() }
+    internal fun List<ApiOppgaveegenskap>.tilDatabaseversjon(): List<EgenskapForDatabase> = this.map { it.tilDatabaseversjon() }
 
-    internal fun Kategori.tilDatabaseversjon(): Egenskap.Kategori =
+    internal fun ApiKategori.tilDatabaseversjon(): Egenskap.Kategori =
         when (this) {
-            Kategori.Mottaker -> Egenskap.Kategori.Mottaker
-            Kategori.Inntektskilde -> Egenskap.Kategori.Inntektskilde
-            Kategori.Oppgavetype -> Egenskap.Kategori.Oppgavetype
-            Kategori.Ukategorisert -> Egenskap.Kategori.Ukategorisert
-            Kategori.Periodetype -> Egenskap.Kategori.Periodetype
-            Kategori.Status -> Egenskap.Kategori.Status
+            ApiKategori.Mottaker -> Egenskap.Kategori.Mottaker
+            ApiKategori.Inntektskilde -> Egenskap.Kategori.Inntektskilde
+            ApiKategori.Oppgavetype -> Egenskap.Kategori.Oppgavetype
+            ApiKategori.Ukategorisert -> Egenskap.Kategori.Ukategorisert
+            ApiKategori.Periodetype -> Egenskap.Kategori.Periodetype
+            ApiKategori.Status -> Egenskap.Kategori.Status
         }
 
     private fun Egenskap.tilApiversjon(): EgenskapForApi =
@@ -197,14 +197,14 @@ internal object OppgaveMapper {
             Egenskap.TILKOMMEN -> EgenskapForApi.TILKOMMEN
         }
 
-    private fun Egenskap.Kategori.tilApiversjon(): Kategori =
+    private fun Egenskap.Kategori.tilApiversjon(): ApiKategori =
         when (this) {
-            Egenskap.Kategori.Mottaker -> Kategori.Mottaker
-            Egenskap.Kategori.Inntektskilde -> Kategori.Inntektskilde
-            Egenskap.Kategori.Oppgavetype -> Kategori.Oppgavetype
-            Egenskap.Kategori.Ukategorisert -> Kategori.Ukategorisert
-            Egenskap.Kategori.Periodetype -> Kategori.Periodetype
-            Egenskap.Kategori.Status -> Kategori.Status
+            Egenskap.Kategori.Mottaker -> ApiKategori.Mottaker
+            Egenskap.Kategori.Inntektskilde -> ApiKategori.Inntektskilde
+            Egenskap.Kategori.Oppgavetype -> ApiKategori.Oppgavetype
+            Egenskap.Kategori.Ukategorisert -> ApiKategori.Ukategorisert
+            Egenskap.Kategori.Periodetype -> ApiKategori.Periodetype
+            Egenskap.Kategori.Status -> ApiKategori.Status
         }
 
     internal fun EgenskapForDatabase.tilModellversjon(): Egenskap =
@@ -313,7 +313,7 @@ internal object OppgaveMapper {
             EgenskapForDatabase.TILKOMMEN -> EgenskapDto.TILKOMMEN
         }
 
-    private fun Oppgaveegenskap.tilDatabaseversjon() =
+    private fun ApiOppgaveegenskap.tilDatabaseversjon() =
         when (this.egenskap) {
             EgenskapForApi.RISK_QA -> EgenskapForDatabase.RISK_QA
             EgenskapForApi.FORTROLIG_ADRESSE -> EgenskapForDatabase.FORTROLIG_ADRESSE

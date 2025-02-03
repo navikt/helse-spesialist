@@ -20,14 +20,14 @@ import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilEgenskaperForVisning
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilOppgaverTilBehandling
-import no.nav.helse.spesialist.api.graphql.schema.AntallArbeidsforhold
-import no.nav.helse.spesialist.api.graphql.schema.Egenskap
-import no.nav.helse.spesialist.api.graphql.schema.Kategori
-import no.nav.helse.spesialist.api.graphql.schema.Mottaker
-import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
-import no.nav.helse.spesialist.api.graphql.schema.Oppgavetype
+import no.nav.helse.spesialist.api.graphql.schema.ApiAntallArbeidsforhold
+import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap
+import no.nav.helse.spesialist.api.graphql.schema.ApiKategori
+import no.nav.helse.spesialist.api.graphql.schema.ApiMottaker
+import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
+import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
+import no.nav.helse.spesialist.api.graphql.schema.ApiPersonnavn
 import no.nav.helse.spesialist.api.graphql.schema.Periodetype
-import no.nav.helse.spesialist.api.graphql.schema.Personnavn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -91,20 +91,20 @@ internal class OppgaveMapperTest {
         assertEquals(oppgaveId.toString(), oppgaveTilBehandling.id)
         assertEquals(aktørId, oppgaveTilBehandling.aktorId)
         assertEquals(vedtaksperiodeId, oppgaveTilBehandling.vedtaksperiodeId)
-        assertEquals(Personnavn("fornavn", "etternavn", "mellomnavn"), oppgaveTilBehandling.navn)
+        assertEquals(ApiPersonnavn("fornavn", "etternavn", "mellomnavn"), oppgaveTilBehandling.navn)
         assertEquals(opprettet, oppgaveTilBehandling.opprettet)
         assertEquals(opprinneligSøknadsdato, oppgaveTilBehandling.opprinneligSoknadsdato)
         assertEquals(tidsfrist, oppgaveTilBehandling.tidsfrist)
-        assertEquals(AntallArbeidsforhold.ET_ARBEIDSFORHOLD, oppgaveTilBehandling.antallArbeidsforhold)
-        assertEquals(Mottaker.BEGGE, oppgaveTilBehandling.mottaker)
-        assertEquals(Oppgavetype.SOKNAD, oppgaveTilBehandling.oppgavetype)
+        assertEquals(ApiAntallArbeidsforhold.ET_ARBEIDSFORHOLD, oppgaveTilBehandling.antallArbeidsforhold)
+        assertEquals(ApiMottaker.BEGGE, oppgaveTilBehandling.mottaker)
+        assertEquals(ApiOppgavetype.SOKNAD, oppgaveTilBehandling.oppgavetype)
         assertEquals(Periodetype.FORSTEGANGSBEHANDLING, oppgaveTilBehandling.periodetype)
         assertEquals(
             setOf(
-                Oppgaveegenskap(Egenskap.SOKNAD, Kategori.Oppgavetype),
-                Oppgaveegenskap(Egenskap.FORSTEGANGSBEHANDLING, Kategori.Periodetype),
-                Oppgaveegenskap(Egenskap.EN_ARBEIDSGIVER, Kategori.Inntektskilde),
-                Oppgaveegenskap(Egenskap.DELVIS_REFUSJON, Kategori.Mottaker),
+                ApiOppgaveegenskap(ApiEgenskap.SOKNAD, ApiKategori.Oppgavetype),
+                ApiOppgaveegenskap(ApiEgenskap.FORSTEGANGSBEHANDLING, ApiKategori.Periodetype),
+                ApiOppgaveegenskap(ApiEgenskap.EN_ARBEIDSGIVER, ApiKategori.Inntektskilde),
+                ApiOppgaveegenskap(ApiEgenskap.DELVIS_REFUSJON, ApiKategori.Mottaker),
             ),
             oppgaveTilBehandling.egenskaper.toSet(),
         )
@@ -206,8 +206,8 @@ internal class OppgaveMapperTest {
     fun `map til oppgavetype`(egenskapSomMapperTilOppgavetype: EgenskapForDatabase) {
         val map =
             mapOf(
-                SØKNAD to Oppgavetype.SOKNAD,
-                REVURDERING to Oppgavetype.REVURDERING,
+                SØKNAD to ApiOppgavetype.SOKNAD,
+                REVURDERING to ApiOppgavetype.REVURDERING,
             )
         val (fornavn, mellomnavn, etternavn) = navn
         val oppgaveFraDatabaseForVisning =
@@ -306,8 +306,8 @@ internal class OppgaveMapperTest {
     fun `map til antallArbeidsforhold`(egenskapSomMapperTilAntallArbeidsforhold: EgenskapForDatabase) {
         val map =
             mapOf(
-                EN_ARBEIDSGIVER to AntallArbeidsforhold.ET_ARBEIDSFORHOLD,
-                FLERE_ARBEIDSGIVERE to AntallArbeidsforhold.FLERE_ARBEIDSFORHOLD,
+                EN_ARBEIDSGIVER to ApiAntallArbeidsforhold.ET_ARBEIDSFORHOLD,
+                FLERE_ARBEIDSGIVERE to ApiAntallArbeidsforhold.FLERE_ARBEIDSFORHOLD,
             )
         val (fornavn, mellomnavn, etternavn) = navn
         val oppgaveFraDatabaseForVisning =
@@ -399,10 +399,10 @@ internal class OppgaveMapperTest {
 
         assertEquals(
             setOf(
-                Oppgaveegenskap(Egenskap.SOKNAD, Kategori.Oppgavetype),
-                Oppgaveegenskap(Egenskap.FORSTEGANGSBEHANDLING, Kategori.Periodetype),
-                Oppgaveegenskap(Egenskap.EN_ARBEIDSGIVER, Kategori.Inntektskilde),
-                Oppgaveegenskap(Egenskap.DELVIS_REFUSJON, Kategori.Mottaker),
+                ApiOppgaveegenskap(ApiEgenskap.SOKNAD, ApiKategori.Oppgavetype),
+                ApiOppgaveegenskap(ApiEgenskap.FORSTEGANGSBEHANDLING, ApiKategori.Periodetype),
+                ApiOppgaveegenskap(ApiEgenskap.EN_ARBEIDSGIVER, ApiKategori.Inntektskilde),
+                ApiOppgaveegenskap(ApiEgenskap.DELVIS_REFUSJON, ApiKategori.Mottaker),
             ),
             oppgaveEgenskaper.toSet(),
         )

@@ -26,13 +26,13 @@ import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
-import no.nav.helse.spesialist.api.graphql.schema.AntallArbeidsforhold
-import no.nav.helse.spesialist.api.graphql.schema.Egenskap.PA_VENT
-import no.nav.helse.spesialist.api.graphql.schema.Filtrering
-import no.nav.helse.spesialist.api.graphql.schema.Kategori
-import no.nav.helse.spesialist.api.graphql.schema.Mottaker
-import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
-import no.nav.helse.spesialist.api.graphql.schema.Oppgavetype
+import no.nav.helse.spesialist.api.graphql.schema.ApiAntallArbeidsforhold
+import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap.PA_VENT
+import no.nav.helse.spesialist.api.graphql.schema.ApiFiltrering
+import no.nav.helse.spesialist.api.graphql.schema.ApiKategori
+import no.nav.helse.spesialist.api.graphql.schema.ApiMottaker
+import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
+import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.Periodetype
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.test.lagEpostadresseFraFulltNavn
@@ -128,7 +128,7 @@ internal class ApiOppgaveServiceTest {
                     oppgaveFraDatabaseForVisning(filtrertAntall = 2),
                     oppgaveFraDatabaseForVisning(filtrertAntall = 2),
                 )
-        val oppgaver = apiOppgaveService.oppgaver(saksbehandlerFraApi(), 0, MAX_VALUE, emptyList(), Filtrering())
+        val oppgaver = apiOppgaveService.oppgaver(saksbehandlerFraApi(), 0, MAX_VALUE, emptyList(), ApiFiltrering())
         assertEquals(2, oppgaver.oppgaver.size)
     }
 
@@ -156,7 +156,7 @@ internal class ApiOppgaveServiceTest {
 
     @Test
     fun `Hent kun oppgaver til visning som saksbehandler har tilgang til`() {
-        apiOppgaveService.oppgaver(saksbehandlerFraApi(), 0, MAX_VALUE, emptyList(), Filtrering())
+        apiOppgaveService.oppgaver(saksbehandlerFraApi(), 0, MAX_VALUE, emptyList(), ApiFiltrering())
         verify(exactly = 1) {
             oppgaveDao.finnOppgaverForVisning(
                 ekskluderEgenskaper = Egenskap.alleTilgangsstyrteEgenskaper.map { it.name },
@@ -174,7 +174,7 @@ internal class ApiOppgaveServiceTest {
             offset = 0,
             limit = MAX_VALUE,
             sortering = emptyList(),
-            filtrering = Filtrering(ingenUkategoriserteEgenskaper = true)
+            filtrering = ApiFiltrering(ingenUkategoriserteEgenskaper = true)
         )
         verify(exactly = 1) {
             oppgaveDao.finnOppgaverForVisning(
@@ -194,12 +194,12 @@ internal class ApiOppgaveServiceTest {
             0,
             MAX_VALUE,
             emptyList(),
-            Filtrering(
+            ApiFiltrering(
                 ekskluderteEgenskaper =
                     listOf(
-                        Oppgaveegenskap(
+                        ApiOppgaveegenskap(
                             egenskap = PA_VENT,
-                            kategori = Kategori.Status,
+                            kategori = ApiKategori.Status,
                         ),
                     ),
             ),
@@ -238,9 +238,9 @@ internal class ApiOppgaveServiceTest {
         assertEquals("etternavn", oppgave.personnavn.etternavn)
         assertEquals("Kurt", oppgave.ferdigstiltAv)
         assertEquals(ferdigstiltTidspunkt, oppgave.ferdigstiltTidspunkt)
-        assertEquals(Oppgavetype.SOKNAD, oppgave.oppgavetype)
+        assertEquals(ApiOppgavetype.SOKNAD, oppgave.oppgavetype)
         assertEquals(Periodetype.FORSTEGANGSBEHANDLING, oppgave.periodetype)
-        assertEquals(AntallArbeidsforhold.ET_ARBEIDSFORHOLD, oppgave.antallArbeidsforhold)
+        assertEquals(ApiAntallArbeidsforhold.ET_ARBEIDSFORHOLD, oppgave.antallArbeidsforhold)
     }
 
     @Test
@@ -271,7 +271,7 @@ internal class ApiOppgaveServiceTest {
                 idForGruppe(it)
             )
         })
-        val oppgaver = apiOppgaveService.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), Filtrering())
+        val oppgaver = apiOppgaveService.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), ApiFiltrering())
         assertEquals(1, oppgaver.oppgaver.size)
         val oppgave = oppgaver.oppgaver.single()
         assertEquals("1", oppgave.id)
@@ -325,7 +325,7 @@ internal class ApiOppgaveServiceTest {
                 idForGruppe(it)
             )
         })
-        val oppgaver = apiOppgaveService.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), Filtrering())
+        val oppgaver = apiOppgaveService.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), ApiFiltrering())
         val oppgave = oppgaver.oppgaver.single()
         assertEquals(egenskap.oppgavetype(), oppgave.oppgavetype)
     }
@@ -370,7 +370,7 @@ internal class ApiOppgaveServiceTest {
                 idForGruppe(it)
             )
         })
-        val oppgaver = apiOppgaveService.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), Filtrering())
+        val oppgaver = apiOppgaveService.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), ApiFiltrering())
         val oppgave = oppgaver.oppgaver.single()
         assertEquals(egenskap.periodetype(), oppgave.periodetype)
     }
@@ -415,7 +415,7 @@ internal class ApiOppgaveServiceTest {
                 idForGruppe(it)
             )
         })
-        val oppgaver = apiOppgaveService.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), Filtrering())
+        val oppgaver = apiOppgaveService.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), ApiFiltrering())
         val oppgave = oppgaver.oppgaver.single()
         assertEquals(egenskap.mottaker(), oppgave.mottaker)
     }
@@ -457,7 +457,7 @@ internal class ApiOppgaveServiceTest {
                 idForGruppe(it)
             )
         })
-        val oppgaver = apiOppgaveService.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), Filtrering())
+        val oppgaver = apiOppgaveService.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), ApiFiltrering())
         val oppgave = oppgaver.oppgaver.single()
         assertEquals(egenskap.antallArbeidsforhold(), oppgave.antallArbeidsforhold)
     }
@@ -516,27 +516,27 @@ internal class ApiOppgaveServiceTest {
             else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
         }
 
-    private fun EgenskapForDatabase.oppgavetype(): Oppgavetype =
+    private fun EgenskapForDatabase.oppgavetype(): ApiOppgavetype =
         when (this) {
-            EgenskapForDatabase.SØKNAD -> Oppgavetype.SOKNAD
-            EgenskapForDatabase.REVURDERING -> Oppgavetype.REVURDERING
-            EgenskapForDatabase.STIKKPRØVE -> Oppgavetype.STIKKPROVE
+            EgenskapForDatabase.SØKNAD -> ApiOppgavetype.SOKNAD
+            EgenskapForDatabase.REVURDERING -> ApiOppgavetype.REVURDERING
+            EgenskapForDatabase.STIKKPRØVE -> ApiOppgavetype.STIKKPROVE
             else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
         }
 
-    private fun EgenskapForDatabase.mottaker(): Mottaker =
+    private fun EgenskapForDatabase.mottaker(): ApiMottaker =
         when (this) {
-            EgenskapForDatabase.UTBETALING_TIL_SYKMELDT -> Mottaker.SYKMELDT
-            EgenskapForDatabase.UTBETALING_TIL_ARBEIDSGIVER -> Mottaker.ARBEIDSGIVER
-            EgenskapForDatabase.DELVIS_REFUSJON -> Mottaker.BEGGE
-            EgenskapForDatabase.INGEN_UTBETALING -> Mottaker.INGEN
+            EgenskapForDatabase.UTBETALING_TIL_SYKMELDT -> ApiMottaker.SYKMELDT
+            EgenskapForDatabase.UTBETALING_TIL_ARBEIDSGIVER -> ApiMottaker.ARBEIDSGIVER
+            EgenskapForDatabase.DELVIS_REFUSJON -> ApiMottaker.BEGGE
+            EgenskapForDatabase.INGEN_UTBETALING -> ApiMottaker.INGEN
             else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
         }
 
-    private fun EgenskapForDatabase.antallArbeidsforhold(): AntallArbeidsforhold =
+    private fun EgenskapForDatabase.antallArbeidsforhold(): ApiAntallArbeidsforhold =
         when (this) {
-            EgenskapForDatabase.EN_ARBEIDSGIVER -> AntallArbeidsforhold.ET_ARBEIDSFORHOLD
-            EgenskapForDatabase.FLERE_ARBEIDSGIVERE -> AntallArbeidsforhold.FLERE_ARBEIDSFORHOLD
+            EgenskapForDatabase.EN_ARBEIDSGIVER -> ApiAntallArbeidsforhold.ET_ARBEIDSFORHOLD
+            EgenskapForDatabase.FLERE_ARBEIDSGIVERE -> ApiAntallArbeidsforhold.FLERE_ARBEIDSFORHOLD
             else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
         }
 }

@@ -510,7 +510,7 @@ data class BeregnetPeriode(
 
     fun handlinger() = byggHandlinger()
 
-    fun egenskaper(): List<Oppgaveegenskap> = apiOppgaveService.hentEgenskaper(periode.vedtaksperiodeId, periode.utbetaling.id)
+    fun egenskaper(): List<ApiOppgaveegenskap> = apiOppgaveService.hentEgenskaper(periode.vedtaksperiodeId, periode.utbetaling.id)
 
     private fun byggHandlinger(): List<Handling> =
         if (periodetilstand != Periodetilstand.TilGodkjenning) {
@@ -731,11 +731,11 @@ data class BeregnetPeriode(
         oppgaveApiDao.finnPeriodeoppgave(periode.vedtaksperiodeId)
     }
 
-    val oppgave = oppgaveDto?.let { oppgaveDto -> OppgaveForPeriodevisning(id = oppgaveDto.id) }
+    val oppgave = oppgaveDto?.let { oppgaveDto -> ApiOppgaveForPeriodevisning(id = oppgaveDto.id) }
 
-    fun totrinnsvurdering(): Totrinnsvurdering? =
+    fun totrinnsvurdering(): ApiTotrinnsvurdering? =
         totrinnsvurderingApiDao.hentAktiv(vedtaksperiodeId())?.let {
-            Totrinnsvurdering(
+            ApiTotrinnsvurdering(
                 erRetur = it.erRetur,
                 saksbehandler = it.saksbehandler,
                 beslutter = it.beslutter,

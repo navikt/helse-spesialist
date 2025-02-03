@@ -7,11 +7,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
-import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
-import no.nav.helse.spesialist.api.graphql.schema.BehandledeOppgaver
-import no.nav.helse.spesialist.api.graphql.schema.Filtrering
-import no.nav.helse.spesialist.api.graphql.schema.OppgaverTilBehandling
-import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
+import no.nav.helse.spesialist.api.graphql.schema.ApiAntallOppgaver
+import no.nav.helse.spesialist.api.graphql.schema.ApiBehandledeOppgaver
+import no.nav.helse.spesialist.api.graphql.schema.ApiFiltrering
+import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaverTilBehandling
+import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavesortering
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -25,7 +25,7 @@ class OppgaverQuery(private val apiOppgaveService: ApiOppgaveService) : Query {
         offset: Int,
         limit: Int,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<BehandledeOppgaver> {
+    ): DataFetcherResult<ApiBehandledeOppgaver> {
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         val behandledeOppgaver =
             withContext(Dispatchers.IO) {
@@ -36,17 +36,17 @@ class OppgaverQuery(private val apiOppgaveService: ApiOppgaveService) : Query {
                 )
             }
 
-        return DataFetcherResult.newResult<BehandledeOppgaver>().data(behandledeOppgaver).build()
+        return DataFetcherResult.newResult<ApiBehandledeOppgaver>().data(behandledeOppgaver).build()
     }
 
     @Suppress("unused")
     suspend fun oppgaveFeed(
         offset: Int,
         limit: Int,
-        sortering: List<Oppgavesortering>,
-        filtrering: Filtrering,
+        sortering: List<ApiOppgavesortering>,
+        filtrering: ApiFiltrering,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<OppgaverTilBehandling> {
+    ): DataFetcherResult<ApiOppgaverTilBehandling> {
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         sikkerLogg.debug("Henter OppgaverTilBehandling for ${saksbehandler.navn}")
         val (oppgaver, tid) =
@@ -67,11 +67,11 @@ class OppgaverQuery(private val apiOppgaveService: ApiOppgaveService) : Query {
             sikkerLogg.info("Det tok over $grense ms å hente oppgaver med disse filtrene: $filtrering")
         }
 
-        return DataFetcherResult.newResult<OppgaverTilBehandling>().data(oppgaver).build()
+        return DataFetcherResult.newResult<ApiOppgaverTilBehandling>().data(oppgaver).build()
     }
 
     @Suppress("unused")
-    suspend fun antallOppgaver(env: DataFetchingEnvironment): DataFetcherResult<AntallOppgaver> {
+    suspend fun antallOppgaver(env: DataFetchingEnvironment): DataFetcherResult<ApiAntallOppgaver> {
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         sikkerLogg.info("Henter AntallOppgaver for ${saksbehandler.navn}")
         val (antallOppgaver, tid) =
@@ -84,6 +84,6 @@ class OppgaverQuery(private val apiOppgaveService: ApiOppgaveService) : Query {
             }
         sikkerLogg.debug("Query antallOppgaver er ferdig etter ${tid.inWholeMilliseconds} ms")
 
-        return DataFetcherResult.newResult<AntallOppgaver>().data(antallOppgaver).build()
+        return DataFetcherResult.newResult<ApiAntallOppgaver>().data(antallOppgaver).build()
     }
 }

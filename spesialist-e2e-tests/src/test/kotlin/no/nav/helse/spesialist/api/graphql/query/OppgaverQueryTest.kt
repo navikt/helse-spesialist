@@ -3,27 +3,27 @@ package no.nav.helse.spesialist.api.graphql.query
 import io.mockk.every
 import io.mockk.verify
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
-import no.nav.helse.spesialist.api.graphql.schema.AntallArbeidsforhold
-import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
-import no.nav.helse.spesialist.api.graphql.schema.BehandledeOppgaver
-import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
-import no.nav.helse.spesialist.api.graphql.schema.Egenskap
-import no.nav.helse.spesialist.api.graphql.schema.Filtrering
-import no.nav.helse.spesialist.api.graphql.schema.Kategori
-import no.nav.helse.spesialist.api.graphql.schema.Mottaker
-import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
-import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
-import no.nav.helse.spesialist.api.graphql.schema.OppgaverTilBehandling
-import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
+import no.nav.helse.spesialist.api.graphql.schema.ApiAntallArbeidsforhold
+import no.nav.helse.spesialist.api.graphql.schema.ApiAntallOppgaver
+import no.nav.helse.spesialist.api.graphql.schema.ApiBehandledeOppgaver
+import no.nav.helse.spesialist.api.graphql.schema.ApiBehandletOppgave
+import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap
+import no.nav.helse.spesialist.api.graphql.schema.ApiFiltrering
+import no.nav.helse.spesialist.api.graphql.schema.ApiKategori
+import no.nav.helse.spesialist.api.graphql.schema.ApiMottaker
+import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveTilBehandling
+import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
+import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaverTilBehandling
+import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavesortering
+import no.nav.helse.spesialist.api.graphql.schema.ApiPersonnavn
+import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsnokkel
 import no.nav.helse.spesialist.api.graphql.schema.Periodetype
-import no.nav.helse.spesialist.api.graphql.schema.Personnavn
-import no.nav.helse.spesialist.api.graphql.schema.Sorteringsnokkel
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.spesialist.api.graphql.schema.Oppgavetype as OppgavetypeForApi
+import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype as OppgavetypeForApi
 
 internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
 
@@ -31,7 +31,7 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
     fun `oppgaver query uten parametere returnerer oppgave`() {
         every {
             apiOppgaveService.oppgaver(any(), any(), any(), any(), any())
-        } returns OppgaverTilBehandling(oppgaver = listOf(oppgaveTilBehandling()), totaltAntallOppgaver = 1)
+        } returns ApiOppgaverTilBehandling(oppgaver = listOf(oppgaveTilBehandling()), totaltAntallOppgaver = 1)
 
         val body =
             runQuery(
@@ -59,7 +59,7 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
     fun `oppgaver query med parametere returnerer oppgave`() {
         every {
             apiOppgaveService.oppgaver(any(), any(), any(), any(), any())
-        } returns OppgaverTilBehandling(oppgaver = listOf(oppgaveTilBehandling()), totaltAntallOppgaver = 1)
+        } returns ApiOppgaverTilBehandling(oppgaver = listOf(oppgaveTilBehandling()), totaltAntallOppgaver = 1)
 
         val body =
             runQuery(
@@ -84,10 +84,10 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
                 saksbehandlerFraApi = any(),
                 offset = 14,
                 limit = 14,
-                sortering = listOf(Oppgavesortering(Sorteringsnokkel.TILDELT_TIL, true)),
+                sortering = listOf(ApiOppgavesortering(ApiSorteringsnokkel.TILDELT_TIL, true)),
                 filtrering =
-                    Filtrering(
-                        egenskaper = listOf(Oppgaveegenskap(Egenskap.DELVIS_REFUSJON, Kategori.Mottaker)),
+                    ApiFiltrering(
+                        egenskaper = listOf(ApiOppgaveegenskap(ApiEgenskap.DELVIS_REFUSJON, ApiKategori.Mottaker)),
                         egneSaker = true,
                     ),
             )
@@ -99,7 +99,7 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
     fun `oppgaver query sortert på tidsfrist`() {
         every {
             apiOppgaveService.oppgaver(any(), any(), any(), any(), any())
-        } returns OppgaverTilBehandling(oppgaver = listOf(oppgaveTilBehandling()), totaltAntallOppgaver = 1)
+        } returns ApiOppgaverTilBehandling(oppgaver = listOf(oppgaveTilBehandling()), totaltAntallOppgaver = 1)
 
         val body =
             runQuery(
@@ -124,10 +124,10 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
                 saksbehandlerFraApi = any(),
                 offset = 14,
                 limit = 14,
-                sortering = listOf(Oppgavesortering(Sorteringsnokkel.TIDSFRIST, true)),
+                sortering = listOf(ApiOppgavesortering(ApiSorteringsnokkel.TIDSFRIST, true)),
                 filtrering =
-                    Filtrering(
-                        egenskaper = listOf(Oppgaveegenskap(Egenskap.DELVIS_REFUSJON, Kategori.Mottaker)),
+                    ApiFiltrering(
+                        egenskaper = listOf(ApiOppgaveegenskap(ApiEgenskap.DELVIS_REFUSJON, ApiKategori.Mottaker)),
                         egneSaker = true,
                     ),
             )
@@ -139,7 +139,7 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
     fun `behandledeOppgaverFeed uten parametere returnerer oppgave`() {
         every {
             apiOppgaveService.behandledeOppgaver(any(), any(), any())
-        } returns BehandledeOppgaver(oppgaver = listOf(behandletOppgave()), totaltAntallOppgaver = 1)
+        } returns ApiBehandledeOppgaver(oppgaver = listOf(behandletOppgave()), totaltAntallOppgaver = 1)
 
         val body =
             runQuery(
@@ -160,7 +160,7 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
     fun `behandledeOppgaverFeed med parametere returnerer oppgave`() {
         every {
             apiOppgaveService.behandledeOppgaver(any(), any(), any())
-        } returns BehandledeOppgaver(oppgaver = listOf(behandletOppgave()), totaltAntallOppgaver = 1)
+        } returns ApiBehandledeOppgaver(oppgaver = listOf(behandletOppgave()), totaltAntallOppgaver = 1)
 
         val body =
             runQuery(
@@ -185,7 +185,7 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `antallOppgaver returnerer antall oppgaver`() {
-        every { apiOppgaveService.antallOppgaver(any()) } returns AntallOppgaver(antallMineSaker = 2, antallMineSakerPaVent = 1)
+        every { apiOppgaveService.antallOppgaver(any()) } returns ApiAntallOppgaver(antallMineSaker = 2, antallMineSakerPaVent = 1)
 
         val body =
             runQuery(
@@ -210,14 +210,14 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
     }
 
     private fun oppgaveTilBehandling() =
-        OppgaveTilBehandling(
+        ApiOppgaveTilBehandling(
             id = UUID.randomUUID().toString(),
             opprettet = LocalDateTime.now(),
             opprinneligSoknadsdato = LocalDateTime.now(),
             tidsfrist = LocalDate.now(),
             vedtaksperiodeId = UUID.randomUUID(),
             navn =
-                Personnavn(
+                ApiPersonnavn(
                     fornavn = "Aage",
                     etternavn = "Kurt",
                     mellomnavn = null,
@@ -227,22 +227,22 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
             egenskaper = emptyList(),
             periodetype = Periodetype.FORSTEGANGSBEHANDLING,
             oppgavetype = OppgavetypeForApi.SOKNAD,
-            mottaker = Mottaker.SYKMELDT,
-            antallArbeidsforhold = AntallArbeidsforhold.ET_ARBEIDSFORHOLD,
+            mottaker = ApiMottaker.SYKMELDT,
+            antallArbeidsforhold = ApiAntallArbeidsforhold.ET_ARBEIDSFORHOLD,
             paVentInfo = null,
         )
 
     private fun behandletOppgave() =
-        BehandletOppgave(
+        ApiBehandletOppgave(
             id = UUID.randomUUID().toString(),
             aktorId = "1017011111111",
             oppgavetype = OppgavetypeForApi.SOKNAD,
             periodetype = Periodetype.FORSTEGANGSBEHANDLING,
-            antallArbeidsforhold = AntallArbeidsforhold.ET_ARBEIDSFORHOLD,
+            antallArbeidsforhold = ApiAntallArbeidsforhold.ET_ARBEIDSFORHOLD,
             ferdigstiltTidspunkt = LocalDateTime.now(),
             ferdigstiltAv = "SAKSBEHANDLER",
             personnavn =
-                Personnavn(
+                ApiPersonnavn(
                     fornavn = "Aage",
                     etternavn = "Kurt",
                     mellomnavn = null,
