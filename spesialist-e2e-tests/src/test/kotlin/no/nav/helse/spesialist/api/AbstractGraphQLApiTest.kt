@@ -31,9 +31,27 @@ import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettBeregnetPeriod
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotGenerasjon
 import no.nav.helse.spesialist.api.graphql.RequestParser
-import no.nav.helse.spesialist.api.graphql.SchemaBuilder
+import no.nav.helse.spesialist.api.graphql.SpesialistSchema
+import no.nav.helse.spesialist.api.graphql.mutation.AnnulleringMutationHandler
+import no.nav.helse.spesialist.api.graphql.mutation.MinimumSykdomsgradMutationHandler
+import no.nav.helse.spesialist.api.graphql.mutation.NotatMutationHandler
+import no.nav.helse.spesialist.api.graphql.mutation.OpphevStansMutationHandler
+import no.nav.helse.spesialist.api.graphql.mutation.OpptegnelseMutationHandler
+import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
+import no.nav.helse.spesialist.api.graphql.mutation.PaVentMutationHandler
+import no.nav.helse.spesialist.api.graphql.mutation.PersonMutationHandler
+import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutationHandler
+import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutationHandler
+import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHandler
+import no.nav.helse.spesialist.api.graphql.mutation.VarselMutationHandler
+import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutationHandler
+import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandler
+import no.nav.helse.spesialist.api.graphql.query.DokumentQueryHandler
+import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
+import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQueryHandler
+import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.graphql.queryHandler
-import no.nav.helse.spesialist.api.graphql.schemaGeneratorHooks
+import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
@@ -76,33 +94,75 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     )
 
     private fun ApplicationTestBuilder.graphQL() {
-        val schemaBuilder = SchemaBuilder(
-            personApiDao = personApiDao,
-            egenAnsattApiDao = egenAnsattApiDao,
-            tildelingApiDao = tildelingApiDao,
-            arbeidsgiverApiDao = arbeidsgiverApiDao,
-            overstyringApiDao = overstyringApiDao,
-            risikovurderingApiDao = risikovurderingApiDao,
-            varselRepository = apiVarselRepository,
-            oppgaveApiDao = oppgaveApiDao,
-            periodehistorikkApiDao = periodehistorikkApiDao,
-            påVentApiDao = påVentApiDao,
-            snapshotService = snapshotService,
-            notatDao = notatDao,
-            totrinnsvurderingApiDao = totrinnsvurderingApiDao,
-            vergemålApiDao = vergemålApiDao,
-            reservasjonClient = reservasjonClient,
-            avviksvurderinghenter = avviksvurderinghenter,
-            behandlingsstatistikkMediator = behandlingsstatistikkMediator,
-            saksbehandlerhåndterer = saksbehandlerhåndterer,
-            apiOppgaveService = apiOppgaveService,
-            totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
-            godkjenninghåndterer = godkjenninghåndterer,
-            personhåndterer = personhåndterer,
-            dokumenthåndterer = dokumenthåndterer,
-            stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
-            env = environment,
-        )
+        val spesialistSchema =
+            SpesialistSchema(
+                queryHandlers = SpesialistSchema.QueryHandlers(
+                    person = PersonQueryHandler(
+                        personoppslagService =
+                            PersonService(
+                                personApiDao = personApiDao,
+                                egenAnsattApiDao = egenAnsattApiDao,
+                                tildelingApiDao = tildelingApiDao,
+                                arbeidsgiverApiDao = arbeidsgiverApiDao,
+                                overstyringApiDao = overstyringApiDao,
+                                risikovurderingApiDao = risikovurderingApiDao,
+                                varselRepository = apiVarselRepository,
+                                oppgaveApiDao = oppgaveApiDao,
+                                periodehistorikkApiDao = periodehistorikkApiDao,
+                                notatDao = notatDao,
+                                totrinnsvurderingApiDao = totrinnsvurderingApiDao,
+                                påVentApiDao = påVentApiDao,
+                                vergemålApiDao = vergemålApiDao,
+                                snapshotService = snapshotService,
+                                reservasjonClient = reservasjonClient,
+                                apiOppgaveService = apiOppgaveService,
+                                saksbehandlerhåndterer = saksbehandlerhåndterer,
+                                avviksvurderinghenter = avviksvurderinghenter,
+                                personhåndterer = personhåndterer,
+                                stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
+                                env = environment,
+                            ),
+                    ),
+                    oppgaver = OppgaverQueryHandler(
+                        apiOppgaveService = apiOppgaveService,
+                    ),
+                    behandlingsstatistikk = BehandlingsstatistikkQueryHandler(
+                        behandlingsstatistikkMediator = behandlingsstatistikkMediator,
+                    ),
+                    opptegnelse = OpptegnelseQueryHandler(
+                        saksbehandlerhåndterer = saksbehandlerhåndterer,
+                    ),
+                    dokument = DokumentQueryHandler(
+                        personApiDao = personApiDao,
+                        egenAnsattApiDao = egenAnsattApiDao,
+                        dokumenthåndterer = dokumenthåndterer,
+                    ),
+                ),
+                mutationHandlers = SpesialistSchema.MutationHandlers(
+                    notat = NotatMutationHandler(notatDao = notatDao),
+                    varsel = VarselMutationHandler(varselRepository = apiVarselRepository),
+                    tildeling = TildelingMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
+                    opptegnelse = OpptegnelseMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
+                    overstyring = OverstyringMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
+                    skjonnsfastsettelse = SkjonnsfastsettelseMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
+                    minimumSykdomsgrad = MinimumSykdomsgradMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
+                    totrinnsvurdering = TotrinnsvurderingMutationHandler(
+                        saksbehandlerhåndterer = saksbehandlerhåndterer,
+                        apiOppgaveService = apiOppgaveService,
+                        totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
+                    ),
+                    vedtak = VedtakMutationHandler(
+                        saksbehandlerhåndterer = saksbehandlerhåndterer,
+                        godkjenninghåndterer = godkjenninghåndterer,
+                    ),
+                    person = PersonMutationHandler(personhåndterer = personhåndterer),
+                    annullering = AnnulleringMutationHandler(
+                        saksbehandlerhåndterer = saksbehandlerhåndterer,
+                    ),
+                    paVent = PaVentMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
+                    opphevStans = OpphevStansMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer)
+                ),
+            )
 
         install(GraphQL) {
             server {
@@ -114,16 +174,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                         beslutterSaksbehandlergruppe = beslutterGruppeId,
                     )
             }
-            schema {
-                packages =
-                    listOf(
-                        "no.nav.helse.spesialist.api.graphql",
-                        "no.nav.helse.spleis.graphql",
-                    )
-                queries = schemaBuilder.queries
-                mutations = schemaBuilder.mutations
-                hooks = schemaGeneratorHooks
-            }
+            schema(spesialistSchema::setup)
         }
     }
 
