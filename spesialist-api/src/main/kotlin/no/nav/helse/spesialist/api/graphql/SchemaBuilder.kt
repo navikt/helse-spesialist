@@ -26,6 +26,7 @@ import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkS
 import no.nav.helse.spesialist.api.graphql.mutation.AnnulleringMutation
 import no.nav.helse.spesialist.api.graphql.mutation.AnnulleringMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.MinimumSykdomsgradMutation
+import no.nav.helse.spesialist.api.graphql.mutation.MinimumSykdomsgradMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutation
 import no.nav.helse.spesialist.api.graphql.mutation.OpphevStansMutation
 import no.nav.helse.spesialist.api.graphql.mutation.OpptegnelseMutation
@@ -145,7 +146,9 @@ class SchemaBuilder(
             OpptegnelseMutation(saksbehandlerhåndterer = saksbehandlerhåndterer),
             OverstyringMutation(saksbehandlerhåndterer = saksbehandlerhåndterer),
             SkjonnsfastsettelseMutation(saksbehandlerhåndterer = saksbehandlerhåndterer),
-            MinimumSykdomsgradMutation(saksbehandlerhåndterer = saksbehandlerhåndterer),
+            MinimumSykdomsgradMutation(
+                handler = MinimumSykdomsgradMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
+            ),
             TotrinnsvurderingMutation(
                 saksbehandlerhåndterer = saksbehandlerhåndterer,
                 apiOppgaveService = apiOppgaveService,

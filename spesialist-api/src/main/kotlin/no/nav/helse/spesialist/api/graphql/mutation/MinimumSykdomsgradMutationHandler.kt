@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
-import com.expediagroup.graphql.server.operations.Mutation
 import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
@@ -14,13 +13,12 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class MinimumSykdomsgradMutation(private val saksbehandlerhåndterer: Saksbehandlerhåndterer) : Mutation {
+class MinimumSykdomsgradMutationHandler(private val saksbehandlerhåndterer: Saksbehandlerhåndterer) : MinimumSykdomsgradMutationSchema {
     private companion object {
         private val logg: Logger = LoggerFactory.getLogger(MinimumSykdomsgradMutation::class.java)
     }
 
-    @Suppress("unused")
-    suspend fun minimumSykdomsgrad(
+    override suspend fun minimumSykdomsgrad(
         minimumSykdomsgrad: ApiMinimumSykdomsgrad,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =
