@@ -13,7 +13,7 @@ import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.SendTilGodkjenningResult
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
-import no.nav.helse.spesialist.api.graphql.schema.PaVentRequest
+import no.nav.helse.spesialist.api.graphql.schema.ApiPaVentRequest
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.LoggerFactory
 
@@ -164,7 +164,7 @@ class TotrinnsvurderingMutation(
 
             apiOppgaveService.sendIRetur(oppgavereferanse.toLong(), besluttendeSaksbehandler)
             saksbehandlerhåndterer.påVent(
-                PaVentRequest.FjernPaVentUtenHistorikkinnslag(oppgavereferanse.toLong()),
+                ApiPaVentRequest.ApiFjernPaVentUtenHistorikkinnslag(oppgavereferanse.toLong()),
                 besluttendeSaksbehandler,
             )
 

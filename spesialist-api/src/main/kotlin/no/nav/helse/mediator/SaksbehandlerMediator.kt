@@ -75,13 +75,13 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyrin
 import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgrad
 import no.nav.helse.spesialist.api.graphql.schema.ApiOpptegnelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiOpptegnelsetype
+import no.nav.helse.spesialist.api.graphql.schema.ApiPaVentRequest
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.ANNET
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.OMREGNET_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.RAPPORTERT_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Avslag
-import no.nav.helse.spesialist.api.graphql.schema.PaVentRequest
 import no.nav.helse.spesialist.api.graphql.schema.VedtakBegrunnelse
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
@@ -240,7 +240,7 @@ class SaksbehandlerMediator(
     }
 
     override fun påVent(
-        handling: PaVentRequest,
+        handling: ApiPaVentRequest,
         saksbehandlerFraApi: SaksbehandlerFraApi,
     ) {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
@@ -636,7 +636,7 @@ class SaksbehandlerMediator(
         }
 
         try {
-            påVent(PaVentRequest.FjernPaVentUtenHistorikkinnslag(oppgavereferanse), saksbehandlerFraApi)
+            påVent(ApiPaVentRequest.ApiFjernPaVentUtenHistorikkinnslag(oppgavereferanse), saksbehandlerFraApi)
         } catch (modellfeil: no.nav.helse.spesialist.api.feilhåndtering.Modellfeil) {
             return SendTilGodkjenningResult.Feil.KunneIkkeFjerneFraPåVent(modellfeil)
         } catch (e: Exception) {
@@ -742,12 +742,12 @@ class SaksbehandlerMediator(
             else -> throw IllegalStateException("Støtter ikke handling ${this::class.simpleName}")
         }
 
-    private fun PaVentRequest.tilModellversjon(): PåVent =
+    private fun ApiPaVentRequest.tilModellversjon(): PåVent =
         when (this) {
-            is PaVentRequest.LeggPaVent -> this.tilModellversjon()
-            is PaVentRequest.FjernPaVent -> this.tilModellversjon()
-            is PaVentRequest.FjernPaVentUtenHistorikkinnslag -> this.tilModellversjon()
-            is PaVentRequest.EndrePaVent -> this.tilModellversjon()
+            is ApiPaVentRequest.ApiLeggPaVent -> this.tilModellversjon()
+            is ApiPaVentRequest.ApiFjernPaVent -> this.tilModellversjon()
+            is ApiPaVentRequest.ApiFjernPaVentUtenHistorikkinnslag -> this.tilModellversjon()
+            is ApiPaVentRequest.ApiEndrePaVent -> this.tilModellversjon()
         }
 
     private fun ApiArbeidsforholdOverstyringHandling.tilModellversjon(): OverstyrtArbeidsforhold =
@@ -904,7 +904,7 @@ class SaksbehandlerMediator(
             kommentar = this.kommentar,
         )
 
-    private fun PaVentRequest.LeggPaVent.tilModellversjon(): LeggPåVent =
+    private fun ApiPaVentRequest.ApiLeggPaVent.tilModellversjon(): LeggPåVent =
         LeggPåVent(
             fødselsnummer = apiOppgaveService.fødselsnummer(oppgaveId),
             oppgaveId = oppgaveId,
@@ -915,7 +915,7 @@ class SaksbehandlerMediator(
             årsaker = årsaker.map { årsak -> PåVentÅrsak(key = årsak._key, årsak = årsak.arsak) },
         )
 
-    private fun PaVentRequest.EndrePaVent.tilModellversjon(): EndrePåVent {
+    private fun ApiPaVentRequest.ApiEndrePaVent.tilModellversjon(): EndrePåVent {
         return EndrePåVent(
             fødselsnummer = apiOppgaveService.fødselsnummer(oppgaveId),
             oppgaveId = oppgaveId,
@@ -927,9 +927,9 @@ class SaksbehandlerMediator(
         )
     }
 
-    private fun PaVentRequest.FjernPaVent.tilModellversjon(): FjernPåVent = FjernPåVent(oppgaveId)
+    private fun ApiPaVentRequest.ApiFjernPaVent.tilModellversjon(): FjernPåVent = FjernPåVent(oppgaveId)
 
-    private fun PaVentRequest.FjernPaVentUtenHistorikkinnslag.tilModellversjon(): FjernPåVentUtenHistorikkinnslag =
+    private fun ApiPaVentRequest.ApiFjernPaVentUtenHistorikkinnslag.tilModellversjon(): FjernPåVentUtenHistorikkinnslag =
         FjernPåVentUtenHistorikkinnslag(oppgaveId)
 
     private fun TildelOppgave.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.TildelOppgave =

@@ -30,9 +30,9 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgrad
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringDag
+import no.nav.helse.spesialist.api.graphql.schema.ApiPaVentRequest
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
-import no.nav.helse.spesialist.api.graphql.schema.PaVentRequest
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
@@ -394,13 +394,13 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         val frist = LocalDate.now()
         val skalTildeles = true
         mediator.påVent(
-            PaVentRequest.LeggPaVent(
+            ApiPaVentRequest.ApiLeggPaVent(
                 oppgaveId,
                 saksbehandler.oid,
                 frist,
                 skalTildeles,
                 "en tekst",
-                listOf(PaVentRequest.PaVentArsak("key", "arsak"))
+                listOf(ApiPaVentRequest.ApiPaVentArsak("key", "arsak"))
             ), saksbehandler
         )
         val melding = testRapid.inspektør.hendelser("lagt_på_vent").lastOrNull()
@@ -425,13 +425,13 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         val frist = LocalDate.now()
         val skalTildeles = true
         mediator.påVent(
-            PaVentRequest.LeggPaVent(
+            ApiPaVentRequest.ApiLeggPaVent(
                 oppgaveId,
                 saksbehandler.oid,
                 frist,
                 skalTildeles,
                 "en tekst",
-                listOf(PaVentRequest.PaVentArsak("key", "arsak"))
+                listOf(ApiPaVentRequest.ApiPaVentArsak("key", "arsak"))
             ), saksbehandler
         )
         val melding1 = testRapid.inspektør.hendelser("lagt_på_vent").lastOrNull()
@@ -439,13 +439,13 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
         val nyFrist = LocalDate.now().plusDays(5)
         mediator.påVent(
-            PaVentRequest.EndrePaVent(
+            ApiPaVentRequest.ApiEndrePaVent(
                 oppgaveId,
                 saksbehandler.oid,
                 nyFrist,
                 skalTildeles,
                 "en ny tekst",
-                listOf(PaVentRequest.PaVentArsak("key", "arsak"))
+                listOf(ApiPaVentRequest.ApiPaVentArsak("key", "arsak"))
             ), saksbehandler
         )
 
@@ -502,15 +502,15 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         nyPerson()
         val oppgaveId = OPPGAVE_ID
         mediator.påVent(
-            PaVentRequest.LeggPaVent(
+            ApiPaVentRequest.ApiLeggPaVent(
                 oppgaveId,
                 saksbehandler.oid,
                 LocalDate.now().plusDays(21),
                 true,
                 "notat tekst",
                 listOf(
-                    PaVentRequest.PaVentArsak("key", "arsak"),
-                    PaVentRequest.PaVentArsak("key2", "arsak2"),
+                    ApiPaVentRequest.ApiPaVentArsak("key", "arsak"),
+                    ApiPaVentRequest.ApiPaVentArsak("key2", "arsak2"),
                 ),
             ),
             saksbehandler,
@@ -526,15 +526,15 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         nyPerson()
         val oppgaveId = OPPGAVE_ID
         mediator.påVent(
-            PaVentRequest.LeggPaVent(
+            ApiPaVentRequest.ApiLeggPaVent(
                 oppgaveId,
                 saksbehandler.oid,
                 LocalDate.now().plusDays(10),
                 true,
                 "notat tekst",
                 listOf(
-                    PaVentRequest.PaVentArsak("key", "arsak"),
-                    PaVentRequest.PaVentArsak("key2", "arsak2"),
+                    ApiPaVentRequest.ApiPaVentArsak("key", "arsak"),
+                    ApiPaVentRequest.ApiPaVentArsak("key2", "arsak2"),
                 ),
             ),
             saksbehandler,
@@ -545,14 +545,14 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         assertTrue(melding["egenskaper"].map { it.asText() }.contains("PÅ_VENT"))
 
         mediator.påVent(
-            PaVentRequest.EndrePaVent(
+            ApiPaVentRequest.ApiEndrePaVent(
                 oppgaveId,
                 saksbehandler.oid,
                 LocalDate.now().plusDays(20),
                 true,
                 "ny notat tekst",
                 listOf(
-                    PaVentRequest.PaVentArsak("key", "arsak"),
+                    ApiPaVentRequest.ApiPaVentArsak("key", "arsak"),
                 ),
             ),
             saksbehandler,
@@ -568,20 +568,20 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         nyPerson()
         val oppgaveId = OPPGAVE_ID
         mediator.påVent(
-            PaVentRequest.LeggPaVent(
+            ApiPaVentRequest.ApiLeggPaVent(
                 oppgaveId,
                 saksbehandler.oid,
                 LocalDate.now().plusDays(21),
                 false,
                 "notat tekst",
                 listOf(
-                    PaVentRequest.PaVentArsak("key", "arsak"),
-                    PaVentRequest.PaVentArsak("key2", "arsak2"),
+                    ApiPaVentRequest.ApiPaVentArsak("key", "arsak"),
+                    ApiPaVentRequest.ApiPaVentArsak("key2", "arsak2"),
                 ),
             ),
             saksbehandler,
         )
-        mediator.påVent(PaVentRequest.FjernPaVent(oppgaveId), saksbehandler)
+        mediator.påVent(ApiPaVentRequest.ApiFjernPaVent(oppgaveId), saksbehandler)
         val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
         val historikk = periodehistorikkApiDao.finn(UTBETALING_ID)
         assertTrue(historikk.map { it.type }

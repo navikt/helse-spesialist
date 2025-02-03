@@ -15,8 +15,8 @@ import no.nav.helse.spesialist.api.feilhåndtering.FinnerIkkeLagtPåVent
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
+import no.nav.helse.spesialist.api.graphql.schema.ApiPaVentRequest
 import no.nav.helse.spesialist.api.graphql.schema.PaVent
-import no.nav.helse.spesialist.api.graphql.schema.PaVentRequest
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -35,14 +35,14 @@ class PaVentMutation(
         notatTekst: String?,
         frist: LocalDate,
         tildeling: Boolean,
-        arsaker: List<PaVentRequest.PaVentArsak>? = emptyList(),
+        arsaker: List<ApiPaVentRequest.ApiPaVentArsak>? = emptyList(),
         env: DataFetchingEnvironment,
     ): DataFetcherResult<PaVent?> {
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         return withContext(Dispatchers.IO) {
             try {
                 saksbehandlerhåndterer.påVent(
-                    PaVentRequest.LeggPaVent(
+                    ApiPaVentRequest.ApiLeggPaVent(
                         oppgaveId.toLong(),
                         saksbehandler.oid,
                         frist,
@@ -78,7 +78,7 @@ class PaVentMutation(
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         return withContext(Dispatchers.IO) {
             try {
-                saksbehandlerhåndterer.påVent(PaVentRequest.FjernPaVent(oppgaveId.toLong()), saksbehandler)
+                saksbehandlerhåndterer.påVent(ApiPaVentRequest.ApiFjernPaVent(oppgaveId.toLong()), saksbehandler)
                 newResult<Boolean?>().data(true).build()
             } catch (e: OppgaveIkkeTildelt) {
                 e.logger()
@@ -96,14 +96,14 @@ class PaVentMutation(
         notatTekst: String?,
         frist: LocalDate,
         tildeling: Boolean,
-        arsaker: List<PaVentRequest.PaVentArsak>,
+        arsaker: List<ApiPaVentRequest.ApiPaVentArsak>,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<PaVent?> {
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         return withContext(Dispatchers.IO) {
             try {
                 saksbehandlerhåndterer.påVent(
-                    PaVentRequest.EndrePaVent(
+                    ApiPaVentRequest.ApiEndrePaVent(
                         oppgaveId = oppgaveId.toLong(),
                         saksbehandlerOid = saksbehandler.oid,
                         frist = frist,
