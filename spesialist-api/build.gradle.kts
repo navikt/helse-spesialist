@@ -3,10 +3,11 @@ plugins {
 }
 
 dependencies {
-    api(project(":spesialist-api-schema"))
-    api(project(":spesialist-selve"))
+    implementation(project(":spesialist-api-schema"))
+    implementation(project(":spesialist-selve"))
+    implementation(project(":spesialist-modell"))
 
-    api("com.nimbusds:nimbus-jose-jwt:9.37.3")
+    implementation("com.nimbusds:nimbus-jose-jwt:9.37.3")
     implementation(libs.graphql.kotlin.ktor.server)
 
     implementation(libs.bundles.logging)
@@ -16,8 +17,8 @@ dependencies {
     implementation(libs.ktor.micrometer)
     implementation(libs.micrometer.prometheus)
 
-    api(libs.bundles.ktor.server)
-    api(libs.bundles.ktor.client)
+    implementation(libs.bundles.ktor.server)
+    implementation(libs.bundles.ktor.client)
 
     testImplementation(libs.bundles.ktor.server.test)
 }

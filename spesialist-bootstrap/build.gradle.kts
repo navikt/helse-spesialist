@@ -12,13 +12,22 @@ repositories {
 }
 
 dependencies {
-    api(project(":spesialist-api"))
-    api(project(":spesialist-db"))
-    api(project(":spesialist-kafka"))
+    implementation(project(":spesialist-api"))
+    implementation(project(":spesialist-selve"))
+    implementation(project(":spesialist-modell"))
+    implementation(project(":spesialist-db"))
+    implementation(project(":spesialist-kafka"))
+
+    implementation(libs.rapids.and.rivers)
+
+    implementation(libs.hikari)
+    implementation(libs.flyway.core)
+
+    testImplementation(project(":spesialist-api-schema"))
 
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
+    testImplementation("org.testcontainers:kafka:$testcontainersVersion")
     testImplementation("no.nav.security:mock-oauth2-server:$mockOAuth2ServerVersion")
-    api("org.testcontainers:kafka:$testcontainersVersion")
 }
 
 kotlin {

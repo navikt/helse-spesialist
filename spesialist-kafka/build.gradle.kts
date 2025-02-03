@@ -1,7 +1,8 @@
 dependencies {
-    api(project(":spesialist-selve"))
+    implementation(project(":spesialist-selve"))
+    implementation(project(":spesialist-modell"))
 
-    api(libs.rapids.and.rivers)
+    implementation(libs.rapids.and.rivers)
 
     testImplementation(libs.rapids.and.rivers.test)
 }
