@@ -2,30 +2,16 @@ package no.nav.helse.spesialist.api.graphql.schema
 
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiverrefusjon
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLRefusjonselement
-import java.time.LocalDate
-import java.util.UUID
 
-data class Arbeidsgiverrefusjon(
-    val arbeidsgiver: String,
-    val refusjonsopplysninger: List<Refusjonselement>,
-)
-
-data class Refusjonselement(
-    val fom: LocalDate,
-    val tom: LocalDate?,
-    val belop: Double,
-    val meldingsreferanseId: UUID,
-)
-
-fun GraphQLArbeidsgiverrefusjon.tilArbeidsgiverrefusjon(): Arbeidsgiverrefusjon =
-    Arbeidsgiverrefusjon(
+fun GraphQLArbeidsgiverrefusjon.tilArbeidsgiverrefusjon(): ApiArbeidsgiverrefusjon =
+    ApiArbeidsgiverrefusjon(
         arbeidsgiver = arbeidsgiver,
         refusjonsopplysninger = refusjonsopplysninger.tilRefusjonsopplysninger(),
     )
 
 private fun List<GraphQLRefusjonselement>.tilRefusjonsopplysninger() =
     map {
-        Refusjonselement(
+        ApiRefusjonselement(
             fom = it.fom,
             tom = it.tom,
             belop = it.belop,

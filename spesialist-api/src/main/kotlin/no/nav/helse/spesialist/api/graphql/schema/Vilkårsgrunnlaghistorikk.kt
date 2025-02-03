@@ -15,7 +15,7 @@ interface Vilkarsgrunnlag {
     val id: UUID
     val vilkarsgrunnlagtype: Vilkarsgrunnlagtype
     val inntekter: List<ApiArbeidsgiverinntekt>
-    val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>
+    val arbeidsgiverrefusjoner: List<ApiArbeidsgiverrefusjon>
     val omregnetArsinntekt: Double
     val skjaeringstidspunkt: LocalDate
     val sykepengegrunnlag: Double
@@ -25,7 +25,7 @@ data class VilkarsgrunnlagInfotrygd(
     override val id: UUID,
     override val vilkarsgrunnlagtype: Vilkarsgrunnlagtype,
     override val inntekter: List<ApiArbeidsgiverinntekt>,
-    override val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>,
+    override val arbeidsgiverrefusjoner: List<ApiArbeidsgiverrefusjon>,
     override val omregnetArsinntekt: Double,
     override val skjaeringstidspunkt: LocalDate,
     override val sykepengegrunnlag: Double,
@@ -38,7 +38,7 @@ data class VilkarsgrunnlagSpleis(
     override val omregnetArsinntekt: Double,
     override val skjaeringstidspunkt: LocalDate,
     override val sykepengegrunnlag: Double,
-    override val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>,
+    override val arbeidsgiverrefusjoner: List<ApiArbeidsgiverrefusjon>,
     val sammenligningsgrunnlag: Double?,
     val skjonnsmessigFastsattAarlig: Double?,
     val avviksprosent: Double?,
