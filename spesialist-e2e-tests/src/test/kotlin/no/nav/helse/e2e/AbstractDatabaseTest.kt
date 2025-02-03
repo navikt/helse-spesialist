@@ -48,16 +48,12 @@ abstract class AbstractDatabaseTest {
                 .load()
                 .migrate()
 
-            // Kan sikkert slå sammen disse to hvis vi ikke lenger trenger å truncate mer enn en gang
-            createTruncateFunction(dataSource)
-            sessionOf(dataSource).use  {
-                it.run(queryOf("SELECT truncate_tables()").asExecute)
-            }
+            resetDatabase(dataSource)
         }
     }
 }
 
-private fun createTruncateFunction(dataSource: DataSource) {
+private fun resetDatabase(dataSource: DataSource) {
     sessionOf(dataSource).use {
         @Language("PostgreSQL")
         val query = """
@@ -71,10 +67,12 @@ private fun createTruncateFunction(dataSource: DataSource) {
                 WHERE schemaname='public'
                 AND tablename not in ('enhet', 'flyway_schema_history', 'global_snapshot_versjon');
                 UPDATE global_snapshot_versjon SET versjon = 0 WHERE id = 1;
+
                 EXECUTE truncate_statement;
             END;
             $$ LANGUAGE plpgsql;
         """.trimIndent()
         it.run(queryOf(query).asExecute)
+        it.run(queryOf("SELECT truncate_tables()").asExecute)
     }
 }
