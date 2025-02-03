@@ -29,7 +29,7 @@ dependencyResolutionManagement {
             version("hikari", "5.1.0")
             version("postgres", "42.7.3")
             version("cloudsql", "1.16.0")
-            version("graphql-kotlin", "8.2.1")
+            version("graphql-kotlin", "8.3.0")
 
             library("rapids-and-rivers", "com.github.navikt", "rapids-and-rivers").versionRef("rapids-and-rivers")
             library("rapids-and-rivers-test", "com.github.navikt.tbd-libs", "rapids-and-rivers-test").versionRef("tbd-libs")

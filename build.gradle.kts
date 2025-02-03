@@ -54,7 +54,7 @@ allprojects {
                 because("org.testcontainers:postgresql:1.19.7 -> 1.24.0 har en sårbarhet")
             }
             implementation("com.google.protobuf:protobuf-java:4.28.2") {
-                because("com.expediagroup:graphql-kotlin-ktor-server:8.1.0 -> 4.27.1 har en sårbarhet")
+                because("com.expediagroup:graphql-kotlin-ktor-server:8.3.0 -> 4.27.1 har en sårbarhet")
             }
         }
 

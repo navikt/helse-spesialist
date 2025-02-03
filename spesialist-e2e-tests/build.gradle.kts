@@ -7,4 +7,5 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation(libs.testcontainers.postgresql)
     testImplementation(libs.bundles.ktor.server.test)
+    testImplementation(libs.graphql.kotlin.ktor.server)
 }

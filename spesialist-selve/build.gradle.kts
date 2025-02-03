@@ -1,20 +1,18 @@
 import com.expediagroup.graphql.plugin.gradle.config.GraphQLScalar
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLIntrospectSchemaTask
 
-val graphQLKotlinVersion = "8.2.1"
 val micrometerRegistryPrometheusVersion = "1.13.6"
 val logbackEncoderVersion = "8.0"
 
 plugins {
     kotlin("plugin.serialization") version "2.0.20"
-    id("com.expediagroup.graphql") version "8.3.0"
+    id("com.expediagroup.graphql") version libs.versions.graphql.kotlin
 }
 
 dependencies {
     api(project(":spesialist-modell"))
 
     api("com.nimbusds:nimbus-jose-jwt:9.37.3")
-    api("com.expediagroup:graphql-kotlin-ktor-server:$graphQLKotlinVersion")
 
     implementation(libs.bundles.logging)
     implementation(libs.jackson.datatype)
@@ -28,7 +26,6 @@ dependencies {
     api(libs.bundles.ktor.client)
 
     testImplementation(libs.bundles.ktor.server.test)
-    testImplementation("com.expediagroup:graphql-kotlin-ktor-server:$graphQLKotlinVersion")
 }
 
 val graphqlDir = "${project.projectDir}/src/main/resources/graphql"

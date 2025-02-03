@@ -1,5 +1,5 @@
 plugins {
-    id("com.expediagroup.graphql") version "8.3.0"
+    id("com.expediagroup.graphql") version libs.versions.graphql.kotlin
 }
 
 dependencies {
