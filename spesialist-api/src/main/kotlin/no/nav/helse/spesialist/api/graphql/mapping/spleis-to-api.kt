@@ -1,7 +1,10 @@
 package no.nav.helse.spesialist.api.graphql.mapping
 
 import no.nav.helse.db.api.NotatApiDao
+import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Toggle
+import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering
+import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverinntekt
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverrefusjon
 import no.nav.helse.spesialist.api.graphql.schema.ApiBegrunnelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiDag
@@ -20,15 +23,21 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOmregnetArsinntekt
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetilstand
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiRefusjonselement
+import no.nav.helse.spesialist.api.graphql.schema.ApiSammenligningsgrunnlag
 import no.nav.helse.spesialist.api.graphql.schema.ApiSoknadArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.ApiSoknadArbeidsledig
 import no.nav.helse.spesialist.api.graphql.schema.ApiSoknadFrilans
 import no.nav.helse.spesialist.api.graphql.schema.ApiSoknadNav
 import no.nav.helse.spesialist.api.graphql.schema.ApiSoknadSelvstendig
 import no.nav.helse.spesialist.api.graphql.schema.ApiSykdomsdagtype
+import no.nav.helse.spesialist.api.graphql.schema.ApiSykepengegrunnlagsgrense
 import no.nav.helse.spesialist.api.graphql.schema.ApiSykmelding
 import no.nav.helse.spesialist.api.graphql.schema.ApiUtbetalingsdagtype
 import no.nav.helse.spesialist.api.graphql.schema.ApiUtbetalingsinfo
+import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlag
+import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagInfotrygd
+import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagSpleis
+import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagtype
 import no.nav.helse.spleis.graphql.enums.GraphQLBegrunnelse
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektskilde
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
@@ -40,6 +49,7 @@ import no.nav.helse.spleis.graphql.enums.GraphQLUtbetalingsdagType
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiverrefusjon
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLDag
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLHendelse
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInfotrygdVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntektFraAOrdningen
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntekterFraAOrdningen
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntektsmelding
@@ -51,10 +61,13 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadArbeidsledig
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadFrilans
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadNav
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadSelvstendig
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSpleisVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSykdomsdagkilde
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSykepengegrunnlagsgrense
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSykmelding
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLTidslinjeperiode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetalingsinfo
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLVilkarsgrunnlag
 import java.util.UUID
 
 fun GraphQLDag.tilApiDag() =
@@ -346,3 +359,95 @@ fun GraphQLInntektstype.tilApiInntektstype() =
         GraphQLInntektstype.FLEREARBEIDSGIVERE -> ApiInntektstype.FLEREARBEIDSGIVERE
         else -> throw Exception("Ukjent inntektstype $this")
     }
+
+fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Avviksvurderinghenter): ApiVilkårsgrunnlag {
+    return when (this) {
+        is GraphQLSpleisVilkarsgrunnlag -> {
+            val avviksvurdering: Avviksvurdering =
+                checkNotNull(avviksvurderinghenter.hentAvviksvurdering(id)) { "Fant ikke avviksvurdering for vilkårsgrunnlagId $id" }
+            val orgnrs =
+                (
+                    avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter.map {
+                        it.arbeidsgiverreferanse
+                    } + inntekter.map { it.arbeidsgiver }
+                ).toSet()
+            val inntekter =
+                orgnrs.map { arbeidsgiverreferanse ->
+                    val inntektFraSpleis =
+                        inntekter.singleOrNull { inntektFraSpleis -> inntektFraSpleis.arbeidsgiver == arbeidsgiverreferanse }
+                    val sammenligningsgrunnlagInntekt =
+                        avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter.singleOrNull { it.arbeidsgiverreferanse == arbeidsgiverreferanse }
+                    ApiArbeidsgiverinntekt(
+                        arbeidsgiver = arbeidsgiverreferanse,
+                        omregnetArsinntekt = inntektFraSpleis?.omregnetArsinntekt?.tilApiOmregnetArsinntekt(),
+                        sammenligningsgrunnlag =
+                            sammenligningsgrunnlagInntekt?.let {
+                                ApiSammenligningsgrunnlag(
+                                    belop = sammenligningsgrunnlagInntekt.inntekter.sumOf { it.beløp },
+                                    inntektFraAOrdningen =
+                                        sammenligningsgrunnlagInntekt.inntekter.map { inntekt ->
+                                            ApiInntektFraAOrdningen(
+                                                maned = inntekt.årMåned,
+                                                sum = inntekt.beløp,
+                                            )
+                                        },
+                                )
+                            },
+                        skjonnsmessigFastsatt = inntektFraSpleis?.skjonnsmessigFastsatt?.tilApiOmregnetArsinntekt(),
+                        deaktivert = inntektFraSpleis?.deaktivert,
+                        fom = inntektFraSpleis?.fom,
+                        tom = inntektFraSpleis?.tom,
+                    )
+                }
+
+            ApiVilkårsgrunnlagSpleis(
+                inntekter = inntekter,
+                omregnetArsinntekt = avviksvurdering.beregningsgrunnlag.totalbeløp,
+                sammenligningsgrunnlag = avviksvurdering.sammenligningsgrunnlag.totalbeløp,
+                avviksprosent = avviksvurdering.avviksprosent,
+                vilkarsgrunnlagtype = ApiVilkårsgrunnlagtype.SPLEIS,
+                id = id,
+                arbeidsgiverrefusjoner = arbeidsgiverrefusjoner.map { it.tilApiArbeidsgiverrefusjon() },
+                skjonnsmessigFastsattAarlig = skjonnsmessigFastsattAarlig,
+                skjaeringstidspunkt = skjaeringstidspunkt,
+                sykepengegrunnlag = sykepengegrunnlag,
+                antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
+                grunnbelop = grunnbelop,
+                sykepengegrunnlagsgrense = sykepengegrunnlagsgrense.tilSykepengegrunnlaggrense(),
+                oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap,
+                oppfyllerKravOmMinstelonn = oppfyllerKravOmMinstelonn,
+                oppfyllerKravOmOpptjening = oppfyllerKravOmOpptjening,
+                opptjeningFra = opptjeningFra,
+            )
+        }
+
+        is GraphQLInfotrygdVilkarsgrunnlag ->
+            ApiVilkårsgrunnlagInfotrygd(
+                id = id,
+                vilkarsgrunnlagtype = ApiVilkårsgrunnlagtype.INFOTRYGD,
+                inntekter =
+                    inntekter.map {
+                        ApiArbeidsgiverinntekt(
+                            arbeidsgiver = it.arbeidsgiver,
+                            omregnetArsinntekt = it.omregnetArsinntekt.tilApiOmregnetArsinntekt(),
+                            sammenligningsgrunnlag = null,
+                            skjonnsmessigFastsatt = null,
+                            deaktivert = it.deaktivert,
+                        )
+                    },
+                arbeidsgiverrefusjoner = arbeidsgiverrefusjoner.map { it.tilApiArbeidsgiverrefusjon() },
+                omregnetArsinntekt = omregnetArsinntekt,
+                skjaeringstidspunkt = skjaeringstidspunkt,
+                sykepengegrunnlag = sykepengegrunnlag,
+            )
+
+        else -> throw Exception("Ukjent vilkårsgrunnlag ${this.javaClass.name}")
+    }
+}
+
+internal fun GraphQLSykepengegrunnlagsgrense.tilSykepengegrunnlaggrense() =
+    ApiSykepengegrunnlagsgrense(
+        grunnbelop,
+        grense,
+        virkningstidspunkt,
+    )

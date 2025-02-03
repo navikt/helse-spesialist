@@ -14,6 +14,7 @@ import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
+import no.nav.helse.spesialist.api.graphql.mapping.tilVilkarsgrunnlag
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.ApiDagoverstyring
@@ -32,7 +33,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilleggsinfoForInntektskilde
 import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlag
 import no.nav.helse.spesialist.api.graphql.schema.PersonSchema
-import no.nav.helse.spesialist.api.graphql.schema.tilVilkarsgrunnlag
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringArbeidsforholdDto
